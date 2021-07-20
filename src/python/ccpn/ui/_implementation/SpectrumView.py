@@ -5,7 +5,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-19 17:40:23 +0000 (Fri, March 19, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -393,19 +394,40 @@ class SpectrumView(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
-@newObject(SpectrumView)
-def _newSpectrumView(display, spectrumName: str = None,
-                        stripSerial: int = None, dataSource=None,
-                        dimensionOrdering=None, **kwds):
+
+
+# @newObject(SpectrumView)
+# Cannot use the decorator
+# """
+#   File "/Users/geerten/Code/CCPNv3/CcpNmr/src/python/ccpn/core/lib/ContextManagers.py", line 638, in theDecorator
+#     apiObjectsCreated = result._getApiObjectTree()
+#   File "/Users/geerten/Code/CCPNv3/CcpNmr/src/python/ccpn/core/_implementation/AbstractWrapperObject.py", line 683, in _getApiObjectTree
+#     obj._checkDelete(apiObjectlist, objsToBeChecked, linkCounter, topObjectsToCheck)  # This builds the list/set
+#   File "/Users/geerten/Code/CCPNv3/CcpNmr/src/python/ccpnmodel/ccpncore/api/ccpnmr/gui/Task.py", line 28366, in _checkDelete
+#     raise ApiError("StripSpectrumView %s: StripSpectrumViews can only be deleted when the SpectrumView or Strip is deleted." % self)
+# ccpnmodel.ccpncore.memops.ApiError.ApiError: StripSpectrumView <ccpnmr.gui.Task.StripSpectrumView ['user', 'View', '1D_H', 1, <ccpnmr.gui.Task.SpectrumView ['user', 'View', '1D_H', 'AcetatePE', 0]>]>: StripSpectrumViews can only be deleted when the SpectrumView or Strip is deleted.
+# """
+
+def _newSpectrumView(display, spectrum, dimensionOrdering):
     """Create new SpectrumView
     """
-    # 20191113:ED testing - doesn't work yet, _data2Obj not created in correct place
-    apiSpectrumView = display._wrappedData.newSpectrumView(spectrumName=spectrumName,
-                                                 stripSerial=stripSerial, dataSource=dataSource,
-                                                 dimensionOrdering=dimensionOrdering)
 
-    # result = display.project._data2Obj.get(apiSpectrumView)
-    result = SpectrumView(display.project, apiSpectrumView)
+    # # Set stripSerial
+    # if 'Free' in apiStrip.className:
+    #     # Independent strips
+    #     stripSerial = apiStrip.serial
+    # else:
+    #     stripSerial = 0
+
+
+    obj = display._wrappedData.newSpectrumView(spectrumName=spectrum.name, stripSerial=0, dataSource=spectrum._wrappedData,
+                                               dimensionOrdering=dimensionOrdering)
+
+    # 20191113:ED testing - doesn't work yet, _data2Obj not created in correct place
+    # GWV: don't know why, but only querying via the FindFirstStripSpectrumView seems to allows to yield the V2 object
+    apiSpectrumView = display.strips[0]._wrappedData.findFirstStripSpectrumView(spectrumView=obj)
+    result = display.project._data2Obj.get(apiSpectrumView)
+
     if result is None:
         raise RuntimeError('Unable to generate new SpectrumView item')
 

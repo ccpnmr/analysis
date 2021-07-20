@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 17:36:49 +0100 (Fri, June 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:00 +0100 (Tue, July 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -432,19 +432,19 @@ class AbstractWrapperObject(NotifierBase):
         pidFields = [cls.shortClassName] + [str(x) for x in args]
         return Pid.new(*pidFields)
 
-    CCPNMR_NAMESPACE = '_ccpNmrV3internal'
+    _CCPNMR_NAMESPACE = '_ccpNmrV3internal'
 
     def _setInternalParameter(self, parameterName: str, value):
         """Sets parameterName for CCPNINTERNAL namespace to value; value must be json seriliasable"""
-        self.setParameter(self.CCPNMR_NAMESPACE, parameterName, value)
+        self.setParameter(self._CCPNMR_NAMESPACE, parameterName, value)
 
     def _getInternalParameter(self, parameterName: str):
         """Gets parameterName for CCPNINTERNAL namespace"""
-        return self.getParameter(self.CCPNMR_NAMESPACE, parameterName)
+        return self.getParameter(self._CCPNMR_NAMESPACE, parameterName)
 
     def _hasInternalParameter(self, parameterName: str):
         """Returns true if parameterName for CCPNINTERNAl namespace exists"""
-        return self.hasParameter(self.CCPNMR_NAMESPACE, parameterName)
+        return self.hasParameter(self._CCPNMR_NAMESPACE, parameterName)
 
     def setParameter(self, namespace: str, parameterName: str, value):
         """Sets parameterName for namespace to value; value must be json serialisable"""
@@ -1057,52 +1057,6 @@ class AbstractWrapperObject(NotifierBase):
             children = AbstractWrapperObject._allDescendants(obj, descendantClasses=descendantClasses[1:])
             objs.extend(children)
         return objs
-
-    # @classmethod
-    # def _restoreObject(cls, project, apiObj):
-    #     """Restores object from apiObj; checks for _factoryFunction.
-    #     Restores the children
-    #     :return Restored obj
-    #
-    #     CCPNINTERNAL: subclassed in special cases
-    #     """
-    #     if apiObj is None:
-    #         raise ValueError('_restoreObject: undefined apiObj')
-    #
-    #     factoryFunction = cls._factoryFunction
-    #     if factoryFunction is None:
-    #         obj = cls(project, apiObj)
-    #     else:
-    #         obj = factoryFunction(project, apiObj)
-    #
-    #     if obj is None:
-    #         raise RuntimeError('Error restoring object encoded by %s' % apiObj)
-    #
-    #     # restore the children
-    #     obj._initializeAll()
-    #
-    #     return obj
-    #
-    # def _initializeAll(self):
-    #     """Initialize children, using existing objects in data model"""
-    #
-    #     project = self._project
-    #     data2Obj = project._data2Obj
-    #
-    #     for childClass in self._childClasses:
-    #         # print('>>> childClass', childClass)
-    #         # recursively create children
-    #         for apiObj in childClass._getAllWrappedData(self):
-    #             obj = data2Obj.get(apiObj)
-    #
-    #             if obj is None:
-    #                 try:
-    #                     obj = childClass._restoreObject(project, apiObj)
-    #                 except RuntimeError as es:
-    #
-    #                     _text = 'Error restoring child object %s of %s' % (apiObj, self)
-    #                     getLogger().warning(_text)
-    #                     raise RuntimeError(_text)
 
     def _unwrapAll(self):
         """remove wrapper from object and child objects

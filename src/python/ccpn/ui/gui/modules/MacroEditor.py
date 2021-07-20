@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-08 13:29:51 +0100 (Thu, July 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -71,7 +71,7 @@ class MacroEditor(CcpnModule):
 
     className = 'MacroEditor'
 
-    def __init__(self, mainWindow=None, name='Macro Editor', filePath=None):
+    def __init__(self, mainWindow=None, name='MacroEditor', filePath=None):
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
         self.mainWindow = mainWindow

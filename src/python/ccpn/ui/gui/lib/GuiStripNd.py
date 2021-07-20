@@ -34,7 +34,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-29 09:34:32 +0100 (Tue, June 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -282,7 +282,7 @@ class GuiStripNd(GuiStrip):
         """
         with undoBlockWithoutSideBar():
             # create a new spectrum display
-            newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=self.axisOrder)
+            newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisCodes=self.axisOrder)
             for spectrum in self.spectra:
                 newDisplay.displaySpectrum(spectrum)
 
@@ -304,7 +304,7 @@ class GuiStripNd(GuiStrip):
 
             with undoBlockWithoutSideBar():
                 # create a new spectrum display with the new axis order
-                newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=axisOrder)
+                newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisCodes=axisOrder)
                 for spectrum in self.spectra:
                     newDisplay.displaySpectrum(spectrum)
 
@@ -328,7 +328,7 @@ class GuiStripNd(GuiStrip):
 
             with undoBlockWithoutSideBar():
                 # create a new spectrum display with the new axis order
-                newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=axisOrder)
+                newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisCodes=axisOrder)
                 for spectrum in self.spectra:  #[1:]:
                     newDisplay.displaySpectrum(spectrum)
 
@@ -352,7 +352,7 @@ class GuiStripNd(GuiStrip):
 
             with undoBlockWithoutSideBar():
                 # create a new spectrum display with the new axis order
-                newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisOrder=axisOrder)
+                newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisCodes=axisOrder)
                 for spectrum in self.spectra:
                     newDisplay.displaySpectrum(spectrum)
 
@@ -500,17 +500,18 @@ class GuiStripNd(GuiStrip):
 
                 if ignoreSpectrumView is spectrumView:
                     continue
-
+                spectrum = spectrumView.spectrum
                 # get a mapping of the axes to the strip - effectively the same as spectrumView.dimensionOrdering
                 # but allows for finding close matched axis codes
-                indices = getAxisCodeMatchIndices(self.axisCodes, spectrumView.spectrum.axisCodes)
+                # indices = getAxisCodeMatchIndices(self.axisCodes, spectrumView.spectrum.axisCodes)
+                indices = spectrum.getByAxisCodes('axes', self.axisCodes, exactMatch=False)
                 _index = indices[n + 2]
                 if _index is None:
                     continue
 
-                _minAliasedFrequency, _maxAliasedFrequency = sorted(spectrumView.spectrum.aliasingLimits[_index])  # ppm limits (min, max) sorted for clarity
-                _minSpectrumFrequency, _maxSpectrumFrequency = sorted(spectrumView.spectrum.spectrumLimits[_index])
-                _valuePerPoint = spectrumView.spectrum.valuesPerPoint[_index]
+                _minAliasedFrequency, _maxAliasedFrequency = sorted(spectrum.aliasingLimits[_index])  # ppm limits (min, max) sorted for clarity
+                _minSpectrumFrequency, _maxSpectrumFrequency = sorted(spectrum.spectrumLimits[_index])
+                _valuePerPoint = spectrum.valuesPerPoint[_index]
 
                 _minFreq = _minAliasedFrequency or _minSpectrumFrequency
                 _maxFreq = _maxAliasedFrequency or _maxSpectrumFrequency
@@ -551,7 +552,8 @@ class GuiStripNd(GuiStrip):
 
         zAxis = self.orderedAxes[n]  # was + 2
 
-        planeMin, planeMax, planeSize, planePpmPosition, _tmp = self.planeAxisBars[n - 2].getPlaneValues()
+        planeAxisBar = self.planeAxisBars[n - 2]
+        planeMin, planeMax, planeSize, planePpmPosition, _tmp = planeAxisBar.getPlaneValues()
         # planeLabel = self.planeToolbar.planeLabels[n]
         # planeSize = planeLabel.singleStep()
 
@@ -560,6 +562,7 @@ class GuiStripNd(GuiStrip):
             return
 
         if planeCount:
+            _tmp2 = planeSize
             delta = planeSize * planeCount
             position = zAxis.position + delta
 
@@ -577,7 +580,7 @@ class GuiStripNd(GuiStrip):
             self.axisRegionChanged(zAxis)
             self.refresh()
 
-        elif position is not None:  # should always be the case
+        if position is not None:  # should always be the case
             if planeMin <= position <= planeMax:
                 zAxis.position = position
                 self.axisRegionChanged(zAxis)
@@ -705,9 +708,9 @@ class GuiStripNd(GuiStrip):
                 if objAxisIndex is not None and (0 <= objAxisIndex < len(ppmPositions)):
                     position = (ppmPositions[objAxisIndex],)
                     axisCode = (axisCodes[objAxisIndex],)
-                    self._project.newMark(defaultColour, position, axisCode)
+                    self.mainWindow.newMark(defaultColour, position, axisCode)
             else:
-                self._project.newMark(defaultColour, ppmPositions, axisCodes)
+                self.mainWindow.newMark(defaultColour, ppmPositions, axisCodes)
 
             # add the marks for the double cursor - needs to be enabled in preferences
             if self.doubleCrosshairVisible and self._CcpnGLWidget._matchingIsotopeCodes:
@@ -726,14 +729,14 @@ class GuiStripNd(GuiStrip):
                         if objAxisIndex is not None and objDoubleAxisIndex is not None:
                             position = (ppmPositions[objAxisIndex],)
                             axisCode = (axisCodes[objDoubleAxisIndex],)
-                            self._project.newMark(defaultColour, position, axisCode)
+                            self.mainWindow.newMark(defaultColour, position, axisCode)
                 else:
                     # flip the XY axes for the peak
                     if None not in indices:
                         ppmPositions = [ppmPositions[ii] for ii in indices]
                         axisCodes = [axisCodes[ii] for ii in indices]
                         ppmPositions = [ppmPositions[1], ppmPositions[0]] + ppmPositions[2:]
-                        self._project.newMark(defaultColour, ppmPositions, axisCodes)
+                        self.mainWindow.newMark(defaultColour, ppmPositions, axisCodes)
 
         except Exception as es:
             getLogger().warning('Error setting mark at position')

@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-22 09:51:59 +0100 (Tue, June 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:01 +0100 (Tue, July 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -279,6 +279,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
                                                                   spectrumAttribute='temperature',
                                                                   hasSetterInSpectrumClass=True
                                                                   )
+    noiseLevel = CFloat(allow_none=True, default_value=None).tag(isDimensional=False,
+                                                                  doCopy=True,
+                                                                  spectrumAttribute='noiseLevel',
+                                                                  hasSetterInSpectrumClass=True
+                                                                  )
     isBigEndian = Bool(default_value=_bigEndian).tag(isDimensional=False,
                                                      doCopy=True,
                                                      spectrumAttribute=None,
@@ -314,7 +319,6 @@ class SpectrumDataSourceABC(CcpNmrJson):
             spectrumAttribute=None,
             hasSetterInSpectrumClass=False
             )
-
     pointCounts = CList(trait=CInt(allow_none=False), default_value=[0] * MAXDIM, maxlen=MAXDIM).tag(
             isDimensional=True,
             doCopy=True,
@@ -1615,14 +1619,27 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         if self.dimensionCount == 1:
             data = self.getSliceData()
+            stdFactor = 1.0
+
+        elif self.dimensionCount == 2:
+            # 2D: presumably t has data (and potentially water!)
+            data =self.getPlaneData()
+            data.flatten()
+            stdFactor = 0.5
+
         else:
-            data = self.getPlaneData()
+            # 3D and up: use a yz-plane, about 10 points in; this plane is likely mostly empty
+            position = [min(10, self.pointCounts[0])] + [1] * (self.dimensionCount-1)
+            data = self.getPlaneData(xDim=self.Y_DIM, yDim=self.Z_DIM, position=position)
             data = data.flatten()
+            stdFactor = 2.0
 
         absData = numpy.array([v for v in map(abs, data)])
         median = numpy.median(absData)
-        std = numpy.std(absData)
-        noiseLevel = median + 1.0 * std
+        std = numpy.std(data)
+        noiseLevel = median + stdFactor * std
+        self.noiseLevel = noiseLevel
+
         return noiseLevel
 
     #=========================================================================================

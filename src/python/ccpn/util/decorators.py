@@ -5,7 +5,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-05 17:05:43 +0000 (Fri, February 05, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:03 +0100 (Tue, July 20, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -40,7 +41,7 @@ import inspect
 import time
 from functools import partial
 from ccpn.util.SafeFilename import getSafeFilename
-from ccpn.util.Path import aPath
+from ccpn.util.Path import aPath, Path
 import ccpn.util.Logging as Logging
 
 
@@ -259,6 +260,53 @@ def callList(func):
 # Adapted from from sandbox.Geerten.Refactored.decorators to fit current setup
 #----------------------------------------------------------------------------------------------
 
+def _obj2pid(obj):
+    """
+    Convert any core objects and CcpnModules to pids;
+            expand list, tuples, dicts but don't use recursion
+    Convert Path to str
+    CCPNINTERNAL: also used in logCommandManager contextmanager
+    """
+
+    # local import to prevent circular import
+    from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+    from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+
+    if isinstance(obj, (AbstractWrapperObject, CcpnModule)):
+        obj = obj.pid
+
+    elif isinstance(obj, list):
+        _tmp = []
+        for itm in obj:
+            if isinstance(itm, (AbstractWrapperObject, CcpnModule)):
+                _tmp.append(itm.pid)
+            else:
+                _tmp.append(itm)
+        obj = _tmp
+
+    elif isinstance(obj, tuple):
+        _tmp = []
+        for itm in obj:
+            if isinstance(itm, (AbstractWrapperObject, CcpnModule)):
+                _tmp.append(itm.pid)
+            else:
+                _tmp.append(itm)
+        obj = tuple(_tmp)
+
+    elif isinstance(obj, dict):
+        _tmp = {}
+        for key, value in obj.items():
+            if isinstance(value, (AbstractWrapperObject, CcpnModule)):
+                _tmp[key] = value.pid
+            else:
+                _tmp[key] = value
+        obj = _tmp
+
+    elif isinstance(obj, Path):
+        obj = str(obj)
+
+    return obj
+
 def _makeLogString(prefix, addSelf, func, *args, **kwds):
     """Helper function to create the log string from func, args and kwds
 
@@ -271,45 +319,6 @@ def _makeLogString(prefix, addSelf, func, *args, **kwds):
       prefix+CLASSNAME-of-SELF+'.'+func.__name__(EXPANDED-ARGUMENTS)
 
     """
-
-    def obj2pid(obj):
-        "Convert core objects and CcpnModules to pids; expand list, tuples, dicts but don't use recursion"
-
-        # local import to prevent circular import
-        from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-        from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-
-        if isinstance(obj, (AbstractWrapperObject, CcpnModule)):
-            obj = obj.pid
-
-        elif isinstance(obj, list):
-            _tmp = []
-            for itm in obj:
-                if isinstance(itm, (AbstractWrapperObject, CcpnModule)):
-                    _tmp.append(itm.pid)
-                else:
-                    _tmp.append(itm)
-            obj = _tmp
-
-        elif isinstance(obj, tuple):
-            _tmp = []
-            for itm in obj:
-                if isinstance(itm, (AbstractWrapperObject, CcpnModule)):
-                    _tmp.append(itm.pid)
-                else:
-                    _tmp.append(itm)
-            obj = tuple(_tmp)
-
-        elif isinstance(obj, dict):
-            _tmp = {}
-            for key, value in obj.items():
-                if isinstance(value, (AbstractWrapperObject, CcpnModule)):
-                    _tmp[key] = value.pid
-                else:
-                    _tmp[key] = value
-            obj = _tmp
-
-        return obj
 
     # get the signature
     sig = inspect.signature(func)
@@ -331,17 +340,17 @@ def _makeLogString(prefix, addSelf, func, *args, **kwds):
         pValue = ba.arguments[pName]
 
         if kinds[pName] == inspect.Parameter.VAR_POSITIONAL:  # variable arguments
-            pStrings.extend([repr(obj2pid(p)) for p in pValue])
+            pStrings.extend([repr(_obj2pid(p)) for p in pValue])
 
         elif kinds[pName] == inspect.Parameter.VAR_KEYWORD:  # variable keywords
-            pStrings.extend(['{0!s}={1!r}'.format(k, obj2pid(v)) for (k, v) in pValue.items()])
+            pStrings.extend(['{0!s}={1!r}'.format(k, _obj2pid(v)) for (k, v) in pValue.items()])
 
         elif kinds[pName] == inspect.Parameter.POSITIONAL_ONLY:
-            pStrings.append(repr(obj2pid(pValue)))
+            pStrings.append(repr(_obj2pid(pValue)))
 
         elif kinds[pName] == inspect.Parameter.KEYWORD_ONLY or \
                 kinds[pName] == inspect.Parameter.POSITIONAL_OR_KEYWORD:  # #  keywords or positional keywords
-            pStrings.append('{0!s}={1!r}'.format(pName, obj2pid(pValue)))
+            pStrings.append('{0!s}={1!r}'.format(pName, _obj2pid(pValue)))
 
     if ('self' in ba.arguments or 'cls' in ba.arguments) and addSelf:
         logString = prefix + '%s.%s' % (args[0].__class__.__name__, func.__name__)

@@ -1,12 +1,13 @@
 """
-This module defines the data loading mechanism for loading a Exel file
+This module defines the data loading mechanism for loading a pdb file
 """
 
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2018"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                )
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -16,14 +17,14 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: geertenv $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:36 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:01 +0100 (Tue, July 20, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: geertenv $"
-__date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
+__date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -37,8 +38,6 @@ class PdbDataLoader(DataLoaderABC):
     """
     dataFormat = 'pdbFile'
     suffixes = ['.pdb']  # a list of suffixes that get matched to path
-    allowDirectory = False  # Can/Can't open a directory
-    createsNewProject = False
     loadFunction = (Project._loadPdbFile, 'project')
 
 PdbDataLoader._registerFormat()

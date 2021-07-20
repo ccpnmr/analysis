@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-29 09:34:32 +0100 (Tue, June 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:03 +0100 (Tue, July 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -132,7 +132,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         """
         # insert widgets into the parent widget
         row = 0
-        self.xAxisUnits = Label(parent, text="X Axis Units", grid=(row, 0))
+        self.xAxisUnits = Label(parent, text="X-axis units", grid=(row, 0))
         self.xAxisUnitsData = RadioButtons(parent, texts=xTexts,
                                            objectNames=[f'xUnitsSDS_{text}' for text in xTexts],
                                            objectName='xUnitsSDS',
@@ -146,7 +146,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.xAxisUnitsData.setVisible(showXAxis)
 
         row += 1
-        self.yAxisUnits = Label(parent, text="Y Axis Units", grid=(row, 0))
+        self.yAxisUnits = Label(parent, text="Y-axis units", grid=(row, 0))
         self.yAxisUnitsData = RadioButtons(parent, texts=yTexts,
                                            objectNames=[f'yUnitsSDS_{text}' for text in xTexts],
                                            objectName='yUnitsSDS',
@@ -162,7 +162,58 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         HLine(parent, grid=(row, 0), gridSpan=(1, 5), colour=getColours()[DIVIDER], height=15)
 
         row += 1
-        self.useAspectRatioModeLabel = Label(parent, text="Aspect Ratio Mode", grid=(row, 0))
+        _height = getFontHeight(size='VLARGE') or 24
+        self.stripArrangementLabel = Label(parent, text="Strip Arrangement", grid=(row, 0))
+        self.stripArrangementButtons = RadioButtons(parent, texts=['    ', '    ', '    '],
+                                                    objectNames=['stripSDS_Row', 'stripSDS_Column', 'stripSDS_Tile'],
+                                                    objectName='stripSDS',
+                                                    # selectedInd=stripArrangement,
+                                                    direction='horizontal',
+                                                    grid=(row, 1), gridSpan=(1, 3), hAlign='l',
+                                                    tipTexts=None,
+                                                    icons=[('icons/strip-row', (_height, _height)),
+                                                           ('icons/strip-column', (_height, _height)),
+                                                           ('icons/strip-tile', (_height, _height))
+                                                           ],
+                                                    )
+        # NOTE:ED - temporarily disable/hide the Tile button
+        self.stripArrangementButtons.radioButtons[2].setEnabled(False)
+        self.stripArrangementButtons.radioButtons[2].setVisible(False)
+        self.stripArrangementButtons.setCallback(self._stripArrangementChanged)
+
+        if self._spectrumDisplay.is1D:
+            # not currently required for 1D
+            self.stripArrangementLabel.setVisible(False)
+            self.stripArrangementButtons.setVisible(False)
+            self.stripArrangementButtons.setEnabled(False)
+
+        row += 1
+        self.zPlaneNavigationModeLabel = Label(parent, text="zPlane Navigation Mode", grid=(row, 0))
+        self.zPlaneNavigationModeData = RadioButtons(parent, texts=[val.description for val in ZPlaneNavigationModes],
+                                                     objectNames=[f'zPlaneSDS_{val.label}' for val in ZPlaneNavigationModes],
+                                                     objectName='zPlaneSDS',
+                                                     callback=self._zPlaneNavigationModeChanged,
+                                                     direction='h',
+                                                     grid=(row, 1), hAlign='l', gridSpan=(1, 2),
+                                                     tipTexts=('Tools are located at the bottom of the spectrumDisplay,\nand will operate on the last strip selected in that spectrumDisplay',
+                                                               'Tools are located at the bottom of each strip',
+                                                               'Tools are displayed in the upper-left corner of each strip display'),
+                                                     )
+        self.zPlaneNavigationModeLabel.setToolTip('Select where the zPlane navigation tools are located')
+
+        if len(self._spectrumDisplay.axisCodes) < 3:
+            self.zPlaneNavigationModeLabel.setVisible(False)
+            self.zPlaneNavigationModeData.setVisible(False)
+            self.zPlaneNavigationModeData.setEnabled(False)
+
+        row += 1
+        HLine(parent, grid=(row, 0), gridSpan=(1, 5), colour=getColours()[DIVIDER], height=15)
+
+        row += 1
+        Label(parent, text="Aspect Ratio", grid=(row, 0))
+
+        row += 1
+        self.useAspectRatioModeLabel = Label(parent, text="Mode", hAlign='r', grid=(row, 0))
         self.useAspectRatioModeButtons = RadioButtons(parent, texts=['Free', 'Locked', 'Fixed'],
                                                       objectNames=['armSDS_Free', 'armSDS_Locked', 'armSDS_Fixed'],
                                                       objectName='armSDS',
@@ -174,7 +225,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                                                       )
 
         row += 1
-        Label(parent, text='Current Fixed', grid=(row, 1))
+        Label(parent, text='Current values:', hAlign='r', grid=(row, 0))
+        Label(parent, text='Fixed', grid=(row, 1))
         Label(parent, text='Screen', grid=(row, 2))
 
         row += 1
@@ -206,11 +258,24 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
         row += 1
         _buttonFrame = Frame(parent, setLayout=True, grid=(row, 1), gridSpan=(1, 3), hAlign='l')
-        self.setFromDefaultsButton = Button(_buttonFrame, text='Set from Defaults', grid=(0, 0), callback=self.updateFromDefaults)
-        self.setFromScreenButton = Button(_buttonFrame, text='Set from Screen', grid=(0, 1), callback=self._setAspectFromScreen)
+        self.setFromDefaultsButton = Button(_buttonFrame, text='Defaults', grid=(0, 0), callback=self.updateFromDefaults)
+        self.setFromScreenButton = Button(_buttonFrame, text='Set from screen', grid=(0, 1), callback=self._setAspectFromScreen)
 
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 5), colour=getColours()[DIVIDER], height=15)
+
+        row += 1
+        self.contourThicknessLabel = Label(parent, text="Contour thickness (pixel)", grid=(row, 0))
+        self.contourThicknessData = Spinbox(parent, step=1,
+                                            min=1, max=20, grid=(row, 1), hAlign='l', objectName='SDS_contour')
+        self.contourThicknessData.setMinimumWidth(LineEditsMinimumWidth)
+        self.contourThicknessData.valueChanged.connect(self._symbolsChanged)
+
+        row += 1
+        HLine(parent, grid=(row, 0), gridSpan=(1, 5), colour=getColours()[DIVIDER], height=15)
+
+        row += 1
+        Label(parent, text="Peaks", hAlign='l', grid=(row, 0))
 
         if self._spectrumDisplay.MAXPEAKLABELTYPES:
             row += 1
@@ -219,7 +284,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             _texts = _texts[:self._spectrumDisplay.MAXPEAKLABELTYPES]
             _names = _names[:self._spectrumDisplay.MAXPEAKLABELTYPES]
 
-            self.annotationsLabel = Label(parent, text="Symbol Labelling", grid=(row, 0))
+            self.annotationsLabel = Label(parent, text="Label", hAlign='r', grid=(row, 0))
             self.annotationsData = RadioButtons(parent, texts=_texts,
                                                 objectNames=_names,
                                                 objectName='annSDS',
@@ -238,7 +303,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             _texts = _texts[:self._spectrumDisplay.MAXPEAKSYMBOLTYPES]
             _names = _names[:self._spectrumDisplay.MAXPEAKSYMBOLTYPES]
 
-            self.symbolsLabel = Label(parent, text="Symbol Type", grid=(row, 0))
+            self.symbolsLabel = Label(parent, text="Symbol",  hAlign='r', grid=(row, 0))
             self.symbol = RadioButtons(parent, texts=_texts,
                                        objectNames=_names,
                                        objectName='symSDS',
@@ -256,7 +321,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                 self.symbol.radioButtons[2].setVisible(False)
 
         row += 1
-        self.symbolSizePixelLabel = Label(parent, text="Symbol Size (pixel)", grid=(row, 0))
+        self.symbolSizePixelLabel = Label(parent, text="Size (pixel)", hAlign='r', grid=(row, 0))
         self.symbolSizePixelData = Spinbox(parent, step=1,
                                            min=2, max=50, grid=(row, 1), hAlign='l', objectName='SDS_symbolSize')
         self.symbolSizePixelData.setMinimumWidth(LineEditsMinimumWidth)
@@ -264,7 +329,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.symbolSizePixelData.valueChanged.connect(self._symbolsChanged)
 
         row += 1
-        self.symbolThicknessLabel = Label(parent, text="Symbol Thickness (pixel)", grid=(row, 0))
+        self.symbolThicknessLabel = Label(parent, text="Thickness (pixel)", hAlign='r', grid=(row, 0))
         self.symbolThicknessData = Spinbox(parent, step=1,
                                            min=1, max=20, grid=(row, 1), hAlign='l', objectName='SDS_symbolThickness')
         self.symbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
@@ -272,54 +337,27 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.symbolThicknessData.valueChanged.connect(self._symbolsChanged)
 
         row += 1
-        self.contourThicknessLabel = Label(parent, text="Contour Thickness (pixel)", grid=(row, 0))
-        self.contourThicknessData = Spinbox(parent, step=1,
-                                            min=1, max=20, grid=(row, 1), hAlign='l', objectName='SDS_contour')
-        self.contourThicknessData.setMinimumWidth(LineEditsMinimumWidth)
-        self.contourThicknessData.valueChanged.connect(self._symbolsChanged)
+        HLine(parent, grid=(row, 0), gridSpan=(1, 5), colour=getColours()[DIVIDER], height=15)
 
         row += 1
-        _height = getFontHeight(size='VLARGE') or 24
-        self.stripArrangementLabel = Label(parent, text="Strip Arrangement", grid=(row, 0))
-        self.stripArrangementButtons = RadioButtons(parent, texts=['    ', '    ', '    '],
-                                                    objectNames=['stripSDS_Row', 'stripSDS_Column', 'stripSDS_Tile'],
-                                                    objectName='stripSDS',
-                                                    # selectedInd=stripArrangement,
-                                                    direction='horizontal',
-                                                    grid=(row, 1), gridSpan=(1, 3), hAlign='l',
-                                                    tipTexts=None,
-                                                    icons=[('icons/strip-row', (_height, _height)),
-                                                           ('icons/strip-column', (_height, _height)),
-                                                           ('icons/strip-tile', (_height, _height))
-                                                           ],
-                                                    )
-        # NOTE:ED - temporarily disable/hide the Tile button
-        self.stripArrangementButtons.radioButtons[2].setEnabled(False)
-        self.stripArrangementButtons.radioButtons[2].setVisible(False)
-        self.stripArrangementButtons.setCallback(self._stripArrangementChanged)
-
-        if self._spectrumDisplay.is1D:
-            # not currently required for 1D
-            self.stripArrangementLabel.setVisible(False)
-            self.stripArrangementButtons.setVisible(False)
-            self.stripArrangementButtons.setEnabled(False)
+        Label(parent, text="Aliased Peaks", hAlign='l', grid=(row, 0))
 
         row += 1
-        self.aliasEnabledLabel = Label(parent, text="Show Aliased Peaks", grid=(row, 0))
+        self.aliasEnabledLabel = Label(parent, text="Show peaks", hAlign='r', grid=(row, 0))
         self.aliasEnabledData = CheckBox(parent,
                                          # checked=aliasEnabled,
                                          grid=(row, 1), objectName='SDS_aliasEnabled')
         self.aliasEnabledData.clicked.connect(self._symbolsChanged)
 
         row += 1
-        self.aliasLabelsEnabledLabel = Label(parent, text="    Show Aliased Labels", grid=(row, 0))
+        self.aliasLabelsEnabledLabel = Label(parent, text="Show labels", hAlign='r', grid=(row, 0))
         self.aliasLabelsEnabledData = CheckBox(parent,
                                                # checked=aliasLabelsEnabled,
                                                grid=(row, 1), objectName='SDS_aliasLabelsEnabled')
         self.aliasLabelsEnabledData.clicked.connect(self._symbolsChanged)
 
         row += 1
-        self.aliasShadeLabel = Label(parent, text="    Opacity", grid=(row, 0))
+        self.aliasShadeLabel = Label(parent, text="Opacity", hAlign='r', grid=(row, 0))
         _sliderBox = Frame(parent, setLayout=True, grid=(row, 1), hAlign='l')
         self.aliasShadeData = Slider(_sliderBox, grid=(0, 1), hAlign='l', objectName='SDS_aliasShade')
         Label(_sliderBox, text="0", grid=(0, 0), hAlign='l')
@@ -327,25 +365,6 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         self.aliasShadeData.setMinimumWidth(LineEditsMinimumWidth)
         # self.aliasShadeData.set(aliasShade)
         self.aliasShadeData.valueChanged.connect(self._symbolsChanged)
-
-        row += 1
-        self.zPlaneNavigationModeLabel = Label(parent, text="zPlane Navigation Mode", grid=(row, 0))
-        self.zPlaneNavigationModeData = RadioButtons(parent, texts=[val.description for val in ZPlaneNavigationModes],
-                                                     objectNames=[f'zPlaneSDS_{val.label}' for val in ZPlaneNavigationModes],
-                                                     objectName='zPlaneSDS',
-                                                     callback=self._zPlaneNavigationModeChanged,
-                                                     direction='h',
-                                                     grid=(row, 1), hAlign='l', gridSpan=(1, 2),
-                                                     tipTexts=('Tools are located at the bottom of the spectrumDisplay,\nand will operate on the last strip selected in that spectrumDisplay',
-                                                               'Tools are located at the bottom of each strip',
-                                                               'Tools are displayed in the upper-left corner of each strip display'),
-                                                     )
-        self.zPlaneNavigationModeLabel.setToolTip('Select where the zPlane navigation tools are located')
-
-        if len(self._spectrumDisplay.axisCodes) < 3:
-            self.zPlaneNavigationModeLabel.setVisible(False)
-            self.zPlaneNavigationModeData.setVisible(False)
-            self.zPlaneNavigationModeData.setEnabled(False)
 
         row += 1
         self._spacer = Spacer(parent, 5, 5,
@@ -362,8 +381,9 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         with self.blockWidgetSignals():
 
             # put the values into the correct widgets
-            self.xAxisUnitsData.setIndex(xAxisUnits)
-            self.yAxisUnitsData.setIndex(yAxisUnits)
+
+            self._setAxesUnits(xAxisUnits, yAxisUnits)
+
 
             self.useAspectRatioModeButtons.setIndex(aspectRatioMode)
             for ii, aspect in enumerate(sorted(aspectRatios.keys())):
@@ -387,6 +407,15 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.aliasLabelsEnabledData.setEnabled(aliasEnabled)
             self.aliasShadeData.setEnabled(aliasEnabled)
             self.zPlaneNavigationModeData.setIndex(zPlaneNavigationMode)
+
+    def _setAxesUnits(self, xAxisUnits, yAxisUnits):
+        """Set the unit's checkboxes
+        CCPNINTERNAL: used in GuiSpectrumDisplay
+        """
+        if xAxisUnits is not None:
+            self.xAxisUnitsData.setIndex(xAxisUnits)
+        if yAxisUnits is not None:
+            self.yAxisUnitsData.setIndex(yAxisUnits)
 
     def getValues(self):
         """Return a dict containing the current settings

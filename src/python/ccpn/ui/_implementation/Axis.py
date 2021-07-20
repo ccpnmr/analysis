@@ -4,8 +4,9 @@ GUI Display Strip class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:40 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -101,24 +102,23 @@ class Axis(AbstractWrapperObject):
     @property
     def region(self) -> tuple:
         """Display region - position +/- width/2.."""
-        position = self._wrappedData.axis.position
-        halfwidth = self._wrappedData.axis.width / 2.
+        position = self.position
+        halfwidth = self.width * 0.5
         return (position - halfwidth, position + halfwidth)
 
     @region.setter
     def region(self, value):
-        self._wrappedData.axis.position = (value[0] + value[1]) / 2.
-        self._wrappedData.axis.width = abs(value[1] - value[0])
+        self.position = (value[0] + value[1]) * 0.5
+        self.width = abs(value[1] - value[0])
 
     @property
     def unit(self) -> str:
         """Display unit for axis"""
         return self._wrappedData.axis.unit
 
-    # NBNB TBD This should be settable, but changing it requires changing the position
-    # values. For now we leave it unsettable.
-
-    # NBNB TBD the 'regions' attribute may not be needed. leave it out
+    @unit.setter
+    def unit(self, value: str):
+        self._wrappedData.axis.unit = value
 
     @property
     def nmrAtoms(self) -> Tuple[NmrAtom]:

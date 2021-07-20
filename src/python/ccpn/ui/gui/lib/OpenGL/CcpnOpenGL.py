@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-28 19:12:27 +0100 (Mon, June 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1585,6 +1585,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self._axisCodes = strip.axisCodes
         self._axisOrder = strip.axisOrder
 
+        unitIndices = self.spectrumDisplay._getUnitsIndices()
+
         axis = self.orderedAxes[0]
         if self.INVERTXAXIS:
             self.axisL = max(axis.region[0], axis.region[1])
@@ -1592,6 +1594,7 @@ class CcpnGLWidget(QOpenGLWidget):
         else:
             self.axisL = min(axis.region[0], axis.region[1])
             self.axisR = max(axis.region[0], axis.region[1])
+        self._xUnits = unitIndices[0]
 
         axis = self.orderedAxes[1]
         if self.INVERTYAXIS:
@@ -1600,6 +1603,9 @@ class CcpnGLWidget(QOpenGLWidget):
         else:
             self.axisB = min(axis.region[0], axis.region[1])
             self.axisT = max(axis.region[0], axis.region[1])
+        if not self.spectrumDisplay.is1D:
+            self._yUnits = unitIndices[1]
+
         self.update()
 
     def zoom(self, xRegion: Tuple[float, float], yRegion: Tuple[float, float]):

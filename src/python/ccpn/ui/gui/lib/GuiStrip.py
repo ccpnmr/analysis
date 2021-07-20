@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-29 09:34:32 +0100 (Tue, June 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1747,7 +1747,7 @@ class GuiStrip(Frame):
         except:
             defaultColour = '#FF0000'
 
-        self._project.newMark(defaultColour, positions, axisCodes)
+        self.mainWindow.newMark(defaultColour, positions, axisCodes)
 
     def _copyAxisFromStrip(self, axisId, fromStrip):
         try:
@@ -1808,9 +1808,9 @@ class GuiStrip(Frame):
                 if (0 <= axisIndex < len(positions)):
                     positions = (positions[axisIndex],)
                     axisCodes = (axisCodes[axisIndex],)
-                    self._project.newMark(defaultColour, positions, axisCodes)
+                    self.mainWindow.newMark(defaultColour, positions, axisCodes)
             else:
-                self._project.newMark(defaultColour, positions, axisCodes)
+                self.mainWindow.newMark(defaultColour, positions, axisCodes)
 
             # add the marks for the double cursor - needs to be enabled in preferences
             if self.doubleCrosshairVisible and self._CcpnGLWidget._matchingIsotopeCodes:
@@ -1825,9 +1825,9 @@ class GuiStrip(Frame):
                         doubleIndex = 1 - axisIndex
                         positions = (positions[doubleIndex],)
                         axisCodes = (axisCodes[doubleIndex],)
-                        self._project.newMark(defaultColour, positions, axisCodes)
+                        self.mainWindow.newMark(defaultColour, positions, axisCodes)
                 else:
-                    self._project.newMark(defaultColour, positions, axisCodes)
+                    self.mainWindow.newMark(defaultColour, positions, axisCodes)
 
             # need new mark method of the form newMark(colour=colour, axisCode=position)
 

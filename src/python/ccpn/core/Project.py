@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-08 13:29:50 +0100 (Thu, July 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:00 +0100 (Tue, July 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -60,7 +60,7 @@ from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 # from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
-                                          notificationEchoBlocking, inactivity
+                                          notificationEchoBlocking, inactivity, logCommandManager
 from ccpn.util.Logging import getLogger
 
 
@@ -143,6 +143,11 @@ class Project(AbstractWrapperObject):
 
     @property
     def peakLists(self):
+        "STUB: hot-fixed later"
+        return ()
+
+    @property
+    def peaks(self):
         "STUB: hot-fixed later"
         return ()
 
@@ -352,7 +357,9 @@ class Project(AbstractWrapperObject):
                 raise ValueError('Cannot overwrite existing file "%s"' % newPath)
             if len(newPath.basename) > 32:
                 raise ValueError('Unfortunately, we currently have limited (32) length of the filename (%s)' % newPath.basename)
-            newPath = str(newPath)
+            path = str(newPath)
+        else:
+            path = str(self.path)
 
         try:
             apiStatus = self._getAPIObjectsStatus()
@@ -368,7 +375,7 @@ class Project(AbstractWrapperObject):
             getLogger().warning('Error checking project status: %s' % str(es))
 
         # don't check valid inside this routine as it is not optimised and only results in a crash. Use apiStatus object.
-        savedOk = apiIo.saveProject(self._wrappedData.root, newPath=str(newPath),
+        savedOk = apiIo.saveProject(self._wrappedData.root, newPath=path,
                                     changeBackup=changeBackup, createFallback=createFallback,
                                     overwriteExisting=overwriteExisting, checkValid=False,
                                     changeDataLocations=changeDataLocations)
@@ -739,28 +746,6 @@ class Project(AbstractWrapperObject):
         #
         return notifier
 
-    #GWV 20181123
-    # def duplicateNotifier(self,  className:str, target:str,
-    #                       notifier:typing.Callable[..., None]):
-    #   """register copy of notifier for a new className and target.
-    #   Intended for onceOnly=True notifiers. It is up to the user to make sure the calling
-    #   interface matches the action"""
-    #   if target in self._notifierActions:
-    #
-    #     tt = (className, target)
-    #   else:
-    #     # This is right, it just looks strange. But if target is not an action it is
-    #     # another className, and if so the names must be sorted.
-    #     tt = tuple(sorted([className, target]))
-    #
-    #   for od in self._context2Notifiers.values():
-    #     onceOnly = od.get(notifier)
-    #     if onceOnly is not None:
-    #       self._context2Notifiers.setdefault(tt, OrderedDict())[notifier] = onceOnly
-    #       break
-    #   else:
-    #     raise ValueError("Unknown notifier: %s" % notifier)
-
     def unRegisterNotifier(self, className: str, target: str, notifier: typing.Callable[..., None]):
         """Unregister the notifier from this className, and target"""
         if target in self._notifierActions:
@@ -848,7 +833,15 @@ class Project(AbstractWrapperObject):
     # RESTRICTED. Use in core classes ONLY
 
     def _startDeleteCommandBlock(self, *allWrappedData):
-        """Call startCommandBlock for wrapper object delete. Implementation only"""
+        """Call startCommandBlock for wrapper object delete. Implementation only
+
+        If commented: _activateApiNotifier fails
+
+        Used by the preset Api notifiers populated for self._apiNotifiers;
+        have _newApiObject, _startDeleteCommandBlock, _finaliseApiDelete, _endDeleteCommandBlock, _finaliseApiUnDelete
+        and _modifiedApiObject for each V3 class
+        Initialised from _linkWrapperObjects in AbstractWrapperObject.py:954
+        """
 
         undo = self._undo
         if undo is not None:
@@ -1295,52 +1288,32 @@ class Project(AbstractWrapperObject):
         """
         return self.application.loadData(path)
 
-# To implement
-        #
-        #     elif dataType == 'Text':
-        #         # Special case - you return the text instead of a list of Pids
-        #         # GWV: Can't do this!! -> have to return a list of tuples: [(dataType, pid or data)]
-        #         # need to define these dataTypes as CONSTANTS in the ioFormats.analyseUrl routine!
-        #
-        #         return open(usePath).read()
-        #
-        #     elif dataType == 'Macro' and subType == ioFormats.PYTHON:
-        #         # GWV: Can't do this: have to call the routine with a flag: autoExecute=True
-        #         # with suspendSideBarNotifications(self, 'runMacro', usePath, quiet=False):
-        #         self._appBase.runMacro(usePath)
-        #
-        #     elif dataType == 'Project' and subType == ioFormats.CCPNTARFILE:
-        #         # with suspendSideBarNotifications(self, 'loadData', usePath, quiet=False):
-        #         projectPath, temporaryDirectory = self._appBase._unpackCcpnTarfile(usePath)
-        #         project = self.loadProject(projectPath, ioFormats.CCPN)
-
-
-
     def _loadFastaFile(self, path: (str, Path)) -> list:
         """Load Fasta sequence(s) from file into Wrapper project
         CCPNINTERNAL: called from FastDataLoader
         """
-        sequences = fastaIo.parseFastaFile(path)
-        chains = []
-        for sequence in sequences:
-            newChain = self.createChain(sequence=sequence[1], compoundName=sequence[0],
-                                        molType='protein')
-            chains.append(newChain)
-        #
+        with logCommandManager('application.', 'loadData', path):
+            sequences = fastaIo.parseFastaFile(path)
+            chains = []
+            for sequence in sequences:
+                newChain = self.createChain(sequence=sequence[1], compoundName=sequence[0],
+                                            molType='protein')
+                chains.append(newChain)
+            #
         return chains
 
     def _loadPdbFile(self, path: (str, Path)) -> list:
         """Load data from pdb file path into new StructureEnsemble object(s)
         CCPNINTERNAL: called from pdb dataLoader
         """
-
         from ccpn.util.StructureData import EnsembleData
 
-        path = aPath(path)
-        name = path.basename
+        with logCommandManager('application.', 'loadData', path):
+            path = aPath(path)
+            name = path.basename
 
-        ensemble = EnsembleData.from_pdb(str(path))
-        se = self.newStructureEnsemble(name=name, data=ensemble)
+            ensemble = EnsembleData.from_pdb(str(path))
+            se = self.newStructureEnsemble(name=name, data=ensemble)
 
         return [se]
 
@@ -1348,14 +1321,14 @@ class Project(AbstractWrapperObject):
         """Load text from file path into new Note object
         CCPNINTERNAL: called from text dataLoader
         """
-        path = aPath(path)
-        name = path.basename
+        with logCommandManager('application.', 'loadData', path):
+            path = aPath(path)
+            name = path.basename
 
-        with path.open('r') as fp:
-            # cannot do read() as we want one string
-            text = ''.join(line for line in fp.readlines())
-        note = self.newNote(name=name, text=text)
-
+            with path.open('r') as fp:
+                # cannot do read() as we want one string
+                text = ''.join(line for line in fp.readlines())
+            note = self.newNote(name=name, text=text)
         return [note]
 
     def _loadLayout(self, path: (str, Path), subType: str):
@@ -1367,10 +1340,12 @@ class Project(AbstractWrapperObject):
         :returns list of loaded objects (awaiting adjust ment of excelReader)
         CCPNINTERNAL: used in Excel data loader
         """
-        with undoBlock():
-            reader = ExcelReader(project=self, excelPath=str(path))
-            result = reader.load()
-            return result
+
+        with logCommandManager('application.', 'loadData', path):
+            with undoBlock():
+                reader = ExcelReader(project=self, excelPath=str(path))
+                result = reader.load()
+        return result
 
     #===========================================================================================
     # End data loaders
@@ -1420,8 +1395,7 @@ class Project(AbstractWrapperObject):
         #
         return result
 
-    def getObjectsById(self, className: str,
-                       id: str) -> typing.List[AbstractWrapperObject]:
+    def getObjectsById(self, className: str, id: str) -> typing.List[AbstractWrapperObject]:
         """get objects from class name / shortName and the start of the ID.
 
         The function does NOT interrogate the API level, which makes it faster in a
@@ -1480,49 +1454,15 @@ class Project(AbstractWrapperObject):
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
-    @logCommand('project.')
     def newMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence[str],
                 style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = ()):
-        """Create new Mark
-
-        :param str colour: Mark colour
-        :param tuple/list positions: Position in unit (default ppm) of all lines in the mark
-        :param tuple/list axisCodes: Axis codes for all lines in the mark
-        :param str style: Mark drawing style (dashed line etc.) default: full line ('simple')
-        :param tuple/list units: Axis units for all lines in the mark, Default: all ppm
-        :param tuple/list labels: Ruler labels for all lines in the mark. Default: None
-
-        :return Mark instance
-
-        To be depreciated in next version in lieu of mainWindow.newMark (with different call signature)
-
         """
-        from ccpn.ui._implementation.Mark import _newMark, _removeMarkAxes
+        To be depreciated in next version; use mainWindow.newMark() instead
+        """
 
-        marks = _removeMarkAxes(self, positions=positions, axisCodes=axisCodes, labels=labels)
-        if marks:
-            pos, axes, lbls = marks
-            return _newMark(self, colour=colour, positions=pos, axisCodes=axes,
-                            style=style, units=units, labels=lbls
-                            )
-
-    # GWV 20181127: not used
-    # def _newSimpleMark(self, colour: str, position: float, axisCode: str, style: str = 'simple',
-    #                    unit: str = 'ppm', label: str = None):
-    #     """Create new child Mark with a single line
-    #
-    #     :param str colour: Mark colour
-    #     :param tuple/list position: Position in unit (default ppm)
-    #     :param tuple/list axisCode: Axis code
-    #     :param str style: Mark drawing style (dashed line etc.) default: full line ('simple')
-    #     :param tuple/list unit: Axis unit. Default: all ppm
-    #     :param tuple/list label: Line label. Default: None
-    #
-    #     return Mark instance
-    #
-    #     Inserted later ccpn.ui._implementation.Mark
-    #     """
-    #     pass
+        return self.application.mainWindow.newMark(colour=colour, positions=positions,
+                                                   axisCodes=axisCodes, style=style,
+                                                   units=units, labels=labels)
 
     @logCommand('project.')
     def newSpectrum(self, path:str, name: str = None):
@@ -1739,32 +1679,6 @@ class Project(AbstractWrapperObject):
 
         return _newDataSet(self, name=name, title=title, programName=programName, programVersion=programVersion,
                            dataPath=dataPath, creationDate=creationDate, uuid=uuid, comment=comment, **kwds)
-
-    # @logCommand('project.')
-    # def newSpectrumDisplay(self, axisCodes: (str,), stripDirection: str = 'Y',
-    #                        title: str = None, window=None, comment: str = None,
-    #                        independentStrips=False, nmrResidue=None, **kwds):
-    #     """Create new SpectrumDisplay
-    #
-    #     See the SpectrumDisplay class for details.
-    #
-    #     Optional keyword arguments can be passed in; see SpectrumDisplay._newSpectrumDisplay for details.
-    #
-    #     :param axisCodes:
-    #     :param stripDirection:
-    #     :param title:
-    #     :param window:
-    #     :param comment:
-    #     :param independentStrips:
-    #     :param nmrResidue:
-    #     :param serial: optional serial number.
-    #     :return: a new SpectrumDisplay instance.
-    #     """
-    #     from ccpn.ui._implementation.SpectrumDisplay import _newSpectrumDisplay
-    #
-    #     return _newSpectrumDisplay(self, axisCodes=axisCodes, stripDirection=stripDirection,
-    #                                title=title, window=window, independentStrips=independentStrips,
-    #                                comment=comment, **kwds)
 
     @logCommand('project.')
     def newSpectrumGroup(self, name: str, spectra=(), **kwds):
@@ -1988,47 +1902,3 @@ class Project(AbstractWrapperObject):
         from ccpn.core.ChemicalShiftList import _getChemicalShiftList
 
         return _getChemicalShiftList(self, name=name, **kwds)
-
-#
-# def isValidPath(projectName, stripFullPath=True, stripExtension=True):
-#     """Check whether the project name is valid after stripping fullpath and extension
-#     Can only contain alphanumeric characters and underscores
-#
-#     :param projectName: name of project to check
-#     :param stripFullPath: set to true to remove leading directory
-#     :param stripExtension: set to true to remove extension
-#     :return: True if valid else False
-#     """
-#     if not projectName:
-#         return
-#
-#     if isinstance(projectName, str):
-#
-#         name = os.path.basename(projectName) if stripFullPath else projectName
-#         name = os.path.splitext(name)[0] if stripExtension else name
-#
-#         STRIPCHARS = '_'
-#         for ss in STRIPCHARS:
-#             name = name.replace(ss, '')
-#
-#         if name.isalnum():
-#             return True
-#
-#
-# def isValidFileNameLength(projectName, stripFullPath=True, stripExtension=True):
-#     """Check whether the project name is valid after stripping fullpath and extension
-#     Can only contain alphanumeric characters and underscores
-#
-#     :param projectName: name of project to check
-#     :param stripFullPath: set to true to remove leading directory
-#     :param stripExtension: set to true to remove extension
-#     :return: True if length <= 32 else False
-#     """
-#     if not projectName:
-#         return
-#
-#     if isinstance(projectName, str):
-#         name = os.path.basename(projectName) if stripFullPath else projectName
-#         name = os.path.splitext(name)[0] if stripExtension else name
-#
-#         return len(name) <= 32

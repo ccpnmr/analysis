@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:32 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:03 +0100 (Tue, July 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -245,8 +245,9 @@ class Path(_Path_):
     def __eq__(self, other):
         return (str(self).strip() == str(other).strip())
 
-    def __ne__(self, other):
-        return not (str(self).strip() == str(other).strip())
+    # No longer needed in Pyhton 3.x
+    # def __ne__(self, other):
+    #     return not (str(self).strip() == str(other).strip())
 
     def __add__(self, other):
         return Path(self.asString() + other)
@@ -510,9 +511,13 @@ validCcpnFileNameChars = validFileNamePartChars + '-.' + separatorFileNameChar
 def makeValidCcpnFilePath(path):
     """Replace invalid chars in path to assure Python 2.1 (used in ObjectDomain) compatibility
     """
+    # used in ApiPath.py
     ll = []
     for ii, char in enumerate(path):
         if char not in validFileNamePartChars:
             char = defaultFileNameChar
         ll.append(char)
     return ''.join(ll)
+
+makeValidCcpnPath = makeValidCcpnFilePath
+# used in ccpnmodel/ccpncore/lib/chemComp/Io.py"

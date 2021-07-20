@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-09 11:36:32 +0100 (Fri, July 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:00 +0100 (Tue, July 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -35,6 +35,7 @@ import ccpn.core.lib.SpectrumLib as specLib
 
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.core.lib.ContextManagers import newObject
+from ccpn.util.Logging import getLogger
 
 
 class SpectrumReference(AbstractWrapperObject):
@@ -52,9 +53,6 @@ class SpectrumReference(AbstractWrapperObject):
     className = 'SpectrumReference'
 
     _parentClass = Spectrum
-
-    # Type of dimension. Always 'Frequency' for frequency (Fourier transformed) dimension
-    _dimensionType = specLib.DIMENSION_FREQUENCY  # 'Frequency'
 
     #: Name of plural link to instances of class
     _pluralLinkName = 'spectrumReferences'
@@ -194,7 +192,7 @@ class SpectrumReference(AbstractWrapperObject):
         """Dimension type ('Time' / 'Frequency' / 'Sampled')"""
         if not self._hasInternalParameter('dimensionType'):
             result = specLib.DIMENSION_FREQUENCY
-            # self._dimensionType = result
+            self._setInternalParameter('dimensionType', result)
         else:
             result = self._getInternalParameter('dimensionType')
         return result
@@ -243,7 +241,7 @@ class SpectrumReference(AbstractWrapperObject):
         """maximum possible peak frequency (in ppm) for this reference """
         if (result := self._expDimRef.maxAliasedFreq) is None:
             point_1 = 1 - self._dataDim.pointOffset
-            point_n = point_1 + self.pointCount
+            point_n = float(point_1 + self.pointCount) + 0.5
             result = self.pointToValue((point_n))
         return result
 
@@ -255,7 +253,7 @@ class SpectrumReference(AbstractWrapperObject):
     def minAliasedFrequency(self) -> float:
         """minimum possible peak frequency (in ppm) for this reference """
         if (result := self._expDimRef.minAliasedFreq) is None:
-            point_1 = 1 - self._dataDim.pointOffset
+            point_1 = float(1 - self._dataDim.pointOffset) - 0.5
             result = self.pointToValue((point_1))
         return result
 
@@ -267,9 +265,9 @@ class SpectrumReference(AbstractWrapperObject):
     def limits(self) -> Tuple[float, float]:
         """Return the limits of this dimension as a tuple of floats"""
         if self.dimensionType == specLib.DIMENSION_FREQUENCY:
-            return (self.pointToValue(1), self.pointToValue(self.pointCount + 1))
+            return (self.pointToValue(1.0), self.pointToValue(float(self.pointCount)))
         elif self.dimensionType == specLib.DIMENSION_TIME:
-            return (self.pointToValue(1), self.pointToValue(self.pointCount + 1))
+            return (self.pointToValue(1.0), self.pointToValue(float(self.pointCount)))
             # return (0.0, self._valuePerPoint * self.pointCount)
         else:
             raise RuntimeError('SpectrumReference.limits not implemented for sampled data')

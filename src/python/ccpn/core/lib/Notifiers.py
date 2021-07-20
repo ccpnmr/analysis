@@ -19,8 +19,9 @@ April 2017: First design by Geerten Vuister
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -29,8 +30,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-09 18:38:59 +0100 (Wed, September 09, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:01 +0100 (Tue, July 20, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -455,13 +456,13 @@ class NotifierBase(object):
     """
     A class confering notifier management routines
     """
-    NOTIFIERSDICT = '_ccpNmrV3notifiersDict'  # attribute name for storing notifiers in Ccpn objects
+    _NOTIFIERSDICT = '_ccpNmrV3notifiersDict'  # attribute name for storing notifiers in Ccpn objects
 
     def _getObjectNotifiersDict(self):
         """Internal routine to get the object notifiers dict"""
-        if not hasattr(self, self.NOTIFIERSDICT):
-            setattr(self, self.NOTIFIERSDICT, _NotifiersDict())
-        objNotifiers = getattr(self, self.NOTIFIERSDICT)
+        if not hasattr(self, self._NOTIFIERSDICT):
+            setattr(self, self._NOTIFIERSDICT, _NotifiersDict())
+        objNotifiers = getattr(self, self._NOTIFIERSDICT)
         # check type
         if not isinstance(objNotifiers, _NotifiersDict):
             raise RuntimeError('Invalid NotifiersDict, got %s, expected %s' %
@@ -538,7 +539,7 @@ class NotifierBase(object):
         :param notifier: Notifier instance or None
         :return: True or False
         """
-        if not hasattr(self, self.NOTIFIERSDICT):
+        if not hasattr(self, self._NOTIFIERSDICT):
             return False
 
         objNotifiers = self._getObjectNotifiersDict()
@@ -565,7 +566,7 @@ class NotifierBase(object):
         :param targetName: valid className, attributeName or ANY
         :return: None or list of existing notifiers
         """
-        if not hasattr(self, self.NOTIFIERSDICT):
+        if not hasattr(self, self._NOTIFIERSDICT):
             return ()
 
         objNotifiers = self._getObjectNotifiersDict()

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-08 18:24:44 +0100 (Thu, July 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -83,7 +83,14 @@ from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXBACKGROUND, CCPN
 
 STRIP_SPACING = 5
 AXIS_WIDTH = 30
-AXISUNITS = ['ppm', 'Hz', 'points']
+
+AXISUNIT_PPM = 'ppm'
+AXISUNIT_HZ = 'Hz'
+AXISUNIT_POINT = 'point'  # Cannot be 'points' because of the v2-model; Grrrr
+AXISUNIT_NUMBER = 'number'
+# AXISUNITS = ['ppm', 'Hz', 'point']
+AXISUNITS = [AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT]
+
 SPECTRUMGROUPS = 'spectrumGroups'
 SPECTRUMISGROUPED = 'spectrumIsGrouped'
 SPECTRUMGROUPLIST = 'spectrumGroupList'
@@ -261,20 +268,30 @@ class GuiSpectrumDisplay(CcpnModule):
         aspectCodes = self.application.preferences.general.aspectRatios
 
         # create settings widget
-        if not self.is1D:
+        if self.is1D:
+            # Can't do for now; Axes do not yet exist
+            # xAxisUnits = AXISUNITS.index(self.axes[0].unit)
+            xAxisUnits = yAxisUnits = 0
+
             self._spectrumDisplaySettings = SpectrumDisplaySettings(parent=self.settingsWidget,
                                                                     mainWindow=self.mainWindow, spectrumDisplay=self,
                                                                     grid=(0, 0),
-                                                                    xTexts=AXISUNITS, yTexts=AXISUNITS,
+                                                                    xTexts=AXISUNITS, xAxisUnits=xAxisUnits,
+                                                                    yTexts=[''],
+                                                                    showYAxis=False,
                                                                     _baseAspectRatioAxisCode=baseAspectRatioCode,
                                                                     _aspectRatios=aspectCodes,
                                                                     )
         else:
+            # Can't do for now; Axes do not yet exist
+            # xAxisUnits = AXISUNITS.index(self.axes[0].unit)
+            # yAxisUnits = AXISUNITS.index(self.axes[1].unit)
+            xAxisUnits = yAxisUnits = 0
             self._spectrumDisplaySettings = SpectrumDisplaySettings(parent=self.settingsWidget,
                                                                     mainWindow=self.mainWindow, spectrumDisplay=self,
                                                                     grid=(0, 0),
-                                                                    xTexts=AXISUNITS, yTexts=[''],
-                                                                    showYAxis=False,
+                                                                    xTexts=AXISUNITS, xAxisUnits=xAxisUnits,
+                                                                    yTexts=AXISUNITS, yAxisUnits=yAxisUnits,
                                                                     _baseAspectRatioAxisCode=baseAspectRatioCode,
                                                                     _aspectRatios=aspectCodes,
                                                                     )
@@ -433,6 +450,15 @@ class GuiSpectrumDisplay(CcpnModule):
                                                        prefsGen.contourThickness,
                                                        prefsGen.zPlaneNavigationMode)
 
+    def _updateAxesUnits(self):
+        """Update the x- and y-axis units of the display"""
+        units = self.units
+        xUnit = AXISUNITS.index(units[0])
+        yUnit = AXISUNITS.index(units[1]) if not self.is1D else None
+
+        self._spectrumDisplaySettings._setAxesUnits(xUnit, yUnit)
+        self._spectrumDisplaySettings._settingsChanged()
+
     def restoreSpectrumState(self, discard=False):
         """Restore the state for this widget
         """
@@ -494,10 +520,12 @@ class GuiSpectrumDisplay(CcpnModule):
 
     def _postInit(self):
         """Method to be called as last item during spectrumDisplay creation
-        Called from _newSpectrumDisplay/_createSpectrumDisplay
+        CCPNMRINTERNAL: Called from _newSpectrumDisplay
         """
         self.setToolbarButtons()
         try:
+            # # force an update for units
+            # self._updateAxesUnits() This proved not to work; adjusted the code in initialiseAxes() instead
             self.strips[0]._CcpnGLWidget.initialiseAxes(strip=self.strips[0])
         except:
             getLogger().debugGL('OpenGL widget not instantiated')
@@ -2365,7 +2393,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
     # def _deletedPeak(self, peak):
     #     apiPeak = peak._wrappedData
-    #     # NBNB TBD FIXME rewrite this to not use API peaks
+    #     # NBNB TBD
     #     # ALSO move this machinery from subclasses to this class.
     #     for peakListView in self.activePeakItemDict:
     #         peakItemDict = self.activePeakItemDict[peakListView]
@@ -2381,41 +2409,51 @@ class GuiSpectrumDisplay(CcpnModule):
     @logCommand(get='self')
     def displaySpectrum(self, spectrum, axisOrder: (str,) = ()):
         """Display additional spectrum, with spectrum axes ordered according ton axisOrder
+        :return SpectrumView instance or None
         """
+        from ccpn.ui._implementation.SpectrumView import _newSpectrumView
+
         spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
         if not isinstance(spectrum, Spectrum):
             raise TypeError('spectrum is not of type Spectrum')
 
-        # check not already here
-        _spectra = [specView.spectrum for specView in self.spectrumViews]
-        if spectrum in _spectra:
-            getLogger().warning(f'displaySpectrum: Spectrum {spectrum.pid} already in this display')
-            return
+        # check if not already here
+        _specViews = self.getSpectrumViewFromSpectrum(spectrum)
+        if len(_specViews) > 0:
+            getLogger().debug('displaySpectrum: Spectrum %s already in display %s' % (spectrum, self))
+            return _specViews[0]
 
         _oldOrdering = self.getOrderedSpectrumViewsIndex()
+
+        dimensionOrdering = [1, 0] if self.is1D else spectrum.getByAxisCodes('dimensions', self.axisCodes, exactMatch=False)
+        if len(dimensionOrdering) != len(self.axisCodes):
+            raise RuntimeError('Unable to match display.axisCodes (%r) to %s' % (self.axisCodes, spectrum))
 
         with undoStackRevert(self.application) as revertStack:
             with undoBlockWithoutSideBar(self.application):
                 # push/pop ordering
                 with undoStackBlocking(self.application) as addUndoItem:
+
+                    # add toolbar ordering to the undo stack
                     addUndoItem(undo=partial(self.setToolbarButtons, tuple(_oldOrdering)))
 
-                newSpectrumView = self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
+                    # Make spectrumView
+                    if (spectrumView := _newSpectrumView(self, spectrum=spectrum, dimensionOrdering=dimensionOrdering)) \
+                        is None:
+                        # notify the stack to revert to the pre-context manager stack
+                        revertStack(True)
 
-                if newSpectrumView:
-                    # push/pop ordering
-                    with undoStackBlocking(self.application) as addUndoItem:
+                    else:
+
                         # add the spectrum to the end of the spectrum ordering in the toolbar
                         index = self.getOrderedSpectrumViewsIndex()
-                        newInd = self.spectrumViews.index(newSpectrumView)
+                        newInd = self.spectrumViews.index(spectrumView)
                         index = tuple((ii + 1) if (ii >= newInd) else ii for ii in index)
                         index += (newInd,)
 
                         self.setToolbarButtons(tuple(index))
                         addUndoItem(redo=partial(self.setToolbarButtons, tuple(index)))
-                else:
-                    # notify the stack to revert to the pre-context manager stack
-                    revertStack(True)
+        return spectrumView
 
     @logCommand(get='self')
     def removeSpectrum(self, spectrum):

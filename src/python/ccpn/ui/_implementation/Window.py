@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-29 09:34:32 +0100 (Tue, June 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -33,12 +33,16 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDispl
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 
 from ccpn.core.Project import Project
+from ccpn.core.Spectrum import Spectrum
+from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpn.core.lib.SpectrumLib import DIMENSION_FREQUENCY
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, undoBlockWithoutSideBar, undoStackBlocking
+from ccpn.core.lib.ContextManagers import newObject, undoBlockWithoutSideBar, undoStackBlocking, \
+    logCommandManager
 from ccpn.util.Logging import getLogger
+
 
 
 class Window(AbstractWrapperObject):
@@ -64,10 +68,15 @@ class Window(AbstractWrapperObject):
 
     #=========================================================================================
     @property
-    def spectrumDisplays(self):
+    def spectrumDisplays(self) -> tuple:
         """A tuple of SpectrumDisplay instances displayed in the window"""
         ll = [x for x in self._wrappedData.sortedModules() if isinstance(x, ApiBoundDisplay)]
         return tuple(self._project._data2Obj[x] for x in ll if x in self._project._data2Obj)
+
+    @property
+    def marks(self) -> tuple:
+        """A redirections for now, as the marks still live in the project (for now)"""
+        return tuple(self.application.project.marks)
 
     #=========================================================================================
     # CCPN properties
@@ -255,31 +264,65 @@ class Window(AbstractWrapperObject):
         else:
             return windowStore.sortedWindows()
 
-    @logCommand('mainWindow.')  #there is already a log command internally. This is not needed it and slows down the process.
-    def createSpectrumDisplay(self, spectrum, displayAxisCodes: Sequence[str] = (),
-                              axisOrder: Sequence[str] = (), title: str = None, positions: Sequence[float] = (),
-                              widths: Sequence[float] = (), units: Sequence[str] = (),
-                              stripDirection: str = None, is1D: bool = False,
-                              position='right', relativeTo=None, isGrouped=False,
-                              **kwds):
+    #=========================================================================================
+    # 'new' methods
+    #=========================================================================================
+
+    @logCommand('mainWindow.')
+    def newMacroEditor(self, path=None, position='top', relativeTo=None):
+        """Open a new Module to edit macros
         """
-        :param \*str, displayAxisCodes: display axis codes to use in display order - default to spectrum axisCodes in heuristic order
-        :param \*str axisOrder: spectrum axis codes in display order - default to spectrum axisCodes in heuristic order
-        :param \*float positions: axis positions in order - default to heuristic
-        :param \*float widths: axis widths in order - default to heuristic
-        :param \*str units: axis units in display order - default to heuristic
-        :param str stripDirection: if 'X' or 'Y' set strip axis
-        :param bool is1D: If True, or spectrum passed in is 1D, do 1D display
-        :param bool independentStrips: if True do freeStrip display.
+        # local to prevent circular import
+        from ccpn.ui.gui.modules.MacroEditor import MacroEditor
+
+        path = str(path) if path is not None else None
+        macroEditor = MacroEditor(mainWindow=self, filePath=path)
+        self.moduleArea.addModule(macroEditor, position=position, relativeTo=relativeTo)
+        return macroEditor
+
+    @logCommand('mainWindow.')
+    def newHtmlModule(self, urlPath, position='top', relativeTo=None):
+        """Open a new Module to display urlPath
         """
-        from ccpn.ui._implementation.SpectrumDisplay import _createSpectrumDisplay
+        # local to prevent circular imports
+        from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView
+
+        htmlModule = CcpnWebView(mainWindow=self, urlPath=urlPath)
+        self.moduleArea.addModule(htmlModule, position=position, relativeTo=relativeTo)
+        return htmlModule
+
+    #Command logging done inside the method
+    def newSpectrumDisplay(self, spectra, axisCodes: Sequence[str] = (), stripDirection: str = 'Y',
+                              position='right', relativeTo=None):
+        """Create new SpectrumDisplay
+
+        :param spectra: a Spectrum or SpectrumGroup instance to be displayed
+        :param axisCodes: display order of the dimensions of spectrum (defaults to spectrum.preferredAxisOrdering)
+        :param stripDirection: stripDirection: if 'X' or 'Y' sets strip axis
+
+        :return: a new SpectrumDisplay instance.
+        """
+
+        from ccpn.ui._implementation.SpectrumDisplay import _newSpectrumDisplay
         from ccpn.ui.gui.lib.GuiSpectrumDisplay import STRIPDIRECTIONS
         from ccpn.ui.gui.guiSettings import ZPlaneNavigationModes
 
-        spectrum = self.project.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
-        # dimensionTypes = spectrum.getByAxisCodes('dimensionTypes', displayAxisCodes)
-        # if any(x != DIMENSION_FREQUENCY for x in dimensionTypes):
-        #     raise NotImplementedError("createSpectrumDisplay not implemented for processed frequency spectra, dimension types were: {}".format(spectrum.dimensionTypes, ))
+        if isinstance(spectra, str):
+            spectra = self.project.getByPid(spectra)
+
+        if not isinstance(spectra, (Spectrum, SpectrumGroup)):
+            raise ValueError('Invalid spectra argument, expected Spectrum or SpectrumGroup; got "%s"' % spectra)
+
+        if isinstance(spectra, Spectrum):
+            isGrouped = False
+        elif isinstance(spectra, SpectrumGroup) and len(spectra.spectra) > 0:
+            isGrouped = True
+        else:
+            raise ValueError('%s has no spectra' % spectra)
+        spectrum = spectra.spectra[0] if isGrouped else spectra
+
+        if not axisCodes:
+            axisCodes = tuple(spectrum.axisCodes[ac] for ac in spectrum.preferredAxisOrdering)
 
         # change string names to objects
         if isinstance(relativeTo, str):
@@ -288,45 +331,58 @@ class Window(AbstractWrapperObject):
                 raise ValueError("Error, not a unique module")
             relativeTo = modules[0] if modules else None
 
-        with undoBlockWithoutSideBar():
+        with logCommandManager('mainWindow.', 'newSpectrumDisplay',
+                               spectra, axisCodes=axisCodes, stripDirection=stripDirection,
+                               position=position, relativeTo=relativeTo):
+            with undoBlockWithoutSideBar():
 
-            try:
-                zPlaneNavigationMode = ZPlaneNavigationModes(0).label
+                try:
+                    zPlaneNavigationMode = ZPlaneNavigationModes(0).label
 
-                # default to preferences if not set
-                _stripDirection = self.project.application.preferences.general.stripArrangement
-                stripDirection = stripDirection or STRIPDIRECTIONS[_stripDirection]
-                _zPlaneNavigationMode = self.project.application.preferences.general.zPlaneNavigationMode
-                zPlaneNavigationMode = ZPlaneNavigationModes(_zPlaneNavigationMode).label
-            except Exception as es:
-                getLogger().warning(f'createSpectrumDisplay {es}')
+                    # default to preferences if not set
+                    _stripDirection = self.project.application.preferences.general.stripArrangement
+                    stripDirection = stripDirection or STRIPDIRECTIONS[_stripDirection]
+                    _zPlaneNavigationMode = self.project.application.preferences.general.zPlaneNavigationMode
+                    zPlaneNavigationMode = ZPlaneNavigationModes(_zPlaneNavigationMode).label
+                except Exception as es:
+                    getLogger().warning(f'newSpectrumDisplay {es}')
 
-            # create the new spectrumDisplay
-            display = _createSpectrumDisplay(self, spectrum, displayAxisCodes=displayAxisCodes, axisOrder=axisOrder,
-                                             title=title, positions=positions, widths=widths, units=units,
-                                             stripDirection=stripDirection, isGrouped=isGrouped,
-                                             zPlaneNavigationMode=zPlaneNavigationMode,
-                                             **kwds)
+                # create the new spectrumDisplay
+                display = _newSpectrumDisplay(self,
+                                              spectrum = spectrum,
+                                              axisCodes=axisCodes,
+                                              stripDirection=stripDirection,
+                                              zPlaneNavigationMode=zPlaneNavigationMode,
+                                              isGrouped = isGrouped
+                                              )
 
-            # add the new module to mainWindow at the required position
-            self.moduleArea.addModule(display, position=position, relativeTo=relativeTo)
-            display._insertPosition = (position, relativeTo)
+                # add the new module to mainWindow at the required position
+                self.moduleArea.addModule(display, position=position, relativeTo=relativeTo)
+                display._insertPosition = (position, relativeTo)
 
-            with undoStackBlocking() as addUndoItem:
-                # disable all notifiers in spectrumDisplays
-                addUndoItem(undo=partial(self._setBlankingSpectrumDisplayNotifiers, display, True),
-                            redo=partial(self._setBlankingSpectrumDisplayNotifiers, display, False))
+                with undoStackBlocking() as addUndoItem:
+                    # disable all notifiers in spectrumDisplays
+                    addUndoItem(undo=partial(self._setBlankingSpectrumDisplayNotifiers, display, True),
+                                redo=partial(self._setBlankingSpectrumDisplayNotifiers, display, False))
 
-                # add/remove spectrumDisplay from module Area - use moveDock not addModule, otherwise introduces extra splitters
-                addUndoItem(undo=partial(self._hiddenModules.moveDock, display, position='top', neighbor=None),
-                            redo=partial(self.moduleArea.moveDock, display, position=position, neighbor=relativeTo))
+                    # add/remove spectrumDisplay from module Area - use moveDock not addModule, otherwise introduces extra splitters
+                    addUndoItem(undo=partial(self._hiddenModules.moveDock, display, position='top', neighbor=None),
+                                redo=partial(self.moduleArea.moveDock, display, position=position, neighbor=relativeTo))
 
-            # if not positions and not widths:
-            #     display.autoRange()
+                # if not positions and not widths:
+                #     display.autoRange()
+
+                if isGrouped:
+                    display._colourChanged(spectra)
+                    display.spectrumToolBar.hide()
+                    display.spectrumGroupToolBar.show()
+                    display.spectrumGroupToolBar._addAction(spectra)
 
         return display
 
-    @logCommand('mainWindow.')
+    # deprecated
+    createSpectrumDisplay = newSpectrumDisplay
+
     def _deleteSpectrumDisplay(self, display):
         """Delete a spectrumDisplay from the moduleArea
         Removes the display to a hidden moduleArea of mainWindow, deletes the _wrappedData, and disables all notifiers
@@ -362,6 +418,31 @@ class Window(AbstractWrapperObject):
             # delete the spectrumDisplay
             display.delete()
 
+    @logCommand('mainWindow.')
+    def newMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence[str],
+                style: str = 'simple', units: Sequence[str] = (), labels: Sequence[str] = ()):
+        """Create new Mark
+
+        :param str colour: Mark colour
+        :param tuple/list positions: Position in unit (default ppm) of all lines in the mark
+        :param tuple/list axisCodes: Axis codes for all lines in the mark
+        :param str style: Mark drawing style (dashed line etc.) default: full line ('simple')
+        :param tuple/list units: Axis units for all lines in the mark, Default: all ppm
+        :param tuple/list labels: Ruler labels for all lines in the mark. Default: None
+
+        :return Mark instance
+        """
+        from ccpn.ui._implementation.Mark import _newMark, _removeMarkAxes
+
+        # Marks are stored in the project!
+        project = self.project
+
+        marks = _removeMarkAxes(project, positions=positions, axisCodes=axisCodes, labels=labels)
+        if marks:
+            pos, axes, lbls = marks
+            return _newMark(project, colour=colour, positions=pos, axisCodes=axes,
+                            style=style, units=units, labels=lbls
+                            )
 
 #=========================================================================================
 # Connections to parents:

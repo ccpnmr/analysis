@@ -1,5 +1,5 @@
 """
-This module defines the data loading mechanism for loading a Fasta file
+This module contains helper code for untarring file
 """
 
 #=========================================================================================
@@ -18,26 +18,51 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:01 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: geertenv $"
-__date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
+__author__ = "$Author: CCPN $"
+__date__ = "$Date: 2021-07-14 10:28:41 +0000 (Fri, July 14, 2021) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
-from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
-from ccpn.core.Project import Project
+import os
+import tempfile
+import tarfile
 
-
-class FastaDataLoader(DataLoaderABC):
-    """Fasta data loader
+def _unpackCcpnTarfile(tarfilePath, outputPath=None, directoryPrefix='CcpnProject_'):
     """
-    dataFormat = 'fastaFile'
-    suffixes = ['.fasta']  # a list of suffixes that get matched to path
-    loadFunction = (Project._loadFastaFile, 'project')
+    # CCPNINTERNAL - called in Framework.restoreFromArchive
+    """
 
-FastaDataLoader._registerFormat()
+    if outputPath:
+        if not os.path.exists(outputPath):
+            os.makedirs(outputPath)
+        temporaryDirectory = None
+    else:
+        temporaryDirectory = tempfile.TemporaryDirectory(prefix=directoryPrefix)
+        outputPath = temporaryDirectory.name
+
+    cwd = os.getcwd()
+    try:
+        os.chdir(outputPath)
+        tp = tarfile.open(tarfilePath)
+        tp.extractall()
+
+        # look for a directory inside and assume the first found is the project directory (there should be exactly one)
+        relfiles = os.listdir('.')
+        for relfile in relfiles:
+            fullfile = os.path.join(outputPath, relfile)
+            if os.path.isdir(fullfile):
+                outputPath = fullfile
+                break
+        else:
+            raise IOError('Could not find project directory in tarfile')
+
+    finally:
+        os.chdir(cwd)
+
+    return outputPath, temporaryDirectory

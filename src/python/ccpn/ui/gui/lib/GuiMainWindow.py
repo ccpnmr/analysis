@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: gvuister $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:30 +0100 (Fri, June 04, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1065,7 +1065,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         text = ''.join([line.strip().split(':', 6)[-1] + '\n' for line in l])
         editor.textBox.setText(text)
 
-    def _highlightCurrentStrip(self, data):
+    def _highlightCurrentStrip(self, data:Notifier):
         """Callback on current to highlight the strip
         """
         previousStrip = data[Notifier.PREVIOUSVALUE]
@@ -1144,7 +1144,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         """Get dataLoader for the url (or None if not present)
         Allows for reporting or checking through popups
         does not do the actual loading
-        :returns a tuple (dataLoader, createsNewProject)
+        :returns a tuple (dataLoader, createNewProject)
         """
         dataLoader = checkPathForDataLoader(url)
 
@@ -1153,7 +1153,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             getLogger().warning(txt)
             return (None, False)
 
-        createsNewProject = dataLoader.createsNewProject
+        createNewProject = dataLoader.createNewProject
 
         # local import here, as checkPathForDataLoaders needs to be called first to assure proper import orer
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
@@ -1167,16 +1167,16 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                                'How do you want to handle the file:',
                                choices, parent=self)
             if choice == choices[0]:
-                dataLoader.makeNewProject = False
-                createsNewProject = False
+                dataLoader.createNewProject = False
+                createNewProject = False
             elif choice == choices[1]:
-                dataLoader.makeNewProject = True
-                createsNewProject = True
+                dataLoader.createNewProject = True
+                createNewProject = True
             else:
                 dataLoader = None
-                createsNewProject = False
+                createNewProject = False
 
-        return (dataLoader, createsNewProject)
+        return (dataLoader, createNewProject)
 
     def _processDroppedItems(self, data):
         """Handle the dropped urls
@@ -1223,6 +1223,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 with undoBlockWithoutSideBar():
                     result = dLoader.load()
             return result
+        #end def
 
         objs = []
         for url, dataLoader, createNewProject in urlsToLoad:
@@ -1350,7 +1351,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             MessageDialog.showError('Load Project', 'No suitable dataLoader found', parent=self)
             return None
 
-        if not dataLoader.createsNewProject:
+        if not dataLoader.createNewProject:
             MessageDialog.showError('Load Project', '"%s" does not yield a new project' % dataLoader.path,
                                     parent=self
                                     )

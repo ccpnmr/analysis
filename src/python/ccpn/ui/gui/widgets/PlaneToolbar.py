@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-29 09:34:32 +0100 (Tue, June 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:03 +0100 (Tue, July 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -739,7 +739,7 @@ class ZPlaneToolbar(Frame):
     Class to contain the widgets for zPlane navigation
     """
 
-    def __init__(self, qtParent, mainWindow, strip, showHeader=False, showLabels=False, **kwds):
+    def __init__(self, qtParent, mainWindow, displayOrStrip, showHeader=False, showLabels=False, **kwds):
 
         super().__init__(parent=qtParent, setLayout=True, **kwds)
 
@@ -751,10 +751,10 @@ class ZPlaneToolbar(Frame):
         self._header.setVisible(showHeader)
 
         self.labels = []
-        axisCodes = strip.axisCodes
-        _axisCount = len(axisCodes) - 2
-        for ii in range(_axisCount):
-            lbl = Label(self, text=axisCodes[ii + 2], grid=(0, 1 + (ii * 2)), bold=True)
+        # axisCodes = spectrumDisplay.axisCodes
+        # _axisCount = len(axisCodes) - 2
+        for ii, axisCode in enumerate(displayOrStrip.axisCodes[2:]):
+            lbl = Label(self, text=axisCode, grid=(0, 1 + (ii * 2)), bold=True)
             lbl.setVisible(showLabels)
             self.labels.append(lbl)
 
@@ -825,6 +825,99 @@ class ZPlaneToolbar(Frame):
                 # reattach the widget to the in strip container
                 pl._attachButton('_axisSelector')
                 pl._hideAxisSelector()
+
+
+# class ZPlaneToolbar(Frame):
+#     """
+#     Class to contain the widgets for zPlane navigation
+#     """
+#
+#     def __init__(self, qtParent, mainWindow, strip, showHeader=False, showLabels=False, **kwds):
+#
+#         super().__init__(parent=qtParent, setLayout=True, **kwds)
+#
+#         self._strip = None
+#         self.getLayout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
+#         self.setVisible(False)
+#         self.mainWindow = mainWindow
+#         self._header = Label(self, text='zPlaneWidget', grid=(0, 0))
+#         self._header.setVisible(showHeader)
+#
+#         self.labels = []
+#         axisCodes = strip.axisCodes
+#         _axisCount = len(axisCodes) - 2
+#         for ii in range(_axisCount):
+#             lbl = Label(self, text=axisCodes[ii + 2], grid=(0, 1 + (ii * 2)), bold=True)
+#             lbl.setVisible(showLabels)
+#             self.labels.append(lbl)
+#
+#     def setHeaderText(self, value):
+#         """Set the header text
+#         """
+#         if not isinstance(value, str):
+#             raise TypeError('{} is not a string'.format(value))
+#         self._header.setText(value)
+#
+#     def setLabels(self, value):
+#         """Set the labels for the dimensions
+#         """
+#         if not isinstance(value, (tuple, list)):
+#             raise TypeError('{} must be tuple/list'.format(value))
+#         if len(value) != len(self._strip.axisCodes) - 2:
+#             raise TypeError('{} must be tuple/list of length {}'.format(value, len(self._strip) - 2))
+#         if not all(isinstance(val, str) for val in value):
+#             raise TypeError('{} must be tuple/list of strings'.format(value))
+#
+#         for lbl, val in zip(self.labels, value):
+#             lbl.setText(value)
+#
+#     def setHeaderVisible(self, value):
+#         """Set the visibility of the header
+#         """
+#         if not isinstance(value, bool):
+#             raise TypeError('{} must be a True/False')
+#         self._header.setVisible(value)
+#
+#     def setLabelsVisible(self, value):
+#         """Set the visibility of the labels
+#         """
+#         if not isinstance(value, bool):
+#             raise TypeError('{} must be a True/False')
+#         for lbl in self.labels:
+#             lbl.setVisible(value)
+#
+#     def attachZPlaneWidgets(self, strip):
+#         """Attach new widgets to the zPlane toolbar
+#         """
+#         layout = self.getLayout()
+#
+#         # if strip != self._strip: - causing it to skip on undo/redo
+#         self.removeZPlaneWidgets()
+#
+#         for col, fr in enumerate(strip.planeAxisBars):
+#             index = layout.indexOf(fr._axisSelector)
+#             if index == -1:
+#                 layout.addWidget(fr._axisSelector._mainWidget, 0, 2 + col * 2, 1, 1)
+#                 fr._axisSelector._mainWidget.setParent(self)
+#                 fr._axisSelector.setVisible(True)
+#                 fr._resize()
+#
+#         self._header.setText(strip.pid)
+#         self._strip = strip
+#
+#         self.setVisible(True)
+#         self.update()
+#
+#     def removeZPlaneWidgets(self):
+#         """Remove existing widgets from the zPlane toolbar
+#         """
+#         layout = self.getLayout()
+#
+#         if self._strip and hasattr(self._strip, 'planeAxisBars'):
+#             for pl in self._strip.planeAxisBars:
+#                 # reattach the widget to the in strip container
+#                 pl._attachButton('_axisSelector')
+#                 pl._hideAxisSelector()
 
 
 STRIPCONNECT_LEFT = 'isLeft'

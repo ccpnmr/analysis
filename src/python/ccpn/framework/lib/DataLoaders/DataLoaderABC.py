@@ -9,8 +9,9 @@ work of loading the data into the project.
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2018"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                )
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -20,14 +21,14 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: geertenv $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:36 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:01 +0100 (Tue, July 20, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: geertenv $"
-__date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
+__date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -67,6 +68,9 @@ def getDataLoaders():
     from ccpn.framework.lib.DataLoaders.ExelDataLoader import ExcelDataLoader
     from ccpn.framework.lib.DataLoaders.PdbDataLoader import PdbDataLoader
     from ccpn.framework.lib.DataLoaders.TextDataLoader import TextDataLoader
+    from ccpn.framework.lib.DataLoaders.PythonDataLoader import PythonDataLoader
+    from ccpn.framework.lib.DataLoaders.HtmlDataLoader import HtmlDataLoader
+    from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
     from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
     return DataLoaderABC._dataLoaders
 
@@ -101,10 +105,12 @@ class DataLoaderABC(TraitBase):
     #=========================================================================================
     dataFormat = None
     suffixes = []  # a list of suffixes that gets matched to path
-    createsNewProject = False
+    alwaysCreateNewProject = False
+    canCreateNewProject = False
     allowDirectory = False  # Can/Can't open a directory
     loadFunction = (None, None) # A (function, attributeName) tuple;
-                                # attributeName := 'project' or 'application'
+                                # :param function(obj:(Application,Project), path:Path) -> List[newObj]
+                                # :param attributeName := 'project' or 'application'
 
     #=========================================================================================
     # end to be subclassed
@@ -113,6 +119,7 @@ class DataLoaderABC(TraitBase):
     # traits
     path = CPath().tag(info='a path to a file to be loaded')
     application = Any(default_value=None, allow_none=True)
+    createNewProject = Bool().tag(info='flag to indicate if a new project will be created')
 
     # A dict of registered DataLoaders: filled by _registerFormat classmethod, called
     # once after each definition of a new derived class (e.g. PdbDataLoader)
@@ -133,6 +140,9 @@ class DataLoaderABC(TraitBase):
         self.path = aPath(path)
         if not self.path.exists():
             raise ValueError('Invalid path "%s"' % path)
+
+        # get default setting for project creation
+        self.createNewProject = self.alwaysCreateNewProject or self.canCreateNewProject
 
         # local import to avoid cycles
         from ccpn.framework.Framework import getApplication

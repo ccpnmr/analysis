@@ -6,8 +6,9 @@ It creates a list of dataLoaders for each recognised type, optionally filtered
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2018"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                )
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -17,20 +18,21 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: geertenv $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:36 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.1.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:01 +0100 (Tue, July 20, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: geertenv $"
-__date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
+__date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC, checkPathForDataLoader
 from ccpn.util.traits.CcpNmrTraits import Bool, List, Int
+from ccpn.core.lib.ContextManagers import logCommandManager
 
 
 class DirectoryDataLoader(DataLoaderABC):
@@ -39,7 +41,6 @@ class DirectoryDataLoader(DataLoaderABC):
     dataFormat = 'directoryData'
     suffixes = []  # a list of suffixes that get matched to path
     allowDirectory = True  # Can/Can't open a directory
-    createsNewProject = False
 
     recursive = Bool(default_value=False).tag(info='Flag to define recursive behavior')
     dataLoaders = List(default_value=[]).tag(info='List with dataLoader instances for the files of the directory "path"')
@@ -63,13 +64,15 @@ class DirectoryDataLoader(DataLoaderABC):
         raises RunTimeError on error
         :return: a list of [object(s)] representing the directory
         """
-        result = []
-        try:
-            for dataLoader in self.dataLoaders:
-                objs = dataLoader.load()  # This will automatically recurse
-                result.extend(objs)
-        except (ValueError, RuntimeError) as es:
-            raise RuntimeError('Error loading files from "%s"' % self.path)
+        with logCommandManager('application.', 'loadData', self.path):
+
+            result = []
+            try:
+                for dataLoader in self.dataLoaders:
+                    objs = dataLoader.load()  # This will automatically recurse
+                    result.extend(objs)
+            except (ValueError, RuntimeError) as es:
+                raise RuntimeError('Error loading files from "%s"' % self.path)
         return result
 
     def __init__(self, path, recursive: bool = False, filterForDataFormats: (tuple,list) = None):

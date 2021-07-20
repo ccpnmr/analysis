@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: varioustoxins $"
-__dateModified__ = "$dateModified: 2021-06-13 17:12:08 +0100 (Sun, June 13, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:01 +0100 (Tue, July 20, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -353,6 +354,37 @@ def notificationEchoBlocking(application=None):
     finally:
         # clean up after disabling echo blocking
         application._decreaseNotificationBlocking()
+
+@contextmanager
+def logCommandManager(prefix, funcName, *args, **kwds):
+    """Echo commands as prefix.funcName( **kwds )"""
+    from ccpn.util.decorators import _obj2pid
+
+    application = getApplication()
+    if application is None:
+        raise RuntimeError('Error getting application')
+
+    blocking = application._echoBlocking
+
+    if blocking == 0 and application.ui is not None:
+        if not prefix[-1] == '.':
+            prefix += '.'
+
+        msg = prefix + funcName + '('
+        for arg in args:
+            msg += '%r, ' % _obj2pid(arg)
+        for key, val in kwds.items():
+            msg += '%s=%r, ' % (key, _obj2pid(val))
+        # remove any unnecesary ', ' from the end
+        if msg[-2:] == ', ':
+            msg = msg[:-2]
+        msg += ')'
+
+        application.ui.echoCommands([msg])
+
+    with notificationEchoBlocking(application=application):
+        yield
+
 
 @contextmanager
 def inactivity(application=None):

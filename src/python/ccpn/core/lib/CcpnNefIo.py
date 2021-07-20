@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-07 20:15:17 +0100 (Wed, July 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:00 +0100 (Tue, July 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -7203,7 +7203,7 @@ def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict
             spectrum.chemicalShiftList = spectrumParameters.get('chemicalShiftList')
 
             if acquisitionAxisIndex is not None:
-                spectrum.acquisitionAxisCode = axisCodes[acquisitionAxisIndex]
+                spectrum.isAquisition[acquisitionAxisIndex] = True
 
         # Delete autocreated peaklist  and reset - we want any read-in peakList to be the first
         # If necessary an empty PeakList is added downstream

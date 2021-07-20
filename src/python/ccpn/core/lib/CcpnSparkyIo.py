@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-23 15:38:08 +0000 (Tue, March 23, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-07-20 21:57:00 +0100 (Tue, July 20, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -567,7 +568,11 @@ class CcpnSparkyReader:
 
     def parseSparkyFile(self, path):
 
-        with open(path, 'r') as fileName:
+        _path = aPath(path)
+        if not _path.exists():
+            raise FileNotFoundError('File %s does not exist' % path)
+
+        with open(_path, 'r') as fileName:
             self.text = fileName.read()
 
         self.tokeniser = getSparkyTokenIterator(self.text)
@@ -731,8 +736,10 @@ class CcpnSparkyReader:
 
         spectrumPath = (aPath(pathName) / aPath(filePath)).normalise()
 
-        getLogger().info('Loading spectrum: %s' % spectrumPath)
-        loadedSpectrum = self.project.loadData(spectrumPath)  # load the spectrum
+        loadedSpectrum = None
+        if spectrumPath.exists():
+            getLogger().info('Loading spectrum: %s' % spectrumPath)
+            loadedSpectrum = self.project.application.loadData(spectrumPath)  # load the spectrum
         if not loadedSpectrum:
             if parentBlock:
                 fileName = aPath(parentBlock.getDataValues(SPARKY_NAME, firstOnly=True))
@@ -1001,8 +1008,11 @@ class CcpnSparkyReader:
             saveFiles = sparkyDict.getBlocks(SPARKY_SAVEFILES, firstOnly=True)
             loadedBlocks = []
             for sp in saveFiles.getData():
-                savefilePath = (aPath(filePath) / aPath(sp)).normalise()
-                loadedBlocks.append(self.parseSparkyFile(savefilePath))
+                savefilePath = aPath(filePath) / sp
+                if not savefilePath.exists():
+                    getLogger().warning('Skipping %s, file not found' % savefilePath)
+                else:
+                    loadedBlocks.append(self.parseSparkyFile(savefilePath))
 
             # now import the molecule from the main project file
             self.importSparkyMolecule(project, sparkyDict)

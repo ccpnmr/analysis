@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:00 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-20 22:11:40 +0100 (Tue, July 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -192,7 +192,7 @@ class SpectrumReference(AbstractWrapperObject):
         """Dimension type ('Time' / 'Frequency' / 'Sampled')"""
         if not self._hasInternalParameter('dimensionType'):
             result = specLib.DIMENSION_FREQUENCY
-            self._setInternalParameter('dimensionType', result)
+            # self._setInternalParameter('dimensionType', result)
         else:
             result = self._getInternalParameter('dimensionType')
         return result

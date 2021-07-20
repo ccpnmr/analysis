@@ -442,7 +442,7 @@ class StripDisplay1d(coreClass, _SpectrumDisplay1d):
         self.application = project._appBase
 
         _SpectrumDisplay1d.__init__(self, mainWindow=self.application.ui.mainWindow,
-                                    name=self._longName('SpectrumDisplay'))
+                                    name=self._id)
 
         # 20191113: ED moved to initGraphics
         # if not project._isNew:
@@ -475,7 +475,7 @@ class SpectrumDisplayNd(coreClass, _SpectrumDisplayNd):
         self._appBase = project._appBase
 
         _SpectrumDisplayNd.__init__(self, mainWindow=self.application.ui.mainWindow,
-                                    name=self._longName('SpectrumDisplay'))
+                                    name=self._id)
 
         # 20191113: ED moved to initGraphics
         # if not project._isNew:

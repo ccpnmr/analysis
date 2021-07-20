@@ -195,7 +195,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
                       OR __init__ with closeFunc=<your close function>
     """
-    moduleName = ''
     className = ''
 
     HORIZONTAL = 'horizontal'
@@ -268,7 +267,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self._nameSplitter = '_'  # used to create the serial
         self._serial = None       # int after the nameSplitter
         self._titleName = None    # name without serial
-        CcpnModule.moduleName = name
 
         setWidgetFont(self, )
 
@@ -440,6 +438,14 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             return title
         else:
             return moduleName
+
+    @property
+    def moduleName(self):
+        return self._name
+
+    @moduleName.setter
+    def moduleName(self, name):
+        self._name = name
 
     @property
     def widgetsState(self):

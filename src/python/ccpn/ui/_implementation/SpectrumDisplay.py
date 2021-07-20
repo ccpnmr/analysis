@@ -280,7 +280,11 @@ class SpectrumDisplay(AbstractWrapperObject):
                 guiModule = self.project.getByPid(self.pid)
                 # self._wrappedData.name = name  # cannot set yet because API constraints. Also missing notifiers.
                 if guiModule: # just rename the label on the Gui. Could be done via notifiers (to be implemented)
-                    name = guiModule._renameModule(f'{self.className}:{name}')
+                    name = guiModule._renameModule(name)
+                    del self.project._pid2Obj[self.shortClassName][self._id]
+                    task = self._wrappedData.parent
+                    task.modules[name] = task.modules.pop(self._id)
+
                     self._wrappedData.__dict__['name'] = name
                     self._id = name
                     return (oldName,)

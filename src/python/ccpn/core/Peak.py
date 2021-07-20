@@ -989,7 +989,7 @@ class Peak(AbstractWrapperObject):
         """Make (and return) a copy of the Peak in targetPeakList."""
 
         singleValueTags = ['height', 'volume', 'heightError', 'volumeError', 'figureOfMerit',
-                           'annotation', 'comment', 'serial']
+                           'annotation', 'comment', ]
         dimensionValueTags = ['ppmPositions', 'positionError', 'boxWidths', 'lineWidths', ]
 
         peakList = self._parent

@@ -368,6 +368,47 @@ class SpectrumView(AbstractWrapperObject):
         ll = tuple(dimensionOrdering[axisCodes.index(x)] for x in axisOrder)
         return tuple((x or None) and x - 1 for x in ll)
 
+    @property
+    def dimensions(self) -> tuple:
+        """Spectrum dimensions in display order"""
+        return tuple(self._wrappedData.spectrumView.dimensionOrdering)
+
+    @property
+    def axes(self) -> tuple:
+        """Spectrum axes in display order"""
+        return tuple([dim-1 for dim in self._wrappedData.spectrumView.dimensionOrdering])
+
+    @property
+    def axisCodes(self) -> list:
+        """Spectrum axisCodes in display order"""
+        return [self.spectrum.axisCodes[idx] for idx in self.axes]
+
+    def _getPointPosition(self, ppmPostions) -> tuple:
+        """Convert the ppm-positions vector (in display order) to a position (1-based)
+        in spectrum-dimension order, suitable to be used with getPlaneData
+        """
+        position = [1]*self.spectrum.dimensionCount
+        for dim, ppmValue in zip(self.dimensions, ppmPostions):
+            if dim > 0:
+                # Intensity dimensions have dim=0, or axis=-1;
+                p = self.spectrum.ppm2point(value=ppmValue, dimension=dim)
+                position[dim-1] = int(p+0.5)
+
+        return tuple(position)
+
+    def _getByDisplayOrder(self, parameterName) -> list:
+        """Return parameter in displayOrder"""
+        return list(self.spectrum.getByDimensions(parameterName=parameterName, dimensions=self.dimensions))
+
+    def _extractXYplaneToFile(self, ppmPositions):
+        """Extract an XY (display order) plane
+        :return Spectrum instance
+        """
+        position = self._getPointPosition(ppmPositions)
+        axisCodes=self.axisCodes[0:2]
+        plane = self.spectrum.extractPlaneToFile(axisCodes=axisCodes, position=position)
+        return plane
+
     #=========================================================================================
     # Implementation functions
     #=========================================================================================
@@ -390,10 +431,8 @@ class SpectrumView(AbstractWrapperObject):
         GLSignals.emitPaintEvent()
 
 #=========================================================================================
-# Connections to parents:
+# New method
 #=========================================================================================
-
-
 
 # @newObject(SpectrumView)
 # Cannot use the decorator
@@ -433,47 +472,9 @@ def _newSpectrumView(display, spectrum, dimensionOrdering):
     return result
 
 #=========================================================================================
-# CCPN functions
+# Notifiers:
 #=========================================================================================
 
-
-# GWV 20/7/2021: Moved to Spectrum class
-# # Spectrum.spectrumViews property
-# def getter(spectrum: Spectrum):
-#     specViews = [spectrum._project._data2Obj.get(y)
-#                  for x in spectrum._wrappedData.sortedSpectrumViews()
-#                  for y in x.sortedStripSpectrumViews()]
-#     return tuple(specViews)
-#
-# Spectrum.spectrumViews = property(getter, None, None,
-#                                   "SpectrumViews showing Spectrum")
-
-
-# # Strip.spectrumViews property
-# def getter(strip: Strip):
-#     return tuple(strip._project._data2Obj.get(x)
-#                  for x in strip._wrappedData.sortedStripSpectrumViews())
-#
-#
-# Strip.spectrumViews = property(getter, None, None,
-#                                "SpectrumViews shown in Strip")
-# del getter
-
-# GWV 20/7/2021: Moved to Spectrum class
-# def _findSpectrumView(strip: Strip, spectrum: Spectrum) -> SpectrumView:
-#     """find Strip.spectrumView that matches spectrum, or None if not present"""
-#     dataSource = spectrum._wrappedData
-#     for stripSpectrumView in strip._wrappedData.sortedStripSpectrumViews():
-#         if stripSpectrumView.spectrumView.dataSource is dataSource:
-#             return strip._project._data2Obj.get(stripSpectrumView)
-#     #
-#     return None
-
-#
-# Strip.findSpectrumView = _findSpectrumView
-# del _findSpectrumView
-
-# Notifiers:
 # Notify SpectrumView change when ApiSpectrumView changes (underlying object is StripSpectrumView)
 Project._apiNotifiers.append(
         ('_notifyRelatedApiObject', {'pathToObject': 'stripSpectrumViews', 'action': 'change'},

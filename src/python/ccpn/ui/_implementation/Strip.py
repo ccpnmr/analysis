@@ -90,10 +90,11 @@ class Strip(AbstractWrapperObject):
         # return tuple(self._project._data2Obj.get(x)
         #      for x in self._wrappedData.sortedStripSpectrumViews())
 
-    def findSpectrumView(self, spectrum):
-        """find Strip.spectrumView that matches spectrum, or None if not present"""
-        sViews = [sv for sv in self.spectrumViews if sv.spectrum == spectrum]
-        return sViews[0] if len(sViews) == 1 else None
+    # GWV 20/7/2021: not used
+    # def findSpectrumView(self, spectrum):
+    #     """find Strip.spectrumView that matches spectrum, or None if not present"""
+    #     sViews = [sv for sv in self.spectrumViews if sv.spectrum == spectrum]
+    #     return sViews[0] if len(sViews) == 1 else None
 
     #-----------------------------------------------------------------------------------------
 

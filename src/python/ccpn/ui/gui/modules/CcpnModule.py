@@ -195,7 +195,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
                       OR __init__ with closeFunc=<your close function>
     """
-    className = ''
+    className = '' # used for restoring GUI layouts
+    shortClassName = PidShortClassName # used to create the pid
 
     HORIZONTAL = 'horizontal'
     VERTICAL = 'vertical'
@@ -209,7 +210,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     settingsMinimumSizes = (100, 50)
     _restored = False
     _onlySingleInstance = False
-
     # _instances = set()
 
     def __init__(self, mainWindow, name, closable=True, closeFunc=None, settingsScrollBarPolicies=('asNeeded', 'asNeeded'), **kwds):
@@ -386,28 +386,28 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     #=========================================================================================
 
     def __repr__(self):
-        return f'<{PidLongClassName}:{self.name()}>'
+        return f'<{self.pid}>'
 
     @property
     def pid(self) -> Pid:
         """
         Identifier for the object, unique within the project - added to give label to ccpnModules
         """
-        return Pid(f'{PidShortClassName}:{self.name()}')
+        return Pid(f'{self.shortClassName}:{self.id}')
 
     @property
     def longPid(self) -> Pid:
         """
         Identifier for the object, unique within the project - added to give label to ccpnModules
         """
-        return Pid(f'{PidLongClassName}:{self.name()}')
+        return Pid(f'{PidLongClassName}:{self.id}')
 
     @property
     def id(self):
         """
-        The module name without Class name or serial.
+        The module name without Class name (Mo, Module or GD, GuiDisplay).
         """
-        return self.titleName
+        return self.name()
 
     @property
     def serial(self):
@@ -1410,9 +1410,7 @@ class CcpnModuleLabel(DockLabel):
         #align = self.alignment()
         # GWV adjusted
         align = QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter
-        pidPrefix, baseName, serialName = self.module._getModuleNameBlocks()
-        serialLabel = f'({serialName})' if serialName else ''
-        label = f'{baseName} {serialLabel}'
+        label = self.module.name()
         self.hint = p.drawText(rgn, align, label)
         p.end()
 

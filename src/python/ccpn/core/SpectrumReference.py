@@ -54,9 +54,6 @@ class SpectrumReference(AbstractWrapperObject):
 
     _parentClass = Spectrum
 
-    # Type of dimension. Always 'Frequency' for frequency (Fourier transformed) dimension
-    dimensionType = 'Frequency'
-
     #: Name of plural link to instances of class
     _pluralLinkName = 'spectrumReferences'
 
@@ -195,7 +192,7 @@ class SpectrumReference(AbstractWrapperObject):
         """Dimension type ('Time' / 'Frequency' / 'Sampled')"""
         if not self._hasInternalParameter('dimensionType'):
             result = specLib.DIMENSION_FREQUENCY
-            self.dimensionType = result
+            self._setInternalParameter('dimensionType', result)
         else:
             result = self._getInternalParameter('dimensionType')
         return result

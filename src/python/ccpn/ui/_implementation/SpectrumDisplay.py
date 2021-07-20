@@ -152,6 +152,11 @@ class SpectrumDisplay(AbstractWrapperObject):
         self._wrappedData.axisOrder = value
 
     @property
+    def dimensionCount(self) -> int:
+        """Dimensionality of the SpectrumDisplay"""
+        return len(self.axisCodes)
+
+    @property
     def is1D(self) -> bool:
         """True if this is a 1D display."""
         tt = self.axisCodes
@@ -417,11 +422,11 @@ class SpectrumDisplay(AbstractWrapperObject):
                       parent._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
         return [x for x in apiGuiTask.sortedModules() if isinstance(x, ApiBoundDisplay)]
 
-    @deleteObject()
-    def delete(self):
-        """Delete object, with all contained objects and underlying data.
-        """
-        self._wrappedData.delete()
+    # @deleteObject()
+    # def delete(self):
+    #     """Delete object, with all contained objects and underlying data.
+    #     """
+    #     self._wrappedData.delete()
 
     #=========================================================================================
     # CCPN functions

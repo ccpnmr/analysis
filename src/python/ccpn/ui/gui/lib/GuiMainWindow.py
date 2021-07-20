@@ -1065,7 +1065,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         text = ''.join([line.strip().split(':', 6)[-1] + '\n' for line in l])
         editor.textBox.setText(text)
 
-    def _highlightCurrentStrip(self, data):
+    def _highlightCurrentStrip(self, data:Notifier):
         """Callback on current to highlight the strip
         """
         previousStrip = data[Notifier.PREVIOUSVALUE]

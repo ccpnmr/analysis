@@ -147,6 +147,11 @@ class Project(AbstractWrapperObject):
         return ()
 
     @property
+    def peaks(self):
+        "STUB: hot-fixed later"
+        return ()
+
+    @property
     def multipletLists(self):
         "STUB: hot-fixed later"
         return ()
@@ -741,28 +746,6 @@ class Project(AbstractWrapperObject):
         #
         return notifier
 
-    #GWV 20181123
-    # def duplicateNotifier(self,  className:str, target:str,
-    #                       notifier:typing.Callable[..., None]):
-    #   """register copy of notifier for a new className and target.
-    #   Intended for onceOnly=True notifiers. It is up to the user to make sure the calling
-    #   interface matches the action"""
-    #   if target in self._notifierActions:
-    #
-    #     tt = (className, target)
-    #   else:
-    #     # This is right, it just looks strange. But if target is not an action it is
-    #     # another className, and if so the names must be sorted.
-    #     tt = tuple(sorted([className, target]))
-    #
-    #   for od in self._context2Notifiers.values():
-    #     onceOnly = od.get(notifier)
-    #     if onceOnly is not None:
-    #       self._context2Notifiers.setdefault(tt, OrderedDict())[notifier] = onceOnly
-    #       break
-    #   else:
-    #     raise ValueError("Unknown notifier: %s" % notifier)
-
     def unRegisterNotifier(self, className: str, target: str, notifier: typing.Callable[..., None]):
         """Unregister the notifier from this className, and target"""
         if target in self._notifierActions:
@@ -850,7 +833,15 @@ class Project(AbstractWrapperObject):
     # RESTRICTED. Use in core classes ONLY
 
     def _startDeleteCommandBlock(self, *allWrappedData):
-        """Call startCommandBlock for wrapper object delete. Implementation only"""
+        """Call startCommandBlock for wrapper object delete. Implementation only
+
+        If commented: _activateApiNotifier fails
+
+        Used by the preset Api notifiers populated for self._apiNotifiers;
+        have _newApiObject, _startDeleteCommandBlock, _finaliseApiDelete, _endDeleteCommandBlock, _finaliseApiUnDelete
+        and _modifiedApiObject for each V3 class
+        Initialised from _linkWrapperObjects in AbstractWrapperObject.py:954
+        """
 
         undo = self._undo
         if undo is not None:
@@ -1297,18 +1288,6 @@ class Project(AbstractWrapperObject):
         """
         return self.application.loadData(path)
 
-# To implement
-        #
-
-        #
-        #     elif dataType == 'Macro' and subType == ioFormats.PYTHON:
-        #         # GWV: Can't do this: have to call the routine with a flag: autoExecute=True
-        #         # with suspendSideBarNotifications(self, 'runMacro', usePath, quiet=False):
-        #         self._appBase.runMacro(usePath)
-        #
-
-
-
     def _loadFastaFile(self, path: (str, Path)) -> list:
         """Load Fasta sequence(s) from file into Wrapper project
         CCPNINTERNAL: called from FastDataLoader
@@ -1701,32 +1680,6 @@ class Project(AbstractWrapperObject):
         return _newDataSet(self, name=name, title=title, programName=programName, programVersion=programVersion,
                            dataPath=dataPath, creationDate=creationDate, uuid=uuid, comment=comment, **kwds)
 
-    # @logCommand('project.')
-    # def newSpectrumDisplay(self, axisCodes: (str,), stripDirection: str = 'Y',
-    #                        title: str = None, window=None, comment: str = None,
-    #                        independentStrips=False, nmrResidue=None, **kwds):
-    #     """Create new SpectrumDisplay
-    #
-    #     See the SpectrumDisplay class for details.
-    #
-    #     Optional keyword arguments can be passed in; see SpectrumDisplay._newSpectrumDisplay for details.
-    #
-    #     :param axisCodes:
-    #     :param stripDirection:
-    #     :param title:
-    #     :param window:
-    #     :param comment:
-    #     :param independentStrips:
-    #     :param nmrResidue:
-    #     :param serial: optional serial number.
-    #     :return: a new SpectrumDisplay instance.
-    #     """
-    #     from ccpn.ui._implementation.SpectrumDisplay import _newSpectrumDisplay
-    #
-    #     return _newSpectrumDisplay(self, axisCodes=axisCodes, stripDirection=stripDirection,
-    #                                title=title, window=window, independentStrips=independentStrips,
-    #                                comment=comment, **kwds)
-
     @logCommand('project.')
     def newSpectrumGroup(self, name: str, spectra=(), **kwds):
         """Create new SpectrumGroup
@@ -1949,47 +1902,3 @@ class Project(AbstractWrapperObject):
         from ccpn.core.ChemicalShiftList import _getChemicalShiftList
 
         return _getChemicalShiftList(self, name=name, **kwds)
-
-#
-# def isValidPath(projectName, stripFullPath=True, stripExtension=True):
-#     """Check whether the project name is valid after stripping fullpath and extension
-#     Can only contain alphanumeric characters and underscores
-#
-#     :param projectName: name of project to check
-#     :param stripFullPath: set to true to remove leading directory
-#     :param stripExtension: set to true to remove extension
-#     :return: True if valid else False
-#     """
-#     if not projectName:
-#         return
-#
-#     if isinstance(projectName, str):
-#
-#         name = os.path.basename(projectName) if stripFullPath else projectName
-#         name = os.path.splitext(name)[0] if stripExtension else name
-#
-#         STRIPCHARS = '_'
-#         for ss in STRIPCHARS:
-#             name = name.replace(ss, '')
-#
-#         if name.isalnum():
-#             return True
-#
-#
-# def isValidFileNameLength(projectName, stripFullPath=True, stripExtension=True):
-#     """Check whether the project name is valid after stripping fullpath and extension
-#     Can only contain alphanumeric characters and underscores
-#
-#     :param projectName: name of project to check
-#     :param stripFullPath: set to true to remove leading directory
-#     :param stripExtension: set to true to remove extension
-#     :return: True if length <= 32 else False
-#     """
-#     if not projectName:
-#         return
-#
-#     if isinstance(projectName, str):
-#         name = os.path.basename(projectName) if stripFullPath else projectName
-#         name = os.path.splitext(name)[0] if stripExtension else name
-#
-#         return len(name) <= 32

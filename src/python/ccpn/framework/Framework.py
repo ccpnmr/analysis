@@ -1729,8 +1729,8 @@ class Framework(NotifierBase):
         mainWindow = self.mainWindow
         with logCommandManager('application.', 'loadData', path):
             path = Path.aPath(path)
-            title = path.basename
-            mainWindow.newHtmlModule(urlPath=str(path), title=title, position='top', relativeTo=mainWindow.moduleArea)
+            # title = path.basename
+            mainWindow.newHtmlModule(urlPath=str(path), position='top', relativeTo=mainWindow.moduleArea)
         return []
 
     def clearRecentProjects(self):

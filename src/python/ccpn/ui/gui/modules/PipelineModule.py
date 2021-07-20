@@ -191,6 +191,12 @@ class GuiPipeline(CcpnModule, Pipeline):
         else:
             self._guiPipes = []
 
+    def currentGuiPipes(self):
+        """
+        currently displayed pipes
+        """
+        return self.pipelineArea.currentGuiPipes
+
     def _loadUserPipes(self):
 
         from ccpn.framework.lib.pipeline.PipesLoader import _fetchUserPipesPath, loadPipeSysModules
@@ -453,6 +459,7 @@ class GuiPipeline(CcpnModule, Pipeline):
                     self.pipelineArea.addDock(newGuiPipe, position=position, relativeTo=relativeTo)
                     autoActive = self.autoActiveCheckBox.get()
                     newGuiPipe.label.checkBox.setChecked(autoActive)
+                    newGuiPipe._formatLabelWidgets()
                     return
 
 

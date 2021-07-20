@@ -1003,18 +1003,18 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         QUIT_WITHOUT_SAVING = 'Quit without saving'
         SAVE_DATA = 'Save changes'
         DETAIL = "Do you want to save changes before quitting?"
-
+        # add to preferences SAVE_DATA .
         if disableCancel:
             if undos.isDirty():
                 reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT], checkbox=SAVE_DATA, okText=QUIT,
-                                                checked=True)
+                                                checked=False)
             else:
                 reply = QUIT_WITHOUT_SAVING
 
         else:
             if undos.isDirty():
                 reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT, CANCEL], checkbox=SAVE_DATA, okText=QUIT,
-                                                checked=True)
+                                                checked=False)
             else:
                 reply = QUIT_WITHOUT_SAVING
 

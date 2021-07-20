@@ -794,9 +794,16 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._getDimensionalAttributes('dimensionType')
 
     @dimensionTypes.setter
-    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(str,))
+    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(str,),
+                                enumerated=specLib.DIMENSIONTYPES)
     def dimensionTypes(self, value):
         self._setDimensionalAttributes('dimensionType', value)
+
+    @property
+    def isTimeDomains(self) -> list:
+        """Conveniance: A list of booleans per dimension indicating if dimension is
+          time domain """
+        return [(dimType == specLib.DIMENSION_TIME) for dimType in self. dimensionTypes]
 
     @property
     @_includeInDimensionalCopy

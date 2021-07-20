@@ -354,19 +354,23 @@ class SpectrumView(AbstractWrapperObject):
         """Spectrum that SpectrumView refers to"""
         return self._project._data2Obj.get(self._wrappedData.spectrumView.dataSource)
 
-    @property
-    def dimensionOrdering(self) -> Tuple[int, ...]:
-        """Axes Indices (zero-based) of spectrum dimensions in display order (x, y, Z1, ...)"""
-        apiStripSpectrumView = self._wrappedData
-        axisCodes = self.strip.axisCodes
-        axisOrder = self.strip.axisOrder
+    # @property
+    # def dimensionOrdering(self) -> Tuple[int, ...]:
+    #     """Axes Indices (zero-based) of spectrum dimensions in display order (x, y, Z1, ...)"""
+    #     apiStripSpectrumView = self._wrappedData
+    #     axisCodes = self.strip.axisCodes
+    #     axisOrder = self.strip.axisOrder
+    #
+    #     # DimensionOrdering is one-origin (first dim is dim 1)
+    #     dimensionOrdering = apiStripSpectrumView.spectrumView.dimensionOrdering
+    #
+    #     # Convert to zero-origin (for indices) and return
+    #     ll = tuple(dimensionOrdering[axisCodes.index(x)] for x in axisOrder)
+    #     return tuple((x or None) and x - 1 for x in ll)
 
-        # DimensionOrdering is one-origin (first dim is dim 1)
-        dimensionOrdering = apiStripSpectrumView.spectrumView.dimensionOrdering
-
-        # Convert to zero-origin (for indices) and return
-        ll = tuple(dimensionOrdering[axisCodes.index(x)] for x in axisOrder)
-        return tuple((x or None) and x - 1 for x in ll)
+    #=========================================================================================
+    # Spectrum properties in displayOrder; conveniance methods
+    #=========================================================================================
 
     @property
     def dimensions(self) -> tuple:
@@ -378,10 +382,32 @@ class SpectrumView(AbstractWrapperObject):
         """Spectrum axes in display order"""
         return tuple([dim-1 for dim in self._wrappedData.spectrumView.dimensionOrdering])
 
+    # depricated
+    dimensionOrdering = axes
+
     @property
     def axisCodes(self) -> list:
         """Spectrum axisCodes in display order"""
         return [self.spectrum.axisCodes[idx] for idx in self.axes]
+
+    @property
+    def spectrumLimits(self) -> list:
+        """Spectrum limits in display order"""
+        return [self.spectrum.spectrumLimits[idx] for idx in self.axes]
+
+    @property
+    def aliasingLimits(self) -> list:
+        """Spectrum ailiasing limits in display order"""
+        return [self.spectrum.aliasingLimits[idx] for idx in self.axes]
+
+    @property
+    def valuesPerPoint(self) -> list:
+        """Spectrum valuesPerPoint in display order"""
+        return [self.spectrum.valuesPerPoint[idx] for idx in self.axes]
+
+    def _getByDisplayOrder(self, parameterName) -> list:
+        """Return parameter in displayOrder"""
+        return list(self.spectrum.getByDimensions(parameterName=parameterName, dimensions=self.dimensions))
 
     def _getPointPosition(self, ppmPostions) -> tuple:
         """Convert the ppm-positions vector (in display order) to a position (1-based)
@@ -395,10 +421,6 @@ class SpectrumView(AbstractWrapperObject):
                 position[dim-1] = int(p+0.5)
 
         return tuple(position)
-
-    def _getByDisplayOrder(self, parameterName) -> list:
-        """Return parameter in displayOrder"""
-        return list(self.spectrum.getByDimensions(parameterName=parameterName, dimensions=self.dimensions))
 
     def _extractXYplaneToFile(self, ppmPositions):
         """Extract an XY (display order) plane
@@ -464,12 +486,22 @@ def _newSpectrumView(display, spectrum, dimensionOrdering):
     # 20191113:ED testing - doesn't work yet, _data2Obj not created in correct place
     # GWV: don't know why, but only querying via the FindFirstStripSpectrumView seems to allows to yield the V2 object
     apiSpectrumView = display.strips[0]._wrappedData.findFirstStripSpectrumView(spectrumView=obj)
-    result = display.project._data2Obj.get(apiSpectrumView)
+    newSpecView = display.project._data2Obj.get(apiSpectrumView)
 
-    if result is None:
-        raise RuntimeError('Unable to generate new SpectrumView item')
+    if newSpecView is None:
+        raise RuntimeError('Failed to generate new SpectrumView instance')
 
-    return result
+    for param in '''negativeContourBase negativeContourCount negativeContourFactor 
+                    displayNegativeContours negativeContourColour 
+                    positiveContourBase positiveContourCount positiveContourFactor 
+                    displayPositiveContours positiveContourColour
+                    sliceColour
+                 '''.split():
+        if hasattr(spectrum, param):
+            value= getattr(spectrum, param)
+            setattr(newSpecView, param, value)
+
+    return newSpecView
 
 #=========================================================================================
 # Notifiers:

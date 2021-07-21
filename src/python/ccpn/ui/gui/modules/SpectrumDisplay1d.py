@@ -38,11 +38,11 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
     MAXPEAKLABELTYPES = 6
     MAXPEAKSYMBOLTYPES = 4
 
-    def __init__(self, mainWindow, name):
+    def __init__(self, mainWindow):
         # if not apiSpectrumDisplay1d.strips:
         #   apiSpectrumDisplay1d.newStrip1d()
 
-        GuiSpectrumDisplay.__init__(self, mainWindow=mainWindow, name=name, useScrollArea=True)
+        GuiSpectrumDisplay.__init__(self, mainWindow=mainWindow, useScrollArea=True)
         self._fillToolBar()
         # self.addSpinSystemSideLabel()
         self.setAcceptDrops(True)

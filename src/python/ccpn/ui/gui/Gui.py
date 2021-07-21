@@ -310,7 +310,7 @@ class Gui(Ui):
 
 
 
-    #TODO:RASMUS: should discuss how application should deal with it
+    #TODO: should discuss how application should deal with it
     def getByGid(self, gid):
         return self.application.project.getByPid(gid)
 
@@ -339,14 +339,14 @@ class Gui(Ui):
 #
 #######################################################################################
 
-#TODO:RASMUS move to individual files containing the wrapped class and Gui-class
+#TODO: move to individual files containing the wrapped class and Gui-class
 # Any Factory function to _implementation or abstractWrapper
 
 
 ## Window class
 coreClass = _coreClassMap['Window']
 
-#TODO:RASMUS move to individual files containing the wrapped class and Gui-class
+#TODO: move to individual files containing the wrapped class and Gui-class
 # Any Factory function to _implementation or abstractWrapper
 #
 from ccpn.ui.gui.lib.GuiMainWindow import GuiMainWindow as _GuiMainWindow
@@ -387,7 +387,7 @@ class MainWindow(coreClass, _GuiMainWindow):
 from ccpn.ui.gui.lib.GuiWindow import GuiWindow as _GuiWindow
 
 
-#TODO:RASMUS: copy from MainWindow
+#TODO: copy from MainWindow
 class SideWindow(coreClass, _GuiWindow):
     """GUI side window, corresponds to OS window"""
 
@@ -413,7 +413,7 @@ Gui._factoryFunctions[coreClass.className] = _factoryFunction
 ## Mark class - put in namespace for documentation
 Mark = _coreClassMap['Mark']
 
-#TODO:RASMUS move to individual files containing the wrapped class and Gui-class
+#TODO: move to individual files containing the wrapped class and Gui-class
 # Any Factory function to _implementation or abstractWrapper
 # Also Rename
 # SpectrumDisplay1d.py; contains SpectrumDisplay1d (formerly StripDisplay1d) and
@@ -426,7 +426,7 @@ coreClass = _coreClassMap['SpectrumDisplay']
 from ccpn.ui.gui.modules.SpectrumDisplay1d import SpectrumDisplay1d as _SpectrumDisplay1d
 
 
-#TODO:RASMUS: also change for this class as done for the Nd variant below; this involves
+#TODO: also change for this class as done for the Nd variant below; this involves
 #chaning the init signature of the SpectrumDisplay1d and passing the parameters along to
 # GuiSpectrumDisplay
 
@@ -441,8 +441,7 @@ class StripDisplay1d(coreClass, _SpectrumDisplay1d):
         # hack for now
         self.application = project._appBase
 
-        _SpectrumDisplay1d.__init__(self, mainWindow=self.application.ui.mainWindow,
-                                    name=self._longName('SpectrumDisplay'))
+        _SpectrumDisplay1d.__init__(self, mainWindow=self.application.ui.mainWindow)
 
         # 20191113: ED moved to initGraphics
         # if not project._isNew:
@@ -456,7 +455,7 @@ class StripDisplay1d(coreClass, _SpectrumDisplay1d):
 from ccpn.ui.gui.modules.SpectrumDisplayNd import SpectrumDisplayNd as _SpectrumDisplayNd
 
 
-#TODO:RASMUS Need to check on the consequences of hiding name from the wrapper
+#TODO: Need to check on the consequences of hiding name from the wrapper
 # NB: GWV had to comment out the name property to make it work
 # conflicts existed between the 'name' and 'window' attributes of the two classes
 # the pyqtgraph decendents need name(), GuiStripNd had 'window', but that could be replaced with
@@ -474,8 +473,7 @@ class SpectrumDisplayNd(coreClass, _SpectrumDisplayNd):
         self.application = project._appBase
         self._appBase = project._appBase
 
-        _SpectrumDisplayNd.__init__(self, mainWindow=self.application.ui.mainWindow,
-                                    name=self._longName('SpectrumDisplay'))
+        _SpectrumDisplayNd.__init__(self, mainWindow=self.application.ui.mainWindow)
 
         # 20191113: ED moved to initGraphics
         # if not project._isNew:
@@ -626,7 +624,6 @@ Gui._factoryFunctions[coreClass.className] = _factoryFunction
 ## Axis class - put in namespace for documentation
 Axis = _coreClassMap['Axis']
 
-# TODO:RASMUS move to individual files containing the wrapped class and Gui-class
 # Any Factory function to _implementation or abstractWrapper
 #
 ## SpectrumView class
@@ -679,7 +676,6 @@ def _factoryFunction(project: Project, wrappedData) -> coreClass:
 
 Gui._factoryFunctions[coreClass.className] = _factoryFunction
 
-# TODO:RASMUS move to individual files containing the wrapped class and Gui-class
 # Any Factory function to _implementation or abstractWrapper
 #
 

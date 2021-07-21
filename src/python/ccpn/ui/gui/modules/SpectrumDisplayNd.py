@@ -39,7 +39,7 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
     MAXPEAKLABELTYPES = 6
     MAXPEAKSYMBOLTYPES = 4
 
-    def __init__(self, mainWindow, name):
+    def __init__(self, mainWindow):
         """
         spectrum display object for Nd spectra
 
@@ -56,7 +56,7 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
         ###self.inactivePeakItems = set() # contains unused peakItems
         self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to set of peaks which are not being displayed
 
-        GuiSpectrumDisplay.__init__(self, mainWindow=mainWindow, name=name, useScrollArea=True)
+        GuiSpectrumDisplay.__init__(self, mainWindow=mainWindow, useScrollArea=True)
         # .mainWindow, .current and .application are set by GuiSpectrumDisplay
         # .project is set by the wrapper
 

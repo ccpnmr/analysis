@@ -739,17 +739,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             self._allChildren.update({i})
             self._findChildren(i)
 
-    @property
-    def titleName(self):
-        'module name without serial'
-        moduleName = self.name()
-        splits = moduleName.split(self._nameSplitter)
-        if len(splits) > 1:
-            title = splits[0]
-            return title
-        else:
-            return moduleName
-
     def _setNestedWidgetsAttrToModule(self):
         """
         :return: nestedWidgets

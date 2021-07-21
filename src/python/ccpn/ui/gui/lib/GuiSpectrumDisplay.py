@@ -2407,8 +2407,8 @@ class GuiSpectrumDisplay(CcpnModule):
     from ccpn.util.decorators import profile
 
     @logCommand(get='self')
-    def displaySpectrum(self, spectrum, axisOrder: (str,) = ()):
-        """Display additional spectrum, with spectrum axes ordered according ton axisOrder
+    def displaySpectrum(self, spectrum):
+        """Display spectrum, with spectrum axes ordered according to display axisCodes
         :return SpectrumView instance or None
         """
         from ccpn.ui._implementation.SpectrumView import _newSpectrumView
@@ -2425,9 +2425,11 @@ class GuiSpectrumDisplay(CcpnModule):
 
         _oldOrdering = self.getOrderedSpectrumViewsIndex()
 
-        dimensionOrdering = [1, 0] if self.is1D else spectrum.getByAxisCodes('dimensions', self.axisCodes, exactMatch=False)
-        if len(dimensionOrdering) != len(self.axisCodes):
-            raise RuntimeError('Unable to match display.axisCodes (%r) to %s' % (self.axisCodes, spectrum))
+        # dimensionOrdering = [1, 0] if self.is1D else spectrum.getByAxisCodes('dimensions', self.axisCodes, exactMatch=False)
+        dimensionOrdering = [1, 0] if self.is1D else self._getDimensionsMapping(spectrum)
+
+        # if len(dimensionOrdering) != spectrum.dimensionCount:
+        #     raise RuntimeError('Unable to match display.axisCodes %r to %s' % (self.axisCodes, spectrum))
 
         with undoStackRevert(self.application) as revertStack:
             with undoBlockWithoutSideBar(self.application):

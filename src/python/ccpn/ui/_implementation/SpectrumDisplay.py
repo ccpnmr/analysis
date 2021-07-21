@@ -445,6 +445,20 @@ class SpectrumDisplay(AbstractWrapperObject):
         widths[axis] = width
         self.widths = widths
 
+    def _getDimensionsMapping(self, spectrum:Spectrum) -> list:
+        """Get the spectrum dimensions in display order
+        """
+        dimensionOrder = spectrum.getByAxisCodes('dimensions', self.axisCodes, exactMatch=False)
+        if len(dimensionOrder) != spectrum.dimensionCount:
+            raise RuntimeError('Error mapping dimensions of %s onto %s' % (spectrum, self))
+        return dimensionOrder
+
+    def _getAxesMapping(self, spectrum:Spectrum) -> list:
+        """Get the spectrum axes in display order
+        CCPNMRINTERNAL: used in _newSpectrumDisplay
+        """
+        return [dim-1 for dim in self._getDimensionsMapping(spectrum)]
+
     def _setLimits(self, spectrum:Spectrum):
         """Define the relevant display limits from the dimensions of spectrum
         CCPNMRINTERNAL: used in _newSpectrumDisplay
@@ -453,7 +467,7 @@ class SpectrumDisplay(AbstractWrapperObject):
         # and widths of the axis
 
         # Get the mapping of the the axes of spectrum onto this SpectrumDisplay
-        spectrumAxes = spectrum.getByAxisCodes('axes', self.axisCodes, exactMatch=False)
+        spectrumAxes = self._getAxesMapping(spectrum)
 
         if spectrum.dimensionCount == 1:
             # 1D spectrum
@@ -471,8 +485,8 @@ class SpectrumDisplay(AbstractWrapperObject):
                     # A display "plane-axis"
                     self.axes[ii].region = spectrum.spectrumLimits[axis]
                     self.axes[ii].width = spectrum.valuesPerPoint[axis]
-                    if spectrum.dimensionTypes[axis] == specLib.DIMENSION_TIME:
-                        self.axes[ii].position = 0.0
+                    if spectrum.isTimeDomains[axis]:
+                        self.axes[ii].position = 1.0
 
         # Copy to strips
         for strip in self.strips:
@@ -568,11 +582,9 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
 
         apiSpectrumDisplay.newIntensityAxis(code='intensity', stripSerial=1, unit=AXISUNIT_NUMBER)
 
-        dimensionOrdering = [1,0]
-
     else:
         # nD
-        spectrumAxes = spectrum.getByAxisCodes('axes', axisCodes, exactMatch=False)
+        spectrumAxes = display._getAxesMapping(spectrum)
 
         for ii, axis in enumerate(spectrumAxes):
             displayAxisCode = axisCodes[ii]
@@ -604,8 +616,7 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
     display._setLimits(spectrum)
 
     # display the spectrum, this will also create a new spectrumView
-    # display.strips[0]._displaySpectrum(spectrum=spectrum, axisOrder=axisCodes, useUndoBlock=False)
-    display.displaySpectrum(spectrum=spectrum, axisOrder=axisCodes)
+    display.displaySpectrum(spectrum=spectrum)
     # We only can set the z-widgets when there is a spectrumView
     strip._setZWidgets()
 
@@ -613,169 +624,6 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
     display._postInit()
 
     return display
-
-
-# def _createSpectrumDisplay(window: Window,
-#                            spectrum: Spectrum,
-#                            displayAxisCodes: Sequence[str] = (),
-#                            axisOrder: Sequence[str] = (),
-#                            title: str = None,
-#                            positions: Sequence[float] = (),
-#                            widths: Sequence[float] = (),
-#                            units: Sequence[str] = (),
-#                            stripDirection: str = 'Y',
-#                            isGrouped=False,
-#                            zPlaneNavigationMode: str = 'strip'):
-#     """
-#     :param \*str, displayAxisCodes: display axis codes to use in display order - default to spectrum axisCodes in heuristic order
-#     :param \*str axisOrder: spectrum axis codes in display order - default to spectrum axisCodes in heuristic order
-#     :param \*float positions: axis positions in order - default to heuristic
-#     :param \*float widths: axis widths in order - default to heuristic
-#     :param \*str units: axis units in display order - default to heuristic
-#     :param str stripDirection: if 'X' or 'Y' set strip axis
-#     :param bool is1D: If True, or spectrum passed in is 1D, do 1D display
-#     :param bool independentStrips: if True do freeStrip display.
-#     """
-#
-#
-#     spectrum = window.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
-#     if spectrum is None:
-#         raise ValueError('_createSpectrumDisplay: undefined spectrum')
-#     is1D = (spectrum.dimensionCount == 1)
-#
-#     dataSource = spectrum._wrappedData
-#     project = window._project
-#
-#     axisOrder = spectrum.getDefaultOrdering(axisOrder)
-#     spectrumAxisCodes = spectrum.axisCodes
-#
-#     if axisOrder:
-#         mapIndices = _axisCodeMapIndices(spectrumAxisCodes, axisOrder)
-#         if displayAxisCodes:
-#             if not doAxisCodesMatch(axisOrder, displayAxisCodes):
-#                 raise ValueError("AxisOrder %s do not match display axisCodes %s"
-#                                  % (axisOrder, displayAxisCodes))
-#         else:
-#             displayAxisCodes = axisOrder
-#     elif displayAxisCodes:
-#         mapIndices = _axisCodeMapIndices(spectrumAxisCodes, displayAxisCodes)
-#     else:
-#         displayAxisCodes = list(spectrumAxisCodes)
-#         mapIndices = list(range(dataSource.numDim))
-#         if is1D:
-#             displayAxisCodes.insert(1, 'intensity')
-#             mapIndices.insert(1, None)
-#
-#     # Make DataDim ordering
-#     sortedDataDims = dataSource.sortedDataDims()
-#     orderedDataDims = []
-#     for index in mapIndices:
-#         if index is None:
-#             orderedDataDims.append(None)
-#         else:
-#             orderedDataDims.append(sortedDataDims[index])
-#
-#     # Make dimensionOrdering
-#     dimensionOrdering = [(0 if x is None else x.dim) for x in orderedDataDims]
-#
-#     # Add intensity dimension for 1D if necessary
-#     if dataSource.numDim == 1 and len(displayAxisCodes) == 1:
-#         displayAxisCodes += ('intensity',)
-#         dimensionOrdering.append(0)
-#
-#     if dataSource.findFirstDataDim(className='SampledDataDim') is not None:
-#         # logger.warning( "Display of sampled dimension spectra is not implemented yet")
-#         # showWarning("createSpectrumDisplay", "Display of sampled dimension spectra is not implemented yet")
-#         # return
-#         raise NotImplementedError(
-#                 "Display of sampled dimension spectra is not implemented yet")
-#         # # NBNB TBD
-#
-#     with undoBlockWithoutSideBar():
-#         display = _newSpectrumDisplay(window=window,
-#                                       spectrum=spectrum,
-#                                       axisCodes=displayAxisCodes,
-#                                       stripDirection=stripDirection,
-#                                       name=title,
-#                                       zPlaneNavigationMode=zPlaneNavigationMode)
-#
-#         # Set unit, position and width
-#         orderedApiAxes = display._wrappedData.orderedAxes
-#         for ii, dataDim in enumerate(orderedDataDims):
-#
-#             if dataDim is not None:
-#                 # Set values only if we have a spectrum axis
-#
-#                 # Get unit, position and width
-#                 dataDimRef = dataDim.primaryDataDimRef
-#                 if dataDimRef:
-#                     # This is a FreqDataDim
-#                     unit = dataDimRef.expDimRef.unit
-#                     position = dataDimRef.pointToValue(1) - dataDimRef.spectralWidth / 2
-#                     if ii < 2:
-#                         width = dataDimRef.spectralWidth
-#                     else:
-#                         width = dataDimRef.valuePerPoint
-#
-#                 elif dataDim.className == 'SampledDataDim':
-#
-#                     unit = dataDim.unit
-#                     width = len(dataDim.pointValues)
-#                     position = 1 + width // 2
-#                     if ii >= 2:
-#                         width = 1
-#                     # NBNB TBD this may not work, once we implement sampled axes
-#
-#                 else:
-#                     # This is a FidDataDim
-#                     unit = dataDim.unit
-#                     width = dataDim.maxValue - dataDim.firstValue
-#                     position = width / 2
-#                     if ii >= 2:
-#                         width = dataDim.valuePerPoint
-#
-#                 # Set values
-#                 apiAxis = orderedApiAxes[ii]
-#                 apiAxis.unit = unit
-#                 apiAxis.position = position
-#                 apiAxis.width = width
-#
-#         # set the intensity axes not caught by the dataDims
-#         for apiAxis in orderedApiAxes[len(orderedDataDims):]:
-#             if apiAxis.code == 'intensity':
-#                 _intensities = spectrum.intensities
-#                 # assumes _intensities if a numpy array
-#                 if not isinstance(_intensities, ndarray):
-#                     raise TypeError(f'spectrum.intensities {spectrum.id} must be an ndarray')
-#
-#                 if _intensities is not None and _intensities.size != 0:
-#                     _max, _min = max(_intensities), min(_intensities)
-#                     apiAxis.position = float(_min + _max) / 2
-#                     apiAxis.width = float(_max - _min)
-#                 else:
-#                     apiAxis.position = 0.0
-#                     apiAxis.width = 1.0
-#
-#         if not is1D:  # it gets crazy on 1D displays
-#             display._useFirstDefault = False
-#
-#         display.isGrouped = isGrouped
-#
-#     # # Make spectrumView. NB We need notifiers on for these
-#     # _spectrumView = display._wrappedData.newSpectrumView(spectrumName=spectrum.name,
-#     #                                                      stripSerial=0,
-#     #                                                      dataSource=spectrum._wrappedData,
-#     #                                                      dimensionOrdering=dimensionOrdering)
-#     # # from ccpn.ui._implementation.SpectrumView import _newSpectrumView
-#     # # _spectrumView = _newSpectrumView(display,
-#     # #                                  spectrumName=dataSource.name,
-#     # #                                  stripSerial=0, dataSource=dataSource,
-#     # #                                  dimensionOrdering=dimensionOrdering)
-#     #
-#     # # call any post initialise routines for the spectrumDisplay here
-#     # display._postInit()
-#
-#     return display
 
 
 #EJB 20181206: moved to _implementation.Window

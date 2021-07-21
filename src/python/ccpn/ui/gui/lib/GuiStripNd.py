@@ -500,18 +500,28 @@ class GuiStripNd(GuiStrip):
 
                 if ignoreSpectrumView is spectrumView:
                     continue
+
                 spectrum = spectrumView.spectrum
-                # get a mapping of the axes to the strip - effectively the same as spectrumView.dimensionOrdering
-                # but allows for finding close matched axis codes
-                # indices = getAxisCodeMatchIndices(self.axisCodes, spectrumView.spectrum.axisCodes)
-                indices = spectrum.getByAxisCodes('axes', self.axisCodes, exactMatch=False)
-                _index = indices[n + 2]
-                if _index is None:
+                if spectrum.dimensionCount <= 2:
                     continue
 
-                _minAliasedFrequency, _maxAliasedFrequency = sorted(spectrum.aliasingLimits[_index])  # ppm limits (min, max) sorted for clarity
-                _minSpectrumFrequency, _maxSpectrumFrequency = sorted(spectrum.spectrumLimits[_index])
-                _valuePerPoint = spectrum.valuesPerPoint[_index]
+                # # get a mapping of the axes to the strip - effectively the same as spectrumView.dimensionOrdering
+                # # but allows for finding close matched axis codes
+                # # indices = getAxisCodeMatchIndices(self.axisCodes, spectrumView.spectrum.axisCodes)
+                # indices = spectrum.getByAxisCodes('axes', self.axisCodes, exactMatch=False)
+                # _index = indices[n + 2]
+                # if _index is None:
+                #     continue
+                #
+                # _minAliasedFrequency, _maxAliasedFrequency = sorted(spectrum.aliasingLimits[_index])  # ppm limits (min, max) sorted for clarity
+                # _minSpectrumFrequency, _maxSpectrumFrequency = sorted(spectrum.spectrumLimits[_index])
+                # _valuePerPoint = spectrum.valuesPerPoint[_index]
+
+                isTimeDimension = spectrumView._getByDisplayOrder('isTimeDomains')[n+2]
+
+                _minAliasedFrequency, _maxAliasedFrequency = sorted(spectrumView.aliasingLimits[n+2])
+                _minSpectrumFrequency, _maxSpectrumFrequency = sorted(spectrumView.spectrumLimits[n+2])
+                _valuePerPoint = spectrumView.valuesPerPoint[n+2]
 
                 _minFreq = _minAliasedFrequency or _minSpectrumFrequency
                 _maxFreq = _maxAliasedFrequency or _maxSpectrumFrequency
@@ -535,7 +545,7 @@ class GuiStripNd(GuiStrip):
     # @logCommand(get='self')
     def changeZPlane(self, n: int = None, planeCount: int = None, position: float = None):
         """
-        Changes the position of the z axis of the strip by number of planes or a ppm position, depending
+        Changes the position of the z,a,b axis of the strip by number of planes or a ppm position, depending
         on which is specified.
         """
         if self.isDeleted:
@@ -544,7 +554,8 @@ class GuiStripNd(GuiStrip):
         if not (self.planeAxisBars and self.activePlaneAxis is not None):
             return
 
-        # GWV: don't get this; Z is always 2; why pass it in??
+        # GWV: don't get this; Z is always 2; why pass it in?? I now know; the routine is used for z-plane, a-plane
+        # etc; i.e. n == planeIndex
         n = (n if isinstance(n, int) else self.activePlaneAxis)
         if not (0 <= (n - 2) < len(self.planeAxisBars)):
             getLogger().warning('planeIndex out of range %s' % str(n))

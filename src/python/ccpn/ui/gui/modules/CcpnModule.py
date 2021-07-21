@@ -1275,18 +1275,8 @@ class CcpnModuleLabel(DockLabel):
         """
         show the name editor and give full focus to start typing.
         """
-        # self.nameEditor.setFocusPolicy(QtCore.Qt.StrongFocus) # this is not enough to show the cursor and give focus.
-        pos = QtCore.QPointF(25, 10)
-        # Transfer focus, otherwise the click does not seem to be handled
-        self.nameEditor.setFocus(QtCore.Qt.OtherFocusReason)
-        press_event = QtGui.QMouseEvent(QtCore.QEvent.MouseButtonPress, pos,
-                                        QtCore.Qt.LeftButton, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier)
-        self.nameEditor.mousePressEvent(press_event)
-        release_event = QtGui.QMouseEvent(QtCore.QEvent.MouseButtonRelease, pos,
-                                          QtCore.Qt.LeftButton, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier)
-        self.nameEditor.mouseReleaseEvent(release_event)
+        self.nameEditor._setFocus()
         self.nameEditor.show()
-
 
     def _isValidName(self, name):
         return self.module.area._isValidName(name)
@@ -1501,8 +1491,6 @@ class CcpnModuleLabel(DockLabel):
 
         if hasattr(self, 'nameEditor') and self.nameEditor:
             self.layout().addWidget(self.nameEditor, 0, 1, alignment=QtCore.Qt.AlignCenter)
-            self.nameEditor.selectAll()
-
 
         super(DockLabel, self).resizeEvent(ev)
 
@@ -1572,6 +1560,17 @@ class NameEditor(LineEdit):
         self.returnPressed.connect(self._parent._renameLabel)
         self.setStyleSheet('LineEdit { padding: 0px 0px 0px 0px; }')
 
+    def _setFocus(self):
+        # self.setFocusPolicy(QtCore.Qt.StrongFocus) # this is not enough to show the cursor and give focus.
+        pos = QtCore.QPointF(25, 10)
+        # Transfer focus, otherwise the click does not seem to be handled
+        qc = QtCore.Qt
+        self.setFocus(qc.OtherFocusReason)
+        pressEv = QtGui.QMouseEvent(QtCore.QEvent.MouseButtonPress, pos, qc.LeftButton, qc.LeftButton, qc.NoModifier)
+        self.mousePressEvent(pressEv)
+        releaseEv = QtGui.QMouseEvent(QtCore.QEvent.MouseButtonRelease, pos, qc.LeftButton, qc.LeftButton,
+                                      qc.NoModifier)
+        self.mouseReleaseEvent(releaseEv)
 
     def focusOutEvent(self, ev):
         self.setFocusPolicy(QtCore.Qt.StrongFocus)

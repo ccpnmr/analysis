@@ -284,7 +284,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         # problems with 3. ask the pyqtgraph guys to add a factory method...
         self.label = CcpnModuleLabel(name, self,
                                      showCloseButton=closable, closeCallback=self._closeModule,
-                                     showSettingsButton=self.includeSettingsWidget,
+                                     enableSettingsButton=self.includeSettingsWidget,
                                      settingsCallback=self._settingsCallback
                                      )
         self.topLayout.addWidget(self.label, 0, 1)  # ejb - swap out the old widget, keeps hierarchy
@@ -1216,7 +1216,7 @@ class CcpnModuleLabel(DockLabel):
         iconSizes = [max((size.height(), size.width())) for size in icon.availableSizes()]
         return max(iconSizes)
 
-    def __init__(self, name, module, showCloseButton=True, closeCallback=None, showSettingsButton=False, settingsCallback=None):
+    def __init__(self, name, module, showCloseButton=True, closeCallback=None, enableSettingsButton=False, settingsCallback=None):
 
         self.buttonBorderWidth = 1
         self.buttonIconMargin = 1
@@ -1254,14 +1254,14 @@ class CcpnModuleLabel(DockLabel):
             self.setupLabelButton(self.closeButton, 'close_cross', CcpnModuleLabel.TOP_RIGHT)
 
         # Settings
-        if showSettingsButton:
-            self.settingsButton = ToolButton(self)
-            self.setupLabelButton(self.settingsButton, 'settings_cog', CcpnModuleLabel.TOP_LEFT)
+        self.settingsButton = ToolButton(self)
+        self.setupLabelButton(self.settingsButton, 'settings_cog', CcpnModuleLabel.TOP_LEFT)
 
-            if settingsCallback is None:
-                raise RuntimeError('Requested settingsButton without callback')
-            else:
-                self.settingsButton.clicked.connect(settingsCallback)
+        if settingsCallback is None:
+            raise RuntimeError('Requested settingsButton without callback')
+        else:
+            self.settingsButton.clicked.connect(settingsCallback)
+        self.settingsButton.setEnabled(enableSettingsButton)
 
         self.updateStyle()
 
@@ -1559,6 +1559,7 @@ class NameEditor(LineEdit):
         # self.editingFinished.connect(self._parent._renameLabel)
         self.returnPressed.connect(self._parent._renameLabel)
         self.setStyleSheet('LineEdit { padding: 0px 0px 0px 0px; }')
+        self.setMinimumWidth(200)
 
     def _setFocus(self):
         # self.setFocusPolicy(QtCore.Qt.StrongFocus) # this is not enough to show the cursor and give focus.

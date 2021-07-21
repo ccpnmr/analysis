@@ -261,7 +261,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self.closeFunc = closeFunc
         self._nameSplitter = ':'  #used to create the serial
         self._serial = None
-        self._titleName = None  # name without serial
+        self._titleName = name  # name without serial
         CcpnModule.moduleName = name
 
         # from ccpn.framework.Application import getApplication

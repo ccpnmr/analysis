@@ -40,8 +40,6 @@ _NEWCOMPILEDCONTOURS = True
 AxisPlaneData = namedtuple('AxisPlaneData', 'startPoint endPoint pointCount')
 
 
-#TODO:RASMUS: why is this function here when the wrapper has positiveLevels and negativeLevels
-# attributes
 def _getLevels(count: int, base: float, factor: float) -> list:
     "return a list with contour levels"
     levels = []
@@ -499,6 +497,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         spectrum = self.spectrum
         dimensionCount = spectrum.dimensionCount
         dimIndices = self.dimensionOrdering
+        #TODO: no Api calls!
         orderedAxes = self._apiStripSpectrumView.strip.orderedAxes
 
         if dimensionCount <= 2:

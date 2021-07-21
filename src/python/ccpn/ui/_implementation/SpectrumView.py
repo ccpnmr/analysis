@@ -398,19 +398,21 @@ class SpectrumView(AbstractWrapperObject):
     @property
     def aliasingLimits(self) -> list:
         """Spectrum ailiasing limits in display order"""
-        return [self.spectrum.aliasingLimits[idx] for idx in self.axes]
+        _tmp = self.spectrum.aliasingLimits
+        return [_tmp[idx] for idx in self.axes]
 
     @property
     def valuesPerPoint(self) -> list:
         """Spectrum valuesPerPoint in display order"""
-        return [self.spectrum.valuesPerPoint[idx] for idx in self.axes]
+        _tmp = self.spectrum.valuesPerPoint
+        return [_tmp[idx] for idx in self.axes]
 
     def _getByDisplayOrder(self, parameterName) -> list:
         """Return parameter in displayOrder"""
         return list(self.spectrum.getByDimensions(parameterName=parameterName, dimensions=self.dimensions))
 
     def _getPointPosition(self, ppmPostions) -> tuple:
-        """Convert the ppm-positions vector (in display order) to a position (1-based)
+        """Convert the ppm-positions vector (in display order) to a position (1-based) vector
         in spectrum-dimension order, suitable to be used with getPlaneData
         """
         position = [1]*self.spectrum.dimensionCount

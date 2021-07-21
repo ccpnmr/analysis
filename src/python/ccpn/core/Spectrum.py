@@ -1678,9 +1678,11 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     # def automaticIntegration(self, spectralData):
     #     return self._apiDataSource.automaticIntegration(spectralData)
 
-    def _mapAxisCodes(self, axisCodes: Sequence[str]):
+    def _mapAxisCodes(self, axisCodes: Sequence[str]) -> list:
         """Map axisCodes on self.axisCodes
-        return mapped axisCodes as list
+        :return mapped axisCodes as list
+
+        CCPNMRINTERNAL: used in SpectrumDisplay._getDimensionsMapping()
         """
         # find the map of newAxisCodeOrder to self.axisCodes; eg. 'H' to 'Hn'
         axisCodeMap = getAxisCodeMatch(axisCodes, self.axisCodes)

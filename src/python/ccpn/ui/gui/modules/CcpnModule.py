@@ -1271,14 +1271,14 @@ class CcpnModuleLabel(DockLabel):
     def labelName(self):
         return self.module.name()
 
-    def _showLineEditName(self):
-        # self.nameEditor.selectAll()
-        # self.nameEditor.setFocusPolicy(QtCore.Qt.StrongFocus)
-        # This minimal example always uses the same position in the widget
+    def _showNameEditor(self):
+        """
+        show the name editor and give full focus to start typing.
+        """
+        # self.nameEditor.setFocusPolicy(QtCore.Qt.StrongFocus) # this is not enough to show the cursor and give focus.
         pos = QtCore.QPointF(25, 10)
         # Transfer focus, otherwise the click does not seem to be handled
         self.nameEditor.setFocus(QtCore.Qt.OtherFocusReason)
-
         press_event = QtGui.QMouseEvent(QtCore.QEvent.MouseButtonPress, pos,
                                         QtCore.Qt.LeftButton, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier)
         self.nameEditor.mousePressEvent(press_event)
@@ -1299,6 +1299,7 @@ class CcpnModuleLabel(DockLabel):
                     self.module.rename(name)
                 else:
                     showWarning('Cannot rename module', f'{name} already in use')
+                    self.nameEditor.set(self.labelName)
                     return
             else:
                 self.nameEditor.set(self.labelName) #reset the original name
@@ -1377,7 +1378,7 @@ class CcpnModuleLabel(DockLabel):
     def _createContextMenu(self):
 
         contextMenu = Menu('', self, isFloatWidget=True)
-        contextMenu.addAction('Rename', self.nameEditor.show)
+        contextMenu.addAction('Rename', self._showNameEditor)
         contextMenu.addSeparator()
         contextMenu.addAction('Close', self.module._closeModule)
         if len(self.module.mainWindow.moduleArea.ccpnModules) > 1:
@@ -1569,6 +1570,7 @@ class NameEditor(LineEdit):
         self.setMaximumHeight(self._parent.labelSize)
         # self.editingFinished.connect(self._parent._renameLabel)
         self.returnPressed.connect(self._parent._renameLabel)
+        self.setStyleSheet('LineEdit { padding: 0px 0px 0px 0px; }')
 
 
     def focusOutEvent(self, ev):

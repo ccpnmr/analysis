@@ -1377,9 +1377,6 @@ class CcpnModuleLabel(DockLabel):
         contextMenu.addSeparator()
         contextMenu.addAction('Copy Pid to clipboard', self._copyPidToClipboard)
 
-        # add option to hide the module (but not close) - add a hide icon?
-        contextMenu.addSeparator()
-        contextMenu.addAction('Hide', self.module._hideModule)
         # numDocks = len(self.module.getDocksInParentArea())
         #
         # if not self.module.maximised and numDocks > 1:

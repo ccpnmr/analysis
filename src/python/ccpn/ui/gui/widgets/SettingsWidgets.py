@@ -1443,6 +1443,15 @@ class SpectrumDisplaySelectionWidget(ListCompoundWidget):
                          fixedWidths=fixedWidths, orientation=orientation,
                          labelText=labelText, tipText=tipText, texts=texts,
                          callback=self._selectDisplayInList, **kwds)
+        if self.project:
+            self._notifierRename = Notifier(theObject=self.project,
+                                       triggers=[Notifier.RENAME],
+                                       targetName='SpectrumDisplay',
+                                       callback=self._spectrumDisplayRenamed)
+            self._notifierDelete = Notifier(theObject=self.project,
+                                       triggers=[Notifier.DELETE],
+                                       targetName='SpectrumDisplay',
+                                       callback=self._spectrumDisplayDeleted)
 
         # default to 5 rows
         self.setFixedHeights((None, None, 5 * getFontHeight()))
@@ -1465,6 +1474,23 @@ class SpectrumDisplaySelectionWidget(ListCompoundWidget):
         """
         if self._displayWidgetChangedCallback:
             self._displayWidgetChangedCallback()
+
+    def _spectrumDisplayDeleted(self, dataDict, **kwargs):
+        obj = dataDict.get(Notifier.OBJECT)
+        currentTexts = self.getTexts()
+        if obj.pid in currentTexts:
+            self.removeTexts([obj.pid])
+
+    def _spectrumDisplayRenamed(self, dataDict, **kwargs):
+        obj = dataDict.get(Notifier.OBJECT)
+        currentTexts = self.getTexts()
+        toRemoveTexts = []
+        for i in currentTexts: # could use oldPid from data. not yet available for SpectrumDisplay
+            if i != ALL:
+                if not self.application.getByGid(i):
+                    toRemoveTexts.append(i)
+        self.removeTexts(toRemoveTexts)
+        self.addText(obj.pid)
 
     def _changeAxisCode(self):
         """Handle clicking the axis code buttons
@@ -1494,6 +1520,20 @@ class SpectrumDisplaySelectionWidget(ListCompoundWidget):
         else:
             displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
         return displays
+
+
+    def unRegister(self):
+        """Unregister the notifiers; needs to be called when discarding an instance
+        """
+        try:
+            if self._notifierRename is not None:
+                self._notifierRename.unRegister()
+                del (self._notifierRename)
+            if self._notifierDelete is not None:
+                self._notifierDelete.unRegister()
+                del (self._notifierDelete)
+        except:
+            pass
 
 
 class ObjectSelectionWidget(ListCompoundWidget):

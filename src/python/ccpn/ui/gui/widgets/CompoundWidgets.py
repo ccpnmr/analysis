@@ -221,6 +221,10 @@ class ListCompoundWidget(CompoundBaseWidget):
             return
         self.listWidget.addItem(text)
 
+    def removeTexts(self, texts):
+        """Convenience: Remove texts to listWidget"""
+        self.listWidget.removeTexts(texts)
+
     def addPulldownItem(self, item):
         """convenience: add pulldown item (text or index) to list"""
         texts = self.pulldownList.texts

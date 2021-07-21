@@ -409,20 +409,20 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         """
         return self.name()
 
-    @property
-    def serial(self):
-        """
-        The progressive number which appear after the name,
-        This is slightly different from serials of Abstract Wrapper classes.
-        """
-        if self._onlySingleInstance:
-            return 1
-        pidPrefix, baseName, serialName = self._getModuleNameBlocks()
-        try:
-            self._serial = int(serialName)
-            return self._serial
-        except Exception as e:
-            getLogger().warnig('Cannot get serial for module %s.' % self.moduleName, e)
+    # @property
+    # def serial(self):
+    #     """
+    #     The progressive number which appear after the name,
+    #     This is slightly different from serials of Abstract Wrapper classes.
+    #     """
+    #     if self._onlySingleInstance:
+    #         return 1
+    #     pidPrefix, baseName, serialName = self._getModuleNameBlocks()
+    #     try:
+    #         self._serial = int(serialName)
+    #         return self._serial
+    #     except Exception as e:
+    #         getLogger().warnig('Cannot get serial for module %s.' % self.moduleName, e)
 
     #=========================================================================================
     # Module Properties

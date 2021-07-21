@@ -921,7 +921,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     def enterEvent(self, event):
         if self.mainWindow:
             if self.mainWindow.application.preferences.general.focusFollowsMouse:
-                self.setFocus()
+                if not self.area._isNameEditing():
+                    self.setFocus()
                 self.label.setModuleHighlight(True)
         super().enterEvent(event)
 
@@ -1246,6 +1247,9 @@ class CcpnModuleLabel(DockLabel):
                                        'border-radius: 1px;'
                                        'background-color: transparent;' % BORDERNOFOCUS_COLOUR)
 
+        self.nameEditor = NameEditor(self, text=self.labelName)
+        self.nameEditor.hide()
+
         layout = QtWidgets.QGridLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         self.setLineWidth(0)
@@ -1274,6 +1278,42 @@ class CcpnModuleLabel(DockLabel):
 
         # flag to disable dragMoveEvent during a doubleClick
         self._inDoubleClick = False
+    @property
+    def labelName(self):
+        return self.module.name()
+
+    def _showLineEditName(self):
+        # self.nameEditor.selectAll()
+        # self.nameEditor.setFocusPolicy(QtCore.Qt.StrongFocus)
+        # This minimal example always uses the same position in the widget
+        pos = QtCore.QPointF(25, 10)
+        # Transfer focus, otherwise the click does not seem to be handled
+        self.nameEditor.setFocus(QtCore.Qt.OtherFocusReason)
+
+        press_event = QtGui.QMouseEvent(QtCore.QEvent.MouseButtonPress, pos,
+                                        QtCore.Qt.LeftButton, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier)
+        self.nameEditor.mousePressEvent(press_event)
+        release_event = QtGui.QMouseEvent(QtCore.QEvent.MouseButtonRelease, pos,
+                                          QtCore.Qt.LeftButton, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier)
+        self.nameEditor.mouseReleaseEvent(release_event)
+        self.nameEditor.show()
+
+
+    def _isValidName(self, name):
+        return self.module.area._isValidName(name)
+
+    def _renameLabel(self, name=None):
+        name = name or self.nameEditor.get()
+        if name != self.labelName:
+            if name:
+                if self._isValidName(name):
+                    self.module.rename(name)
+                else:
+                    showWarning('Cannot rename module', f'{name} already in use')
+                    return
+        self.nameEditor.hide()
+
+
 
     def setupLabelButton(self, button, iconName, position):
         icon = Icon('icons/%s' % iconName)
@@ -1346,6 +1386,8 @@ class CcpnModuleLabel(DockLabel):
     def _createContextMenu(self):
 
         contextMenu = Menu('', self, isFloatWidget=True)
+        contextMenu.addAction('Rename', self.nameEditor.show)
+        contextMenu.addSeparator()
         contextMenu.addAction('Close', self.module._closeModule)
         if len(self.module.mainWindow.moduleArea.ccpnModules) > 1:
             contextMenu.addAction('Close Others', partial(self.module.mainWindow.moduleArea._closeOthers, self.module))
@@ -1388,7 +1430,9 @@ class CcpnModuleLabel(DockLabel):
                 menu.move(event.globalPos().x(), event.globalPos().y() + 10)
                 menu.exec()
         else:
-            super(CcpnModuleLabel, self).mousePressEvent(event)
+            if self.nameEditor.isVisible():
+                self._renameLabel() # so to close the on-going operation
+        super(CcpnModuleLabel, self).mousePressEvent(event)
 
     def paintEvent(self, ev):
         """
@@ -1410,7 +1454,7 @@ class CcpnModuleLabel(DockLabel):
         #align = self.alignment()
         # GWV adjusted
         align = QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter
-        label = self.module.name()
+        label = self.labelName
         self.hint = p.drawText(rgn, align, label)
         p.end()
 
@@ -1464,8 +1508,76 @@ class CcpnModuleLabel(DockLabel):
             else:
                 self.layout().addWidget(self.settingsButton, 0, 0, alignment=QtCore.Qt.AlignLeft)
 
+        if hasattr(self, 'nameEditor') and self.nameEditor:
+            self.layout().addWidget(self.nameEditor, 0, 1, alignment=QtCore.Qt.AlignCenter)
+            self.nameEditor.selectAll()
+
+
         super(DockLabel, self).resizeEvent(ev)
 
+INVALIDROWCOLOUR = QtGui.QColor('lightpink')
+
+class NameValidator(QtGui.QValidator):
+    """ Make sure the newly typed module name on a GUI is unique.
+    """
+    def __init__(self, parent, func, startingName):
+        super().__init__(parent=parent)
+        self.baseColour = self.parent().palette().color(QtGui.QPalette.Base)
+        self._func = func
+        self._parent = parent
+        self.startingName = startingName
+
+    def validate(self, name, p_int):
+
+        palette = self.parent().palette()
+
+        if self.startingName==name: # entry is as the starting name therefore is still valid
+            palette.setColor(QtGui.QPalette.Base, self.baseColour)
+            self.parent().setPalette(palette)
+            state = QtGui.QValidator.Acceptable
+            return state, name, p_int
+
+        if self._func(name):
+            palette.setColor(QtGui.QPalette.Base, self.baseColour)
+            state = QtGui.QValidator.Acceptable  # entry is valid
+        else:
+            palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
+            state = QtGui.QValidator.Intermediate  # entry is NOT valid, but can continue editing
+        self.parent().setPalette(palette)
+        return state, name, p_int
+
+    def clearValidCheck(self):
+        palette = self.parent().palette()
+        palette.setColor(QtGui.QPalette.Base, self.baseColour)
+        self.parent().setPalette(palette)
+
+    def resetCheck(self):
+        self.validate(self.parent().text(), 0)
+
+    @property
+    def checkState(self):
+        state, _, _ = self.validate(self.parent().text(), 0)
+        return state
+
+
+class NameEditor(LineEdit):
+    """LineEdit widget that contains validator for checking filePaths exists
+    """
+    def __init__(self, parent, **kwds):
+        super().__init__(parent=parent, **kwds)
+
+        self._parent = parent # the LabelObject
+        self.setValidator(NameValidator(parent=self, func=self._parent._isValidName, startingName=self._parent.labelName))
+        self.validator().resetCheck()
+        self.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter)
+        self.setMaximumHeight(self._parent.labelSize)
+        # self.editingFinished.connect(self._parent._renameLabel)
+        self.returnPressed.connect(self._parent._renameLabel)
+
+
+    def focusOutEvent(self, ev):
+        self.setFocusPolicy(QtCore.Qt.StrongFocus)
+        super(LineEdit, self).focusOutEvent(ev)
 
 class DropAreaSelectedOverlay(QtWidgets.QWidget):
     """Overlay widget that draws highlight over the current module during a drag-drop operation

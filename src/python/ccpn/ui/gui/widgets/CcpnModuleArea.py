@@ -443,16 +443,23 @@ class CcpnModuleArea(ModuleArea, DropBase):
             module.toggleMaximised()
         return module
 
+    def _getModulesOnActiveNameEditing(self):
+        modules = []
+        for module in self.ccpnModules:
+            if hasattr(module.label, 'nameEditor'):
+                if module.label.nameEditor.isVisible():
+                    modules.append(module)
+        return modules
+
     def _isNameEditing(self):
         """
         True if any module is being renamed
         """
-        editing = False
-        for module in self.ccpnModules:
-            if hasattr(module.label, 'nameEditor'):
-                if module.label.nameEditor.isVisible():
-                    return True
-        return editing
+        return len(self._getModulesOnActiveNameEditing())>0
+
+    def _finaliseAllNameEditing(self):
+        for module in self._getModulesOnActiveNameEditing():
+            module.label._renameLabel()
 
     def makeContainer(self, typ):
         # stop the child containers from collapsing

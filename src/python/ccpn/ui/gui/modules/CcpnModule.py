@@ -1300,6 +1300,8 @@ class CcpnModuleLabel(DockLabel):
                 else:
                     showWarning('Cannot rename module', f'{name} already in use')
                     return
+            else:
+                self.nameEditor.set(self.labelName) #reset the original name
         self.nameEditor.hide()
 
 
@@ -1413,15 +1415,14 @@ class CcpnModuleLabel(DockLabel):
         """
         Re-implementation of the  mouse event so a right mouse context menu can be raised.
         """
+        self.module.area._finaliseAllNameEditing()  # so to close the on-going operation
         if event.button() == QtCore.Qt.RightButton:
             menu = self._createContextMenu()
             if menu:
                 menu.move(event.globalPos().x(), event.globalPos().y() + 10)
                 menu.exec()
         else:
-            if self.nameEditor.isVisible():
-                self._renameLabel() # so to close the on-going operation
-        super(CcpnModuleLabel, self).mousePressEvent(event)
+            super(CcpnModuleLabel, self).mousePressEvent(event)
 
     def paintEvent(self, ev):
         """
@@ -1506,19 +1507,25 @@ class CcpnModuleLabel(DockLabel):
 
 INVALIDROWCOLOUR = QtGui.QColor('lightpink')
 
-class NameValidator(QtGui.QValidator):
+class LabelNameValidator(QtGui.QValidator):
     """ Make sure the newly typed module name on a GUI is unique.
     """
-    def __init__(self, parent, func, startingName):
+    def __init__(self, parent, labelObj):
         super().__init__(parent=parent)
         self.baseColour = self.parent().palette().color(QtGui.QPalette.Base)
-        self._func = func
         self._parent = parent
-        self.startingName = startingName
+        self._labelObj = labelObj
+        self._func = self._labelObj._isValidName
 
     def validate(self, name, p_int):
 
         palette = self.parent().palette()
+        self.startingName = self._labelObj.labelName
+        if not name or len(name) == 0:
+            palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
+            state = QtGui.QValidator.Intermediate  # entry is NOT valid, but can continue editing
+            self.parent().setPalette(palette)
+            return state, name, p_int
 
         if self.startingName==name: # entry is as the starting name therefore is still valid
             palette.setColor(QtGui.QPalette.Base, self.baseColour)
@@ -1556,7 +1563,7 @@ class NameEditor(LineEdit):
         super().__init__(parent=parent, **kwds)
 
         self._parent = parent # the LabelObject
-        self.setValidator(NameValidator(parent=self, func=self._parent._isValidName, startingName=self._parent.labelName))
+        self.setValidator(LabelNameValidator(parent=self, labelObj=self._parent))
         self.validator().resetCheck()
         self.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter)
         self.setMaximumHeight(self._parent.labelSize)

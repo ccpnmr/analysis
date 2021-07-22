@@ -51,6 +51,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, _getCurrentZoomRatio
 from ccpn.core.PeakList import PeakList
+from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySelectionWidget
 
 
 logger = getLogger()
@@ -102,7 +103,7 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
         # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
         # underpinning the addNotifier call do not allow for it either
         colwidth = 140
-        self.displaysWidget = ListCompoundWidget(self._AIwidget,
+        self.displaysWidget = SpectrumDisplaySelectionWidget(self._AIwidget, mainWindow=self.mainWindow,
                                                  grid=(0, 0), vAlign='top', stretch=(0, 0), hAlign='left',
                                                  vPolicy='minimal',
                                                  #minimumWidths=(colwidth, 0, 0),
@@ -112,7 +113,6 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
                                                  tipText='SpectrumDisplay modules to respond to double-click',
                                                  texts=[ALL] + [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
                                                  )
-        self.displaysWidget.setPreSelect(self._fillDisplayWidget)
         self.displaysWidget.setFixedHeights((None, None, 40))
 
         self.sequentialStripsWidget = CheckBoxCompoundWidget(
@@ -226,10 +226,6 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
 
         # install the event filter to handle maximising from floated dock
         self.installMaximiseEventHandler(self._maximise, self._closeModule)
-
-    def _fillDisplayWidget(self):
-        ll = ['> select-to-add <'] + [ALL] + [display.pid for display in self.mainWindow.spectrumDisplays]
-        self.displaysWidget.pulldownList.setData(texts=ll)
 
     def _maximise(self):
         """

@@ -264,9 +264,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         # Logging.getLogger().debug('module:"%s"' % (name,))
         self.mainWindow = mainWindow
         self.closeFunc = closeFunc
-        self._nameSplitter = '_'  # used to create the serial
-        self._serial = None       # int after the nameSplitter
-        self._titleName = None    # name without serial
+        self._nameSplitter = '_'  # used to get the serial number.
 
         setWidgetFont(self, )
 
@@ -405,20 +403,15 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     @property
     def id(self):
         """
-        The module name without Class name (Mo, Module or GD, GuiDisplay).
+        The module name without  the pid-prefix  but including the serial number (if any)
         """
         return self.name()
 
     @property
     def titleName(self):
-        """module name without the serial number added at the end"""
-        # moduleName = self.name()
-        # splits = moduleName.split(self._nameSplitter)
-        # if len(splits) > 1:
-        #     title = self._nameSplitter.join(splits[:-1])
-        #     return title
-        # else:
-        #     return moduleName
+        """
+        module name without the pid-prefix and serial number (if any)
+        """
         pidPrefix, moduleName, serialName = self.pidFields
         return moduleName
 

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-15 19:36:11 +0100 (Tue, June 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-22 16:05:51 +0100 (Thu, July 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1963,6 +1963,7 @@ class Framework(NotifierBase):
         :return: instance of NefImporter
         """
 
+        # NOTE:ED - this will need moving to the loaders in .alpha
         from ccpn.util.nef import NefImporter as Nef
         from ccpn.framework.PathsAndUrls import nefValidationPath as defaultNefValidationPath
 
@@ -1989,6 +1990,49 @@ class Framework(NotifierBase):
 
         # load the nef file and the validation file
         _loader.loadFile(path)
+        _loader.loadValidateDictionary(_validation)
+
+        return _loader
+
+    @logCommand('application.')
+    def readNefText(self, text: str, nefValidationPath: Union[str, Path.aPath, None]=None, errorLogging=None, hidePrefix=True):
+        """Create a Nef loader object and populate from a text string containing the nef structure together with a Nef validation file.
+
+        If no validation file is specified, the default is taken from PathsAndUrls
+
+        :param text: text containging the nef structure
+        :param nefValidationPath: path to the nef validation file - an mmcif.dic file
+        :param errorLogging: level of logging - 'standard', 'silent', 'strict'
+        :param hidePrefix: True/False, hide the 'nef_' prefixes in the saveframes
+        :return: instance of NefImporter
+        """
+
+        # NOTE:ED - this will need moving to the loaders in .alpha
+        from ccpn.util.nef import NefImporter as Nef
+        from ccpn.framework.PathsAndUrls import nefValidationPath as defaultNefValidationPath
+
+        # set the default values if not specified
+        _errorLogging = errorLogging or Nef.el.NEF_STRICT
+        _validation = nefValidationPath or defaultNefValidationPath
+
+        # check the parameters
+        if not isinstance(text, str):
+            raise ValueError(f'text not defined correctly')
+        if not isinstance(_validation, (str, Path.Path, type(None))):
+            raise ValueError(f'nefValidationPath {_validation} not defined correctly')
+        if _errorLogging not in [Nef.el.NEF_STANDARD, Nef.el.NEF_STRICT, Nef.el.NEF_SILENT]:
+            raise ValueError(f'errorLogging must be one of: [{repr(Nef.el.NEF_STANDARD)}, {repr(Nef.el.NEF_STRICT)}, {repr(Nef.el.NEF_SILENT)}]')
+        if not isinstance(hidePrefix, bool):
+            raise ValueError(f'hidePrefix must be a bool')
+
+        # convert to aPath objects
+        _validation = Path.aPath(_validation) if isinstance(_validation, str) else _validation
+
+        # create the nef importer instance
+        _loader = Nef.NefImporter(errorLogging=_errorLogging, hidePrefix=hidePrefix)
+
+        # load the nef from text, and the validation file
+        _loader.loadText(text)
         _loader.loadValidateDictionary(_validation)
 
         return _loader

@@ -1170,7 +1170,7 @@ class CcpnModuleLabel(DockLabel):
                                        'border-radius: 1px;'
                                        'background-color: transparent;' % BORDERNOFOCUS_COLOUR)
 
-        self.nameEditor = NameEditor(self, text=self.labelName)
+        self.nameEditor = NameEditor(self)
         self.nameEditor.hide()
 
         layout = QtWidgets.QGridLayout(self)
@@ -1203,7 +1203,7 @@ class CcpnModuleLabel(DockLabel):
         self._inDoubleClick = False
     @property
     def labelName(self):
-        return self.module.name()
+        return self.module.id
 
     def _showNameEditor(self):
         """
@@ -1211,6 +1211,7 @@ class CcpnModuleLabel(DockLabel):
         """
         self.nameEditor._setFocus()
         self.nameEditor.show()
+        self.nameEditor.set(self.labelName)
 
     def _isValidName(self, name):
         return self.module.area._isValidName(name)
@@ -1440,7 +1441,7 @@ class LabelNameValidator(QtGui.QValidator):
     def validate(self, name, p_int):
 
         palette = self.parent().palette()
-        self.startingName = self._labelObj.labelName
+        self.startingName = self._labelObj.module.id
         if not name or len(name) == 0:
             palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
             state = QtGui.QValidator.Intermediate  # entry is NOT valid, but can continue editing

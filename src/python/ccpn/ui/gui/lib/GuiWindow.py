@@ -148,8 +148,8 @@ class GuiWindow():
         # addShortCut("Space, Space", self, self.toggleConsole, context=context) # this is not needed here, already set on Menus!!
         # addShortCut("CTRL+a", self, self.selectAllPeaks, context=context)
 
-        addShortCut("q, q", self, self.contourLevelUp, context=context)
-        addShortCut("w, w", self, self.contourLevelDown, context=context)
+        addShortCut("q, q", self, self._lowerContourBaseCallback, context=context)
+        addShortCut("w, w", self, self._raiseContourBaseCallback, context=context)
         addShortCut("z, z", self, self.previousZPlane, context=context)
         addShortCut("x, x", self, self.nextZPlane, context=context)
 
@@ -936,18 +936,18 @@ class GuiWindow():
         else:  # just close it!
             self.pythonConsoleModule._closeModule()
 
-    def contourLevelDown(self):
-        """
-        lower the contour level for the currently selected strip
+    def _lowerContourBaseCallback(self):
+        """Callback to lower the contour level for the currently
+        selected strip
         """
         if self.current.strip:
             self.current.strip.spectrumDisplay.lowerContourBase()
         else:
             getLogger().warning('No current strip. Select a strip first.')
 
-    def contourLevelUp(self):
-        """
-        increase the contour level for the currently selected strip
+    def _raiseContourBaseCallback(self):
+        """Callback to increase the contour level for the currently
+        selected strip
         """
         if self.current.strip:
             self.current.strip.spectrumDisplay.raiseContourBase()

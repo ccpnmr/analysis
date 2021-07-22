@@ -4703,6 +4703,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
         return sliceData numpy array
         """
+        #TODO: Move functionality to SpectrumView class
+
         # need to block logging
         with notificationEchoBlocking(self.application):
             axisCodes = [a.code for a in spectrumView.strip.axes][0:2]

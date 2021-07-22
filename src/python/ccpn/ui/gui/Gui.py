@@ -345,9 +345,6 @@ class Gui(Ui):
 
 ## Window class
 coreClass = _coreClassMap['Window']
-
-#TODO: move to individual files containing the wrapped class and Gui-class
-# Any Factory function to _implementation or abstractWrapper
 #
 from ccpn.ui.gui.lib.GuiMainWindow import GuiMainWindow as _GuiMainWindow
 
@@ -471,7 +468,6 @@ class SpectrumDisplayNd(coreClass, _SpectrumDisplayNd):
 
         # hack for now;
         self.application = project._appBase
-        self._appBase = project._appBase
 
         _SpectrumDisplayNd.__init__(self, mainWindow=self.application.ui.mainWindow)
 

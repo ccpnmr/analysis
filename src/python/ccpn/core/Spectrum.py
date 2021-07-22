@@ -228,8 +228,10 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def spectrumDimensions(self) -> list:
         """:return A list with the spectrum dimension (== SpectrumReference) instances
         """
-        from ccpn.core.SpectrumReference import SpectrumReference
-        return self._getChildrenByClass(SpectrumReference)
+        if self._spectrumDimensions is None:
+            from ccpn.core.SpectrumReference import SpectrumReference
+            self._spectrumDimensions = tuple(self._getChildrenByClass(SpectrumReference))
+        return self._spectrumDimensions
 
     @property
     def spectrumHits(self) -> list:
@@ -263,6 +265,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         # 1D data references
         self._intensities = None
         self._positions = None
+
+        self._spectrumDimensions = None   # A tuple of SpectrumReferences instances; set onece and retained for speed
 
         self.doubleCrosshairOffsets = self.dimensionCount * [0]  # TBD: do we need this to be a property?
         self.showDoubleCrosshair = False
@@ -716,7 +720,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def _getDimensionalAttributes(self, attributeName: str) -> list:
         """Conveniance function get the values for each spectrumReference.attributeName
         """
-        return [getattr(specDim, attributeName) for specDim in self.spectrumDimensions]
+        specDims = self.spectrumDimensions  # local copy to avoid getting it N-times
+        return [getattr(specDim, attributeName) for specDim in specDims]
 
     @property
     @_includeInDimensionalCopy
@@ -794,8 +799,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._getDimensionalAttributes('dimensionType')
 
     @dimensionTypes.setter
-    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(str,),
-                                enumerated=specLib.DIMENSIONTYPES)
+    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(str,), enumerated=specLib.DIMENSIONTYPES)
     def dimensionTypes(self, value):
         self._setDimensionalAttributes('dimensionType', value)
 
@@ -873,7 +877,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(float, int))
     def phases0(self, value: Sequence):
         self._setDimensionalAttributes('phase0', value)
-        # self._setStdDataDimValue('phase0', value)
 
     @property
     @_includeInDimensionalCopy
@@ -889,7 +892,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     @_includeInDimensionalCopy
     def windowFunctions(self) -> List[Optional[str]]:
-        """Window function name (or None) per dimension
+        """Window function name (or None); per dimension
         e.g. 'EM', 'GM', 'SINE', 'QSINE', .... (defined in SpectrumLib.WINDOW_FUNCTIONS)
         """
         return self._getDimensionalAttributes('windowFunction')
@@ -902,7 +905,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     @_includeInDimensionalCopy
     def lorentzianBroadenings(self) -> List[Optional[float]]:
-        """Lorenzian broadening per dimension (in Hz)"""
+        """Lorenzian broadening (in Hz) or None; per dimension"""
         return self._getDimensionalAttributes('lorentzianBroadening')
 
     @lorentzianBroadenings.setter
@@ -913,7 +916,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     @_includeInDimensionalCopy
     def gaussianBroadenings(self) -> List[Optional[float]]:
-        """Gaussian broadening per dimension"""
+        """Gaussian broadening or None; per dimension"""
         return self._getDimensionalAttributes('gaussianBroadening')
 
     @gaussianBroadenings.setter
@@ -924,7 +927,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     @_includeInDimensionalCopy
     def sineWindowShifts(self) -> List[Optional[float]]:
-        """Shift of sine/sine-square window function per dimension (in degrees)"""
+        """Shift of sine/sine-square window function (in degrees) or None; per dimension"""
         return self._getDimensionalAttributes('sineWindowShift')
 
     @sineWindowShifts.setter
@@ -935,7 +938,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     @_includeInDimensionalCopy
     def spectrometerFrequencies(self) -> List[float]:
-        """List of spectrometer frequency for each dimension"""
+        """Spectrometer frequency; per dimension"""
         return self._getDimensionalAttributes('spectrometerFrequency')
 
     @spectrometerFrequencies.setter
@@ -962,7 +965,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     @_includeInDimensionalCopy
     def isotopeCodes(self) -> List[str]:
-        """isotopeCode per dimension - None if not known"""
+        """isotopeCode or None; per dimension"""
         return self._getDimensionalAttributes('isotopeCode')
 
     @isotopeCodes.setter
@@ -1047,7 +1050,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     @_includeInDimensionalCopy
     def foldingModes(self) -> List[Optional[str]]:
-        """folding mode (values: 'circular', 'mirror', None), per dimension"""
+        """folding mode (values: 'circular', 'mirror', None); per dimension"""
         return self._getDimensionalAttributes('foldingMode')
         # dd = {True: 'mirror', False: 'circular', None: None}
         # return tuple(dd[x and x.isFolded] for x in self._mainExpDimRefs())
@@ -1069,7 +1072,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     @_includeInDimensionalCopy
     def axisUnits(self) -> List[Optional[str]]:
-        """Main axis unit (most commonly 'ppm'), per dimension - None if no unique code"""
+        """Main axis unit (most commonly 'ppm') or None; per dimension"""
         return self._getDimensionalAttributes('axisUnit')
 
     @axisUnits.setter
@@ -1080,7 +1083,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     @_includeInDimensionalCopy
     def referencePoints(self) -> List[Optional[float]]:
-        """point used for axis (chemical shift) referencing, per dimension."""
+        """point used for axis (chemical shift) referencing; per dimension."""
         return self._getDimensionalAttributes('referencePoint')
 
     @referencePoints.setter
@@ -1091,7 +1094,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     @_includeInDimensionalCopy
     def referenceValues(self) -> List[Optional[float]]:
-        """ppm-value used for axis (chemical shift) referencing, per dimension."""
+        """ppm-value used for axis (chemical shift) referencing; per dimension."""
         return self._getDimensionalAttributes('referenceValue')
 
     @referenceValues.setter
@@ -1142,7 +1145,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     @_includeInDimensionalCopy
     def assignmentTolerances(self) -> List[Optional[float]]:
-        """Assignment tolerance in axis unit (ppm), per dimension"""
+        """Assignment tolerance in axis unit (ppm); per dimension"""
         return self._getDimensionalAttributes('assignmentTolerance')
 
     @assignmentTolerances.setter

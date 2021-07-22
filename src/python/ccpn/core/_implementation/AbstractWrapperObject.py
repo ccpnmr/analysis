@@ -269,10 +269,10 @@ class AbstractWrapperObject(NotifierBase):
         """
         return Pid.Pid(Pid.PREFIXSEP.join((self.className, self._id)))
 
-    def _longName(self, name):
-        """long name generated from the name and the object id
-        """
-        return Pid.Pid(Pid.PREFIXSEP.join((name, self._id)))
+    # def _longName(self, name):
+    #     """long name generated from the name and the object id
+    #     """
+    #     return Pid.Pid(Pid.PREFIXSEP.join((name, self._id)))
 
     @property
     def isDeleted(self) -> bool:
@@ -561,12 +561,6 @@ class AbstractWrapperObject(NotifierBase):
         else:
             return (self._key,)
 
-    def _newInstance(self, *kwds):
-        """Instantiate a new instance, including the wrappedData
-        Should be subclassed
-        """
-        pass
-
     #=========================================================================================
     # Abstract /Api methods
     #=========================================================================================
@@ -774,10 +768,11 @@ class AbstractWrapperObject(NotifierBase):
                         getLogger().warning(_text)
                         raise RuntimeError(_text)
 
+    #  For restore 3.2 branch
+
     # def _restoreChildren(self, classes=['all']):
     #     """GWV: A method to restore the children of self
     #     classes is either 'gui' or 'nonGui' or 'all' or explicit enumeration of classNames
-    #     For restore 3.2 branch
     #     """
     #     _classMap = dict([(cls.className, cls) for cls in self._childClasses])
     #
@@ -821,6 +816,14 @@ class AbstractWrapperObject(NotifierBase):
     #         raise RuntimeError('Error creating new instance of class "%s"' % cls.className)
     #
     #     return newInstance
+
+    # def _newInstance(self, *kwds):
+    #     """Instantiate a new instance, including the wrappedData
+    # future v3.2
+    #     Should be subclassed
+    #     """
+    #     pass
+
 
     #=========================================================================================
     # CCPN functions

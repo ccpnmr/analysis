@@ -3079,11 +3079,6 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
     # assure unique name
     name = Spectrum._uniqueName(project=project, name=name)
 
-    # check the dataSources of all spectra of the project for open file pointers to the same file
-    for ds in [sp._dataSource for sp in project.spectra if sp.hasValidPath()]:
-        if ds.path == dataStore.aPath() and ds.hasOpenFile():
-            raise RuntimeError('Unable to create new Spectrum; project has existing open dataSource %s' % ds)
-
     apiProject = project._wrappedData
     apiExperiment = apiProject.newExperiment(name=name, numDim=dataSource.dimensionCount)
 

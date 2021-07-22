@@ -4706,7 +4706,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # need to block logging
         with notificationEchoBlocking(self.application):
             axisCodes = [a.code for a in spectrumView.strip.axes][0:2]
-            planeDims = spectrumView.spectrum.getByAxisCodes('dimensions', axisCodes)
+            # planeDims = spectrumView.spectrum.getByAxisCodes('dimensions', axisCodes)
             pointCounts = spectrumView.spectrum.pointCounts
             pointInt = [int(round(pnt) % pointCounts[ii]) + 1 for ii, pnt in enumerate(points)]
             pointInt[sliceDim - 1] = 1  # To improve caching; points, dimensions are 1-based
@@ -4716,6 +4716,8 @@ class CcpnGLWidget(QOpenGLWidget):
             #                                                              xDim=planeDims[0], yDim=planeDims[1], sliceDim=sliceDim))
             # GWV reverted to getSliceData
             data = spectrumView.spectrum.getSliceData(position=pointInt, sliceDim=sliceDim)
+            if spectrumView._traceScale is None:
+                spectrumView._traceScale = 1.0/max(data) * 0.5
         return data
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

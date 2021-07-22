@@ -73,7 +73,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         self.zRegionPrev = None
         self.posDisplayLists = []
         self.negDisplayLists = []
-        self._traceScale = 1.0e-7  # TBD: need a better way of setting this
+        self._traceScale = None  # For now: Initialised by CcpOpenGl._getSliceData
         self.okDataFile = True  # used to keep track of warning message that data file does not exist
 
         dimensionCount = len(self.strip.axisCodes)

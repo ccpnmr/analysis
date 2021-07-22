@@ -237,6 +237,7 @@ class GuiSpectrumDisplay(CcpnModule):
         # GWV: This assures that a 'hoverbar' is visible over the strip when dragging
         # the module to another location
         self.hoverEvent = self._hoverEvent
+
         self._phasingTraceScale = 1.0e-7
         self.stripScaleFactor = 1.0
 
@@ -1819,7 +1820,8 @@ class GuiSpectrumDisplay(CcpnModule):
         if not self.is1D:
             for strip in self.strips:
                 for spectrumView in strip.spectrumViews:
-                    spectrumView.traceScale *= 1.4
+                    if spectrumView.traceScale is not None:
+                        spectrumView.traceScale *= 1.4
 
                 # spawn a redraw of the strip
                 strip._updatePivot()
@@ -1830,7 +1832,8 @@ class GuiSpectrumDisplay(CcpnModule):
         if not self.is1D:
             for strip in self.strips:
                 for spectrumView in strip.spectrumViews:
-                    spectrumView.traceScale /= 1.4
+                    if spectrumView.traceScale is not None:
+                        spectrumView.traceScale /= 1.4
 
                 # spawn a redraw of the strip
                 strip._updatePivot()

@@ -650,7 +650,7 @@ class GuiWindow():
                 with undoBlockWithoutSideBar():
                     # GWV 20181030: changed from atomName to id
                     if colour:
-                        self.mainWindow.newMark(colour, [chemicalShift.value], [axisCode], labels=[atomId])
+                        self.newMark(colour, [chemicalShift.value], [axisCode], labels=[atomId])
                     else:
                         # just use default mark colour rather than checking colourScheme
                         defaultColour = self.application.preferences.general.defaultMarksColour

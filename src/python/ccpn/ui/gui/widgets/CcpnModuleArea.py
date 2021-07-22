@@ -346,10 +346,8 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
         if not module._restored:
             if not isinstance(module, GuiSpectrumDisplay):  #
-                print(module.titleName, 'dddsdssd')
                 nextAvailableName = self._incrementModuleName(module.titleName, module._nameSplitter)
                 if not module._onlySingleInstance:
-                    print(nextAvailableName, 'gfdfs')
                     module.rename(nextAvailableName)
 
         # test that only one instance of the module is opened

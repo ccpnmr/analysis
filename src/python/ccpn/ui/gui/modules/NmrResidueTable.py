@@ -158,27 +158,6 @@ class NmrResidueTableModule(CcpnModule):
         """
         self.nmrResidueTable._selectNmrChain(nmrChain)
 
-    def _getDisplays(self):
-        """Return list of displays to navigate - if needed
-        """
-        displays = []
-        # check for valid displays
-        if self.nmrResidueTableSettings.displaysWidget:
-            gids = self.nmrResidueTableSettings.displaysWidget.getTexts()
-            if len(gids) == 0:
-                return displays
-
-            if self.includeDisplaySettings:
-                if ALL in gids:
-                    displays = self.application.ui.mainWindow.spectrumDisplays
-                else:
-                    displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
-        else:
-            if self.current.strip:
-                displays.append(self.current.strip.spectrumDisplay)
-
-        return displays
-
     # def navigateToNmrResidue(self, nmrResidue, row=None, col=None):
     def navigateToNmrResidueCallBack(self, data):
         """Navigate in selected displays to nmrResidue; skip if none defined
@@ -195,8 +174,12 @@ class NmrResidueTableModule(CcpnModule):
             nmrResidue = objs
 
         logger.debug('nmrResidue=%s' % str(nmrResidue.id if nmrResidue else None))
-
-        displays = self._getDisplays()
+        displays = []
+        if self.nmrResidueTableSettings.displaysWidget:
+            displays = self.nmrResidueTableSettings.displaysWidget.getDisplays()
+        else:
+            if self.current.strip:
+                displays = [self.current.strip.spectrumDisplay]
         if len(displays) == 0 and self.nmrResidueTableSettings.displaysWidget:
             logger.warning('Undefined display module(s); select in settings first')
             showWarning('startAssignment', 'Undefined display module(s);\nselect in settings first')

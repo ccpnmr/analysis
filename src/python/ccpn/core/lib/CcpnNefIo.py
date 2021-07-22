@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:00 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-22 18:35:31 +0100 (Thu, July 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1958,7 +1958,7 @@ class CcpnNefReader(CcpnNefContent):
         self._frameCodeToSpectra = {}
 
         # Map for speeding up restraint reading
-        self._dataSet2ItemMap = None
+        self._dataSet2ItemMap = {}
         self._nmrResidueMap = None
 
         self.defaultDataSetSerial = None
@@ -4658,7 +4658,7 @@ class CcpnNefReader(CcpnNefContent):
 
         # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
         name = framecode[len(category) + 1:]
-        dataSetName = saveFrame.get('ccpn_dataset_id')
+        dataSetId = saveFrame.get('ccpn_dataset_id')
 
         # ejb - need to remove the rogue `n` at the beginning of the name if it exists
         #       as it is passed into the namespace and gets added iteratively every save
@@ -4667,7 +4667,7 @@ class CcpnNefReader(CcpnNefContent):
 
         run_id = parameters.get('runId')
 
-        restraintId = Pid.IDSEP.join(('' if x is None else str(x)) for x in (dataSetName, name))
+        restraintId = Pid.IDSEP.join(('' if x is None else str(x)) for x in (dataSetId, name))
         previous = project.getObjectsByPartialId(className='RestraintList', idStartsWith=restraintId)
 
         # need to fix the names here... cannot contain '.'
@@ -4676,7 +4676,8 @@ class CcpnNefReader(CcpnNefContent):
         if previous and len(previous) == 1:
             dataSet = previous[0].dataSet
         else:
-            dataSet = project.newDataSet()
+            # dataSet = project.newDataSet()
+            dataSet = self.fetchDataSet(dataSetId)
 
         # read list
         parameters['name'] = name
@@ -7103,8 +7104,8 @@ class CcpnNefReader(CcpnNefContent):
             dataSet = dataSet or self.project.newDataSet(dataSetId)
             self.defaultDataSetSerial = dataSet.serial
         else:
-            # take or create dataSet matching serial
-            dataSet = dataSet or self.getDataSet(serial)
+            # # take or create dataSet matching serial
+            # dataSet = dataSet or self.getDataSet(serial)
             if dataSet is None:
                 _name = dataSetId or self._defaultName(DataSet, serial)
                 dataSet = self.project.newDataSet(name=_name, )  #serial=serial)

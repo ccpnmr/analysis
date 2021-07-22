@@ -1505,8 +1505,9 @@ class SpectrumDisplaySelectionWidget(ListCompoundWidget):
             ll += [display.pid for display in self.mainWindow.spectrumDisplays]
         self.pulldownList.setData(texts=ll)
 
-    def _getDisplays(self):
-        """Return list of displays to navigate - if needed
+    def getDisplays(self):
+        """
+        Return list of selected displays
         """
         if not self.application:
             return []

@@ -364,27 +364,6 @@ class ResidueInformation(CcpnModule):
         """
         self.current.residue = residue
 
-    def _getDisplays(self, settings):
-        """Return list of displays to navigate - if needed - need to update for all modules
-        """
-        displays = []
-        # check for valid displays
-        if settings.displaysWidget:
-            gids = settings.displaysWidget.getTexts()
-            if len(gids) == 0:
-                return displays
-
-            if self.includeDisplaySettings:
-                if ALL in gids:
-                    displays = self.application.ui.mainWindow.spectrumDisplays
-                else:
-                    displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
-        else:
-            if self.current.strip:
-                displays.append(self.current.strip.spectrumDisplay)
-
-        return displays
-
     def _residueDoubleClicked(self, residue):
         """Handle double-cicking a residue in the table
         """
@@ -411,7 +390,9 @@ class ResidueInformation(CcpnModule):
         logger.debug('nmrResidue=%s' % str(nmrResidue.id if nmrResidue else None))
 
         _settings = self._moduleSettings
-        displays = self._getDisplays(_settings)
+        displays = []
+        if self.current.strip:
+            displays.append(self.current.strip.spectrumDisplay)
 
         if len(displays) == 0 and self._moduleSettings.displaysWidget:
             logger.warning('Undefined display module(s); select in settings first')

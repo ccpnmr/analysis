@@ -116,7 +116,7 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
         # repaint
         GLSignals.emitPaintEvent()
 
-    @logCommand(get='self')
+    # @logCommand(get='self')
     def raiseContourBase(self):
         """
         Increases contour base level for all spectra visible in the display.
@@ -154,7 +154,7 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
                         # Display has custom contour base - change that one only
                         spectrumView.negativeContourBase *= spectrumView.negativeContourFactor
 
-    @logCommand(get='self')
+    # @logCommand(get='self')
     def lowerContourBase(self):
         """
         Decreases contour base level for all spectra visible in the display.
@@ -191,7 +191,7 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
                         # Display has custom contour base - change that one only
                         spectrumView.negativeContourBase /= spectrumView.negativeContourFactor
 
-    @logCommand(get='self')
+    # @logCommand(get='self')
     def addContourLevel(self):
         """
         Increases number of contours by 1 for all spectra visible in the display.
@@ -226,7 +226,7 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
                         # Display has custom contour count - change that one only
                         spectrumView.negativeContourCount += 1
 
-    @logCommand(get='self')
+    # @logCommand(get='self')
     def removeContourLevel(self):
         """
         Decreases number of contours by 1 for all spectra visible in the display.

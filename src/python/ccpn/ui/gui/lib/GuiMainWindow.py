@@ -272,9 +272,9 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self.pythonConsole.setProject(project)
         self._updateWindowTitle()
         if self.application.project.isTemporary:
-            self.getMenuAction('Project->Archive').setEnabled(False)
+            self.getMenuAction('File->Archive').setEnabled(False)
         else:
-            self.getMenuAction('Project->Archive').setEnabled(True)
+            self.getMenuAction('File->Archive').setEnabled(True)
 
         from copy import deepcopy
 
@@ -316,7 +316,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             # print ('>>>', menuString, a.text())
             if a.text() == splitMenuString[-1]:
                 return a.menu() or a
-        raise ValueError('Menu item not found.')
+        raise ValueError('Menu item %r not found' % menuString)
 
     def searchMenuAction(self, menuString, topMenuAction=None):
         from ccpn.framework.Translation import translator
@@ -597,7 +597,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         specified in the preferences file.
         """
         recentFileLocations = self.application._getRecentFiles()
-        recentFileMenu = self.getMenuAction('Project->Open Recent')
+        recentFileMenu = self.getMenuAction('File->Open Recent')
         recentFileMenu.clear()
         for recentFile in recentFileLocations:
             # action = Action(self, text=recentFile, translate=False,
@@ -619,7 +619,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         userDefinedLayoutDirPath = self.application.preferences.general.get('userLayoutsPath')
         prelayouts = Layout._dictLayoutsNamePath(Layout._getPredefinedLayouts(predefinedLayouts))
-        prelayoutMenu = self.getMenuAction('Project->Layout->Open pre-defined')
+        prelayoutMenu = self.getMenuAction('File->Layout->Open pre-defined')
         prelayoutMenu.clear()
         for name, path in prelayouts.items():
             action = Action(self, text=name, translate=False,
@@ -944,7 +944,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
     def _updateRestoreArchiveMenu(self):
 
-        action = self.getMenuAction('Project->Restore From Archive...')
+        action = self.getMenuAction('File->Restore From Archive...')
         action.setEnabled(bool(self.application._archivePaths()))
 
     def undo(self):

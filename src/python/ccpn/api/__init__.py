@@ -14,19 +14,22 @@ Examples of import usage:
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
 __modifiedBy__ = "$Author: Luca Mureddu $"
 __dateModified__ = "$Date: 2021-06-23 17:58:44 +0000 (Wed, June 23, 2021) $"
-__version__ = "$Revision$"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-07-22 14:06:37 +0100 (Thu, July 22, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
-# Created:
+# Created
 #=========================================================================================
 __author__ = "$Author: Luca Mureddu $"
 __date__ = "$Date: 2021-06-23 18:02:28 +0100 (Wed, June 23, 2021) $"
@@ -78,15 +81,15 @@ from ccpn.core.Multiplet import Multiplet
 ############   UI Core objects       #######
 ############################################
 
-from ui._implementation.Window import Window
-from ui._implementation.SpectrumDisplay import SpectrumDisplay
-from ui._implementation.Strip import Strip
-from ui._implementation.Axis import Axis
-from ui._implementation.Mark import Mark
-from ui._implementation.SpectrumView import SpectrumView
-from ui._implementation.MultipletListView import MultipletListView
-from ui._implementation.PeakListView import PeakListView
-from ui._implementation.IntegralListView import IntegralListView
+from ccpn.ui._implementation.Window import Window
+from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
+from ccpn.ui._implementation.Strip import Strip
+from ccpn.ui._implementation.Axis import Axis
+from ccpn.ui._implementation.Mark import Mark
+from ccpn.ui._implementation.SpectrumView import SpectrumView
+from ccpn.ui._implementation.MultipletListView import MultipletListView
+from ccpn.ui._implementation.PeakListView import PeakListView
+from ccpn.ui._implementation.IntegralListView import IntegralListView
 
 #######################################
 ############  LIB objects       #######

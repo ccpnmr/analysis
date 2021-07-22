@@ -288,7 +288,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
     def _incrementModuleName(self, name, splitter):
         """ fetch an incremented name if not already taken. """
-        names = list(self.modules.keys()) + [name] # add name so it will start from 1
+        names = list(self.modules.keys())
         while name in names:
             name = incrementName(name, splitter)
         return name
@@ -346,8 +346,10 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
         if not module._restored:
             if not isinstance(module, GuiSpectrumDisplay):  #
+                print(module.titleName, 'dddsdssd')
                 nextAvailableName = self._incrementModuleName(module.titleName, module._nameSplitter)
                 if not module._onlySingleInstance:
+                    print(nextAvailableName, 'gfdfs')
                     module.rename(nextAvailableName)
 
         # test that only one instance of the module is opened

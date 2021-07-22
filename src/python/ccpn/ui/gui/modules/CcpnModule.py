@@ -197,7 +197,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     """
     className = '' # used for restoring GUI layouts
     shortClassName = PidShortClassName # used to create the pid
-
+    longClassName  = PidLongClassName  # used to create the long pid
     HORIZONTAL = 'horizontal'
     VERTICAL = 'vertical'
     labelOrientation = HORIZONTAL  # toplabel orientation
@@ -400,7 +400,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         """
         Identifier for the object, unique within the project - added to give label to ccpnModules
         """
-        return Pid(f'{PidLongClassName}:{self.id}')
+        return Pid(f'{self.longClassName}:{self.id}')
 
     @property
     def id(self):
@@ -409,43 +409,37 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         """
         return self.name()
 
-    # @property
-    # def serial(self):
-    #     """
-    #     The progressive number which appear after the name,
-    #     This is slightly different from serials of Abstract Wrapper classes.
-    #     """
-    #     if self._onlySingleInstance:
-    #         return 1
-    #     pidPrefix, baseName, serialName = self._getModuleNameBlocks()
-    #     try:
-    #         self._serial = int(serialName)
-    #         return self._serial
-    #     except Exception as e:
-    #         getLogger().warnig('Cannot get serial for module %s.' % self.moduleName, e)
-
-    #=========================================================================================
-    # Module Properties
-    #=========================================================================================
-
     @property
     def titleName(self):
-        'module name without serial'
-        moduleName = self.name()
-        splits = moduleName.split(self._nameSplitter)
-        if len(splits) > 1:
-            title = splits[0]
-            return title
-        else:
-            return moduleName
+        """module name without the serial number added at the end"""
+        # moduleName = self.name()
+        # splits = moduleName.split(self._nameSplitter)
+        # if len(splits) > 1:
+        #     title = self._nameSplitter.join(splits[:-1])
+        #     return title
+        # else:
+        #     return moduleName
+        pidPrefix, moduleName, serialName = self.pidFields
+        return moduleName
 
     @property
     def moduleName(self):
+        """
+        Module name as appear on the GUI, without the pid identifier (e.g.: MO:, Module: or GD:, SpectrumDisplay:).
+        """
         return self._name
 
     @moduleName.setter
     def moduleName(self, name):
         self._name = name
+
+    @property
+    def pidFields(self):
+        """
+        get the three parts of a Pid
+        """
+        pidPrefix, moduleName, serialName = self._getModulePidFields()
+        return (pidPrefix, moduleName, serialName)
 
     @property
     def widgetsState(self):
@@ -473,33 +467,31 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     # Widget Methods
     #=========================================================================================
 
-    def _getModuleNameBlocks(self):
+    def _getModulePidFields(self):
         """
 
         split name in the blocks:
-            Pid prefix (short or long)
+            Pid-prefix (short or long)
             Name
             Serial
         return a tuple
 
         """
-        name = self.name()
-        pidPrefix = ''
-        baseName = ''
+        pid = self.pid
+        pidPrefix = pid.type
+        moduleName = pid.id
         serialName = ''
-        splitter = self._nameSplitter
-        prefixSplit = name.split(PREFIXSEP)
-        if len(prefixSplit) > 1:
-            pidPrefix = prefixSplit[0]
-            name = PREFIXSEP.join(prefixSplit[0:]) #just in rare case there are multiple "prefixSplit"
 
-        nameSplit = name.split(splitter)
-        if len(nameSplit) > 1:
-            baseName, serialName = splitter.join(nameSplit[:-1]), nameSplit[-1]
+        splits = moduleName.split(self._nameSplitter)
+        if len(splits) > 1:
+            try:
+                serialName = str(int(splits[-1])) # consider a serial only if can be an int.
+                moduleName = self._nameSplitter.join(splits[:-1])
+            except:
+                serialName = ''
+                moduleName = self._nameSplitter.join(splits) # this is when there is a splitter but not a serial. eg 2D_HN
 
-        if not baseName:
-            baseName = name
-        return (pidPrefix, baseName, serialName)
+        return (pidPrefix, moduleName, serialName)
 
     def rename(self, newName):
         """
@@ -1160,39 +1152,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self._selectedOverlay._resize()
         self._borderOverlay._resize()
         super().resizeEvent(ev)
-
-
-    def __repr__(self):
-        return f'<{PidClassName}:{self.name()}>'
-
-    @property
-    def pid(self) -> str:
-        """
-        Identifier for the object, unique within the project - added to give label to ccpnModules
-        """
-        from ccpn.core.lib.Pid import Pid
-        return Pid(f'{PidShortClassName}:{self.name()}')
-
-    @property
-    def id(self):
-        """
-        Effectively the Module name.  Without Class name and serial
-        """
-        return self.titleName
-
-    @property
-    def serial(self):
-        """
-        The progressive number after the name
-        """
-        if self._onlySingleInstance:
-            return 1
-        serial = self.name().split(self._nameSplitter)[-1]
-        try:
-            self._serial = int(serial)
-            return self._serial
-        except Exception as e:
-            getLogger().warnig('Cannot get serial for module %s.' % self.moduleName, e)
 
 
 

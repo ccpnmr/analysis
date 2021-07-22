@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-28 13:40:34 +0100 (Mon, June 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-22 13:09:38 +0100 (Thu, July 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -73,7 +73,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         self.zRegionPrev = None
         self.posDisplayLists = []
         self.negDisplayLists = []
-        self._traceScale = 1.0e-7  # TBD: need a better way of setting this
+        self._traceScale = None  # For now: Initialised by CcpOpenGl._getSliceData
         self.okDataFile = True  # used to keep track of warning message that data file does not exist
 
         dimensionCount = len(self.strip.axisCodes)

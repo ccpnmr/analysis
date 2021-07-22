@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-22 13:09:38 +0100 (Thu, July 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -178,24 +178,6 @@ class GuiSpectrumDisplay(CcpnModule):
     units             Axis units, in display order
                         :return <Tuple>
 
-    parameters        Keyword-value dictionary of parameters.
-                        NB the value is a copy - modifying it will not modify the actual data.
-                        Values can be anything that can be exported to JSON,
-                        including OrderedDict, numpy.ndarray, ccpn.util.Tensor,
-                        or pandas DataFrame, Series, or Panel
-                        :return <dict>
-    setParameter      Add name:value to parameters, overwriting existing entries
-                        setParameter(name:str, value)
-                          :param name:<str> name of parameter
-                          :param value: value to set
-    deleteParameter   Delete parameter
-                        deleteParameter(name:str)
-                          :param name:<str> name of parameter to delete
-    clearParameters   Delete all parameters
-    updateParameters  Update list of parameters
-                        updateParameters(value:dict)
-                          :param value:<dict> parameter list
-
     resetAxisOrder    Reset display to original axis order
     findAxis          Find axis
                         findAxis(axisCode)
@@ -212,19 +194,19 @@ class GuiSpectrumDisplay(CcpnModule):
     settingsPosition = 'left'
     settingsMinimumSizes = (250, 50)
 
-    def __init__(self, mainWindow, name, useScrollArea=False):
+    def __init__(self, mainWindow, useScrollArea=False):
         """
         Initialise the Gui spectrum display object
 
         :param mainWindow: MainWindow instance
-        :param name: Title-bar name for the Module
         :param useScrollArea: Having a scrolled widget containing OpenGL and PyQtGraph widgets does not seem to work.
                               The leftmost strip is full of random garbage if it's not completely visible.
                               So for now add option below to have it turned off (False) or on (True).
         """
 
-        getLogger().debug('GuiSpectrumDisplay.__init__>> mainWindow, name: %s %s' % (mainWindow, name))
-        super(GuiSpectrumDisplay, self).__init__(mainWindow=mainWindow, name=name,
+        moduleTitle = str(self.pid)
+        getLogger().debug('GuiSpectrumDisplay.__init__>> mainWindow %s; name: %s' % (mainWindow, moduleTitle))
+        super(GuiSpectrumDisplay, self).__init__(mainWindow=mainWindow, name=moduleTitle,
                                                  size=(1100, 1300), autoOrientation=False
                                                  )
         self.mainWindow = mainWindow
@@ -255,6 +237,7 @@ class GuiSpectrumDisplay(CcpnModule):
         # GWV: This assures that a 'hoverbar' is visible over the strip when dragging
         # the module to another location
         self.hoverEvent = self._hoverEvent
+
         self._phasingTraceScale = 1.0e-7
         self.stripScaleFactor = 1.0
 
@@ -1837,7 +1820,8 @@ class GuiSpectrumDisplay(CcpnModule):
         if not self.is1D:
             for strip in self.strips:
                 for spectrumView in strip.spectrumViews:
-                    spectrumView.traceScale *= 1.4
+                    if spectrumView.traceScale is not None:
+                        spectrumView.traceScale *= 1.4
 
                 # spawn a redraw of the strip
                 strip._updatePivot()
@@ -1848,7 +1832,8 @@ class GuiSpectrumDisplay(CcpnModule):
         if not self.is1D:
             for strip in self.strips:
                 for spectrumView in strip.spectrumViews:
-                    spectrumView.traceScale /= 1.4
+                    if spectrumView.traceScale is not None:
+                        spectrumView.traceScale /= 1.4
 
                 # spawn a redraw of the strip
                 strip._updatePivot()

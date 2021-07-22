@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-22 13:09:38 +0100 (Thu, July 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -4706,7 +4706,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # need to block logging
         with notificationEchoBlocking(self.application):
             axisCodes = [a.code for a in spectrumView.strip.axes][0:2]
-            planeDims = spectrumView.spectrum.getByAxisCodes('dimensions', axisCodes)
+            # planeDims = spectrumView.spectrum.getByAxisCodes('dimensions', axisCodes)
             pointCounts = spectrumView.spectrum.pointCounts
             pointInt = [int(round(pnt) % pointCounts[ii]) + 1 for ii, pnt in enumerate(points)]
             pointInt[sliceDim - 1] = 1  # To improve caching; points, dimensions are 1-based
@@ -4716,6 +4716,8 @@ class CcpnGLWidget(QOpenGLWidget):
             #                                                              xDim=planeDims[0], yDim=planeDims[1], sliceDim=sliceDim))
             # GWV reverted to getSliceData
             data = spectrumView.spectrum.getSliceData(position=pointInt, sliceDim=sliceDim)
+            if spectrumView._traceScale is None:
+                spectrumView._traceScale = 1.0/max(data) * 0.5
         return data
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

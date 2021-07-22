@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-09 18:46:07 +0100 (Wed, June 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-22 13:40:13 +0100 (Thu, July 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1096,7 +1096,7 @@ GuiTable::item::selected {
             self.searchWidget.show()
 
     def _copySelectedCell(self):
-        from util.Common import copyToClipboard
+        from ccpn.util.Common import copyToClipboard
         i = self.currentItem()
         if i is not None:
             text = i.text().strip()

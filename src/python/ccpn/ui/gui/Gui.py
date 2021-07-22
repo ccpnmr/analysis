@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-22 13:09:37 +0100 (Thu, July 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-22 13:40:13 +0100 (Thu, July 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -439,7 +439,8 @@ class StripDisplay1d(coreClass, _SpectrumDisplay1d):
         self.application = project._appBase
 
         _SpectrumDisplay1d.__init__(self, mainWindow=self.application.ui.mainWindow,
-                                    name=self._id)
+                                    # name=self._id
+                                    )
 
         # 20191113: ED moved to initGraphics
         # if not project._isNew:
@@ -471,7 +472,8 @@ class SpectrumDisplayNd(coreClass, _SpectrumDisplayNd):
         self.application = project._appBase
 
         _SpectrumDisplayNd.__init__(self, mainWindow=self.application.ui.mainWindow,
-                                    name=self._id)
+                                    # name=self._id)
+                                    )
 
         # 20191113: ED moved to initGraphics
         # if not project._isNew:

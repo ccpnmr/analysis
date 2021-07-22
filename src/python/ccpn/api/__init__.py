@@ -26,7 +26,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 __modifiedBy__ = "$Author: Luca Mureddu $"
 __dateModified__ = "$Date: 2021-06-23 17:58:44 +0000 (Wed, June 23, 2021) $"
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-08 13:29:50 +0100 (Thu, July 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-22 13:40:13 +0100 (Thu, July 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -81,15 +81,15 @@ from ccpn.core.Multiplet import Multiplet
 ############   UI Core objects       #######
 ############################################
 
-from ui._implementation.Window import Window
-from ui._implementation.SpectrumDisplay import SpectrumDisplay
-from ui._implementation.Strip import Strip
-from ui._implementation.Axis import Axis
-from ui._implementation.Mark import Mark
-from ui._implementation.SpectrumView import SpectrumView
-from ui._implementation.MultipletListView import MultipletListView
-from ui._implementation.PeakListView import PeakListView
-from ui._implementation.IntegralListView import IntegralListView
+from ccpn.ui._implementation.Window import Window
+from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
+from ccpn.ui._implementation.Strip import Strip
+from ccpn.ui._implementation.Axis import Axis
+from ccpn.ui._implementation.Mark import Mark
+from ccpn.ui._implementation.SpectrumView import SpectrumView
+from ccpn.ui._implementation.MultipletListView import MultipletListView
+from ccpn.ui._implementation.PeakListView import PeakListView
+from ccpn.ui._implementation.IntegralListView import IntegralListView
 
 #######################################
 ############  LIB objects       #######

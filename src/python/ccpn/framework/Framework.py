@@ -1275,7 +1275,7 @@ class Framework(NotifierBase):
         """
         self._menuSpec = ms = []
 
-        ms.append(('Project', [
+        ms.append(('File', [
             ("New", self._newProjectMenuCallback, [('shortcut', '⌃n')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             (),
             ("Open...", self._openProjectMenuCallback, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
@@ -1302,10 +1302,6 @@ class Framework(NotifierBase):
                         ("Open pre-defined", ()),
 
                         )),
-            (),
-            ("Undo", self.undo, [('shortcut', '⌃z')]),  # Unicode U+2303, NOT the carrot on your keyboard.
-            ("Redo", self.redo, [('shortcut', '⌃y')]),  # Unicode U+2303, NOT the carrot on your keyboard.
-            (),
             ("Summary", self.displayProjectSummary),
             ("Archive", self.archiveProject, [('enabled', False)]),
             ("Restore From Archive...", self.restoreFromArchive, [('enabled', False)]),
@@ -1314,43 +1310,19 @@ class Framework(NotifierBase):
             (),
             ("Quit", self._closeEvent, [('shortcut', '⌃q')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ]
-                   ))
+        ))
 
-        ms.append(('Spectrum', [
-            ("Load Spectra...", self._loadSpectraCallback, [('shortcut', 'ls')]),
+        ms.append(('Edit', [
+            ("Undo", self.undo, [('shortcut', '⌃z')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+            ("Redo", self.redo, [('shortcut', '⌃y')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             (),
-            # ("Spectrum Groups...", self.showSpectrumGroupsPopup, [('shortcut', 'ss')]), # multiple edit temporarly disabled
-            ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
-            ("Validate Paths...", self.showValidateSpectraPopup, [('shortcut', 'vp')]),
-            (),
-            ("Pick Peaks", (("Pick 1D Peaks...", self.showPeakPick1DPopup, [('shortcut', 'p1')]),
-                            ("Pick ND Peaks...", self.showPeakPickNDPopup, [('shortcut', 'pp')])
-                            )),
-            ("Copy PeakList...", self.showCopyPeakListPopup, [('shortcut', 'cl')]),
-            ("Copy Peaks...", self.showCopyPeaks, [('shortcut', 'cp')]),
-            ("Estimate Volumes...", self.showEstimateVolumesPopup, [('shortcut', 'ev')]),
-            ("Reorder PeakList Axes...", self.showReorderPeakListAxesPopup, [('shortcut', 'rl')]),
-            (),
-            ("Make Strip Plot...", self.makeStripPlotPopup, [('shortcut', 'sp')]),
 
-            (),
-            ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
-            (),
-            ("Print to File...", self.showPrintSpectrumDisplayPopup, [('shortcut', '⌃p')]),
+            ("Cut", self._nyi,        [('shortcut', '⌃x'), ('enabled', False)]),
+            ("Copy", self._nyi,       [('shortcut', '⌃c'), ('enabled', False)]),
+            ("Paste", self._nyi,      [('shortcut', '⌃v'), ('enabled', False)]),
+            ("Select all", self._nyi, [('shortcut', '⌃a'), ('enabled', False)]),
             ]
-                   ))
-
-        ms.append(('Molecules', [
-            ("Chain from FASTA...", lambda: self._loadDataFromMenu(text='Load FASTA')),
-            (),
-            ("New Chain...", self.showCreateChainPopup),
-            ("Inspect...", self.inspectMolecule, [('enabled', False)]),
-            (),
-            ("Residue Information", self.showResidueInformation, [('shortcut', 'ri')]),
-            (),
-            ("Reference Chemical Shifts", self.showReferenceChemicalShifts, [('shortcut', 'rc')]),
-            ]
-                   ))
+        ))
 
         ms.append(('View', [
             ("Chemical Shift Table", partial(self.showChemicalShiftTable, selectFirstItem=True), [('shortcut', 'ct')]),
@@ -1379,20 +1351,20 @@ class Framework(NotifierBase):
             #                                               ('checked', False)
             #                                               ]),
             (),
-            ("Current", (("Show/Hide Toolbar", self.toggleToolbar, [('shortcut', 'tb')]),
-                         ("Show/Hide Spectrum Toolbar", self.toggleSpectrumToolbar, [('shortcut', 'sb')]),
-                         ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')]),
-                         (),
-                         ("Set Zoom...", self._setZoomPopup, [('shortcut', 'sz')]),
-                         ("Reset Zoom", self.resetZoom, [('shortcut', 'rz')]),
-                         (),
-                         ("New SpectrumDisplay with strip", self.copyStrip, []),
-                         ("Copy with X-Y Axes flipped", self._flipXYAxisCallback, [('shortcut', 'xy')]),
-                         ("Copy with X-Z Axes flipped", self._flipXZAxisCallback, [('shortcut', 'xz')]),
-                         ("Copy with Y-Z Axes flipped", self._flipYZAxisCallback, [('shortcut', 'yz')]),
-                         ("Copy with Axes Flipped...", self.showFlipArbitraryAxisPopup, [('shortcut', 'fa')]),
-                         )),
-            (),
+            # ("Current", (("Show/Hide Toolbar", self.toggleToolbar, [('shortcut', 'tb')]),
+            #              ("Show/Hide Spectrum Toolbar", self.toggleSpectrumToolbar, [('shortcut', 'sb')]),
+            #              ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')]),
+            #              (),
+            #              ("Set Zoom...", self._setZoomPopup, [('shortcut', 'sz')]),
+            #              ("Reset Zoom", self.resetZoom, [('shortcut', 'rz')]),
+            #              (),
+            #              ("New SpectrumDisplay with strip", self.copyStrip, []),
+            #              ("Copy with X-Y Axes flipped", self._flipXYAxisCallback, [('shortcut', 'xy')]),
+            #              ("Copy with X-Z Axes flipped", self._flipXZAxisCallback, [('shortcut', 'xz')]),
+            #              ("Copy with Y-Z Axes flipped", self._flipYZAxisCallback, [('shortcut', 'yz')]),
+            #              ("Copy with Axes Flipped...", self.showFlipArbitraryAxisPopup, [('shortcut', 'fa')]),
+            #              )),
+            # (),
             (SHOWMODULESMENU, ([
                 ("None", None, [('checkable', True),
                                 ('checked', False)])
@@ -1401,7 +1373,43 @@ class Framework(NotifierBase):
                                                              ('checkable', True),
                                                              ('checked', False)])
             ]
-                   ))
+        ))
+
+        ms.append(('Spectrum', [
+            ("Load Spectra...", self._loadSpectraCallback, [('shortcut', 'ls')]),
+            (),
+            # ("Spectrum Groups...", self.showSpectrumGroupsPopup, [('shortcut', 'ss')]), # multiple edit temporarly disabled
+            ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
+            ("Validate Paths...", self.showValidateSpectraPopup, [('shortcut', 'vp')]),
+            (),
+            ("Pick Peaks", (("Pick 1D Peaks...", self.showPeakPick1DPopup, [('shortcut', 'p1')]),
+                            ("Pick ND Peaks...", self.showPeakPickNDPopup, [('shortcut', 'pp')])
+                            )),
+            ("Copy PeakList...", self.showCopyPeakListPopup, [('shortcut', 'cl')]),
+            ("Copy Peaks...", self.showCopyPeaks, [('shortcut', 'cp')]),
+            ("Estimate Volumes...", self.showEstimateVolumesPopup, [('shortcut', 'ev')]),
+            ("Reorder PeakList Axes...", self.showReorderPeakListAxesPopup, [('shortcut', 'rl')]),
+            (),
+            ("Make Strip Plot...", self.makeStripPlotPopup, [('shortcut', 'sp')]),
+
+            (),
+            ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
+            (),
+            ("Print to File...", self.showPrintSpectrumDisplayPopup, [('shortcut', '⌃p')]),
+            ]
+        ))
+
+        ms.append(('Molecules', [
+            ("Chain from FASTA...", lambda: self._loadDataFromMenu(text='Load FASTA')),
+            (),
+            ("New Chain...", self.showCreateChainPopup),
+            ("Inspect...", self.inspectMolecule, [('enabled', False)]),
+            (),
+            ("Residue Information", self.showResidueInformation, [('shortcut', 'ri')]),
+            (),
+            ("Reference Chemical Shifts", self.showReferenceChemicalShifts, [('shortcut', 'rc')]),
+            ]
+        ))
 
         ms.append(('Macro', [
             ("New Macro Editor", self._showMacroEditorCallback),
@@ -1423,13 +1431,13 @@ class Framework(NotifierBase):
             ("Define Macro Shortcuts...", self.defineUserShortcuts, [('shortcut', 'du')]),
             ("Submit Macro...", self.showSubmitMacroPopup)
             ]
-                   ))
+        ))
 
         ms.append(('Plugins', [
             (CCPNPLUGINSMENU, ()),
             (PLUGINSMENU, ()),
             ]
-                   ))
+        ))
 
         ms.append(('Help', [
             (TUTORIALSMENU, ([
@@ -1484,7 +1492,7 @@ class Framework(NotifierBase):
             (),
             ("About CcpNmr V3...", self.showAboutPopup),
             ]
-                   ))
+        ))
 
     ###################################################################################################################
     ## These will eventually move to gui (probably via a set of lambda functions.
@@ -1492,6 +1500,10 @@ class Framework(NotifierBase):
     ###################################################################################################################
     ## MENU callbacks:  Project
     ###################################################################################################################
+
+    def _nyi(self):
+        """Not yet implemented"""
+        pass
 
     def _loadDataFromMenu(self, text='Load Data', filter=None):
         """Call loadData from the menu and trap errors.

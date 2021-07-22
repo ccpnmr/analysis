@@ -117,20 +117,6 @@ class RestraintTableModule(CcpnModule):
         """
         self.restraintTable._selectRestraintList(restraintList)
 
-    def _getDisplays(self):
-        """
-        Return list of displays to navigate - if needed
-        """
-        displays = []
-        # check for valid displays
-        gids = self._RTwidget.displaysWidget.getTexts()
-        if len(gids) == 0: return displays
-        if ALL in gids:
-            displays = self.application.ui.mainWindow.spectrumDisplays
-        else:
-            displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
-        return displays
-
     def _closeModule(self):
         """
         CCPN-INTERNAL: used to close the module
@@ -384,8 +370,7 @@ class RestraintTable(GuiTable):
         if restraint and restraint.peaks:
             self.current.peaks = restraint.peaks
             pk = restraint.peaks[0]
-
-            displays = self.moduleParent._getDisplays()
+            displays = self.moduleParent._RTwidget.displaysWidget.getDisplays()
             autoClear = self.moduleParent._RTwidget.autoClearMarksWidget.isChecked()
             markPositions = self.moduleParent._RTwidget.markPositionsWidget.isChecked()
 

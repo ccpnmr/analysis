@@ -1413,7 +1413,7 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
 
 
 class SpectrumDisplaySelectionWidget(ListCompoundWidget):
-
+    # TODO Change to be a subclass of ObjectSelectionWidget
     def __init__(self, parent=None, mainWindow=None, vAlign='top', stretch=(0, 0), hAlign='left',
                  vPolicy='minimal', fixedWidths=(None, None, None), orientation='left', labelText='Display(s):',
                  tipText='SpectrumDisplay modules to respond to double-click',
@@ -1537,6 +1537,7 @@ class SpectrumDisplaySelectionWidget(ListCompoundWidget):
 
 
 class ObjectSelectionWidget(ListCompoundWidget):
+    # TODO add missing notifiers
     KLASS = None
 
     def __init__(self, parent=None, mainWindow=None, vAlign='top', stretch=(0, 0), hAlign='left',

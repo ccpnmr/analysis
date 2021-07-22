@@ -1090,11 +1090,11 @@ class GuiSpectrumDisplay(CcpnModule):
 
         for pid in pids:
             obj = self.project.getByPid(pid)
-            if obj:
+            if obj is not None:
                 objs.append(obj)
 
         for obj in objs:
-            if obj is not None and isinstance(obj, Spectrum):
+            if isinstance(obj, Spectrum):
                 if self.isGrouped:
                     showWarning('Forbidden drop', 'A Single spectrum cannot be dropped onto grouped displays.')
                     return success
@@ -1107,36 +1107,42 @@ class GuiSpectrumDisplay(CcpnModule):
                     self.current.strip = self.strips[0]
 
                 success = True
-            elif obj is not None and isinstance(obj, PeakList):
+
+            elif isinstance(obj, PeakList):
                 with undoBlockWithoutSideBar():
                     self._handlePeakList(obj)
                 success = True
-            elif obj is not None and isinstance(obj, SpectrumGroup):
+
+            elif isinstance(obj, Peak):
+                self._handlePeak(obj, strip)
+
+            elif isinstance(obj, SpectrumGroup):
                 with undoBlockWithoutSideBar():
                     self._handleSpectrumGroup(obj)
                 success = True
-            elif obj is not None and isinstance(obj, Sample):
+
+            elif isinstance(obj, Sample):
                 with undoBlockWithoutSideBar():
                     self._handleSample(obj)
                 success = True
-            elif obj is not None and isinstance(obj, NmrAtom):
+
+            elif isinstance(obj, NmrAtom):
                 nmrAtoms.append(obj)
-            elif obj is not None and isinstance(obj, Substance):
+
+            elif isinstance(obj, Substance):
                 substances.append(obj)
-            elif obj is not None and isinstance(obj, NmrResidue):
+
+            elif isinstance(obj, NmrResidue):
                 nmrResidues.append(obj)
 
             elif obj is not None and isinstance(obj, NmrChain):
                 nmrChains.append(obj)
 
-            elif obj is not None and isinstance(obj, GuiStrip):
+            elif isinstance(obj, GuiStrip):
                 self._handleStrip(obj, strip)
 
-            elif obj is not None and isinstance(obj, Peak):
-                self._handlePeak(obj, strip)
-
             else:
-                showWarning('Dropped item "%s"' % obj.pid, 'Wrong kind; drop Spectrum, SpectrumGroup, PeakList,'
+                showWarning('Dropped item "%s"' % obj.pid, 'Wrong kind; drop Spectrum, SpectrumGroup, Peak, PeakList,'
                                                            ' NmrChain, NmrResidue, NmrAtom or Strip')
         if nmrChains:
             with undoBlockWithoutSideBar():

@@ -62,7 +62,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
-from ccpn.ui.gui.widgets.MessageDialog import showWarning, showMulti
+from ccpn.ui.gui.widgets.MessageDialog import showWarning, showMulti, showYesNo
 
 from ccpn.util.Common import uniquify, camelCaseToString
 from ccpn.util import Logging
@@ -1144,22 +1144,26 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         """Get dataLoader for the url (or None if not present)
         Allows for reporting or checking through popups
         does not do the actual loading
-        :returns a tuple (dataLoader, createNewProject)
+        :returns a tuple (dataLoader, createNewProject, ignore)
         """
         dataLoader = checkPathForDataLoader(url)
 
         if dataLoader is None:
             txt = 'Loading "%s" failed; unrecognised type' % url
             getLogger().warning(txt)
-            return (None, False)
+            return (None, False, False)
 
         createNewProject = dataLoader.createNewProject
+        ignore = False
 
         # local import here, as checkPathForDataLoaders needs to be called first to assure proper import orer
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
         from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
+        from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
+
         # check-for and set any specific attributes of the dataLoader instance
         # depending on the dataFormat
+
         if dataLoader.dataFormat == NefDataLoader.dataFormat or \
            dataLoader.dataFormat == SparkyDataLoader.dataFormat:
             choices = ['Import', 'New project', 'Cancel']
@@ -1176,7 +1180,13 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 dataLoader = None
                 createNewProject = False
 
-        return (dataLoader, createNewProject)
+        elif dataLoader.dataFormat == SpectrumDataLoader.dataFormat and dataLoader.existsInProject():
+            choice = showYesNo('Spectrum "%s"'  % dataLoader.path,
+                               'already exists in the project, do you want to load?')
+            if choice == False:
+                ignore = True
+
+        return (dataLoader, createNewProject, ignore)
 
     def _processDroppedItems(self, data):
         """Handle the dropped urls
@@ -1195,11 +1205,11 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         dataLoaders = []
         # analyse the Urls
         for url in urls:
-            dataLoader, createsNewProject = self._getDataLoader(url)
-            dataLoaders.append( (url, dataLoader, createsNewProject) )
+            dataLoader, createsNewProject, ignore = self._getDataLoader(url)
+            dataLoaders.append( (url, dataLoader, createsNewProject, ignore) )
 
         # analyse for potential errors
-        errorUrls = [url for url, dl, createNew in dataLoaders if dl is None]
+        errorUrls = [url for url, dl, createNew, ignore in dataLoaders if (dl is None and not ignore)]
         if len(errorUrls) == 1:
             MessageDialog.showError('Load Data', 'Dropped item "%s" was not unrecognised' % errorUrls[0], parent=self)
         elif len(errorUrls) > 1:
@@ -1207,12 +1217,13 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                                     len(errorUrls), parent=self)
 
         # Analyse if any Url would create a new project
-        createNewProject = any([createNew for url, dl, createNew in dataLoaders])
+        createNewProject = any([createNew for url, dl, createNew, ignore in dataLoaders])
         if createNewProject and not self._queryCloseProject(title='Load project', phrase='create a new'):
                 return []
 
         # load the url's with valid handlers
-        urlsToLoad = [(url, dl, createNew) for url, dl, createNew in dataLoaders if dl is not None]
+        urlsToLoad = [(url, dl, createNew) for url, dl, createNew, ignore in dataLoaders if
+                      (dl is not None and not ignore)]
         doEchoBlocking = len(urlsToLoad) > MAXITEMLOGGING
 
         # just a helper function to avoid code duplication

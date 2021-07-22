@@ -478,6 +478,10 @@ class SpectrumDisplay(AbstractWrapperObject):
     def _getDimensionsMapping(self, spectrum:Spectrum) -> list:
         """Get the spectrum dimensions in display order
         """
+        # For now: do not allow spectrum mapping with higher dimensionality than the display
+        if spectrum.dimensionCount > self.dimensionCount:
+            raise RuntimeError('Unable to map %s onto %s, dimensionality mismatch' % (spectrum, self))
+
         spectrumAxisCodes = spectrum._mapAxisCodes(self.axisCodes)[:spectrum.dimensionCount]
         if None in spectrumAxisCodes:
             raise RuntimeError('Unable to map dimensions of %s onto %s, axes %s' % (spectrum, self, self.axisCodes))

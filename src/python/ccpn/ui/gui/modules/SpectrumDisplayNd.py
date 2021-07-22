@@ -45,7 +45,6 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
         spectrum display object for Nd spectra
 
         :param mainWindow: MainWindow instance
-        :param name: Title-bar name for the Module
 
         This module inherits attributes from the SpectralDisplay wrapper class (see GuiSpectrumDislay)
         """

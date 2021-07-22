@@ -795,7 +795,13 @@ def _openItemObjects(mainWindow, objs, **kwds):
 
                     # if a spectrum object has already been opened then attach to that spectrumDisplay
                     if isinstance(obj, (Spectrum, SpectrumGroup)) and spectrumDisplay:
-                        spectrumDisplay._handlePids([obj.pid])
+                        try:
+                            spectrumDisplay._handlePids([obj.pid])
+
+                        except RuntimeError:
+                             # process objects to open
+                            func = OpenObjAction[obj.__class__](useNone=True, **kwds)
+                            returnObj = func._execOpenItem(mainWindow, obj)
 
                     else:
                         # process objects to open

@@ -98,5 +98,15 @@ class SpectrumDataLoader(DataLoaderABC):
 
         return [spectrum]
 
+    def existsInProject(self) -> bool:
+        """:return True if spectrum exists in the project
+        """
+        # check the dataSources of all spectra of the project for open file pointers to the same file
+        for ds in [sp._dataSource for sp in self.project.spectra if sp.hasValidPath()]:
+            if ds.path == self.dataStore.aPath() and ds.hasOpenFile():
+                return True
+        return False
+
+
 
 SpectrumDataLoader._registerFormat()

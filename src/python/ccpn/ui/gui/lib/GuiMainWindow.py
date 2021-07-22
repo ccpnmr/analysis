@@ -1181,8 +1181,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 createNewProject = False
 
         elif dataLoader.dataFormat == SpectrumDataLoader.dataFormat and dataLoader.existsInProject():
-            choice = showYesNo('Load Spectrum',
-                               'Spectrum already exists, do you want to load?')
+            choice = showYesNo('Spectrum "%s"'  % dataLoader.path,
+                               'already exists in the project, do you want to load?')
             if choice == False:
                 ignore = True
 

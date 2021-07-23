@@ -486,14 +486,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
         return (pidPrefix, moduleName, serialName)
 
-    def rename(self, newName):
-        """
-        Rename the label module.
-        """
-        self._renameModule(newName)
 
-    def _renameModule(self, newName):
-        """ CCPN internal called by SpectrumDisplay"""
+    def renameModule(self, newName):
+        """ rename the Gui module a  """
 
         if self.area:
             validator = self.label.nameEditor.validator()
@@ -1228,11 +1223,8 @@ class CcpnModuleLabel(DockLabel):
 
     def _renameLabel(self, name=None):
         name = name or self.nameEditor.get()
-
-        self.module.rename(name)
+        self.module.renameModule(name)
         self.nameEditor.hide()
-
-
 
     def setupLabelButton(self, button, iconName, position):
         icon = Icon('icons/%s' % iconName)

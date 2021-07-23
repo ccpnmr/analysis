@@ -455,6 +455,13 @@ class GuiSpectrumDisplay(CcpnModule):
         # need to set the values from the restored state
         self._spectrumDisplaySettings._updateLockedSettings(always=True)
 
+    def renameModule(self, name):
+
+        super(GuiSpectrumDisplay, self).renameModule(name)
+        self.rename(name) # rename the Core Object
+        for strip in self.strips:
+            strip.stripLabel._populate()
+
     def clearSpectra(self):
         """
         :return: remove all displayed spectra

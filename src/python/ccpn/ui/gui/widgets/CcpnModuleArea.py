@@ -340,7 +340,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
             if not isinstance(module, GuiSpectrumDisplay):  #
                 nextAvailableName = self._incrementModuleName(module.titleName, module._nameSplitter)
                 if not module._onlySingleInstance:
-                    module.rename(nextAvailableName)
+                    module.renameModule(nextAvailableName)
 
         # test that only one instance of the module is opened
         if hasattr(type(module), '_alreadyOpened'):

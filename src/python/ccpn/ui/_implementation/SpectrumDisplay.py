@@ -273,27 +273,26 @@ class SpectrumDisplay(AbstractWrapperObject):
 
     @renameObject()
     def rename(self, name):
-
+        """
+        Rename the Spectrum Display core object.
+        Note to rename the GuiModule GuiSpectrumDisplay object use the method "renameModule".
+        Renaming from the GuiSpectrumDisplay ensures all graphical objects are updated correctly.
+        """
         oldName = self.title
         try:
-            if not self.project.getSpectrumDisplay(name):
-                guiModule = self.project.getByPid(self.pid)
-                if guiModule:
-                    # rename the label on the Gui.
-                    name = guiModule._renameModule(name)
-                    # rename the API underling objects
-                    del self.project._pid2Obj[self.shortClassName][self._id]
-                    apiDisplay = self._wrappedData
-                    apiTask = apiDisplay.parent
-                    apiModules = apiTask.__dict__.get('modules')
-                    apiModules[name] = apiModules.pop(self._id)
-                    apiDisplay.__dict__['name'] = name
-                    self._id = name
-                    return (oldName,)
-            else:
-                msg = 'Cannot rename spectrum Display. Name already taken: %s' %name
-                getLogger().warning(msg)
-                raise RuntimeError(msg)
+            self._validateStringValue('name', name)
+        except Exception as err:
+            return (oldName,)
+        try:
+            del self.project._pid2Obj[self.shortClassName][self._id]
+            apiDisplay = self._wrappedData
+            apiTask = apiDisplay.parent
+            apiModules = apiTask.__dict__.get('modules')
+            apiModules[name] = apiModules.pop(self._id)
+            apiDisplay.__dict__['name'] = name
+            self._id = name
+            return (oldName,)
+
 
         except Exception as err:
             getLogger().warning('Cannot rename spectrum Display', err)

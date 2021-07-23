@@ -75,7 +75,7 @@ from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.ui.gui.widgets.Entry import Entry
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.core.lib.Pid import Pid, PREFIXSEP
+from ccpn.core.lib.Pid import Pid, PREFIXSEP, createPid
 
 
 CommonWidgets = {
@@ -391,14 +391,14 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         """
         Identifier for the object, unique within the project - added to give label to ccpnModules
         """
-        return Pid(f'{self.shortClassName}:{self.id}')
+        return createPid(self.shortClassName, self.id)
 
     @property
     def longPid(self) -> Pid:
         """
         Identifier for the object, unique within the project - added to give label to ccpnModules
         """
-        return Pid(f'{self.longClassName}:{self.id}')
+        return createPid(self.longClassName, self.id)
 
     @property
     def id(self):
@@ -1221,7 +1221,12 @@ class CcpnModuleLabel(DockLabel):
         if name != self.labelName:
             if name:
                 if self._isValidName(name):
-                    self.module.rename(name)
+                    try:
+                        #  For SpectrumDisplays this calls directly to the AWO class
+                        self.module.rename(name)
+                    except Exception as err:
+                        showWarning('Cannot rename module', str(err))
+
                 else:
                     showWarning('Cannot rename module', f'{name} already in use')
                     self.nameEditor.set(self.labelName)

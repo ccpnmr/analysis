@@ -1888,7 +1888,7 @@ class Framework(NotifierBase):
             successMessage = '==> Project successfully saved\n'
             self.ui.mainWindow._updateWindowTitle()
             self.ui.mainWindow.statusBar().showMessage(successMessage)
-            self.ui.mainWindow.getMenuAction('Project->Archive').setEnabled(True)
+            self.ui.mainWindow.getMenuAction('File->Archive').setEnabled(True)
             self.ui.mainWindow._fillRecentProjectsMenu()
             # self._createApplicationPaths()
             self.current._dumpStateToFile(self.statePath)

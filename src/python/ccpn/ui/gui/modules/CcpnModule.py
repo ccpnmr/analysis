@@ -495,18 +495,14 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             validator.validate(newName, 0, )
             _isValidState, _messageState = validator._isValidState, validator._messageState
             if _isValidState:
-                try:
-                    #  For SpectrumDisplays this calls directly to the AWO class
-                    self.label.setText(newName)
-                    self._name = newName
-                    self.moduleName = self._name
-                    return newName
-                except Exception as err:
-                    showWarning('Cannot rename module', str(err))
+                self.label.setText(newName)
+                self._name = newName
+                self.moduleName = self._name
+                return True
             else:
                 showWarning('Cannot rename module', _messageState)
                 self.label.nameEditor.set(self._name)  #reset the original name
-                return self._name
+        return False
 
     def _isNameAvailable(self, name):
 

@@ -279,11 +279,12 @@ class SpectrumDisplay(AbstractWrapperObject):
         Renaming from the GuiSpectrumDisplay ensures all graphical objects are updated correctly.
         """
         oldName = self.title
+        if name != self.id:
+            if self._project.getSpectrumDisplay(name):
+                getLogger().warning('Cannot rename spectrum Display', 'Name Already Taken')
+                return (oldName,)
         try:
             self._validateStringValue('name', name)
-        except Exception as err:
-            return (oldName,)
-        try:
             del self.project._pid2Obj[self.shortClassName][self._id]
             apiDisplay = self._wrappedData
             apiTask = apiDisplay.parent
@@ -292,8 +293,6 @@ class SpectrumDisplay(AbstractWrapperObject):
             apiDisplay.__dict__['name'] = name
             self._id = name
             return (oldName,)
-
-
         except Exception as err:
             getLogger().warning('Cannot rename spectrum Display', err)
             getLogger().exception(str(err))

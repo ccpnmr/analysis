@@ -457,10 +457,11 @@ class GuiSpectrumDisplay(CcpnModule):
 
     def renameModule(self, name):
 
-        super(GuiSpectrumDisplay, self).renameModule(name)
-        self.rename(name) # rename the Core Object
-        for strip in self.strips:
-            strip.stripLabel._populate()
+        success = super(GuiSpectrumDisplay, self).renameModule(name)
+        if success:
+            self.rename(name) # rename the Core Object
+            for strip in self.strips:
+                strip.stripLabel._populate()
 
     def clearSpectra(self):
         """

@@ -496,14 +496,26 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         """ CCPN internal called by SpectrumDisplay"""
 
         if self.area:
-            if self.area._isValidName(newName):
-                self.label.setText(newName)
-                self._name = newName
-                self.moduleName = self._name
-                return newName
+            validator = self.label.nameEditor.validator()
+            validator.validate(newName, 0, )
+            _isValidState, _messageState = validator._isValidState, validator._messageState
+            if _isValidState:
+                try:
+                    #  For SpectrumDisplays this calls directly to the AWO class
+                    self.label.setText(newName)
+                    self._name = newName
+                    self.moduleName = self._name
+                    return newName
+                except Exception as err:
+                    showWarning('Cannot rename module', str(err))
             else:
-                showWarning('Could not rename module', 'Please use a different name')
+                showWarning('Cannot rename module', _messageState)
+                self.label.nameEditor.set(self._name)  #reset the original name
                 return self._name
+
+    def _isNameAvailable(self, name):
+
+        return self.area._isNameAvailable(name)
 
     def restoreWidgetsState(self, **widgetsState):
         """
@@ -1170,7 +1182,9 @@ class CcpnModuleLabel(DockLabel):
                                        'border-radius: 1px;'
                                        'background-color: transparent;' % BORDERNOFOCUS_COLOUR)
 
-        self.nameEditor = NameEditor(self)
+        from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
+        allowSpace = not isinstance(self.module, SpectrumDisplay)
+        self.nameEditor = NameEditor(self, text=self.labelName, allowSpace=allowSpace)
         self.nameEditor.hide()
 
         layout = QtWidgets.QGridLayout(self)
@@ -1209,30 +1223,13 @@ class CcpnModuleLabel(DockLabel):
         """
         show the name editor and give full focus to start typing.
         """
-        self.nameEditor._setFocus()
-        self.nameEditor.show()
-        self.nameEditor.set(self.labelName)
 
-    def _isValidName(self, name):
-        return self.module.area._isValidName(name)
+        self.nameEditor.show()
 
     def _renameLabel(self, name=None):
         name = name or self.nameEditor.get()
-        if name != self.labelName:
-            if name:
-                if self._isValidName(name):
-                    try:
-                        #  For SpectrumDisplays this calls directly to the AWO class
-                        self.module.rename(name)
-                    except Exception as err:
-                        showWarning('Cannot rename module', str(err))
 
-                else:
-                    showWarning('Cannot rename module', f'{name} already in use')
-                    self.nameEditor.set(self.labelName)
-                    return
-            else:
-                self.nameEditor.set(self.labelName) #reset the original name
+        self.module.rename(name)
         self.nameEditor.hide()
 
 
@@ -1436,36 +1433,82 @@ INVALIDROWCOLOUR = QtGui.QColor('lightpink')
 class LabelNameValidator(QtGui.QValidator):
     """ Make sure the newly typed module name on a GUI is unique.
     """
-    def __init__(self, parent, labelObj):
+    def __init__(self, parent, labelObj, allowSpace=True):
         super().__init__(parent=parent)
         self.baseColour = self.parent().palette().color(QtGui.QPalette.Base)
         self._parent = parent
         self._labelObj = labelObj
-        self._func = self._labelObj._isValidName
+        self._isNameAvailableFunc = str # str as placeholder.
+        self._allowSpace = allowSpace
+        self._isValidState = True
+        self._messageState = ''
+
+    def _setNameValidFunc(self, func):
+        """
+        set a custom validation function to perform during the built in validate method, like isNameAvailable...
+        """
+        self._isNameAvailableFunc = func
+
+    def _isValidInput(self, value):
+        import re
+        notAllowedSequences = {
+                                'Empty_String'                  : '^\s*$',
+                                'Ends_With_Space'               : '\s$',
+                                'Contains_Empty_Spaces'         : '\s',
+                                'Contains_Non-Alphanumeric'     : '\W',
+                                'Contains_Illegal_Characters'   :'[^A-Za-z0-9 _]+'  #exclude non-alpha but include space and underscore
+                              }
+        valids = [True]
+        if value is None:
+            valids.append(False)
+            self._isValidState, self._messageState = False, 'Contains None'
+        if self._allowSpace:
+            notAllowedSequences.pop('Contains_Empty_Spaces')
+            notAllowedSequences.pop('Contains_Non-Alphanumeric')
+        for key, seq in notAllowedSequences.items():
+            if re.findall(seq, value):
+                valids.append(False)
+                self._isValidState, self._messageState = False, key.replace('_', ' ')
+        return all(valids)
+
+    def _setIntermediateStatus(self):
+        palette = self.parent().palette()
+        palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
+        state = QtGui.QValidator.Intermediate  # entry is NOT valid, but can continue editing
+        self.parent().setPalette(palette)
+        return state
+
+    def _setAccetableStatus(self):
+        palette = self.parent().palette()
+        palette.setColor(QtGui.QPalette.Base, self.baseColour)
+        state = QtGui.QValidator.Acceptable
+        self.parent().setPalette(palette)
+        return state
+
+    def _getMessageState(self):
+        return self._messageState
 
     def validate(self, name, p_int):
 
-        palette = self.parent().palette()
-        self.startingName = self._labelObj.module.id
-        if not name or len(name) == 0:
-            palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
-            state = QtGui.QValidator.Intermediate  # entry is NOT valid, but can continue editing
-            self.parent().setPalette(palette)
+        startingName = self._labelObj.module.id
+        state = QtGui.QValidator.Acceptable
+
+        if startingName==name:
+            state = self._setAccetableStatus()
+            self._isValidState, self._messageState = True, 'Same name as original'
             return state, name, p_int
 
-        if self.startingName==name: # entry is as the starting name therefore is still valid
-            palette.setColor(QtGui.QPalette.Base, self.baseColour)
-            self.parent().setPalette(palette)
-            state = QtGui.QValidator.Acceptable
-            return state, name, p_int
+        if self._isNameAvailableFunc(name):
+            self._isValidState, self._messageState = True, 'Name available'
+            state = self._setAccetableStatus()
 
-        if self._func(name):
-            palette.setColor(QtGui.QPalette.Base, self.baseColour)
-            state = QtGui.QValidator.Acceptable  # entry is valid
-        else:
-            palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
-            state = QtGui.QValidator.Intermediate  # entry is NOT valid, but can continue editing
-        self.parent().setPalette(palette)
+        if not self._isValidInput(name):
+            state = self._setIntermediateStatus()
+
+        if not self._isNameAvailableFunc(name):
+            state = self._setIntermediateStatus()
+            self._isValidState, self._messageState = False, 'Name already taken'
+
         return state, name, p_int
 
     def clearValidCheck(self):
@@ -1485,18 +1528,24 @@ class LabelNameValidator(QtGui.QValidator):
 class NameEditor(LineEdit):
     """LineEdit widget that contains validator for checking filePaths exists
     """
-    def __init__(self, parent, **kwds):
+    def __init__(self, parent, allowSpace=True, **kwds):
         super().__init__(parent=parent, **kwds)
 
         self._parent = parent # the LabelObject
-        self.setValidator(LabelNameValidator(parent=self, labelObj=self._parent))
+        self.setValidator(LabelNameValidator(parent=self, labelObj=self._parent, allowSpace=allowSpace))
         self.validator().resetCheck()
+        self.validator()._setNameValidFunc(self._parent.module._isNameAvailable)
         self.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter)
         self.setMaximumHeight(self._parent.labelSize)
         # self.editingFinished.connect(self._parent._renameLabel)
         self.returnPressed.connect(self._parent._renameLabel)
         self.setStyleSheet('LineEdit { padding: 0px 0px 0px 0px; }')
         self.setMinimumWidth(200)
+
+    def show(self):
+        self._setFocus()
+        self.set(self._parent.labelName)
+        super(LineEdit, self).show()
 
     def _setFocus(self):
         # self.setFocusPolicy(QtCore.Qt.StrongFocus) # this is not enough to show the cursor and give focus.

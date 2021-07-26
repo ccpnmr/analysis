@@ -312,9 +312,6 @@ class GuiStrip(Frame):
         # Notifier for change of stripLabel
         self.setNotifier(self.project, [Notifier.RENAME], 'Spectrum', self._updateSpectrumLabels)
 
-        # Notifier for change of SpectrumDisplay name
-        # self.setNotifier(self.project, [Notifier.RENAME], 'SpectrumDisplay', self._spectrumDiplayRenamed)
-
         # # Notifier for change of stripLabel
         # self.setNotifier(self.project, [Notifier.RENAME], 'NmrResidue', self._updateStripLabel)
 
@@ -594,16 +591,6 @@ class GuiStrip(Frame):
     #     self._stripLabelNotifier.unRegister()
     #     self._droppedNotifier.unRegister()
     #     self._moveEventNotifier.unRegister()
-
-    # def _spectrumDiplayRenamed(self, data):
-    #     """Callback when spectrumDisplay name has changed.
-    #     """
-    #     from ccpn.core.lib.Pid import createPid
-    #     obj = data.get('object')
-    #     if obj == self.spectrumDisplay:
-    #         if self.stripLabel:
-    #             # FIXME, Strip pid is not yet updated when this is called. that's why recreate a pid.
-    #             self.stripLabel._stripLabel.set(createPid(self.shortClassName, obj.id))
 
     def _updateSpectrumLabels(self, data):
         """Callback when spectra have changed

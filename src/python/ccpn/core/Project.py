@@ -1411,6 +1411,16 @@ class Project(AbstractWrapperObject):
         #
         return result
 
+    def getObjectsByPids(self, pids:list):
+        """Optimise method to get all found objects from a list of pids. Remove any None.
+         Warning: do not use with zip"""
+        return list(filter(None, map(lambda x: self.getByPid(x) if isinstance(x, str) else str(x), pids)))
+
+    def getPidsByObjects(self, objs:list):
+        """Optimise method to get all found pids from a list of objects. Remove any None.
+         Warning: do not use with zip"""
+        return list(filter(None, map(lambda x: x.pid if isinstance(x, AbstractWrapperObject) else None, objs)))
+
     def getCcpCodeData(self, ccpCode, molType=None, atomType=None):
         """Get the CcpCode for molType/AtomType
         """

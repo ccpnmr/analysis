@@ -815,11 +815,11 @@ def zipCycle(*iterables, emptyDefault=None):
 
 
 def _getObjectsByPids(project, pids):
-    return list(filter(None, map(lambda x: project.getByPid(x), pids)))
+    return project.getObjectsByPids(pids)
 
 
-def _getPidsFromObjects(objs):
-    return list(filter(None, map(lambda x: x.pid, objs)))
+def _getPidsFromObjects(project, objs):
+    return project.getPidsByObjects(objs)
 
 
 def copyToClipboard(items):

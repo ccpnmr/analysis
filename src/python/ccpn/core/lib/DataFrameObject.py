@@ -48,7 +48,6 @@ class DataFrameObject(object):
         self._objects = objectList.copy() if objectList else []
         # self._indexList = indexList
         self._columnDefinitions = columnDefs
-        self._hiddenColumns = hiddenColumns
         self._table = table
 
     @property
@@ -79,13 +78,13 @@ class DataFrameObject(object):
     # def indexList(self, indexList=None):
     #   self._indexList = indexList
 
-    @property
-    def hiddenColumns(self):
-        return self._hiddenColumns
+    # @property
+    # def hiddenColumns(self):
+    #     return self._hiddenColumns
 
-    @hiddenColumns.setter
-    def hiddenColumns(self, hiddenColumns=None):
-        self._hiddenColumns = hiddenColumns
+    # @hiddenColumns.setter
+    # def hiddenColumns(self, hiddenColumns=None):
+    #     self._hiddenColumns = hiddenColumns
 
     @property
     def numColumns(self):

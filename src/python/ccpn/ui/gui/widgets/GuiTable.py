@@ -375,7 +375,8 @@ GuiTable::item::selected {
         self._icons = [self.ICON_FILE]
         self._stretchLastSection = stretchLastSection
         self._defaultHeadings = []
-        self._defaultHiddenColumns = []
+        self._internalColumnTexts = [DATAFRAME_OBJECT] # columns that are always hidden.
+        self._hiddenColumns = []
 
         # set the minimum size the table can collapse to
         _height = getFontHeight(name=TABLEFONT, size='VLARGE')
@@ -881,40 +882,98 @@ GuiTable::item::selected {
         if self._checkBoxCallback:
             self._checkBoxCallback(data)
 
+    def getHiddenColumns(self):
+        """
+        get a list of currently hidden columns
+        """
+        hiddenColumns = self._hiddenColumns + self._internalColumnTexts
+        ll = list(set(hiddenColumns))
+        return [x for x in ll if x in self.columnTexts]
+
+    def setHiddenColumns(self, texts, update=True):
+        """
+        set a list of columns headers to be hidden from the table.
+        """
+        ll = [x for x in texts if x in self.columnTexts]
+        self._hiddenColumns = ll
+        if update:
+            self.showColumns(self._dataFrameObject)
+
+
     def hideDefaultColumns(self):
         """If the table is empty then check visible headers against the last header hidden list
         """
-        h = self.horizontalHeader()
-        for ii in range(h.count()):
-            headerItem = self.horizontalHeaderItem(ii)
-
+        for i, columnName in enumerate(self.columnTexts):
             # remember to hide th special column
-            if headerItem.text() in self._defaultHiddenColumns or headerItem.text() == DATAFRAME_OBJECT:
-                self.hideColumn(ii)
+            if columnName in self._internalColumnTexts:
+                self.hideColumn(i)
+
+    @property
+    def columns(self):
+        """
+        return a list of column objs.
+        """
+        if self._dataFrameObject:
+            return self._dataFrameObject.columnDefinitions.columns
+        else:
+            return [self.horizontalHeaderItem(i) for i in range(self.columnCount())]
+
+    @property
+    def columnTexts(self):
+        """
+        return a list of column texts.
+        """
+        if self._dataFrameObject:
+            return self._dataFrameObject.headings
+        else:
+            return [self.horizontalHeaderItem(i).text() for i in range(self.columnCount())]
+
+    @property
+    def columnDefinitions(self):
+        """
+        return a ccpn ColumnClass obj if  _dataFrameObject is set.
+        """
+        if self._dataFrameObject:
+            return self._dataFrameObject.columnDefinitions
+        else:
+            return None
 
     def showColumns(self, dataFrameObject):
         # show the columns in the list
-        for i, colName in enumerate(dataFrameObject.headings):
-            if dataFrameObject.hiddenColumns:
+        hiddenColumns = self.getHiddenColumns()
 
-                # store the current hidden columns
-                self._defaultHiddenColumns = dataFrameObject.hiddenColumns
-
+        for i, colName in enumerate(self.columnTexts):
                 # always hide the special column DATAFRAME_OBJECT
-                if colName in dataFrameObject.hiddenColumns or colName == DATAFRAME_OBJECT:
-                    self.hideColumn(i)
-                else:
-                    self.showColumn(i)
+            if colName in hiddenColumns:
+                self._hideColumn(colName)
+            else:
+                self._showColumn(colName)
 
-                    if dataFrameObject.columnDefinitions.setEditValues[i]:
+                if self.columnDefinitions:
+                    if self.columnDefinitions.setEditValues[i]:
                         # need to put it into the header
                         header = self.horizontalHeaderItem(i)
                         icon = QtGui.QIcon(self._icons[0])
                         if header:
                             header.setIcon(icon)
-            else:
-                if colName == DATAFRAME_OBJECT:
-                    self.hideColumn(i)
+            if colName == DATAFRAME_OBJECT:
+                self._hideColumn(i)
+
+    def _showColumn(self, name):
+        if name not in self.columnTexts:
+            return
+        if name in self._hiddenColumns:
+            self._hiddenColumns.remove(name)
+        i = self.columnTexts.index(name)
+        self.showColumn(i)
+
+    def _hideColumn(self, name):
+        if name not in self.columnTexts:
+            return
+        if not name in self._hiddenColumns:
+            self._hiddenColumns.append(name)
+        i = self.columnTexts.index(name)
+        self.hideColumn(i)
 
     def _setDefaultRowHeight(self):
         # set a minimum height to the rows based on the fontmetrics of a generic character
@@ -1084,7 +1143,12 @@ GuiTable::item::selected {
         action = self.headerContextMenumenu.exec_(self.mapToGlobal(pos))
 
         if action == columnsSettings:
-            settingsPopup = ColumnViewSettingsPopup(parent=self._parent, dataFrameObject=self._dataFrameObject)  #, hideColumns=self._hiddenColumns, table=self)
+            settingsPopup = ColumnViewSettingsPopup(parent=self._parent, table=self,
+                                                    dataFrameObject=self._dataFrameObject,
+                                                    hiddenColumns = self.getHiddenColumns(),
+                                                    )
+            hiddenColumns = settingsPopup.getHiddenColumns()
+            self.setHiddenColumns(texts=hiddenColumns, update=False)
             settingsPopup.raise_()
             settingsPopup.exec_()  # exclusive control to the menu and return _hiddencolumns
 
@@ -1311,7 +1375,7 @@ GuiTable::item::selected {
 
                 # store the current headings, in case table is cleared, to stop table jumping
                 self._defaultHeadings = dataFrameObject.headings
-                self._defaultHiddenColumns = dataFrameObject.hiddenColumns
+                self.setHiddenColumns(self.getHiddenColumns())# dataFrameObject.hiddenColumns
 
                 if columnDefs:
                     for col, colFormat in enumerate(columnDefs.formats):

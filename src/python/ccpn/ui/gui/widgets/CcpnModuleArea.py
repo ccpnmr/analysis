@@ -123,6 +123,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
         self._modulesNames = {}
         self._ccpnModules = []
         self._modules = {}  # don't use self.docks, is not updated when removing docks
+        self._openedSpectrumDisplays = [] # keep track of the order of opened spectrumDisplays
 
         # self.setAcceptDrops(True) GWV not needed; handled by DropBase init
 
@@ -308,6 +309,14 @@ class CcpnModuleArea(ModuleArea, DropBase):
             return modules
         return {}
 
+    @property
+    def spectrumDisplays(self):
+        """
+        Return the list of opened spectrumDisplays in the order of their opening.
+        Contrary to mainWindow.spectrumDisplays that return in alphabetical order.
+        """
+        return [x for x in self._openedSpectrumDisplays if not x.isDeleted]
+
     def repopulateModules(self):
         """
         Repopulate all modules to globally refresh all pulldowns, etc.
@@ -341,6 +350,8 @@ class CcpnModuleArea(ModuleArea, DropBase):
                 nextAvailableName = self._incrementModuleName(module.titleName, module._nameSplitter)
                 if not module._onlySingleInstance:
                     module.renameModule(nextAvailableName)
+            else:
+                self._openedSpectrumDisplays.append(module)
 
         # test that only one instance of the module is opened
         if hasattr(type(module), '_alreadyOpened'):
@@ -442,6 +453,10 @@ class CcpnModuleArea(ModuleArea, DropBase):
                 if module.label.nameEditor.isVisible():
                     modules.append(module)
         return modules
+
+    def _updateSpectrumDisplays(self):
+        self._openedSpectrumDisplays = [x for x in self._openedSpectrumDisplays if
+                                        x in self.mainWindow.spectrumDisplays]
 
     def _isNameEditing(self):
         """

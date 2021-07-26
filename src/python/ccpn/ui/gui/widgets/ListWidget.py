@@ -315,6 +315,11 @@ class ListWidget(QtWidgets.QListWidget, Base):
                 if item.text() == text:
                     self.takeItem(self.row(item))
 
+    def renameItem(self, oldName, newName):
+        for item in self.getItems():
+            if item.text() == oldName:
+                item.setText(newName)
+
     def mousePressEvent(self, event):
         self._mouse_button = event.button()
         if event.button() == QtCore.Qt.RightButton:

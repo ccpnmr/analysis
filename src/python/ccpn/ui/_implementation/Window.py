@@ -417,6 +417,8 @@ class Window(AbstractWrapperObject):
 
             # delete the spectrumDisplay
             display.delete()
+            self.moduleArea._updateSpectrumDisplays()
+            print('Updating')
 
     @logCommand('mainWindow.')
     def newMark(self, colour: str, positions: Sequence[float], axisCodes: Sequence[str],

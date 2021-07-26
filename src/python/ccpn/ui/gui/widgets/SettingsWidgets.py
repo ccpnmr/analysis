@@ -55,10 +55,17 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.ui.gui.widgets.Base import SignalBlocking
 from ccpn.core.Chain import Chain
+from ccpn.core.NmrChain import NmrChain
 from ccpn.core.RestraintList import RestraintList
+from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 
+ALL = '<Use all>'
+UseCurrent = '<Use current>'
+UseLastOpened = '<Use last opened>' # used for last opened display
 
-ALL = '<all>'
+StandardSelections = [ALL, UseCurrent, UseLastOpened]
+
+SelectToAdd = '> select-to-add <'
 
 STRIPPLOT_PEAKS = 'peaks'
 STRIPPLOT_NMRRESIDUES = 'nmrResidues'
@@ -1412,133 +1419,7 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
             return self.checkBoxes[widgetName][SETTINGSCHECKBOX]
 
 
-class SpectrumDisplaySelectionWidget(ListCompoundWidget):
-    # TODO Change to be a subclass of ObjectSelectionWidget
-    def __init__(self, parent=None, mainWindow=None, vAlign='top', stretch=(0, 0), hAlign='left',
-                 vPolicy='minimal', fixedWidths=(None, None, None), orientation='left', labelText='Display(s):',
-                 tipText='SpectrumDisplay modules to respond to double-click',
-                 texts=None, callback=None, displayWidgetChangedCallback=None,
-                 defaultListItem=None, displayText=[],
-                 **kwds):
-
-        if not texts:
-            texts = [ALL] + defaultListItem.pid if defaultListItem else ([ALL] + displayText)
-
-        # Derive application, project, and current from mainWindow
-        self.mainWindow = mainWindow
-        if mainWindow:
-            self.application = mainWindow.application
-            self.project = mainWindow.application.project
-            self.current = mainWindow.application.current
-        else:
-            self.application = None
-            self.project = None
-            self.current = None
-
-        self._displayWidgetChangedCallback = displayWidgetChangedCallback
-        self._selectDisplayInListCallback = callback
-
-        super().__init__(parent=parent,
-                         vAlign=vAlign, stretch=stretch, hAlign=hAlign, vPolicy=vPolicy,
-                         fixedWidths=fixedWidths, orientation=orientation,
-                         labelText=labelText, tipText=tipText, texts=texts,
-                         callback=self._selectDisplayInList, **kwds)
-        if self.project:
-            self._notifierRename = Notifier(theObject=self.project,
-                                       triggers=[Notifier.RENAME],
-                                       targetName='SpectrumDisplay',
-                                       callback=self._spectrumDisplayRenamed)
-            self._notifierDelete = Notifier(theObject=self.project,
-                                       triggers=[Notifier.DELETE],
-                                       targetName='SpectrumDisplay',
-                                       callback=self._spectrumDisplayDeleted)
-
-        # default to 5 rows
-        self.setFixedHeights((None, None, 5 * getFontHeight()))
-        self.setPreSelect(self._fillDisplayWidget)
-
-        # handle signals when the items in the displaysWidget have changed
-        model = self.listWidget.model()
-        model.rowsInserted.connect(self._displayWidgetChanged)
-        model.rowsRemoved.connect(self._displayWidgetChanged)
-        self.listWidget.cleared.connect(self._displayWidgetChanged)
-
-    def _selectDisplayInList(self):
-        """Handle clicking items in display selection
-        """
-        if self._selectDisplayInListCallback:
-            self._selectDisplayInListCallback()
-
-    def _displayWidgetChanged(self):
-        """Handle adding/removing items from display selection
-        """
-        if self._displayWidgetChangedCallback:
-            self._displayWidgetChangedCallback()
-
-    def _spectrumDisplayDeleted(self, dataDict, **kwargs):
-        obj = dataDict.get(Notifier.OBJECT)
-        currentTexts = self.getTexts()
-        if obj.pid in currentTexts:
-            self.removeTexts([obj.pid])
-
-    def _spectrumDisplayRenamed(self, dataDict, **kwargs):
-        obj = dataDict.get(Notifier.OBJECT)
-        currentTexts = self.getTexts()
-        toRemoveTexts = []
-        for i in currentTexts: # could use oldPid from data. not yet available for SpectrumDisplay
-            if i != ALL:
-                if not self.application.getByGid(i):
-                    toRemoveTexts.append(i)
-        self.removeTexts(toRemoveTexts)
-        self.addText(obj.pid)
-
-    def _changeAxisCode(self):
-        """Handle clicking the axis code buttons
-        """
-        pass
-
-    def _fillDisplayWidget(self):
-        """Fill the display box with the currently available spectrumDisplays
-        """
-        ll = ['> select-to-add <'] + [ALL]
-        if self.mainWindow:
-            ll += [display.pid for display in self.mainWindow.spectrumDisplays]
-        self.pulldownList.setData(texts=ll)
-
-    def getDisplays(self):
-        """
-        Return list of selected displays
-        """
-        if not self.application:
-            return []
-
-        displays = []
-        # check for valid displays
-        gids = self.getTexts()
-        if len(gids) == 0: return displays
-        if ALL in gids:
-            displays = self.mainWindow.spectrumDisplays
-        else:
-            displays = [self.application.getByGid(gid) for gid in gids if gid != ALL]
-        return displays
-
-
-    def unRegister(self):
-        """Unregister the notifiers; needs to be called when discarding an instance
-        """
-        try:
-            if self._notifierRename is not None:
-                self._notifierRename.unRegister()
-                del (self._notifierRename)
-            if self._notifierDelete is not None:
-                self._notifierDelete.unRegister()
-                del (self._notifierDelete)
-        except:
-            pass
-
-
 class ObjectSelectionWidget(ListCompoundWidget):
-    # TODO add missing notifiers
     KLASS = None
 
     def __init__(self, parent=None, mainWindow=None, vAlign='top', stretch=(0, 0), hAlign='left',
@@ -1546,13 +1427,15 @@ class ObjectSelectionWidget(ListCompoundWidget):
                  labelText=None, tipText=None,
                  texts=None, callback=None, objectWidgetChangedCallback=None,
                  defaultListItem=None, displayText=[],
+                 standardListItems=[ALL],
                  **kwds):
 
         if not self.KLASS:
             raise RuntimeError('Klass must be specified')
 
         if not texts:
-            texts = [ALL] + defaultListItem.pid if defaultListItem else ([ALL] + displayText)
+            texts = standardListItems + defaultListItem.pid if defaultListItem \
+                else (standardListItems + displayText)
 
         if mainWindow:
             self.mainWindow = mainWindow
@@ -1563,6 +1446,7 @@ class ObjectSelectionWidget(ListCompoundWidget):
 
         self._objectWidgetChangedCallback = objectWidgetChangedCallback
         self._selectObjectInListCallback = callback
+        self.standardListItems = standardListItems
 
         labelText = labelText or 'Select {}:'.format((self.KLASS._pluralLinkName).capitalize())
         tipText = tipText or 'Set active {} for module:'.format((self.KLASS._pluralLinkName).capitalize())
@@ -1583,6 +1467,19 @@ class ObjectSelectionWidget(ListCompoundWidget):
         model.rowsRemoved.connect(self._objectWidgetChanged)
         self.listWidget.cleared.connect(self._objectWidgetChanged)
 
+    #     Notifiers
+        self._notifierRename = None
+        if self.project:
+            self._notifierRename = Notifier(theObject=self.project,
+                                            triggers=[Notifier.RENAME],
+                                            targetName=self.KLASS.className,
+                                            callback=self._objRenamedCallback)
+
+            self._notifierDelete = Notifier(theObject=self.project,
+                                            triggers=[Notifier.DELETE],
+                                            targetName=self.KLASS.className,
+                                            callback=self._objDeletedCallback)
+
     def _selectObjectInList(self):
         """Handle clicking items in object selection
         """
@@ -1595,6 +1492,21 @@ class ObjectSelectionWidget(ListCompoundWidget):
         if self._objectWidgetChangedCallback:
             self._objectWidgetChangedCallback()
 
+    def _objRenamedCallback(self, data):
+        obj = data.get(Notifier.OBJECT)
+        if obj:
+            oldPid = data.get(Notifier.OLDPID)
+            # get the old pid and replace with the new
+            self.renameText(oldPid, obj.pid)
+
+    def _objDeletedCallback(self, data):
+        """
+        Remove the deleted object from listWidget
+        """
+        obj = data.get(Notifier.OBJECT)
+        if obj:
+            self.removeTexts([obj.pid])
+
     def _changeAxisCode(self):
         """Handle clicking the axis code buttons
         """
@@ -1603,40 +1515,76 @@ class ObjectSelectionWidget(ListCompoundWidget):
     def _fillPulldownListWidget(self):
         """Fill the pulldownList with the currently available objects
         """
-        ll = ['> select-to-add <'] + [ALL]
+        ll = [SelectToAdd] + self.standardListItems
         if self.project:
             ll += [obj.pid for obj in getattr(self.project, self.KLASS._pluralLinkName, [])]
         self.pulldownList.setData(texts=ll)
 
-    def _getDisplays(self):
-        """Return list of objects to navigate - if needed
-        """
-        pass
 
     def _getObjects(self):
         """Return list of objects in the listWidget selection
         """
         if not self.project:
             return []
-
-        objects = []
         pids = self.getTexts()
-        if len(pids) == 0: return objects
-
-        if ALL in pids:
-            objects = getattr(self.project, self.KLASS._pluralLinkName, [])
-        else:
-            objects = [self.project.getByPid(pid) for pid in pids if pid != ALL]
+        objects = self.project.getObjectsByPids(pids)
         return objects
 
 
 class ChainSelectionWidget(ObjectSelectionWidget):
     KLASS = Chain
 
+class NmrChainSelectionWidget(ObjectSelectionWidget):
+    KLASS = NmrChain
 
 class RestraintListSelectionWidget(ObjectSelectionWidget):
     KLASS = RestraintList
 
+
+class SpectrumDisplaySelectionWidget(ObjectSelectionWidget):
+    KLASS = SpectrumDisplay
+
+    def getDisplays(self):
+        """
+        Return list of selected displays
+        """
+        if not self.application:
+            return []
+
+        displays = []
+        gids = self.getTexts()
+        if len(gids) == 0:
+            return displays
+        if ALL in gids:
+            return self.mainWindow.spectrumDisplays
+        if UseCurrent in gids:
+            strip = self.application.current.strip
+            if strip is not None:
+                spectrumDisplay = strip.spectrumDisplay
+                if spectrumDisplay:
+                    return [spectrumDisplay]
+        if UseLastOpened in gids:
+            spectrumDisplay = self.mainWindow.moduleArea.spectrumDisplays[-1]
+            return [spectrumDisplay]
+        else:
+            displays = self._getObjects()
+        return displays
+
+    def _objRenamedCallback(self, data):
+        self._spectrumDisplayRenamed(data)
+
+    def _spectrumDisplayRenamed(self, dataDict, **kwargs):
+        # This method has been implemeted only because
+        # oldPid argument in data is not yet available for SpectrumDisplay
+        obj = dataDict.get(Notifier.OBJECT)
+        currentTexts = self.getTexts()
+        toRemoveTexts = []
+        for i in currentTexts:
+            if i not in self.standardListItems:
+                if not self.application.getByGid(i):
+                    toRemoveTexts.append(i)
+        self.removeTexts(toRemoveTexts)
+        self.addText(obj.pid)
 
 if __name__ == '__main__':
     import os

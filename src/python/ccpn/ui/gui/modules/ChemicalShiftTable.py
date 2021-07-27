@@ -45,18 +45,19 @@ from ccpn.core.lib.CallBack import CallBack
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
 from ccpn.ui.gui.widgets.MessageDialog import showYesNo, showWarning
-from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySelectionWidget
-
+from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySelectionWidget, ALL, UseCurrent
+from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay, navigateToNmrAtomsInStrip, navigateToPositionInStrip
+from ccpn.core.lib.CallBack import CallBack
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
+from functools import partial
 
 logger = getLogger()
-ALL = '<all>'
-
 
 class ChemicalShiftTableModule(CcpnModule):
     """
     This class implements the module by wrapping a NmrResidueTable instance
     """
-    includeSettingsWidget = False
+    includeSettingsWidget = True
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
     settingsPosition = 'left'
 
@@ -88,12 +89,11 @@ class ChemicalShiftTableModule(CcpnModule):
             self.displaysWidget = SpectrumDisplaySelectionWidget(self._CSTwidget, mainWindow=self.mainWindow,
                                                      grid=(0, 0), vAlign='top', stretch=(0, 0), hAlign='left',
                                                      vPolicy='minimal',
-                                                     #minimumWidths=(colwidth, 0, 0),
-                                                     # fixedWidths=(colwidth, 2 * colwidth, None),
                                                      orientation='left',
                                                      labelText='Display(s):',
                                                      tipText='SpectrumDisplay modules to respond to double-click',
-                                                     texts=[ALL] + [display.pid for display in self.application.ui.mainWindow.spectrumDisplays]
+                                                     defaults=[UseCurrent],
+                                                     standardListItems=[ALL, UseCurrent],
                                                      )
             self.displaysWidget.setFixedHeights((None, None, 40))
 
@@ -347,20 +347,30 @@ class ChemicalShiftTable(GuiTable):
                            columnDefs=self.CScolumns
                            )
 
-    def _actionCallback(self, data):
-        """
-        Notifier DoubleClick action on item in table
-        """
-        # multiselection table will return a list of objects
-        objs = data[CallBack.OBJECT]
-        if not objs:
+    def _getValidChemicalShift4Callback(self, objs):
+        chemicalShift = None
+        if not objs or not all(objs):
             return
         if isinstance(objs, (tuple, list)):
-            obj = objs[0]
+            chemicalShift = objs[-1]
         else:
-            obj = objs
+            chemicalShift = objs
+        if not chemicalShift:
+            showWarning('Cannot perform action', 'No selected ChemicalShift')
+            return
+        if not chemicalShift.nmrAtom:
+            showWarning('Cannot perform action', 'No NmrAtom found for ChemicalShift')
+            return
+        return chemicalShift
 
-        getLogger().debug('ChemicalShiftTable>>> action', obj)
+    def _actionCallback(self, data):
+        """
+        Notifier DoubleClick action on item in table. Mark a chemicalShift based on attached nmrAtom
+        """
+        from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import markNmrAtoms
+        chemicalShift = self._getValidChemicalShift4Callback(data.get(CallBack.OBJECT, []))
+        if chemicalShift and chemicalShift.nmrAtom:
+            markNmrAtoms(self.mainWindow, [chemicalShift.nmrAtom])
 
     def _selectionCallback(self, data):
         """
@@ -409,11 +419,46 @@ class ChemicalShiftTable(GuiTable):
         if _actions:
             _topMenuItem = _actions[0]
             _topSeparator = self.tableMenu.insertSeparator(_topMenuItem)
+            self._navigateMenu = self.tableMenu.addMenu('Navigate to:')
             self._mergeMenuAction = self.tableMenu.addAction('Merge NmrAtoms', self._mergeNmrAtoms)
             self._editMenuAction = self.tableMenu.addAction('Edit NmrAtom', self._editNmrAtom)
             # move new actions to the top of the list
             self.tableMenu.insertAction(_topSeparator, self._mergeMenuAction)
             self.tableMenu.insertAction(self._mergeMenuAction, self._editMenuAction)
+
+
+    def _addNavigationStripsToContextMenu(self):
+        chemicalShift = self._getValidChemicalShift4Callback(self.getSelectedObjects())
+        self._navigateMenu.clear()
+        if chemicalShift and chemicalShift.nmrAtom:
+            name = chemicalShift.nmrAtom.name
+            value = round(chemicalShift.value, 3)
+            if self._navigateMenu is not None:
+                self._navigateMenu.addItem(f'All ({name}:{value})',
+                                           callback=partial(self._navigateToChemicalShift,
+                                                            chemicalShift=chemicalShift,
+                                                            stripPid=ALL))
+                for strip in self.project.strips:
+                    self._navigateMenu.addItem(f'{strip.pid} ({name}:{value})',
+                                               callback=partial(self._navigateToChemicalShift,
+                                                                chemicalShift = chemicalShift,
+                                                                stripPid = strip.pid))
+
+    def _navigateToChemicalShift(self, chemicalShift,  stripPid):
+        # TODO add check if chemicalShift.spectra are in the strip.
+        strips = []
+        if stripPid == ALL:
+            strips = self.project.strips
+        else:
+            strip = self.application.getByGid(stripPid)
+            if strip:
+                strips.append(strip)
+        if strips:
+            for strip in strips:
+                navigateToPositionInStrip(strip,
+                                          positions=[chemicalShift.value],
+                                          axisCodes=[chemicalShift.nmrAtom.name],
+                                          widths=[])
 
     def _raiseTableContextMenu(self, pos):
         """Create a new menu and popup at cursor position
@@ -433,6 +478,7 @@ class ChemicalShiftTable(GuiTable):
 
             self._editMenuAction.setText('Edit NmrAtom {}'.format(currentNmrAtom.id if currentNmrAtom else ''))
             self._editMenuAction.setEnabled(True if currentNmrAtom else False)
+            self._addNavigationStripsToContextMenu()
 
         else:
             # disabled but visible lets user know that menu items exist

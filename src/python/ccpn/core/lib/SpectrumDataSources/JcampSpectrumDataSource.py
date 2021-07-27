@@ -81,14 +81,29 @@ class JcampSpectrumDataSource(SpectrumDataSourceABC):
         self.openFile(mode=self.defaultOpenReadMode)
 
         params, data = readJcamp(self.path)
-
+        # Some elementary checks
         if (jcampVersion := float(params['JCAMPDX'][0])) < 5.0:
             raise RuntimeError('JcampDataSource.readParameters: invalid Jcamp version (%s)' % jcampVersion)
 
-        # if len(params['$SW']) != 1:
-        #     raise RuntimeError(
-        #         'JcampDataSource.readParameters: parsing "%s" did not yield viable data, dimensionalty > 1' % self.path)
-        self.setDimensionCount(1)
+        # Get the data arrays and related parameters
+        if isIterable(data):
+            if len(data) == 2:
+                self._realData = np.array(data[0])
+                self._imaginaryData = np.array(data[1])
+                self.isComplex[self.X_AXIS] = True
+
+            elif len(data) == 1:
+                self._realData = np.array(data[0])
+                self._imaginaryData = None
+
+            else:
+                raise RuntimeError(
+                    'JcampDataSource.readParameters: parsing "%s" did not yield viable data' % self.path)
+
+            if (dimCount:= len(self._realData.shape)) != 1:
+                raise RuntimeError('JcampDataSource.readParameters: data reading only implemented for 1D; got dimensionCount "%s"' % dimCount)
+            self.setDimensionCount(1)
+            self.pointCounts[self.X_AXIS] = self._realData.shape[0]
 
         # Extract the non-dimensional parameters
         _comment = params.get('_comments')
@@ -157,23 +172,6 @@ class JcampSpectrumDataSource(SpectrumDataSourceABC):
         # end for
         # retain the params dictionary
         self._params = params
-
-        # Set the data arrays and related parameters
-        if isIterable(data):
-            if len(data) == 2:
-                self._realData = np.array(data[0])
-                self._imaginaryData = np.array(data[1])
-                self.isComplex[self.X_AXIS] = True
-
-            elif len(data) == 1:
-                self._realData = np.array(data[0])
-                self._imaginaryData = None
-
-            else:
-                raise RuntimeError(
-                    'JcampDataSource.readParameters: parsing "%s" did not yield viable data' % self.path)
-
-            self.pointCounts[self.X_AXIS] = len(self._realData)
 
         return super().readParameters()
 

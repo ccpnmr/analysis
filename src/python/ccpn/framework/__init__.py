@@ -28,7 +28,4 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from ccpn.framework.lib.misc import _checked
 
-# just a dummy to import and get the dataLoaders registered
-from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders
-_loaders = getDataLoaders()
 

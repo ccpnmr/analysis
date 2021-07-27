@@ -334,6 +334,10 @@ class Framework(NotifierBase):
         self._disableUndoException = getattr(self.args, 'disableUndoException', False)
         self._ccpnLogging = getattr(self.args, 'ccpnLogging', False)
 
+        # register dataLoader for the first and only time
+        from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders
+        _loaders = getDataLoaders()
+
     @property
     def _isInDebugMode(self) -> bool:
         """Return True if either of the debug flags has been set

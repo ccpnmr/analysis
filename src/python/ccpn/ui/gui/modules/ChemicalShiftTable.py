@@ -86,36 +86,7 @@ class ChemicalShiftTableModule(CcpnModule):
             # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
             # underpinning the addNotifier call do not allow for it either
             colwidth = 140
-            self.displaysWidget = SpectrumDisplaySelectionWidget(self._CSTwidget, mainWindow=self.mainWindow,
-                                                     grid=(0, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                                                     vPolicy='minimal',
-                                                     orientation='left',
-                                                     labelText='Display(s):',
-                                                     tipText='SpectrumDisplay modules to respond to double-click',
-                                                     defaults=[UseCurrent],
-                                                     standardListItems=[ALL, UseCurrent],
-                                                     )
-            self.displaysWidget.setFixedHeights((None, None, 40))
 
-            self.sequentialStripsWidget = CheckBoxCompoundWidget(
-                    self._CSTwidget,
-                    grid=(1, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                    #minimumWidths=(colwidth, 0),
-                    fixedWidths=(colwidth, 30),
-                    orientation='left',
-                    labelText='Show sequential strips:',
-                    checked=False
-                    )
-
-            self.markPositionsWidget = CheckBoxCompoundWidget(
-                    self._CSTwidget,
-                    grid=(2, 0), vAlign='top', stretch=(0, 0), hAlign='left',
-                    #minimumWidths=(colwidth, 0),
-                    fixedWidths=(colwidth, 30),
-                    orientation='left',
-                    labelText='Mark positions:',
-                    checked=True
-                    )
             self.autoClearMarksWidget = CheckBoxCompoundWidget(
                     self._CSTwidget,
                     grid=(3, 0), vAlign='top', stretch=(0, 0), hAlign='left',
@@ -369,6 +340,9 @@ class ChemicalShiftTable(GuiTable):
         """
         from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import markNmrAtoms
         chemicalShift = self._getValidChemicalShift4Callback(data.get(CallBack.OBJECT, []))
+        if len(self.mainWindow.marks):
+            if self.moduleParent.autoClearMarksWidget.checkBox.isChecked():
+                self.mainWindow.clearMarks()
         if chemicalShift and chemicalShift.nmrAtom:
             markNmrAtoms(self.mainWindow, [chemicalShift.nmrAtom])
 
@@ -455,10 +429,15 @@ class ChemicalShiftTable(GuiTable):
                 strips.append(strip)
         if strips:
             for strip in strips:
-                navigateToPositionInStrip(strip,
-                                          positions=[chemicalShift.value],
-                                          axisCodes=[chemicalShift.nmrAtom.name],
-                                          widths=[])
+                try:
+                    navigateToPositionInStrip(strip,
+                                              positions=[chemicalShift.value],
+                                              axisCodes=[chemicalShift.nmrAtom.name],
+                                              widths=[])
+                except:
+                    showWarning('Impossible to navigate', f'Cannot navigate to position {round(chemicalShift.value, 3)}'
+                                                          f' in strip {strip.pid}'
+                                                          f' for nmrAtom {chemicalShift.nmrAtom.name}')
 
     def _raiseTableContextMenu(self, pos):
         """Create a new menu and popup at cursor position

@@ -345,7 +345,7 @@ class Project(AbstractWrapperObject):
             setattr(self._wrappedData, '_nextUniqueIdValues', {})
 
         nextUniqueId = self._wrappedData._nextUniqueIdValues.setdefault(className, 0)
-        self._nextUniqueIdValues[className] += 1
+        self._wrappedData._nextUniqueIdValues[className] += 1
         return nextUniqueId
 
     @property

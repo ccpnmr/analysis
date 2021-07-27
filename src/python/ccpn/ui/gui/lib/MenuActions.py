@@ -780,10 +780,11 @@ def _openItemObject(mainWindow, objs, **kwds):
             else:
                 _openItemObjects(mainWindow, objs, **kwds)
 
+
 def _openItemObjects(mainWindow, objs, **kwds):
     """
     Abstract routine to activate a module to display objs
-    Builds on OpenObjAction dict, generated below, which defines the handling for the various
+    Builds on OpenObjAction dict, defined above, which defines the handling for the various
     obj classes
     """
     spectrumDisplay = None
@@ -794,15 +795,23 @@ def _openItemObjects(mainWindow, objs, **kwds):
                 if obj.__class__ in OpenObjAction:
 
                     # if a spectrum object has already been opened then attach to that spectrumDisplay
-                    if isinstance(obj, (Spectrum, SpectrumGroup)) and spectrumDisplay:
+                    if isinstance(obj, Spectrum) and spectrumDisplay:
                         try:
-                            spectrumDisplay._handlePids([obj.pid])
+                            spectrumDisplay.displaySpectrum(obj)
 
                         except RuntimeError:
                              # process objects to open
                             func = OpenObjAction[obj.__class__](useNone=True, **kwds)
                             returnObj = func._execOpenItem(mainWindow, obj)
 
+                    elif isinstance(obj, SpectrumGroup) and spectrumDisplay:
+                        try:
+                            spectrumDisplay._handleSpectrumGroup(obj)
+
+                        except RuntimeError:
+                             # process objects to open
+                            func = OpenObjAction[obj.__class__](useNone=True, **kwds)
+                            returnObj = func._execOpenItem(mainWindow, obj)
                     else:
                         # process objects to open
                         func = OpenObjAction[obj.__class__](useNone=True, **kwds)

@@ -1057,7 +1057,7 @@ class Framework(NotifierBase):
     #     #   self._echoBlocking -= 1
     #     # # self.project.resumeNotification()
 
-    def addApplicationMenuSpec(self, spec, position=3):
+    def addApplicationMenuSpec(self, spec, position=5):
         """Add an entirely new menu at specified position"""
         self._menuSpec.insert(position, spec)
 

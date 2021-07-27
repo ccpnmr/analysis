@@ -334,7 +334,7 @@ class Framework(NotifierBase):
         self._disableUndoException = getattr(self.args, 'disableUndoException', False)
         self._ccpnLogging = getattr(self.args, 'ccpnLogging', False)
 
-        # just a dummy to import and get the dataLoaders registered
+        # register dataLoader for the first and only time
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders
         self._dataLoaders = getDataLoaders()
 
@@ -1583,6 +1583,9 @@ class Framework(NotifierBase):
         with logCommandManager('application.', 'loadProject', path):
             logger = getLogger()
             project = self._loadV3Project(path)
+            # returns a list or None
+            if project and isinstance(project, list):
+                project = project[0]
             logger.info('==> Upgraded %s to version-3' % project)
             try:
                 project.save()

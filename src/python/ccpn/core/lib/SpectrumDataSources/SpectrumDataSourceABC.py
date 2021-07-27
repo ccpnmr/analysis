@@ -149,6 +149,7 @@ def getDataFormats() -> OrderedDict:
     from ccpn.core.lib.SpectrumDataSources.FelixSpectrumDataSource import FelixSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.XeasySpectrumDataSource import XeasySpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.NmrViewSpectrumDataSource import NmrViewSpectrumDataSource
+    from ccpn.core.lib.SpectrumDataSources.JcampSpectrumDataSource import JcampSpectrumDataSource
     from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
     return SpectrumDataSourceABC._spectrumDataFormats
 
@@ -215,7 +216,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     #=========================================================================================
     dataFormat = None  # string defining format type
 
-    isBlocked = None  # flag defining if data are blocked
+    isBlocked = False  # flag defining if data are blocked
     hasBlockCached = True  # Flag indicating if block data are cached
     maxCacheSize = 64 * MB  # Max cache size in Bytes
 
@@ -538,8 +539,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         # initiate the block cache
         self._initBlockCache()  # This wil initiate the cache instance
-        if not self.hasBlockCached:
-            self.disableCache()
+        # if not self.hasBlockCached:
+        #     self.disableCache()
 
     def setDefaultParameters(self, nDim=MAXDIM):
         """Set default values for all parameters
@@ -835,7 +836,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 nuc = Nucleus(isotopeCode)
                 if nuc.isotopeRecord is None:
                     getLogger().warning('%s: isotopeCode[%d] = %s not known; unable to set axisCode[%d] automatically'
-                                        % (self, isotopeCode, idx, idx))
+                                        % (self, idx, isotopeCode, idx))
                     self.axisCodes[idx] = 'Unknown'
                 else:
                     # we found the a Nucleus
@@ -1181,9 +1182,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
             raise es
 
         if mode.startswith('r'):
-            self.readParameters()  # need to read to have blocksizes defined
-            if self.hasBlockCached:
-                self._setMaxCacheSize(self.maxCacheSize)
+            # cache will be defined after parameters are read
+            pass
         else:
             self.disableCache()  # No caching on writing; that creates sync issues
 
@@ -1205,8 +1205,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
             mode = self.defaultOpenReadMode
 
         self.closeFile()  # Wil close if open, do nothing otherwise
-        self.openFile(mode=mode)  # also reads parameters
-        # self.readParameters()
+        self.openFile(mode=mode)
+        self.readParameters()
         try:
             yield self
 
@@ -1276,6 +1276,12 @@ class SpectrumDataSourceABC(CcpNmrJson):
         self._assureProperDimensionality()
         self._setIsotopeCodes()
         self._setAxisCodes()
+
+        if self.mode.startswith('r') and self.isBlocked and self.hasBlockCached:
+            self._setMaxCacheSize(self.maxCacheSize)
+        else:
+            self.disableCache()  # No caching on writing; that creates sync issues
+
         return self
 
     def writeParameters(self):
@@ -1333,11 +1339,12 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         :return NumPy data array
         """
+
         if self.hdf5buffer is not None:
             return self.hdf5buffer.getPlaneData(position=position, xDim=xDim, yDim=yDim)
 
-        elif self.isBlocked:
-            position = self.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
+        position = self.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
+        if self.isBlocked:
             data = self._readBlockedPlane(xDim=xDim, yDim=yDim, position=position)
             data *= self.dataScale
             return data

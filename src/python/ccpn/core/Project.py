@@ -208,7 +208,6 @@ class Project(AbstractWrapperObject):
         self._resetIds()
 
         # Set up notification machinery
-
         # Active notifiers - saved for later cleanup. CORER APPLICAATION ONLY
         self._activeNotifiers = []
 
@@ -334,6 +333,20 @@ class Project(AbstractWrapperObject):
     def _key(self) -> str:
         """Project id: Globally unique identifier (guid)"""
         return self._wrappedData.guid.translate(Pid.remapSeparators)
+
+    def _getNextUniqueIdValue(self, className) -> int:
+        """Get the next uniqueId for klass
+        CCPNINTERNAL: used in AbstractWrapper on __init__
+        """
+        # _uniqueId: Some classes require a unique identifier per class
+        # use _uniqueId property defined in AbstractWrapperObject
+        # _nextUniqueIdValues = {}    # a (className, nexIdValue) dictionary
+        if not hasattr(self._wrappedData, '_nextUniqueIdValues'):
+            setattr(self._wrappedData, '_nextUniqueIdValues', {})
+
+        nextUniqueId = self._wrappedData._nextUniqueIdValues.setdefault(className, 0)
+        self._nextUniqueIdValues[className] += 1
+        return nextUniqueId
 
     @property
     def _parent(self) -> AbstractWrapperObject:

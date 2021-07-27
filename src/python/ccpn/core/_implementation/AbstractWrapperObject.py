@@ -136,8 +136,6 @@ class AbstractWrapperObject(NotifierBase):
     # e.g. NmrResidue and Residue. Used to get parent id's
     _numberOfIdFields = 1
 
-    # Implementation methods
-
     def __init__(self, project: 'Project', wrappedData: ApiImplementation.DataObject):
 
         # NB project parameter type is Project. Set in Project.py
@@ -163,6 +161,17 @@ class AbstractWrapperObject(NotifierBase):
 
         #EJB 20181217: test for preDelete
         self._flaggedForDelete = False
+
+        # Assign an unique id (per class) if it does not yet exists
+        if not hasattr(self._wrappedData, '_uniqueId') or \
+                self._wrappedData._uniqueId is None:
+            self._wrappedData._uniqueId = self.project._getNextUniqueIdValue(self.className)
+
+    @property
+    def _uniqueId(self) -> int:
+        """:return an per-class, persistent, positive-valued unique id (an integer)
+        """
+        return self._wrappedData._uniqueId
 
     def _resetIds(self):
         # reset id

@@ -32,7 +32,7 @@ import ccpn.ui.gui.widgets.CompoundWidgets as cw
 from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
-from ccpn.util.Common import _incrementObjectName, _validateName
+# from ccpn.util.Common import _incrementObjectName, _validateName
 from ccpn.core.DataSet import DataSet
 from ccpn.core.RestraintList import RestraintList
 
@@ -170,8 +170,8 @@ class CalculateDistanceRestraintsPopup(CcpnDialogMainWidget):
     def _populateWsFromProjectInfo(self):
         if self.project:
             self.pLwidget.selectFirstItem()
-            name = _incrementObjectName(self.project, DataSet._pluralLinkName, self.nameWidget.getText())
-            self.nameWidget.setText(name)
+            # name = _incrementObjectName(self.project, DataSet._pluralLinkName, self.nameWidget.getText())
+            # self.nameWidget.setText(name)
 
     @property
     def params(self):

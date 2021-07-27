@@ -1021,6 +1021,9 @@ def ccpNmrV3CoreUndoBlock():
 
     return theDecorator
 
+@contextmanager
+def nullContext(*args):
+    yield args
 
 def ccpNmrV3CoreSimple():
     """A decorator wrap the property setters method in an undo block and triggering the

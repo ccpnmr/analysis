@@ -217,7 +217,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self.maximised = False
         self.maximiseRestoreState = None
 
-        #TODO:GEERTEN: make mainWindow actually do something
         self.area = None
         if mainWindow is not None:
             self.area = mainWindow.moduleArea
@@ -489,20 +488,27 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
     def renameModule(self, newName):
         """ rename the Gui module a  """
+        from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, nullContext
 
-        if self.area:
-            validator = self.label.nameEditor.validator()
-            validator.validate(newName, 0, )
-            _isValidState, _messageState = validator._isValidState, validator._messageState
-            if _isValidState:
-                self.label.setText(newName)
-                self._name = newName
-                self.moduleName = self._name
-                return True
-            else:
-                showWarning('Cannot rename module', _messageState)
-                self.label.nameEditor.set(self._name)  #reset the original name
-        return False
+        if self.mainWindow:
+            context = undoBlockWithoutSideBar
+        else:
+            context = nullContext
+
+        with context():
+            if self.area:
+                validator = self.label.nameEditor.validator()
+                validator.validate(newName, 0, )
+                _isValidState, _messageState = validator._isValidState, validator._messageState
+                if _isValidState:
+                    self.label.setText(newName)
+                    self._name = newName
+                    self.moduleName = self._name
+                    return True
+                else:
+                    showWarning('Cannot rename module', _messageState)
+                    self.label.nameEditor.set(self._name)  #reset the original name
+            return False
 
     def _isNameAvailable(self, name):
 
@@ -1296,9 +1302,9 @@ class CcpnModuleLabel(DockLabel):
         contextMenu.addAction('Rename', self._showNameEditor)
         contextMenu.addSeparator()
         contextMenu.addAction('Close', self.module._closeModule)
-        if len(self.module.mainWindow.moduleArea.ccpnModules) > 1:
-            contextMenu.addAction('Close Others', partial(self.module.mainWindow.moduleArea._closeOthers, self.module))
-            contextMenu.addAction('Close All', self.module.mainWindow.moduleArea._closeAll)
+        if len(self.module.area.ccpnModules) > 1:
+            contextMenu.addAction('Close Others', partial(self.module.area._closeOthers, self.module))
+            contextMenu.addAction('Close All', self.module.area._closeAll)
         contextMenu.addSeparator()
         contextMenu.addAction('Copy Pid to clipboard', self._copyPidToClipboard)
 
@@ -1317,11 +1323,11 @@ class CcpnModuleLabel(DockLabel):
 
         menu = Menu(menuName.title(), self, isFloatWidget=True)
         if module:
-            toAll = menu.addAction('All', partial(module.mainWindow.moduleArea.moveModule, module, menuName, None))
-            for availableModule in module.mainWindow.moduleArea.ccpnModules:
+            toAll = menu.addAction('All', partial(self.module.area.moveModule, module, menuName, None))
+            for availableModule in self.module.area.ccpnModules:
                 if availableModule != module:
                     toModule = menu.addAction(str(availableModule.name()),
-                                              partial(module.mainWindow.moduleArea.moveModule, module, menuName, availableModule))
+                                              partial(self.module.area.moveModule, module, menuName, availableModule))
             return menu
 
     def mousePressEvent(self, event: QtGui.QMouseEvent):
@@ -1440,23 +1446,24 @@ class LabelNameValidator(QtGui.QValidator):
     def _isValidInput(self, value):
         import re
         notAllowedSequences = {
-                                'Empty_String'                  : '^\s*$',
-                                'Ends_With_Space'               : '\s$',
-                                'Contains_Empty_Spaces'         : '\s',
-                                'Contains_Non-Alphanumeric'     : '\W',
-                                'Contains_Illegal_Characters'   :'[^A-Za-z0-9 _]+'  #exclude non-alpha but include space and underscore
+                                'No_strings'            : '^\s*$'   ,
+                                'Space_At_Start'        : '^\s'     ,
+                                'Space_At_End'          : '\s$'     ,
+                                'Empty_Spaces'          : '\s'      ,
+                                'Non-Alphanumeric'      : '\W'      ,
+                                'Illegal_Characters'    :'[^A-Za-z0-9 _]+'  # exclude non-alpha but include space and underscore
                               }
         valids = [True]
         if value is None:
             valids.append(False)
             self._isValidState, self._messageState = False, 'Contains None'
         if self._allowSpace:
-            notAllowedSequences.pop('Contains_Empty_Spaces')
-            notAllowedSequences.pop('Contains_Non-Alphanumeric')
+            notAllowedSequences.pop('Empty_Spaces')
+            notAllowedSequences.pop('Non-Alphanumeric')
         for key, seq in notAllowedSequences.items():
             if re.findall(seq, value):
                 valids.append(False)
-                self._isValidState, self._messageState = False, key.replace('_', ' ')
+                self._isValidState, self._messageState = False, 'Name cannot include:\n%s' % key.replace('_', ' ')
         return all(valids)
 
     def _setIntermediateStatus(self):

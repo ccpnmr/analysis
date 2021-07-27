@@ -1066,32 +1066,36 @@ class GuiSpectrumDisplay(CcpnModule):
 
         if DropBase.URLS in data:
             # process dropped items but don't open any spectra
-            self.mainWindow._processDroppedItems(data)
+            objs = self.mainWindow._processDroppedItems(data)
 
-        # handle Pids, many more items than mainWindow._processPids
-        pids = data.get(DropBase.PIDS, [])
-        if pids and len(pids) > 0:
-            with undoBlockWithoutSideBar():
-                getLogger().info('Handling pids...')
-                if len(pids) > MAXITEMLOGGING:
-                    with notificationEchoBlocking():
-                        self._handlePids(pids, theObject)
-                else:
-                    self._handlePids(pids, theObject)
+        elif DropBase.PIDS in data:
+            # handle Pids
+            pids = data.get(DropBase.PIDS, [])
+            objs = []
+            for pid in pids:
+                obj = self.project.getByPid(pid)
+                if obj is not None:
+                    objs.append(obj)
 
-    def _handlePids(self, pids, strip=None):
-        "handle a; return True in case it is a Spectrum or a SpectrumGroup"
+        if len(objs) > 0:
+
+            if len(objs) > MAXITEMLOGGING:
+                with notificationEchoBlocking():
+                    self._handleObjs(objs, theObject)
+            else:
+                self._handleObjs(objs, theObject)
+
+    def _handleObjs(self, objs:(list,tuple), strip=None) -> bool:
+        """handle a list of objects;
+        :return True in case it is a Spectrum or a SpectrumGroup
+        """
         success = False
-        objs = []
         nmrChains = []
         nmrResidues = []
         nmrAtoms = []
         substances = []
 
-        for pid in pids:
-            obj = self.project.getByPid(pid)
-            if obj is not None:
-                objs.append(obj)
+        getLogger().info('Handling objects...')
 
         for obj in objs:
             if isinstance(obj, Spectrum):
@@ -1099,7 +1103,14 @@ class GuiSpectrumDisplay(CcpnModule):
                     showWarning('Forbidden drop', 'A Single spectrum cannot be dropped onto grouped displays.')
                     return success
 
-                self.displaySpectrum(obj)
+                with undoBlockWithoutSideBar():
+                    try:
+                        self.displaySpectrum(obj)
+                    except RuntimeError:
+                        errorTxt = '%s cannot be displayed on %s' % (obj, self)
+                        showWarning('Incompatible drop', errorTxt)
+                        # raise RuntimeError(errorTxt)
+                        return  success
 
                 if strip in self.strips:
                     self.current.strip = strip
@@ -1197,6 +1208,7 @@ class GuiSpectrumDisplay(CcpnModule):
     def _handleSpectrumGroup(self, spectrumGroup):
         """
         Add spectrumGroup on the display and its button on the toolBar
+        CCPNINTERNAL: also called from open module-related code OpenItemObjects
         """
         if self.isGrouped:
             self.spectrumGroupToolBar._addAction(spectrumGroup)
@@ -2419,9 +2431,6 @@ class GuiSpectrumDisplay(CcpnModule):
         # dimensionOrdering = [1, 0] if self.is1D else spectrum.getByAxisCodes('dimensions', self.axisCodes, exactMatch=False)
         dimensionOrdering = [1, 0] if self.is1D else self._getDimensionsMapping(spectrum)
 
-        # if len(dimensionOrdering) != spectrum.dimensionCount:
-        #     raise RuntimeError('Unable to match display.axisCodes %r to %s' % (self.axisCodes, spectrum))
-
         with undoStackRevert(self.application) as revertStack:
             with undoBlockWithoutSideBar(self.application):
                 # push/pop ordering
@@ -2437,7 +2446,6 @@ class GuiSpectrumDisplay(CcpnModule):
                         revertStack(True)
 
                     else:
-
                         # add the spectrum to the end of the spectrum ordering in the toolbar
                         index = self.getOrderedSpectrumViewsIndex()
                         newInd = self.spectrumViews.index(spectrumView)

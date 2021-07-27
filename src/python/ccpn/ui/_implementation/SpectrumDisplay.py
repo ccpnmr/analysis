@@ -133,19 +133,19 @@ class SpectrumDisplay(AbstractWrapperObject):
     #     # self._wrappedData.__dict__['stripDirection'] = value
 
     @property
-    def stripCount(self) -> str:
+    def stripCount(self) -> int:
         """Number of strips"""
         return self._wrappedData.stripCount
 
     @property
     def axisCodes(self) -> Tuple[str, ...]:
         """Fixed string Axis codes in original display order (X, Y, Z1, Z2, ...)"""
-        return self._wrappedData.axisCodes
+        return tuple(self._wrappedData.axisCodes)
 
     @property
     def axisOrder(self) -> Tuple[str, ...]:
         """String Axis codes in display order (X, Y, Z1, Z2, ...), determine axis display order"""
-        return self._wrappedData.axisOrder
+        return tuple(self._wrappedData.axisOrder)
 
     @axisOrder.setter
     def axisOrder(self, value: Sequence):

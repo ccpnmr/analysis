@@ -296,7 +296,7 @@ class Window(AbstractWrapperObject):
                               position='right', relativeTo=None):
         """Create new SpectrumDisplay
 
-        :param spectra: a Spectrum or SpectrumGroup instance to be displayed
+        :param spectra: a Spectrum or SpectrumGroup instance, or a list,tuple of Spectrum Instances to be displayed
         :param axisCodes: display order of the dimensions of spectrum (defaults to spectrum.preferredAxisOrdering)
         :param stripDirection: stripDirection: if 'X' or 'Y' sets strip axis
 
@@ -310,16 +310,26 @@ class Window(AbstractWrapperObject):
         if isinstance(spectra, str):
             spectra = self.project.getByPid(spectra)
 
-        if not isinstance(spectra, (Spectrum, SpectrumGroup)):
-            raise ValueError('Invalid spectra argument, expected Spectrum or SpectrumGroup; got "%s"' % spectra)
+        if not isinstance(spectra, (Spectrum, SpectrumGroup, list, tuple)):
+            raise ValueError('Invalid spectra argument, expected Spectrum, list of Spectra or SpectrumGroup; got "%s"' % spectra)
 
+        spectrum = None
         if isinstance(spectra, Spectrum):
             isGrouped = False
+            isList = False
+            spectrum = spectra
         elif isinstance(spectra, SpectrumGroup) and len(spectra.spectra) > 0:
             isGrouped = True
+            isList = False
+            spectrum = spectra.spectra[0]
+        elif isinstance(spectra, (list, tuple)) and len(spectra) > 0:
+            isGrouped = False
+            isList = True
+            spectrum = spectra[0]
+            if not isinstance(spectrum, Spectrum):
+                raise ValueError('Invalid spectra argument, expected list to contain Spectra; got "%s"' % spectra)
         else:
             raise ValueError('%s has no spectra' % spectra)
-        spectrum = spectra.spectra[0] if isGrouped else spectra
 
         if not axisCodes:
             axisCodes = tuple(spectrum.axisCodes[ac] for ac in spectrum.preferredAxisOrdering)
@@ -377,6 +387,10 @@ class Window(AbstractWrapperObject):
                     display.spectrumToolBar.hide()
                     display.spectrumGroupToolBar.show()
                     display.spectrumGroupToolBar._addAction(spectra)
+
+                if isList:
+                    for sp in spectra[1:]:
+                        display.displaySpectrum(sp)
 
         return display
 

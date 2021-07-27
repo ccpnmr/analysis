@@ -29,7 +29,7 @@ __date__ = "$Date: 2018-12-20 15:44:34 +0000 (Thu, December 20, 2018) $"
 import decorator
 import inspect
 import traceback
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from collections.abc import Iterable
 from functools import partial
 
@@ -1021,9 +1021,7 @@ def ccpNmrV3CoreUndoBlock():
 
     return theDecorator
 
-@contextmanager
-def nullContext(*args):
-    yield args
+nullContext = nullcontext # an empty context manager
 
 def ccpNmrV3CoreSimple():
     """A decorator wrap the property setters method in an undo block and triggering the

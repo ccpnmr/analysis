@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-30 09:45:23 +0100 (Wed, June 30, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-27 12:17:06 +0100 (Tue, July 27, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -62,7 +62,7 @@ def loadProject(path: str, useFileLogger: bool = True, level=logging.INFO) -> Pr
         # Directory name has changed. Change project name and move Project xml file.
         oldProjectFilePath = aPath(ApiPath.getProjectFile(projectPath, oldName))
         if oldProjectFilePath.exists():
-            oldProjectFilePath.removeDir()
+            oldProjectFilePath.removeFile()
         apiProject.__dict__['name'] = newName
         apiProject.touch()
         apiProject.save()

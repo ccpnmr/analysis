@@ -115,6 +115,9 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
         self.mainWindow = mainWindow  # a link back to the parent MainWindow
         self.application = getApplication()  # this will enable to create testing ModuleArea/Modules without mainWindow/project/application
+        self.preferences = None
+        if self.application:
+            self.preferences = self.application.preferences
 
 
         self.moveModule = self.moveDock
@@ -351,14 +354,9 @@ class CcpnModuleArea(ModuleArea, DropBase):
                 if not module._onlySingleInstance:
                     nextAvailableName = self._incrementModuleName(module.titleName, module._nameSplitter)
                     module.renameModule(nextAvailableName)
-                    seenModule = self._seenModuleStates.get(module.className)
                     ## reset  widgets  as last time the module was opened
-                    if seenModule:
-                        name = seenModule.get(MODULENAME, module.titleName)
-                        state = seenModule.get(WIDGETSTATE, {})
-                        nextAvailableName = self._incrementModuleName(name, module._nameSplitter)
-                        module.renameModule(nextAvailableName)
-                        module.restoreWidgetsState(**state)
+                    self._restoreAsTheLastSeenModule(module)
+
 
             else:
                 self._openedSpectrumDisplays.append(module)
@@ -447,6 +445,21 @@ class CcpnModuleArea(ModuleArea, DropBase):
         if wasMaximised:
             module.toggleMaximised()
         return module
+
+    def _restoreAsTheLastSeenModule(self, module):
+        """
+        internal.
+        Called when adding a new module to the mainArea, but not on restoring from a disk state.
+        """
+        if self.preferences:
+            if self.preferences.appearance.rememberLastClosedModuleState:
+                seenModule = self._seenModuleStates.get(module.className)
+                if seenModule:
+                    name = seenModule.get(MODULENAME, module.titleName)
+                    state = seenModule.get(WIDGETSTATE, {})
+                    nextAvailableName = self._incrementModuleName(name, module._nameSplitter)
+                    module.renameModule(nextAvailableName)
+                    module.restoreWidgetsState(**state)
 
     def _getModulesOnActiveNameEditing(self):
         modules = []

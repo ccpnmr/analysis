@@ -588,6 +588,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.showAllTips.clicked.connect(self._queueShowAllTips)
 
         row += 1
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
+
+        row += 1
+        self.rememberLastClosedModuleLabel = Label(parent, text="Remember last closed Module settings", grid=(row, 0))
+        self.rememberLastClosedModule = CheckBox(parent, grid=(row, 1))
+        self.rememberLastClosedModule.toggled.connect(self._queueSetRememberLastClosedModuleState)
+
+        row += 1
         Spacer(parent, 15, 2,
                QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(row, 1), gridSpan=(1, 1))
@@ -614,6 +622,16 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self.preferences.general.seenTipsOfTheDay.extend(self._shownTips)
         else:
             self.preferences.general.seenTipsOfTheDay.clear()
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetRememberLastClosedModuleState(self):
+        value = self.rememberLastClosedModule.isChecked()
+        if value != self.preferences.appearance.rememberLastClosedModuleState:
+            return partial(self._setRememberLastClosedModuleState, value)
+
+    def _setRememberLastClosedModuleState(self, state):
+        self.preferences.appearance.rememberLastClosedModuleState = state
+
 
     # def _queueClearSeenTips(self):
     #     #GST in this case the default should be no, but we can't do this yet... as yesNo doesn't support it
@@ -645,6 +663,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self.showAllTips.setEnabled(False)
         self.showAllTips.setChecked(False)
         self._shownTips = copy(self.preferences.general.seenTipsOfTheDay)
+        self.rememberLastClosedModule.setChecked(self.preferences.appearance.rememberLastClosedModuleState)
+
 
     def _populate(self):
         """Populate the widgets in the tabs

@@ -2764,10 +2764,10 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        chemicalShiftTableModule = ChemicalShiftTableModule(mainWindow=mainWindow,
-                                                            chemicalShiftList=chemicalShiftList, selectFirstItem=selectFirstItem)
-
+        chemicalShiftTableModule = ChemicalShiftTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(chemicalShiftTableModule, position=position, relativeTo=relativeTo)
+        if chemicalShiftList:
+            chemicalShiftTableModule.selectChemicalShiftList(chemicalShiftList)
         return chemicalShiftTableModule
 
     @logCommand('application.')
@@ -2780,10 +2780,10 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        nmrResidueTableModule = NmrResidueTableModule(mainWindow=mainWindow,
-                                                      nmrChain=nmrChain, selectFirstItem=selectFirstItem)
-
+        nmrResidueTableModule = NmrResidueTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(nmrResidueTableModule, position=position, relativeTo=relativeTo)
+        if nmrChain:
+            nmrResidueTableModule.selectNmrChain(nmrChain)
         return nmrResidueTableModule
 
     @logCommand('application.')
@@ -2796,10 +2796,10 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        residueTableModule = ResidueTableModule(mainWindow=mainWindow,
-                                                chain=chain, selectFirstItem=selectFirstItem)
-
+        residueTableModule = ResidueTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(residueTableModule, position=position, relativeTo=relativeTo)
+        if chain:
+            residueTableModule.selectChain(chain)
         return residueTableModule
 
     @logCommand('application.')
@@ -2812,9 +2812,9 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        peakTableModule = PeakTableModule(mainWindow,
-                                          peakList=peakList, selectFirstItem=selectFirstItem)
-
+        peakTableModule = PeakTableModule(mainWindow,selectFirstItem=selectFirstItem)
+        if peakList:
+            peakTableModule.selectPeakList(peakList)
         mainWindow.moduleArea.addModule(peakTableModule, position=position, relativeTo=relativeTo)
         return peakTableModule
 
@@ -2828,10 +2828,10 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        multipletTableModule = MultipletTableModule(mainWindow,
-                                                    multipletList=multipletList, selectFirstItem=selectFirstItem)
-
+        multipletTableModule = MultipletTableModule(mainWindow, selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(multipletTableModule, position=position, relativeTo=relativeTo)
+        if multipletList:
+            multipletTableModule.selectMultipletList(multipletList)
         return multipletTableModule
 
     @logCommand('application.')
@@ -2844,10 +2844,10 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        integralTableModule = IntegralTableModule(mainWindow=mainWindow,
-                                                  integralList=integralList, selectFirstItem=selectFirstItem)
-
+        integralTableModule = IntegralTableModule(mainWindow=mainWindow,selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(integralTableModule, position=position, relativeTo=relativeTo)
+        if integralList:
+            integralTableModule.selectIntegralList(integralList)
         return integralTableModule
 
     @logCommand('application.')
@@ -2860,10 +2860,10 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        restraintTableModule = RestraintTableModule(mainWindow=mainWindow,
-                                                    restraintList=restraintList, selectFirstItem=selectFirstItem)
-
+        restraintTableModule = RestraintTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(restraintTableModule, position=position, relativeTo=relativeTo)
+        if restraintList:
+            restraintTableModule.selectRestraintList(restraintList)
         return restraintTableModule
 
     @logCommand('application.')
@@ -2876,10 +2876,10 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        structureTableModule = StructureTableModule(mainWindow=mainWindow,
-                                                    structureEnsemble=structureEnsemble, selectFirstItem=selectFirstItem)
-
+        structureTableModule = StructureTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(structureTableModule, position=position, relativeTo=relativeTo)
+        if structureEnsemble:
+            structureTableModule.selectStructureEnsemble(structureEnsemble)
         return structureTableModule
 
     @logCommand('application.')
@@ -2892,10 +2892,10 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        notesEditorModule = NotesEditorModule(mainWindow=mainWindow,
-                                              note=note, selectFirstItem=selectFirstItem)
-
+        notesEditorModule = NotesEditorModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(notesEditorModule, position=position, relativeTo=relativeTo)
+        if note:
+            notesEditorModule.selectNote(note)
         return notesEditorModule
 
     @logCommand('application.')
@@ -2910,9 +2910,10 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        restraintAnalysisTableModule = RestraintAnalysisTableModule(mainWindow=mainWindow, peakList=peakList, selectFirstItem=selectFirstItem)
-
+        restraintAnalysisTableModule = RestraintAnalysisTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(restraintAnalysisTableModule, position=position, relativeTo=relativeTo)
+        if peakList:
+            restraintAnalysisTableModule.selectPeakList(peakList)
         return restraintAnalysisTableModule
 
     def showPrintSpectrumDisplayPopup(self):

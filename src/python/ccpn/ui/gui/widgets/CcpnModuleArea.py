@@ -351,15 +351,14 @@ class CcpnModuleArea(ModuleArea, DropBase):
                 if not module._onlySingleInstance:
                     nextAvailableName = self._incrementModuleName(module.titleName, module._nameSplitter)
                     module.renameModule(nextAvailableName)
-                    # seenModule = self._seenModuleStates.get(module.className)
-                    # reset  widgets  as last time the module was opened
-                    # if seenModule:
-                    #     name = seenModule.get('moduleName', module.titleName)
-                    #     state = seenModule.get('state', {})
-                    #     nextAvailableName = self._incrementModuleName(name, module._nameSplitter)
-                    #     module.renameModule(nextAvailableName)
-                    #     module.restoreWidgetsState(**state)
-
+                    seenModule = self._seenModuleStates.get(module.className)
+                    ## reset  widgets  as last time the module was opened
+                    if seenModule:
+                        name = seenModule.get('moduleName', module.titleName)
+                        state = seenModule.get('state', {})
+                        nextAvailableName = self._incrementModuleName(name, module._nameSplitter)
+                        module.renameModule(nextAvailableName)
+                        module.restoreWidgetsState(**state)
 
             else:
                 self._openedSpectrumDisplays.append(module)

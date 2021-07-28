@@ -76,7 +76,7 @@ from ccpn.ui.gui.widgets.Entry import Entry
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.lib.Pid import Pid, PREFIXSEP, createPid
-
+from ccpn.ui.gui.widgets.GuiTable import GuiTable
 
 CommonWidgets = {
     CheckBox.__name__                   : (CheckBox.get, CheckBox.setChecked),
@@ -109,8 +109,8 @@ CommonWidgets = {
     EntryCompoundWidget.__name__        : (EntryCompoundWidget.getText, EntryCompoundWidget.setText),
     TextEditorCompoundWidget.__name__   : (TextEditorCompoundWidget.getText, TextEditorCompoundWidget.setText),
     NmrChainPulldown.__name__           : (NmrChainPulldown.getText, NmrChainPulldown.select),
+    GuiTable.__name__                   : (GuiTable.getHiddenColumns, GuiTable.setHiddenColumns) # For Tables, save/restore only hidden columns
 
-    # ADD TABLES
     # ADD Others
     }
 
@@ -443,14 +443,17 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         widgetsState = {}
         self._setNestedWidgetsAttrToModule()
         for varName, varObj in vars(self).items():
+            className = varObj.__class__.__name__
             if isinstance(varObj, _PulldownABC):
                 widgetsState[varName] = varObj.getText()
                 continue
-            if varObj.__class__.__name__ in CommonWidgets.keys():
+            if issubclass(varObj.__class__, GuiTable):
+                className = GuiTable.__name__
+            if className in CommonWidgets.keys():
                 try:  # try because widgets can be dynamically deleted
-                    widgetsState[varName] = getattr(varObj, CommonWidgets[varObj.__class__.__name__][0].__name__)()
+                    widgetsState[varName] = getattr(varObj, CommonWidgets[className][0].__name__)()
                 except Exception as es:
-                    getLogger().debug(f'Error {es} - {varName}')
+                    getLogger().warn(f'Error {es} - {varName}')
         # self._kwargs = collections.OrderedDict(sorted(widgetsState.items()))
 
         return collections.OrderedDict(sorted(widgetsState.items()))
@@ -533,11 +536,14 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         for variableName, value in widgetsState.items():
             try:
                 widget = getattr(self, str(variableName))
+                className = widget.__class__.__name__
                 if isinstance(widget, _PulldownABC):
                     widget.select(value)
                     continue
-                if widget.__class__.__name__ in CommonWidgets.keys():
-                    setWidget = getattr(widget, CommonWidgets[widget.__class__.__name__][1].__name__)
+                if issubclass(widget.__class__, GuiTable):
+                    className = GuiTable.__name__
+                if className in CommonWidgets.keys():
+                    setWidget = getattr(widget, CommonWidgets[className][1].__name__)
                     setWidget(value)
 
             except Exception as e:
@@ -567,7 +573,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                     for i in area.children():
                         if isinstance(i, Container):
                             self._container = i
-        # self.area._seenModuleStates[self.className] = {'moduleName':self.moduleName, 'state':self.widgetsState}
+        self.area._seenModuleStates[self.className] = {'moduleName':self.moduleName, 'state':self.widgetsState}
         super().close()
 
     #=========================================================================================

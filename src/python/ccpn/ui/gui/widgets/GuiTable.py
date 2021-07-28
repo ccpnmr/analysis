@@ -575,8 +575,8 @@ GuiTable::item::selected {
         selectableObjects = [obj for obj in objs if isinstance(obj, objType)]
         others = [obj for obj in objs if not isinstance(obj, objType)]
         if len(selectableObjects) > 0:
-            pulldown.select(selectableObjects[0].pid)
             _openItemObject(self.mainWindow, selectableObjects[1:])
+            pulldown.select(selectableObjects[0].pid)
 
         else:
             from ccpn.ui.gui.widgets.MessageDialog import showYesNo

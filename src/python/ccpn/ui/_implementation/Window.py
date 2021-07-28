@@ -78,6 +78,10 @@ class Window(AbstractWrapperObject):
         """A redirections for now, as the marks still live in the project (for now)"""
         return tuple(self.application.project.marks)
 
+    @property
+    def strips(self):
+        return tuple([strip for display in self.spectrumDisplays for strip in display.strips])
+
     #=========================================================================================
     # CCPN properties
     #=========================================================================================

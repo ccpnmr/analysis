@@ -412,17 +412,20 @@ class ChemicalShiftTable(GuiTable):
                                            callback=partial(self._navigateToChemicalShift,
                                                             chemicalShift=chemicalShift,
                                                             stripPid=ALL))
-                for strip in self.project.strips:
-                    self._navigateMenu.addItem(f'{strip.pid} ({name}:{value})',
-                                               callback=partial(self._navigateToChemicalShift,
-                                                                chemicalShift = chemicalShift,
-                                                                stripPid = strip.pid))
+                self._navigateMenu.addSeparator()
+                for spectrumDisplay in self.mainWindow.spectrumDisplays:
+                    for strip in spectrumDisplay.strips:
+                        self._navigateMenu.addItem(f'{strip.pid} ({name}:{value})',
+                                                   callback=partial(self._navigateToChemicalShift,
+                                                                    chemicalShift = chemicalShift,
+                                                                    stripPid = strip.pid))
+                    self._navigateMenu.addSeparator()
 
     def _navigateToChemicalShift(self, chemicalShift,  stripPid):
         # TODO add check if chemicalShift.spectra are in the strip.
         strips = []
         if stripPid == ALL:
-            strips = self.project.strips
+            strips = self.mainWindow.strips
         else:
             strip = self.application.getByGid(stripPid)
             if strip:

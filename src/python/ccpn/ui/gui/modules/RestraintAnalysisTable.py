@@ -286,7 +286,7 @@ class RestraintAnalysisTableWidget(GuiTable):
 
     positionsUnit = UNITS[0]  #default
 
-    # define columns for multi-column sorting
+    # define _columns for multi-column sorting
     ITEMKLASS = MultiColumnTableWidgetItem
     MERGECOLUMN = 1
     PIDCOLUMN = 1
@@ -426,7 +426,7 @@ class RestraintAnalysisTableWidget(GuiTable):
         if useSelectedPeakList:
             if self._selectedPeakList:
                 self.populateTable(rowObjects=self._selectedPeakList.peaks,
-                                   # columnDefs=self.columns,
+                                   # columnDefs=self._columns,
                                    selectedObjects=self.current.peaks)
             else:
                 self.clear()
@@ -435,7 +435,7 @@ class RestraintAnalysisTableWidget(GuiTable):
             if peaks:
                 if peakList:
                     self.populateTable(rowObjects=peaks,
-                                       # columnDefs=self.columns,
+                                       # columnDefs=self._columns,
                                        selectedObjects=self.current.peaks)
             else:
                 self.clear()
@@ -576,7 +576,7 @@ class RestraintAnalysisTableWidget(GuiTable):
                                                                  expandColumn='Restraint')
 
             # populate from the Pandas dataFrame inside the dataFrameObject
-            self.setTableFromDataFrameObject(dataFrameObject=_dataFrameObject, columnDefs=self.columns)
+            self.setTableFromDataFrameObject(dataFrameObject=_dataFrameObject, columnDefs=self._columns)
 
         except Exception as es:
             getLogger().warning('Error populating table', str(es))
@@ -674,7 +674,7 @@ class RestraintAnalysisTableWidget(GuiTable):
                                      expandColumn=None):
         """
         Return a Pandas dataFrame from an internal list of objects
-        The columns are based on the 'func' functions in the columnDefinitions
+        The _columns are based on the 'func' functions in the columnDefinitions
 
         :param buildList:
         :param colDefs:
@@ -697,7 +697,7 @@ class RestraintAnalysisTableWidget(GuiTable):
                              (HeaderCount2, lambda rt: 0.0),
                              ]
 
-        # define self.columns here
+        # define self._columns here
         # create the column objects
         _cols = [
             (HeaderIndex, lambda row: _getValueByHeader(row, HeaderIndex), 'TipTex1', None, None),
@@ -717,13 +717,13 @@ class RestraintAnalysisTableWidget(GuiTable):
         #     # _cols.append((f'Atoms{col + 1}', lambda row: _getValueByHeader(row, f'Atoms{col + 1}'), f'ATipTex{col + 1}', None, None))
         #     # _cols.append((f'Violation{col + 1}', lambda row: _getValueByHeader(row, f'Violation{col + 1}'), f'VTipTex{col + 1}', None, None))
         #
-        # self.columns = ColumnClass(_cols)
+        # self._columns = ColumnClass(_cols)
 
         # if buildList:
         #     for col, obj in enumerate(buildList):
         #
         #         # ids = pd.DataFrame({'#': [pk.serial for pk in buildList], 'Peak': [pk.pid for pk in buildList], '_object': [pk for pk in buildList], 'Expand': [None for pk in buildList]})
-        #         # df1 = pd.DataFrame([(pk, res) for pk in buildList for res in pk.restraints if res.restraintList == rl], columns=['Peak', 'Pid_1'])
+        #         # df1 = pd.DataFrame([(pk, res) for pk in buildList for res in pk.restraints if res.restraintList == rl], _columns=['Peak', 'Pid_1'])
         #         # rl1 = pd.merge(ids['Peak'], df1, how='right')
         #
         #         if not obj.restraints or len(self._restraintLists) < 1:
@@ -743,8 +743,8 @@ class RestraintAnalysisTableWidget(GuiTable):
         #             # get the result from the dataSet.data
         #             # rl = self._restraintLists[0]; rl.dataSet.data[0].parameters.get('results')
         #             #
-        #             # rename the columns to match
-        #             # viols.columns = [col+'_{ii+1}' for col in viols.columns]
+        #             # rename the _columns to match
+        #             # viols._columns = [col+'_{ii+1}' for col in viols._columns]
         #             #
         #             # pd.merge(blank, viols, on=['Pid_1', 'Atoms_1'], how='left').fillna(0.0)
         #
@@ -766,10 +766,10 @@ class RestraintAnalysisTableWidget(GuiTable):
         #
         #     pass
         #
-        # _dataFrame = DataFrameObject(dataFrame=pd.DataFrame(allItems, columns=self.columns.headings),
+        # _dataFrame = DataFrameObject(dataFrame=pd.DataFrame(allItems, _columns=self._columns.headings),
         #                              # objectList=objects or [],
         #                              # indexList=indexList,
-        #                              columnDefs=self.columns or [],
+        #                              columnDefs=self._columns or [],
         #                              hiddenColumns=hiddenColumns or [],
         #                              table=table,
         #                              )
@@ -814,7 +814,7 @@ class RestraintAnalysisTableWidget(GuiTable):
             # print(f' max counts {list(maxCount)}')
             # maxCount += 1
 
-            # allPks = pd.DataFrame([(pk.serial, pk, None)  for pk, count in zip(pks, maxCount) for rr in range(count)], columns=['Peak', '_object', 'Expand'])
+            # allPks = pd.DataFrame([(pk.serial, pk, None)  for pk, count in zip(pks, maxCount) for rr in range(count)], _columns=['Peak', '_object', 'Expand'])
             allPkSerials = pd.DataFrame([pk.serial for pk, count in zip(pks, maxCount) for rr in range(count)], columns=['PeakSerial', ])
             index = pd.DataFrame([ii for ii in range(1, len(allPkSerials) + 1)], columns=['index', ])
             allPks = pd.DataFrame([(pk.serial, pk.pid, self._downIcon) for pk, count in zip(pks, maxCount) for rr in range(count)], columns=['PeakSerial', '_object', 'Expand'])
@@ -843,10 +843,10 @@ class RestraintAnalysisTableWidget(GuiTable):
                                 for data in resList.dataSet.data if resList.name == data.name
                                 for k, viols in data.parameters.items() if k == 'results'}
 
-            # rename the columns to match the order in visible list - number must match the position in the selected restraintLists
+            # rename the _columns to match the order in visible list - number must match the position in the selected restraintLists
             for ii, (k, resViol) in enumerate(violationResults.items()):
                 ind = resLists.index(k)
-                resViol.columns = [vv + f'_{ind + 1}' for vv in resViol.columns]
+                resViol._columns = [vv + f'_{ind + 1}' for vv in resViol._columns]
 
             # merge all the tables for each restraintList
             _out = {}
@@ -857,7 +857,7 @@ class RestraintAnalysisTableWidget(GuiTable):
                     _left = dfs[resList]
                     _right = violationResults[resList]
                     if (f'RestraintPid_{ii + 1}' in _left.columns and f'Atoms_{ii + 1}' in _left.columns) and \
-                            (f'RestraintPid_{ii + 1}' in _right.columns and f'Atoms_{ii + 1}' in _right.columns):
+                            (f'RestraintPid_{ii + 1}' in _right._columns and f'Atoms_{ii + 1}' in _right._columns):
                         _out[resList] = pd.merge(_left, _right, on=[f'RestraintPid_{ii + 1}', f'Atoms_{ii + 1}'], how='left').drop(columns=['PeakSerial']).fillna(0.0)
                         zeroCols.append(f'{HeaderMean}_{ii + 1}')
 
@@ -878,12 +878,12 @@ class RestraintAnalysisTableWidget(GuiTable):
 
             _table = pd.concat([index, allPks], axis=1)
 
-        # set the table columns
-        self.columns = ColumnClass(_cols)
+        # set the table _columns
+        self._columns = ColumnClass(_cols)
 
         # set the table from the dataFrame
         _dataFrame = DataFrameObject(dataFrame=_table,
-                                     columnDefs=self.columns or [],
+                                     columnDefs=self._columns or [],
                                      hiddenColumns=hiddenColumns or [],
                                      table=table,
                                      )

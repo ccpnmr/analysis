@@ -924,7 +924,7 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
         if includeDisplaySettings:
             row += 1
             self.displaysWidget = SpectrumDisplaySelectionWidget(self, mainWindow=self.mainWindow, grid=(row, 0), gridSpan=(1, 1), texts=texts, displayText=[],
-                                                                 displayWidgetChangedCallback=self._displayWidgetChanged, labelText=labelText)
+                                                                 objectWidgetChangedCallback=self._displayWidgetChanged, labelText=labelText)
         else:
             self.displaysWidget = None
 

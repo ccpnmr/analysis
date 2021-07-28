@@ -124,7 +124,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
         self._ccpnModules = []
         self._modules = {}  # don't use self.docks, is not updated when removing docks
         self._openedSpectrumDisplays = [] # keep track of the order of opened spectrumDisplays
-
+        self._seenModuleStates = {} # {className: {moduleName:'', state:widgetsState}}
         # self.setAcceptDrops(True) GWV not needed; handled by DropBase init
 
         self.textLabel = DropAreaLabel
@@ -347,9 +347,20 @@ class CcpnModuleArea(ModuleArea, DropBase):
 
         if not module._restored:
             if not isinstance(module, GuiSpectrumDisplay):  #
-                nextAvailableName = self._incrementModuleName(module.titleName, module._nameSplitter)
+
                 if not module._onlySingleInstance:
+                    nextAvailableName = self._incrementModuleName(module.titleName, module._nameSplitter)
                     module.renameModule(nextAvailableName)
+                    # seenModule = self._seenModuleStates.get(module.className)
+                    # reset  widgets  as last time the module was opened
+                    # if seenModule:
+                    #     name = seenModule.get('moduleName', module.titleName)
+                    #     state = seenModule.get('state', {})
+                    #     nextAvailableName = self._incrementModuleName(name, module._nameSplitter)
+                    #     module.renameModule(nextAvailableName)
+                    #     module.restoreWidgetsState(**state)
+
+
             else:
                 self._openedSpectrumDisplays.append(module)
 

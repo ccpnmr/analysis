@@ -567,7 +567,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                     for i in area.children():
                         if isinstance(i, Container):
                             self._container = i
-
+        # self.area._seenModuleStates[self.className] = {'moduleName':self.moduleName, 'state':self.widgetsState}
         super().close()
 
     #=========================================================================================

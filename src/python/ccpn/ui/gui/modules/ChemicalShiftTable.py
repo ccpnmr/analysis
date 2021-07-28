@@ -428,16 +428,23 @@ class ChemicalShiftTable(GuiTable):
             if strip:
                 strips.append(strip)
         if strips:
+            failedStripPids = []
             for strip in strips:
+
                 try:
                     navigateToPositionInStrip(strip,
                                               positions=[chemicalShift.value],
                                               axisCodes=[chemicalShift.nmrAtom.name],
                                               widths=[])
                 except:
-                    showWarning('Impossible to navigate', f'Cannot navigate to position {round(chemicalShift.value, 3)}'
-                                                          f' in strip {strip.pid}'
-                                                          f' for nmrAtom {chemicalShift.nmrAtom.name}')
+                    failedStripPids.append(strip.pid)
+            if len(failedStripPids)>0:
+                stripStr = 'strip' if len(failedStripPids)==1 else 'strips'
+                strips = ', '.join(failedStripPids)
+                getLogger().warn(
+                                 f'Cannot navigate to position {round(chemicalShift.value, 3)} '
+                                 f'in {stripStr}: {strips} '
+                                 f'for nmrAtom {chemicalShift.nmrAtom.name}.')
 
     def _raiseTableContextMenu(self, pos):
         """Create a new menu and popup at cursor position

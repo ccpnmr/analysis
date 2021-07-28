@@ -31,7 +31,7 @@ from pyqtgraph.dockarea.DockArea import DockArea, DockDrop
 from pyqtgraph.dockarea.Container import Container
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule, MODULENAME, WIDGETSTATE
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.SideBar import SideBar, SideBarSearchListView
@@ -354,8 +354,8 @@ class CcpnModuleArea(ModuleArea, DropBase):
                     seenModule = self._seenModuleStates.get(module.className)
                     ## reset  widgets  as last time the module was opened
                     if seenModule:
-                        name = seenModule.get('moduleName', module.titleName)
-                        state = seenModule.get('state', {})
+                        name = seenModule.get(MODULENAME, module.titleName)
+                        state = seenModule.get(WIDGETSTATE, {})
                         nextAvailableName = self._incrementModuleName(name, module._nameSplitter)
                         module.renameModule(nextAvailableName)
                         module.restoreWidgetsState(**state)
@@ -438,16 +438,8 @@ class CcpnModuleArea(ModuleArea, DropBase):
             container = self.topContainer
             container.insert(module, insertPos, neighbor)
         module.area = self
-        #    self.modules[module.getName()] = module
-        # explicitly calling the CcpnModule.name() method as GuiDisplay modules have their name masked by
 
-        # ejb - I think there is a logic error here when adding a module
-        #       that leaves the blank display without a parent
-
-        # from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-        # self.modules[CcpnModule.name(module)] = module
-        self.modules[module.name()] = module  # ejb - testing
-        # self.movePythonConsole()
+        self.modules[module.moduleName] = module  # ejb - testing
         if self.mainWindow is not None:
             self.mainWindow.application.ccpnModules = self.ccpnModules
 

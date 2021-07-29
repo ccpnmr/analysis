@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-30 15:41:11 +0100 (Fri, July 30, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-30 15:43:43 +0100 (Fri, July 30, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -74,6 +74,7 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 # from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.DataSet import DataSet
+from ccpn.core.Data import Data
 from ccpn.core.RestraintList import RestraintList
 from ccpn.core.Note import Note
 from ccpn.core.lib import SpectrumLib
@@ -116,7 +117,10 @@ POSITIONCERTAINTY = 'position_uncertainty_'
 POSITIONCERTAINTYLEN = len(POSITIONCERTAINTY)
 
 DEFAULTRESTRAINTLINKLOAD = False
+
 REGEXREMOVEENDQUOTES = u'\`\d*`+?'
+REGEXPREFIXQUOTEDNUMBER = u'^\`(\d+)\`'
+REGEXPOSTFIXQUOTEDNUMBER = u'\`(\d+)\`$'
 REGEXCHECKNMRATOM = u'^\?\@\d+$|^\w+\@\d+$'  # u'^\?\@\d+$'
 
 NEFEXTENSION = '.nef'
@@ -4367,17 +4371,23 @@ class CcpnNefReader(CcpnNefContent):
         name = framecode[len(category) + 1:]
         dataSetId = saveFrame.get('ccpn_dataset_id')
         dataSetSerial = saveFrame.get('ccpn_dataset_serial')
-        if dataSetSerial is not None:
-            ss = '`%s`' % dataSetSerial
-            if name.startswith(ss):
-                name = name[len(ss):]
+
+        # get optional serial from the end of the name
+        _serials = re.findall(REGEXPOSTFIXQUOTEDNUMBER, name)
+        _serialFromName = int(_serials[0]) if _serials else None
+
+        # if dataSetSerial is not None:
+        #     ss = '`%s`' % dataSetSerial
+        #     if name.startswith(ss):
+        #         name = name[len(ss):]
+
         # ejb - need to remove the rogue `n` at the beginning of the name if it exists
         #       as it is passed into the namespace and gets added iteratively every save
         #       next three lines remove all occurrences of `n` from name
         name = re.sub(REGEXREMOVEENDQUOTES, '', name)  # substitute with ''
 
         # Make main object
-        dataSet = self.fetchDataSet(dataSetId, dataSetSerial)
+        dataSet = self.fetchDataSet(dataSetId, _serialFromName or dataSetSerial)
 
         # need to fix the names here... cannot contain '.'
 
@@ -4685,6 +4695,9 @@ class CcpnNefReader(CcpnNefContent):
         # create a data item with the same name as the restraintList
         result = dataSet.getData(name) or dataSet.newData(name)
 
+        # get a unique parameter name if undefined
+        run_id = run_id or self._uniqueParameterName(result, run_id)
+
         # Load loops, with object as parent
         for loopName in loopNames:
             loop = saveFrame.get(loopName)
@@ -4720,9 +4733,23 @@ class CcpnNefReader(CcpnNefContent):
 
     verifiers['ccpn_distance_restraint_violation_list'] = verify_ccpn_restraint_violation_list
 
-    def load_ccpn_restraint_violation(self, dataSet: DataSet, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame,
+    def _uniqueParameterName(self, data, name):
+        """Return a unique name based on name (set to defaultName if None)
+        """
+        if name is None:
+            name = 'default'
+        name = name.strip()
+        names = [dd.name for dd in data.parameters]
+        while name in names:
+            name = commonUtil.incrementName(name)
+        return name
+
+    def load_ccpn_restraint_violation(self, data: Data, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame,
                                       run_id: str = '', itemLength: int = None):
         """Serves to load ccpn_distance_restraint_violation loops"""
+
+        if not run_id:
+            raise RuntimeError('run_id is not defined')
 
         if loop and loop.data:
             # if loop.data exists then load as a pandas dataFrame
@@ -4750,7 +4777,7 @@ class CcpnNefReader(CcpnNefContent):
             # vset3 = [v for k, v in p1.groupby(['model_id'])]
             # pd.concat([v.reset_index()['violation'] for v in vset3], axis=1).agg(['sum', 'mean', 'min', 'max', lambda x : sum(x > 0.3), lambda x : sum(x > 0.3)], axis=1)
 
-            dataSet.setParameter(run_id, _df)
+            data.setParameter(run_id, _df)
 
     importers['ccpn_distance_restraint_violation'] = load_ccpn_restraint_violation
 
@@ -5868,6 +5895,9 @@ class CcpnNefReader(CcpnNefContent):
                             peakList = project.getObjectsByPartialId(className='PeakList', idStartsWith=peakListId)
                             if peakList:
                                 peakListSerial = _serial
+
+                if not _spectrum:
+                    continue
 
                 _lastPeakListNum = _spectrum.peakLists[-1].serial if _spectrum.peakLists else None
 
@@ -7104,11 +7134,17 @@ class CcpnNefReader(CcpnNefContent):
             dataSet = dataSet or self.project.newDataSet(dataSetId)
             self.defaultDataSetSerial = dataSet.serial
         else:
-            # # take or create dataSet matching serial
-            # dataSet = dataSet or self.getDataSet(serial)
+            dataSet = dataSet or self.getDataSet(serial)
             if dataSet is None:
                 _name = dataSetId or self._defaultName(DataSet, serial)
-                dataSet = self.project.newDataSet(name=_name, )  #serial=serial)
+                _name = DataSet._uniqueName(project=self.project, name=_name)
+                dataSet = self.project.newDataSet(name=_name, )
+
+            # # # take or create dataSet matching serial
+            # # dataSet = dataSet or self.getDataSet(serial)
+            # if dataSet is None:
+            #     _name = dataSetId or self._defaultName(DataSet, serial)
+            #     dataSet = self.project.newDataSet(name=_name, )  #serial=serial)
 
             try:
                 dataSet._resetSerial(serial)
@@ -7128,9 +7164,13 @@ class CcpnNefReader(CcpnNefContent):
 
         if serial is None:
             serial = self.defaultDataSetSerial or 1
-        _name = self._defaultName(DataSet, serial)
-        return self.project.getDataSet(_name)
-
+        # _name = self._defaultName(DataSet, serial)
+        # return self.project.getDataSet(_name)
+        dataSets = [ds for ds in self.project.dataSets if ds.serial == serial]
+        if dataSets:
+            if len(dataSets) > 1:
+                raise RuntimeError('CcpnNefReader.getDataSet: too many dataSets with the same serial')
+            return dataSets[0]
 
 def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict,
                    dimensionData: dict, transferData: Sequence[Tuple] = None):

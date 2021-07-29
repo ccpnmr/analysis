@@ -608,8 +608,8 @@ class RestraintAnalysisTableWidget(GuiTable):
                     self._groups = None
 
                 # store the current headings, in case table is cleared, to stop table jumping
-                self._defaultHeadings = dataFrameObject.headings
-                self._defaultHiddenColumns = dataFrameObject.hiddenColumns
+                # self._defaultHeadings = dataFrameObject.headings
+                # self._defaultHiddenColumns = dataFrameObject.hiddenColumns
 
                 if columnDefs:
                     for col, colFormat in enumerate(columnDefs.formats):
@@ -674,7 +674,7 @@ class RestraintAnalysisTableWidget(GuiTable):
                                      expandColumn=None):
         """
         Return a Pandas dataFrame from an internal list of objects
-        The _columns are based on the 'func' functions in the columnDefinitions
+        The columns are based on the 'func' functions in the columnDefinitions
 
         :param buildList:
         :param colDefs:
@@ -723,7 +723,7 @@ class RestraintAnalysisTableWidget(GuiTable):
         #     for col, obj in enumerate(buildList):
         #
         #         # ids = pd.DataFrame({'#': [pk.serial for pk in buildList], 'Peak': [pk.pid for pk in buildList], '_object': [pk for pk in buildList], 'Expand': [None for pk in buildList]})
-        #         # df1 = pd.DataFrame([(pk, res) for pk in buildList for res in pk.restraints if res.restraintList == rl], _columns=['Peak', 'Pid_1'])
+        #         # df1 = pd.DataFrame([(pk, res) for pk in buildList for res in pk.restraints if res.restraintList == rl], columns=['Peak', 'Pid_1'])
         #         # rl1 = pd.merge(ids['Peak'], df1, how='right')
         #
         #         if not obj.restraints or len(self._restraintLists) < 1:
@@ -743,8 +743,8 @@ class RestraintAnalysisTableWidget(GuiTable):
         #             # get the result from the dataSet.data
         #             # rl = self._restraintLists[0]; rl.dataSet.data[0].parameters.get('results')
         #             #
-        #             # rename the _columns to match
-        #             # viols._columns = [col+'_{ii+1}' for col in viols._columns]
+        #             # rename the columns to match
+        #             # viols.columns = [col+'_{ii+1}' for col in viols.columns]
         #             #
         #             # pd.merge(blank, viols, on=['Pid_1', 'Atoms_1'], how='left').fillna(0.0)
         #
@@ -814,7 +814,7 @@ class RestraintAnalysisTableWidget(GuiTable):
             # print(f' max counts {list(maxCount)}')
             # maxCount += 1
 
-            # allPks = pd.DataFrame([(pk.serial, pk, None)  for pk, count in zip(pks, maxCount) for rr in range(count)], _columns=['Peak', '_object', 'Expand'])
+            # allPks = pd.DataFrame([(pk.serial, pk, None)  for pk, count in zip(pks, maxCount) for rr in range(count)], columns=['Peak', '_object', 'Expand'])
             allPkSerials = pd.DataFrame([pk.serial for pk, count in zip(pks, maxCount) for rr in range(count)], columns=['PeakSerial', ])
             index = pd.DataFrame([ii for ii in range(1, len(allPkSerials) + 1)], columns=['index', ])
             allPks = pd.DataFrame([(pk.serial, pk.pid, self._downIcon) for pk, count in zip(pks, maxCount) for rr in range(count)], columns=['PeakSerial', '_object', 'Expand'])
@@ -843,10 +843,10 @@ class RestraintAnalysisTableWidget(GuiTable):
                                 for data in resList.dataSet.data if resList.name == data.name
                                 for k, viols in data.parameters.items() if k == 'results'}
 
-            # rename the _columns to match the order in visible list - number must match the position in the selected restraintLists
+            # rename the columns to match the order in visible list - number must match the position in the selected restraintLists
             for ii, (k, resViol) in enumerate(violationResults.items()):
                 ind = resLists.index(k)
-                resViol._columns = [vv + f'_{ind + 1}' for vv in resViol._columns]
+                resViol.columns = [vv + f'_{ind + 1}' for vv in resViol.columns]
 
             # merge all the tables for each restraintList
             _out = {}
@@ -857,7 +857,7 @@ class RestraintAnalysisTableWidget(GuiTable):
                     _left = dfs[resList]
                     _right = violationResults[resList]
                     if (f'RestraintPid_{ii + 1}' in _left.columns and f'Atoms_{ii + 1}' in _left.columns) and \
-                            (f'RestraintPid_{ii + 1}' in _right._columns and f'Atoms_{ii + 1}' in _right._columns):
+                            (f'RestraintPid_{ii + 1}' in _right.columns and f'Atoms_{ii + 1}' in _right.columns):
                         _out[resList] = pd.merge(_left, _right, on=[f'RestraintPid_{ii + 1}', f'Atoms_{ii + 1}'], how='left').drop(columns=['PeakSerial']).fillna(0.0)
                         zeroCols.append(f'{HeaderMean}_{ii + 1}')
 

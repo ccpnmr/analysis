@@ -158,10 +158,10 @@ class ColumnViewSettings(Frame):
 
     def showColumns(self):
         # show/hide the columns in the list
-        columns = self.dataFrameObject.headings
+        columns = self.table.columnTexts
 
         for i, colName in enumerate(columns):
-            if colName in self.dataFrameObject.hiddenColumns:
+            if colName in self._hiddenColumns:
                 self._hideColumn(i, colName)
             else:
                 self._showColumn(i, colName)

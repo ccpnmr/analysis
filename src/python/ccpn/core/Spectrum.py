@@ -779,7 +779,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         self._setDimensionalAttributes('axisCode', value)
 
     @property
-    @_includeInCopy
     def acquisitionAxisCode(self) -> Optional[str]:
         """Axis code of acquisition axis - None if not known"""
         trues = [idx for idx, val in enumerate(self.isAquisition) if val == True]

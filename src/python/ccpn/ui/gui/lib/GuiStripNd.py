@@ -359,6 +359,44 @@ class GuiStripNd(GuiStrip):
                 # newDisplay.autoRange()
                 copyStripPosition(self, newDisplay.strips[0])
 
+    @logCommand(get='self')
+    def extractVisiblePlanes(self, openInSpectrumDisplay=True) -> list:
+        """Extract all visible planes of strip to file, creating a Spectrum instance for each plane
+        :param openInSpectrumDisplay: optionally open in a new SpectrumDisplay
+        :returns: a list of Spectrum instances
+        """
+
+        display=self.spectrumDisplay
+
+        result = []
+
+        for specView in [spv for spv in display.spectrumViews if spv.isVisible]:
+
+            ppmPositions = self.positions
+
+            # spectrum = specView.spectrum
+            #
+            # print('Display:', display)
+            # print('Strip:', strip)
+            # print('ppmPositions:', ppmPositions)
+            # print('')
+            # print('Spectrum:', spectrum)
+            # print('point position:', specView._getPointPosition(ppmPositions))
+            # print('')
+            # print('SpectrumView:', specView)
+            # print('Spectrumview dimensions:', specView.dimensions)
+            # print('Spectrumview axisCodes:', specView.axisCodes)
+            # print('Spectrumview SW:', specView._getByDisplayOrder('spectralWidths'))
+            # print('Spectrumview limits:', specView._getByDisplayOrder('spectrumLimits'))
+
+            plane = specView._extractXYplaneToFile(ppmPositions)
+            result.append(plane)
+
+        if openInSpectrumDisplay:
+            display.mainWindow.newSpectrumDisplay(spectra=result, axisCodes=self.axisCodes[0:2])
+
+        return result
+
     def reorderSpectra(self):
         pass
 

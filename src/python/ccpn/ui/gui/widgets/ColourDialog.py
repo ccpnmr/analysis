@@ -43,7 +43,7 @@ def inverseGrey(colour):
 
     return QtGui.QColor(m, m, m)
 
-
+# TODO add Base
 class ColourDialog(QtWidgets.QColorDialog):
 
     def __init__(self, parent=None, doAlpha=False, **kwds):
@@ -115,3 +115,15 @@ class ColourDialog(QtWidgets.QColorDialog):
 
     def quit(self):
         self.aborted = True
+
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.get()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.set(value)

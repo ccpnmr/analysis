@@ -261,6 +261,19 @@ class GLTargetButtonSpinBoxes(Widget):
     # def _spinBoxesValidator(self, w, *args):
     #     return super(DoubleSpinbox, w).validate(*args)
 
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.get()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.setValues(value)
+
+
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog

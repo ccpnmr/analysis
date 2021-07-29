@@ -151,6 +151,18 @@ class Slider(QtWidgets.QSlider, Base):
 
         self.setEnabled(state)
 
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.get()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.setValue(value)
+
 
 class SliderSpinBox(QtWidgets.QWidget, Base):
     def __init__(self, parent, startVal=0, endVal=100, value=None, step=1, bigStep=5, **kwds):

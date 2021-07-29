@@ -571,6 +571,19 @@ class LineEditButtonDialog(Widget):
     def setText(self, text):
         self.lineEdit.setText(str(text))
 
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.get()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.set(value)
+
+
 
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication

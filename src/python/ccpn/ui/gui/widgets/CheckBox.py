@@ -64,6 +64,18 @@ class CheckBox(QtWidgets.QCheckBox, Base):
         "Get the text of the button"
         return self.get()
 
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.get()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.setChecked(value)
+
 
 class EditableCheckBox(Widget):
     def __init__(self, parent, text=None, checked=False, callback=None, **kwds):

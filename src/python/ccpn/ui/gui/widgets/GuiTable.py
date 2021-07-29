@@ -2334,6 +2334,19 @@ GuiTable::item::selected {
             pass
 
 
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.getHiddenColumns()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.setHiddenColumns(value)
+
+
 EDIT_ROLE = QtCore.Qt.EditRole
 
 

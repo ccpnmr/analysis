@@ -323,6 +323,18 @@ class QCodeEditor(QPlainTextEdit,Base):
             printer.setOutputFileName(filename)
             self.document().print_(printer)
 
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.get()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.set(value)
+
 
 if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Application import TestApplication

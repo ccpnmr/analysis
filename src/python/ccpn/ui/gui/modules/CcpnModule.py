@@ -77,41 +77,42 @@ from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.lib.Pid import Pid, PREFIXSEP, createPid
 from ccpn.ui.gui.widgets.GuiTable import GuiTable
+from ccpn.ui.gui.widgets.Base import Base
 
 
 # TODO remove this, add to the widget baseclass two methods: _getState, __setState.
 CommonWidgets = {
-    CheckBox.__name__                   : (CheckBox.get, CheckBox.setChecked),
-    ColourDialog.__name__               : (ColourDialog.getColor, ColourDialog.setColour),
-    DoubleSpinbox.__name__              : (DoubleSpinbox.value, DoubleSpinbox.setValue),
-    ScientificDoubleSpinBox.__name__    : (ScientificDoubleSpinBox.value, ScientificDoubleSpinBox.setValue),
-    # Label.__name__:                   (Label.get,                   Label.setText),
-    LineEdit.__name__                   : (LineEdit.get, LineEdit.setText),
-    LineEditButtonDialog.__name__       : (LineEditButtonDialog.get, LineEditButtonDialog.setText),
-    PulldownList.__name__               : (PulldownList.currentText, PulldownList.set),
-    RadioButtons.__name__               : (RadioButtons.get, RadioButtons.set),
-    RadioButton.__name__                : (RadioButton.isChecked, RadioButton.setChecked),
-    EditableRadioButtons.__name__       : (EditableRadioButtons.getIndex, EditableRadioButtons.setIndex),
+    # CheckBox.__name__                   : (CheckBox.get, CheckBox.setChecked),
+    # ColourDialog.__name__               : (ColourDialog.getColor, ColourDialog.setColour),
+    # DoubleSpinbox.__name__              : (DoubleSpinbox.value, DoubleSpinbox.setValue),
+    # ScientificDoubleSpinBox.__name__    : (ScientificDoubleSpinBox.value, ScientificDoubleSpinBox.setValue),
+    ## Label.__name__:                   (Label.get,                   Label.setText),
+    # LineEdit.__name__                   : (LineEdit.get, LineEdit.setText),
+    # LineEditButtonDialog.__name__       : (LineEditButtonDialog.get, LineEditButtonDialog.setText),
+    # PulldownList.__name__               : (PulldownList.currentText, PulldownList.set),
+    # RadioButtons.__name__               : (RadioButtons.get, RadioButtons.set),
+    # RadioButton.__name__                : (RadioButton.isChecked, RadioButton.setChecked),
+    # EditableRadioButtons.__name__       : (EditableRadioButtons.getIndex, EditableRadioButtons.setIndex),
+    #
+    # Slider.__name__                     : (Slider.get, Slider.setValue),
+    # Spinbox.__name__                    : (Spinbox.value, Spinbox.set),
+    # TextEditor.__name__                 : (TextEditor.get, TextEditor.setText),
+    # GLTargetButtonSpinBoxes.__name__    : (GLTargetButtonSpinBoxes.get, GLTargetButtonSpinBoxes.setValues),
 
-    Slider.__name__                     : (Slider.get, Slider.setValue),
-    Spinbox.__name__                    : (Spinbox.value, Spinbox.set),
-    TextEditor.__name__                 : (TextEditor.get, TextEditor.setText),
-    GLTargetButtonSpinBoxes.__name__    : (GLTargetButtonSpinBoxes.get, GLTargetButtonSpinBoxes.setValues),
+    # PulldownListCompoundWidget.__name__ : (PulldownListCompoundWidget.getText, PulldownListCompoundWidget.select),  #PulldownList
+    # ListCompoundWidget.__name__         : (ListCompoundWidget.getTexts, ListCompoundWidget.setTexts),  #PulldownList based
+    # CheckBoxCompoundWidget.__name__     : (CheckBoxCompoundWidget.get, CheckBoxCompoundWidget.set),
+    # DoubleSpinBoxCompoundWidget.__name__: (DoubleSpinBoxCompoundWidget.getValue, DoubleSpinBoxCompoundWidget.setValue),  #D oubleSpinbox
+    # SelectorWidget.__name__             : (SelectorWidget.getText, SelectorWidget.select),  #PulldownList
+    # InputPulldown.__name__              : (InputPulldown.currentText, InputPulldown.set),  #PulldownList
+    # ColourSelectionWidget.__name__      : (ColourSelectionWidget.currentText, ColourSelectionWidget.setColour),  #PulldownList
+    # LineEditPopup.__name__              : (LineEditPopup.get, LineEditPopup.set),
+    # QCodeEditor.__name__                : (QCodeEditor.get, QCodeEditor.set),
 
-    PulldownListCompoundWidget.__name__ : (PulldownListCompoundWidget.getText, PulldownListCompoundWidget.select),  #PulldownList
-    ListCompoundWidget.__name__         : (ListCompoundWidget.getTexts, ListCompoundWidget.setTexts),  #PulldownList based
-    CheckBoxCompoundWidget.__name__     : (CheckBoxCompoundWidget.get, CheckBoxCompoundWidget.set),
-    DoubleSpinBoxCompoundWidget.__name__: (DoubleSpinBoxCompoundWidget.getValue, DoubleSpinBoxCompoundWidget.setValue),  #D oubleSpinbox
-    SelectorWidget.__name__             : (SelectorWidget.getText, SelectorWidget.select),  #PulldownList
-    InputPulldown.__name__              : (InputPulldown.currentText, InputPulldown.set),  #PulldownList
-    ColourSelectionWidget.__name__      : (ColourSelectionWidget.currentText, ColourSelectionWidget.setColour),  #PulldownList
-    LineEditPopup.__name__              : (LineEditPopup.get, LineEditPopup.set),
-    QCodeEditor.__name__                : (QCodeEditor.get, QCodeEditor.set),
-
-    EntryCompoundWidget.__name__        : (EntryCompoundWidget.getText, EntryCompoundWidget.setText),
-    TextEditorCompoundWidget.__name__   : (TextEditorCompoundWidget.getText, TextEditorCompoundWidget.setText),
+    # EntryCompoundWidget.__name__        : (EntryCompoundWidget.getText, EntryCompoundWidget.setText),
+    # TextEditorCompoundWidget.__name__   : (TextEditorCompoundWidget.getText, TextEditorCompoundWidget.setText),
     NmrChainPulldown.__name__           : (NmrChainPulldown.getText, NmrChainPulldown.select),
-    GuiTable.__name__                   : (GuiTable.getHiddenColumns, GuiTable.setHiddenColumns) # For Tables, save/restore only hidden columns
+    # GuiTable.__name__                   : (GuiTable.getHiddenColumns, GuiTable.setHiddenColumns) # For Tables, save/restore only hidden columns
 
     # ADD Others
     }
@@ -445,22 +446,31 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     def widgetsState(self):
         """return  {"variableName":"value"}  of all gui Variables  """
         widgetsState = {}
+
         self._setNestedWidgetsAttrToModule()
         for varName, varObj in vars(self).items():
-            className = varObj.__class__.__name__
-            if isinstance(varObj, _PulldownABC):
-                widgetsState[varName] = varObj.getText()
-                continue
-            if isinstance(varObj, ListCompoundWidget):
-                widgetsState[varName] = varObj.getTexts()
-                continue
-            if issubclass(varObj.__class__, GuiTable):
-                className = GuiTable.__name__
-            if className in CommonWidgets.keys():
+            # className = varObj.__class__.__name__
+            if isinstance(varObj, Base):
+                # print('====> Saving ====>', varObj, varObj._getSaveState())
                 try:  # try because widgets can be dynamically deleted
-                    widgetsState[varName] = getattr(varObj, CommonWidgets[className][0].__name__)()
+                    widgetsState[varName] = varObj._getSaveState()
                 except Exception as es:
                     getLogger().warn(f'Error {es} - {varName}')
+
+
+            # if isinstance(varObj, _PulldownABC):
+            #     widgetsState[varName] = varObj.getText()
+            #     continue
+            # if isinstance(varObj, ListCompoundWidget):
+            #     widgetsState[varName] = varObj.getTexts()
+            #     continue
+            # if issubclass(varObj.__class__, GuiTable):
+            #     className = GuiTable.__name__
+            # if className in CommonWidgets.keys():
+            #     try:  # try because widgets can be dynamically deleted
+            #         widgetsState[varName] = getattr(varObj, CommonWidgets[className][0].__name__)()
+            #     except Exception as es:
+            #         getLogger().warn(f'Error {es} - {varName}')
         # self._kwargs = collections.OrderedDict(sorted(widgetsState.items()))
 
         return collections.OrderedDict(sorted(widgetsState.items()))
@@ -543,18 +553,22 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         for variableName, value in widgetsState.items():
             try:
                 widget = getattr(self, str(variableName))
-                className = widget.__class__.__name__
-                if isinstance(widget, _PulldownABC):
-                    widget.select(value)
-                    continue
-                if isinstance(widget, ListCompoundWidget):
-                    widget.setTexts(value)
-                    continue
-                if issubclass(widget.__class__, GuiTable):
-                    className = GuiTable.__name__
-                if className in CommonWidgets.keys():
-                    setWidget = getattr(widget, CommonWidgets[className][1].__name__)
-                    setWidget(value)
+                if isinstance(widget, Base):
+                    # print('====> restoring ====>', widget, )
+                    widget._setSavedState(value)
+
+                # className = widget.__class__.__name__
+                # if isinstance(widget, _PulldownABC):
+                #     widget.select(value)
+                #     continue
+                # if isinstance(widget, ListCompoundWidget):
+                #     widget.setTexts(value)
+                #     continue
+                # if issubclass(widget.__class__, GuiTable):
+                #     className = GuiTable.__name__
+                # if className in CommonWidgets.keys():
+                #     setWidget = getattr(widget, CommonWidgets[className][1].__name__)
+                #     setWidget(value)
 
             except Exception as e:
                 getLogger().debug('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
@@ -756,11 +770,11 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         allStorableWidgets = []
         self._findChildren(self)
         for num, w in enumerate(self._allChildren):
-            if w.__class__.__name__ in CommonWidgets:
+            if isinstance(w, Base):
                 allStorableWidgets.append(w)
         widgetsWithinSelf = []
         for varName, varObj in vars(self).items():
-            if varObj.__class__.__name__ in CommonWidgets.keys():
+            if isinstance(varObj, Base):
                 widgetsWithinSelf.append(varObj)
 
         nestedWidgets = [widget for widget in allStorableWidgets if widget not in widgetsWithinSelf]

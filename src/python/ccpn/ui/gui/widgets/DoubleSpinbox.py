@@ -237,6 +237,18 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
         _, maxDim = getTextDimensionsFromFont(textList=['_' * value])
         self.setMinimumWidth(maxDim.width())
 
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.get()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.set(value)
+
 
 # Regular expression to find floats. Match groups are the whole string, the
 # whole coefficient, the decimal part of the coefficient, and the exponent
@@ -314,6 +326,18 @@ class ScientificDoubleSpinBox(DoubleSpinbox):
         string = self._qLocale.toString(float(value), 'g', 6).replace("e+", "e")
         string = re.sub("e(-?)0*(\d+)", r"e\1\2", string)
         return string
+
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.get()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.set(value)
 
 
 v = float("{0:.3f}".format(0.024))

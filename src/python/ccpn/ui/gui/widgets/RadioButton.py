@@ -74,6 +74,19 @@ class RadioButton(QtWidgets.QRadioButton, Base):
             # self.connect(self, QtCore.SIGNAL('clicked()'), callback)
             self.clicked.connect(callback)
 
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.isChecked()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.setChecked(value)
+
+
 class EditableRadioButton(Widget):
     def __init__(self, parent, text=None, backgroundText=None, callback=None, tipText=None,
                  editable=True, callbackOneditingFinished=True, **kwds):

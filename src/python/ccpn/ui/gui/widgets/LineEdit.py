@@ -88,6 +88,19 @@ class LineEdit(QtWidgets.QLineEdit, Base):
         #text = translator.translate(text)
         self.setText(text)
 
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.get()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.set(value)
+
+
     # def paintEvent(self, ev):
     #     #p.setBrush(QtGui.QBrush(QtGui.QColor(100, 100, 200)))
     #     #p.setPen(QtGui.QPen(QtGui.QColor(50, 50, 100)))
@@ -145,6 +158,19 @@ class FloatLineEdit(LineEdit):
     def set(self, text=''):
 
         LineEdit.set(str(text))
+
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.get()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.set(value)
+
 
 
 class PasswordEdit(LineEdit):

@@ -223,6 +223,18 @@ class RadioButtons(QtWidgets.QWidget, Base):
             #  e.g. self.callback(self.get())
             self.callback()
 
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.get()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.set(value)
+
 
 def _fillMissingValuesInSecondList(aa, bb, value):
     if not value:
@@ -395,6 +407,19 @@ class EditableRadioButtons(Widget, Base):
     def _editingFinishedCallback(self, button, index):
         if button:
             self._buttonClicked(button, index)
+
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.getIndex()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.setIndex(value)
+
 
 
 if __name__ == '__main__':

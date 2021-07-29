@@ -415,3 +415,17 @@ class Base(DropBase, SignalBlocking):
         if parent is None:
             parent = self
         return Spacer(parent, width, height, expandingX, expandingY, grid=grid, gridSpan=gridSpan)
+
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        Override in the subclass with the desired behaviour
+        """
+        return
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        Override in the subclass with the desired behaviour
+        """
+        pass

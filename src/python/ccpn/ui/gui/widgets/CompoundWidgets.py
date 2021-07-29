@@ -247,6 +247,18 @@ class ListCompoundWidget(CompoundBaseWidget):
         # reset to first > select-to-add < entry
         self.pulldownList.setIndex(0)
 
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.getTexts()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.setTexts(value)
+
 
 class EntryCompoundWidget(CompoundBaseWidget):
     """
@@ -326,6 +338,18 @@ class EntryCompoundWidget(CompoundBaseWidget):
     def setText(self, text):
         """Convenience: set text of Entry"""
         self.entry.setText(text)
+
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.getText()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.setText(value)
 
 
 class TextEditorCompoundWidget(CompoundBaseWidget):
@@ -417,6 +441,19 @@ class TextEditorCompoundWidget(CompoundBaseWidget):
         """Convenience: set text of textEditor
         """
         self.textEditor.set(text)
+
+
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.getText()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.setText(value)
 
 
 class PulldownListCompoundWidget(CompoundBaseWidget):
@@ -571,6 +608,18 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
         """
         self.label.setText(value)
 
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.getText()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.select(value)
+
 
 class CheckBoxCompoundWidget(CompoundBaseWidget):
     """
@@ -654,6 +703,19 @@ class CheckBoxCompoundWidget(CompoundBaseWidget):
 
     def set(self, checked):
         self.checkBox.setChecked(checked)
+
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.get()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.set(value)
+
 
 
 class SpinBoxCompoundWidget(CompoundBaseWidget):
@@ -841,6 +903,19 @@ class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
         """
         self.doubleSpinBox.setCallback(callback)
 
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.getValue()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.setValue(value)
+
+
 
 class ScientificSpinBoxCompoundWidget(CompoundBaseWidget):
     """
@@ -953,6 +1028,19 @@ class SelectorWidget(Widget):
         """Convenience: Set item in Pulldown; works with text or item"""
         return self.pulldownList.select(item)
 
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.getText()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.select(value)
+
+
 
 class InputPulldown(PulldownList):
 
@@ -978,6 +1066,19 @@ class InputPulldown(PulldownList):
             self.select(newItem)
             return newItem
 
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.getText()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.set(value)
+
+
 
 class LineEditPopup(QtWidgets.QDialog, Base):
 
@@ -1002,6 +1103,18 @@ class LineEditPopup(QtWidgets.QDialog, Base):
     def set(self, text=''):
         #text = translator.translate(text)
         self.inputField.setText(text)
+
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.get()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.set(value)
 
 
 class ColourSelectionWidget(Widget):
@@ -1036,6 +1149,19 @@ class ColourSelectionWidget(Widget):
 
     def setColour(self, value):
         self.pulldownList.select(spectrumColours[value])
+
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.currentText()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.setColour(value)
+
 
 
 class RadioButtonsCompoundWidget(CompoundBaseWidget):

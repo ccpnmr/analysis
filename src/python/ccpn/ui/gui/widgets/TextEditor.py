@@ -264,6 +264,18 @@ class TextEditor(QtWidgets.QTextEdit, Base):
     def minimumSizeHint(self) -> QtCore.QSize:
         return QtCore.QSize(self._height * 15, self._height * 3)
 
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.get()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.set(value)
+
 
 class PlainTextEditor(QtWidgets.QPlainTextEdit, Base):
     editingFinished = QtCore.pyqtSignal()

@@ -78,6 +78,8 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.lib.Pid import Pid, PREFIXSEP, createPid
 from ccpn.ui.gui.widgets.GuiTable import GuiTable
 
+
+# TODO remove this, add to the widget baseclass two methods: _getState, __setState.
 CommonWidgets = {
     CheckBox.__name__                   : (CheckBox.get, CheckBox.setChecked),
     ColourDialog.__name__               : (ColourDialog.getColor, ColourDialog.setColour),
@@ -449,6 +451,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             if isinstance(varObj, _PulldownABC):
                 widgetsState[varName] = varObj.getText()
                 continue
+            if isinstance(varObj, ListCompoundWidget):
+                widgetsState[varName] = varObj.getTexts()
+                continue
             if issubclass(varObj.__class__, GuiTable):
                 className = GuiTable.__name__
             if className in CommonWidgets.keys():
@@ -541,6 +546,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 className = widget.__class__.__name__
                 if isinstance(widget, _PulldownABC):
                     widget.select(value)
+                    continue
+                if isinstance(widget, ListCompoundWidget):
+                    widget.setTexts(value)
                     continue
                 if issubclass(widget.__class__, GuiTable):
                     className = GuiTable.__name__

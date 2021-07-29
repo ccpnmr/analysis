@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 17:35:45 +0100 (Fri, June 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-29 20:47:58 +0100 (Thu, July 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -133,7 +133,7 @@ class ChemicalShift(AbstractWrapperObject):
                                nmrAtom=self.nmrAtom,
                                valueError=self.valueError,
                                figureOfMerit=self.figureOfMerit,
-                               comment=self.comment,)
+                               comment=self.comment, )
         return cs
 
     @classmethod
@@ -163,6 +163,20 @@ class ChemicalShift(AbstractWrapperObject):
         if not (self.isDeleted or self._flaggedForDelete):
             Shift.recalculateValue(self._wrappedData)
 
+    def _getShiftAsTuple(self):
+        """Return the contents of the shift as a row for insertion into a pandas dataframe
+        """
+        newRow = (self._wrappedData._uniqueId,
+                  self.value,
+                  self.valueError,
+                  self.figureOfMerit,
+                  ) + \
+                 (self.nmrAtom.pid if self.nmrAtom else None,) + \
+                 (self.nmrAtom.pid.fields if self.nmrAtom else
+                  (None, None, None, None)) + \
+                 (self.comment,)
+        return newRow
+
     #===========================================================================================
     # new'Object' and other methods
     # Call appropriate routines in their respective locations
@@ -172,6 +186,7 @@ class ChemicalShift(AbstractWrapperObject):
         """Routine to try to recover an object that has not loaded correctly to repair integrity
         """
         pass
+
 
 #=========================================================================================
 # Connections to parents:
@@ -213,14 +228,13 @@ def _newChemicalShift(self: ChemicalShiftList, value: float, nmrAtom: NmrAtom,
             raise RuntimeError('chemicalShift: nmrAtom undefined - unable to create associated nmrAtom')
 
     apiShift = self._wrappedData.newShift(value=value,
-                                     resonance=nmrAtom._wrappedData, error=valueError,
-                                     figOfMerit=figureOfMerit, details=comment)
+                                          resonance=nmrAtom._wrappedData, error=valueError,
+                                          figOfMerit=figureOfMerit, details=comment)
     result = self._project._data2Obj.get(apiShift)
     if result is None:
         raise RuntimeError('Unable to generate new ChemicalShift item')
 
     return result
-
 
 #EJB 20181203: moved to ChemicalShiftList
 # ChemicalShiftList.newChemicalShift = _newChemicalShift

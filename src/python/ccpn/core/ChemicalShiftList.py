@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:19:59 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-29 20:47:58 +0100 (Thu, July 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -25,20 +25,20 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from typing import Tuple, Sequence, List
-from functools import partial
+import pandas as pd
+from typing import Tuple, Sequence, List, Union
 
-import ccpn.core._implementation.resetSerial
-from ccpn.util import Common as commonUtil
-from ccpn.util.OrderedSet import OrderedSet
+from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.lib import Pid
-from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
+from ccpn.util.decorators import logCommand
+from ccpn.util.OrderedSet import OrderedSet
+
 
 class ChemicalShiftList(AbstractWrapperObject):
     """An object containing Chemical Shifts. Note: the object is not a (subtype of a) Python list.
@@ -67,7 +67,6 @@ class ChemicalShiftList(AbstractWrapperObject):
     _apiClassQualifiedName = Nmr.ShiftList._metaclass.qualifiedName()
 
     def __init__(self, project: Project, wrappedData: Nmr.ShiftList):
-
         self._wrappedData = wrappedData
         self._project = project
         defaultName = 'Shifts%s' % wrappedData.serial
@@ -101,7 +100,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         return self._wrappedData.name
 
     @name.setter
-    def name(self, value:str):
+    def name(self, value: str):
         """set name of ChemicalShiftList."""
         self.rename(value)
 
@@ -143,6 +142,49 @@ class ChemicalShiftList(AbstractWrapperObject):
     def spectra(self, value: Sequence[Spectrum]):
         self._wrappedData.experiments = set(x._wrappedData.experiment for x in value)
 
+    def getShift(self, nmrAtom: Union[None, NmrAtom, str] = None, uniqueId: int = None):
+        """Return a chemicalShift by nmrAtom or uniqueId
+        Shift is returned as a namedTuple
+        """
+        # NOTE:ED consider returning an AttrDict to allow chemicalShift properties
+
+        if nmrAtom and uniqueId:
+            raise ValueError('Please use either nmrAtom or uniqueId')
+
+        _data = self._wrappedData.data
+        if _data is None:
+            return
+
+        rows = None
+        if nmrAtom:
+            # get shift by nmrAtom
+            nmrAtom = self.project.getByPid(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom
+            if not isinstance(nmrAtom, (NmrAtom, type(None))):
+                raise ValueError('chemicalShiftList.getShift: nmrAtom must be of type NmrAtom or str')
+            elif nmrAtom:
+                # search table
+                rows = _data[_data['nmrAtom'] == nmrAtom.pid]
+        elif uniqueId:
+            # get shift by uniqueId
+            if not isinstance(uniqueId, int):
+                raise ValueError('chemicalShiftList.getShift: uniqueId must be an int')
+            else:
+                # search table
+                rows = _data[_data['uniqueId'] == uniqueId]
+
+        if rows is not None:
+            if len(rows) > 1:
+                raise RuntimeError('chemicalShiftList.getShift: returned too many shifts')
+            # return the row as a Pandas namedTuple
+            for row in rows.itertuples():
+                return row
+
+    # new shift
+
+    # delete shift
+
+    # copy/clone shift
+
     #=========================================================================================
     # Implementation functions
     #=========================================================================================
@@ -179,6 +221,68 @@ class ChemicalShiftList(AbstractWrapperObject):
     # CCPN functions
     #=========================================================================================
 
+    def _updateEdgeToAlpha1(self):
+        """Move chemicalShifts from model shifts to pandas dataFrame
+
+        version 3.0.4 -> 3.1.0.alpha update
+        dataframe now stored in _wrappedData.data
+        """
+
+        # skip for no shifts
+        if not self.chemicalShifts:
+            return
+
+        # create a new dataframe
+        shifts = []
+        for row, shift in enumerate(self.chemicalShifts):
+            newRow = shift._getShiftAsTuple()
+            shifts.append(newRow)
+
+            # delete the old shift
+            shift.delete()
+
+        # instantiate the dataframe
+        df = pd.DataFrame(shifts,
+                          columns=['uniqueId',
+                                   'value', 'valueError', 'figureOfMerit',
+                                   'nmrAtom', 'nmrChain', 'sequenceCode', 'residueType', 'atomName',
+                                   'comment'])
+
+        # put into model
+        self._wrappedData.data = df
+
+    @classmethod
+    def _restoreObject(cls, project, apiObj):
+        """Subclassed to allow for initialisations on restore, not on creation via newChemicalShiftList
+        """
+        from ccpn.util.Logging import getLogger
+
+        chemicalShiftList = super()._restoreObject(project, apiObj)
+
+        # keep a list of the update methods
+        # this needs to be traversed on order from the latest version that the project has been saved under
+        versionUpdates = (('3.0.4', cls._updateEdgeToAlpha1),
+                          ('3.1.0', None),  # current version - just used for debug logging
+                          )
+
+        # check version history, default to 3.0.4
+        history = (project.versionHistory and project.versionHistory[-1]) or '3.0.4'
+
+        try:
+            # get the index of the saved version, this SHOULD always work
+            startIndex = [_ver for _ver, _func in versionUpdates].index(history)
+        except:
+            raise RuntimeError(f'ChemicalShiftList._restoreObject: current version is not defined {history}')
+
+        lastIndex = len(versionUpdates)
+
+        # iterate through the updates
+        for (ver, func), (nextVer, _) in zip(versionUpdates[startIndex:lastIndex - 1], versionUpdates[startIndex + 1:lastIndex]):
+            getLogger().debug(f'>>> updating version {ver} -> {nextVer}')
+            func(chemicalShiftList)
+
+        return chemicalShiftList
+
     #===========================================================================================
     # new'Object' and other methods
     # Call appropriate routines in their respective locations
@@ -186,8 +290,8 @@ class ChemicalShiftList(AbstractWrapperObject):
 
     @logCommand(get='self')
     def newChemicalShift(self, value: float, nmrAtom,
-                          valueError: float = 0.0, figureOfMerit: float = 1.0,
-                          comment: str = None, **kwds):
+                         valueError: float = 0.0, figureOfMerit: float = 1.0,
+                         comment: str = None, **kwds):
         """Create new ChemicalShift within ChemicalShiftList.
 
         See the ChemicalShift class for details.
@@ -239,6 +343,7 @@ PeakList.chemicalShiftList = property(getter, setter, None,
 del getter
 del setter
 
+
 #=========================================================================================
 
 @newObject(ChemicalShiftList)
@@ -272,7 +377,7 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
 
     name = ChemicalShiftList._uniqueName(project=self, name=name)
 
-    dd = {'name': name, 'unit': unit, 'autoUpdate': autoUpdate, 'isSimulated': isSimulated,
+    dd = {'name'   : name, 'unit': unit, 'autoUpdate': autoUpdate, 'isSimulated': isSimulated,
           'details': comment}
     if spectra:
         dd.update({'experiments': OrderedSet([spec._wrappedData.experiment for spec in spectra])})
@@ -286,7 +391,7 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
 
 
 def _getChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', autoUpdate: bool = True,
-                          isSimulated: bool = False, serial: int = None, comment: str = None,
+                          isSimulated: bool = False, comment: str = None,
                           spectra=()) -> ChemicalShiftList:
     """Create new ChemicalShiftList.
 
@@ -297,7 +402,6 @@ def _getChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
     :param autoUpdate:
     :param isSimulated:
     :param comment:
-    :param serial: optional serial number.
     :return: a new ChemicalShiftList instance.
     """
 
@@ -319,7 +423,7 @@ def _getChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
     # # match the error message to the attribute
     # commonUtil._validateName(self, ChemicalShiftList, name)
 
-    dd = {'name': name, 'unit': unit, 'autoUpdate': autoUpdate, 'isSimulated': isSimulated,
+    dd = {'name'   : name, 'unit': unit, 'autoUpdate': autoUpdate, 'isSimulated': isSimulated,
           'details': comment}
     if spectra:
         dd.update({'experiments': OrderedSet([spec._wrappedData.experiment for spec in spectra])})

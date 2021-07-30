@@ -36,14 +36,14 @@ class Menu(QtWidgets.QMenu):
     
     self.callback = callback
     
-    # self.connect(self, QtCore.SIGNAL("hovered(QAction *)"), self._toolTipHover)
-    # self.connect(self, QtCore.SIGNAL('triggered(QAction *)'), self._callback)
+    # self.connect(self, QtCore.pyqtSignal("hovered(QAction *)"), self._toolTipHover)
+    # self.connect(self, QtCore.pyqtSignal('triggered(QAction *)'), self._callback)
     #
     # if persistant:
-    #   self.connect(self, QtCore.SIGNAL('aboutToHide()'), self._stayUp)
+    #   self.connect(self, QtCore.pyqtSignal('aboutToHide()'), self._stayUp)
     #
     # if self.setupFunc:
-    #   self.connect(self, QtCore.SIGNAL('aboutToShow()'), self._setupFunc)
+    #   self.connect(self, QtCore.pyqtSignal('aboutToShow()'), self._setupFunc)
 
     self.hovered.connect(self._toolTipHover)
     self.triggered.connect(self._callback)
@@ -188,7 +188,7 @@ class Menu(QtWidgets.QMenu):
       else:
         func = callback
       
-      # action.connect(action, QtCore.SIGNAL("triggered()"), func)
+      # action.connect(action, QtCore.pyqtSignal("triggered()"), func)
       action.triggered.connect(func)
     
     if object:

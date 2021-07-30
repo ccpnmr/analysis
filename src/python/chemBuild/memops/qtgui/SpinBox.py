@@ -23,8 +23,9 @@ class _SpinBase(Base):
     self.setRange(minValue, maxValue)   
     self.setStep(step)
     self.setValue(value)
-    self.connect(self, QtCore.SIGNAL('editingFinished()'), self._callback)
-      
+    # self.connect(self, QtCore.pyqtSignal('editingFinished()'), self._callback)
+    self.editingFinished.connect(self._callback)
+
     if listener:
       if isinstance(listener, (set, list, tuple)):
         for signal in listener:
@@ -97,7 +98,8 @@ class IntSpinBox(QtWidgets.QSpinBox, _SpinBase):
     _SpinBase.__init__(self, parent, value, minValue, maxValue, step,
                        callback, suffix, prefix, **kw)
   
-    self.connect(self, QtCore.SIGNAL('valueChanged(int)'), self._callback)
+    # self.connect(self, QtCore.pyqtSignal('valueChanged(int)'), self._callback)
+    self.valueChanged.connect(self._callback)
     self.multiplier = multiplier
 
   def stepBy(self, steps):
@@ -129,7 +131,8 @@ class FloatSpinBox(QtWidgets.QDoubleSpinBox, _SpinBase):
     _SpinBase.__init__(self, parent, value, minValue, maxValue, step,
                        callback, suffix, prefix, **kw)
 
-    self.connect(self, QtCore.SIGNAL('valueChanged(double)'), self._callback)
+    # self.connect(self, QtCore.pyqtSignal('valueChanged(double)'), self._callback)
+    self.valueChanged.connect(self._callback)
     self.multiplier = multiplier
 
   def stepBy(self, steps):

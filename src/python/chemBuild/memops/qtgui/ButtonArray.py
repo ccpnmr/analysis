@@ -47,7 +47,8 @@ class ButtonArray(QtWidgets.QWidget, Base):
     
     self.setItems(texts, objects, icons, tipTexts, selected)
 
-    buttonGroup.connect(buttonGroup, QtCore.SIGNAL('buttonClicked(int)'), self._callback)
+    # buttonGroup.connect(buttonGroup, QtCore.pyqtSignal('buttonClicked(int)'), self._callback)
+    buttonGroup.buttonClicked.connect(self._callback)
 
     self.setCallback(callback)
   

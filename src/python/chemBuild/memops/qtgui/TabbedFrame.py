@@ -41,7 +41,8 @@ class TabbedFrame(QtWidgets.QTabWidget, Base):
 
     self.callback = callback
     
-    self.connect(self, QtCore.SIGNAL('currentChanged(QWidget *)'), self._callback)
+    # self.connect(self, QtCore.pyqtSignal('currentChanged(QWidget *)'), self._callback)
+    self.currentChanged.connect(self._callback)
 
   def clear(self):
   

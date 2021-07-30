@@ -17,7 +17,7 @@ class CheckButton(QtWidgets.QCheckBox, Base):
 
     if callback:
       self.clicked.connect(callback)
-      # self.connect(self, QtCore.SIGNAL('stateChanged(int)'), self._callback)
+      # self.connect(self, QtCore.pyqtSignal('stateChanged(int)'), self._callback)
 
   def _callback(self, state):
 

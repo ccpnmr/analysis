@@ -54,13 +54,13 @@ class Slider(QtWidgets.QSlider, Base):
     
   
     if showNumber and not tracking:
-      self.connect(self, QtCore.SIGNAL('sliderMoved(int)'), self._redraw)
-    
+      # self.connect(self, QtCore.pyqtSignal('sliderMoved(int)'), self._redraw)
+      self.sliderMoved.connect(self._redraw)
     if showNumber:
-      self.connect(self, QtCore.SIGNAL('sliderReleased()'), self.update)
-    
-    self.connect(self, QtCore.SIGNAL('valueChanged(int)'), self._callback)
-    
+      # self.connect(self, QtCore.pyqtSignal('sliderReleased()'), self.update)
+      self.sliderReleased.connect(self.update)
+    # self.connect(self, QtCore.pyqtSignal('valueChanged(int)'), self._callback)
+    self.valueChanged.connect(self._callback)
     if listener:
       if isinstance(listener, (set, list, tuple)):
         for signal in listener:
@@ -220,13 +220,14 @@ class FloatSlider(Slider):
     self.callback = callback
   
     if showNumber and not tracking:
-      self.connect(self, QtCore.SIGNAL('sliderMoved(int)'), self._redraw)
-    
+      # self.connect(self, QtCore.pyqtSignal('sliderMoved(int)'), self._redraw)
+      self.sliderMoved.connect(self._redraw)
     if showNumber:
-      self.connect(self, QtCore.SIGNAL('sliderReleased()'), self.update)
-    
-    self.connect(self, QtCore.SIGNAL('valueChanged(int)'), self._callback)
-    
+      # self.connect(self, QtCore.pyqtSignal('sliderReleased()'), self.update)
+      self.sliderReleased.connect(self.update)
+    # self.connect(self, QtCore.pyqtSignal('valueChanged(int)'), self._callback)
+    self.valueChanged.connect(self._callback)
+
     if listener:
       listener.connect(self.set)
   

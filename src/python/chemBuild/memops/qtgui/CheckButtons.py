@@ -48,7 +48,8 @@ class CheckButtons(QtWidgets.QWidget, Base):
       buttonGroup.addButton(button)
       buttonGroup.setId(button, i)
       
-    buttonGroup.connect(buttonGroup, QtCore.SIGNAL('buttonClicked(int)'), self._callback)
+    # buttonGroup.connect(buttonGroup, QtCore.pyqtSignal('buttonClicked(int)'), self._callback)
+    buttonGroup.buttonClicked.connect(self._callback)
 
     self.setCallback(callback)
   

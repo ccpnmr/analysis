@@ -101,7 +101,7 @@ class TableModel(QtCore.QAbstractTableModel):
       result = self.setDataForCell(index.row(), index.column(), value)
 
       if result:
-        self.emit(QtCore.SIGNAL("dataChanged(QModelIndex,QModelIndex)"), index, index)
+        self.emit(QtCore.pyqtSignal("dataChanged(QModelIndex,QModelIndex)"), index, index)
 
     return result
     
@@ -131,10 +131,10 @@ class TableModel(QtCore.QAbstractTableModel):
 
   def sort(self, column, order):
 
-    self.emit(QtCore.SIGNAL("layoutAboutToBeChanged()"))
+    self.emit(QtCore.pyqtSignal("layoutAboutToBeChanged()"))
     isDescending = (order == QtCore.Qt.DescendingOrder)
     self.sortRows(column, isDescending)
-    self.emit(QtCore.SIGNAL("layoutChanged()"))
+    self.emit(QtCore.pyqtSignal("layoutChanged()"))
 
 class ObjectTableModel(TableModel):
 

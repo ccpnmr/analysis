@@ -18,8 +18,9 @@ class Text(QtWidgets.QPlainTextEdit, Base):
     self.callback = callback
     self._isUserModified = False
    
-    self.connect(self, QtCore.SIGNAL('textChanged()'), self._textChanged)
-  
+    # self.connect(self, QtCore.pyqtSignal('textChanged()'), self._textChanged)
+    self.textChanged.connect(self._textChanged)
+
   def _textChanged(self):
   
     self._isUserModified = True

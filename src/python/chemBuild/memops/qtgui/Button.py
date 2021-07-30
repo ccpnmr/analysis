@@ -41,11 +41,11 @@ class Button(QtWidgets.QPushButton, Base):
   def setCallback(self, callback):
   
     if self.callback:
-      # self.disconnect(self, QtCore.SIGNAL('clicked()'), self.callback)
+      # self.disconnect(self, QtCore.pyqtSignal('clicked()'), self.callback)
       self.clicked.disconnect(self.callback)
 
     if callback:
-      # self.connect(self, QtCore.SIGNAL('clicked()'), callback)
+      # self.connect(self, QtCore.pyqtSignal('clicked()'), callback)
       self.clicked.connect(callback)
       # self.clicked.connect doesn't work with lambda, yet...
     
@@ -85,8 +85,9 @@ class ButtonMenu(Button):
     menu.callback = callback
     
     self.setMenu(menu)   
-    self.connect(menu, QtCore.SIGNAL('triggered(QAction *)'), self._setText)
-    
+    # self.connect(menu, QtCore.pyqtSignal('triggered(QAction *)'), self._setText)
+    self.triggered.connect(self._setText)
+
   def _setText(self, action):
     
     text = action.text()

@@ -7,7 +7,7 @@ from .Base import Base
 
 class WellPlateWidget(QtWidgets.QWidget, Base):
   
-  wellSelected = QtCore.Signal(int)
+  wellSelected = QtCore.pyqtSignal(int)
 
   def __init__(self, parent = None, objects = None, colorKeyWord = None, baseColor = None, **kw):
     
@@ -64,7 +64,7 @@ class WellPlateWidget(QtWidgets.QWidget, Base):
 
 class Well(QtWidgets.QWidget):
   
-  selected = QtCore.Signal(int)
+  selected = QtCore.pyqtSignal(int)
   
   def __init__(self, parent, index, baseColor = 'blue', colorIntensity = 225, pos = None, size = None, text = None):
     

@@ -137,9 +137,11 @@ class ColorPulldown(PulldownList):
     self.setData(colors, index)
     
     self.object = self.objects[index]
-    self.disconnect(self, QtCore.SIGNAL('currentIndexChanged(int)'), self._callback)
-    self.connect(self, QtCore.SIGNAL('activated(int)'), self._callback)
-        
+    # self.disconnect(self, QtCore.pyqtSignal('currentIndexChanged(int)'), self._callback)
+    # self.connect(self, QtCore.pyqtSignal('activated(int)'), self._callback)
+    self.currentIndexChanged.connect(self._callback)
+    self.activated.connect(self._callback)
+
   def addItem(self, text, object=None, icon=None):
     
     i = len(self.objects)

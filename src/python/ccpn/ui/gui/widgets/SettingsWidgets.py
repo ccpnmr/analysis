@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
 from ccpn.ui.gui.widgets.Widget import Widget
@@ -1447,9 +1447,9 @@ class ObjectSelectionWidget(ListCompoundWidget):
         self._objectWidgetChangedCallback = objectWidgetChangedCallback
         self._selectObjectInListCallback = callback
         self.standardListItems = standardListItems
-
-        labelText = labelText or 'Select {}:'.format((self.KLASS._pluralLinkName).capitalize())
-        tipText = tipText or 'Set active {} for module:'.format((self.KLASS._pluralLinkName).capitalize())
+        labelName = self.KLASS._pluralLinkName[0].upper() + self.KLASS._pluralLinkName[1:] #Keep CamelCase intact
+        labelText = labelText or 'Select {}'.format(labelName)
+        tipText = tipText or 'Set active {} for module:'.format(labelName)
 
         super().__init__(parent=parent,
                          vAlign=vAlign, stretch=stretch, hAlign=hAlign, vPolicy=vPolicy,

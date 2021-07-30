@@ -16,14 +16,13 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:30 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-30 20:34:02 +0100 (Fri, July 30, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: Geerten Vuister $"
 __date__ = "$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
-
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -137,6 +136,7 @@ PidShortClassName = 'MO'
 MODULENAME = 'moduleName'
 WIDGETSTATE = 'widgetsState'
 
+
 class CcpnModule(Dock, DropBase, NotifierBase):
     """
     Base class for CCPN modules
@@ -160,9 +160,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
                       OR __init__ with closeFunc=<your close function>
     """
-    className = '' # used for restoring GUI layouts
-    shortClassName = PidShortClassName # used to create the pid
-    longClassName  = PidLongClassName  # used to create the long pid
+    className = ''  # used for restoring GUI layouts
+    shortClassName = PidShortClassName  # used to create the pid
+    longClassName = PidLongClassName  # used to create the long pid
     HORIZONTAL = 'horizontal'
     VERTICAL = 'vertical'
     labelOrientation = HORIZONTAL  # toplabel orientation
@@ -176,6 +176,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     _restored = False
     _onlySingleInstance = False
     _includeInLastSeen = True # whether to restore or not after closing it (in the same project)
+
     # _instances = set()
 
     def __init__(self, mainWindow, name, closable=True, closeFunc=None, settingsScrollBarPolicies=('asNeeded', 'asNeeded'), **kwds):
@@ -443,14 +444,13 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         splits = moduleName.split(self._nameSplitter)
         if len(splits) > 1:
             try:
-                serialName = str(int(splits[-1])) # consider a serial only if can be an int.
+                serialName = str(int(splits[-1]))  # consider a serial only if can be an int.
                 moduleName = self._nameSplitter.join(splits[:-1])
             except:
                 serialName = ''
-                moduleName = self._nameSplitter.join(splits) # this is when there is a splitter but not a serial. eg 2D_HN
+                moduleName = self._nameSplitter.join(splits)  # this is when there is a splitter but not a serial. eg 2D_HN
 
         return (pidPrefix, moduleName, serialName)
-
 
     def renameModule(self, newName):
         """ rename the Gui module a  """
@@ -529,7 +529,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                         if isinstance(i, Container):
                             self._container = i
         if self._includeInLastSeen:
-            self.area._seenModuleStates[self.className] = {MODULENAME:self.moduleName, WIDGETSTATE:self.widgetsState}
+            self.area._seenModuleStates[self.className] = {MODULENAME: self.moduleName, WIDGETSTATE: self.widgetsState}
         super().close()
 
     #=========================================================================================
@@ -727,7 +727,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                     setattr(self, DoubleUnderscore +name, widget)
                 else:
                     setattr(self, DoubleUnderscore + widget.__class__.__name__ + str(count), widget)
-
 
     def event(self, event):
         """
@@ -1101,8 +1100,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         super().resizeEvent(ev)
 
 
-
-
 class CcpnModuleLabel(DockLabel):
     """
     Subclassing DockLabel to modify appearance and functionality
@@ -1116,7 +1113,7 @@ class CcpnModuleLabel(DockLabel):
     # defined here, as the updateStyle routine is called from the
     # DockLabel instanciation; changed later on
 
-    sigDragEntered = QtCore.Signal(object, object)
+    sigDragEntered = QtCore.pyqtSignal(object, object)
 
     def getMaxIconSize(self, icon):
         iconSizes = [max((size.height(), size.width())) for size in icon.availableSizes()]
@@ -1129,13 +1126,14 @@ class CcpnModuleLabel(DockLabel):
         self.buttonCornerRadius = 3
         self.labelRadius = 3
 
-        super(CcpnModuleLabel, self).__init__(name, module, showCloseButton=showCloseButton)
+        _fontSize = getWidgetFontHeight(size='LARGE') or 16
+        super().__init__(name, module, showCloseButton=showCloseButton, fontSize=_fontSize)
 
         self.module = module
         self.fixedWidth = True
 
         setWidgetFont(self, size='MEDIUM')
-        self.labelSize = (getWidgetFontHeight(size='LARGE') or 16)
+        self.labelSize = _fontSize  # (getWidgetFontHeight(size='LARGE') or 16)
 
         self.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter)
         self.closeButton.setStyleSheet('border: 0px solid %s;'
@@ -1143,6 +1141,7 @@ class CcpnModuleLabel(DockLabel):
                                        'background-color: transparent;' % BORDERNOFOCUS_COLOUR)
 
         from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
+
         allowSpace = not isinstance(self.module, SpectrumDisplay)
         self.nameEditor = NameEditor(self, text=self.labelName, allowSpace=allowSpace)
         self.nameEditor.hide()
@@ -1175,6 +1174,7 @@ class CcpnModuleLabel(DockLabel):
 
         # flag to disable dragMoveEvent during a doubleClick
         self._inDoubleClick = False
+
     @property
     def labelName(self):
         return self.module.id
@@ -1385,6 +1385,7 @@ class CcpnModuleLabel(DockLabel):
 
         super(DockLabel, self).resizeEvent(ev)
 
+
 INVALIDROWCOLOUR = QtGui.QColor('lightpink')
 
 EXTRA_CHARACTERS_ALLOWED = [' ', # extra characters allowed when renaming a Module (except spectrumDisplays)
@@ -1397,12 +1398,13 @@ EXTRA_CHARACTERS_ALLOWED = [' ', # extra characters allowed when renaming a Modu
 class LabelNameValidator(QtGui.QValidator):
     """ Make sure the newly typed module name on a GUI is unique.
     """
+
     def __init__(self, parent, labelObj, allowSpace=True):
         super().__init__(parent=parent)
         self.baseColour = self.parent().palette().color(QtGui.QPalette.Base)
         self._parent = parent
         self._labelObj = labelObj
-        self._isNameAvailableFunc = str # str as placeholder.
+        self._isNameAvailableFunc = str  # str as placeholder.
         self._allowSpace = allowSpace
         self._isValidState = True
         self._messageState = ''
@@ -1458,7 +1460,7 @@ class LabelNameValidator(QtGui.QValidator):
         startingName = self._labelObj.module.id
         state = QtGui.QValidator.Acceptable
 
-        if startingName==name:
+        if startingName == name:
             state = self._setAccetableStatus()
             self._isValidState, self._messageState = True, 'Same name as original'
             return state, name, p_int
@@ -1493,10 +1495,11 @@ class LabelNameValidator(QtGui.QValidator):
 class NameEditor(LineEdit):
     """LineEdit widget that contains validator for checking filePaths exists
     """
+
     def __init__(self, parent, allowSpace=True, **kwds):
         super().__init__(parent=parent, **kwds)
 
-        self._parent = parent # the LabelObject
+        self._parent = parent  # the LabelObject
         self.setValidator(LabelNameValidator(parent=self, labelObj=self._parent, allowSpace=allowSpace))
         self.validator().resetCheck()
         self.validator()._setNameValidFunc(self._parent.module._isNameAvailable)
@@ -1527,6 +1530,7 @@ class NameEditor(LineEdit):
     def focusOutEvent(self, ev):
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         super(LineEdit, self).focusOutEvent(ev)
+
 
 class DropAreaSelectedOverlay(QtWidgets.QWidget):
     """Overlay widget that draws highlight over the current module during a drag-drop operation

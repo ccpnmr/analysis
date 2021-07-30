@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-22 18:35:31 +0100 (Thu, July 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-30 15:41:11 +0100 (Fri, July 30, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -7224,11 +7224,11 @@ def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict
         if 'pointCounts' in dimensionData:
             dimTags.remove('pointCounts')
             spectrum.pointCounts = pointCounts = dimensionData['pointCounts']
-            if 'totalPointCounts' in dimensionData:
-                dimTags.remove('totalPointCounts')
-                spectrum.totalPointCounts = dimensionData['totalPointCounts']
-            else:
-                spectrum.totalPointCounts = pointCounts
+            # if 'totalPointCounts' in dimensionData:
+            #     dimTags.remove('totalPointCounts')
+            #     spectrum.totalPointCounts = dimensionData['totalPointCounts']
+            # else:
+            #     spectrum.totalPointCounts = pointCounts
         # Needed below:
         if 'value_first_point' in dimensionData:
             dimTags.remove('value_first_point')

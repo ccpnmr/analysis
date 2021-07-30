@@ -446,34 +446,19 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     def widgetsState(self):
         """return  {"variableName":"value"}  of all gui Variables  """
         widgetsState = {}
-
         self._setNestedWidgetsAttrToModule()
         for varName, varObj in vars(self).items():
-            # className = varObj.__class__.__name__
             if isinstance(varObj, Base):
-                # print('====> Saving ====>', varObj, varObj._getSaveState())
+                widget = varObj
                 try:  # try because widgets can be dynamically deleted
-                    widgetsState[varName] = varObj._getSaveState()
+                    value = widget._getSaveState()
+                    if value: # Nones come from non-storable widgets: Splitters, tabs etc..
+                        widgetsState[varName] = value
                 except Exception as es:
                     getLogger().warn(f'Error {es} - {varName}')
 
-
-            # if isinstance(varObj, _PulldownABC):
-            #     widgetsState[varName] = varObj.getText()
-            #     continue
-            # if isinstance(varObj, ListCompoundWidget):
-            #     widgetsState[varName] = varObj.getTexts()
-            #     continue
-            # if issubclass(varObj.__class__, GuiTable):
-            #     className = GuiTable.__name__
-            # if className in CommonWidgets.keys():
-            #     try:  # try because widgets can be dynamically deleted
-            #         widgetsState[varName] = getattr(varObj, CommonWidgets[className][0].__name__)()
-            #     except Exception as es:
-            #         getLogger().warn(f'Error {es} - {varName}')
         # self._kwargs = collections.OrderedDict(sorted(widgetsState.items()))
-
-        return collections.OrderedDict(sorted(widgetsState.items()))
+        return collections.OrderedDict(sorted(widgetsState.items(), key=lambda x:x[0]))
 
     #=========================================================================================
     # Widget Methods
@@ -554,22 +539,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
             try:
                 widget = getattr(self, str(variableName))
                 if isinstance(widget, Base):
-                    # print('====> restoring ====>', widget, )
                     widget._setSavedState(value)
-
-                # className = widget.__class__.__name__
-                # if isinstance(widget, _PulldownABC):
-                #     widget.select(value)
-                #     continue
-                # if isinstance(widget, ListCompoundWidget):
-                #     widget.setTexts(value)
-                #     continue
-                # if issubclass(widget.__class__, GuiTable):
-                #     className = GuiTable.__name__
-                # if className in CommonWidgets.keys():
-                #     setWidget = getattr(widget, CommonWidgets[className][1].__name__)
-                #     setWidget(value)
-
             except Exception as e:
                 getLogger().debug('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
 

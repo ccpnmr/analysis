@@ -59,7 +59,7 @@ from ccpn.util.Path import aPath
 
 
 _filenameLineEdit = '_filenameLineEdit'
-
+SaveMsgTipText = 'Note: macros are automatically saved at every changes'
 
 class MacroEditor(CcpnModule):
     """
@@ -152,12 +152,7 @@ class MacroEditor(CcpnModule):
         hGrid = 0
         self.toolbar = ToolBar(self.mainWidget, grid=(hGrid, 0), gridSpan=(1, 2), hAlign='l', hPolicy='preferred')
         hGrid += 1
-        self.filePathLabel = Label(self.mainWidget, hAlign='l', grid=(hGrid, 0))
-        self._fileNameButtons = ButtonList(self.mainWidget, texts=['Save As...'],
-                                           callbacks=[self.saveMacroAs],
-                                           icons=[Icon('icons/saveAs')],
-                                           hAlign='r',
-                                           grid=(hGrid, 1))
+        self.filePathLabel = Label(self.mainWidget, tipText='Macro filePath. '+SaveMsgTipText, hAlign='l', grid=(hGrid, 0))
         self._filenameLineEdit = LineEdit(self.mainWidget, grid=(hGrid, 1))
         self._filenameLineEdit.hide()
         setattr(self, _filenameLineEdit, LineEdit(self.mainWidget, grid=(hGrid, 1)))
@@ -293,6 +288,13 @@ class MacroEditor(CcpnModule):
                 ('toolTip', 'Open a Python File'),
                 ('icon', Icon('icons/document_open_recent')),
                 ('callback', self._openMacroFile),
+                ('enabled', True)
+                ))),
+            ('Save as', od((
+                ('text', 'SaveAs'),
+                ('toolTip', 'Save file with a new name to a new location. '),
+                ('icon', Icon('icons/saveAs')),
+                ('callback', self.saveMacroAs),
                 ('enabled', True)
                 ))),
             ('Export', od((

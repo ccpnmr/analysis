@@ -100,7 +100,7 @@ class ListCompoundWidget(CompoundBaseWidget):
     def __init__(self, parent=None, showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
                  labelText='', texts=None, callback=None,
-                 defaults=None, uniqueList=True, compoundKwds=None,
+                 defaults=None, uniqueList=True, objectName='', compoundKwds=None,
                  **kwds):
         """
         :param parent: parent widget
@@ -134,7 +134,8 @@ class ListCompoundWidget(CompoundBaseWidget):
         self._addWidget(self.pulldownList)
 
         # listWidget
-        self.listWidget = ListWidget(parent=self, callback=callback, infiniteHeight=True, **(compoundKwds or {}))
+        self.listWidget = ListWidget(parent=self, callback=callback, infiniteHeight=True, objectName=objectName,
+                                     **(compoundKwds or {}))
         self.listWidget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         self._uniqueList = uniqueList
         if defaults is not None:

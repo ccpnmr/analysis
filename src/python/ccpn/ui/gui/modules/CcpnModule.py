@@ -452,7 +452,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 widget = varObj
                 try:  # try because widgets can be dynamically deleted
                     value = widget._getSaveState()
-                    if value: # Nones come from non-storable widgets: Splitters, tabs etc..
+                    if value is not None: # Nones come from non-storable widgets: Splitters, tabs etc..
                         widgetsState[varName] = value
                 except Exception as es:
                     getLogger().warn(f'Error {es} - {varName}')
@@ -760,8 +760,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         groupednestedWidgets = [list(v) for k, v in itertools.groupby(nestedWidgs, lambda x: str(type(x)), )]
         for widgetsGroup in groupednestedWidgets:
             for count, widget in enumerate(widgetsGroup):
-                if widget.objectName():
-                    setattr(self, DoubleUnderscore + widget.objectName(), widget)
+                if isinstance(widget.objectName(), str):
+                    name = widget.objectName().replace(' ','')
+                    setattr(self, DoubleUnderscore +name, widget)
                 else:
                     setattr(self, DoubleUnderscore + widget.__class__.__name__ + str(count), widget)
 

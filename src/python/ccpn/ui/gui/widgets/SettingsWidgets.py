@@ -1531,6 +1531,20 @@ class ObjectSelectionWidget(ListCompoundWidget):
         return objects
 
 
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.getTexts()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.setTexts(value)
+
+
+
 class ChainSelectionWidget(ObjectSelectionWidget):
     KLASS = Chain
 

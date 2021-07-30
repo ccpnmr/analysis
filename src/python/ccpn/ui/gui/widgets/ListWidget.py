@@ -514,6 +514,18 @@ class ListWidget(QtWidgets.QListWidget, Base):
         p.setPen(oldPen)
         p.end()
 
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.getTexts()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.setTexts(value)
+
 
 
 class ListWidgetPair(Widget):

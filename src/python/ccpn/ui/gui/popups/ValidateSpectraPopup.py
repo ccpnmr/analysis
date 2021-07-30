@@ -338,7 +338,10 @@ class SpectrumPathRow(PathRowABC):
         # For speed reasons, we check if it any different from before, or was not valid to start with
         oldPath = self.getPath()
         if path != oldPath or not self.obj.hasValidPath():
-            self.obj.filePath = path
+            try:
+                self.obj.filePath = path
+            except Exception as es:
+                pass
 
     def getDialogPath(self) -> str:
         """Get the directory path to start the selection"""

@@ -4,8 +4,9 @@ Abstract base class to easily implement a popup to edit attributes of V3 layer o
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:53 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-07-30 20:30:53 +0100 (Fri, July 30, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -244,7 +245,7 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
         return changeState(self, allChanges, applyState, revertState, self._okButton, None, self._revertButton, 0)
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetValue(self, attr, attrType, getFunction, setFunction, presetFunction, callback, dim):
+    def _queueSetValue(self, attr, attrType, getFunction, setFunction, presetFunction, callback, dim, _value):
         """Queue the function for setting the attribute in the calling object (dim needs to stay for the decorator)
         """
         from ccpn.ui.gui.modules.CcpnModule import CommonWidgetsEdits

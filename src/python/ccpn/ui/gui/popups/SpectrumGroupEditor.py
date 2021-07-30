@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:50 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-30 20:30:53 +0100 (Fri, July 30, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1112,7 +1112,7 @@ class SeriesFrame(Frame):
         self._parent._spectrumGroupSeriesTypeEdited = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueChangeName(self):
+    def _queueChangeName(self, _value):
         """callback from editing the name
         """
         editName = self._parent.nameEdit.text()
@@ -1128,7 +1128,7 @@ class SeriesFrame(Frame):
         pass
 
     @queueStateChange(_verifyPopupApply)
-    def _queueChangeComment(self):
+    def _queueChangeComment(self, _value):
         """callback from editing the comment
         """
         editComment = self._parent.commentEdit.text() or None

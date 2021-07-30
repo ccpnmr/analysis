@@ -679,27 +679,27 @@ class GeneralTab(Widget):
         """
         return self._parent._getChangeState()
 
-    @queueStateChange(_verifyPopupApply)
-    def _queueSetValidateDataUrl(self, dataUrl, newUrl, urlValid, dim):
-        """Set the new url in the dataUrl
-        dim is required by the decorator to give a unique id for dataUrl row
-        """
-        if newUrl != dataUrl.url.path:
-            return partial(self._validatePreferencesDataUrl, dataUrl, newUrl, urlValid, dim)
-
-    def _validatePreferencesDataUrl(self, dataUrl, newUrl, urlValid, dim):
-        """Put the new dataUrl into the dataUrl and the preferences.general.dataPath
-        Extra step incase urlValid needs to be checked
-        """
-        self._validateFrame.dataUrlFunc(dataUrl, newUrl)
-
-    @queueStateChange(_verifyPopupApply)
-    def _queueSetValidateFilePath(self, spectrum, filePath, dim):
-        """Set the new filePath for the spectrum
-        dim is required by the decorator to give a unique id for filePath row
-        """
-        if filePath != spectrum.filePath:
-            return partial(self._validateFrame.filePathFunc, spectrum, filePath)
+    # @queueStateChange(_verifyPopupApply)
+    # def _queueSetValidateDataUrl(self, dataUrl, newUrl, urlValid, dim):
+    #     """Set the new url in the dataUrl
+    #     dim is required by the decorator to give a unique id for dataUrl row
+    #     """
+    #     if newUrl != dataUrl.url.path:
+    #         return partial(self._validatePreferencesDataUrl, dataUrl, newUrl, urlValid, dim)
+    #
+    # def _validatePreferencesDataUrl(self, dataUrl, newUrl, urlValid, dim):
+    #     """Put the new dataUrl into the dataUrl and the preferences.general.dataPath
+    #     Extra step incase urlValid needs to be checked
+    #     """
+    #     self._validateFrame.dataUrlFunc(dataUrl, newUrl)
+    #
+    # @queueStateChange(_verifyPopupApply)
+    # def _queueSetValidateFilePath(self, spectrum, filePath, dim):
+    #     """Set the new filePath for the spectrum
+    #     dim is required by the decorator to give a unique id for filePath row
+    #     """
+    #     if filePath != spectrum.filePath:
+    #         return partial(self._validateFrame.filePathFunc, spectrum, filePath)
 
     @queueStateChange(_verifyPopupApply)
     def _queueSpectrumNameChange(self, spectrum, value):
@@ -764,7 +764,7 @@ class GeneralTab(Widget):
         self.spectrum.chemicalShiftList = spectrum.project.getByPid(item)
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSampleChange(self, spectrum, value):
+    def _queueSampleChange(self, spectrum, _value):
         _text, sample = self.samplesPulldownList.getSelected()
         return partial(self._changeSampleSpectrum, spectrum, sample)
 
@@ -1278,7 +1278,7 @@ class DimensionsTab(Widget):
         spectrum.doubleCrosshairOffsets = doubleCrosshairOffsets
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetAxisCodes(self, spectrum, ): #valueGetter, dim): # dim required to make the changeState unique per dim
+    def _queueSetAxisCodes(self, spectrum, _value): #valueGetter, dim): # dim required to make the changeState unique per dim
         # set the axisCodes in single operation
         value = tuple(val.text() for val in self.axisCodeEdits)
         if value != spectrum.axisCodes:
@@ -1293,7 +1293,7 @@ class DimensionsTab(Widget):
         spectrum.axisCodes = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetIsotopeCodes(self, spectrum, valueGetter, dim):
+    def _queueSetIsotopeCodes(self, spectrum, valueGetter, dim, _value):
         value = valueGetter()
         if value != spectrum.isotopeCodes[dim]:
             return partial(self._setIsotopeCodes, spectrum, dim, value)
@@ -1326,7 +1326,7 @@ class DimensionsTab(Widget):
         spectrum.experimentType = expType
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetReferenceDimensions(self, spectrum, ): #valueGetter, dim):
+    def _queueSetReferenceDimensions(self, spectrum, _value): #valueGetter, dim):
         # set the referenceDimensions in single operation
         value = tuple(val.getText() or None for val in self.referenceDimensionPullDowns)
 
@@ -1432,7 +1432,7 @@ class DimensionsTab(Widget):
         spectrum.referencePoints = spectrumReferencing
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetMinAliasing(self, spectrum, valueGetter, dim):
+    def _queueSetMinAliasing(self, spectrum, valueGetter, dim, _value):
         _index = self.minAliasingPullDowns[dim].getSelectedIndex()
         minValue = min(self.specLim[dim]) - _index * self.deltaLim[dim]
         if abs(minValue - min(spectrum.aliasingLimits[dim])) > 1e-8:  # for rounding errors
@@ -1446,7 +1446,7 @@ class DimensionsTab(Widget):
         spectrum.aliasingLimits = tuple(alias)
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetMaxAliasing(self, spectrum, valueGetter, dim):
+    def _queueSetMaxAliasing(self, spectrum, valueGetter, dim, _value):
         _index = MAXALIASINGRANGE - self.maxAliasingPullDowns[dim].getSelectedIndex()
         maxValue = max(self.specLim[dim]) + _index * self.deltaLim[dim]
         if abs(maxValue - max(spectrum.aliasingLimits[dim])) > 1e-8:  # for rounding errors
@@ -1460,7 +1460,7 @@ class DimensionsTab(Widget):
         spectrum.aliasingLimits = tuple(alias)
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetFoldingModes(self, spectrum, valueGetter, dim):
+    def _queueSetFoldingModes(self, spectrum, valueGetter, dim, _value):
         dd = {False: 'mirror', True: 'circular', None: None}  # swapped because inverted checkbox
         value = dd[valueGetter()]
         if value != spectrum.foldingModes[dim]:
@@ -1472,7 +1472,7 @@ class DimensionsTab(Widget):
         spectrum.foldingModes = tuple(folding)
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetDisplayFoldedContours(self, spectrum, valueGetter):
+    def _queueSetDisplayFoldedContours(self, spectrum, valueGetter, _value):
         value = valueGetter()
         if value != spectrum.displayFoldedContours:
             return partial(self._setDisplayFoldedContours, spectrum, value)

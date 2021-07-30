@@ -68,7 +68,15 @@ class ProjectSummaryPopup(CcpnDialog):
         self.mainFrame = frame = Frame(self, grid=(0, 0), setLayout=True)
 
         row = 0
+        self.pathFrame = Frame(self.mainFrame, grid=(row, 0), setLayout=True)
 
+        self.pathLabel = Label(self.pathFrame, text='Path', grid=(row, 0), hAlign='l', bold=True)
+        self.pathPathLabel = Label(self.pathFrame, text=self.project.path, grid=(row, 1), hAlign='l', bold=False)
+        self.pathPathButton = Button(self.pathFrame, text='Copy', grid=(row, 2), hAlign='r',
+                                     callback=self._pathToClipboard)
+
+
+        row += 1
         # SPECTRA
 
         self.spectrumFrame = Frame(self.mainFrame, grid=(row, 0), setLayout=True)
@@ -179,7 +187,7 @@ class ProjectSummaryPopup(CcpnDialog):
         # Buttons
         buttonFrame = Frame(self, grid=(1, 0), setLayout=True)
         button = Button(buttonFrame, 'Save to Excel', callback=self._saveToExcel, grid=(0, 0))
-        button = Button(buttonFrame, 'Save to PDF', callback=self._saveToPdf, grid=(0, 1))
+        # button = Button(buttonFrame, 'Save to PDF', callback=self._saveToPdf, grid=(0, 1))
         button = Button(buttonFrame, 'Close', callback=self.accept, grid=(0, 2))
 
         row += 1
@@ -228,6 +236,10 @@ class ProjectSummaryPopup(CcpnDialog):
         self.chainNumberDict = {}
         for n, chain in enumerate(self.chains):
             self.chainNumberDict[chain] = n + 1
+
+    def _pathToClipboard(self, *args):
+        from ccpn.util.Common import copyToClipboard
+        copyToClipboard([self.pathPathLabel.get()])
 
     def _getPathPrefix(self):
 

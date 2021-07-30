@@ -28,6 +28,7 @@ __date__ = "$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
 # Start of code
 #=========================================================================================
 
+import re
 from ccpn.util import Logging
 from ccpn.util.Logging import getLogger
 import itertools
@@ -470,7 +471,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                     self.moduleName = self._name
                     return True
                 else:
-                    showWarning('Cannot rename module', _messageState)
+                    showWarning('Cannot rename module %s'%self.titleName, _messageState)
                     self.label.nameEditor.set(self._name)  #reset the original name
             return False
 
@@ -1384,6 +1385,13 @@ class CcpnModuleLabel(DockLabel):
 
 INVALIDROWCOLOUR = QtGui.QColor('lightpink')
 
+EXTRA_CHARACTERS_ALLOWED = [' ', # extra characters allowed when renaming a Module (except spectrumDisplays)
+                            '_',
+                            '(',
+                            ')',
+                            ':'
+                            ]
+
 class LabelNameValidator(QtGui.QValidator):
     """ Make sure the newly typed module name on a GUI is unique.
     """
@@ -1404,14 +1412,14 @@ class LabelNameValidator(QtGui.QValidator):
         self._isNameAvailableFunc = func
 
     def _isValidInput(self, value):
-        import re
+        extras = ''.join(EXTRA_CHARACTERS_ALLOWED)
         notAllowedSequences = {
                                 'No_strings'            : '^\s*$'   ,
                                 'Space_At_Start'        : '^\s'     ,
                                 'Space_At_End'          : '\s$'     ,
                                 'Empty_Spaces'          : '\s'      ,
                                 'Non-Alphanumeric'      : '\W'      ,
-                                'Illegal_Characters'    :'[^A-Za-z0-9 _]+'  # exclude non-alpha but include space and underscore
+                                'Illegal_Characters'    :'[^A-Za-z0-9%s]+'%extras # exclude non-alpha but include the extras
                               }
         valids = [True]
         if value is None:

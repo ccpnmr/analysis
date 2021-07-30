@@ -5,7 +5,8 @@ This file contains the routines for message dialogues
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-11 11:10:04 +0000 (Thu, February 11, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-07-30 20:44:26 +0100 (Fri, July 30, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,6 +31,7 @@ from PyQt5 import QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Font import setWidgetFont
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from PyQt5.QtCore import QEvent
+
 
 # from ccpn.ui.gui.guiSettings import messageFont, messageFontBold
 
@@ -207,7 +209,7 @@ class MessageDialog(QtWidgets.QMessageBox):
             (Qt.MetaModifier | Qt.ShiftModifier, Qt.Key_Up),
             (Qt.MetaModifier | Qt.ShiftModifier, Qt.Key_Down),
             (Qt.ControlModifier, Qt.Key_A)
-        )
+            )
 
         result = False
         if event.type() == QEvent.ShortcutOverride:
@@ -455,7 +457,7 @@ class progressPopup(CcpnDialog):
         self.busyFunc = busyFunc
 
         # progress bar
-        self.progressbar = QtGui.QProgressBar()
+        self.progressbar = QtWidgets.QProgressBar()
         self.progressbar.reset()  # resets the progress bar
         self.progressbar.setAlignment(Qt.AlignCenter)  # centers the text
         # 'valueChanged()' signal

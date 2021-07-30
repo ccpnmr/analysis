@@ -5,7 +5,8 @@ Module Documentation Here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:37 +0000 (Thu, February 04, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-07-30 20:44:25 +0100 (Fri, July 30, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,6 +40,7 @@ from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import percentage
 from ccpn.core.Spectrum import Spectrum
+
 
 current = []
 
@@ -120,7 +122,6 @@ class BarGraph(pg.BarGraphItem):
                     else:
                         label.setText(getattr(obj, objAttr, ''))
 
-
         # for label in self.labels:
         #     for object in objects:
         #         if isinstance(object, NmrResidue):
@@ -184,10 +185,9 @@ class BarGraph(pg.BarGraphItem):
         for key, value in self.allValues.items():
             label = CustomLabel(text=str(key))
             self.viewBox.addItem(label)
-            label.setPos(int(key), value+ratio)
+            label.setPos(int(key), value + ratio)
             self.labels.append(label)
             label.setBrush(QtGui.QColor(self.brush))
-
 
 
 class CustomLabel(QtWidgets.QGraphicsSimpleTextItem):
@@ -233,8 +233,7 @@ class CustomLabel(QtWidgets.QGraphicsSimpleTextItem):
 
 
 class CustomViewBox(pg.ViewBox):
-
-    itemsSelected = QtCore.Signal(object)
+    itemsSelected = QtCore.pyqtSignal(object)
 
     def __init__(self, application=None, *args, **kwds):
         pg.ViewBox.__init__(self, *args, **kwds)
@@ -349,7 +348,7 @@ class CustomViewBox(pg.ViewBox):
         if len(selected) > 0:
             try:
                 self.itemsSelected.emit(selected)
-                if self.application.current: # replace this bit
+                if self.application.current:  # replace this bit
                     currentSelected = getattr(self.application.current, selected[0]._pluralLinkName)
                     selected.extend(currentSelected)
                     currentObjs = setattr(self.application.current, selected[0]._pluralLinkName, selected)
@@ -370,7 +369,7 @@ class CustomViewBox(pg.ViewBox):
             for label in self.getLabels():
                 for text in texts:
                     if text == label.text():
-                       label.setSelected(True)
+                        label.setSelected(True)
 
     def clearSelection(self):
         for label in self.getLabels():

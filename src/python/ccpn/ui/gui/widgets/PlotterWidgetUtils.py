@@ -2,7 +2,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -10,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-24 17:58:26 +0000 (Sun, January 24, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-07-30 20:44:26 +0100 (Fri, July 30, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -44,17 +45,15 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.util.Logging import getLogger
 
 
-
-
 CLASSIC = 'classic'
 ColourMap = {
-            GS.DEFAULT  : CLASSIC,
-            GS.DARK     :'dark_background',
-            GS.LIGHT    :'seaborn-bright',
-            }
+    GS.DEFAULT: CLASSIC,
+    GS.DARK   : 'dark_background',
+    GS.LIGHT  : 'seaborn-bright',
+    }
+
 
 def _setDefaultGlobalPlotPreferences(plt):
-
     """
     Set the global preferences in the plt.rcParams dictionary.
     # TODO: make a better mechanism to set these from general preferences.
@@ -71,13 +70,14 @@ def _setDefaultGlobalPlotPreferences(plt):
     ccpnColourScheme = GS.getColourScheme()
     ## set background
     plt.style.use(ColourMap.get(ccpnColourScheme, CLASSIC))
-    setPlotPreference(plt, 'ytick.right', False)          # don't show Y ticks on right
-    setPlotPreference(plt, 'xtick.top'  , False)          # don't show Top X ticks
+    setPlotPreference(plt, 'ytick.right', False)  # don't show Y ticks on right
+    setPlotPreference(plt, 'xtick.top', False)  # don't show Top X ticks
     # setPlotPreference(plt, 'ytick.labelright', False)   # don't show label ticks
     # setPlotPreference(plt, 'xtick.labelleft', False)    # don't show label ticks
     ## setup backend
     setPlotPreference(plt, 'interactive', False)  # Set to True here could cause to open twice a plot.
     setPlotPreference(plt, 'backend', 'Qt5Agg')
+
 
 def setPlotPreference(plt, key, value):
     """
@@ -85,18 +85,19 @@ def setPlotPreference(plt, key, value):
     """
     plt.rcParams[key] = value
 
+
 def getPlotPreferences(plt):
     return plt.rcParams
 
 
-class PyPlotToolbar(ToolBar,  backends.NavigationToolbar2):
+class PyPlotToolbar(ToolBar, backends.NavigationToolbar2):
     """
     Re-implementation of Matplotlib ToolBar with CcpNmr widgets ands syntax.
     Matplotlib  backends for toolbars gave UserWarning as it was an experimental feature at the time of
     this implementation.
     Navigation Toolbar controls panning and zooming. Therefore re-implementations of those actions are done here.
     """
-    message = QtCore.Signal(str)
+    message = QtCore.pyqtSignal(str)
 
     def __init__(self, parent, canvas, coordinates=True, *args, **kwargs):
         super().__init__(canvas)
@@ -150,12 +151,12 @@ class PyPlotToolbar(ToolBar,  backends.NavigationToolbar2):
                 ('enabled', True)
                 ))),
             ('SaveAs', od((
-                        ('text', 'SaveAs'),
-                        ('toolTip', 'Save image to disk'),
-                        ('icon', Icon('icons/saveAs.png')),
-                        ('callback', self.save_figure),
-                        ('enabled', True)
-                        ))),
+                ('text', 'SaveAs'),
+                ('toolTip', 'Save image to disk'),
+                ('icon', Icon('icons/saveAs.png')),
+                ('callback', self.save_figure),
+                ('enabled', True)
+                ))),
             (),
             )
         return toolBarDefs
@@ -176,7 +177,7 @@ class PyPlotToolbar(ToolBar,  backends.NavigationToolbar2):
         default_filetype = self.canvas.get_default_filetype()
 
         startpath = os.path.expanduser(
-            matplotlib.rcParams['savefig.directory'])
+                matplotlib.rcParams['savefig.directory'])
         start = os.path.join(startpath, self.canvas.get_default_filename())
         filters = []
         selectedFilter = None
@@ -212,7 +213,7 @@ class PyPlotToolbar(ToolBar,  backends.NavigationToolbar2):
         axes = self.canvas.figure.get_axes()
         if not axes:
             QtWidgets.QMessageBox.warning(
-                self.parent, "Error", "There are no axes to edit.")
+                    self.parent, "Error", "There are no axes to edit.")
             return
         elif len(axes) == 1:
             ax, = axes
@@ -229,7 +230,7 @@ class PyPlotToolbar(ToolBar,  backends.NavigationToolbar2):
                 if titles[i] in duplicate_titles:
                     titles[i] += f" (id: {id(ax):#x})"  # Deduplicate titles.
             item, ok = QtWidgets.QInputDialog.getItem(
-                self.parent, 'Customise', 'Select axes:', titles, 0, False)
+                    self.parent, 'Customise', 'Select axes:', titles, 0, False)
             if not ok:
                 return
             ax = axes[titles.index(item)]
@@ -272,5 +273,3 @@ class PyPlotToolbar(ToolBar,  backends.NavigationToolbar2):
         ax = event.inaxes
         ax._set_view_from_bbox([event.x, event.y, scl])
         self.canvas.draw_idle()  # force re-draw
-
-

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-10 14:59:40 +0100 (Thu, June 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-30 20:44:26 +0100 (Fri, July 30, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -56,6 +56,7 @@ from ccpn.util.Common import _getObjectsByPids, splitDataFrameWithinRange
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.ui.gui.widgets.Icon import Icon, ICON_DIR
 
+
 # colours
 BackgroundColour = gs.getColours()[gs.CCPNGLWIDGET_HEXBACKGROUND]
 OriginAxes = pg.functions.mkPen(hexToRgb(gs.getColours()[gs.GUISTRIP_PIVOT]), width=1, style=QtCore.Qt.DashLine)
@@ -66,11 +67,11 @@ HandlePen = pg.functions.mkPen(hexToRgb(gs.getColours()[gs.GUISTRIP_PIVOT]), wid
 DefaultRoiLimits = [[0, 0], [0, 0]]  #
 
 SelectedLabel = pg.functions.mkBrush(rgbaRatioToHex(*gs.getColours()[gs.CCPNGLWIDGET_HIGHLIGHT]), width=4)
-c =rgbaRatioToHex(*gs.getColours()[gs.CCPNGLWIDGET_LABELLING])
+c = rgbaRatioToHex(*gs.getColours()[gs.CCPNGLWIDGET_LABELLING])
 GridPen = pg.functions.mkPen(c, width=1, style=QtCore.Qt.SolidLine)
 GridFont = getFont()
 DefaultPointSize = 10
-DefaultPointColour = '#000000' # black
+DefaultPointColour = '#000000'  # black
 DefaultInnerPointColour = '#7080EE'
 DefaultSymbol = 'o'
 AllowedSymbols = ['o', 's', 't', 'd', '+']
@@ -88,12 +89,13 @@ _HEXCOLOUR = 'hexColour'
 _INNERHEXCOLOUR = 'innerHexColour'
 
 ScatterSymbolsDict = od([
-                        ['circle',   {'symbol':'o', 'icon': 'icons/scatter_o'}],
-                        ['square',   {'symbol':'s', 'icon': 'icons/scatter_s'}],
-                        ['triangle', {'symbol':'t', 'icon': 'icons/scatter_t'}],
-                        ['diamond',  {'symbol':'d', 'icon': 'icons/scatter_d'}],
-                        ['plus',     {'symbol':'+', 'icon': 'icons/scatter_+'}],
-                        ])
+    ['circle', {'symbol': 'o', 'icon': 'icons/scatter_o'}],
+    ['square', {'symbol': 's', 'icon': 'icons/scatter_s'}],
+    ['triangle', {'symbol': 't', 'icon': 'icons/scatter_t'}],
+    ['diamond', {'symbol': 'd', 'icon': 'icons/scatter_d'}],
+    ['plus', {'symbol': '+', 'icon': 'icons/scatter_+'}],
+    ])
+
 
 def _getPointsWithinLimits(points, limits):
     xMin, xMax, yMin, yMax = limits
@@ -106,6 +108,7 @@ def _getPointsWithinLimits(points, limits):
         return innerPoints
     return []
 
+
 class _ItemBC(object):
     """ """
 
@@ -116,26 +119,27 @@ class _ItemBC(object):
 
         """
         self.kwargs = {
-                       _SELECTORNAME      : headerValueName,
-                       _VALUEHEADER       : headerValueName,
-                       _PIDHEADER         : None,
-                       _HEXCOLOURHEADER   : None,
-                       _OBJCOLOURPROPERTY : None, # the obj property where to grab the colour. E.g for spectrum: sliceColour
-                       }
+            _SELECTORNAME     : headerValueName,
+            _VALUEHEADER      : headerValueName,
+            _PIDHEADER        : None,
+            _HEXCOLOURHEADER  : None,
+            _OBJCOLOURPROPERTY: None,  # the obj property where to grab the colour. E.g for spectrum: sliceColour
+            }
         self.kwargs.update(kwargs)
         for k, v in self.kwargs.items():
             setattr(self, k, v)
+
 
 class ScatterROI(pg.ROI):
     """
     Re-implemetation of pg.ROI to allow customised functionalities
     """
-    def __init__(self, parentWidget,  *args, **kwargs):
 
-        pg.ROI.__init__(self,  *args, **kwargs)
+    def __init__(self, parentWidget, *args, **kwargs):
+        pg.ROI.__init__(self, *args, **kwargs)
         self.parentWidget = parentWidget
         self.handleSize = 8
-        self.translatable = False # keep False otherwise it doesn't allow normal pan/selection of the plotItems within the ROI region.
+        self.translatable = False  # keep False otherwise it doesn't allow normal pan/selection of the plotItems within the ROI region.
         self._setROIhandles()
         # self._isEnabled = True
 
@@ -185,7 +189,6 @@ class ScatterROI(pg.ROI):
         """
         return _getPointsWithinLimits(self.parentWidget.scatterPlot.points(), self.getLimits())
 
-
     def getInnerData(self):
         """
         :return: List of Pandas series. The linked data for points within the ROI limits.
@@ -205,23 +208,23 @@ class ScatterROI(pg.ROI):
         innerSeries = self.getInnerData()
         return pd.DataFrame(innerSeries)
 
-class ScatterPlot(Widget):
 
-    dataSelectedSignal = QtCore.Signal(object)
+class ScatterPlot(Widget):
+    dataSelectedSignal = QtCore.pyqtSignal(object)
 
     def __init__(self,
                  application,
                  dataFrame,
-                 axesDefinitions = None,
-                 roiVisible = True,
-                 roiEnabled = True,
-                 mouseSelectionRegion = True,
-                 pointSelectionCallback = None,
-                 pointActionCallback = None,
-                 pointSymbol = DefaultSymbol,
-                 pointSize = DefaultPointSize,
-                 hexPointColour = DefaultPointColour,
-                 innerRoiPointColour = DefaultInnerPointColour,
+                 axesDefinitions=None,
+                 roiVisible=True,
+                 roiEnabled=True,
+                 mouseSelectionRegion=True,
+                 pointSelectionCallback=None,
+                 pointActionCallback=None,
+                 pointSymbol=DefaultSymbol,
+                 pointSize=DefaultPointSize,
+                 hexPointColour=DefaultPointColour,
+                 innerRoiPointColour=DefaultInnerPointColour,
                  **kwds):
         super().__init__(setLayout=True, **kwds)
 
@@ -243,10 +246,10 @@ class ScatterPlot(Widget):
         self._plotItem = self._scatterView.addPlot()
         self._scatterViewbox = self._plotItem.vb
         self._addScatterSelectionBox()
-        self._scatterViewbox.mouseClickEvent = self._scatterViewboxMouseClickEvent # click on the background canvas
+        self._scatterViewbox.mouseClickEvent = self._scatterViewboxMouseClickEvent  # click on the background canvas
         self._scatterViewbox.mouseDragEvent = self._scatterMouseDragEvent
         # self._scatterViewbox.hoverEvent = self._scatterHoverEvent
-        self._scatterViewbox.scene().sigMouseMoved.connect(self.mouseMoved) #use this if you need the mouse Posit
+        self._scatterViewbox.scene().sigMouseMoved.connect(self.mouseMoved)  #use this if you need the mouse Posit
         # self._scatterViewbox.setLimits(**{'xMin':0, 'xMax':1, 'yMin':0, 'yMax':1})
         self._plotItem.setMenuEnabled(False)
         self._exportDialog = None
@@ -267,34 +270,33 @@ class ScatterPlot(Widget):
         self._plotItem.autoRange()
         self.xOriginLine = pg.InfiniteLine(angle=90, pos=0, pen=OriginAxes)
         self.yOriginLine = pg.InfiniteLine(angle=0, pos=0, pen=OriginAxes)
-        self.pointSelectionCallback = pointSelectionCallback # single click
-        self.pointActionCallback = pointActionCallback # double click
+        self.pointSelectionCallback = pointSelectionCallback  # single click
+        self.pointActionCallback = pointActionCallback  # double click
         self._plotItem.addItem(self.scatterPlot)
         self._plotItem.addItem(self.xOriginLine)
         self._plotItem.addItem(self.yOriginLine)
         autoBtnFile = os.path.join(ICON_DIR, 'icons/zoom-full.png')
         self.autoBtn = self._plotItem.autoBtn = pg.ButtonItem(imageFile=autoBtnFile, width=30, parentItem=self._plotItem)
-        self._plotItem.updateButtons = lambda : None # just to remove the odd PyQtGraph default behaviour
+        self._plotItem.updateButtons = lambda: None  # just to remove the odd PyQtGraph default behaviour
         self.autoBtn.clicked.connect(self._setZoomFull)
         self.getLayout().addWidget(self._scatterView)
         self.axisSelectionFrame = Frame(self, setLayout=True, grid=(1, 0))
         self.axisSelectionFrame.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
         self._xSelCW = PulldownListCompoundWidget(self.axisSelectionFrame, labelText='Select X-axis',
-                                        callback=self._axisSelectionCallback, grid=(0, 0))#,  hAlign='l',)
+                                                  callback=self._axisSelectionCallback, grid=(0, 0))  #,  hAlign='l',)
         self._ySelCW = PulldownListCompoundWidget(self.axisSelectionFrame, labelText='Select Y-axis',
-                                                  callback=self._axisSelectionCallback, grid=(0, 1))#,  hAlign='l',)
+                                                  callback=self._axisSelectionCallback, grid=(0, 1))  #,  hAlign='l',)
         self.xAxisSelector = self._xSelCW.pulldownList
         self.yAxisSelector = self._ySelCW.pulldownList
 
         # coordinates
-        self.coordinatesLabel = Label(self.axisSelectionFrame, text='', grid=(0,2))
+        self.coordinatesLabel = Label(self.axisSelectionFrame, text='', grid=(0, 2))
         # context menu
         self.contextMenu = Menu('', None, isFloatWidget=True)
         self._setPlotItemFonts()
         self.setAxesWidgets()
         self._selectedData = []
         self._tipTextIsEnabled = True
-
 
     @property
     def dataFrame(self):
@@ -349,7 +351,7 @@ class ScatterPlot(Widget):
         self._setPointPens(self._getPointPens())
         self.dataSelectedSignal.emit(data)
 
-    def setAxesDefinitions(self, defs:od, updateWidgets=True):
+    def setAxesDefinitions(self, defs: od, updateWidgets=True):
         """
         :param defs: orderedDict key: visible label to appear in the pulldown, value: the dataframe column header name.
         if None, they will be used the  header names as they appear in the original dataframe.
@@ -409,7 +411,7 @@ class ScatterPlot(Widget):
         #todo
         if not enable:
             self.roiItem.hide()
-            self.roiItem.setLimits(0,0,0,0)
+            self.roiItem.setLimits(0, 0, 0, 0)
             self.roiItem.sigRegionChangeFinished.disconnect(self._roiChangedCallback)
             self.roiItem._isEnabled = False
         else:
@@ -482,7 +484,7 @@ class ScatterPlot(Widget):
             args = [x, y]
         if not kwargs.get(_SYMBOL) in AllowedSymbols:
             getLogger().warning('Symbol not available. Used the default instead')
-            kwargs.update({_SYMBOL:'o'})
+            kwargs.update({_SYMBOL: 'o'})
         self.scatterPlot.addPoints(*args, **kwargs)
         self.setPlotLimits()
 
@@ -512,6 +514,7 @@ class ScatterPlot(Widget):
 
     def setPlotLimits(self, **kwargs):
         from ccpn.util.Common import percentage
+
         try:
             addPercent = 200
             xValues, yValues = self.scatterPlot.getData()
@@ -526,16 +529,15 @@ class ScatterPlot(Widget):
             return
 
         self._scatterViewbox.setLimits(
-                                        xMin = xMin - deltaX,
-                                        xMax = xMax + deltaX,
-                                        yMin = yMin - deltaY,
-                                        yMax = yMax + deltaY,
-                                        minXRange = 0.01,
-                                        maxXRange = max(xValues)*10,
-                                        minYRange = 0.01,
-                                        maxYRange = max(yValues)*10,
-                                        )
-
+                xMin=xMin - deltaX,
+                xMax=xMax + deltaX,
+                yMin=yMin - deltaY,
+                yMax=yMax + deltaY,
+                minXRange=0.01,
+                maxXRange=max(xValues) * 10,
+                minYRange=0.01,
+                maxYRange=max(yValues) * 10,
+                )
 
     def getPointBrushes(self, itemDef=None, overrideItemDef=False):
         """
@@ -559,7 +561,7 @@ class ScatterPlot(Widget):
         :return: list of brushes for painting the scatterPlot points
         """
         if itemDef is None:
-            if len(self.axesDefinitions.values())>0:
+            if len(self.axesDefinitions.values()) > 0:
                 itemDef = list(self.axesDefinitions.values())[0]
 
         innerData = self.roiItem.getInnerData()
@@ -572,13 +574,13 @@ class ScatterPlot(Widget):
                 pidHeader = getattr(itemDef, _PIDHEADER)
                 objColourProperty = getattr(itemDef, _OBJCOLOURPROPERTY)
                 hexHeader = getattr(itemDef, _HEXCOLOURHEADER)
-                if objColourProperty is not None: # use the obj for getting the colour info (if defined)
+                if objColourProperty is not None:  # use the obj for getting the colour info (if defined)
                     pidDf = self.dataFrame.get(pidHeader)
                     if pidDf is not None and self.project:
                         ccpnObjs = _getObjectsByPids(self.project, pidDf.values)
                         hexs = [getattr(o, objColourProperty) for o in ccpnObjs]
 
-                if hexHeader is not None: # use the dedicated colour Header for getting the colour info (if defined)
+                if hexHeader is not None:  # use the dedicated colour Header for getting the colour info (if defined)
                     hexDf = self.dataFrame.get(hexHeader)
                     if hexDf is not None:
                         hexDf.fillna(self.hexPointColour, inplace=True)
@@ -612,7 +614,7 @@ class ScatterPlot(Widget):
     def _setPlotItemLabels(self):
         self._plotItem.setLabel('bottom', self.xAxisSelector.getText())
         self._plotItem.setLabel('left', self.yAxisSelector.getText())
-    
+
     def _setPlotItemFonts(self):
         if self.application:
             self._plotItem.getAxis('bottom').setPen(GridPen)
@@ -627,25 +629,25 @@ class ScatterPlot(Widget):
         Creates default context menu items.
         """
         items = [
-                cm._SCMitem(name='Reset Zoom',
-                         typeItem=cm.ItemTypes.get(cm.ITEM), icon='icons/zoom-full',
-                         toolTip='Reset the plot to default limits',
-                         callback=self._plotItem.autoRange),
-                cm._SCMitem(name='ROI',
+            cm._SCMitem(name='Reset Zoom',
+                        typeItem=cm.ItemTypes.get(cm.ITEM), icon='icons/zoom-full',
+                        toolTip='Reset the plot to default limits',
+                        callback=self._plotItem.autoRange),
+            cm._SCMitem(name='ROI',
                         typeItem=cm.ItemTypes.get(cm.ITEM), icon='icons/roi',
                         toolTip='Toggle ROI',
-                        checkable = True,
+                        checkable=True,
                         callback=self.toggleROI),
-                cm._SCMitem(name='Select within ROI',
-                            typeItem=cm.ItemTypes.get(cm.ITEM), icon='icons/roi_selection',
-                            toolTip='Select items locatate inside the ROI limits',
-                            callback=self.selectFromROI),
-                cm._SCMitem(name='Toggle Mouse Text',
+            cm._SCMitem(name='Select within ROI',
+                        typeItem=cm.ItemTypes.get(cm.ITEM), icon='icons/roi_selection',
+                        toolTip='Select items locatate inside the ROI limits',
+                        callback=self.selectFromROI),
+            cm._SCMitem(name='Toggle Mouse Text',
                         typeItem=cm.ItemTypes.get(cm.ITEM), icon=None,
                         toolTip='Show/hide the mouse coordinates from plot',
                         callback=self.toggleTipText),
-                cm._separator(),
-                ]
+            cm._separator(),
+            ]
         items = [itm for itm in items if itm is not None]
         return items
 
@@ -654,11 +656,11 @@ class ScatterPlot(Widget):
         Creates default Export context menu items.
         """
         items = [
-                cm._SCMitem(name='Export image...',
+            cm._SCMitem(name='Export image...',
                         typeItem=cm.ItemTypes.get(cm.ITEM), icon=None,
                         toolTip='Export image to file.',
                         callback=partial(self._showExportDialog, self._scatterViewbox)),
-                ]
+            ]
         items = [itm for itm in items if itm is not None]
         return items
 
@@ -702,11 +704,11 @@ class ScatterPlot(Widget):
         for item in items:
             if item is not None:
                 data.append(CallBack(value=[item.pos().x(), item.pos().y()],
-                                theObject=item,
-                                object=item.data(),
-                                targetName=None,
-                                trigger=trigger,
-                                ))
+                                     theObject=item,
+                                     object=item.data(),
+                                     targetName=None,
+                                     trigger=trigger,
+                                     ))
         return data
 
     def _scatterMouseDoubleClickEvent(self, ev):
@@ -768,8 +770,8 @@ class ScatterPlot(Widget):
             if self._scatterViewbox.sceneBoundingRect().contains(position):
                 mousePoint = self._scatterViewbox.mapSceneToView(position)
                 x = mousePoint.x()
-                y =  mousePoint.y()
-                self._showTipTextForPosition(x,y)
+                y = mousePoint.y()
+                self._showTipTextForPosition(x, y)
             else:
                 self.tipText.hide()
 
@@ -788,7 +790,7 @@ class ScatterPlot(Widget):
     def _showTipTextForPosition(self, x, y):
         labelPos = "x=%0.2f, y=%0.2f" % (x, y)
         pts = self.scatterPlot.pointsAt(pg.Point(x, y))
-        if len(pts)>0:
+        if len(pts) > 0:
             pids = self.getPidsFromPoints(pts)
             if any(pids):
                 pidsLabels = '\n'.join(map(str, pids))
@@ -913,7 +915,7 @@ class ScatterPlot(Widget):
         # self._setPointPens(self._getPointPens())
 
     def _selectScatterPointsFromCurrent(self):
-       pass
+        pass
         #todo
 
     def _invertScatterSelection(self):
@@ -922,7 +924,7 @@ class ScatterPlot(Widget):
 
     def selectByPids(self, pids):
 
-        if len(self.axesDefinitions)>0:
+        if len(self.axesDefinitions) > 0:
             dataToSelect = []
             itemDef = list(self.axesDefinitions.values())[0]
             pidHeader = getattr(itemDef, _PIDHEADER)
@@ -937,7 +939,7 @@ class ScatterPlot(Widget):
 
     def getPidsFromPoints(self, points):
         pids = []
-        if len(self.axesDefinitions)>0:
+        if len(self.axesDefinitions) > 0:
             itemDef = list(self.axesDefinitions.values())[0]
             pidHeader = getattr(itemDef, _PIDHEADER)
             for point in points:
@@ -948,56 +950,58 @@ class ScatterPlot(Widget):
     def constrainPlot(self, abool):
         if not abool:
             self._scatterViewbox.setLimits(
-                                        xMin = None,
-                                        xMax = None,
-                                        yMin = None,
-                                        yMax = None,
-                                        minXRange = None,
-                                        maxXRange = None,
-                                        minYRange = None,
-                                        maxYRange = None,
-                                        )
+                    xMin=None,
+                    xMax=None,
+                    yMin=None,
+                    yMax=None,
+                    minXRange=None,
+                    maxXRange=None,
+                    minYRange=None,
+                    maxYRange=None,
+                    )
         else:
             self.setPlotLimits()
+
 
 if __name__ == '__main__':
     from PyQt5 import QtGui, QtWidgets
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
     from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+
+
     n = 50
 
     data = pd.DataFrame({
-        'entryValues': np.arange(1, n+1),
-        'lengthValues': np.random.rand(n)*33,
-        'diameterValues': np.random.rand(n)/10,
-        'heightValues': np.random.rand(n)*7.5,
+        'entryValues'       : np.arange(1, n + 1),
+        'lengthValues'      : np.random.rand(n) * 33,
+        'diameterValues'    : np.random.rand(n) / 10,
+        'heightValues'      : np.random.rand(n) * 7.5,
         'buggingScoreValues': np.random.rand(n),
         # 'SpectraPidsValues': np.array(['SP:LadyBug', 'SP:Lice', 'SP:BedBug', 'SP:Flea', 'SP:Mite']),
         # 'HexColoursValues': np.array([list(darkDefaultSpectrumColours.keys())[10]]*n),
-    })
+        })
 
     defs = od([
-                ( '#', _ItemBC(
-                        selectorName = '#',
-                        headerValueName = 'entryValues',
-                        headerPidName = 'SpectraPidsValues',
-                        headerHexColour = 'HexColoursValues',
-                        )),
-                ('Length', _ItemBC(
-                    selectorName='Length',
-                    headerValueName='lengthValues',
-                    headerPidName='SpectraPidsValues',
-                    headerHexColour='HexColoursValues',
-                    )),
-                ('Score', _ItemBC(
-                    selectorName='Score',
-                    headerValueName='buggingScoreValues',
-                    headerPidName='SpectraPidsValues',
-                    headerHexColour='HexColoursValues',
-                    )),
-                ])
-
+        ('#', _ItemBC(
+                selectorName='#',
+                headerValueName='entryValues',
+                headerPidName='SpectraPidsValues',
+                headerHexColour='HexColoursValues',
+                )),
+        ('Length', _ItemBC(
+                selectorName='Length',
+                headerValueName='lengthValues',
+                headerPidName='SpectraPidsValues',
+                headerHexColour='HexColoursValues',
+                )),
+        ('Score', _ItemBC(
+                selectorName='Score',
+                headerValueName='buggingScoreValues',
+                headerPidName='SpectraPidsValues',
+                headerHexColour='HexColoursValues',
+                )),
+        ])
 
     app = TestApplication()
     win = QtWidgets.QMainWindow()
@@ -1006,11 +1010,11 @@ if __name__ == '__main__':
     module = CcpnModule(mainWindow=None, name='Testing Module')
     moduleArea.addModule(module)
     scatterPlot = ScatterPlot(parent=module.mainWidget, application=None,
-                              dataFrame=data, axesDefinitions=defs, roiEnabled=True, grid=(0,0))
+                              dataFrame=data, axesDefinitions=defs, roiEnabled=True, grid=(0, 0))
     # scatterPlot.setAxesDefinitions(defs)
     scatterPlot.selectAxes(xHeader='#', yHeader='Length')
     scatterPlot.roiLimits = [0, 1, 0, 1]
-    scatterPlot.setInnerPointColour('#008000') # green
+    scatterPlot.setInnerPointColour('#008000')  # green
     scatterPlot.setPointSymbol(AllowedSymbols[4])
 
     win.setCentralWidget(moduleArea)
@@ -1022,44 +1026,46 @@ if __name__ == '__main__':
     win.close()
 
 false = False
-if false: # this should never be called from here ###  only run on ipythonConsole
+if false:  # this should never be called from here ###  only run on ipythonConsole
     from collections import OrderedDict as od
     from ccpn.ui.gui.modules.CcpnModule import CcpnModule
     from ccpn.ui.gui.widgets.ScatterPlotWidget import ScatterPlot, _ItemBC
     import numpy as np
     import pandas as pd
+
+
     n = 5
 
     data = pd.DataFrame({
-                        'Values0': np.arange(1, n + 1),
-                        'Values1': np.random.rand(n),
-                        'Values2': np.random.rand(n),
-                        'SpectraPids': [sp.pid for sp in project.spectra[:5]]
-                        })
+        'Values0'    : np.arange(1, n + 1),
+        'Values1'    : np.random.rand(n),
+        'Values2'    : np.random.rand(n),
+        'SpectraPids': [sp.pid for sp in project.spectra[:5]]
+        })
 
     defs = od([
-                ('#', _ItemBC(
-                    selectorName='#',
-                    headerValueName='Values0',
-                    headerPidName='SpectraPids',
-                    objColourProperty='positiveContourColour',
+        ('#', _ItemBC(
+                selectorName='#',
+                headerValueName='Values0',
+                headerPidName='SpectraPids',
+                objColourProperty='positiveContourColour',
                 )),
-                ('Length', _ItemBC(
-                    selectorName='Length',
-                    headerValueName='Values1',
-                    headerPidName='SpectraPids',
-                    objColourProperty='positiveContourColour',
+        ('Length', _ItemBC(
+                selectorName='Length',
+                headerValueName='Values1',
+                headerPidName='SpectraPids',
+                objColourProperty='positiveContourColour',
                 )),
-                ('Score', _ItemBC(
-                    selectorName='Score',
-                    headerValueName='Values2',
-                    headerPidName='SpectraPids',
-                    objColourProperty='positiveContourColour',
+        ('Score', _ItemBC(
+                selectorName='Score',
+                headerValueName='Values2',
+                headerPidName='SpectraPids',
+                objColourProperty='positiveContourColour',
                 )),
-                ])
+        ])
 
     module = CcpnModule(mainWindow=mainWindow, name='Testing Module')
-    scatterPlot = ScatterPlot(parent=module.mainWidget, application=application, dataFrame=data, grid=(0,0))
+    scatterPlot = ScatterPlot(parent=module.mainWidget, application=application, dataFrame=data, grid=(0, 0))
     scatterPlot.setAxesDefinitions(defs)
     scatterPlot.selectAxes(xHeader='#', yHeader='Length')
     mainWindow.moduleArea.addModule(module)

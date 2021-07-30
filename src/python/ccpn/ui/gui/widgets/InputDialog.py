@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-29 13:31:41 +0100 (Tue, June 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-30 20:44:26 +0100 (Fri, July 30, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -30,50 +30,49 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 
 def askPassword(title, prompt, parent=None):
-    
-  dialog = QtWidgets.QInputDialog(parent)
-  dialog.setInputMode(QtWidgets.QInputDialog.TextInput)
-  dialog.setTextEchoMode( QtWidgets.QLineEdit.Password )
-  dialog.setLabelText(prompt)
-  # dialog.connect(dialog, QtCore.SIGNAL('rejected()'), lambda:dialog.setTextValue(''))
-  dialog.rejected.connect(lambda:dialog.setTextValue(''))
-  dialog.exec_()
-  
-  return dialog.textValue() or None
- 
+    dialog = QtWidgets.QInputDialog(parent)
+    dialog.setInputMode(QtWidgets.QInputDialog.TextInput)
+    dialog.setTextEchoMode(QtWidgets.QLineEdit.Password)
+    dialog.setLabelText(prompt)
+
+    dialog.rejected.connect(lambda: dialog.setTextValue(''))
+    dialog.exec_()
+
+    return dialog.textValue() or None
+
 
 def askString(title, prompt, initialValue='', parent=None):
+    value, isOk = QtWidgets.QInputDialog.getText(parent, title, prompt,
+                                                 text=initialValue)
 
-  value, isOk =  QtWidgets.QInputDialog.getText(parent, title, prompt,
-                                            text=initialValue)
-  
-  if isOk:
-    return value
+    if isOk:
+        return value
+
 
 def askInteger(title, prompt, initialValue=0, minValue=-2147483647,
                maxValue=2147483647, parent=None):
+    value, isOk = QtWidgets.QInputDialog.getInt(parent, title, prompt, initialValue,
+                                                minValue, maxValue)
+    if isOk:
+        return value
 
-  value, isOk = QtWidgets.QInputDialog.getInt(parent, title, prompt, initialValue,
-                                          minValue, maxValue)
-  if isOk:
-    return value
 
 def askFloat(title, prompt, initialValue=0.0, minValue=-2147483647,
              maxValue=2147483647, decimals=6, parent=None):
+    value, isOk = QtWidgets.QInputDialog.getDouble(parent, title, prompt, initialValue,
+                                                   minValue, maxValue, decimals)
 
-  value, isOk = QtWidgets.QInputDialog.getDouble(parent, title, prompt, initialValue,
-                                             minValue, maxValue, decimals)
-                                             
-  if isOk:
-    return value
+    if isOk:
+        return value
+
 
 if __name__ == '__main__':
-  
-  from ccpn.ui.gui.widgets.Application import Application
-  
-  app = Application()
+    from ccpn.ui.gui.widgets.Application import Application
 
-  print(askString('ask string title', 'ask string prompt', 'Hello'))
-  print(askInteger('ask integer title', 'ask integer prompt', 7))
-  print(askFloat('ask float title', 'ask float prompt', 3.141593))
-  print(askPassword('ask password', 'ask password prompt'))
+
+    app = Application()
+
+    print(askString('ask string title', 'ask string prompt', 'Hello'))
+    print(askInteger('ask integer title', 'ask integer prompt', 7))
+    print(askFloat('ask float title', 'ask float prompt', 3.141593))
+    print(askPassword('ask password', 'ask password prompt'))

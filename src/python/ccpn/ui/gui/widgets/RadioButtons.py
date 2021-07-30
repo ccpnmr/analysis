@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 11:00:57 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-30 20:44:26 +0100 (Fri, July 30, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -90,7 +90,6 @@ class RadioButtons(QtWidgets.QWidget, Base):
         # if selectedInd is not None:
         #   self.radioButtons[selectedInd].setChecked(True)
 
-        # buttonGroup.connect(buttonGroup, QtCore.SIGNAL('buttonClicked(int)'), self._callback)
         buttonGroup.buttonClicked.connect(self._callback)
         self.setCallback(callback)
 
@@ -308,8 +307,8 @@ class EditableRadioButtons(Widget, Base):
             layout.addWidget(button, *grid)
             if objectNames and objectNames[i]:
                 button.radioButton.setObjectName(objectNames[i])
-                button.radioButton.setObjectName('radioButton_'+objectNames[i])
-                button.lineEdit.setObjectName('lineEdit_'+objectNames[i])
+                button.radioButton.setObjectName('radioButton_' + objectNames[i])
+                button.lineEdit.setObjectName('lineEdit_' + objectNames[i])
 
             if icons and icons[i]:
                 thisIcon = icons[i]

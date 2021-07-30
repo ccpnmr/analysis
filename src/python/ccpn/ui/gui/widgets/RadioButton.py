@@ -4,8 +4,9 @@ This module implements the Button class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-16 12:14:33 +0100 (Wed, September 16, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-07-30 20:44:26 +0100 (Fri, July 30, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -66,12 +67,7 @@ class RadioButton(QtWidgets.QRadioButton, Base):
         return self.get()
 
     def setCallback(self, callback):
-        #
-        # if self.callback:
-        #   self.disconnect(self, QtCore.SIGNAL('clicked()'), self.callback)
-
         if callback:
-            # self.connect(self, QtCore.SIGNAL('clicked()'), callback)
             self.clicked.connect(callback)
 
     def _getSaveState(self):
@@ -93,11 +89,11 @@ class EditableRadioButton(Widget):
 
         """editingFinishedCallback = True. it will re-fired the radioButton callback
         """
-        super().__init__(parent, setLayout=True,)
+        super().__init__(parent, setLayout=True, )
         # Base._init(self, setLayout=True, **kwds)
         # self.setEnabled(False)
-        self.radioButton = RadioButton(self, callback=callback, tipText=tipText, grid=(0,0))
-        self.lineEdit = LineEdit(self, text=text, backgroundText=backgroundText, grid=(0,1))#  hAlign='l',)
+        self.radioButton = RadioButton(self, callback=callback, tipText=tipText, grid=(0, 0))
+        self.lineEdit = LineEdit(self, text=text, backgroundText=backgroundText, grid=(0, 1))  #  hAlign='l',)
         self.lineEdit.hide()
         self.editable = editable
         if editable:
@@ -145,17 +141,17 @@ class EditableRadioButton(Widget):
             self.callback()
 
 
-
-
-
-
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
+
+
     app = TestApplication()
+
 
     def callback():
         print('callback ~~~~')
+
 
     popup = CcpnDialog(setLayout=True)
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-30 20:30:53 +0100 (Fri, July 30, 2021) $"
+__dateModified__ = "$dateModified: 2021-07-30 21:18:49 +0100 (Fri, July 30, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -245,9 +245,10 @@ class AttributeEditorPopupABC(CcpnDialogMainWidget):
         return changeState(self, allChanges, applyState, revertState, self._okButton, None, self._revertButton, 0)
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetValue(self, attr, attrType, getFunction, setFunction, presetFunction, callback, dim, _value):
+    def _queueSetValue(self, attr, attrType, getFunction, setFunction, presetFunction, callback, dim, _value=None):
         """Queue the function for setting the attribute in the calling object (dim needs to stay for the decorator)
         """
+        # _value needs to be None because this is also called by widget.callBack which does not add the extra parameter
         from ccpn.ui.gui.modules.CcpnModule import CommonWidgetsEdits
 
         if attrType and attrType.__name__ in CommonWidgetsEdits:

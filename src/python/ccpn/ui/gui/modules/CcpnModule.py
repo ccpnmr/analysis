@@ -55,19 +55,16 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
-from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.ToolButton import ToolButton
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
-from ccpn.ui.gui.widgets.RadioButtons import EditableRadioButtons
 from ccpn.ui.gui.widgets.SideBar import SideBar, SideBarSearchListView
 from ccpn.ui.gui.widgets.PythonEditor import QCodeEditor
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, CheckBoxCompoundWidget, \
     DoubleSpinBoxCompoundWidget, SelectorWidget, InputPulldown, \
     ColourSelectionWidget, LineEditPopup, ListCompoundWidget
-from ccpn.ui.gui.widgets.PulldownListsForObjects import _PulldownABC
 from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, TextEditorCompoundWidget, \
     RadioButtonsCompoundWidget, ScientificSpinBoxCompoundWidget, SpinBoxCompoundWidget
@@ -76,46 +73,8 @@ from ccpn.ui.gui.widgets.Entry import Entry
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.lib.Pid import Pid, PREFIXSEP, createPid
-from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.ui.gui.widgets.Base import Base
 
-
-# TODO remove this, add to the widget baseclass two methods: _getState, __setState.
-CommonWidgets = {
-    # CheckBox.__name__                   : (CheckBox.get, CheckBox.setChecked),
-    # ColourDialog.__name__               : (ColourDialog.getColor, ColourDialog.setColour),
-    # DoubleSpinbox.__name__              : (DoubleSpinbox.value, DoubleSpinbox.setValue),
-    # ScientificDoubleSpinBox.__name__    : (ScientificDoubleSpinBox.value, ScientificDoubleSpinBox.setValue),
-    ## Label.__name__:                   (Label.get,                   Label.setText),
-    # LineEdit.__name__                   : (LineEdit.get, LineEdit.setText),
-    # LineEditButtonDialog.__name__       : (LineEditButtonDialog.get, LineEditButtonDialog.setText),
-    # PulldownList.__name__               : (PulldownList.currentText, PulldownList.set),
-    # RadioButtons.__name__               : (RadioButtons.get, RadioButtons.set),
-    # RadioButton.__name__                : (RadioButton.isChecked, RadioButton.setChecked),
-    # EditableRadioButtons.__name__       : (EditableRadioButtons.getIndex, EditableRadioButtons.setIndex),
-    #
-    # Slider.__name__                     : (Slider.get, Slider.setValue),
-    # Spinbox.__name__                    : (Spinbox.value, Spinbox.set),
-    # TextEditor.__name__                 : (TextEditor.get, TextEditor.setText),
-    # GLTargetButtonSpinBoxes.__name__    : (GLTargetButtonSpinBoxes.get, GLTargetButtonSpinBoxes.setValues),
-
-    # PulldownListCompoundWidget.__name__ : (PulldownListCompoundWidget.getText, PulldownListCompoundWidget.select),  #PulldownList
-    # ListCompoundWidget.__name__         : (ListCompoundWidget.getTexts, ListCompoundWidget.setTexts),  #PulldownList based
-    # CheckBoxCompoundWidget.__name__     : (CheckBoxCompoundWidget.get, CheckBoxCompoundWidget.set),
-    # DoubleSpinBoxCompoundWidget.__name__: (DoubleSpinBoxCompoundWidget.getValue, DoubleSpinBoxCompoundWidget.setValue),  #D oubleSpinbox
-    # SelectorWidget.__name__             : (SelectorWidget.getText, SelectorWidget.select),  #PulldownList
-    # InputPulldown.__name__              : (InputPulldown.currentText, InputPulldown.set),  #PulldownList
-    # ColourSelectionWidget.__name__      : (ColourSelectionWidget.currentText, ColourSelectionWidget.setColour),  #PulldownList
-    # LineEditPopup.__name__              : (LineEditPopup.get, LineEditPopup.set),
-    # QCodeEditor.__name__                : (QCodeEditor.get, QCodeEditor.set),
-
-    # EntryCompoundWidget.__name__        : (EntryCompoundWidget.getText, EntryCompoundWidget.setText),
-    # TextEditorCompoundWidget.__name__   : (TextEditorCompoundWidget.getText, TextEditorCompoundWidget.setText),
-    NmrChainPulldown.__name__           : (NmrChainPulldown.getText, NmrChainPulldown.select),
-    # GuiTable.__name__                   : (GuiTable.getHiddenColumns, GuiTable.setHiddenColumns) # For Tables, save/restore only hidden columns
-
-    # ADD Others
-    }
 
 CommonWidgetsEdits = {
     CheckBox.__name__                       : (CheckBox.get, CheckBox.setChecked, None),

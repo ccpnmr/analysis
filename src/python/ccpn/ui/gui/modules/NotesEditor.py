@@ -57,6 +57,7 @@ class NotesEditorModule(CcpnModule):
 
     className = 'NotesEditorModule'
     attributeName = 'notes'  # self.project.notes
+    _includeInLastSeen = False
 
     def __init__(self, mainWindow=None, name='Notes Editor',
                  note=None, selectFirstItem=False):

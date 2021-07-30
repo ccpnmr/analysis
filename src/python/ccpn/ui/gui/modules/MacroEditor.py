@@ -65,11 +65,13 @@ class MacroEditor(CcpnModule):
     """
     Macro editor will run Python Files only.
     """
-    includeSettingsWidget = True
+    includeSettingsWidget = False
     maxSettingsState = 2
     settingsPosition = 'top'
 
     className = 'MacroEditor'
+    _includeInLastSeen = False
+
 
     def __init__(self, mainWindow=None, name='MacroEditor', filePath=None):
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
@@ -101,6 +103,7 @@ class MacroEditor(CcpnModule):
 
         if self.preferences:
             self.userMacroDirPath = self.preferences.general.userMacroPath
+            self.autoOpenPythonConsole = self.preferences.appearance.autoOpenPythonConsoleOnMacroEditor
         if self.userMacroDirPath is None and self.application:
             self.userMacroDirPath = self.application.tempMacrosPath
 
@@ -171,13 +174,6 @@ class MacroEditor(CcpnModule):
 
     def _createWidgetSettings(self):
         hGrid = 0
-        self.autoOpenPythonConsoleLabel = Label(self.settingsWidget, 'Auto-Open PythonConsole', grid=(hGrid, 0), )
-        self.autoOpenPythonConsoleCB = CheckBox(self.settingsWidget,
-                                                checked=self.autoOpenPythonConsole,
-                                                callback=self._setAutoOpenPythonConsole, grid=(hGrid, 1))
-
-    def _setAutoOpenPythonConsole(self, value):
-        self.autoOpenPythonConsole = value
 
     def run(self):
         if self._pythonConsole is not None:

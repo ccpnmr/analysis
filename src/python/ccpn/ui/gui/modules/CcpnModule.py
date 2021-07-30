@@ -175,6 +175,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     settingsMinimumSizes = (100, 50)
     _restored = False
     _onlySingleInstance = False
+    _includeInLastSeen = True # whether to restore or not after closing it (in the same project)
     # _instances = set()
 
     def __init__(self, mainWindow, name, closable=True, closeFunc=None, settingsScrollBarPolicies=('asNeeded', 'asNeeded'), **kwds):
@@ -527,7 +528,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                     for i in area.children():
                         if isinstance(i, Container):
                             self._container = i
-        self.area._seenModuleStates[self.className] = {MODULENAME:self.moduleName, WIDGETSTATE:self.widgetsState}
+        if self._includeInLastSeen:
+            self.area._seenModuleStates[self.className] = {MODULENAME:self.moduleName, WIDGETSTATE:self.widgetsState}
         super().close()
 
     #=========================================================================================

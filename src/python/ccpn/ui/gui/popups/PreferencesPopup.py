@@ -596,6 +596,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.rememberLastClosedModule.toggled.connect(self._queueSetRememberLastClosedModuleState)
 
         row += 1
+        self.runPyConsoleOnMacroEditorLabel = Label(parent, text="Auto-Open Python Console on Macro Editor", grid=(row, 0))
+        self.runPyConsoleOnMacroEditor = CheckBox(parent, grid=(row, 1))
+        self.runPyConsoleOnMacroEditor.toggled.connect(self._queueSetAutoOpenPythonConsoleOnMacroEditor)
+
+        row += 1
         Spacer(parent, 15, 2,
                QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(row, 1), gridSpan=(1, 1))
@@ -632,6 +637,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
     def _setRememberLastClosedModuleState(self, state):
         self.preferences.appearance.rememberLastClosedModuleState = state
 
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetAutoOpenPythonConsoleOnMacroEditor(self):
+        value = self.rememberLastClosedModule.isChecked()
+        if value != self.preferences.appearance.autoOpenPythonConsoleOnMacroEditor:
+            return partial(self._setAutoOpenPythonConsoleOnMacroEditor, value)
+
+    def _setAutoOpenPythonConsoleOnMacroEditor(self, state):
+        self.preferences.appearance.autoOpenPythonConsoleOnMacroEditor = state
 
     # def _queueClearSeenTips(self):
     #     #GST in this case the default should be no, but we can't do this yet... as yesNo doesn't support it
@@ -664,7 +677,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.showAllTips.setChecked(False)
         self._shownTips = copy(self.preferences.general.seenTipsOfTheDay)
         self.rememberLastClosedModule.setChecked(self.preferences.appearance.rememberLastClosedModuleState)
-
+        self.runPyConsoleOnMacroEditor.setChecked(self.preferences.appearance.autoOpenPythonConsoleOnMacroEditor)
 
     def _populate(self):
         """Populate the widgets in the tabs

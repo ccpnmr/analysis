@@ -125,6 +125,8 @@ def findExportFormats(path, dataFrame, sheet_name='Table', filterType=None, colu
         try:
             findExportFormats(str(path) + filterType, sheet_name)
         except:
+            showWarning('Could not export', 'Format file not supported or not provided.'
+                                            '\nUse one of %s' %', '.join(formatTypes))
             getLogger().warning('Format file not supported')
 
 

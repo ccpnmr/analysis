@@ -202,6 +202,25 @@ class SpectrumGroup(AbstractWrapperObject):
         # Store the api objects
         self._wrappedData.dataSources = [x._wrappedData for x in data]
 
+    def addSpectrum(self, spectrum, seriesValue=None):
+        """Add a spectrum Instance to the spectrum group
+
+        :param spectrum: a Spectrum instance to be added to the group
+        :param seriesValue: a value associated with this series
+        """
+        if not isinstance(spectrum, Spectrum):
+            raise RuntimeError('Can only add Spectrum instances to a spectrumGroup; got %s' % spectrum)
+
+        # For now: cumbersome; TODO the setter on self.spectra should disappear
+        _spectra = list(self.spectra)
+        _spectra.append(spectrum)
+
+        _series = list(self.series)
+        _series.append(seriesValue)
+
+        self.spectra = _spectra
+        self.series = _series
+
     @property
     def series(self) -> Tuple[Any, ...]:
         """Returns a tuple of series items for the attached spectra
@@ -211,11 +230,11 @@ class SpectrumGroup(AbstractWrapperObject):
         where val1-valN correspond to the series items in the attached spectra associated with this group
         For a spectrum with no values, returns None in place of Item
         """
-        series = ()
-        for spectrum in self.spectra:
-            series += (spectrum._getSeriesItem(self),)
-
-        return series
+        # series = ()
+        # for spectrum in self.spectra:
+        #     series += (spectrum._getSeriesItem(self),)
+        result = [sp._getSeriesItem(self) for sp in self.spectra]
+        return tuple(result)
 
     @series.setter
     @ccpNmrV3CoreSetter()
@@ -379,7 +398,7 @@ class SpectrumGroup(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(SpectrumGroup)
-def _newSpectrumGroup(self: Project, name: str, spectra=(), comment: str = None) -> SpectrumGroup:
+def _newSpectrumGroup(self: Project, name: str, spectra=(), **kwds) -> SpectrumGroup:
     """Create new SpectrumGroup
 
     See the SpectrumGroup class for details.
@@ -405,9 +424,14 @@ def _newSpectrumGroup(self: Project, name: str, spectra=(), comment: str = None)
 
     if spectra:
         result.spectra = spectra
-    if comment:
-        result.comment = comment
 
+    for param, value in kwds.items():
+        if hasattr(result, param):
+            setattr(result, param, value)
+        else:
+            getLogger().warning('%s does not have parameter "%s"; unable to set' %
+                                (result, param)
+                                )
     return result
 
 

@@ -379,13 +379,16 @@ def _openSpectrumDisplays(mainWindow, spectrumDisplaysState):
     """
     project = mainWindow.project
     for dd in spectrumDisplaysState:
-        spectrumDisplayKeys = ["displayAxisCodes", "axisOrder", "title", "positions", "widths", "units", "stripDirection", "is1D"]
+        spectrumDisplayKeys = ["displayAxisCodes", "axisOrder", "title",
+                               "positions", "widths", "units", "stripDirection", "is1D"]
         fd = {i: dd.get(i) for i in spectrumDisplayKeys}
         spectraPids = dd.get("spectra")
         spectra = [project.getByPid(p) for p in spectraPids if project.getByPid(p)]
         stripsZoomStates = dd.get("stripsZoomStates")
         if len(spectra) > 0:
-            sd = mainWindow.createSpectrumDisplay(spectra[0], **fd)
+            sd = mainWindow.newSpectrumDisplay(spectra[0], axisCodes=fd.get('displayAxisCodes'),
+                                               stripDirection=fd.get('stripDirection'))
+            # sd = mainWindow.createSpectrumDisplay(spectra[0], **fd)
             for sp in spectra[1:]:
                 sd.displaySpectrum(sp)
             if len(stripsZoomStates) > 0:

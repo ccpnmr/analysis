@@ -29,6 +29,8 @@ from PyQt5 import QtPrintSupport
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.FileDialog import MacrosFileDialog
 from pyqode.python.widgets import PyCodeEdit
+from ccpn.ui.gui.modules.macroEditorUtil import MacroEditorServer
+
 
 # import warnings
 # with warnings.catch_warnings():
@@ -42,7 +44,7 @@ marginPosition = 100
 
 class PyCodeEditor(PyCodeEdit, Base):
     def __init__(self, parent=None, **kwds):
-        super().__init__(parent)
+        super().__init__(parent,  server_script=MacroEditorServer.__file__)
         Base._init(self, **kwds)
         self.rightMarginMode = self.modes.get('RightMarginMode')
         if self.rightMarginMode:
@@ -81,7 +83,6 @@ if __name__ == '__main__':
   popup = CcpnDialog(windowTitle='Test widget', setLayout=True)
   editor = PyCodeEditor(popup, grid=[0,0])
   editor.set('print("Hello")')
-  editor.saveToPDF()
   editor.get()
 
 

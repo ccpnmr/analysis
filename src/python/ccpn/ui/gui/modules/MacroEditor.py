@@ -24,16 +24,22 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import time as systime
-
-
 if not hasattr(systime, 'clock'):
     # NOTE:ED - quick patch to fix bug in pyqt 5.9
     systime.clock = systime.process_time
 
-import datetime
+
+import sys
 import os
+import datetime
+import tempfile
+from collections import OrderedDict as od
+from pyqode.python.widgets import PyConsole, PyInteractiveConsole
+from pyqode.core.api import TextHelper
+from ccpn.framework.PathsAndUrls import macroPath as ccpnMacroPath
+from ccpn.util.Path import aPath
+from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.FileDialog import MacrosFileDialog
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
@@ -41,21 +47,10 @@ from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.QPythonEditor import PyCodeEditor
-from ccpn.framework.PathsAndUrls import macroPath as ccpnMacroPath
-from pyqode.python.widgets import PyConsole, PyInteractiveConsole
-from ccpn.ui.gui.widgets.CheckBox import EditableCheckBox, CheckBox
-import sys
-from pyqode.core.api import TextHelper
-from collections import OrderedDict as od
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Action import Action
-import ntpath
-import tempfile
-from pathlib import Path
-from ccpn.util.Path import aPath
 
 
 _filenameLineEdit = '_filenameLineEdit'

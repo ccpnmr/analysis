@@ -23,16 +23,12 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 # Start of code
 #=========================================================================================
 
-from multiprocessing.pool import ThreadPool as Pool
 import os
 from os.path import isfile, join
 import pathlib
 import pandas as pd
-import time
 from ccpn.util.Logging import getLogger
-from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
-from tqdm import tqdm, tqdm_gui
-from ccpn.util.Common import sortObjectByName, naturalSortList
+
 
 ################################       Excel Headers Warning      ######################################################
 """The excel headers for sample, sampleComponents, substances properties are named as the appear on the wrapper.
@@ -313,6 +309,7 @@ class ExcelReader(object):
         return samplesDataFrames
 
     def _createSamples(self, dataframesList):
+        from ccpn.util.Common import naturalSortList
         from ccpn.core.Sample import _newSample
 
         samples = []

@@ -560,7 +560,7 @@ class Framework(NotifierBase):
         self.preferences = getPreferences(self.args.skipUserPreferences)
 
     def _savePreferences(self):
-        "Save the preferences to file"
+        """Save the preferences to file"""
         with catchExceptions(application=self, errorStringTemplate='Error saving preferences; "%s"', printTraceBack=True):
             directory = os.path.dirname(userPreferencesPath)
             if not os.path.exists(directory):
@@ -969,7 +969,7 @@ class Framework(NotifierBase):
         return self.getByPid(identifier)
 
     def getByPid(self, pid):
-        "Convenience"
+        """Convenience"""
         obj = self.project.getByPid(pid)
         if obj:
             return obj
@@ -981,7 +981,7 @@ class Framework(NotifierBase):
                         return self.ui.mainWindow.moduleArea.modules.get(pid.id)
 
     def getByGid(self, gid):
-        "Convenience"
+        """Convenience"""
         return self.getByPid(gid)
 
     # def _startCommandBlock(self, command: str, quiet: bool = False, **objectParameters):
@@ -1530,7 +1530,7 @@ class Framework(NotifierBase):
                 raise es
 
     def _newProjectMenuCallback(self):
-        "Callback for creating new project"
+        """Callback for creating new project"""
         with catchExceptions(application=self, errorStringTemplate='Error creating new project:', printTraceBack=True):
             okToContinue = self.ui.mainWindow._queryCloseProject(title='New Project',
                                                                  phrase='create a new')
@@ -3107,7 +3107,7 @@ class Framework(NotifierBase):
                 raise TypeError('PDFViewer not defined for linux')
 
     def _showHtmlFile(self, title, urlPath):
-        "Displays html files in program QT viewer or using native webbrowser depending on useNativeWebbrowser option"
+        """Displays html files in program QT viewer or using native webbrowser depending on useNativeWebbrowser option"""
 
         mainWindow = self.ui.mainWindow
 
@@ -3140,7 +3140,7 @@ class Framework(NotifierBase):
             #
             # _newModule = CcpnWebView(mainWindow=mainWindow, name=title, urlPath=urlPath)
             # self.ui.mainWindow.moduleArea.addModule(_newModule, position='top', relativeTo=mainWindow.moduleArea)
-            mainWindow.newHtmlModule(urlPath=urlPath, title=title, position='top', relativeTo=mainWindow.moduleArea)
+            mainWindow.newHtmlModule(urlPath=urlPath, position='top', relativeTo=mainWindow.moduleArea)
 
     def showBeginnersTutorial(self):
         from ccpn.framework.PathsAndUrls import beginnersTutorialPath
@@ -3388,7 +3388,7 @@ if __name__ == '__main__':
 
 
     class MyProgramme(Framework):
-        "My first app"
+        """My first app"""
         pass
 
 

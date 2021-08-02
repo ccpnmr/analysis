@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-02 14:03:14 +0100 (Mon, August 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import os
 import posixpath
+from PyQt5 import QtCore
 from PyQt5.QtCore import QUrl
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -48,9 +49,8 @@ class CcpnWebView(CcpnModule):
         self.mainWidget.getLayout().addWidget(self.webView, 0, 0)
 
         self.mainWidget.setStyleSheet('border-right: 1px solid %s;'
-                                             'border-left: 1px solid %s;'
-                                             'border-bottom: 1px solid %s;'
-                                             'background: transparent;' % (BORDERNOFOCUS_COLOUR, BORDERNOFOCUS_COLOUR, BORDERNOFOCUS_COLOUR))
+                                      'border-left: 1px solid %s;'
+                                      'border-bottom: 1px solid %s;' % (BORDERNOFOCUS_COLOUR, BORDERNOFOCUS_COLOUR, BORDERNOFOCUS_COLOUR))
 
         # may be a Path object
         urlPath = str(urlPath) if urlPath is not None else ''
@@ -63,14 +63,14 @@ class CcpnWebView(CcpnModule):
             if isWindowsOS():
                 urlPath = urlPath.replace(os.sep, posixpath.sep)
             else:
-                urlPath = 'file://'+urlPath
+                urlPath = 'file://' + urlPath
         else:
             if isWindowsOS():
                 urlPath = urlPath.replace(os.sep, posixpath.sep)
             else:
-                urlPath = 'file://'+ str(aPath(urlPath))
+                urlPath = 'file://' + str(aPath(urlPath))
 
-        self.webView.load(QUrl(urlPath))
+        self.webView.load(QUrl.fromUserInput(urlPath))
         self.webView.show()
 
 
@@ -84,7 +84,7 @@ if __name__ == '__main__':
     win = QtWidgets.QMainWindow()
 
     moduleArea = CcpnModuleArea(mainWindow=None)
-    module = CcpnWebView(mainWindow=None, name='My Module')
+    module = CcpnWebView(mainWindow=None, name='My Module', urlPath='http://www.ccpn.ac.uk')
     moduleArea.addModule(module)
 
     win.setCentralWidget(moduleArea)

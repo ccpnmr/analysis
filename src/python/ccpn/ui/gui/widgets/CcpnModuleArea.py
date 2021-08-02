@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-22 13:40:13 +0100 (Thu, July 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-02 20:41:02 +0100 (Mon, August 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -499,7 +499,7 @@ class CcpnModuleArea(ModuleArea, DropBase):
         return obj.container()
 
     def apoptose(self):
-        if self.temporary and self.topContainer.count() == 0:
+        if self.topContainer and self.topContainer.count() == 0:
             self.topContainer = None
             if self.home:
                 self.home.removeTempArea(self)

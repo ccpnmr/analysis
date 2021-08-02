@@ -23,12 +23,12 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import time as systime
-
-
-if not hasattr(systime, 'clock'):
-    # NOTE:ED - quick patch to fix bug in pyqt 5.9
-    systime.clock = systime.process_time
+# import time as systime
+#
+#
+# if not hasattr(systime, 'clock'):
+#     # NOTE:ED - quick patch to fix bug in pyqt 5.9
+#     systime.clock = systime.process_time
 
 # how frequently to check if license dialog has closed when waiting to show the tip of the day
 WAIT_EVENT_LOOP_EMPTY = 0

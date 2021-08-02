@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-02 20:42:22 +0100 (Mon, August 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -23,10 +23,12 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import time as systime
-if not hasattr(systime, 'clock'):
-    # NOTE:ED - quick patch to fix bug in pyqt 5.9
-    systime.clock = systime.process_time
+# import time as systime
+#
+#
+# if not hasattr(systime, 'clock'):
+#     # NOTE:ED - quick patch to fix bug in pyqt 5.9
+#     systime.clock = systime.process_time
 
 
 import sys
@@ -53,8 +55,10 @@ from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Action import Action
 from collections import OrderedDict
 
+
 _filenameLineEdit = '_filenameLineEdit'
 SaveMsgTipText = 'Note: macros are automatically saved at every changes'
+
 
 PROFILING_SORTINGS = OrderedDict([ # (arg to go on script, tipText)
                 ('time'         , 'internal time'       ),
@@ -79,6 +83,7 @@ ShowMaxLines = OrderedDict([
                              ('All'     , 1.0)
                             ])
 
+
 class MacroEditor(CcpnModule):
     """
     Macro editor will run Python Files only.
@@ -89,7 +94,6 @@ class MacroEditor(CcpnModule):
 
     className = 'MacroEditor'
     _includeInLastSeen = True
-
 
     def __init__(self, mainWindow=None, name='MacroEditor', filePath=None):
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
@@ -170,7 +174,7 @@ class MacroEditor(CcpnModule):
         hGrid = 0
         self.toolbar = ToolBar(self.mainWidget, grid=(hGrid, 0), gridSpan=(1, 2), hAlign='l', hPolicy='preferred')
         hGrid += 1
-        self.filePathLabel = Label(self.mainWidget, tipText='Macro filePath. '+SaveMsgTipText, hAlign='l', grid=(hGrid, 0))
+        self.filePathLabel = Label(self.mainWidget, tipText='Macro filePath. ' + SaveMsgTipText, hAlign='l', grid=(hGrid, 0))
         self._filenameLineEdit = LineEdit(self.mainWidget, grid=(hGrid, 1))
         self._filenameLineEdit.hide()
         setattr(self, _filenameLineEdit, LineEdit(self.mainWidget, grid=(hGrid, 1)))
@@ -635,7 +639,6 @@ class MacroEditor(CcpnModule):
                     widget._setSavedState(value)
             except Exception as e:
                 getLogger().debug('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
-
 
     def _closeModule(self):
         """Re-implementation of closeModule"""

@@ -851,7 +851,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.userDataPathText.setMinimumWidth(LineEditsMinimumWidth)
         self.userDataPathText.textChanged.connect(self._queueSetUserDataPath)
         self.userDataPathButton = Button(parent, grid=(row, 2), callback=self._getUserDataPath, icon='icons/directory',
-                                         hPolicy='fixed')
+                                         hPolicy='fixed', hAlign='left')
+
 
         # # add validate frame
         # row += 1
@@ -864,52 +865,36 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # self._validateFrame._matchFilePathWidths = parent
         #
         # self._validateFrame.setVisible(False)
+        row += 1
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
+
+        row += 1
+        self.xAxisUnits = Label(parent, text="X Axis Units", grid=(row, 0))
+        self.xAxisUnitsData = RadioButtons(parent, texts=AXIS_UNITS,
+                                           # selectedInd=xAxisUnits,
+                                           callback=self._queueSetXUnits,
+                                           direction='h',
+                                           grid=(row, 1), gridSpan=(1, 3), hAlign='l',
+                                           tipTexts=None,
+                                           )
+
+        row += 1
+        self.yAxisUnits = Label(parent, text="Y Axis Units", grid=(row, 0))
+        self.yAxisUnitsData = RadioButtons(parent, texts=AXIS_UNITS,
+                                           # selectedInd=yAxisUnits,
+                                           callback=self._queueSetYUnits,
+                                           direction='h',
+                                           grid=(row, 1), gridSpan=(1, 3), hAlign='l',
+                                           tipTexts=None)
+
+        row += 1
+        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
 
         row += 1
         self.regionPaddingLabel = Label(parent, text="Spectral Padding (%)", grid=(row, 0))
         self.regionPaddingData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=0, max=100)
         self.regionPaddingData.setMinimumWidth(LineEditsMinimumWidth)
         self.regionPaddingData.valueChanged.connect(self._queueSetRegionPadding)
-
-        row += 1
-        self.dropFactorLabel = Label(parent, text="Peak Picking Drop (%)", grid=(row, 0))
-        self.dropFactorData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=0, max=100)
-        self.dropFactorData.setMinimumWidth(LineEditsMinimumWidth)
-        self.dropFactorData.valueChanged.connect(self._queueSetDropFactor)
-
-        row += 1
-        self.dropFactorLabel = Label(parent, text="1D Peak Picking Drop (%)", tipText='Increase to filter out more', grid=(row, 0))
-        self.peakFactor1D = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=-100, max=100)
-        self.peakFactor1D.setMinimumWidth(LineEditsMinimumWidth)
-        self.peakFactor1D.valueChanged.connect(self._queueSetDropFactor1D)
-
-        row += 1
-        self.volumeIntegralLimitLabel = Label(parent, text="Volume Integral Limit", grid=(row, 0))
-        self.volumeIntegralLimitData = DoubleSpinbox(parent, step=0.05, decimals=2,
-                                                     min=1.0, max=5.0, grid=(row, 1), hAlign='l')
-        self.volumeIntegralLimitData.setMinimumWidth(LineEditsMinimumWidth)
-        self.volumeIntegralLimitData.valueChanged.connect(self._queueSetVolumeIntegralLimit)
-
-        row += 1
-        self.peakPicker1dLabel = Label(parent, text="Default 1d Peak Picker", grid=(row, 0))
-        self.peakPicker1dData = PulldownList(parent, grid=(row, 1))
-        self.peakPicker1dData.setMinimumWidth(LineEditsMinimumWidth)
-        self.peakPicker1dData.currentIndexChanged.connect(self._queueChangePeakPicker1dIndex)
-
-        row += 1
-        self.peakPickerNdLabel = Label(parent, text="Default Nd Peak Picker", grid=(row, 0))
-        self.peakPickerNdData = PulldownList(parent, grid=(row, 1))
-        self.peakPickerNdData.setMinimumWidth(LineEditsMinimumWidth)
-        self.peakPickerNdData.currentIndexChanged.connect(self._queueChangePeakPickerNdIndex)
-
-        row += 1
-        self.peakFittingMethodLabel = Label(parent, text="Peak Region Fitting Method", grid=(row, 0))
-        self.peakFittingMethod = RadioButtons(parent, texts=PEAKFITTINGDEFAULTS,
-                                              callback=self._queueSetPeakFittingMethod,
-                                              direction='h',
-                                              grid=(row, 1), hAlign='l', gridSpan=(1, 2),
-                                              tipTexts=None,
-                                              )
 
         ### Not fully Tested, Had some issues with $Path routines in setting the path of the copied spectra.
         ###  Needs more testing for different spectra formats etc. Disabled until completion.
@@ -980,6 +965,59 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                                 )
 
         row += 1
+        _frame =  Frame(parent, setLayout=True, showBorder=False, grid=(row, 0), gridSpan=(1,3))
+        _frame.setMinimumHeight(40)
+
+        _frame1 = Frame(_frame, setLayout=True, showBorder=False, grid=(0, 0))
+        _frame1.setMaximumWidth(30)
+        HLine(_frame1, grid=(0, 0), colour=getColours()[DIVIDER], height=20)
+
+        Label(_frame, grid=(0, 1), hAlign='centre', hPolicy='minimal', bold=True, text="Peak Picking")
+
+        _frame2 = Frame(_frame, setLayout=True, showBorder=False, grid=(0, 2))
+        HLine(_frame2, grid=(0, 0), colour=getColours()[DIVIDER], height=20)
+
+        row += 1
+        self.peakPicker1dLabel = Label(parent, text="Default 1D Peak Picker", grid=(row, 0))
+        self.peakPicker1dData = PulldownList(parent, grid=(row, 1))
+        # self.peakPicker1dData.setMinimumWidth(LineEditsMinimumWidth)
+        self.peakPicker1dData.currentIndexChanged.connect(self._queueChangePeakPicker1dIndex)
+
+        row += 1
+        self.dropFactorLabel = Label(parent, text="1D Peak Picking Drop (%)", tipText='Increase to filter out more', grid=(row, 0))
+        self.peakFactor1D = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=-100, max=100)
+        self.peakFactor1D.setMinimumWidth(LineEditsMinimumWidth)
+        self.peakFactor1D.valueChanged.connect(self._queueSetDropFactor1D)
+
+        row += 1
+        self.peakPickerNdLabel = Label(parent, text="Default nD Peak Picker", grid=(row, 0))
+        self.peakPickerNdData = PulldownList(parent, grid=(row, 1))
+        # self.peakPickerNdData.setMinimumWidth(LineEditsMinimumWidth)
+        self.peakPickerNdData.currentIndexChanged.connect(self._queueChangePeakPickerNdIndex)
+
+        row += 1
+        self.dropFactorLabel = Label(parent, text="nD Peak Picking Drop (%)", grid=(row, 0))
+        self.dropFactorData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=0, max=100)
+        self.dropFactorData.setMinimumWidth(LineEditsMinimumWidth)
+        self.dropFactorData.valueChanged.connect(self._queueSetDropFactor)
+
+        row += 1
+        self.peakFittingMethodLabel = Label(parent, text="Peak Interpolation Method", grid=(row, 0))
+        self.peakFittingMethod = RadioButtons(parent, texts=PEAKFITTINGDEFAULTS,
+                                              callback=self._queueSetPeakFittingMethod,
+                                              direction='h',
+                                              grid=(row, 1), hAlign='l', gridSpan=(1, 2),
+                                              tipTexts=None,
+                                              )
+
+        row += 1
+        self.volumeIntegralLimitLabel = Label(parent, text="Volume Integral Limit", grid=(row, 0))
+        self.volumeIntegralLimitData = DoubleSpinbox(parent, step=0.05, decimals=2,
+                                                     min=1.0, max=5.0, grid=(row, 1), hAlign='l')
+        self.volumeIntegralLimitData.setMinimumWidth(LineEditsMinimumWidth)
+        self.volumeIntegralLimitData.valueChanged.connect(self._queueSetVolumeIntegralLimit)
+
+        row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
 
         row += 1
@@ -1020,27 +1058,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.showIntensityLimitBox.setMinimumWidth(LineEditsMinimumWidth)
         self.showIntensityLimitBox.valueChanged.connect(self._queueSetIntensityLimit)
 
-        row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
-
-        row += 1
-        self.xAxisUnits = Label(parent, text="X Axis Units", grid=(row, 0))
-        self.xAxisUnitsData = RadioButtons(parent, texts=AXIS_UNITS,
-                                           # selectedInd=xAxisUnits,
-                                           callback=self._queueSetXUnits,
-                                           direction='h',
-                                           grid=(row, 1), gridSpan=(1, 3), hAlign='l',
-                                           tipTexts=None,
-                                           )
-
-        row += 1
-        self.yAxisUnits = Label(parent, text="Y Axis Units", grid=(row, 0))
-        self.yAxisUnitsData = RadioButtons(parent, texts=AXIS_UNITS,
-                                           # selectedInd=yAxisUnits,
-                                           callback=self._queueSetYUnits,
-                                           direction='h',
-                                           grid=(row, 1), gridSpan=(1, 3), hAlign='l',
-                                           tipTexts=None)
 
         row += 1
         HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)

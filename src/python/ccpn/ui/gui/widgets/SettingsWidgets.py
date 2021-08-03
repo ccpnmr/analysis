@@ -530,7 +530,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
             self.blockSignals(True)
 
-            for aspect in sorted(_aspectRatios.keys()):
+            for aspect in _aspectRatios.keys():
                 aspectValue = _aspectRatios[aspect]
                 if aspect in self.aspectScreen and aspect in self.aspectData:
                     self.aspectScreen[aspect].setText(self.aspectData[aspect].textFromValue(aspectValue))

@@ -261,7 +261,7 @@ class Chain(AbstractWrapperObject):
     def _toNmrChain(self):
         """ Makes an Nmr Chain from the chain """
         try:
-            from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
+            from ccpn.util.isotopes import DEFAULT_ISOTOPE_DICT
             from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
             with undoBlockWithoutSideBar():
                 nmrChain = self.project.newNmrChain(isConnected=True)

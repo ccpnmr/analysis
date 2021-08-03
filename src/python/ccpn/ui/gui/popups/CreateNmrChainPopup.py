@@ -200,7 +200,7 @@ class CreateNmrChainPopup(CcpnDialog):
         self.buttonBox.setButtonEnabled(Create, value)
 
     def _cloneFromChain(self, name):
-        from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
+        from ccpn.util.isotopes import DEFAULT_ISOTOPE_DICT
 
         with undoBlockWithoutSideBar():
             with notificationEchoBlocking():

@@ -32,7 +32,7 @@ import re
 import collections
 import pandas as pd
 import itertools
-from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
+from ccpn.util.isotopes import DEFAULT_ISOTOPE_DICT
 
 
 try:

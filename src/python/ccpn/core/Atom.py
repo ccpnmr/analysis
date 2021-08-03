@@ -248,12 +248,13 @@ def _newAtom(self: Residue, name: str, elementSymbol: str = None) -> 'Atom':
     :param elementSymbol:
     :return: a new Atom instance.
     """
+    from ccpn.util.isotopes import name2ElementSymbol
 
     lastAtom = self.getAtom(name)
     if lastAtom is not None:
         raise ValueError("Cannot create %s, atom name %s already in use" % (lastAtom.longPid, name))
     if elementSymbol is None:
-        elementSymbol = commonUtil.name2ElementSymbol(name)
+        elementSymbol = name2ElementSymbol(name)
 
     apiAtom = self._wrappedData.newAtom(name=name, elementSymbol=elementSymbol)
     result = self._project._data2Obj[apiAtom]

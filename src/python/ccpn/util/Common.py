@@ -46,7 +46,7 @@ from ccpn.core.lib.AxisCodeLib import _axisCodeMapIndices
 from ccpn.util.OrderedSet import OrderedSet
 
 from ccpn.util import Constants
-from ccpn.util.isotopes import isotopeRecords
+# from ccpn.util.isotopes import isotopeRecords
 
 
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
@@ -317,64 +317,65 @@ def getUuid(programName, timeStamp=None):
     return '%s-%s-%s' % (programName, timeStamp, random.randint(0, maxRandomInt))
 
 
-def name2ElementSymbol(name):
-    """Get standard element symbol matching name or axisCode
+# GWV 20210803: moved to util/isotopes.py
+# def name2ElementSymbol(name):
+#     """Get standard element symbol matching name or axisCode
+#
+#     NB, the first letter takes precedence, so e.g. 'CD' returns 'C' (carbon)
+#     rather than 'CD' (Cadmium)"""
+#
+#     # NB, We deliberately do NOT use 'value in Constants.DEFAULT_ISOTOPE_DICT'
+#     # We want to avoid elements that are in the dict but have value None.
+#     if not name:
+#         return None
+#     elif Constants.DEFAULT_ISOTOPE_DICT.get(name[0]) is not None:
+#         return name[0]
+#     elif Constants.DEFAULT_ISOTOPE_DICT.get(name[:2]) is not None:
+#         return name[:2]
+#     elif name[0].isdigit():
+#         ss = name.title()
+#         for key, record in isotopeRecords.items():
+#             if ss.startswith(key):
+#                 if name[:len(key)].isupper():
+#                     return record.symbol.upper()
+#                 break
+#     #
+#     return None
 
-    NB, the first letter takes precedence, so e.g. 'CD' returns 'C' (carbon)
-    rather than 'CD' (Cadmium)"""
 
-    # NB, We deliberately do NOT use 'value in Constants.DEFAULT_ISOTOPE_DICT'
-    # We want to avoid elements that are in the dict but have value None.
-    if not name:
-        return None
-    elif Constants.DEFAULT_ISOTOPE_DICT.get(name[0]) is not None:
-        return name[0]
-    elif Constants.DEFAULT_ISOTOPE_DICT.get(name[:2]) is not None:
-        return name[:2]
-    elif name[0].isdigit():
-        ss = name.title()
-        for key, record in isotopeRecords.items():
-            if ss.startswith(key):
-                if name[:len(key)].isupper():
-                    return record.symbol.upper()
-                break
-    #
-    return None
-
-
-def checkIsotope(text):
-    """Convert isotope specifier string to most probable isotope code - defaulting to '1H'
-
-    This function is intended for external format isotope specifications, *not* for
-    axisCodes or atom names, hence the difference to name2ElementSymbol.
-    """
-    defaultIsotope = '1H'
-
-    if not text:
-        return defaultIsotope
-
-    name = text.strip().upper()
-    if name in isotopeRecords:
-        # Superfluous but should speed things up
-        return name
-
-    for isotopeCode in isotopeRecords:
-        # NB checking this first means that e.g. 'H13C' returns '13C' rather than '1H'
-        if isotopeCode.upper() in name:
-            return isotopeCode
-
-    # NB order of checking means that e.g. 'CA' returns Calcium rather than Carbon
-    result = (Constants.DEFAULT_ISOTOPE_DICT.get(name[:2])
-              or Constants.DEFAULT_ISOTOPE_DICT.get(name[0]))
-
-    if result is None:
-        if name == 'D':
-            # special case
-            result = '2H'
-        else:
-            result = defaultIsotope
-    #
-    return result
+# def checkIsotope(text):
+#     """Convert isotope specifier string to most probable isotope code - defaulting to '1H'
+#
+#     This function is intended for external format isotope specifications, *not* for
+#     axisCodes or atom names, hence the difference to name2ElementSymbol.
+#     """
+#     defaultIsotope = '1H'
+#
+#     if not text:
+#         return defaultIsotope
+#
+#     name = text.strip().upper()
+#     if name in isotopeRecords:
+#         # Superfluous but should speed things up
+#         return name
+#
+#     for isotopeCode in isotopeRecords:
+#         # NB checking this first means that e.g. 'H13C' returns '13C' rather than '1H'
+#         if isotopeCode.upper() in name:
+#             return isotopeCode
+#
+#     # NB order of checking means that e.g. 'CA' returns Calcium rather than Carbon
+#     result = (Constants.DEFAULT_ISOTOPE_DICT.get(name[:2])
+#               or Constants.DEFAULT_ISOTOPE_DICT.get(name[0]))
+#
+#     if result is None:
+#         if name == 'D':
+#             # special case
+#             result = '2H'
+#         else:
+#             result = defaultIsotope
+#     #
+#     return result
 
 
 def reorder(values, axisCodes, refAxisCodes):
@@ -849,7 +850,6 @@ def copyToClipboard(items):
     df = pd.DataFrame([values])
     df.to_clipboard(index=False, header=False)
     getLogger().info("Copied to clipboard: %s" %values)
-
 
 
 def loadModules(paths):

@@ -4265,7 +4265,10 @@ class CcpnNefReader(CcpnNefContent):
     # renames['ccpn_parameter'] = rename_saveframe
 
     def load_nef_chemical_shift(self, parent: ChemicalShiftList, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame):
-        """load nef_chemical_shift loop"""
+        """load nef_chemical_shift loop
+        """
+        from ccpn.util.isotopes import name2ElementSymbol, DEFAULT_ISOTOPE_DICT
+
 
         result = []
 
@@ -4285,9 +4288,9 @@ class CcpnNefReader(CcpnNefContent):
                 if isotope:
                     isotopeCode = '%s%s' % (isotope, element.title())
                 else:
-                    isotopeCode = Constants.DEFAULT_ISOTOPE_DICT.get(element.upper())
+                    isotopeCode = DEFAULT_ISOTOPE_DICT.get(element.upper())
             elif isotope:
-                element = commonUtil.name2ElementSymbol(tt[3])
+                element = name2ElementSymbol(tt[3])
                 isotopeCode = '%s%s' % (isotope, element.title())
             else:
                 isotopeCode = None

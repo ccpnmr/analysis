@@ -615,11 +615,15 @@ class CcpnGLWidget(QOpenGLWidget):
             self.axisB = axisB
         self._setRegion(self._orderedAxes[1], (self.axisT, self.axisB))
 
-    def _setRegion(self, region, value):
-        self.strip.project._undo.increaseBlocking()
-        if region:
-            region.region = value
-        self.strip.project._undo.decreaseBlocking()
+    def _setRegion(self, axisObject, value):
+        """Set the region attribute in the axis object"""
+        # self.strip.project._undo.increaseBlocking()
+        undo = self.mainWindow.application._getUndo()
+        undo.increaseBlocking()
+        if axisObject:
+            axisObject.region = value
+        # self.strip.project._undo.decreaseBlocking()
+        undo.decreaseBlocking()
 
     def autoRange(self):
         self._updateVisibleSpectrumViews()

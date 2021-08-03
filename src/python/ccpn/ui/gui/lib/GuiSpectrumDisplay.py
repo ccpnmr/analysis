@@ -2420,6 +2420,12 @@ class GuiSpectrumDisplay(CcpnModule):
         if not isinstance(spectrum, Spectrum):
             raise TypeError('spectrum is not of type Spectrum')
 
+        if self.is1D and spectrum.dimensionCount > 1:
+            raise RuntimeError('Cannot display nD spectrum on %s' % self)
+
+        if not self.is1D and spectrum.dimensionCount == 1:
+            raise RuntimeError('Cannot display 1D spectrum on %s' % self)
+
         # check if not already here
         _specViews = self.getSpectrumViewFromSpectrum(spectrum)
         if len(_specViews) > 0:
@@ -2429,7 +2435,7 @@ class GuiSpectrumDisplay(CcpnModule):
         _oldOrdering = self.getOrderedSpectrumViewsIndex()
 
         # dimensionOrdering = [1, 0] if self.is1D else spectrum.getByAxisCodes('dimensions', self.axisCodes, exactMatch=False)
-        dimensionOrdering = [1, 0] if self.is1D else self._getDimensionsMapping(spectrum)
+        dimensionOrdering = (1, 0) if self.is1D else self._getDimensionsMapping(spectrum)
 
         with undoStackRevert(self.application) as revertStack:
             with undoBlockWithoutSideBar(self.application):

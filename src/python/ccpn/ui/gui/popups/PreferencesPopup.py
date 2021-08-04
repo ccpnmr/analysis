@@ -46,7 +46,7 @@ from ccpn.framework.Translation import languages
 from ccpn.ui.gui.popups.Dialog import handleDialogApply, _verifyPopupApply
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Tabs import Tabs
-from ccpn.ui.gui.widgets.HLine import HLine
+from ccpn.ui.gui.widgets.HLine import HLine, LabeledHLine
 from ccpn.util.Logging import getLogger
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, colourNameNoSpace, _setColourPulldown
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
@@ -158,9 +158,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self._populate()
 
         tabs = tuple(self.tabWidget.widget(ii) for ii in range(self.tabWidget.count()))
-        w = max(tab.sizeHint().width() for tab in tabs) + 40
+        w = max(tab.sizeHint().width() for tab in tabs) + 150
         h = max(tab.sizeHint().height() for tab in tabs)
-        h = max((h, 700))
+        h = max((h, 800))
         self._size = QtCore.QSize(w, h)
         self.setMinimumWidth(w)
         self.setMaximumWidth(w * 1.5)
@@ -840,115 +840,30 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """Insert a widget in here to appear in the Spectrum Tab. Parent = the Frame obj where the widget should live
         """
 
+        dividerHeight = 30
+        labelAlignment = 'r'
+
         row = 0
-        self.autoSetDataPathLabel = Label(parent, text="Auto Set dataPath", grid=(row, 0))
+        self.autoSetDataPathLabel = Label(parent, text="Auto set dataPath", grid=(row, 0), hAlign=labelAlignment)
         self.autoSetDataPathBox = CheckBox(parent, grid=(row, 1))
         self.autoSetDataPathBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'autoSetDataPath'))
 
         row += 1
-        self.userDataPathLabel = Label(parent, "User Data Path", grid=(row, 0), )
+        self.userDataPathLabel = Label(parent, "User dataPath", grid=(row, 0), hAlign=labelAlignment )
         self.userDataPathText = PathEdit(parent, grid=(row, 1), vAlign='t')
         self.userDataPathText.setMinimumWidth(LineEditsMinimumWidth)
         self.userDataPathText.textChanged.connect(self._queueSetUserDataPath)
         self.userDataPathButton = Button(parent, grid=(row, 2), callback=self._getUserDataPath, icon='icons/directory',
                                          hPolicy='fixed', hAlign='left')
 
-
-        # # add validate frame
-        # row += 1
-        # self._validateFrame = ValidateSpectraForPreferences(parent, mainWindow=self.mainWindow, spectra=self.project.spectra,
-        #                                                     setLayout=True, showBorder=False, grid=(row, 0), gridSpan=(1, 3))
-        #
-        # self._validateFrame._filePathCallback = self._queueSetValidateFilePath
-        # self._validateFrame._dataUrlCallback = self._queueSetValidateDataUrl
-        # self._validateFrame._matchDataUrlWidths = parent
-        # self._validateFrame._matchFilePathWidths = parent
-        #
-        # self._validateFrame.setVisible(False)
+        #====== Spectrum Display ======
         row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
+        LabeledHLine(parent, grid=(row,0), gridSpan=(1,3),
+                     text="Spectrum Display", colour=getColours()[DIVIDER], height=dividerHeight)
 
         row += 1
-        self.xAxisUnits = Label(parent, text="X Axis Units", grid=(row, 0))
-        self.xAxisUnitsData = RadioButtons(parent, texts=AXIS_UNITS,
-                                           # selectedInd=xAxisUnits,
-                                           callback=self._queueSetXUnits,
-                                           direction='h',
-                                           grid=(row, 1), gridSpan=(1, 3), hAlign='l',
-                                           tipTexts=None,
-                                           )
-
-        row += 1
-        self.yAxisUnits = Label(parent, text="Y Axis Units", grid=(row, 0))
-        self.yAxisUnitsData = RadioButtons(parent, texts=AXIS_UNITS,
-                                           # selectedInd=yAxisUnits,
-                                           callback=self._queueSetYUnits,
-                                           direction='h',
-                                           grid=(row, 1), gridSpan=(1, 3), hAlign='l',
-                                           tipTexts=None)
-
-        row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
-
-        row += 1
-        self.regionPaddingLabel = Label(parent, text="Spectral Padding (%)", grid=(row, 0))
-        self.regionPaddingData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=0, max=100)
-        self.regionPaddingData.setMinimumWidth(LineEditsMinimumWidth)
-        self.regionPaddingData.valueChanged.connect(self._queueSetRegionPadding)
-
-        ### Not fully Tested, Had some issues with $Path routines in setting the path of the copied spectra.
-        ###  Needs more testing for different spectra formats etc. Disabled until completion.
-        # row += 1
-        # self.keepSPWithinProjectTipText = 'Keep a copy of spectra inside the project directory. Useful when changing the original spectra location path'
-        # self.keepSPWithinProject = Label(parent, text="Keep a Copy Inside Project", grid=(row, 0))
-        # self.keepSPWithinProjectBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.keepSpectraInsideProject,
-        #                                        tipText=self.keepSPWithinProjectTipText)
-        # self.keepSPWithinProjectBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'keepSpectraInsideProject'))
-
-        row += 1
-        self.showToolbarLabel = Label(parent, text="Show ToolBar(s)", grid=(row, 0))
-        self.showToolbarBox = CheckBox(parent, grid=(row, 1))
-        self.showToolbarBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showToolbar'))
-
-        row += 1
-        self.spectrumBorderLabel = Label(parent, text="Show Spectrum Borders", grid=(row, 0))
-        self.spectrumBorderBox = CheckBox(parent, grid=(row, 1))
-        self.spectrumBorderBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showSpectrumBorder'))
-
-        row += 1
-        self.showGridLabel = Label(parent, text="Show Grids", grid=(row, 0))
-        self.showGridBox = CheckBox(parent, grid=(row, 1))
-        self.showGridBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showGrid'))
-
-        row += 1
-        self.showCrosshairLabel = Label(parent, text="Show Crosshairs", grid=(row, 0))
-        self.showCrosshairBox = CheckBox(parent, grid=(row, 1))
-        self.showCrosshairBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showCrosshair'))
-
-        row += 1
-        self.showDoubleCrosshairLabel = Label(parent, text="    and Double Crosshairs", grid=(row, 0))
-        self.showDoubleCrosshairBox = CheckBox(parent, grid=(row, 1))
-        self.showDoubleCrosshairBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showDoubleCrosshair'))
-
-        row += 1
-        self.showSideBandsLabel = Label(parent, text="Show MAS Side Bands", grid=(row, 0))
-        self.showSideBandsBox = CheckBox(parent, grid=(row, 1))
-        self.showSideBandsBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showSideBands'))
-
-        row += 1
-        self.showSideBands = Label(parent, text='    number of MAS side bands shown', grid=(row, 0), hAlign='l')
-        self.showSideBandsData = DoubleSpinbox(parent, step=1, min=0, max=25, grid=(row, 1), hAlign='l', decimals=0)
-        self.showSideBandsData.setMinimumWidth(LineEditsMinimumWidth)
-        self.showSideBandsData.valueChanged.connect(self._queueSetNumSideBands)
-
-        row += 1
-        self.showLastAxisOnlyLabel = Label(parent, text="Share Y Axis", grid=(row, 0))
-        self.showLastAxisOnlyBox = CheckBox(parent, grid=(row, 1))
-        self.showLastAxisOnlyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'lastAxisOnly'))
-
-        row += 1
-        self.matchAxisCodeLabel = Label(parent, text="Match Axis Codes", grid=(row, 0))
-        self.matchAxisCode = RadioButtons(parent, texts=['Atom Type', 'Full Axis Code'],
+        self.matchAxisCodeLabel = Label(parent, text="Match axis codes by", grid=(row, 0), hAlign=labelAlignment)
+        self.matchAxisCode = RadioButtons(parent, texts=['Atom type', 'Full axis code'],
                                           callback=self._queueSetMatchAxisCode,
                                           direction='h',
                                           grid=(row, 1), hAlign='l', gridSpan=(1, 2),
@@ -956,8 +871,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                           )
 
         row += 1
-        self.axisOrderingOptionsLabel = Label(parent, text="Axis Ordering", grid=(row, 0))
-        self.axisOrderingOptions = RadioButtons(parent, texts=['Use Spectrum Settings', 'Always Ask'],
+        self.axisOrderingOptionsLabel = Label(parent, text="Displayed axes order", grid=(row, 0), hAlign=labelAlignment)
+        self.axisOrderingOptions = RadioButtons(parent,
+                                                texts=['Use spectrum settings', 'Always ask'],
                                                 callback=self._queueSetAxisOrderingOptions,
                                                 direction='h',
                                                 grid=(row, 1), hAlign='l', gridSpan=(1, 2),
@@ -965,187 +881,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                                 )
 
         row += 1
-        _frame =  Frame(parent, setLayout=True, showBorder=False, grid=(row, 0), gridSpan=(1,3))
-        _frame.setMinimumHeight(40)
-
-        _frame1 = Frame(_frame, setLayout=True, showBorder=False, grid=(0, 0))
-        _frame1.setMaximumWidth(30)
-        HLine(_frame1, grid=(0, 0), colour=getColours()[DIVIDER], height=20)
-
-        Label(_frame, grid=(0, 1), hAlign='centre', hPolicy='minimal', bold=True, text="Peak Picking")
-
-        _frame2 = Frame(_frame, setLayout=True, showBorder=False, grid=(0, 2))
-        HLine(_frame2, grid=(0, 0), colour=getColours()[DIVIDER], height=20)
-
-        row += 1
-        self.peakPicker1dLabel = Label(parent, text="Default 1D Peak Picker", grid=(row, 0))
-        self.peakPicker1dData = PulldownList(parent, grid=(row, 1))
-        # self.peakPicker1dData.setMinimumWidth(LineEditsMinimumWidth)
-        self.peakPicker1dData.currentIndexChanged.connect(self._queueChangePeakPicker1dIndex)
-
-        row += 1
-        self.dropFactorLabel = Label(parent, text="1D Peak Picking Drop (%)", tipText='Increase to filter out more', grid=(row, 0))
-        self.peakFactor1D = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=-100, max=100)
-        self.peakFactor1D.setMinimumWidth(LineEditsMinimumWidth)
-        self.peakFactor1D.valueChanged.connect(self._queueSetDropFactor1D)
-
-        row += 1
-        self.peakPickerNdLabel = Label(parent, text="Default nD Peak Picker", grid=(row, 0))
-        self.peakPickerNdData = PulldownList(parent, grid=(row, 1))
-        # self.peakPickerNdData.setMinimumWidth(LineEditsMinimumWidth)
-        self.peakPickerNdData.currentIndexChanged.connect(self._queueChangePeakPickerNdIndex)
-
-        row += 1
-        self.dropFactorLabel = Label(parent, text="nD Peak Picking Drop (%)", grid=(row, 0))
-        self.dropFactorData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=0, max=100)
-        self.dropFactorData.setMinimumWidth(LineEditsMinimumWidth)
-        self.dropFactorData.valueChanged.connect(self._queueSetDropFactor)
-
-        row += 1
-        self.peakFittingMethodLabel = Label(parent, text="Peak Interpolation Method", grid=(row, 0))
-        self.peakFittingMethod = RadioButtons(parent, texts=PEAKFITTINGDEFAULTS,
-                                              callback=self._queueSetPeakFittingMethod,
-                                              direction='h',
-                                              grid=(row, 1), hAlign='l', gridSpan=(1, 2),
-                                              tipTexts=None,
-                                              )
-
-        row += 1
-        self.volumeIntegralLimitLabel = Label(parent, text="Volume Integral Limit", grid=(row, 0))
-        self.volumeIntegralLimitData = DoubleSpinbox(parent, step=0.05, decimals=2,
-                                                     min=1.0, max=5.0, grid=(row, 1), hAlign='l')
-        self.volumeIntegralLimitData.setMinimumWidth(LineEditsMinimumWidth)
-        self.volumeIntegralLimitData.valueChanged.connect(self._queueSetVolumeIntegralLimit)
-
-        row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
-
-        row += 1
-        self.zoomCentreLabel = Label(parent, text="Zoom Centre", grid=(row, 0))
-        self.zoomCentre = RadioButtons(parent, texts=['Mouse', 'Screen'],
-                                       callback=self._queueSetZoomCentre,
-                                       direction='h',
-                                       grid=(row, 1), hAlign='l', gridSpan=(1, 2),
-                                       tipTexts=None,
-                                       )
-        row += 1
-        self.zoomPercentLabel = Label(parent, text="Manual Zoom (%)", grid=(row, 0))
-        self.zoomPercentData = DoubleSpinbox(parent, step=1,
-                                             min=1, max=100, grid=(row, 1), hAlign='l')
-        self.zoomPercentData.setMinimumWidth(LineEditsMinimumWidth)
-        self.zoomPercentData.valueChanged.connect(self._queueSetZoomPercent)
-
-        row += 1
-        self.stripWidthZoomPercentLabel = Label(parent, text="Strip Width Zoom (%)", grid=(row, 0))
-        self.stripWidthZoomPercentData = DoubleSpinbox(parent, step=1,
-                                                       min=1, max=100, grid=(row, 1), hAlign='l')
-        self.stripWidthZoomPercentData.setMinimumWidth(LineEditsMinimumWidth)
-        self.stripWidthZoomPercentData.valueChanged.connect(self._queueSetStripWidthZoomPercent)
-
-        row += 1
-        self.showZoomXLimitApplyLabel = Label(parent, text="Apply Zoom limit to X axis", grid=(row, 0))
-        self.showZoomXLimitApplyBox = CheckBox(parent, grid=(row, 1))
-        self.showZoomXLimitApplyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'zoomXLimitApply'))
-
-        row += 1
-        self.showZoomYLimitApplyLabel = Label(parent, text="Apply Zoom limit to Y axis", grid=(row, 0))
-        self.showZoomYLimitApplyBox = CheckBox(parent, grid=(row, 1))
-        self.showZoomYLimitApplyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'zoomYLimitApply'))
-
-        row += 1
-        self.showIntensityLimitLabel = Label(parent, text='Minimum Intensity Limit', grid=(row, 0), hAlign='l')
-        self.showIntensityLimitBox = ScientificDoubleSpinBox(parent, min=1e-6, grid=(row, 1), hAlign='l')
-        self.showIntensityLimitBox.setMinimumWidth(LineEditsMinimumWidth)
-        self.showIntensityLimitBox.valueChanged.connect(self._queueSetIntensityLimit)
-
-
-        row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
-
-        row += 1
-        self.aspectRatioModeLabel = Label(parent, text="Aspect Ratio Mode", grid=(row, 0))
-        self.aspectRatioModeData = RadioButtons(parent, texts=['Free', 'Locked', 'Fixed'],
-                                                callback=self._queueSetAspectRatioMode,
-                                                direction='h',
-                                                grid=(row, 1), hAlign='l', gridSpan=(1, 2),
-                                                tipTexts=None,
-                                                )
-
-        row += 1
-        Label(parent, text='Fixed Aspects', grid=(row, 0), hAlign='r')
-
-        row += 1
-        self.aspectLabel = {}
-        self.aspectData = {}
-        self.aspectLabelFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 0))
-        self.aspectDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
-
-        row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
-
-        row += 1
-        self.annotationsLabel = Label(parent, text="Symbol Labelling", grid=(row, 0))
-        self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal', 'Id', 'Annotation'],
-                                            callback=self._queueSetAnnotations,
-                                            direction='h',
-                                            grid=(row, 1), hAlign='l', gridSpan=(1, 2),
-                                            tipTexts=None,
-                                            )
-        row += 1
-        self.symbolsLabel = Label(parent, text="Symbol Type", grid=(row, 0))
-        self.symbol = RadioButtons(parent, texts=['Cross', 'lineWidths', 'Filled lineWidths', 'Plus'],
-                                   callback=self._queueSetSymbol,
-                                   direction='h',
-                                   grid=(row, 1), hAlign='l', gridSpan=(1, 2),
-                                   tipTexts=None,
-                                   )
-
-        row += 1
-        self.symbolSizePixelLabel = Label(parent, text="Symbol Size (pixel)", grid=(row, 0))
-        self.symbolSizePixelData = Spinbox(parent, step=1,
-                                           min=2, max=50, grid=(row, 1), hAlign='l')
-        self.symbolSizePixelData.setMinimumWidth(LineEditsMinimumWidth)
-        self.symbolSizePixelData.valueChanged.connect(self._queueSetSymbolSizePixel)
-
-        row += 1
-        self.symbolThicknessLabel = Label(parent, text="Symbol Thickness (pixel)", grid=(row, 0))
-        self.symbolThicknessData = Spinbox(parent, step=1,
-                                           min=1, max=20, grid=(row, 1), hAlign='l')
-        self.symbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
-        self.symbolThicknessData.valueChanged.connect(self._queueSetSymbolThickness)
-
-        row += 1
-        self.aliasEnabledLabel = Label(parent, text="Show Aliased Peaks", grid=(row, 0))
-        self.aliasEnabledData = CheckBox(parent, grid=(row, 1))
-        self.aliasEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions, 'aliasEnabled'))
-
-        row += 1
-        self.aliasLabelsEnabledLabel = Label(parent, text="    Show Aliased Labels", grid=(row, 0))
-        self.aliasLabelsEnabledData = CheckBox(parent, grid=(row, 1))
-        self.aliasLabelsEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions, 'aliasLabelsEnabled'))
-
-        row += 1
-        self.aliasShadeLabel = Label(parent, text="    Opacity", grid=(row, 0))
-        # self.aliasShadeData = DoubleSpinbox(parent, step=0.05,
-        #                                     min=0.0, max=1.0, grid=(row, 1), hAlign='l')
-        _sliderBox = Frame(parent, setLayout=True, grid=(row, 1), hAlign='l')
-        # self.aliasShadeData = Slider(parent, grid=(row, 1), hAlign='l')
-        self.aliasShadeData = Slider(_sliderBox, grid=(0, 1), hAlign='l')
-        Label(_sliderBox, text="0", grid=(0, 0), hAlign='l')
-        Label(_sliderBox, text="100%", grid=(0, 2), hAlign='l')
-        self.aliasShadeData.setMinimumWidth(LineEditsMinimumWidth)
-        self.aliasShadeData.valueChanged.connect(self._queueSetAliasShade)
-
-        row += 1
-        self.contourThicknessLabel = Label(parent, text="Contour Thickness (pixel)", grid=(row, 0))
-        self.contourThicknessData = Spinbox(parent, step=1,
-                                            min=1, max=20, grid=(row, 1), hAlign='l')
-        self.contourThicknessData.setMinimumWidth(LineEditsMinimumWidth)
-        self.contourThicknessData.valueChanged.connect(self._queueSetContourThickness)
-
-        row += 1
         _height = getFontHeight(size='VLARGE') or 24
-        self.stripArrangementLabel = Label(parent, text="Strip Arrangement", grid=(row, 0))
+        self.stripArrangementLabel = Label(parent, text="Strip arrangement", grid=(row, 0), hAlign=labelAlignment)
         self.stripArrangementButtons = RadioButtons(parent, texts=['    ', '    ', '    '],
                                                     # selectedInd=stripArrangement,
                                                     direction='horizontal',
@@ -1162,7 +899,44 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.stripArrangementButtons.setCallback(self._queueSetStripArrangement)
 
         row += 1
-        self.zPlaneNavigationModeLabel = Label(parent, text="zPlane Navigation Mode", grid=(row, 0))
+        self.showLastAxisOnlyLabel = Label(parent, text="Strips share X- or Y-axis", grid=(row, 0), hAlign=labelAlignment)
+        self.showLastAxisOnlyBox = CheckBox(parent, grid=(row, 1))
+        self.showLastAxisOnlyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'lastAxisOnly'))
+
+
+        # # add validate frame
+        # row += 1
+        # self._validateFrame = ValidateSpectraForPreferences(parent, mainWindow=self.mainWindow, spectra=self.project.spectra,
+        #                                                     setLayout=True, showBorder=False, grid=(row, 0), gridSpan=(1, 3))
+        #
+        # self._validateFrame._filePathCallback = self._queueSetValidateFilePath
+        # self._validateFrame._dataUrlCallback = self._queueSetValidateDataUrl
+        # self._validateFrame._matchDataUrlWidths = parent
+        # self._validateFrame._matchFilePathWidths = parent
+        #
+        # self._validateFrame.setVisible(False)
+
+        row += 1
+        self.xAxisUnits = Label(parent, text="X-axis units", grid=(row, 0), hAlign=labelAlignment)
+        self.xAxisUnitsData = RadioButtons(parent, texts=AXIS_UNITS,
+                                           # selectedInd=xAxisUnits,
+                                           callback=self._queueSetXUnits,
+                                           direction='h',
+                                           grid=(row, 1), gridSpan=(1, 3), hAlign='l',
+                                           tipTexts=None,
+                                           )
+
+        row += 1
+        self.yAxisUnits = Label(parent, text="Y-xis units", grid=(row, 0), hAlign=labelAlignment)
+        self.yAxisUnitsData = RadioButtons(parent, texts=AXIS_UNITS,
+                                           # selectedInd=yAxisUnits,
+                                           callback=self._queueSetYUnits,
+                                           direction='h',
+                                           grid=(row, 1), gridSpan=(1, 3), hAlign='l',
+                                           tipTexts=None)
+
+        row += 1
+        self.zPlaneNavigationModeLabel = Label(parent, text="zPlane navigation mode", grid=(row, 0), hAlign=labelAlignment)
         self.zPlaneNavigationModeData = RadioButtons(parent, texts=[val.description for val in ZPlaneNavigationModes],
                                                      callback=self._queueSetZPlaneNavigationMode,
                                                      direction='h',
@@ -1173,53 +947,151 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                                      )
         self.zPlaneNavigationModeLabel.setToolTip('Select where the zPlane navigation tools are located')
 
+        #====== Aspect ratios ======
         row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
+        LabeledHLine(parent, grid=(row,0), gridSpan=(1,3),
+                     text="Aspect Ratios", colour=getColours()[DIVIDER], height=dividerHeight)
+        row += 1
+        self.aspectRatioModeLabel = Label(parent, text="Mode", grid=(row, 0), hAlign=labelAlignment)
+        self.aspectRatioModeData = RadioButtons(parent, texts=['Free', 'Locked', 'Fixed'],
+                                                callback=self._queueSetAspectRatioMode,
+                                                direction='h',
+                                                grid=(row, 1), hAlign='l', gridSpan=(1, 2),
+                                                tipTexts=None,
+                                                )
 
         row += 1
-        self.useSearchBoxModeLabel = Label(parent, text="Use Search Box Widths", grid=(row, 0))
-        self.useSearchBoxModeBox = CheckBox(parent, grid=(row, 1))
-        self.useSearchBoxModeBox.toggled.connect(self._queueSetUseSearchBoxMode)
-        self.useSearchBoxModeLabel.setToolTip(
-                'Use defined search box widths (ppm)\nor default to ±4 index points.\nNote, default will depend on resolution of spectrum')
-        self.useSearchBoxModeBox.setToolTip(
-                'Use defined search box widths (ppm)\nor default to ±4 index points.\nNote, default will depend on resolution of spectrum')
+        Label(parent, text='Fixed aspects', grid=(row, 0), hAlign='r')
 
         row += 1
-        self.useSearchBoxDoFitLabel = Label(parent, text="Apply Peak Fitting Method\n after Snap To Extrema", grid=(row, 0))
-        self.useSearchBoxDoFitBox = CheckBox(parent, grid=(row, 1))
-        self.useSearchBoxDoFitBox.toggled.connect(self._queueSetUseSearchBoxDoFit)
-        self.useSearchBoxDoFitLabel.setToolTip('Option to apply fitting method after initial snap to extrema')
-        self.useSearchBoxDoFitBox.setToolTip('Option to apply fitting method after initial snap to extrema')
+        self.aspectLabel = {}
+        self.aspectData = {}
+        self.aspectLabelFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 0))
+        self.aspectDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
+
+        #====== Show ======
+        row += 1
+        LabeledHLine(parent, grid=(row,0), gridSpan=(1,3),
+                     text="Show", colour=getColours()[DIVIDER], height=dividerHeight)
 
         row += 1
-        self.defaultSearchBox1dRatioLabel = Label(parent, text="1d Search Box Widths (ppm)", grid=(row, 0), hAlign='r')
+        self.regionPaddingLabel = Label(parent, text="Spectral padding (%)", grid=(row, 0), hAlign=labelAlignment)
+        self.regionPaddingData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=0, max=100)
+        self.regionPaddingData.setMinimumWidth(LineEditsMinimumWidth)
+        self.regionPaddingData.valueChanged.connect(self._queueSetRegionPadding)
+
+        ### Not fully Tested, Had some issues with $Path routines in setting the path of the copied spectra.
+        ###  Needs more testing for different spectra formats etc. Disabled until completion.
+        # row += 1
+        # self.keepSPWithinProjectTipText = 'Keep a copy of spectra inside the project directory. Useful when changing the original spectra location path'
+        # self.keepSPWithinProject = Label(parent, text="Keep a Copy Inside Project", grid=(row, 0))
+        # self.keepSPWithinProjectBox = CheckBox(parent, grid=(row, 1), checked=self.preferences.general.keepSpectraInsideProject,
+        #                                        tipText=self.keepSPWithinProjectTipText)
+        # self.keepSPWithinProjectBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'keepSpectraInsideProject'))
 
         row += 1
-        self.searchBox1dLabel = {}
-        self.searchBox1dData = {}
-        self.searchBox1dLabelFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 0))
-        self.searchBox1dDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
+        self.showToolbarLabel = Label(parent, text="ToolBar(s)", grid=(row, 0), hAlign=labelAlignment)
+        self.showToolbarBox = CheckBox(parent, grid=(row, 1))
+        self.showToolbarBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showToolbar'))
 
         row += 1
-        self.defaultSearchBoxNdRatioLabel = Label(parent, text="Nd Search Box Widths (ppm)", grid=(row, 0), hAlign='r')
+        self.spectrumBorderLabel = Label(parent, text="Spectrum borders", grid=(row, 0), hAlign=labelAlignment)
+        self.spectrumBorderBox = CheckBox(parent, grid=(row, 1))
+        self.spectrumBorderBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showSpectrumBorder'))
 
         row += 1
-        self.searchBoxNdLabel = {}
-        self.searchBoxNdData = {}
-        self.searchBoxNdLabelFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 0))
-        self.searchBoxNdDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
+        self.showGridLabel = Label(parent, text="Grids", grid=(row, 0), hAlign=labelAlignment)
+        self.showGridBox = CheckBox(parent, grid=(row, 1))
+        self.showGridBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showGrid'))
 
         row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
+        self.showCrosshairLabel = Label(parent, text="Crosshairs", grid=(row, 0), hAlign=labelAlignment)
+        self.showCrosshairBox = CheckBox(parent, grid=(row, 1))
+        self.showCrosshairBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showCrosshair'))
 
         row += 1
-        self.autoCorrectLabel = Label(parent, text="Autocorrect Colours", grid=(row, 0))
+        self.showDoubleCrosshairLabel = Label(parent, text="Double crosshairs", grid=(row, 0), hAlign=labelAlignment)
+        self.showDoubleCrosshairBox = CheckBox(parent, grid=(row, 1))
+        self.showDoubleCrosshairBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showDoubleCrosshair'))
+
+        row += 1
+        self.showSideBandsLabel = Label(parent, text="MAS side-bands", grid=(row, 0), hAlign=labelAlignment)
+        self.showSideBandsBox = CheckBox(parent, grid=(row, 1))
+        self.showSideBandsBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showSideBands'))
+
+        row += 1
+        self.showSideBands = Label(parent, text='Number of MAS side-bands', grid=(row, 0), hAlign=labelAlignment)
+        self.showSideBandsData = DoubleSpinbox(parent, step=1, min=0, max=25, grid=(row, 1), hAlign='l', decimals=0)
+        self.showSideBandsData.setMinimumWidth(LineEditsMinimumWidth)
+        self.showSideBandsData.valueChanged.connect(self._queueSetNumSideBands)
+
+        #====== Zooming ======
+        row += 1
+        LabeledHLine(parent, grid=(row,0), gridSpan=(1,3),
+                     text="Zooming", colour=getColours()[DIVIDER], height=dividerHeight)
+
+        row += 1
+        self.zoomCentreLabel = Label(parent, text="Zoom centre", grid=(row, 0), hAlign=labelAlignment)
+        self.zoomCentre = RadioButtons(parent, texts=['Mouse', 'Screen'],
+                                       callback=self._queueSetZoomCentre,
+                                       direction='h',
+                                       grid=(row, 1), hAlign='l', gridSpan=(1, 2),
+                                       tipTexts=None,
+                                       )
+        row += 1
+        self.zoomPercentLabel = Label(parent, text="Manual zoom (%)", grid=(row, 0), hAlign=labelAlignment)
+        self.zoomPercentData = DoubleSpinbox(parent, step=1,
+                                             min=1, max=100, grid=(row, 1), hAlign='l')
+        self.zoomPercentData.setMinimumWidth(LineEditsMinimumWidth)
+        self.zoomPercentData.valueChanged.connect(self._queueSetZoomPercent)
+
+        row += 1
+        self.stripWidthZoomPercentLabel = Label(parent, text="Strip width zoom (%)", grid=(row, 0), hAlign=labelAlignment)
+        self.stripWidthZoomPercentData = DoubleSpinbox(parent, step=1,
+                                                       min=1, max=100, grid=(row, 1), hAlign='l')
+        self.stripWidthZoomPercentData.setMinimumWidth(LineEditsMinimumWidth)
+        self.stripWidthZoomPercentData.valueChanged.connect(self._queueSetStripWidthZoomPercent)
+
+        row += 1
+        self.showZoomXLimitApplyLabel = Label(parent, text="X-axis zoom limit", grid=(row, 0), hAlign=labelAlignment)
+        self.showZoomXLimitApplyBox = CheckBox(parent, grid=(row, 1))
+        self.showZoomXLimitApplyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'zoomXLimitApply'))
+
+        row += 1
+        self.showZoomYLimitApplyLabel = Label(parent, text="Y-axis zoom limit", grid=(row, 0), hAlign=labelAlignment)
+        self.showZoomYLimitApplyBox = CheckBox(parent, grid=(row, 1))
+        self.showZoomYLimitApplyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'zoomYLimitApply'))
+
+        row += 1
+        self.showIntensityLimitLabel = Label(parent, text='Intensity-axis zoom limit', grid=(row, 0), hAlign=labelAlignment)
+        self.showIntensityLimitBox = ScientificDoubleSpinBox(parent, min=1e-6, grid=(row, 1), hAlign='l')
+        self.showIntensityLimitBox.setMinimumWidth(LineEditsMinimumWidth)
+        self.showIntensityLimitBox.valueChanged.connect(self._queueSetIntensityLimit)
+
+        #====== Contours and Colours ======
+        row += 1
+        LabeledHLine(parent, grid=(row,0), gridSpan=(1,3),
+                     text="Contours and Colours", colour=getColours()[DIVIDER], height=dividerHeight)
+
+        row += 1
+        self.singleContoursLabel = Label(parent, text="Single contours per plane", grid=(row, 0), hAlign=labelAlignment)
+        self.singleContoursBox = CheckBox(parent, grid=(row, 1))
+        self.singleContoursBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'generateSinglePlaneContours'))
+
+        row += 1
+        self.contourThicknessLabel = Label(parent, text="Contour thickness (pixel)", grid=(row, 0), hAlign=labelAlignment)
+        self.contourThicknessData = Spinbox(parent, step=1,
+                                            min=1, max=20, grid=(row, 1), hAlign='l')
+        self.contourThicknessData.setMinimumWidth(LineEditsMinimumWidth)
+        self.contourThicknessData.valueChanged.connect(self._queueSetContourThickness)
+
+        row += 1
+        self.autoCorrectLabel = Label(parent, text="Autocorrect colours", grid=(row, 0), hAlign=labelAlignment)
         self.autoCorrectBox = CheckBox(parent, grid=(row, 1))
         self.autoCorrectBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'autoCorrectColours'))
 
         row += 1
-        self.marksDefaultColourLabel = Label(parent, text="Default Marks Colour", grid=(row, 0))
+        self.marksDefaultColourLabel = Label(parent, text="Default marks colour", grid=(row, 0), hAlign=labelAlignment)
         _colourFrame = Frame(parent, setLayout=True, grid=(row, 1), hAlign='l', gridSpan=(1, 2))
         self.marksDefaultColourBox = PulldownList(_colourFrame, grid=(0, 0))
         self.marksDefaultColourBox.setMinimumWidth(LineEditsMinimumWidth)
@@ -1234,10 +1106,76 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.marksDefaultColourButton.clicked.connect(self._queueChangeMarksColourButton)
 
         row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
+        self.negativeTraceColourLabel = Label(parent, text="Negative colour for phasing traces", grid=(row, 0), hAlign=labelAlignment)
+        self.negativeTraceColourBox = CheckBox(parent, grid=(row, 1))
+        self.negativeTraceColourBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'traceIncludeNegative'))
+
+       #====== Peaks and Multiplets ======
+        row += 1
+        LabeledHLine(parent, grid=(row,0), gridSpan=(1,3),
+                     text="Peaks and Multiplets", colour=getColours()[DIVIDER], height=dividerHeight)
 
         row += 1
-        self.multipletAveragingLabel = Label(parent, text="Multiplet Averaging", grid=(row, 0))
+        self.peakFittingMethodLabel = Label(parent, text="Peak interpolation method", grid=(row, 0), hAlign=labelAlignment)
+        self.peakFittingMethod = RadioButtons(parent, texts=PEAKFITTINGDEFAULTS,
+                                              callback=self._queueSetPeakFittingMethod,
+                                              direction='h',
+                                              grid=(row, 1), hAlign='l', gridSpan=(1, 2),
+                                              tipTexts=None,
+                                              )
+        row += 1
+        self.peakPicker1dLabel = Label(parent, text="Default 1D peak picker", grid=(row, 0), hAlign=labelAlignment)
+        self.peakPicker1dData = PulldownList(parent, grid=(row, 1), hAlign='l')
+        self.peakPicker1dData.setMinimumWidth(LineEditsMinimumWidth)
+        self.peakPicker1dData.currentIndexChanged.connect(self._queueChangePeakPicker1dIndex)
+
+        row += 1
+        self.dropFactorLabel = Label(parent, text="1D Peak picking drop (%)", tipText='Increase to filter out more', grid=(row, 0),
+                                     hAlign=labelAlignment)
+        self.peakFactor1D = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=-100, max=100)
+        self.peakFactor1D.setMinimumWidth(LineEditsMinimumWidth)
+        self.peakFactor1D.valueChanged.connect(self._queueSetDropFactor1D)
+
+        row += 1
+        self.peakPickerNdLabel = Label(parent, text="Default nD peak picker", grid=(row, 0), hAlign=labelAlignment)
+        self.peakPickerNdData = PulldownList(parent, grid=(row, 1), hAlign='l')
+        self.peakPickerNdData.setMinimumWidth(LineEditsMinimumWidth)
+        self.peakPickerNdData.currentIndexChanged.connect(self._queueChangePeakPickerNdIndex)
+
+        row += 1
+        self.dropFactorLabel = Label(parent, text="nD Peak picking drop (%)", grid=(row, 0), hAlign=labelAlignment)
+        self.dropFactorData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=0, max=100)
+        self.dropFactorData.setMinimumWidth(LineEditsMinimumWidth)
+        self.dropFactorData.valueChanged.connect(self._queueSetDropFactor)
+
+        row += 1
+        self.volumeIntegralLimitLabel = Label(parent, text="Volume integral limit", grid=(row, 0), hAlign=labelAlignment)
+        self.volumeIntegralLimitData = DoubleSpinbox(parent, step=0.05, decimals=2,
+                                                     min=1.0, max=5.0, grid=(row, 1), hAlign='l')
+        self.volumeIntegralLimitData.setMinimumWidth(LineEditsMinimumWidth)
+        self.volumeIntegralLimitData.valueChanged.connect(self._queueSetVolumeIntegralLimit)
+        row += 1
+        self.aliasEnabledLabel = Label(parent, text="Show aliased peaks", grid=(row, 0), hAlign=labelAlignment)
+        self.aliasEnabledData = CheckBox(parent, grid=(row, 1))
+        self.aliasEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions, 'aliasEnabled'))
+
+        row += 1
+        self.aliasLabelsEnabledLabel = Label(parent, text="Show aliased labels", grid=(row, 0), hAlign=labelAlignment)
+        self.aliasLabelsEnabledData = CheckBox(parent, grid=(row, 1))
+        self.aliasLabelsEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions, 'aliasLabelsEnabled'))
+
+        row += 1
+        self.aliasShadeLabel = Label(parent, text="Label opacity", grid=(row, 0), hAlign=labelAlignment)
+        _sliderBox = Frame(parent, setLayout=True, grid=(row, 1), hAlign='l')
+        # self.aliasShadeData = Slider(parent, grid=(row, 1), hAlign='l')
+        Label(_sliderBox, text="0%", grid=(0, 0), hAlign='l')
+        self.aliasShadeData = Slider(_sliderBox, grid=(0, 1), hAlign='l')
+        Label(_sliderBox, text="100%", grid=(0, 2), hAlign='l')
+        self.aliasShadeData.setMinimumWidth(LineEditsMinimumWidth)
+        self.aliasShadeData.valueChanged.connect(self._queueSetAliasShade)
+
+        row += 1
+        self.multipletAveragingLabel = Label(parent, text="Multiplet Averaging", grid=(row, 0), hAlign=labelAlignment)
         self.multipletAveraging = RadioButtons(parent, texts=MULTIPLETAVERAGINGTYPES,
                                                callback=self._queueSetMultipletAveraging,
                                                direction='h',
@@ -1245,20 +1183,82 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                                tipTexts=None,
                                                )
 
+        #====== Peak Fitting ======
         row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
+        LabeledHLine(parent, grid=(row,0), gridSpan=(1,3),
+                     text="Peak Fitting", colour=getColours()[DIVIDER], height=dividerHeight)
 
         row += 1
-        self.singleContoursLabel = Label(parent, text="Generate Single Contours\n   per Plane", grid=(row, 0))
-        self.singleContoursBox = CheckBox(parent, grid=(row, 1))
-        self.singleContoursBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'generateSinglePlaneContours'))
+        self.useSearchBoxDoFitLabel = Label(parent, text="Fit after snap-to-extrema", grid=(row, 0), hAlign=labelAlignment)
+        self.useSearchBoxDoFitBox = CheckBox(parent, grid=(row, 1))
+        self.useSearchBoxDoFitBox.toggled.connect(self._queueSetUseSearchBoxDoFit)
+        self.useSearchBoxDoFitLabel.setToolTip('Option to apply fitting method after initial snap to extrema')
+        self.useSearchBoxDoFitBox.setToolTip('Option to apply fitting method after initial snap to extrema')
 
         row += 1
-        self.negativeTraceColourLabel = Label(parent, text="Include Negative Colour\n    for Phasing Traces", grid=(row, 0))
-        self.negativeTraceColourBox = CheckBox(parent, grid=(row, 1))
-        self.negativeTraceColourBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'traceIncludeNegative'))
+        self.useSearchBoxModeLabel = Label(parent, text="Use search box", grid=(row, 0), hAlign=labelAlignment)
+        self.useSearchBoxModeBox = CheckBox(parent, grid=(row, 1))
+        self.useSearchBoxModeBox.toggled.connect(self._queueSetUseSearchBoxMode)
+        self.useSearchBoxModeLabel.setToolTip(
+                'Use defined search box widths (ppm)\nor default to ±4 index points.\nNote, default will depend on resolution of spectrum')
+        self.useSearchBoxModeBox.setToolTip(
+                'Use defined search box widths (ppm)\nor default to ±4 index points.\nNote, default will depend on resolution of spectrum')
 
-        # add spacer to stop columns changing width
+        row += 1
+        self.defaultSearchBox1dRatioLabel = Label(parent, text="1D box widths (ppm)", bold=True, grid=(row, 1), hAlign='l')
+
+        row += 1
+        self.searchBox1dLabel = {}
+        self.searchBox1dData = {}
+        self.searchBox1dLabelFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 0))
+        self.searchBox1dDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
+
+        row += 1
+        self.defaultSearchBoxNdRatioLabel = Label(parent, text="nD box widths (ppm)", bold=True, grid=(row, 1), hAlign='l')
+
+        row += 1
+        self.searchBoxNdLabel = {}
+        self.searchBoxNdData = {}
+        self.searchBoxNdLabelFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 0))
+        self.searchBoxNdDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
+
+        #======  Peak Symbols ======
+        row += 1
+        LabeledHLine(parent, grid=(row,0), gridSpan=(1,3),
+                     text="Peak Symbols", colour=getColours()[DIVIDER], height=dividerHeight)
+
+        row += 1
+        self.annotationsLabel = Label(parent, text="Annotation", grid=(row, 0), hAlign=labelAlignment)
+        self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal', 'Id', 'Annotation'],
+                                            callback=self._queueSetAnnotations,
+                                            direction='h',
+                                            grid=(row, 1), hAlign='l', gridSpan=(1, 2),
+                                            tipTexts=None,
+                                            )
+        row += 1
+        self.symbolsLabel = Label(parent, text="Type", grid=(row, 0), hAlign=labelAlignment)
+        self.symbol = RadioButtons(parent, texts=['Cross', 'lineWidths', 'Filled lineWidths', 'Plus'],
+                                   callback=self._queueSetSymbol,
+                                   direction='h',
+                                   grid=(row, 1), hAlign='l', gridSpan=(1, 2),
+                                   tipTexts=None,
+                                   )
+
+        row += 1
+        self.symbolSizePixelLabel = Label(parent, text="Size (pixel)", grid=(row, 0), hAlign=labelAlignment)
+        self.symbolSizePixelData = Spinbox(parent, step=1,
+                                           min=2, max=50, grid=(row, 1), hAlign='l')
+        self.symbolSizePixelData.setMinimumWidth(LineEditsMinimumWidth)
+        self.symbolSizePixelData.valueChanged.connect(self._queueSetSymbolSizePixel)
+
+        row += 1
+        self.symbolThicknessLabel = Label(parent, text="Thickness (pixel)", grid=(row, 0), hAlign=labelAlignment)
+        self.symbolThicknessData = Spinbox(parent, step=1,
+                                           min=1, max=20, grid=(row, 1), hAlign='l')
+        self.symbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
+        self.symbolThicknessData.valueChanged.connect(self._queueSetSymbolThickness)
+
+        #==== add spacer to stop columns changing width
         row += 1
         Spacer(parent, 15, 2,
                QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,

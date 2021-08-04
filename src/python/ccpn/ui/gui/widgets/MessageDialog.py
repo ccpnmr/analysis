@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-30 20:44:26 +0100 (Fri, July 30, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-04 13:33:57 +0100 (Wed, August 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -109,7 +109,9 @@ class MessageDialog(QtWidgets.QMessageBox):
 
     def __init__(self, title, basicText, message, icon=Information, iconPath=None, parent=None):
         QtWidgets.QMessageBox.__init__(self, None)
-        self.setWindowModality(QtCore.Qt.WindowModal)
+
+        # set modality to take control
+        self.setWindowModality(QtCore.Qt.ApplicationModal)
 
         self._parent = parent
         self.setWindowTitle(title)

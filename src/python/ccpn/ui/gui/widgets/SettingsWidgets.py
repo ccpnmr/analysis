@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-04 12:28:19 +0100 (Wed, August 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-04 13:39:31 +0100 (Wed, August 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1259,6 +1259,7 @@ class _SpectrumRow(Frame):
 
 
 SETTINGSCHECKBOX = 'checkBox'
+SETTINGSWIDGET = 'widget'
 
 
 class ModuleSettingsWidget(Widget):  #, _commonSettings):
@@ -1417,6 +1418,13 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
         """
         if widgetName in self.checkBoxes and SETTINGSCHECKBOX in self.checkBoxes[widgetName]:
             return self.checkBoxes[widgetName][SETTINGSCHECKBOX]
+
+    def getWidget(self, widgetName):
+        """Get the required widget from the new setting Widget class
+        Should be moved to a new settings class
+        """
+        if widgetName in self.checkBoxes and SETTINGSWIDGET in self.checkBoxes[widgetName]:
+            return self.checkBoxes[widgetName][SETTINGSWIDGET]
 
 
 class ObjectSelectionWidget(ListCompoundWidget):

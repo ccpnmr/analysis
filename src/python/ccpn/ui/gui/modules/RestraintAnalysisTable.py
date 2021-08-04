@@ -207,8 +207,10 @@ class RestraintAnalysisTableModule(CcpnModule):
         self._RATwidget = ModuleSettingsWidget(parent=self.settingsWidget, mainWindow=self.mainWindow,
                                                settingsDict=settingsDict,
                                                grid=(0, 0))
-        self._displayListWidget = self._RATwidget.checkBoxes['SpectrumDisplays']['widget']
-        self._restraintList = self._RATwidget.checkBoxes['RestraintLists']['widget']
+        # self._displayListWidget = self._RATwidget.checkBoxes['SpectrumDisplays']['widget']
+        # self._restraintList = self._RATwidget.checkBoxes['RestraintLists']['widget']
+        self._displayListWidget = self._RATwidget.getWidget('SpectrumDisplays')
+        self._restraintList = self._RATwidget.getWidget('RestraintLists')
         self._restraintList.listWidget.changed.connect(self._updateRestraintLists)
         # self._expandSelector = self._RATwidget.checkBoxes['autoExpand']['widget']
 

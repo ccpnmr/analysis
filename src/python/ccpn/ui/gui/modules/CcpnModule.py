@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-30 20:34:02 +0100 (Fri, July 30, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-04 13:40:09 +0100 (Wed, August 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1127,7 +1127,7 @@ class CcpnModuleLabel(DockLabel):
         self.labelRadius = 3
 
         _fontSize = getWidgetFontHeight(size='LARGE') or 16
-        super().__init__(name, module, showCloseButton=showCloseButton, fontSize=_fontSize)
+        super().__init__(name, module, showCloseButton=showCloseButton, ) # fontSize=_fontSize)
 
         self.module = module
         self.fixedWidth = True

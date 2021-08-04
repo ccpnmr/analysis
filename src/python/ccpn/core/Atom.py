@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 17:35:45 +0100 (Fri, June 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-04 12:28:18 +0100 (Wed, August 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -248,12 +248,13 @@ def _newAtom(self: Residue, name: str, elementSymbol: str = None) -> 'Atom':
     :param elementSymbol:
     :return: a new Atom instance.
     """
+    from ccpn.util.isotopes import name2ElementSymbol
 
     lastAtom = self.getAtom(name)
     if lastAtom is not None:
         raise ValueError("Cannot create %s, atom name %s already in use" % (lastAtom.longPid, name))
     if elementSymbol is None:
-        elementSymbol = commonUtil.name2ElementSymbol(name)
+        elementSymbol = name2ElementSymbol(name)
 
     apiAtom = self._wrappedData.newAtom(name=name, elementSymbol=elementSymbol)
     result = self._project._data2Obj[apiAtom]

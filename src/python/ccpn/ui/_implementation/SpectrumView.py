@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-04 12:28:19 +0100 (Wed, August 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -482,6 +482,11 @@ def _newSpectrumView(display, spectrum, dimensionOrdering):
     # else:
     #     stripSerial = 0
 
+    if not isinstance(spectrum, Spectrum):
+        raise ValueError('invlaid spectrum; got %r' % spectrum)
+
+    if not isinstance(dimensionOrdering, (list, tuple)) or len(dimensionOrdering) < 2:
+        raise ValueError('invalid dimensionOrdering; got %r' % dimensionOrdering)
 
     obj = display._wrappedData.newSpectrumView(spectrumName=spectrum.name, stripSerial=0, dataSource=spectrum._wrappedData,
                                                dimensionOrdering=dimensionOrdering)

@@ -44,7 +44,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-29 14:27:30 +0100 (Tue, June 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-04 12:28:20 +0100 (Wed, August 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -467,7 +467,10 @@ class CcpnNefReader:
     # importers['nef_covalent_links'] = load_nef_covalent_links
 
     def load_nef_chemical_shift_list(self, project, saveFrame):
-        """load nef_chemical_shift_list saveFrame"""
+        """load nef_chemical_shift_list saveFrame
+        """
+        from ccpn.util.isotopes import name2ElementSymbol, DEFAULT_ISOTOPE_DICT
+
 
         # Get ccpn-to-nef mappping for saveframe
         category = saveFrame['sf_category']
@@ -496,12 +499,12 @@ class CcpnNefReader:
             isotopeNumber = row.get('isotope_number')
 
             if not element:
-                element = commonUtil.name2ElementSymbol(name)
+                element = name2ElementSymbol(name)
             if element:
                 if isotopeNumber:
                     isotopeCode = '%s%s%s' % (isotopeNumber, element[0].upper(), element[1:].lower())
                 else:
-                    isotopeCode = genConstants.DEFAULT_ISOTOPE_DICT.get(element.upper())
+                    isotopeCode = DEFAULT_ISOTOPE_DICT.get(element.upper())
             else:
                 isotopeCode = None
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-29 14:27:30 +0100 (Tue, June 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-04 12:28:19 +0100 (Wed, August 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -32,7 +32,10 @@ from ccpn.core.NmrAtom import NmrAtom, UnknownIsotopeCode
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, TextEditorCompoundWidget, \
     PulldownListCompoundWidget, CheckBoxCompoundWidget
 from ccpn.util import Constants as ct
+from ccpn.util.isotopes import DEFAULT_ISOTOPE_DICT
 from functools import partial
+
+PriorityIsotopeCodes = ['1H', '13C', '15N', '17O', '19F', '31P']
 
 MERGE = 'merge'
 Undefined = 'Undefined'
@@ -40,7 +43,7 @@ OtherNames = '--  Other Options  --'
 OtherByIC  = '-- Name Options --'
 
 def _getNmrAtomIsotopeCodes(cls, nmrAtom):
-    priorityIsotopeCodes = [Undefined] + ct.PriorityIsotopeCodes
+    priorityIsotopeCodes = [Undefined] + PriorityIsotopeCodes
     cls.isotopeCode.modifyTexts(priorityIsotopeCodes)
     _selectIsotopeCodeForName(cls,  isotopeCode=nmrAtom.isotopeCode)
 
@@ -162,7 +165,7 @@ class NmrAtomNewPopup(AttributeEditorPopupABC):
         nmrResidue = self.nmrResidue.getText()
         comment = self.comment.getText()
         isotopeCode =  self.isotopeCode.getText()
-        isotopeCode = isotopeCode if isotopeCode in ct.DEFAULT_ISOTOPE_DICT.values() else None
+        isotopeCode = isotopeCode if isotopeCode in DEFAULT_ISOTOPE_DICT.values() else None
 
         destNmrResidue = self.project.getByPid('NR:{}'.format(nmrResidue))
         if not destNmrResidue:
@@ -242,7 +245,7 @@ class NmrAtomEditPopup(AttributeEditorPopupABC):
         nmrResidue = self.nmrResidue.getText()
         comment = self.comment.getText()
         isotopeCode = self.isotopeCode.getText()
-        isotopeCode = isotopeCode if isotopeCode in ct.DEFAULT_ISOTOPE_DICT.values() else None
+        isotopeCode = isotopeCode if isotopeCode in DEFAULT_ISOTOPE_DICT.values() else None
 
         destNmrResidue = self.project.getByPid('NR:{}'.format(nmrResidue))
         if not destNmrResidue:

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 17:35:45 +0100 (Fri, June 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-04 12:28:19 +0100 (Wed, August 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -261,7 +261,7 @@ class Chain(AbstractWrapperObject):
     def _toNmrChain(self):
         """ Makes an Nmr Chain from the chain """
         try:
-            from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
+            from ccpn.util.isotopes import DEFAULT_ISOTOPE_DICT
             from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
             with undoBlockWithoutSideBar():
                 nmrChain = self.project.newNmrChain(isConnected=True)

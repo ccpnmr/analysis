@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-22 16:08:23 +0100 (Thu, July 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-04 12:28:19 +0100 (Wed, August 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -334,9 +334,9 @@ class Framework(NotifierBase):
         self._disableUndoException = getattr(self.args, 'disableUndoException', False)
         self._ccpnLogging = getattr(self.args, 'ccpnLogging', False)
 
-        # register dataLoader for the first and only time
+        # just a dummy to import and get the dataLoaders registered
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders
-        _loaders = getDataLoaders()
+        self._dataLoaders = getDataLoaders()
 
     @property
     def _isInDebugMode(self) -> bool:

@@ -5,7 +5,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-26 12:43:48 +0000 (Fri, March 26, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-08-04 12:28:20 +0100 (Wed, August 04, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -113,6 +114,10 @@ measurementType2ElementCode = {
     't1zz'           : 'delay'
     }
 
+PSEUDO_ATOM_NAME = 'Q'
+PSEUDO_ATOM_NAMES = {PSEUDO_ATOM_NAME: '1H'}
+PSEUDO_ATOMS = ['QA', 'QB', 'QD', 'QE', 'QG', 'QH', 'QH1', 'QH2', 'QR', 'QZ']
+
 # GWV 210113: moved to Spectrum class
 # # Isotope-dependent assignment tolerances (in ppm)
 # defaultAssignmentTolerance = 0.03
@@ -122,112 +127,113 @@ measurementType2ElementCode = {
 #     '15N': 0.4,
 #     }
 
-# Chosen to be 1) stable. 2) NMR-active, 3)Spin 1/2, 4) abundant
-# NB keys are ALL-UPPER, as used in names,
-# whereas values are titlecase, as standard for isotopeCodes
-DEFAULT_ISOTOPE_DICT = OrderedDict((
-    ('H', '1H'),
-    ('D', '2H'),
-    ('B', '11B'),
-    ('C', '13C'),
-    ('N', '15N'),
-    ('O', '17O'),
-    ('F', '19F'),
-    ('P', '31P'),
-    ('S', '33S'),
-    ('K', '39K'),
-    ('V', '51V'),
-    ('Y', '89Y'),
-    ('I', '127I'),
-    ('W', '183W'),
-    ('U', '235U'),
-    ('HE', '3He'),
-    ('LI', '7Li'),
-    ('BE', '9Be'),
-    ('NE', '21Ne'),
-    ('NA', '23Na'),
-    ('MG', '25Mg'),
-    ('AL', '27Al'),
-    ('SI', '29Si'),
-    ('CL', '35Cl'),
-    ('AR', '40Ar'),
-    ('CA', '43Ca'),
-    ('SC', '45Sc'),
-    ('TI', '47Ti'),
-    ('CR', '53Cr'),
-    ('MN', '55Mn'),
-    ('FE', '57Fe'),
-    ('CO', '59Co'),
-    ('NI', '61Ni'),
-    ('CU', '63Cu'),
-    ('ZN', '67Zn'),
-    ('GA', '69Ga'),
-    ('GE', '73Ge'),
-    ('AS', '75As'),
-    ('SE', '77Se'),
-    ('BR', '79Br'),
-    ('KR', '83Kr'),
-    ('RB', '85Rb'),
-    ('SR', '87Sr'),
-    ('ZR', '91Zr'),
-    ('NB', '93Nb'),
-    ('MO', '95Mo'),
-    ('TC', '99Tc'),
-    ('RU', '99Ru'),
-    ('RH', '103Rh'),
-    ('PD', '105Pd'),
-    ('AG', '107Ag'),
-    ('CD', '111Cd'),
-    ('IN', '115In'),
-    ('SN', '119Sn'),
-    ('SB', '121Sb'),
-    ('TE', '125Te'),
-    ('XE', '129Xe'),
-    ('CS', '133Cs'),
-    ('BA', '137Ba'),
-    ('LA', '139La'),
-    ('CE', '140Ce'),
-    ('PR', '141Pr'),
-    ('ND', '143Nd'),
-    ('PM', '147Pm'),
-    ('SM', '144Sm'),
-    ('EU', '153Eu'),
-    ('GD', '157Gd'),
-    ('TB', '159Tb'),
-    ('DY', '163Dy'),
-    ('HO', '165Ho'),
-    ('ER', '167Er'),
-    ('TM', '169Tm'),
-    ('YB', '171Yb'),
-    ('LU', '175Lu'),
-    ('HF', '177Hf'),
-    ('TA', '181Ta'),
-    ('RE', '187Re'),
-    ('OS', '187Os'),
-    ('IR', '193Ir'),
-    ('PT', '195Pt'),
-    ('AU', '197Au'),
-    ('HG', '199Hg'),
-    ('TL', '205Tl'),
-    ('PB', '207Pb'),
-    ('BI', '209Bi'),
-    ('PO', '209Po'),
-    ('AC', '227Ac'),
-    ('TH', '232Th'),
-    ('NP', '237Np'),
-    ('PU', '239Pu'),
-    ('AM', '243Am'),
+# GWV 20210803: moved to util/isotopes.py
+# # Chosen to be 1) stable. 2) NMR-active, 3)Spin 1/2, 4) abundant
+# # NB keys are ALL-UPPER, as used in names,
+# # whereas values are titlecase, as standard for isotopeCodes
+# DEFAULT_ISOTOPE_DICT = OrderedDict((
+#     ('H', '1H'),
+#     ('D', '2H'),
+#     ('B', '11B'),
+#     ('C', '13C'),
+#     ('N', '15N'),
+#     ('O', '17O'),
+#     ('F', '19F'),
+#     ('P', '31P'),
+#     ('S', '33S'),
+#     ('K', '39K'),
+#     ('V', '51V'),
+#     ('Y', '89Y'),
+#     ('I', '127I'),
+#     ('W', '183W'),
+#     ('U', '235U'),
+#     ('HE', '3He'),
+#     ('LI', '7Li'),
+#     ('BE', '9Be'),
+#     ('NE', '21Ne'),
+#     ('NA', '23Na'),
+#     ('MG', '25Mg'),
+#     ('AL', '27Al'),
+#     ('SI', '29Si'),
+#     ('CL', '35Cl'),
+#     ('AR', '40Ar'),
+#     ('CA', '43Ca'),
+#     ('SC', '45Sc'),
+#     ('TI', '47Ti'),
+#     ('CR', '53Cr'),
+#     ('MN', '55Mn'),
+#     ('FE', '57Fe'),
+#     ('CO', '59Co'),
+#     ('NI', '61Ni'),
+#     ('CU', '63Cu'),
+#     ('ZN', '67Zn'),
+#     ('GA', '69Ga'),
+#     ('GE', '73Ge'),
+#     ('AS', '75As'),
+#     ('SE', '77Se'),
+#     ('BR', '79Br'),
+#     ('KR', '83Kr'),
+#     ('RB', '85Rb'),
+#     ('SR', '87Sr'),
+#     ('ZR', '91Zr'),
+#     ('NB', '93Nb'),
+#     ('MO', '95Mo'),
+#     ('TC', '99Tc'),
+#     ('RU', '99Ru'),
+#     ('RH', '103Rh'),
+#     ('PD', '105Pd'),
+#     ('AG', '107Ag'),
+#     ('CD', '111Cd'),
+#     ('IN', '115In'),
+#     ('SN', '119Sn'),
+#     ('SB', '121Sb'),
+#     ('TE', '125Te'),
+#     ('XE', '129Xe'),
+#     ('CS', '133Cs'),
+#     ('BA', '137Ba'),
+#     ('LA', '139La'),
+#     ('CE', '140Ce'),
+#     ('PR', '141Pr'),
+#     ('ND', '143Nd'),
+#     ('PM', '147Pm'),
+#     ('SM', '144Sm'),
+#     ('EU', '153Eu'),
+#     ('GD', '157Gd'),
+#     ('TB', '159Tb'),
+#     ('DY', '163Dy'),
+#     ('HO', '165Ho'),
+#     ('ER', '167Er'),
+#     ('TM', '169Tm'),
+#     ('YB', '171Yb'),
+#     ('LU', '175Lu'),
+#     ('HF', '177Hf'),
+#     ('TA', '181Ta'),
+#     ('RE', '187Re'),
+#     ('OS', '187Os'),
+#     ('IR', '193Ir'),
+#     ('PT', '195Pt'),
+#     ('AU', '197Au'),
+#     ('HG', '199Hg'),
+#     ('TL', '205Tl'),
+#     ('PB', '207Pb'),
+#     ('BI', '209Bi'),
+#     ('PO', '209Po'),
+#     ('AC', '227Ac'),
+#     ('TH', '232Th'),
+#     ('NP', '237Np'),
+#     ('PU', '239Pu'),
+#     ('AM', '243Am'),
+#
+#     ('J', None),
+#     ('MQ', None),
+#     ('delay', None),
+#     ('RDC', None),
+#     ('ANISO', None),
+#     ('TROESY', None),
+#     ('DIPOLAR', None),
+#     ))
 
-    ('J', None),
-    ('MQ', None),
-    ('delay', None),
-    ('RDC', None),
-    ('ANISO', None),
-    ('TROESY', None),
-    ('DIPOLAR', None),
-    ))
-
-PriorityIsotopeCodes = ['1H', '13C', '15N', '17O', '19F', '31P']
+# PriorityIsotopeCodes = ['1H', '13C', '15N', '17O', '19F', '31P']
 
 # IsotopeRecord = namedtuple('IsotopeRecord', (
 #     'isotopeCode', 'elementNumber', 'massNumber', 'isRadioactive',
@@ -559,10 +565,6 @@ PriorityIsotopeCodes = ['1H', '13C', '15N', '17O', '19F', '31P']
 #     ('239Pu', IsotopeRecord('239Pu', 94, 239, True, 'Pu', 'Plutonium', 0.5, 0.406, 0, 0)),
 #     ('243Am', IsotopeRecord('243Am', 95, 243, True, 'Am', 'Americium', 2.5, 0.6, 0, 2.86)),
 #     ))
-
-PSEUDO_ATOM_NAME = 'Q'
-PSEUDO_ATOM_NAMES = {PSEUDO_ATOM_NAME: '1H'}
-PSEUDO_ATOMS = ['QA', 'QB', 'QD', 'QE', 'QG', 'QH', 'QH1', 'QH2', 'QR', 'QZ']
 
 # GWV: now handled by EmptySpectrumDataSource class
 # #

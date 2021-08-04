@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-29 14:30:45 +0100 (Tue, June 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-04 12:28:20 +0100 (Wed, August 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:48 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import math
-from collections import Counter
+from collections import Counter, OrderedDict
 
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson, CcpnJsonDirectoryABC
 from ccpn.util.traits.CcpNmrTraits import Unicode, Int, Float, Bool
@@ -84,7 +84,7 @@ IsotopeRecord.register()
 
 @singleton
 class IsotopeRecords(CcpnJsonDirectoryABC):
-    """Singleton class to contain all isotopeRecords as (isotopeCode, IsotopeRecord) key,value pairs
+    """Singleton class to contain all isotopeRecords as (isotopeCode, IsotopeRecord) (key,value) pairs
     """
     attributeName = 'isotopeCode'
     directory = aPath(ccpnConfigPath) / 'isotopeRecords'
@@ -256,13 +256,153 @@ def findNucleiFromSpectrometerFrequencies(spectrometerFrequencies):
     return tuple(nuclei)
 
 
+def isotopeCode2Nucleus(isotopeCode=None):
+    if not isotopeCode:
+        return None
+
+    record = isotopeRecords.get(isotopeCode)
+    if record is None:
+        return None
+    else:
+        return record.symbol.upper()
+
+#=================================================================================================
+# This routines were copied/adapted from util.Common
+#=================================================================================================
+
+# A translation dict
+DEFAULT_ISOTOPE_DICT = OrderedDict((
+    ('H', '1H'),
+    ('D', '2H'),
+    ('B', '11B'),
+    ('C', '13C'),
+    ('N', '15N'),
+    ('O', '17O'),
+    ('F', '19F'),
+    ('P', '31P'),
+    ('S', '33S'),
+    ('K', '39K'),
+    ('V', '51V'),
+    ('Y', '89Y'),
+    ('I', '127I'),
+    ('W', '183W'),
+    ('U', '235U'),
+    ('HE', '3He'),
+    ('LI', '7Li'),
+    ('BE', '9Be'),
+    ('NE', '21Ne'),
+    ('NA', '23Na'),
+    ('MG', '25Mg'),
+    ('AL', '27Al'),
+    ('SI', '29Si'),
+    ('CL', '35Cl'),
+    ('AR', '40Ar'),
+    ('CA', '43Ca'),
+    ('SC', '45Sc'),
+    ('TI', '47Ti'),
+    ('CR', '53Cr'),
+    ('MN', '55Mn'),
+    ('FE', '57Fe'),
+    ('CO', '59Co'),
+    ('NI', '61Ni'),
+    ('CU', '63Cu'),
+    ('ZN', '67Zn'),
+    ('GA', '69Ga'),
+    ('GE', '73Ge'),
+    ('AS', '75As'),
+    ('SE', '77Se'),
+    ('BR', '79Br'),
+    ('KR', '83Kr'),
+    ('RB', '85Rb'),
+    ('SR', '87Sr'),
+    ('ZR', '91Zr'),
+    ('NB', '93Nb'),
+    ('MO', '95Mo'),
+    ('TC', '99Tc'),
+    ('RU', '99Ru'),
+    ('RH', '103Rh'),
+    ('PD', '105Pd'),
+    ('AG', '107Ag'),
+    ('CD', '111Cd'),
+    ('IN', '115In'),
+    ('SN', '119Sn'),
+    ('SB', '121Sb'),
+    ('TE', '125Te'),
+    ('XE', '129Xe'),
+    ('CS', '133Cs'),
+    ('BA', '137Ba'),
+    ('LA', '139La'),
+    ('CE', '140Ce'),
+    ('PR', '141Pr'),
+    ('ND', '143Nd'),
+    ('PM', '147Pm'),
+    ('SM', '144Sm'),
+    ('EU', '153Eu'),
+    ('GD', '157Gd'),
+    ('TB', '159Tb'),
+    ('DY', '163Dy'),
+    ('HO', '165Ho'),
+    ('ER', '167Er'),
+    ('TM', '169Tm'),
+    ('YB', '171Yb'),
+    ('LU', '175Lu'),
+    ('HF', '177Hf'),
+    ('TA', '181Ta'),
+    ('RE', '187Re'),
+    ('OS', '187Os'),
+    ('IR', '193Ir'),
+    ('PT', '195Pt'),
+    ('AU', '197Au'),
+    ('HG', '199Hg'),
+    ('TL', '205Tl'),
+    ('PB', '207Pb'),
+    ('BI', '209Bi'),
+    ('PO', '209Po'),
+    ('AC', '227Ac'),
+    ('TH', '232Th'),
+    ('NP', '237Np'),
+    ('PU', '239Pu'),
+    ('AM', '243Am'),
+
+    ))
+
+
+def checkIsotope(isotopeCode) -> str:
+    """Convert isotopeCode string to most probable isotope code - defaulting to '1H'
+
+    This function is intended for external format isotope specifications; mostly in SpectrumSource parameter
+    reading routines
+    """
+    defaultIsotope = '1H'
+
+    if not isotopeCode:
+        raise ValueError('Invalid isotopeCode (%r)' % isotopeCode)
+
+    isotopeCode = isotopeCode.strip().upper()
+    if isotopeCode in isotopeRecords:
+        # Superfluous but should speed things up
+        return isotopeCode
+
+    for ic in isotopeRecords.keys():
+        # NB checking this first means that e.g. 'H13C' returns '13C' rather than '1H'
+        if ic.upper() in isotopeCode:
+            return ic
+
+    # NB order of checking means that e.g. 'CA' returns Calcium rather than Carbon
+    result = (DEFAULT_ISOTOPE_DICT.get(isotopeCode[:2]) or
+              DEFAULT_ISOTOPE_DICT.get(isotopeCode[0]))
+
+    if result is None:
+       result = defaultIsotope
+
+    return result
+
+
 def name2IsotopeCode(name=None):
     """Get standard isotope code matching atom name or axisCode string
     """
     if not name:
         return None
-
-    from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
 
     result = DEFAULT_ISOTOPE_DICT.get(name[0])
     if result is None:
@@ -279,12 +419,26 @@ def name2IsotopeCode(name=None):
     return result
 
 
-def isotopeCode2Nucleus(isotopeCode=None):
-    if not isotopeCode:
-        return None
+def name2ElementSymbol(name):
+    """Get standard element symbol matching name or axisCode
 
-    record = isotopeRecords.get(isotopeCode)
-    if record is None:
+    NB, the first letter takes precedence, so e.g. 'CD' returns 'C' (carbon)
+    rather than 'CD' (Cadmium)"""
+
+    # NB, We deliberately do NOT use 'value in Constants.DEFAULT_ISOTOPE_DICT'
+    # We want to avoid elements that are in the dict but have value None.
+    if not name:
         return None
-    else:
-        return record.symbol.upper()
+    elif DEFAULT_ISOTOPE_DICT.get(name[0]) is not None:
+        return name[0]
+    elif DEFAULT_ISOTOPE_DICT.get(name[:2]) is not None:
+        return name[:2]
+    elif name[0].isdigit():
+        ss = name.title()
+        for key, record in isotopeRecords.items():
+            if ss.startswith(key):
+                if name[:len(key)].isupper():
+                    return record.symbol.upper()
+                break
+    #
+    return None

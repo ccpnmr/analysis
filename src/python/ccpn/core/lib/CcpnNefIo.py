@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-30 15:43:43 +0100 (Fri, July 30, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-04 12:28:19 +0100 (Wed, August 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -4269,7 +4269,10 @@ class CcpnNefReader(CcpnNefContent):
     # renames['ccpn_parameter'] = rename_saveframe
 
     def load_nef_chemical_shift(self, parent: ChemicalShiftList, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame):
-        """load nef_chemical_shift loop"""
+        """load nef_chemical_shift loop
+        """
+        from ccpn.util.isotopes import name2ElementSymbol, DEFAULT_ISOTOPE_DICT
+
 
         result = []
 
@@ -4289,9 +4292,9 @@ class CcpnNefReader(CcpnNefContent):
                 if isotope:
                     isotopeCode = '%s%s' % (isotope, element.title())
                 else:
-                    isotopeCode = Constants.DEFAULT_ISOTOPE_DICT.get(element.upper())
+                    isotopeCode = DEFAULT_ISOTOPE_DICT.get(element.upper())
             elif isotope:
-                element = commonUtil.name2ElementSymbol(tt[3])
+                element = name2ElementSymbol(tt[3])
                 isotopeCode = '%s%s' % (isotope, element.title())
             else:
                 isotopeCode = None

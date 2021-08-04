@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-22 13:09:38 +0100 (Thu, July 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-04 12:28:19 +0100 (Wed, August 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2428,6 +2428,12 @@ class GuiSpectrumDisplay(CcpnModule):
         if not isinstance(spectrum, Spectrum):
             raise TypeError('spectrum is not of type Spectrum')
 
+        if self.is1D and spectrum.dimensionCount > 1:
+            raise RuntimeError('Cannot display nD spectrum on %s' % self)
+
+        if not self.is1D and spectrum.dimensionCount == 1:
+            raise RuntimeError('Cannot display 1D spectrum on %s' % self)
+
         # check if not already here
         _specViews = self.getSpectrumViewFromSpectrum(spectrum)
         if len(_specViews) > 0:
@@ -2437,7 +2443,7 @@ class GuiSpectrumDisplay(CcpnModule):
         _oldOrdering = self.getOrderedSpectrumViewsIndex()
 
         # dimensionOrdering = [1, 0] if self.is1D else spectrum.getByAxisCodes('dimensions', self.axisCodes, exactMatch=False)
-        dimensionOrdering = [1, 0] if self.is1D else self._getDimensionsMapping(spectrum)
+        dimensionOrdering = (1, 0) if self.is1D else self._getDimensionsMapping(spectrum)
 
         with undoStackRevert(self.application) as revertStack:
             with undoBlockWithoutSideBar(self.application):

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-04 12:28:19 +0100 (Wed, August 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-04 13:38:44 +0100 (Wed, August 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -675,7 +675,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.appearance.rememberLastClosedModuleState = state
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetAutoOpenPythonConsoleOnMacroEditor(self):
+    def _queueSetAutoOpenPythonConsoleOnMacroEditor(self, _value):
         value = self.rememberLastClosedModule.isChecked()
         if value != self.preferences.appearance.autoOpenPythonConsoleOnMacroEditor:
             return partial(self._setAutoOpenPythonConsoleOnMacroEditor, value)

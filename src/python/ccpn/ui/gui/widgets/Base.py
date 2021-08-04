@@ -415,3 +415,13 @@ class Base(DropBase, SignalBlocking):
         if parent is None:
             parent = self
         return Spacer(parent, width, height, expandingX, expandingY, grid=grid, gridSpan=gridSpan)
+
+    def enableWidget(self, flag:bool):
+        """Enable or disable widget depending on flag
+        """
+        if flag:
+            self.setEnabled(True)
+            self.setStyleSheet("background:white")
+        else:
+            self.setEnabled(False)
+            self.setStyleSheet("background:#E8E8E8")  # some light gr

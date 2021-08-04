@@ -50,7 +50,6 @@ from ccpn.ui.gui.widgets.HLine import HLine, LabeledHLine
 from ccpn.util.Logging import getLogger
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, colourNameNoSpace, _setColourPulldown
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
-from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
 from ccpn.core.MultipletList import MULTIPLETAVERAGINGTYPES
 from ccpn.util.UserPreferences import UserPreferences
@@ -114,6 +113,41 @@ def _updateSettings(self, newPrefs, updateColourScheme, updateSpectrumDisplays, 
 
 def _refreshGLItems():
     pass
+
+
+def _makeLabel(parent, text, grid, **kwds) -> Label:
+    """Convenience routine to make a Label with uniform settings
+    :return Label instance
+    """
+    kwds.setdefault('hAlign', 'r')
+    kwds.setdefault('margins', (0,3,10,3))
+    label = Label(parent, text=text, grid=grid, **kwds)
+    return label
+
+
+def _makeLine(parent, grid, text=None, **kwds):
+    """Convenience routine to make a horizontal Line, optionally with text and with uniform settings
+    """
+    kwds.setdefault('gridSpan', (1,3))
+    kwds.setdefault('colour', getColours()[DIVIDER])
+    kwds.setdefault('height', 30)
+    if text is None:
+        result = HLine(parent=parent, grid=grid, **kwds)
+    else:
+        result = LabeledHLine(parent=parent, text=text, grid=grid, **kwds)
+    return result
+
+def _makeCheckBox(parent, row, text, callback, toolTip=None, **kwds):
+    """Convenience routine to make a row with a label and a checkbox
+    :return CheckBox instance
+    """
+    _label = _makeLabel(parent, text=text, grid=(row, 0), **kwds)
+    _checkBox = CheckBox(parent, grid=(row, 1), hAlign='l', hPolicy='minimal', spacing=(0,0))
+    _checkBox.toggled.connect(callback)
+    if toolTip is not None:
+        _label.setToolTip(toolTip)
+        _checkBox.setToolTip(toolTip)
+    return _checkBox
 
 
 class PreferencesPopup(CcpnDialogMainWidget):
@@ -368,6 +402,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         for (tabFunc, tabName) in ((self._setGeneralTabWidgets, 'General'),
                                    (self._setSpectrumTabWidgets, 'Spectrum'),
+                                   (self._setPeaksTabWidgets, 'Peaks and Multiplets'),
                                    (self._setExternalProgramsTabWidgets, 'External Programs'),
                                    (self._setAppearanceTabWidgets, 'Appearance'),
                                    ):
@@ -377,47 +412,55 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self.tabWidget.addTab(fr.scrollArea, tabName)
             tabFunc(parent=fr)
 
-        self.useApplyToSpectrumDisplaysLabel = Label(self.mainWidget, text="Apply to All Spectrum Displays", grid=(1, 0))
-        self.useApplyToSpectrumDisplaysBox = CheckBox(self.mainWidget, grid=(1, 1))
-        self.useApplyToSpectrumDisplaysBox.toggled.connect(partial(self._queueApplyToSpectrumDisplays, 'applyToSpectrumDisplays'))
-
     def _setGeneralTabWidgets(self, parent):
         """Insert a widget in here to appear in the General Tab
         """
-        row = 0
+        row = -1
 
-        self.languageLabel = Label(parent, text="Language", grid=(row, 0), enabled=False)
+        row += 1
+        self.languageLabel = _makeLabel(parent, text="Language", grid=(row, 0), enabled=False)
         self.languageBox = PulldownList(parent, grid=(row, 1), hAlign='l', enabled=False)
         self.languageBox.addItems(languages)
         self.languageBox.setMinimumWidth(PulldownListsMinimumWidth)
         self.languageBox.currentIndexChanged.connect(self._queueChangeLanguage)
 
+        #====== Layouts ======
         row += 1
-        self.autoSaveLayoutOnQuitLabel = Label(parent, text="Auto Save Layout On Quit", grid=(row, 0))
-        self.autoSaveLayoutOnQuitBox = CheckBox(parent, grid=(row, 1))  #,
-        self.autoSaveLayoutOnQuitBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'autoSaveLayoutOnQuit'))
+        _makeLine(parent, grid=(row, 0), text="Layouts")
 
         row += 1
-        self.restoreLayoutOnOpeningLabel = Label(parent, text="Restore Layout On Opening", grid=(row, 0))
-        self.restoreLayoutOnOpeningBox = CheckBox(parent, grid=(row, 1))
-        self.restoreLayoutOnOpeningBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'restoreLayoutOnOpening'))
+        self.autoSaveLayoutOnQuitBox = _makeCheckBox(parent, row=row, text="Auto-save on 'Quit'",
+                                                     callback=partial(self._queueToggleGeneralOptions, 'autoSaveLayoutOnQuit'))
 
         row += 1
-        self.autoBackupEnabledLabel = Label(parent, text="Auto Backup On", grid=(row, 0))
-        self.autoBackupEnabledBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.autoBackupEnabled)
-        self.autoBackupEnabledBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'autoBackupEnabled'))
+        self.restoreLayoutOnOpeningBox = _makeCheckBox(parent, row=row, text="Restore on 'Open'",
+                                                       callback = partial(self._queueToggleGeneralOptions, 'restoreLayoutOnOpening'))
+
+        #====== Auto Backups ======
+        row += 1
+        _makeLine(parent, grid=(row, 0), text="Auto Backups")
 
         row += 1
-        self.autoBackupFrequencyLabel = Label(parent, text="Auto Backup Freq (mins)", grid=(row, 0))
+        self.autoBackupEnabledBox = _makeCheckBox(parent, row=row, text="Auto backup",
+                                                  callback=partial(self._queueToggleGeneralOptions, 'autoBackupEnabled'))
+
+        row += 1
+        self.autoBackupFrequencyLabel = _makeLabel(parent, text="Backup frequency (mins)", grid=(row, 0))
         self.autoBackupFrequencyData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', min=10, decimals=0, step=10)
         self.autoBackupFrequencyData.setMinimumWidth(LineEditsMinimumWidth)
         self.autoBackupFrequencyData.valueChanged.connect(self._queueSetAutoBackupFrequency)
 
+        #====== Paths ======
         row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
+        _makeLine(parent, grid=(row, 0), text="Paths")
 
         row += 1
-        self.userWorkingPathLabel = Label(parent, "User Working Path ", grid=(row, 0), )
+        self.useProjectPathBox = _makeCheckBox(parent, row=row, text="Application uses project path",
+                                               callback=partial(self._queueToggleGeneralOptions, 'useProjectPath'),
+                                               toolTip = 'Set the application working path to the project folder on loading')
+
+        row += 1
+        self.userWorkingPathLabel = _makeLabel(parent, "Application working path ", grid=(row, 0), )
         self.userWorkingPathData = PathEdit(parent, grid=(row, 1), vAlign='t')
         self.userWorkingPathData.setMinimumWidth(LineEditsMinimumWidth)
         self.userWorkingPathButton = Button(parent, grid=(row, 2), callback=self._getUserWorkingPath,
@@ -425,7 +468,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.userWorkingPathData.textChanged.connect(self._queueSetUserWorkingPath)
 
         row += 1
-        userLayouts = Label(parent, text="User Predefined Layouts ", grid=(row, 0))
+        userLayouts = _makeLabel(parent, text="Layouts ", grid=(row, 0))
         self.userLayoutsPathData = PathEdit(parent, grid=(row, 1), vAlign='t')
         self.userLayoutsPathData.setMinimumWidth(LineEditsMinimumWidth)
         self.userLayoutsLeButton = Button(parent, grid=(row, 2), callback=self._getUserLayoutsPath,
@@ -433,7 +476,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.userLayoutsPathData.textChanged.connect(self._queueSetuserLayoutsPath)
 
         row += 1
-        self.auxiliaryFilesLabel = Label(parent, text="Auxiliary Files Path ", grid=(row, 0))
+        self.auxiliaryFilesLabel = _makeLabel(parent, text="Auxiliary files", grid=(row, 0))
         self.auxiliaryFilesData = PathEdit(parent, grid=(row, 1), vAlign='t')
         self.auxiliaryFilesData.setMinimumWidth(LineEditsMinimumWidth)
         self.auxiliaryFilesDataButton = Button(parent, grid=(row, 2), callback=self._getAuxiliaryFilesPath,
@@ -441,7 +484,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.auxiliaryFilesData.textChanged.connect(self._queueSetAuxiliaryFilesPath)
 
         row += 1
-        self.macroPathLabel = Label(parent, text="Macro Path", grid=(row, 0))
+        self.macroPathLabel = _makeLabel(parent, text="Macro's", grid=(row, 0))
         self.macroPathData = PathEdit(parent, grid=(row, 1), vAlign='t')
         self.macroPathData.setMinimumWidth(LineEditsMinimumWidth)
         self.macroPathDataButton = Button(parent, grid=(row, 2), callback=self._getMacroFilesPath,
@@ -449,7 +492,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.macroPathData.textChanged.connect(self._queueSetMacroFilesPath)
 
         row += 1
-        self.pluginPathLabel = Label(parent, text="Plugin Path", grid=(row, 0))
+        self.pluginPathLabel = _makeLabel(parent, text="Plugins", grid=(row, 0))
         self.pluginPathData = PathEdit(parent, grid=(row, 1), vAlign='t', tipText=NotImplementedTipText)
         self.pluginPathData.setMinimumWidth(LineEditsMinimumWidth)
         self.pluginPathDataButton = Button(parent, grid=(row, 2), callback=self._getPluginFilesPath,
@@ -457,140 +500,133 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.pluginPathData.textChanged.connect(self._queueSetPluginFilesPath)
 
         row += 1
-        self.pipesPathLabel = Label(parent, text="Pipes Path", grid=(row, 0), )
+        self.pipesPathLabel = _makeLabel(parent, text="Pipes", grid=(row, 0), )
         self.userPipesPath = PathEdit(parent, grid=(row, 1), vAlign='t', tipText='')
         self.userPipesPath.setMinimumWidth(LineEditsMinimumWidth)
         self.pipesPathDataButton = Button(parent, grid=(row, 2), callback=self._getUserPipesPath,
                                           icon='icons/directory', hPolicy='fixed')
         self.userPipesPath.textChanged.connect(self._queueSetPipesFilesPath)
 
+        #====== Proxy Settings ======
         row += 1
-        self.useProjectPathLabel = Label(parent, text="Set Working Path to Project Path", grid=(row, 0))
-        self.useProjectPathBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.useProjectPath)
-        self.useProjectPathBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useProjectPath'))
-        self.useProjectPathLabel.setToolTip('Set the current user working path to the project folder on loading')
-        self.useProjectPathBox.setToolTip('Set the current user working path to the project folder on loading')
+        _makeLine(parent, grid=(row, 0), text="Proxy Settings")
 
         row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
+        self.useProxyBox = _makeCheckBox(parent, row=row, text="Use proxy settings",
+                                         callback=self._queueSetUseProxy)
 
         row += 1
-        self.verifySSLLabel = Label(parent, text="Verify SSL certificates", grid=(row, 0))
-        self.verifySSLBox = CheckBox(parent, grid=(row, 1))
-        self.verifySSLBox.toggled.connect(self._queueSetVerifySSL)
-        row += 1
-        self.useProxyLabel = Label(parent, text="Use Proxy Settings", grid=(row, 0))
-        self.useProxyBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.proxySettings.useProxy)
-        self.useProxyBox.toggled.connect(self._queueSetUseProxy)
+        self.verifySSLBox = _makeCheckBox(parent, row=row, text="Verify SSL certificates",
+                                          callback=self._queueSetVerifySSL)
 
         row += 1
-        self.proxyAddressLabel = Label(parent, text="   Web Proxy Server", grid=(row, 0), hAlign='l')
+        self.proxyAddressLabel = _makeLabel(parent, text="Proxy server", grid=(row, 0))
         self.proxyAddressData = LineEdit(parent, grid=(row, 1), hAlign='l')
         self.proxyAddressData.setMinimumWidth(LineEditsMinimumWidth)
         self.proxyAddressData.textEdited.connect(self._queueSetProxyAddress)
 
         row += 1
-        self.proxyPortLabel = Label(parent, text="   Port", grid=(row, 0), hAlign='l')
+        self.proxyPortLabel = _makeLabel(parent, text="Port", grid=(row, 0))
         self.proxyPortData = LineEdit(parent, grid=(row, 1), hAlign='l')
         self.proxyPortData.setMinimumWidth(LineEditsMinimumWidth)
         self.proxyPortData.textEdited.connect(self._queueSetProxyPort)
 
         row += 1
-        self.useProxyPasswordLabel = Label(parent, text="   Proxy Server Requires Password", grid=(row, 0))
-        self.useProxyPasswordBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.proxySettings.useProxyPassword)
-        self.useProxyPasswordBox.toggled.connect(self._queueSetUseProxyPassword)
+        self.useProxyPasswordBox = _makeCheckBox(parent, row=row, text="Server requires password",
+                                                 callback=self._queueSetUseProxyPassword)
 
         row += 1
-        self.proxyUsernameLabel = Label(parent, text="        Username", grid=(row, 0), hAlign='l')
+        self.proxyUsernameLabel = _makeLabel(parent, text="Username", grid=(row, 0))
         self.proxyUsernameData = LineEdit(parent, grid=(row, 1), hAlign='l')
         self.proxyUsernameData.setMinimumWidth(LineEditsMinimumWidth)
         self.proxyUsernameData.textEdited.connect(self._queueSetProxyUsername)
 
         row += 1
-        self.proxyPasswordLabel = Label(parent, text="        Password", grid=(row, 0), hAlign='l')
+        self.proxyPasswordLabel = _makeLabel(parent, text="Password", grid=(row, 0))
         self.proxyPasswordData = PasswordEdit(parent, grid=(row, 1), hAlign='l')
         self.proxyPasswordData.setMinimumWidth(LineEditsMinimumWidth)
         self.proxyPasswordData.textEdited.connect(self._queueSetProxyPassword)
 
+        # Add spacer to prevent rows from spreading into empty space
         row += 1
-        Spacer(parent, 15, 2,
-               QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
-               grid=(row, 1), gridSpan=(1, 1))
+        parent.addSpacer(15, 2, expandX=True, expandY=True, grid=(row, 1), gridSpan=(1, 1))
 
     def _setAppearanceTabWidgets(self, parent):
         """Insert a widget in here to appear in the Appearance Tab
         """
 
-        row = 0
-        self.colourSchemeLabel = Label(parent, text="Colour Scheme ", grid=(row, 0))
-        self.colourSchemeBox = PulldownList(parent, grid=(row, 1), hAlign='l')
-        self.colourSchemeBox.setToolTip('SpectrumDisplay Background only')
-        self.colourSchemeBox.setMinimumWidth(PulldownListsMinimumWidth)
-        self.colourSchemeBox.addItems(COLOUR_SCHEMES)
-        self._oldColourScheme = None
-        self.colourSchemeBox.currentIndexChanged.connect(self._queueChangeColourScheme)
+        row = -1
+
+        # GWV : moved to Spectrum tab
+        # row += 1
+        # self.colourSchemeLabel = _makeLabel(parent, text="Colour scheme ", grid=(row, 0))
+        # self.colourSchemeBox = PulldownList(parent, grid=(row, 1), hAlign='l')
+        # self.colourSchemeBox.setToolTip('SpectrumDisplay background only')
+        # self.colourSchemeBox.setMinimumWidth(PulldownListsMinimumWidth)
+        # self.colourSchemeBox.addItems(COLOUR_SCHEMES)
+        # self._oldColourScheme = None
+        # self.colourSchemeBox.currentIndexChanged.connect(self._queueChangeColourScheme)
 
         row += 1
-        self.useNativeFileLabel = Label(parent, text="Use Native File Dialogs", grid=(row, 0))
+        self.useNativeFileLabel = _makeLabel(parent, text="Use native file dialogs", grid=(row, 0))
         self.useNativeFileBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.useNative)
         self.useNativeFileBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useNative'))
 
         row += 1
-        self.useNativeLabel = Label(parent, text="Use Native Menus (requires restart)", grid=(row, 0))
+        self.useNativeLabel = _makeLabel(parent, text="Use native menus (requires restart)", grid=(row, 0))
         self.useNativeMenus = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.useNativeMenus)
         self.useNativeMenus.toggled.connect(partial(self._queueToggleGeneralOptions, 'useNativeMenus'))
 
         row += 1
-        self.useNativeWebLabel = Label(parent, text="Use Native Web Browser", grid=(row, 0))
+        self.useNativeWebLabel = _makeLabel(parent, text="Use native web browser", grid=(row, 0))
         self.useNativeWebBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.useNativeWebbrowser)
         self.useNativeWebBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useNativeWebbrowser'))
 
+        #====== Tip of the Day ======
         row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
+        _makeLine(parent, grid=(row, 0), text="Tip of the Day")
 
         row += 1
-        self.useImportNefPopupLabel = Label(parent, text="Show Import Popup\n    on dropped Nef Files", grid=(row, 0))
-        self.useImportNefPopupBox = CheckBox(parent, grid=(row, 1))
-        self.useImportNefPopupBox.toggled.connect(partial(self._queueToggleAppearanceOptions, 'openImportPopupOnDroppedNef'))
+        self.showTipsAtStartUplabel = _makeLabel(parent, text="Show at startup", grid=(row, 0))
+        self.showTipsAtStartUp = CheckBox(parent, grid=(row, 1))
+        self.showTipsAtStartUp.toggled.connect(self._queueSetShowTipsAtStartUp)
 
         row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
+        self.showAllTipsLabel = _makeLabel(parent, text="Clear tip history", tipText="show all tips on next restart", grid=(row, 0))
+        self.showAllTips = CheckBox(parent, grid=(row, 1))
+        self.showAllTips.clicked.connect(self._queueShowAllTips)
+
+        # GWV: option removed as test is done after Drop
+        # row += 1
+        # HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=_dividerColour, height=20)
+        #
+        # row += 1
+        # self.useImportNefPopupLabel = Label(parent, text="Show Import Popup\n    on dropped Nef Files", grid=(row, 0))
+        # self.useImportNefPopupBox = CheckBox(parent, grid=(row, 1))
+        # self.useImportNefPopupBox.toggled.connect(partial(self._queueToggleAppearanceOptions, 'openImportPopupOnDroppedNef'))
+
+        #====== Fonts ======
+        row += 1
+        _makeLine(parent, grid=(row, 0), text="Fonts (requires restart)")
 
         # NOTE:ED - testing new font loader
-        row += 1
-        self._fontsLabel = Label(parent, text="Fonts (requires restart)", grid=(row, 0))
-
         for num, fontName in enumerate(FONTLIST):
             row += 1
-            _label = Label(parent, text="    {}".format(fontName), grid=(row, 0))
-            _data = Button(parent, grid=(row, 1), callback=partial(self._getFont, num, fontName))
+            _label = _makeLabel(parent, text="{}".format(fontName), grid=(row, 0))
+            _data = Button(parent, grid=(row, 1), callback=partial(self._getFont, num, fontName), hAlign='l')
+            _data.setMinimumWidth(PulldownListsMinimumWidth)
 
             setattr(self, FONTLABELFORMAT.format(num), _label)
             setattr(self, FONTDATAFORMAT.format(num), _data)
 
         row += 1
-        self.glFontSizeLabel = Label(parent, text="Spectrum Display Font Size", grid=(row, 0))
+        self.glFontSizeLabel = _makeLabel(parent, text="Spectrum Display Font Size", grid=(row, 0))
         self.glFontSizeData = PulldownList(parent, grid=(row, 1), hAlign='l')
         self.glFontSizeData.setMinimumWidth(PulldownListsMinimumWidth)
         self.glFontSizeData.currentIndexChanged.connect(self._queueChangeGLFontSize)
 
         row += 1
-        HLine(parent, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[DIVIDER], height=20)
-
-        row += 1
-        self.showTipsAtStartUplabel = Label(parent, text="Show tips of the day at startup", grid=(row, 0))
-        self.showTipsAtStartUp = CheckBox(parent, grid=(row, 1))
-        self.showTipsAtStartUp.toggled.connect(self._queueSetShowTipsAtStartUp)
-
-        row += 1
-        self.showAllTipsLabel = Label(parent, text="Clear tip history\n (show all tips on next restart)", grid=(row, 0))
-        self.showAllTips = CheckBox(parent, grid=(row, 1))
-        self.showAllTips.clicked.connect(self._queueShowAllTips)
-
-        row += 1
-        Spacer(parent, 15, 2,
-               QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
-               grid=(row, 1), gridSpan=(1, 1))
+        parent.addSpacer(15, 2, expandX=True, expandY=True, grid=(row, 1), gridSpan=(1, 1))
 
     @queueStateChange(_verifyPopupApply)
     def _queueShowAllTips(self):
@@ -625,11 +661,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
     def _populateAppearanceTab(self):
         """Populate the widgets in the appearanceTab
         """
-        self.colourSchemeBox.setCurrentIndex(self.colourSchemeBox.findText(self.preferences.general.colourScheme))
         self.useNativeFileBox.setChecked(self.preferences.general.useNative)
         self.useNativeMenus.setChecked(self.preferences.general.useNativeMenus)
         self.useNativeWebBox.setChecked(self.preferences.general.useNativeWebbrowser)
-        self.useImportNefPopupBox.setChecked(self.preferences.appearance.openImportPopupOnDroppedNef)
+        # self.useImportNefPopupBox.setChecked(self.preferences.appearance.openImportPopupOnDroppedNef)
 
         for fontNum, fontName in enumerate(FONTLIST):
             value = self.preferences.appearance[FONTPREFS.format(fontNum)]
@@ -656,6 +691,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self.useApplyToSpectrumDisplaysBox.setChecked(self.preferences.general.applyToSpectrumDisplays)
             self._populateGeneralTab()
             self._populateSpectrumTab()
+            self._populatePeaksTab()
             self._populateExternalProgramsTab()
             self._populateAppearanceTab()
 
@@ -686,8 +722,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.restoreLayoutOnOpeningBox.setChecked(self.preferences.general.restoreLayoutOnOpening)
         self.autoBackupEnabledBox.setChecked(self.preferences.general.autoBackupEnabled)
         self.autoBackupFrequencyData.setValue(self.preferences.general.autoBackupFrequency)
-        self.userLayoutsPathData.setText(self.preferences.general.userLayoutsPath)
+
         self.userWorkingPathData.setText(self.preferences.general.userWorkingPath)
+        self.useProjectPathBox.setChecked(self.preferences.general.useProjectPath)
+
+        self.userLayoutsPathData.setText(self.preferences.general.userLayoutsPath)
         self.auxiliaryFilesData.setText(self.preferences.general.auxiliaryFilesPath)
         self.macroPathData.setText(self.preferences.general.userMacroPath)
         self.pluginPathData.setText(self.preferences.general.userPluginPath)
@@ -695,7 +734,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         userPipesPath = _fetchUserPipesPath(self.application)  # gets from preferences or creates the default dir
         self.userPipesPath.setText(str(userPipesPath))
 
-        self.useProjectPathBox.setChecked(self.preferences.general.useProjectPath)
+
         self.verifySSLBox.setChecked(self.preferences.proxySettings.verifySSL)
         self.useProxyBox.setChecked(self.preferences.proxySettings.useProxy)
         self.proxyAddressData.setText(str(self.preferences.proxySettings.proxyAddress))
@@ -705,7 +744,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.proxyPasswordData.setText(self._userPreferences.decodeValue(str(self.preferences.proxySettings.proxyPassword)))
 
         # set the enabled state of the proxy settings boxes
-        self._setProxyButtons()
+        self._enableProxyButtons()
 
     def _populateSpectrumTab(self):
         """Populate the widgets in the spectrumTab
@@ -717,20 +756,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # self._validateFrame._populate()
 
         self.regionPaddingData.setValue(float('%.1f' % (100 * self.preferences.general.stripRegionPadding)))
-        self.dropFactorData.setValue(float('%.1f' % (100 * self.preferences.general.peakDropFactor)))
-        self.peakFactor1D.setValue(float(self.preferences.general.peakFactor1D))
-        volumeIntegralLimit = self.preferences.general.volumeIntegralLimit
-        self.volumeIntegralLimitData.setValue(int(volumeIntegralLimit))
 
-        from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC
-
-        _peakPickers = PeakPickerABC._peakPickers
-        self.peakPicker1dData.setData(texts=[''] + sorted([pp for pp in _peakPickers.keys()]))
-        self.peakPickerNdData.setData(texts=[''] + sorted([pp for pp in _peakPickers.keys()]))
-        self.peakPicker1dData.set(self.preferences.general.peakPicker1d)
-        self.peakPickerNdData.set(self.preferences.general.peakPickerNd)
-
-        self.peakFittingMethod.setIndex(PEAKFITTINGDEFAULTS.index(self.preferences.general.peakFittingMethod))
         self.showToolbarBox.setChecked(self.preferences.general.showToolbar)
         self.spectrumBorderBox.setChecked(self.preferences.general.showSpectrumBorder)
         self.showGridBox.setChecked(self.preferences.general.showGrid)
@@ -758,75 +784,56 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.symbolSizePixelData.setValue(int('%i' % self.preferences.general.symbolSizePixel))
         self.symbolThicknessData.setValue(int(self.preferences.general.symbolThickness))
 
-        _enabled = self.preferences.general.aliasEnabled
-        self.aliasEnabledData.setChecked(_enabled)
-        self.aliasShadeData.setValue(self.preferences.general.aliasShade)
-        self.aliasLabelsEnabledData.setChecked(self.preferences.general.aliasLabelsEnabled)
-        self.aliasLabelsEnabledData.setEnabled(_enabled)
-        self.aliasShadeData.setEnabled(_enabled)
+        # _enabled = self.preferences.general.aliasEnabled
+        # self.aliasEnabledData.setChecked(_enabled)
+        # self.aliasShadeData.setValue(self.preferences.general.aliasShade)
+        # self.aliasLabelsEnabledData.setChecked(self.preferences.general.aliasLabelsEnabled)
+        # self.aliasLabelsEnabledData.setEnabled(_enabled)
+        # self.aliasShadeData.setEnabled(_enabled)
 
         self.contourThicknessData.setValue(int(self.preferences.general.contourThickness))
+        self.colourSchemeBox.setCurrentIndex(self.colourSchemeBox.findText(self.preferences.general.colourScheme))
 
         self.autoCorrectBox.setChecked(self.preferences.general.autoCorrectColours)
         _setColourPulldown(self.marksDefaultColourBox, self.preferences.general.defaultMarksColour)
         self.showSideBandsData.setValue(int(self.preferences.general.numSideBands))
 
+        # multipletAveraging = self.preferences.general.multipletAveraging
+        # self.multipletAveraging.setIndex(MULTIPLETAVERAGINGTYPES.index(multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0)
+        # self.singleContoursBox.setChecked(self.preferences.general.generateSinglePlaneContours)
+        # self.negativeTraceColourBox.setChecked(self.preferences.general.traceIncludeNegative)
+
+        for aspect, aspectValue in self.preferences.general.aspectRatios.items():
+            if aspect in self.aspectData:
+                self.aspectData[aspect].setValue(aspectValue)
+
+    def _populatePeaksTab(self):
+        """Populate the widgets in the PeaksTab
+        """
+
+        from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC, getPeakPickerTypes
+
+        _peakPickers = getPeakPickerTypes()
+        self.peakPicker1dData.setData(texts=[''] + sorted([pp for pp in _peakPickers.keys()]))
+        self.peakPickerNdData.setData(texts=[''] + sorted([pp for pp in _peakPickers.keys()]))
+        self.peakPicker1dData.set(self.preferences.general.peakPicker1d)
+        self.peakPickerNdData.set(self.preferences.general.peakPickerNd)
+
+        self.peakFittingMethod.setIndex(PEAKFITTINGDEFAULTS.index(self.preferences.general.peakFittingMethod))
+
         multipletAveraging = self.preferences.general.multipletAveraging
         self.multipletAveraging.setIndex(MULTIPLETAVERAGINGTYPES.index(multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0)
-        self.singleContoursBox.setChecked(self.preferences.general.generateSinglePlaneContours)
-        self.negativeTraceColourBox.setChecked(self.preferences.general.traceIncludeNegative)
-
-        # NOTE: ED this seems a little awkward
-        self.aspectLabel = {}
-        self.aspectData = {}
-        self._removeWidget(self.aspectLabelFrame)
-        self._removeWidget(self.aspectDataFrame)
-        for ii, aspect in enumerate(sorted(self.preferences.general.aspectRatios.keys())):
-            aspectValue = self.preferences.general.aspectRatios[aspect]
-            self.aspectLabel[aspect] = Label(self.aspectLabelFrame, text=aspect, grid=(ii, 0), hAlign='r')
-            self.aspectData[aspect] = ScientificDoubleSpinBox(self.aspectDataFrame, min=1, grid=(ii, 0), hAlign='l')
-            self.aspectData[aspect].setValue(aspectValue)
-            self.aspectData[aspect].setMinimumWidth(LineEditsMinimumWidth)
-            if aspect == self.preferences.general._baseAspectRatioAxisCode:
-                self.aspectData[aspect].setEnabled(False)
-            else:
-                self.aspectData[aspect].setEnabled(True)
-                self.aspectData[aspect].valueChanged.connect(partial(self._queueSetAspect, aspect, ii))
 
         self.useSearchBoxModeBox.setChecked(self.preferences.general.searchBoxMode)
         self.useSearchBoxDoFitBox.setChecked(self.preferences.general.searchBoxDoFit)
 
-        self.searchBox1dLabel = {}
-        self.searchBox1dData = {}
-        self._removeWidget(self.searchBox1dLabelFrame)
-        self._removeWidget(self.searchBox1dDataFrame)
-        for ii, searchBox1d in enumerate(sorted(self.preferences.general.searchBoxWidths1d.keys())):
-            searchBox1dValue = self.preferences.general.searchBoxWidths1d[searchBox1d]
-            self.searchBox1dLabel[searchBox1d] = Label(self.searchBox1dLabelFrame, text=searchBox1d, grid=(ii, 0), hAlign='r')
-            self.searchBox1dData[searchBox1d] = ScientificDoubleSpinBox(self.searchBox1dDataFrame, min=0.0001, grid=(ii, 0), hAlign='l')
-            self.searchBox1dData[searchBox1d].setValue(searchBox1dValue)
-            self.searchBox1dData[searchBox1d].setMinimumWidth(LineEditsMinimumWidth)
-            # if searchBox1d == self.preferences.general._basesearchBox1dRatioAxisCode:
-            #     self.searchBox1dData[searchBox1d].setEnabled(False)
-            # else:
-            #     self.searchBox1dData[searchBox1d].setEnabled(True)
-            self.searchBox1dData[searchBox1d].valueChanged.connect(partial(self._queueSetSearchBox1d, searchBox1d, ii))
+        for key, value in self.preferences.general.searchBoxWidths1d.items():
+            if key in self.searchBox1dData:
+                self.searchBox1dData[key].setValue(value)
 
-        self.searchBoxNdLabel = {}
-        self.searchBoxNdData = {}
-        self._removeWidget(self.searchBoxNdLabelFrame)
-        self._removeWidget(self.searchBoxNdDataFrame)
-        for ii, searchBoxNd in enumerate(sorted(self.preferences.general.searchBoxWidthsNd.keys())):
-            searchBoxNdValue = self.preferences.general.searchBoxWidthsNd[searchBoxNd]
-            self.searchBoxNdLabel[searchBoxNd] = Label(self.searchBoxNdLabelFrame, text=searchBoxNd, grid=(ii, 0), hAlign='r')
-            self.searchBoxNdData[searchBoxNd] = ScientificDoubleSpinBox(self.searchBoxNdDataFrame, min=0.0001, grid=(ii, 0), hAlign='l')
-            self.searchBoxNdData[searchBoxNd].setValue(searchBoxNdValue)
-            self.searchBoxNdData[searchBoxNd].setMinimumWidth(LineEditsMinimumWidth)
-            # if searchBoxNd == self.preferences.general._basesearchBoxNdRatioAxisCode:
-            #     self.searchBoxNdData[searchBoxNd].setEnabled(False)
-            # else:
-            #     self.searchBoxNdData[searchBoxNd].setEnabled(True)
-            self.searchBoxNdData[searchBoxNd].valueChanged.connect(partial(self._queueSetSearchBoxNd, searchBoxNd, ii))
+        for key, value in self.preferences.general.searchBoxWidthsNd.items():
+            if key in self.searchBoxNdData:
+                self.searchBoxNdData[key].setValue(value)
 
     def _populateExternalProgramsTab(self):
         """Populate the widgets in the externalProgramsTab
@@ -840,16 +847,13 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """Insert a widget in here to appear in the Spectrum Tab. Parent = the Frame obj where the widget should live
         """
 
-        dividerHeight = 30
-        labelAlignment = 'r'
-
         row = 0
-        self.autoSetDataPathLabel = Label(parent, text="Auto set dataPath", grid=(row, 0), hAlign=labelAlignment)
+        self.autoSetDataPathLabel = _makeLabel(parent, text="Auto set data path", grid=(row, 0))
         self.autoSetDataPathBox = CheckBox(parent, grid=(row, 1))
         self.autoSetDataPathBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'autoSetDataPath'))
 
         row += 1
-        self.userDataPathLabel = Label(parent, "User dataPath", grid=(row, 0), hAlign=labelAlignment )
+        self.userDataPathLabel = _makeLabel(parent, text="Data path ($DATA)", grid=(row, 0))
         self.userDataPathText = PathEdit(parent, grid=(row, 1), vAlign='t')
         self.userDataPathText.setMinimumWidth(LineEditsMinimumWidth)
         self.userDataPathText.textChanged.connect(self._queueSetUserDataPath)
@@ -858,11 +862,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         #====== Spectrum Display ======
         row += 1
-        LabeledHLine(parent, grid=(row,0), gridSpan=(1,3),
-                     text="Spectrum Display", colour=getColours()[DIVIDER], height=dividerHeight)
+        _makeLine(parent, grid=(row, 0), text="Spectrum Display")
 
         row += 1
-        self.matchAxisCodeLabel = Label(parent, text="Match axis codes by", grid=(row, 0), hAlign=labelAlignment)
+        self.matchAxisCodeLabel = _makeLabel(parent, text="Match axis codes by", grid=(row, 0))
         self.matchAxisCode = RadioButtons(parent, texts=['Atom type', 'Full axis code'],
                                           callback=self._queueSetMatchAxisCode,
                                           direction='h',
@@ -871,7 +874,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                           )
 
         row += 1
-        self.axisOrderingOptionsLabel = Label(parent, text="Displayed axes order", grid=(row, 0), hAlign=labelAlignment)
+        self.axisOrderingOptionsLabel = _makeLabel(parent, text="Displayed axes order", grid=(row, 0))
         self.axisOrderingOptions = RadioButtons(parent,
                                                 texts=['Use spectrum settings', 'Always ask'],
                                                 callback=self._queueSetAxisOrderingOptions,
@@ -882,7 +885,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         _height = getFontHeight(size='VLARGE') or 24
-        self.stripArrangementLabel = Label(parent, text="Strip arrangement", grid=(row, 0), hAlign=labelAlignment)
+        self.stripArrangementLabel = _makeLabel(parent, text="Strip arrangement", grid=(row, 0))
         self.stripArrangementButtons = RadioButtons(parent, texts=['    ', '    ', '    '],
                                                     # selectedInd=stripArrangement,
                                                     direction='horizontal',
@@ -899,7 +902,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.stripArrangementButtons.setCallback(self._queueSetStripArrangement)
 
         row += 1
-        self.showLastAxisOnlyLabel = Label(parent, text="Strips share X- or Y-axis", grid=(row, 0), hAlign=labelAlignment)
+        self.showLastAxisOnlyLabel = _makeLabel(parent, text="Strips share X- or Y-axis", grid=(row, 0))
         self.showLastAxisOnlyBox = CheckBox(parent, grid=(row, 1))
         self.showLastAxisOnlyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'lastAxisOnly'))
 
@@ -917,7 +920,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # self._validateFrame.setVisible(False)
 
         row += 1
-        self.xAxisUnits = Label(parent, text="X-axis units", grid=(row, 0), hAlign=labelAlignment)
+        self.xAxisUnits = _makeLabel(parent, text="Default X-axis units", grid=(row, 0))
         self.xAxisUnitsData = RadioButtons(parent, texts=AXIS_UNITS,
                                            # selectedInd=xAxisUnits,
                                            callback=self._queueSetXUnits,
@@ -927,7 +930,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                            )
 
         row += 1
-        self.yAxisUnits = Label(parent, text="Y-xis units", grid=(row, 0), hAlign=labelAlignment)
+        self.yAxisUnits = _makeLabel(parent, text="Default Y-xis units", grid=(row, 0))
         self.yAxisUnitsData = RadioButtons(parent, texts=AXIS_UNITS,
                                            # selectedInd=yAxisUnits,
                                            callback=self._queueSetYUnits,
@@ -936,7 +939,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                            tipTexts=None)
 
         row += 1
-        self.zPlaneNavigationModeLabel = Label(parent, text="zPlane navigation mode", grid=(row, 0), hAlign=labelAlignment)
+        self.zPlaneNavigationModeLabel = _makeLabel(parent, text="Plane navigation mode", grid=(row, 0))
         self.zPlaneNavigationModeData = RadioButtons(parent, texts=[val.description for val in ZPlaneNavigationModes],
                                                      callback=self._queueSetZPlaneNavigationMode,
                                                      direction='h',
@@ -947,12 +950,17 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                                      )
         self.zPlaneNavigationModeLabel.setToolTip('Select where the zPlane navigation tools are located')
 
+        row += 1
+        self.useApplyToSpectrumDisplaysLabel = _makeLabel(parent, text="Apply to open SpectrumDisplay's", grid=(row, 0))
+        self.useApplyToSpectrumDisplaysBox = CheckBox(parent, grid=(row, 1))
+        self.useApplyToSpectrumDisplaysBox.toggled.connect(partial(self._queueApplyToSpectrumDisplays, 'applyToSpectrumDisplays'))
+
         #====== Aspect ratios ======
         row += 1
-        LabeledHLine(parent, grid=(row,0), gridSpan=(1,3),
-                     text="Aspect Ratios", colour=getColours()[DIVIDER], height=dividerHeight)
+        _makeLine(parent, grid=(row, 0), text="Aspect Ratios")
+
         row += 1
-        self.aspectRatioModeLabel = Label(parent, text="Mode", grid=(row, 0), hAlign=labelAlignment)
+        self.aspectRatioModeLabel = _makeLabel(parent, text="Mode", grid=(row, 0))
         self.aspectRatioModeData = RadioButtons(parent, texts=['Free', 'Locked', 'Fixed'],
                                                 callback=self._queueSetAspectRatioMode,
                                                 direction='h',
@@ -961,21 +969,82 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                                 )
 
         row += 1
-        Label(parent, text='Fixed aspects', grid=(row, 0), hAlign='r')
+        _makeLabel(parent, text='Fixed aspect ratios:', grid=(row, 0))
 
-        row += 1
+        # row += 1
         self.aspectLabel = {}
         self.aspectData = {}
-        self.aspectLabelFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 0))
-        self.aspectDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
+        # self.aspectLabelFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 0))
+        # self.aspectDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
+        # for ii, aspect in enumerate(sorted(self.preferences.general.aspectRatios.keys())):
+        #     self.aspectLabel[aspect] = Label(self.aspectLabelFrame, text=aspect, grid=(ii, 0), hAlign='r')
+        #     self.aspectData[aspect] = ScientificDoubleSpinBox(self.aspectDataFrame, min=0.5, grid=(ii, 0), hAlign='l')
+        #     self.aspectData[aspect].setMinimumWidth(LineEditsMinimumWidth)
+        #     # if aspect == self.preferences.general._baseAspectRatioAxisCode:
+        #     #     self.aspectData[aspect].setEnabled(False)
+        #     # else:
+        #     #     self.aspectData[aspect].setEnabled(True)
+        #     self.aspectData[aspect].valueChanged.connect(partial(self._queueSetAspect, aspect, ii))
+
+        for ii, key in enumerate(sorted(self.preferences.general.aspectRatios.keys())):
+            row += 1
+            self.aspectLabel[key] = Label(parent, text=key, grid=(row, 0), hAlign='r')
+            self.aspectData[key] = ScientificDoubleSpinBox(parent, min=0.5, grid=(row, 1), hAlign='l')
+            self.aspectData[key].setMinimumWidth(LineEditsMinimumWidth)
+            # if aspect == self.preferences.general._baseAspectRatioAxisCode:
+            #     self.aspectData[aspect].setEnabled(False)
+            # else:
+            #     self.aspectData[aspect].setEnabled(True)
+            self.aspectData[key].valueChanged.connect(partial(self._queueSetAspect, key, ii))
+
+        #====== Zooming ======
+        row += 1
+        _makeLine(parent, grid=(row, 0), text="Zooming")
+
+        row += 1
+        self.zoomCentreLabel = _makeLabel(parent, text="Zoom centre", grid=(row, 0))
+        self.zoomCentre = RadioButtons(parent, texts=['Mouse', 'Screen'],
+                                       callback=self._queueSetZoomCentre,
+                                       direction='h',
+                                       grid=(row, 1), hAlign='l', gridSpan=(1, 2),
+                                       tipTexts=None,
+                                       )
+        row += 1
+        self.zoomPercentLabel = _makeLabel(parent, text="Manual zoom (%)", grid=(row, 0))
+        self.zoomPercentData = DoubleSpinbox(parent, step=1,
+                                             min=1, max=100, grid=(row, 1), hAlign='l')
+        self.zoomPercentData.setMinimumWidth(LineEditsMinimumWidth)
+        self.zoomPercentData.valueChanged.connect(self._queueSetZoomPercent)
+
+        row += 1
+        self.stripWidthZoomPercentLabel = _makeLabel(parent, text="Strip width zoom (%)", grid=(row, 0))
+        self.stripWidthZoomPercentData = DoubleSpinbox(parent, step=1,
+                                                       min=1, max=100, grid=(row, 1), hAlign='l')
+        self.stripWidthZoomPercentData.setMinimumWidth(LineEditsMinimumWidth)
+        self.stripWidthZoomPercentData.valueChanged.connect(self._queueSetStripWidthZoomPercent)
+
+        row += 1
+        self.showZoomXLimitApplyLabel = _makeLabel(parent, text="X-axis zoom limit", grid=(row, 0))
+        self.showZoomXLimitApplyBox = CheckBox(parent, grid=(row, 1))
+        self.showZoomXLimitApplyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'zoomXLimitApply'))
+
+        row += 1
+        self.showZoomYLimitApplyLabel = _makeLabel(parent, text="Y-axis zoom limit", grid=(row, 0))
+        self.showZoomYLimitApplyBox = CheckBox(parent, grid=(row, 1))
+        self.showZoomYLimitApplyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'zoomYLimitApply'))
+
+        row += 1
+        self.showIntensityLimitLabel = _makeLabel(parent, text='Intensity-axis zoom limit', grid=(row, 0))
+        self.showIntensityLimitBox = ScientificDoubleSpinBox(parent, min=1e-6, grid=(row, 1), hAlign='l')
+        self.showIntensityLimitBox.setMinimumWidth(LineEditsMinimumWidth)
+        self.showIntensityLimitBox.valueChanged.connect(self._queueSetIntensityLimit)
 
         #====== Show ======
         row += 1
-        LabeledHLine(parent, grid=(row,0), gridSpan=(1,3),
-                     text="Show", colour=getColours()[DIVIDER], height=dividerHeight)
+        _makeLine(parent, grid=(row, 0), text="Show")
 
         row += 1
-        self.regionPaddingLabel = Label(parent, text="Spectral padding (%)", grid=(row, 0), hAlign=labelAlignment)
+        self.regionPaddingLabel = _makeLabel(parent, text="Spectral padding (%)", grid=(row, 0))
         self.regionPaddingData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=0, max=100)
         self.regionPaddingData.setMinimumWidth(LineEditsMinimumWidth)
         self.regionPaddingData.valueChanged.connect(self._queueSetRegionPadding)
@@ -990,108 +1059,73 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # self.keepSPWithinProjectBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'keepSpectraInsideProject'))
 
         row += 1
-        self.showToolbarLabel = Label(parent, text="ToolBar(s)", grid=(row, 0), hAlign=labelAlignment)
+        self.showToolbarLabel = _makeLabel(parent, text="ToolBar(s)", grid=(row, 0))
         self.showToolbarBox = CheckBox(parent, grid=(row, 1))
         self.showToolbarBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showToolbar'))
 
         row += 1
-        self.spectrumBorderLabel = Label(parent, text="Spectrum borders", grid=(row, 0), hAlign=labelAlignment)
+        self.spectrumBorderLabel = _makeLabel(parent, text="Spectrum borders", grid=(row, 0))
         self.spectrumBorderBox = CheckBox(parent, grid=(row, 1))
         self.spectrumBorderBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showSpectrumBorder'))
 
         row += 1
-        self.showGridLabel = Label(parent, text="Grids", grid=(row, 0), hAlign=labelAlignment)
+        self.showGridLabel = _makeLabel(parent, text="Grids", grid=(row, 0))
         self.showGridBox = CheckBox(parent, grid=(row, 1))
         self.showGridBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showGrid'))
 
         row += 1
-        self.showCrosshairLabel = Label(parent, text="Crosshairs", grid=(row, 0), hAlign=labelAlignment)
+        self.showCrosshairLabel = _makeLabel(parent, text="Crosshairs", grid=(row, 0))
         self.showCrosshairBox = CheckBox(parent, grid=(row, 1))
         self.showCrosshairBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showCrosshair'))
 
         row += 1
-        self.showDoubleCrosshairLabel = Label(parent, text="Double crosshairs", grid=(row, 0), hAlign=labelAlignment)
+        self.showDoubleCrosshairLabel = _makeLabel(parent, text="Double crosshairs", grid=(row, 0))
         self.showDoubleCrosshairBox = CheckBox(parent, grid=(row, 1))
         self.showDoubleCrosshairBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showDoubleCrosshair'))
 
         row += 1
-        self.showSideBandsLabel = Label(parent, text="MAS side-bands", grid=(row, 0), hAlign=labelAlignment)
+        self.showSideBandsLabel = _makeLabel(parent, text="MAS side-bands", grid=(row, 0))
         self.showSideBandsBox = CheckBox(parent, grid=(row, 1))
         self.showSideBandsBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showSideBands'))
 
         row += 1
-        self.showSideBands = Label(parent, text='Number of MAS side-bands', grid=(row, 0), hAlign=labelAlignment)
+        self.showSideBands = _makeLabel(parent, text='Number of MAS side-bands', grid=(row, 0))
         self.showSideBandsData = DoubleSpinbox(parent, step=1, min=0, max=25, grid=(row, 1), hAlign='l', decimals=0)
         self.showSideBandsData.setMinimumWidth(LineEditsMinimumWidth)
         self.showSideBandsData.valueChanged.connect(self._queueSetNumSideBands)
 
-        #====== Zooming ======
-        row += 1
-        LabeledHLine(parent, grid=(row,0), gridSpan=(1,3),
-                     text="Zooming", colour=getColours()[DIVIDER], height=dividerHeight)
-
-        row += 1
-        self.zoomCentreLabel = Label(parent, text="Zoom centre", grid=(row, 0), hAlign=labelAlignment)
-        self.zoomCentre = RadioButtons(parent, texts=['Mouse', 'Screen'],
-                                       callback=self._queueSetZoomCentre,
-                                       direction='h',
-                                       grid=(row, 1), hAlign='l', gridSpan=(1, 2),
-                                       tipTexts=None,
-                                       )
-        row += 1
-        self.zoomPercentLabel = Label(parent, text="Manual zoom (%)", grid=(row, 0), hAlign=labelAlignment)
-        self.zoomPercentData = DoubleSpinbox(parent, step=1,
-                                             min=1, max=100, grid=(row, 1), hAlign='l')
-        self.zoomPercentData.setMinimumWidth(LineEditsMinimumWidth)
-        self.zoomPercentData.valueChanged.connect(self._queueSetZoomPercent)
-
-        row += 1
-        self.stripWidthZoomPercentLabel = Label(parent, text="Strip width zoom (%)", grid=(row, 0), hAlign=labelAlignment)
-        self.stripWidthZoomPercentData = DoubleSpinbox(parent, step=1,
-                                                       min=1, max=100, grid=(row, 1), hAlign='l')
-        self.stripWidthZoomPercentData.setMinimumWidth(LineEditsMinimumWidth)
-        self.stripWidthZoomPercentData.valueChanged.connect(self._queueSetStripWidthZoomPercent)
-
-        row += 1
-        self.showZoomXLimitApplyLabel = Label(parent, text="X-axis zoom limit", grid=(row, 0), hAlign=labelAlignment)
-        self.showZoomXLimitApplyBox = CheckBox(parent, grid=(row, 1))
-        self.showZoomXLimitApplyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'zoomXLimitApply'))
-
-        row += 1
-        self.showZoomYLimitApplyLabel = Label(parent, text="Y-axis zoom limit", grid=(row, 0), hAlign=labelAlignment)
-        self.showZoomYLimitApplyBox = CheckBox(parent, grid=(row, 1))
-        self.showZoomYLimitApplyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'zoomYLimitApply'))
-
-        row += 1
-        self.showIntensityLimitLabel = Label(parent, text='Intensity-axis zoom limit', grid=(row, 0), hAlign=labelAlignment)
-        self.showIntensityLimitBox = ScientificDoubleSpinBox(parent, min=1e-6, grid=(row, 1), hAlign='l')
-        self.showIntensityLimitBox.setMinimumWidth(LineEditsMinimumWidth)
-        self.showIntensityLimitBox.valueChanged.connect(self._queueSetIntensityLimit)
-
         #====== Contours and Colours ======
         row += 1
-        LabeledHLine(parent, grid=(row,0), gridSpan=(1,3),
-                     text="Contours and Colours", colour=getColours()[DIVIDER], height=dividerHeight)
+        _makeLine(parent, grid=(row, 0), text="Contour and Colours")
 
         row += 1
-        self.singleContoursLabel = Label(parent, text="Single contours per plane", grid=(row, 0), hAlign=labelAlignment)
+        self.singleContoursLabel = _makeLabel(parent, text="Single contours per plane", grid=(row, 0))
         self.singleContoursBox = CheckBox(parent, grid=(row, 1))
         self.singleContoursBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'generateSinglePlaneContours'))
 
         row += 1
-        self.contourThicknessLabel = Label(parent, text="Contour thickness (pixel)", grid=(row, 0), hAlign=labelAlignment)
+        self.contourThicknessLabel = _makeLabel(parent, text="Contour thickness (pixel)", grid=(row, 0))
         self.contourThicknessData = Spinbox(parent, step=1,
                                             min=1, max=20, grid=(row, 1), hAlign='l')
         self.contourThicknessData.setMinimumWidth(LineEditsMinimumWidth)
         self.contourThicknessData.valueChanged.connect(self._queueSetContourThickness)
 
         row += 1
-        self.autoCorrectLabel = Label(parent, text="Autocorrect colours", grid=(row, 0), hAlign=labelAlignment)
+        self.colourSchemeLabel = _makeLabel(parent, text="Spectrum display background", grid=(row, 0))
+        self.colourSchemeBox = PulldownList(parent, grid=(row, 1), hAlign='l')
+        self.colourSchemeBox.setToolTip('Set SpectrumDisplay background')
+        self.colourSchemeBox.setMinimumWidth(PulldownListsMinimumWidth)
+        self.colourSchemeBox.addItems(COLOUR_SCHEMES)
+        self._oldColourScheme = None
+        self.colourSchemeBox.currentIndexChanged.connect(self._queueChangeColourScheme)
+
+        row += 1
+        self.autoCorrectLabel = _makeLabel(parent, text="Autocorrect colours", grid=(row, 0))
         self.autoCorrectBox = CheckBox(parent, grid=(row, 1))
         self.autoCorrectBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'autoCorrectColours'))
 
         row += 1
-        self.marksDefaultColourLabel = Label(parent, text="Default marks colour", grid=(row, 0), hAlign=labelAlignment)
+        self.marksDefaultColourLabel = _makeLabel(parent, text="Default marks colour", grid=(row, 0))
         _colourFrame = Frame(parent, setLayout=True, grid=(row, 1), hAlign='l', gridSpan=(1, 2))
         self.marksDefaultColourBox = PulldownList(_colourFrame, grid=(0, 0))
         self.marksDefaultColourBox.setMinimumWidth(LineEditsMinimumWidth)
@@ -1106,17 +1140,21 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.marksDefaultColourButton.clicked.connect(self._queueChangeMarksColourButton)
 
         row += 1
-        self.negativeTraceColourLabel = Label(parent, text="Negative colour for phasing traces", grid=(row, 0), hAlign=labelAlignment)
+        self.negativeTraceColourLabel = _makeLabel(parent, text="Negative colour for phasing traces", grid=(row, 0))
         self.negativeTraceColourBox = CheckBox(parent, grid=(row, 1))
         self.negativeTraceColourBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'traceIncludeNegative'))
 
-       #====== Peaks and Multiplets ======
+        #==== add spacer to stop columns changing width
         row += 1
-        LabeledHLine(parent, grid=(row,0), gridSpan=(1,3),
-                     text="Peaks and Multiplets", colour=getColours()[DIVIDER], height=dividerHeight)
+        parent.addSpacer(15, 2, expandX=True, expandY=True, grid=(row, 1), gridSpan=(1, 1))
+
+    def _setPeaksTabWidgets(self, parent):
+        """Insert a widget in here to appear in the Peaks and Multiplets Tab. Parent = the Frame obj where the widget should live
+        """
+        row = -1
 
         row += 1
-        self.peakFittingMethodLabel = Label(parent, text="Peak interpolation method", grid=(row, 0), hAlign=labelAlignment)
+        self.peakFittingMethodLabel = _makeLabel(parent, text="Peak interpolation method", grid=(row, 0))
         self.peakFittingMethod = RadioButtons(parent, texts=PEAKFITTINGDEFAULTS,
                                               callback=self._queueSetPeakFittingMethod,
                                               direction='h',
@@ -1124,48 +1162,47 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                               tipTexts=None,
                                               )
         row += 1
-        self.peakPicker1dLabel = Label(parent, text="Default 1D peak picker", grid=(row, 0), hAlign=labelAlignment)
+        self.peakPicker1dLabel = _makeLabel(parent, text="Default 1D peak picker", grid=(row, 0))
         self.peakPicker1dData = PulldownList(parent, grid=(row, 1), hAlign='l')
         self.peakPicker1dData.setMinimumWidth(LineEditsMinimumWidth)
         self.peakPicker1dData.currentIndexChanged.connect(self._queueChangePeakPicker1dIndex)
 
         row += 1
-        self.dropFactorLabel = Label(parent, text="1D Peak picking drop (%)", tipText='Increase to filter out more', grid=(row, 0),
-                                     hAlign=labelAlignment)
+        self.dropFactorLabel = _makeLabel(parent, text="1D Peak picking drop (%)", tipText='Increase to filter out more', grid=(row, 0))
         self.peakFactor1D = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=-100, max=100)
         self.peakFactor1D.setMinimumWidth(LineEditsMinimumWidth)
         self.peakFactor1D.valueChanged.connect(self._queueSetDropFactor1D)
 
         row += 1
-        self.peakPickerNdLabel = Label(parent, text="Default nD peak picker", grid=(row, 0), hAlign=labelAlignment)
+        self.peakPickerNdLabel = _makeLabel(parent, text="Default nD peak picker", grid=(row, 0))
         self.peakPickerNdData = PulldownList(parent, grid=(row, 1), hAlign='l')
         self.peakPickerNdData.setMinimumWidth(LineEditsMinimumWidth)
         self.peakPickerNdData.currentIndexChanged.connect(self._queueChangePeakPickerNdIndex)
 
         row += 1
-        self.dropFactorLabel = Label(parent, text="nD Peak picking drop (%)", grid=(row, 0), hAlign=labelAlignment)
+        self.dropFactorLabel = _makeLabel(parent, text="nD Peak picking drop (%)", grid=(row, 0))
         self.dropFactorData = DoubleSpinbox(parent, grid=(row, 1), hAlign='l', decimals=1, step=0.1, min=0, max=100)
         self.dropFactorData.setMinimumWidth(LineEditsMinimumWidth)
         self.dropFactorData.valueChanged.connect(self._queueSetDropFactor)
 
         row += 1
-        self.volumeIntegralLimitLabel = Label(parent, text="Volume integral limit", grid=(row, 0), hAlign=labelAlignment)
+        self.volumeIntegralLimitLabel = _makeLabel(parent, text="Volume integral limit", grid=(row, 0))
         self.volumeIntegralLimitData = DoubleSpinbox(parent, step=0.05, decimals=2,
                                                      min=1.0, max=5.0, grid=(row, 1), hAlign='l')
         self.volumeIntegralLimitData.setMinimumWidth(LineEditsMinimumWidth)
         self.volumeIntegralLimitData.valueChanged.connect(self._queueSetVolumeIntegralLimit)
         row += 1
-        self.aliasEnabledLabel = Label(parent, text="Show aliased peaks", grid=(row, 0), hAlign=labelAlignment)
+        self.aliasEnabledLabel = _makeLabel(parent, text="Show aliased peaks", grid=(row, 0))
         self.aliasEnabledData = CheckBox(parent, grid=(row, 1))
         self.aliasEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions, 'aliasEnabled'))
 
         row += 1
-        self.aliasLabelsEnabledLabel = Label(parent, text="Show aliased labels", grid=(row, 0), hAlign=labelAlignment)
+        self.aliasLabelsEnabledLabel = _makeLabel(parent, text="Show aliased labels", grid=(row, 0))
         self.aliasLabelsEnabledData = CheckBox(parent, grid=(row, 1))
         self.aliasLabelsEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions, 'aliasLabelsEnabled'))
 
         row += 1
-        self.aliasShadeLabel = Label(parent, text="Label opacity", grid=(row, 0), hAlign=labelAlignment)
+        self.aliasShadeLabel = _makeLabel(parent, text="Label opacity", grid=(row, 0))
         _sliderBox = Frame(parent, setLayout=True, grid=(row, 1), hAlign='l')
         # self.aliasShadeData = Slider(parent, grid=(row, 1), hAlign='l')
         Label(_sliderBox, text="0%", grid=(0, 0), hAlign='l')
@@ -1174,29 +1211,20 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.aliasShadeData.setMinimumWidth(LineEditsMinimumWidth)
         self.aliasShadeData.valueChanged.connect(self._queueSetAliasShade)
 
-        row += 1
-        self.multipletAveragingLabel = Label(parent, text="Multiplet Averaging", grid=(row, 0), hAlign=labelAlignment)
-        self.multipletAveraging = RadioButtons(parent, texts=MULTIPLETAVERAGINGTYPES,
-                                               callback=self._queueSetMultipletAveraging,
-                                               direction='h',
-                                               grid=(row, 1), hAlign='l', gridSpan=(1, 2),
-                                               tipTexts=None,
-                                               )
-
         #====== Peak Fitting ======
         row += 1
-        LabeledHLine(parent, grid=(row,0), gridSpan=(1,3),
-                     text="Peak Fitting", colour=getColours()[DIVIDER], height=dividerHeight)
+        _makeLine(parent, grid=(row, 0), text="Peak Fitting")
 
         row += 1
-        self.useSearchBoxDoFitLabel = Label(parent, text="Fit after snap-to-extrema", grid=(row, 0), hAlign=labelAlignment)
+        self.useSearchBoxDoFitLabel = _makeLabel(parent, text="Fit after snap-to-extrema", grid=(row, 0))
         self.useSearchBoxDoFitBox = CheckBox(parent, grid=(row, 1))
         self.useSearchBoxDoFitBox.toggled.connect(self._queueSetUseSearchBoxDoFit)
-        self.useSearchBoxDoFitLabel.setToolTip('Option to apply fitting method after initial snap to extrema')
-        self.useSearchBoxDoFitBox.setToolTip('Option to apply fitting method after initial snap to extrema')
+        _toolTip = 'Option to apply fitting method after initial snap to extrema'
+        self.useSearchBoxDoFitLabel.setToolTip(_toolTip)
+        self.useSearchBoxDoFitBox.setToolTip(_toolTip)
 
         row += 1
-        self.useSearchBoxModeLabel = Label(parent, text="Use search box", grid=(row, 0), hAlign=labelAlignment)
+        self.useSearchBoxModeLabel = _makeLabel(parent, text="Use search box", grid=(row, 0))
         self.useSearchBoxModeBox = CheckBox(parent, grid=(row, 1))
         self.useSearchBoxModeBox.toggled.connect(self._queueSetUseSearchBoxMode)
         self.useSearchBoxModeLabel.setToolTip(
@@ -1205,30 +1233,35 @@ class PreferencesPopup(CcpnDialogMainWidget):
                 'Use defined search box widths (ppm)\nor default to ±4 index points.\nNote, default will depend on resolution of spectrum')
 
         row += 1
-        self.defaultSearchBox1dRatioLabel = Label(parent, text="1D box widths (ppm)", bold=True, grid=(row, 1), hAlign='l')
+        _makeLabel(parent, text="1D box widths (ppm):", grid=(row, 0))
 
-        row += 1
         self.searchBox1dLabel = {}
         self.searchBox1dData = {}
-        self.searchBox1dLabelFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 0))
-        self.searchBox1dDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
+        for ii, key in enumerate(sorted(self.preferences.general.searchBoxWidths1d.keys())):
+            row += 1
+            self.searchBox1dLabel[key] = _makeLabel(parent, text=key, grid=(row, 0))
+            self.searchBox1dData[key] = ScientificDoubleSpinBox(parent, min=0.0001, grid=(row, 1), hAlign='l')
+            self.searchBox1dData[key].setMinimumWidth(LineEditsMinimumWidth)
+            self.searchBox1dData[key].valueChanged.connect(partial(self._queueSetSearchBox1d, key, ii))
 
         row += 1
-        self.defaultSearchBoxNdRatioLabel = Label(parent, text="nD box widths (ppm)", bold=True, grid=(row, 1), hAlign='l')
+        _makeLabel(parent, text="nD box widths (ppm):", grid=(row, 0))
 
-        row += 1
-        self.searchBoxNdLabel = {}
+        # self.searchBoxNdLabel = {}
         self.searchBoxNdData = {}
-        self.searchBoxNdLabelFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 0))
-        self.searchBoxNdDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
+        for ii, key in enumerate(sorted(self.preferences.general.searchBoxWidthsNd.keys())):
+            row += 1
+            _makeLabel(parent, text=key, grid=(row, 0))
+            self.searchBoxNdData[key] = ScientificDoubleSpinBox(parent, min=0.0001, grid=(row, 1), hAlign='l')
+            self.searchBoxNdData[key].setMinimumWidth(LineEditsMinimumWidth)
+            self.searchBoxNdData[key].valueChanged.connect(partial(self._queueSetSearchBoxNd, key, ii))
 
         #======  Peak Symbols ======
         row += 1
-        LabeledHLine(parent, grid=(row,0), gridSpan=(1,3),
-                     text="Peak Symbols", colour=getColours()[DIVIDER], height=dividerHeight)
+        _makeLine(parent, grid=(row, 0), text="Peak Symbols")
 
         row += 1
-        self.annotationsLabel = Label(parent, text="Annotation", grid=(row, 0), hAlign=labelAlignment)
+        self.annotationsLabel = _makeLabel(parent, text="Annotation", grid=(row, 0))
         self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal', 'Id', 'Annotation'],
                                             callback=self._queueSetAnnotations,
                                             direction='h',
@@ -1236,7 +1269,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                             tipTexts=None,
                                             )
         row += 1
-        self.symbolsLabel = Label(parent, text="Type", grid=(row, 0), hAlign=labelAlignment)
+        self.symbolsLabel = _makeLabel(parent, text="Type", grid=(row, 0))
         self.symbol = RadioButtons(parent, texts=['Cross', 'lineWidths', 'Filled lineWidths', 'Plus'],
                                    callback=self._queueSetSymbol,
                                    direction='h',
@@ -1245,24 +1278,35 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                    )
 
         row += 1
-        self.symbolSizePixelLabel = Label(parent, text="Size (pixel)", grid=(row, 0), hAlign=labelAlignment)
+        self.symbolSizePixelLabel = _makeLabel(parent, text="Size (pixel)", grid=(row, 0))
         self.symbolSizePixelData = Spinbox(parent, step=1,
                                            min=2, max=50, grid=(row, 1), hAlign='l')
         self.symbolSizePixelData.setMinimumWidth(LineEditsMinimumWidth)
         self.symbolSizePixelData.valueChanged.connect(self._queueSetSymbolSizePixel)
 
         row += 1
-        self.symbolThicknessLabel = Label(parent, text="Thickness (pixel)", grid=(row, 0), hAlign=labelAlignment)
+        self.symbolThicknessLabel = _makeLabel(parent, text="Thickness (pixel)", grid=(row, 0))
         self.symbolThicknessData = Spinbox(parent, step=1,
                                            min=1, max=20, grid=(row, 1), hAlign='l')
         self.symbolThicknessData.setMinimumWidth(LineEditsMinimumWidth)
         self.symbolThicknessData.valueChanged.connect(self._queueSetSymbolThickness)
 
+        #====== Multiplets ======
+        row += 1
+        _makeLine(parent, grid=(row, 0), text="Multiplets")
+
+        row += 1
+        self.multipletAveragingLabel = _makeLabel(parent, text="Multiplet Averaging", grid=(row, 0))
+        self.multipletAveraging = RadioButtons(parent, texts=MULTIPLETAVERAGINGTYPES,
+                                               callback=self._queueSetMultipletAveraging,
+                                               direction='h',
+                                               grid=(row, 1), hAlign='l', gridSpan=(1, 2),
+                                               tipTexts=None,
+                                               )
+
         #==== add spacer to stop columns changing width
         row += 1
-        Spacer(parent, 15, 2,
-               QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
-               grid=(row, 1), gridSpan=(1, 1))
+        parent.addSpacer(15, 2, expandX=True, expandY=True, grid=(row, 1), gridSpan=(1, 1))
 
     @queueStateChange(_verifyPopupApply)
     def _queueChangeMarksColourIndex(self, value):
@@ -1322,9 +1366,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         # add spacer to stop columns changing width
         row += 1
-        Spacer(parent, 15, 2,
-               QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.MinimumExpanding,
-               grid=(row, 1), gridSpan=(1, 1))
+        parent.addSpacer(15, 2, expandX=True, expandY=True, grid=(row, 1), gridSpan=(1, 1))
 
     def _testExternalPath(self, external):
         if external not in self.preferences.externalPrograms:
@@ -1403,6 +1445,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
         directory = dialog.selectedFiles()
         if directory and len(directory) > 0:
             self.userWorkingPathData.setText(directory[0])
+
+    def _enableUserWorkingPath(self):
+        value = self.useProjectPathBox.get()
+        self.userWorkingPathData.enableWidget(not value)
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetAuxiliaryFilesPath(self):
@@ -1557,11 +1603,15 @@ class PreferencesPopup(CcpnDialogMainWidget):
         Requires the parameter to be called 'option' so that the decorator gives it a unique name
         in the internal updates dict
         """
+        if option == 'useProjectPath':
+            self._enableUserWorkingPath()
+
         if checked != self.preferences.general[option]:
             # change the enabled state of checkboxes as required
-            _enabled = self.aliasEnabledData.get()
-            self.aliasLabelsEnabledData.setEnabled(_enabled)
-            self.aliasShadeData.setEnabled(_enabled)
+
+            # _enabled = self.aliasEnabledData.get()
+            # self.aliasLabelsEnabledData.setEnabled(_enabled)
+            # self.aliasShadeData.setEnabled(_enabled)
 
             return partial(self._toggleGeneralOptions, option, checked)
 
@@ -2022,7 +2072,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
     def _queueSetUseProxy(self):
         value = self.useProxyBox.get()
         # set the state of the other buttons
-        self._setProxyButtons()
+        self._enableProxyButtons()
         if value != self.preferences.proxySettings.useProxy:
             return partial(self._setUseProxy, value)
 
@@ -2033,7 +2083,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
     def _queueUseSystemProxy(self):
         value = self.useSystemProxyBox.get()
         # set the state of the other buttons
-        self._setProxyButtons()
+        self._enableProxyButtons()
         if value != self.preferences.proxySettings.useSystemProxy:
             return partial(self._setUseSystemProxy, value)
 
@@ -2062,7 +2112,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
     def _queueSetUseProxyPassword(self):
         value = self.useProxyPasswordBox.get()
         # set the state of the other buttons
-        self._setProxyButtons()
+        self._enableProxyButtons()
         if value != self.preferences.proxySettings.useProxyPassword:
             return partial(self._setUseProxyPassword, value)
 
@@ -2087,19 +2137,18 @@ class PreferencesPopup(CcpnDialogMainWidget):
     def _setProxyPassword(self, value):
         self.preferences.proxySettings.proxyPassword = value
 
-    def _setProxyButtons(self):
+    def _enableProxyButtons(self):
         """Enable/disable proxy widgets based on check boxes
         """
         usePW = self.useProxyPasswordBox.get()
-        useP = self.useProxyBox.get()
-        useSP = False
-        usePEnabled = useP and not useSP
+        useProxy = self.useProxyBox.get()
 
-        self.proxyAddressData.setEnabled(usePEnabled)
-        self.proxyPortData.setEnabled(usePEnabled)
-        self.useProxyPasswordBox.setEnabled(usePEnabled)
-        self.proxyUsernameData.setEnabled(usePEnabled and usePW)
-        self.proxyPasswordData.setEnabled(usePEnabled and usePW)
+        self.proxyAddressData.enableWidget(useProxy)
+        self.proxyPortData.enableWidget(useProxy)
+        self.useProxyPasswordBox.enableWidget(useProxy)
+        self.proxyUsernameData.enableWidget(useProxy and usePW)
+        self.proxyPasswordData.enableWidget(useProxy and usePW)
+
 
     @queueStateChange(_verifyPopupApply)
     def _queueApplyToSpectrumDisplays(self, option, checked):

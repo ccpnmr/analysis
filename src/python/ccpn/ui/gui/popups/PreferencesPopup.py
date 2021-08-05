@@ -402,7 +402,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         for (tabFunc, tabName) in ((self._setGeneralTabWidgets, 'General'),
                                    (self._setSpectrumTabWidgets, 'Spectrum'),
-                                   (self._setPeaksTabWidgets, 'Peaks and Multiplets'),
+                                   (self._setPeaksTabWidgets, 'Peaks'),
                                    (self._setExternalProgramsTabWidgets, 'External Programs'),
                                    (self._setAppearanceTabWidgets, 'Appearance'),
                                    ):
@@ -567,34 +567,47 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # self._oldColourScheme = None
         # self.colourSchemeBox.currentIndexChanged.connect(self._queueChangeColourScheme)
 
+        #====== OS Behavior ======
         row += 1
-        self.useNativeFileLabel = _makeLabel(parent, text="Use native file dialogs", grid=(row, 0))
-        self.useNativeFileBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.useNative)
-        self.useNativeFileBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useNative'))
+        _makeLine(parent, grid=(row, 0), text="OS Behavior")
 
         row += 1
-        self.useNativeLabel = _makeLabel(parent, text="Use native menus (requires restart)", grid=(row, 0))
-        self.useNativeMenus = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.useNativeMenus)
-        self.useNativeMenus.toggled.connect(partial(self._queueToggleGeneralOptions, 'useNativeMenus'))
+        self.useNativeFileBox = _makeCheckBox(parent, text="Use native file dialogs", row=row,
+                                              callback=partial(self._queueToggleGeneralOptions, 'useNative'))
 
         row += 1
-        self.useNativeWebLabel = _makeLabel(parent, text="Use native web browser", grid=(row, 0))
-        self.useNativeWebBox = CheckBox(parent, grid=(row, 1))  #, checked=self.preferences.general.useNativeWebbrowser)
-        self.useNativeWebBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'useNativeWebbrowser'))
+        self.useNativeWebBox = _makeCheckBox(parent, text="Use native web browser", row=row,
+                                             callback=partial(self._queueToggleGeneralOptions, 'useNativeWebbrowser'))
+
+        row += 1
+        self.useNativeMenus = _makeCheckBox(parent, text="Use native menus (requires restart)", row=row,
+                                            callback=partial(self._queueToggleGeneralOptions, 'useNativeMenus'))
+
+        #====== Module Behavior ======
+        row += 1
+        _makeLine(parent, grid=(row, 0), text="Module Behavior")
+
+        row += 1
+        self.rememberLastClosedModule = _makeCheckBox(parent, row=row, text="Remember last settings",
+                                                      callback=self._queueSetRememberLastClosedModuleState)
+
+        row += 1
+        self.runPyConsoleOnMacroEditor = _makeCheckBox(parent, row=row, text="Auto-open python console",
+                                                       callback=self._queueSetAutoOpenPythonConsoleOnMacroEditor,
+                                                       toolTip="Open pyhton console when opening a macro editor module")
 
         #====== Tip of the Day ======
         row += 1
         _makeLine(parent, grid=(row, 0), text="Tip of the Day")
 
         row += 1
-        self.showTipsAtStartUplabel = _makeLabel(parent, text="Show at startup", grid=(row, 0))
-        self.showTipsAtStartUp = CheckBox(parent, grid=(row, 1))
-        self.showTipsAtStartUp.toggled.connect(self._queueSetShowTipsAtStartUp)
+        self.showTipsAtStartUp = _makeCheckBox(parent, text="Show at startup", row=row,
+                                               callback=self._queueSetShowTipsAtStartUp)
 
         row += 1
-        self.showAllTipsLabel = _makeLabel(parent, text="Clear tip history", tipText="show all tips on next restart", grid=(row, 0))
-        self.showAllTips = CheckBox(parent, grid=(row, 1))
-        self.showAllTips.clicked.connect(self._queueShowAllTips)
+        self.showAllTips = _makeCheckBox(parent, text="Clear tip history", row=row,
+                                         toolTip="show all tips on next restart",
+                                         callback=self._queueShowAllTips)
 
         # GWV: option removed as test is done after Drop
         # row += 1
@@ -620,21 +633,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
             setattr(self, FONTDATAFORMAT.format(num), _data)
 
         row += 1
-        self.glFontSizeLabel = _makeLabel(parent, text="Spectrum Display Font Size", grid=(row, 0))
+        self.glFontSizeLabel = _makeLabel(parent, text="Spectrum display font size", grid=(row, 0))
         self.glFontSizeData = PulldownList(parent, grid=(row, 1), hAlign='l')
         self.glFontSizeData.setMinimumWidth(PulldownListsMinimumWidth)
         self.glFontSizeData.currentIndexChanged.connect(self._queueChangeGLFontSize)
-
-
-        row += 1
-        self.rememberLastClosedModuleLabel = Label(parent, text="Remember last closed Module settings", grid=(row, 0))
-        self.rememberLastClosedModule = CheckBox(parent, grid=(row, 1))
-        self.rememberLastClosedModule.toggled.connect(self._queueSetRememberLastClosedModuleState)
-
-        row += 1
-        self.runPyConsoleOnMacroEditorLabel = Label(parent, text="Auto-Open Python Console on Macro Editor", grid=(row, 0))
-        self.runPyConsoleOnMacroEditor = CheckBox(parent, grid=(row, 1))
-        self.runPyConsoleOnMacroEditor.toggled.connect(self._queueSetAutoOpenPythonConsoleOnMacroEditor)
 
 
         row += 1
@@ -879,13 +881,18 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """Insert a widget in here to appear in the Spectrum Tab. Parent = the Frame obj where the widget should live
         """
 
-        row = 0
-        self.autoSetDataPathLabel = _makeLabel(parent, text="Auto set data path", grid=(row, 0))
-        self.autoSetDataPathBox = CheckBox(parent, grid=(row, 1))
-        self.autoSetDataPathBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'autoSetDataPath'))
+        row = -1
+
+        #====== Data Path ($DATA) ======
+        row += 1
+        _makeLine(parent, grid=(row, 0), text="Data Path ($DATA)")
 
         row += 1
-        self.userDataPathLabel = _makeLabel(parent, text="Data path ($DATA)", grid=(row, 0))
+        self.autoSetDataPathBox = _makeCheckBox(parent, text="Auto set", row=row,
+                                                callback=partial(self._queueToggleGeneralOptions, 'autoSetDataPath'))
+
+        row += 1
+        self.userDataPathLabel = _makeLabel(parent, text="Data path", grid=(row, 0))
         self.userDataPathText = PathEdit(parent, grid=(row, 1), vAlign='t')
         self.userDataPathText.setMinimumWidth(LineEditsMinimumWidth)
         self.userDataPathText.textChanged.connect(self._queueSetUserDataPath)
@@ -1169,6 +1176,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """
         row = -1
 
+        #====== Peak Picking ======
+        row += 1
+        _makeLine(parent, grid=(row, 0), text="Peak Picking")
+
         row += 1
         self.peakFittingMethodLabel = _makeLabel(parent, text="Peak interpolation method", grid=(row, 0))
         self.peakFittingMethod = RadioButtons(parent, texts=PEAKFITTINGDEFAULTS,
@@ -1360,23 +1371,23 @@ class PreferencesPopup(CcpnDialogMainWidget):
         """Insert a widget in here to appear in the externalPrograms Tab
         """
         self.externalPaths = {}
-        extPrograms = sorted((camelCaseToString(k), k) for k in self.preferences.externalPrograms.keys())
 
         row = 0
-        for dim, (name, external) in enumerate(extPrograms):
-            Label(parent, name, grid=(row, 0), )
+        # self.preferences.externalPrograms is a (programName, programPath) dict
+        for idx, programName in enumerate(sorted(self.preferences.externalPrograms.keys())):
+            _makeLabel(parent, text=programName, grid=(row, 0))
 
             externalPath = PathEdit(parent, grid=(row, 1), hAlign='t')
             externalPath.setMinimumWidth(LineEditsMinimumWidth)
-            externalPath.textChanged.connect(partial(self._queueSetExternalPath, external, dim))
+            externalPath.textChanged.connect(partial(self._queueSetExternalPath, programName, idx))
 
-            externalButton = Button(parent, grid=(row, 2), callback=partial(self._getExternalPath, external),
+            externalButton = Button(parent, grid=(row, 2), callback=partial(self._getExternalPath, programName),
                                     icon='icons/directory', hPolicy='fixed')
 
-            externalTestButton = Button(parent, grid=(row, 3), callback=partial(self._testExternalPath, external),
+            externalTestButton = Button(parent, grid=(row, 3), callback=partial(self._testExternalPath, programName),
                                         text='test', hPolicy='fixed')
 
-            self.externalPaths[external] = (externalPath, externalButton, externalTestButton)
+            self.externalPaths[programName] = (externalPath, externalButton, externalTestButton)
 
             row += 1
 
@@ -1441,6 +1452,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
         directory = dialog.selectedFiles()
         if directory and len(directory) > 0:
             self.userDataPathText.setText(directory[0])
+
+    def _enableUserDataPath(self):
+        "callback upon changing autoSetDataPathBox"
+        value = self.autoSetDataPathBox.get()
+        self.userDataPathText.enableWidget(not value)
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetUserWorkingPath(self):
@@ -1622,13 +1638,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
         if option == 'useProjectPath':
             self._enableUserWorkingPath()
 
+        elif option == 'autoSetDataPath':
+            self._enableUserDataPath()
+
         if checked != self.preferences.general[option]:
             # change the enabled state of checkboxes as required
-
-            # _enabled = self.aliasEnabledData.get()
-            # self.aliasLabelsEnabledData.setEnabled(_enabled)
-            # self.aliasShadeData.setEnabled(_enabled)
-
             return partial(self._toggleGeneralOptions, option, checked)
 
     def _toggleGeneralOptions(self, option, checked):

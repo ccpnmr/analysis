@@ -32,14 +32,20 @@ from ccpn.util.Colour import hexToRgb
 
 
 class HLine(Widget):
+
+    SOLID_LINE = 'SolidLine'
+    DASH_LINE = 'DashLine'
+    DASH_DOT_LINE = 'DashDotLine'
+    DASH_DOT_DOT_LINE = 'DashDotDotLine'
+
     styles = {
-            'SolidLine'     : QtCore.Qt.SolidLine,
-            'DashLine'      : QtCore.Qt.DashLine,
-            'DashDotLine'   : QtCore.Qt.DashDotLine,
-            'DashDotDotLine': QtCore.Qt.DashDotDotLine,
+            SOLID_LINE     : QtCore.Qt.SolidLine,
+            DASH_LINE      : QtCore.Qt.DashLine,
+            DASH_DOT_LINE  : QtCore.Qt.DashDotLine,
+            DASH_DOT_DOT_LINE: QtCore.Qt.DashDotDotLine,
             }
 
-    def __init__(self, parent=None, style='SolidLine', colour=QtCore.Qt.black, height=10, lineWidth=2, divisor = 3, **kwds):
+    def __init__(self, parent=None, style=SOLID_LINE, colour=QtCore.Qt.black, height=10, lineWidth=2, divisor = 3, **kwds):
         """
         :param style: Options:
                               'SolidLine';
@@ -90,7 +96,7 @@ class LabeledHLine(Frame):
     """
 
     def __init__(self, parent=None, height=30, text=None, bold=False,
-                                    style='SolidLine', colour=QtCore.Qt.black, lineWidth=2, **kwds):
+                                    style=HLine.SOLID_LINE, colour=QtCore.Qt.black, lineWidth=2, **kwds):
 
         super(LabeledHLine, self).__init__(parent=parent, setLayout=True, showBorder=False, **kwds)
         self.setMinimumHeight(height)

@@ -36,7 +36,7 @@ from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.DoubleSpinbox import ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.HLine import HLine
+from ccpn.ui.gui.widgets.HLine import HLine, LabeledHLine
 from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget, RadioButtonsCompoundWidget
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.guiSettings import getColours, SOFTDIVIDER
@@ -55,6 +55,7 @@ ESTIMATEMULTIPLIER = 'estimateMultiplier'
 ESTIMATEDEFAULT = 'estimateDefault'
 ESTIMATEAUTO = 'estimateAuto'
 
+lineColour = getColours()[SOFTDIVIDER]
 
 class EstimateNoisePopup(CcpnDialogMainWidget):
     """
@@ -114,12 +115,23 @@ class EstimateNoisePopup(CcpnDialogMainWidget):
         self.close()
 
     def _setWidgets(self):
-        self.stripLabel = Label(self.mainWidget, grid=(0, 0), gridSpan=(1, 4))
+        row = -1
 
-        # this will need to change in the future to a better method of listing spectra
-        self.tabWidget = Tabs(self.mainWidget, setLayout=True, grid=(1, 0), gridSpan=(1, 4))
-        self.infoFrame = Frame(self.mainWidget, setLayout=True, grid=(2, 0), gridSpan=(1, 4))
-        self.commonFrame = Frame(self.mainWidget, setLayout=True, grid=(3, 0), gridSpan=(1, 4))
+        row += 1
+        self.topFrame = Frame(self.mainWidget, setLayout=True, grid=(row, 0), gridSpan=(1, 1), hPolicy='minimal')
+
+        row += 1
+        HLine(self.mainWidget, grid=(row, 0), gridSpan=(1, 4), colour=lineColour, height=20)
+
+        row += 1
+        self.stripLabel = Label(self.mainWidget, grid=(row, 0), gridSpan=(1, 4), bold=True)
+        self.stripLabel.setMinimumHeight(20)
+
+        row += 1
+        self.tabWidget = Tabs(self.mainWidget, setLayout=True, grid=(row, 0), gridSpan=(1, 4))
+
+        row += 1
+        self.contourFrame = Frame(self.mainWidget, setLayout=True, grid=(row, 0), gridSpan=(1, 4))
 
         # add a tab for each spectrum in the spectrumDisplay
         self._noiseTab = []
@@ -131,58 +143,48 @@ class EstimateNoisePopup(CcpnDialogMainWidget):
 
             self.tabWidget.addTab(self._noiseTab[specNum], thisSpec.name)
 
-        self._setInfoWidgets()
-        self._setCommonWidgets()
+        self._setTopWidgets()
+        self._setContourWidgets()
+        if self.strip.spectrumDisplay.is1D:
+            self.contourFrame.hide()
 
-    def _setInfoWidgets(self):
+
+    def _setTopWidgets(self):
+        "Populate the top-frame"
         row = 0
-        # NOTE:ED - this is not very good or generic, needs possibly plugin type methods
 
         texts = ['Visible Area', 'Random Sampling']
         tipTexts = ['Estimate the noise from the visible plane',
                     'Estimate the noise from a random sampling of the whole spectrum']
 
-        self.estimateOption = RadioButtonsCompoundWidget(self.infoFrame, labelText='Estimation method',
-                                                         grid=(row, 0), gridSpan=(1, 2),
+        self.estimateOption = RadioButtonsCompoundWidget(self.topFrame, labelText='Estimation method',
+                                                         grid=(row, 0), gridSpan=(1, 1), stretch=(0, 0),
                                                          compoundKwds={'direction': 'h',
+                                                                       'hPolicy'  : 'minimal',
                                                                        # 'selectedInd': 0,
                                                                        'texts'    : texts,
-                                                                       'tipTexts' : tipTexts})
+                                                                       'tipTexts' : tipTexts},
+                                                         callback=self._autoEstimate
+                                                         )
 
-    def _setCommonWidgets(self):
-        row = 0
-        # checkbox to recalculate on first popup - False to start
-        self.autoCalculate = CheckBoxCompoundWidget(self.commonFrame,
+        # checkbox to recalculate on first popup - True to start
+        row += 1
+        self.autoCalculate = CheckBoxCompoundWidget(self.topFrame,
                                                     grid=(row, 0), vAlign='top', stretch=(0, 0), hAlign='left',
                                                     orientation='right',
                                                     labelText='Automatically estimate noise on popup',
-                                                    checked=False)
+                                                    checked=True)
 
-        # row += 1
-        # tipText = 'Maximum number of random samples taken from spectrum'
-        # self.randomSamples = SpinBoxCompoundWidget(self.infoFrame, labelText='Maximum Random Samples',
-        #                                            grid=(row, 0), gridSpan=(1, 2),
-        #                                            compoundKwds={'min': 1,
-        #                                                          'max': 10000,
-        #                                                          'step': 1,
-        #                                                          'tipText': tipText})
-
-        self._infoRow = row
-        if not self.strip.spectrumDisplay.is1D:
-            self._addContourNoiseButtons(self._infoRow, self.infoFrame)
-
-    def _addContourNoiseButtons(self, row, frame, buttonLabel='Set Contours'):
-        # add a series of buttons to the infoFrame
-        row += 1
-        HLine(frame, grid=(row, 0), gridSpan=(1, 3), colour=getColours()[SOFTDIVIDER], height=15)
+    def _setContourWidgets(self):
+        row = -1
 
         row += 1
-        Label(frame, text='Contour Options', grid=(row, 0), gridSpan=(1, 3), vAlign='t', hAlign='l')
+        Label(self.contourFrame, text='Contour Options:', grid=(row, 0), gridSpan=(1, 3), vAlign='t', hAlign='l')
 
         from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 
         row += 1
-        self.setPositiveContours = CheckBoxCompoundWidget(frame, grid=(row, 0), gridSpan=(1, 3),
+        self.setPositiveContours = CheckBoxCompoundWidget(self.contourFrame, grid=(row, 0), gridSpan=(1, 3),
                                                           vAlign='top', stretch=(0, 0), hAlign='left',
                                                           orientation='right', margins=(15, 0, 0, 0),
                                                           labelText='Set positive contour levels',
@@ -190,7 +192,7 @@ class EstimateNoisePopup(CcpnDialogMainWidget):
                                                           )
 
         row += 1
-        self.setNegativeContours = CheckBoxCompoundWidget(frame, grid=(row, 0), gridSpan=(1, 3),
+        self.setNegativeContours = CheckBoxCompoundWidget(self.contourFrame, grid=(row, 0), gridSpan=(1, 3),
                                                           vAlign='top', stretch=(0, 0), hAlign='left',
                                                           orientation='right', margins=(15, 0, 0, 0),
                                                           labelText='Set negative contour levels',
@@ -198,7 +200,7 @@ class EstimateNoisePopup(CcpnDialogMainWidget):
                                                           )
 
         row += 1
-        self.setUseSameMultiplier = CheckBoxCompoundWidget(frame, grid=(row, 0), gridSpan=(1, 3),
+        self.setUseSameMultiplier = CheckBoxCompoundWidget(self.contourFrame, grid=(row, 0), gridSpan=(1, 3),
                                                            vAlign='top', stretch=(0, 0), hAlign='left',
                                                            orientation='right', margins=(15, 0, 0, 0),
                                                            labelText='Use same (positive) multiplier for negative contours',
@@ -206,10 +208,10 @@ class EstimateNoisePopup(CcpnDialogMainWidget):
                                                            )
 
         row += 1
-        self.setDefaults = CheckBoxCompoundWidget(frame, grid=(row, 0), gridSpan=(1, 3),
+        self.setDefaults = CheckBoxCompoundWidget(self.contourFrame, grid=(row, 0), gridSpan=(1, 3),
                                                   vAlign='top', stretch=(0, 0), hAlign='left',
                                                   orientation='right', margins=(15, 0, 0, 0),
-                                                  labelText='Use default multiplier (%0.3f)\n and contour level count (%i)' % (
+                                                  labelText='Use default multiplier (%0.3f) and contour level count (%i)' % (
                                                       DEFAULTMULTIPLIER, DEFAULTLEVELS),
                                                   checked=True
                                                   )
@@ -294,36 +296,52 @@ class NoiseTab(Widget):
 
     def _setWidgets(self):
         # set up the common widgets
-        row = 0
+        row = -1
+
+        row += 1
+        LabeledHLine(self, text='Visible Area', style=HLine.DASH_LINE, colour=lineColour,
+                     grid=(row,0), gridSpan=(1,3), height=10)
 
         self.axisCodeLabels = []
         for ii, axis in enumerate(self.strip.axisCodes):
+            row += 1
             Label(self, text=axis, grid=(row, 0), vAlign='t', hAlign='l')
             self.axisCodeLabels.append(Label(self, text=NONE_TEXT, grid=(row, 1), gridSpan=(1, 2), vAlign='t', hAlign='l'))
-            row += 1
-
-        for label, text in zip(['meanLabel', 'SDLabel', 'maxLabel', 'minLabel'], ['Mean', 'SD', 'Max', 'Min']):
-            Label(self, text=text, grid=(row, 0), vAlign='t', hAlign='l')
-            setattr(self, label, Label(self, text=NONE_TEXT, grid=(row, 1), gridSpan=(1, 2), vAlign='t', hAlign='l'))
-            row += 1
-
-        Label(self, text='Estimated Noise Level', grid=(row, 0), vAlign='c', hAlign='l')
-        self.noiseLevelSpinBox = ScientificDoubleSpinBox(self, grid=(row, 1), vAlign='t')
-        self.noiseLevelSpinBox.setMaximum(1e12)
-        self.noiseLevelSpinBox.setMinimum(0.1)
-        self.noiseLevelSpinBox.setMinimumCharacters(15)
-        self.recalculateLevelsButton = Button(self, grid=(row, 2), callback=self._estimateNoise, text='Re-estimate Noise')
 
         row += 1
-        Label(self, text='Current Noise Level', grid=(row, 0), vAlign='c', hAlign='l')
+        LabeledHLine(self, text='Noise', style=HLine.DASH_LINE, colour=lineColour,
+                     grid=(row,0), gridSpan=(1,3), height=10)
+
+        for label, text in zip(['meanLabel', 'SDLabel', 'maxLabel', 'minLabel'], ['Mean', 'SD', 'Max', 'Min']):
+            row += 1
+            Label(self, text=text, grid=(row, 0), vAlign='t', hAlign='l')
+            setattr(self, label, Label(self, text=NONE_TEXT, grid=(row, 1), gridSpan=(1, 2), vAlign='t', hAlign='l'))
+
+        row += 1
+        Label(self, text='Current noise level', grid=(row, 0), vAlign='c', hAlign='l')
         self.currentNoiseLabel = Label(self, text=NONE_TEXT, grid=(row, 1), gridSpan=(1, 2), vAlign='c', hAlign='l')
 
         row += 1
-        self.noiseLevelButtons = ButtonList(self, grid=(row, 2), callbacks=[self._setNoiseLevel],
-                                            texts=['Set Noise Level'])
+        Label(self, text='Estimated noise level', grid=(row, 0), vAlign='c', hAlign='l')
+        self.noiseLevelSpinBox = ScientificDoubleSpinBox(self, grid=(row, 1), vAlign='t', decimals=1)
+        self.noiseLevelSpinBox.setMaximum(1e12)
+        self.noiseLevelSpinBox.setMinimum(0.1)
+        self.noiseLevelSpinBox.setMinimumCharacters(15)
+        self.recalculateLevelsButton = Button(self, grid=(row, 2), callback=self._estimateNoise, text='Re-estimate')
+
         row += 1
-        self.noiseLevelToAllButtons = ButtonList(self, grid=(row, 2), callbacks=[self._setNoiseLevelToAll],
-                                            texts=['Set Noise Level To All'])
+        self.addSpacer(20, 20, expandX=True, expandY=True, grid=(row,0), gridSpan=(1,3))
+
+        options = {}
+
+        row += 1
+        self.noiseLevelButtons = Button(self, grid=(row, 0), callback=self._setNoiseLevel,
+                                            text='Set Noise Level', **options)
+        self.noiseLevelToAllButtons = Button(self, grid=(row, 1), callback=self._setNoiseLevelToAll,
+                                            text='Set Noise Level To All', **options)
+        self.contoursButton = Button(self, grid=(row, 2), callback=self._setContourLevels,
+                                       text='Generate Contours', **options)
+        self.contoursButton.hide()  # un-hidden for nD
 
         # remember the row for subclassed Nd below
         self.row = row
@@ -331,7 +349,7 @@ class NoiseTab(Widget):
     def _populate(self):
         # populate the widgets, but don't perform any calculations
         if self.spectrum.noiseLevel is not None:
-            self.currentNoiseLabel.setText(f'{self.spectrum.noiseLevel:.3f}')
+            self.currentNoiseLabel.setText(f'{self.spectrum.noiseLevel:8.1e}')
 
     def _setFromCurrentCursor(self):
         """Add the initial spinbox value from the current cursor position. Implemented only for 1D.
@@ -358,7 +376,7 @@ class NoiseTab(Widget):
 
             # populate the widgets
             for ii, region in enumerate(regions):
-                self.axisCodeLabels[ii].setText('(' + ','.join(['%.3f' % rr for rr in region]) + ')')
+                self.axisCodeLabels[ii].setText('( ' + ', '.join(['%.1f' % rr for rr in region]) + ' )')
 
             self._setLabels(noise.mean, noise.std, noise.min, noise.max, noise.noiseLevel)
 
@@ -403,6 +421,17 @@ class NoiseTab(Widget):
         for tab in self._parent._noiseTab:
             tab._populate()
 
+    def _setContourLevels(self):
+        """Estimate the contour levels for the current spectrum
+        """
+        # get the settings from the parent checkboxes
+        setContourLevelsFromNoise(self.spectrum, setNoiseLevel=False,
+                                  setPositiveContours=self._parent.setPositiveContours.isChecked(),
+                                  setNegativeContours=self._parent.setNegativeContours.isChecked(),
+                                  useSameMultiplier=self._parent.setUseSameMultiplier.isChecked(),
+                                  useDefaultLevels=self._parent.setDefaults.isChecked(),
+                                  useDefaultMultiplier=self._parent.setDefaults.isChecked())
+
     def _storeWidgetState(self):
         """Store the state of the checkBoxes between popups
         """
@@ -426,23 +455,20 @@ class NoiseTabNd(NoiseTab):
         self._parent = parent
 
     def _setWidgets(self):
-        self.row = 0
         super()._setWidgets()
+        self.contoursButton.show()
 
-        # add the extra button
-        self._addContourNoiseButtons(self.row, self)
+    # def _setContourLevels(self):
+    #     """Estimate the contour levels for the current spectrum
+    #     """
+    #     # get the settings from the parent checkboxes
+    #     setContourLevelsFromNoise(self.spectrum, setNoiseLevel=False,
+    #                               setPositiveContours=self._parent.setPositiveContours.isChecked(),
+    #                               setNegativeContours=self._parent.setNegativeContours.isChecked(),
+    #                               useSameMultiplier=self._parent.setUseSameMultiplier.isChecked(),
+    #                               useDefaultLevels=self._parent.setDefaults.isChecked(),
+    #                               useDefaultMultiplier=self._parent.setDefaults.isChecked())
 
-    def _setContourLevels(self):
-        """Estimate the contour levels for the current spectrum
-        """
-        # get the settings from the parent checkboxes
-        setContourLevelsFromNoise(self.spectrum, setNoiseLevel=False,
-                                  setPositiveContours=self._parent.setPositiveContours.isChecked(),
-                                  setNegativeContours=self._parent.setNegativeContours.isChecked(),
-                                  useSameMultiplier=self._parent.setUseSameMultiplier.isChecked(),
-                                  useDefaultLevels=self._parent.setDefaults.isChecked(),
-                                  useDefaultMultiplier=self._parent.setDefaults.isChecked())
-
-    def _addContourNoiseButtons(self, row, frame, buttonLabel='Generate Contours'):
-        row += 1
-        self.noiseLevelButton = Button(frame, grid=(row, 2), callback=self._setContourLevels, text=buttonLabel)
+    # def _addContourNoiseButtons(self, row, frame, buttonLabel='Generate Contours'):
+    #     row += 1
+    #     self.noiseLevelButton = Button(frame, grid=(row, 2), callback=self._setContourLevels, text=buttonLabel)

@@ -71,6 +71,24 @@ def _getCcpnNamespace():
                  ]
     return _namespace
 
+def getJediInterpreter(text, namespaces=None, **kwds):
+    """
+    :type text: str. the  text to parse and get the completions
+    :type namespaces: list of dict. a list of namespace dictionaries such as the one
+                      returned by :func:"locals".
+    Other optional arguments are same as the ones for :class:"Script".
+    If "line" and "column" are None, they are assumed be at the end of
+    "text".
+    """
+
+    if not namespaces:
+        namespaces = list(_getCcpnNamespace())
+    try:
+        interpreter = jedi.Interpreter(text, namespaces=namespaces, **kwds)
+        return interpreter
+    except ValueError:
+        return None
+
 def _getAvailablePids() -> list:
     """
     Get all the pids available in the current project
@@ -114,7 +132,7 @@ class CcpnNameSpacesProvider:
             # namespaces += pidNameSpaces
             namespaces = _getCcpnNamespace()
             _namespaceAtts = [k for dd in namespaces for k in dd.keys()]
-            script = jedi.Interpreter(code, namespaces=list(namespaces))
+            script = getJediInterpreter(text=code, encoding=encoding)
             completions = script.completions()
         except Exception as ex:
             completions = []
@@ -150,10 +168,9 @@ class CcpnJediCompletionProvider:
 
         :returns: a list of completion.
         """
-        sys.stderr.write(f'==> completions code:{code}, line:{line}, column:{column}, prefix:{prefix}, path:{path}.')
         ret_val = []
         try:
-            script = jedi.Script(code, line + 1, column, path, encoding)
+            script = getJediInterpreter(text=code, encoding=encoding)
             completions = script.completions()
         except RuntimeError:
             completions = []
@@ -163,6 +180,4 @@ class CcpnJediCompletionProvider:
                             'tooltip': completion.description,
                             'icon': iDef.iconFromTypename(completion.name, completion.type),
                             })
-            sys.stderr.write(
-                f'ITEMS => Name:{ completion.name}, type:{completion.type}.')
         return ret_val

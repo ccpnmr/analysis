@@ -26,10 +26,19 @@ import sys
 from PyQt5 import QtGui, QtCore, QtWidgets
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.util.Colour import hexToRgb
 
 
 class HLine(Widget):
+    styles = {
+            'SolidLine'     : QtCore.Qt.SolidLine,
+            'DashLine'      : QtCore.Qt.DashLine,
+            'DashDotLine'   : QtCore.Qt.DashDotLine,
+            'DashDotDotLine': QtCore.Qt.DashDotDotLine,
+            }
+
     def __init__(self, parent=None, style='SolidLine', colour=QtCore.Qt.black, height=10, lineWidth=2, divisor = 3, **kwds):
         """
         :param style: Options:
@@ -47,13 +56,6 @@ class HLine(Widget):
         self.divisor = divisor #int(height / divisor)
         self.lineWidth=lineWidth
 
-        self.styles = {
-            'SolidLine'     : QtCore.Qt.SolidLine,
-            'DashLine'      : QtCore.Qt.DashLine,
-            'DashDotLine'   : QtCore.Qt.DashDotLine,
-            'DashDotDotLine': QtCore.Qt.DashDotDotLine,
-            }
-
         # self.setMaximumHeight(10)
         self.setFixedHeight(height)
 
@@ -65,9 +67,12 @@ class HLine(Widget):
 
     def drawLine(self, qp, style=None, colour=None):
 
-        geomRect = self.geometry().marginsRemoved(self.contentsMargins())
-        geomHeight = geomRect.height() / self.divisor
+        # geomRect = self.geometry().marginsRemoved(self.contentsMargins())
+        geomRect = self.geometry()
+        geomHeight = int(geomRect.height() / self.divisor + 0.5)
         lineHeight = geomHeight + self.contentsMargins().top()
+        left = geomRect.left()
+        right =geomRect.right()
 
         if style in self.styles:
             style = self.styles[style]
@@ -77,8 +82,27 @@ class HLine(Widget):
                 pen = QtGui.QPen(QtGui.QColor(*hexToRgb(self.colour)), self.lineWidth, style)
 
             qp.setPen(pen)
-            qp.drawLine(geomRect.left(), lineHeight, geomRect.right(), lineHeight)
+            qp.drawLine(left, lineHeight, right, lineHeight)
 
+
+class LabeledHLine(Frame):
+    """A class to make a Frame with an Hline - Label - Hline
+    """
+
+    def __init__(self, parent=None, height=30, text=None, bold=False,
+                                    style='SolidLine', colour=QtCore.Qt.black, lineWidth=2, **kwds):
+
+        super(LabeledHLine, self).__init__(parent=parent, setLayout=True, showBorder=False, **kwds)
+        self.setMinimumHeight(height)
+
+        # first line
+        self._line1 = Frame(parent=self, grid=(0, 0), setLayout=True, showBorder=False, hPolicy='expanding')
+        HLine(self._line1, grid=(0,0), style=style, colour=colour, lineWidth=lineWidth, height=height, divisor=2)
+        # the label with text
+        self._label = Label(parent=self, grid=(0, 1), text=text, bold=bold, hAlign='centre')
+        # the second line
+        self._line2 = Frame(parent=self, grid=(0, 2), setLayout=True, showBorder=False, hPolicy='expanding')
+        HLine(self._line2, grid=(0,0), style=style, colour=colour, lineWidth=lineWidth, height=height, divisor=2)
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
@@ -93,10 +117,11 @@ if __name__ == '__main__':
 
 
     app = TestApplication()
-    popup = CcpnDialog(windowTitle='Test slider', setLayout=True)
-    slider = SliderSpinBox(parent=popup, startVal=0, endVal=100, value=5, grid=(0, 0))
-    line = HLine(parent=popup, grid=(1, 0))
-    slider2 = SliderSpinBox(parent=popup, startVal=0, endVal=100, value=5, grid=(2, 0))
+    popup = CcpnDialog(windowTitle='Test HLine', setLayout=True)
+    Label(parent=popup, grid=(0,0), text='Just some text')
+    line = HLine(parent=popup, grid=(1, 0), hPolicy='expanding', spacing=(0,0))
+    Label(parent=popup, grid=(2,0), text='Just some text to separate')
+    line2 = LabeledHLine(parent=popup, grid=(3,0), text='a line with text')
     popup.show()
     popup.raise_()
     app.start()

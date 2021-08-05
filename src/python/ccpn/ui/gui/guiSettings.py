@@ -450,7 +450,8 @@ def getColours():
     return colourDict
 
 
+@singleton
 class ZPlaneNavigationModes(LabelledEnum):
-    PERSPECTRUMDISPLAY = 0, 'Per Spectrum Display', 'spectrumdisplay'
-    PERSTRIP = 1, 'Per Strip', 'strip'
-    INSTRIP = 2, 'In Strip', 'instrip'
+    PERSPECTRUMDISPLAY = 0, 'Per spectrum display', 'spectrumdisplay'
+    PERSTRIP = 1, 'Per strip', 'strip'
+    INSTRIP = 2, 'In strip', 'instrip'

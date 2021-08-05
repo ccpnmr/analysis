@@ -86,6 +86,7 @@ class PathEdit(LineEdit):
     """LineEdit widget that contains validator for checking filePaths exists
     """
     def __init__(self, parent, fileMode=VALIDPATH, **kwds):
+        kwds.setdefault('textAlignment', 'l')
         super().__init__(parent=parent, **kwds)
 
         if fileMode not in VALIDMODES:

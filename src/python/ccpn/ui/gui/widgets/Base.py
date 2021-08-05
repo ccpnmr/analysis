@@ -429,3 +429,13 @@ class Base(DropBase, SignalBlocking):
         Override in the subclass with the desired behaviour
         """
         pass
+
+    def enableWidget(self, flag:bool):
+        """Enable or disable widget depending on flag
+        """
+        if flag:
+            self.setEnabled(True)
+            self.setStyleSheet("background:white")
+        else:
+            self.setEnabled(False)
+            self.setStyleSheet("background:#E8E8E8")  # some light gr

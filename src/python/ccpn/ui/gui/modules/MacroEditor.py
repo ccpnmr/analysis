@@ -154,13 +154,16 @@ class MacroEditor(CcpnModule):
         getattr(self, _filenameLineEdit).hide()  #  this is used only to store and restore the widgets
         hGrid += 1
         # macro editing area
-        self.textEditor = PyCodeEditor(self.mainWidget, grid=(hGrid, 0), acceptDrops=True, gridSpan=(1, 2))
+        self.textEditor = PyCodeEditor(self.mainWidget, application=self.application, grid=(hGrid, 0), acceptDrops=True, gridSpan=(1, 2))
         self.searchReplacePanel = self.textEditor.panels.get('SearchAndReplacePanel')
         self.fileWatcher = self.textEditor.modes.get('FileWatcherMode')
         if self.fileWatcher:
             self.fileWatcher.on_state_changed(False)
         self.textEditor.focused_in.connect(self._focusInEvent)
         self.textEditor.textChanged.connect(self._textedChanged)
+
+        ## editor pointers
+        self._backend = self.textEditor.backend
 
     def _createWidgetSettings(self):
         hGrid = 0
@@ -173,7 +176,7 @@ class MacroEditor(CcpnModule):
                 self.preferences.recentMacros.append(self.filePath)
                 self._pythonConsole._runMacro(self.filePath)
         else:
-            # Used when running the editor outiside of Analyis. Run from an external IpythonConsole
+            # Used when running the editor outside of Analysis. Run from an external IpythonConsole
             self._runOnTempIPythonConsole()
 
     def saveMacro(self):

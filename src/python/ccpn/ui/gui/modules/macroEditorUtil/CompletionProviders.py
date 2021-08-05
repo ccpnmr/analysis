@@ -32,16 +32,34 @@ from ccpn.ui.gui.modules.macroEditorUtil import IconDefinitions as iDef
 
 _namespace = []
 
-def _getCcpnNamespace():
+
+import gc
+
+def _getObjectsById(_id):
+    for obj in gc.get_objects():
+        if id(obj) == _id:
+            return obj
+
+def _getCcpnNamespaceFromApplication():
+    """
+    Get the namespaces as a list of dicts. Used to complete the Editor on key-pressed.
+    """
+    from ccpn.framework.Application import getApplication
+    application = getApplication()
+    namespaceList = []
+    if application:
+        namespace = application.mainWindow.namespace
+        namespaceList = [{i: namespace[i]} for i in list(namespace.keys())]
+    return namespaceList
+
+def _getCcpnNamespaceFromImports():
     """
     This function is called several times from external scrips, therefore it init the imports Only Once with global.
-    Namespace are (unfortunately) done with imports.
-    NOTE:
-    Ideally Namespace should be inserted from the initialised objects. However the PyQode implementation of using
-    sockets/processes to run external scripts means you need to give them in a Json-Serialisable format.
-    The alternative way of not using sockets, seems to create odd behaviours on the QCompleter. For using that you need
-    to add a subclassed CodeCompletionMode (see src/python/ccpn/ui/gui/widgets/QPythonEditor.py:49)
-    and remove the native CodeCompletionMode.
+    Namespace are done with imports to get Call-Signatures and documentation string.
+    Namespaces for completion on the Editor are currently taken from imports too, This because the PyQode mechanism uses
+    threads of json-serialisable items only. Therefore cannot send directly the application namespace as the
+    IPython-console module.
+    The alternative way of not using threads seems to break the GUI.
     """
     global _namespace
     if _namespace:
@@ -74,7 +92,7 @@ def _getCcpnNamespace():
 def getJediInterpreter(text, namespaces=None, **kwds):
     """
     :type text: str. the  text to parse and get the completions
-    :type namespaces: list of dict. a list of namespace dictionaries such as the one
+    :type namespaces: list of dict. a list of namespaces dictionaries such as the one
                       returned by :func:"locals".
     Other optional arguments are same as the ones for :class:"Script".
     If "line" and "column" are None, they are assumed be at the end of
@@ -82,7 +100,7 @@ def getJediInterpreter(text, namespaces=None, **kwds):
     """
 
     if not namespaces:
-        namespaces = list(_getCcpnNamespace())
+        namespaces = list(_getCcpnNamespaceFromImports())
     try:
         interpreter = jedi.Interpreter(text, namespaces=namespaces, **kwds)
         return interpreter
@@ -108,31 +126,76 @@ def _getAvailablePids() -> list:
     return result or []
 
 
+class CcpnCodeCompletionWorker(object):
+    """
+    This is the worker associated with the code completion mode.
+
+    The worker does not actually do anything smart, the real work of collecting
+    code completions is accomplished by the completion providers (see the
+    :class:`pyqode.core.backend.workers.CodeCompletionWorker.Provider`
+    interface) listed in
+    :attr:`pyqode.core.backend.workers.CompletionWorker.providers`.
+
+    Completion providers must be installed on the CodeCompletionWorker
+    at the beginning of the main server script, e.g.::
+
+        from pyqode.core.backend import CodeCompletionWorker
+        CodeCompletionWorker.providers.insert(0, MyProvider())
+    """
+    #: The list of code completion provider to run on each completion request.
+    providers = []
+    namespaces = [{'ajo':111}]
+    _application = None
+    # namespaces = _getCcpnNamespaceFromApplication()
+
+
+    def __call__(self, data):
+        """
+        Do the work (this will be called in the child process by the
+        SubprocessServer).
+        """
+        code = data['code']
+        line = data['line']
+        column = data['column']
+        path = data['path']
+        encoding = data['encoding']
+        prefix = data['prefix']
+        req_id = data['request_id']
+        completions = []
+
+        for prov in CcpnCodeCompletionWorker.providers:
+            try:
+                results = prov.complete(
+                    code, line, column, path, encoding, prefix)
+                completions.append(results)
+                if len(completions):
+                    break
+            except:
+                sys.stderr.write('Failed to get completions from provider %r' % prov)
+                exc1, exc2, exc3 = sys.exc_info()
+        return [(line, column, req_id)] + completions
+
+    def registerProvider(cls, provider):
+        cls.providers.append(provider)
+
 class CcpnNameSpacesProvider:
     """
     Provides code completion for the Ccpn Name space...
     """
+    namespaces = []
 
     def complete(self, code, line, column, path, encoding, prefix):
         """
         Completes python code using `jedi`_.
-
         :returns: a list of completion.
         """
 
         ret_val = []
         _namespaceAtts = []
-        pids = []
         try:
-            # namespaceDict = self.namespace
-            # ccpnNamespaces = list(namespaceDict)
-            # namespaces = [{k: namespaceDict[k]} for k in ccpnNamespaces]
-            # pids = _getAvailablePids()
-            # pidNameSpaces = [{pid: pid} for pid in pids]
-            # namespaces += pidNameSpaces
-            namespaces = _getCcpnNamespace()
+            namespaces = _getCcpnNamespaceFromImports()
             _namespaceAtts = [k for dd in namespaces for k in dd.keys()]
-            script = getJediInterpreter(text=code, encoding=encoding)
+            script = getJediInterpreter(text=code, namespaces=namespaces, encoding=encoding)
             completions = script.completions()
         except Exception as ex:
             completions = []
@@ -181,3 +244,12 @@ class CcpnJediCompletionProvider:
                             'icon': iDef.iconFromTypename(completion.name, completion.type),
                             })
         return ret_val
+
+# setup completion providers
+from pyqode.core.modes.code_completion import backend as _backend
+_backend.CodeCompletionWorker = CcpnCodeCompletionWorker
+# _backend.CodeCompletionWorker.namespaces = _getCcpnNamespaceFromApplication()
+ccpnNameSpacesProvider = CcpnNameSpacesProvider()
+ccpnNameSpacesProvider.worker = _backend.CodeCompletionWorker
+_backend.CodeCompletionWorker.registerProvider(CcpnCodeCompletionWorker, ccpnNameSpacesProvider)
+_backend.CodeCompletionWorker.registerProvider(CcpnCodeCompletionWorker, _backend.DocumentWordsProvider())

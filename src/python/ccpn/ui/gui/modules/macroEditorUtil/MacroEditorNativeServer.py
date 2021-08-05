@@ -55,9 +55,14 @@ if __name__ == '__main__':
         for path in args.syspath:
             sys.path.append(path)
 
-    import ccpn.ui.gui.modules.macroEditorUtil.CompletionProviders as pv
-    try:
-        pv._backend.serve_forever(args)
-    except:
-        sys.stderr.write('Backend on Editor was interrupted.')
+    from pyqode.core import backend
+    from pyqode.python.backend.workers import JediCompletionProvider
+
+    # setup completion providers
+    backend.CodeCompletionWorker.providers.append(JediCompletionProvider())
+    backend.CodeCompletionWorker.providers.append(
+        backend.DocumentWordsProvider())
+
+    # starts the server
+    backend.serve_forever(args)
 

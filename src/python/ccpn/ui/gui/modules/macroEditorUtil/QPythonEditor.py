@@ -29,23 +29,29 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.FileDialog import MacrosFileDialog
 from pyqode.python.widgets import PyCodeEdit
 from ccpn.ui.gui.modules.macroEditorUtil import MacroEditorServer
+from ccpn.ui.gui.modules.macroEditorUtil import MacroEditorNativeServer
 from pyqode.python import panels as pypanels
 from pyqode.core import api
 from pyqode.python.modes.calltips import CalltipsMode
 from ccpn.ui.gui.modules.macroEditorUtil.workers import CcpnQuickDocPanel, CcpnCalltipsMode
 
-
 marginColour = QtGui.QColor('lightgrey')
 marginPosition = 100
-
-
+import sys
 #########################################################################################
 ################################  Editor Widget  ########################################
 #########################################################################################
 
 class PyCodeEditor(PyCodeEdit, Base):
+    useNativeServer = False
+
     def __init__(self, parent=None, application=None, **kwds):
-        super().__init__(parent,  server_script=MacroEditorServer.__file__)
+
+        if self.useNativeServer:
+            serverScript = MacroEditorNativeServer.__file__
+        else:
+            serverScript = MacroEditorServer.__file__
+        super().__init__(parent,  server_script=serverScript)
         Base._init(self, **kwds)
         self.rightMarginMode = self.modes.get('RightMarginMode')
         if self.rightMarginMode:
@@ -63,6 +69,7 @@ class PyCodeEditor(PyCodeEdit, Base):
         self.panels.append(CcpnQuickDocPanel(), api.Panel.Position.BOTTOM)
         self.modes.remove(CalltipsMode)
         self.modes.append(CcpnCalltipsMode())
+
 
 
     def get(self):
@@ -87,8 +94,6 @@ class PyCodeEditor(PyCodeEdit, Base):
     def enterEvent(self, event):
         self.setFocus()
         super(PyCodeEditor, self).enterEvent(event)
-
-
 
 
 if __name__ == '__main__':

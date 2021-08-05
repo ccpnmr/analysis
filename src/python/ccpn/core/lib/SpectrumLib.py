@@ -680,37 +680,38 @@ def arPLS_Implementation(y, lambdaValue=5.e4, maxValue=1e6, minValue=-1e6, iterm
     return b
 
 
-def lowess(x, y):
-    """
-    LOWESS (Locally Weighted Scatterplot Smoothing).
-    A lowess function that outs smoothed estimates of endog
-    at the given exog values from points (exog, endog)
-    To use this, you need to install statsmodels in your miniconda:
-     - conda install statsmodels or pip install --upgrade --no-deps statsmodels
-    """
-
-    from scipy.interpolate import interp1d
-    #FIXME: invalid import
-    import statsmodels.api as sm
-
-    # introduce some floats in our x-values
-
-    # lowess will return our "smoothed" data with a y value for at every x-value
-    lowess = sm.nonparametric.lowess(y, x, frac=.3)
-
-    # unpack the lowess smoothed points to their values
-    lowess_x = list(zip(*lowess))[0]
-    lowess_y = list(zip(*lowess))[1]
-
-    # run scipy's interpolation. There is also extrapolation I believe
-    f = interp1d(lowess_x, lowess_y, bounds_error=False)
-
-    # this this generate y values for our xvalues by our interpolator
-    # it will MISS values outsite of the x window (less than 3, greater than 33)
-    # There might be a better approach, but you can run a for loop
-    # and if the value is out of the range, use f(min(lowess_x)) or f(max(lowess_x))
-    ynew = f(x)
-    return ynew
+# GWV disabled 5/8/2021
+# def lowess(x, y):
+#     """
+#     LOWESS (Locally Weighted Scatterplot Smoothing).
+#     A lowess function that outs smoothed estimates of endog
+#     at the given exog values from points (exog, endog)
+#     To use this, you need to install statsmodels in your miniconda:
+#      - conda install statsmodels or pip install --upgrade --no-deps statsmodels
+#     """
+#
+#     from scipy.interpolate import interp1d
+#     #FIXME: invalid import
+#     import statsmodels.api as sm
+#
+#     # introduce some floats in our x-values
+#
+#     # lowess will return our "smoothed" data with a y value for at every x-value
+#     lowess = sm.nonparametric.lowess(y, x, frac=.3)
+#
+#     # unpack the lowess smoothed points to their values
+#     lowess_x = list(zip(*lowess))[0]
+#     lowess_y = list(zip(*lowess))[1]
+#
+#     # run scipy's interpolation. There is also extrapolation I believe
+#     f = interp1d(lowess_x, lowess_y, bounds_error=False)
+#
+#     # this this generate y values for our xvalues by our interpolator
+#     # it will MISS values outsite of the x window (less than 3, greater than 33)
+#     # There might be a better approach, but you can run a for loop
+#     # and if the value is out of the range, use f(min(lowess_x)) or f(max(lowess_x))
+#     ynew = f(x)
+#     return ynew
 
 
 def nmrGlueBaselineCorrector(data, wd=20):

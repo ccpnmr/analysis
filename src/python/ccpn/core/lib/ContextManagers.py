@@ -43,10 +43,10 @@ import time
 import signal
 import sys
 
+
 @contextmanager
 def echoCommand(obj, funcName, *params, values=None, defaults=None,
                 parName=None, propertySetter=False, **objectParameters):
-
     from ccpn.core.lib import Util as coreUtil
 
     try:
@@ -333,6 +333,7 @@ def apiNotificationBlanking(application=None):
         # clean up after blocking notifications
         application.project._apiNotificationBlanking -= 1
 
+
 @contextmanager
 def notificationEchoBlocking(application=None):
     """
@@ -356,6 +357,7 @@ def notificationEchoBlocking(application=None):
     finally:
         # clean up after disabling echo blocking
         application._decreaseNotificationBlocking()
+
 
 @contextmanager
 def logCommandManager(prefix, funcName, *args, **kwds):
@@ -419,35 +421,6 @@ def inactivity(application=None):
         application._decreaseNotificationBlocking()
         application.project._apiNotificationBlanking -= 1
 
-@contextmanager
-def logCommandManager(prefix, funcName, *args, **kwds):
-    """Echo commands as prefix.funcName( **kwds )"""
-    from ccpn.util.decorators import _obj2pid
-
-    application = getApplication()
-    if application is None:
-        raise RuntimeError('Error getting application')
-
-    blocking = application._echoBlocking
-
-    if blocking == 0 and application.ui is not None:
-        if not prefix[-1] == '.':
-            prefix += '.'
-
-        msg = prefix + funcName + '('
-        for arg in args:
-            msg += '%r, ' % _obj2pid(arg)
-        for key, val in kwds.items():
-            msg += '%s=%r, ' % (key, _obj2pid(val))
-        # remove any unnecessary ', ' from the end
-        if msg[-2:] == ', ':
-            msg = msg[:-2]
-        msg += ')'
-
-        application.ui.echoCommands([msg])
-
-    with notificationEchoBlocking(application=application):
-        yield
 
 @contextmanager
 def notificationUnblanking():
@@ -626,7 +599,6 @@ def waypointBlocking(application=None):
 
 
 class Timeout:
-
     """
     A simple No-UI context manager to wrap a long operation, which is not necessarily a loop.
 
@@ -643,8 +615,7 @@ class Timeout:
 
     """
 
-    def __init__(self, seconds:int=60, timeoutMessage:str = ""):
-
+    def __init__(self, seconds: int = 60, timeoutMessage: str = ""):
         self.seconds = int(seconds)
         self.timeoutMessage = timeoutMessage
 
@@ -659,8 +630,6 @@ class Timeout:
     def __exit__(self, exc_type, exc_val, exc_tb):
         signal.alarm(0)  # Cancel SIGALRM if it's scheduled
         return exc_type is TimeoutError  # Suppress TimeoutError
-
-
 
 
 CURRENT_ATTRIBUTE_NAME = '_currentAttributeName'
@@ -1051,7 +1020,9 @@ def ccpNmrV3CoreUndoBlock():
 
     return theDecorator
 
-nullContext = nullcontext # an empty context manager
+
+nullContext = nullcontext  # an empty context manager
+
 
 def ccpNmrV3CoreSimple():
     """A decorator wrap the property setters method in an undo block and triggering the
@@ -1079,6 +1050,23 @@ def ccpNmrV3CoreSimple():
 
         # self._finaliseAction('change')
         return result
+
+    return theDecorator
+
+
+def checkDeleted():
+    """A decorator to wrap the property getter/setter methods with a check on deletion flag
+    """
+
+    @decorator.decorator
+    def theDecorator(*args, **kwds):
+        func = args[0]
+        args = args[1:]  # Optional 'self' is now args[0]
+        self = args[0]  # this is the object
+
+        if self.isDeleted:
+            raise RuntimeError(f'object {self} is deleted')
+        return func(*args, **kwds)
 
     return theDecorator
 
@@ -1118,6 +1106,7 @@ def queueStateChange(verify):
 
 class PaintContext:
     """context manager for closing painters correctly"""
+
     def __init__(self, painter):
         self._painter = painter
 
@@ -1135,6 +1124,7 @@ class AntiAliasedPaintContext(PaintContext):
         super(AntiAliasedPaintContext, self).__init__(painter)
         painter.setRenderHint(QPainter.Antialiasing)
         painter.setRenderHint(QPainter.HighQualityAntialiasing)
+
 
 # if __name__ == '__main__':
 #     # check that the undo mechanism is working with the new context managers
@@ -1223,4 +1213,3 @@ if __name__ == '__main__':
     print(f'>>> {application.project._undo}')
     for value in application.project._undo:
         print(f'>>>   {value}')
-

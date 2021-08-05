@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-29 20:47:58 +0100 (Thu, July 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-05 18:55:49 +0100 (Thu, August 05, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,7 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.Project import Project
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.NmrAtom import NmrAtom
+from ccpn.core._ChemicalShift import ShiftParameters
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr import Shift
 from ccpn.core.lib.ContextManagers import newObject
@@ -95,8 +96,8 @@ class ChemicalShift(AbstractWrapperObject):
         return self._wrappedData.value
 
     @value.setter
-    def value(self, value: float):
-        self._wrappedData.value = value
+    def value(self, val: float):
+        self._wrappedData.value = val
 
     @property
     def valueError(self) -> float:
@@ -167,14 +168,16 @@ class ChemicalShift(AbstractWrapperObject):
         """Return the contents of the shift as a row for insertion into a pandas dataframe
         """
         newRow = (self._wrappedData._uniqueId,
+                  self.isDeleted,
                   self.value,
                   self.valueError,
                   self.figureOfMerit,
                   ) + \
-                 (self.nmrAtom.pid if self.nmrAtom else None,) + \
-                 (self.nmrAtom.pid.fields if self.nmrAtom else
-                  (None, None, None, None)) + \
+                 (((str(self.nmrAtom.pid),) + tuple(val or None for val in self.nmrAtom.pid.fields)) if self.nmrAtom else
+                  (None, None, None, None, None)) + \
                  (self.comment,)
+        newRow = ShiftParameters(*newRow)
+
         return newRow
 
     #===========================================================================================

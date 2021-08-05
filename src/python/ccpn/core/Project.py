@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-29 20:04:48 +0100 (Thu, July 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-05 18:55:49 +0100 (Thu, August 05, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -354,12 +354,27 @@ class Project(AbstractWrapperObject):
         self._wrappedData._nextUniqueIdValues[className] += 1
         return nextUniqueId
 
-    @property
-    def versionHistory(self) -> list:
-        """Return the list of versions that the project has been saved under
-        The last element is the most recent
+    def _getUniqueIdValue(self, className) -> int:
+        """Get the current uniqueId for klass
+        CCPNINTERNAL: used in _restoreObject to validate objects loaded from dataframes
         """
-        return getattr(self._wrappedData, 'versionHistory', [])
+        # _uniqueId: Some classes require a unique identifier per class
+        # use _uniqueId property defined in AbstractWrapperObject
+        # _nextUniqueIdValues = {}    # a (className, nexIdValue) dictionary
+        if not hasattr(self._wrappedData, '_nextUniqueIdValues'):
+            setattr(self._wrappedData, '_nextUniqueIdValues', {})
+
+        nextUniqueId = self._wrappedData._nextUniqueIdValues.setdefault(className, 0)
+        return nextUniqueId
+
+    @property
+    def versionHistory(self) -> tuple:
+        """Return the tuple of versions that the project has been saved under
+        The last element is the most recent
+        Defaults to ('3.0.4',) if project saved before version 3.1.0.alpha
+        """
+        _history = getattr(self._wrappedData, 'versionHistory', []) or ['3.0.4']
+        return tuple(_history)
 
     @property
     def _parent(self) -> AbstractWrapperObject:

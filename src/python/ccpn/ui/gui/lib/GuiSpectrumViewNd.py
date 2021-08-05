@@ -61,11 +61,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         """ guiSpectrumDisplay is the parent
             apiSpectrumView is the (API) SpectrumView object
         """
-        """ old comment
-            region is in units of parent, ordered by spectrum dimensions
-            dimMapping is from spectrum numerical dimensions to guiStrip numerical dimensions
-            (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)
-        """
 
         self.setAcceptedMouseButtons = QtCore.Qt.LeftButton
         self.posLevelsPrev = []
@@ -402,6 +397,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         dimIndices = self.dimensionOrdering
         xDim = dimIndices[0]
         yDim = dimIndices[1]
+        #TODO: this needs rewriting without api calls
         orderedAxes = self._apiStripSpectrumView.strip.orderedAxes
 
         if dimensionCount == 2:

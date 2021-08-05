@@ -34,10 +34,10 @@ _namespace = []
 
 def _getCcpnNamespace():
     """
-    init the imports (Only Once) to be inserted on the namespace definitions.
-    Currently done with imports.
+    This function is called several times from external scrips, therefore it init the imports Only Once with global.
+    Namespace are (unfortunately) done with imports.
     NOTE:
-    Ideally should be inserted from the initialised objects. However the PyQode implementation of using
+    Ideally Namespace should be inserted from the initialised objects. However the PyQode implementation of using
     sockets/processes to run external scripts means you need to give them in a Json-Serialisable format.
     The alternative way of not using sockets, seems to create odd behaviours on the QCompleter. For using that you need
     to add a subclassed CodeCompletionMode (see src/python/ccpn/ui/gui/widgets/QPythonEditor.py:49)
@@ -46,25 +46,28 @@ def _getCcpnNamespace():
     global _namespace
     if _namespace:
         return _namespace
+
     from ccpn.core.Project import Project
-    from ccpn.framework.Framework import Framework  #
+    from ccpn.framework.Framework import Framework, getPreferences
     from ccpn.ui.gui.lib.GuiMainWindow import GuiMainWindow
     from ccpn.framework.Current import Current
     from ccpn.ui.Ui import Ui
+    from ccpn.util.Logging import getLogger
 
-    # sys.stderr.write(f'==> Imports done!')
-    _namespace = [{'application': Framework},
-                 {'current': Current},
-                 {'mainWindow': GuiMainWindow},
-                 {'ui': Ui},
-                 {'project': Project},
-                 # {'preferences'   : GuiMainWindow.preferences},
-                 {'redo': GuiMainWindow.redo},
-                 {'undo': GuiMainWindow.undo},
-                 {'get': Framework.getByPid},
-                 {'loadProject': Framework.loadProject},
-                 {'loadData': Framework.loadData},
-                 # {'warning'       : ''},
+    _namespace = [
+                 {'application'     : Framework},
+                 {'current'         : Current},
+                 {'mainWindow'      : GuiMainWindow},
+                 {'ui'              : Ui},
+                 {'project'         : Project},
+                 {'preferences'     : getPreferences()},
+                 {'redo'            : GuiMainWindow.redo},
+                 {'undo'            : GuiMainWindow.undo},
+                 {'get'             : Framework.getByPid},
+                 {'loadProject'     : Framework.loadProject},
+                 {'loadData'        : Framework.loadData},
+                 {'warning'         : getLogger().warning},
+                 {'info'            : getLogger().info},
                  ]
     return _namespace
 

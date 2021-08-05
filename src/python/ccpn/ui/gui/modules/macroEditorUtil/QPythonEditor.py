@@ -34,14 +34,9 @@ from pyqode.core import api
 from pyqode.python.modes.calltips import CalltipsMode
 from ccpn.ui.gui.modules.macroEditorUtil.workers import CcpnQuickDocPanel, CcpnCalltipsMode
 
-# import warnings
-# with warnings.catch_warnings():
-#     warnings.filterwarnings("ignore", message='Unimplemented completion icon_type:')
 
 marginColour = QtGui.QColor('lightgrey')
 marginPosition = 100
-
-
 
 
 #########################################################################################

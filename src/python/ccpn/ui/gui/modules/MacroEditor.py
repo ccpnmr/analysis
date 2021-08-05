@@ -34,7 +34,7 @@ import os
 import datetime
 import tempfile
 from collections import OrderedDict as od
-from pyqode.python.widgets import PyConsole, PyInteractiveConsole
+from pyqode.python.widgets import PyInteractiveConsole
 from pyqode.core.api import TextHelper
 from ccpn.framework.PathsAndUrls import macroPath as ccpnMacroPath
 from ccpn.util.Path import aPath
@@ -47,7 +47,7 @@ from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.ui.gui.widgets.QPythonEditor import PyCodeEditor
+from ccpn.ui.gui.modules.macroEditorUtil.QPythonEditor import PyCodeEditor
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Action import Action
@@ -555,10 +555,9 @@ class MacroEditor(CcpnModule):
 
 
 if __name__ == '__main__':
-    from PyQt5 import QtGui, QtWidgets
+    from PyQt5 import QtWidgets
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
-    from ccpn.ui.gui.widgets.CheckBox import EditableCheckBox, CheckBox
 
 
     app = TestApplication()

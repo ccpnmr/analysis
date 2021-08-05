@@ -27,6 +27,8 @@ __date__ = "$Date: 2020-04-16 12:14:50 +0000 (Thu, April 16, 2020) $"
 
 import os
 from PyQt5 import QtGui, QtWidgets
+
+from ccpn.util.Path import aPath
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 
 
@@ -35,10 +37,20 @@ ACCEPTROWCOLOUR = QtGui.QColor('darkseagreen')
 REJECTROWCOLOUR = QtGui.QColor('orange')
 INVALIDROWCOLOUR = QtGui.QColor('lightpink')
 
+def _validPath(path) -> bool:
+    "Return True if path is valid"
+    _path = aPath(path)
+    return _path.exists()
+
+def _validFile(path) -> bool:
+    "Return True if path is valid and a file"
+    _path = aPath(path)
+    return _path.exists() and _path.is_file()
+
 VALIDFILE ='File'
 VALIDPATH = 'Path'
 VALIDMODES = (VALIDFILE, VALIDPATH)
-VALIDFUNCS = (os.path.isfile, os.path.isdir)
+VALIDFUNCS = (_validFile, _validPath)
 
 
 class PathValidator(QtGui.QValidator):
@@ -53,12 +65,12 @@ class PathValidator(QtGui.QValidator):
         self._func = VALIDFUNCS[VALIDMODES.index(fileMode)]
 
     def validate(self, p_str, p_int):
-        filePath = p_str.strip()
-        filePath = os.path.expanduser(filePath)
+        # filePath = p_str.strip()
+        # filePath = os.path.expanduser(filePath)
 
         palette = self.parent().palette()
 
-        if self._func(filePath):
+        if self._func(p_str):
             palette.setColor(QtGui.QPalette.Base, self.baseColour)
             state = QtGui.QValidator.Acceptable  # entry is valid
         else:

@@ -309,6 +309,32 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         return self._peakPicker
 
+    @peakPicker.setter
+    def peakPicker(self, peakPicker):
+        """Set the current peakPicker class instance
+        """
+        from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC
+
+        if not isinstance(peakPicker, (PeakPickerABC, type(None))):
+            raise ValueError('Not a valid peakPickerABC class')
+        elif peakPicker and peakPicker.spectrum != self:
+            raise ValueError(f'peakPicker is already linked to spectrum {peakPicker.spectrum}')
+        elif peakPicker:
+            with undoBlockWithoutSideBar():
+                # set the current peakPicker
+                self._peakPicker = peakPicker
+
+                # automatically store in the spectrum CCPN internal store
+                self._peakPicker._storeAttributes()
+                getLogger().debug('Setting new peak picker')
+        else:
+            with undoBlockWithoutSideBar():
+                # clear the current peakPicker
+                if self._peakPicker:
+                    self._peakPicker._detachFromSpectrum()
+                    self._peakPicker = None
+                    getLogger().debug('Clearing old peak picker')
+
     #-----------------------------------------------------------------------------------------
     # Spectrum properties
     #-----------------------------------------------------------------------------------------
@@ -647,15 +673,21 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         if value is None:
             self._clearCache()
             self._dataStore.path = None
-            self.setTraitValue('_dataStore', None, force=True)
+            self.setTraitValue('_dataSource', None, force=True)
             return
 
-        newDataStore = DataStore.newFromPath(path=value, dataFormat=self.dataFormat)
-        newDataStore.spectrum = self
-
-        try:
-            newDataSource = self._getDataSource(newDataStore)
-        except:
+        # newDataStore = DataStore.newFromPath(path=value, dataFormat=self.dataFormat)
+        # if not newDataStore.exists():
+        #     raise ValueError('FilePath %r does not exist' % value)
+        #
+        # newDataStore.spectrum = self
+        #
+        # try:
+        #     newDataSource = self._getDataSource(newDataStore)
+        # except:
+        #     raise ValueError('Spectrum.filePath: incompatible file "%s"' % value)
+        newDataStore, newDataSource = self._getDataSourceFromPath(path=value)
+        if newDataStore is None or newDataSource is None:
             raise ValueError('Spectrum.filePath: incompatible file "%s"' % value)
 
         # we found a valid new file
@@ -2313,32 +2345,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         return _createPeak(self, peakList, **ppmPositions)
 
-    @peakPicker.setter
-    def peakPicker(self, peakPicker):
-        """Set the current peakPicker class instance
-        """
-        from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC
-
-        if not isinstance(peakPicker, (PeakPickerABC, type(None))):
-            raise ValueError('Not a valid peakPickerABC class')
-        elif peakPicker and peakPicker.spectrum != self:
-            raise ValueError(f'peakPicker is already linked to spectrum {peakPicker.spectrum}')
-        elif peakPicker:
-            with undoBlockWithoutSideBar():
-                # set the current peakPicker
-                self._peakPicker = peakPicker
-
-                # automatically store in the spectrum CCPN internal store
-                self._peakPicker._storeAttributes()
-                getLogger().debug('Setting new peak picker')
-        else:
-            with undoBlockWithoutSideBar():
-                # clear the current peakPicker
-                if self._peakPicker:
-                    self._peakPicker._detachFromSpectrum()
-                    self._peakPicker = None
-                    getLogger().debug('Clearing old peak picker')
-
     @logCommand(get='self')
     def pickPeaks(self, peakList=None, positiveThreshold=None, negativeThreshold=None, **ppmRegions) -> Optional[Tuple['Peak', ...]]:
         """Pick peaks in the region defined by the ppmRegions dict.
@@ -2458,9 +2464,25 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """
         return self._wrappedData.serial
 
+    def _getDataSourceFromPath(self, path):
+        """Return a (dataStore, dataSource) tuple if path points  a file compatible
+        with self.dataFormat, or (None, None) otherwise
+        """
+        dataStore = DataStore.newFromPath(path=path, dataFormat=self.dataFormat)
+        if not dataStore.exists():
+            return (None, None)
+        dataStore.spectrum = self
+
+        try:
+            dataSource = self._getDataSource(dataStore)
+        except RuntimeError:
+            return (None, None)
+
+        return (dataStore, dataSource)
+
     def _getDataSource(self, dataStore):
         """Check the validity and access the file defined by dataStore;
-        returns: SpectrumDataSource instance or None when filePath and/or dataFormat of the
+        returns: SpectrumDataSource instance when filePath and/or dataFormat of the
         dataStore instance are incorrect
         """
 
@@ -2475,6 +2497,10 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             dataSource.importFromSpectrum(self)
 
         else:
+            if not dataStore.exists():
+                raise RuntimeError('Spectrum._getDataSource: dataStore path "%s" does not exist' %
+                                    dataStore.aPath())
+
             dataSource = getSpectrumDataSource(dataStore.aPath(), dataStore.dataFormat)
             if dataSource is None:
                 raise RuntimeError('Spectrum._getDataSource: dataStore path "%s" is incompatible with dataFormat "%s"' %

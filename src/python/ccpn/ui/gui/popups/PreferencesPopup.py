@@ -777,8 +777,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.proxyUsernameData.setText(str(self.preferences.proxySettings.proxyUsername))
         self.proxyPasswordData.setText(self._userPreferences.decodeValue(str(self.preferences.proxySettings.proxyPassword)))
 
-        # set the enabled state of the proxy settings boxes
+        # set the enabled state of some settings boxes
         self._enableProxyButtons()
+        self._enableAutoBackupFrequency()
+        self._enableUserWorkingPath()
 
     def _populateSpectrumTab(self):
         """Populate the widgets in the spectrumTab
@@ -1641,6 +1643,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
         elif option == 'autoSetDataPath':
             self._enableUserDataPath()
 
+        elif option == 'autoBackupEnabled':
+            self._enableAutoBackupFrequency()
+
+
         if checked != self.preferences.general[option]:
             # change the enabled state of checkboxes as required
             return partial(self._toggleGeneralOptions, option, checked)
@@ -1728,6 +1734,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
     def _setAutoBackupFrequency(self, value):
         self.preferences.general.autoBackupFrequency = value
         self.application.updateAutoBackup()
+
+    def _enableAutoBackupFrequency(self):
+        value = self.autoBackupEnabledBox.get()
+        self.autoBackupFrequencyData.enableWidget(value)
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetRegionPadding(self):
@@ -2178,7 +2188,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.useProxyPasswordBox.enableWidget(useProxy)
         self.proxyUsernameData.enableWidget(useProxy and usePW)
         self.proxyPasswordData.enableWidget(useProxy and usePW)
-
 
     @queueStateChange(_verifyPopupApply)
     def _queueApplyToSpectrumDisplays(self, option, checked):

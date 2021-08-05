@@ -397,8 +397,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     #def getPlaneData(self, guiStrip):
     def _getPlaneData(self):
 
-        # NBNB TODO FIXME - Wayne, please check through the modified code
-
         spectrum = self.spectrum
         dimensionCount = spectrum.dimensionCount
         dimIndices = self.dimensionOrdering

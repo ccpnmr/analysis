@@ -37,15 +37,28 @@ ACCEPTROWCOLOUR = QtGui.QColor('darkseagreen')
 REJECTROWCOLOUR = QtGui.QColor('orange')
 INVALIDROWCOLOUR = QtGui.QColor('lightpink')
 
+
 def _validPath(path) -> bool:
     "Return True if path is valid"
-    _path = aPath(path)
-    return _path.exists()
+    # catch any anomalies in expanding or testing _path
+    try:
+        _path = aPath(path)
+        result = _path.exists()
+    except RuntimeError:
+        result = False
+    return result
+
 
 def _validFile(path) -> bool:
     "Return True if path is valid and a file"
-    _path = aPath(path)
-    return _path.exists() and _path.is_file()
+    # catch any anomalies in expanding or testing _path
+    try:
+        _path = aPath(path)
+        result = _path.exists() and _path.is_file()
+    except RuntimeError:
+        result = False
+    return result
+
 
 VALIDFILE ='File'
 VALIDPATH = 'Path'

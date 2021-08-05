@@ -181,9 +181,11 @@ class PathRowABC(object):
         if choices is not None and len(choices) > 0 and len(choices[0]) > 0:
             newPath = choices[0]
             # We sometimes get silly results back; just checking here
-            if aPath(newPath).exists():
+            if self.validator.isValid(newPath):
                 self.setPath(newPath)
                 self._setDataInWidget(newPath)
+            else:
+                showWarning("Invalid File", '"%s" is not compatible with %s' % (newPath, self.obj))
 
     def _setDataInWidget(self, path):
         """Populate the dataWidget and validate"""
@@ -295,9 +297,8 @@ class SpectrumValidator(ValidatorABC):
     def isValid(self, value):
         """return True is value is valid;
         """
-        # ds = DataStore.newFromPath(value, autoRedirect=False)
-        # return ds.exists()
-        return self.obj.hasValidPath()
+        dataStore, dataSource = self.obj._getDataSourceFromPath(path=value)
+        return dataStore is not None and dataSource is not None
 # end class
 
 

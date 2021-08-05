@@ -974,27 +974,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
         # row += 1
         self.aspectLabel = {}
         self.aspectData = {}
-        # self.aspectLabelFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 0))
-        # self.aspectDataFrame = Frame(parent, setLayout=True, showBorder=False, grid=(row, 1))
-        # for ii, aspect in enumerate(sorted(self.preferences.general.aspectRatios.keys())):
-        #     self.aspectLabel[aspect] = Label(self.aspectLabelFrame, text=aspect, grid=(ii, 0), hAlign='r')
-        #     self.aspectData[aspect] = ScientificDoubleSpinBox(self.aspectDataFrame, min=0.5, grid=(ii, 0), hAlign='l')
-        #     self.aspectData[aspect].setMinimumWidth(LineEditsMinimumWidth)
-        #     # if aspect == self.preferences.general._baseAspectRatioAxisCode:
-        #     #     self.aspectData[aspect].setEnabled(False)
-        #     # else:
-        #     #     self.aspectData[aspect].setEnabled(True)
-        #     self.aspectData[aspect].valueChanged.connect(partial(self._queueSetAspect, aspect, ii))
-
         for ii, key in enumerate(sorted(self.preferences.general.aspectRatios.keys())):
             row += 1
             self.aspectLabel[key] = Label(parent, text=key, grid=(row, 0), hAlign='r')
             self.aspectData[key] = ScientificDoubleSpinBox(parent, min=0.5, grid=(row, 1), hAlign='l')
             self.aspectData[key].setMinimumWidth(LineEditsMinimumWidth)
-            # if aspect == self.preferences.general._baseAspectRatioAxisCode:
-            #     self.aspectData[aspect].setEnabled(False)
-            # else:
-            #     self.aspectData[aspect].setEnabled(True)
             self.aspectData[key].valueChanged.connect(partial(self._queueSetAspect, key, ii))
 
         #====== Zooming ======

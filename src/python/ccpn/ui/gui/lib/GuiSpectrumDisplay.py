@@ -2466,13 +2466,13 @@ class GuiSpectrumDisplay(CcpnModule):
 
                     else:
                         # add the spectrum to the end of the spectrum ordering in the toolbar
-                        index = self.getOrderedSpectrumViewsIndex()
+                        idx = self.getOrderedSpectrumViewsIndex()
                         newInd = self.spectrumViews.index(spectrumView)
-                        index = tuple((ii + 1) if (ii >= newInd) else ii for ii in index)
-                        index += (newInd,)
+                        idx = tuple((ii + 1) if (ii >= newInd) else ii for ii in idx)
+                        idx += (newInd,)
 
-                        self.setToolbarButtons(tuple(index))
-                        addUndoItem(redo=partial(self.setToolbarButtons, tuple(index)))
+                        self.setToolbarButtons(tuple(idx))
+                        addUndoItem(redo=partial(self.setToolbarButtons, tuple(idx)))
         return spectrumView
 
     @logCommand(get='self')

@@ -62,22 +62,6 @@ def getPeakPickerTypes() -> OrderedDict:
     return PeakPickerABC._peakPickers
 
 
-def getPeakPicker(peakPickerType, spectrum, *args, **kwds):
-    """Return instance of class if PeakPicker defined by peakPickerType has been registered
-
-    :param peakPickerType: type str; reference to peakPickerType of peakPicker class
-    :return: new instance of class if registered else None
-    """
-    peakPickerTypes = getPeakPickerTypes()
-    cls = peakPickerTypes.get(peakPickerType)
-    if cls is None:
-        raise ValueError('getPeakPicker: invalid format "%s"; must be one of %s' %
-                         (peakPickerType, [k for k in peakPickerTypes.keys()])
-                         )
-
-    return cls(spectrum, *args, **kwds)
-
-
 def isRegistered(peakPickerType):
     """Return True if a PeakPicker class of type peakPickerType is registered
 
@@ -144,41 +128,13 @@ class PeakPickerABC(CcpNmrJson):
         """register cls.peakPickerType"""
         if cls.peakPickerType in cls._peakPickers:
             getLogger().debug(f'PeakPicker "{cls.peakPickerType}" was already registered')
-        PeakPickerABC._peakPickers[cls.peakPickerType] = cls
-        getLogger().info(f'Registering peakPicker class {cls.peakPickerType}')
-
-    @classmethod
-    def _restorePeakPicker(cls, spectrum):
-        """Create a new peakPicker instance defined by parameters stored within
-        spectrum Ccpn Internal data
-        """
-        from ccpn.core.Spectrum import Spectrum
-
-        if spectrum is None:
-            raise ValueError('%s: spectrum is None' % cls.__class__.__name__)
-        if not isinstance(spectrum, Spectrum):
-            raise ValueError('%s: spectrum is not of Spectrum class' % cls.__class__.__name__)
-
-        try:
-            # read peakPicker from CCPNinternal
-            jsonData = spectrum._getInternalParameter(PEAKPICKERPARAMETERS)
-            _pickerType = dict(loads(jsonData)).get('_metadata').get('className')
-        except Exception as es:
-            getLogger().debug(f'peakPicker not restored from {spectrum}')
 
         else:
-            if _pickerType:
-                _picker = getPeakPicker(_pickerType, spectrum)
-                if _picker:
-                    getLogger().debug(f'peakPicker {_picker} instantiated')
-                    # restore peakPicker with parameters from CcpnInternal
-                    _picker._restoreAttributes()
-                    return _picker
+            PeakPickerABC._peakPickers[cls.peakPickerType] = cls
 
-                else:
-                    getLogger().debug(f'peakPicker {_pickerType} not defined')
-            else:
-                getLogger().debug(f'peakPicker not restored from {spectrum}')
+            # register for restoring from json
+            super(PeakPickerABC, cls).register()
+            getLogger().info(f'Registering peakPicker class {cls.peakPickerType}')
 
     #=========================================================================================
     # parameter definitions and mappings onto the Spectrum class

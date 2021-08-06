@@ -389,29 +389,41 @@ class CcpNmrJson(TraitBase):
         return False
 
     @staticmethod
-    def _newObjectFromDict(theDict):
-        """Return new object as defined by theDict;
+    def _newObjectFromDict(theDict, **kwds):
+        """Return new object as defined by theDict; kwds are passed to the class instantiation
         requires presence of metadata and registered classname
         CCPNMRINTERNAL: used in recursive handler classes (see below)
         """
         cls = CcpNmrJson._getClassFromDict(theDict)
-        obj = cls()
+        obj = cls(**kwds)
         obj._decode(theDict)
         return obj
 
     @staticmethod
-    def newObjectFromJson(path):
-        """Create a new object defined by json-file path; this should be a json file with valid metadata
-        needed for restoring
+    def newObjectFromJson(path=None, jsonString=None, **kwds):
+        """Create a new object defined by either the:
+        - json-file path; reading the jsonString or
+        - jsonString
+        The jsonString should be a json encoded dict with valid metadata needed for restoring the objects
+        kwds are passed to the class instantiation of the object
+
+        :return the object restored from the Json data
         """
-        path = aPath(path)
-        if not path.exists():
-            raise FileNotFoundError('file "%s" does not exist' % path)
+        if path is None and jsonString is None:
+            raise RuntimeError('newObjectFromJson: undefined path and jsonString')
 
-        with path.open('r') as fp:
-            theDict = dict(json.load(fp))
+        if path is not None:
+            path = aPath(path)
+            if not path.exists():
+                raise FileNotFoundError('file "%s" does not exist' % path)
 
-        return CcpNmrJson._newObjectFromDict(theDict)
+            with path.open('r') as fp:
+                theDict =  dict(json.load(fp))
+
+        elif jsonString is not None:
+            theDict = dict(json.loads(jsonString))
+
+        return CcpNmrJson._newObjectFromDict(theDict, **kwds)
 
     #--------------------------------------------------------------------------------------------
 

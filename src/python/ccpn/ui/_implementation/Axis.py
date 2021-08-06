@@ -1,5 +1,5 @@
 """
-GUI Display Strip class
+GUI Axis class
 """
 #=========================================================================================
 # Licence, Reference and Credits

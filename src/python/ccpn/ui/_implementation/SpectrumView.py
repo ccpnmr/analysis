@@ -389,28 +389,29 @@ class SpectrumView(AbstractWrapperObject):
     @property
     def axisCodes(self) -> list:
         """Spectrum axisCodes in display order"""
-        return [self.spectrum.axisCodes[idx] for idx in self.axes]
+        return [self.spectrum.axisCodes[idx] for idx in self.axes if idx >=0]
 
     @property
     def spectrumLimits(self) -> list:
         """Spectrum limits in display order"""
-        return [self.spectrum.spectrumLimits[idx] for idx in self.axes]
+        return [self.spectrum.spectrumLimits[idx] for idx in self.axes if idx >=0]
 
     @property
     def aliasingLimits(self) -> list:
         """Spectrum ailiasing limits in display order"""
         _tmp = self.spectrum.aliasingLimits
-        return [_tmp[idx] for idx in self.axes]
+        return [_tmp[idx] for idx in self.axes if idx >=0]
 
     @property
     def valuesPerPoint(self) -> list:
         """Spectrum valuesPerPoint in display order"""
         _tmp = self.spectrum.valuesPerPoint
-        return [_tmp[idx] for idx in self.axes]
+        return [_tmp[idx] for idx in self.axes if idx >=0]
 
     def _getByDisplayOrder(self, parameterName) -> list:
         """Return parameter in displayOrder"""
-        return list(self.spectrum.getByDimensions(parameterName=parameterName, dimensions=self.dimensions))
+        dims = [d for d in self.dimensions if d > 0]  # Filter the '0' dimension of 1D
+        return list(self.spectrum.getByDimensions(parameterName=parameterName, dimensions=dims))
 
     def _getPointPosition(self, ppmPostions) -> tuple:
         """Convert the ppm-positions vector (in display order) to a position (1-based) vector

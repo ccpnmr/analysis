@@ -72,13 +72,30 @@ class SpectrumDisplay(AbstractWrapperObject):
     _orderedSpectrumViews = None
 
     #-----------------------------------------------------------------------------------------
-    # Attributes of the data structure
+    # Attributes of the data structure (incomplete?)
     #-----------------------------------------------------------------------------------------
 
     @property
     def strips(self) -> list:
         """STUB: hot-fixed later"""
         return []
+
+    #-----------------------------------------------------------------------------------------
+
+    def __init__(self, project: Project, wrappedData):
+
+        AbstractWrapperObject.__init__(self, project, wrappedData)
+        # isotopeCodes in display order; set on initialisation with the first spectrum
+        self._isotopeCodes = None
+
+    @classmethod
+    def _restoreObject(cls, project, apiObj):
+        """Subclassed to allow for initialisations on restore
+        """
+        display = super()._restoreObject(project, apiObj)
+        display._isotopeCodes = tuple(display.spectrumViews[0]._getByDisplayOrder('isotopeCodes'))
+        return display
+
 
     #-----------------------------------------------------------------------------------------
     # CCPN properties
@@ -139,7 +156,7 @@ class SpectrumDisplay(AbstractWrapperObject):
 
     @property
     def axisCodes(self) -> Tuple[str, ...]:
-        """Fixed string Axis codes in original display order (X, Y, Z1, Z2, ...)"""
+        """Fixed string Axis codes in display order (X, Y, Z1, Z2, ...)"""
         return tuple(self._wrappedData.axisCodes)
 
     @property
@@ -150,6 +167,11 @@ class SpectrumDisplay(AbstractWrapperObject):
     @axisOrder.setter
     def axisOrder(self, value: Sequence):
         self._wrappedData.axisOrder = value
+
+    @property
+    def isotopeCodes(self) -> Tuple[str, ...]:
+        """Fixed string isotope codes in display order (X, Y, Z1, Z2, ...)"""
+        return self._isotopeCodes
 
     @property
     def dimensionCount(self) -> int:
@@ -478,13 +500,14 @@ class SpectrumDisplay(AbstractWrapperObject):
         """
         # For now: do not allow spectrum mapping with higher dimensionality than the display
         if spectrum.dimensionCount > self.dimensionCount:
-            raise RuntimeError('Unable to map %s onto %s, dimensionality mismatch' % (spectrum, self))
+            raise RuntimeError('Cannot display %s onto %s; dimensionality mismatch' % (spectrum, self))
 
         spectrumAxisCodes = spectrum._mapAxisCodes(self.axisCodes)[:spectrum.dimensionCount]
         if None in spectrumAxisCodes:
-            raise RuntimeError('Unable to map dimensions of %s onto %s, axes %s' % (spectrum, self, self.axisCodes))
+            raise RuntimeError('Cannot display %s on %s; incompatible axisCodes' % (spectrum, self))
 
         dimensionOrder = spectrum.getByAxisCodes('dimensions', spectrumAxisCodes, exactMatch=True)
+
         return dimensionOrder
 
     def _getAxesMapping(self, spectrum:Spectrum) -> list:
@@ -614,9 +637,12 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
 
         apiSpectrumDisplay.newIntensityAxis(code='intensity', stripSerial=1, unit=AXISUNIT_NUMBER)
 
+        display._isotopeCodes = tuple(spectrum.isotopeCodes)
+
     else:
         # nD
         spectrumAxes = display._getAxesMapping(spectrum)
+        display._isotopeCodes = tuple(spectrum.isotopeCodes[axis] for axis in spectrumAxes)
 
         for ii, axis in enumerate(spectrumAxes):
             displayAxisCode = axisCodes[ii]
@@ -645,11 +671,12 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
             else:
                 raise NotImplementedError('No sampled axes (yet)')
 
+
     display._setLimits(spectrum)
 
     # display the spectrum, this will also create a new spectrumView
-    display.displaySpectrum(spectrum=spectrum)
-    # We only can set the z-widgets when there is a spectrumView
+    spectrumView = display.displaySpectrum(spectrum=spectrum)
+    # We only can set the z-widgets when there is a spectrumView; which we just created
     strip._setZWidgets()
 
     # call any post initialise routines for the spectrumDisplay here

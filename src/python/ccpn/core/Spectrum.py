@@ -184,7 +184,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     version = 1.0  # for json saving
 
     #-----------------------------------------------------------------------------------------
-    # Attributes of the data structure
+    # Attributes of the data structure (incomplete?)
     #-----------------------------------------------------------------------------------------
 
     @property

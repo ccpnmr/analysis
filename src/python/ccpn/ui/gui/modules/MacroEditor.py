@@ -70,6 +70,12 @@ PROFILING_SORTINGS = OrderedDict([ # (arg to go on script, tipText)
                 ])
 
 ProfileSufixName = '-profile'
+DefaultProfileLines = .2    # % of tot lines to be printed
+ShowMaxLines = OrderedDict([
+                     ('Top (20%)', DefaultProfileLines),
+                     ('Half', 0.5),
+                     ('All', 1.0)]
+                    )
 
 class MacroEditor(CcpnModule):
     """
@@ -185,7 +191,7 @@ class MacroEditor(CcpnModule):
         from ccpn.ui.gui.widgets import CompoundWidgets as CW
 
         self.safeProfileFileCheckBox = CW.CheckBoxCompoundWidget(self.settingsWidget,
-                                                       labelText='Save Profiler',
+                                                       labelText='Save Profiler to disk',
                                                        checked=True,
                                                        orientation='left', hAlign='left',
                                                        tipText='When running with the Profiler, save the stats to disk '
@@ -195,13 +201,26 @@ class MacroEditor(CcpnModule):
         sortingModes = PROFILING_SORTINGS.keys()
         sortingModesTt = [f'Sort by: {x}' for x in PROFILING_SORTINGS.values()]
         self.sortProfileFilePulldown = CW.PulldownListCompoundWidget(self.settingsWidget,
-                                                                 labelText='Sort Profiler',
+                                                                 labelText='Profiler output sorting',
                                                                  orientation='left', hAlign='left',
                                                                  tipText='When running with the Profiler, '
                                                                          'sort results by the selected option)',
                                                                 texts= sortingModes,
                                                                 toolTips = sortingModesTt,
+                                                                     compoundKwds={'hAlign': 'left' },
                                                                 grid=(hGrid, 0), gridSpan=(1, 1))
+        showLinesText = ShowMaxLines.keys()
+        showLinesTipText = [f'Show {x} of the total Lines' for x in showLinesText]
+        hGrid += 1
+        self.showLinesPulldown = CW.PulldownListCompoundWidget(self.settingsWidget,
+                                                                     labelText='Profiler output limits  ',
+                                                                     orientation='left', hAlign='left',
+                                                                     tipText='When running with the Profiler, '
+                                                                             'set how many line to show',
+                                                                     texts=showLinesText,
+                                                                     toolTips=showLinesTipText,
+                                                                     compoundKwds={'hAlign':'left',},
+                                                                     grid=(hGrid, 0), gridSpan=(1, 1))
 
     def run(self):
         if self._pythonConsole is not None:
@@ -221,11 +240,13 @@ class MacroEditor(CcpnModule):
         """
         sortMode = self.sortProfileFilePulldown.getText()
         saveToFile = self.safeProfileFileCheckBox.get()
-        _i = f'-i'              # -i interactive
-        _p = f'-p'              # -p profile
-        _s = f'-s {sortMode}'   # -s sort keyword
+        showLines = ShowMaxLines.get(self.showLinesPulldown.getText(), DefaultProfileLines)
+        _i = f'-i'               # -i interactive
+        _p = f'-p'               # -p profile
+        _s = f'-s {sortMode}'    # -s sort keyword
+        _l = f'-l {showLines}'   # -l limits keyword 0-1 float for % of output to show
         _f = f'-T {self.filePath}{ProfileSufixName}' if saveToFile else '' # -T filepath to dump the profile
-        return [_i, _p, _s, _f]
+        return [_i, _p, _s, _l, _f]
 
     def runProfiler(self):
         if self._pythonConsole is not None:

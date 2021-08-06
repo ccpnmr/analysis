@@ -39,7 +39,7 @@ from pyqode.core.api import TextHelper
 from ccpn.framework.PathsAndUrls import macroPath as ccpnMacroPath
 from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule, MODULENAME, WIDGETSTATE
 from ccpn.ui.gui.widgets.FileDialog import MacrosFileDialog
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
@@ -86,7 +86,7 @@ class MacroEditor(CcpnModule):
     settingsPosition = 'left'
 
     className = 'MacroEditor'
-    _includeInLastSeen = False
+    _includeInLastSeen = True
 
 
     def __init__(self, mainWindow=None, name='MacroEditor', filePath=None):
@@ -619,14 +619,17 @@ class MacroEditor(CcpnModule):
                 widget = getattr(self, str(variableName))
                 if variableName == _filenameLineEdit:
                     if isinstance(widget, LineEdit):
-                        if value is not None:
+                        if value is not None and value != '':
                             if self.filePath != value:
                                 self._removeMacroFromCurrent()
                                 self._deleteTempFile()
                             self.openPath(value)
                         continue
+                else:
+                    widget._setSavedState(value)
             except Exception as e:
                 getLogger().debug('Impossible to restore %s value for %s. %s' % (variableName, self.name(), e))
+
 
     def _closeModule(self):
         """Re-implementation of closeModule"""
@@ -641,6 +644,10 @@ class MacroEditor(CcpnModule):
         except Exception as err:
             getLogger().warning(f'error closing macro editor {err}')
 
+        widgetsState = super().widgetsState
+        widgetsState[_filenameLineEdit] = '' # don't save the filename for next time you open a "last-seen" module
+        self.area._seenModuleStates[self.className] = {MODULENAME: self.moduleName, WIDGETSTATE: widgetsState}
+        self._includeInLastSeen = False # otherwise overrides the saved state.
         super()._closeModule()
 
 

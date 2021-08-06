@@ -144,9 +144,7 @@ class CcpnCodeCompletionWorker(object):
     """
     #: The list of code completion provider to run on each completion request.
     providers = []
-    namespaces = [{'ajo':111}]
-    _application = None
-    # namespaces = _getCcpnNamespaceFromApplication()
+    namespaces = _getCcpnNamespaceFromApplication()
 
 
     def __call__(self, data):
@@ -248,8 +246,6 @@ class CcpnJediCompletionProvider:
 # setup completion providers
 from pyqode.core.modes.code_completion import backend as _backend
 _backend.CodeCompletionWorker = CcpnCodeCompletionWorker
-# _backend.CodeCompletionWorker.namespaces = _getCcpnNamespaceFromApplication()
 ccpnNameSpacesProvider = CcpnNameSpacesProvider()
-ccpnNameSpacesProvider.worker = _backend.CodeCompletionWorker
 _backend.CodeCompletionWorker.registerProvider(CcpnCodeCompletionWorker, ccpnNameSpacesProvider)
 _backend.CodeCompletionWorker.registerProvider(CcpnCodeCompletionWorker, _backend.DocumentWordsProvider())

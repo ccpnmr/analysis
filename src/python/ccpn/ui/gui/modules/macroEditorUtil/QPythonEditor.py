@@ -43,11 +43,12 @@ import sys
 #########################################################################################
 
 class PyCodeEditor(PyCodeEdit, Base):
-    useNativeServer = False
+
+    useNativeCompletion = False # use the original completion without Ccpn Namespace and icons
 
     def __init__(self, parent=None, application=None, **kwds):
 
-        if self.useNativeServer:
+        if self.useNativeCompletion:
             serverScript = MacroEditorNativeServer.__file__
         else:
             serverScript = MacroEditorServer.__file__

@@ -29,16 +29,8 @@ import jedi
 import sys
 from ccpn.ui.gui.modules.macroEditorUtil import IconDefinitions as iDef
 
-
 _namespace = []
 
-
-import gc
-
-def _getObjectsById(_id):
-    for obj in gc.get_objects():
-        if id(obj) == _id:
-            return obj
 
 def _getCcpnNamespaceFromApplication():
     """
@@ -56,10 +48,6 @@ def _getCcpnNamespaceFromImports():
     """
     This function is called several times from external scrips, therefore it init the imports Only Once with global.
     Namespace are done with imports to get Call-Signatures and documentation string.
-    Namespaces for completion on the Editor are currently taken from imports too, This because the PyQode mechanism uses
-    threads of json-serialisable items only. Therefore cannot send directly the application namespace as the
-    IPython-console module.
-    The alternative way of not using threads seems to break the GUI.
     """
     global _namespace
     if _namespace:
@@ -89,7 +77,7 @@ def _getCcpnNamespaceFromImports():
                  ]
     return _namespace
 
-def getJediInterpreter(text, namespaces=None, **kwds):
+def getJediInterpreter(text, namespaces=None, useImports=False, **kwds):
     """
     :type text: str. the  text to parse and get the completions
     :type namespaces: list of dict. a list of namespaces dictionaries such as the one
@@ -98,11 +86,16 @@ def getJediInterpreter(text, namespaces=None, **kwds):
     If "line" and "column" are None, they are assumed be at the end of
     "text".
     """
+    if namespaces:
+        _namespaces = namespaces
+    else:
+        if useImports:
+            _namespaces = list(_getCcpnNamespaceFromImports())
+        else:
+            _namespaces = list(_getCcpnNamespaceFromApplication())
 
-    if not namespaces:
-        namespaces = list(_getCcpnNamespaceFromImports())
     try:
-        interpreter = jedi.Interpreter(text, namespaces=namespaces, **kwds)
+        interpreter = jedi.Interpreter(text, namespaces=_namespaces, **kwds)
         return interpreter
     except ValueError:
         return None
@@ -144,8 +137,6 @@ class CcpnCodeCompletionWorker(object):
     """
     #: The list of code completion provider to run on each completion request.
     providers = []
-    namespaces = _getCcpnNamespaceFromApplication()
-
 
     def __call__(self, data):
         """
@@ -178,20 +169,18 @@ class CcpnCodeCompletionWorker(object):
 
 class CcpnNameSpacesProvider:
     """
-    Provides code completion for the Ccpn Name space...
+    Provides code completion for the Ccpn Namespace...
     """
-    namespaces = []
 
-    def complete(self, code, line, column, path, encoding, prefix):
+    def complete(self, code, line, column, path, encoding, prefix, *args):
         """
         Completes python code using `jedi`_.
         :returns: a list of completion.
         """
-
         ret_val = []
         _namespaceAtts = []
         try:
-            namespaces = _getCcpnNamespaceFromImports()
+            namespaces = _getCcpnNamespaceFromApplication()
             _namespaceAtts = [k for dd in namespaces for k in dd.keys()]
             script = getJediInterpreter(text=code, namespaces=namespaces, encoding=encoding)
             completions = script.completions()
@@ -209,10 +198,16 @@ class CcpnNameSpacesProvider:
                     ccpnTag = True
             else:
                 iconType = completion.type
+
+            iconDef =  iDef.iconFromTypename(completion.name, iconType, ccpnTag=ccpnTag)
+            iconPath = ''
+            if iconDef:
+                if len(iconDef)==2:
+                    iconPath = iconDef[1]
             ret_val.append({
                  'name': completion.name,
                  'tooltip': completion.description,
-                 'icon': iDef.iconFromTypename(completion.name, iconType, ccpnTag=ccpnTag),
+                 'icon': iconPath,
                 })
 
         return ret_val
@@ -239,7 +234,7 @@ class CcpnJediCompletionProvider:
             ret_val.append({
                             'name': completion.name,
                             'tooltip': completion.description,
-                            'icon': iDef.iconFromTypename(completion.name, completion.type),
+                            # 'icon': iDef.iconFromTypename(completion.name, completion.type),
                             })
         return ret_val
 

@@ -56,6 +56,7 @@ ICON_KEYWORD_CCPN       = editorIconsPath / 'keyword_ccpn.png'
 ICON_VAR_CCPN           = editorIconsPath / 'variable_ccpn.png'
 ICON_FUNC_CCPN          = editorIconsPath / 'function_ccpn.png'
 ICON_METHOD_CCPN        = editorIconsPath / 'method_ccpn.png'
+ICON_NAMESPACE_CCPN     = editorIconsPath / 'namespace_ccpn.png'
 
 
 
@@ -87,6 +88,7 @@ def _getCcpnIconsDefs():
         'CLASS-CCPN'     : ('code-class'    , str(ICON_CLASS_CCPN)),
         'FUNCTION-CCPN'  : ('code-class'    , str(ICON_FUNC_CCPN)),
         'PARAM-CCPN'     : ('code-class'    , str(ICON_VAR_CCPN)),
+        'INSTANCE-CCPN'  : ('code-class'    , str(ICON_NAMESPACE_CCPN)),
         PID              : ('code-variable' , str(ICON_PID))
         }
     return CCPNICONS

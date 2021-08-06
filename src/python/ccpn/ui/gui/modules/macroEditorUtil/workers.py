@@ -31,8 +31,7 @@ from ccpn.ui.gui.modules.macroEditorUtil.CompletionProviders import getJediInter
 from pyqode.python import panels as pypanels
 from pyqode.core.api import TextHelper
 from pyqode.python.modes.calltips import CalltipsMode
-
-
+from docutils.core import publish_parts
 
 def _quickDoc(request_data):
     """
@@ -43,6 +42,7 @@ def _quickDoc(request_data):
     column = request_data['column']
     path = request_data['path']
     encoding = 'utf-8'
+
     script = getJediInterpreter(text=code, line=line, column=column, path=path, encoding=encoding)
     try:
         definitions = script.goto_definitions()
@@ -51,24 +51,6 @@ def _quickDoc(request_data):
     else:
         ret_val = [d.docstring() for d in definitions]
         return ret_val
-
-class CcpnQuickDocPanel(pypanels.QuickDocPanel):
-    """ Shows the python documentation for the word under the text cursor.
-
-    This panel quickly shows the documentation of the symbol under
-    cursor.
-    """
-    def _on_action_quick_doc_triggered(self):
-        tc = TextHelper(self.editor).word_under_cursor(select_whole_word=True)
-        request_data = {
-            'code': self.editor.toPlainText(),
-            'line': tc.blockNumber(),
-            'column': tc.columnNumber(),
-            'path': self.editor.file.path,
-            'encoding': self.editor.file.encoding
-        }
-        self.editor.backend.send_request(
-            _quickDoc, request_data, on_receive=self._on_results_available)
 
 
 def _getCalltips(data):
@@ -92,7 +74,7 @@ def _getCalltips(data):
     encoding = 'utf-8'
     # use jedi to get call signatures
     try:
-        script = getJediInterpreter(text=code, line=line, column=column, path=path, encoding=encoding)
+        script = getJediInterpreter(text=code, column=column, path=path, encoding=encoding, useImports=True)
     except ValueError:
         # Is triggered when an the position is invalid, for example if the
         # column is larger or equal to the line length. This may be due to a
@@ -106,6 +88,33 @@ def _getCalltips(data):
                    sig.bracket_start, column)
         return results
     return []
+
+
+class CcpnQuickDocPanel(pypanels.QuickDocPanel):
+    """ Shows the python documentation for the word under the text cursor.
+
+    This panel quickly shows the documentation of the symbol under
+    cursor.
+    Bug: Documentation doesn't appear for decorated methods.
+    """
+    def _on_action_quick_doc_triggered(self):
+        tc = TextHelper(self.editor).word_under_cursor(select_whole_word=True)
+        request_data = {
+            'code': self.editor.toPlainText(),
+            'line': tc.blockNumber(),
+            'column': tc.columnNumber(),
+            'path': self.editor.file.path,
+            'encoding': self.editor.file.encoding
+        }
+        results = _quickDoc(request_data)
+        if results:
+            self._onResultsAvailable(results)
+
+    def _onResultsAvailable(self, results):
+
+        self.text_edit.clear()
+        self._on_results_available(results)
+
 
 
 class CcpnCalltipsMode(CalltipsMode):
@@ -197,82 +206,3 @@ class CcpnCalltipsMode(CalltipsMode):
         calltip = calltip.replace(',', ',\n')
         QtWidgets.QToolTip.showText(position, calltip, self.editor)
 
-
-#
-# class CcpnNamespaceCompletionMode(modes.CodeCompletionMode):
-#     """
-#     Extend base code completion mode to insert the completion in the buffer of the
-#     input handler.
-#
-#     """
-#     namespace = {}
-#     ccpnCompleter = CcpnNameSpacesProvider()
-#
-#
-#     def request_completion(self):
-#         line = self._helper.current_line_nbr()
-#         column = self._helper.current_column_nbr() - \
-#             len(self.completion_prefix)
-#         same_context = (line == self._last_cursor_line and
-#                         column == self._last_cursor_column)
-#         if same_context:
-#             if self._request_id - 1 == self._last_request_id:
-#                 # context has not changed and the correct results can be
-#                 # directly shown
-#                 self._show_popup()
-#             else:
-#                 # same context but result not yet available
-#                 pass
-#             return True
-#         else:
-#
-#             data = {
-#                 'code': self.editor.toPlainText(),
-#                 'line': line,
-#                 'column': column,
-#                 'path': self.editor.file.path,
-#                 'encoding': self.editor.file.encoding,
-#                 'prefix': self.completion_prefix,
-#                 'request_id': self._request_id
-#             }
-#             print('data ===>', data)
-#             application = getApplication()
-#             if application:
-#                 self.namespace = application.mainWindow.namespace
-#             result = []
-#             try:
-#                 self.ccpnCompleter.namespace = self.namespace
-#                 result = self.ccpnCompleter.complete(code = self.editor.toPlainText(),
-#                                                 line = line,
-#                                                 column = column,
-#                                                 path = self.editor.file.path,
-#                                                 encoding = self.editor.file.encoding,
-#                                                 prefix = self.completion_prefix,)
-#                 print('=RESULTS ===>',result)
-#             except NotRunning:
-#                 return False
-#             else:
-#                 self._last_cursor_column = column
-#                 self._last_cursor_line = line
-#                 self._on_results_available([[line, column, self._request_id], result])
-#                 self._request_id += 1
-#
-#                 return True
-#
-#     def _on_results_available(self, results):
-#         context = results[0]
-#         results = results[1:]
-#         if not results: return
-#         line, column, request_id = context
-#
-#         self._last_request_id = request_id
-#         if (line == self._last_cursor_line and
-#                 column == self._last_cursor_column):
-#             if self.editor:
-#                 all_results = []
-#                 for res in results:
-#                     all_results += res
-#                 self._show_completions(all_results)
-#         else:
-#
-#             print('>>>_on_results_available >> outdated request, dropping')

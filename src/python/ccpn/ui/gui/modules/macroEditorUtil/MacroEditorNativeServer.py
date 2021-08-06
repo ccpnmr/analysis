@@ -64,5 +64,9 @@ if __name__ == '__main__':
         backend.DocumentWordsProvider())
 
     # starts the server
-    backend.serve_forever(args)
+    try:
+        backend.serve_forever(args)
+    except:
+        sys.stderr.write('Backend on Editor was interrupted.')
+
 

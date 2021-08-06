@@ -547,7 +547,7 @@ class MacroEditor(CcpnModule):
         self._removeMacroFromCurrent()
         try:
             getLogger().debug('closing macro editor thread')
-            self.textEditor.backend.stop()
+            self.textEditor.close()
         except Exception as err:
             getLogger().warning(f'error closing macro editor {err}')
 

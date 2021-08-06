@@ -34,6 +34,11 @@ from pyqode.python import panels as pypanels
 from pyqode.core import api
 from pyqode.python.modes.calltips import CalltipsMode
 from ccpn.ui.gui.modules.macroEditorUtil.workers import CcpnQuickDocPanel, CcpnCalltipsMode
+from pyqode.core.modes.code_completion import CodeCompletionMode
+from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.modules.macroEditorUtil.CompletionProviders import CcpnNameSpacesProvider
+from pyqode.core.cache import Cache
+
 
 marginColour = QtGui.QColor('lightgrey')
 marginPosition = 100
@@ -44,7 +49,7 @@ import sys
 
 class PyCodeEditor(PyCodeEdit, Base):
 
-    useNativeCompletion = False # use the original completion without Ccpn Namespace and icons
+    useNativeCompletion = False # use the original completion without Ccpn Namespace
 
     def __init__(self, parent=None, application=None, **kwds):
 
@@ -60,18 +65,68 @@ class PyCodeEditor(PyCodeEdit, Base):
             self.rightMarginMode.position = marginPosition
 
         self.application = application
-        #     ## removing the default completion and the replacing ccpnCompletion for live namespaces breaks the completer and Gui.
-        #     self.modes.remove(modes.CodeCompletionMode)
-        #     namespace = self.application.mainWindow.namespace
-        #     ccpnNamespaceCompletionMode = CcpnNamespaceCompletionMode()
-        #     ccpnNamespaceCompletionMode.namespace = namespace
-        #     self.modes.append(ccpnNamespaceCompletionMode)
+        self.completionMode = self.modes.get(CodeCompletionMode.__name__)
+        if self.application and not self.useNativeCompletion:
+            self.backend.stop()
+            self.completionMode.request_completion = self._requestCompletion
+            self.completionMode._insert_completion = self._insertCompletion
+
         self.panels.remove(pypanels.QuickDocPanel)
-        self.panels.append(CcpnQuickDocPanel(), api.Panel.Position.BOTTOM)
+        self.docPanel = CcpnQuickDocPanel()
+        self.panels.append(self.docPanel, api.Panel.Position.RIGHT)
         self.modes.remove(CalltipsMode)
         self.modes.append(CcpnCalltipsMode())
+        # self.docPanel.setVisible(True)
 
+    def _requestCompletion(self):
+        """
+        re-implemetation of completion to insert ccpn Namespaces from application
+        without sending requests to threads.
+        """
+        completionMode = self.completionMode
+        line = completionMode._helper.current_line_nbr()
+        column = completionMode._helper.current_column_nbr() - len(completionMode.completion_prefix)
+        same_context = (line == completionMode._last_cursor_line and column == completionMode._last_cursor_column)
+        if same_context:
+            if completionMode._request_id - 1 == completionMode._last_request_id:
+                # context has not changed and the correct results can be  directly shown
+                getLogger().debug('request completion ignored, context has not changed')
+                completionMode._show_popup()
+            else:
+                # same context but result not yet available
+                pass
+            return True
+        else:
+            getLogger().debug('requesting completion')
+            try:
+                code = completionMode.editor.toPlainText()
+                line = line
+                column = column
+                path = completionMode.editor.file.path
+                encoding = completionMode.editor.file.encoding
+                prefix = completionMode.completion_prefix
+                request_id = completionMode._request_id
+                cw = CcpnNameSpacesProvider()
+                completions = cw.complete(code, line, column, path, encoding, prefix)
+                results = [(line, column, request_id), completions]
 
+            except Exception as ex:
+                getLogger().exception('failed to send the completion request')
+                return False
+            else:
+                completionMode._last_cursor_column = column
+                completionMode._last_cursor_line = line
+                completionMode._request_id += 1
+                completionMode._on_results_available(results)
+                return True
+
+    def _insertCompletion(self, completion):
+        completionMode = self.completionMode
+        cursor = completionMode._helper.word_under_cursor(select_whole_word=False)
+        cursor.insertText(completion)
+        self.setTextCursor(cursor)
+        if self.docPanel.isVisible():
+            self.docPanel._on_action_quick_doc_triggered()
 
     def get(self):
         return self.toPlainText()
@@ -95,6 +150,24 @@ class PyCodeEditor(PyCodeEdit, Base):
     def enterEvent(self, event):
         self.setFocus()
         super(PyCodeEditor, self).enterEvent(event)
+
+    def close(self, clear=False):
+
+        """
+        Closes the editor, stops the backend and removes any installed
+        mode/panel.
+
+        This is also where we cache the cursor position.
+
+        :param clear: True to clear the editor content before closing.
+        """
+        if self._tooltips_runner:
+            self._tooltips_runner.cancel_requests()
+            self._tooltips_runner = None
+        self.decorations.clear()
+        self.backend.stop()
+        Cache().set_cursor_position(
+                self.file.path, self.textCursor().position())
 
 
 if __name__ == '__main__':

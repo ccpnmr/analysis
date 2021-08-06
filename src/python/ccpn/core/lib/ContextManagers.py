@@ -852,6 +852,44 @@ def deleteWrapperWithoutSideBar():
     return theDecorator
 
 
+def newV3Object(klass):
+    """ A decorator to wrap the creation of pure v3 method of the V3 core classes
+    calls self._finalise('create') post-creation
+    """
+
+    @decorator.decorator
+    def theDecorator(*args, **kwds):
+        func = args[0]
+        args = args[1:]  # Optional 'self' is now args[0]
+        self = args[0]
+        application = getApplication()  # pass it in to reduce overhead
+
+        with notificationBlanking(application=application):
+            with undoBlockWithoutSideBar():
+                # must be done like this as the undo functions are not known
+                with undoStackBlocking(application=application) as addUndoItem:
+                    # incorporate the change notifier to simulate the decorator
+                    addUndoItem(undo=application.project.unblankNotification,
+                                redo=application.project.blankNotification)
+
+                # call the wrapped function
+                result = func(*args, **kwds)
+                if not isinstance(result, klass):
+                    raise RuntimeError(f'Expected an object of class {klass}, obtained {result.__class__}')
+
+                with undoStackBlocking(application=application) as addUndoItem:
+                    # incorporate the change notifier to simulate the decorator
+                    addUndoItem(undo=application.project.blankNotification,
+                                redo=application.project.unblankNotification)
+                    addUndoItem(redo=partial(result._finaliseAction, 'create'),
+                                undo=partial(result._finaliseAction, 'delete'))
+
+        result._finaliseAction('create')
+        return result
+
+    return theDecorator
+
+
 def renameObject():
     """ A decorator to wrap the rename(self) method of the V3 core classes
     calls self._finaliseAction('rename') after the rename

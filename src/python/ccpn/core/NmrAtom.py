@@ -25,6 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import math
 from typing import Union, Tuple, Sequence
 from functools import partial
 from ccpn.core.NmrResidue import NmrResidue
@@ -76,6 +77,13 @@ class NmrAtom(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = Nmr.Resonance._metaclass.qualifiedName()
+
+    def __init__(self, project: Project, wrappedData):
+
+        # internal lists to hold the current chemicalShifts
+        self._chemicalShifts = []
+
+        super().__init__(project, wrappedData)
 
     # CCPN properties
     @property
@@ -443,10 +451,63 @@ class NmrAtom(AbstractWrapperObject):
     # CCPN functions
     #=========================================================================================
 
-    #===========================================================================================
+    def _recalculateShiftValue(self, spectra, simulatedPeakScale: float = 0.0001):
+        """Get a new shift value from the assignedPeaks
+        """
+
+        apiResonance = self._wrappedData
+        sum1 = sum2 = N = 0.0
+        peakDims = []
+        peaks = set()
+
+        for contrib in apiResonance.peakDimContribs:
+
+            if contrib.isDeleted:
+                # Function may be called during PeakDimContrib deletion
+                continue
+
+            peakDim = contrib.peakDim
+            apiPeak = peakDim.peak
+
+            if apiPeak.isDeleted or peakDim.isDeleted or apiPeak.figOfMerit == 0.0:
+                continue
+
+            apiPeakList = apiPeak.peakList
+            spectrum = self.project._data2Obj[apiPeakList].spectrum
+            if spectrum not in spectra:
+                continue
+
+            # NBNB TBD: Old Rasmus comment - peak splittings are not yet handled in V3. TBD add them
+            value = peakDim.realValue
+            weight = apiPeak.figOfMerit
+
+            if apiPeakList.isSimulated:
+                weight *= simulatedPeakScale
+
+            peakDims.append(peakDim)
+            peaks.add(apiPeak)
+
+            vw = value * weight
+            sum1 += vw
+            sum2 += value * vw
+            N += weight
+
+        if N > 0.0:
+            mean = sum1 / N
+            mean2 = sum2 / N
+            sigma2 = abs(mean2 - (mean * mean))
+            sigma = math.sqrt(sigma2)
+
+        else:
+            return None, None
+
+        print(f'>>>  _recalculateShiftValue    {mean}   {sigma}')
+        return mean, sigma
+
+    #=========================================================================================
     # new'Object' and other methods
     # Call appropriate routines in their respective locations
-    #===========================================================================================
+    #=========================================================================================
 
 
 #=========================================================================================

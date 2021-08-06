@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-05 18:55:49 +0100 (Thu, August 05, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-06 16:41:31 +0100 (Fri, August 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -36,11 +36,13 @@ from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.lib import Pid
-from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlockWithoutSideBar, undoStackBlocking
+from ccpn.core.lib.ContextManagers import newObject, newV3Object, deleteWrapperWithoutSideBar, renameObject, \
+    undoBlockWithoutSideBar, undoStackBlocking
 from ccpn.util.decorators import logCommand
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.core._ChemicalShift import UNIQUEID, ISDELETED, \
-    NMRATOM, SHIFTCOLUMNS, SHIFTNAME, _getByTuple, _newChemicalShift as _newShift
+    NMRATOM, SHIFTCOLUMNS, SHIFTNAME, _getByTuple, _ChemicalShift, \
+    _newChemicalShift as _newShift
 
 
 class ChemicalShiftList(AbstractWrapperObject):
@@ -239,12 +241,17 @@ class ChemicalShiftList(AbstractWrapperObject):
             raise ValueError(f'ChemicalShiftList._getShiftByUniqueId: uniqueId {uniqueId} not found')
         return rows.iloc[0]
 
-    def _getShiftAttribute(self, uniqueId, name):
+    def _getShiftAttribute(self, uniqueId, name, attribType):
         """Get the named attribute from the chemicalShift with supplied uniqueId
+
+        Check the attribute for None, nan, inf, etc., and cast to attribType
+        CCPN Internal - Pandas dataframe changes values after saving through api
         """
         row = self._getShiftByUniqueId(uniqueId)
         if name in row:
-            return row[name]
+            # get the value and cast to the correct type
+            _val = row[name]
+            return None if (_val is None or (_val != _val)) else attribType(_val)
         else:
             raise ValueError(f'ChemicalShiftList._getShiftAttribute: attribute {name} not found in chemicalShift')
 
@@ -263,14 +270,14 @@ class ChemicalShiftList(AbstractWrapperObject):
         else:
             raise ValueError(f'ChemicalShiftList._setShiftAttribute: attribute {name} not found in chemicalShift {self}')
 
-    def _getShiftAttributes(self, uniqueId, startName, endName):
-        """Get the named attributes from the chemicalShift with supplied uniqueId
-        """
-        row = self._getShiftByUniqueId(uniqueId)
-        if startName in row and endName in row:
-            return row[startName:endName]
-        else:
-            raise ValueError(f'ChemicalShiftList._getShiftAttributes: attribute {startName}|{endName} not found in chemicalShift')
+    # def _getShiftAttributes(self, uniqueId, startName, endName):
+    #     """Get the named attributes from the chemicalShift with supplied uniqueId
+    #     """
+    #     row = self._getShiftByUniqueId(uniqueId)
+    #     if startName in row and endName in row:
+    #         return row[startName:endName]
+    #     else:
+    #         raise ValueError(f'ChemicalShiftList._getShiftAttributes: attribute {startName}|{endName} not found in chemicalShift')
 
     def _setShiftAttributes(self, uniqueId, startName, endName, value):
         """Set the attributes of the chemicalShift with the supplied uniqueId
@@ -343,35 +350,6 @@ class ChemicalShiftList(AbstractWrapperObject):
             rows = _data[_data[UNIQUEID] == uniqueId]
             return len(rows) > 0
 
-    def _setShiftDataFrame(self, rows):
-        """Update the dataframe and handle notifiers
-        """
-        # NOTE:ED - need notifier handling here
-        with undoBlockWithoutSideBar():
-            _oldShifts = self._shifts.copy()
-            _oldDeletedShifts = self._deletedShifts.copy()
-
-            uniqueId = rows.iloc[0].uniqueId
-            _shs = [sh for sh in self._shifts if sh._uniqueId == uniqueId]
-            _val = _shs[0]
-            _val._deleted = True
-
-            ind = self._shifts.index(_val)
-            self._shifts.pop(ind)
-            self._deletedShifts.append(_val)  # not sorted - sort?
-
-            _newShifts = self._shifts.copy()
-            _newDeletedShifts = self._deletedShifts.copy()
-
-            # add an undo/redo item to recover shifts - check order
-            with undoStackBlocking() as addUndoItem:
-                addUndoItem(undo=partial(self._undoRedoShifts, _oldShifts),
-                            redo=partial(self._undoRedoShifts, _newShifts))
-                addUndoItem(undo=partial(self._undoRedoDeletedShifts, _oldDeletedShifts),
-                            redo=partial(self._undoRedoDeletedShifts, _newDeletedShifts))
-                addUndoItem(undo=partial(self._setDeleted, _val, False),
-                            redo=partial(self._setDeleted, _val, True))
-
     #=========================================================================================
     # CCPN functions
     #=========================================================================================
@@ -435,25 +413,31 @@ class ChemicalShiftList(AbstractWrapperObject):
 
         # create a set of new shift objects linked to the pandas rows - discard deleted
         _data = chemicalShiftList._wrappedData.data
-        _data = _data[_data[ISDELETED] == False]
-        _data.index = pd.RangeIndex(len(_data.index))  # re-index
-        chemicalShiftList._wrappedData.data = _data
 
-        maxUniqueId = -1
-        for ii in range(len(_data)):
-            _row = _data.iloc[ii]
+        if _data is not None:
+            # NOTE:ED - Need a conversion here to replace pandas objects with python OR do in getters
+            _data = _data[_data[ISDELETED] == False]
+            _data.index = pd.RangeIndex(len(_data.index))  # re-index
+            chemicalShiftList._wrappedData.data = _data
 
-            # create a new shift with the uniqueId from the old shift
-            shift = _newShift(chemicalShiftList, _ignoreUniqueId=True)
-            _uniqueId = _row[UNIQUEID]
-            maxUniqueId = max(maxUniqueId, _uniqueId)
-            shift._uniqueId = _uniqueId
-            chemicalShiftList._shifts.append(shift)
+            maxUniqueId = -1
+            for ii in range(len(_data)):
+                _row = _data.iloc[ii]
 
-        # check that there is not an error creating a new uniqueId number
-        _nextUniqueId = project._getUniqueIdValue(SHIFTNAME)
-        if maxUniqueId >= _nextUniqueId:
-            raise RuntimeError(f'ChemicalShiftList._restoreObject: uniqueId {repr(maxUniqueId)} does not match next uniqueId for class {repr(SHIFTNAME)} -> {_nextUniqueId}')
+                # create a new shift with the uniqueId from the old shift
+                shift = _newShift(chemicalShiftList, _ignoreUniqueId=True)
+                _uniqueId = _row[UNIQUEID]
+                maxUniqueId = max(maxUniqueId, _uniqueId)
+                shift._uniqueId = int(_uniqueId)
+                chemicalShiftList._shifts.append(shift)
+                shift._restoreObject()
+
+                # Need to recover the nmrAtom.chemicalShifts and peak.assignedNmrAtoms
+
+            # check that there is not an error creating a new uniqueId number
+            _nextUniqueId = project._getUniqueIdValue(SHIFTNAME)
+            if maxUniqueId >= _nextUniqueId:
+                raise RuntimeError(f'ChemicalShiftList._restoreObject: uniqueId {repr(maxUniqueId)} does not match next uniqueId for class {repr(SHIFTNAME)} -> {_nextUniqueId}')
 
         return chemicalShiftList
 
@@ -488,37 +472,42 @@ class ChemicalShiftList(AbstractWrapperObject):
         if data is not None and nmrAtom and nmrAtom.pid in list(data[NMRATOM]):
             raise ValueError(f'ChemicalShiftList.newChemicalShift: nmrAtom {nmrAtom} already exists')
 
+        shift = self._createObject(atomName, chainCode, comment, data, figureOfMerit, nmrAtom, residueType, sequenceCode, value, valueError)
+
+        return shift
+
+    @newV3Object(_ChemicalShift)
+    def _createObject(self, atomName, chainCode, comment, data, figureOfMerit, nmrAtom, residueType, sequenceCode, value, valueError):
+        """Create a new pure V3 ChemicalShift object
+        Method is wrapped with create/delete notifier
+        """
+        # make new tuple
+        _row = _getByTuple(self, value, valueError, figureOfMerit,
+                           nmrAtom, chainCode, sequenceCode, residueType, atomName,
+                           comment)
+        _nextId = self.project._getNextUniqueIdValue(SHIFTNAME)
+        # add to dataframe - this is in undo stack and marked as modified
+        _dfRow = pd.DataFrame(((_nextId, False) + _row[2:],), columns=SHIFTCOLUMNS)
+        if data is None:
+            self._wrappedData.data = _dfRow
+        else:
+            self._wrappedData.data = self._wrappedData.data.append(_dfRow)
+        self._wrappedData.data.index = pd.RangeIndex(len(self._wrappedData.data.index))
+        # create new shift object
+        # new Shift only needs chemicalShiftList and uniqueId - properties are linked to dataframe
+        shift = _newShift(self, _ignoreUniqueId=True)
+        shift._uniqueId = _nextId
+        _oldShifts = self._shifts[:]
+        self._shifts.append(shift)
+        _newShifts = self._shifts[:]
+
         with undoBlockWithoutSideBar():
-
-            # make new tuple
-            _row = _getByTuple(self, value, valueError, figureOfMerit,
-                               nmrAtom, chainCode, sequenceCode, residueType, atomName,
-                               comment)
-            _nextId = self.project._getNextUniqueIdValue(SHIFTNAME)
-
-            # add to dataframe - this is in undo stack and marked as modified
-            _dfRow = pd.DataFrame(((_nextId, False) + _row[2:],), columns=SHIFTCOLUMNS)
-            if data is None:
-                self._wrappedData.data = _dfRow
-            else:
-                self._wrappedData.data = self._wrappedData.data.append(_dfRow)
-            self._wrappedData.data.index = pd.RangeIndex(len(self._wrappedData.data.index))
-
-            # create new shift object
-            # new Shift only needs chemicalShiftList and uniqueId - properties are linked to dataframe
-            shift = _newShift(self, _ignoreUniqueId=True)
-            shift._uniqueId = _nextId
-            _oldShifts = self._shifts.copy()
-            self._shifts.append(shift)
-
-            _newShifts = self._shifts.copy()
-
             # add an undo/redo item to recover shifts
             with undoStackBlocking() as addUndoItem:
                 addUndoItem(undo=partial(self._undoRedoShifts, _oldShifts),
                             redo=partial(self._undoRedoShifts, _newShifts))
 
-            return shift
+        return shift
 
     @logCommand(get='self')
     def deleteChemicalShift(self, nmrAtom: Union[None, NmrAtom, str] = None, uniqueId: int = None):
@@ -544,7 +533,7 @@ class ChemicalShiftList(AbstractWrapperObject):
             elif len(rows) == 0:
                 raise ValueError(f'ChemicalShiftList.deleteChemicalShift: nmrAtom {nmrAtom.pid} not found')
 
-            self._setShiftDataFrame(rows)
+            self._deleteObject(rows)
 
         elif uniqueId is not None:
             # get shift by uniqueId
@@ -559,7 +548,27 @@ class ChemicalShiftList(AbstractWrapperObject):
             elif len(rows) == 0:
                 raise ValueError(f'ChemicalShiftList.deleteChemicalShift: uniqueId {uniqueId} not found')
 
-            self._setShiftDataFrame(rows)
+            self._deleteObject(rows)
+
+    def _deleteObject(self, rows):
+        """Update the dataframe and handle notifiers
+        """
+        # NOTE:ED - need notifier handling here
+        _oldShifts = self._shifts[:]
+        _oldDeletedShifts = self._deletedShifts[:]
+
+        uniqueId = rows.iloc[0].uniqueId
+        _shs = [sh for sh in self._shifts if sh._uniqueId == uniqueId]
+        _val = _shs[0]
+        _val._deleted = True
+
+        self._shifts.remove(_val)
+        self._deletedShifts.append(_val)  # not sorted - sort?
+
+        _newShifts = self._shifts[:]
+        _newDeletedShifts = self._deletedShifts[:]
+
+        _val._deleteWrapper(self, _newDeletedShifts, _newShifts, _oldDeletedShifts, _oldShifts)
 
     @logCommand(get='self')
     def newChemicalShift(self, value: float, nmrAtom,

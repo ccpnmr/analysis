@@ -297,10 +297,10 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """A peakPicker instance for region picking in this spectrum.
         None indicates no valid peakPicker has been defined
         """
-        from ccpn.core.lib.SpectrumLib import _createPeakPicker
+        from ccpn.core.lib.SpectrumLib import fetchPeakPicker
 
         if not self._peakPicker:
-            _peakPicker = _createPeakPicker(self)
+            _peakPicker = fetchPeakPicker(self)
             # automatically store in the spectrum internal store
             if _peakPicker:
                 with undoBlockWithoutSideBar():
@@ -311,7 +311,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @peakPicker.setter
     def peakPicker(self, peakPicker):
-        """Set the current peakPicker class instance
+        """Set the current peakPicker or deassign when None
         """
         from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC
 
@@ -2522,11 +2522,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     def _getPeakPicker(self):
         """Check whether a peakPicker class has been saved with this spectrum.
-        Returns new peakPicker instance or None if one has not been defined
+        Returns new peakPicker instance or None if cannot be defined
         """
-        from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC
-
-        return PeakPickerABC._restorePeakPicker(self)
+        from ccpn.core.lib.SpectrumLib import fetchPeakPicker
+        if (peakPicker :=  fetchPeakPicker(self)) is not None:
+            self.peakPicker = peakPicker
+        return peakPicker
 
     def _updateParameterValues(self):
         """This method check, and if needed updates specific parameter values
@@ -2607,22 +2608,23 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         # move parameters from _ccpnInternal to the correct namespace, delete old parameters
         spectrum._updateEdgeToAlpha1()
 
+        # Restore the dataStore info
         try:
-            # Restore the dataStore info
             dataStore = DataStore()._importFromSpectrum(spectrum)
             spectrum.setTraitValue('_dataStore', dataStore, force=True)
         except (ValueError, RuntimeError) as es:
             getLogger().warning('Error restoring valid data store for %s (%s)' % (spectrum, es))
 
+        # Get a dataSource object
         try:
-            # Get a dataSource object
             dataSource = spectrum._getDataSource(dataStore)
             spectrum.setTraitValue('_dataSource', dataSource, force=True)
         except (ValueError, RuntimeError) as es:
             getLogger().warning('Error restoring valid data source for %s (%s)' % (spectrum, es))
 
+        # Get a peak picker
         try:
-            spectrum._peakPicker = spectrum._getPeakPicker()
+            spectrum._getPeakPicker()
         except (ValueError, RuntimeError) as es:
             getLogger().warning('Error restoring valid peak picker for %s (%s)' % (spectrum, es))
 
@@ -3142,6 +3144,9 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
     # Update all parameters from the dataSource to the Spectrum instance; retain the dataSource instance
     dataSource.exportToSpectrum(spectrum, includePath=False)
     spectrum.setTraitValue('_dataSource', dataSource, force=True)
+
+    # get a peak picker
+    spectrum._getPeakPicker()
 
     # Quietly update some essentials
     with inactivity():

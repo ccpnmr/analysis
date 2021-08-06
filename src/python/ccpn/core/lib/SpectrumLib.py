@@ -1975,37 +1975,86 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
                 getLogger().warning(f'could not pick peaks for {spectrum} in region {axisDict}')
 
 
-def _createPeakPicker(spectrum):
-    """Create a PeakPicker from preferences; resort to default types when not set
+# def _createPeakPicker(spectrum):
+#     """Create a PeakPicker from preferences; resort to default types when not set
+#
+#     :param spectrum: instance of type Spectrum
+#     :return: new peakPicker instance of type defined in 1d or Nd section of preferences or None
+#     """
+#     from ccpn.framework.Application import getApplication
+#     from ccpn.core.lib.PeakPickers.PeakPickerABC import getPeakPicker
+#     from ccpn.core.lib.PeakPickers.PeakPickerNd import PeakPickerNd
+#     from ccpn.core.lib.PeakPickers.Simple1DPeakPicker import Simple1DPeakPicker
+#
+#     app = getApplication()
+#
+#     if app and spectrum:
+#         prefsGeneral = app.preferences.general
+#
+#         if spectrum.dimensionCount == 1:
+#             _pickerType = prefsGeneral.peakPicker1d if prefsGeneral.peakPicker1d is not None \
+#                           else Simple1DPeakPicker.peakPickerType
+#         else:
+#             _pickerType = prefsGeneral.peakPickerNd if prefsGeneral.peakPickerNd is not None \
+#                           else PeakPickerNd.peakPickerType
+#
+#         _picker = None
+#         if _pickerType and (_picker := getPeakPicker(_pickerType, spectrum)) is not None:
+#             getLogger().debug(f'{spectrum}: creating default peakPicker {_picker}')
+#         else:
+#             getLogger().warning(f'{spectrum}: unable to define peakPicker')
+#
+#         return _picker
 
-    :param spectrum: instance of type Spectrum
-    :return: new peakPicker instance of type defined in 1d or Nd section of preferences or None
+
+def fetchPeakPicker(spectrum):
+    """Get a peakPicker; either by restore from spectrum or the default relevant for spectrum
+    :return a PeakPicker instance or None on errors
     """
-    from ccpn.framework.Application import getApplication
-    from ccpn.core.lib.PeakPickers.PeakPickerABC import getPeakPicker
-    from ccpn.core.lib.PeakPickers.PeakPickerNd import PeakPickerNd
+    from ccpn.util.traits.CcpNmrJson import CcpNmrJson
+    from ccpn.core.Spectrum import Spectrum
     from ccpn.core.lib.PeakPickers.Simple1DPeakPicker import Simple1DPeakPicker
+    from ccpn.core.lib.PeakPickers.PeakPickerNd import PeakPickerNd
+    from ccpn.core.lib.PeakPickers.PeakPickerABC import getPeakPickerTypes, PEAKPICKERPARAMETERS
 
-    app = getApplication()
 
-    if app and spectrum:
-        prefsGeneral = app.preferences.general
+    if spectrum is None:
+        raise ValueError('fetchPeakPicker: spectrum is None')
+    if not isinstance(spectrum, Spectrum):
+        raise ValueError('fetchPeakPicker: : spectrum is not of Spectrum class')
 
-        if spectrum.dimensionCount == 1:
-            _pickerType = prefsGeneral.peakPicker1d if prefsGeneral.peakPicker1d is not None \
-                          else Simple1DPeakPicker.peakPickerType
+    project = spectrum.project
+    application = project.application
+    preferences = application.preferences
+
+    peakPickers = getPeakPickerTypes()
+    default1DPickerType = preferences.general.peakPicker1d
+    if default1DPickerType is None or len(default1DPickerType) == 0 or default1DPickerType not in peakPickers:
+        default1DPickerType = Simple1DPeakPicker.peakPickerType
+
+    defaultNDPickerType = preferences.general.peakPickerNd
+    if defaultNDPickerType is None or len(defaultNDPickerType) == 0 or defaultNDPickerType not in peakPickers:
+        defaultNDPickerType = PeakPickerNd.peakPickerType
+
+    _picker = None
+    try:
+        # read peakPicker from CCPNinternal
+        jsonString = spectrum._getInternalParameter(PEAKPICKERPARAMETERS)
+        _picker = CcpNmrJson.newObjectFromJson(jsonString=jsonString, spectrum=spectrum)
+
+    except Exception as es:
+        # No internal definition found
+        _pickerType = default1DPickerType if spectrum.dimensionCount == 1 else defaultNDPickerType
+        getLogger().debug(f'peakPicker not restored from {spectrum}; selected {_pickerType} instead')
+        if (cls := peakPickers.get(_pickerType)) is not None:
+            _picker = cls(spectrum=spectrum)
         else:
-            _pickerType = prefsGeneral.peakPickerNd if prefsGeneral.peakPickerNd is not None \
-                          else PeakPickerNd.peakPickerType
+            getLogger().debug(f'Failed to initiate {_pickerType} peakPicker')
 
-        _picker = None
-        if _pickerType and (_picker := getPeakPicker(_pickerType, spectrum)) is not None:
-            getLogger().debug(f'{spectrum}: creating default peakPicker {_picker}')
-        else:
-            getLogger().warning(f'{spectrum}: unable to define peakPicker')
+    if _picker is None:
+        getLogger().debug(f'peakPicker for {spectrum} not defined')
 
-        return _picker
-
+    return _picker
 
 #===========================================================================================================
 # GWV testing only

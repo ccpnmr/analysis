@@ -89,15 +89,12 @@ class PyCodeEditor(PyCodeEdit, Base):
         same_context = (line == completionMode._last_cursor_line and column == completionMode._last_cursor_column)
         if same_context:
             if completionMode._request_id - 1 == completionMode._last_request_id:
-                # context has not changed and the correct results can be  directly shown
-                getLogger().debug('request completion ignored, context has not changed')
                 completionMode._show_popup()
             else:
                 # same context but result not yet available
                 pass
             return True
         else:
-            getLogger().debug('requesting completion')
             try:
                 code = completionMode.editor.toPlainText()
                 line = line
@@ -109,9 +106,7 @@ class PyCodeEditor(PyCodeEdit, Base):
                 cw = CcpnNameSpacesProvider()
                 completions = cw.complete(code, line, column, path, encoding, prefix)
                 results = [(line, column, request_id), completions]
-
             except Exception as ex:
-                getLogger().exception('failed to send the completion request')
                 return False
             else:
                 completionMode._last_cursor_column = column

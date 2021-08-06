@@ -1114,8 +1114,8 @@ class GuiSpectrumDisplay(CcpnModule):
                 with undoBlockWithoutSideBar():
                     try:
                         self.displaySpectrum(obj)
-                    except RuntimeError:
-                        errorTxt = '%s cannot be displayed on %s' % (obj, self)
+                    except RuntimeError as es:
+                        errorTxt = str(es)
                         showWarning('Incompatible drop', errorTxt)
                         # raise RuntimeError(errorTxt)
                         return  success
@@ -2442,8 +2442,13 @@ class GuiSpectrumDisplay(CcpnModule):
 
         _oldOrdering = self.getOrderedSpectrumViewsIndex()
 
-        # dimensionOrdering = [1, 0] if self.is1D else spectrum.getByAxisCodes('dimensions', self.axisCodes, exactMatch=False)
-        dimensionOrdering = (1, 0) if self.is1D else self._getDimensionsMapping(spectrum)
+        # _getDimensionsMapping will check the match for axisCodes
+        dimensionOrder = (1, 0) if self.is1D else self._getDimensionsMapping(spectrum)
+        # check the isotopeCodes
+        dims = dimensionOrder[0:1] if self.is1D else dimensionOrder
+        for ic1, ic2 in zip(self.isotopeCodes, spectrum.getByDimensions('isotopeCodes', dims)):
+            if ic1 != ic2:
+                raise RuntimeError('Cannot display %s on %s; incompatible isotopeCodes' % (spectrum,self))
 
         with undoStackRevert(self.application) as revertStack:
             with undoBlockWithoutSideBar(self.application):
@@ -2454,7 +2459,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     addUndoItem(undo=partial(self.setToolbarButtons, tuple(_oldOrdering)))
 
                     # Make spectrumView
-                    if (spectrumView := _newSpectrumView(self, spectrum=spectrum, dimensionOrdering=dimensionOrdering)) \
+                    if (spectrumView := _newSpectrumView(self, spectrum=spectrum, dimensionOrdering=dimensionOrder)) \
                         is None:
                         # notify the stack to revert to the pre-context manager stack
                         revertStack(True)

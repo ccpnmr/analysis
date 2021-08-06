@@ -107,8 +107,7 @@ class CcpnQuickDocPanel(pypanels.QuickDocPanel):
             'encoding': self.editor.file.encoding
         }
         results = _quickDoc(request_data)
-        if results:
-            self._onResultsAvailable(results)
+        self._onResultsAvailable(results)
 
     def _onResultsAvailable(self, results):
 

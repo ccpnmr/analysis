@@ -73,7 +73,7 @@ class PyCodeEditor(PyCodeEdit, Base):
 
         self.panels.remove(pypanels.QuickDocPanel)
         self.docPanel = CcpnQuickDocPanel()
-        self.panels.append(self.docPanel, api.Panel.Position.RIGHT)
+        self.panels.append(self.docPanel, api.Panel.Position.BOTTOM)
         self.modes.remove(CalltipsMode)
         self.modes.append(CcpnCalltipsMode())
         # self.docPanel.setVisible(True)

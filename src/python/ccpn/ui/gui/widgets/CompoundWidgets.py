@@ -486,7 +486,7 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
     def __init__(self, parent=None, mainWindow=None,
                  showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
-                 labelText='', texts=None, callback=None, default=None,
+                 labelText='', texts=None, toolTips=None, callback=None, default=None,
                  sizeAdjustPolicy=None, editable=False, compoundKwds=None,
                  **kwds):
         """
@@ -527,6 +527,7 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
                         'index'   : index,
                         'editable': editable,
                         'callback': callback,
+                        'toolTips': toolTips,
                         }
         pulldownKwds.update(compoundKwds or {})
         self.pulldownList = PulldownList(parent=self, **pulldownKwds)

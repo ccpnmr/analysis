@@ -117,6 +117,20 @@ class IpythonConsole(Widget):
         except Exception as e:
             getLogger().debug('Impossible to fill the menus with recent macros %s' % e)
 
+    def _runMacroProfiler(self, macroFile: str, extraCommands):
+        """
+        # CCPN INTERNAL - called in runMacro method of GuiMainWindow.
+        Executes the specified macro file in the python console with a profiler.
+        Execute the command: %run -p [prof_opts] filename.py [args to program]
+        see https://ipython.readthedocs.io/en/stable/interactive/magics.html for more info
+        """
+        if macroFile:
+            self.ipythonWidget.execute(f'%run {" ".join(extraCommands)} {macroFile}')
+        try:
+            self.mainWindow._fillRecentMacrosMenu()
+        except Exception as e:
+            getLogger().debug('Impossible to fill the menus with recent macros %s' % e)
+
     def _startChannels(self):
         """
         # CCPN INTERNAL - called in constructor of PythonConsoleModule.

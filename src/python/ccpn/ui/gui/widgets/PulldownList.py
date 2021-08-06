@@ -48,7 +48,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
                  backgroundText=None, headerText=None,
                  headerEnabled=False, headerIcon=None,
                  editable=False, maxVisibleItems=16,
-                 iconSize=None,
+                 iconSize=None, toolTips=None,
                  **kwds):
         """
 
@@ -116,6 +116,8 @@ class PulldownList(QtWidgets.QComboBox, Base):
         if editable:
             self.currentIndexChanged.connect(self._textReady)
             self.lineEdit().editingFinished.connect(self._textReady)
+        if toolTips:
+            self.setToolTips(toolTips)
 
     def setEditable(self, editable: bool) -> None:
         super(PulldownList, self).setEditable(editable)
@@ -319,6 +321,13 @@ class PulldownList(QtWidgets.QComboBox, Base):
 
         self.callback = callback
 
+    def setToolTips(self, toolTips):
+        if len(self.texts) == len(toolTips):
+            for text, toolTip in zip(self.texts, toolTips):
+                item = self.model().item(self.getItemIndex(text))
+                if item:
+                    item.setToolTip(toolTip)
+
     def _callback(self, index):
 
         if index < 0:
@@ -416,6 +425,7 @@ if __name__ == '__main__':
     pulldownList = PulldownList(parent=popup, texts=texts, icons=icons,
                                 objects=objects, callback=callback, clickToShowCallback=callback21, grid=(0, 0), **policyDict
                                 )
+
     pulldownList.popupAboutToBeShown.connect(partial(abts, pulldownList))
     pulldownList.insertSeparator(2)
     pulldownList.clearEditText()

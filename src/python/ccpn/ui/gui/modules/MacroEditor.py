@@ -51,18 +51,33 @@ from ccpn.ui.gui.modules.macroEditorUtil.QPythonEditor import PyCodeEditor
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Action import Action
-
+from collections import OrderedDict
 
 _filenameLineEdit = '_filenameLineEdit'
 SaveMsgTipText = 'Note: macros are automatically saved at every changes'
+
+PROFILING_SORTINGS = OrderedDict([ # (arg to go on script, tipText)
+                ('time'         , 'internal time'       ),
+                ('calls'        , 'call count'          ),
+                ('cumulative'   , 'cumulative time'     ),
+                ('file'         , 'file name'           ),
+                ('module'       , 'file name'           ),
+                ('pcalls'       , 'primitive call count'),
+                ('line'         , 'line number'         ),
+                ('name'         , 'function name'       ),
+                ('nfl'          , 'name/file/line'      ),
+                ('stdname'      , 'standard name'       ),
+                ])
+
+ProfileSufixName = '-profile'
 
 class MacroEditor(CcpnModule):
     """
     Macro editor will run Python Files only.
     """
-    includeSettingsWidget = False
+    includeSettingsWidget = True
     maxSettingsState = 2
-    settingsPosition = 'top'
+    settingsPosition = 'left'
 
     className = 'MacroEditor'
     _includeInLastSeen = False
@@ -167,6 +182,26 @@ class MacroEditor(CcpnModule):
 
     def _createWidgetSettings(self):
         hGrid = 0
+        from ccpn.ui.gui.widgets import CompoundWidgets as CW
+
+        self.safeProfileFileCheckBox = CW.CheckBoxCompoundWidget(self.settingsWidget,
+                                                       labelText='Save Profiler',
+                                                       checked=True,
+                                                       orientation='left', hAlign='left',
+                                                       tipText='When running with the Profiler, save the stats to disk '
+                                                               '(in the same dir as the running macro)',
+                                                       grid=(hGrid, 0), gridSpan=(1, 1))
+        hGrid +=1
+        sortingModes = PROFILING_SORTINGS.keys()
+        sortingModesTt = [f'Sort by: {x}' for x in PROFILING_SORTINGS.values()]
+        self.sortProfileFilePulldown = CW.PulldownListCompoundWidget(self.settingsWidget,
+                                                                 labelText='Sort Profiler',
+                                                                 orientation='left', hAlign='left',
+                                                                 tipText='When running with the Profiler, '
+                                                                         'sort results by the selected option)',
+                                                                texts= sortingModes,
+                                                                toolTips = sortingModesTt,
+                                                                grid=(hGrid, 0), gridSpan=(1, 1))
 
     def run(self):
         if self._pythonConsole is not None:
@@ -177,6 +212,33 @@ class MacroEditor(CcpnModule):
                 self._pythonConsole._runMacro(self.filePath)
         else:
             # Used when running the editor outside of Analysis. Run from an external IpythonConsole
+            self._runOnTempIPythonConsole()
+
+    def _getProfilerArgs(self):
+        """
+        Get the arguments to execute the profile command.
+        More info https://ipython.readthedocs.io/en/stable/interactive/magics.html
+        """
+        sortMode = self.sortProfileFilePulldown.getText()
+        saveToFile = self.safeProfileFileCheckBox.get()
+        _i = f'-i'              # -i interactive
+        _p = f'-p'              # -p profile
+        _s = f'-s {sortMode}'   # -s sort keyword
+        _f = f'-T {self.filePath}{ProfileSufixName}' if saveToFile else '' # -T filepath to dump the profile
+        return [_i, _p, _s, _f]
+
+    def runProfiler(self):
+        if self._pythonConsole is not None:
+            if self.autoOpenPythonConsole:
+                self._openPythonConsoleModule()
+            if self.filePath:
+                self.preferences.recentMacros.append(self.filePath)
+                profileCommands = self._getProfilerArgs()
+                self._pythonConsole._runMacroProfiler(macroFile=self.filePath, extraCommands=profileCommands)
+
+        else:
+            # Used when running the editor outside of Analysis. Run from an external IpythonConsole
+            getLogger().warning('Profiler not implemented yet outside Assign')
             self._runOnTempIPythonConsole()
 
     def saveMacro(self):
@@ -354,6 +416,14 @@ class MacroEditor(CcpnModule):
                 ('callback', self.run),
                 ('enabled', True),
                 ('shortcut', '⌃r')
+                ))),
+            ('Run-Profile', od((
+                ('text', 'Run with a profiler'),
+                ('toolTip', 'Run the macro in the IpythonConsole with a profiler.\nShortcut: cmd(ctrl)+p'),
+                ('icon', Icon('icons/profiler')),
+                ('callback', self.runProfiler),
+                ('enabled', True),
+                ('shortcut', '⌃t')
                 ))),
             )
         return toolBarDefs

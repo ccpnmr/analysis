@@ -70,12 +70,14 @@ PROFILING_SORTINGS = OrderedDict([ # (arg to go on script, tipText)
                 ])
 
 ProfileSufixName = '-profile'
-DefaultProfileLines = .2    # % of tot lines to be printed
+DefaultProfileLines = .2       # % of tot lines to be printed when profiling
+DefaultProfileMaxNoLines = 10  # Max number of lines to be printed when profiling
 ShowMaxLines = OrderedDict([
-                     ('Top (20%)', DefaultProfileLines),
-                     ('Half', 0.5),
-                     ('All', 1.0)]
-                    )
+                             ('Minimal' , DefaultProfileMaxNoLines),
+                             ('Top'     , DefaultProfileLines),
+                             ('Half'    , 0.5),
+                             ('All'     , 1.0)
+                            ])
 
 class MacroEditor(CcpnModule):
     """
@@ -255,7 +257,11 @@ class MacroEditor(CcpnModule):
             if self.filePath:
                 self.preferences.recentMacros.append(self.filePath)
                 profileCommands = self._getProfilerArgs()
-                self._pythonConsole._runMacroProfiler(macroFile=self.filePath, extraCommands=profileCommands)
+                try:
+                    self._pythonConsole._runMacroProfiler(macroFile=self.filePath, extraCommands=profileCommands)
+                except Exception as er:
+                    getLogger().warning('Cannot run profiler. Fallback to normal execution.')
+                    self._pythonConsole._runMacro(self.filePath)
 
         else:
             # Used when running the editor outside of Analysis. Run from an external IpythonConsole

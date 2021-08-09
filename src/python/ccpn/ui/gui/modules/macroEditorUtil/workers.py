@@ -32,6 +32,7 @@ from pyqode.python import panels as pypanels
 from pyqode.core.api import TextHelper
 from pyqode.python.modes.calltips import CalltipsMode
 from docutils.core import publish_parts
+from ccpn.util.Logging import getLogger
 
 def _quickDoc(request_data):
     """
@@ -72,6 +73,7 @@ def _getCalltips(data):
     path = data['path']
     # encoding = request_data['encoding']
     encoding = 'utf-8'
+    signatures = []
     # use jedi to get call signatures
     try:
         script = getJediInterpreter(text=code, column=column, path=path, encoding=encoding, useImports=True)
@@ -81,7 +83,11 @@ def _getCalltips(data):
         # bug elsewhere in PyQode, but this at least suppresses the error
         # message, and does not seem to hve any adverse side effects.
         return []
-    signatures = script.call_signatures()
+    try:
+        signatures = script.get_signatures(line=line, column=column)
+    except Exception as ex:
+        getLogger().debug2('Pycode: ERROR in getting signatures from JEDI. %s'% ex)
+
     for sig in signatures:
         results = (str(sig.module_name), str(sig.name),
                    [p.description for p in sig.params], sig.index,

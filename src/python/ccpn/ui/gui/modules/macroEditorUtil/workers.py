@@ -86,7 +86,7 @@ def _getCalltips(data):
     try:
         signatures = script.get_signatures(line=line, column=column)
     except Exception as ex:
-        getLogger().debug2('Pycode: ERROR in getting signatures from JEDI. %s'% ex)
+        getLogger().debug2('PyQode: ERROR in getting signatures from JEDI. %s'% ex)
 
     for sig in signatures:
         results = (str(sig.module_name), str(sig.name),

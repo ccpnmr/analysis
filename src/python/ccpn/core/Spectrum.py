@@ -264,7 +264,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         self._intensities = None
         self._positions = None
 
-        self._spectrumDimensions = None   # A tuple of SpectrumReferences instances; set onece and retained for speed
+        self._spectrumDimensions = None   # A tuple of SpectrumReferences instances; set once and retained for speed
 
         self.doubleCrosshairOffsets = self.dimensionCount * [0]  # TBD: do we need this to be a property?
         self.showDoubleCrosshair = False
@@ -323,17 +323,16 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             with undoBlockWithoutSideBar():
                 # set the current peakPicker
                 self._peakPicker = peakPicker
-
                 # automatically store in the spectrum CCPN internal store
                 self._peakPicker._storeAttributes()
-                getLogger().debug('Setting new peak picker')
+                getLogger().debug('Setting peakPicker to %s' % peakPicker)
         else:
             with undoBlockWithoutSideBar():
                 # clear the current peakPicker
                 if self._peakPicker:
                     self._peakPicker._detachFromSpectrum()
                     self._peakPicker = None
-                    getLogger().debug('Clearing old peak picker')
+                    getLogger().debug('Clearing current peakPicker')
 
     #-----------------------------------------------------------------------------------------
     # Spectrum properties
@@ -2839,35 +2838,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         for sv in self.spectrumViews:
             sv._finaliseAction(action)
 
-    # Attributes belonging to ExpDimRef and DataDimRef
-
-    # def _mainExpDimRefs(self) -> tuple:
-    #     """Get main API ExpDimRef (serial=1) for each dimension
-    #     """
-    #     result = []
-    #     for ii, dataDim in enumerate(self._wrappedData.sortedDataDims()):
-    #         # NB MUST loop over dataDims, in case of projection spectra
-    #         result.append(dataDim.expDim.findFirstExpDimRef(serial=1))
-    #     return tuple(result)
-
-    # def _setExpDimRefAttribute(self, attributeName: str, value: Sequence, mandatory: bool = True):
-    #     """Set main ExpDimRef attribute (serial=1) for each dimension"""
-    #     apiDataSource = self._wrappedData
-    #     if len(value) == apiDataSource.numDim:
-    #         for ii, dataDim in enumerate(self._wrappedData.sortedDataDims()):
-    #             # NB MUST loop over dataDims, in case of projection spectra
-    #             expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
-    #             val = value[ii]
-    #             if expDimRef is None and val is not None:
-    #                 raise ValueError("Attempt to set attribute %s in dimension %s to %s - must be None" %
-    #                                  (attributeName, ii + 1, val))
-    #             elif val is None and mandatory:
-    #                 raise ValueError(
-    #                         "Attempt to set mandatory attribute %s to None in dimension %s: %s" %
-    #                         (attributeName, ii + 1, val))
-    #             else:
-    #                 setattr(expDimRef, attributeName, val)
-
     #-----------------------------------------------------------------------------------------
     # new'Object' and other methods
     # Call appropriate routines in their respective locations
@@ -2980,41 +2950,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                                figureOfMerit=figureOfMerit, meritCode=meritCode, normalisedChange=normalisedChange,
                                isConfirmed=isConfirmed, concentration=concentration, concentrationError=concentrationError,
                                concentrationUnit=concentrationUnit, comment=comment, **kwds)
-
-    # GWV: this should nver be done by a user; newSpectum generates these on creation
-
-    # @logCommand(get='self')
-    # def newSpectrumReference(self, dimension: int, spectrometerFrequency: float,
-    #                          isotopeCodes: Sequence[str], axisCode: str = None, measurementType: str = 'Shift',
-    #                          maxAliasedFrequency: float = None, minAliasedFrequency: float = None,
-    #                          foldingMode: str = None, axisUnit: str = None, referencePoint: float = 0.0,
-    #                          referenceValue: float = 0.0, **kwds):
-    #     """Create new SpectrumReference.
-    #
-    #     See the SpectrumReference class for details.
-    #
-    #     Optional keyword arguments can be passed in; see SpectrumReference._newSpectrumReference for details.
-    #
-    #     :param dimension:
-    #     :param spectrometerFrequency:
-    #     :param isotopeCodes:
-    #     :param axisCode:
-    #     :param measurementType:
-    #     :param maxAliasedFrequency:
-    #     :param minAliasedFrequency:
-    #     :param foldingMode:
-    #     :param axisUnit:
-    #     :param referencePoint:
-    #     :param referenceValue:
-    #     :return: a new SpectrumReference instance.
-    #     """
-    #     from ccpn.core.SpectrumReference import _newSpectrumReference
-    #
-    #     return _newSpectrumReference(self, dimension=dimension, spectrometerFrequency=spectrometerFrequency,
-    #                                  isotopeCodes=isotopeCodes, axisCode=axisCode, measurementType=measurementType,
-    #                                  maxAliasedFrequency=maxAliasedFrequency, minAliasedFrequency=minAliasedFrequency,
-    #                                  foldingMode=foldingMode, axisUnit=axisUnit, referencePoint=referencePoint,
-    #                                  referenceValue=referenceValue, **kwds)
 
     #-----------------------------------------------------------------------------------------
     # Output, printing, etc

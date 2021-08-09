@@ -1280,10 +1280,9 @@ class NmrResidue(AbstractWrapperObject):
     #===========================================================================================
 
     @logCommand(get='self')
-    def newNmrAtom(self, name: str = None, isotopeCode: str = None,
-                   comment: str = None, **kwds):
+    def newNmrAtom(self, name: str = None, isotopeCode: str = None, comment: str = None, **kwds):
         """Create new NmrAtom within NmrResidue. If name is None, use default name
-            (of form e.g. 'H@211', 'N@45', ...)
+            (of form e.g. '@_123, @H_211', '@N_45', ...)
 
         See the NmrAtom class for details
 
@@ -1294,7 +1293,8 @@ class NmrResidue(AbstractWrapperObject):
         """
         from ccpn.core.NmrAtom import _newNmrAtom  # imported here to avoid circular imports
 
-        return _newNmrAtom(self, name=name, isotopeCode=isotopeCode, comment=comment, **kwds)
+        result = _newNmrAtom(self, name=name, isotopeCode=isotopeCode, comment=comment, **kwds)
+        return result
 
     def fetchNmrAtom(self, name: str, isotopeCode: str = None):
         """Fetch NmrAtom with name=name, creating it if necessary

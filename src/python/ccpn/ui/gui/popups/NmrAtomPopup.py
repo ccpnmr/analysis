@@ -231,7 +231,8 @@ class NmrAtomEditPopup(AttributeEditorPopupABC):
     attributes = [('Pid', EntryCompoundWidget, getattr, None, None, None, {}),
                   ('Name', PulldownListCompoundWidget, getattr, None, _getNmrAtomName, None, {'editable': True}),
                   ('NmrResidue', PulldownListCompoundWidget, getattr, setattr, _getNmrResidueTypes, _nmrResidueCallback, {'editable': False}),
-                  ('IsotopeCode', PulldownListCompoundWidget, getattr, setattr, _getNmrAtomIsotopeCodes, _isotopeCodeCallback, {'editable': True}),
+                  # ('IsotopeCode', PulldownListCompoundWidget, getattr, setattr, _getNmrAtomIsotopeCodes, _isotopeCodeCallback, {'editable': True}),
+                  ('IsotopeCode', EntryCompoundWidget, getattr, None, None, None, {}),
                   ('Merge to Existing', CheckBoxCompoundWidget, None, None, None, None, {'checkable':True}),
                   ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                   # ('comment', TextEditorCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <',
@@ -277,7 +278,7 @@ class NmrAtomEditPopup(AttributeEditorPopupABC):
                               name=atomName,
                               mergeToExisting=merge)
             self.obj.comment = comment
-            self.obj.isotopeCode = isotopeCode
+            # self.obj.isotopeCode = isotopeCode
             self.pid.setText(self.obj.pid)
 
     def storeWidgetState(self):

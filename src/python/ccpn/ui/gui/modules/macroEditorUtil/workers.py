@@ -24,7 +24,6 @@ __date__ = "$Date: 2021-08-05 15:53:24 +0000 (,  05, 2021) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-import sys
 
 from pyqode.qt import QtWidgets, QtCore
 from ccpn.ui.gui.modules.macroEditorUtil.CompletionProviders import getJediInterpreter

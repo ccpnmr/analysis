@@ -256,7 +256,9 @@ def findNucleiFromSpectrometerFrequencies(spectrometerFrequencies):
     return tuple(nuclei)
 
 
-def isotopeCode2Nucleus(isotopeCode=None):
+def isotopeCode2Nucleus(isotopeCode):
+    """:return the nucleus symbol for isotopeCode or None if not found
+    """
     if not isotopeCode:
         return None
 

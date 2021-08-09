@@ -24,7 +24,7 @@ __date__ = "$Date: 2021-08-05 15:53:24 +0000 (,  05, 2021) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-
+import sys
 
 from pyqode.qt import QtWidgets, QtCore
 from ccpn.ui.gui.modules.macroEditorUtil.CompletionProviders import getJediInterpreter
@@ -85,8 +85,9 @@ def _getCalltips(data):
         return []
     try:
         signatures = script.get_signatures(line=line, column=column)
-    except Exception as ex:
-        getLogger().debug2('PyQode: ERROR in getting signatures from JEDI. %s'% ex)
+    except:
+        # sys.stderr.write('PyQode: Error in getting call-signature from Jedi.') #not really needed to know this.
+        return []
 
     for sig in signatures:
         results = (str(sig.module_name), str(sig.name),

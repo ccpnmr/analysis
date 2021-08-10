@@ -212,8 +212,8 @@ class Base(DropBase, SignalBlocking):
 
               # keywords related to optional layout
               setLayout=False,
-              # hPolicy=None, vPolicy=None, margins=(0,0,0,0), spacing=(12,7),
-              hPolicy=None, vPolicy=None, margins=(0, 0, 0, 0), spacing=(2, 2),
+              hPolicy=None, vPolicy=None,
+              margins=(0, 0, 0, 0), spacing=(2, 2),
 
               # keywords for adding to parent
               grid=(None, None), gridSpan=(1, 1), stretch=(0, 0),

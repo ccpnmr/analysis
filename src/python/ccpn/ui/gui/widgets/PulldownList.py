@@ -96,8 +96,8 @@ class PulldownList(QtWidgets.QComboBox, Base):
             self._iconSize = getFontHeight() or 16
         self.setIconSize(QtCore.QSize(self._iconSize, self._iconSize))
 
-        PulldownList.setData(self, texts, objects, index, icons,
-                             headerText=headerText, headerEnabled=headerEnabled, headerIcon=headerIcon)
+        self.setData(texts, objects, index, icons,
+                     headerText=headerText, headerEnabled=headerEnabled, headerIcon=headerIcon)
         self.setCallback(callback)
         self.clickToShowCallback = clickToShowCallback
         if self.clickToShowCallback:
@@ -265,6 +265,16 @@ class PulldownList(QtWidgets.QComboBox, Base):
 
         if index is not None:
             self.setCurrentIndex(index)
+
+    def selectValue(self, value, default=0) -> int:
+        """Select the item corresponding to value or item with index zero if value is not present
+        :return index of selected item
+        """
+        if default < 0 or default > len(self.texts):
+            raise ValueError('%s.selectValue: invalid value for default "%s"' % (self.__class__.__name__, default))
+        idx = self.texts.index(value) if value in self.texts else default
+        self.setIndex(idx)
+        return idx
 
     def addItem(self, text, object=NULL, icon=None, ):
 

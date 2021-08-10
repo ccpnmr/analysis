@@ -73,8 +73,8 @@ SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
 DEFAULTSPACING = (3, 3)
 TABMARGINS = (1, 10, 1, 5)  # l, t, r, b
 SELECTALL = '<All>'
-SELECT1D = '<All 1d Spectra>'
-SELECTND = '<All Nd Spectra>'
+SELECT1D = '<All 1D Spectra>'
+SELECTND = '<All nD Spectra>'
 
 
 def _updateGl(self, spectrumList):

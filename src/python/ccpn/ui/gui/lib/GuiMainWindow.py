@@ -78,6 +78,7 @@ from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.Peak import Peak
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QApplication
+from ccpn.ui.gui.widgets.PlotterWidget import PlotterWidget
 
 
 #from collections import OrderedDict
@@ -359,6 +360,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                           # 'newProject' : self.application.newProject,
                           'info'       : getLogger().info,
                           'warning'    : getLogger().warning,
+                          'plot'       : PlotterWidget()
                           }
         self.pythonConsole = IpythonConsole(self)
 

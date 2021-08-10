@@ -123,36 +123,37 @@ class PlotterWidget(Widget):
     def plotLine(self, x=None, y=None, colour='b', markerStyle=None, lineStyle='-',
                  linewidth=None, legendName=None, gid=None, **kwargs):
         """
-        Plot data as line using the native MatplotLib Module.
-        -------------
+        Plot data as a line using the native MatplotLib Module.
+        --------------------------
+
         Parameters:
-            ===== args =====
-            x, y:   array-like or scalar
+        ==========================
+            :x, y:   array-like or scalar
                     The horizontal / vertical coordinates of the data points.
                     x values are optional and default to range(len(y)).
-            markerStyle: str, one of:
-                                    '.' 	point marker
-                                    ',' 	pixel marker
-                                    'o' 	circle marker
-                                    'v' 	triangle_down marker
+            :markerStyle: str, one of:
+                                    '.' 	point marker;
+                                    ',' 	pixel marker;
+                                    'o' 	circle marker;
+                                    'v' 	triangle_down marker;
                                     '^' 	triangle_up marker
-            lineStyle: str, one of:
-                                    '-' 	solid line style
-                                    '--' 	dashed line style
-                                    '-.' 	dash-dot line style
+            :lineStyle: str, one of:
+                                    '-' 	solid line style;
+                                    '--' 	dashed line style;
+                                    '-.' 	dash-dot line style;
                                     ':' 	dotted line style
-            colour: str, one of:
-                                    'b' 	blue
-                                    'g' 	green
-                                    'r' 	red
-                                    'c' 	cyan
-                                    'm' 	magenta
-                                    'y' 	yellow
-                                    'k' 	black
+            :colour: str, one of:
+                                    'b' 	blue;
+                                    'g' 	green;
+                                    'r' 	red;
+                                    'c' 	cyan;
+                                    'm' 	magenta;
+                                    'y' 	yellow;
+                                    'k' 	black;
                                     'w' 	white
-            gid:            str, line identifier
-            linewidth:      float, thickness of the line
-            legendName:     str, the name for the line that will go on the legend.
+            :gid:            str, line identifier
+            :linewidth:      float, thickness of the line
+            :legendName:     str, the name for the line that will go on the legend
 
         """
         if y is None:
@@ -166,10 +167,10 @@ class PlotterWidget(Widget):
     def plotLineWithErrors(self, x, y, yErr=None, xErr=None, fmt='', errColour=None, eLinewidth=None, capSize=None,
                            barsAbove=False, lowLims=False, upperLims=False, xLowLims=False, xUpLims=False, errorEvery=1,
                            capThick=None, *args, **kwargs):
+
         """
         Plot data as line and x/y errors.
-        -------------
-        Parameters:
+        --------------------------
 
         For full documentation see:
             https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.errorbar.html#matplotlib.axes.Axes.errorbar
@@ -185,21 +186,26 @@ class PlotterWidget(Widget):
                 label=None, stacked=False, normed=None, data=None, **kwargs):
         """
         Plot data as histogram using the native MatplotLib Module.
-        For full documentation see:
-         https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.hist.html#matplotlib.pyplot.hist
-        -------------
+
+        --------------------------
+
         Parameters:
-            x: float or array-like
-            bins: int or sequence or str, default: 10.
+        ==========================
+
+            :x: float or array-like
+            :bins: int or sequence or str, default: 10.
                     If bins is an integer, it defines the number of equal-width bins in the range.
                     If bins is a sequence, it defines the bin edges.
                     If bins is a string, it is one of the binning strategies: One of
                     'auto', 'fd', 'doane', 'scott', 'stone', 'rice', 'sturges', or 'sqrt'.
-            density: bool, default: False. If True, draw and return a probability density
-            weights(n,) array-like or None, default: None. An array of weights, of the same shape as x.
+            :density: bool, default: False. If True, draw and return a probability density
+            :weights(n,) array-like or None, default: None. An array of weights, of the same shape as x.
                     Each value in x only contributes its associated weight towards the bin count (instead of 1).
                     If density is True, the weights are normalized, so that the integral of the
                     density over the range remains 1.
+
+        For full documentation see:
+        https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.hist.html#matplotlib.pyplot.hist
 
         """
 
@@ -211,9 +217,9 @@ class PlotterWidget(Widget):
     def plotBar(self, values, heights, unitLabels=None, errors=None, thickness=0.8, colour=None, orientation='v', **kwargs):
         """
         Plot data as horizonatal bars using the native MatplotLib Module.
-        For full documentation see:
+        --------------------------
+         For full documentation see:
          https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.bar.html#matplotlib.pyplot.bar
-        -------------
 
         """
 
@@ -230,17 +236,21 @@ class PlotterWidget(Widget):
     def plotContour(self, x, y, heights, levels=None, colours=None, **kwargs):
         """
         Plot contours.
-        For full documentation see:
-        https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.contour.html#matplotlib.pyplot.contour
-        -------------
+        --------------------------
+
         Parameters:
-            heights: (M, N) array-like. The height values over which the contour is drawn.
-            x,y:  (x,y) array-like, optional. The coordinates of the values in heights. X and y must have the same shape.
-            levels: int or array-like, optional .Determines the number and positions of the contour lines / regions.
-            colours: color string or sequence of colors, optional. The colors of the levels, i.e. the lines for contour
+        ==========================
+
+        Parameters:
+            :heights: (M, N) array-like. The height values over which the contour is drawn.
+            :x,y:  (x,y) array-like, optional. The coordinates of the values in heights. X and y must have the same shape.
+            :levels: int or array-like, optional .Determines the number and positions of the contour lines / regions.
+            :colours: color string or sequence of colors, optional. The colors of the levels, i.e. the lines for contour
 
         For more optional parameters see the original documentation in matplotlib.pyplot.contour.
         See _contourExample for x,y,heights demo data.
+        For full documentation see:
+        https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.contour.html#matplotlib.pyplot.contour
 
         """
         self.currentPlot.contour(x, y, heights, levels=levels, colors=colours, **kwargs)
@@ -249,14 +259,16 @@ class PlotterWidget(Widget):
                     alpha=None, lineWidths=None, edgeColours=None, plotNonFinite=False, **kwargs):
         """
         Plot scatter plots.
+        --------------------------
+
+        Parameters:
+        ==========================
+            :x, y:   float or array-like, shape (n, ). The data positions.
+            :shape:  float or array-like, shape (n, ), optional
+            :colours:   array-like or list of colors or color, optional
+
         For full documentation see:
         https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.scatter.html#matplotlib.pyplot.scatter
-
-        -------------
-        Parameters:
-            x, y:   float or array-like, shape (n, ). The data positions.
-            shape:  float or array-like, shape (n, ), optional
-            colours:   array-like or list of colors or color, optional
 
         """
         self.currentPlot.scatter(x, y, s=shape, c=colours, marker=marker, cmap=cmap, norm=norm, vmin=vMin, vmax=vMax,
@@ -268,15 +280,17 @@ class PlotterWidget(Widget):
                 textProps=None, centre=(0,0), frame=False, rotateLabels=False):
         """
         Plot a pie plot.
+        --------------------------
+
+        Parameters:
+        ==========================
+            :x:   array-like. The wedge sizes.
+            :explode:  array-like, optional. A len(x) array which specifies the fraction of the radius with which to offset each wedge.
+            :labels:   list, optional. A sequence of strings providing the labels for each wedge
+            :colours:   array-like or list of colors or color, optional
+
         For full documentation see:
         https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.pie.html#matplotlib.pyplot.pie
-
-        -------------
-        Parameters:
-            x:   array-like. The wedge sizes.
-            explode:  array-like, optional. A len(x) array which specifies the fraction of the radius with which to offset each wedge.
-            labels:   list, optional. A sequence of strings providing the labels for each wedge
-            colours:   array-like or list of colors or color, optional
 
         """
 
@@ -288,10 +302,14 @@ class PlotterWidget(Widget):
     def plotHexBin(self, *args, **kwargs):
         """
         Make a 2D hexagonal binning plot of points x, y.
+        --------------------------
+
+        Parameters:
+        ==========================
+
         For full documentation see:
         https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.hexbin.html#matplotlib.pyplot.hexbin
-        -------------
-        Parameters:
+
         """
         self.currentPlot.hexbin(*args, **kwargs)
 
@@ -304,17 +322,17 @@ class PlotterWidget(Widget):
                          colour=None, orientation='h', legendName=None, **kwargs ):
         """
         Plot univariate distribution of data using the package Seaborn.
+        --------------------------
+
+        Parameters:
+        ==========================
+            :y:   Series, 1d-array, or list
+            :hist: bool, True to add the (normed) histograms.
+            :kde: bool, True to plot a gaussian kernel density estimate as a line.
+            :rug: bool, True to draw a rugplot on the support axis.
 
         For full documentation see:
         https://seaborn.pydata.org/generated/seaborn.displot.html#seaborn.displot
-
-        -------------
-        Parameters:
-            y:   Series, 1d-array, or list
-            hist: bool, True to add the (normed) histograms.
-            kde: bool, True to plot a gaussian kernel density estimate as a line.
-            rug: bool, True to draw a rugplot on the support axis.
-
         """
         import seaborn as sns
 
@@ -337,15 +355,14 @@ class PlotterWidget(Widget):
     def plotKDE(self, x, y, colour=None, orientation='h', legendName=None, **kwargs ):
         """
         Plot bivariate distribution of data using the package Seaborn.
+        --------------------------
+
+        Parameters:
+        ==========================
+            :x,y:   Series, 1d-array, or list
 
         For full documentation see:
         https://seaborn.pydata.org/generated/seaborn.kdeplot.html
-
-        -------------
-        Parameters:
-
-            x,y:   Series, 1d-array, or list
-
         """
         import seaborn as sns
 
@@ -362,12 +379,10 @@ class PlotterWidget(Widget):
                           autoRange=False, zOrder=None, **kwargs):
         """
         Make a box and whisker plot.
+        --------------------------
+
         For full documentation see:
         https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.boxplot.html#matplotlib.pyplot.boxplot
-
-        -------------
-        Parameters:
-
         """
         kwargs.update({'notch':notch, 'sym':sym, 'vert':vert, 'whis':whis,
                         'positions':positions, 'widths':widths, 'patch_artist':patchArtist,
@@ -391,12 +406,15 @@ class PlotterWidget(Widget):
     def plotHeatMap(self, data, *args, **kwargs ):
         """
         Plot a heatmap data using the package Seaborn.
+        --------------------------
+
+        Parameters:
+        ==========================
+            data:   2d-array
 
         For full documentation see:
         https://seaborn.pydata.org/generated/seaborn.heatmap.html
-        -------------
-        Parameters:
-            data:   2d-array
+
         """
         import seaborn as sns
         sns.heatmap(data, *args, **kwargs)
@@ -407,8 +425,10 @@ class PlotterWidget(Widget):
 
         For full documentation see:
         https://seaborn.pydata.org/generated/seaborn.clustermap.html#seaborn.clustermap
-        -------------
+        --------------------------
+
         Parameters:
+        ==========================
 
             data:   2d-array
         """
@@ -425,11 +445,10 @@ class PlotterWidget(Widget):
     def plotRegression(self, x, y, *args, **kwargs):
         """
         Plot data and a linear regression model fit using the package Seaborn.
+        --------------------------
 
         For full documentation see:
         https://seaborn.pydata.org/generated/seaborn.regplot.html#seaborn.regplot
-        -------------
-        Parameters:
 
         """
         import seaborn as sns
@@ -443,33 +462,38 @@ class PlotterWidget(Widget):
         This function will regress y on x (possibly as a robust or polynomial regression)
          and then draw a scatterplot of the residuals. You can optionally fit a lowess
          smoother to the residual plot, which can help in determining if there is structure to the residuals.
+        --------------------------
 
         For full documentation see:
         https://seaborn.pydata.org/generated/seaborn.residplot.html#seaborn.residplot
-        -------------
-        Parameters:
         """
         import seaborn as sns
         sns.residplot(x,y, *args, **kwargs)
 
     def plotCoherence(self, x, y, *args, **kwargs):
         """
+
         Plot the coherence between x and y.
+        ---------------------------------
+
         Plot the coherence between x and y. Coherence is the normalized cross spectral density:
-            𝐶𝑥𝑦=|𝑃𝑥𝑦|2𝑃𝑥𝑥𝑃𝑦𝑦
+            Cxy = | Pxy| 2PxxPyy
+
+        ---------------------------------
 
         For full documentation see:
         https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.cohere.html#matplotlib.pyplot.cohere
-        -------------
+
         """
         self.currentPlot.cohere(x, y, *args, **kwargs)
 
     def plotAutoCorrelation(self, x, *args, **kwargs):
         """
         Plot the autocorrelation of x.
+        --------------------------
+
         For full documentation see:
         https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.acorr.html#matplotlib.pyplot.acorr
-        -------------
 
         """
         self.currentPlot.acorr(x, *args, **kwargs)
@@ -477,27 +501,29 @@ class PlotterWidget(Widget):
     def plotCrossCorrelation(self, x, y, *args, **kwargs):
         """
         Plot the cross correlation between x and y.
+        --------------------------
 
         The correlation with lag k is defined as ∑𝑛𝑥[𝑛+𝑘]⋅𝑦∗[𝑛]
         where 𝑦∗ is the complex conjugate of 𝑦.
 
         For full documentation see:
         https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.xcorr.html#matplotlib.pyplot.xcorr
-        -------------
 
         """
         self.currentPlot.xcorr(x, y, *args, **kwargs)
 
     def plotCrossSpectralDensity(self, x, y, *args, **kwargs):
         """
-        Plot the cross-spectral density. The cross spectral density 𝑃𝑥𝑦 by Welch's average periodogram method.
+        Plot the cross-spectral density.
+        --------------------------
+
+        The cross spectral density 𝑃𝑥𝑦 by Welch's average periodogram method.
         The vectors x and y are divided into NFFT length segments. Each segment is detrended by function detrend
         and windowed by function window. noverlap gives the length of the overlap between segments.
         The product of the direct FFTs of x and y are averaged over each segment to compute 𝑃𝑥𝑦,
         with a scaling to correct for power loss due to windowing.
         For full documentation see:
         https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.acorr.html#matplotlib.pyplot.acorr
-        -------------
 
         """
         self.currentPlot.csd(x, y, *args, **kwargs)
@@ -506,6 +532,9 @@ class PlotterWidget(Widget):
     def displayImage(self, imagePath:str=None, format=None, axis=False, *args, **kwds):
         """
         quick way to display images using the built-in methods from pyPlot
+        --------------------------
+
+        Parameters:
         :param image: str -- Path
         :param format: as imread
         :param axis: False doesn't display axis around the image.
@@ -523,9 +552,22 @@ class PlotterWidget(Widget):
     def show(self, windowTitle='CcpNmr Plot', size=(700, 700),
              xAxisTitle=None, yAxisTitle=None, plotTitle=None, showLegend=True, minimalMargins=False, dialogKwds=None):
         """
-        :param args: as CcpnDialog
-        :param kwds: CcpnDialog
+
+        Show the plot in a new popup window.
+        --------------------------
+
+        Parameters:
+        ---------------------------------
+        :windowTitle: str, title of the popup window
+        :plotTitle: str, title of the plot (top-centre)
+        :xAxisTitle: str, name of the x Axis label
+        :yAxisTitle: str, name of the y Axis label
+        :showLegend: bool, show the legend on the top-right corner of the plot
+        :param dialogKwds: dict, CcpnDialog key arguments
         :return: opens a CcpnDialog with the plot
+
+        See CcpnDialog for more arguments.
+
         """
         if self.isClosed:
             showWarning('Cannot show','Plot has been closed. Please create a new instance.')

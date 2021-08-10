@@ -118,7 +118,36 @@ class CcpnQuickDocPanel(pypanels.QuickDocPanel):
     def _onResultsAvailable(self, results):
 
         self.text_edit.clear()
-        self._on_results_available(results)
+        self.setVisible(True)
+
+
+        if len(results) and results[0] != '':
+            settings = {'output_encoding': 'unicode', 'report_level':5} # report_level 5 to suppress any sys warning
+
+            string = '\n\n'.join(results)
+            string = publish_parts(string, writer_name='html', settings_overrides=settings)['html_body']
+            string = string.replace('colspan="2"', 'colspan="0"')
+            string = string.replace('<th ', '<th align="left" ')
+            string = string.replace(
+                '</tr>\n<tr class="field"><td>&nbsp;</td>', '')
+            if string:
+                skip_error_msg = False
+                lines = []
+                for l in string.splitlines():
+                    if (l.startswith('<div class="system-message"') or
+                            l.startswith(
+                                '<div class="last system-message"')):
+                        skip_error_msg = True
+                        continue
+                    if skip_error_msg:
+                        if l.endswith('</div>'):
+                            skip_error_msg = False
+                    else:
+                        lines.append(l)
+                self.text_edit.setText('\n'.join(lines))
+                return
+        else:
+            self.text_edit.setText(_('Documentation not found'))
 
 
 

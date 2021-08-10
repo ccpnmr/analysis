@@ -39,6 +39,7 @@ PriorityIsotopeCodes = ['1H', '13C', '15N', '17O', '19F', '31P']
 
 MERGE = 'merge'
 Undefined = 'Undefined'
+Default = '>default<'
 OtherNames = '--  Other Options  --'
 OtherByIC  = '-- Name Options --'
 
@@ -67,10 +68,10 @@ def _selectIsotopeCodeForName(cls, nmrAtomName=None, isotopeCode=None):
 def _nameChanged(cls, value):
     _selectIsotopeCodeForName(cls)
 
-def _getNmrAtomName(cls, nmrAtom, nmrResidue=None, isotopeCode=None):
+def _getNmrAtomName(popupinstance, nmrAtom, nmrResidue=None, isotopeCode=None):
     """
     called from edit and new NnmAtom popup.
-    :param cls: the popup obj.
+    :param popupinstance: the popup obj.
     :param nmrAtom: the NmrAtom Obj or its dummy
     :param nmrResidue: the NmrResidue Obj or its dummy
     :return:
@@ -79,12 +80,12 @@ def _getNmrAtomName(cls, nmrAtom, nmrResidue=None, isotopeCode=None):
     from ccpn.core.lib.AssignmentLib import NEF_ATOM_NAMES
 
     nmrAtomName = nmrAtom.name # compoundWidget for setting the NmrAtom name
-    nameWidget = cls.name
-    isotopeCode = isotopeCode or cls.isotopeCode
+    nameWidget = popupinstance.name
+    # isotopeCode = isotopeCode or popupinstance.isotopeCode
     atomNameOptions = []
     ## if a residue type is specified: Append all other options for that type only!
     if not nmrResidue:
-        nmrResidue = cls._getParentNmrResidue(nmrAtom)
+        nmrResidue = popupinstance._getParentNmrResidue(nmrAtom)
     atomNameOptionsByResType = PROTEIN_ATOM_NAMES.get(nmrResidue.residueType, [])
     ## if residue type is not specify: Append all other NEF options
     if atomNameOptionsByResType:
@@ -92,7 +93,8 @@ def _getNmrAtomName(cls, nmrAtom, nmrResidue=None, isotopeCode=None):
     else:
         atomNameOptions += getIsotopeListFromCode(None) # all options
 
-    if isotopeCode in NEF_ATOM_NAMES:
+    # if isotopeCode in NEF_ATOM_NAMES:
+    if False:
         atomsNameOptionsByIC = getIsotopeListFromCode(isotopeCode or nmrAtom.isotopeCode)
         atomNotOfSameIsotopeCode = [x for x in atomNameOptions if x not in atomsNameOptionsByIC]
         atomOfSameIsotopeCode = [x for x in atomNameOptions if x in atomsNameOptionsByIC]
@@ -144,7 +146,7 @@ class NmrAtomNewPopup(AttributeEditorPopupABC):
     klass = NmrAtom
     attributes = [('Name', PulldownListCompoundWidget, getattr, None, _getNmrAtomName, None, {'editable': True}),
                   ('NmrResidue', PulldownListCompoundWidget, getattr, setattr, _getNewNmrResidueTypes, _nmrResidueCallback, {'editable': False},),
-                  ('IsotopeCode', PulldownListCompoundWidget, getattr, setattr, _getNmrAtomIsotopeCodes, _isotopeCodeCallback, {'editable': True}),
+                  # ('IsotopeCode', PulldownListCompoundWidget, getattr, setattr, _getNmrAtomIsotopeCodes, _isotopeCodeCallback, {'editable': True}),
                   ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                   # ('comment', TextEditorCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <',
                   #                                                                      'addWordWrap': True}),
@@ -164,8 +166,8 @@ class NmrAtomNewPopup(AttributeEditorPopupABC):
         atomName = self.name.getText()
         nmrResidue = self.nmrResidue.getText()
         comment = self.comment.getText()
-        isotopeCode =  self.isotopeCode.getText()
-        isotopeCode = isotopeCode if isotopeCode in DEFAULT_ISOTOPE_DICT.values() else None
+        # isotopeCode =  self.isotopeCode.getText()
+        # isotopeCode = isotopeCode if isotopeCode in DEFAULT_ISOTOPE_DICT.values() else None
 
         destNmrResidue = self.project.getByPid('NR:{}'.format(nmrResidue))
         if not destNmrResidue:

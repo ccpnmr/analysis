@@ -334,17 +334,23 @@ class Project(AbstractWrapperObject):
         """Project id: Globally unique identifier (guid)"""
         return self._wrappedData.guid.translate(Pid.remapSeparators)
 
-    def _getNextUniqueIdValue(self, className) -> int:
-        """Get the next uniqueId for klass
-        CCPNINTERNAL: used in AbstractWrapper on __init__
+    # _uniqueId: Some classes require a unique identifier per class
+    # use _uniqueId property defined in AbstractWrapperObject; values are maintained for project instance
+    def _queryNextUniqueIdValue(self, className) -> int:
+        """query the next uniqueId for class className; does not increment its value
+        CCPNINTERNAL: used in NmrAtom on _uniqueName
         """
-        # _uniqueId: Some classes require a unique identifier per class
-        # use _uniqueId property defined in AbstractWrapperObject
         # _nextUniqueIdValues = {}    # a (className, nexIdValue) dictionary
         if not hasattr(self._wrappedData, '_nextUniqueIdValues'):
             setattr(self._wrappedData, '_nextUniqueIdValues', {})
-
         nextUniqueId = self._wrappedData._nextUniqueIdValues.setdefault(className, 0)
+        return nextUniqueId
+
+    def _getNextUniqueIdValue(self, className) -> int:
+        """Get the next uniqueId for class className; increments its value
+        CCPNINTERNAL: used in AbstractWrapper on __init__
+        """
+        nextUniqueId = self._queryNextUniqueIdValue(className)
         self._wrappedData._nextUniqueIdValues[className] += 1
         return nextUniqueId
 

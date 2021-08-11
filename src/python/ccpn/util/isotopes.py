@@ -82,6 +82,12 @@ class IsotopeRecord(CcpNmrJson):
 IsotopeRecord.register()
 
 
+def getIsotopeRecords():
+    """Coveniance funtions to return the istopeRecords Instance
+    """
+    return IsotopeRecords()
+
+
 @singleton
 class IsotopeRecords(CcpnJsonDirectoryABC):
     """Singleton class to contain all isotopeRecords as (isotopeCode, IsotopeRecord) (key,value) pairs
@@ -105,7 +111,7 @@ class IsotopeRecords(CcpnJsonDirectoryABC):
 #end class
 
 # create an instance
-isotopeRecords = IsotopeRecords()
+isotopeRecords = getIsotopeRecords()
 
 
 class Nucleus(str):

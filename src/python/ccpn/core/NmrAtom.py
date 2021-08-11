@@ -37,7 +37,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.lib import Constants
 from ccpn.util.Common import makeIterableList
 from ccpn.util.decorators import logCommand
-from ccpn.util.isotopes import isotopeCode2Nucleus
+from ccpn.util.isotopes import isotopeCode2Nucleus, getIsotopeRecords
 from ccpn.core.lib.ContextManagers import newObject, undoBlock, renameObjectContextManager, undoStackBlocking
 from ccpn.util.Logging import getLogger
 
@@ -132,28 +132,13 @@ class NmrAtom(AbstractWrapperObject):
         """Atom to which NmrAtom is assigned. NB resetting the atom will rename the NmrAtom"""
         return self._project.getAtom(self._id)
 
-    # # GWV 20181122: removed setters between Chain/NmrChain, Residue/NmrResidue, Atom/NmrAtom
-    # @atom.setter
-    # def atom(self, value: 'Atom'):
-    #     if value is None:
-    #         self.deassign()
-    #     else:
-    #         self._wrappedData.atom = value._wrappedData
-
     @property
     def isotopeCode(self) -> str:
         """isotopeCode of NmrAtom. Used to facilitate the nmrAtom assignment."""
-        return self._wrappedData.isotopeCode
-
-    @isotopeCode.setter
-    def isotopeCode(self, value) -> str:
-        """Set the isotopeCode of NmrAtom. """
-    #     from ccpn.util import Constants as ct
-    #
-    #     if not self.isotopeCode == value:
-    #         isotopeCode = value if value in ct.DEFAULT_ISOTOPE_DICT.values() else UnknownIsotopeCode
-    #         self._wrappedData.isotopeCode = isotopeCode or UnknownIsotopeCode
-        self._wrappedData.isotopeCode = value
+        value = self._wrappedData.isotopeCode
+        if value == self._NONE_VALUE_STRING:
+            value = None
+        return value
 
     def _setIsotopeCode(self, value):
         """
@@ -163,7 +148,11 @@ class NmrAtom(AbstractWrapperObject):
 
         CCPNINTERNAL: used in _newNmrAtom, Peak.assignDimension
         """
-        self._wrappedData.isotopeCode = value if value else UnknownIsotopeCode
+        if not isinstance(value, (str, type(None))):
+            raise ValueError('isotopeCode must be of type string (or None); got {}'.format(value))
+        if value is not None and value not in getIsotopeRecords().keys():
+            raise ValueError('Invalid isotopeCode {}'.format(value))
+        self._wrappedData.isotopeCode = value if value else self._NONE_VALUE_STRING
 
     @property
     def boundNmrAtoms(self) -> 'NmrAtom':
@@ -349,6 +338,17 @@ class NmrAtom(AbstractWrapperObject):
     #=========================================================================================
 
     @classmethod
+    def _restoreObject(cls, project, apiObj):
+        """Subclassed to replace unknown isotopCodes"""
+        result = super(NmrAtom, cls)._restoreObject(project=project, apiObj=apiObj)
+
+        # Update Unknown to None
+        if result.isotopeCode == UnknownIsotopeCode:
+            result._setIsotopeCode(None)
+
+        return result
+
+    @classmethod
     def _getAllWrappedData(cls, parent: NmrResidue) -> list:
         """get wrappedData (ApiResonance) for all NmrAtom children of parent NmrResidue
         """
@@ -392,6 +392,19 @@ class NmrAtom(AbstractWrapperObject):
             _name = '@_%d' % self._uniqueId
         return _name
 
+    # Sub-class two methods to get '@' names
+    @classmethod
+    def _defaultName(cls) -> str:
+        return '@'
+
+    @classmethod
+    def _uniqueName(cls, project, name=None) -> str:
+        """Subclassed to get the '@' default name behavior"""
+        if name is None:
+            id = project._queryNextUniqueIdValue(cls.className)
+            name = '%s_%d' %(cls._defaultName(), id)
+        return super(NmrAtom, cls)._uniqueName(project=project, name=name)
+
     @logCommand(get='self')
     def rename(self, value: str = None):
         """Rename the NmrAtom, changing its name, Pid, and internal representation.
@@ -411,13 +424,8 @@ class NmrAtom(AbstractWrapperObject):
             raise ValueError('NmrAtom.rename: "%s" conflicts with' % (value, previous))
 
         with renameObjectContextManager(self) as addUndoItem:
-            # GWV: not sure why we are monkying with isotope codes here;
-            # guess the model is doing things here it shouldn't (!?)
-            isotopeCode = self.isotopeCode
             oldName = self.name
-            self._setIsotopeCode(UnknownIsotopeCode)
             self._wrappedData.name = value
-            self._setIsotopeCode(isotopeCode)
             self._resetIds()
 
             addUndoItem(undo=partial(self.rename, oldName),
@@ -492,37 +500,6 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None, com
         if previous is not None:
             raise ValueError('newNmrAtom: name "%s" clashes with %s' % (name, previous))
 
-        # # Deal with reserved names
-        # idx = name.find('@')
-        # if idx >= 0:
-        #     try:
-        #         serial = int(name[idx + 1:])
-        #         obj = apiNmrProject.findFirstResonance(serial=serial)
-        #     except ValueError:
-        #         obj = None
-        #
-        #     if obj is not None:
-        #         previous = self._project._data2Obj[obj]
-        #         if '@' in obj.name:
-        #             # Two NmrAtoms both with same @serial. Error
-        #             raise ValueError("Cannot create NmrAtom:%s.%s - reserved atom name clashes with %s"
-        #                              % (self._id, name, previous.longPid))
-        #
-        #             # # NOTE:ED - these two lines renumber the current nmrAtom, instead of error
-        #             # serial = obj.parent._serialDict['resonances'] + 1
-        #             # name = None
-        #
-        #         else:
-        #             # We can renumber obj to free the serial for the new NmrAtom
-        #             newSerial = obj.parent._serialDict['resonances'] + 1
-        #             try:
-        #                 previous._resetSerial(newSerial)
-        #             except ValueError:
-        #                 getLogger().warning(
-        #                         "Could not reset serial of %s to %s - keeping original value" % (previous, serial)
-        #                         )
-        #             previous._finaliseAction('rename')
-
     # Create the api object
     # Always create first with unknown isotopeCode
     dd = {'resonanceGroup': resonanceGroup, 'isotopeCode': UnknownIsotopeCode, 'name':_name}
@@ -532,8 +509,6 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None, com
         raise RuntimeError('Unable to generate new NmrAtom item')
 
     # Check/set isotopeCode; it has to be set after the creation to avoid API errors.
-    if not isinstance(isotopeCode, (str, type(None))):
-        raise TypeError('isotopeCode {} must be of type string (or None)'.format(isotopeCode))
     result._setIsotopeCode(isotopeCode)
 
     # adjust the name if it was not supplied; needed to create the nmrAtom first to get an uniqueId, used by rename()

@@ -136,6 +136,11 @@ class AbstractWrapperObject(NotifierBase):
     # e.g. NmrResidue and Residue. Used to get parent id's
     _numberOfIdFields = 1
 
+    #=========================================================================================
+    _NONE_VALUE_STRING = '__NONE__'  # Used to emulate None for strings that otherwise have
+                                     # model restrictions
+    #=========================================================================================
+
     def __init__(self, project: 'Project', wrappedData: ApiImplementation.DataObject):
 
         # NB project parameter type is Project. Set in Project.py
@@ -356,12 +361,12 @@ class AbstractWrapperObject(NotifierBase):
                              (cls.__name__, attribName))
 
         if Pid.altCharacter in value:
-            raise ValueError('%s: Character %r not allowed for %r' %
-                             (cls.__name__, Pid.altCharacter, attribName))
+            raise ValueError('%s: Character %r not allowed for %r; got %r' %
+                             (cls.__name__, Pid.altCharacter, attribName, value))
 
         if not allowWhitespace and commonUtil.contains_whitespace(value):
-            raise ValueError('%s: Whitespace not allowed in %r' %
-                             (cls.__name__, attribName))
+            raise ValueError('%s: Whitespace not allowed in %r; got %r' %
+                             (cls.__name__, attribName, value))
 
     # @staticmethod
     # def _nextAvailableName(cls, project):

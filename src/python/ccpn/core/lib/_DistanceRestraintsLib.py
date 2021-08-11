@@ -2390,13 +2390,13 @@ def _correctIsotopeCodes(nmrAtoms):
     """
     from ccpn.core.NmrAtom import UnknownIsotopeCode
     for i in nmrAtoms:
-        if i.isotopeCode == UnknownIsotopeCode:
+        if i._setIsotopeCode is None or i.isotopeCode == UnknownIsotopeCode:
             isotopeCode = name2IsotopeCode(str(i.name).upper())
             if isotopeCode:
                 getLogger().warning("isotopeCode is Undefined for NmrAtom: %s. "
                                     "IsotopeCode has to be set for calculating Distance Restraints."
                                     " Set to %s" %(i.name, isotopeCode))
-                i.isotopeCode = isotopeCode
+                i._setIsotopeCode(isotopeCode)
 
 
 def _setupResonanceAndAtomSets(peakList):

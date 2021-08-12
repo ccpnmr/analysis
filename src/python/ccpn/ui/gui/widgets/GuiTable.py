@@ -1107,10 +1107,12 @@ GuiTable::item::selected {
         self.tableMenu.addAction("Copy clicked cell value", self._copySelectedCell)
         if enableExport:
             self.tableMenu.addAction("Export Visible Table", partial(self.exportTableDialog, exportAll=False))
-        if enableExport:
             self.tableMenu.addAction("Export All Columns", partial(self.exportTableDialog, exportAll=True))
+
+        self.tableMenu.addSeparator()
+
         if enableDelete:
-            self.tableMenu.addAction("Delete", self.deleteObjFromTable)
+            self.tableMenu.addAction("Delete Selection", self.deleteObjFromTable)
 
         # ejb - added these but don't think they are needed
         # self.tableMenu.addAction("Select All", self.selectAllObjects)
@@ -1167,7 +1169,6 @@ GuiTable::item::selected {
         if i is not None:
             text = i.text().strip()
             copyToClipboard([text])
-
 
     def deleteObjFromTable(self):
         selected = self.getSelectedObjects()

@@ -589,8 +589,6 @@ class RestraintAnalysisTableWidget(GuiTable):
         try:
             _dataFrameObject = self.getDataFrameFromExpandedList(table=self,
                                                                  buildList=rowObjects,
-                                                                 # colDefs=columnDefs,
-                                                                 hiddenColumns=self._hiddenColumns,
                                                                  expandColumn='Restraint')
 
             # populate from the Pandas dataFrame inside the dataFrameObject
@@ -625,10 +623,6 @@ class RestraintAnalysisTableWidget(GuiTable):
                     self.setData([list(range(len(dataFrameObject.headings)))])
                     self._groups = None
 
-                # store the current headings, in case table is cleared, to stop table jumping
-                # self._defaultHeadings = dataFrameObject.headings
-                # self._defaultHiddenColumns = dataFrameObject.hiddenColumns
-
                 if columnDefs:
                     for col, colFormat in enumerate(columnDefs.formats):
                         if colFormat is not None:
@@ -636,9 +630,6 @@ class RestraintAnalysisTableWidget(GuiTable):
 
             # highlight them back again
             self._highLightObjs(objs)
-
-        # # outside of the with to spawn a repaint
-        # self.show()
 
     def _highLightObjs(self, selection, scrollToSelection=True):
 
@@ -663,7 +654,7 @@ class RestraintAnalysisTableWidget(GuiTable):
 
                 _peakObjects = tuple(_getValueByHeader(row, 3) for row in self._dataFrameObject.objects)
                 rows = [self._dataFrameObject.find(self, str(obj.pid), column='_object', multiRow=True) for obj in uniqObjs]
-                        # if obj in _peakObjects and obj.peakList == self._selectedPeakList]
+                # if obj in _peakObjects and obj.peakList == self._selectedPeakList]
                 rows = [row for row in set(makeIterableList(rows)) if row is not None]
                 if rows:
                     rows.sort(key=lambda c: int(c))
@@ -688,7 +679,6 @@ class RestraintAnalysisTableWidget(GuiTable):
     def getDataFrameFromExpandedList(self, table=None,
                                      buildList=None,
                                      colDefs=None,
-                                     hiddenColumns=None,
                                      expandColumn=None):
         """
         Return a Pandas dataFrame from an internal list of objects
@@ -788,7 +778,6 @@ class RestraintAnalysisTableWidget(GuiTable):
         #                              # objectList=objects or [],
         #                              # indexList=indexList,
         #                              columnDefs=self._columns or [],
-        #                              hiddenColumns=hiddenColumns or [],
         #                              table=table,
         #                              )
         # _objects = [row for row in _dataFrame.dataFrame.itertuples()]
@@ -902,7 +891,6 @@ class RestraintAnalysisTableWidget(GuiTable):
         # set the table from the dataFrame
         _dataFrame = DataFrameObject(dataFrame=_table,
                                      columnDefs=self._columns or [],
-                                     hiddenColumns=hiddenColumns or [],
                                      table=table,
                                      )
         # extract the row objects from the dataFrame

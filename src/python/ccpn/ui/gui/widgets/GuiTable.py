@@ -377,7 +377,7 @@ GuiTable::item::selected {
         self._icons = [self.ICON_FILE]
         self._stretchLastSection = stretchLastSection
         self._defaultHeadings = []
-        self._internalColumnTexts = [DATAFRAME_OBJECT] # columns that are always hidden.
+        self._internalColumnTexts = ['isDeleted', DATAFRAME_OBJECT] # columns that are always hidden.
         self._hiddenColumns = []
 
         # set the minimum size the table can collapse to
@@ -1693,7 +1693,8 @@ GuiTable::item::selected {
                                         rows.append(row)
                                         objIndex = model.model().data(iSelect)
 
-                                        obj = self.project.getByPid(objIndex)
+                                        # NOTE:ED - fix for now - Pid or _object column?
+                                        obj = self.project.getByPid(objIndex.strip('<>'))
                                         if obj:
                                             selectedObjects.append(obj)
             if valuesDict:

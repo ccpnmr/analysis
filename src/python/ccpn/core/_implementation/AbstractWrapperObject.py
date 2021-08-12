@@ -711,6 +711,7 @@ class AbstractWrapperObject(NotifierBase):
         # rename functions from here
         oldName = self.name
         self._oldPid = self.pid
+
         self._wrappedData.name = name
 
         return (oldName,)
@@ -1222,7 +1223,6 @@ class AbstractWrapperObject(NotifierBase):
             # propagate the action to explicitly associated (generally child) instances
             for func in self._childActions:
                 func()
-
             self._childActions = []
 
         project = self.project

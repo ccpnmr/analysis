@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:01 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-12 03:45:44 +0100 (Thu, August 12, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -300,8 +300,9 @@ class Notifier(NotifierABC):
             else:
                 # Projects allow all registering of all classes
                 allowedClassNames = [c.className for c in theObject._getChildClasses(recursion=self._isProject)]
-                if targetName not in allowedClassNames:
-                    raise RuntimeWarning('Notifier.__init__: invalid targetName "%s" for class "%s"' % (targetName, theObject.className))
+                # TODO:ED - is this check needed? - skips new _ChemicalShift object
+                # if targetName not in allowedClassNames:
+                #     raise RuntimeWarning('Notifier.__init__: invalid targetName "%s" for class "%s"' % (targetName, theObject.className))
 
                 notifier = (trigger, targetName)
                 func = self._project.registerNotifier(targetName,
@@ -349,10 +350,10 @@ class Notifier(NotifierABC):
             #
             raise RuntimeError('Notifier.__call__: obj is None')
 
-        if not self._isCurrent and obj.isDeleted:
-            # It is a V3 core object notifier; check if obj is still around
-            # hack for now (20181127) until a better implementation
-            return
+        # if not self._isCurrent and obj.isDeleted:
+        #     # It is a V3 core object notifier; check if obj is still around
+        #     # hack for now (20181127) until a better implementation
+        #     return
 
         trigger, targetName = notifier
 

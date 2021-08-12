@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-17 15:10:50 +0100 (Mon, May 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-12 03:45:44 +0100 (Thu, August 12, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.OrderedSet import OrderedSet
 
 
-MAXUNDOWAYPOINTS = 25
+MAXUNDOWAYPOINTS = 50
 MAXUNDOOPERATIONS = 10000
 
 
@@ -322,6 +322,12 @@ class Undo(deque):
 
         # fix waypoints:
         ll = self.waypoints
+        _waypoints = [ii for ii, wp in enumerate(ll) if wp == ll[-1]]
+        if _waypoints:
+            if len(_waypoints) > 2:
+                raise RuntimeError('waypoint length error')
+            # need to back-track to the previous value if duplicated
+            ll[:] = ll[:_waypoints[0] + 1]
         while ll and ll[-1] >= self.nextIndex:
             ll.pop()
 
@@ -381,6 +387,12 @@ class Undo(deque):
 
         # fix waypoints:
         ll = self.waypoints
+        _waypoints = [ii for ii, wp in enumerate(ll) if wp == ll[-1]]
+        if _waypoints:
+            if len(_waypoints) > 2:
+                raise RuntimeError('waypoint length error')
+            # need to back-track to the previous value if duplicated
+            ll[:] = ll[:_waypoints[0] + 1]
         while ll and ll[-1] >= self.nextIndex:
             ll.pop()
 

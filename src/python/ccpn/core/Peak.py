@@ -47,8 +47,8 @@ from ccpn.util.Common import makeIterableList, isIterable
 from ccpn.util.Constants import SCALETOLERANCE
 
 
-DIMENSIONNMRATOMSCHANGED = '_dimensionNmrAtomsChanged'
-RECALCULATESHIFTVALUE = '_recalculateShiftValue'
+# DIMENSIONNMRATOMSCHANGED = '_dimensionNmrAtomsChanged'
+# RECALCULATESHIFTVALUE = '_recalculateShiftValue'
 
 
 class Peak(AbstractWrapperObject):
@@ -245,18 +245,16 @@ class Peak(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def figureOfMerit(self, value: float):
+        if self._wrappedData.figOfMerit == value:
+            return
         self._wrappedData.figOfMerit = value
 
         # recalculate the shifts
         assigned = set(makeIterableList(self.assignments))
-        shifts = set([cs for nmr in assigned for cs in nmr.chemicalShifts if cs and not (cs.isDeleted or cs._flaggedForDelete)])
-        for cs in shifts:
-            cs.recalculateShiftValue()
+        shifts = set(cs for nmr in assigned for cs in nmr._chemicalShifts if cs and not cs.isDeleted)
 
-        # set the attribute to trigger the _finaliseAction for the shifts that have changed
-        if shifts:
-            # notify that the shifts have also changed
-            setattr(self, RECALCULATESHIFTVALUE, shifts)
+        self._childActions.extend(sh._recalculateShiftValue for sh in shifts)
+        self._finaliseChildren.extend((sh, 'change') for sh in shifts)
 
     @property
     def annotation(self) -> Optional[str]:
@@ -286,7 +284,7 @@ class Peak(AbstractWrapperObject):
     @ccpNmrV3CoreSetter()
     def position(self, value: Sequence):
         # call api changes
-        assigned = set()
+        shifts = set()
         ff = self._project._data2Obj.get
 
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
@@ -296,11 +294,11 @@ class Peak(AbstractWrapperObject):
 
             # log any peak assignments that have moved in this axis
             if peakDim.position != _old:
-                assigned |= set([ff(pdc.resonance) for pdc in peakDim.mainPeakDimContribs if hasattr(pdc, 'resonance')])
+                assigned = set([ff(pdc.resonance) for pdc in peakDim.mainPeakDimContribs if hasattr(pdc, 'resonance')])
+                shifts |= set(sh for nmr in assigned for sh in nmr._chemicalShifts)
 
-        # set the attribute to trigger the _finaliseAction for the positions that have changed
-        if assigned:
-            setattr(self, DIMENSIONNMRATOMSCHANGED, assigned)
+        self._childActions.extend(sh._recalculateShiftValue for sh in shifts)
+        self._finaliseChildren.extend((sh, 'change') for sh in shifts)
 
     ppmPositions = position
 
@@ -339,7 +337,7 @@ class Peak(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def pointPositions(self, value: Sequence):
-        assigned = set()
+        shifts = set()
         ff = self._project._data2Obj.get
 
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
@@ -348,11 +346,11 @@ class Peak(AbstractWrapperObject):
 
             # log any peak assignments that have moved in this axis
             if peakDim.position != _old:
-                assigned |= set([ff(pdc.resonance) for pdc in peakDim.mainPeakDimContribs if hasattr(pdc, 'resonance')])
+                assigned = set([ff(pdc.resonance) for pdc in peakDim.mainPeakDimContribs if hasattr(pdc, 'resonance')])
+                shifts |= set(sh for nmr in assigned for sh in nmr._chemicalShifts)
 
-        # set the attribute to trigger the _finaliseAction for the positions that have changed
-        if assigned:
-            setattr(self, DIMENSIONNMRATOMSCHANGED, assigned)
+        self._childActions.extend(sh._recalculateShiftValue for sh in shifts)
+        self._finaliseChildren.extend((sh, 'change') for sh in shifts)
 
     @property
     def boxWidths(self) -> Tuple[Optional[float], ...]:
@@ -421,7 +419,6 @@ class Peak(AbstractWrapperObject):
                 axisReversed = -1 if expDimRef.isAxisReversed else 1
             aliasing.append(axisReversed * peakDim.numAliasing)
         return tuple(aliasing)
-        # return tuple((-1 if peakDim.dataDim.expDim.findFirstExpDimRef(serial=1)) * peakDim.numAliasing for peakDim in self._wrappedData.sortedPeakDims())
 
     @aliasing.setter
     @logCommand(get='self', isProperty=True)
@@ -432,8 +429,19 @@ class Peak(AbstractWrapperObject):
         if not all(isinstance(dimVal, int) for dimVal in value):
             raise ValueError("Aliasing values must be integer.")
 
+        # call api changes
+        shifts = set()
+        ff = self._project._data2Obj.get
         for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-            peakDim.numAliasing = -1 * value[ii]
+            # log any peak assignments that have moved in this axis
+            if peakDim.numAliasing != -1 * value[ii]:
+                assigned = set([ff(pdc.resonance) for pdc in peakDim.mainPeakDimContribs if hasattr(pdc, 'resonance')])
+                peakDim.numAliasing = -1 * value[ii]
+
+                shifts |= set(sh for nmr in assigned for sh in nmr._chemicalShifts)
+
+        self._childActions.extend(sh._recalculateShiftValue for sh in shifts)
+        self._finaliseChildren.extend((sh, 'change') for sh in shifts)
 
     @property
     def dimensionNmrAtoms(self) -> Tuple[Tuple['NmrAtom', ...], ...]:
@@ -470,7 +478,6 @@ class Peak(AbstractWrapperObject):
         return self.dimensionNmrAtoms
 
     @_dimensionNmrAtoms.setter
-    # @ccpNmrV3CoreSetter() # not required
     def _dimensionNmrAtoms(self, value: Sequence):
         """Assign by Dimensions
         Ccpn Internal:used by assignDimension/dimensionNmrAtoms - not to be called elsewhere
@@ -514,44 +521,21 @@ class Peak(AbstractWrapperObject):
 
     @dimensionNmrAtoms.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def dimensionNmrAtoms(self, value: Sequence):
 
-        _app = self.project.application
+        _pre = set(makeIterableList(self.assignedNmrAtoms))
+        _post = set(makeIterableList(value))
+        nmrResidues = set(nmr.nmrResidue for nmr in (_pre | _post))
+        shifts = set(cs for nmrAt in (_pre | _post) for cs in nmrAt._chemicalShifts if cs and not cs.isDeleted)
 
-        # store the currently attached nmrAtoms
-        _pre = set(makeIterableList(value))
-        _post = set(makeIterableList(self.assignedNmrAtoms))
-        _cs = set(makeIterableList([shift for nmrAt in (_pre | _post) for shift in nmrAt.chemicalShifts]))
+        # set the value
+        self._dimensionNmrAtoms = value
 
-        # def _deleteChemShifts(shifts):
-        #     """Delete chemicalShifts that have no attached peaks"""
-        #     _delCS = [shift for shift in shifts if shift and len(shift.nmrAtom.assignedPeaks) == 0]
-        #     for cs in _delCS:
-        #         cs.delete()
-
-        with undoBlockWithoutSideBar(application=_app):
-            # add notifiers to stack
-            with undoStackBlocking(application=_app) as addUndoItem:
-                for cs in _cs:
-                    addUndoItem(undo=partial(cs._finaliseAction, 'change'))
-
-            # set the value
-            self._dimensionNmrAtoms = value
-
-            _csNew = set(makeIterableList([shift for nmrAt in (_pre | _post) for shift in nmrAt.chemicalShifts]))
-            # _deleteChemShifts(_cs)
-            for cs in _cs:
-                cs._finaliseAction('change')
-            for cs in _csNew - _cs:
-                cs._finaliseAction('create')
-
-            # add notifiers to stack
-            with undoStackBlocking(application=_app) as addUndoItem:
-                for cs in _cs:
-                    addUndoItem(redo=partial(cs._finaliseAction, 'change'))
-                for cs in _csNew - _cs:
-                    addUndoItem(undo=partial(cs._finaliseAction, 'delete'),
-                                redo=partial(cs._finaliseAction, 'create'))
+        # update the assigned nmrAtom chemical shift values - notify the nmrResidues and _chemicalShifts
+        self._childActions.extend(sh._recalculateShiftValue for sh in shifts)
+        self._finaliseChildren.extend((nmr, 'change') for nmr in nmrResidues)
+        self._finaliseChildren.extend((sh, 'change') for sh in shifts)
 
     @property
     def assignedNmrAtoms(self) -> Tuple[Tuple[Optional['NmrAtom'], ...], ...]:
@@ -603,7 +587,6 @@ class Peak(AbstractWrapperObject):
         return self.assignedNmrAtoms
 
     @_assignedNmrAtoms.setter
-    # @ccpNmrV3CoreSetter() # not required
     def _assignedNmrAtoms(self, value: Sequence):
         """Assign by Contributions
         Ccpn Internal: used by assignedNmrAtoms - not to be called elsewhere
@@ -644,44 +627,58 @@ class Peak(AbstractWrapperObject):
 
     @assignedNmrAtoms.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def assignedNmrAtoms(self, value: Sequence):
 
-        _app = self.project.application
+        _pre = set(makeIterableList(self.assignedNmrAtoms))
+        _post = set(makeIterableList(value))
+        nmrResidues = set(nmr.nmrResidue for nmr in (_pre | _post))
+        shifts = set(cs for nmrAt in (_pre | _post) for cs in nmrAt._chemicalShifts if cs and not cs.isDeleted)
 
-        # store the currently attached nmrAtoms
-        _pre = set(makeIterableList(value))
-        _post = set(makeIterableList(self.assignedNmrAtoms))
-        _cs = set(makeIterableList([shift for nmrAt in (_pre | _post) for shift in nmrAt.chemicalShifts]))
+        # set the value
+        self._assignedNmrAtoms = value
 
-        # def _deleteChemShifts(shifts):
-        #     """Delete chemicalShifts that have no attached peaks"""
-        #     _delCS = [shift for shift in shifts if shift and len(shift.nmrAtom.assignedPeaks) == 0]
-        #     for cs in _delCS:
-        #         cs.delete()
+        # update the assigned nmrAtom chemical shift values - notify the nmrResidues and _chemicalShifts
+        self._childActions.extend(sh._recalculateShiftValue for sh in shifts)
+        self._finaliseChildren.extend((nmr, 'change') for nmr in nmrResidues)
+        self._finaliseChildren.extend((sh, 'change') for sh in shifts)
 
-        with undoBlockWithoutSideBar(application=_app):
-            # add notifiers to stack
-            with undoStackBlocking(application=_app) as addUndoItem:
-                for cs in _cs:
-                    addUndoItem(undo=partial(cs._finaliseAction, 'change'))
-
-            # set the value
-            self._assignedNmrAtoms = value
-
-            _csNew = set(makeIterableList([shift for nmrAt in (_pre | _post) for shift in nmrAt.chemicalShifts]))
-            # _deleteChemShifts(_cs)
-            for cs in _cs:
-                cs._finaliseAction('change')
-            for cs in _csNew - _cs:
-                cs._finaliseAction('create')
-
-            # add notifiers to stack
-            with undoStackBlocking(application=_app) as addUndoItem:
-                for cs in _cs:
-                    addUndoItem(redo=partial(cs._finaliseAction, 'change'))
-                for cs in _csNew - _cs:
-                    addUndoItem(undo=partial(cs._finaliseAction, 'delete'),
-                                redo=partial(cs._finaliseAction, 'create'))
+        # _app = self.project.application
+        #
+        # # store the currently attached nmrAtoms
+        # _pre = set(makeIterableList(value))
+        # _post = set(makeIterableList(self.assignedNmrAtoms))
+        # _cs = set(makeIterableList([shift for nmrAt in (_pre | _post) for shift in nmrAt._chemicalShifts]))
+        #
+        # # def _deleteChemShifts(shifts):
+        # #     """Delete chemicalShifts that have no attached peaks"""
+        # #     _delCS = [shift for shift in shifts if shift and len(shift.nmrAtom.assignedPeaks) == 0]
+        # #     for cs in _delCS:
+        # #         cs.delete()
+        #
+        # with undoBlockWithoutSideBar(application=_app):
+        #     # add notifiers to stack
+        #     with undoStackBlocking(application=_app) as addUndoItem:
+        #         for cs in _cs:
+        #             addUndoItem(undo=partial(cs._finaliseAction, 'change'))
+        #
+        #     # set the value
+        #     self._assignedNmrAtoms = value
+        #
+        #     _csNew = set(makeIterableList([shift for nmrAt in (_pre | _post) for shift in nmrAt._chemicalShifts]))
+        #     # _deleteChemShifts(_cs)
+        #     for cs in _cs:
+        #         cs._finaliseAction('change')
+        #     for cs in _csNew - _cs:
+        #         cs._finaliseAction('create')
+        #
+        #     # add notifiers to stack
+        #     with undoStackBlocking(application=_app) as addUndoItem:
+        #         for cs in _cs:
+        #             addUndoItem(redo=partial(cs._finaliseAction, 'change'))
+        #         for cs in _csNew - _cs:
+        #             addUndoItem(undo=partial(cs._finaliseAction, 'delete'),
+        #                         redo=partial(cs._finaliseAction, 'create'))
 
     # alternativeNames
     assignments = assignedNmrAtoms
@@ -743,42 +740,45 @@ class Peak(AbstractWrapperObject):
             value = [value]
         dimensionNmrAtoms = list(self.dimensionNmrAtoms)
 
-        # store the currently attached nmrAtoms
-        _pre = set(makeIterableList(dimensionNmrAtoms))
         dimensionNmrAtoms[axis] = value
-        _post = set(makeIterableList(dimensionNmrAtoms))
+        self.dimensionNmrAtoms = dimensionNmrAtoms
 
-        _cs = set(makeIterableList([shift for nmrAt in (_pre | _post) for shift in nmrAt.chemicalShifts]))
-        _app = self.project.application
-
-        # def _deleteChemShifts(shifts):
-        #     """Delete chemicalShifts that have no attached peaks"""
-        #     _delCS = [shift for shift in shifts if shift and len(shift.nmrAtom.assignedPeaks) == 0]
-        #     for cs in _delCS:
-        #         cs.delete()
-
-        with undoBlockWithoutSideBar(application=_app):
-            # add notifiers to stack
-            with undoStackBlocking(application=_app) as addUndoItem:
-                for cs in _cs:
-                    addUndoItem(undo=partial(cs._finaliseAction, 'change'))
-
-            # set the value
-            self._dimensionNmrAtoms = dimensionNmrAtoms
-            _csNew = set(makeIterableList([shift for nmrAt in (_pre | _post) for shift in nmrAt.chemicalShifts]))
-            # _deleteChemShifts(_cs)
-            for cs in _cs - _csNew:
-                cs._finaliseAction('change')
-            for cs in _csNew - _cs:
-                cs._finaliseAction('create')
-
-            # add notifiers to stack
-            with undoStackBlocking(application=_app) as addUndoItem:
-                for cs in _cs - _csNew:
-                    addUndoItem(redo=partial(cs._finaliseAction, 'change'))
-                for cs in _csNew - _cs:
-                    addUndoItem(undo=partial(cs._finaliseAction, 'delete'),
-                                redo=partial(cs._finaliseAction, 'create'))
+        # # store the currently attached nmrAtoms
+        # _pre = set(makeIterableList(dimensionNmrAtoms))
+        # dimensionNmrAtoms[axis] = value
+        # _post = set(makeIterableList(dimensionNmrAtoms))
+        #
+        # _cs = set(makeIterableList([shift for nmrAt in (_pre | _post) for shift in nmrAt._chemicalShifts]))
+        # _app = self.project.application
+        #
+        # # def _deleteChemShifts(shifts):
+        # #     """Delete chemicalShifts that have no attached peaks"""
+        # #     _delCS = [shift for shift in shifts if shift and len(shift.nmrAtom.assignedPeaks) == 0]
+        # #     for cs in _delCS:
+        # #         cs.delete()
+        #
+        # with undoBlockWithoutSideBar(application=_app):
+        #     # add notifiers to stack
+        #     with undoStackBlocking(application=_app) as addUndoItem:
+        #         for cs in _cs:
+        #             addUndoItem(undo=partial(cs._finaliseAction, 'change'))
+        #
+        #     # set the value
+        #     self._dimensionNmrAtoms = dimensionNmrAtoms
+        #     _csNew = set(makeIterableList([shift for nmrAt in (_pre | _post) for shift in nmrAt._chemicalShifts]))
+        #     # _deleteChemShifts(_cs)
+        #     for cs in _cs - _csNew:
+        #         cs._finaliseAction('change')
+        #     for cs in _csNew - _cs:
+        #         cs._finaliseAction('create')
+        #
+        #     # add notifiers to stack
+        #     with undoStackBlocking(application=_app) as addUndoItem:
+        #         for cs in _cs - _csNew:
+        #             addUndoItem(redo=partial(cs._finaliseAction, 'change'))
+        #         for cs in _csNew - _cs:
+        #             addUndoItem(undo=partial(cs._finaliseAction, 'delete'),
+        #                         redo=partial(cs._finaliseAction, 'create'))
 
     def getByAxisCodes(self, attributeName: str, axisCodes: Sequence[str] = None, exactMatch: bool = False):
         """Return values defined by attributeName in order defined by axisCodes:
@@ -917,23 +917,21 @@ class Peak(AbstractWrapperObject):
                 mt._finaliseAction('change')
             # NOTE:ED does integral need to be notified? - and reverse notifiers in multiplet/integral
 
-        if action in ['change']:
-            # if the assignedNmrAtoms have changed then notify
-            # This contains the pre-post set to handle updating the chemicalShift table
-            nmrAtoms = getattr(self, DIMENSIONNMRATOMSCHANGED, None)
-            if nmrAtoms:
-                for nmrAtom in nmrAtoms:
-                    if not (nmrAtom.isDeleted or nmrAtom._flaggedForDelete):
-                        nmrAtom._finaliseAction(action)
-            setattr(self, DIMENSIONNMRATOMSCHANGED, None)
-
-            # if the chemicalShifts have changed then notify, handles chemicalShift table
-            shifts = getattr(self, RECALCULATESHIFTVALUE, None)
-            if shifts:
-                for cs in shifts:
-                    if not (cs.isDeleted or cs._flaggedForDelete):
-                        cs._finaliseAction(action)
-            setattr(self, RECALCULATESHIFTVALUE, None)
+        # if action in ['change']:
+        #     # if the assignedNmrAtoms have changed then notify
+        #     # This contains the pre-post set to handle updating the chemicalShift table
+        #     nmrAtoms = getattr(self, DIMENSIONNMRATOMSCHANGED, [])
+        #     for nmrAtom in nmrAtoms:
+        #         if not (nmrAtom.isDeleted or nmrAtom._flaggedForDelete):
+        #             nmrAtom._finaliseAction(action)
+        #     setattr(self, DIMENSIONNMRATOMSCHANGED, None)
+        #
+        #     # if the chemicalShifts have changed then notify, handles chemicalShift table
+        #     shifts = getattr(self, RECALCULATESHIFTVALUE, [])
+        #     for cs in shifts:
+        #         if not (cs.isDeleted or cs._flaggedForDelete):
+        #             cs._finaliseAction(action)
+        #     setattr(self, RECALCULATESHIFTVALUE, None)
 
     # in baseclass
     # @deleteObject()
@@ -945,38 +943,45 @@ class Peak(AbstractWrapperObject):
 
     def delete(self):
         """Delete a peak."""
-        dimensionNmrAtoms = list(self.dimensionNmrAtoms)
+        assigned = tuple(() for _ in range(self.peakList.spectrum.dimensionCount))
 
-        _pre = set(makeIterableList(dimensionNmrAtoms))
-        _cs = set(makeIterableList([shift for nmrAt in _pre for shift in nmrAt.chemicalShifts]))
-        _app = self.project.application
+        with undoBlockWithoutSideBar():
 
-        # def _deleteChemShifts(shifts):
-        #     """Delete chemicalShifts that have no attached peaks"""
-        #     _delCS = [shift for shift in shifts if shift and len(shift.nmrAtom.assignedPeaks) == 0]
-        #     for cs in _delCS:
-        #         cs.delete()
-
-        with undoBlockWithoutSideBar(application=_app):
-            # add notifiers to stack
-            with undoStackBlocking(application=_app) as addUndoItem:
-                for cs in _cs:
-                    addUndoItem(undo=cs.recalculateShiftValue)
-                    addUndoItem(redo=partial(cs._finaliseAction, 'change'))
-
-            # delete the peak - notifiers handled by decorator
+            self.dimensionNmrAtoms = assigned
             self._delete()
-            # _deleteChemShifts(_cs)
-            for cs in _cs:
-                # NOTE:ED - check whether recalculate is firing any notifiers
-                cs.recalculateShiftValue()
-                cs._finaliseAction('change')
 
-            # add notifiers to stack
-            with undoStackBlocking(application=_app) as addUndoItem:
-                for cs in _cs:
-                    addUndoItem(undo=cs.recalculateShiftValue)
-                    addUndoItem(redo=partial(cs._finaliseAction, 'change'))
+        # dimensionNmrAtoms = list(self.dimensionNmrAtoms)
+        #
+        # _pre = set(makeIterableList(dimensionNmrAtoms))
+        # _cs = set(makeIterableList([shift for nmrAt in _pre for shift in nmrAt._chemicalShifts]))
+        # _app = self.project.application
+        #
+        # # def _deleteChemShifts(shifts):
+        # #     """Delete chemicalShifts that have no attached peaks"""
+        # #     _delCS = [shift for shift in shifts if shift and len(shift.nmrAtom.assignedPeaks) == 0]
+        # #     for cs in _delCS:
+        # #         cs.delete()
+        #
+        # with undoBlockWithoutSideBar(application=_app):
+        #     # add notifiers to stack
+        #     with undoStackBlocking(application=_app) as addUndoItem:
+        #         for cs in _cs:
+        #             addUndoItem(undo=cs._recalculateShiftValue)
+        #             addUndoItem(redo=partial(cs._finaliseAction, 'change'))
+        #
+        #     # delete the peak - notifiers handled by decorator
+        #     self._delete()
+        #     # _deleteChemShifts(_cs)
+        #     for cs in _cs:
+        #         # NOTE:ED - check whether recalculate is firing any notifiers
+        #         cs._recalculateShiftValue()
+        #         cs._finaliseAction('change')
+        #
+        #     # add notifiers to stack
+        #     with undoStackBlocking(application=_app) as addUndoItem:
+        #         for cs in _cs:
+        #             addUndoItem(undo=cs._recalculateShiftValue)
+        #             addUndoItem(redo=partial(cs._finaliseAction, 'change'))
 
     #=========================================================================================
     # CCPN functions

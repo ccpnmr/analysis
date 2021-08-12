@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:19:59 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-22 12:06:50 +0100 (Sun, August 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -40,10 +40,12 @@ from ccpn.util.Common import makeIterableList
 from ccpn.util.decorators import logCommand
 from ccpn.util.isotopes import isotopeCode2Nucleus, getIsotopeRecords
 from ccpn.core.lib.ContextManagers import newObject, undoBlock, renameObjectContextManager, undoStackBlocking
+from ccpn.core.lib.ContextManagers import newObject, renameObject, deleteV3Object, \
+    undoBlock, undoStackBlocking
 from ccpn.util.Logging import getLogger
 
 
-ASSIGNEDPEAKSCHANGED = '_assignedPeaksChanged'
+# ASSIGNEDPEAKSCHANGED = '_assignedPeaksChanged'
 UnknownIsotopeCode = '?'
 
 
@@ -327,6 +329,8 @@ class NmrAtom(AbstractWrapperObject):
             for nmrAtom in nmrAtoms:
                 absorbResonance(self, nmrAtom)
 
+                # TODO:ED - update shifts
+
     @property
     def chemicalShifts(self) -> Tuple:
         """Returns ChemicalShift objects connected to NmrAtom"""
@@ -362,34 +366,42 @@ class NmrAtom(AbstractWrapperObject):
         """
         return parent._wrappedData.sortedResonances()
 
-    def _finaliseAction(self, action: str):
-        """Subclassed to handle associated ChemicalShift instances
-        """
-        if not super()._finaliseAction(action):
-            return
-
-        # propagate the rename to associated ChemicalShift instances
-        if action in ['rename', 'delete', 'change', 'create']:
-            for cs in self.chemicalShifts:
-                if cs and not (cs.isDeleted or cs._flaggedForDelete):
-                    # copy same action to the chemicalShift as one-one relation
-                    # so delete => delete and create => create
-                    cs._finaliseAction(action)
-
-            # if the assignedPeaks have changed then notifier the peaks
-            # This contains the pre-post set to handle updating the peakTable/spectrumDisplay
-            peaks = getattr(self, ASSIGNEDPEAKSCHANGED, None)
-            if peaks:
-                for peak in peaks:
-                    if not (peak.isDeleted or peak._flaggedForDelete):
-                        peak._finaliseAction('change')
-            setattr(self, ASSIGNEDPEAKSCHANGED, None)
+    # def _finaliseAction(self, action: str):
+    #     """Subclassed to handle associated ChemicalShift instances
+    #     """
+    #     if not super()._finaliseAction(action):
+    #         # called many times from the api
+    #         return
+    #
+    #     # print(f'  {self} ACTIONS   {self._finaliseChildren}')
+    #     # # propagate the action to associated ChemicalShift instances
+    #     # for obj, action, params in self._finaliseChildren:
+    #     #     obj._finaliseAction(action, params)
+    #     # self._finaliseChildren = []
+    #
+    #     # propagate the rename to associated ChemicalShift instances
+    #     # if action in ['rename', 'delete', 'change', 'create']:
+    #     #     for cs in self._chemicalShifts:
+    #     #         if cs and not cs.isDeleted: # or cs._flaggedForDelete):
+    #     #             # copy same action to the chemicalShift as one-one relation
+    #     #             # so delete => delete and create => create
+    #     #             cs._finaliseAction('change', nmrAtom=self)
+    #     #
+    #     #     # if the assignedPeaks have changed then notifier the peaks
+    #     #     # This contains the pre-post set to handle updating the peakTable/spectrumDisplay
+    #     #     peaks = getattr(self, ASSIGNEDPEAKSCHANGED, None)
+    #     #     if peaks:
+    #     #         for peak in peaks:
+    #     #             if not (peak.isDeleted or peak._flaggedForDelete):
+    #     #                 peak._finaliseAction('change')
+    #     #     setattr(self, ASSIGNEDPEAKSCHANGED, None)
 
     def _setApiName(self, name):
         # set a serial format name of the form ?@<n> from the current serial number
         # functionality provided by the api
         self._wrappedData.name = None
 
+    @renameObject()
     def _makeUniqueName(self) -> str:
         """Generate a unique name in the form @n (e.g. @_123) or @symbol_n (e.g. @H_34)
         :return the generated name
@@ -413,6 +425,7 @@ class NmrAtom(AbstractWrapperObject):
             name = '%s_%d' %(cls._defaultName(), id)
         return super(NmrAtom, cls)._uniqueName(project=project, name=name)
 
+    @renameObject()
     @logCommand(get='self')
     def rename(self, value: str = None):
         """Rename the NmrAtom, changing its name, Pid, and internal representation.
@@ -431,21 +444,38 @@ class NmrAtom(AbstractWrapperObject):
         if previous is not None:
             raise ValueError('NmrAtom.rename: "%s" conflicts with' % (value, previous))
 
-        with renameObjectContextManager(self) as addUndoItem:
-            oldName = self.name
-            self._oldPid = self.pid
+        # with renameObjectContextManager(self) as addUndoItem:
+        isotopeCode = self.isotopeCode
+        oldName = self.name
+        self._oldPid = self.pid
 
-            self._wrappedData.isotopeCode = UnknownIsotopeCode
-            self._wrappedData.name = value
-            self._resetIds()
+        self._wrappedData.isotopeCode = UnknownIsotopeCode
+        self._wrappedData.name = value
+        self._wrappedData.isotopeCode = isotopeCode
 
-            addUndoItem(undo=partial(self.rename, oldName),
-                        redo=partial(self.rename, value))
+            # addUndoItem(undo=partial(self.rename, oldName),
+            #             redo=partial(self.rename, value))
 
-            # if isotopeChanged:
-            #     addUndoItem(undo=partial(self._setIsotopeCode, isotopeCode))
+        self._childActions.append(self._renameChemicalShifts)
+        self._finaliseChildren.extend((sh, 'change') for sh in self._chemicalShifts)
 
         return (oldName,)
+
+    def _renameChemicalShifts(self):
+        # update chemicalShifts
+        for cs in self._chemicalShifts:
+            cs._renameNmrAtom(self)
+
+    def delete(self):
+        """Delete self and update the chemicalShift values
+        """
+        shifts = list(self._chemicalShifts)
+
+        with undoBlock():
+            for sh in shifts:
+                sh.nmrAtom = None
+            # delete the nmrAtom - notifiers handled by decorator
+            self._delete()
 
     #=========================================================================================
     # CCPN functions
@@ -501,7 +531,6 @@ class NmrAtom(AbstractWrapperObject):
         else:
             return None, None
 
-        print(f'>>>  _recalculateShiftValue    {mean}   {sigma}')
         return mean, sigma
 
     #=========================================================================================

@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-05 18:55:49 +0100 (Thu, August 05, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-12 03:45:44 +0100 (Thu, August 12, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -39,12 +39,12 @@ from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
-from ccpn.core._ChemicalShift import UNIQUEID, \
+from ccpn.core._ChemicalShift import UNIQUEID, ISDELETED, \
     VALUE, VALUEERROR, FIGUREOFMERIT, \
     NMRATOM, CHAINCODE, SEQUENCECODE, RESIDUETYPE, ATOMNAME, \
-    SHIFTLISTPEAKS, ALLPEAKS, \
-    COMMENT, \
-    SHIFTCOLUMNS, SHIFTTABLECOLUMNS
+    ALLPEAKS, SHIFTLISTPEAKSCOUNT, ALLPEAKSCOUNT, \
+    COMMENT, CSOBJ, \
+    SHIFTCOLUMNS, SHIFTTABLECOLUMNS, _ChemicalShift
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import makeIterableList
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -152,7 +152,7 @@ class ChemicalShiftTable(GuiTable):
     className = 'ChemicalShiftListTable'
     attributeName = 'chemicalShiftLists'
 
-    PRIMARYCOLUMN = 'uniqueId'  # column holding active objects (uniqueId for this table)
+    PRIMARYCOLUMN = CSOBJ # column holding active objects (uniqueId for this table)
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None,
                  actionCallback=None, selectionCallback=None,
@@ -217,8 +217,8 @@ class ChemicalShiftTable(GuiTable):
                          dataFrameObject=None,
                          setLayout=True,
                          autoResize=True, multiSelect=True,
-                         actionCallback=actionCallback if actionCallback else self._actionCallback,
-                         selectionCallback=selectionCallback if selectionCallback else self._selectionCallback,
+                         actionCallback=actionCallback,
+                         selectionCallback=selectionCallback,
                          grid=(3, 0), gridSpan=(1, 6),
                          )
         self.moduleParent = moduleParent
@@ -249,19 +249,18 @@ class ChemicalShiftTable(GuiTable):
         if chemicalShiftList is not None:
             self._selectChemicalShiftList(chemicalShiftList)
 
-        # self.setTableNotifiers(tableClass=ChemicalShiftList,
-        #                        className=self.attributeName,
-        #                        tableSelection='chemicalShiftList',
-        #                        rowClass=ChemicalShift,
-        #                        cellClassNames=(NmrAtom, 'chemicalShifts'),
-        #                        tableName='chemicalShiftList', rowName='chemicalShift',
-        #                        changeFunc=self.displayTableForChemicalShift,
-        #                        updateFunc=self._update,
-        #                        pullDownWidget=self.CScolumns,
-        #                        callBackClass=ChemicalShift,
-        #                        selectCurrentCallBack=self._selectOnTableCurrentChemShiftNotifierCallback,
-        #                        searchCallBack=None,
-        #                        moduleParent=moduleParent)
+        self.setTableNotifiers(tableClass=ChemicalShiftList,
+                               rowClass=_ChemicalShift,
+                               # cellClassNames=(NmrAtom, '_chemicalShifts'),
+                               tableName='chemicalShiftList', rowName='_chemicalShift',
+                               # changeFunc=self.displayTableForChemicalShift,
+                               className=self.attributeName,
+                               # updateFunc=self._update,
+                               # tableSelection='chemicalShiftList',
+                               pullDownWidget=self._chemicalShiftListPulldown,
+                               callBackClass=_ChemicalShift,
+                               # selectCurrentCallBack=self._selectOnTableCurrentChemShiftNotifierCallback,
+                               moduleParent=moduleParent)
 
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
@@ -371,7 +370,7 @@ class ChemicalShiftTable(GuiTable):
         Notifier Callback for selecting a row in the table
         """
         objs = data[CallBack.OBJECT]
-        self.current.chemicalShifts = objs or []
+        # self.current._chemicalShifts = objs or []
 
         if objs:
             nmrResidues = tuple(set(cs.nmrAtom.nmrResidue for cs in objs))
@@ -478,8 +477,8 @@ class ChemicalShiftTable(GuiTable):
             chemShift = data.get(DATAFRAME_OBJECT)
             currentNmrAtom = chemShift.nmrAtom if chemShift else None
 
-            selection = [ch.nmrAtom for ch in selection or []]
-            _check = (currentNmrAtom and (1 < len(selection) < 5) and currentNmrAtom in selection)
+            selection = [ch.nmrAtom for ch in selection or [] if ch.nmrAtom]
+            _check = (currentNmrAtom and (1 < len(selection) < 5) and currentNmrAtom in selection) or False
             _option = ' into {}'.format(currentNmrAtom.id if currentNmrAtom else '') if _check else ''
             self._mergeMenuAction.setText('Merge NmrAtoms {}'.format(_option))
             self._mergeMenuAction.setEnabled(_check)
@@ -659,7 +658,7 @@ class ChemicalShiftTable(GuiTable):
 
         except Exception as es:
             getLogger().warning('Error populating table', str(es))
-            raise es
+            # raise es
 
         finally:
             self._highLightObjs(objs)
@@ -724,8 +723,8 @@ class ChemicalShiftTable(GuiTable):
 
                 # NOTE:ED - fix this
 
-                _peakObjects = tuple(_getValueByHeader(row, 3) for row in self._dataFrameObject.objects)
-                rows = [self._dataFrameObject.find(self, str(obj.uniqueId), column='uniqueId', multiRow=True) for obj in uniqObjs]
+                _shiftObjects = tuple(_getValueByHeader(row, 3) for row in self._dataFrameObject.objects)
+                rows = [self._dataFrameObject.find(self, str(obj.pid), column=CSOBJ, multiRow=True) for obj in uniqObjs]
                 # if obj in _peakObjects and obj.peakList == self._selectedPeakList]
                 rows = [row for row in set(makeIterableList(rows)) if row is not None]
                 if rows:
@@ -773,7 +772,15 @@ class ChemicalShiftTable(GuiTable):
         self._columns = ColumnClass(_cols)
 
         if self.chemicalShiftList._wrappedData.data is not None:
-            _table = self.chemicalShiftList._wrappedData.data
+            _table = self.chemicalShiftList._wrappedData.data.copy()
+            _table = _table[_table[ISDELETED] == False]
+            _table.set_index(_table[UNIQUEID], inplace=True,) # drop=False)
+
+            _table.insert(SHIFTTABLECOLUMNS.index(ALLPEAKS), ALLPEAKS, None)
+            _table.insert(SHIFTTABLECOLUMNS.index(SHIFTLISTPEAKSCOUNT), SHIFTLISTPEAKSCOUNT, None)
+            _table.insert(SHIFTTABLECOLUMNS.index(ALLPEAKSCOUNT), ALLPEAKSCOUNT, None)
+
+            _table[CSOBJ] = [self.chemicalShiftList._getChemicalShift(uniqueId=unq) for unq in _table[UNIQUEID]]
 
             # add columns for SHIFTLISTPEAKS and ALLPEAKS
             nmrAtoms = _table[NMRATOM]
@@ -787,7 +794,7 @@ class ChemicalShiftTable(GuiTable):
                                          table=table,
                                          )
             # extract the row objects from the dataFrame
-            _objects = [row for row in _dataFrame.dataFrame.itertuples()]
+            _objects = [row for row in _table.itertuples()]
             _dataFrame._objects = _objects
 
             return _dataFrame
@@ -803,3 +810,80 @@ class ChemicalShiftTable(GuiTable):
         self.setData(dataFrame.values)
         # self._updateGroups(dataFrame)
         # self.updateTableExpanders()
+
+    def _updateRowCallback(self, data):
+        """
+        Notifier callback for updating the table for change in nmrRows
+        :param data:
+        """
+
+        def _newRowFromUniqueId(data, obj, uniqueId):
+            # NOTE:ED - this needs to go elsewhere
+            _row = data.loc[uniqueId]
+            # make the new row - put into method
+            newRow = _row[:ATOMNAME].copy()
+            _comment = _row[COMMENT:]
+            _extraCols = pd.Series([None, None, None], index=[ALLPEAKS, SHIFTLISTPEAKSCOUNT, ALLPEAKSCOUNT])
+            newRow = newRow.append([_extraCols, _comment])
+            newRow[CSOBJ] = obj
+            return newRow
+
+        with self._tableBlockSignals('_updateRowCallback'):
+            obj = data[Notifier.OBJECT]
+            uniqueId = obj.uniqueId
+
+            if not self._dataFrameObject or obj is None:
+                return
+            if obj.chemicalShiftList != self.chemicalShiftList:
+                return
+
+            _update = False
+
+            trigger = data[Notifier.TRIGGER]
+            try:
+                _df = self.chemicalShiftList._data
+                _df = _df[_df[ISDELETED] == False]  # not deleted
+                # the column containing the uniqueId
+                col = SHIFTTABLECOLUMNS.index(UNIQUEID)
+                tableIds = tuple(self.item(rr, col).value for rr in range(self.rowCount()))
+
+                if trigger == Notifier.DELETE:
+                    # uniqueIds in the visible table
+                    # tableIds = [(rr, self.item(rr, col).value) for rr in range(self.rowCount())]
+                    if uniqueId in (set(tableIds) - set(_df[UNIQUEID])):
+                        # remove from the table
+                        self._dataFrameObject._dataFrame.drop([uniqueId], inplace=True)
+                        self.removeRow(tableIds.index(uniqueId))
+
+                elif trigger == Notifier.CREATE:
+                    # uniqueIds in the visible table
+                    if uniqueId in (set(_df[UNIQUEID]) - set(tableIds)):
+                        newRow = _newRowFromUniqueId(_df, obj, uniqueId)
+                        # visible table dataframe update
+                        self._dataFrameObject._dataFrame.loc[uniqueId] = newRow
+                        # update the table widgets - really need to change to QTableView (think it was actually this before)
+                        self.addRow(newRow)
+
+                elif trigger == Notifier.CHANGE:
+                    # uniqueIds in the visible table
+                    if uniqueId in (set(_df[UNIQUEID]) & set(tableIds)):
+                        newRow = _newRowFromUniqueId(_df, obj, uniqueId)
+                        # visible table dataframe update
+                        self._dataFrameObject._dataFrame.loc[uniqueId] = newRow
+                        # update the table widgets - really need to change to QTableView (think it was actually this before)
+                        self.setRow(tableIds.index(uniqueId), newRow)
+
+                elif trigger == Notifier.RENAME:
+                    pass
+
+            except Exception as es:
+                getLogger().debug2(f'Error updating row in table {es}')
+
+        if _update:
+            getLogger().debug2('<updateRowCallback>', data['notifier'],
+                               self._tableData['tableSelection'],
+                               data['trigger'], data['object'])
+            _val = self.getSelectedObjects() or []
+            self._tableSelectionChanged.emit(_val)
+
+        return _update

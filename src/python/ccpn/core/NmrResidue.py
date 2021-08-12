@@ -45,7 +45,7 @@ from ccpn.util.Logging import getLogger
 
 # Value used for sorting with no offset - puts no_offset just before offset +0
 SORT_NO_OFFSET = -0.1
-ASSIGNEDPEAKSCHANGED = '_assignedPeaksChanged'
+# ASSIGNEDPEAKSCHANGED = '_assignedPeaksChanged'
 
 
 class NmrResidue(AbstractWrapperObject):
@@ -1172,30 +1172,37 @@ class NmrResidue(AbstractWrapperObject):
     # for xx in nmrResidue.offsetNmrResidues:
     #     xx._finaliseAction('rename')
 
-    def _finaliseAction(self, action: str):
-        """Subclassed to handle associated offsetNMrResidues
-        """
-        if not super()._finaliseAction(action):
-            return
-
-        if action in ['rename']:
-            for xx in self.offsetNmrResidues:
-                xx._finaliseAction('rename')
-
-        if action in ['rename', 'delete', 'change']:
-            # if the assignedPeaks have changed then notifier the peaks
-            # This contains the pre-post set to handle updating the peakTable/spectrumDisplay
-            peaks = getattr(self, ASSIGNEDPEAKSCHANGED, None)
-            if peaks:
-                for peak in peaks:
-                    if not (peak.isDeleted or peak._flaggedForDelete):
-                        peak._finaliseAction('change')
-            setattr(self, ASSIGNEDPEAKSCHANGED, None)
-
-        if action in ['rename', 'delete', 'create']:
-            # don't think I need a change here
-            for nmrAtom in self.nmrAtoms:
-                nmrAtom._finaliseAction(action)
+    # def _finaliseAction(self, action: str):
+    #     """Subclassed to handle associated offsetNMrResidues
+    #     """
+    #     if not super()._finaliseAction(action):
+    #         return
+    #
+    #     # print(f'_finaliseAction ACTIONS      {self}   {self._finaliseChildren}')
+    #     # # propagate the action to associated ChemicalShift instances
+    #     # for obj, action, params in self._finaliseChildren:
+    #     #     obj._finaliseAction(action, params)
+    #     # self._finaliseChildren = []
+    #
+    #     # if action in ['rename']:
+    #     #     for xx in self.offsetNmrResidues:
+    #     #         xx._finaliseAction('rename')
+    #
+    #     # if action in ['rename', 'delete', 'change']:
+    #     #     # if the assignedPeaks have changed then notifier the peaks
+    #     #     # This contains the pre-post set to handle updating the peakTable/spectrumDisplay
+    #     #     peaks = getattr(self, ASSIGNEDPEAKSCHANGED, None)
+    #     #     if peaks:
+    #     #         for peak in peaks:
+    #     #             if not (peak.isDeleted or peak._flaggedForDelete):
+    #     #                 peak._finaliseAction('change')
+    #     #     setattr(self, ASSIGNEDPEAKSCHANGED, None)
+    #
+    #     # if action in ['rename', 'delete', 'create']: # rename should handle 'rename
+    #     if action in ['delete', 'create']:
+    #         # don't think I need a change here - undo/redo?
+    #         for nmrAtom in self.nmrAtoms:
+    #             nmrAtom._finaliseAction(action)
 
     def _delete(self):
         """Delete object, with all contained objects and underlying data.
@@ -1269,7 +1276,19 @@ class NmrResidue(AbstractWrapperObject):
         # rename functions from here
         apiResonanceGroup.sequenceCode = sequenceCode
         apiResonanceGroup.resetResidueType(residueType)
+        self._renameChildren()
+
         return (oldName,)
+
+    def _renameChildren(self):
+        """Update the chemicalShifts to the rename
+        """
+        for nmr in self.nmrAtoms:
+            # actions to be called outside of rename - must be last thing to set?
+            nmr._childActions.append(nmr._renameChemicalShifts)
+            nmr._finaliseChildren.extend((sh, 'change') for sh in nmr._chemicalShifts)
+        for offsetRes in self.offsetNmrResidues:
+            self._finaliseChildren.append((offsetRes, 'rename'))
 
     #=========================================================================================
     # CCPN functions

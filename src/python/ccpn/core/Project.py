@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-05 18:55:49 +0100 (Thu, August 05, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-12 03:45:43 +0100 (Thu, August 12, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -138,38 +138,81 @@ class Project(AbstractWrapperObject):
 
     @property
     def spectra(self):
-        "STUB: hot-fixed later"
+        """STUB: hot-fixed later"""
         return ()
 
     @property
     def peakLists(self):
-        "STUB: hot-fixed later"
+        """STUB: hot-fixed later"""
         return ()
 
     @property
     def peaks(self):
-        "STUB: hot-fixed later"
+        """STUB: hot-fixed later"""
         return ()
 
     @property
     def multipletLists(self):
-        "STUB: hot-fixed later"
+        """STUB: hot-fixed later"""
         return ()
 
     @property
     def integralLists(self):
-        "STUB: hot-fixed later"
+        """STUB: hot-fixed later"""
         return ()
 
     @property
     def spectrumViews(self):
-        "STUB: hot-fixed later"
+        """STUB: hot-fixed later"""
         return ()
 
     @property
     def chemicalShiftLists(self):
-        "STUB: hot-fixed later"
+        """STUB: hot-fixed later"""
         return None
+
+    @property
+    def _chemicalShifts(self):
+        """Return the list of chemicalShifts in the project
+        This is the _ChemicalShift class to be renamed later
+        """
+        _shifts = []
+        for shiftList in self.chemicalShiftLists:
+            _shifts.extend(shiftList._chemicalShifts)
+        return _shifts
+
+    def get_ChemicalShift(self, relativeId: str) -> Optional['_ChemicalShift']:
+        """Return the chemicalShift from the supplied relativeId
+        """
+        from ccpn.core._ChemicalShift import _ChemicalShift
+
+        dd = self._project._pid2Obj.get(_ChemicalShift.className)
+        if dd:
+            if self is self._project:
+                key = '{}'.format(relativeId)
+            else:
+                # shouldn't get here
+                key = '{}{}{}'.format(self._id, Pid.IDSEP, relativeId)
+            return dd.get(key)
+        else:
+            return None
+
+    def _finalisePid2Obj(self, obj, action):
+        """New/Delete object to the general dict for v3 pids
+        """
+        # update pid:object mapping dictionary
+        dd = self._pid2Obj.get(obj.className)
+        if dd is None:
+            # create new dict item if not found
+            dd = {}
+            self._pid2Obj[obj.className] = dd
+            self._pid2Obj[obj.shortClassName] = dd
+
+        # set/delete on action
+        if action == 'create':
+            dd[obj.id] = obj
+        elif action == 'delete':
+            del dd[obj.id]
 
     # Inherited from AbstractWrapperObject
 
@@ -343,6 +386,9 @@ class Project(AbstractWrapperObject):
         # _nextUniqueIdValues = {}    # a (className, nexIdValue) dictionary
         if not hasattr(self._wrappedData, '_nextUniqueIdValues'):
             setattr(self._wrappedData, '_nextUniqueIdValues', {})
+        if self._wrappedData._nextUniqueIdValues is None:
+            self._wrappedData._nextUniqueIdValues = {}
+
         nextUniqueId = self._wrappedData._nextUniqueIdValues.setdefault(className, 0)
         return nextUniqueId
 

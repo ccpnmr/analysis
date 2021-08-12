@@ -356,7 +356,11 @@ class NmrChain(AbstractWrapperObject):
         # rename functions from here
         oldName = self.shortName
         self._oldPid = self.pid
+
         wrappedData.code = value
+        for nmrRes in self.nmrResidues:
+            nmrRes._renameChildren()
+
         return (oldName,)
 
     def _finaliseAction(self, action):

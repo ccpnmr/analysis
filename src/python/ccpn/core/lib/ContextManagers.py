@@ -852,7 +852,7 @@ def deleteWrapperWithoutSideBar():
     return theDecorator
 
 
-def newV3Object(klass):
+def newV3Object():
     """ A decorator to wrap the creation of pure v3 method of the V3 core classes
     calls self._finalise('create') post-creation
     """
@@ -861,7 +861,7 @@ def newV3Object(klass):
     def theDecorator(*args, **kwds):
         func = args[0]
         args = args[1:]  # Optional 'self' is now args[0]
-        self = args[0]
+        # self = args[0]
         application = getApplication()  # pass it in to reduce overhead
 
         with notificationBlanking(application=application):
@@ -874,17 +874,58 @@ def newV3Object(klass):
 
                 # call the wrapped function
                 result = func(*args, **kwds)
-                if not isinstance(result, klass):
-                    raise RuntimeError(f'Expected an object of class {klass}, obtained {result.__class__}')
+                # application.project._finalisePid2Obj(result, 'create')
+
+                with undoStackBlocking(application=application) as addUndoItem:
+                    # incorporate the change notifier to simulate the decorator
+                    # addUndoItem(undo=partial(application.project._finalisePid2Obj, result, 'delete'),
+                    #             redo=partial(application.project._finalisePid2Obj, result, 'create'))
+                    addUndoItem(undo=application.project.blankNotification,
+                                redo=application.project.unblankNotification)
+                    addUndoItem(undo=partial(result._finaliseAction, 'delete'),
+                                redo=partial(result._finaliseAction, 'create'))
+
+        result._finaliseAction('create')
+        return result
+
+    return theDecorator
+
+
+def deleteV3Object():
+    """ A decorator to wrap the delete(self) method of the V3 core classes
+    calls self._finalise('delete') prior to deletion
+    """
+
+    @decorator.decorator
+    def theDecorator(*args, **kwds):
+        func = args[0]
+        args = args[1:]  # Optional 'self' is now args[0]
+        self = args[0]
+        application = getApplication()  # pass it in to reduce overhead
+
+        self._finaliseAction('delete')
+
+        with notificationBlanking(application=application):
+            with undoBlockWithoutSideBar():
+                # must be done like this as the undo functions are not known
+                with undoStackBlocking(application=application) as addUndoItem:
+                    # incorporate the change notifier to simulate the decorator
+                    addUndoItem(undo=partial(self._finaliseAction, 'create'),
+                                redo=partial(self._finaliseAction, 'delete'))
+                    addUndoItem(undo=application.project.unblankNotification,
+                                redo=application.project.blankNotification)
+                    # addUndoItem(undo=partial(application.project._finalisePid2Obj, self, 'create'),
+                    #             redo=partial(application.project._finalisePid2Obj, self, 'delete'))
+
+                # application.project._finalisePid2Obj(self, 'delete')
+                # call the wrapped function
+                result = func(*args, **kwds)
 
                 with undoStackBlocking(application=application) as addUndoItem:
                     # incorporate the change notifier to simulate the decorator
                     addUndoItem(undo=application.project.blankNotification,
                                 redo=application.project.unblankNotification)
-                    addUndoItem(redo=partial(result._finaliseAction, 'create'),
-                                undo=partial(result._finaliseAction, 'delete'))
 
-        result._finaliseAction('create')
         return result
 
     return theDecorator
@@ -1063,8 +1104,8 @@ nullContext = nullcontext  # an empty context manager
 
 
 def ccpNmrV3CoreSimple():
-    """A decorator wrap the property setters method in an undo block and triggering the
-    'change' notification
+    """A decorator wrap the property setters method in an undo block
+    Notifiers are not explicitly triggered
     """
 
     @decorator.decorator

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:50 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-12 19:30:59 +0100 (Thu, August 12, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
+# from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
 
 
 class ColumnViewSettingsPopup(CcpnDialogMainWidget):
@@ -98,8 +98,8 @@ class ColumnViewSettings(Frame):
         if columns:
             for i, colum in enumerate(columns):
 
-                # always ignore the special column
-                if colum != DATAFRAME_OBJECT:
+                # always ignore the _internal columns
+                if colum not in self.table._internalColumns:
                     if self.direction == 'v':
                         i += 1
                         cb = CheckBox(self.widgetFrame, text=colum, grid=(i, 1), callback=self.checkBoxCallBack,

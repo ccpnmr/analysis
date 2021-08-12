@@ -34,7 +34,7 @@ from pyqtgraph import TableWidget
 from pyqtgraph.widgets.TableWidget import _defersort
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.DataFrameObject import DataFrameObject, DATAFRAME_OBJECT, \
-    DATAFRAME_INDEX, DATAFRAME_PID
+    DATAFRAME_INDEX, DATAFRAME_PID, DATAFRAME_ISDELETED
 
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.guiSettings import getColours
@@ -231,6 +231,9 @@ GuiTable::item::selected {
 
     PRIMARYCOLUMN = 'Pid'
 
+    _internalColumns = [DATAFRAME_ISDELETED, DATAFRAME_OBJECT] # columns that are always hidden.
+    _hiddenColumns = []
+
     def __init__(self, parent=None,
                  mainWindow=None,
                  dataFrameObject=None,  # collate into a single object that can be changed quickly
@@ -377,8 +380,6 @@ GuiTable::item::selected {
         self._icons = [self.ICON_FILE]
         self._stretchLastSection = stretchLastSection
         self._defaultHeadings = []
-        self._internalColumnTexts = ['isDeleted', DATAFRAME_OBJECT] # columns that are always hidden.
-        self._hiddenColumns = []
 
         # set the minimum size the table can collapse to
         _height = getFontHeight(name=TABLEFONT, size='VLARGE')
@@ -888,7 +889,7 @@ GuiTable::item::selected {
         """
         get a list of currently hidden columns
         """
-        hiddenColumns = self._hiddenColumns + self._internalColumnTexts
+        hiddenColumns = self._hiddenColumns
         ll = list(set(hiddenColumns))
         return [x for x in ll if x in self.columnTexts]
 
@@ -896,18 +897,17 @@ GuiTable::item::selected {
         """
         set a list of columns headers to be hidden from the table.
         """
-        ll = [x for x in texts if x in self.columnTexts]
+        ll = [x for x in texts if x in self.columnTexts and x not in self._internalColumns]
         self._hiddenColumns = ll
         if update:
             self.showColumns(self._dataFrameObject)
-
 
     def hideDefaultColumns(self):
         """If the table is empty then check visible headers against the last header hidden list
         """
         for i, columnName in enumerate(self.columnTexts):
-            # remember to hide th special column
-            if columnName in self._internalColumnTexts:
+            # remember to hide the special column
+            if columnName in self._internalColumns:
                 self.hideColumn(i)
 
     @property
@@ -933,7 +933,7 @@ GuiTable::item::selected {
     @property
     def columnDefinitions(self):
         """
-        return a ccpn ColumnClass obj if  _dataFrameObject is set.
+        return a ccpn ColumnClass obj if _dataFrameObject is set.
         """
         if self._dataFrameObject:
             return self._dataFrameObject.columnDefinitions
@@ -945,8 +945,8 @@ GuiTable::item::selected {
         hiddenColumns = self.getHiddenColumns()
 
         for i, colName in enumerate(self.columnTexts):
-                # always hide the special column DATAFRAME_OBJECT
-            if colName in hiddenColumns:
+            # always hide the internal columns
+            if colName in (hiddenColumns + self._internalColumns):
                 self._hideColumn(colName)
             else:
                 self._showColumn(colName)
@@ -958,8 +958,6 @@ GuiTable::item::selected {
                         icon = QtGui.QIcon(self._icons[0])
                         if header:
                             header.setIcon(icon)
-            if colName == DATAFRAME_OBJECT:
-                self._hideColumn(i)
 
     def _showColumn(self, name):
         if name not in self.columnTexts:
@@ -972,7 +970,7 @@ GuiTable::item::selected {
     def _hideColumn(self, name):
         if name not in self.columnTexts:
             return
-        if not name in self._hiddenColumns:
+        if name not in (self._hiddenColumns + self._internalColumns):
             self._hiddenColumns.append(name)
         i = self.columnTexts.index(name)
         self.hideColumn(i)
@@ -1295,6 +1293,7 @@ GuiTable::item::selected {
             else:
                 # usually called when clicking on a table header when an empty table
                 self.hideDefaultColumns()
+                self.setHiddenColumns(self._hiddenColumns)
                 self.setRowCount(0)
 
             # resize the columns if required (true by default)
@@ -1344,8 +1343,7 @@ GuiTable::item::selected {
         try:
             _dataFrameObject = self.getDataFrameFromList(table=self,
                                                          buildList=rowObjects,
-                                                         colDefs=columnDefs,
-                                                         hiddenColumns=self._hiddenColumns)
+                                                         colDefs=columnDefs)
 
             # populate from the Pandas dataFrame inside the dataFrameObject
             self.setTableFromDataFrameObject(dataFrameObject=_dataFrameObject, columnDefs=columnDefs)
@@ -1378,7 +1376,7 @@ GuiTable::item::selected {
 
                 # store the current headings, in case table is cleared, to stop table jumping
                 self._defaultHeadings = dataFrameObject.headings
-                self.setHiddenColumns(self.getHiddenColumns())# dataFrameObject.hiddenColumns
+                self.setHiddenColumns(self.getHiddenColumns())
 
                 if columnDefs:
                     for col, colFormat in enumerate(columnDefs.formats):
@@ -1401,7 +1399,7 @@ GuiTable::item::selected {
         # outside of the with to spawn a repaint
         self.show()
 
-    def getDataFromFrame(self, table, df, colDefs, hiddenColumns=None):
+    def getDataFromFrame(self, table, df, colDefs):
         """
         """
         objects = []
@@ -1416,13 +1414,11 @@ GuiTable::item::selected {
         return DataFrameObject(dataFrame=pd.DataFrame(allItems, columns=colDefs.headings),
                                objectList=objects or [],
                                columnDefs=colDefs or [],
-                               hiddenColumns=hiddenColumns or [],
                                table=table)
 
     def getDataFrameFromList(self, table=None,
                              buildList=None,
-                             colDefs=None,
-                             hiddenColumns=None):
+                             colDefs=None):
         """
         Return a Pandas dataFrame from an internal list of objects
         The columns are based on the 'func' functions in the columnDefinitions
@@ -1433,9 +1429,6 @@ GuiTable::item::selected {
         """
         allItems = []
         objects = []
-
-        # objectList = {}
-        # indexList = {}
 
         if buildList:
             for col, obj in enumerate(buildList):
@@ -1451,25 +1444,14 @@ GuiTable::item::selected {
                 allItems.append(listItem)
                 objects.append(obj)
 
-            # indexList[str(listItem['Index'])] = obj
-            # objectList[obj.pid] = listItem['Index']
-
-            # indexList[str(col)] = obj
-            # objectList[obj.pid] = col
-
-            # indexList[str(col)] = obj
-            # objectList[obj.pid] = col
         return DataFrameObject(dataFrame=pd.DataFrame(allItems, columns=colDefs.headings),
                                objectList=objects or [],
-                               # indexList=indexList,
                                columnDefs=colDefs or [],
-                               hiddenColumns=hiddenColumns or [],
                                table=table)
 
     def getDataFrameFromRows(self, table=None,
                              dataFrame=None,
-                             colDefs=None,
-                             hiddenColumns=None):
+                             colDefs=None):
         """
         Return a Pandas dataFrame from the internal rows of an internal Pandas dataFrame
         The columns are based on the 'func' functions in the columnDefinitions
@@ -1480,8 +1462,6 @@ GuiTable::item::selected {
         """
         allItems = []
         objects = []
-        # objectList = None
-        # indexList = {}
 
         buildList = dataFrame.as_namedtuples()
         for ind, obj in enumerate(buildList):
@@ -1491,19 +1471,9 @@ GuiTable::item::selected {
 
             allItems.append(listItem)
 
-        #   # TODO:ED need to add object links in here, but only the top object exists so far
-        #   if 'Index' in listItem:
-        #     indexList[str(listItem['Index'])] = obj
-        #     objectList[obj.pid] = listItem['Index']
-        #   else:
-        #     indexList[str(ind)] = obj
-        #     objectList[obj.pid] = ind
-
         return DataFrameObject(dataFrame=pd.DataFrame(allItems, columns=colDefs.headings),
                                objectList=objects,
-                               # indexList=indexList,
                                columnDefs=colDefs,
-                               hiddenColumns=hiddenColumns,
                                table=table)
 
     def rawDataToDF(self):

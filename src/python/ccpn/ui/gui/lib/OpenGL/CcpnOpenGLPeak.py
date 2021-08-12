@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-14 19:17:57 +0100 (Mon, June 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-12 03:39:48 +0100 (Thu, August 12, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -132,6 +132,8 @@ class GLpeakListMethods():
         """
         triggers = data[Notifier.TRIGGER]
         obj = data[Notifier.OBJECT]
+        if obj.isDeleted:
+            return
 
         if isinstance(obj, Peak):
 

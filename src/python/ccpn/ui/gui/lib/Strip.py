@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-29 14:27:30 +0100 (Tue, June 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-12 03:40:10 +0100 (Thu, August 12, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -158,9 +158,10 @@ def matchAxesAndNmrAtoms(strip: GuiStrip, nmrAtoms: typing.List[NmrAtom]):
         # axis may not exist in Nd
         if axis:
             shiftDict[axis.code] = []
-            for atom in nmrAtoms:
-                if atom.isotopeCode == name2IsotopeCode(axis.code):
-                    shift = shiftList.getChemicalShift(atom.id)
+            for nmr in nmrAtoms:
+                if nmr.isotopeCode == name2IsotopeCode(axis.code):
+                    # shift = shiftList.getChemicalShift(atom.id)
+                    shift = shiftList._getChemicalShift(nmrAtom=nmr)
                     if shift is not None and isPositionWithinfBounds(strip, shift, axis):
                         shiftDict[axis.code].append(shift)
 

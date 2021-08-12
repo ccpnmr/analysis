@@ -268,7 +268,7 @@ class Peak(AbstractWrapperObject):
     @property
     def axisCodes(self) -> Tuple[str, ...]:
         """Spectrum axis codes in dimension order matching position."""
-        return self.peakList.spectrum.axisCodes
+        return self.spectrum.axisCodes
 
     @property
     def position(self) -> Tuple[float, ...]:

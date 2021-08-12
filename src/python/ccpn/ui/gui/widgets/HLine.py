@@ -110,6 +110,10 @@ class LabeledHLine(Frame):
         self._line2 = Frame(parent=self, grid=(0, 2), setLayout=True, showBorder=False, hPolicy='expanding')
         HLine(self._line2, grid=(0,0), style=style, colour=colour, lineWidth=lineWidth, height=height, divisor=2)
 
+    def setText(self, text):
+        """Set the text of the widget"""
+        self._label.setText(text)
+
 def main():
     app = QtWidgets.QApplication(sys.argv)
     ex = HLine()

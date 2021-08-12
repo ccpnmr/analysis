@@ -275,7 +275,6 @@ def copyPeakListAssignments(referencePeakList: PeakList, matchPeakList: PeakList
     of a match peakList based on matching axis codes.
     """
 
-    import numpy
     from sklearn.ensemble import RandomForestClassifier
 
     project = referencePeakList.project
@@ -811,7 +810,6 @@ def nmrAtomsForPeaks(peaks: typing.List[Peak], nmrAtoms: typing.List[NmrAtom],
                      intraResidual: bool = False, doubleTolerance: bool = False):
     """Get a set of nmrAtoms that fit to the dimensions of the
        peaks.
-
     """
 
     selected = matchingNmrAtomsForPeaks(peaks, nmrAtoms, doubleTolerance=doubleTolerance)
@@ -826,7 +824,6 @@ def filterIntraResidual(nmrAtomsForDimensions: typing.List[NmrAtom]):
        those which belong to residues that show up in
        at least to of the dimensions (This is the behaviour
        in v2, if I am correct).
-
     """
 
     nmrResiduesForDimensions = []
@@ -856,54 +853,56 @@ def filterIntraResidual(nmrAtomsForDimensions: typing.List[NmrAtom]):
     return nmrAtomsForDimenionsFiltered
 
 
-def matchingNmrAtomsForPeaks(peaks: typing.List[Peak], nmrAtoms: typing.List[NmrAtom],
-                             doubleTolerance: bool = False):
-    """Get a set of nmrAtoms that fit to the dimensions of the
-       peaks. This function does the actual calculation and does
-       not involve filtering like in nmrAtoms_for_peaks, where
-       more filters can be specified in the future.
+def matchingNmrAtomsForPeaks(peaks: typing.List[Peak],
+                             nmrAtoms: typing.List[NmrAtom],
+                             doubleTolerance: bool = False) -> list:
+    """Return the sub-set of nmrAtoms that fit to the dimensions of the peaks.
+       All peaks should have the same dimensionality
+       This function does the actual calculation and does not involve filtering like
+       in nmrAtoms_for_peaks, where more filters can be specified in the future.
 
+       :return a list of the sets matching nmrAtoms per dimension
     """
 
-    dimensionCount = [len(peak.position) for peak in peaks]
+    dimensionCounts = [peak.spectrum.dimensionCount for peak in peaks]
     #All peaks should have the same number of dimensions.
-    if not len(set(dimensionCount)) == 1:
+    if not len(set(dimensionCounts)) == 1:
         return []
-    N_dims = dimensionCount[0]
-    dim_nmrAtoms = []
+    N_dims = dimensionCounts[0]
+    matchingNmrAtomsPerDimension = []
 
     for dim in range(N_dims):
         # Find and add the NmrAtoms that dimension dim in all peaks
-
         common = set(nmrAtoms)  # ejb - was empty?
-        if sameAxisCodes(peaks, dim):
-            for peak in peaks:
-                matchingNmrAtoms = matchingNmrAtomsForPeakDimension(peak, dim, nmrAtoms,
-                                                                    doubleTolerance=doubleTolerance)
-                # '&=' is set intersection update
-                common &= matchingNmrAtoms
-        dim_nmrAtoms.append(common)
-        # matching = matchingNmrAtomsForDimensionOfPeaks(peaks, dim, nmrAtoms,
-        #                                                doubleTolerance=doubleTolerance)
-        # dim_nmrAtoms.append(matching)
-    return dim_nmrAtoms
+        for peak in peaks:
+            matchingNmrAtoms = matchingNmrAtomsForPeakDimension(peak, dim, nmrAtoms,
+                                                                doubleTolerance=doubleTolerance)
+            # '&=' is set intersection update
+            common &= matchingNmrAtoms
+        matchingNmrAtomsPerDimension.append(common)
+
+    return matchingNmrAtomsPerDimension
 
 
 def matchingNmrAtomsForPeakDimension(peak: Peak, dim: int, nmrAtoms: typing.List[NmrAtom],
-                                     doubleTolerance: bool = False):
-    """Just finds the nmrAtoms that fit a dimension of one peak.
+                                     doubleTolerance: bool = False) -> typing.Set[NmrAtom]:
+    """Find the nmrAtoms that match a dimension of one peak, both with respect to isotopeCode
+    and tolerance setting.
 
+    :return A (sub-)set of nmrAtoms that match
     """
 
-    fitting_nmrAtoms = set()
+    matchingNmrAtoms = set()
     # shiftList = getShiftlistForPeak(peak)
     spectrum = peak.peakList.spectrum
     shiftList = peak.peakList.chemicalShiftList
     position = peak.position[dim]
+
     # isotopeCode = getIsotopeCodeForPeakDimension(peak, dim)
     isotopeCode = spectrum.isotopeCodes[dim]
     if not position or not isotopeCode or not shiftList:
-        return fitting_nmrAtoms
+        return matchingNmrAtoms
+
     tolerance = spectrum.assignmentTolerances[dim]
     if not tolerance:
         tolerance = spectrum.defaultAssignmentTolerances[dim]
@@ -911,11 +910,11 @@ def matchingNmrAtomsForPeakDimension(peak: Peak, dim: int, nmrAtoms: typing.List
         tolerance *= 2
 
     for nmrAtom in nmrAtoms:
-        if nmrAtom.isotopeCode == isotopeCode and withinTolerance(nmrAtom, position,
-                                                                  shiftList, tolerance):
-            fitting_nmrAtoms.add(nmrAtom)
+        if nmrAtom.isotopeCode == isotopeCode and \
+           withinTolerance(nmrAtom, position,shiftList, tolerance):
+            matchingNmrAtoms.add(nmrAtom)
 
-    return fitting_nmrAtoms
+    return matchingNmrAtoms
 
 
 def withinTolerance(nmrAtom: NmrAtom, position: float, shiftList: ChemicalShiftList, tolerance: float):
@@ -931,19 +930,26 @@ def withinTolerance(nmrAtom: NmrAtom, position: float, shiftList: ChemicalShiftL
     return False
 
 
-def peaksAreOnLine(peaks: typing.List[Peak], dim: int):
+def peaksAreOnLine(peaks: typing.List[Peak], dimIndex: int):
     """Returns True when multiple peaks are located
-       on a line in the given dimensions.
+       on a line in the dimension defined by dimIndex.
     """
+    if not commonUtil.isIterable(peaks):
+        raise ValueError('Not iterable peaks argument')
 
-    if not sameAxisCodes(peaks, dim):
-        return False
-    # Take the two furthest peaks (in this dimension) of the selection.
-    positions = sorted([peak.position[dim] for peak in peaks])
+    peaks = list(peaks)
+    if len(peaks) == 0:
+        raise ValueError('Empty peaks argument')
+
+    if len(peaks) == 1:
+        return True
+
+    # Two or more peaks: Take the two furthest peaks (in this dimension) of the selection.
+    positions = sorted([peak.position[dimIndex] for peak in peaks])
     max_difference = abs(positions[0] - positions[-1])
     # Use the smallest tolerance of all peaks.
-    spectra = set(peak.peakList.spectrum for peak in peaks)
-    ll = [y for y in (x.assignmentTolerances[dim] for x in spectra) if y]
+    spectra = set(peak.spectrum for peak in peaks)
+    ll = [y for y in (sp.assignmentTolerances[dimIndex] for sp in spectra) if y]
     if ll:
         if len(ll) == 1:
             tolerance = ll[0]
@@ -954,6 +960,7 @@ def peaksAreOnLine(peaks: typing.List[Peak], dim: int):
     # tolerance = min([getAssignmentToleranceForPeakDimension(peak, dim) for peak in peaks])
     if max_difference < tolerance:
         return True
+
     return False
 
 

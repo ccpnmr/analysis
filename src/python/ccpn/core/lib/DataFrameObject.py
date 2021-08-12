@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-17 14:27:27 +0100 (Mon, May 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-12 19:38:28 +0100 (Thu, August 12, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -38,11 +38,12 @@ DATAFRAME_OBJECT = '_object'
 DATAFRAME_PID = 'Pid'
 DATAFRAME_HASH = '#'
 DATAFRAME_INDEX = 'Index'
+DATAFRAME_ISDELETED = 'isDeleted'
 
 
 class DataFrameObject(object):
     # class to handle pandas dataframe and matching object pid list
-    def __init__(self, table=None, dataFrame=None, objectList=None, columnDefs=None, hiddenColumns=None):
+    def __init__(self, table=None, dataFrame=None, objectList=None, columnDefs=None):
         self._dataFrame = dataFrame
         # self._objectList = objectList
         self._objects = objectList.copy() if objectList else []
@@ -58,33 +59,9 @@ class DataFrameObject(object):
     def dataFrame(self, dataFrame=None):
         self._dataFrame = dataFrame
 
-    # @property
-    # def objectList(self):
-    #   return self._objectList
-    #
-    # @objectList.setter
-    # def objectList(self, objectList=None):
-    #   self._objectList = objectList
-
     @property
     def objects(self):
         return self._objects
-
-    # @property
-    # def indexList(self):
-    #   return self._indexList
-    #
-    # @indexList.setter
-    # def indexList(self, indexList=None):
-    #   self._indexList = indexList
-
-    # @property
-    # def hiddenColumns(self):
-    #     return self._hiddenColumns
-
-    # @hiddenColumns.setter
-    # def hiddenColumns(self, hiddenColumns=None):
-    #     self._hiddenColumns = hiddenColumns
 
     @property
     def numColumns(self):
@@ -104,11 +81,11 @@ class DataFrameObject(object):
 
     @property
     def visibleColumnHeadings(self):
-        return [col for col in self._columnDefinitions.headings if col not in self._hiddenColumns and col != DATAFRAME_OBJECT]
+        return [col for col in self._columnDefinitions.headings if col not in (self._table._hiddenColumns + self._table._internalColumns)]
 
     @property
     def userHeadings(self):
-        return [col for col in self._columnDefinitions.headings if col != DATAFRAME_OBJECT]
+        return [col for col in self._columnDefinitions.headings if col not in (self._table._internalColumns)]
 
     @property
     def headings(self):

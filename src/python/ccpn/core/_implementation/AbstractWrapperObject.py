@@ -311,11 +311,11 @@ class AbstractWrapperObject(NotifierBase):
         """
         return 'my%s' % cls.className
 
-    @staticmethod
-    def _defaultNameFromSerial(cls, serial):
-        # Get the next default name using serial, this may already exist
-        name = 'my%s_%s' % (cls.className, serial)
-        return name
+    # @staticmethod
+    # def _defaultNameFromSerial(cls, serial):
+    #     # Get the next default name using serial, this may already exist
+    #     name = 'my%s_%s' % (cls.className, serial)
+    #     return name
 
     @classmethod
     def _uniqueName(cls, project, name=None) -> str:
@@ -369,7 +369,7 @@ class AbstractWrapperObject(NotifierBase):
                              (cls.__name__, attribName))
 
         if Pid.altCharacter in value:
-            raise ValueError('%s: Character %r not allowed in %r; got %r; got %r' %
+            raise ValueError('%s: Character %r not allowed in %r; got %r' %
                              (cls.__name__, Pid.altCharacter, attribName, value))
 
         if not allowWhitespace and commonUtil.contains_whitespace(value):
@@ -377,9 +377,29 @@ class AbstractWrapperObject(NotifierBase):
                              (cls.__name__, attribName, value))
 
     # @staticmethod
-    # def _defaultNameFromSerial(cls, serial):
-    #     # Get the next default name using serial, this may already exist
-    #     name = 'my%s_%s' % (cls.className, serial)
+    # def _nextAvailableName(cls, project):
+    #     # Get the next available name
+    #     _cls = getattr(project, cls._pluralLinkName)
+    #     nextNumber = len(_cls) + 1
+    #     _name = cls.className  #._defaultName(cls, cls)
+    #     name = 'my%s_%s' % (_name, nextNumber)  # if nextNumber > 0 else sampleName
+    #     names = [d.name for d in _cls]
+    #     while name in names:
+    #         name = commonUtil.incrementName(name)
+    #
+    #     return name
+
+    # @staticmethod
+    # def _nextAvailableWrappedName(cls, project):
+    #     # Get the next available name
+    #     _cls = getattr(project, cls._pluralLinkName)
+    #     nextNumber = len(_cls) + 1
+    #     _name = cls.className  #._defaultName(cls, cls)
+    #     name = 'my%s_%s' % (_name, nextNumber)  # if nextNumber > 0 else sampleName
+    #     names = [d._wrappedData.name for d in _cls]
+    #     while name in names:
+    #         name = commonUtil.incrementName(name)
+    #
     #     return name
 
     @property
@@ -430,6 +450,7 @@ class AbstractWrapperObject(NotifierBase):
         """Create a new pid instance from cls.shortClassName and args
         """
         from ccpn.core.lib.Pid import Pid
+
         if len(args) < cls._numberOfIdFields:
             raise ValueError('%s.newPid: to few id-fields to generate a valid Pid instance')
         pidFields = [cls.shortClassName] + [str(x) for x in args]
@@ -831,7 +852,6 @@ class AbstractWrapperObject(NotifierBase):
     #     Should be subclassed
     #     """
     #     pass
-
 
     #=========================================================================================
     # CCPN functions

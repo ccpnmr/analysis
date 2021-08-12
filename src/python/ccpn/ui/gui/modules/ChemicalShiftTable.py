@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-12 03:45:44 +0100 (Thu, August 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-12 19:38:28 +0100 (Thu, August 12, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -39,12 +39,12 @@ from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
-from ccpn.core._ChemicalShift import UNIQUEID, ISDELETED, \
-    VALUE, VALUEERROR, FIGUREOFMERIT, \
-    NMRATOM, CHAINCODE, SEQUENCECODE, RESIDUETYPE, ATOMNAME, \
-    ALLPEAKS, SHIFTLISTPEAKSCOUNT, ALLPEAKSCOUNT, \
-    COMMENT, CSOBJ, \
-    SHIFTCOLUMNS, SHIFTTABLECOLUMNS, _ChemicalShift
+from ccpn.core._ChemicalShift import CS_UNIQUEID, CS_ISDELETED, \
+    CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT, \
+    CS_NMRATOM, CS_CHAINCODE, CS_SEQUENCECODE, CS_RESIDUETYPE, CS_ATOMNAME, \
+    CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT, \
+    CS_COMMENT, CS_OBJECT, \
+    CS_COLUMNS, CS_TABLECOLUMNS, _ChemicalShift
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import makeIterableList
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -115,7 +115,8 @@ class ChemicalShiftTableModule(CcpnModule):
                                                      mainWindow=self.mainWindow,
                                                      moduleParent=self,
                                                      setLayout=True,
-                                                     grid=(0, 0))
+                                                     grid=(0, 0),
+                                                     hiddenColumns=['isDeleted', 'allPeaks', 'chainCode', 'sequenceCode', 'residueType'])
 
         if chemicalShiftList is not None:
             self.selectChemicalShiftList(chemicalShiftList)
@@ -152,11 +153,11 @@ class ChemicalShiftTable(GuiTable):
     className = 'ChemicalShiftListTable'
     attributeName = 'chemicalShiftLists'
 
-    PRIMARYCOLUMN = CSOBJ # column holding active objects (uniqueId for this table)
+    PRIMARYCOLUMN = CS_OBJECT  # column holding active objects (uniqueId for this table)
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None,
                  actionCallback=None, selectionCallback=None,
-                 chemicalShiftList=None, hiddenColumns=['isDeleted', 'chainCode', 'sequenceCode', 'residueType'], **kwds):
+                 chemicalShiftList=None, hiddenColumns=None, **kwds):
         """
         Initialise the widgets for the module.
         """
@@ -205,7 +206,7 @@ class ChemicalShiftTable(GuiTable):
         #[Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat)
 
         # initialise the currently attached dataFrame
-        self._hiddenColumns = hiddenColumns
+        self._hiddenColumns = hiddenColumns or []
         self.dataFrameObject = None
         selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
         actionCallback = self._actionCallback if actionCallback is None else actionCallback
@@ -649,8 +650,6 @@ class ChemicalShiftTable(GuiTable):
         try:
             _dataFrameObject = self.getDataFrameFromExpandedList(table=self,
                                                                  buildList=rowObjects,
-                                                                 # colDefs=columnDefs,
-                                                                 hiddenColumns=self._hiddenColumns,
                                                                  expandColumn='Restraint')
 
             # populate from the Pandas dataFrame inside the dataFrameObject
@@ -724,7 +723,7 @@ class ChemicalShiftTable(GuiTable):
                 # NOTE:ED - fix this
 
                 _shiftObjects = tuple(_getValueByHeader(row, 3) for row in self._dataFrameObject.objects)
-                rows = [self._dataFrameObject.find(self, str(obj.pid), column=CSOBJ, multiRow=True) for obj in uniqObjs]
+                rows = [self._dataFrameObject.find(self, str(obj.pid), column=CS_OBJECT, multiRow=True) for obj in uniqObjs]
                 # if obj in _peakObjects and obj.peakList == self._selectedPeakList]
                 rows = [row for row in set(makeIterableList(rows)) if row is not None]
                 if rows:
@@ -747,10 +746,23 @@ class ChemicalShiftTable(GuiTable):
                     if scrollToSelection and not self._scrollOverride:
                         self.scrollToSelectedIndex()
 
+    def _derivedFromObject(self, obj):
+        """Get a tuple of derived values from obj
+        Not very generic yet - column class now seems redundant
+        """
+        _peaks = obj.allAssignedPeaks or []
+        allPeaks = str([pp.pid for pp in _peaks])
+        try:
+            shiftPeakCount = len([pp for pp in _peaks if pp.spectrum.chemicalShiftList == obj._chemicalShiftList])
+        except Exception as es:
+            shiftPeakCount = 0
+        peakCount = len(_peaks) if _peaks else 0
+
+        return (allPeaks, shiftPeakCount, peakCount)
+
     def getDataFrameFromExpandedList(self, table=None,
                                      buildList=None,
                                      colDefs=None,
-                                     hiddenColumns=None,
                                      expandColumn=None):
         """
         Return a Pandas dataFrame from an internal list of objects
@@ -765,7 +777,7 @@ class ChemicalShiftTable(GuiTable):
         # create the column objects
         _cols = [
             (col, lambda row: _getValueByHeader(row, col), f'TipText{ii}', None, None)
-            for ii, col in enumerate(SHIFTTABLECOLUMNS)
+            for ii, col in enumerate(CS_TABLECOLUMNS)
             ]
 
         # set the table _columns
@@ -773,31 +785,34 @@ class ChemicalShiftTable(GuiTable):
 
         if self.chemicalShiftList._wrappedData.data is not None:
             _table = self.chemicalShiftList._wrappedData.data.copy()
-            _table = _table[_table[ISDELETED] == False]
-            _table.set_index(_table[UNIQUEID], inplace=True,) # drop=False)
+            _table = _table[_table[CS_ISDELETED] == False]
+            _table.set_index(_table[CS_UNIQUEID], inplace=True, )  # drop=False)
 
-            _table.insert(SHIFTTABLECOLUMNS.index(ALLPEAKS), ALLPEAKS, None)
-            _table.insert(SHIFTTABLECOLUMNS.index(SHIFTLISTPEAKSCOUNT), SHIFTLISTPEAKSCOUNT, None)
-            _table.insert(SHIFTTABLECOLUMNS.index(ALLPEAKSCOUNT), ALLPEAKSCOUNT, None)
+            _table.insert(CS_TABLECOLUMNS.index(CS_ALLPEAKS), CS_ALLPEAKS, None)
+            _table.insert(CS_TABLECOLUMNS.index(CS_SHIFTLISTPEAKSCOUNT), CS_SHIFTLISTPEAKSCOUNT, None)
+            _table.insert(CS_TABLECOLUMNS.index(CS_ALLPEAKSCOUNT), CS_ALLPEAKSCOUNT, None)
 
-            _table[CSOBJ] = [self.chemicalShiftList._getChemicalShift(uniqueId=unq) for unq in _table[UNIQUEID]]
+            _objs = [self.chemicalShiftList._getChemicalShift(uniqueId=unq) for unq in _table[CS_UNIQUEID]]
+            _table[CS_OBJECT] = _objs
 
-            # add columns for SHIFTLISTPEAKS and ALLPEAKS
-            nmrAtoms = _table[NMRATOM]
-            # len(set(x for x in cs.nmrAtom.assignedPeaks)),
-            # len(set(x for x in cs.nmrAtom.assignedPeaks)) if peakList.chemicalShiftList == self
+            _stats = [self._derivedFromObject(obj) for obj in _objs]
+            _table[[CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT]] = _stats
 
-            # set the table from the dataFrame
-            _dataFrame = DataFrameObject(dataFrame=_table,
-                                         columnDefs=self._columns or [],
-                                         hiddenColumns=hiddenColumns or [],
-                                         table=table,
-                                         )
-            # extract the row objects from the dataFrame
-            _objects = [row for row in _table.itertuples()]
-            _dataFrame._objects = _objects
+            # replace the visible nans with string 'None'
+            _table.fillna('None', inplace=True)
+        else:
+            _table = pd.DataFrame(columns=CS_TABLECOLUMNS)
 
-            return _dataFrame
+        # set the table from the dataFrame
+        _dataFrame = DataFrameObject(dataFrame=_table,
+                                     columnDefs=self._columns or [],
+                                     table=table,
+                                     )
+        # extract the row objects from the dataFrame
+        _objects = [row for row in _table.itertuples()]
+        _dataFrame._objects = _objects
+
+        return _dataFrame
 
     def refreshTable(self):
         # subclass to refresh the groups
@@ -819,13 +834,15 @@ class ChemicalShiftTable(GuiTable):
 
         def _newRowFromUniqueId(data, obj, uniqueId):
             # NOTE:ED - this needs to go elsewhere
+            #   need to define a row handler rather than a column handler
             _row = data.loc[uniqueId]
             # make the new row - put into method
-            newRow = _row[:ATOMNAME].copy()
-            _comment = _row[COMMENT:]
-            _extraCols = pd.Series([None, None, None], index=[ALLPEAKS, SHIFTLISTPEAKSCOUNT, ALLPEAKSCOUNT])
+            newRow = _row[:CS_ATOMNAME].copy()
+            _comment = _row[CS_COMMENT:]
+            _extraCols = pd.Series(self._derivedFromObject(obj), index=[CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT])
             newRow = newRow.append([_extraCols, _comment])
-            newRow[CSOBJ] = obj
+            newRow[CS_OBJECT] = obj
+            newRow.fillna('None', inplace=True)
             return newRow
 
         with self._tableBlockSignals('_updateRowCallback'):
@@ -842,22 +859,22 @@ class ChemicalShiftTable(GuiTable):
             trigger = data[Notifier.TRIGGER]
             try:
                 _df = self.chemicalShiftList._data
-                _df = _df[_df[ISDELETED] == False]  # not deleted
+                _df = _df[_df[CS_ISDELETED] == False]  # not deleted
                 # the column containing the uniqueId
-                col = SHIFTTABLECOLUMNS.index(UNIQUEID)
+                col = CS_TABLECOLUMNS.index(CS_UNIQUEID)
                 tableIds = tuple(self.item(rr, col).value for rr in range(self.rowCount()))
 
                 if trigger == Notifier.DELETE:
                     # uniqueIds in the visible table
                     # tableIds = [(rr, self.item(rr, col).value) for rr in range(self.rowCount())]
-                    if uniqueId in (set(tableIds) - set(_df[UNIQUEID])):
+                    if uniqueId in (set(tableIds) - set(_df[CS_UNIQUEID])):
                         # remove from the table
                         self._dataFrameObject._dataFrame.drop([uniqueId], inplace=True)
                         self.removeRow(tableIds.index(uniqueId))
 
                 elif trigger == Notifier.CREATE:
                     # uniqueIds in the visible table
-                    if uniqueId in (set(_df[UNIQUEID]) - set(tableIds)):
+                    if uniqueId in (set(_df[CS_UNIQUEID]) - set(tableIds)):
                         newRow = _newRowFromUniqueId(_df, obj, uniqueId)
                         # visible table dataframe update
                         self._dataFrameObject._dataFrame.loc[uniqueId] = newRow
@@ -866,7 +883,7 @@ class ChemicalShiftTable(GuiTable):
 
                 elif trigger == Notifier.CHANGE:
                     # uniqueIds in the visible table
-                    if uniqueId in (set(_df[UNIQUEID]) & set(tableIds)):
+                    if uniqueId in (set(_df[CS_UNIQUEID]) & set(tableIds)):
                         newRow = _newRowFromUniqueId(_df, obj, uniqueId)
                         # visible table dataframe update
                         self._dataFrameObject._dataFrame.loc[uniqueId] = newRow

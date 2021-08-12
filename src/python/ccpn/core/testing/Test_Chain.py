@@ -317,7 +317,7 @@ class Test_Properties(WrapperTesting):
         """
         Test that renaming a Chain with no parameter raises TypeError.
         """
-        with self.assertRaisesRegexp(TypeError, 'required positional argument'):
+        with self.assertRaisesRegexp(TypeError, 'required argument'):
             self.chain.rename()
 
     def test_renameChain_None(self):
@@ -351,7 +351,7 @@ class Test_Properties(WrapperTesting):
         """
         Test that renaming a Chain with whitespace raises ValueError.
         """
-        with self.assertRaisesRegexp(ValueError, 'Whitespace not allowed'):
+        with self.assertRaisesRegexp(ValueError, 'not allowed'):
             self.chain.rename('not found')
 
     #=========================================================================================
@@ -376,7 +376,7 @@ class Test_Properties(WrapperTesting):
         """
         Test that creating a new Chain with 42 raises TypeError.
         """
-        with self.assertRaisesRegexp(TypeError, 'must be a string'):
+        with self.assertRaisesRegexp(ValueError, 'must be a string'):
             self.newChain = self.project.createChain('ACDC', shortName=42, molType='protein')
         self.assertEqual(len(self.project.chains), 1)
 
@@ -393,6 +393,8 @@ class Test_Properties(WrapperTesting):
         Test that creating a new Chain with existing raises ValueError.
         """
         self.newChain = self.project.createChain('ACDC', shortName='exists', molType='protein')
-        with self.assertRaisesRegexp(ValueError, 'already exists'):
-            self.newChain = self.project.createChain('ACDC', shortName='exists', molType='protein')
-        self.assertEqual(len(self.project.chains), 2)
+        # with self.assertRaisesRegexp(ValueError, 'already exists'):
+        #     self.newChain = self.project.createChain('ACDC', shortName='exists', molType='protein')
+        self.newChain = self.project.createChain('ACDC', shortName='exists', molType='protein')
+        self.assertEqual(len(self.project.chains), 3)
+        self.assertEqual(self.project.chains[2].name, 'exists_1') # shortname

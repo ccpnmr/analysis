@@ -77,6 +77,7 @@ class NoteTest_setUp(WrapperTesting):
         Test that renaming to None is valid
         """
         self.note.rename(None)
+        self.assertEqual(self.note.name, 'myNote')
 
     def test_rename_Note_Int(self):
         """
@@ -215,6 +216,7 @@ class NoteTest_setUp(WrapperTesting):
     #     loadedProject = _framework.project
     #     _framework._closeProject()
 
+
 #=========================================================================================
 # NoteTest_No_setUp
 #=========================================================================================
@@ -230,16 +232,13 @@ class NoteTest_No_setUp(WrapperTesting):
         Test that creating a new Note with no parameter creates a valid Note.
         """
         self.note = self.project.newNote()
-        self.assertEqual(self.note.name, 'myNote_1')  # check that default name has been set 'Note'
 
     def test_newNote_ES(self):
         """
         Test that creating a new Note with '' raises an error.
         """
-        # with self.assertRaisesRegexp(ApiError, 'Empty string not allowed'):
-        #   self.project.newNote('')
-        #
-        self.project.newNote('')
+        with self.assertRaisesRegexp(ValueError, 'must be set'):
+            self.project.newNote('')
 
     def test_newNote_Badname(self):
         """
@@ -253,9 +252,6 @@ class NoteTest_No_setUp(WrapperTesting):
         """
         Test that creating a new Note with None raises an error.
         """
-        # with self.assertRaisesRegexp(ApiError, 'Line input is not of a valid type'):
-        #   self.project.newNote(None)
-        #
         self.project.newNote(None)
 
     def test_newNote_Int(self):
@@ -265,5 +261,5 @@ class NoteTest_No_setUp(WrapperTesting):
         # with self.assertRaisesRegexp(TypeError, 'argument of type'):
         #   self.project.newNote(42)
         #
-        with self.assertRaisesRegexp(TypeError, 'must be a string'):
+        with self.assertRaisesRegexp(ValueError, 'must be a string'):
             self.project.newNote(42)

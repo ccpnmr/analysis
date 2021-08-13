@@ -435,7 +435,7 @@ class Base(DropBase, SignalBlocking):
         """
         if flag:
             self.setEnabled(True)
-            self.setStyleSheet("background:white")
+            # self.setStyleSheet("background:white")
         else:
-            self.setEnabled(False)
-            self.setStyleSheet("background:#E8E8E8")  # some light gr
+            self.setDisabled(True)
+            # self.setStyleSheet("background:#E8E8E8")  # some light gr

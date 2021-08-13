@@ -1116,7 +1116,7 @@ GuiTable::item::selected {
 
         # ejb - added these but don't think they are needed
         # self.tableMenu.addAction("Select All", self.selectAllObjects)
-        self.tableMenu.addAction("Clear Selection", self.clearSelection)
+        self.tableMenu.addAction("Clear Selection", self._clearSelectionCallback)
 
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self._raiseTableContextMenu)
@@ -1704,6 +1704,12 @@ GuiTable::item::selected {
                     data[colName] = self.item(0, cc).value
 
                 return data
+
+    def _clearSelectionCallback(self):
+        """Callback for the context menu clear;
+        For now just a placeholder
+        """
+        self.clearSelection()
 
     def clearSelection(self):
         """Clear the current selection in the table

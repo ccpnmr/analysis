@@ -1144,7 +1144,9 @@ def checkDeleted():
         self = args[0]  # this is the object
 
         if self.isDeleted:
-            raise RuntimeError(f'object {self} is deleted')
+            getLogger().debug(f'object {self} is deleted {func} {args} {kwds}')
+            return
+            # raise RuntimeError(f'object {self} is deleted {func} {args} {kwds}')
         return func(*args, **kwds)
 
     return theDecorator

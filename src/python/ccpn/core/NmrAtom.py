@@ -366,36 +366,6 @@ class NmrAtom(AbstractWrapperObject):
         """
         return parent._wrappedData.sortedResonances()
 
-    # def _finaliseAction(self, action: str):
-    #     """Subclassed to handle associated ChemicalShift instances
-    #     """
-    #     if not super()._finaliseAction(action):
-    #         # called many times from the api
-    #         return
-    #
-    #     # print(f'  {self} ACTIONS   {self._finaliseChildren}')
-    #     # # propagate the action to associated ChemicalShift instances
-    #     # for obj, action, params in self._finaliseChildren:
-    #     #     obj._finaliseAction(action, params)
-    #     # self._finaliseChildren = []
-    #
-    #     # propagate the rename to associated ChemicalShift instances
-    #     # if action in ['rename', 'delete', 'change', 'create']:
-    #     #     for cs in self._chemicalShifts:
-    #     #         if cs and not cs.isDeleted: # or cs._flaggedForDelete):
-    #     #             # copy same action to the chemicalShift as one-one relation
-    #     #             # so delete => delete and create => create
-    #     #             cs._finaliseAction('change', nmrAtom=self)
-    #     #
-    #     #     # if the assignedPeaks have changed then notifier the peaks
-    #     #     # This contains the pre-post set to handle updating the peakTable/spectrumDisplay
-    #     #     peaks = getattr(self, ASSIGNEDPEAKSCHANGED, None)
-    #     #     if peaks:
-    #     #         for peak in peaks:
-    #     #             if not (peak.isDeleted or peak._flaggedForDelete):
-    #     #                 peak._finaliseAction('change')
-    #     #     setattr(self, ASSIGNEDPEAKSCHANGED, None)
-
     def _setApiName(self, name):
         # set a serial format name of the form ?@<n> from the current serial number
         # functionality provided by the api
@@ -542,31 +512,6 @@ class NmrAtom(AbstractWrapperObject):
 #=========================================================================================
 # Connections to parents:
 #=========================================================================================
-
-#GWV 20181122: moved to Atom class
-# def getter(self: Atom) -> Optional[NmrAtom]:
-#     try:
-#         return self._project.getNmrAtom(self._id)
-#     except:
-#         return None
-#
-#
-# def setter(self: Atom, value: NmrAtom):
-#     oldValue = self.nmrAtom
-#     if oldValue is value:
-#         return
-#     elif value is None:
-#         raise ValueError("Cannot set Atom.nmrAtom to None")
-#     elif oldValue is not None:
-#         raise ValueError("New assignment of Atom clashes with existing assignment")
-#     else:
-#         value.atom = self
-#
-#
-# Atom.nmrAtom = property(getter, setter, None, "NmrAtom to which Atom is assigned")
-#
-# del getter
-# del setter
 
 
 @newObject(NmrAtom)

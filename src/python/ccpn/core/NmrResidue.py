@@ -1158,52 +1158,6 @@ class NmrResidue(AbstractWrapperObject):
         """
         apiNmrChain.__dict__['mainResonanceGroups'].reverse()
 
-    # def _finaliseAction(self, action: str):
-    #     """Subclassed to handle associated ChemicalShift instances
-    #     """
-    #     if not super()._finaliseAction(action=action):
-    #         return
-    #     # propagate the rename to associated ChemicalShift instances
-    #     if action == 'rename':
-    #         for cs in self.chemicalShifts:
-    #             cs._finaliseAction(action=action)
-
-    # nmrResidue._finaliseAction('rename')
-    # for xx in nmrResidue.offsetNmrResidues:
-    #     xx._finaliseAction('rename')
-
-    # def _finaliseAction(self, action: str):
-    #     """Subclassed to handle associated offsetNMrResidues
-    #     """
-    #     if not super()._finaliseAction(action):
-    #         return
-    #
-    #     # print(f'_finaliseAction ACTIONS      {self}   {self._finaliseChildren}')
-    #     # # propagate the action to associated ChemicalShift instances
-    #     # for obj, action, params in self._finaliseChildren:
-    #     #     obj._finaliseAction(action, params)
-    #     # self._finaliseChildren = []
-    #
-    #     # if action in ['rename']:
-    #     #     for xx in self.offsetNmrResidues:
-    #     #         xx._finaliseAction('rename')
-    #
-    #     # if action in ['rename', 'delete', 'change']:
-    #     #     # if the assignedPeaks have changed then notifier the peaks
-    #     #     # This contains the pre-post set to handle updating the peakTable/spectrumDisplay
-    #     #     peaks = getattr(self, ASSIGNEDPEAKSCHANGED, None)
-    #     #     if peaks:
-    #     #         for peak in peaks:
-    #     #             if not (peak.isDeleted or peak._flaggedForDelete):
-    #     #                 peak._finaliseAction('change')
-    #     #     setattr(self, ASSIGNEDPEAKSCHANGED, None)
-    #
-    #     # if action in ['rename', 'delete', 'create']: # rename should handle 'rename
-    #     if action in ['delete', 'create']:
-    #         # don't think I need a change here - undo/redo?
-    #         for nmrAtom in self.nmrAtoms:
-    #             nmrAtom._finaliseAction(action)
-
     def _delete(self):
         """Delete object, with all contained objects and underlying data.
         """

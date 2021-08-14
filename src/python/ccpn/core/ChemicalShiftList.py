@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-12 19:38:27 +0100 (Thu, August 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-14 01:48:28 +0100 (Sat, August 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,7 +28,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import pandas as pd
 from typing import Tuple, Sequence, List, Union
 from functools import partial
-
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.PeakList import PeakList
@@ -37,9 +36,10 @@ from ccpn.core.Spectrum import Spectrum
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.lib import Pid
 from ccpn.core.lib.ContextManagers import newObject, newV3Object, renameObject, \
-    undoBlockWithoutSideBar, undoStackBlocking, undoBlock
+    undoBlockWithoutSideBar, undoStackBlocking, undoBlock, ccpNmrV3CoreSetter
 from ccpn.util.decorators import logCommand
 from ccpn.util.OrderedSet import OrderedSet
+from ccpn.util.Common import makeIterableList
 
 
 CS_UNIQUEID = 'uniqueId'
@@ -178,8 +178,46 @@ class ChemicalShiftList(AbstractWrapperObject):
                             for y in x.dataSources))
 
     @spectra.setter
+    # @ccpNmrV3CoreSetter()
     def spectra(self, value: Sequence[Spectrum]):
+
+        # _pre = set(self.spectra)
+        # _post = set(value)
+        # _new = _post - _pre
         self._wrappedData.experiments = set(x._wrappedData.experiment for x in value)
+
+        # NOTE:ED - update chemicalShifts
+        #   need new CS for every peak.assignNmrAtom
+        #   -
+        #   new peaks - if nmrAtom not in list
+        #                   new shift pointing to nmrAtom
+        #               shiftList ->spectrum -> peak -> nmrAtom
+        # update all old and new shift values
+
+        # # recalculate the shifts
+        # assigned = set(makeIterableList(self.assignments))
+        # shifts = set(cs for nmr in assigned for cs in nmr._chemicalShifts if cs and not cs.isDeleted)
+        #
+        # self._addChildActions(sh._recalculateShiftValue for sh in shifts)
+        # self._addFinaliseChildren((sh, 'change') for sh in shifts)
+
+        # change
+        #       spectrum
+        #       peaklists
+        #       peaks
+        #       shifts
+
+    def _getNmrAtoms(self, spectra):
+        """Get the list of nmrAtoms
+        """
+        nmrAtoms = set([nmr
+                    for spec in spectra
+                    for pList in spec.peakLists if not pList.isSimulated
+                    for pk in pList.peaks
+                    for nmr in makeIterableList(pk.assignedNmrAtoms)
+                    ])
+        _data = self._wrappedData.data
+        _odlNmrAtoms = _data[_data[CS_ISDELETED] == False][CS_NMRATOM]
 
     @property
     def _chemicalShifts(self):
@@ -546,13 +584,15 @@ class ChemicalShiftList(AbstractWrapperObject):
         """
         from ccpn.core._ChemicalShift import _getByTuple, _newChemicalShift as _newShift
 
-        # make new tuple
+        # make new tuple - verifies contents
         _row = _getByTuple(self, value, valueError, figureOfMerit,
                            nmrAtom, chainCode, sequenceCode, residueType, atomName,
                            comment)
         _nextId = self.project._getNextUniqueIdValue(CS_CLASSNAME)
         # add to dataframe - this is in undo stack and marked as modified
-        _dfRow = pd.DataFrame(((_nextId, False) + _row[2:],), columns=CS_COLUMNS)
+        # _dfRow = pd.DataFrame(((_nextId, False) + _row[2:],), columns=CS_COLUMNS)
+        _dfRow = pd.DataFrame(((_nextId, False, value, valueError, figureOfMerit, None) + _row[6:],), columns=CS_COLUMNS)
+
         if data is None:
             self._wrappedData.data = _dfRow
         else:
@@ -566,6 +606,9 @@ class ChemicalShiftList(AbstractWrapperObject):
         # new Shift only needs chemicalShiftList and uniqueId - properties are linked to dataframe
         shift = _newShift(self, _ignoreUniqueId=True)
         shift._uniqueId = _nextId
+        if nmrAtom:
+            shift.nmrAtom = nmrAtom
+
         _oldShifts = self._shifts[:]
         self._shifts.append(shift)
         _newShifts = self._shifts[:]
@@ -575,6 +618,10 @@ class ChemicalShiftList(AbstractWrapperObject):
             with undoStackBlocking() as addUndoItem:
                 addUndoItem(undo=partial(self._undoRedoShifts, _oldShifts),
                             redo=partial(self._undoRedoShifts, _newShifts))
+                # if nmrAtom:
+                #     addUndoItem(undo=partial(setattr, shift, CS_NMRATOM, None),
+                #                 redo=partial(setattr, shift, CS_NMRATOM, nmrAtom))
+                # addUndoItem(redo=shift._recalculateShiftValue)
 
         return shift
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-14 01:48:28 +0100 (Sat, August 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-17 02:16:06 +0100 (Tue, August 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -480,10 +480,6 @@ class _ChemicalShift(NotifierBase):
         # must assume that the shift value is correct at this point
         if _nmrAtom:
             _nmrAtom._chemicalShifts.append(self)
-
-        # TODO:ED -
-        #   -
-        #   spectrum update - recalculate shifts
 
     def getByPid(self, pid: str):
         """Get an arbitrary data object from either its pid (e.g. 'SP:HSQC2') or its longPid

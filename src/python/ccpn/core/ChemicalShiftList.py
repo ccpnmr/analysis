@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-14 01:48:28 +0100 (Sat, August 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-17 02:16:06 +0100 (Tue, August 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -177,47 +177,73 @@ class ChemicalShiftList(AbstractWrapperObject):
         return tuple(sorted(ff(y) for x in self._wrappedData.experiments
                             for y in x.dataSources))
 
+    def _recalculatePeakShifts(self, nmrResidues, shifts):
+        # update the assigned nmrAtom chemical shift values - notify the nmrResidues and _chemicalShifts
+        for sh in shifts:
+            sh._recalculateShiftValue()
+        for nmr in nmrResidues:
+            nmr._finaliseAction('change')
+        for sh in shifts:
+            sh._finaliseAction('change')
+
     @spectra.setter
-    # @ccpNmrV3CoreSetter()
+    @logCommand(get='self', isProperty=True)
     def spectra(self, value: Sequence[Spectrum]):
 
-        # _pre = set(self.spectra)
-        # _post = set(value)
-        # _new = _post - _pre
-        self._wrappedData.experiments = set(x._wrappedData.experiment for x in value)
+        # add a spectrum/remove a spectrum
+        _createSpectra = set(value) - set(self.spectra)
+        _deleteSpectra = set(self.spectra) - set(value)
+        _createNmr = self._getNmrAtomsFromSpectra(_createSpectra) # new nmrAtoms to add
+        _deleteNmr = self._getNmrAtomsFromSpectra(_deleteSpectra) # old nmrAtoms to update
 
-        # NOTE:ED - update chemicalShifts
-        #   need new CS for every peak.assignNmrAtom
-        #   -
-        #   new peaks - if nmrAtom not in list
-        #                   new shift pointing to nmrAtom
-        #               shiftList ->spectrum -> peak -> nmrAtom
-        # update all old and new shift values
+        _thisNmr = self._getNmrAtoms() # current nmrAtoms referenced in shiftLift
 
-        # # recalculate the shifts
-        # assigned = set(makeIterableList(self.assignments))
-        # shifts = set(cs for nmr in assigned for cs in nmr._chemicalShifts if cs and not cs.isDeleted)
-        #
-        # self._addChildActions(sh._recalculateShiftValue for sh in shifts)
-        # self._addFinaliseChildren((sh, 'change') for sh in shifts)
+        # nmrAtoms with peakCount = 0 -> these are okay
+        _oldNmrPks = set(nmr for nmr in _thisNmr if self not in [pk.spectrum.chemicalShiftList for pk in nmr.assignedPeaks])
 
-        # change
-        #       spectrum
-        #       peaklists
-        #       peaks
-        #       shifts
+        _newNmr = _createNmr - _oldNmrPks
+        if (_newNmr & _thisNmr):
+            raise RuntimeError(f'ChemicalShiftList.spectra: nmrAtoms already in list')
+        _nmrs = _deleteNmr | _oldNmrPks
+        nmrResidues = set(nmr.nmrResidue for nmr in _nmrs)
+        shifts = set(cs for nmrAt in _nmrs for cs in nmrAt._chemicalShifts if cs and not cs.isDeleted)
 
-    def _getNmrAtoms(self, spectra):
-        """Get the list of nmrAtoms
+        with undoBlock():
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(undo=partial(self._recalculatePeakShifts, nmrResidues, shifts))
+
+            self._wrappedData.experiments = set(x._wrappedData.experiment for x in value)
+
+            for nmrAtom in _newNmr:
+                self._newChemicalShift(nmrAtom=nmrAtom)
+
+            self._recalculatePeakShifts(nmrResidues, shifts)
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(redo=partial(self._recalculatePeakShifts, nmrResidues, shifts))
+
+    def _getNmrAtomsFromSpectra(self, spectra):
+        """Get the list of nmrAtoms in the supplied spectra
         """
-        nmrAtoms = set([nmr
+        _newNmr = set(nmrAtom
                     for spec in spectra
                     for pList in spec.peakLists if not pList.isSimulated
                     for pk in pList.peaks
-                    for nmr in makeIterableList(pk.assignedNmrAtoms)
-                    ])
-        _data = self._wrappedData.data
-        _odlNmrAtoms = _data[_data[CS_ISDELETED] == False][CS_NMRATOM]
+                    for aNmrAtoms in pk.assignedNmrAtoms
+                    for nmrAtom in aNmrAtoms
+                    ) - {None}
+        return _newNmr
+
+    def _getNmrAtoms(self):
+        """Get the list of nmrAtoms
+        """
+        try:
+            _data = self._wrappedData.data
+            _oldNmrAtoms = _data[_data[CS_ISDELETED] == False][CS_NMRATOM]
+            _oldNmr = set(self.project.getByPid(nmr) for nmr in _oldNmrAtoms) - {None} # remove any Nones
+        except:
+            # dataframe may not have been ceated yet
+            _oldNmr = set()
+        return _oldNmr
 
     @property
     def _chemicalShifts(self):
@@ -282,13 +308,45 @@ class ChemicalShiftList(AbstractWrapperObject):
         :param autoUpdate: automatically update according to the project changes.
         :return: a duplicated copy of itself containing all chemicalShifts.
         """
+        from ccpn.core._ChemicalShift import _newChemicalShift as _newShift
+
         # name = _incrementObjectName(self.project, self._pluralLinkName, self.name)
         ncsl = self.project.newChemicalShiftList()
-        ncsl.spectra = self.spectra if includeSpectra else ()
+
+        # duplicate the chemicalShiftList dataframe - remove the deleted shifts (not required)
+        df = self._wrappedData.data.copy()
+        df = df[df[CS_ISDELETED] == False]
+        df.set_index(df[CS_UNIQUEID], inplace=True, )
+        ncsl._wrappedData.data = df
+
+        # make a new list of uniqueIds
+        _newIds = [self.project._getNextUniqueIdValue(CS_CLASSNAME) for _ in range(len(df))]
+        df[CS_UNIQUEID] = _newIds
+
+        # create the new shift objects
+        for ii in range(len(df)):
+            _row = df.iloc[ii]
+
+            # create a new shift with the uniqueId from the dataframe
+            shift = _newShift(ncsl, _ignoreUniqueId=True)
+            _uniqueId = _row[CS_UNIQUEID]
+            shift._uniqueId = int(_uniqueId)
+            ncsl._shifts.append(shift)
+
+            # add the new object to the _pid2Obj dict
+            self.project._finalisePid2Obj(shift, 'create')
+
+            # add the shift to the nmrAtom
+            shift._restoreObject()
+
         ncsl.autoUpdate = autoUpdate
         for att in ['unit', 'isSimulated', 'comment']:
             setattr(ncsl, att, getattr(self, att, None))
-        list(map(lambda cs: cs.copyTo(ncsl), self.chemicalShifts))
+
+        # setting the spectra will autoUpdate as required
+        ncsl.spectra = self.spectra if includeSpectra else ()
+        # # old chemicalShifts
+        # list(map(lambda cs: cs.copyTo(ncsl), self.chemicalShifts))
 
     @classmethod
     def _getAllWrappedData(cls, parent: Project) -> List[Nmr.ShiftList]:
@@ -775,6 +833,11 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
     result = self._data2Obj.get(apiChemicalShiftList)
     if result is None:
         raise RuntimeError('Unable to generate new ChemicalShiftList item')
+
+    # instantiate a new empty dataframe
+    df = pd.DataFrame(columns=CS_COLUMNS)
+    df.set_index(df[CS_UNIQUEID], inplace=True, )
+    apiChemicalShiftList.data = df
 
     return result
 

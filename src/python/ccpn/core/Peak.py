@@ -540,11 +540,12 @@ class Peak(AbstractWrapperObject):
         _post = set(makeIterableList(value))
         nmrResidues = set(nmr.nmrResidue for nmr in (_pre | _post))
         shifts = list(set(cs for nmrAt in (_pre | _post) for cs in nmrAt._chemicalShifts))
+        _thisNmr = self.spectrum.chemicalShiftList._getNmrAtoms()
 
-        # NOTE:ED - need this check as nmrAtoms must be unique in chemicalShiftList
-        for nmrAtom in (_post - _pre):
-            if self.spectrum.chemicalShiftList._getChemicalShift(nmrAtom=nmrAtom):
-                raise RuntimeError(f'Peak.dimensionNmrAtoms: {nmrAtom} already in list')
+        # # NOTE:ED - need this check as nmrAtoms must be unique in chemicalShiftList
+        # for nmrAtom in (_post - _pre - _thisNmr):
+        #     if self.spectrum.chemicalShiftList._getChemicalShift(nmrAtom=nmrAtom):
+        #         raise RuntimeError(f'Peak.dimensionNmrAtoms: {nmrAtom} already in list')
 
         with undoBlock():
             with undoStackBlocking() as addUndoItem:
@@ -553,7 +554,8 @@ class Peak(AbstractWrapperObject):
             # set the value
             self._dimensionNmrAtoms = value
 
-            for nmrAtom in (_post - _pre):
+            # add those that are not already in the list - otherwise recalculate
+            for nmrAtom in (_post - _pre - _thisNmr):
                 self.spectrum.chemicalShiftList._newChemicalShift(nmrAtom=nmrAtom)
 
             self._recalculatePeakShifts(nmrResidues, shifts)
@@ -657,12 +659,13 @@ class Peak(AbstractWrapperObject):
         _pre = set(makeIterableList(self.assignedNmrAtoms))
         _post = set(makeIterableList(value))
         nmrResidues = set(nmr.nmrResidue for nmr in (_pre | _post))
-        shifts = set(cs for nmrAt in (_pre | _post) for cs in nmrAt._chemicalShifts if cs and not cs.isDeleted)
+        shifts = list(set(cs for nmrAt in (_pre | _post) for cs in nmrAt._chemicalShifts))
+        _thisNmr = self.spectrum.chemicalShiftList._getNmrAtoms()
 
-        # NOTE:ED - need this check as nmrAtoms must be unique in chemicalShiftList
-        for nmrAtom in (_post - _pre):
-            if self.spectrum.chemicalShiftList._getChemicalShift(nmrAtom=nmrAtom):
-                raise RuntimeError(f'Peak.assignedNmrAtoms: {nmrAtom} already in list')
+        # # NOTE:ED - need this check as nmrAtoms must be unique in chemicalShiftList
+        # for nmrAtom in (_post - _pre - _thisNmr):
+        #     if self.spectrum.chemicalShiftList._getChemicalShift(nmrAtom=nmrAtom):
+        #         raise RuntimeError(f'Peak.assignedNmrAtoms: {nmrAtom} already in list')
 
         with undoBlock():
             with undoStackBlocking() as addUndoItem:
@@ -671,7 +674,8 @@ class Peak(AbstractWrapperObject):
             # set the value
             self._assignedNmrAtoms = value
 
-            for nmrAtom in (_post - _pre):
+            # add those that are not already in the list - otherwise recalculate
+            for nmrAtom in (_post - _pre - _thisNmr):
                 self.spectrum.chemicalShiftList._newChemicalShift(nmrAtom=nmrAtom)
 
             self._recalculatePeakShifts(nmrResidues, shifts)

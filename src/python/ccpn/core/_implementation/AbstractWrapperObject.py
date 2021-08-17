@@ -1242,10 +1242,7 @@ class AbstractWrapperObject(NotifierBase):
             # print(f'CHILDACTIONS {self.className}   {self}    {self._childActions}')
             # propagate the action to explicitly associated (generally child) instances
             for func in self._childActions:
-                try:
-                    func()
-                except Exception as es:
-                    print(f' error {es}')
+                func()
 
             self._childActions = []
 
@@ -1305,10 +1302,7 @@ class AbstractWrapperObject(NotifierBase):
         # print(f'  {self} ACTIONS   {self._finaliseChildren}')
         # propagate the action to explicitly associated (generally child) instances
         for obj, action in self._finaliseChildren:
-            try:
-                obj._finaliseAction(action)
-            except Exception as es:
-                print(f'   final error {es}  {obj._finaliseAction}')
+            obj._finaliseAction(action)
         self._finaliseChildren = []
 
         return True

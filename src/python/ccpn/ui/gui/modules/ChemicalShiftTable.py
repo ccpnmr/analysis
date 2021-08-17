@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-12 19:38:28 +0100 (Thu, August 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-17 02:14:15 +0100 (Tue, August 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -793,13 +793,14 @@ class ChemicalShiftTable(GuiTable):
             _table.insert(CS_TABLECOLUMNS.index(CS_ALLPEAKSCOUNT), CS_ALLPEAKSCOUNT, None)
 
             _objs = [self.chemicalShiftList._getChemicalShift(uniqueId=unq) for unq in _table[CS_UNIQUEID]]
-            _table[CS_OBJECT] = _objs
+            if _objs:
+                _table[CS_OBJECT] = _objs
 
-            _stats = [self._derivedFromObject(obj) for obj in _objs]
-            _table[[CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT]] = _stats
+                _stats = [self._derivedFromObject(obj) for obj in _objs]
+                _table[[CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT]] = _stats
 
-            # replace the visible nans with string 'None'
-            _table.fillna('None', inplace=True)
+                # replace the visible nans with string 'None'
+                _table.fillna('None', inplace=True)
         else:
             _table = pd.DataFrame(columns=CS_TABLECOLUMNS)
 

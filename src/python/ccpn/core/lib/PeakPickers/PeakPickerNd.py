@@ -62,6 +62,7 @@ class PeakPickerNd(PeakPickerABC):
     halfBoxFitWidth = CInt(allow_none=True, default_value=3)
     searchBoxDoFit = CBool(allow_none=True, default_value=True)
     setLineWidths = CBool(allow_none=True, default_value=True)
+    searchBoxMode = CBool(allow_none=True, default_value=True)
 
     def __init__(self, spectrum):
         super().__init__(spectrum=spectrum)
@@ -277,7 +278,7 @@ class PeakPickerNd(PeakPickerABC):
         startPoint = np.maximum(pLower - boxWidths, 0)
 
         self.sliceTuples = [(int(pos - bWidth), int(pos + bWidth + 1)) for pos, bWidth in zip(pointPositions, boxWidths)]
-        data = self.spectrum.dataSource.getRegionData(self.sliceTuples, aliasingFlags=[1] * self.spectrum.dimensionCount)
+        data = self.spectrum._dataSource.getRegionData(self.sliceTuples, aliasingFlags=[1] * self.spectrum.dimensionCount)
 
         # getLogger().debug('%s.snapToExtremum: found %d peaks in spectrum %s; %r' %
         #                   (self.__class__.__name__, len(peaks), self.spectrum, axisDict))
@@ -347,10 +348,11 @@ class PeakPickerNd(PeakPickerABC):
                     newPos = list(peak.pointPositions)
                     for ii in range(len(center)):
                         if 0.5 < center[ii] < (_shape[ii] - 0.5):
-                            newPos[ii] = center[ii] + startPoint[ii]
+                            newPos[ii] = float(center[ii] + startPoint[ii])
 
                     peak.pointPositions = newPos
-                    peak.pointLineWidths = linewidth
+                    if linewidth:
+                        peak.pointLineWidths = linewidth
 
                     if self.searchBoxDoFit:
                         peak.height = height
@@ -435,7 +437,7 @@ class PeakPickerNd(PeakPickerABC):
             regionArray = np.array((firstArray - firstArray, lastArray - firstArray))
 
             self.sliceTuples = [(fst, lst) for fst, lst in zip(firstArray, lastArray)]
-            data = self.spectrum.dataSource.getRegionData(self.sliceTuples, aliasingFlags=[1] * self.spectrum.dimensionCount)
+            data = self.spectrum._dataSource.getRegionData(self.sliceTuples, aliasingFlags=[1] * self.spectrum.dimensionCount)
 
             # update positions relative to the corner of the data array
             firstArray = firstArray.astype(np.float32)

@@ -48,6 +48,7 @@ from ccpn.ui.gui.widgets.GuiTable import GuiTable, _getValueByHeader
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CompoundWidgets import DoubleSpinBoxCompoundWidget
+from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.TableSorting import MultiColumnTableWidgetItem
@@ -55,6 +56,10 @@ from ccpn.ui.gui.widgets.SettingsWidgets import ModuleSettingsWidget, \
     RestraintListSelectionWidget, SpectrumDisplaySelectionWidget
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import makeIterableList
+import ccpn.ui.gui.modules.PyMolUtil as pyMolUtil
+from ccpn.ui.gui.widgets import MessageDialog
+from ccpn.util.Common import flattenLists
+from ccpn.util.Path import joinPath
 
 
 logger = getLogger()
@@ -75,6 +80,8 @@ HeaderStd = 'STD'
 HeaderCount1 = 'Count>0.3'
 HeaderCount2 = 'Count>0.5'
 
+ALL = '<all>'
+PymolScriptName = 'Restraint_Pymol_Template.py'
 
 class RestraintAnalysisTableModule(CcpnModule):
     """
@@ -350,6 +357,12 @@ class RestraintAnalysisTableWidget(GuiTable):
         gridHPos += 1
         self.expandButtons = ButtonList(parent=self._widget, texts=[' Expand all', ' Collapse all'], grid=(row, gridHPos),
                                         callbacks=[partial(self._expandAll, True), partial(self._expandAll, False), ])
+
+        gridHPos += 1
+        self.showOnViewerButton = Button(self._widget, tipText='Show on Molecular Viewer',
+                                         icon=Icon('icons/showStructure'),
+                                         callback=self._showOnMolecularViewer,
+                                         grid=(row, gridHPos), hAlign='l')
 
         row += 1
         self.spacer = Spacer(self._widget, 5, 5,
@@ -1005,6 +1018,28 @@ class RestraintAnalysisTableWidget(GuiTable):
             lastRow = nextRow
 
         self.resizeRowsToContents()
+
+    def _showOnMolecularViewer(self):
+
+        pdbPath = None
+        selectedPeaks= self.getSelectedObjects() or []
+        ## get the restraints to display
+        restraints = flattenLists([pk.restraints for pk in selectedPeaks])
+        ## get the PDB file from the parent restraintList.
+        for rs in restraints:
+            if rs.restraintList.moleculeFilePath:
+                pdbPath = rs.restraintList.moleculeFilePath
+                getLogger().info('Using pdb file %s for displaying violation on Molecular viewer.' %pdbPath )
+                break
+        ## run Pymol
+        pymolScriptPath = joinPath(self.application.pymolScriptsPath, PymolScriptName)
+        if pdbPath is None:
+            MessageDialog.showWarning('No Molecule File found',
+                                      '''To add a molecule file path to the RestraintList: Find the restraintList on sideBar, 
+                                      open the properties popup, add a full PDB file path in the entry widget.''')
+            return
+        pymolScriptPath = pyMolUtil._restraintsSelection2PyMolFile(pymolScriptPath, pdbPath, restraints)
+        pyMolUtil.runPymolWithScript(self.application, pymolScriptPath)
 
 
 if __name__ == '__main__':

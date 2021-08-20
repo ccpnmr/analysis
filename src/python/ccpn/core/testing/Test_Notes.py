@@ -5,7 +5,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-29 16:18:46 +0100 (Mon, March 29, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-08-20 22:18:49 +0100 (Fri, August 20, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -73,11 +74,9 @@ class NoteTest_setUp(WrapperTesting):
 
     def test_rename_Note_None(self):
         """
-        Test that renaming to None raises an error and does not alter the original Note.
+        Test that renaming to None is valid
         """
-        with self.assertRaisesRegexp(ValueError, 'None not allowed'):
-            self.note.rename(None)
-        self.assertEqual(self.note.name, 'ValidNote')
+        self.note.rename(None)
 
     def test_rename_Note_Int(self):
         """
@@ -86,7 +85,7 @@ class NoteTest_setUp(WrapperTesting):
         # with self.assertRaisesRegexp(TypeError, 'argument of type'):
         #   self.note.rename(42)
         #
-        with self.assertRaisesRegexp(TypeError, 'must be a string'):
+        with self.assertRaisesRegexp(ValueError, 'must be a string'):
             self.note.rename(42)
         self.assertEqual(self.note.name, 'ValidNote')
 

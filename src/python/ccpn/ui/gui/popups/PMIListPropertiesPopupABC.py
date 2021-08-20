@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-29 14:41:18 +0000 (Fri, January 29, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-08-20 19:26:48 +0100 (Fri, August 20, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,7 +40,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, _verifyPopupApply
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-from ccpn.core.lib.ContextManagers import undoStackBlocking, queueStateChange
+from ccpn.core.lib.ContextManagers import undoStackBlocking, queueStateChange, notificationEchoBlocking
 from ccpn.core._implementation.PMIListABC import MERITENABLED, MERITTHRESHOLD, \
     SYMBOLCOLOUR, TEXTCOLOUR, LINECOLOUR, MERITCOLOUR
 from ccpn.util.AttrDict import AttrDict
@@ -197,9 +198,10 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         """Populate the widgets from listViewSettings
         """
         # with self.blockWidgetSignals():
-        with self._changes.blockChanges():
-            # populate widgets from settings
-            self._setWidgetSettings()
+        with notificationEchoBlocking():
+            with self._changes.blockChanges():
+                # populate widgets from settings
+                self._setWidgetSettings()
 
     def _getChangeState(self):
         """Get the change state from the _changes dict
@@ -277,41 +279,49 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
     def _setListViewFromWidgets(self):
         """Set listView object from the widgets
         """
-        for item in self._colourPulldowns:
-            _, pl, attrib = item
+        with notificationEchoBlocking():
+            with undoStackBlocking():
+                # # apply all functions to the object
+                # changes = self._changes
+                # if changes: # or not self.EDITMODE:
+                #     self._applyAllChanges(changes)
 
-            value = pl.currentText()
-            colour = Colour.getSpectrumColour(value, defaultReturn='#')
-            if colour is not None:
-                setattr(self.ccpnList, attrib, colour)
+                for item in self._colourPulldowns:
+                    _, pl, attrib = item
 
-        meritEnabled = self.meritEnabledBox.isChecked()
-        setattr(self.ccpnList, MERITENABLED, meritEnabled)
-        meritThreshold = self.meritThresholdData.get()
-        setattr(self.ccpnList, MERITTHRESHOLD, meritThreshold)
+                    value = pl.currentText()
+                    colour = Colour.getSpectrumColour(value, defaultReturn='#')
+                    if colour is not None:
+                        setattr(self.ccpnList, attrib, colour)
+
+                meritEnabled = self.meritEnabledBox.isChecked()
+                setattr(self.ccpnList, MERITENABLED, meritEnabled)
+                meritThreshold = self.meritThresholdData.get()
+                setattr(self.ccpnList, MERITTHRESHOLD, meritThreshold)
 
     def _setListViewFromSettings(self):
         """Set listView object from the original settings dict
         """
-        for item in self._colourPulldowns:
-            _, pl, attrib = item
+        with notificationEchoBlocking():
+            with undoStackBlocking():
+                for item in self._colourPulldowns:
+                    _, pl, attrib = item
 
-            colour = self.listViewSettings[attrib]
-            if colour is not None:
-                setattr(self.ccpnList, attrib, colour)
+                    colour = self.listViewSettings[attrib]
+                    if colour is not None:
+                        setattr(self.ccpnList, attrib, colour)
 
-        if self.listViewSettings[MERITENABLED] is not None:
-            setattr(self.ccpnList, MERITENABLED, self.listViewSettings[MERITENABLED])
-        if self.listViewSettings[MERITTHRESHOLD] is not None:
-            setattr(self.ccpnList, MERITTHRESHOLD, self.listViewSettings[MERITTHRESHOLD])
+                if self.listViewSettings[MERITENABLED] is not None:
+                    setattr(self.ccpnList, MERITENABLED, self.listViewSettings[MERITENABLED])
+                if self.listViewSettings[MERITTHRESHOLD] is not None:
+                    setattr(self.ccpnList, MERITTHRESHOLD, self.listViewSettings[MERITTHRESHOLD])
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def _changeSettings(self):
         """Widgets have been changed in the dialog
         """
-        with undoStackBlocking():
-            self._setListViewFromWidgets()
+        self._setListViewFromWidgets()
 
         # redraw the items
         self._refreshGLItems()
@@ -326,9 +336,9 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         """Accept the dialog and disconnect all signals
         """
         if self._changes or not self.EDITMODE:
-            with undoStackBlocking():
-                # reset so the apply works correctly for undo/redo
-                self._setListViewFromSettings()
+            # with undoStackBlocking():
+            # reset so the apply works correctly for undo/redo
+            self._setListViewFromSettings()
             self._applyChanges()
 
         self.accept()
@@ -337,8 +347,9 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         """Handle the revert clicked button
         """
         if self._changes:
-            with undoStackBlocking():
-                self._setListViewFromSettings()
+            # with notificationEchoBlocking():
+            #     with undoStackBlocking():
+            self._setListViewFromSettings()
             self._populate()
 
         # redraw the items

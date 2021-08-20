@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-23 10:14:53 +0100 (Wed, June 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-20 19:26:48 +0100 (Fri, August 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -120,6 +120,7 @@ class Peak(AbstractWrapperObject):
         return self._wrappedData.height * scale
 
     @height.setter
+    @logCommand(get='self', isProperty=True)
     def height(self, value: Union[float, int, None]):
         if not isinstance(value, (float, int, type(None))):
             raise TypeError('height must be a float, integer or None')
@@ -151,6 +152,7 @@ class Peak(AbstractWrapperObject):
         return self._wrappedData.heightError * scale
 
     @heightError.setter
+    @logCommand(get='self', isProperty=True)
     def heightError(self, value: Union[float, int, None]):
         if not isinstance(value, (float, int, type(None))):
             raise TypeError('heightError must be a float, integer or None')
@@ -182,6 +184,7 @@ class Peak(AbstractWrapperObject):
         return self._wrappedData.volume * scale
 
     @volume.setter
+    @logCommand(get='self', isProperty=True)
     def volume(self, value: Union[float, int, None]):
         if not isinstance(value, (float, int, type(None))):
             raise TypeError('volume must be a float, integer or None')
@@ -213,6 +216,7 @@ class Peak(AbstractWrapperObject):
         return self._wrappedData.volumeError * scale
 
     @volumeError.setter
+    @logCommand(get='self', isProperty=True)
     def volumeError(self, value: Union[float, int, None]):
         if not isinstance(value, (float, int, type(None))):
             raise TypeError('volumeError must be a float, integer or None')
@@ -236,6 +240,7 @@ class Peak(AbstractWrapperObject):
         return self._wrappedData.figOfMerit
 
     @figureOfMerit.setter
+    @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def figureOfMerit(self, value: float):
         self._wrappedData.figOfMerit = value
@@ -257,6 +262,7 @@ class Peak(AbstractWrapperObject):
         return self._wrappedData.annotation
 
     @annotation.setter
+    @logCommand(get='self', isProperty=True)
     def annotation(self, value: Optional[str]):
         if not isinstance(value, (str, type(None))):
             raise ValueError("annotation must be a string or None")

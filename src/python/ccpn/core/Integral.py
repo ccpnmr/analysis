@@ -4,8 +4,9 @@ Module documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-23 09:34:54 +0100 (Wed, September 23, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-08-20 19:26:48 +0100 (Fri, August 20, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -110,6 +111,7 @@ class Integral(AbstractWrapperObject):
         return self._wrappedData.volume * scale
 
     @value.setter
+    @logCommand(get='self', isProperty=True)
     def value(self, value: Union[float, int, None]):
         if not isinstance(value, (float, int, type(None))):
             raise TypeError('value must be a float, integer or None')
@@ -141,6 +143,7 @@ class Integral(AbstractWrapperObject):
         return self._wrappedData.volumeError * scale
 
     @valueError.setter
+    @logCommand(get='self', isProperty=True)
     def valueError(self, value: Union[float, int, None]):
         if not isinstance(value, (float, int, type(None))):
             raise TypeError('valueError must be a float, integer or None')
@@ -169,6 +172,7 @@ class Integral(AbstractWrapperObject):
         return self._wrappedData.offset * scale
 
     @bias.setter
+    @logCommand(get='self', isProperty=True)
     def bias(self, value: Union[float, int]):
         if not isinstance(value, (float, int)):
             raise TypeError('bias must be a float or integer')
@@ -190,6 +194,7 @@ class Integral(AbstractWrapperObject):
         return self._wrappedData.figOfMerit
 
     @figureOfMerit.setter
+    @logCommand(get='self', isProperty=True)
     def figureOfMerit(self, value: float):
         self._wrappedData.figOfMerit = value
 
@@ -204,6 +209,7 @@ class Integral(AbstractWrapperObject):
         return self._wrappedData.offset * scale
 
     @offset.setter
+    @logCommand(get='self', isProperty=True)
     def offset(self, value: Union[float, int]):
         if not isinstance(value, (float, int)):
             raise TypeError('offset must be a float or integer')
@@ -231,6 +237,7 @@ class Integral(AbstractWrapperObject):
         return self._wrappedData.offset * scale
 
     @baseline.setter
+    @logCommand(get='self', isProperty=True)
     def baseline(self, value: Union[float, int]):
         if not isinstance(value, (float, int)):
             raise TypeError('baseline must be a float or integer')
@@ -252,6 +259,7 @@ class Integral(AbstractWrapperObject):
         return self._wrappedData.constraintWeight
 
     @constraintWeight.setter
+    @logCommand(get='self', isProperty=True)
     def constraintWeight(self, value: float):
         self._wrappedData.constraintWeight = value
 
@@ -305,6 +313,7 @@ class Integral(AbstractWrapperObject):
         return self._wrappedData.annotation
 
     @annotation.setter
+    @logCommand(get='self', isProperty=True)
     def annotation(self, value: str):
         self._wrappedData.annotation = value
 

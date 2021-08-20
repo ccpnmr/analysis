@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-01-22 15:44:50 +0000 (Fri, January 22, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-08-20 19:26:48 +0100 (Fri, August 20, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -47,6 +48,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.lib.GuiPath import VALIDROWCOLOUR, ACCEPTROWCOLOUR, REJECTROWCOLOUR, INVALIDROWCOLOUR
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.popups.AttributeEditorPopupABC import getAttributeTipText
 
 
 LINEEDITSMINIMUMWIDTH = 195
@@ -417,7 +419,7 @@ class ValidateSpectraFrameABC(Frame):
                 for spectrum in self.spectra:
                     # if not spectrum.isValidPath:
 
-                    pathLabel = Label(self.spectrumScrollAreaWidgetContents, text=spectrum.pid, grid=(scrollRow, 0))
+                    pathLabel = Label(self.spectrumScrollAreaWidgetContents, text=spectrum.pid, grid=(scrollRow, 0), tipText=getAttributeTipText(spectrum.__class__, 'filePath'))
                     pathUrlLabel = Label(self.spectrumScrollAreaWidgetContents, text='', grid=(scrollRow, 1))
                     pathUrlLabel.setVisible(self.application._isInDebugMode)
 

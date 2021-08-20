@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 17:58:16 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-20 19:26:48 +0100 (Fri, August 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -48,6 +48,7 @@ from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 from ccpn.util.Constants import INTERNALQTDATA
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
+from ccpn.ui.gui.popups.AttributeEditorPopupABC import getAttributeTipText
 import traceback
 
 DEFAULTSPACING = (3, 3)
@@ -595,12 +596,12 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
         self._FIXEDWIDTH = maxDim.width()
 
         row = 1
-        self.nameLabel = Label(self._dialogWidget, labelName, grid=(row, 0))
+        self.nameLabel = Label(self._dialogWidget, labelName, grid=(row, 0), tipText=getAttributeTipText(self._class, 'name'))
         self._nameEditFrame = Frame(self._dialogWidget, setLayout=True, showBorder=False, grid=(row, 1), gridSpan=(1, 2))
         self.nameEdit = LineEdit(self._nameEditFrame, backgroundText='%s Name' % self._groupName, hAlign='l', textAlignment='left', grid=(row, 1))
 
         row += 1
-        self.commentLabel = Label(self._dialogWidget, 'Comment', grid=(row, 0))
+        self.commentLabel = Label(self._dialogWidget, 'Comment', grid=(row, 0), tipText=getAttributeTipText(self._class, 'comment'))
         self.commentEdit = LineEdit(self._dialogWidget, backgroundText='> Optional <', textAlignment='left', grid=(row, 1), gridSpan=(1, 2))
 
         # GST need something better than this..!
@@ -624,7 +625,7 @@ class _GroupEditorPopupABC(CcpnDialogMainWidget):
             self.leftPullDown.setEnabled(False) ## Editing of different SG from the same popup is disabled.
             ## It is confusing and error-prone in notifying changes to the other tabs.
         row += 2
-        self.selectionLabel = Label(self._dialogWidget, self._classItemAttribute.capitalize(), grid=(row, 0))
+        self.selectionLabel = Label(self._dialogWidget, self._classItemAttribute.capitalize(), grid=(row, 0), tipText=getAttributeTipText(self._class, self._classItemAttribute))
         self.leftItemsLabel = Label(self._dialogWidget, 'Not Included', grid=(row, 1))
 
         row += 1

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 16:43:28 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-20 19:26:48 +0100 (Fri, August 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -33,6 +33,7 @@ from PyQt5 import QtWidgets, QtCore
 from ccpn.core import _coreClassMap
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 from ccpn.ui.Ui import Ui
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPopup
 from ccpn.ui.gui.widgets.Application import Application
@@ -49,7 +50,8 @@ def qtMessageHandler(*errors):
         Logging.getLogger().warning('QT error: %s' % err)
 
 
-REMOVEDEBUG = r'\(\w+\.\w+:\d+\)$'
+# REMOVEDEBUG = r'\(\w+\.\w+:\d+\)$'
+REMOVEDEBUG = r'\(\S+\.\w+:\d+\)$'
 
 # un/suppress messages
 QtCore.qInstallMessageHandler(qtMessageHandler)
@@ -134,13 +136,14 @@ class Gui(Ui):
     def initialize(self, mainWindow):
         """UI operations done after every project load/create"""
 
-        # Set up mainWindow
-        self.mainWindow = self._setupMainWindow(mainWindow)
+        with notificationEchoBlocking():
+            # Set up mainWindow
+            self.mainWindow = self._setupMainWindow(mainWindow)
 
-        self.application.initGraphics()
+            self.application.initGraphics()
 
-        project = self.application.project
-        current = self.application.current
+            project = self.application.project
+            current = self.application.current
 
         # Wrapper Notifiers
         from ccpn.ui.gui.lib import GuiStrip

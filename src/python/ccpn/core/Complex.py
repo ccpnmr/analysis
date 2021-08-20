@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 17:35:45 +0100 (Fri, June 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-20 19:19:59 +0100 (Fri, August 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -101,6 +101,7 @@ class Complex(AbstractWrapperObject):
         return tuple(sorted(data2Obj[x] for x in self._wrappedData.chains))
 
     @chains.setter
+    @logCommand(get='self', isProperty=True)
     def chains(self, value):
         getDataObj = self._project._data2Obj.get
         value = [getDataObj(x) if isinstance(x, str) else x for x in value]
@@ -113,6 +114,7 @@ class Complex(AbstractWrapperObject):
         return comment
 
     @comment.setter
+    @logCommand(get='self', isProperty=True)
     def comment(self, value: str):
         """set optional comment of Complex."""
         if not isinstance(value, (str, type(None))):
@@ -138,7 +140,13 @@ class Complex(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename Complex, changing its name and Pid.
         """
-        return self._rename(value)
+        name = self._uniqueName(project=self.project, name=value)
+
+        # rename functions from here
+        oldName = self.name
+        self._oldPid = self.pid
+        self._wrappedData.__dict__['name'] = name
+        return (oldName,)
 
     #=========================================================================================
     # CCPN functions

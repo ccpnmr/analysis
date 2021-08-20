@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-22 13:09:37 +0100 (Thu, July 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-20 19:20:00 +0100 (Fri, August 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import functools
 import typing
 import re
+from contextlib import contextmanager
 from collections import OrderedDict
 from copy import deepcopy
 
@@ -42,6 +43,9 @@ from ccpn.util.Logging import getLogger
 from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking, \
     apiNotificationBlanking, inactivity
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
+from ccpn.core.lib.ContextManagers import deleteObject
+from ccpn.core.lib.Notifiers import NotifierBase
+from ccpn.util.decorators import logCommand
 
 
 @functools.total_ordering
@@ -164,8 +168,12 @@ class AbstractWrapperObject(NotifierBase):
         self._id = None
         self._resetIds()
 
-        #EJB 20181217: test for preDelete
+        #EJB 20181217: test for preDelete - may be able to remove this again
         self._flaggedForDelete = False
+
+        # tuple to hold children that explicitly need finalising after atomic operations
+        self._finaliseChildren = []
+        self._childActions = []
 
         # Assign an unique id (per class) if it does not yet exists
         if not hasattr(self._wrappedData, '_uniqueId') or \
@@ -303,11 +311,11 @@ class AbstractWrapperObject(NotifierBase):
         """
         return 'my%s' % cls.className
 
-    # @staticmethod
-    # def _defaultNameFromSerial(cls, serial):
-    #     # Get the next default name using serial, this may already exist
-    #     name = 'my%s_%s' % (cls.className, serial)
-    #     return name
+    @staticmethod
+    def _defaultNameFromSerial(cls, serial):
+        # Get the next default name using serial, this may already exist
+        name = 'my%s_%s' % (cls.className, serial)
+        return name
 
     @classmethod
     def _uniqueName(cls, project, name=None) -> str:
@@ -315,11 +323,11 @@ class AbstractWrapperObject(NotifierBase):
         """
         if name is None:
             name = cls._defaultName()
+        cls._validateStringValue('name', name)
         name = name.strip()
         names = [sib.name for sib in getattr(project, cls._pluralLinkName)]
         while name in names:
             name = commonUtil.incrementName(name)
-        cls._validateStringValue('name', name)
         return name
 
     @classmethod
@@ -329,11 +337,11 @@ class AbstractWrapperObject(NotifierBase):
         """
         if name is None:
             name = cls._defaultName()
+        cls._validateStringValue('name', name)
         name = name.strip()
         names = [sib._wrappedData.name for sib in getattr(project, cls._pluralLinkName)]
         while name in names:
             name = commonUtil.incrementName(name)
-        cls._validateStringValue('name', name)
         return name
 
     @classmethod
@@ -361,7 +369,7 @@ class AbstractWrapperObject(NotifierBase):
                              (cls.__name__, attribName))
 
         if Pid.altCharacter in value:
-            raise ValueError('%s: Character %r not allowed for %r; got %r' %
+            raise ValueError('%s: Character %r not allowed in %r; got %r' %
                              (cls.__name__, Pid.altCharacter, attribName, value))
 
         if not allowWhitespace and commonUtil.contains_whitespace(value):
@@ -369,29 +377,9 @@ class AbstractWrapperObject(NotifierBase):
                              (cls.__name__, attribName, value))
 
     # @staticmethod
-    # def _nextAvailableName(cls, project):
-    #     # Get the next available name
-    #     _cls = getattr(project, cls._pluralLinkName)
-    #     nextNumber = len(_cls) + 1
-    #     _name = cls.className  #._defaultName(cls, cls)
-    #     name = 'my%s_%s' % (_name, nextNumber)  # if nextNumber > 0 else sampleName
-    #     names = [d.name for d in _cls]
-    #     while name in names:
-    #         name = commonUtil.incrementName(name)
-    #
-    #     return name
-
-    # @staticmethod
-    # def _nextAvailableWrappedName(cls, project):
-    #     # Get the next available name
-    #     _cls = getattr(project, cls._pluralLinkName)
-    #     nextNumber = len(_cls) + 1
-    #     _name = cls.className  #._defaultName(cls, cls)
-    #     name = 'my%s_%s' % (_name, nextNumber)  # if nextNumber > 0 else sampleName
-    #     names = [d._wrappedData.name for d in _cls]
-    #     while name in names:
-    #         name = commonUtil.incrementName(name)
-    #
+    # def _defaultNameFromSerial(cls, serial):
+    #     # Get the next default name using serial, this may already exist
+    #     name = 'my%s_%s' % (cls.className, serial)
     #     return name
 
     @property
@@ -429,6 +417,7 @@ class AbstractWrapperObject(NotifierBase):
         return self._none2str(self._wrappedData.details)
 
     @comment.setter
+    @logCommand(get='self', isProperty=True)
     def comment(self, value: str):
         self._wrappedData.details = self._str2none(value)
 
@@ -716,10 +705,14 @@ class AbstractWrapperObject(NotifierBase):
         """Generic rename method that individual classes can use for implementation
         of their rename method to minimises code duplication
         """
+        # validate the name
         name = self._uniqueName(project=self.project, name=value)
+
         # rename functions from here
         oldName = self.name
+        self._oldPid = self.pid
         self._wrappedData.name = name
+
         return (oldName,)
 
     def rename(self, value: str):
@@ -1210,6 +1203,28 @@ class AbstractWrapperObject(NotifierBase):
 
         action is one of: 'create', 'delete', 'change', 'rename'"""
 
+        # print(f'>>>  _finaliseAction {self} - {action}')
+        # Special case - always update _ids
+        if action == 'rename':
+            try:
+                # get the stored value BEFORE renaming - valid for undo/redo
+                oldPid = self._oldPid
+            except Exception as es:
+                oldPid = self.pid
+            # Wrapper-level processing
+            self._resetIds()
+        self._flaggedForDelete = True if action == 'delete' else False
+
+        if self._childActions:
+            # operations that MUST be performed during _finalise
+            # irrespective of whether notifiers fire to external objects
+            # print(f'CHILDACTIONS {self.className}   {self}    {self._childActions}')
+            # propagate the action to explicitly associated (generally child) instances
+            for func in self._childActions:
+                func()
+
+            self._childActions = []
+
         project = self.project
         if project._notificationBlanking:
             return
@@ -1225,18 +1240,18 @@ class AbstractWrapperObject(NotifierBase):
         #       are about to be deleted.
         #       e.g. deleting an nmrAtom from nmrResidue - 'delete' fired but nmrAtom still exists
         #       so the row update must be able to ignore 'deleted' nmrAtoms
-        if action == 'delete':
-            self._flaggedForDelete = True
-        else:
-            self._flaggedForDelete = False
+        # if action == 'delete':
+        #     self._flaggedForDelete = True
+        # else:
+        #     self._flaggedForDelete = False
 
         if action == 'rename':
-            # Special case
-
-            oldPid = self.pid
-
-            # Wrapper-level processing
-            self._resetIds()
+            # # Special case
+            #
+            # oldPid = self.pid
+            #
+            # # Wrapper-level processing
+            # self._resetIds()
 
             # Call notifiers with special signature
             if project._notificationSuspension:
@@ -1262,6 +1277,12 @@ class AbstractWrapperObject(NotifierBase):
                 for dd in iterator:
                     for notifier in tuple(dd):
                         notifier(self)
+
+        # print(f'  {self} ACTIONS   {self._finaliseChildren}')
+        # propagate the action to explicitly associated (generally child) instances
+        for obj, action in self._finaliseChildren:
+            obj._finaliseAction(action)
+        self._finaliseChildren = []
 
         return True
 

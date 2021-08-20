@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-04 12:28:19 +0100 (Wed, August 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-20 19:19:59 +0100 (Fri, August 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -127,6 +127,7 @@ class SpectrumGroup(AbstractWrapperObject):
         return comment
 
     @comment.setter
+    @logCommand(get='self', isProperty=True)
     def comment(self, value: str):
         """set optional comment of SpectrumGroup."""
         if not isinstance(value, (str, type(None))):
@@ -136,13 +137,13 @@ class SpectrumGroup(AbstractWrapperObject):
 
     @property
     def sliceColour(self) -> str:
-        """1d sliceColour for group"""
+        """1D slice colour for group"""
         colour = self.getParameter(SPECTRUMGROUP, SPECTRUMGROUPSLICECOLOUR)
         return colour
 
     @sliceColour.setter
     def sliceColour(self, value: str):
-        """1d sliceColour for group"""
+        """1D slice colour for group"""
         if not isinstance(value, (str, type(None))):
             raise ValueError("sliceColour must be a string/None.")
 
@@ -150,13 +151,13 @@ class SpectrumGroup(AbstractWrapperObject):
 
     @property
     def positiveContourColour(self) -> str:
-        """1d positivecontourColour for group"""
+        """nD positive contour colour for group"""
         colour = self.getParameter(SPECTRUMGROUP, SPECTRUMGROUPPOSITIVECONTOURCOLOUR)
         return colour
 
     @positiveContourColour.setter
     def positiveContourColour(self, value: str):
-        """1d positiveContourColour for group"""
+        """nD positive contour colour for group"""
         if not isinstance(value, (str, type(None))):
             raise ValueError("positiveContourColour must be a string/None.")
 
@@ -164,13 +165,13 @@ class SpectrumGroup(AbstractWrapperObject):
 
     @property
     def negativeContourColour(self) -> str:
-        """Nd negativecontourColour for group"""
+        """nD negative contour colour for group"""
         colour = self.getParameter(SPECTRUMGROUP, SPECTRUMGROUPNEGATIVECONTOURCOLOUR)
         return colour
 
     @negativeContourColour.setter
     def negativeContourColour(self, value: str):
-        """Nd negativeContourColour for group"""
+        """nD negative contour colour for group"""
         if not isinstance(value, (str, type(None))):
             raise ValueError("negativeContourColour must be a string/None.")
 
@@ -191,6 +192,7 @@ class SpectrumGroup(AbstractWrapperObject):
         return tuple(data)
 
     @spectra.setter
+    @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def spectra(self, value):
         if not isinstance(value, (tuple, list)):
@@ -237,6 +239,7 @@ class SpectrumGroup(AbstractWrapperObject):
         return tuple(result)
 
     @series.setter
+    @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def series(self, items):
         """Setter for series
@@ -368,7 +371,14 @@ class SpectrumGroup(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename SpectrumGroup, changing its name and Pid.
         """
-        return self._rename(value)
+        name = self._uniqueName(project=self.project, name=value)
+
+        # rename functions from here
+        oldName = self.name
+        self._oldPid = self.pid
+        self._wrappedData.__dict__['name'] = name
+
+        return (oldName,)
 
     def _finaliseAction(self, action: str):
         """Subclassed to handle associated seriesValues instances

@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-22 13:09:37 +0100 (Thu, July 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-20 19:19:59 +0100 (Fri, August 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -388,6 +388,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._wrappedData.positiveContourCount
 
     @positiveContourCount.setter
+    @logCommand(get='self', isProperty=True)
     def positiveContourCount(self, value):
         self._wrappedData.positiveContourCount = value
 
@@ -398,6 +399,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._wrappedData.positiveContourBase
 
     @positiveContourBase.setter
+    @logCommand(get='self', isProperty=True)
     def positiveContourBase(self, value):
         self._wrappedData.positiveContourBase = value
 
@@ -408,6 +410,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._wrappedData.positiveContourFactor
 
     @positiveContourFactor.setter
+    @logCommand(get='self', isProperty=True)
     def positiveContourFactor(self, value):
         self._wrappedData.positiveContourFactor = value
 
@@ -418,6 +421,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._wrappedData.positiveContourColour
 
     @positiveContourColour.setter
+    @logCommand(get='self', isProperty=True)
     def positiveContourColour(self, value):
         self._wrappedData.positiveContourColour = value
 
@@ -433,6 +437,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return result
 
     @includePositiveContours.setter
+    @logCommand(get='self', isProperty=True)
     def includePositiveContours(self, value: bool):
         """Include flag for the positive contours
         """
@@ -448,6 +453,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._wrappedData.negativeContourCount
 
     @negativeContourCount.setter
+    @logCommand(get='self', isProperty=True)
     def negativeContourCount(self, value):
         self._wrappedData.negativeContourCount = value
 
@@ -458,6 +464,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._wrappedData.negativeContourBase
 
     @negativeContourBase.setter
+    @logCommand(get='self', isProperty=True)
     def negativeContourBase(self, value):
         self._wrappedData.negativeContourBase = value
 
@@ -468,6 +475,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._wrappedData.negativeContourFactor
 
     @negativeContourFactor.setter
+    @logCommand(get='self', isProperty=True)
     def negativeContourFactor(self, value):
         self._wrappedData.negativeContourFactor = value
 
@@ -478,6 +486,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._wrappedData.negativeContourColour
 
     @negativeContourColour.setter
+    @logCommand(get='self', isProperty=True)
     def negativeContourColour(self, value):
         self._wrappedData.negativeContourColour = value
 
@@ -493,6 +502,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return result
 
     @includeNegativeContours.setter
+    @logCommand(get='self', isProperty=True)
     def includeNegativeContours(self, value: bool):
         """Include flag for the negative contours
         """
@@ -509,6 +519,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._wrappedData.sliceColour
 
     @sliceColour.setter
+    @logCommand(get='self', isProperty=True)
     def sliceColour(self, value):
         self._wrappedData.sliceColour = value
         # for spectrumView in self.spectrumViews:
@@ -612,6 +623,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             return refExperiment.name
 
     @experimentType.setter
+    @logCommand(get='self', isProperty=True)
     def experimentType(self, value: str):
         from ccpn.core.lib.SpectrumLib import _setApiExpTransfers, _setApiRefExperiment, _clearLinkToRefExp
 
@@ -648,6 +660,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._wrappedData.experiment.name
 
     @experimentName.setter
+    @logCommand(get='self', isProperty=True)
     def experimentName(self, value):
         # force to a string
         # because: reading from .nef files extracts the name from the end of the experiment_type in nef reader
@@ -1017,6 +1030,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return tuple(result)
 
     @referenceExperimentDimensions.setter
+    @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     @checkSpectrumPropertyValue(iterable=True, unique=True, allowNone=True, types=(str,))
     def referenceExperimentDimensions(self, values: Sequence):

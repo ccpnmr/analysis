@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-04 12:28:19 +0100 (Wed, August 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-20 19:19:59 +0100 (Fri, August 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -296,7 +296,14 @@ class Chain(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename Chain, changing its shortName and Pid.
         """
-        return self._rename(value)
+        name = self._uniqueName(project=self.project, name=value)
+
+        # rename functions from here
+        oldName = self.shortName
+        self._oldPid = self.pid
+        self._apiChain.renameChain(name)
+
+        return (oldName,)
 
     # def delete(self):
     #     print('>>>deleting - need to delete apiMolecules')

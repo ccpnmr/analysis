@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-02 13:01:43 +0100 (Fri, July 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-20 19:19:59 +0100 (Fri, August 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -178,8 +178,11 @@ class Data(AbstractWrapperObject):
         """Rename Data, changing its name and Pid.
         """
         name = self._uniqueName(project=self.project, name=value)
+
         # rename functions from here
         oldName = self.name
+        self._oldPid = self.pid
+
         # GWV: unsure why this is different from  rename() implementations of many other classes?
         coreUtil._resetParentLink(self._wrappedData, 'data', {'name': name})
         return (oldName,)

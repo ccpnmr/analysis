@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-29 14:27:29 +0100 (Tue, June 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-20 19:19:59 +0100 (Fri, August 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -425,11 +425,19 @@ class NmrAtom(AbstractWrapperObject):
 
         with renameObjectContextManager(self) as addUndoItem:
             oldName = self.name
+            self._oldPid = self.pid
+
+            self._wrappedData.isotopeCode = UnknownIsotopeCode
             self._wrappedData.name = value
             self._resetIds()
 
             addUndoItem(undo=partial(self.rename, oldName),
                         redo=partial(self.rename, value))
+
+            # if isotopeChanged:
+            #     addUndoItem(undo=partial(self._setIsotopeCode, isotopeCode))
+
+        return (oldName,)
 
     #=========================================================================================
     # CCPN functions

@@ -5,7 +5,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:30 +0000 (Thu, February 04, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-08-20 22:18:49 +0100 (Fri, August 20, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -323,14 +324,13 @@ class Test_Properties(WrapperTesting):
         """
         Test that renaming a Chain with None raises TypeError.
         """
-        with self.assertRaisesRegexp(ValueError, 'None not allowed in'):
-            self.chain.rename(None)
+        self.chain.rename(None)
 
     def test_renameChain_Int(self):
         """
         Test that renaming a Chain with 42 raises TypeError.
         """
-        with self.assertRaisesRegexp(TypeError, 'must be a string'):
+        with self.assertRaisesRegexp(ValueError, 'must be a string'):
             self.chain.rename(42)
 
     def test_renameChain_ES(self):
@@ -351,7 +351,7 @@ class Test_Properties(WrapperTesting):
         """
         Test that renaming a Chain with whitespace raises ValueError.
         """
-        with self.assertRaisesRegexp(ValueError, 'whitespace not allowed'):
+        with self.assertRaisesRegexp(ValueError, 'Whitespace not allowed'):
             self.chain.rename('not found')
 
     #=========================================================================================

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:26:48 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-20 22:18:49 +0100 (Fri, August 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -282,11 +282,11 @@ class Integral(AbstractWrapperObject):
     @slopes.setter
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
-    def slopes(self, value: Optional[List[float]] = None):
-        if not isinstance(value, (list, type(None))):
-            raise TypeError('slopes must be a None or list of floats - {}'.format(value))
+    def slopes(self, value: Union[List[float], Tuple[float], None] = None):
+        if not isinstance(value, (list, tuple, type(None))):
+            raise TypeError('slopes must be a None or list/tuple of floats - {}'.format(value))
         if value and not all(isinstance(sl, float) for sl in value):
-            raise TypeError('slopes must be a None or list of floats - {}'.format(value))
+            raise TypeError('slopes must be a None or list/tuple of floats - {}'.format(value))
 
         if value is None:
             self._wrappedData.slopes = None

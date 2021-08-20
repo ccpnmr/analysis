@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-22 13:40:13 +0100 (Thu, July 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-20 19:26:48 +0100 (Fri, August 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1384,6 +1384,16 @@ GuiTable::item::selected {
                     for col, colFormat in enumerate(columnDefs.formats):
                         if colFormat is not None:
                             self.setFormat(colFormat, column=col)
+
+            try:
+                # set the tipTexts
+                for col, colText in enumerate(columnDefs.tipTexts):
+                    _item = self.horizontalHeaderItem(col)
+                    if _item:
+                        _item.setToolTip(colText)
+            except Exception as es:
+                # ignore if no tipTexts
+                pass
 
             # highlight them back again
             self._highLightObjs(objs)

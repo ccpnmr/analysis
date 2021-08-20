@@ -4,8 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 19:08:45 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-08-20 19:26:48 +0100 (Fri, August 20, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -35,6 +36,7 @@ from ccpn.ui.gui.popups.Dialog import _verifyPopupApply
 from ccpn.core.MultipletList import MultipletList
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import getAttributeTipText
 from ccpn.util.Common import camelCaseToString
+from ccpn.core.lib.ContextManagers import notificationEchoBlocking, undoStackBlocking
 
 
 MULTIPLETAVERAGING = 'multipletAveraging'
@@ -98,19 +100,23 @@ class MultipletListPropertiesPopup(PMIListPropertiesPopupABC):
     def _setListViewFromWidgets(self):
         """Set listView object from the widgets
         """
-        super()._setListViewFromWidgets()
+        with notificationEchoBlocking():
+            with undoStackBlocking():
+                super()._setListViewFromWidgets()
 
-        multipletAveraging = self.multipletAveraging.getIndex()
-        setattr(self.ccpnList, MULTIPLETAVERAGING, MULTIPLETAVERAGINGTYPES[multipletAveraging])
+                multipletAveraging = self.multipletAveraging.getIndex()
+                setattr(self.ccpnList, MULTIPLETAVERAGING, MULTIPLETAVERAGINGTYPES[multipletAveraging])
 
     def _setListViewFromSettings(self):
         """Set listView object from the original settings dict
         """
-        super()._setListViewFromSettings()
+        with notificationEchoBlocking():
+            with undoStackBlocking():
+                super()._setListViewFromSettings()
 
-        multipletAveraging = self.listViewSettings[MULTIPLETAVERAGING]
-        if multipletAveraging is not None:
-            setattr(self.ccpnList, MULTIPLETAVERAGING, multipletAveraging)
+                multipletAveraging = self.listViewSettings[MULTIPLETAVERAGING]
+                if multipletAveraging is not None:
+                    setattr(self.ccpnList, MULTIPLETAVERAGING, multipletAveraging)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

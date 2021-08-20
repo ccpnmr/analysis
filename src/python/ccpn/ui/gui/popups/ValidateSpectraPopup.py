@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 15:57:59 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-20 19:26:48 +0100 (Fri, August 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -53,6 +53,23 @@ from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.lib.GuiPath import VALIDROWCOLOUR, ACCEPTROWCOLOUR, REJECTROWCOLOUR, INVALIDROWCOLOUR
+from ccpn.core.lib.ContextManagers import undoStackBlocking
+from ccpn.util.Logging import getLogger
+from ccpn.ui.gui.popups.AttributeEditorPopupABC import getAttributeTipText
+
+
+LINEEDITSMINIMUMWIDTH = 195
+INSIDEDATA = 'insideData'
+ALONGSIDEDATA = 'alongsideData'
+REMOTEDATA = 'remoteData'
+STANDARD = 'standard'
+VALIDSTORENAMES = (('$DATA', REMOTEDATA),
+                   ('$INSIDEDATA', INSIDEDATA),
+                   ('ALONGSIDEDATA', ALONGSIDEDATA))
+DIRSEP = '/'
+SHOWDATAURLS = True
+
 
 
 VALID_ROWCOLOUR = QtGui.QColor('palegreen')

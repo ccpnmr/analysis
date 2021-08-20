@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-20 16:32:34 +0100 (Thu, May 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-20 19:26:48 +0100 (Fri, August 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -67,6 +67,7 @@ from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, 
 from ccpn.util.Logging import getLogger
 from ccpn.util.isotopes import isotopeRecords
 from ccpn.util.OrderedSet import OrderedSet
+from ccpn.ui.gui.popups.AttributeEditorPopupABC import getAttributeTipText
 
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
@@ -492,16 +493,16 @@ class GeneralTab(Widget):
                grid=(row, 3))
         row += 1
 
-        Label(self, text="Pid ", vAlign='t', hAlign='l', grid=(row, 0))
+        Label(self, text="Pid ", vAlign='t', hAlign='l', grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'pid'))
         self.spectrumPidLabel = Label(self, vAlign='t', grid=(row, 1))
         row += 1
 
-        Label(self, text="Name ", grid=(row, 0))
+        Label(self, text="Name ", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'name'))
         self.nameData = LineEdit(self, textAlignment='left', vAlign='t', grid=(row, 1), backgroundText='> Enter name <')
         self.nameData.textChanged.connect(partial(self._queueSpectrumNameChange, spectrum))  # ejb - was editingFinished
         row += 1
 
-        Label(self, text="Comment ", grid=(row, 0))
+        Label(self, text="Comment ", grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'comment'))
         self.commentData = LineEdit(self, textAlignment='left', vAlign='t', grid=(row, 1), backgroundText='> Optional <')
         self.commentData.textChanged.connect(partial(self._queueSpectrumCommentChange, spectrum))  # ejb - was editingFinished
         row += 1
@@ -512,18 +513,18 @@ class GeneralTab(Widget):
                                            )
         row += 1
 
-        Label(self, text="Chemical Shift List ", vAlign='t', hAlign='l', grid=(row, 0))
+        Label(self, text="Chemical Shift List ", vAlign='t', hAlign='l', grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'chemicalShiftList'))
         self.chemicalShiftListPulldown = PulldownList(self, vAlign='t', grid=(row, 1),
                                                       callback=partial(self._queueChemicalShiftListChange, spectrum))
         row += 1
 
-        Label(self, text="Sample", vAlign='t', hAlign='l', grid=(row, 0))
+        Label(self, text="Sample", vAlign='t', hAlign='l', grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'sample'))
         self.samplesPulldownList = PulldownList(self, vAlign='t', grid=(row, 1))
         self.samplesPulldownList.currentIndexChanged.connect(partial(self._queueSampleChange, spectrum))
         row += 1
 
         if spectrum.dimensionCount == 1:
-            Label(self, text="Colour", vAlign='t', hAlign='l', grid=(row, 0))
+            Label(self, text="Colour", vAlign='t', hAlign='l', grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'sliceColour'))
             self.colourBox = PulldownList(self, vAlign='t', grid=(row, 1))
 
             # populate initial pulldown
@@ -534,7 +535,7 @@ class GeneralTab(Widget):
                                   callback=partial(self._queueSetSpectrumColour, spectrum), icon='icons/colours')
             row += 1
 
-            Label(self, text="Reference Experiment Type ", vAlign='t', hAlign='l', grid=(row, 0))
+            Label(self, text="Reference Experiment Type ", vAlign='t', hAlign='l', grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'experimentType'))
             self.spectrumType = FilteringPulldownList(self, vAlign='t', grid=(row, 1))
             spButton = Button(self, grid=(row, 2),
                               callback=partial(self._raiseExperimentFilterPopup, spectrum),
@@ -544,17 +545,17 @@ class GeneralTab(Widget):
             self.spectrumType.currentIndexChanged.connect(partial(self._queueSetSpectrumType, spectrum))
             row += 1
 
-            Label(self, text="Spinning Rate (Hz)", grid=(row, 0), hAlign='l')
+            Label(self, text="Spinning Rate (Hz)", grid=(row, 0), hAlign='l', tipText=getAttributeTipText(Spectrum, 'spinningRate'))
             self.spinningRateData = ScientificDoubleSpinBox(self, vAlign='t', grid=(row, 1), min=0, max=100000.0)
             self.spinningRateData.valueChanged.connect(partial(self._queueSpinningRateChange, spectrum, self.spinningRateData.textFromValue))
             row += 1
 
-            Label(self, text="Temperature", grid=(row, 0), hAlign='l')
+            Label(self, text="Temperature", grid=(row, 0), hAlign='l', tipText=getAttributeTipText(Spectrum, 'temperature'))
             self.temperatureData = ScientificDoubleSpinBox(self, vAlign='t', grid=(row, 1), min=0, max=1000.0)
             self.temperatureData.valueChanged.connect(partial(self._queueTemperatureChange, spectrum, self.temperatureData.textFromValue))
             row += 1
 
-            Label(self, text='Spectrum Scaling', vAlign='t', hAlign='l', grid=(row, 0))
+            Label(self, text='Spectrum Scaling', vAlign='t', hAlign='l', grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'scale'))
             self.spectrumScalingData = ScientificDoubleSpinBox(self, vAlign='t', grid=(row, 1), min=0.1, max=100.0)
             self.spectrumScalingData.valueChanged.connect(partial(self._queueSpectrumScaleChange, spectrum, self.spectrumScalingData.textFromValue))
             row += 1
@@ -563,14 +564,14 @@ class GeneralTab(Widget):
             Label(self, text='n/a', vAlign='t', hAlign='l', grid=(row, 1))
             row += 1
 
-            Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(row, 0))
+            Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'noiseLevel'))
             self.noiseLevelData = ScientificDoubleSpinBox(self, vAlign='t', hAlign='l', grid=(row, 1))
 
             self.noiseLevelData.valueChanged.connect(partial(self._queueNoiseLevelDataChange, spectrum, self.noiseLevelData.textFromValue))
             row += 1
 
         else:
-            _specLabel = Label(self, text="Reference Experiment Type ", vAlign='t', hAlign='l', grid=(row, 0))
+            _specLabel = Label(self, text="Reference Experiment Type ", vAlign='t', hAlign='l', grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'experimentType'))
             self.spectrumType = FilteringPulldownList(self, vAlign='t', grid=(row, 1))
             _specButton = Button(self, grid=(row, 2),
                               callback=partial(self._raiseExperimentFilterPopup, spectrum),
@@ -582,22 +583,22 @@ class GeneralTab(Widget):
             _specButton.setVisible(False)
             row += 1
 
-            Label(self, text="Spinning rate (Hz)", grid=(row, 0), hAlign='l')
+            Label(self, text="Spinning rate (Hz)", grid=(row, 0), hAlign='l', tipText=getAttributeTipText(Spectrum, 'spinningRate'))
             self.spinningRateData = ScientificDoubleSpinBox(self, vAlign='t', grid=(row, 1), min=0, max=100000.0)
             self.spinningRateData.valueChanged.connect(partial(self._queueSpinningRateChange, spectrum, self.spinningRateData.textFromValue))
             row += 1
 
-            Label(self, text="Temperature", grid=(row, 0), hAlign='l')
+            Label(self, text="Temperature", grid=(row, 0), hAlign='l', tipText=getAttributeTipText(Spectrum, 'temperature'))
             self.temperatureData = ScientificDoubleSpinBox(self, vAlign='t', grid=(row, 1), min=0, max=1000.0)
             self.temperatureData.valueChanged.connect(partial(self._queueTemperatureChange, spectrum, self.temperatureData.textFromValue))
             row += 1
 
-            spectrumScalingLabel = Label(self, text='Spectrum Scaling', vAlign='t', grid=(row, 0))
+            spectrumScalingLabel = Label(self, text='Spectrum Scaling', vAlign='t', grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'scale'))
             self.spectrumScalingData = ScientificDoubleSpinBox(self, vAlign='t', grid=(row, 1), min=0.1, max=100.0)
             self.spectrumScalingData.valueChanged.connect(partial(self._queueSpectrumScaleChange, spectrum, self.spectrumScalingData.textFromValue))
             row += 1
 
-            noiseLevelLabel = Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(row, 0))
+            noiseLevelLabel = Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'noiseLevel'))
             self.noiseLevelData = ScientificDoubleSpinBox(self, vAlign='t', grid=(row, 1))
             row += 1
 
@@ -867,16 +868,16 @@ class DimensionsTab(Widget):
         self.maxAliasingPullDowns = [i for i in range(dimensions)]
 
         row = 2
-        Label(self, text="Axis Code ", grid=(row, 0), vAlign='t', hAlign='l')
+        Label(self, text="Axis Code ", grid=(row, 0), vAlign='t', hAlign='l', tipText=getAttributeTipText(Spectrum, 'axisCodes'))
 
         row += 1
-        Label(self, text="Isotope Code ", grid=(row, 0), vAlign='t', hAlign='l')
+        Label(self, text="Isotope Code ", grid=(row, 0), vAlign='t', hAlign='l', tipText=getAttributeTipText(Spectrum, 'isotopeCodes'))
 
         row += 1
-        _specLabel = Label(self, text="Reference Experiment Type ", grid=(row, 0), vAlign='t', hAlign='l')
+        _specLabel = Label(self, text="Reference Experiment Type ", grid=(row, 0), vAlign='t', hAlign='l', tipText=getAttributeTipText(Spectrum, 'experimentType'))
 
         row += 1
-        _refLabel = Label(self, text="Reference Experiment Dimensions ", grid=(row, 0), vAlign='t', hAlign='l')
+        _refLabel = Label(self, text="Reference Experiment Dimensions ", grid=(row, 0), vAlign='t', hAlign='l', tipText=getAttributeTipText(Spectrum, 'referenceExperimentDimensions'))
 
         row += 2
         # spacer for extra button
@@ -884,31 +885,31 @@ class DimensionsTab(Widget):
         hLine.setContentsMargins(5, 0, 0, 0)
 
         row += 1
-        Label(self, text="Point Counts ", grid=(row, 0), vAlign='t', hAlign='l')
+        Label(self, text="Point Counts ", grid=(row, 0), vAlign='t', hAlign='l', tipText=getAttributeTipText(Spectrum, 'pointCounts'))
 
         row += 1
-        Label(self, text="Dimension Type ", grid=(row, 0), vAlign='t', hAlign='l')
+        Label(self, text="Dimension Type ", grid=(row, 0), vAlign='t', hAlign='l', tipText=getAttributeTipText(Spectrum, 'dimensionTypes'))
 
         row += 1
-        Label(self, text="Spectrum Width (ppm) ", grid=(row, 0), vAlign='t', hAlign='l')
+        Label(self, text="Spectrum Width (ppm) ", grid=(row, 0), vAlign='t', hAlign='l', tipText=getAttributeTipText(Spectrum, 'spectralWidths'))
 
         row += 1
-        Label(self, text="Spectral Width (Hz) ", grid=(row, 0), vAlign='t', hAlign='l')
+        Label(self, text="Spectral Width (Hz) ", grid=(row, 0), vAlign='t', hAlign='l', tipText=getAttributeTipText(Spectrum, 'spectralWidthsHz'))
 
         row += 1
-        Label(self, text="Spectrometer Frequency (MHz) ", grid=(row, 0), vAlign='t', hAlign='l')
+        Label(self, text="Spectrometer Frequency (MHz) ", grid=(row, 0), vAlign='t', hAlign='l', tipText=getAttributeTipText(Spectrum, 'spectrometerFrequencies'))
 
         row += 1
-        Label(self, text="Referencing (ppm) ", grid=(row, 0), vAlign='t', hAlign='l')
+        Label(self, text="Referencing (ppm) ", grid=(row, 0), vAlign='t', hAlign='l', tipText=getAttributeTipText(Spectrum, 'referenceValues'))
 
         row += 1
-        Label(self, text="Referencing (points)", grid=(row, 0), vAlign='t', hAlign='l')
+        Label(self, text="Referencing (points)", grid=(row, 0), vAlign='t', hAlign='l', tipText=getAttributeTipText(Spectrum, 'referencePoints'))
 
         row += 1
-        Label(self, text="Assignment Tolerance ", grid=(row, 0), hAlign='l')
+        Label(self, text="Assignment Tolerance ", grid=(row, 0), hAlign='l', tipText=getAttributeTipText(Spectrum, 'assignmentTolerances'))
 
         row += 1
-        Label(self, text="Second Cursor Offset (Hz) ", grid=(row, 0), hAlign='l')
+        Label(self, text="Second Cursor Offset (Hz) ", grid=(row, 0), hAlign='l', tipText=getAttributeTipText(Spectrum, 'doubleCrosshairOffsets'))
 
         row += 1
         hLine = HLine(self, grid=(row, 0), gridSpan=(1, dimensions + 1), colour=getColours()[DIVIDER], height=15, divisor=2)
@@ -918,10 +919,10 @@ class DimensionsTab(Widget):
         Label(self, text="Show Aliased Regions", grid=(row, 0), hAlign='l')
 
         row += 1
-        Label(self, text="Dimension is Circular", grid=(row, 0), hAlign='l')
+        Label(self, text="Dimension is Circular", grid=(row, 0), hAlign='l', tipText=getAttributeTipText(Spectrum, 'foldingModes'))
 
         row += 1
-        Label(self, text="Aliasing Limits         Upperbound", grid=(row, 0), hAlign='r')
+        Label(self, text="Aliasing Limits         Upperbound", grid=(row, 0), hAlign='r', tipText=getAttributeTipText(Spectrum, 'aliasingLimits'))
 
         row += 1
         Label(self, text="Lowerbound", grid=(row, 0), hAlign='r')
@@ -1052,7 +1053,7 @@ class DimensionsTab(Widget):
 
             row += 1
             self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self, labelText="Preferred Axis Order",
-                                                                         grid=(row, 0), gridSpan=(1, dimensions + 1), vAlign='t')
+                                                                         grid=(row, 0), gridSpan=(1, dimensions + 1), vAlign='t', tipText=getAttributeTipText(Spectrum, 'preferredAxisOrdering'))
             self.preferredAxisOrderPulldown.pulldownList.setCallback(partial(self._queueSetSpectrumOrderingComboIndex, spectrum))
 
         row += 1
@@ -1532,12 +1533,12 @@ class ContoursTab(Widget):
         self.linkContoursCheckBox = CheckBox(self, grid=(row, col + 1), checked=True, vAlign='t', hAlign='l')
 
         row += 1
-        positiveContoursLabel = Label(self, text="Show Positive Contours", grid=(row, col), vAlign='t', hAlign='l')
+        positiveContoursLabel = Label(self, text="Show Positive Contours", grid=(row, col), vAlign='t', hAlign='l', tipText=getAttributeTipText(Spectrum, 'includePositiveContours'))
         self.positiveContoursCheckBox = CheckBox(self, grid=(row, col + 1), vAlign='t', hAlign='l')
         self.positiveContoursCheckBox.stateChanged.connect(partial(self._queueChangePositiveContourDisplay, spectrum))
 
         row += 1
-        positiveContourBaseLabel = Label(self, text="Positive Base Level", grid=(row, col), vAlign='c', hAlign='l')
+        positiveContourBaseLabel = Label(self, text="Positive Base Level", grid=(row, col), vAlign='c', hAlign='l', tipText=getAttributeTipText(Spectrum, 'positiveContourBase'))
         self.positiveContourBaseData = ScientificDoubleSpinBox(self, grid=(row, col + 1), vAlign='t', min=0.1, max=1e12)
         self.positiveContourBaseData.valueChanged.connect(partial(self._queueChangePositiveContourBase, spectrum, self.positiveContourBaseData.textFromValue))
 
@@ -1545,17 +1546,17 @@ class ContoursTab(Widget):
         self.positiveContourBaseData.setSingleStep(self.positiveContourBaseData.value() * 0.1)
 
         row += 1
-        positiveMultiplierLabel = Label(self, text="Positive Multiplier", grid=(row, col), vAlign='c', hAlign='l')
+        positiveMultiplierLabel = Label(self, text="Positive Multiplier", grid=(row, col), vAlign='c', hAlign='l', tipText=getAttributeTipText(Spectrum, 'positiveContourFactor'))
         self.positiveMultiplierData = ScientificDoubleSpinBox(self, grid=(row, col + 1), vAlign='t', min=0.0, decimals=3, step=0.01)
         self.positiveMultiplierData.valueChanged.connect(partial(self._queueChangePositiveContourFactor, spectrum, self.positiveMultiplierData.textFromValue))
 
         row += 1
-        positiveContourCountLabel = Label(self, text="Number of positive contours", grid=(row, col), vAlign='c', hAlign='l')
+        positiveContourCountLabel = Label(self, text="Number of positive contours", grid=(row, col), vAlign='c', hAlign='l', tipText=getAttributeTipText(Spectrum, 'positiveContourCount'))
         self.positiveContourCountData = Spinbox(self, grid=(row, col + 1), vAlign='t', min=1)
         self.positiveContourCountData.valueChanged.connect(partial(self._queueChangePositiveContourCount, spectrum))
 
         row += 1
-        positiveContourColourLabel = Label(self, text="Positive Contour Colour", grid=(row, col), vAlign='c', hAlign='l')
+        positiveContourColourLabel = Label(self, text="Positive Contour Colour", grid=(row, col), vAlign='c', hAlign='l', tipText=getAttributeTipText(Spectrum, 'positiveContourColour'))
         self.positiveColourBox = PulldownList(self, grid=(row, col + 1), vAlign='t')
         self.negativeColourBox = PulldownList(self, grid=(row, col + 1), vAlign='t')
 
@@ -1569,13 +1570,13 @@ class ContoursTab(Widget):
         self.positiveColourButton.clicked.connect(partial(self._queueChangePosSpectrumColour, spectrum))
 
         row += 1
-        negativeContoursLabel = Label(self, text="Show Negative Contours", grid=(row, col), vAlign='c', hAlign='l')
+        negativeContoursLabel = Label(self, text="Show Negative Contours", grid=(row, col), vAlign='c', hAlign='l', tipText=getAttributeTipText(Spectrum, 'includeNegativeContours'))
         self.negativeContoursCheckBox = CheckBox(self, grid=(row, col + 1), vAlign='t', hAlign='l')
         # self.negativeContoursCheckBox.setChecked(self.spectrum.includeNegativeContours)
         self.negativeContoursCheckBox.stateChanged.connect(partial(self._queueChangeNegativeContourDisplay, spectrum))
 
         row += 1
-        negativeContourBaseLabel = Label(self, text="Negative Base Level", grid=(row, col), vAlign='c', hAlign='l')
+        negativeContourBaseLabel = Label(self, text="Negative Base Level", grid=(row, col), vAlign='c', hAlign='l', tipText=getAttributeTipText(Spectrum, 'negativeContourBase'))
         self.negativeContourBaseData = ScientificDoubleSpinBox(self, grid=(row, col + 1), vAlign='t', min=-1e12, max=-0.1)
 
         self.negativeContourBaseData.valueChanged.connect(partial(self._queueChangeNegativeContourBase, spectrum, self.negativeContourBaseData.textFromValue))
@@ -1584,17 +1585,17 @@ class ContoursTab(Widget):
         self.negativeContourBaseData.setSingleStep((self.negativeContourBaseData.value() * -1) * 0.1)
 
         row += 1
-        negativeMultiplierLabel = Label(self, text="Negative Multiplier", grid=(row, col), vAlign='c', hAlign='l')
+        negativeMultiplierLabel = Label(self, text="Negative Multiplier", grid=(row, col), vAlign='c', hAlign='l', tipText=getAttributeTipText(Spectrum, 'negativeContourFactor'))
         self.negativeMultiplierData = ScientificDoubleSpinBox(self, grid=(row, col + 1), vAlign='t', min=0.0, decimals=3, step=0.01)
         self.negativeMultiplierData.valueChanged.connect(partial(self._queueChangeNegativeContourFactor, spectrum, self.negativeMultiplierData.textFromValue))
 
         row += 1
-        negativeContourCountLabel = Label(self, text="Number of negative contours", grid=(row, col), vAlign='c', hAlign='l')
+        negativeContourCountLabel = Label(self, text="Number of negative contours", grid=(row, col), vAlign='c', hAlign='l', tipText=getAttributeTipText(Spectrum, 'negativeContourCount'))
         self.negativeContourCountData = Spinbox(self, grid=(row, col + 1), vAlign='t', min=1)
         self.negativeContourCountData.valueChanged.connect(partial(self._queueChangeNegativeContourCount, spectrum))
 
         row += 1
-        negativeContourColourLabel = Label(self, text="Negative Contour Colour", grid=(row, col), vAlign='c', hAlign='l')
+        negativeContourColourLabel = Label(self, text="Negative Contour Colour", grid=(row, col), vAlign='c', hAlign='l', tipText=getAttributeTipText(Spectrum, 'negativeContourColour'))
 
         self.positiveColourBox.currentIndexChanged.connect(partial(self._queueChangePosColourComboIndex, spectrum))
         self.negativeColourBox.currentIndexChanged.connect(partial(self._queueChangeNegColourComboIndex, spectrum))
@@ -2079,7 +2080,7 @@ class ColourTab(Widget):
         copyLabel = Label(self, text="Copy Selected\nAttribute", grid=(self._topRow - 1, self._checkBoxCol), vAlign='t', hAlign='l')
         self._addToCopyWidgetSet(copyLabel)
 
-        Label(self, text="Colour", vAlign='t', hAlign='l', grid=(7, 0))
+        Label(self, text="Colour", vAlign='t', hAlign='l', grid=(7, 0), tipText=getAttributeTipText(Spectrum, 'sliceColour'))
         self.positiveColourBox = PulldownList(self, vAlign='t', grid=(7, 1))
 
         # populate initial pulldown
@@ -2313,7 +2314,7 @@ class ColourFrameABC(Frame):
 
         row = 0
         if self.POSITIVECOLOUR:
-            Label(self, text="Group Positive Contour Colour", vAlign='t', hAlign='l', grid=(row, 0))
+            Label(self, text="Group Positive Contour Colour", vAlign='t', hAlign='l', grid=(row, 0), tipText=getAttributeTipText(SpectrumGroup, 'positiveContourColour'))
             self.positiveColourBox = PulldownList(self, vAlign='t', grid=(row, 1))
             self.positiveColourButton = Button(self, grid=(row, 2), vAlign='t', hAlign='l',
                                                icon='icons/colours', hPolicy='fixed')
@@ -2321,7 +2322,7 @@ class ColourFrameABC(Frame):
             row += 1
 
         if self.NEGATIVECOLOUR:
-            Label(self, text="Group Negative Contour Colour", vAlign='t', hAlign='l', grid=(row, 0))
+            Label(self, text="Group Negative Contour Colour", vAlign='t', hAlign='l', grid=(row, 0), tipText=getAttributeTipText(SpectrumGroup, 'negativeContourColour'))
             self.negativeColourBox = PulldownList(self, vAlign='t', grid=(row, 1))
             self.negativeColourButton = Button(self, grid=(row, 2), vAlign='t', hAlign='l',
                                                icon='icons/colours', hPolicy='fixed')
@@ -2329,7 +2330,7 @@ class ColourFrameABC(Frame):
             row += 1
 
         if self.SLICECOLOUR:
-            Label(self, text="Group Slice Colour", vAlign='t', hAlign='l', grid=(row, 0))
+            Label(self, text="Group Slice Colour", vAlign='t', hAlign='l', grid=(row, 0), tipText=getAttributeTipText(SpectrumGroup, 'sliceColour'))
             self.sliceColourBox = PulldownList(self, vAlign='t', grid=(row, 1))
             self.sliceColourButton = Button(self, grid=(row, 2), vAlign='t', hAlign='l',
                                             icon='icons/colours', hPolicy='fixed')

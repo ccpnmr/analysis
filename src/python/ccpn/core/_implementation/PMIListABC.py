@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:29 +0000 (Thu, February 04, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-08-20 19:26:48 +0100 (Fri, August 20, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,6 +31,7 @@ import re
 from typing import Optional, Union
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Spectrum import Spectrum
+from ccpn.util.decorators import logCommand
 
 
 MERITSETTINGS = 'meritSettings'
@@ -134,6 +136,7 @@ class PMIListABC(AbstractWrapperObject):
         return self._wrappedData.symbolStyle
 
     @symbolStyle.setter
+    @logCommand(get='self', isProperty=True)
     def symbolStyle(self, value: str):
         self._wrappedData.symbolStyle = value
 
@@ -146,6 +149,7 @@ class PMIListABC(AbstractWrapperObject):
         return self._wrappedData.symbolColour
 
     @symbolColour.setter
+    @logCommand(get='self', isProperty=True)
     def symbolColour(self, value: str):
         if not isinstance(value, str):
             raise TypeError("symbolColour must be a hex colour string (e.g. '#ABCDEF' or '%s')" % INHERITCOLOUR)
@@ -164,6 +168,7 @@ class PMIListABC(AbstractWrapperObject):
         return self._wrappedData.textColour
 
     @textColour.setter
+    @logCommand(get='self', isProperty=True)
     def textColour(self, value: str):
         if not isinstance(value, str):
             raise TypeError("textColour must be a hex colour string (e.g. '#ABCDEF' or '%s')" % INHERITCOLOUR)
@@ -179,6 +184,7 @@ class PMIListABC(AbstractWrapperObject):
         return self._wrappedData.isSimulated
 
     @isSimulated.setter
+    @logCommand(get='self', isProperty=True)
     def isSimulated(self, value: bool):
         self._wrappedData.isSimulated = value
 
@@ -191,6 +197,7 @@ class PMIListABC(AbstractWrapperObject):
         return self.getParameter(MERITSETTINGS, MERITCOLOUR)
 
     @meritColour.setter
+    @logCommand(get='self', isProperty=True)
     def meritColour(self, value: str):
         if not isinstance(value, str):
             raise TypeError("meritColour must be a hex colour string (e.g. '#ABCDEF' or '%s')" % INHERITCOLOUR)
@@ -208,6 +215,7 @@ class PMIListABC(AbstractWrapperObject):
         return self.getParameter(MERITSETTINGS, MERITENABLED)
 
     @meritEnabled.setter
+    @logCommand(get='self', isProperty=True)
     def meritEnabled(self, value: bool):
         if not isinstance(value, bool):
             raise TypeError("meritEnabled must be True/False.")
@@ -222,6 +230,7 @@ class PMIListABC(AbstractWrapperObject):
         return self.getParameter(MERITSETTINGS, MERITTHRESHOLD)
 
     @meritThreshold.setter
+    @logCommand(get='self', isProperty=True)
     def meritThreshold(self, value: Union[float, int]):
         if not isinstance(value, (float, int)):
             raise TypeError("meritThreshold must be a float or integer")
@@ -240,6 +249,7 @@ class PMIListABC(AbstractWrapperObject):
         return self.getParameter(LINESETTINGS, LINECOLOUR)
 
     @lineColour.setter
+    @logCommand(get='self', isProperty=True)
     def lineColour(self, value: str):
         if not isinstance(value, str):
             raise TypeError("lineColour must be a hex colour string (e.g. '#ABCDEF' or '%s')" % INHERITCOLOUR)

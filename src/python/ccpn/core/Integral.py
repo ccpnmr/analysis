@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 17:35:46 +0100 (Fri, June 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-20 19:26:48 +0100 (Fri, August 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -111,6 +111,7 @@ class Integral(AbstractWrapperObject):
         return self._wrappedData.volume * scale
 
     @value.setter
+    @logCommand(get='self', isProperty=True)
     def value(self, value: Union[float, int, None]):
         if not isinstance(value, (float, int, type(None))):
             raise TypeError('value must be a float, integer or None')
@@ -142,6 +143,7 @@ class Integral(AbstractWrapperObject):
         return self._wrappedData.volumeError * scale
 
     @valueError.setter
+    @logCommand(get='self', isProperty=True)
     def valueError(self, value: Union[float, int, None]):
         if not isinstance(value, (float, int, type(None))):
             raise TypeError('valueError must be a float, integer or None')
@@ -170,6 +172,7 @@ class Integral(AbstractWrapperObject):
         return self._wrappedData.offset * scale
 
     @bias.setter
+    @logCommand(get='self', isProperty=True)
     def bias(self, value: Union[float, int]):
         if not isinstance(value, (float, int)):
             raise TypeError('bias must be a float or integer')
@@ -191,6 +194,7 @@ class Integral(AbstractWrapperObject):
         return self._wrappedData.figOfMerit
 
     @figureOfMerit.setter
+    @logCommand(get='self', isProperty=True)
     def figureOfMerit(self, value: float):
         self._wrappedData.figOfMerit = value
 
@@ -205,6 +209,7 @@ class Integral(AbstractWrapperObject):
         return self._wrappedData.offset * scale
 
     @offset.setter
+    @logCommand(get='self', isProperty=True)
     def offset(self, value: Union[float, int]):
         if not isinstance(value, (float, int)):
             raise TypeError('offset must be a float or integer')
@@ -232,6 +237,7 @@ class Integral(AbstractWrapperObject):
         return self._wrappedData.offset * scale
 
     @baseline.setter
+    @logCommand(get='self', isProperty=True)
     def baseline(self, value: Union[float, int]):
         if not isinstance(value, (float, int)):
             raise TypeError('baseline must be a float or integer')
@@ -253,6 +259,7 @@ class Integral(AbstractWrapperObject):
         return self._wrappedData.constraintWeight
 
     @constraintWeight.setter
+    @logCommand(get='self', isProperty=True)
     def constraintWeight(self, value: float):
         self._wrappedData.constraintWeight = value
 
@@ -306,6 +313,7 @@ class Integral(AbstractWrapperObject):
         return self._wrappedData.annotation
 
     @annotation.setter
+    @logCommand(get='self', isProperty=True)
     def annotation(self, value: str):
         self._wrappedData.annotation = value
 

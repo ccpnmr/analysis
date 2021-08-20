@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 17:35:46 +0100 (Fri, June 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-20 19:26:48 +0100 (Fri, August 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -204,6 +204,7 @@ class Multiplet(AbstractWrapperObject):
         return self._wrappedData.volume * scale
 
     @volume.setter
+    @logCommand(get='self', isProperty=True)
     def volume(self, value: Union[float, int, None]):
         if not isinstance(value, (float, int, type(None))):
             raise TypeError('volume must be a float, integer or None')
@@ -227,6 +228,7 @@ class Multiplet(AbstractWrapperObject):
         return self._wrappedData.offset
 
     @offset.setter
+    @logCommand(get='self', isProperty=True)
     def offset(self, value: float):
         self._wrappedData.offset = value
 
@@ -236,6 +238,7 @@ class Multiplet(AbstractWrapperObject):
         return self._wrappedData.constraintWeight
 
     @constraintWeight.setter
+    @logCommand(get='self', isProperty=True)
     def constraintWeight(self, value: float):
         self._wrappedData.constraintWeight = value
 
@@ -253,6 +256,7 @@ class Multiplet(AbstractWrapperObject):
         return self._wrappedData.volumeError * scale
 
     @volumeError.setter
+    @logCommand(get='self', isProperty=True)
     def volumeError(self, value: Union[float, int, None]):
         if not isinstance(value, (float, int, type(None))):
             raise TypeError('volumeError must be a float, integer or None')
@@ -276,6 +280,7 @@ class Multiplet(AbstractWrapperObject):
         return self._wrappedData.figOfMerit
 
     @figureOfMerit.setter
+    @logCommand(get='self', isProperty=True)
     def figureOfMerit(self, value: float):
         self._wrappedData.figOfMerit = value
 
@@ -285,6 +290,7 @@ class Multiplet(AbstractWrapperObject):
         return self._wrappedData.annotation
 
     @annotation.setter
+    @logCommand(get='self', isProperty=True)
     def annotation(self, value: str):
         self._wrappedData.annotation = value
 

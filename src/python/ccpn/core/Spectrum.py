@@ -53,7 +53,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:19:59 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-20 23:26:04 +0100 (Fri, August 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -225,7 +225,7 @@ class Spectrum(AbstractWrapperObject):
     _SLICEDATACACHE = '_sliceDataCache'  # Attribute name for the slicedata cache
     _SLICE1DDATACACHE = '_slice1DDataCache'  # Attribute name for the 1D slicedata cache
     _REGIONDATACACHE = '_regionDataCache'  # Attribute name for the regionData cache
-    _REFERENCESUBSANCESCACHE = '_referenceSubstances'
+    _REFERENCESUBSTANCESCACHE = '_referenceSubstances'
     _dataCaches = [_PLANEDATACACHE, _SLICEDATACACHE, _SLICE1DDATACACHE, _REGIONDATACACHE]
 
     def __init__(self, project: Project, wrappedData: Nmr.ShiftList):
@@ -556,6 +556,7 @@ assignmentTolerances
         return self._wrappedData.experiment.spinningRate
 
     @spinningRate.setter
+    @logCommand(get='self', isProperty=True)
     def spinningRate(self, value: float):
         self._wrappedData.experiment.spinningRate = value
 
@@ -567,6 +568,7 @@ assignmentTolerances
         return self._wrappedData.noiseLevel
 
     @noiseLevel.setter
+    @logCommand(get='self', isProperty=True)
     def noiseLevel(self, value: float):
         self._wrappedData.noiseLevel = value
 
@@ -579,13 +581,14 @@ assignmentTolerances
         return value
 
     @negativeNoiseLevel.setter
+    @logCommand(get='self', isProperty=True)
     def negativeNoiseLevel(self, value):
         """Stored in Internal """
         propertyName = sys._getframe().f_code.co_name
         self.setParameter(self._AdditionalAttribute, propertyName, value)
 
     @property
-    def synonym(self) -> str:
+    def synonym(self) -> Optional[str]:
         """Systematic experiment type descriptor (CCPN system)."""
         refExperiment = self._wrappedData.experiment.refExperiment
         if refExperiment is None:
@@ -595,7 +598,7 @@ assignmentTolerances
 
     @property
     @_includeInCopy
-    def experimentType(self) -> str:
+    def experimentType(self) -> Optional[str]:
         """Systematic experiment type descriptor (CCPN system)."""
         refExperiment = self._wrappedData.experiment.refExperiment
         if refExperiment is None:
@@ -671,6 +674,7 @@ assignmentTolerances
             return None
 
     @filePath.setter
+    @logCommand(get='self', isProperty=True)
     def filePath(self, value: str):
 
         apiDataStore = self._wrappedData.dataStore
@@ -790,6 +794,7 @@ assignmentTolerances
         return tuple(result)
 
     @axisCodes.setter
+    @logCommand(get='self', isProperty=True)
     def axisCodes(self, values):
         check = {}
         for i, v in enumerate(values):
@@ -1179,6 +1184,7 @@ assignmentTolerances
         return tuple(result)
 
     @isotopeCodes.setter
+    @logCommand(get='self', isProperty=True)
     def isotopeCodes(self, value: Sequence):
         apiDataSource = self._wrappedData
         if len(value) == apiDataSource.numDim:
@@ -1278,6 +1284,7 @@ assignmentTolerances
         return tuple(dd[x and x.isFolded] for x in self._mainExpDimRefs())
 
     @foldingModes.setter
+    @logCommand(get='self', isProperty=True)
     def foldingModes(self, values):
 
         # TODO For NEF we should support both True, False, and None
@@ -1390,7 +1397,7 @@ assignmentTolerances
         self._setDataDimRefAttribute('refValue', value)
 
     @property
-    @cached(_REFERENCESUBSANCESCACHE, maxItems=5000, debug=False)
+    @cached(_REFERENCESUBSTANCESCACHE, maxItems=5000, debug=False)
     def referenceSubstances(self):
         """
         :return: a list of substances
@@ -1494,6 +1501,7 @@ assignmentTolerances
         return tuple(result)
 
     @aliasingLimits.setter
+    @logCommand(get='self', isProperty=True)
     def aliasingLimits(self, value):
         if len(value) != self.dimensionCount:
             raise ValueError("length of aliasingLimits must match spectrum dimension, was %s" % value)
@@ -2344,7 +2352,7 @@ assignmentTolerances
     @cached.clear(_SLICEDATACACHE)  # Check if there was a slicedata cache, and if so, clear it
     @cached.clear(_SLICE1DDATACACHE)  # Check if there was a slice1ddata cache, and if so, clear it
     @cached.clear(_REGIONDATACACHE)  # Check if there was a regiondata cache, and if so, clear it
-    @cached.clear(_REFERENCESUBSANCESCACHE)
+    @cached.clear(_REFERENCESUBSTANCESCACHE)
     def _clearCache(self):
         """Convenience to clear the cache; all action done by the decorators
         """
@@ -2362,6 +2370,7 @@ assignmentTolerances
             return self._wrappedData.experiment.temperature
 
     @temperature.setter
+    @logCommand(get='self', isProperty=True)
     def temperature(self, value):
         """The temperature of the spectrometer when the spectrum was recorded
         """

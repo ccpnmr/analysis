@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-27 16:46:39 +0100 (Thu, May 27, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-20 19:19:59 +0100 (Fri, August 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -448,6 +448,8 @@ class Residue(AbstractWrapperObject):
             oldSequenceCode = '.'.join((str(apiResidue.seqCode), apiResidue.seqInsertCode))
         else:
             oldSequenceCode = str(apiResidue.seqCode)
+        self._oldPid = self.pid
+
         apiResidue.seqCode = seqCode
         apiResidue.seqInsertCode = seqInsertCode
 

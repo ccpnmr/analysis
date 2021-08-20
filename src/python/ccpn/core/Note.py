@@ -3,8 +3,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-12-03 10:01:40 +0000 (Thu, December 03, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-08-20 19:19:59 +0100 (Fri, August 20, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,8 +32,8 @@ from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Note as ApiNote
-from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
+from ccpn.util.decorators import logCommand
 from ccpn.util.Logging import getLogger
 from ccpn.util import Common as commonUtil
 
@@ -100,6 +101,7 @@ class Note(AbstractWrapperObject):
         return self._wrappedData.text
 
     @text.setter
+    @logCommand(get='self', isProperty=True)
     def text(self, value: str):
         if value is not None:
             if not isinstance(value, str):
@@ -112,6 +114,7 @@ class Note(AbstractWrapperObject):
         return self._wrappedData.created.strftime(utilConstants.stdTimeFormat)
 
     @created.setter
+    @logCommand(get='self', isProperty=True)
     def created(self, created):
         # bypass the api because frozen
         for timeFormat in (utilConstants.stdTimeFormat, utilConstants.isoTimeFormat):
@@ -130,6 +133,7 @@ class Note(AbstractWrapperObject):
         return self._wrappedData.lastModified.strftime(utilConstants.stdTimeFormat)
 
     @lastModified.setter
+    @logCommand(get='self', isProperty=True)
     def lastModified(self, lastModified):
         # bypass the api because frozen
         for timeFormat in (utilConstants.stdTimeFormat, utilConstants.isoTimeFormat):
@@ -160,7 +164,8 @@ class Note(AbstractWrapperObject):
         return comment
 
     @comment.setter
-    def comment(self, value:str):
+    @logCommand(get='self', isProperty=True)
+    def comment(self, value: str):
         """set optional comment of note."""
         if not isinstance(value, (str, type(None))):
             raise ValueError("comment must be a string/None.")
@@ -180,14 +185,8 @@ class Note(AbstractWrapperObject):
     @logCommand(get='self')
     def rename(self, value: str):
         """Rename Note, changing its name and Pid.
-
-        NB, the serial remains immutable."""
-        commonUtil._validateName(self.project, Note, value=value, allowWhitespace=False)
-
-        # rename functions from here
-        oldName = self.name
-        self._wrappedData.name = value
-        return (oldName,)
+        """
+        return self._rename(value)
 
     #=========================================================================================
     # CCPN functions

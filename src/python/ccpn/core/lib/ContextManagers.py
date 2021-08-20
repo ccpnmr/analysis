@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-18 13:10:47 +0000 (Thu, March 18, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-08-20 19:20:00 +0100 (Fri, August 20, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -325,6 +326,36 @@ def notificationEchoBlocking(application=None):
 
 
 @contextmanager
+def logCommandManager(prefix, funcName, *args, **kwds):
+    """Echo commands as prefix.funcName( **kwds )"""
+    from ccpn.util.decorators import _obj2pid
+
+    application = getApplication()
+    if application is None:
+        raise RuntimeError('Error getting application')
+
+    blocking = application._echoBlocking
+
+    if blocking == 0 and application.ui is not None:
+        if not prefix[-1] == '.':
+            prefix += '.'
+
+        msg = prefix + funcName + '('
+        for arg in args:
+            msg += '%r, ' % _obj2pid(arg)
+        for key, val in kwds.items():
+            msg += '%s=%r, ' % (key, _obj2pid(val))
+        # remove any unnecessary ', ' from the end
+        if msg[-2:] == ', ':
+            msg = msg[:-2]
+        msg += ')'
+
+        application.ui.echoCommands([msg])
+
+    with notificationEchoBlocking(application=application):
+        yield
+
+@contextmanager
 def notificationUnblanking():
     """
     Unblock all notifiers, disable at the end of the function block.
@@ -566,6 +597,9 @@ def newObject(klass):
         with notificationBlanking(application=application):
             with undoStackBlocking(application=application) as addUndoItem:
                 result = func(*args, **kwds)
+                if result is None:
+                    return None
+
                 if not isinstance(result, klass):
                     raise RuntimeError('Expected an object of class %s, obtained %s' % (klass, result.__class__))
 

@@ -53,7 +53,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-16 12:55:20 +0100 (Wed, June 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-20 19:19:59 +0100 (Fri, August 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -378,6 +378,7 @@ assignmentTolerances
         return self._wrappedData.positiveContourCount
 
     @positiveContourCount.setter
+    @logCommand(get='self', isProperty=True)
     def positiveContourCount(self, value):
         self._wrappedData.positiveContourCount = value
 
@@ -388,6 +389,7 @@ assignmentTolerances
         return self._wrappedData.positiveContourBase
 
     @positiveContourBase.setter
+    @logCommand(get='self', isProperty=True)
     def positiveContourBase(self, value):
         self._wrappedData.positiveContourBase = value
 
@@ -398,6 +400,7 @@ assignmentTolerances
         return self._wrappedData.positiveContourFactor
 
     @positiveContourFactor.setter
+    @logCommand(get='self', isProperty=True)
     def positiveContourFactor(self, value):
         self._wrappedData.positiveContourFactor = value
 
@@ -408,6 +411,7 @@ assignmentTolerances
         return self._wrappedData.positiveContourColour
 
     @positiveContourColour.setter
+    @logCommand(get='self', isProperty=True)
     def positiveContourColour(self, value):
         self._wrappedData.positiveContourColour = value
 
@@ -424,6 +428,7 @@ assignmentTolerances
         return result
 
     @includePositiveContours.setter
+    @logCommand(get='self', isProperty=True)
     def includePositiveContours(self, value: bool):
         """Include flag for the positive contours
         """
@@ -442,6 +447,7 @@ assignmentTolerances
         return self._wrappedData.negativeContourCount
 
     @negativeContourCount.setter
+    @logCommand(get='self', isProperty=True)
     def negativeContourCount(self, value):
         self._wrappedData.negativeContourCount = value
 
@@ -452,6 +458,7 @@ assignmentTolerances
         return self._wrappedData.negativeContourBase
 
     @negativeContourBase.setter
+    @logCommand(get='self', isProperty=True)
     def negativeContourBase(self, value):
         self._wrappedData.negativeContourBase = value
 
@@ -462,6 +469,7 @@ assignmentTolerances
         return self._wrappedData.negativeContourFactor
 
     @negativeContourFactor.setter
+    @logCommand(get='self', isProperty=True)
     def negativeContourFactor(self, value):
         self._wrappedData.negativeContourFactor = value
 
@@ -472,6 +480,7 @@ assignmentTolerances
         return self._wrappedData.negativeContourColour
 
     @negativeContourColour.setter
+    @logCommand(get='self', isProperty=True)
     def negativeContourColour(self, value):
         self._wrappedData.negativeContourColour = value
 
@@ -488,6 +497,7 @@ assignmentTolerances
         return result
 
     @includeNegativeContours.setter
+    @logCommand(get='self', isProperty=True)
     def includeNegativeContours(self, value: bool):
         """Include flag for the negative contours
         """
@@ -506,6 +516,7 @@ assignmentTolerances
         return self._wrappedData.sliceColour
 
     @sliceColour.setter
+    @logCommand(get='self', isProperty=True)
     def sliceColour(self, value):
         self._wrappedData.sliceColour = value
         # for spectrumView in self.spectrumViews:
@@ -593,6 +604,7 @@ assignmentTolerances
             return refExperiment.name
 
     @experimentType.setter
+    @logCommand(get='self', isProperty=True)
     def experimentType(self, value: str):
         from ccpn.core.lib.SpectrumLib import _setApiExpTransfers, _setApiRefExperiment, _clearLinkToRefExp
 
@@ -642,6 +654,7 @@ assignmentTolerances
         return self._wrappedData.experiment.name
 
     @experimentName.setter
+    @logCommand(get='self', isProperty=True)
     def experimentName(self, value):
         # force to a string
         # because: reading from .nef files extracts the name from the end of the experiment_type in nef reader
@@ -1201,6 +1214,7 @@ assignmentTolerances
         return tuple(result)
 
     @referenceExperimentDimensions.setter
+    @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def referenceExperimentDimensions(self, values: Sequence):
         apiDataSource = self._wrappedData
@@ -2846,12 +2860,7 @@ assignmentTolerances
     def rename(self, value: str):
         """Rename Spectrum, changing its name and Pid.
         """
-        _validateName(self.project, Spectrum, value=value, allowWhitespace=False)
-
-        # rename functions from here
-        oldName = self.name
-        self._wrappedData.name = value
-        return (oldName,)
+        return self._rename(value)
 
     def _finaliseAction(self, action: str):
         """Subclassed to handle associated spectrumViews instances

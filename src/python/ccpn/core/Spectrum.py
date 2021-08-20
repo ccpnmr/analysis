@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:19:59 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-20 23:26:04 +0100 (Fri, August 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -572,6 +572,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._wrappedData.experiment.spinningRate
 
     @spinningRate.setter
+    @logCommand(get='self', isProperty=True)
     def spinningRate(self, value: float):
         self._wrappedData.experiment.spinningRate = value
 
@@ -586,6 +587,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return noise
 
     @noiseLevel.setter
+    @logCommand(get='self', isProperty=True)
     def noiseLevel(self, value: float):
         self._wrappedData.noiseLevel = value
 
@@ -598,6 +600,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return value
 
     @negativeNoiseLevel.setter
+    @logCommand(get='self', isProperty=True)
     def negativeNoiseLevel(self, value):
         """Stored in Internal """
         propertyName = sys._getframe().f_code.co_name
@@ -1010,6 +1013,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._getDimensionalAttributes('isotopeCode')
 
     @isotopeCodes.setter
+    @logCommand(get='self', isProperty=True)
     @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(str,))
     def isotopeCodes(self, value: Sequence):
         self._setDimensionalAttributes('isotopeCode', value)
@@ -1098,6 +1102,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         # return tuple(dd[x and x.isFolded] for x in self._mainExpDimRefs())
 
     @foldingModes.setter
+    @logCommand(get='self', isProperty=True)
     @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(str,), enumerated=specLib.FOLDING_MODES)
     def foldingModes(self, value):
         self._setDimensionalAttributes('foldingMode', value)
@@ -1145,7 +1150,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         self._setDimensionalAttributes('referenceValue', value)
 
     @property
-    @cached(_REFERENCESUBSANCESCACHE, maxItems=5000, debug=False)
+    @cached(_REFERENCESUBSTANCESCACHE, maxItems=5000, debug=False)
     def referenceSubstances(self):
         """
         :return: a list of substances
@@ -1232,6 +1237,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         # return tuple(result)
 
     @aliasingLimits.setter
+    @logCommand(get='self', isProperty=True)
     @checkSpectrumPropertyValue(iterable=True, allowNone=False, types=(tuple, list))
     def aliasingLimits(self, value):
         # check that we have iterables with two (min,max) values

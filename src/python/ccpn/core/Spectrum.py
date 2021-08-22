@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-29 12:37:49 +0100 (Sun, August 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-22 12:38:08 +0100 (Sun, August 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -607,7 +607,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         self.setParameter(self._AdditionalAttribute, propertyName, value)
 
     @property
-    def synonym(self) -> (str, None):
+    def synonym(self) -> Optional[str]:
         """Systematic experiment type descriptor (CCPN system)."""
         refExperiment = self._wrappedData.experiment.refExperiment
         if refExperiment is None:
@@ -617,7 +617,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @property
     @_includeInCopy
-    def experimentType(self) -> (str, None):
+    def experimentType(self) -> Optional[str]:
         """Systematic experiment type descriptor (CCPN system)."""
         refExperiment = self._wrappedData.experiment.refExperiment
         if refExperiment is None:

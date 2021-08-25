@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-10 14:52:46 +0100 (Thu, June 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-25 16:08:46 +0100 (Wed, August 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -50,7 +50,7 @@ SERVER_DB_FILE = '__UpdateData.db'
 # when you just fetch a URL you always get a response but how do you know it is valid
 # (and not a 404 or whatever)
 SERVER_DOWNLOAD_SCRIPT = 'cgi-bin/update/downloadFile'
-SERVER_UPLOAD_SCRIPT = 'cgi-bin/updateadmin/uploadFile'
+SERVER_UPLOAD_SCRIPT = 'cgi-bin/updateadmin/uploadFileVerify'
 
 FIELD_SEP = '\t'
 PATH_SEP = '__sep_'
@@ -128,7 +128,7 @@ def downloadFile(serverScript, serverDbRoot, fileName):
         getLogger().warning('Download error: %s' % str(es))
 
 
-def uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot, fileStoredAs):
+def uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot, fileStoredAs, md5=None):
     """Upload a file to the server
     """
     from ccpn.util.Url import fetchHttpResponse
@@ -148,7 +148,7 @@ def uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot,
 
     headers = {'Content-Type' : 'application/x-www-form-urlencoded;charset=UTF-8',
                'Authorization': authheader}
-    values = {'fileData': fileData, 'fileName': fileStoredAs, 'serverDbRoot': serverDbRoot}
+    values = {'fileData': fileData, 'fileName': fileStoredAs, 'serverDbRoot': serverDbRoot, 'md5': md5}
 
     try:
         response = fetchHttpResponse('POST', serverScript, values, headers=headers, proxySettings=None)
@@ -171,14 +171,15 @@ def uploadFile(serverUser, serverPassword, serverScript, fileName, serverDbRoot,
     """
     # fp = open(fileName, 'rU')
     try:
+        md5 = calcHashCode(fileName)
         with open(fileName, 'rb') as fp:
             fileData = fp.read()
     except Exception as es:
         getLogger().warning('error reading file,', str(es))
-        fileData = ''
+        md5 = fileData = ''
 
     if fileData:
-        return uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot, fileStoredAs)
+        return uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot, fileStoredAs, md5=md5)
 
 
 def uploadFileForDelete(serverUser, serverPassword, serverScript, fileName, serverDbRoot, fileStoredAs):

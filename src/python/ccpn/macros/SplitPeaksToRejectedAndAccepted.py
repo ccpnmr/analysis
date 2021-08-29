@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 __modifiedBy__ = "$Author: Eliza $"
 __dateModified__ = "$Date: 2021-04-27 16:04:57 +0100 (Tue, April 27, 2021) $"
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:49 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-29 12:32:54 +0100 (Sun, August 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -36,29 +36,33 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.ListWidget import ListWidgetPair
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets import MessageDialog
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
 
-def splitRejectedAccept(peaklistPid ,
-                        rejectedcomment = 'rejected',
-                        rejectedcolour = '#FF0000'):
+with undoBlockWithoutSideBar():
+    with notificationEchoBlocking():
 
-    pkList = get(peaklistPid)
+        def splitRejectedAccept(peaklistPid ,
+                                rejectedcomment = 'rejected',
+                                rejectedcolour = '#FF0000'):
 
-    pkList.comment = 'Accepted Peak List'
-    pkList.textColour = '#000000'
-    pkList.symbolColour = '#000000'
+            pkList = get(peaklistPid)
 
-    #backUpList = get(peaklistPid).copyTo(targetSpectrum=peaklistPid.spectra)
+            pkList.comment = 'Accepted Peak List'
+            pkList.textColour = '#000000'
+            pkList.symbolColour = '#000000'
 
-    rejectedPeakList = get(pkList.spectrum.pid).newPeakList(comment=rejectedcomment,
-                                                    symbolColour=rejectedcolour,
-                                                    textColour=rejectedcolour)
+            #backUpList = get(peaklistPid).copyTo(targetSpectrum=peaklistPid.spectra)
 
-    for peak in pkList.peaks:
-        if len(peak.restraints) == 0:
-            peak.copyTo(rejectedPeakList)
-            peak.delete()
+            rejectedPeakList = get(pkList.spectrum.pid).newPeakList(comment=rejectedcomment,
+                                                            symbolColour=rejectedcolour,
+                                                            textColour=rejectedcolour)
 
-    return
+            for peak in pkList.peaks:
+                if len(peak.restraints) == 0:
+                    peak.copyTo(rejectedPeakList)
+                    peak.delete()
+
+            return
 
 class SetupSplitPeakListPopup(CcpnDialogMainWidget):
     """

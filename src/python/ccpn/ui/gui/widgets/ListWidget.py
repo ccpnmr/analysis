@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:51 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-29 12:32:55 +0100 (Sun, August 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -319,6 +319,11 @@ class ListWidget(QtWidgets.QListWidget, Base):
         for item in self.getItems():
             if item.text() == oldName:
                 item.setText(newName)
+
+    def scrollToFirstSelected(self):
+        for selectedItem in self.selectedItems():
+            self.scrollToItem(selectedItem, QtWidgets.QAbstractItemView.PositionAtCenter)
+            break
 
     def mousePressEvent(self, event):
         self._mouse_button = event.button()

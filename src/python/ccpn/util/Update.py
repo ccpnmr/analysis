@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-10 14:59:40 +0100 (Thu, June 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-29 12:32:55 +0100 (Sun, August 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -47,7 +47,7 @@ SERVER_DB_FILE = '__UpdateData.db'
 # when you just fetch a URL you always get a response but how do you know it is valid
 # (and not a 404 or whatever)
 SERVER_DOWNLOAD_SCRIPT = 'cgi-bin/update/downloadFile'
-SERVER_UPLOAD_SCRIPT = 'cgi-bin/updateadmin/uploadFile'
+SERVER_UPLOAD_SCRIPT = 'cgi-bin/updateadmin/uploadFileVerify'
 SERVER_DOWNLOADCHECK_SCRIPT = 'cgi-bin/register/downloadFileCheckV3'
 
 FIELD_SEP = '\t'

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-15 16:14:14 +0100 (Tue, June 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-29 12:32:54 +0100 (Sun, August 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -94,7 +94,7 @@ class CopyPeaks(CcpnDialog):
         if isinstance(obj, Spectrum):
             peaks = []
             for peakList in obj.peakLists:
-                peaks.append(peakList.peaks)
+                peaks.extend(peakList.peaks)
             self.inputPeaksWidget.setObjects(peaks, name='pid')
         else:
             self.inputPeaksWidget.setObjects(self.project.peaks, name='pid')
@@ -142,6 +142,7 @@ class CopyPeaks(CcpnDialog):
 
     def _selectPeaks(self, peaks):
         self.inputPeaksWidget.selectObjects(peaks)
+        self.inputPeaksWidget.scrollToFirstSelected()
 
     def clearSelections(self):
         self.inputPeaksWidget.clearSelection()

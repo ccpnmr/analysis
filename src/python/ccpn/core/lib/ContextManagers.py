@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:20:00 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-29 12:32:54 +0100 (Sun, August 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -418,6 +418,36 @@ def inactivity(application=None):
         application.project.unblankNotification()
         application._decreaseNotificationBlocking()
         application.project._apiNotificationBlanking -= 1
+
+@contextmanager
+def logCommandManager(prefix, funcName, *args, **kwds):
+    """Echo commands as prefix.funcName( **kwds )"""
+    from ccpn.util.decorators import _obj2pid
+
+    application = getApplication()
+    if application is None:
+        raise RuntimeError('Error getting application')
+
+    blocking = application._echoBlocking
+
+    if blocking == 0 and application.ui is not None:
+        if not prefix[-1] == '.':
+            prefix += '.'
+
+        msg = prefix + funcName + '('
+        for arg in args:
+            msg += '%r, ' % _obj2pid(arg)
+        for key, val in kwds.items():
+            msg += '%s=%r, ' % (key, _obj2pid(val))
+        # remove any unnecessary ', ' from the end
+        if msg[-2:] == ', ':
+            msg = msg[:-2]
+        msg += ')'
+
+        application.ui.echoCommands([msg])
+
+    with notificationEchoBlocking(application=application):
+        yield
 
 @contextmanager
 def notificationUnblanking():

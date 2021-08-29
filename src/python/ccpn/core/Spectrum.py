@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-29 12:32:54 +0100 (Sun, August 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-29 12:37:49 +0100 (Sun, August 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -176,7 +176,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     # Key for storing the dataStore info in the Ccpn internal parameter store
     _DATASTORE_KEY = '_dataStore'
-    _REFERENCESUBSANCESCACHE = '_referenceSubstances'
+    _REFERENCESUBSTANCESCACHE = '_referenceSubstances'
 
     _AdditionalAttribute = 'AdditionalAttribute'
     _ReferenceSubstancesPids = '_ReferenceSubstancesPids'
@@ -2737,7 +2737,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             # GLSignals = GLNotifier(parent=self)
             # GLSignals.emitPaintEvent()
 
-    @cached.clear(_REFERENCESUBSANCESCACHE)
+    @cached.clear(_REFERENCESUBSTANCESCACHE)
     def _clearCache(self):
         """Clear the cache
         """

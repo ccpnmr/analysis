@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-22 12:06:50 +0100 (Sun, August 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-31 13:03:04 +0100 (Tue, August 31, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -419,12 +419,11 @@ class NmrAtom(AbstractWrapperObject):
         oldName = self.name
         self._oldPid = self.pid
 
+        # clear the isotopeCode so that the name may be changed (model restriction)
         self._wrappedData.isotopeCode = UnknownIsotopeCode
         self._wrappedData.name = value
-        self._wrappedData.isotopeCode = isotopeCode
-
-            # addUndoItem(undo=partial(self.rename, oldName),
-            #             redo=partial(self.rename, value))
+        # set isotopeCode to the correct value
+        self._wrappedData.isotopeCode = isotopeCode if isotopeCode else UnknownIsotopeCode # self._NONE_VALUE_STRING
 
         self._childActions.append(self._renameChemicalShifts)
         self._finaliseChildren.extend((sh, 'change') for sh in self._chemicalShifts)

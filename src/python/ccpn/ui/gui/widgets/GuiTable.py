@@ -1733,6 +1733,7 @@ GuiTable::item::selected {
                         # need to remove objList from multipleAttr - fires only one current change
                         setattr(self.current, multiple, tuple(set(multipleAttr) - set(tableObjs)))
 
+            self._lastSelection = [None]
         self._tableSelectionChanged.emit([])
 
     def selectObjects(self, objList: list, setUpdatesEnabled: bool = False):

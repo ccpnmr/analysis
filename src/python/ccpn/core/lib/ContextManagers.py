@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-29 12:32:54 +0100 (Sun, August 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-31 16:06:39 +0100 (Tue, August 31, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -379,7 +379,7 @@ def logCommandManager(prefix, funcName, *args, **kwds):
             msg += '%r, ' % _obj2pid(arg)
         for key, val in kwds.items():
             msg += '%s=%r, ' % (key, _obj2pid(val))
-        # remove any unnecesary ', ' from the end
+        # remove any unnecessary ', ' from the end
         if msg[-2:] == ', ':
             msg = msg[:-2]
         msg += ')'

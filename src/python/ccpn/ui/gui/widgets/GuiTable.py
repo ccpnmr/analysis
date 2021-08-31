@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:26:48 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-08-31 11:51:25 +0100 (Tue, August 31, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1743,6 +1743,7 @@ GuiTable::item::selected {
                         # need to remove objList from multipleAttr - fires only one current change
                         setattr(self.current, multiple, tuple(set(multipleAttr) - set(tableObjs)))
 
+            self._lastSelection = [None]
         self._tableSelectionChanged.emit([])
 
     def selectObjects(self, objList: list, setUpdatesEnabled: bool = False):

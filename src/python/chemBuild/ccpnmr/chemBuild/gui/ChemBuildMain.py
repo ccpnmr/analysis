@@ -924,6 +924,7 @@ class ChemBuildMain(QtWidgets.QMainWindow):
         variant.snapAtomsToGrid(ignoreHydrogens=False)
       
       self.setCompound(compound, replace)
+      self.minimise()
       
       return compound
   

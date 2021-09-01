@@ -715,7 +715,10 @@ class Variant:
             f = bondLengths[pair] - sqrt(r2)
 
           elif r2 < r2limit:
-            f = 5e6 / (r2*r2)
+            if (r2*r2) == 0:
+              continue
+            else:
+              f = 5e6 / (r2*r2)
           
           else:
             continue

@@ -21,7 +21,7 @@ class RadioButtons(QtWidgets.QWidget, Base):
     
     self.texts = texts
     direction = direction.lower()
-    buttonGroup = self.buttonGroup = QtGui.QButtonGroup(self)
+    buttonGroup = self.buttonGroup = QtWidgets.QButtonGroup(self)
     buttonGroup.setExclusive(True)
     
     if not tipTexts:
@@ -44,7 +44,7 @@ class RadioButtons(QtWidgets.QWidget, Base):
     if selectedInd is not None:
       self.radioButtons[selectedInd].setChecked(True)
 
-    buttonGroup.connect(buttonGroup, QtCore.SIGNAL('buttonClicked(int)'), self._callback)
+    buttonGroup.buttonClicked.connect(self._callback)
 
     self.setCallback(callback)
 

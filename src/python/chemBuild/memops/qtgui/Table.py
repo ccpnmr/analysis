@@ -476,8 +476,9 @@ class ObjectTable(QtWidgets.QTableView, Base):
   
     header = ObjectHeaderView(Qt.Horizontal, self)
     # header.setMovable(True)
-    header.setMinimumSectionSize(30)
-    header.setDefaultSectionSize(30)
+    ## for some reasons a SectionSize lower than 100 creates an annoying overlay box on the table and hides the first column.
+    header.setMinimumSectionSize(100)
+    header.setDefaultSectionSize(100)
     #header.setSortIndicatorShown(False)
     #header.setStyleSheet('QHeaderView::down-arrow { image: url(icons/sort-up.png);} QHeaderView::up-arrow { image: url(icons/sort-down.png);}')
     

@@ -4736,7 +4736,8 @@ def loadFromStream(stream, topObjId=None, topObject=None, partialLoad=False):
     
     # get elementtree NBNB TBD to be redone to allow for different sources
     from memops.universal.ElementTree import ElementTree
-    
+    import xml.etree.cElementTree as ElementTree
+
     # LOOP H
     for event, elem in ElementTree.iterparse(stream, events=("start", "end")):
     

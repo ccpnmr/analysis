@@ -715,7 +715,10 @@ class Variant:
             f = bondLengths[pair] - sqrt(r2)
 
           elif r2 < r2limit:
-            f = 5e6 / (r2*r2)
+            if (r2*r2) == 0:
+              continue
+            else:
+              f = 5e6 / (r2*r2)
           
           else:
             continue
@@ -1116,18 +1119,21 @@ class Variant:
             if prevAtom.getRings():
               break
         else:
-          prevAtom = set(atom.neighbours).pop()
+          prevAtom = set(atom.neighbours)
+          if prevAtom:
+            prevAtom.pop()
 
-        prevX, prevY, prevZ = prevAtom.coords
-        neighbours = sorted(prevAtom.neighbours, key=lambda atom: atom.name)
-        for neighbour in neighbours:
-          if neighbour != atom and not neighbour in hydrogens:
-            prevAngle = round(degrees(prevAtom.getBondAngle(neighbour)), 0)
-            break
-            
-        angles = prevAtom.getPreferredBondAngles(prevAngle, neighbours, hydrogens + [atom], ignoreHydrogens = False)
-            
-        atom.snapToGrid(prevAtom, bondLength*0.75, prevAngle, angles, hydrogens, ignoreHydrogens = False)
+        if prevAtom:
+          prevX, prevY, prevZ = prevAtom.coords
+          neighbours = sorted(prevAtom.neighbours, key=lambda atom: atom.name)
+          for neighbour in neighbours:
+            if neighbour != atom and not neighbour in hydrogens:
+              prevAngle = round(degrees(prevAtom.getBondAngle(neighbour)), 0)
+              break
+
+          angles = prevAtom.getPreferredBondAngles(prevAngle, neighbours, hydrogens + [atom], ignoreHydrogens = False)
+
+          atom.snapToGrid(prevAtom, bondLength*0.75, prevAngle, angles, hydrogens, ignoreHydrogens = False)
 
     for c in chiralities:
       for a in self.varAtoms:

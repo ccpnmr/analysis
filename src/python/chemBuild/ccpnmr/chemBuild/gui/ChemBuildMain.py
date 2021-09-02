@@ -924,7 +924,10 @@ class ChemBuildMain(QtWidgets.QMainWindow):
         variant.snapAtomsToGrid(ignoreHydrogens=False)
       
       self.setCompound(compound, replace)
-      
+      try:
+        self.minimise()
+      except Exception as err:
+        print('Warning. Could not minimise compound. Try with the manual Auto-arrange button from the main menu.')
       return compound
   
   def importMol2(self, filePath=None, replace=True):

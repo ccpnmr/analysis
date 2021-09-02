@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-02 12:39:24 +0100 (Thu, September 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-02 13:11:21 +0100 (Thu, September 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -374,7 +374,7 @@ class ChemicalShiftTable(GuiTable):
         # self.current._chemicalShifts = objs or []
 
         if objs:
-            nmrResidues = tuple(set(cs.nmrAtom.nmrResidue for cs in objs))
+            nmrResidues = tuple(set(cs.nmrAtom.nmrResidue for cs in objs if cs.nmrAtom))
         else:
             nmrResidues = []
 

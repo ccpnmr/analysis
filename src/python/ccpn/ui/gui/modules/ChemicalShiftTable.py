@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-17 02:14:15 +0100 (Tue, August 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-02 12:39:24 +0100 (Thu, September 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -153,7 +153,7 @@ class ChemicalShiftTable(GuiTable):
     className = 'ChemicalShiftListTable'
     attributeName = 'chemicalShiftLists'
 
-    PRIMARYCOLUMN = CS_OBJECT  # column holding active objects (uniqueId for this table)
+    PRIMARYCOLUMN = CS_OBJECT  # column holding active objects (uniqueId/_chemicalShift for this table?)
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None,
                  actionCallback=None, selectionCallback=None,
@@ -252,7 +252,7 @@ class ChemicalShiftTable(GuiTable):
 
         self.setTableNotifiers(tableClass=ChemicalShiftList,
                                rowClass=_ChemicalShift,
-                               # cellClassNames=(NmrAtom, '_chemicalShifts'),
+                               # cellClassNames=(NmrAtom, '_chemicalShifts'), # not required
                                tableName='chemicalShiftList', rowName='_chemicalShift',
                                # changeFunc=self.displayTableForChemicalShift,
                                className=self.attributeName,
@@ -720,10 +720,10 @@ class ChemicalShiftTable(GuiTable):
                         return
                 uniqObjs = set(selection)
 
-                # NOTE:ED - fix this
+                # NOTE:ED - fix this?
+                # _shiftObjects = tuple(_getValueByHeader(row, CS_OBJECT) for row in self._dataFrameObject.objects)
 
-                _shiftObjects = tuple(_getValueByHeader(row, 3) for row in self._dataFrameObject.objects)
-                rows = [self._dataFrameObject.find(self, str(obj.pid), column=CS_OBJECT, multiRow=True) for obj in uniqObjs]
+                rows = [self._dataFrameObject.find(self, str(obj), column=CS_OBJECT, multiRow=True) for obj in uniqObjs]
                 # if obj in _peakObjects and obj.peakList == self._selectedPeakList]
                 rows = [row for row in set(makeIterableList(rows)) if row is not None]
                 if rows:
@@ -794,6 +794,7 @@ class ChemicalShiftTable(GuiTable):
 
             _objs = [self.chemicalShiftList._getChemicalShift(uniqueId=unq) for unq in _table[CS_UNIQUEID]]
             if _objs:
+                # append the actual objects as the last column - not sure whether this is required - check _highlightObjs
                 _table[CS_OBJECT] = _objs
 
                 _stats = [self._derivedFromObject(obj) for obj in _objs]
@@ -842,6 +843,7 @@ class ChemicalShiftTable(GuiTable):
             _comment = _row[CS_COMMENT:]
             _extraCols = pd.Series(self._derivedFromObject(obj), index=[CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT])
             newRow = newRow.append([_extraCols, _comment])
+            # append the actual object to the end - not sure whether this is required - check _highlightObjs
             newRow[CS_OBJECT] = obj
             newRow.fillna('None', inplace=True)
             return newRow
@@ -850,17 +852,18 @@ class ChemicalShiftTable(GuiTable):
             obj = data[Notifier.OBJECT]
             uniqueId = obj.uniqueId
 
+            # check that the object belongs to the list that is being displayed
             if not self._dataFrameObject or obj is None:
                 return
             if obj.chemicalShiftList != self.chemicalShiftList:
                 return
 
-            _update = False
+            _update = False  # from original row update - need to check
 
             trigger = data[Notifier.TRIGGER]
             try:
                 _df = self.chemicalShiftList._data
-                _df = _df[_df[CS_ISDELETED] == False]  # not deleted
+                _df = _df[_df[CS_ISDELETED] == False]  # not deleted - should be the only visible ones
                 # the column containing the uniqueId
                 col = CS_TABLECOLUMNS.index(CS_UNIQUEID)
                 tableIds = tuple(self.item(rr, col).value for rr in range(self.rowCount()))
@@ -892,6 +895,7 @@ class ChemicalShiftTable(GuiTable):
                         self.setRow(tableIds.index(uniqueId), newRow)
 
                 elif trigger == Notifier.RENAME:
+                    # not sure that I need this yet
                     pass
 
             except Exception as es:

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-17 03:05:03 +0100 (Tue, August 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-02 12:39:24 +0100 (Thu, September 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -175,6 +175,7 @@ class _ChemicalShift(NotifierBase):
     #~~~~~~~~~~~~~~~~
 
     @property
+    # NOTE:ED - added '@checkDeleted' but I don't think they are required
     # @checkDeleted()
     def value(self) -> Optional[float]:
         """shift value of ChemicalShift, in unit as defined in the ChemicalShiftList.

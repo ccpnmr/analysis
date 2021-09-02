@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:19:59 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-02 12:39:24 +0100 (Thu, September 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -38,13 +38,16 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGro
 from ccpnmodel.ccpncore.lib.Constants import defaultNmrChainCode
 from ccpn.core import _importOrder
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, renameObject, renameObjectNoBlanking, undoBlock
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, \
+    renameObject, undoBlock, deleteObject
 from ccpn.util.Common import makeIterableList
 from ccpn.util.Logging import getLogger
 
 
 # Value used for sorting with no offset - puts no_offset just before offset +0
 SORT_NO_OFFSET = -0.1
+
+
 # ASSIGNEDPEAKSCHANGED = '_assignedPeaksChanged'
 
 
@@ -1158,6 +1161,18 @@ class NmrResidue(AbstractWrapperObject):
         """
         apiNmrChain.__dict__['mainResonanceGroups'].reverse()
 
+    def _finaliseAction(self, action: str):
+        """Subclassed to handle associated offsetNMrResidues
+        """
+        if not super()._finaliseAction(action):
+            return
+
+        if action in ['delete', 'create']:
+            # notify that the peak labels need to be updated
+            _peaks = set(pk for nmrAtom in self.nmrAtoms for pk in nmrAtom.assignedPeaks)
+            for pk in _peaks:
+                pk._finaliseAction('change')
+
     def _delete(self):
         """Delete object, with all contained objects and underlying data.
         """
@@ -1168,7 +1183,13 @@ class NmrResidue(AbstractWrapperObject):
             atHeadOfChain = True if len(stretch) > 1 and stretch[0] is self._wrappedData else False
 
         if not atHeadOfChain:
-            super().delete()
+            with undoBlock():
+                # remove all the mmrAtoms from their associated chemicalShifts
+                # - clearing before the delete handles the notifiers nicely
+                _shs = [sh for nmrAt in self.nmrAtoms for sh in nmrAt._chemicalShifts]
+                for sh in _shs:
+                    sh.nmrAtom = None
+                super().delete()
 
         else:
             raise ValueError('Cannot delete nmrResidues from the head of a connected chain.')
@@ -1186,8 +1207,6 @@ class NmrResidue(AbstractWrapperObject):
             self._getApiObjectTree()
 
             # need to do a special delete here as the api always reinserts the nmrResidue at the end of the chain
-
-            # super().delete()
             self._delete()
 
         except Exception as es:

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-31 16:06:39 +0100 (Tue, August 31, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-02 12:30:32 +0100 (Thu, September 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -803,12 +803,14 @@ def deleteObject():
                                                 topObjectsToCheck=(self._wrappedData.topObject,),
                                                 obj=self, trigger='create', preExecution=False,
                                                 objsToBeUnDeleted=apiObjectsCreated),
+                            # use 'func' so that it calls the wrapped method (was previously 'self.delete')
+                            # - shouldn't be any arguments
                             redo=BlankedPartial(partial(func, self),
                                                 obj=self, trigger='delete', preExecution=True)
                             )
 
-                # call the wrapped delete function
-                result = func(*args, **kwds)
+                # call the wrapped delete function (shouldn't be any arguments)
+                result = func(self)  # *args, **kwds)
 
         return result
 

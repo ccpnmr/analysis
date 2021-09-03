@@ -68,6 +68,7 @@ AtomNamingSystem = 'atomNamingSystem'
 PseudoNamingSystem = 'pseudoNamingSystem'
 ChainCode = 'chainCode'
 Code3Letter = 'code3Letter'
+ResNumber = 'ResNumber'
 
 DefaultAddAtomGroups = True
 DefaultAddPseudoAtoms = False
@@ -78,10 +79,12 @@ DefaultAtomNamingSystem = 'PDB_REMED'
 DefaultPseudoNamingSystem = 'AQUA'
 DefaultChainCode = 'L'
 DefaultCode3Letter = 'LIG'
+DefaultResNumber = 1
 
 DefaultOptions = {
                 ChainCode: DefaultChainCode,
                 Code3Letter: DefaultCode3Letter,
+                ResNumber: DefaultResNumber,
                 AddAtomGroups: DefaultAddAtomGroups,
                 AddPseudoAtoms: DefaultAddPseudoAtoms,
                 RemoveDuplicateEquivalentAtoms: DefaultRemoveDuplicateEquivalentAtoms,
@@ -129,14 +132,18 @@ class NewChainFromChemComp(CcpnDialogMainWidget):
     def _createWidgets(self):
 
         row = 0
+        self.filePathW = Widget(self.mainWidget, setLayout=True, grid=(row, 0))
 
-        self.filePathW = Widget(self.mainWidget, setLayout=True, grid=(row, 0), gridSpan=(1, 1))
-        self.filePathLabel = Label(self.filePathW, text="ChemComp Path", grid=(0, 0), )
-        self.filePathEdit = PathEdit(self.filePathW, grid=(0, 1), vAlign='t', tipText='')
-        # self.filePathEdit.setMinimumWidth(100)
-        self.filePathButton = Button(self.filePathW, grid=(0, 2), callback=self._getUserPipesPath,
+        self.filePathLabel = Label(self.filePathW, text="ChemComp Path", grid=(0, 0),)
+
+        self.filePathEntry = Widget(self.filePathW, setLayout=True, grid=(row, 1))
+        self.filePathEdit = PathEdit(self.filePathEntry, backgroundText='myPath/other+code+ChemBuild.xml',
+                                     grid=(0, 0), vAlign='t', tipText='Absolute path to the ChemComp file in .xml format')
+        self.filePathButton = Button(self.filePathEntry, grid=(0, 1), callback=self._getUserPipesPath,
                                           icon='icons/directory', hPolicy='fixed')
         # self.userPipesPath.textChanged.connect(None)
+        self.filePathEntry.setFixedWidth(300)
+
 
         row += 1
         self.chainCodeW = cw.EntryCompoundWidget(self.mainWidget, labelText='Chain Code',
@@ -147,6 +154,11 @@ class NewChainFromChemComp(CcpnDialogMainWidget):
                                                  entryText=DefaultOptions.get(Code3Letter),
                                                  grid=(row, 0), gridSpan=(1, 1))
 
+        row += 1
+        self.resNumW = cw.SpinBoxCompoundWidget(self.mainWidget, labelText='Residue Number',
+                                                 value=DefaultOptions.get(ResNumber),
+                                                 range=(1, 10000),
+                                                 grid=(row, 0), gridSpan=(1, 1))
 
         row += 1
         self.addAtomGroupsW = cw.CheckBoxCompoundWidget(self.mainWidget,
@@ -156,47 +168,23 @@ class NewChainFromChemComp(CcpnDialogMainWidget):
 
         row += 1
 
-
-        _frame = MoreLessFrame(self.mainWidget, name='Advanced', showMore=False, grid=(row, 0), gridSpan=(1, 2))
-        advContentsFrame = _frame.contentsFrame
-
-        advRow = 0
-
-
-        self.addNonstereoAtomsW = cw.CheckBoxCompoundWidget(advContentsFrame,
+        self.addNonstereoAtomsW = cw.CheckBoxCompoundWidget(self.mainWidget,
                                                             labelText='Add Non Stereo-Specific Atom',
                                                             checked=DefaultOptions.get(AddNonstereoAtoms),
-                                                            grid=(advRow, 0), gridSpan=(1, 1))
+                                                            grid=(row, 0), gridSpan=(1, 1))
 
-        # advRow += 1
-        # self.addPseudoAtomsW = cw.CheckBoxCompoundWidget(advContentsFrame,
-        #                                                  labelText='Add Pseudo-Atom Groups',
-        #                                                  checked=DefaultOptions.get(AddPseudoAtoms, False),
-        #                                                  grid=(advRow, 0), gridSpan=(1, 1))
-        # advRow += 1
-        # self.pseudoNamingSystemsW = cw.PulldownListCompoundWidget(advContentsFrame,
-        #                                                           labelText='Pseudo-Atoms Naming Systems',
-        #                                                           texts=NamingSystems,
-        #                                                           default=DefaultOptions.get(PseudoNamingSystem),
-        #                                                           grid=(advRow, 0), gridSpan=(1, 1))
-        #
-        # advRow += 1
-        # self.renamePseudoAtomsW = cw.CheckBoxCompoundWidget(advContentsFrame,
-        #                                                  labelText='Rename Pseudo-Atoms with the selected Naming System',
-        #                                                  checked=DefaultOptions.get(RemoveDuplicateEquivalentAtoms),
-        #                                                  grid=(advRow, 0), gridSpan=(1, 1))
-        #
-        #
-        # advRow += 1
-        # self.setBoundsForAtomGroupsW = cw.CheckBoxCompoundWidget(advContentsFrame,
-        #                                                                   labelText='Set Bounds for Pseudo-Atom Groups',
-        #                                                                   checked=DefaultOptions.get(SetBoundsForAtomGroups),
-        #                                                                   grid=(advRow, 0), gridSpan=(1, 1))
-        #
-        # advRow += 1
-
-        self.mainWidget.getLayout().setAlignment(QtCore.Qt.AlignRight)
+        self.mainWidget.getLayout().setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTop)
         self._populateWsFromProjectInfo()
+        self._alignWidgets(self.mainWidget)
+
+    def _alignWidgets(self, parent):
+        if isinstance(parent, QtWidgets.QWidget):
+            for w in parent.children():
+                if isinstance(w, QtWidgets.QFrame):
+                    for _sc in w.children():
+                        if not isinstance(_sc, QtWidgets.QGridLayout):
+                            if not isinstance(_sc,QtWidgets.QLabel):
+                                _sc.setFixedWidth(300)
 
     def _populateWsFromProjectInfo(self):
         from ccpn.ui.gui.popups.CreateChainPopup import _nextChainCode
@@ -219,7 +207,7 @@ class NewChainFromChemComp(CcpnDialogMainWidget):
                 expandFromAtomSets =  self.addAtomGroupsW.get() or DefaultOptions[AddAtomGroups]
                 addNonstereoAtoms = self.addNonstereoAtomsW.get() or DefaultOptions[AddNonstereoAtoms]
                 code3Letter = self.res3LettW.getText() or DefaultOptions[Code3Letter]
-
+                renumberFromResidue = self.resNumW.getValue() or DefaultOptions[ResNumber]
                 try:
                     ccpCode = 'Ccp'
                     basename = aPath(filePath).basename
@@ -242,13 +230,15 @@ class NewChainFromChemComp(CcpnDialogMainWidget):
                                                   expandFromAtomSets = expandFromAtomSets,
                                                   addNonstereoAtoms = addNonstereoAtoms
                                                   )
+
+                    chain.renumberResidues(offset=renumberFromResidue-1, start=1)
                     getLogger().info("New Chain available from SideBar")
                 except Exception as err:
 
                     MessageDialog.showError('Error creating Chain from File', str(err))
 
             else:
-                getLogger().warning('No selected file. Chain from ChemComp Aborted')
+                getLogger().warning('No selected xml file. Chain from ChemComp Aborted')
 
         self.accept()
 

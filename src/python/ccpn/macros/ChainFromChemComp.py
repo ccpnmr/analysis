@@ -42,11 +42,10 @@ __date__ = "$Date: 2021-03-05 11:01:32 +0000 (Fri, March 05, 2021) $"
 #=========================================================================================
 
 
-from ccpn.core.Chain import _fetchChemCompFromFile, _newChainFromChemComp
+from ccpn.core.Chain import _fetchChemCompFromFile, _newChainFromChemComp, _checkChemCompExists
 from ccpn.ui.gui.widgets.FileDialog import ChemCompFileDialog
 from ccpn.util.Logging import getLogger
-
-
+from ccpn.util.Path import aPath
 from PyQt5 import QtCore, QtGui, QtWidgets
 import ccpn.ui.gui.widgets.CompoundWidgets as cw
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
@@ -68,6 +67,7 @@ SetBoundsForAtomGroups = 'setBoundsForAtomGroups'
 AtomNamingSystem = 'atomNamingSystem'
 PseudoNamingSystem = 'pseudoNamingSystem'
 ChainCode = 'chainCode'
+Code3Letter = 'code3Letter'
 
 DefaultAddAtomGroups = True
 DefaultAddPseudoAtoms = False
@@ -76,10 +76,12 @@ DefaultAddNonstereoAtoms = False
 DefaultSetBoundsForAtomGroups = False
 DefaultAtomNamingSystem = 'PDB_REMED'
 DefaultPseudoNamingSystem = 'AQUA'
-DefaultChainCode = 'Lig'
+DefaultChainCode = 'L'
+DefaultCode3Letter = 'LIG'
 
 DefaultOptions = {
                 ChainCode: DefaultChainCode,
+                Code3Letter: DefaultCode3Letter,
                 AddAtomGroups: DefaultAddAtomGroups,
                 AddPseudoAtoms: DefaultAddPseudoAtoms,
                 RemoveDuplicateEquivalentAtoms: DefaultRemoveDuplicateEquivalentAtoms,
@@ -139,6 +141,10 @@ class NewChainFromChemComp(CcpnDialogMainWidget):
         row += 1
         self.chainCodeW = cw.EntryCompoundWidget(self.mainWidget, labelText='Chain Code',
                                                  entryText=DefaultOptions.get(DefaultChainCode),
+                                                 grid=(row, 0), gridSpan=(1, 1))
+        row += 1
+        self.res3LettW = cw.EntryCompoundWidget(self.mainWidget, labelText='Residue 3 Letter Code',
+                                                 entryText=DefaultOptions.get(Code3Letter),
                                                  grid=(row, 0), gridSpan=(1, 1))
 
 
@@ -206,31 +212,30 @@ class NewChainFromChemComp(CcpnDialogMainWidget):
             if filePath:
                 self.filePathEdit.setText(filePath)
 
-    @property
-    def params(self):
-        return self._params
-
-    @params.getter
-    def params(self):
-        _params = DefaultOptions
-        _params.update({ChainCode: self.chainCodeW.getText() or _params[ChainCode]})
-        _params.update({AddAtomGroups: self.addAtomGroupsW.get() or _params[AddAtomGroups]})
-        _params.update({AddNonstereoAtoms: self.addNonstereoAtomsW.get() or _params[AddNonstereoAtoms] })
-        _params.update({AddPseudoAtoms: self.addPseudoAtomsW.get() or _params[AddPseudoAtoms]})
-        # _params.update({PseudoNamingSystem: self.pseudoNamingSystemsW.getText() or _params[PseudoNamingSystem]})
-        # _params.update({RemoveDuplicateEquivalentAtoms: self.renamePseudoAtomsW.get() or _params[RemoveDuplicateEquivalentAtoms]})
-        # _params.update({SetBoundsForAtomGroups: self.setBoundsForAtomGroupsW.get() or _params[SetBoundsForAtomGroups]})
-        return _params
-
     def _okCallback(self):
         if self.project:
             filePath = self.filePathEdit.get()
             if filePath:
                 expandFromAtomSets =  self.addAtomGroupsW.get() or DefaultOptions[AddAtomGroups]
                 addNonstereoAtoms = self.addNonstereoAtomsW.get() or DefaultOptions[AddNonstereoAtoms]
+                code3Letter = self.res3LettW.getText() or DefaultOptions[Code3Letter]
 
                 try:
+                    ccpCode = 'Ccp'
+                    basename = aPath(filePath).basename
+                    ll = basename.split('+') # assuming the file is an old xml type with + separators or created from Chembuild.
+                    if len(ll) > 1:
+                        ccpCode = ll[1]
+                    prevChemComp = _checkChemCompExists(self.project, ccpCode)
+                    if prevChemComp:
+                        answ = MessageDialog.showYesNo('A ChemComp with the same ccpCode is already loaded',
+                                                       'Do you want to create a new chain with the previously loaded ChemComp?')
+                        if not answ:
+                            MessageDialog.showError('Aborted', 'Please create a newChemComp with a different ccpCode, or use a different ChemComp file.')
+                            return
+
                     chemComp = _fetchChemCompFromFile(self.project, filePath)
+                    chemComp.__dict__['code3Letter'] = code3Letter
 
                     chain = _newChainFromChemComp(self.project, chemComp,
                                                   chainCode = self.chainCodeW.getText(),
@@ -248,12 +253,22 @@ class NewChainFromChemComp(CcpnDialogMainWidget):
         self.accept()
 
 if __name__ == '__main__':
-    from ccpn.ui.gui.widgets.Application import TestApplication
-    # app = TestApplication()
-    popup = NewChainFromChemComp(mainWindow=mainWindow)
-    popup.show()
-    popup.raise_()
-    # app.start()
+
+    def _start(mainWindow=None):
+        popup = NewChainFromChemComp(mainWindow=mainWindow)
+        popup.show()
+        popup.raise_()
+
+    from ccpn.framework.Application import getApplication
+    ccpnApplication = getApplication()
+    if ccpnApplication:
+        _start(ccpnApplication.ui.mainWindow)
+    else:
+        from ccpn.ui.gui.widgets.Application import TestApplication
+        app = TestApplication()
+        _start()
+        app.start()
+
 
 
 

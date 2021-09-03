@@ -590,6 +590,12 @@ def _getChainFromSubstance(self: Substance, shortName: str = None, role: str = N
 # Substance.createChain = _createChainFromSubstance
 # del _createChainFromSubstance
 
+def _checkChemCompExists(project, ccpCode):
+    memopsRoot =  project._wrappedData.root
+    chemComp = memopsRoot.findFirstChemComp(ccpCode=ccpCode)  # Check if the chemcomp is already loaded
+    if chemComp:
+        return chemComp
+    return
 
 def _fetchChemCompFromFile(project, filePath):
     """
@@ -608,8 +614,7 @@ def _fetchChemCompFromFile(project, filePath):
         ccpCode = ll[1]
         chemComp = memopsRoot.findFirstChemComp(ccpCode=ccpCode) # Check if the chemcomp is already loaded
         if chemComp:
-            raise RuntimeError('A ChemComp with the same ccpCode is already loaded. Could not create a new ChemComp'
-                                'with a pre-existing ccpCode: %s.' % ccpCode)
+            return chemComp
     topObjId = ll[-1]
     chemComp = memopsRoot.findFirstChemComp(topObjId=topObjId)  # Check if the chemcomp is already loaded
     if chemComp:

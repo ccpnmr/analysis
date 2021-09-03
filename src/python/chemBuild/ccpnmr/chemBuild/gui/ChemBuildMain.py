@@ -1403,21 +1403,26 @@ class ChemBuildMain(QtWidgets.QMainWindow):
       else:
         self.setCompound( Compound('Unnamed') )
       
-      self.updateVars()  
+      self.updateVars()
+
+  def _getUniqueID(self):
+    # Get a unique Id because Ccpnmr API cannot load two Molecules with identical Ccp code (in the same project)!
+    import uuid
+    _id = uuid.uuid4()
+    shortID = str(_id).split('-')[0]  # _id[0] has 8 char; _id[1][2][3] have 4 chars; _id[4] has 12 chars
+    return str(shortID)
 
   def _setDefaultCcpCode(self):
     if self.compound:
       if not self.compound.ccpCode:
-        self.compound.ccpCode = DeafultCcpCode
+        self.compound.ccpCode = self._getUniqueID()
         self.ccpCodeEdit.setText(self.compound.ccpCode)
-        msg = "CCPN Code set to default. %s \nTo Change: Right Panel > Compound Info tab > CCPN Code " % DeafultCcpCode
-        print(msg)
 
   def updateCompDetails(self):
     
     if self.compound:
       name = self.compound.name
-      ccpCode = self.compound.ccpCode or DeafultCcpCode
+      ccpCode = self.compound.ccpCode or self._getUniqueID()
       molType = self.compound.ccpMolType or 'other'
       details = self.compound.details or ''
     else:

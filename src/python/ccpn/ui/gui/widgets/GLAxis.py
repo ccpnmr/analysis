@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 22:16:54 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-03 11:56:14 +0100 (Fri, September 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1443,6 +1443,9 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         # GLversionFunctions = self.context().versionFunctions()
         # GLversionFunctions.initializeOpenGLFunctions()
         # self._GLVersion = GLversionFunctions.glGetString(GL.GL_VERSION)
+        if self.spectrumDisplay.isDeleted:
+            getLogger().debug2(f'initializeGL  {self}  {self.spectrumDisplay}')
+            return
 
         # initialise a common to all OpenGL windows
         self.globalGL = GLGlobalData(parent=self, mainWindow=self.mainWindow)  #, strip=None, spectrumDisplay=self.spectrumDisplay)
@@ -2314,6 +2317,10 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
 
     def resizeGL(self, w, h):
         # must be set here to catch the change of screen
+        if self.spectrumDisplay.isDeleted:
+            getLogger().debug2(f'resizeGL  {self}  {self.spectrumDisplay}')
+            return
+
         self.refreshDevicePixelRatio()
         self._resizeGL(w, h)
         if self._aspectRatioMode == 0:

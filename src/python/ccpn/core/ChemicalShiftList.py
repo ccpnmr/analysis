@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-17 02:16:06 +0100 (Tue, August 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-03 12:18:43 +0100 (Fri, September 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -69,7 +69,7 @@ CS_TABLECOLUMNS = (CS_UNIQUEID, CS_ISDELETED,
                    CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT,
                    CS_COMMENT, CS_OBJECT)
 
-# NOTE:ED - these currently match the original V3 classNames - not _ChemicalShift
+# NOTE:ED - these currently match the original V3 classNames - not ChemShift
 CS_CLASSNAME = 'ChemicalShift'
 CS_PLURALNAME = 'chemicalShifts'
 
@@ -178,7 +178,7 @@ class ChemicalShiftList(AbstractWrapperObject):
                             for y in x.dataSources))
 
     def _recalculatePeakShifts(self, nmrResidues, shifts):
-        # update the assigned nmrAtom chemical shift values - notify the nmrResidues and _chemicalShifts
+        # update the assigned nmrAtom chemical shift values - notify the nmrResidues and chemShifts
         for sh in shifts:
             sh._recalculateShiftValue()
         for nmr in nmrResidues:
@@ -206,7 +206,7 @@ class ChemicalShiftList(AbstractWrapperObject):
             raise RuntimeError(f'ChemicalShiftList.spectra: nmrAtoms already in list')
         _nmrs = _deleteNmr | _oldNmrPks
         nmrResidues = set(nmr.nmrResidue for nmr in _nmrs)
-        shifts = set(cs for nmrAt in _nmrs for cs in nmrAt._chemicalShifts if cs and not cs.isDeleted)
+        shifts = set(cs for nmrAt in _nmrs for cs in nmrAt.chemShifts if cs and not cs.isDeleted)
 
         with undoBlock():
             with undoStackBlocking() as addUndoItem:
@@ -246,7 +246,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         return _oldNmr
 
     @property
-    def _chemicalShifts(self):
+    def chemShifts(self):
         """Return the shifts belonging to ChemicalShiftList
         """
         return self._shifts
@@ -308,7 +308,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         :param autoUpdate: automatically update according to the project changes.
         :return: a duplicated copy of itself containing all chemicalShifts.
         """
-        from ccpn.core._ChemicalShift import _newChemicalShift as _newShift
+        from ccpn.core.ChemShift import _newChemicalShift as _newShift
 
         # name = _incrementObjectName(self.project, self._pluralLinkName, self.name)
         ncsl = self.project.newChemicalShiftList()
@@ -538,7 +538,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         """Subclassed to allow for initialisations on restore, not on creation via newChemicalShiftList
         """
         from ccpn.util.Logging import getLogger
-        from ccpn.core._ChemicalShift import _newChemicalShift as _newShift
+        from ccpn.core.ChemShift import _newChemicalShift as _newShift
 
         chemicalShiftList = super()._restoreObject(project, apiObj)
 
@@ -640,7 +640,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         """Create a new pure V3 ChemicalShift object
         Method is wrapped with create/delete notifier
         """
-        from ccpn.core._ChemicalShift import _getByTuple, _newChemicalShift as _newShift
+        from ccpn.core.ChemShift import _getByTuple, _newChemicalShift as _newShift
 
         # make new tuple - verifies contents
         _row = _getByTuple(self, value, valueError, figureOfMerit,

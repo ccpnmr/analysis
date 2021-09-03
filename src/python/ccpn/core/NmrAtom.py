@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-31 13:03:04 +0100 (Tue, August 31, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-03 12:18:43 +0100 (Fri, September 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -83,7 +83,7 @@ class NmrAtom(AbstractWrapperObject):
     def __init__(self, project: Project, wrappedData):
 
         # internal lists to hold the current chemicalShifts
-        self._chemicalShifts = []
+        self.chemShifts = []
 
         super().__init__(project, wrappedData)
 
@@ -426,19 +426,19 @@ class NmrAtom(AbstractWrapperObject):
         self._wrappedData.isotopeCode = isotopeCode if isotopeCode else UnknownIsotopeCode # self._NONE_VALUE_STRING
 
         self._childActions.append(self._renameChemicalShifts)
-        self._finaliseChildren.extend((sh, 'change') for sh in self._chemicalShifts)
+        self._finaliseChildren.extend((sh, 'change') for sh in self.chemShifts)
 
         return (oldName,)
 
     def _renameChemicalShifts(self):
         # update chemicalShifts
-        for cs in self._chemicalShifts:
+        for cs in self.chemShifts:
             cs._renameNmrAtom(self)
 
     def delete(self):
         """Delete self and update the chemicalShift values
         """
-        shifts = list(self._chemicalShifts)
+        shifts = list(self.chemShifts)
 
         with undoBlock():
             for sh in shifts:

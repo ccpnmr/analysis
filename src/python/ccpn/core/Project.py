@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-12 03:45:43 +0100 (Thu, August 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-03 12:18:43 +0100 (Fri, September 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -172,21 +172,21 @@ class Project(AbstractWrapperObject):
         return None
 
     @property
-    def _chemicalShifts(self):
+    def chemShifts(self):
         """Return the list of chemicalShifts in the project
-        This is the _ChemicalShift class to be renamed later
+        This is the ChemShift class to be renamed later
         """
         _shifts = []
         for shiftList in self.chemicalShiftLists:
-            _shifts.extend(shiftList._chemicalShifts)
+            _shifts.extend(shiftList.chemShifts)
         return _shifts
 
-    def get_ChemicalShift(self, relativeId: str) -> Optional['_ChemicalShift']:
+    def getChemShift(self, relativeId: str) -> Optional['ChemShift']:
         """Return the chemicalShift from the supplied relativeId
         """
-        from ccpn.core._ChemicalShift import _ChemicalShift
+        from ccpn.core.ChemShift import ChemShift
 
-        dd = self._project._pid2Obj.get(_ChemicalShift.className)
+        dd = self._project._pid2Obj.get(ChemShift.className)
         if dd:
             if self is self._project:
                 key = '{}'.format(relativeId)

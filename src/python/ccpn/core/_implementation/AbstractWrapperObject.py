@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-31 11:51:25 +0100 (Tue, August 31, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-03 12:18:44 +0100 (Fri, September 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1234,7 +1234,10 @@ class AbstractWrapperObject(NotifierBase):
                 oldPid = self.pid
             # Wrapper-level processing
             self._resetIds()
-        self._flaggedForDelete = True if action == 'delete' else False
+        elif action == 'create':
+            self._flaggedForDelete = False
+        elif action == 'delete':
+            self._flaggedForDelete = True
 
         if self._childActions:
             # operations that MUST be performed during _finalise
@@ -1243,7 +1246,6 @@ class AbstractWrapperObject(NotifierBase):
             # propagate the action to explicitly associated (generally child) instances
             for func in self._childActions:
                 func()
-
             self._childActions = []
 
         project = self.project
@@ -1256,24 +1258,7 @@ class AbstractWrapperObject(NotifierBase):
                     for name in (className, 'AbstractWrapperObject'))
         pendingNotifications = project._pendingNotifications
 
-        #EJB 20181217: test for preDelete
-        #       required for some table updates that need to ignore cell contents that
-        #       are about to be deleted.
-        #       e.g. deleting an nmrAtom from nmrResidue - 'delete' fired but nmrAtom still exists
-        #       so the row update must be able to ignore 'deleted' nmrAtoms
-        # if action == 'delete':
-        #     self._flaggedForDelete = True
-        # else:
-        #     self._flaggedForDelete = False
-
         if action == 'rename':
-            # # Special case
-            #
-            # oldPid = self.pid
-            #
-            # # Wrapper-level processing
-            # self._resetIds()
-
             # Call notifiers with special signature
             if project._notificationSuspension:
                 for dd in iterator:

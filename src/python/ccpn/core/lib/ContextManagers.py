@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-02 12:30:32 +0100 (Thu, September 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-03 12:18:44 +0100 (Fri, September 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -795,7 +795,6 @@ def deleteObject():
 
         with notificationBlanking(application=application):
             with undoStackBlocking(application=application) as addUndoItem:
-                # _storeDeleteObjectCurrent(self, addUndoItem)
 
                 # retrieve list of created items from the api
                 apiObjectsCreated = self._getApiObjectTree()

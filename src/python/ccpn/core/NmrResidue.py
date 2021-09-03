@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-02 12:39:24 +0100 (Thu, September 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-03 12:18:43 +0100 (Fri, September 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1186,7 +1186,7 @@ class NmrResidue(AbstractWrapperObject):
             with undoBlock():
                 # remove all the mmrAtoms from their associated chemicalShifts
                 # - clearing before the delete handles the notifiers nicely
-                _shs = [sh for nmrAt in self.nmrAtoms for sh in nmrAt._chemicalShifts]
+                _shs = [sh for nmrAt in self.nmrAtoms for sh in nmrAt.chemShifts]
                 for sh in _shs:
                     sh.nmrAtom = None
                 super().delete()
@@ -1256,10 +1256,10 @@ class NmrResidue(AbstractWrapperObject):
     def _renameChildren(self):
         """Update the chemicalShifts to the rename
         """
-        for nmr in self.nmrAtoms:
+        for nmrAt in self.nmrAtoms:
             # actions to be called outside of rename - must be last thing to set?
-            nmr._childActions.append(nmr._renameChemicalShifts)
-            nmr._finaliseChildren.extend((sh, 'change') for sh in nmr._chemicalShifts)
+            nmrAt._childActions.append(nmrAt._renameChemicalShifts)
+            nmrAt._finaliseChildren.extend((sh, 'change') for sh in nmrAt.chemShifts)
         for offsetRes in self.offsetNmrResidues:
             self._finaliseChildren.append((offsetRes, 'rename'))
 

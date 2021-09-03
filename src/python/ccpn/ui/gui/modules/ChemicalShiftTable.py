@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-03 12:02:03 +0100 (Fri, September 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-03 12:18:44 +0100 (Fri, September 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -301,7 +301,6 @@ class ChemicalShiftTable(GuiTable):
                            selectedObjects=self.current.chemShifts)
 
     def _getValidChemicalShift4Callback(self, objs):
-        chemicalShift = None
         if not objs or not all(objs):
             return
         if isinstance(objs, (tuple, list)):

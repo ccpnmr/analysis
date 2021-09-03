@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-31 11:51:25 +0100 (Tue, August 31, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-03 12:02:03 +0100 (Fri, September 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -814,10 +814,11 @@ GuiTable::item::selected {
         if objList and isinstance(objList[0], pd.Series):
             pass
         else:
-            if not objList:
-                return
-            if set(objList or []) == set(self._lastSelection or []):  # pd.Series should never reach here or will crash here. Cannot use set([series])== because Series are mutable, thus they cannot be hashed
-                return
+            if self._clickedInTable:
+                if not objList:
+                    return
+                if set(objList or []) == set(self._lastSelection or []):  # pd.Series should never reach here or will crash here. Cannot use set([series])== because Series are mutable, thus they cannot be hashed
+                    return
 
         self._lastSelection = objList
 
@@ -1070,9 +1071,10 @@ GuiTable::item::selected {
             return True
 
     def _itemSelectionChanged(self):
-        # if self._checkMousePressAllowed():
-        if self.hasFocus():  # or signals blocked?
-            self._selectionTableCallback(None, mouseDrag=False)
+        """Handle item selection as changed in table - call user callback
+        Includes checking for clicking below last row
+        """
+        self._selectionTableCallback(None, mouseDrag=False)
 
     def _handleCellClicked(self, eventPos):
         """handle a single click event, but ignore double click events,
@@ -1618,6 +1620,18 @@ GuiTable::item::selected {
 
         return rows
 
+    def mousePressEvent(self, event):
+        """handle mouse press events
+        Clicking is handled on the mouse release
+        """
+        if event.button() == QtCore.Qt.RightButton:
+            # stops the selection from the table when the right button is clicked
+            self._rightClickedTableItem = self.itemAt(event.pos())
+
+        # user can click in the blank area below the last row
+        self._clickedInTable = True if self.itemAt(event.pos()) else False
+        super().mousePressEvent(event)
+
     def getRightMouseItem(self):
         if self._rightClickedTableItem:
             row = self._rightClickedTableItem.row()
@@ -1698,7 +1712,7 @@ GuiTable::item::selected {
         """
         with self._tableBlockSignals('clearSelection'):
 
-            objList = self.getSelectedObjects()
+            # objList = self.getSelectedObjects()
             selectionModel = self.selectionModel()
             selectionModel.clearSelection()
 

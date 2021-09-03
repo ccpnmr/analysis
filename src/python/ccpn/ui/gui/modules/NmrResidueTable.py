@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:30 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-03 12:02:03 +0100 (Fri, September 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -557,16 +557,6 @@ class NmrResidueTable(GuiTable):
 
     def _selectPullDown(self, value):
         self.ncWidget.select(value)
-
-    def mousePressEvent(self, event):
-        """handle mouse press events
-        Clicking is handled on the mouse release
-        """
-        if event.button() == QtCore.Qt.RightButton:
-            # stops the selection from the table when the right button is clicked
-            self._rightClickedTableItem = self.itemAt(event.pos())
-
-        super().mousePressEvent(event)
 
     def _setContextMenu(self, enableExport=True, enableDelete=True):
         """Subclass guiTable to insert new merge items to top of context menu

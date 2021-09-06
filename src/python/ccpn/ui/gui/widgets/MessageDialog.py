@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-04 13:33:57 +0100 (Wed, August 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-06 17:46:10 +0100 (Mon, September 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -59,7 +59,7 @@ default_icons = (Information, Question, Warning, Critical)
 if _isDarwin():
     Question = Warning
 
-LINELENGTH = 120
+LINELENGTH = 100
 WRAPBORDER = 5
 WRAPSCALE = 1.01
 
@@ -68,37 +68,52 @@ def _wrapString(text, lineLength=LINELENGTH):
     """Wrap a line of text to the desired width of the dialog
     Returns list of individual lines and the concatenated string for dialog
     """
-    wrapped = textwrap.wrap(text, width=lineLength, replace_whitespace=False, break_long_words=False)
-
     newWrapped = []
-    for mm in wrapped:
-        if len(mm) > LINELENGTH:
-            for chPos in range(0, len(mm), lineLength):
-                newWrapped.append(mm[chPos:chPos + lineLength])
-        else:
-            newWrapped.append(mm)
 
-    # merge lines that have now been created by splitting longer lines (if no newlines in first line)
-    newWrapped2 = []
-    if len(newWrapped) > 1:
-        lineNum = 0
-        while lineNum < len(newWrapped) - 1:
-            l1 = newWrapped[lineNum]
-            l2 = newWrapped[lineNum + 1]
+    _text = text.split('\n')
+    for text in _text:
+        wrapped = textwrap.wrap(text, width=lineLength, replace_whitespace=False, break_long_words=False)
 
-            if (len(l1) + len(l2) < LINELENGTH) and '\n' not in l1:
-                newWrapped2.append(l1 + ' ' + l2)
-                lineNum += 1
+        if not text:
+            newWrapped.append('')
+        for mm in wrapped:
+            if len(mm) > LINELENGTH:
+                for chPos in range(0, len(mm), lineLength):
+                    newWrapped.append(mm[chPos:chPos + lineLength])
             else:
-                newWrapped2.append(l1)
-                if lineNum == len(newWrapped) - 2:
-                    newWrapped2.append(l2)
+                newWrapped.append(mm)
 
-            lineNum += 1
-    else:
-        newWrapped2 = newWrapped
+    return newWrapped, '\n'.join(newWrapped)
 
-    return newWrapped2, '\n'.join(newWrapped2)
+    # # merge lines that have now been created by splitting longer lines (if no newlines in first line)
+    # newWrapped2 = []
+    # if len(newWrapped) > 1:
+    #     lineNum = 0
+    #     while lineNum < len(newWrapped):
+    #         l1 = newWrapped[lineNum]
+    #         if lineNum == len(newWrapped) - 1:
+    #             newWrapped2.append(l1)
+    #             break
+    #
+    #         l2 = newWrapped[lineNum + 1]
+    #         if not l2:
+    #             newWrapped2.append(l1)
+    #             newWrapped2.append(l2)
+    #             lineNum += 1
+    #         elif (len(l1) + len(l2) < LINELENGTH) and '\n' not in l1:
+    #             # not sure it will get here now
+    #             newWrapped2.append(l1 + ' ' + l2)
+    #             lineNum += 1
+    #         else:
+    #             newWrapped2.append(l1)
+    #             if lineNum == len(newWrapped) - 2:
+    #                 newWrapped2.append(l2)
+    #
+    #         lineNum += 1
+    # else:
+    #     newWrapped2 = newWrapped
+    #
+    # return newWrapped2, '\n'.join(newWrapped2)
 
 
 class MessageDialog(QtWidgets.QMessageBox):
@@ -140,6 +155,7 @@ class MessageDialog(QtWidgets.QMessageBox):
         item = layout.itemAtPosition(0, 2)  # grid position of basic text item
         if item:
             widgetBasic = item.widget()
+            setWidgetFont(widgetBasic, bold=True)
 
             # get the bounding rectangle for each line of basicText
             for wrapLine in basicTextWrap:

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-03 12:18:43 +0100 (Fri, September 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-06 17:58:19 +0100 (Mon, September 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -70,13 +70,14 @@ CS_TABLECOLUMNS = (CS_UNIQUEID, CS_ISDELETED,
                    CS_COMMENT, CS_OBJECT)
 
 # NOTE:ED - these currently match the original V3 classNames - not ChemShift
-CS_CLASSNAME = 'ChemicalShift'
-CS_PLURALNAME = 'chemicalShifts'
+#   it is the name used in the dataframe and in project._getNextUniqueIdValue
+CS_CLASSNAME = '_OldChemicalShift'
+CS_PLURALNAME = '_oldChemicalShifts'
 
 
 class ChemicalShiftList(AbstractWrapperObject):
     """An object containing Chemical Shifts. Note: the object is not a (subtype of a) Python list.
-    To access all ChemicalShift objects, use chemicalShiftList.chemicalShifts.
+    To access all ChemicalShift objects, use chemicalShiftList.chemShifts.
 
     A chemical shift list named 'default' is used by default for new experiments,
     and is created if necessary."""
@@ -106,7 +107,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         defaultName = 'Shifts%s' % wrappedData.serial
         self._setUniqueStringKey(defaultName)
 
-        # internal lists to hold the current chemicalShifts and deletedChemicalShift
+        # internal lists to hold the current chemShifts and deletedChemicalShift
         self._shifts = []
         self._deletedShifts = []
 
@@ -306,7 +307,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         """
         :param includeSpectra: move the spectra to the newly created ChemicalShiftList
         :param autoUpdate: automatically update according to the project changes.
-        :return: a duplicated copy of itself containing all chemicalShifts.
+        :return: a duplicated copy of itself containing all chemShifts.
         """
         from ccpn.core.ChemShift import _newChemicalShift as _newShift
 
@@ -345,8 +346,8 @@ class ChemicalShiftList(AbstractWrapperObject):
 
         # setting the spectra will autoUpdate as required
         ncsl.spectra = self.spectra if includeSpectra else ()
-        # # old chemicalShifts
-        # list(map(lambda cs: cs.copyTo(ncsl), self.chemicalShifts))
+        # # old chemShifts
+        # list(map(lambda cs: cs.copyTo(ncsl), self.chemShifts))
 
     @classmethod
     def _getAllWrappedData(cls, parent: Project) -> List[Nmr.ShiftList]:
@@ -451,7 +452,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         return self._wrappedData.data
 
     def _searchChemicalShifts(self, nmrAtom=None, uniqueId=None):
-        """Return True if the nmrAtom/uniqueId already exists in the chemicalShifts dataframe
+        """Return True if the nmrAtom/uniqueId already exists in the chemShifts dataframe
         """
         if nmrAtom and uniqueId:
             raise ValueError('ChemicalShiftList._searchChemicalShifts: use either nmrAtom or uniqueId')
@@ -481,7 +482,7 @@ class ChemicalShiftList(AbstractWrapperObject):
             return len(rows) > 0
 
     def delete(self):
-        """Delete the chemicalShiftList and associated chemicalShifts
+        """Delete the chemicalShiftList and associated chemShifts
         """
         shifts = list(self._shifts)
 
@@ -505,20 +506,20 @@ class ChemicalShiftList(AbstractWrapperObject):
     #=========================================================================================
 
     def _updateEdgeToAlpha1(self):
-        """Move chemicalShifts from model shifts to pandas dataFrame
+        """Move chemShifts from model shifts to pandas dataFrame
 
         version 3.0.4 -> 3.1.0.alpha update
         dataframe now stored in _wrappedData.data
         CCPN Internal
         """
         # skip for no shifts
-        if not self.chemicalShifts:
+        if not self._oldChemicalShifts:
             return
 
         with undoBlockWithoutSideBar():
             # create a new dataframe
             shifts = []
-            for row, oldShift in enumerate(self.chemicalShifts):
+            for row, oldShift in enumerate(self._oldChemicalShifts):
                 newRow = oldShift._getShiftAsTuple()
                 if not newRow.isDeleted:
                     # ignore deleted as not needed - this SHOULDN'T happen here, but just to be safe
@@ -591,9 +592,19 @@ class ChemicalShiftList(AbstractWrapperObject):
 
                 shift._restoreObject()
 
-                # Need to recover the nmrAtom.chemicalShifts and peak.assignedNmrAtoms
+                # Need to recover the nmrAtom.chemShifts and peak.assignedNmrAtoms
 
+            # TODO:ED - need to disable whilst half way through updating to the new objects
+            #   otherwise get a clash between names in the list
+            #   NEED TO RENAME TO _OldChemicalShifts (I think)
+            #   but should be okay after rename to chemicalShift commit
             # check that there is not an error creating a new uniqueId number
+            if not hasattr(project._wrappedData, '_nextUniqueIdValues'):
+                setattr(project._wrappedData, '_nextUniqueIdValues', {})
+            else:
+                _num = project._wrappedData._nextUniqueIdValues.get('ChemicalShift', 0)
+                project._wrappedData._nextUniqueIdValues.setdefault(CS_CLASSNAME, _num)
+
             _nextUniqueId = project._getUniqueIdValue(CS_CLASSNAME)
             if maxUniqueId >= _nextUniqueId:
                 raise RuntimeError(f'ChemicalShiftList._restoreObject: uniqueId {repr(maxUniqueId)} does not match next uniqueId for class {repr(CS_CLASSNAME)} -> {_nextUniqueId}')
@@ -761,7 +772,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         :param comment: optional comment string
         :return: a new ChemicalShift instance.
         """
-        from ccpn.core.ChemicalShift import _newChemicalShift
+        from ccpn.core._OldChemicalShift import _newChemicalShift
 
         return _newChemicalShift(self, value, nmrAtom, valueError=valueError,
                                  figureOfMerit=figureOfMerit, comment=comment, **kwds)
@@ -812,7 +823,7 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
 
     :param name: name for the new chemicalShiftList
     :param unit: unit type as str, e.g. 'ppm'
-    :param autoUpdate: True/False - automatically update chemicalShifts when assignments change
+    :param autoUpdate: True/False - automatically update chemShifts when assignments change
     :param isSimulated: True/False
     :param comment: optional user comment
     :return: a new ChemicalShiftList instance.

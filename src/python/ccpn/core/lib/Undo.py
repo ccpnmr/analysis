@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-12 03:45:44 +0100 (Thu, August 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-06 17:58:20 +0100 (Mon, September 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -634,9 +634,9 @@ class Undo(deque):
                         _log(f'    {pkDimContrib}   {pkDimContrib.resonance}')
 
             _log('shifts ~~~~~~~~~~~')
-            _log('\n'.join([str(sh) for sh in _project.chemicalShifts]))
-            shifts = [sh._wrappedData for sh in _project.chemicalShifts]
-            for sh in _project.chemicalShifts:
+            _log('\n'.join([str(sh) for sh in _project.chemShifts]))
+            shifts = [sh._wrappedData for sh in _project.chemShifts]
+            for sh in _project.chemShifts:
                 _log(f'    {sh}    {sh.nmrAtom}')
             for sh in shifts:
                 _log(f'   {sh}   {sh.isDeleted}  {sh.resonance}')

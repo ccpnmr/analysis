@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-03 12:18:44 +0100 (Fri, September 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-06 17:58:20 +0100 (Mon, September 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -949,7 +949,7 @@ class AbstractWrapperObject(NotifierBase):
                                 + "(for assigned or connected NmrChains), otherwise in creation order. "
                                 + "This is identical to the standard sorting order."
                         )
-                    elif cls.className == 'ChemicalShift':
+                    elif cls.className == '_OldChemicalShift':
                         docTemplate = (
                                 "\- *(%s,)*  - contained %s objects in NmrAtom creation order "
                                 + "This is different from the standard sorting order"

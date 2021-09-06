@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-03 12:02:03 +0100 (Fri, September 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-06 17:58:20 +0100 (Mon, September 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -46,7 +46,7 @@ from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay, navigateToNmrAt
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrAtom import NmrAtom
-from ccpn.core.ChemicalShift import ChemicalShift
+from ccpn.core._OldChemicalShift import _OldChemicalShift
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot
 from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
@@ -378,7 +378,7 @@ class NmrResidueTable(GuiTable):
                                className=self.attributeName,
                                tableSelection='_nmrChain',
                                rowClass=NmrResidue,
-                               cellClassNames=[(NmrAtom, 'nmrResidue'), (ChemicalShift, 'nmrAtom')],
+                               cellClassNames=[(NmrAtom, 'nmrResidue'), (_OldChemicalShift, 'nmrAtom')],
                                tableName='nmrChain', rowName='nmrResidue',
                                changeFunc=self.displayTableForNmrChain,
                                updateFunc=self._update,

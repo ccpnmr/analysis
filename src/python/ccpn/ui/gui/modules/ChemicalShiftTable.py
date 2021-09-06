@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-03 12:18:44 +0100 (Fri, September 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-06 17:58:20 +0100 (Mon, September 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ from ccpn.core.lib.DataFrameObject import DataFrameObject
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
 from ccpn.core.lib.CallBack import CallBack
-from ccpn.core.ChemicalShift import ChemicalShift
+from ccpn.core._OldChemicalShift import _OldChemicalShift
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.core.ChemShift import CS_UNIQUEID, CS_ISDELETED, \
@@ -304,16 +304,16 @@ class ChemicalShiftTable(GuiTable):
         if not objs or not all(objs):
             return
         if isinstance(objs, (tuple, list)):
-            chemicalShift = objs[-1]
+            cShift = objs[-1]
         else:
-            chemicalShift = objs
-        if not chemicalShift:
+            cShift = objs
+        if not cShift:
             showWarning('Cannot perform action', 'No selected ChemicalShift')
             return
-        if not chemicalShift.nmrAtom:
+        if not cShift.nmrAtom:
             showWarning('Cannot perform action', 'No NmrAtom found for ChemicalShift')
             return
-        return chemicalShift
+        return cShift
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Widgets callbacks
@@ -325,12 +325,12 @@ class ChemicalShiftTable(GuiTable):
         """
         from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import markNmrAtoms
 
-        chemicalShift = self._getValidChemicalShift4Callback(data.get(CallBack.OBJECT, []))
+        cShift = self._getValidChemicalShift4Callback(data.get(CallBack.OBJECT, []))
         if len(self.mainWindow.marks):
             if self.moduleParent.autoClearMarksWidget.checkBox.isChecked():
                 self.mainWindow.clearMarks()
-        if chemicalShift and chemicalShift.nmrAtom:
-            markNmrAtoms(self.mainWindow, [chemicalShift.nmrAtom])
+        if cShift and cShift.nmrAtom:
+            markNmrAtoms(self.mainWindow, [cShift.nmrAtom])
 
     def _selectionCallback(self, data):
         """
@@ -377,24 +377,24 @@ class ChemicalShiftTable(GuiTable):
             self.tableMenu.insertAction(self._mergeMenuAction, self._editMenuAction)
 
     def _addNavigationStripsToContextMenu(self):
-        chemicalShift = self._getValidChemicalShift4Callback(self.getSelectedObjects())
+        cShift = self._getValidChemicalShift4Callback(self.getSelectedObjects())
         self._navigateMenu.clear()
-        if chemicalShift and chemicalShift.nmrAtom:
-            name = chemicalShift.nmrAtom.name
-            if chemicalShift.value is None:
+        if cShift and cShift.nmrAtom:
+            name = cShift.nmrAtom.name
+            if cShift.value is None:
                 return
-            value = round(chemicalShift.value, 3)
+            value = round(cShift.value, 3)
             if self._navigateMenu is not None:
                 self._navigateMenu.addItem(f'All ({name}:{value})',
                                            callback=partial(self._navigateToChemicalShift,
-                                                            chemicalShift=chemicalShift,
+                                                            chemicalShift=cShift,
                                                             stripPid=ALL))
                 self._navigateMenu.addSeparator()
                 for spectrumDisplay in self.mainWindow.spectrumDisplays:
                     for strip in spectrumDisplay.strips:
                         self._navigateMenu.addItem(f'{strip.pid} ({name}:{value})',
                                                    callback=partial(self._navigateToChemicalShift,
-                                                                    chemicalShift=chemicalShift,
+                                                                    chemicalShift=cShift,
                                                                     stripPid=strip.pid))
                     self._navigateMenu.addSeparator()
 

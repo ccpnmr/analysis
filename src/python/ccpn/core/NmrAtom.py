@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-03 12:18:43 +0100 (Fri, September 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-06 17:58:20 +0100 (Mon, September 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -332,7 +332,7 @@ class NmrAtom(AbstractWrapperObject):
                 # TODO:ED - update shifts
 
     @property
-    def chemicalShifts(self) -> Tuple:
+    def _oldChemicalShifts(self) -> Tuple:
         """Returns ChemicalShift objects connected to NmrAtom"""
         getDataObj = self._project._data2Obj.get
         return tuple(sorted(getDataObj(x) for x in self._wrappedData.shifts))

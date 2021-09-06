@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-03 12:18:43 +0100 (Fri, September 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-06 17:58:20 +0100 (Mon, September 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,7 @@ from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr import Shift
 from ccpn.core.lib.ContextManagers import newObject
 
 
-class ChemicalShift(AbstractWrapperObject):
+class _OldChemicalShift(AbstractWrapperObject):
     """Chemical Shift, containing a ChemicalShift value for the NmrAtom they belong to.
 
     Chemical shift values are continuously averaged over peaks assigned to the NmrAtom,
@@ -49,15 +49,15 @@ class ChemicalShift(AbstractWrapperObject):
     #: Short class name, for PID.
     shortClassName = 'CS'
     # Attribute it necessary as subclasses must use superclass className
-    className = 'ChemicalShift'
+    className = '_OldChemicalShift'
 
     _parentClass = ChemicalShiftList
 
     #: Name of plural link to instances of class
-    _pluralLinkName = 'chemicalShifts'
+    _pluralLinkName = '_oldChemicalShifts'
 
     # the attribute name used by current
-    _currentAttributeName = 'chemicalShifts'
+    _currentAttributeName = '_oldChemicalShifts'
 
     #: List of child classes.
     _childClasses = []
@@ -127,7 +127,7 @@ class ChemicalShift(AbstractWrapperObject):
     # Implementation functions
     #=========================================================================================
 
-    def copyTo(self, targetChemicalShiftList: ChemicalShiftList) -> 'ChemicalShift':
+    def copyTo(self, targetChemicalShiftList: ChemicalShiftList) -> '_OldChemicalShift':
         """Make (and return) a copy of the ChemicalShiftList in targetChemicalShiftList."""
         cs = _newChemicalShift(self=targetChemicalShiftList,
                                value=self.value,
@@ -195,19 +195,10 @@ class ChemicalShift(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
-# GWV 20181122: Moved to NmrAtom class
-# def getter(self:NmrAtom) -> Tuple[ChemicalShift, ...]:
-#   getDataObj = self._project._data2Obj.get
-#   return tuple(sorted(getDataObj(x) for x in self._wrappedData.shifts))
-#
-# NmrAtom.chemicalShifts = property(getter, None, None, "Returns ChemicalShift objects connected to NmrAtom")
-#
-# del getter
-
-@newObject(ChemicalShift)
+@newObject(_OldChemicalShift)
 def _newChemicalShift(self: ChemicalShiftList, value: float, nmrAtom: NmrAtom,
                       valueError: float = 0.0, figureOfMerit: float = 1.0,
-                      comment: str = None) -> ChemicalShift:
+                      comment: str = None) -> _OldChemicalShift:
     """Create new ChemicalShift within ChemicalShiftList.
 
     See the ChemicalShift class for details.
@@ -245,7 +236,7 @@ def _newChemicalShift(self: ChemicalShiftList, value: float, nmrAtom: NmrAtom,
 
 # Notifiers:
 # GWV 20181122: refactored as explicit call in NmrAtom._finalise
-# # rename chemicalShifts when atom is renamed
+# # rename chemShifts when atom is renamed
 # NmrAtom._setupCoreNotifier('rename', AbstractWrapperObject._finaliseRelatedObjectFromRename,
-#                           {'pathToObject':'chemicalShifts', 'action':'rename'})
+#                           {'pathToObject':'chemShifts', 'action':'rename'})
 # # NB The link to NmrAtom is immutable - does need a link notifier

@@ -26,7 +26,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 __modifiedBy__ = "$Author: Luca Mureddu $"
 __dateModified__ = "$Date: 2021-06-23 17:58:44 +0000 (Wed, June 23, 2021) $"
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-22 13:40:13 +0100 (Thu, July 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-06 17:58:19 +0100 (Mon, September 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -62,7 +62,7 @@ from ccpn.core.Complex import Complex
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
-from ccpn.core.ChemicalShift import ChemicalShift
+from ccpn.core._OldChemicalShift import _OldChemicalShift
 from ccpn.core.DataSet import DataSet
 from ccpn.core.RestraintList import RestraintList
 from ccpn.core.Restraint import Restraint

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-12 03:40:10 +0100 (Thu, August 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-06 17:58:20 +0100 (Mon, September 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import typing
 
 from ccpn.util.isotopes import name2IsotopeCode
-from ccpn.core.ChemicalShift import ChemicalShift
+from ccpn.core._OldChemicalShift import _OldChemicalShift
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip
 from ccpn.util.Common import reorder
@@ -171,7 +171,7 @@ def matchAxesAndNmrAtoms(strip: GuiStrip, nmrAtoms: typing.List[NmrAtom]):
     return shiftDict
 
 
-def isPositionWithinfBounds(strip: GuiStrip, shift: ChemicalShift, axis: object):
+def isPositionWithinfBounds(strip: GuiStrip, shift: _OldChemicalShift, axis: object):
     """
     Determines whether a given shift is within the bounds of the specified axis of the specified
     strip.

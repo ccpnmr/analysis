@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 15:49:11 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-06 17:58:20 +0100 (Mon, September 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -386,12 +386,12 @@ class ChainPulldown(_PulldownABC):
 
 
 class ChemicalShiftPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for ChemicalShifts
+    """A PulldownListCompoundWidget class for _OldChemicalShifts
     """
-    from ccpn.core.ChemicalShift import ChemicalShift
+    from ccpn.core._OldChemicalShift import _OldChemicalShift
 
-    _klass, _className, _shortClassName, _attributeName = _definedBy(ChemicalShift)
-    _currentAttributeName = 'chemicalShifts'
+    _klass, _className, _shortClassName, _attributeName = _definedBy(_OldChemicalShift)
+    _currentAttributeName = '_oldChemicalShifts'
 
 
 class ChemicalShiftListPulldown(_PulldownABC):

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-04 12:28:18 +0100 (Wed, August 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-06 17:58:19 +0100 (Mon, September 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -212,7 +212,7 @@ class Atom(AbstractWrapperObject):
         :return: True if Atom has as NmrAtom with an associated ChemicalShift object
         """
         if self.nmrAtom is None: return False
-        if not self.nmrAtom.chemicalShifts: return False  # either None or len==0
+        if not self.nmrAtom.chemShifts: return False  # either None or len==0
         return True
 
     #=========================================================================================

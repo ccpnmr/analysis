@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-03 12:18:44 +0100 (Fri, September 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-06 17:47:50 +0100 (Mon, September 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -671,15 +671,21 @@ def _storeNewObjectCurrent(result, thisAddUndoItem):
 
 def _storeDeleteObjectCurrent(self, thisAddUndoItem):
     if hasattr(self, CURRENT_ATTRIBUTE_NAME):
-        storeObj = _ObjectStore(self)
+        try:
+            storeObj = _ObjectStore(self)
 
-        # store the current state - check because item already removed from current?
-        storeObj._storeCurrentSelectedObject()
+            # store the current state - check because item already removed from current?
+            storeObj._storeCurrentSelectedObject()
 
-        # add it to the stack
-        thisAddUndoItem(undo=storeObj._restoreCurrentSelectedObject,
-                        redo=storeObj._storeCurrentSelectedObject
-                        )
+            # add it to the stack
+            thisAddUndoItem(undo=storeObj._restoreCurrentSelectedObject,
+                            redo=storeObj._storeCurrentSelectedObject
+                            )
+        except:
+            # ignore objects that do not have project.current
+            # currently should only be the original chemicalShift that has been
+            # disabled because renamed to _ChemicalShift
+            pass
 
 
 def newObject(klass):

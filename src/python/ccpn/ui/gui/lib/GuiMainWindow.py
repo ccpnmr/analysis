@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-06 17:55:33 +0100 (Mon, September 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1376,7 +1376,11 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         try:
             with progressManager(self, 'Loading project %s ... ' % dataLoader.path):
-                newProject = dataLoader.load()[0]
+                _loaded = dataLoader.load()
+                if not _loaded:
+                    return
+
+                newProject = _loaded[0]
                 # Note that the newProject has its own MainWindow; i.e. it is not self
                 newProject._mainWindow.sideBar.buildTree(newProject)
                 newProject._mainWindow.show()

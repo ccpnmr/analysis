@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-03 12:18:43 +0100 (Fri, September 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-06 17:54:14 +0100 (Mon, September 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -33,6 +33,7 @@ from typing import Sequence, Union, Optional
 from collections import OrderedDict
 from time import time
 from datetime import datetime
+import json
 
 # from ccpn.util.Common import isValidPath, isValidFileNameLength
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -435,6 +436,8 @@ class Project(AbstractWrapperObject):
         Return True if save succeeded otherwise return False (or throw error)"""
         # self._flushCachedData()
 
+        from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY, ccpnVersionHistory
+
         # path is empty for save under the same name
         if newPath:
             # check validity of the newPath
@@ -479,6 +482,11 @@ class Project(AbstractWrapperObject):
             # application = self._appBase
             # if application is not None:
             #     application._refreshAfterSave()
+
+            # store the version history in state subfolder json file - not the best as a duplication which could cause issues later
+            _tmpPath = aPath(path).fetchDir(CCPN_STATE_DIRECTORY)
+            with open(_tmpPath / ccpnVersionHistory, 'w') as fp:
+                json.dump(self._wrappedData.versionHistory, fp)
 
         return savedOk
 

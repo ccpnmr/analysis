@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-09 13:55:53 +0100 (Wed, June 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-06 17:54:15 +0100 (Mon, September 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -89,7 +89,7 @@ userCcpnPathSubDirectories      = ['data', 'macros', 'pipes']  # These get creat
 predefinedLayouts               = ccpnCodePath / 'layouts'
 
 # others; also defined in util.Path and from there imported in Api and Implementation
-# DO NOT REMOVE and keep in sinc (for circular import reasons) (for now!)
+# DO NOT REMOVE and keep in sync (for circular import reasons) (for now!)
 CCPN_DIRECTORY_SUFFIX    = '.ccpn'
 CCPN_BACKUP_SUFFIX       = '_backup'  # used by ApiLoader; deprecated
 
@@ -104,6 +104,8 @@ CCPN_PLUGINS_DIRECTORY   = 'data/plugins'
 CCPN_SPECTRA_DIRECTORY   = 'data/spectra'
 CCPN_SCRIPTS_DIRECTORY   = 'scripts'
 CCPN_STATE_DIRECTORY     = 'state'
+
+ccpnVersionHistory       = 'versionHistory.json'
 
 # historical
 CCPN_EXTENSION = CCPN_DIRECTORY_SUFFIX

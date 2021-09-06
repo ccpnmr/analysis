@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-29 12:32:54 +0100 (Sun, August 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-06 17:54:14 +0100 (Mon, September 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1599,6 +1599,9 @@ class Framework(NotifierBase):
         """Actual V3 project loader
         CCPNINTERNAL: called from CcpNmrV3ProjectDataLoader
         """
+        from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY, ccpnVersionHistory
+        from ccpn.util.Path import aPath
+
         with logCommandManager('application.', 'loadProject', path):
             if not isinstance(path, (Path.Path, str)):
                 raise ValueError('invalid path "%s"' % path)
@@ -1606,6 +1609,34 @@ class Framework(NotifierBase):
             _path = Path.aPath(path)
             if not _path.exists():
                 raise ValueError('path "%s" does not exist' % path)
+
+            # warning for projects that predate 3.1.0.alpha - these will no longer be backwards compatible with
+            #   3.0.4.edge and earlier
+            _lastVersion = None
+            try:
+                with open(_path / CCPN_STATE_DIRECTORY / ccpnVersionHistory, 'r') as fp:
+                    # load the current version history from the state folder - this should be a list of version strings
+                    _history = json.load(fp)
+
+                _lastVersion = _history[-1]
+            except:
+                # file does not exists, or contains the wrong information/json structure
+                ok = MessageDialog.showYesNoWarning('Load Project',
+                                                    f'Project {_path} was created with an earlier version of AnalysisV3.\n'
+                                                    '\n'
+                                                    'CAUTION: After saving in version 3.1 the project cannot currently be loaded '
+                                                    'back into versions 3.0.4 or earlier. If you are in any doubt, please make a copy of '
+                                                    'the project folder before loading/saving this project.\n'
+                                                    '\n'
+                                                    'Do you want to continue loading?')
+                if not ok:
+                    # skip loading so that user can backup/copy project
+                    return []
+
+            else:
+                # project contains a versionHistory
+                # this is okay as there is no file for projects pre-dating 3.1.0.alpha
+                pass
 
             if self.project is not None:  # always close for Ccpn
                 self._closeProject()

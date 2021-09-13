@@ -5,7 +5,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:39 +0000 (Thu, February 04, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-09-13 19:25:09 +0100 (Mon, September 13, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -69,9 +70,28 @@ def getLogger():
 
     if not logger:
         defaultLogger._loggingCommandBlock = 0
+
+        logger = defaultLogger
+        if not hasattr(logger, 'echoInfo'):
+            # add the new methods
+            # required because default logger called before correct instantiated
+            # but needed for loading from command line
+            logger.debugGL = functools.partial(_debugGLError, DEBUG1, logger)
+            logger.echoInfo = functools.partial(_message, INFO, logger, includeInspection=False)
+            logger.info = functools.partial(_message, INFO, logger)
+            logger.debug1 = functools.partial(_message, DEBUG1, logger)
+            logger.debug = logger.debug1
+            logger.debug2 = functools.partial(_message, DEBUG2, logger)
+            logger.debug3 = functools.partial(_message, DEBUG3, logger)
+            logger.warning = functools.partial(_message, WARNING, logger)
+
+            logging.addLevelName(DEBUG2, 'DEBUG2')
+            logging.addLevelName(DEBUG3, 'DEBUG3')
+
         return defaultLogger
 
     logger._loggingCommandBlock = 0
+
     return logger
 
 

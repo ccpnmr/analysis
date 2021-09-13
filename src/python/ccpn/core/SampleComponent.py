@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 17:35:47 +0100 (Fri, June 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:25:07 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -278,9 +278,16 @@ def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, r
 
     labelling = labelling or DEFAULT_LABELLING
 
-    name = SampleComponent._uniqueName(self.project, name=name)
-    SampleComponent._validateStringValue(attribName='labelling', value = labelling)
+    # if not name:
+    #     name = SampleComponent._nextAvailableName(SampleComponent, self)
+    # commonUtil._validateName(self, SampleComponent, name, checkExisting=False)
+    # commonUtil._validateName(self, SampleComponent, labelling, attribName='labelling',
+    #                          allowNone=True, checkExisting=False)
 
+    if not name:
+        name = SampleComponent._uniqueName(self.project, name=name)
+    SampleComponent._validateStringValue(attribName='name', value = name)
+    SampleComponent._validateStringValue(attribName='labelling', value = labelling, allowNone=True)
 
     if not isinstance(name, str):
         name = str(name)

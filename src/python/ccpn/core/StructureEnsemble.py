@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:19:59 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:25:07 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -135,7 +135,8 @@ class StructureEnsemble(AbstractWrapperObject):
             # Add model for model-less data
             for modelNumber in modelNumbers:
                 if modelNumber not in serial2Model:
-                    self.newModel(serial=modelNumber)
+                    _model = self.newModel()
+                    _model._resetSerial(modelNumber)
 
     #=========================================================================================
     # Implementation functions
@@ -230,7 +231,8 @@ def _newStructureEnsemble(self: Project, name: str = None, data: EnsembleData = 
         for modelNumber in sorted(data['modelNumber'].unique()):
             # _validateName
             _label = 'my%s_%s' % (Model.className, modelNumber)
-            result.newModel(serial=modelNumber, label=_label)
+            _model = result.newModel(label=_label)
+            _model._resetSerial(modelNumber)
 
     return result
 

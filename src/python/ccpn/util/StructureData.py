@@ -5,7 +5,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:39 +0000 (Thu, February 04, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-09-13 19:25:09 +0100 (Mon, September 13, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -239,7 +240,8 @@ class EnsembleData(pd.DataFrame):
         ('nmrChainCode', (str, None)),
         ('nmrSequenceCode', (str, '_nmrSequenceCodeConversion')),
         ('nmrResidueName', (str, None)),
-        ('nmrAtomName', (str, None))
+        ('nmrAtomName', (str, None)),
+        # ('origIndex', (int, None)),
         ))
 
     @property
@@ -693,7 +695,7 @@ class EnsembleData(pd.DataFrame):
 
                 self._finaliseStructureEnsemble('change')
 
-    def _insertCol(self, *args, **kwargs):  # ejb
+    def _insertCol(self, colName, colNum, colData):
         """
         Currently called by undo to re-insert a column.
         Add the **kwargs to the column across the index.
@@ -720,21 +722,23 @@ class EnsembleData(pd.DataFrame):
 
         if self._containingObject is None:
             # process without undoStack
-            colIndex = str(args[0])  # get the index from the first arg value
-            for sInd in kwargs:
-                self.loc[int(sInd), colIndex] = kwargs[sInd]
+            # colIndex = str(args[0])  # get the index from the first arg value
+            # for sInd in kwargs:
+            #     self.loc[int(sInd), colIndex] = kwargs[sInd]
 
+            self.insert(colNum, colName, colData)
             self._finaliseStructureEnsemble('change')
 
         else:
             with undoBlock():
-                colIndex = str(args[0])  # get the index from the first arg value
-                for sInd in kwargs:
-                    self.loc[int(sInd), colIndex] = kwargs[sInd]
+                # colIndex = str(args[0])  # get the index from the first arg value
+                # for sInd in kwargs:
+                #     self.loc[int(sInd), colIndex] = kwargs[sInd]
 
+                self.insert(colNum, colName, colData)
                 self._finaliseStructureEnsemble('change')
 
-    def deleteCol(self, columnName=None):  # ejb - , *args, **kwargs):
+    def deleteCol(self, columnName=None):
         """
         Delete a named column from the table, the columnName must be a string and exist in the table.
 
@@ -751,23 +755,23 @@ class EnsembleData(pd.DataFrame):
         else:
             raise ValueError('deleteCol: Column does not exist.')
 
-        colIndex = columnName
+        colName = columnName
+        colNum = list(self.columns).index(colName)
 
         if self._containingObject is None:
             # process without undoStack
-            colData = dict((str(sInd), self.loc[sInd].get(colIndex)) for sInd in self.index)  # grab the original values
-            self.drop(colIndex, axis=1, inplace=True)
-
+            self.drop(colName, axis=1, inplace=True)
             self._finaliseStructureEnsemble('change')
 
         else:
             with undoBlock():
-                colData = dict((str(sInd), self.loc[sInd].get(colIndex)) for sInd in self.index)  # grab the original values
-                self.drop(colIndex, axis=1, inplace=True)
+                # colData = dict((str(sInd), self.loc[sInd].get(colName)) for sInd in self.index)  # grab the original values
+                colData = self[colName].copy()
+                self.drop(colName, axis=1, inplace=True)
 
                 with undoStackBlocking() as addUndoItem:
-                    addUndoItem(undo=partial(self._insertCol, colIndex, **colData),
-                                redo=partial(self.deleteCol, colIndex))
+                    addUndoItem(undo=partial(self._insertCol, colName, colNum, colData),
+                                redo=partial(self.deleteCol, colName))
 
                 self._finaliseStructureEnsemble('change')
 
@@ -801,7 +805,7 @@ class EnsembleData(pd.DataFrame):
             accessor = int(accessor[0])  # ejb - accessor becomes the wrong type on undo
 
         if isinstance(accessor, (int, numpy.integer)):
-            # This is utter shit! Why are numpy.integers not ints, or at least with a common superclass?
+            # This is utter ****! Why are numpy.integers not ints, or at least with a common superclass?
             # Shows again that numpy is an alien growth within python.
             index = accessor
             if index in self.index:
@@ -909,8 +913,9 @@ class EnsembleData(pd.DataFrame):
                     # Type handling is done there and can be skipped here.
                     # NB, various obvious alternatives, like just setting the row, do NOT work.
 
-                    for key, val in values.items():
-                        self.loc[index, key] = val
+                    self.loc[index, values.keys()] = list(values.values())
+                    # for key, val in values.items():
+                    #     self.loc[index, key] = val
 
                     if rowExists:
                         # Undo modification of existing row
@@ -1048,7 +1053,7 @@ class EnsembleData(pd.DataFrame):
 
         firstData = not (self.shape[0])
 
-        columnTypeData = self._reservedColumns.get(key)
+        columnTypeData = self._reservedColumns.get(key) or (None, None)
         if columnTypeData is None:
             # Not a reserved column name - set the value. No echoing or undo.
             super().__setitem__(key, value)
@@ -1133,12 +1138,14 @@ class EnsembleData(pd.DataFrame):
                                         raise RuntimeError("Code Error. Invalid type converter name %s for column %s"
                                                            % (typeConverterName, key))
                                 else:
-                                    # We set again to make sure of the dataType
-                                    ll = fitToDataType(self[key], dataType)
-                                    if dataType is int and None in ll:
-                                        super().__setitem__(key, pd.Series(ll, self.index, dtype=object))
-                                    else:
-                                        super().__setitem__(key, pd.Series(ll, self.index, dtype=dataType))
+                                    if dataType:
+                                        # We set again to make sure of the dataType
+                                        ll = fitToDataType(self[key], dataType)
+                                        if dataType is int and None in ll:
+                                            super().__setitem__(key, pd.Series(ll, self.index, dtype=object))
+                                        else:
+                                            # not always guaranteed a .loc can change ints to floats :|
+                                            super().__setitem__(key, pd.Series(ll, self.index, dtype=dataType))
 
                                 if firstData:
                                     self.reset_index(drop=True, inplace=True)

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-03 12:18:43 +0100 (Fri, September 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:25:07 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1167,6 +1167,10 @@ class NmrResidue(AbstractWrapperObject):
         if not super()._finaliseAction(action):
             return
 
+        if action in ['rename']:
+            for offNmrRes in self.offsetNmrResidues:
+                offNmrRes._finaliseAction('rename')
+
         if action in ['delete', 'create']:
             # notify that the peak labels need to be updated
             _peaks = set(pk for nmrAtom in self.nmrAtoms for pk in nmrAtom.assignedPeaks)
@@ -1186,7 +1190,7 @@ class NmrResidue(AbstractWrapperObject):
             with undoBlock():
                 # remove all the mmrAtoms from their associated chemicalShifts
                 # - clearing before the delete handles the notifiers nicely
-                _shs = [sh for nmrAt in self.nmrAtoms for sh in nmrAt.chemShifts]
+                _shs = [sh for nmrAt in self.nmrAtoms for sh in nmrAt.chemicalShifts]
                 for sh in _shs:
                     sh.nmrAtom = None
                 super().delete()
@@ -1259,9 +1263,7 @@ class NmrResidue(AbstractWrapperObject):
         for nmrAt in self.nmrAtoms:
             # actions to be called outside of rename - must be last thing to set?
             nmrAt._childActions.append(nmrAt._renameChemicalShifts)
-            nmrAt._finaliseChildren.extend((sh, 'change') for sh in nmrAt.chemShifts)
-        for offsetRes in self.offsetNmrResidues:
-            self._finaliseChildren.append((offsetRes, 'rename'))
+            nmrAt._finaliseChildren.extend((sh, 'change') for sh in nmrAt.chemicalShifts)
 
     #=========================================================================================
     # CCPN functions

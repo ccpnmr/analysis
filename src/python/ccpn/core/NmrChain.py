@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 22:18:12 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:25:07 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -453,6 +453,7 @@ def _newNmrChain(self: Project, shortName: str = None, isConnected: bool = False
     """
 
     nmrProject = self._apiNmrProject
+    serial = None
 
     if shortName:
         previous = self.getNmrChain(shortName.translate(Pid.remapSeparators))
@@ -483,6 +484,13 @@ def _newNmrChain(self: Project, shortName: str = None, isConnected: bool = False
     result = self._data2Obj.get(newApiNmrChain)
     if result is None:
         raise RuntimeError('Unable to generate new NmrChain item')
+
+    if serial is not None:
+        try:
+            result._resetSerial(serial)
+        except ValueError:
+            self.project._logger.warning("Could not set shortName of %s to %s - keeping default value"
+                                         % (result, shortName))
 
     return result
 

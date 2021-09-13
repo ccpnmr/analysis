@@ -5,7 +5,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-04-14 19:56:58 +0100 (Wed, April 14, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-09-13 19:25:08 +0100 (Mon, September 13, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -124,7 +125,7 @@ class SubstanceTest(WrapperTesting):
             substance1.rename(name='^Badname', labelling=None)
         self.assertEqual(sc1._id, 'S1.notmuch.')
 
-        with self.assertRaisesRegexp(TypeError, 'must be a string'):
+        with self.assertRaisesRegexp(ValueError, 'must be a string'):
             substance1.rename(name=12, labelling=None)
         self.assertEqual(sc1._id, 'S1.notmuch.')
 
@@ -135,7 +136,7 @@ class SubstanceTest(WrapperTesting):
             substance1.rename(name='notmuch', labelling='^Badname')
         self.assertEqual(sc1._id, 'S1.notmuch.')
 
-        with self.assertRaisesRegexp(TypeError, 'must be a string'):
+        with self.assertRaisesRegexp(ValueError, 'must be a string'):
             substance1.rename(name='notmuch', labelling=12)
         self.assertEqual(sc1._id, 'S1.notmuch.')
 
@@ -153,14 +154,14 @@ class Test_Substance_SpectrumLink(WrapperTesting):
     def setUp(self):
         with self.initialSetup():
             self.spectrum1 = self.project.newEmptySpectrum(isotopeCodes=('13C', '1H', '15N'), name='COHnNh')
-            self.assertEqual(self.spectrum1.isotopeCodes, ('13C', '1H', '15N'))
+            self.assertEqual(self.spectrum1.isotopeCodes, ['13C', '1H', '15N'])
 
 
             self.chain1 = self.project.createChain(sequence='ACDC', compoundName='sequence1', shortName='cC1',
                                                    molType='protein')
 
             self.spectrum2 = self.project.newEmptySpectrum(isotopeCodes=('1H', '19F', '31P', '1H'), name='HpFPhH')
-            self.assertEqual(self.spectrum2.isotopeCodes, ('1H', '19F', '31P', '1H'))
+            self.assertEqual(self.spectrum2.isotopeCodes, ['1H', '19F', '31P', '1H'])
             self.assertEqual(self.spectrum2.name, 'HpFPhH')
 
             self.chain2 = self.project.createChain(sequence='ACDC', compoundName='sequence2', shortName='cC2',

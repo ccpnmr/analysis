@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-29 18:20:01 +0100 (Tue, June 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:25:07 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -164,7 +164,8 @@ class PathRedirections(list):
 
     def getPaths(self):
         """Return a list of (identifier, path) tuples"""
-        paths = [(r.identifier, r.path) for r in self]
+        # paths = [(r.identifier, r.path) for r in self]
+        paths = [(r.identifier, getattr(r, 'path', None)) for r in self]
         return paths
 
     def getApiMappings(self):

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 23:25:18 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:25:09 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -128,6 +128,12 @@ class WrapperTesting(unittest.TestCase):
         if self.framework:
             self.framework._closeProject()
         self.framework = self.project = self.undo = None
+
+        from ccpn.util.decorators import singleton
+
+        # delete all the singletons - was causing leakage between running testcases
+        singleton._instances = {}
+
 
     def loadData(self, dataPath):
         """load data relative to TEST_PROJECTS_PATH (unless dataPath is absolute"""

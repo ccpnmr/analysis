@@ -5,7 +5,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:32 +0000 (Thu, February 04, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-09-13 19:25:09 +0100 (Mon, September 13, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -182,6 +183,70 @@ class Ui(NotifierBase):
                 regDict[TERMSANDCONDITIONS] = md5
                 Register.saveDict(regDict)
 
+    def loadProject(self, path):
+        """Just a stub for now; calling MainWindow methods as it initialises the Gui
+        """
+        return self._loadProject(path=path)
+
+    def _loadProject(self, dataLoader=None, path=None):
+        """Load a project either from a dataLoader instance or from path;
+        build the project Gui elements
+        :returns project instance or None
+        """
+        from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
+        from ccpn.framework.Application import getApplication
+        _app = getApplication()
+
+        if dataLoader is None and path is not None:
+            dataLoader = checkPathForDataLoader(path)
+
+        if dataLoader is None:
+            getLogger().error('No suitable dataLoader found')
+            return None
+
+        if not dataLoader.createNewProject:
+            getLogger().error('"%s" does not yield a new project' % dataLoader.path)
+            return None
+
+        if _app and _app.project:
+            # Some error recovery; store info to re-open the current project (or a new default)
+            oldProjectPath = _app.project.path
+            oldProjectIsTemporary = _app.project.isTemporary
+        else:
+            oldProjectPath = oldProjectIsTemporary = None
+
+        try:
+            _loaded = dataLoader.load()
+            if not _loaded:
+                return
+
+            newProject = _loaded[0]
+
+            # if the new project contains invalid spectra then open the popup to see them
+            self._checkForBadSpectra(newProject)
+
+        except RuntimeError as es:
+            getLogger().error('"%s" did not yield a valid new project (%s)' % (dataLoader.path, str(es)))
+
+            if _app:
+                # First get to a defined state
+                _app.newProject()
+                if not oldProjectIsTemporary:
+                    _app.loadProject(oldProjectPath)
+                return None
+
+        return newProject
+
+    def _checkForBadSpectra(self, project):
+        """Report bad spectra in a popup
+        """
+        badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.hasValidPath()]
+        if badSpectra:
+            text = 'Detected invalid Spectrum file path(s) for:\n\n'
+            for sp in badSpectra:
+                text += '%s\n' % str(sp)
+            text += '\nUse menu "Spectrum --> Validate paths.." or "VP" shortcut to correct\n'
+            getLogger().warning('Spectrum file paths: %s' % text)
 
 
 class NoUi(Ui):

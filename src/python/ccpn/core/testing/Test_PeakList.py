@@ -5,7 +5,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-04-14 19:56:58 +0100 (Wed, April 14, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-09-13 19:25:08 +0100 (Mon, September 13, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,9 +33,9 @@ from ccpn.core.testing.WrapperTesting import WrapperTesting
 class PeakListCreationTest(WrapperTesting):
     def setUp(self):
         with self.initialSetup():
-            self.spectrum1 = self.project.newEmptySpectrum(isotopeCodes=('1H'), name='H')
+            self.spectrum = self.project.newEmptySpectrum(isotopeCodes=('1H',), name='H')
+            self.spectrum1 = self.project.newEmptySpectrum(isotopeCodes=('1H', '15N'), name='HN-hsqc')
             self.spectrum2 = self.project.newEmptySpectrum(isotopeCodes=('1H', '15N'), name='HN-hsqc')
-            self.spectrum3 = self.project.newEmptySpectrum(isotopeCodes=('1H', '15N'), name='HN-hsqc')
 
     def test_newPeakList(self):
         self.assertEqual(len(self.spectrum.peakLists), 1)
@@ -73,7 +74,7 @@ class PeakListCreationTest(WrapperTesting):
         with self.assertRaisesRegexp(ValueError, 'Cannot copy'):
             peakList1.copyTo(self.spectrum)
 
-        with self.assertRaisesRegexp(TypeError, 'required positional argument'):
+        with self.assertRaisesRegexp(TypeError, 'missing a required argument'):
             peakList1.copyTo()
 
         with self.assertRaisesRegexp(TypeError, 'targetSpectrum is not of type Spectrum'):

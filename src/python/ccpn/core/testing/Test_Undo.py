@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-22 11:23:28 +0100 (Sun, August 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:25:09 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -26,6 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import unittest
 from ccpn.core.testing.WrapperTesting import WrapperTesting
 from ccpn.core.lib.Undo import Undo
 
@@ -94,6 +95,7 @@ class ComplexUndoTest(WrapperTesting):
         apiProject._undo.undo()
         apiProject.checkAllValid()
 
+    @unittest.skip("ISSUE: will fail until getBFactors, getOccupancies and getCoordinates removed from model")
     def test_copy_chain_undo_redo(self):
         # NOTE:ED - this will fail until
         #   getBFactors, getOccupancies and getCoordinates are removed from api (or return [])

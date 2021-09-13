@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-06 17:54:14 +0100 (Mon, September 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:25:09 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1620,15 +1620,20 @@ class Framework(NotifierBase):
 
                 _lastVersion = _history[-1]
             except:
-                # file does not exists, or contains the wrong information/json structure
-                ok = MessageDialog.showYesNoWarning('Load Project',
-                                                    f'Project {_path} was created with an earlier version of AnalysisV3.\n'
-                                                    '\n'
-                                                    'CAUTION: After saving in version 3.1 the project cannot currently be loaded '
-                                                    'back into versions 3.0.4 or earlier. If you are in any doubt, please make a copy of '
-                                                    'the project folder before loading/saving this project.\n'
-                                                    '\n'
-                                                    'Do you want to continue loading?')
+                # TODO:ED - this should really be separated into NoUi and Gui class
+                if self.ui and self.ui.mainWindow:
+                    # file does not exists, or contains the wrong information/json structure
+                    ok = MessageDialog.showYesNoWarning('Load Project',
+                                                        f'Project {_path} was created with an earlier version of AnalysisV3.\n'
+                                                        '\n'
+                                                        'CAUTION: After saving in version 3.1 the project cannot currently be loaded '
+                                                        'back into versions 3.0.4 or earlier. If you are in any doubt, please make a copy of '
+                                                        'the project folder before loading/saving this project.\n'
+                                                        '\n'
+                                                        'Do you want to continue loading?')
+                else:
+                    ok = True
+
                 if not ok:
                     # skip loading so that user can backup/copy project
                     return []
@@ -1651,7 +1656,8 @@ class Framework(NotifierBase):
     def loadProject(self, path):
         """Just a stub for now; calling MainWindow methods as it initialises the Gui
         """
-        self.ui.mainWindow._openProject(path)
+        # self.ui.mainWindow._openProject(path)
+        return self.ui.loadProject(path)
 
     def _loadNefFile(self, path: str, makeNewProject=True) -> Project:
         """Load Project from NEF file at path, and do necessary setup"""

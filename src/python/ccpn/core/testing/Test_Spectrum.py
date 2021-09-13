@@ -5,7 +5,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-04-14 19:56:58 +0100 (Wed, April 14, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-09-13 19:25:08 +0100 (Mon, September 13, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from ccpn.core.testing.WrapperTesting import WrapperTesting, fixCheckAllValid
 from ccpn.util import Path, Constants
+from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
 
 
 class SimpleSpectrumTest(WrapperTesting):
@@ -56,7 +58,7 @@ class SpectrumTest(WrapperTesting):
 
     def test_pointCount(self):
         spectrum = self.project.getSpectrum('hsqc_115')
-        numPoints = tuple([dataDim.numPoints for dataDim in spectrum._apiDataSource.sortedDataDims()])
+        numPoints = [dataDim.numPoints for dataDim in spectrum._apiDataSource.sortedDataDims()]
 
         # Undo and redo all operations
         self.undo.undo()
@@ -68,7 +70,8 @@ class SpectrumTest(WrapperTesting):
         # Undo and redo all operations
         self.undo.undo()
         self.undo.redo()
-        self.assertTrue(spectrum.filePath.startswith(Path.getTopDirectory()))
+        self.assertTrue(spectrum.filePath.startswith('$ALONGSIDE'))
+        self.assertTrue(spectrum._dataSource.dataFile.startswith(Path.getTopDirectory()))
 
     def test_rename(self):
         spectrum = self.project.getSpectrum('hsqc_115')
@@ -113,9 +116,11 @@ class DummySpectrumTest(WrapperTesting):
 
     def test_dummySpectrum(self):
         # Double check these test after refactoring DummySpectrum
-        axisCodes = ('CO', 'Hn', 'Nh')
+        axisCodes = ['CO', 'Hn', 'Nh']
         spectrum = self.project.newEmptySpectrum(isotopeCodes=('13C','1H', '15N'), name='COHnNh')
-        isotopeCodes = ('13C', '1H', '15N')
+        spectrum.axisCodes = axisCodes
+
+        isotopeCodes = ['13C', '1H', '15N']
         self.assertEqual(spectrum.isotopeCodes, isotopeCodes)
         self.assertEqual(spectrum.name, 'COHnNh')
 
@@ -144,19 +149,20 @@ class DummySpectrumTest(WrapperTesting):
         self.assertEqual(spectrum1.name, 'testspec')
         self.assertEqual(spectrum2.name, 'HpFPhH')
 
-        self.assertEqual(spectrum.isotopeCodes, ('13C', '1H', '15N'))
+        self.assertEqual(spectrum.isotopeCodes, ['13C', '1H', '15N'])
 
-        numPoints = tuple([Constants.DEFAULT_SPECTRUM_PARAMETERS[ic]['numPoints'] for ic in isotopeCodes])
-        sf = tuple([Constants.DEFAULT_SPECTRUM_PARAMETERS[ic]['sf'] for ic in isotopeCodes])
-        sw = tuple([Constants.DEFAULT_SPECTRUM_PARAMETERS[ic]['sw'] for ic in isotopeCodes])
-        refppm = tuple([Constants.DEFAULT_SPECTRUM_PARAMETERS[ic]['refppm'] for ic in isotopeCodes])
-        refpt = tuple([Constants.DEFAULT_SPECTRUM_PARAMETERS[ic]['refpt'] for ic in isotopeCodes])
+        # get the default parameters from the empty spectrum class
+        numPoints = [EmptySpectrumDataSource.isotopeDefaultDataDict[ic]['pointCount'] for ic in isotopeCodes]
+        sw = [EmptySpectrumDataSource.isotopeDefaultDataDict[ic]['spectralRange'] for ic in isotopeCodes]
+        # sf = tuple([EmptySpectrumDataSource.isotopeDefaultDataDict[ic]['sf'] for ic in isotopeCodes])
+        # refppm = tuple([EmptySpectrumDataSource.isotopeDefaultDataDict[ic]['refppm'] for ic in isotopeCodes])
+        # refpt = tuple([EmptySpectrumDataSource.isotopeDefaultDataDict[ic]['refpt'] for ic in isotopeCodes])
 
-        self.assertEqual(spectrum.spectrometerFrequencies, sf)
-        self.assertEqual(spectrum.spectralWidthsHz, sw)
+        # self.assertEqual(spectrum.spectralWidthsHz, sw)
         self.assertEqual(spectrum.pointCounts, numPoints)
         self.assertEqual(spectrum.experimentType, None)
         self.assertEqual(spectrum.dimensionCount, 3)
         self.assertEqual(spectrum.axisCodes, axisCodes)
-        self.assertEqual(spectrum.referencePoints, refpt)
-        self.assertEqual(spectrum.referenceValues, refppm)
+        # self.assertEqual(spectrum.spectrometerFrequencies, sf)
+        # self.assertEqual(spectrum.referencePoints, refpt)
+        # self.assertEqual(spectrum.referenceValues, refppm)

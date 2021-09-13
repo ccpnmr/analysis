@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:26:48 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:25:09 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -335,6 +335,10 @@ class Gui(Ui):
             showWarning('Check For Updates',
                         'Could not connect to the update server, please check your internet connection.')
 
+    def loadProject(self, path):
+        """Just a stub for now; calling MainWindow methods as it initialises the Gui
+        """
+        return self.mainWindow._openProject(path)
 
 #######################################################################################
 #

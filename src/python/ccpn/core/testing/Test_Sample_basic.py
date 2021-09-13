@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 22:18:49 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:25:08 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -47,7 +47,7 @@ class TestSample_No_setUp(WrapperTesting):
         Test that creating a new Sample with no parameter creates a valid Sample.
         """
         newSample = self.project.newSample()
-        self.assertEqual(newSample.name, 'mySample_1')
+        self.assertEqual(newSample.name, 'mySample')
         self.assertEqual(len(self.project.samples), 1)
 
     def test_newSample_None(self):
@@ -55,7 +55,7 @@ class TestSample_No_setUp(WrapperTesting):
         Test that creating a new Sample with None creates a valid Sample.
         """
         newSample = self.project.newSample(None)
-        self.assertEqual(newSample.name, 'mySample_1')
+        self.assertEqual(newSample.name, 'mySample')
         self.assertEqual(len(self.project.samples), 1)
 
     #=========================================================================================
@@ -66,11 +66,9 @@ class TestSample_No_setUp(WrapperTesting):
         """
         Test that creating a new Sample with '' raises an error.
         """
-        # with self.assertRaisesRegexp(ApiError, 'Empty string not allowed'):
-        #   self.project.newSample('')
-        #
-        self.project.newSample('')
-        self.assertEqual(len(self.project.samples), 1)
+        with self.assertRaisesRegexp(ValueError, 'must be set'):
+          self.project.newSample('')
+        self.assertEqual(len(self.project.samples), 0)
 
     def test_newSample_Badname(self):
         """
@@ -85,10 +83,7 @@ class TestSample_No_setUp(WrapperTesting):
         """
         Test that creating a new Sample with 42 (non-string) raises an error.
         """
-        # with self.assertRaisesRegexp(TypeError, 'argument of type'):
-        #   self.project.newSample(42)
-        #
-        with self.assertRaisesRegexp(TypeError, 'Sample.name must be a string'):
+        with self.assertRaisesRegexp(ValueError, 'must be a string'):
             self.project.newSample(42)
         self.assertEqual(len(self.project.samples), 0)
 

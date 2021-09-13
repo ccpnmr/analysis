@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-22 12:06:51 +0100 (Sun, August 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:25:07 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -602,8 +602,8 @@ class Substance(AbstractWrapperObject):
             name = self.name
         oldName = self.name
         self._oldPid = self.pid
-
-        name = self._uniqueName(project=self.project, name=name)
+        self._validateStringValue(attribName='name', value=name)
+        # name = self._uniqueName(project=self.project, name=name)
 
         oldLabelling = self.labelling
         apiLabeling = labelling = labelling or DEFAULT_LABELLING
@@ -733,7 +733,9 @@ def _newSubstance(self: Project, name: str = None, labelling: str = None, substa
 
     if isinstance(name, int):
         name = str(name)
-    name = Substance._uniqueName(project=self, name=name)
+    if not name:
+        name = Substance._uniqueName(project=self, name=name)
+    self._validateStringValue(attribName='name', value=name, allowNone=True)
     self._validateStringValue(attribName='labelling', value=_labelling, allowNone=True)
 
     apiNmrProject = self._wrappedData
@@ -878,8 +880,9 @@ def _createPolymerSubstance(self: Project, sequence: typing.Sequence[str], name:
 
     if isinstance(name, int):
         name = str(name)
-    name = Substance._uniqueName(project=self, name=name)
-
+    if not name:
+        name = Substance._uniqueName(project=self, name=name)
+    self._validateStringValue(attribName='name', value=name, allowNone=True)
     self._validateStringValue(attribName='labelling', value=labelling, allowNone=True)
 
     if not sequence:

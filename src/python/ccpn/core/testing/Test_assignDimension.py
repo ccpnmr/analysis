@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-28 19:12:27 +0100 (Mon, June 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:25:09 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -77,11 +77,17 @@ class Test_chemicalShift(WrapperTesting):
             self.peakList = self.spectrum.newPeakList() if spectra else None
 
     def test_assignDimension(self):
-        peaks = self.peakList.pickPeaksNd([[7.0, 7.2], [111.75, 112.2]])
+        # peaks = self.peakList.pickPeaksNd([[7.0, 7.2], [111.75, 112.2]])
+        _picker = self.spectrum.peakPicker
+        peaks = self.spectrum.pickPeaks(peakList=self.peakList,
+                                        positiveThreshold=12000.0, negativeThreshold=12000.0,
+                                        H=(7.0, 7.2), N=(111.75, 112.2))
+
         peaks[0].assignDimension(axisCode=axisCodeMatch('N', self.spectrum.axisCodes),
                                  value=self.atom)
         # Undo and redo all operations
-        self.assertIsNotNone(self.shiftList.getChemicalShift(self.atom.id))
+        self.assertIsNotNone(self.shiftList.getChemicalShift(self.atom))
         self.undo.undo()
+        self.assertIsNone(self.shiftList.getChemicalShift(self.atom))
         self.undo.redo()
-        self.assertIsNotNone(self.shiftList.getChemicalShift(self.atom.id))
+        self.assertIsNotNone(self.shiftList.getChemicalShift(self.atom))

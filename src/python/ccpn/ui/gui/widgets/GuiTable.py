@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-03 12:02:03 +0100 (Fri, September 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:21:22 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -126,7 +126,7 @@ def findExportFormats(path, dataFrame, sheet_name='Table', filterType=None, colu
             findExportFormats(str(path) + filterType, sheet_name)
         except:
             showWarning('Could not export', 'Format file not supported or not provided.'
-                                            '\nUse one of %s' %', '.join(formatTypes))
+                                            '\nUse one of %s' % ', '.join(formatTypes))
             getLogger().warning('Format file not supported')
 
 
@@ -231,7 +231,7 @@ GuiTable::item::selected {
 
     PRIMARYCOLUMN = 'Pid'
 
-    _internalColumns = [DATAFRAME_ISDELETED, DATAFRAME_OBJECT] # columns that are always hidden.
+    _internalColumns = [DATAFRAME_ISDELETED, DATAFRAME_OBJECT]  # columns that are always hidden.
     _hiddenColumns = []
 
     def __init__(self, parent=None,
@@ -328,8 +328,10 @@ GuiTable::item::selected {
         # set Interactive and last column to expanding
         _header.setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
         _header.setStretchLastSection(stretchLastSection)
+        # only look at visible section
         _header.setResizeContentsPrecision(0)
         _header.setDefaultAlignment(QtCore.Qt.AlignLeft)
+        _header.setMinimumSectionSize(20)
         # self.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustIgnored)
         # _header.setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
 
@@ -380,6 +382,7 @@ GuiTable::item::selected {
         self._icons = [self.ICON_FILE]
         self._stretchLastSection = stretchLastSection
         self._defaultHeadings = []
+        self._clickedInTable = False
 
         # set the minimum size the table can collapse to
         _height = getFontHeight(name=TABLEFONT, size='VLARGE')
@@ -1149,7 +1152,7 @@ GuiTable::item::selected {
         if action == columnsSettings:
             settingsPopup = ColumnViewSettingsPopup(parent=self._parent, table=self,
                                                     dataFrameObject=self._dataFrameObject,
-                                                    hiddenColumns = self.getHiddenColumns(),
+                                                    hiddenColumns=self.getHiddenColumns(),
                                                     )
             hiddenColumns = settingsPopup.getHiddenColumns()
             self.setHiddenColumns(texts=hiddenColumns, update=False)
@@ -1165,6 +1168,7 @@ GuiTable::item::selected {
 
     def _copySelectedCell(self):
         from ccpn.util.Common import copyToClipboard
+
         i = self.currentItem()
         if i is not None:
             text = i.text().strip()
@@ -1221,7 +1225,7 @@ GuiTable::item::selected {
         self.setHorizontalHeaderLabels(self._dataFrameObject.headings)
         self.showColumns(self._dataFrameObject)
         # self.resizeColumnsToContents()
-        self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
+        # self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
         self.setColumnCount(self._dataFrameObject.numColumns)
 
         self.show()
@@ -1300,7 +1304,7 @@ GuiTable::item::selected {
 
             # resize the columns if required (true by default)
             if resize:
-                self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
+                # self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
                 self.resizeColumnsToContents()
 
             # reshow table, which will ensure column widths are updated
@@ -1440,7 +1444,7 @@ GuiTable::item::selected {
                         listItem[header.headerText] = header.getValue(obj)
                     except Exception as es:
                         # NOTE:ED - catch any nasty surprises in tables
-                        getLogger().warning(f'Error creating table information {es}')
+                        getLogger().debug(f'Error creating table information {es}')
                         listItem[header.headerText] = None
 
                 allItems.append(listItem)
@@ -1850,7 +1854,7 @@ GuiTable::item::selected {
             self.setHorizontalHeaderLabels(self._dataFrameObject.headings)
             self.showColumns(self._dataFrameObject)
             # self.resizeColumnsToContents()
-            self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
+            # self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
 
             # required to make the header visible
             self.setColumnCount(self._dataFrameObject.numColumns)
@@ -1940,7 +1944,7 @@ GuiTable::item::selected {
                     if sortColumn < self.columnCount():
                         self.sortByColumn(sortColumn, sortOrder)
 
-                    self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
+                    # self.horizontalHeader().setStretchLastSection(self._stretchLastSection)
                     self.resizeColumnsToContents()
 
         getLogger().debug2('<updateTableCallback>', data['notifier'],
@@ -2337,7 +2341,6 @@ GuiTable::item::selected {
                 self.item(_rowIndex, j).setBackground(colour)
         except Exception as es:
             pass
-
 
     def _getSaveState(self):
         """

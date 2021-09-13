@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:20:00 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:21:22 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -77,16 +77,21 @@ def singleton(cls):
     """ Use class as singleton.
     From: https://wiki.python.org/moin/PythonDecoratorLibrary#Singleton
     Annotated by GWV
+    Modified by EJB to keep record of all singletons
+     - these can later be destroyed, was causing leakage between running testcases
     """
 
     @functools.wraps(cls.__new__)
     def singleton_new(cls, *args, **kwds):
+        # keep a list of already created singletons
+        if not hasattr(singleton, '_instances'):
+            singleton._instances = {}
         # check if it already exists
-        it = cls.__dict__.get('__it__')
+        it = singleton._instances.get(cls)
         if it is not None:
             return it
-        # it did not yet exist; generate an instance
-        cls.__it__ = it = cls.__new_original__(cls, *args, **kwds)
+        # it did not yet exist; generate an instance, store in list
+        singleton._instances[cls] = it = cls.__new_original__(cls, *args, **kwds)
         it.__init_original__(*args, **kwds)
         return it
 
@@ -97,6 +102,7 @@ def singleton(cls):
     cls.__init_original__ = cls.__init__
     cls.__init__ = object.__init__
     return cls
+
 
 def pstatToText(pstatPath, outPath=None):
     """
@@ -118,6 +124,7 @@ def pstatToText(pstatPath, outPath=None):
         f.write(s.getvalue())
     return ps
 
+
 def profile(dirPath='~', asText=False):
     """
     Get the stats of all related calls firing from inside a specific function/method.
@@ -129,6 +136,7 @@ def profile(dirPath='~', asText=False):
     :param dirPath: str, dir where to dump the pstat file.
     :param asText: bool. Make a pstat copy as a human readable text file.
     """
+
     def _profile(func):
         @functools.wraps(func)
         def profileWrapper(*args, **kwargs):
@@ -144,8 +152,11 @@ def profile(dirPath='~', asText=False):
                 profiler.dump_stats(filename)
                 if asText:
                     pstatToText(str(filename))
+
         return profileWrapper
+
     return _profile
+
 
 def notify(trigger, preExecution=False):
     """A decorator wrap a method around a notification blanking with explicit notification pre- or post-execution
@@ -256,6 +267,7 @@ def callList(func):
 
     return inner
 
+
 #----------------------------------------------------------------------------------------------
 # Adapted from from sandbox.Geerten.Refactored.decorators to fit current setup
 #----------------------------------------------------------------------------------------------
@@ -306,6 +318,7 @@ def _obj2pid(obj):
         obj = str(obj)
 
     return obj
+
 
 def _makeLogString(prefix, addSelf, func, *args, **kwds):
     """Helper function to create the log string from func, args and kwds
@@ -406,7 +419,7 @@ def logCommand(prefix='', get=None, isProperty=False):
     Use prefix to set the proper command context, e.g. 'application.' or 'project.'
     Use isProperty to get ' = 'args[1]
     """
-    from ccpn.core.lib.ContextManagers import notificationEchoBlocking # local to prevent circular imports
+    from ccpn.core.lib.ContextManagers import notificationEchoBlocking  # local to prevent circular imports
 
     @decorator.decorator
     def theDecorator(*args, **kwds):
@@ -415,10 +428,14 @@ def logCommand(prefix='', get=None, isProperty=False):
         args = args[1:]  # Optional 'self' is now args[0]
         self = args[0]
 
-        application = self.project.application
+        # application = self.project.application
         # GWV: tried this for application.newProject decoration, but unsuccessful (for now)
-        # from ccpn.framework.Framework import getApplication
-        # application = getApplication()
+        from ccpn.framework.Framework import getApplication
+
+        application = getApplication()
+        if application is None:
+            raise RuntimeError('Error getting application')
+
         blocking = application._echoBlocking
 
         if blocking == 0 and application.ui is not None:
@@ -467,6 +484,7 @@ def timeDecorator(method):
 def timeitDecorator(method):
     """calculate execution time of a function/method
     """
+
     def timed(*args, **kwds):
         ts = time.time()
         result = method(*args, **kwds)

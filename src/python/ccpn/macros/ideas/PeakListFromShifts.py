@@ -30,7 +30,7 @@ atomTypes = [H, N]
 get('SP:hsqc').newPeakList(title=None, comment=None, isSimulated=True, symbolStyle=None, symbolColour=None, textColour=None)
 
 # Loop through each shift in the chemical shift list
-for chemicalShift in csl.chemShifts:
+for chemicalShift in csl.chemicalShifts:
     # check if a shift belongs to the first atom type required in the new list (H in this case)
     na[0] = chemicalShift.nmrAtom
     if na[0].name = atomTypes[0]:
@@ -42,8 +42,8 @@ for chemicalShift in csl.chemShifts:
             peak.assignDimension(chemicalShift.nmrAtom, chemicalShift.nmrAtom2)
 
     if cslNmrAtoms of residue include all atomTypes
-       #  create an HN peak in the peak list using the ChemShifts and NmrAtoms in the csl
-       peak = peakList.newPeak(cslHAtomShift, cslNAtomShift)
-       peak.assignDimension(cslHNmrAtom, cslNNmrAtom)
+    #  create an HN peak in the peak list using the ChemShifts and NmrAtoms in the csl
+    peak = peakList.newPeak(cslHAtomShift, cslNAtomShift)
+    peak.assignDimension(cslHNmrAtom, cslNNmrAtom)
 
 # if no peaks created, give an error message

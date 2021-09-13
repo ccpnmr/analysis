@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-06 17:58:20 +0100 (Mon, September 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:21:21 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -508,7 +508,7 @@ class CcpnNefWriter:
             # ChemicalShiftLists and NmrChains
             nmrChainSet = set(nmrChains)
             for chemicalShiftList in chemicalShiftLists:
-                for chemicalShift in chemicalShiftList.chemShifts:
+                for chemicalShift in chemicalShiftList.chemicalShifts:
                     nmrChainSet.add(chemicalShift.nmrAtom.nmrResidue.nmrChain)
             nmrChains = sorted(nmrChainSet)
 
@@ -991,7 +991,7 @@ class CcpnNefWriter:
         loop = result[loopName]
         atomCols = ['chain_code', 'sequence_code', 'residue_name', 'atom_name', ]
         # NB We cannot use nmrAtom.id.split('.'), since the id has reserved characters remapped
-        shifts = sorted(chemicalShiftList.chemShifts)
+        shifts = sorted(chemicalShiftList.chemicalShifts)
         if shifts:
             for shift in shifts:
                 rowdata = self._loopRowData(loopName, shift)
@@ -1007,7 +1007,7 @@ class CcpnNefWriter:
                 name = rowdata['atom_name']
                 if name.startswith(isotopeCode):
                     plainName = name[len(str(isotope)):]
-                    if chemicalShiftList.getChemicalShift(nmrAtom.nmrResidue._id + Pid.IDSEP + plainName) is None:
+                    if chemicalShiftList.getChemicalShift(nmrAtom.nmrResidue.pid + Pid.IDSEP + plainName) is None:
                         # There is no shift in this list that has the corresponding name without the
                         # isotope number prefix. Remove the prefix for writing
                         rowdata['atom_name'] = plainName
@@ -4273,7 +4273,6 @@ class CcpnNefReader(CcpnNefContent):
         """
         from ccpn.util.isotopes import name2ElementSymbol, DEFAULT_ISOTOPE_DICT
 
-
         result = []
 
         creatorFunc = parent.newChemicalShift
@@ -4870,7 +4869,10 @@ class CcpnNefReader(CcpnNefContent):
                 storageParameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping, ccpnPrefix='_dataSource')
                 storageParameters['numPoints'] = spectrum.pointCounts
                 # spectrum._addDataStore(filePath, **storageParameters)
-                spectrum.filePath = filePath
+                try:
+                    spectrum.filePath = filePath
+                except Exception as es:
+                    pass
 
             # Load CCPN dimensions before peaks
             loopName = 'ccpn_spectrum_dimension'
@@ -5716,10 +5718,13 @@ class CcpnNefReader(CcpnNefContent):
                 if not peakList:
                     peakList = spectrum.newPeakList(str(peakListSerial))
 
-                peak = peakList.newPeak(**parameters)
-                peak._resetSerial(serial)
-                peaks[peakLabel] = peak
-                result.append(peak)
+                try:
+                    peak = peakList.newPeak(**parameters)
+                    peak._resetSerial(serial)
+                    peaks[peakLabel] = peak
+                    result.append(peak)
+                except Exception as es:
+                    pass
 
             # Add assignment
             # NB the self.defaultChainCode or converts code None to the default chain code
@@ -7175,6 +7180,7 @@ class CcpnNefReader(CcpnNefContent):
                 raise RuntimeError('CcpnNefReader.getDataSet: too many dataSets with the same serial')
             return dataSets[0]
 
+
 def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict,
                    dimensionData: dict, transferData: Sequence[Tuple] = None):
     """Get or create spectrum using dictionaries of attributes, such as read in from NEF.
@@ -7337,8 +7343,11 @@ def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict
         # Then spectrum-level ones
         for tag, val in spectrumParameters.items():
             if tag != 'dimensionCount':
-                # dimensionCount is handled already and not settable
-                setattr(spectrum, tag, val)
+                try:
+                    # dimensionCount is handled already and not settable
+                    setattr(spectrum, tag, val)
+                except Exception as es:
+                    pass
         #
         return spectrum
 

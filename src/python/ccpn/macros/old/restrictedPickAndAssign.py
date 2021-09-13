@@ -24,19 +24,20 @@ shiftIsotopeCodes = ['15N', '1H']
 # NmrResidue
 nmrResidueIsotopeCodes = []
 for nmrAtom in nmrResidue.nmrAtoms:
-  nmrResidueIsotopeCodes.append(nmrAtom.isotopeCode)
+    nmrResidueIsotopeCodes.append(nmrAtom.isotopeCode)
 
 # Get hold of the chemical shifts for the NmrAtoms in the
 # NmrResidue and append them to a list
 nmrResidueShifts = []
 for nmrAtom in nmrResidue.nmrAtoms:
-  shift = shiftList.getChemicalShift(nmrAtom.id).value
-  nmrResidueShifts.append(shift)
+    cShift = shiftList.getChemicalShift(nmrAtom)
+    shift = cShift and cShift.value
+    nmrResidueShifts.append(shift)
 
 # Create a dictionary of NmrAtomIsotopeCodes: shifts using
 # the dict and zip Python methods
 shiftDict = dict(zip(nmrResidueIsotopeCodes,
-nmrResidueShifts))
+                     nmrResidueShifts))
 
 # Create a position-axisCode dictionary called posDict
 # Loop over the shiftIsotopeCode list, pull out the
@@ -45,22 +46,21 @@ nmrResidueShifts))
 # corresponding isotope code in the posDict
 positionCodeDict = {}
 for ii, shiftIsotopeCode in enumerate(shiftIsotopeCodes):
-  positionCodeDict[axisCodes[ii]] = shiftDict[shiftIsotopeCode]
+    positionCodeDict[axisCodes[ii]] = shiftDict[shiftIsotopeCode]
 
 # Use the created posDict as input for the
 # restrictedPick() method of the PeakList class.
 
 newPeaks = peakList.restrictedPick(positionCodeDict, doPos=True,
-    doNeg=False)
-
+                                   doNeg=False)
 
 assignmentDict = {}
 for ii, axisCode in enumerate(spectrum.axisCodes):
-  for nmrAtom in nmrResidue.nmrAtoms:
-    if nmrAtom.isotopeCode == spectrum.isotopeCodes[ii]:
-      assignmentDict[axisCode] = nmrAtom
+    for nmrAtom in nmrResidue.nmrAtoms:
+        if nmrAtom.isotopeCode == spectrum.isotopeCodes[ii]:
+            assignmentDict[axisCode] = nmrAtom
 
 for peak in newPeaks:
-  for axisCode in peak.axisCodes:
-    if axisCode in assignmentDict.keys():
-      peak.assignDimension(axisCode, value=assignmentDict[axisCode])
+    for axisCode in peak.axisCodes:
+        if axisCode in assignmentDict.keys():
+            peak.assignDimension(axisCode, value=assignmentDict[axisCode])

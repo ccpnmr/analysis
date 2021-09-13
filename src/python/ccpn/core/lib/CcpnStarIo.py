@@ -338,7 +338,7 @@ def _simulatedSpectrumFromCSL(project, csl, axesCodesMap):
 
         # filter by NmrAtom of interest
         nmrResiduesOD = od()
-        for chemicalShift in csl.chemShifts:
+        for chemicalShift in csl.chemicalShifts:
             na = chemicalShift.nmrAtom
             if na.name in nmrAtomNames:
                 try:

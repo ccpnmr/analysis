@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-03 12:18:44 +0100 (Fri, September 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:21:21 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -300,7 +300,7 @@ class Notifier(NotifierABC):
             else:
                 # Projects allow all registering of all classes
                 allowedClassNames = [c.className for c in theObject._getChildClasses(recursion=self._isProject)]
-                # TODO:ED - is this check needed? - skips new ChemShift object
+                # TODO:ED - is this check needed? - skips new ChemicalShift object
                 # if targetName not in allowedClassNames:
                 #     raise RuntimeWarning('Notifier.__init__: invalid targetName "%s" for class "%s"' % (targetName, theObject.className))
 

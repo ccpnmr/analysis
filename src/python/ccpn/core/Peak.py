@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-03 12:18:43 +0100 (Fri, September 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:21:21 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -247,7 +247,7 @@ class Peak(AbstractWrapperObject):
 
         # recalculate the shifts
         assigned = set(makeIterableList(self.assignments))
-        shifts = set(cs for nmrAt in assigned for cs in nmrAt.chemShifts if cs and not cs.isDeleted)
+        shifts = set(cs for nmrAt in assigned for cs in nmrAt.chemicalShifts if cs and not cs.isDeleted)
 
         self._childActions.extend(sh._recalculateShiftValue for sh in shifts)
         self._finaliseChildren.extend((sh, 'change') for sh in shifts)
@@ -291,7 +291,7 @@ class Peak(AbstractWrapperObject):
             # log any peak assignments that have moved in this axis
             if peakDim.position != _old:
                 assigned = set([ff(pdc.resonance) for pdc in peakDim.mainPeakDimContribs if hasattr(pdc, 'resonance')])
-                shifts |= set(sh for nmrAt in assigned for sh in nmrAt.chemShifts)
+                shifts |= set(sh for nmrAt in assigned for sh in nmrAt.chemicalShifts)
 
         self._childActions.extend(sh._recalculateShiftValue for sh in shifts)
         self._finaliseChildren.extend((sh, 'change') for sh in shifts)
@@ -343,7 +343,7 @@ class Peak(AbstractWrapperObject):
             # log any peak assignments that have moved in this axis
             if peakDim.position != _old:
                 assigned = set([ff(pdc.resonance) for pdc in peakDim.mainPeakDimContribs if hasattr(pdc, 'resonance')])
-                shifts |= set(sh for nmrAt in assigned for sh in nmrAt.chemShifts)
+                shifts |= set(sh for nmrAt in assigned for sh in nmrAt.chemicalShifts)
 
         self._childActions.extend(sh._recalculateShiftValue for sh in shifts)
         self._finaliseChildren.extend((sh, 'change') for sh in shifts)
@@ -434,7 +434,7 @@ class Peak(AbstractWrapperObject):
                 assigned = set([ff(pdc.resonance) for pdc in peakDim.mainPeakDimContribs if hasattr(pdc, 'resonance')])
                 peakDim.numAliasing = -1 * value[ii]
 
-                shifts |= set(sh for nmrAt in assigned for sh in nmrAt.chemShifts)
+                shifts |= set(sh for nmrAt in assigned for sh in nmrAt.chemicalShifts)
 
         self._childActions.extend(sh._recalculateShiftValue for sh in shifts)
         self._finaliseChildren.extend((sh, 'change') for sh in shifts)
@@ -517,13 +517,13 @@ class Peak(AbstractWrapperObject):
         apiPeak.assignByDimensions(dimResonances)
 
     # def _tempFunc(self, nmrResidues, shifts):
-    #     # update the assigned nmrAtom chemical shift values - notify the nmrResidues and chemShifts
+    #     # update the assigned nmrAtom chemical shift values - notify the nmrResidues and chemicalShifts
     #     self._childActions.extend(sh._recalculateShiftValue for sh in shifts)
     #     self._finaliseChildren.extend((nmr, 'change') for nmr in nmrResidues)
     #     self._finaliseChildren.extend((sh, 'change') for sh in shifts)
 
     def _recalculatePeakShifts(self, nmrResidues, shifts):
-        # update the assigned nmrAtom chemical shift values - notify the nmrResidues and chemShifts
+        # update the assigned nmrAtom chemical shift values - notify the nmrResidues and chemicalShifts
         for sh in shifts:
             sh._recalculateShiftValue()
         for nmr in nmrResidues:
@@ -539,12 +539,12 @@ class Peak(AbstractWrapperObject):
         _pre = set(makeIterableList(self.assignedNmrAtoms))
         _post = set(makeIterableList(value))
         nmrResidues = set(nmr.nmrResidue for nmr in (_pre | _post))
-        shifts = list(set(cs for nmrAt in (_pre | _post) for cs in nmrAt.chemShifts))
+        shifts = list(set(cs for nmrAt in (_pre | _post) for cs in nmrAt.chemicalShifts))
         _thisNmr = self.spectrum.chemicalShiftList._getNmrAtoms()
 
         # # NOTE:ED - need this check as nmrAtoms must be unique in chemicalShiftList
         # for nmrAtom in (_post - _pre - _thisNmr):
-        #     if self.spectrum.chemicalShiftList._getChemicalShift(nmrAtom=nmrAtom):
+        #     if self.spectrum.chemicalShiftList.getChemicalShift(nmrAtom=nmrAtom):
         #         raise RuntimeError(f'Peak.dimensionNmrAtoms: {nmrAtom} already in list')
 
         with undoBlock():
@@ -659,12 +659,12 @@ class Peak(AbstractWrapperObject):
         _pre = set(makeIterableList(self.assignedNmrAtoms))
         _post = set(makeIterableList(value))
         nmrResidues = set(nmr.nmrResidue for nmr in (_pre | _post))
-        shifts = list(set(cs for nmrAt in (_pre | _post) for cs in nmrAt.chemShifts))
+        shifts = list(set(cs for nmrAt in (_pre | _post) for cs in nmrAt.chemicalShifts))
         _thisNmr = self.spectrum.chemicalShiftList._getNmrAtoms()
 
         # # NOTE:ED - need this check as nmrAtoms must be unique in chemicalShiftList
         # for nmrAtom in (_post - _pre - _thisNmr):
-        #     if self.spectrum.chemicalShiftList._getChemicalShift(nmrAtom=nmrAtom):
+        #     if self.spectrum.chemicalShiftList.getChemicalShift(nmrAtom=nmrAtom):
         #         raise RuntimeError(f'Peak.assignedNmrAtoms: {nmrAtom} already in list')
 
         with undoBlock():
@@ -887,7 +887,6 @@ class Peak(AbstractWrapperObject):
         assigned = tuple(() for _ in range(self.peakList.spectrum.dimensionCount))
 
         with undoBlockWithoutSideBar():
-
             self.dimensionNmrAtoms = assigned
             self._delete()
 
@@ -920,7 +919,7 @@ class Peak(AbstractWrapperObject):
                                 targetPeakList.spectrum.dimensionCount, targetPeakList.longPid))
 
         dimensionMapping = _axisCodeMapIndices(peakList.spectrum.axisCodes,
-                                                                         targetPeakList.spectrum.axisCodes)
+                                               targetPeakList.spectrum.axisCodes)
         if dimensionMapping is None:
             raise ValueError("%s axisCodes %s not compatible with target axisCodes %s"
                              % (self, peakList.spectrum.axisCodes, targetPeakList.spectrum.axisCodes))

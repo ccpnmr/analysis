@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-28 19:12:26 +0100 (Mon, June 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:21:21 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -61,19 +61,17 @@ NEF_ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CG', 'CG1', 'CG2', 'CGx', 'CGy', 'CG
                           ]}
 
 NEF_ATOM_NAMES_SORTED = {'alphas'      : ['CA', 'HA', 'HAx', 'HAy', 'HA2', 'HA3', 'HA%'],
-                    'betas'       : ['CB', 'HB', 'HBx', 'HBy', 'HB%', 'HB2', 'HB3'],
-                    'gammas'      : ['CG', 'CGx', 'CGy', 'CG%', 'CG1', 'CG2', 'HG', 'HGx', 'HGy', 'HG%', 'HG2', 'HG3'],
-                    'moreGammas'  : ['HGx%', 'HGy%', 'HG1', 'HG1x', 'HG1y', 'HG1%', 'HG12', 'HG13', 'HG1%', 'HG2%'],
-                    'deltas'      : ['CD', 'CDx', 'CDy', 'CD%', 'CD1', 'CD2', 'HDx', 'HDy', 'HD%', 'HD1', 'HD2', 'HD3'],
-                    'moreDeltas'  : ['HDx%', 'HDy%', 'ND1', 'ND2', 'HD1%', 'HD2%', 'HD2x', 'HD2y', 'HD21', 'HD22'],
-                    'epsilons'    : ['CE', 'CEx', 'CEy', 'CE1', 'CE2', 'HE', 'HEx', 'HEy', 'HE%', 'HE1', 'HE2', 'HE3'],
-                    'moreEpsilons': ['CE3', 'NE', 'NE1', 'NE2', 'HE2x', 'HE2y', 'HE21', 'HE22', 'HE%'],
-                    'zetas'       : ['CZ', 'CZ2', 'CZ3', 'HZ', 'HZ2', 'HZ3', 'HZ%', 'NZ'],
-                    'etas'        : ['CH2', 'HH2', 'HH1x', 'HH1y', 'HH2x', 'HH2y', 'NH1', 'NH2', 'NHx', 'NHy', 'HH21', 'HH22'],
-                    'moreEtas'    : ['HH', 'HH11', 'HH12']
-                    }
-
-
+                         'betas'       : ['CB', 'HB', 'HBx', 'HBy', 'HB%', 'HB2', 'HB3'],
+                         'gammas'      : ['CG', 'CGx', 'CGy', 'CG%', 'CG1', 'CG2', 'HG', 'HGx', 'HGy', 'HG%', 'HG2', 'HG3'],
+                         'moreGammas'  : ['HGx%', 'HGy%', 'HG1', 'HG1x', 'HG1y', 'HG1%', 'HG12', 'HG13', 'HG1%', 'HG2%'],
+                         'deltas'      : ['CD', 'CDx', 'CDy', 'CD%', 'CD1', 'CD2', 'HDx', 'HDy', 'HD%', 'HD1', 'HD2', 'HD3'],
+                         'moreDeltas'  : ['HDx%', 'HDy%', 'ND1', 'ND2', 'HD1%', 'HD2%', 'HD2x', 'HD2y', 'HD21', 'HD22'],
+                         'epsilons'    : ['CE', 'CEx', 'CEy', 'CE1', 'CE2', 'HE', 'HEx', 'HEy', 'HE%', 'HE1', 'HE2', 'HE3'],
+                         'moreEpsilons': ['CE3', 'NE', 'NE1', 'NE2', 'HE2x', 'HE2y', 'HE21', 'HE22', 'HE%'],
+                         'zetas'       : ['CZ', 'CZ2', 'CZ3', 'HZ', 'HZ2', 'HZ3', 'HZ%', 'NZ'],
+                         'etas'        : ['CH2', 'HH2', 'HH1x', 'HH1y', 'HH2x', 'HH2y', 'NH1', 'NH2', 'NHx', 'NHy', 'HH21', 'HH22'],
+                         'moreEtas'    : ['HH', 'HH11', 'HH12']
+                         }
 
 PROTEIN_NEF_ATOM_NAMES = {
     'ALA': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HB%'],
@@ -113,9 +111,8 @@ PROTEIN_NEF_ATOM_NAMES = {
             'CD2', 'HDx', 'HDy', 'HD1', 'HD2', 'HD%', 'CEx', 'CEy', 'CE1', 'CE2', 'HEx', 'HEy', 'HE1', 'HE2',
             'HE%', 'CZ', 'HH'],
     'VAL': ['H', 'N', 'C', 'CA', 'HA', 'CB', 'HB', 'CGx', 'CGy', 'CG%', 'CG1', 'CG2',
-            'HGx%', 'HGy%', 'HG1%', 'HG2%','HG%']
+            'HGx%', 'HGy%', 'HG1%', 'HG2%', 'HG%']
     }
-
 
 from ccpn.util import Common as commonUtil, Constants
 from typing import Sequence
@@ -135,6 +132,7 @@ from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidue
 import typing
 import numpy
 from ccpn.util.Logging import getLogger
+
 
 defaultAssignmentTolerance = 0.03
 
@@ -383,20 +381,18 @@ def propagateAssignments(peaks: typing.List[Peak] = None, referencePeak: Peak = 
 
             for nmrAtom in dimNmrAtoms[axisCode]:
                 if nmrAtom not in extantNmrAtoms:
-                    shiftList = peak.peakList.spectrum.chemicalShiftList
-                    shift = shiftList.getChemicalShift(nmrAtom.id)
+                    shiftList = peak.spectrum.chemicalShiftList
+                    shift = shiftList.getChemicalShift(nmrAtom)
 
                     if shift:
-
                         sValue = shift.value
+                        if sValue is not None:
+                            if not (shiftMin < sValue < shiftMax):
+                                continue
 
-                        if not (shiftMin < sValue < shiftMax):
-                            continue
-
-                        assignNmrAtoms.append(nmrAtom)
-
-                        if abs(sValue - pValue) <= tolerance:
-                            closeNmrAtoms.append(nmrAtom)
+                            assignNmrAtoms.append(nmrAtom)
+                            if abs(sValue - pValue) <= tolerance:
+                                closeNmrAtoms.append(nmrAtom)
 
             if closeNmrAtoms:
                 for nmrAtom in closeNmrAtoms:
@@ -911,7 +907,7 @@ def matchingNmrAtomsForPeakDimension(peak: Peak, dim: int, nmrAtoms: typing.List
 
     for nmrAtom in nmrAtoms:
         if nmrAtom.isotopeCode == isotopeCode and \
-           withinTolerance(nmrAtom, position,shiftList, tolerance):
+                withinTolerance(nmrAtom, position, shiftList, tolerance):
             matchingNmrAtoms.add(nmrAtom)
 
     return matchingNmrAtoms
@@ -923,10 +919,11 @@ def withinTolerance(nmrAtom: NmrAtom, position: float, shiftList: ChemicalShiftL
        peak dimension.
 
     """
-    shift = shiftList.getChemicalShift(nmrAtom.id)
-    #delta = delta_shift(nmrAtom, position, shiftList)
-    if shift and abs(position - shift.value) < tolerance:
-        return True
+    shift = shiftList.getChemicalShift(nmrAtom)
+    if shift:
+        _value = shift.value
+        if _value is not None and abs(position - _value) < tolerance:
+            return True
     return False
 
 

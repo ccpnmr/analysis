@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-06 17:54:14 +0100 (Mon, September 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:21:21 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -61,7 +61,7 @@ from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 # from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
-                                          notificationEchoBlocking, inactivity, logCommandManager
+    notificationEchoBlocking, inactivity, logCommandManager
 from ccpn.util.Logging import getLogger
 
 
@@ -173,21 +173,20 @@ class Project(AbstractWrapperObject):
         return None
 
     @property
-    def chemShifts(self):
+    def chemicalShifts(self):
         """Return the list of chemicalShifts in the project
-        This is the ChemShift class to be renamed later
         """
         _shifts = []
         for shiftList in self.chemicalShiftLists:
-            _shifts.extend(shiftList.chemShifts)
+            _shifts.extend(shiftList.chemicalShifts)
         return _shifts
 
-    def getChemShift(self, relativeId: str) -> Optional['ChemShift']:
+    def getChemicalShift(self, relativeId: str) -> Optional['ChemicalShift']:
         """Return the chemicalShift from the supplied relativeId
         """
-        from ccpn.core.ChemShift import ChemShift
+        from ccpn.core.ChemicalShift import ChemicalShift
 
-        dd = self._project._pid2Obj.get(ChemShift.className)
+        dd = self._project._pid2Obj.get(ChemicalShift.className)
         if dd:
             if self is self._project:
                 key = '{}'.format(relativeId)
@@ -455,11 +454,11 @@ class Project(AbstractWrapperObject):
             apiStatus = self._getAPIObjectsStatus()
             if apiStatus.invalidObjects:
                 # if deleteInvalidObjects:
-                    # delete here ...
-                    # run save and apiStatus again. Ensure nothing else has been compromised on the deleting process
+                # delete here ...
+                # run save and apiStatus again. Ensure nothing else has been compromised on the deleting process
                 # else:
                 errorMsg = '\n '.join(apiStatus.invalidObjectsErrors)
-                getLogger().critical('Found compromised items. Project might be left in an invalid state. %s' %errorMsg)
+                getLogger().critical('Found compromised items. Project might be left in an invalid state. %s' % errorMsg)
                 # raise ValueError(error)
         except Exception as es:
             getLogger().warning('Error checking project status: %s' % str(es))
@@ -1127,6 +1126,7 @@ class Project(AbstractWrapperObject):
         """
         getLogger().info('Validating Project integrity...')
         from ccpn.core._implementation.APIStatus import APIStatus
+
         root = self._apiNmrProject.root
         apiStatus = APIStatus(apiObj=root, completeScan=completeScan, includeDefaultChildren=includeDefaultChildren)
         return apiStatus
@@ -1512,12 +1512,12 @@ class Project(AbstractWrapperObject):
         #
         return result
 
-    def getObjectsByPids(self, pids:list):
+    def getObjectsByPids(self, pids: list):
         """Optimise method to get all found objects from a list of pids. Remove any None.
          Warning: do not use with zip"""
         return list(filter(None, map(lambda x: self.getByPid(x) if isinstance(x, str) else str(x), pids)))
 
-    def getPidsByObjects(self, objs:list):
+    def getPidsByObjects(self, objs: list):
         """Optimise method to get all found pids from a list of objects. Remove any None.
          Warning: do not use with zip"""
         return list(filter(None, map(lambda x: x.pid if isinstance(x, AbstractWrapperObject) else None, objs)))
@@ -1576,10 +1576,11 @@ class Project(AbstractWrapperObject):
                                                    units=units, labels=labels)
 
     @logCommand('project.')
-    def newSpectrum(self, path:str, name: str = None):
+    def newSpectrum(self, path: str, name: str = None):
         """Creation of new Spectrum defined by path; optionally set name.
         """
         from ccpn.core.Spectrum import _newSpectrum
+
         return _newSpectrum(self, path=path, name=name)
 
     @logCommand('project.')
@@ -1604,6 +1605,7 @@ class Project(AbstractWrapperObject):
         :return: a new Spectrum instance.
         """
         from ccpn.core.Spectrum import _newEmptySpectrum
+
         return _newEmptySpectrum(self, isotopeCodes=isotopeCodes, name=name)
 
     @logCommand('project.')
@@ -1755,7 +1757,7 @@ class Project(AbstractWrapperObject):
                           rowNumber=rowNumber, columnNumber=columnNumber, comment=comment, **kwds)
 
     @logCommand('project.')
-    def fetchSample(self, name:str):
+    def fetchSample(self, name: str):
         """Get or create Sample with given name.
         See the Sample class for details.
         :param self: project

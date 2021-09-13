@@ -2,6 +2,7 @@
 
 from ccpn.core.lib.ContextManagers import undoBlock
 
+
 # specify NmrChain associated with the imported chemical shifts
 nmrChain = project.getByPid('NC:@2')
 
@@ -34,7 +35,6 @@ with undoBlock():
         # create C-C peaks according to makePairs routine
         pairs = makePairs(atomList)
         for atm1, atm2 in pairs:
-            peak = peakList.newPeak(ppmPositions=(atm1.chemShifts[0].value, atm2.chemShifts[0].value))
+            peak = peakList.newPeak(ppmPositions=(atm1.chemicalShifts[0].value, atm2.chemicalShifts[0].value))
             peak.assignDimension(carbonAxes[0], atm1)
             peak.assignDimension(carbonAxes[1], atm2)
-

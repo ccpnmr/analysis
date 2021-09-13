@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-03 12:18:43 +0100 (Fri, September 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:21:20 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,7 @@ from collections import OrderedDict
 from functools import partial
 from typing import Optional, Union
 from collections import namedtuple
+from ccpn.core import _importOrder
 from ccpn.core.Project import Project
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
@@ -54,7 +55,7 @@ ShiftParameters = namedtuple('ShiftParameters', f'{CS_UNIQUEID} {CS_ISDELETED} {
                                                 f'{CS_COMMENT} ')
 
 
-class ChemShift(NotifierBase):
+class ChemicalShift(NotifierBase):
     """Chemical Shift, containing a ChemicalShift value for the NmrAtom they belong to.
 
     Chemical shift values are continuously averaged over peaks assigned to the NmrAtom,
@@ -64,20 +65,21 @@ class ChemShift(NotifierBase):
     """
 
     #: Short class name, for PID.
-    shortClassName = 'SH'
+    shortClassName = 'CS'
     # Attribute - necessary as subclasses must use superclass className
-    className = 'ChemShift'
+    className = 'ChemicalShift'
+    _oldClassName = '_OldChemicalShift'
 
     _parentClass = ChemicalShiftList
 
     #: Name of plural link to instances of class
-    _pluralLinkName = 'chemShifts'
+    _pluralLinkName = 'chemicalShifts'
 
     _childClasses = []
     _isGuiClass = False
 
     # the attribute name used by current
-    _currentAttributeName = 'chemShifts'
+    _currentAttributeName = 'chemicalShifts'
 
     def __init__(self, chemicalShiftList, _ignoreUniqueId=False):
         """Create a new instance of v3 Shift
@@ -87,7 +89,10 @@ class ChemShift(NotifierBase):
         self._uniqueId = None if _ignoreUniqueId else self.project._getNextUniqueIdValue(CS_CLASSNAME)
         self._deletedId = None
         self._isDeleted = False
-        # All properties are derived from the chemicalShiftList pandas dataframe
+        # this should never change as cannot rename
+        self._ccpnSortKey = (id(self.project), _importOrder.index(self._oldClassName), self._uniqueId)
+
+        # All other properties are derived from the chemicalShiftList pandas dataframe
 
     def __str__(self):
         """Readable string representation; potentially subclassed
@@ -98,6 +103,30 @@ class ChemShift(NotifierBase):
         """Object string representation; compatible with application.get()
         """
         return f"'{self.__str__()}'"
+
+    def __bool__(self):
+        """Truth value: true - wrapper classes are never empty"""
+        return True
+
+    def __lt__(self, other):
+        """Ordering implementation function, necessary for making lists sortable.
+        """
+
+        if hasattr(other, '_ccpnSortKey'):
+            return self._ccpnSortKey < other._ccpnSortKey
+        else:
+            return id(self) < id(other)
+
+    def __eq__(self, other):
+        """Python 2 behaviour - objects equal only to themselves."""
+        return self is other
+
+    def __ne__(self, other):
+        """Python 2 behaviour - objects equal only to themselves."""
+        return self is not other
+
+    def __hash__(self):
+        return id(self)
 
     #=========================================================================================
     # CCPN Properties
@@ -130,7 +159,7 @@ class ChemShift(NotifierBase):
     def longPid(self) -> Pid.Pid:
         """Identifier for the object, unique within the project.
         Set automatically from the full class name, the parent chemicalShiftList and object.uniqueId
-        E.g. 'ChemShift:default.1'
+        E.g. 'ChemicalShift:default.1'
         """
         return Pid.Pid(Pid.PREFIXSEP.join((self.className, self.id)))
 
@@ -247,7 +276,7 @@ class ChemShift(NotifierBase):
 
             # clear the nmrAtom and derived values
             self._chemicalShiftList._setShiftAttributes(self._uniqueId, CS_NMRATOM, CS_ATOMNAME, (None, None, None, None, None))
-            nat.chemShifts.remove(self)
+            nat.chemicalShifts.remove(self)
 
         else:
             _nmrAtom = self._project.getByPid(value) if isinstance(value, str) else value
@@ -267,8 +296,8 @@ class ChemShift(NotifierBase):
                                                         (str(_nmrAtom.pid),) + tuple(val or None for val in _nmrAtom.pid.fields))
 
             if nat:
-                nat.chemShifts.remove(self)
-            _nmrAtom.chemShifts.append(self)
+                nat.chemicalShifts.remove(self)
+            _nmrAtom.chemicalShifts.append(self)
 
             if self._chemicalShiftList.autoUpdate:
                 value, valueError = _nmrAtom._recalculateShiftValue(self._chemicalShiftList.spectra)
@@ -394,9 +423,10 @@ class ChemShift(NotifierBase):
         """Reset the uniqueId
         CCPN Internal - although not sure whether actually required here
         """
-        if self._chemicalShiftList._searchChemicalShifts(uniqueId=value):
-            raise ValueError(f'{self.className}._resetUniqueId: uniqueId {value} already exists')
+        # if self._chemicalShiftList._searchChemicalShifts(uniqueId=value):
+        #     raise ValueError(f'{self.className}._resetUniqueId: uniqueId {value} already exists')
         self._uniqueId = int(value)
+        self._ccpnSortKey = (id(self.project), _importOrder.index(self._oldClassName), self._uniqueId)
 
     def _finaliseAction(self, action: str):
         """Do wrapper level finalisation, and execute all notifiers
@@ -462,7 +492,7 @@ class ChemShift(NotifierBase):
         _nmrAtom = self.nmrAtom
         # must assume that the shift value is correct at this point
         if _nmrAtom:
-            _nmrAtom.chemShifts.append(self)
+            _nmrAtom.chemicalShifts.append(self)
 
     def getByPid(self, pid: str):
         """Get an arbitrary data object from either its pid (e.g. 'SP:HSQC2') or its longPid
@@ -577,7 +607,7 @@ def _newChemicalShift(chemicalShiftList, _ignoreUniqueId: bool = False
     :return: a new ChemicalShift instance.
     """
 
-    result = ChemShift(chemicalShiftList, _ignoreUniqueId=_ignoreUniqueId)
+    result = ChemicalShift(chemicalShiftList, _ignoreUniqueId=_ignoreUniqueId)
     if result is None:
         raise RuntimeError('ChemicalShiftList._newChemicalShift: unable to generate new ChemicalShift item')
 

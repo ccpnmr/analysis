@@ -89,6 +89,7 @@ from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.framework.PathsAndUrls import macroPath as mp
 from ccpn.core.lib.ContextManagers import undoBlock
 
+
 _Atom_chem_shift = "_Atom_chem_shift."  # used to find the loop of interest in the BMRB and shorten the column header name on the DataFrame
 
 # only the entries of interest to map to CcpNmr V3 objects. Can be increased as needed
@@ -189,7 +190,7 @@ def _simulatedSpectrumFromCSL(csl, axesCodesMap):
 
     # filter by NmrAtom of interest
     nmrResiduesOD = od()
-    for chemicalShift in csl.chemShifts:
+    for chemicalShift in csl.chemicalShifts:
         na = chemicalShift.nmrAtom
         if na.name in nmrAtomNames:
             try:
@@ -296,7 +297,7 @@ if __name__ == "__main__":
         ("N", "N"),
         ("H", "H"),
         ("CA", "C"),
-    ])
+        ])
     if _UI:
         popup = BMRBcslToV3(axesCodesMap=axesCodesMap, bmrbFilePath=mybmrb, directory=relativePath)
         popup.show()

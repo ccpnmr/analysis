@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-06 17:58:19 +0100 (Mon, September 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:21:20 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -71,13 +71,13 @@ CS_TABLECOLUMNS = (CS_UNIQUEID, CS_ISDELETED,
 
 # NOTE:ED - these currently match the original V3 classNames - not ChemShift
 #   it is the name used in the dataframe and in project._getNextUniqueIdValue
-CS_CLASSNAME = '_OldChemicalShift'
-CS_PLURALNAME = '_oldChemicalShifts'
+CS_CLASSNAME = 'ChemicalShift'
+CS_PLURALNAME = 'chemicalShifts'
 
 
 class ChemicalShiftList(AbstractWrapperObject):
     """An object containing Chemical Shifts. Note: the object is not a (subtype of a) Python list.
-    To access all ChemicalShift objects, use chemicalShiftList.chemShifts.
+    To access all ChemicalShift objects, use chemicalShiftList.chemicalShifts.
 
     A chemical shift list named 'default' is used by default for new experiments,
     and is created if necessary."""
@@ -107,7 +107,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         defaultName = 'Shifts%s' % wrappedData.serial
         self._setUniqueStringKey(defaultName)
 
-        # internal lists to hold the current chemShifts and deletedChemicalShift
+        # internal lists to hold the current chemicalShifts and deletedChemicalShift
         self._shifts = []
         self._deletedShifts = []
 
@@ -179,7 +179,7 @@ class ChemicalShiftList(AbstractWrapperObject):
                             for y in x.dataSources))
 
     def _recalculatePeakShifts(self, nmrResidues, shifts):
-        # update the assigned nmrAtom chemical shift values - notify the nmrResidues and chemShifts
+        # update the assigned nmrAtom chemical shift values - notify the nmrResidues and chemicalShifts
         for sh in shifts:
             sh._recalculateShiftValue()
         for nmr in nmrResidues:
@@ -194,10 +194,10 @@ class ChemicalShiftList(AbstractWrapperObject):
         # add a spectrum/remove a spectrum
         _createSpectra = set(value) - set(self.spectra)
         _deleteSpectra = set(self.spectra) - set(value)
-        _createNmr = self._getNmrAtomsFromSpectra(_createSpectra) # new nmrAtoms to add
-        _deleteNmr = self._getNmrAtomsFromSpectra(_deleteSpectra) # old nmrAtoms to update
+        _createNmr = self._getNmrAtomsFromSpectra(_createSpectra)  # new nmrAtoms to add
+        _deleteNmr = self._getNmrAtomsFromSpectra(_deleteSpectra)  # old nmrAtoms to update
 
-        _thisNmr = self._getNmrAtoms() # current nmrAtoms referenced in shiftLift
+        _thisNmr = self._getNmrAtoms()  # current nmrAtoms referenced in shiftLift
 
         # nmrAtoms with peakCount = 0 -> these are okay
         _oldNmrPks = set(nmr for nmr in _thisNmr if self not in [pk.spectrum.chemicalShiftList for pk in nmr.assignedPeaks])
@@ -207,7 +207,7 @@ class ChemicalShiftList(AbstractWrapperObject):
             raise RuntimeError(f'ChemicalShiftList.spectra: nmrAtoms already in list')
         _nmrs = _deleteNmr | _oldNmrPks
         nmrResidues = set(nmr.nmrResidue for nmr in _nmrs)
-        shifts = set(cs for nmrAt in _nmrs for cs in nmrAt.chemShifts if cs and not cs.isDeleted)
+        shifts = set(cs for nmrAt in _nmrs for cs in nmrAt.chemicalShifts if cs and not cs.isDeleted)
 
         with undoBlock():
             with undoStackBlocking() as addUndoItem:
@@ -226,12 +226,12 @@ class ChemicalShiftList(AbstractWrapperObject):
         """Get the list of nmrAtoms in the supplied spectra
         """
         _newNmr = set(nmrAtom
-                    for spec in spectra
-                    for pList in spec.peakLists if not pList.isSimulated
-                    for pk in pList.peaks
-                    for aNmrAtoms in pk.assignedNmrAtoms
-                    for nmrAtom in aNmrAtoms
-                    ) - {None}
+                      for spec in spectra
+                      for pList in spec.peakLists if not pList.isSimulated
+                      for pk in pList.peaks
+                      for aNmrAtoms in pk.assignedNmrAtoms
+                      for nmrAtom in aNmrAtoms
+                      ) - {None}
         return _newNmr
 
     def _getNmrAtoms(self):
@@ -240,20 +240,20 @@ class ChemicalShiftList(AbstractWrapperObject):
         try:
             _data = self._wrappedData.data
             _oldNmrAtoms = _data[_data[CS_ISDELETED] == False][CS_NMRATOM]
-            _oldNmr = set(self.project.getByPid(nmr) for nmr in _oldNmrAtoms) - {None} # remove any Nones
+            _oldNmr = set(self.project.getByPid(nmr) for nmr in _oldNmrAtoms) - {None}  # remove any Nones
         except:
             # dataframe may not have been ceated yet
             _oldNmr = set()
         return _oldNmr
 
     @property
-    def chemShifts(self):
+    def chemicalShifts(self):
         """Return the shifts belonging to ChemicalShiftList
         """
         return self._shifts
 
-    def _getChemicalShift(self, nmrAtom: Union[NmrAtom, str, None] = None, uniqueId: Union[int, None] = None,
-                          _includeDeleted: bool = False):
+    def getChemicalShift(self, nmrAtom: Union[NmrAtom, str, None] = None, uniqueId: Union[int, None] = None,
+                         _includeDeleted: bool = False):
         """Return a chemicalShift by nmrAtom or uniqueId
         Shift is returned as a namedTuple
         """
@@ -307,9 +307,9 @@ class ChemicalShiftList(AbstractWrapperObject):
         """
         :param includeSpectra: move the spectra to the newly created ChemicalShiftList
         :param autoUpdate: automatically update according to the project changes.
-        :return: a duplicated copy of itself containing all chemShifts.
+        :return: a duplicated copy of itself containing all chemicalShifts.
         """
-        from ccpn.core.ChemShift import _newChemicalShift as _newShift
+        from ccpn.core.ChemicalShift import _newChemicalShift as _newShift
 
         # name = _incrementObjectName(self.project, self._pluralLinkName, self.name)
         ncsl = self.project.newChemicalShiftList()
@@ -331,7 +331,7 @@ class ChemicalShiftList(AbstractWrapperObject):
             # create a new shift with the uniqueId from the dataframe
             shift = _newShift(ncsl, _ignoreUniqueId=True)
             _uniqueId = _row[CS_UNIQUEID]
-            shift._uniqueId = int(_uniqueId)
+            shift._resetUniqueId(int(_uniqueId))
             ncsl._shifts.append(shift)
 
             # add the new object to the _pid2Obj dict
@@ -346,8 +346,8 @@ class ChemicalShiftList(AbstractWrapperObject):
 
         # setting the spectra will autoUpdate as required
         ncsl.spectra = self.spectra if includeSpectra else ()
-        # # old chemShifts
-        # list(map(lambda cs: cs.copyTo(ncsl), self.chemShifts))
+        # # old chemicalShifts
+        # list(map(lambda cs: cs.copyTo(ncsl), self.chemicalShifts))
 
     @classmethod
     def _getAllWrappedData(cls, parent: Project) -> List[Nmr.ShiftList]:
@@ -452,7 +452,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         return self._wrappedData.data
 
     def _searchChemicalShifts(self, nmrAtom=None, uniqueId=None):
-        """Return True if the nmrAtom/uniqueId already exists in the chemShifts dataframe
+        """Return True if the nmrAtom/uniqueId already exists in the chemicalShifts dataframe
         """
         if nmrAtom and uniqueId:
             raise ValueError('ChemicalShiftList._searchChemicalShifts: use either nmrAtom or uniqueId')
@@ -474,7 +474,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         elif uniqueId is not None:
             # get shift by uniqueId
             if not isinstance(uniqueId, int):
-                raise ValueError('ChemicalShiftList._searchChemicalShifts: uniqueId must be an int')
+                raise ValueError(f'ChemicalShiftList._searchChemicalShifts: uniqueId must be an int - {uniqueId}')
 
             # search dataframe for single element
             _data = self._wrappedData.data
@@ -482,7 +482,7 @@ class ChemicalShiftList(AbstractWrapperObject):
             return len(rows) > 0
 
     def delete(self):
-        """Delete the chemicalShiftList and associated chemShifts
+        """Delete the chemicalShiftList and associated chemicalShifts
         """
         shifts = list(self._shifts)
 
@@ -506,7 +506,7 @@ class ChemicalShiftList(AbstractWrapperObject):
     #=========================================================================================
 
     def _updateEdgeToAlpha1(self):
-        """Move chemShifts from model shifts to pandas dataFrame
+        """Move chemicalShifts from model shifts to pandas dataFrame
 
         version 3.0.4 -> 3.1.0.alpha update
         dataframe now stored in _wrappedData.data
@@ -539,7 +539,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         """Subclassed to allow for initialisations on restore, not on creation via newChemicalShiftList
         """
         from ccpn.util.Logging import getLogger
-        from ccpn.core.ChemShift import _newChemicalShift as _newShift
+        from ccpn.core.ChemicalShift import _newChemicalShift as _newShift
 
         chemicalShiftList = super()._restoreObject(project, apiObj)
 
@@ -584,7 +584,7 @@ class ChemicalShiftList(AbstractWrapperObject):
                 shift = _newShift(chemicalShiftList, _ignoreUniqueId=True)
                 _uniqueId = _row[CS_UNIQUEID]
                 maxUniqueId = max(maxUniqueId, _uniqueId)
-                shift._uniqueId = int(_uniqueId)
+                shift._resetUniqueId(int(_uniqueId))
                 chemicalShiftList._shifts.append(shift)
 
                 # add the new object to the _pid2Obj dict
@@ -592,7 +592,7 @@ class ChemicalShiftList(AbstractWrapperObject):
 
                 shift._restoreObject()
 
-                # Need to recover the nmrAtom.chemShifts and peak.assignedNmrAtoms
+                # Need to recover the nmrAtom.chemicalShifts and peak.assignedNmrAtoms
 
             # TODO:ED - need to disable whilst half way through updating to the new objects
             #   otherwise get a clash between names in the list
@@ -602,8 +602,10 @@ class ChemicalShiftList(AbstractWrapperObject):
             if not hasattr(project._wrappedData, '_nextUniqueIdValues'):
                 setattr(project._wrappedData, '_nextUniqueIdValues', {})
             else:
-                _num = project._wrappedData._nextUniqueIdValues.get('ChemicalShift', 0)
-                project._wrappedData._nextUniqueIdValues.setdefault(CS_CLASSNAME, _num)
+                _num = project._wrappedData._nextUniqueIdValues.get('_OldChemicalShift', 0)
+                if _num > 0:
+                    project._wrappedData._nextUniqueIdValues.setdefault(CS_CLASSNAME, _num)
+                    del project._wrappedData._nextUniqueIdValues['_OldChemicalShift']
 
             _nextUniqueId = project._getUniqueIdValue(CS_CLASSNAME)
             if maxUniqueId >= _nextUniqueId:
@@ -651,7 +653,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         """Create a new pure V3 ChemicalShift object
         Method is wrapped with create/delete notifier
         """
-        from ccpn.core.ChemShift import _getByTuple, _newChemicalShift as _newShift
+        from ccpn.core.ChemicalShift import _getByTuple, _newChemicalShift as _newShift
 
         # make new tuple - verifies contents
         _row = _getByTuple(self, value, valueError, figureOfMerit,
@@ -674,7 +676,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         # create new shift object
         # new Shift only needs chemicalShiftList and uniqueId - properties are linked to dataframe
         shift = _newShift(self, _ignoreUniqueId=True)
-        shift._uniqueId = _nextId
+        shift._resetUniqueId(int(_nextId))
         if nmrAtom:
             shift.nmrAtom = nmrAtom
 
@@ -823,7 +825,7 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
 
     :param name: name for the new chemicalShiftList
     :param unit: unit type as str, e.g. 'ppm'
-    :param autoUpdate: True/False - automatically update chemShifts when assignments change
+    :param autoUpdate: True/False - automatically update chemicalShifts when assignments change
     :param isSimulated: True/False
     :param comment: optional user comment
     :return: a new ChemicalShiftList instance.

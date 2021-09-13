@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-06 17:58:20 +0100 (Mon, September 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:21:21 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -83,7 +83,7 @@ class NmrAtom(AbstractWrapperObject):
     def __init__(self, project: Project, wrappedData):
 
         # internal lists to hold the current chemicalShifts
-        self.chemShifts = []
+        self.chemicalShifts = []
 
         super().__init__(project, wrappedData)
 
@@ -371,7 +371,6 @@ class NmrAtom(AbstractWrapperObject):
         # functionality provided by the api
         self._wrappedData.name = None
 
-    @renameObject()
     def _makeUniqueName(self) -> str:
         """Generate a unique name in the form @n (e.g. @_123) or @symbol_n (e.g. @H_34)
         :return the generated name
@@ -392,7 +391,7 @@ class NmrAtom(AbstractWrapperObject):
         """Subclassed to get the '@' default name behavior"""
         if name is None:
             id = project._queryNextUniqueIdValue(cls.className)
-            name = '%s_%d' %(cls._defaultName(), id)
+            name = '%s_%d' % (cls._defaultName(), id)
         return super(NmrAtom, cls)._uniqueName(project=project, name=name)
 
     @renameObject()
@@ -408,11 +407,12 @@ class NmrAtom(AbstractWrapperObject):
 
         if value is None:
             value = self._makeUniqueName()
-            getLogger().debug('Renaming an %s without a specified value. Name set to the auto-generated option: %s.' %(self, value))
+            getLogger().debug('Renaming an %s without a specified value. Name set to the auto-generated option: %s.' % (self, value))
+        NmrAtom._validateStringValue('name', value)
 
         previous = self._parent.getNmrAtom(value.translate(Pid.remapSeparators))
         if previous is not None:
-            raise ValueError('NmrAtom.rename: "%s" conflicts with' % (value, previous))
+            raise ValueError('NmrAtom.rename: "%s" conflicts with %s' % (value, previous))
 
         # with renameObjectContextManager(self) as addUndoItem:
         isotopeCode = self.isotopeCode
@@ -423,22 +423,22 @@ class NmrAtom(AbstractWrapperObject):
         self._wrappedData.isotopeCode = UnknownIsotopeCode
         self._wrappedData.name = value
         # set isotopeCode to the correct value
-        self._wrappedData.isotopeCode = isotopeCode if isotopeCode else UnknownIsotopeCode # self._NONE_VALUE_STRING
+        self._wrappedData.isotopeCode = isotopeCode if isotopeCode else UnknownIsotopeCode  # self._NONE_VALUE_STRING
 
         self._childActions.append(self._renameChemicalShifts)
-        self._finaliseChildren.extend((sh, 'change') for sh in self.chemShifts)
+        self._finaliseChildren.extend((sh, 'change') for sh in self.chemicalShifts)
 
         return (oldName,)
 
     def _renameChemicalShifts(self):
         # update chemicalShifts
-        for cs in self.chemShifts:
+        for cs in self.chemicalShifts:
             cs._renameNmrAtom(self)
 
     def delete(self):
         """Delete self and update the chemicalShift values
         """
-        shifts = list(self.chemShifts)
+        shifts = list(self.chemicalShifts)
 
         with undoBlock():
             for sh in shifts:
@@ -544,7 +544,7 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None, com
 
     # Create the api object
     # Always create first with unknown isotopeCode
-    dd = {'resonanceGroup': resonanceGroup, 'isotopeCode': UnknownIsotopeCode, 'name':_name}
+    dd = {'resonanceGroup': resonanceGroup, 'isotopeCode': UnknownIsotopeCode, 'name': _name}
     obj = apiNmrProject.newResonance(**dd)
 
     if (result := self._project._data2Obj.get(obj)) is None:
@@ -553,10 +553,10 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None, com
     # Check/set isotopeCode; it has to be set after the creation to avoid API errors.
     result._setIsotopeCode(isotopeCode)
 
-    # adjust the name if it was not supplied; needed to create the nmrAtom first to get an uniqueId, used by rename()
-    if name is None:
-        with undoStackBlocking():
-            result.rename()
+    # # adjust the name if it was not supplied; needed to create the nmrAtom first to get an uniqueId, used by rename()
+    # if name is None:
+    #     with undoStackBlocking():
+    #         result.rename()
 
     if comment is not None and len(comment) > 0:
         result.comment = comment

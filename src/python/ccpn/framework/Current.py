@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-06 17:58:20 +0100 (Mon, September 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:21:21 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,7 @@ from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core._OldChemicalShift import _OldChemicalShift
-from ccpn.core.ChemShift import ChemShift
+from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.Sample import Sample
 from ccpn.core.Restraint import Restraint
 from ccpn.core.Substance import Substance
@@ -66,7 +66,7 @@ _currentClasses = {
     Residue          : {},
     ChemicalShiftList: {},
     _OldChemicalShift: {},
-    ChemShift        : {},
+    ChemicalShift    : {},
     Sample           : {},
     SpectrumHit      : {SingularOnly: True},
     Substance        : {},

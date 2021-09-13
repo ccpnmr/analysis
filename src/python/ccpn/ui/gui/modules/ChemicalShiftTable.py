@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-06 17:58:20 +0100 (Mon, September 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:21:22 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -39,12 +39,12 @@ from ccpn.core.lib.CallBack import CallBack
 from ccpn.core._OldChemicalShift import _OldChemicalShift
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
-from ccpn.core.ChemShift import CS_UNIQUEID, CS_ISDELETED, \
+from ccpn.core.ChemicalShift import CS_UNIQUEID, CS_ISDELETED, \
     CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT, \
     CS_NMRATOM, CS_CHAINCODE, CS_SEQUENCECODE, CS_RESIDUETYPE, CS_ATOMNAME, \
     CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT, \
     CS_COMMENT, CS_OBJECT, \
-    CS_COLUMNS, CS_TABLECOLUMNS, ChemShift
+    CS_COLUMNS, CS_TABLECOLUMNS, ChemicalShift
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import makeIterableList
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -153,7 +153,7 @@ class ChemicalShiftTable(GuiTable):
     className = 'ChemicalShiftListTable'
     attributeName = 'chemicalShiftLists'
 
-    PRIMARYCOLUMN = CS_OBJECT  # column holding active objects (uniqueId/ChemShift for this table?)
+    PRIMARYCOLUMN = CS_OBJECT  # column holding active objects (uniqueId/ChemicalShift for this table?)
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None,
                  actionCallback=None, selectionCallback=None,
@@ -218,16 +218,16 @@ class ChemicalShiftTable(GuiTable):
             self._selectChemicalShiftList(chemicalShiftList)
 
         self.setTableNotifiers(tableClass=ChemicalShiftList,
-                               rowClass=ChemShift,
+                               rowClass=ChemicalShift,
                                # cellClassNames=(NmrAtom, '_chemicalShifts'), # not required
-                               tableName='chemicalShiftList', rowName='chemShift',
+                               tableName='chemicalShiftList', rowName='chemicalShift',
                                # changeFunc=self.displayTableForChemicalShift,
                                className=self.attributeName,
                                # updateFunc=self._update,
                                # tableSelection='chemicalShiftList',
                                pullDownWidget=self._chemicalShiftListPulldown,
-                               callBackClass=ChemShift,
-                               selectCurrentCallBack=self._selectOnTableCurrentChemShiftNotifierCallback,
+                               callBackClass=ChemicalShift,
+                               selectCurrentCallBack=self._selectOnTableCurrentChemicalShiftNotifierCallback,
                                moduleParent=moduleParent)
 
         # Initialise the notifier for processing dropped items
@@ -296,9 +296,9 @@ class ChemicalShiftTable(GuiTable):
         """
         Update the table
         """
-        self.populateTable(rowObjects=chemicalShiftList.chemShifts,
+        self.populateTable(rowObjects=chemicalShiftList.chemicalShifts,
                            # columnDefs=self.CScolumns,
-                           selectedObjects=self.current.chemShifts)
+                           selectedObjects=self.current.chemicalShifts)
 
     def _getValidChemicalShift4Callback(self, objs):
         if not objs or not all(objs):
@@ -337,7 +337,7 @@ class ChemicalShiftTable(GuiTable):
         Notifier Callback for selecting a row in the table
         """
         objs = data[CallBack.OBJECT]
-        self.current.chemShifts = objs or []
+        self.current.chemicalShifts = objs or []
 
         if objs:
             nmrResidues = tuple(set(cs.nmrAtom.nmrResidue for cs in objs if cs.nmrAtom))
@@ -433,8 +433,8 @@ class ChemicalShiftTable(GuiTable):
         selection = self.getSelectedObjects()
         data = self.getRightMouseItem()
         if data:
-            chemShift = data.get(DATAFRAME_OBJECT)
-            currentNmrAtom = chemShift.nmrAtom if chemShift else None
+            cShift = data.get(DATAFRAME_OBJECT)
+            currentNmrAtom = cShift.nmrAtom if cShift else None
 
             selection = [ch.nmrAtom for ch in selection or [] if ch.nmrAtom]
             _check = (currentNmrAtom and (1 < len(selection) < 5) and currentNmrAtom in selection) or False
@@ -461,8 +461,8 @@ class ChemicalShiftTable(GuiTable):
         selection = self.getSelectedObjects()
         data = self.getRightMouseItem()
         if data and selection:
-            chemShift = data.get(DATAFRAME_OBJECT)
-            currentNmrAtom = chemShift.nmrAtom if chemShift else None
+            cShift = data.get(DATAFRAME_OBJECT)
+            currentNmrAtom = cShift.nmrAtom if cShift else None
             matching = [ch.nmrAtom for ch in selection if ch and ch.nmrAtom != currentNmrAtom and
                         ch.nmrAtom.isotopeCode == currentNmrAtom.isotopeCode]
             nonMatching = [ch.nmrAtom for ch in selection if ch and ch.nmrAtom != currentNmrAtom and
@@ -485,8 +485,8 @@ class ChemicalShiftTable(GuiTable):
         """
         data = self.getRightMouseItem()
         if data:
-            chemShift = data.get(DATAFRAME_OBJECT)
-            currentNmrAtom = chemShift.nmrAtom if chemShift else None
+            cShift = data.get(DATAFRAME_OBJECT)
+            currentNmrAtom = cShift.nmrAtom if cShift else None
 
             if currentNmrAtom:
                 from ccpn.ui.gui.popups.NmrAtomPopup import NmrAtomEditPopup
@@ -494,15 +494,15 @@ class ChemicalShiftTable(GuiTable):
                 popup = NmrAtomEditPopup(parent=self.mainWindow, mainWindow=self.mainWindow, obj=currentNmrAtom)
                 popup.exec_()
 
-    def _selectOnTableCurrentChemShiftNotifierCallback(self, data):
+    def _selectOnTableCurrentChemicalShiftNotifierCallback(self, data):
         """
         Callback from a notifier to highlight the chemical shifts
         :param data:
         """
         currentShifts = data['value']
-        self._selectOnTableCurrentChemShifts(currentShifts)
+        self._selectOnTableCurrentChemicalShifts(currentShifts)
 
-    def _selectOnTableCurrentChemShifts(self, currentShifts):
+    def _selectOnTableCurrentChemicalShifts(self, currentShifts):
         """
         Highlight the list of currentShifts on the table
         :param currentShifts:
@@ -750,7 +750,7 @@ class ChemicalShiftTable(GuiTable):
             _table.insert(CS_TABLECOLUMNS.index(CS_SHIFTLISTPEAKSCOUNT), CS_SHIFTLISTPEAKSCOUNT, None)
             _table.insert(CS_TABLECOLUMNS.index(CS_ALLPEAKSCOUNT), CS_ALLPEAKSCOUNT, None)
 
-            _objs = [self.chemicalShiftList._getChemicalShift(uniqueId=unq) for unq in _table[CS_UNIQUEID]]
+            _objs = [self.chemicalShiftList.getChemicalShift(uniqueId=unq) for unq in _table[CS_UNIQUEID]]
             if _objs:
                 # append the actual objects as the last column - not sure whether this is required - check _highlightObjs
                 _table[CS_OBJECT] = _objs

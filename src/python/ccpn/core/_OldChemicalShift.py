@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-06 17:58:20 +0100 (Mon, September 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:21:21 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.Project import Project
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.NmrAtom import NmrAtom
-from ccpn.core.ChemShift import ShiftParameters
+from ccpn.core.ChemicalShift import ShiftParameters
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr import Shift
 from ccpn.core.lib.ContextManagers import newObject
@@ -47,7 +47,7 @@ class _OldChemicalShift(AbstractWrapperObject):
     ChemicalShift objects sort as the NmrAtom they belong to."""
 
     #: Short class name, for PID.
-    shortClassName = 'CS'
+    shortClassName = '_CS'
     # Attribute it necessary as subclasses must use superclass className
     className = '_OldChemicalShift'
 
@@ -236,7 +236,7 @@ def _newChemicalShift(self: ChemicalShiftList, value: float, nmrAtom: NmrAtom,
 
 # Notifiers:
 # GWV 20181122: refactored as explicit call in NmrAtom._finalise
-# # rename chemShifts when atom is renamed
+# # rename chemicalShifts when atom is renamed
 # NmrAtom._setupCoreNotifier('rename', AbstractWrapperObject._finaliseRelatedObjectFromRename,
-#                           {'pathToObject':'chemShifts', 'action':'rename'})
+#                           {'pathToObject':'chemicalShifts', 'action':'rename'})
 # # NB The link to NmrAtom is immutable - does need a link notifier

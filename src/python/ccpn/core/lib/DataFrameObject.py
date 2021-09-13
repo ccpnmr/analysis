@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-12 19:38:28 +0100 (Thu, August 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:21:21 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -202,7 +202,7 @@ class DataFrameObject(object):
                     try:
                         listDict[header.headerText] = header.getValue(obj)
                     except Exception as es:
-                        getLogger().warning(f'Error creating table information {es}')
+                        getLogger().debug(f'Error creating table information {es}')
                         listDict[header.headerText] = None
 
                 if self._dataFrame.empty:

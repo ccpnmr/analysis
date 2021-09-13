@@ -1,5 +1,3 @@
-
-
 # TODO needs to pin base of pointer if show at will move pointer below
 # TODO needs a license
 # TODO display of body rect gives double thickness lines, anti aliasing bug?
@@ -19,9 +17,10 @@ from PyQt5.QtGui import QPainterPath, QPainter, QPen, QColor, QBrush, QPolygon, 
     QFontMetrics, QGuiApplication
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QGridLayout, QFrame
 
-from BalloonMetrics import Side, BalloonMetrics, OPPOSITE_SIDES, rect_get_side, calc_side_distance_outside_rect, \
+from ccpn.ui.gui.widgets.BalloonMetrics import Side, BalloonMetrics, OPPOSITE_SIDES, rect_get_side, calc_side_distance_outside_rect, \
     SIDE_AXIS, OPPOSITE_AXIS
 from ccpn.core.lib.ContextManagers import AntiAliasedPaintContext
+
 
 DEFAULT_SEPARATOR = '|'
 
@@ -81,7 +80,6 @@ class SpeechBalloon(QWidget):
 
         self._central_widget: Optional[QWidget] = None
 
-
     def event(self, event: QtCore.QEvent) -> bool:
         if event.type() == QEvent.LayoutRequest:
             self._layout()
@@ -90,7 +88,6 @@ class SpeechBalloon(QWidget):
             result = super(SpeechBalloon, self).event(event)
 
         return result
-
 
     def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
         super(SpeechBalloon, self).resizeEvent(event)
@@ -165,7 +162,6 @@ class SpeechBalloon(QWidget):
         painterPath = self.window_path()
 
         with AntiAliasedPaintContext(QPainter(self)) as painter:
-
             pal = self.palette()
             fgColor = pal.color(QPalette.Active, QPalette.Text)
             bgColor = pal.color(QPalette.Active, QPalette.Window)
@@ -175,7 +171,6 @@ class SpeechBalloon(QWidget):
             pen.setWidth(self._pen_width)
             painter.fillPath(painterPath, brush)
             painter.strokePath(painterPath, pen)
-
 
         return super(SpeechBalloon, self).paintEvent(a0)
 
@@ -203,7 +198,6 @@ class SpeechBalloon(QWidget):
         pixmap = QPixmap(int(path.boundingRect().width() + 2), int(path.boundingRect().height() + 2))
 
         with AntiAliasedPaintContext(QPainter(pixmap)) as painter:
-
             brush = QBrush(QColor('white'))
             painter.fillRect(pixmap.rect(), brush)
 
@@ -211,7 +205,6 @@ class SpeechBalloon(QWidget):
             painter.setBrush(brush)
 
             painter.drawPath(path)
-
 
         result = pixmap.createHeuristicMask(False)
 
@@ -236,8 +229,6 @@ class SpeechBalloon(QWidget):
         self._central_widget.setParent(self)
         self._central_widget.show()
 
-
-
     def centralWidget(self):
         return self._central_widget
 
@@ -250,7 +241,6 @@ class SpeechBalloon(QWidget):
         return result
 
     def _layout(self):
-
 
         self._metrics.from_inner(QRect(QPoint(0, 0), self._central_widget_size()))
 
@@ -289,8 +279,7 @@ class SpeechBalloon(QWidget):
     def showAt(self, point: QPoint, preferred_side=Side.RIGHT,
                side_priority=(Side.RIGHT, Side.LEFT, Side.BOTTOM, Side.TOP), target_screen=None):
 
-
-        self._showAtList(QRect(point, QSize(1, 1)), preferred_side=preferred_side, side_priority=side_priority,
+        self._showAtRect(QRect(point, QSize(1, 1)), preferred_side=preferred_side, side_priority=side_priority,
                          target_screen=target_screen)
 
     @showAt.register
@@ -356,7 +345,6 @@ class SpeechBalloon(QWidget):
             offsets[OPPOSITE_AXIS[pointer_axis]] += 10
         elif offsets[OPPOSITE_AXIS[pointer_axis]] < 0:
             offsets[OPPOSITE_AXIS[pointer_axis]] -= 10
-
 
         return QPoint(*offsets)
 
@@ -526,8 +514,6 @@ class MousePositionLabel(DoubleLabel):
 
 
 if __name__ == '__main__':
-
-
     app = MyApplication(sys.argv)
 
     window2 = SpeechBalloon()

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-04 12:28:19 +0100 (Wed, August 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:29:57 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -204,7 +204,7 @@ class GuiSpectrumDisplay(CcpnModule):
                               So for now add option below to have it turned off (False) or on (True).
         """
 
-        moduleTitle = str(self.id) # the name that appears on the GUI Module
+        moduleTitle = str(self.id)  # the name that appears on the GUI Module
         getLogger().debug('GuiSpectrumDisplay.__init__>> mainWindow %s; name: %s' % (mainWindow, moduleTitle))
         super(GuiSpectrumDisplay, self).__init__(mainWindow=mainWindow, name=moduleTitle,
                                                  size=(1100, 1300), autoOrientation=False
@@ -459,7 +459,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
         success = super(GuiSpectrumDisplay, self).renameModule(name)
         if success:
-            self.rename(name) # rename the Core Object
+            self.rename(name)  # rename the Core Object
             for strip in self.strips:
                 strip.stripLabel._populate()
 
@@ -615,7 +615,6 @@ class GuiSpectrumDisplay(CcpnModule):
 
         spectrumView = data[Notifier.OBJECT]
         trigger = data[Notifier.TRIGGER]
-        spectrum = spectrumView.spectrum
 
         # respond to the create/delete notifiers
         if trigger == Notifier.CREATE:
@@ -624,6 +623,7 @@ class GuiSpectrumDisplay(CcpnModule):
                 for strip in self.strips:
                     strip._setZWidgets()
 
+            spectrum = spectrumView.spectrum
             if spectrumView in self.spectrumViews:
                 self._spectrumChanged({Notifier.TRIGGER: Notifier.CHANGE,
                                        Notifier.OBJECT : spectrum})
@@ -1093,7 +1093,7 @@ class GuiSpectrumDisplay(CcpnModule):
             else:
                 self._handleObjs(objs, theObject)
 
-    def _handleObjs(self, objs:(list,tuple), strip=None) -> bool:
+    def _handleObjs(self, objs: (list, tuple), strip=None) -> bool:
         """handle a list of objects;
         :return True in case it is a Spectrum or a SpectrumGroup
         """
@@ -1118,7 +1118,7 @@ class GuiSpectrumDisplay(CcpnModule):
                         errorTxt = str(es)
                         showWarning('Incompatible drop', errorTxt)
                         # raise RuntimeError(errorTxt)
-                        return  success
+                        return success
 
                 if strip in self.strips:
                     self.current.strip = strip
@@ -1295,8 +1295,8 @@ class GuiSpectrumDisplay(CcpnModule):
                     annotation = substance.name
                     for peak in peaks:
                         if peak.peakList.spectrum in self.visibleSpectra:
-                            if not replaceAnnotation: # if want appending instead of replacing
-                                annotation = ', '.join(filter(None, set([peak.annotation, substance.name]))) # Filter to make sure is not duplicating any existing annotation
+                            if not replaceAnnotation:  # if want appending instead of replacing
+                                annotation = ', '.join(filter(None, set([peak.annotation, substance.name])))  # Filter to make sure is not duplicating any existing annotation
                             peak.annotation = annotation
 
         # # FIXME below still doesn't work if in stack mode
@@ -1325,7 +1325,6 @@ class GuiSpectrumDisplay(CcpnModule):
         #     elif not objectsClicked:
         #         # function not defined yet
         #         showWarning('Dropped Substance(s).','Action not implemented yet' )
-
 
     def _handleNmrAtoms(self, nmrAtoms):
 
@@ -2448,7 +2447,7 @@ class GuiSpectrumDisplay(CcpnModule):
         dims = dimensionOrder[0:1] if self.is1D else dimensionOrder
         for ic1, ic2 in zip(self.isotopeCodes, spectrum.getByDimensions('isotopeCodes', dims)):
             if ic1 != ic2:
-                raise RuntimeError('Cannot display %s on %s; incompatible isotopeCodes' % (spectrum,self))
+                raise RuntimeError('Cannot display %s on %s; incompatible isotopeCodes' % (spectrum, self))
 
         with undoStackRevert(self.application) as revertStack:
             with undoBlockWithoutSideBar(self.application):
@@ -2460,7 +2459,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
                     # Make spectrumView
                     if (spectrumView := _newSpectrumView(self, spectrum=spectrum, dimensionOrdering=dimensionOrder)) \
-                        is None:
+                            is None:
                         # notify the stack to revert to the pre-context manager stack
                         revertStack(True)
 

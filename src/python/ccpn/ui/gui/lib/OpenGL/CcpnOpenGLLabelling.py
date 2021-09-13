@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-14 19:17:57 +0100 (Mon, June 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:29:57 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -296,7 +296,10 @@ class GLLabelling():
         pls = self.objectList(objListView)
 
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
-        p0 = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
+        try:
+            p0 = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
+        except Exception as es:
+            raise
         pointLineWidths = (objLineWidths[pIndex[0]], objLineWidths[pIndex[1]])
         frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
         _alias = obj.aliasing

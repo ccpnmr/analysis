@@ -1,8 +1,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -10,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:46 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-09-13 19:29:57 +0100 (Mon, September 13, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,20 +33,19 @@ from ccpn.util.Colour import hexToRgb
 
 
 class HLine(Widget):
-
     SOLID_LINE = 'SolidLine'
     DASH_LINE = 'DashLine'
     DASH_DOT_LINE = 'DashDotLine'
     DASH_DOT_DOT_LINE = 'DashDotDotLine'
 
     styles = {
-            SOLID_LINE     : QtCore.Qt.SolidLine,
-            DASH_LINE      : QtCore.Qt.DashLine,
-            DASH_DOT_LINE  : QtCore.Qt.DashDotLine,
-            DASH_DOT_DOT_LINE: QtCore.Qt.DashDotDotLine,
-            }
+        SOLID_LINE       : QtCore.Qt.SolidLine,
+        DASH_LINE        : QtCore.Qt.DashLine,
+        DASH_DOT_LINE    : QtCore.Qt.DashDotLine,
+        DASH_DOT_DOT_LINE: QtCore.Qt.DashDotDotLine,
+        }
 
-    def __init__(self, parent=None, style=SOLID_LINE, colour=QtCore.Qt.black, height=10, lineWidth=2, divisor = 3, **kwds):
+    def __init__(self, parent=None, style=SOLID_LINE, colour=QtCore.Qt.black, height=10, lineWidth=2, divisor=3, **kwds):
         """
         :param style: Options:
                               'SolidLine';
@@ -59,8 +59,8 @@ class HLine(Widget):
         self.style = style
         self.colour = colour
         self.height = height
-        self.divisor = divisor #int(height / divisor)
-        self.lineWidth=lineWidth
+        self.divisor = divisor  #int(height / divisor)
+        self.lineWidth = lineWidth
 
         # self.setMaximumHeight(10)
         self.setFixedHeight(height)
@@ -78,7 +78,7 @@ class HLine(Widget):
         geomHeight = int(geomRect.height() / self.divisor + 0.5)
         lineHeight = geomHeight + self.contentsMargins().top()
         left = geomRect.left()
-        right =geomRect.right()
+        right = geomRect.right()
 
         if style in self.styles:
             style = self.styles[style]
@@ -96,23 +96,23 @@ class LabeledHLine(Frame):
     """
 
     def __init__(self, parent=None, height=30, text=None, bold=False,
-                                    style=HLine.SOLID_LINE, colour=QtCore.Qt.black, lineWidth=2, **kwds):
-
+                 style=HLine.SOLID_LINE, colour=QtCore.Qt.black, lineWidth=2, **kwds):
         super(LabeledHLine, self).__init__(parent=parent, setLayout=True, showBorder=False, **kwds)
-        self.setMinimumHeight(height)
+        self.setFixedHeight(height)
 
         # first line
         self._line1 = Frame(parent=self, grid=(0, 0), setLayout=True, showBorder=False, hPolicy='expanding')
-        HLine(self._line1, grid=(0,0), style=style, colour=colour, lineWidth=lineWidth, height=height, divisor=2)
+        HLine(self._line1, grid=(0, 0), style=style, colour=colour, lineWidth=lineWidth, height=height, divisor=2)
         # the label with text
         self._label = Label(parent=self, grid=(0, 1), text=text, bold=bold, hAlign='centre')
         # the second line
         self._line2 = Frame(parent=self, grid=(0, 2), setLayout=True, showBorder=False, hPolicy='expanding')
-        HLine(self._line2, grid=(0,0), style=style, colour=colour, lineWidth=lineWidth, height=height, divisor=2)
+        HLine(self._line2, grid=(0, 0), style=style, colour=colour, lineWidth=lineWidth, height=height, divisor=2)
 
     def setText(self, text):
         """Set the text of the widget"""
         self._label.setText(text)
+
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
@@ -128,10 +128,10 @@ if __name__ == '__main__':
 
     app = TestApplication()
     popup = CcpnDialog(windowTitle='Test HLine', setLayout=True)
-    Label(parent=popup, grid=(0,0), text='Just some text')
-    line = HLine(parent=popup, grid=(1, 0), hPolicy='expanding', spacing=(0,0))
-    Label(parent=popup, grid=(2,0), text='Just some text to separate')
-    line2 = LabeledHLine(parent=popup, grid=(3,0), text='a line with text')
+    Label(parent=popup, grid=(0, 0), text='Just some text')
+    line = HLine(parent=popup, grid=(1, 0), hPolicy='expanding', spacing=(0, 0))
+    Label(parent=popup, grid=(2, 0), text='Just some text to separate')
+    line2 = LabeledHLine(parent=popup, grid=(3, 0), text='a line with text')
     popup.show()
     popup.raise_()
     app.start()

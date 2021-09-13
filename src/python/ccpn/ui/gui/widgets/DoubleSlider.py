@@ -9,7 +9,8 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsItem, QGraphicsI
     QWidget, QGraphicsObject, QCheckBox, QLineEdit, QFormLayout, QTextEdit, QToolButton, QDialog, \
     QComboBox, QStyle
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
-from SpeechBalloon import SpeechBalloon, DoubleLabel, Side
+from ccpn.ui.gui.widgets.SpeechBalloon import SpeechBalloon, DoubleLabel, Side
+
 
 # class MyGraphicsScene(QGraphicsScene):
 #     def drawBackground(self, painter, rect):
@@ -48,11 +49,12 @@ RIGHT = 1
 BOTH = 2
 
 OPPOSITE_SIDES = {
-    Side.TOP: Side.BOTTOM,
+    Side.TOP   : Side.BOTTOM,
     Side.BOTTOM: Side.TOP,
-    Side.LEFT: Side.RIGHT,
-    Side.RIGHT: Side.LEFT
-}
+    Side.LEFT  : Side.RIGHT,
+    Side.RIGHT : Side.LEFT
+    }
+
 
 class DoubleRangeView(QGraphicsView):
     # signals
@@ -1384,7 +1386,7 @@ class PopoverButton(QToolButton):
 
         self._balloon_side = balloon_side
         self._speech_balloon = SpeechBalloon(side=OPPOSITE_SIDES[balloon_side])
-        self._speech_balloon.setWindowFlags(self._speech_balloon.windowFlags()| Qt.Popup)
+        self._speech_balloon.setWindowFlags(self._speech_balloon.windowFlags() | Qt.Popup)
 
         self.pressed.connect(self._press_handler)
         # self.setArrowType(Qt.DownArrow)
@@ -1396,11 +1398,10 @@ class PopoverButton(QToolButton):
                         ''')
 
         # self.setAttribute(Qt.WA_MacShowFocusRect, 0)
-        path='/Users/garythompson/Dropbox/git/ccpnmr/ccpnmr_3.0.3.edge_gwv6/src/python/ccpn/ui/gui/widgets/icons/exclamation.png'
+        path = '/Users/garythompson/Dropbox/git/ccpnmr/ccpnmr_3.0.3.edge_gwv6/src/python/ccpn/ui/gui/widgets/icons/exclamation.png'
         self.setIcon(QIcon(path))
 
         self._event_filter = None
-
 
     @pyqtProperty(Side)
     def balloonSide(self):

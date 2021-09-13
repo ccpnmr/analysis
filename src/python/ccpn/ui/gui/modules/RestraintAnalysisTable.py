@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-15 16:04:16 +0100 (Tue, June 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:29:57 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -82,6 +82,7 @@ HeaderCount2 = 'Count>0.5'
 
 ALL = '<all>'
 PymolScriptName = 'Restraint_Pymol_Template.py'
+
 
 class RestraintAnalysisTableModule(CcpnModule):
     """
@@ -395,8 +396,8 @@ class RestraintAnalysisTableWidget(GuiTable):
 
         self.setTableNotifiers(tableClass=PeakList,
                                rowClass=Peak,
-                               cellClassNames=(Restraint, 'restraints'),
-                               tableName='peakList', rowName='peak',
+                               # cellClassNames=(Restraint, 'restraints'),
+                               # tableName='peakList', rowName='peak',
                                # changeFunc=self._updateTable,
                                className=self.attributeName,
                                # updateFunc=self._updateTable,
@@ -1012,14 +1013,14 @@ class RestraintAnalysisTableWidget(GuiTable):
     def _showOnMolecularViewer(self):
 
         pdbPath = None
-        selectedPeaks= self.getSelectedObjects() or []
+        selectedPeaks = self.getSelectedObjects() or []
         ## get the restraints to display
         restraints = flattenLists([pk.restraints for pk in selectedPeaks])
         ## get the PDB file from the parent restraintList.
         for rs in restraints:
             if rs.restraintList.moleculeFilePath:
                 pdbPath = rs.restraintList.moleculeFilePath
-                getLogger().info('Using pdb file %s for displaying violation on Molecular viewer.' %pdbPath )
+                getLogger().info('Using pdb file %s for displaying violation on Molecular viewer.' % pdbPath)
                 break
         ## run Pymol
         pymolScriptPath = joinPath(self.application.pymolScriptsPath, PymolScriptName)

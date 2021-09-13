@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-06 17:55:33 +0100 (Mon, September 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-13 19:29:57 +0100 (Mon, September 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -80,7 +80,6 @@ from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QApplication
 from ccpn.ui.gui.widgets.PlotterWidget import PlotterWidget
 
-
 #from collections import OrderedDict
 
 from ccpn.ui.gui.widgets.DropBase import DropBase
@@ -101,6 +100,8 @@ MAXITEMLOGGING = 4
 
 class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     # inherits NotifierBase
+
+    WindowMaximiseMinimise = QtCore.pyqtSignal(bool)
 
     def __init__(self, application=None):
 
@@ -244,11 +245,13 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         if event.type() == QtCore.QEvent.WindowStateChange:
             if self.windowState() & QtCore.Qt.WindowMinimized:
 
+                self.WindowMaximiseMinimise.emit(False)
                 # don't do anything on minimising
                 pass
 
             elif event.oldState() & QtCore.Qt.WindowMinimized:
 
+                self.WindowMaximiseMinimise.emit(True)
                 # TODO:ED changeEvent: Normal/Maximised/FullScreen - call populate all modules
                 pass
 
@@ -511,7 +514,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     #     """
     #     return self.project.isTemporary
 
-
     def _checkForBadSpectra(self, project):
         """Report bad spectra in a popup
         """
@@ -563,26 +565,26 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     #             undo.markClean()
     #         return project
 
-        # except Exception as es:
-        #     MessageDialog.showError('loadProject', 'Error loading project:\n%s\n\n%s\n\nReloading last saved position.' % (str(projectDir), str(es)))
-        #     Logging.getLogger().warning('Error loading project: %s - Reloading last saved position.' % str(projectDir))
-        #
-        #     if not lastProjectisTemporary:
-        #         # try and load the previous project (only one try)
-        #         try:
-        #             project = self._loadProjectSingleTry(lastValidProject)
-        #             return project
-        #
-        #         except Exception as es:
-        #             MessageDialog.showError('loadProject', 'Error loading last project:\n%s\n\n%s' % (str(lastValidProject), str(es)))
-        #             Logging.getLogger().warning('Error loading last project: %s' % str(lastValidProject))
-        #     else:
-        #         # open a new project again
-        #         project = self.application.newProject()
-        #         project._mainWindow.sideBar.buildTree(project)
-        #         project._mainWindow.show()
-        #         QtWidgets.QApplication.setActiveWindow(project._mainWindow)
-        #         return project
+    # except Exception as es:
+    #     MessageDialog.showError('loadProject', 'Error loading project:\n%s\n\n%s\n\nReloading last saved position.' % (str(projectDir), str(es)))
+    #     Logging.getLogger().warning('Error loading project: %s - Reloading last saved position.' % str(projectDir))
+    #
+    #     if not lastProjectisTemporary:
+    #         # try and load the previous project (only one try)
+    #         try:
+    #             project = self._loadProjectSingleTry(lastValidProject)
+    #             return project
+    #
+    #         except Exception as es:
+    #             MessageDialog.showError('loadProject', 'Error loading last project:\n%s\n\n%s' % (str(lastValidProject), str(es)))
+    #             Logging.getLogger().warning('Error loading last project: %s' % str(lastValidProject))
+    #     else:
+    #         # open a new project again
+    #         project = self.application.newProject()
+    #         project._mainWindow.sideBar.buildTree(project)
+    #         project._mainWindow.show()
+    #         QtWidgets.QApplication.setActiveWindow(project._mainWindow)
+    #         return project
 
     def showNefPopup(self, path=None):
         """
@@ -834,7 +836,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             _label = camelCaseToString(filePath.basename)
             howtosMenu.addAction(Action(howtosMenu, text=_label, callback=partial(self._showTutorial, filePath, self)))
 
-
     def _showCCPNTutorials(self):
         from ccpn.framework.PathsAndUrls import ccpnVideos
 
@@ -1067,7 +1068,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         text = ''.join([line.strip().split(':', 6)[-1] + '\n' for line in l])
         editor.textBox.setText(text)
 
-    def _highlightCurrentStrip(self, data:Notifier):
+    def _highlightCurrentStrip(self, data: Notifier):
         """Callback on current to highlight the strip
         """
         previousStrip = data[Notifier.PREVIOUSVALUE]
@@ -1167,7 +1168,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # depending on the dataFormat
 
         if dataLoader.dataFormat == NefDataLoader.dataFormat or \
-           dataLoader.dataFormat == SparkyDataLoader.dataFormat:
+                dataLoader.dataFormat == SparkyDataLoader.dataFormat:
             choices = ['Import', 'New project', 'Cancel']
             choice = showMulti('Load %s' % dataLoader.dataFormat,
                                'How do you want to handle the file:',
@@ -1183,7 +1184,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 createNewProject = False
 
         elif dataLoader.dataFormat == SpectrumDataLoader.dataFormat and dataLoader.existsInProject():
-            choice = showYesNo('Spectrum "%s"'  % dataLoader.path,
+            choice = showYesNo('Spectrum "%s"' % dataLoader.path,
                                'already exists in the project, do you want to load?')
             if choice == False:
                 ignore = True
@@ -1197,7 +1198,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # use an undoBlockWithoutSideBar, and ignore logging if MAXITEMLOGGING or more items
         # to stop overloading of the log
 
-        urls = [str(url) for url in data.get(DropBase.URLS, []) if len(url)>0]
+        urls = [str(url) for url in data.get(DropBase.URLS, []) if len(url) > 0]
         if urls is None:
             return []
 
@@ -1208,7 +1209,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # analyse the Urls
         for url in urls:
             dataLoader, createsNewProject, ignore = self._getDataLoader(url)
-            dataLoaders.append( (url, dataLoader, createsNewProject, ignore) )
+            dataLoaders.append((url, dataLoader, createsNewProject, ignore))
 
         # analyse for potential errors
         errorUrls = [url for url, dl, createNew, ignore in dataLoaders if (dl is None and not ignore)]
@@ -1221,7 +1222,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # Analyse if any Url would create a new project
         createNewProject = any([createNew for url, dl, createNew, ignore in dataLoaders])
         if createNewProject and not self._queryCloseProject(title='Load project', phrase='create a new'):
-                return []
+            return []
 
         # load the url's with valid handlers
         urlsToLoad = [(url, dl, createNew) for url, dl, createNew, ignore in dataLoaders if
@@ -1236,6 +1237,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 with undoBlockWithoutSideBar():
                     result = dLoader.load()
             return result
+
         #end def
 
         objs = []
@@ -1392,7 +1394,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         except RuntimeError as es:
             MessageDialog.showError('Load Project', '"%s" did not yield a valid new project (%s)' % \
                                     (dataLoader.path, str(es)), parent=self
-                                   )
+                                    )
 
             # First get to a defined state
             self.application.newProject()
@@ -1426,49 +1428,48 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     #                 with progressManager(self, 'Loading project... ' + url):
     #                     obj = self._loadProjectLastValid(url)
 
-            # dataType, subType, usePath = ioFormats.analyseUrl(url)
-            # if subType == ioFormats.NMRSTAR:  # NMRStar file is available only as import of metadata not as stand alone project
-            #     self.application._loadNMRStarFile(url)
-            #     return objs
-            #
-            # if subType == ioFormats.NEF and self.application.preferences.appearance.openImportPopupOnDroppedNef:
-            #     self.application._importNef(url)
-            #     return objs
-            #
-            # if dataType == 'Project' and subType in (ioFormats.CCPN,
-            #                                          ioFormats.NEF,
-            #                                          ioFormats.SPARKY):
-            #
-            #     try:
-            #         okToContinue = self._queryCloseProject(title='Load %s project' % subType,
-            #                                                phrase='create a new')
-            #         if okToContinue:
-            #             with progressManager(self, 'Loading project... ' + url):
-            #                 obj = None
-            #                 obj = self._loadProjectLastValid(url)
-            #
-            #     except Exception as es:
-            #         MessageDialog.showError('Load Project', 'loadProject Error: %s' % str(es))
-            #         getLogger().warning('loadProject Error: %s' % str(es), )
-            #         getLogger().exception(str(es))
-            #
-            # else:
-            #     # with progressManager(self.mainWindow, 'Loading data... ' + url):
-            #     try:  #  Why do we need this try?
-            #         spectraPathsCount = len(ioFormats._searchSpectraPathsInSubDir(url))
-            #         askBeforeOpen_lenght = 20  # Ask user if want to open all (spectra) before start loading the full set.
-            #         if spectraPathsCount > askBeforeOpen_lenght:
-            #             okToOpenAll = MessageDialog.showYesNo('Load data', 'The directory contains multiple items (~%s).'
-            #                                                                ' Do you want to open all?' % str(spectraPathsCount))
-            #             if not okToOpenAll:
-            #                 continue
-            #         with notificationEchoBlocking():
-            #             data = self.project.loadData(url)
-            #             if data:
-            #                 objs.extend(data)
-            #
-            #     except Exception as es:
-            #         MessageDialog.showError('Load Data', 'Loading "%s" encountered error: %s' % (url,str(es)))
-            #         getLogger().warning('loadData Error: %s' % str(es))
-        # return objs
-
+    # dataType, subType, usePath = ioFormats.analyseUrl(url)
+    # if subType == ioFormats.NMRSTAR:  # NMRStar file is available only as import of metadata not as stand alone project
+    #     self.application._loadNMRStarFile(url)
+    #     return objs
+    #
+    # if subType == ioFormats.NEF and self.application.preferences.appearance.openImportPopupOnDroppedNef:
+    #     self.application._importNef(url)
+    #     return objs
+    #
+    # if dataType == 'Project' and subType in (ioFormats.CCPN,
+    #                                          ioFormats.NEF,
+    #                                          ioFormats.SPARKY):
+    #
+    #     try:
+    #         okToContinue = self._queryCloseProject(title='Load %s project' % subType,
+    #                                                phrase='create a new')
+    #         if okToContinue:
+    #             with progressManager(self, 'Loading project... ' + url):
+    #                 obj = None
+    #                 obj = self._loadProjectLastValid(url)
+    #
+    #     except Exception as es:
+    #         MessageDialog.showError('Load Project', 'loadProject Error: %s' % str(es))
+    #         getLogger().warning('loadProject Error: %s' % str(es), )
+    #         getLogger().exception(str(es))
+    #
+    # else:
+    #     # with progressManager(self.mainWindow, 'Loading data... ' + url):
+    #     try:  #  Why do we need this try?
+    #         spectraPathsCount = len(ioFormats._searchSpectraPathsInSubDir(url))
+    #         askBeforeOpen_lenght = 20  # Ask user if want to open all (spectra) before start loading the full set.
+    #         if spectraPathsCount > askBeforeOpen_lenght:
+    #             okToOpenAll = MessageDialog.showYesNo('Load data', 'The directory contains multiple items (~%s).'
+    #                                                                ' Do you want to open all?' % str(spectraPathsCount))
+    #             if not okToOpenAll:
+    #                 continue
+    #         with notificationEchoBlocking():
+    #             data = self.project.loadData(url)
+    #             if data:
+    #                 objs.extend(data)
+    #
+    #     except Exception as es:
+    #         MessageDialog.showError('Load Data', 'Loading "%s" encountered error: %s' % (url,str(es)))
+    #         getLogger().warning('loadData Error: %s' % str(es))
+    # return objs

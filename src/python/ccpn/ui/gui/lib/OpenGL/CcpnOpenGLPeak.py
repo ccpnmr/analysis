@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-12 03:39:48 +0100 (Thu, August 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-14 13:10:31 +0100 (Tue, September 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -233,7 +233,7 @@ class GLpeakNdLabelling(GLpeakListMethods, GLLabelling):
                 vplLen = len(visiblePlaneList)
 
                 if actualPlane in visiblePlaneList[1:vplLen - 1]:
-                    return True, False, 0, 1.0
+                    inPlane &= True
 
                 # exit if don't want to view outOfPlane peaks
                 elif not viewOutOfPlanePeaks:
@@ -251,7 +251,6 @@ class GLpeakNdLabelling(GLpeakListMethods, GLLabelling):
                     # catch any stray conditions
                     return False, False, 0, 1.0
 
-        # return True, False, 0, 1.0
         return inPlane, (not inPlane), endPlane, GLDefs.INPLANEFADE if inPlane else GLDefs.OUTOFPLANEFADE
 
 

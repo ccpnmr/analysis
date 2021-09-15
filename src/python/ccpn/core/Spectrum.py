@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-15 13:50:07 +0100 (Wed, September 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-15 19:22:31 +0100 (Wed, September 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -116,6 +116,7 @@ SERIESITEMS = '_seriesItems'
 DISPLAYFOLDEDCONTOURS = 'displayFoldedContours'
 
 MAXALIASINGRANGE = 3
+
 
 #=========================================================================================
 # Spectrum class
@@ -228,6 +229,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """
         if self._spectrumDimensions is None:
             from ccpn.core.SpectrumReference import SpectrumReference
+
             self._spectrumDimensions = tuple(self._getChildrenByClass(SpectrumReference))
         return self._spectrumDimensions
 
@@ -264,33 +266,34 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         self._intensities = None
         self._positions = None
 
-        self._spectrumDimensions = None   # A tuple of SpectrumReferences instances; set once and retained for speed
+        self._spectrumDimensions = None  # A tuple of SpectrumReferences instances; set once and retained for speed
 
         self.doubleCrosshairOffsets = self.dimensionCount * [0]  # TBD: do we need this to be a property?
         self.showDoubleCrosshair = False
         self._scaleChanged = False
+
     #-----------------------------------------------------------------------------------------
     # end __init__
     #-----------------------------------------------------------------------------------------
 
     # References to DataStore / DataSource instances for filePath manipulation and (binary) data reading;
-    _dataStore = DataStoreTrait(default_value = None, read_only = True).tag(
-                                saveToJson = True,
-                                info = """
+    _dataStore = DataStoreTrait(default_value=None, read_only=True).tag(
+            saveToJson=True,
+            info="""
                                 A DataStore instance encoding the path and dataFormat of the (binary) spectrum data.
                                 None indicates no spectrum data file path has been defined"""
-                                )
+            )
 
     # CCPNINTERNAL: Also used in PeakPickers
-    _dataSource = DataSourceTrait(default_value = None, read_only = True).tag(
-                                  saveToJson = True,
-                                  info = """
+    _dataSource = DataSourceTrait(default_value=None, read_only=True).tag(
+            saveToJson=True,
+            info="""
                                   A SpectrumDataSource instance for reading (writing) of the (binary) spectrum data.
                                   None indicates no valid spectrum data file has been defined""")
 
-    _peakPicker = PeakPickerTrait(default_value = None).tag(
-                                  saveToJson = True,
-                                  info = "A PeakPicker instance")
+    _peakPicker = PeakPickerTrait(default_value=None).tag(
+            saveToJson=True,
+            info="A PeakPicker instance")
 
     @property
     def peakPicker(self):
@@ -718,7 +721,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """
         # setting filePath will re-initialiase a dataSource instance
         _filePath = self.filePath
-        self.filePath  = _filePath
+        self.filePath = _filePath
         self._dataSource.exportToSpectrum(self, includePath=False)
 
     @property
@@ -776,7 +779,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._getDimensionalAttributes('pointCount')
 
     @pointCounts.setter
-    @checkSpectrumPropertyValue(iterable=True, types=(int,float))
+    @checkSpectrumPropertyValue(iterable=True, types=(int, float))
     def pointCounts(self, value: Sequence):
         self._setDimensionalAttributes('pointCount', value)
 
@@ -836,7 +839,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             return self.axisCodes[trues[0]]
         else:
             raise RuntimeError(
-        'Spectrum.aquisitionAxisCode: this should not happen; more then one dimension defined as acquisition dimension')
+                    'Spectrum.aquisitionAxisCode: this should not happen; more then one dimension defined as acquisition dimension')
 
     @property
     def dimensionTypes(self) -> List[Optional[str]]:
@@ -852,7 +855,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def isTimeDomains(self) -> list:
         """Conveniance: A list of booleans per dimension indicating if dimension is
           time domain """
-        return [(dimType == specLib.DIMENSION_TIME) for dimType in self. dimensionTypes]
+        return [(dimType == specLib.DIMENSION_TIME) for dimType in self.dimensionTypes]
 
     @property
     @_includeInDimensionalCopy
@@ -892,7 +895,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             elif dimType == specLib.DIMENSION_TIME:
                 # valuePerPoint is dwell time
                 valuePerPoint = 1.0 / self.spectralWidthsHz[axis] if self.isComplex[axis] \
-                                 else 0.5 / self.spectralWidthsHz[axis]
+                    else 0.5 / self.spectralWidthsHz[axis]
             else:
                 valuePerPoint = None
 
@@ -1003,7 +1006,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @measurementTypes.setter
     @checkSpectrumPropertyValue(iterable=True, types=(str,), enumerated=specLib.MEASUREMENT_TYPES,
-                                mapping={'shift':'Shift'})
+                                mapping={'shift': 'Shift'})
     def measurementTypes(self, value):
         self._setDimensionalAttributes('measurementType', value)
 
@@ -1248,12 +1251,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         minVals = [t[0] for t in value]
         maxVals = [t[1] for t in value]
 
-        _eta = 1e-8 # for rounding errors
-        _specLims = self.spectrumLimits
-        if any(val > min(specLim) + _eta for val, specLim in zip(minVals, _specLims)):
-            raise ValueError(f'invalid aliasingLimit; lower aliasingLimit exceeds minimum spectrumLimit  {minVals}  {_specLims}')
-        if any(val < max(specLim) - _eta for val, specLim in zip(maxVals, _specLims)):
-            raise ValueError(f'invalid aliasingLimit; upper aliasingLimit exceeds maximum spectrumLimit  {maxVals}  {_specLims}')
+        # crude check that the centre is always included
+        _specLimMeans = [(sl[0] + sl[1]) / 2 for sl in self.spectrumLimits]
+        if any(val >= specLim for val, specLim in zip(minVals, _specLimMeans)):
+            raise ValueError(f'invalid aliasingLimit; lower aliasingLimit exceeds minimum spectrumLimit  {minVals}  {self.spectrumLimits}')
+        if any(val <= specLim for val, specLim in zip(maxVals, _specLimMeans)):
+            raise ValueError(f'invalid aliasingLimit; upper aliasingLimit exceeds maximum spectrumLimit  {maxVals}  {self.spectrumLimits}')
 
         self._setDimensionalAttributes('minAliasedFrequency', minVals)
         self._setDimensionalAttributes('maxAliasedFrequency', maxVals)
@@ -1282,6 +1285,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         #     else:
         #         ll.append((ddr.pointToValue(1), ddr.pointToValue(ddr.dataDim.numPoints + 1)))
         # return tuple(ll)
+
+    @property
+    def foldingLimits(self) -> List[Tuple[float, float]]:
+        """list of tuples of (ppmPoint(0.5), ppmPoint(n+0.5)) for each dimension
+        """
+        return self._getDimensionalAttributes('foldingLimits')
 
     def get1Dlimits(self):
         """Get the 1D spectrum ppm-limits and the intensity limits
@@ -1457,16 +1466,16 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         self._setInternalParameter(DISPLAYFOLDEDCONTOURS, value)
 
     @property
-    def aliasingValues(self) -> Optional[Tuple[Tuple, ...]]:
+    def aliasingIndexes(self) -> Optional[Tuple[Tuple, ...]]:
         """Return a tuple of the aliasing values in each dimension, as multiples of the spectral width.
         This is a derived property from the aliasingLimits.
         """
         _alias = self.aliasingLimits
-        _limits = self.spectrumLimits
+        _limits = self.foldingLimits
+        _widths = self.spectralWidths
 
         values = []
-        for alias, lim in zip(_alias, _limits):
-            width = max(lim) - min(lim)
+        for alias, lim, width in zip(_alias, _limits, _widths):
             minA, maxA = min(alias), max(alias)
             minLim, maxLim = min(lim), max(lim)
             values.append((int((minA - minLim + width / 2) // width), int((maxA - maxLim + width / 2) // width)))
@@ -2284,7 +2293,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         sliceTuples = [None] * self.dimensionCount
         for axis, ac, dim in self.axisTriples:
             idx = inds.index(axis)
-            stopPpm, startPpm = axisPpms[idx] # to be converted to points; ppm scale runs backwards
+            stopPpm, startPpm = axisPpms[idx]  # to be converted to points; ppm scale runs backwards
 
             if startPpm is None:
                 startPoint = 1
@@ -2527,22 +2536,22 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         else:
             if not dataStore.exists():
                 raise RuntimeError('Spectrum._getDataSource: dataStore path "%s" does not exist' %
-                                    dataStore.aPath())
+                                   dataStore.aPath())
 
             dataSource = getSpectrumDataSource(dataStore.aPath(), dataStore.dataFormat)
             if dataSource is None:
                 raise RuntimeError('Spectrum._getDataSource: dataStore path "%s" is incompatible with dataFormat "%s"' %
-                                    (dataStore.aPath(), dataStore.dataFormat))
+                                   (dataStore.aPath(), dataStore.dataFormat))
 
             # check some fundamental parameters
             if dataSource.dimensionCount != self.dimensionCount:
                 raise RuntimeError('Spectrum._getDataSource: incompatible dimensionCount (%s) of "%s"' %
-                                 (dataSource.dimensionCount, dataStore.aPath()))
+                                   (dataSource.dimensionCount, dataStore.aPath()))
 
             for idx, np in enumerate(self.pointCounts):
                 if dataSource.pointCounts[idx] != np:
                     raise RuntimeError('Spectrum._getDataSource: incompatible pointsCount[%s] = %s of "%s"' %
-                                     (idx, dataSource.pointCounts[idx], dataStore.aPath()))
+                                       (idx, dataSource.pointCounts[idx], dataStore.aPath()))
 
             dataSource.spectrum = self
 
@@ -2553,7 +2562,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         Returns new peakPicker instance or None if cannot be defined
         """
         from ccpn.core.lib.SpectrumLib import fetchPeakPicker
-        if (peakPicker :=  fetchPeakPicker(self)) is not None:
+
+        if (peakPicker := fetchPeakPicker(self)) is not None:
             self.peakPicker = peakPicker
         return peakPicker
 
@@ -2658,15 +2668,15 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         # check that the read values of aliasingLimits are with the allowed range (-3, +3) and centre
         # and round to the nearest limit
-        vals = spectrum.aliasingValues
-        clippedVals = tuple((max(min(val[0], 0), -MAXALIASINGRANGE),
-                             max(min(val[1], MAXALIASINGRANGE), 0)) for val in vals)
+        inds = spectrum.aliasingIndexes
+        clippedInds = tuple((max(min(ind[0], 0), -MAXALIASINGRANGE),
+                             max(min(ind[1], MAXALIASINGRANGE), 0)) for ind in inds)
 
-        if vals != clippedVals:
+        if inds != clippedInds:
             getLogger().warning(f'AliasingLimits are out-of-range for {spectrum}, clipping to ±{MAXALIASINGRANGE} spectrumLimits')
             specLims = spectrum.spectrumLimits
-            deltaLims = tuple(abs(spLim[1] - spLim[0]) for spLim in specLims) # +ve
-            newLims = tuple((min(sp) + min(cl) * dl, max(sp) + max(cl) * dl) for sp, cl, dl in zip(specLims, clippedVals, deltaLims))
+            deltaLims = tuple(abs(spLim[1] - spLim[0]) for spLim in specLims)  # +ve
+            newLims = tuple((min(sp) + min(cl) * dl, max(sp) + max(cl) * dl) for sp, cl, dl in zip(specLims, clippedInds, deltaLims))
             # set the new aliasing limits
             spectrum.aliasingLimits = newLims
 
@@ -3173,7 +3183,7 @@ def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], name: str =
     return spectrum
 
 
-def _newSpectrum(project: Project, path: (str, Path), name: str=None) -> (Spectrum, None):
+def _newSpectrum(project: Project, path: (str, Path), name: str = None) -> (Spectrum, None):
     """Creation of new Spectrum;
     :return: Spectrum instance or None on error
     """

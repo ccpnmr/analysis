@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-28 19:12:28 +0100 (Mon, June 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-15 19:22:32 +0100 (Wed, September 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -245,14 +245,14 @@ class GuiNdWidget(CcpnGLWidget):
                 # move to the aliased position in the bounded spectrum
                 p0[ind] += deltaPosition[ii]
 
-                visibleAlias = peak.spectrum.aliasingValues
-                spectrumLimits = peak.spectrum.spectrumLimits
+                aliasInds = peak.spectrum.aliasingIndexes
+                specLims = peak.spectrum.spectrumLimits
 
                 for dim, pos in enumerate(p0):
                     # update the aliasing so that the peak stays within the bounds of the spectrum
-                    minSpectrumFrequency, maxSpectrumFrequency = sorted(spectrumLimits[dim])
-                    regionBounds = (minSpectrumFrequency + visibleAlias[dim][0] * (maxSpectrumFrequency - minSpectrumFrequency),
-                                    minSpectrumFrequency + (visibleAlias[dim][1] + 1) * (maxSpectrumFrequency - minSpectrumFrequency))
+                    minSpectrumFrequency, maxSpectrumFrequency = sorted(specLims[dim])
+                    regionBounds = (minSpectrumFrequency + aliasInds[dim][0] * (maxSpectrumFrequency - minSpectrumFrequency),
+                                    minSpectrumFrequency + (aliasInds[dim][1] + 1) * (maxSpectrumFrequency - minSpectrumFrequency))
 
                     p0[dim] = (pos - regionBounds[0]) % (regionBounds[1] - regionBounds[0]) + regionBounds[0]
 
@@ -492,12 +492,12 @@ class GuiNdWidget(CcpnGLWidget):
         index = 0
         drawList = self.boundingBoxes
 
-        # shouldn't need to build this every time :|
+        # NOTE:ED - shouldn't need to build this every time :|
         drawList.clearArrays()
 
         # if self._preferences.showSpectrumBorder:
         if self.strip.spectrumBordersVisible:
-            for spectrumView in self._ordering:  #self._ordering:                             # strip.spectrumViews:
+            for spectrumView in self._ordering:
 
                 if spectrumView.isDeleted:
                     continue
@@ -505,8 +505,8 @@ class GuiNdWidget(CcpnGLWidget):
                 if spectrumView.isVisible() and spectrumView.spectrum.dimensionCount > 1 and spectrumView in self._spectrumSettings.keys():
                     specSettings = self._spectrumSettings[spectrumView]
 
-                    fxMin, _ = specSettings[GLDefs.SPECTRUM_XLIMITS]
-                    fyMin, _ = specSettings[GLDefs.SPECTRUM_YLIMITS]
+                    fxMin, _ = specSettings[GLDefs.SPECTRUM_XFOLDLIMITS]
+                    fyMin, _ = specSettings[GLDefs.SPECTRUM_YFOLDLIMITS]
                     dxAF, dyAF = specSettings[GLDefs.SPECTRUM_AF]
                     alias = specSettings[GLDefs.SPECTRUM_ALIASINGINDEX]
 
@@ -744,21 +744,23 @@ class GuiNdWidget(CcpnGLWidget):
         if not self._spectrumValues[0].pointCount:
             dx = -1.0 if self.INVERTXAXIS else -1.0
             fxMax, fxMin = 1.0, -1.0
+            fxFoldMax, fxFoldMin = 1.0, -1.0
             dxAF = fxMax - fxMin
             xScale = dx * dxAF
 
             dy = -1.0 if self.INVERTYAXIS else -1.0
             fyMax, fyMin = 1.0, -1.0
+            fyFoldMax, fyFoldMin = 1.0, -1.0
             dyAF = fyMax - fyMin
             yScale = dy * dyAF
             xAliasingIndex = (0, 0)
             yAliasingIndex = (0, 0)
             xFoldingMode = yFoldingMode = None
 
-            self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fxMax - fxMin))
-            self._maxXRange = max(self._maxXRange, (fxMax - fxMin))
-            self._minYRange = min(self._minYRange, GLDefs.RANGEMINSCALE * (fyMax - fyMin))
-            self._maxYRange = max(self._maxYRange, (fyMax - fyMin))
+            self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * dxAF)
+            self._maxXRange = max(self._maxXRange, dxAF)
+            self._minYRange = min(self._minYRange, GLDefs.RANGEMINSCALE * dyAF)
+            self._maxYRange = max(self._maxYRange, dyAF)
 
         else:
 
@@ -767,31 +769,33 @@ class GuiNdWidget(CcpnGLWidget):
             fxMax, fxMin = self._spectrumValues[0].maxSpectrumFrequency, self._spectrumValues[0].minSpectrumFrequency
             xAliasingIndex = self._spectrumValues[0].aliasingIndex
             xFoldingMode = self._spectrumValues[0].foldingMode
+            fxFoldMax, fxFoldMin = self._spectrumValues[0].maxFoldingFrequency, self._spectrumValues[0].minFoldingFrequency
 
             # check tolerances
             if not self._widthsChangedEnough((fxMax, 0.0), (fxMin, 0.0), tol=1e-10):
                 fxMax, fxMin = 1.0, -1.0
 
-            dxAF = fxMax - fxMin
+            dxAF = fxFoldMax - fxFoldMin  # fxMax - fxMin
             xScale = dx * dxAF / self._spectrumValues[0].pointCount
 
             dy = -1.0 if self.INVERTYAXIS else -1.0  # self.sign(self.axisT - self.axisB)
             fyMax, fyMin = self._spectrumValues[1].maxSpectrumFrequency, self._spectrumValues[1].minSpectrumFrequency
             yAliasingIndex = self._spectrumValues[1].aliasingIndex
             yFoldingMode = self._spectrumValues[1].foldingMode
+            fyFoldMax, fyFoldMin = self._spectrumValues[1].maxFoldingFrequency, self._spectrumValues[1].minFoldingFrequency
 
             # check tolerances
             if not self._widthsChangedEnough((fyMax, 0.0), (fyMin, 0.0), tol=1e-10):
                 fyMax, fyMin = 1.0, -1.0
 
-            dyAF = fyMax - fyMin
+            dyAF = fyFoldMax - fyFoldMin  # fyMax - fyMin
             yScale = dy * dyAF / self._spectrumValues[1].pointCount
 
             # set to nD limits to twice the width of the spectrum and a few data points
-            self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fxMax - fxMin) / self._spectrumValues[0].pointCount)
-            self._maxXRange = max(self._maxXRange, (fxMax - fxMin))
-            self._minYRange = min(self._minYRange, GLDefs.RANGEMINSCALE * (fyMax - fyMin) / self._spectrumValues[1].pointCount)
-            self._maxYRange = max(self._maxYRange, (fyMax - fyMin))
+            self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * dxAF / self._spectrumValues[0].pointCount)
+            self._maxXRange = max(self._maxXRange, dxAF)
+            self._minYRange = min(self._minYRange, GLDefs.RANGEMINSCALE * dyAF / self._spectrumValues[1].pointCount)
+            self._maxYRange = max(self._maxYRange, dyAF)
 
         self._rangeXDefined = True
         self._rangeYDefined = True
@@ -811,6 +815,8 @@ class GuiNdWidget(CcpnGLWidget):
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_SPINNINGRATE] = spectrumView.spectrum.spinningRate
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_ALIASINGINDEX] = (xAliasingIndex, yAliasingIndex)
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_FOLDINGMODE] = (xFoldingMode, yFoldingMode)
+        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_XFOLDLIMITS] = (fxFoldMin, fxFoldMax)
+        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_YFOLDLIMITS] = (fyFoldMin, fyFoldMax)
 
         indices = getAxisCodeMatchIndices(self.strip.axisCodes, spectrumView.spectrum.axisCodes)
         # only need the axes for this spectrum
@@ -1443,21 +1449,23 @@ class Gui1dWidget(CcpnGLWidget):
         if not self._spectrumValues[0].pointCount:
             dx = -1.0 if self.INVERTXAXIS else -1.0
             fxMax, fxMin = 1.0, -1.0
+            fxFoldMax, fxFoldMin = 1.0, -1.0
             dxAF = fxMax - fxMin
             xScale = dx * dxAF
 
             dy = -1.0 if self.INVERTYAXIS else -1.0
             fyMax, fyMin = 1.0, -1.0
+            fyFoldMax, fyFoldMin = 1.0, -1.0
             dyAF = fyMax - fyMin
             yScale = dy * dyAF
             xAliasingIndex = (0, 0)
             yAliasingIndex = (0, 0)
             xFoldingMode = yFoldingMode = None
 
-            self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fxMax - fxMin))
-            self._maxXRange = max(self._maxXRange, (fxMax - fxMin))
-            self._minYRange = min(self._minYRange, GLDefs.RANGEMINSCALE * (fyMax - fyMin))
-            self._maxYRange = max(self._maxYRange, (fyMax - fyMin))
+            self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * dxAF)
+            self._maxXRange = max(self._maxXRange, dxAF)
+            self._minYRange = min(self._minYRange, GLDefs.RANGEMINSCALE * dyAF)
+            self._maxYRange = max(self._maxYRange, dyAF)
 
         else:
 
@@ -1466,12 +1474,13 @@ class Gui1dWidget(CcpnGLWidget):
             fxMax, fxMin = self._spectrumValues[0].maxSpectrumFrequency, self._spectrumValues[0].minSpectrumFrequency
             xAliasingIndex = self._spectrumValues[0].aliasingIndex
             xFoldingMode = self._spectrumValues[0].foldingMode
+            fxFoldMax, fxFoldMin = self._spectrumValues[0].maxFoldingFrequency, self._spectrumValues[0].minFoldingFrequency
 
             # check tolerances
             if not self._widthsChangedEnough((fxMax, 0.0), (fxMin, 0.0), tol=1e-10):
                 fxMax, fxMin = 1.0, -1.0
 
-            dxAF = fxMax - fxMin
+            dxAF = fxFoldMax - fxFoldMin  # fxMax - fxMin
             xScale = dx * dxAF / self._spectrumValues[0].pointCount
 
             dy = -1.0 if self.INVERTYAXIS else -1.0  # dy = self.sign(self.axisT - self.axisB)
@@ -1492,11 +1501,11 @@ class Gui1dWidget(CcpnGLWidget):
             yScale = dy * dyAF / 1.0
 
             # set to 1D limits to twice the width of the spectrum and the intensity limit
-            self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * (fxMax - fxMin) / max(self._spectrumValues[0].pointCount, self.SPECTRUMXZOOM))
-            self._maxXRange = max(self._maxXRange, (fxMax - fxMin))
-            # self._minYRange = min(self._minYRange, 3.0 * (fyMax - fyMin) / self.SPECTRUMYZOOM)
+            self._minXRange = min(self._minXRange, GLDefs.RANGEMINSCALE * dxAF / max(self._spectrumValues[0].pointCount, self.SPECTRUMXZOOM))
+            self._maxXRange = max(self._maxXRange, dxAF)
+            # self._minYRange = min(self._minYRange, 3.0 * dyAF / self.SPECTRUMYZOOM)
             self._minYRange = min(self._minYRange, self._intensityLimit)
-            self._maxYRange = max(self._maxYRange, (fyMax - fyMin))
+            self._maxYRange = max(self._maxYRange, dyAF)
 
             self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_STACKEDMATRIX] = np.zeros((16,), dtype=np.float32)
 
@@ -1528,6 +1537,7 @@ class Gui1dWidget(CcpnGLWidget):
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_SPINNINGRATE] = spectrumView.spectrum.spinningRate
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_ALIASINGINDEX] = (xAliasingIndex, yAliasingIndex)
         self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_FOLDINGMODE] = (xFoldingMode, yFoldingMode)
+        self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_XFOLDLIMITS] = (fxFoldMin, fxFoldMax)
 
         indices = getAxisCodeMatchIndices(self.strip.axisCodes, spectrumView.spectrum.axisCodes)
         # only need the axes for this spectrum

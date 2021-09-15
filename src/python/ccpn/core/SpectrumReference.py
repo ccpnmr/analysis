@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 22:11:40 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-15 19:22:31 +0100 (Wed, September 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -269,6 +269,19 @@ class SpectrumReference(AbstractWrapperObject):
         elif self.dimensionType == specLib.DIMENSION_TIME:
             return (self.pointToValue(1.0), self.pointToValue(float(self.pointCount)))
             # return (0.0, self._valuePerPoint * self.pointCount)
+        else:
+            raise RuntimeError('SpectrumReference.limits not implemented for sampled data')
+
+    @property
+    def foldingLimits(self) -> Tuple[float, float]:
+        """Return the foldingLimits of this dimension as a tuple of floats.
+        This is the spectrumLimits ±0.5 extra points to the left and right
+        """
+        # it is easier to define a new function here than mess about with limits
+        if self.dimensionType == specLib.DIMENSION_FREQUENCY:
+            return (self.pointToValue(0.5), self.pointToValue(float(self.pointCount) + 0.5))
+        elif self.dimensionType == specLib.DIMENSION_TIME:
+            return (self.pointToValue(0.5), self.pointToValue(float(self.pointCount) + 0.5))
         else:
             raise RuntimeError('SpectrumReference.limits not implemented for sampled data')
 

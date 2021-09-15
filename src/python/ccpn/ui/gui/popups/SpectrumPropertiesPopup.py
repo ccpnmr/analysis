@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-15 13:50:09 +0100 (Wed, September 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-15 19:22:32 +0100 (Wed, September 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -574,8 +574,8 @@ class GeneralTab(Widget):
             _specLabel = Label(self, text="Reference Experiment Type ", vAlign='t', hAlign='l', grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'experimentType'))
             self.spectrumType = FilteringPulldownList(self, vAlign='t', grid=(row, 1))
             _specButton = Button(self, grid=(row, 2),
-                              callback=partial(self._raiseExperimentFilterPopup, spectrum),
-                              hPolicy='fixed', icon='icons/applications-system')
+                                 callback=partial(self._raiseExperimentFilterPopup, spectrum),
+                                 hPolicy='fixed', icon='icons/applications-system')
 
             self.spectrumType.currentIndexChanged.connect(partial(self._queueSetSpectrumType, spectrum))
             _specLabel.setVisible(False)
@@ -934,7 +934,7 @@ class DimensionsTab(Widget):
             row = 2
             self.axisCodeEdits[i] = LineEdit(self, grid=(row, i + 1), vAlign='t', hAlign='l')
             self.axisCodeEdits[i].textChanged.connect(partial(self._queueSetAxisCodes, spectrum, ))
-                                                              # self.axisCodeEdits[i].text, i))
+            # self.axisCodeEdits[i].text, i))
 
             row += 1
             self.isotopeCodePullDowns[i] = PulldownList(self, grid=(row, i + 1), vAlign='t')
@@ -946,8 +946,8 @@ class DimensionsTab(Widget):
                 # reference experiment type
                 self.spectrumType = FilteringPulldownList(self, vAlign='t', grid=(row, i + 1), gridSpan=(1, dimensions))
                 _specButton = Button(self, grid=(row, i + 1 + dimensions),
-                                  callback=partial(self._raiseExperimentFilterPopup, spectrum),
-                                  hPolicy='fixed', icon='icons/applications-system')
+                                     callback=partial(self._raiseExperimentFilterPopup, spectrum),
+                                     hPolicy='fixed', icon='icons/applications-system')
                 # Added to account for renaming of experiments
                 self.spectrumType.currentIndexChanged.connect(partial(self._queueSetSpectrumType, spectrum))
 
@@ -961,7 +961,7 @@ class DimensionsTab(Widget):
             row += 1
             # reference axis codes
             _refPullDown = self.referenceDimensionPullDowns[i] = PulldownList(self, grid=(row, i + 1), vAlign='t')
-            self.referenceDimensionPullDowns[i].currentIndexChanged.connect(partial(self._queueSetReferenceDimensions, spectrum, )) #self.referenceDimensionPullDowns[i].getText, i))
+            self.referenceDimensionPullDowns[i].currentIndexChanged.connect(partial(self._queueSetReferenceDimensions, spectrum, ))  #self.referenceDimensionPullDowns[i].getText, i))
             if self.dimensions < 2:
                 # hide as not required for 1d
                 _refPullDown.setVisible(False)
@@ -1112,7 +1112,7 @@ class DimensionsTab(Widget):
         refDimensions = self._referenceDimensions or self.spectrum.referenceExperimentDimensions
 
         if (self._referenceExperiment or self.spectrum.experimentType) is None:
-            _referenceLists = [['', val] if val else ['',] for val in refDimensions]
+            _referenceLists = [['', val] if val else ['', ] for val in refDimensions]
             _refDimensions = [val if val else '' for val in refDimensions]
 
             for ii, (refList, ref) in enumerate(zip(_referenceLists, _refDimensions)):
@@ -1120,7 +1120,7 @@ class DimensionsTab(Widget):
                 self.referenceDimensionPullDowns[ii].setIndex(refList.index(ref))
 
         else:
-            _referenceLists = [['',] for val in refDimensions]
+            _referenceLists = [['', ] for val in refDimensions]
             _refDimensions = [val if val else '' for val in refDimensions]
 
             # get the permutations of the available experiment dimensions
@@ -1185,10 +1185,10 @@ class DimensionsTab(Widget):
         with self._changes.blockChanges():
 
             self.aliasLim = self.spectrum.aliasingLimits
-            self.aliasVals = self.spectrum.aliasingValues
+            self.aliasInds = self.spectrum.aliasingIndexes
             self.axesReversed = self.spectrum.axesReversed
-            self.specLim = tuple(sorted(spLim) for spLim in self.spectrum.spectrumLimits)
-            self.deltaLim = tuple(max(spLim) - min(spLim) for spLim in self.specLim)
+            self.foldLim = tuple(sorted(lim) for lim in self.spectrum.foldingLimits)
+            self.deltaLim = self.spectrum.spectralWidths  # tuple(max(lim) - min(lim) for lim in self.foldLim)
 
             for i in range(self.dimensions):
                 value = self.spectrum.axisCodes[i]
@@ -1231,21 +1231,21 @@ class DimensionsTab(Widget):
                 self.foldingModesCheckBox[i].setChecked(dd[fModes[i]])
 
                 # pullDown for min/max aliasing
-                aliasMaxRange = list(max(self.specLim[i]) + rr * self.deltaLim[i] for rr in range(MAXALIASINGRANGE, -1, -1))
-                aliasMinRange = list(min(self.specLim[i]) + rr * self.deltaLim[i] for rr in range(0, -MAXALIASINGRANGE - 1, -1))
+                aliasMaxRange = list(max(self.foldLim[i]) + rr * self.deltaLim[i] for rr in range(MAXALIASINGRANGE, -1, -1))
+                aliasMinRange = list(min(self.foldLim[i]) + rr * self.deltaLim[i] for rr in range(0, -MAXALIASINGRANGE - 1, -1))
                 aliasMaxText = [f'{MAXALIASINGRANGE - ii}   ({aa:.3f} ppm)' for ii, aa in enumerate(aliasMaxRange)]
                 aliasMinText = [f'{-ii}   ({aa:.3f} ppm)' for ii, aa in enumerate(aliasMinRange)]
 
                 self.maxAliasingPullDowns[i].setData(aliasMaxText)
-                # _close = (max(self.aliasLim[i]) - max(self.specLim[i]) + self.deltaLim[i] / 2) // self.deltaLim[i]
+                # _close = (max(self.aliasLim[i]) - max(self.foldLim[i]) + self.deltaLim[i] / 2) // self.deltaLim[i]
                 # self.maxAliasingPullDowns[i].setIndex(MAXALIASINGRANGE - int(_close))
-                # just use the aliasingValues
-                self.maxAliasingPullDowns[i].setIndex(MAXALIASINGRANGE - self.aliasVals[i][1])
+                # just use the aliasingIndexes
+                self.maxAliasingPullDowns[i].setIndex(MAXALIASINGRANGE - self.aliasInds[i][1])
 
                 self.minAliasingPullDowns[i].setData(aliasMinText)
-                # _close = (min(self.specLim[i]) - min(self.aliasLim[i]) + self.deltaLim[i] / 2) // self.deltaLim[i]
+                # _close = (min(self.foldLim[i]) - min(self.aliasLim[i]) + self.deltaLim[i] / 2) // self.deltaLim[i]
                 # self.minAliasingPullDowns[i].setIndex(int(_close))
-                self.minAliasingPullDowns[i].setIndex(-self.aliasVals[i][0])
+                self.minAliasingPullDowns[i].setIndex(-self.aliasInds[i][0])
 
             if self.spectrum.dimensionCount > 1:
                 self.preferredAxisOrderPulldown.setPreSelect(self._fillPreferredWidgetFromAxisTexts)
@@ -1282,11 +1282,11 @@ class DimensionsTab(Widget):
         spectrum.doubleCrosshairOffsets = doubleCrosshairOffsets
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetAxisCodes(self, spectrum, _value): #valueGetter, dim): # dim required to make the changeState unique per dim
+    def _queueSetAxisCodes(self, spectrum, _value):  #valueGetter, dim): # dim required to make the changeState unique per dim
         # set the axisCodes in single operation
         value = tuple(val.text() for val in self.axisCodeEdits)
         if value != spectrum.axisCodes:
-            return partial(self._setAxisCodes, spectrum ,value) #, dim, value)
+            return partial(self._setAxisCodes, spectrum, value)  #, dim, value)
 
         # repopulate the preferred axis order pulldown
         self._fillPreferredWidgetFromAxisTexts()
@@ -1330,7 +1330,7 @@ class DimensionsTab(Widget):
         spectrum.experimentType = expType
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetReferenceDimensions(self, spectrum, _value): #valueGetter, dim):
+    def _queueSetReferenceDimensions(self, spectrum, _value):  #valueGetter, dim):
         # set the referenceDimensions in single operation
         value = tuple(val.getText() or None for val in self.referenceDimensionPullDowns)
 
@@ -1355,9 +1355,9 @@ class DimensionsTab(Widget):
         self._referenceDimensions = tuple(_refDims)
 
         if value != spectrum.referenceExperimentDimensions:
-            return partial(self._setReferenceDimensions, spectrum, value) #, dim, value)
+            return partial(self._setReferenceDimensions, spectrum, value)  #, dim, value)
 
-    def _setReferenceDimensions(self, spectrum, value): #, dim, value):
+    def _setReferenceDimensions(self, spectrum, value):  #, dim, value):
         """Set the value for a single referenceDimension
         - this can lead to non-unique values"""
         spectrum.referenceExperimentDimensions = value
@@ -1438,7 +1438,7 @@ class DimensionsTab(Widget):
     @queueStateChange(_verifyPopupApply)
     def _queueSetMinAliasing(self, spectrum, valueGetter, dim, _value):
         _index = self.minAliasingPullDowns[dim].getSelectedIndex()
-        minValue = min(self.specLim[dim]) - _index * self.deltaLim[dim]
+        minValue = min(self.foldLim[dim]) - _index * self.deltaLim[dim]
         if abs(minValue - min(spectrum.aliasingLimits[dim])) > 1e-8:  # for rounding errors
             returnVal = partial(self._setMinAliasing, self.spectrum, dim, minValue)
             return returnVal
@@ -1452,7 +1452,7 @@ class DimensionsTab(Widget):
     @queueStateChange(_verifyPopupApply)
     def _queueSetMaxAliasing(self, spectrum, valueGetter, dim, _value):
         _index = MAXALIASINGRANGE - self.maxAliasingPullDowns[dim].getSelectedIndex()
-        maxValue = max(self.specLim[dim]) + _index * self.deltaLim[dim]
+        maxValue = max(self.foldLim[dim]) + _index * self.deltaLim[dim]
         if abs(maxValue - max(spectrum.aliasingLimits[dim])) > 1e-8:  # for rounding errors
             returnVal = partial(self._setMaxAliasing, spectrum, dim, maxValue)
             return returnVal

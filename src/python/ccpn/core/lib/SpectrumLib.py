@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:01 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-15 19:22:31 +0100 (Wed, September 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -39,6 +39,7 @@ from ccpn.core.lib._DistanceRestraintsLib import _getBoundResonances, longRangeT
 from ccpn.util.Common import percentage, isIterable
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import singleton
+
 
 #=========================================================================================
 # Dimension definitions
@@ -90,9 +91,8 @@ WINDOW_FUNCTIONS = (WINDOW_FUNCTION_EM, WINDOW_FUNCTION_GM, WINDOW_FUNCTION_SINE
 
 MEASUREMENT_TYPE_TIME = 'Time'
 MEASUREMENT_TYPE_SHIFT = 'Shift'
-MEASUREMENT_TYPES = (MEASUREMENT_TYPE_TIME, MEASUREMENT_TYPE_SHIFT, 'ShiftAnisotropy','JCoupling','Rdc','TROESY','DipolarCoupling', \
-                     'MQShift','T1','T2','T1rho','T1zz')
-
+MEASUREMENT_TYPES = (MEASUREMENT_TYPE_TIME, MEASUREMENT_TYPE_SHIFT, 'ShiftAnisotropy', 'JCoupling', 'Rdc', 'TROESY', 'DipolarCoupling', \
+                     'MQShift', 'T1', 'T2', 'T1rho', 'T1zz')
 
 # Isotope-dependent assignment tolerances (in ppm)
 defaultAssignmentTolerance = 0.4
@@ -102,6 +102,8 @@ isotope2Tolerance = {
     '15N': 0.4,
     '19F': 0.03,
     }
+
+
 def getAssignmentTolerances(isotopeCode) -> float:
     """:return assignmentTolerance for isotopeCode"""
     return isotope2Tolerance.get(isotopeCode, defaultAssignmentTolerance)
@@ -149,8 +151,8 @@ def _includeInDimensionalCopy(func):
     return func
 
 
-def checkSpectrumPropertyValue(iterable:bool, unique:bool=False, allowNone:bool=False, types:tuple=(),
-                               enumerated:tuple=(), mapping={}):
+def checkSpectrumPropertyValue(iterable: bool, unique: bool = False, allowNone: bool = False, types: tuple = (),
+                               enumerated: tuple = (), mapping={}):
     """Decorator to check values of the Spectrum class property setters
 
     :param iterable: True, False: indicates that value should be an iterable
@@ -190,7 +192,7 @@ def checkSpectrumPropertyValue(iterable:bool, unique:bool=False, allowNone:bool=
     def checkIterable(obj, attributeName, value):
         """Check for iterable properties
         """
-        if not isinstance(value, (list,tuple,set)):
+        if not isinstance(value, (list, tuple, set)):
             raise ValueError('Value for "%s" of %s needs to be one of (list, tuple, set); got %r (type %s)' %
                              (attributeName, obj, value, type(value).__name__))
 
@@ -202,13 +204,13 @@ def checkSpectrumPropertyValue(iterable:bool, unique:bool=False, allowNone:bool=
             vals = [val for val in value if val is not None]
             if len(vals) != len(set(vals)):
                 raise ValueError('The items of "%s" of %s need to be unique; got %r' %
-                                (attributeName, obj, value))
+                                 (attributeName, obj, value))
 
     def checkEnumerate(obj, attributeName, value):
         """Check if values needs to be in enumerate
         """
         if len(enumerated) > 0 and value not in enumerated:
-           raise ValueError('Value for "%s" of %s needs to be of %r; got %r' %
+            raise ValueError('Value for "%s" of %s needs to be of %r; got %r' %
                              (attributeName, obj, enumerated, value))
         return value
 
@@ -237,7 +239,7 @@ def checkSpectrumPropertyValue(iterable:bool, unique:bool=False, allowNone:bool=
 
         else:
             if len(mapping) > 0:
-                    value = mapping.get(value, value)
+                value = mapping.get(value, value)
             checkedValue = checkType(self, func.__name__, value)
             checkedValue = checkEnumerate(self, func.__name__, checkedValue)
 
@@ -245,8 +247,8 @@ def checkSpectrumPropertyValue(iterable:bool, unique:bool=False, allowNone:bool=
 
     return theDecorator
 
-#=========================================================================================
 
+#=========================================================================================
 
 
 # def _oldEstimateNoiseLevel1D(x, y, factor=3):
@@ -1863,12 +1865,12 @@ def _createPeak(spectrum, peakList=None, **ppmPositions) -> Optional['Peak']:
         _ppmPositions = [_ppmPositions[ii] for ii in indices]
         height = spectrum.getHeight(_ppmPositions)
         specLimits = spectrum.spectrumLimits
-        aliasingValues = spectrum.aliasingValues
+        aliasInds = spectrum.aliasingIndexes
 
         for dim, pos in enumerate(_ppmPositions):
             # check that the picked peak lies in the bounded region of the spectrum
             minSpectrumFrequency, maxSpectrumFrequency = sorted(specLimits[dim])
-            visibleAlias = aliasingValues[dim]
+            visibleAlias = aliasInds[dim]
             regionBounds = (round(minSpectrumFrequency + visibleAlias[0] * (maxSpectrumFrequency - minSpectrumFrequency), 3),
                             round(minSpectrumFrequency + (visibleAlias[1] + 1) * (maxSpectrumFrequency - minSpectrumFrequency), 3))
 
@@ -1944,12 +1946,12 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
 
         _ppmRegions = [_ppmRegions[indices.index(ii)] for ii in range(len(indices))]
         specLimits = spectrum.spectrumLimits
-        aliasingValues = spectrum.aliasingValues
+        aliasInds = spectrum.aliasingIndexes
 
         # check that the picked peak lies in the bounded region of the spectrum
         for dim, pos in enumerate(_ppmRegions):
             minSpectrumFrequency, maxSpectrumFrequency = sorted(specLimits[dim])
-            visibleAlias = aliasingValues[dim]
+            visibleAlias = aliasInds[dim]
             regionBounds = (round(minSpectrumFrequency + visibleAlias[0] * (maxSpectrumFrequency - minSpectrumFrequency), 3),
                             round(minSpectrumFrequency + (visibleAlias[1] + 1) * (maxSpectrumFrequency - minSpectrumFrequency), 3))
 
@@ -2017,7 +2019,6 @@ def fetchPeakPicker(spectrum):
     from ccpn.core.lib.PeakPickers.PeakPickerNd import PeakPickerNd
     from ccpn.core.lib.PeakPickers.PeakPickerABC import getPeakPickerTypes, PEAKPICKERPARAMETERS
 
-
     if spectrum is None:
         raise ValueError('fetchPeakPicker: spectrum is None')
     if not isinstance(spectrum, Spectrum):
@@ -2056,11 +2057,13 @@ def fetchPeakPicker(spectrum):
 
     return _picker
 
+
 #===========================================================================================================
 # GWV testing only
 #===========================================================================================================
 
 from ccpn.util.traits.CcpNmrTraits import List, Int, Float, TraitError
+
 
 class SpectrumDimensionTrait(List):
     """

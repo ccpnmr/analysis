@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-15 13:50:08 +0100 (Wed, September 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-15 19:22:31 +0100 (Wed, September 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -5136,21 +5136,24 @@ class CcpnNefReader(CcpnNefContent):
         try:
             spectrum.aliasingLimits = list(zip(lowerLimits, higherLimits))
         except:
-            spectrum.aliasingLimits = tuple(sorted(lim) for lim in spectrum.spectrumLimits)
+            # foldingLimits extend 0.5points beyond spectrumLimits
+            spectrum.aliasingLimits = tuple(sorted(lim) for lim in spectrum.foldingLimits)
             self.warning(f'Cannot set aliasingLimits {list(zip(lowerLimits, higherLimits))} for {spectrum}, setting to spectrumLimits',
                          saveFrame)
         else:
             # check that the read values of aliasingLimits are with the allowed range (-3, +3)
             # and round to the nearest limit
-            vals = spectrum.aliasingValues
-            clippedVals = tuple(tuple(max(min(val, MAXALIASINGRANGE), -MAXALIASINGRANGE) for val in aVal) for aVal in vals)
+            inds = spectrum.aliasingIndexes
+            clippedInds = tuple(tuple(max(min(ind, MAXALIASINGRANGE), -MAXALIASINGRANGE) for ind in anInd) for anInd in inds)
 
-            if vals != clippedVals:
+            if inds != clippedInds:
                 self.warning(f'AliasingLimits {list(zip(lowerLimits, higherLimits))} out-of-range for {spectrum}, clipping to ±{MAXALIASINGRANGE} spectrum widths',
                              saveFrame)
-                specLims = spectrum.spectrumLimits
-                deltaLims = tuple(abs(spLim[1] - spLim[0]) for spLim in specLims) # +ve
-                newLims = tuple((min(sp) + min(cl) * dl, max(sp) + max(cl) * dl) for sp, cl, dl in zip(specLims, clippedVals, deltaLims))
+                # foldingLimits extend 0.5points beyond spectrumLimits
+                lims = spectrum.foldingLimits
+                wids = spectrum.spectralWidths
+                # deltaLims = tuple(abs(lim[1] - lim[0]) for lim in lims) # +ve
+                newLims = tuple((min(sp) + min(cl) * wid, max(sp) + max(cl) * wid) for sp, cl, wid in zip(lims, clippedInds, wids))
                 # set the new aliasing limits
                 spectrum.aliasingLimits = newLims
 

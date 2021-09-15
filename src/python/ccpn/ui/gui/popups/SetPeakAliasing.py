@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:50 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-15 19:22:31 +0100 (Wed, September 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -118,10 +118,10 @@ class SetPeakAliasingPopup(CcpnDialogMainWidget):
                 self.spectraPulldowns[spectrum] = []
                 Label(spectrumFrame, text=' aliasing:', grid=(specRow, 1))
 
-                visibleAlias = spectrum.aliasingValues
+                aliasInds = spectrum.aliasingIndexes
 
                 for dim in range(dims):
-                    aliasRange = list(range(visibleAlias[dim][1], visibleAlias[dim][0] - 1, -1))
+                    aliasRange = list(range(aliasInds[dim][1], aliasInds[dim][0] - 1, -1))
                     aliasText = [str(aa) for aa in aliasRange]
 
                     self.spectraPulldowns[spectrum].append(PulldownList(spectrumFrame, texts=aliasText,

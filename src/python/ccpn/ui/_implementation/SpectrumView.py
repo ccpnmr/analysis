@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-15 13:50:08 +0100 (Wed, September 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-15 19:22:31 +0100 (Wed, September 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -381,32 +381,39 @@ class SpectrumView(AbstractWrapperObject):
     @property
     def axes(self) -> tuple:
         """Spectrum axes in display order"""
-        return tuple([dim-1 for dim in self._wrappedData.spectrumView.dimensionOrdering])
+        return tuple([dim - 1 for dim in self._wrappedData.spectrumView.dimensionOrdering])
 
-    # depricated
+    # deprecated
     dimensionOrdering = axes
 
     @property
     def axisCodes(self) -> list:
         """Spectrum axisCodes in display order"""
-        return [self.spectrum.axisCodes[idx] for idx in self.axes if idx >=0]
+        return [self.spectrum.axisCodes[idx] for idx in self.axes if idx >= 0]
 
     @property
     def spectrumLimits(self) -> list:
         """Spectrum limits in display order"""
-        return [self.spectrum.spectrumLimits[idx] for idx in self.axes if idx >=0]
+        _tmp = self.spectrum.spectrumLimits
+        return [_tmp[idx] for idx in self.axes if idx >= 0]
 
     @property
     def aliasingLimits(self) -> list:
         """Spectrum aliasing limits in display order"""
         _tmp = self.spectrum.aliasingLimits
-        return [_tmp[idx] for idx in self.axes if idx >=0]
+        return [_tmp[idx] for idx in self.axes if idx >= 0]
+
+    @property
+    def foldingLimits(self) -> list:
+        """Spectrum folding limits in display order"""
+        _tmp = self.spectrum.foldingLimits
+        return [_tmp[idx] for idx in self.axes if idx >= 0]
 
     @property
     def valuesPerPoint(self) -> list:
         """Spectrum valuesPerPoint in display order"""
         _tmp = self.spectrum.valuesPerPoint
-        return [_tmp[idx] for idx in self.axes if idx >=0]
+        return [_tmp[idx] for idx in self.axes if idx >= 0]
 
     def _getByDisplayOrder(self, parameterName) -> list:
         """Return parameter in displayOrder"""
@@ -417,12 +424,12 @@ class SpectrumView(AbstractWrapperObject):
         """Convert the ppm-positions vector (in display order) to a position (1-based) vector
         in spectrum-dimension order, suitable to be used with getPlaneData
         """
-        position = [1]*self.spectrum.dimensionCount
+        position = [1] * self.spectrum.dimensionCount
         for dim, ppmValue in zip(self.dimensions, ppmPostions):
             if dim > 0:
                 # Intensity dimensions have dim=0, or axis=-1;
                 p = self.spectrum.ppm2point(value=ppmValue, dimension=dim)
-                position[dim-1] = int(p+0.5)
+                position[dim - 1] = int(p + 0.5)
 
         return tuple(position)
 
@@ -431,7 +438,7 @@ class SpectrumView(AbstractWrapperObject):
         :return Spectrum instance
         """
         position = self._getPointPosition(ppmPositions)
-        axisCodes=self.axisCodes[0:2]
+        axisCodes = self.axisCodes[0:2]
         plane = self.spectrum.extractPlaneToFile(axisCodes=axisCodes, position=position)
         return plane
 
@@ -455,6 +462,7 @@ class SpectrumView(AbstractWrapperObject):
 
         GLSignals = GLNotifier(parent=self)
         GLSignals.emitPaintEvent()
+
 
 #=========================================================================================
 # New method
@@ -507,10 +515,11 @@ def _newSpectrumView(display, spectrum, dimensionOrdering):
                     sliceColour
                  '''.split():
         if hasattr(spectrum, param):
-            value= getattr(spectrum, param)
+            value = getattr(spectrum, param)
             setattr(newSpecView, param, value)
 
     return newSpecView
+
 
 #=========================================================================================
 # Notifiers:

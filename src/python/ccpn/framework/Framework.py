@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:25:09 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-15 10:35:20 +0100 (Wed, September 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -378,6 +378,11 @@ class Framework(NotifierBase):
 
         self._initialiseFonts()
 
+        # NOTE:ED - there are currently issues when loading projects from the command line, or from test cases
+        #   There is no project.application and project is None
+        #   The Logger instantiated is the default logger, required adding extra methods so that, e.g., echoInfo worked
+        #   logCommand has no self.project.application, and requires getApplication() instead
+        #   There is NoUi instantiated yet, so temporarily added loadProject to Ui class called by loadProject below)
         # Load / create project
         projectPath = self.args.projectPath
         if projectPath:

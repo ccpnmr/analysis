@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:26:48 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-15 13:50:09 +0100 (Wed, September 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1185,6 +1185,7 @@ class DimensionsTab(Widget):
         with self._changes.blockChanges():
 
             self.aliasLim = self.spectrum.aliasingLimits
+            self.aliasVals = self.spectrum.aliasingValues
             self.axesReversed = self.spectrum.axesReversed
             self.specLim = tuple(sorted(spLim) for spLim in self.spectrum.spectrumLimits)
             self.deltaLim = tuple(max(spLim) - min(spLim) for spLim in self.specLim)
@@ -1236,12 +1237,15 @@ class DimensionsTab(Widget):
                 aliasMinText = [f'{-ii}   ({aa:.3f} ppm)' for ii, aa in enumerate(aliasMinRange)]
 
                 self.maxAliasingPullDowns[i].setData(aliasMaxText)
-                _close = (max(self.aliasLim[i]) - max(self.specLim[i]) + self.deltaLim[i] / 2) // self.deltaLim[i]
-                self.maxAliasingPullDowns[i].setIndex(MAXALIASINGRANGE - int(_close))
+                # _close = (max(self.aliasLim[i]) - max(self.specLim[i]) + self.deltaLim[i] / 2) // self.deltaLim[i]
+                # self.maxAliasingPullDowns[i].setIndex(MAXALIASINGRANGE - int(_close))
+                # just use the aliasingValues
+                self.maxAliasingPullDowns[i].setIndex(MAXALIASINGRANGE - self.aliasVals[i][1])
 
                 self.minAliasingPullDowns[i].setData(aliasMinText)
-                _close = (min(self.specLim[i]) - min(self.aliasLim[i]) + self.deltaLim[i] / 2) // self.deltaLim[i]
-                self.minAliasingPullDowns[i].setIndex(int(_close))
+                # _close = (min(self.specLim[i]) - min(self.aliasLim[i]) + self.deltaLim[i] / 2) // self.deltaLim[i]
+                # self.minAliasingPullDowns[i].setIndex(int(_close))
+                self.minAliasingPullDowns[i].setIndex(-self.aliasVals[i][0])
 
             if self.spectrum.dimensionCount > 1:
                 self.preferredAxisOrderPulldown.setPreSelect(self._fillPreferredWidgetFromAxisTexts)

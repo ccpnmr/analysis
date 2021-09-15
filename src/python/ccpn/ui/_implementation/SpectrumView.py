@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-04 12:28:19 +0100 (Wed, August 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-15 13:50:08 +0100 (Wed, September 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -398,7 +398,7 @@ class SpectrumView(AbstractWrapperObject):
 
     @property
     def aliasingLimits(self) -> list:
-        """Spectrum ailiasing limits in display order"""
+        """Spectrum aliasing limits in display order"""
         _tmp = self.spectrum.aliasingLimits
         return [_tmp[idx] for idx in self.axes if idx >=0]
 

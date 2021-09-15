@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-22 12:38:08 +0100 (Sun, August 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-15 13:50:07 +0100 (Wed, September 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1247,6 +1247,14 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                 raise ValueError('invalid aliasingLimit[%s]; expected (minLimit, maxlimit) but got %r' % (axis, t))
         minVals = [t[0] for t in value]
         maxVals = [t[1] for t in value]
+
+        _eta = 1e-8 # for rounding errors
+        _specLims = self.spectrumLimits
+        if any(val > min(specLim) + _eta for val, specLim in zip(minVals, _specLims)):
+            raise ValueError(f'invalid aliasingLimit; lower aliasingLimit exceeds minimum spectrumLimit  {minVals}  {_specLims}')
+        if any(val < max(specLim) - _eta for val, specLim in zip(maxVals, _specLims)):
+            raise ValueError(f'invalid aliasingLimit; upper aliasingLimit exceeds maximum spectrumLimit  {maxVals}  {_specLims}')
+
         self._setDimensionalAttributes('minAliasedFrequency', minVals)
         self._setDimensionalAttributes('maxAliasedFrequency', maxVals)
 
@@ -1458,7 +1466,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         values = []
         for alias, lim in zip(_alias, _limits):
-            width = abs(max(lim) - min(lim))
+            width = max(lim) - min(lim)
             minA, maxA = min(alias), max(alias)
             minLim, maxLim = min(lim), max(lim)
             values.append((int((minA - minLim + width / 2) // width), int((maxA - maxLim + width / 2) // width)))
@@ -2647,6 +2655,20 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             spectrum._getPeakPicker()
         except (ValueError, RuntimeError) as es:
             getLogger().warning('Error restoring valid peak picker for %s (%s)' % (spectrum, es))
+
+        # check that the read values of aliasingLimits are with the allowed range (-3, +3) and centre
+        # and round to the nearest limit
+        vals = spectrum.aliasingValues
+        clippedVals = tuple((max(min(val[0], 0), -MAXALIASINGRANGE),
+                             max(min(val[1], MAXALIASINGRANGE), 0)) for val in vals)
+
+        if vals != clippedVals:
+            getLogger().warning(f'AliasingLimits are out-of-range for {spectrum}, clipping to ±{MAXALIASINGRANGE} spectrumLimits')
+            specLims = spectrum.spectrumLimits
+            deltaLims = tuple(abs(spLim[1] - spLim[0]) for spLim in specLims) # +ve
+            newLims = tuple((min(sp) + min(cl) * dl, max(sp) + max(cl) * dl) for sp, cl, dl in zip(specLims, clippedVals, deltaLims))
+            # set the new aliasing limits
+            spectrum.aliasingLimits = newLims
 
         # Assure a setting of crucial attributes
         spectrum._updateParameterValues()

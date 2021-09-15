@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:21:21 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-15 13:50:08 +0100 (Wed, September 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -52,7 +52,7 @@ from ccpn.util.isotopes import isotopeCode2Nucleus
 from ccpnmodel.ccpncore.lib import Constants as coreConstants
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
-from ccpn.core.Spectrum import Spectrum
+from ccpn.core.Spectrum import Spectrum, MAXALIASINGRANGE
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.Complex import Complex
 from ccpn.core.PeakList import PeakList
@@ -5133,7 +5133,26 @@ class CcpnNefReader(CcpnNefContent):
         defaultLimits = spectrum.dimensionCount * [None]
         lowerLimits = extras.get('lower_aliasing_limit', defaultLimits)
         higherLimits = extras.get('higher_aliasing_limit', defaultLimits)
-        spectrum.aliasingLimits = list(zip(lowerLimits, higherLimits))
+        try:
+            spectrum.aliasingLimits = list(zip(lowerLimits, higherLimits))
+        except:
+            spectrum.aliasingLimits = tuple(sorted(lim) for lim in spectrum.spectrumLimits)
+            self.warning(f'Cannot set aliasingLimits {list(zip(lowerLimits, higherLimits))} for {spectrum}, setting to spectrumLimits',
+                         saveFrame)
+        else:
+            # check that the read values of aliasingLimits are with the allowed range (-3, +3)
+            # and round to the nearest limit
+            vals = spectrum.aliasingValues
+            clippedVals = tuple(tuple(max(min(val, MAXALIASINGRANGE), -MAXALIASINGRANGE) for val in aVal) for aVal in vals)
+
+            if vals != clippedVals:
+                self.warning(f'AliasingLimits {list(zip(lowerLimits, higherLimits))} out-of-range for {spectrum}, clipping to ±{MAXALIASINGRANGE} spectrum widths',
+                             saveFrame)
+                specLims = spectrum.spectrumLimits
+                deltaLims = tuple(abs(spLim[1] - spLim[0]) for spLim in specLims) # +ve
+                newLims = tuple((min(sp) + min(cl) * dl, max(sp) + max(cl) * dl) for sp, cl, dl in zip(specLims, clippedVals, deltaLims))
+                # set the new aliasing limits
+                spectrum.aliasingLimits = newLims
 
     importers['ccpn_spectrum_dimension'] = load_ccpn_spectrum_dimension
     verifiers['ccpn_spectrum_dimension'] = _noLoopVerify

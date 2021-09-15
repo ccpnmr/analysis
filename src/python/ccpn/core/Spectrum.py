@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-15 19:22:31 +0100 (Wed, September 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-15 21:07:12 +0100 (Wed, September 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1704,6 +1704,33 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         return result
 
+    def getPpmAliasingLimitsArray(self, axisCode=None, dimension=None):
+        """Return a numpy array with ppm values of the grid points along axisCode or dimension
+        for the points contained by the aliasing limits
+        """
+        if dimension is None and axisCode is None:
+            raise ValueError('Spectrum.getPpmAliasingLimits: either axisCode or dimension needs to be defined')
+        if dimension is not None and axisCode is not None:
+            raise ValueError('Spectrum.getPpmAliasingLimits: axisCode and dimension cannot be both defined')
+
+        if axisCode is not None:
+            dimension = self.getByAxisCodes('dimensions', [axisCode], exactMatch=False)[0]
+
+        if dimension is None or dimension < 1 or dimension > self.dimensionCount:
+            raise RuntimeError('Invalid dimension (%s)' % (dimension,))
+
+        aliasLims = self.aliasingLimits[dimension - 1]
+        axisRevd = self.axesReversed[dimension - 1]
+        vpp = self.valuesPerPoint[dimension - 1] * 0.5  # offset for aliasingLimits
+        if axisRevd:
+            aliasLims = list(reversed(aliasLims))
+            vpp = -vpp
+        pl = round(self.ppm2point(aliasLims[0] + vpp, dimension=dimension))
+        pr = round(self.ppm2point(aliasLims[1] - vpp, dimension=dimension))
+        result = np.linspace(aliasLims[0] + vpp, aliasLims[1] - vpp, pr - pl + 1)
+
+        return result
+
     def getDefaultOrdering(self, axisOrder):
         if not axisOrder:
             # axisOption = self.project.application.preferences.general.axisOrderingOptions
@@ -2674,11 +2701,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         if inds != clippedInds:
             getLogger().warning(f'AliasingLimits are out-of-range for {spectrum}, clipping to ±{MAXALIASINGRANGE} spectrumLimits')
-            specLims = spectrum.spectrumLimits
-            deltaLims = tuple(abs(spLim[1] - spLim[0]) for spLim in specLims)  # +ve
-            newLims = tuple((min(sp) + min(cl) * dl, max(sp) + max(cl) * dl) for sp, cl, dl in zip(specLims, clippedInds, deltaLims))
-            # set the new aliasing limits
-            spectrum.aliasingLimits = newLims
+        # foldingLimits extend 0.5points beyond spectrumLimits
+        lims = spectrum.foldingLimits
+        widths = spectrum.spectralWidths
+        newLims = tuple((min(lm) + min(cl) * wid, max(lm) + max(cl) * wid) for lm, cl, wid in zip(lims, clippedInds, widths))
+        # set the new aliasing limits
+        spectrum.aliasingLimits = newLims
 
         # Assure a setting of crucial attributes
         spectrum._updateParameterValues()

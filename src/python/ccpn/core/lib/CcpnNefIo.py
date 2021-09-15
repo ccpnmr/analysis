@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-15 19:22:31 +0100 (Wed, September 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-15 21:07:12 +0100 (Wed, September 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -5149,13 +5149,13 @@ class CcpnNefReader(CcpnNefContent):
             if inds != clippedInds:
                 self.warning(f'AliasingLimits {list(zip(lowerLimits, higherLimits))} out-of-range for {spectrum}, clipping to ±{MAXALIASINGRANGE} spectrum widths',
                              saveFrame)
-                # foldingLimits extend 0.5points beyond spectrumLimits
-                lims = spectrum.foldingLimits
-                wids = spectrum.spectralWidths
-                # deltaLims = tuple(abs(lim[1] - lim[0]) for lim in lims) # +ve
-                newLims = tuple((min(sp) + min(cl) * wid, max(sp) + max(cl) * wid) for sp, cl, wid in zip(lims, clippedInds, wids))
-                # set the new aliasing limits
-                spectrum.aliasingLimits = newLims
+            # foldingLimits extend 0.5points beyond spectrumLimits
+            lims = spectrum.foldingLimits
+            wids = spectrum.spectralWidths
+            # deltaLims = tuple(abs(lim[1] - lim[0]) for lim in lims) # +ve
+            newLims = tuple((min(sp) + min(cl) * wid, max(sp) + max(cl) * wid) for sp, cl, wid in zip(lims, clippedInds, wids))
+            # set the new aliasing limits
+            spectrum.aliasingLimits = newLims
 
     importers['ccpn_spectrum_dimension'] = load_ccpn_spectrum_dimension
     verifiers['ccpn_spectrum_dimension'] = _noLoopVerify

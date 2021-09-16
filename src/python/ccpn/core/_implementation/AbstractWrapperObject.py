@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:25:07 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-16 19:06:53 +0100 (Thu, September 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -472,26 +472,23 @@ class AbstractWrapperObject(NotifierBase):
 
     def setParameter(self, namespace: str, parameterName: str, value):
         """Sets parameterName for namespace to value; value must be json serialisable"""
-        data = deepcopy(self._ccpnInternalData)
-        space = data.setdefault(namespace, {})
-        space[parameterName] = value
-        # Explicit assignment to force saving
-        # self._wrappedData.__dict__['isModfied'] = True
-        # self._ccpnInternalData = {}
-        # self._ccpnInternalData.update(data)
-        checkXml = str(data)
-        pos = re.search('[<>]', str(checkXml), re.MULTILINE)
+        checkXml = str(value)
+        # check that the value does not contains characters incompatible with xml
+        pos = re.search('[<>]', checkXml, re.MULTILINE)
         if pos:
             raise RuntimeError("data cannot contain xml tags '{}' at pos {}".format(pos.group(), pos.span()))
-        self._wrappedData.ccpnInternalData = data
+        space = self._ccpnInternalData.setdefault(namespace, {})
+        space[parameterName] = value
+        # Explicit flag assignment to enforce saving
+        self._wrappedData.__dict__['isModified'] = True
 
     def getParameter(self, namespace: str, parameterName: str):
-        """Returns value of parameterName for namespace; returns None if not present"""
-        data = self._ccpnInternalData
-        space = data.get(namespace)
-        if space is None:
-            return None
-        return deepcopy(space.get(parameterName))
+        """Returns value of parameterName for namespace; returns None if not present
+        A copy is returned so that the integrity of model is preserved
+        """
+        space = self._ccpnInternalData.get(namespace)
+        if space is not None:
+            return deepcopy(space.get(parameterName))
 
     def hasParameter(self, namespace: str, parameterName: str):
         """Returns true if parameterName for namespace exists"""

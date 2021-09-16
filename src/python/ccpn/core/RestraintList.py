@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:19:59 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-16 19:06:53 +0100 (Thu, September 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -68,6 +68,7 @@ class RestraintList(AbstractWrapperObject):
 
     # Internal NameSpace
     _MoleculeFilePath = '_MoleculeFilePath'
+    _MOLECULEFILEPATH = 'moleculeFilePath'
 
     def __init__(self, project, wrappedData):
 
@@ -246,7 +247,7 @@ class RestraintList(AbstractWrapperObject):
         :return: a filePath for corresponding molecule.
         E.g., PDB file path for displaying molecules in a molecular viewer
         """
-        path = self._ccpnInternalData.get(self._MoleculeFilePath)
+        path = self._getInternalParameter(self._MOLECULEFILEPATH)
 
         return path
 
@@ -256,11 +257,7 @@ class RestraintList(AbstractWrapperObject):
         :param filePath: a filePath for corresponding molecule
         :return: None
         """
-        if isinstance(self._ccpnInternalData, dict):
-            tempCcpn = self._ccpnInternalData.copy()
-            tempCcpn[self._MoleculeFilePath] = filePath
-            self._ccpnInternalData = tempCcpn
-
+        self._setInternalParameter(self._MOLECULEFILEPATH, filePath)
 
     #=========================================================================================
     # Implementation functions
@@ -277,6 +274,19 @@ class RestraintList(AbstractWrapperObject):
         """Rename RestraintList, changing its name and Pid.
         """
         return self._rename(value)
+
+    @classmethod
+    def _restoreObject(cls, project, apiObj):
+        """Subclassed to allow for initialisations on restore
+        """
+        resList = super()._restoreObject(project, apiObj)
+
+        # update the list of substances
+        if resList._MoleculeFilePath in resList._ccpnInternalData:
+            value = resList._ccpnInternalData.get(resList._MoleculeFilePath)
+            if value:
+                resList._setInternalParameter(resList._MOLECULEFILEPATH, value)
+            del resList._ccpnInternalData[resList._MoleculeFilePath]
 
     #=========================================================================================
     # CCPN functions

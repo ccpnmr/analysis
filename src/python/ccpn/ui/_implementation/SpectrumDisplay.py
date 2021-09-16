@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-16 19:06:53 +0100 (Thu, September 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -562,7 +562,6 @@ class SpectrumDisplay(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(SpectrumDisplay)
-@logCommand('mainWindow.')
 def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
                         stripDirection: str = 'Y', name: str = None,
                         zPlaneNavigationMode: str = None,

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-15 19:22:31 +0100 (Wed, September 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-16 19:06:53 +0100 (Thu, September 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -102,6 +102,10 @@ isotope2Tolerance = {
     '15N': 0.4,
     '19F': 0.03,
     }
+
+
+SPECTRUM_POSITIONS = 'positions'
+SPECTRUM_INTENSITIES = 'intensities'
 
 
 def getAssignmentTolerances(isotopeCode) -> float:
@@ -320,10 +324,12 @@ def _calibrateYND(spectrum, strip, currentPosition, newPosition):
 
 
 def _set1DRawDataFromCcpnInternal(spectrum):
-    if not spectrum._ccpnInternalData['positions'] and not spectrum._ccpnInternalData['intensities']:
+    _positions = spectrum._getInternalParameter(SPECTRUM_POSITIONS)
+    _intensities = spectrum._getInternalParameter(SPECTRUM_INTENSITIES)
+    if not (_positions or _intensities):
         return
-    spectrum.positions = np.array(spectrum._ccpnInternalData['positions'])
-    spectrum.intensities = np.array(spectrum._ccpnInternalData['intensities'])
+    spectrum.positions = np.array(_positions)
+    spectrum.intensities = np.array(_intensities)
 
 
 def _negLogLikelihood(deltas, queryPeakPositions, kde):

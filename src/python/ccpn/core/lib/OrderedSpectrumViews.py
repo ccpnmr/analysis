@@ -13,7 +13,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -22,8 +23,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-12 19:39:17 +0100 (Mon, April 12, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-09-16 19:06:53 +0100 (Thu, September 16, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -54,33 +55,19 @@ class OrderedSpectrumViews(object):
         Retrieve the indexing form the ccpnInternal database
         :return: tuple of ints
         """
-        if isinstance(self._parent._ccpnInternalData, dict) and \
-                SPECTRUMVIEWINDEX in self._parent._ccpnInternalData:
-            return self._parent._ccpnInternalData[SPECTRUMVIEWINDEX]
+        self._parent._getInternalParameter(SPECTRUMVIEWINDEX)
 
     def _storeOrderedSpectrumViewIndex(self, spectrumViewIndex: Tuple[int]):
         """
         Store the indexing from the ccpnInternal database
         """
-        if isinstance(self._parent._ccpnInternalData, dict):
-            # _wrappedData._ccpnInternalData won't flag for saving unless the dict changes
-            tempCcpn = self._parent._ccpnInternalData.copy()
-            tempCcpn[SPECTRUMVIEWINDEX] = spectrumViewIndex
-            self._parent._ccpnInternalData = tempCcpn
+        self._parent._setInternalParameter(SPECTRUMVIEWINDEX, spectrumViewIndex)
 
     def orderedSpectrumViews(self, spectrumList, includeDeleted=True) -> Optional[Tuple]:
         """
         The spectrumViews attached to the strip (ordered)
         :return: tuple of SpectrumViews
         """
-        # if not self._spectrumViewIndex:
-        # index = self._retrieveOrderedSpectrumViewIndex()
-        # if index is None:
-        #     index = tuple(ii for ii in range(len(spectrumList)))
-        #
-        # self._spectrumViewIndex = index
-        # self._storeOrderedSpectrumViewIndex(index)
-
         _spectrumViewIndex = self._retrieveOrderedSpectrumViewIndex()
         if _spectrumViewIndex is None:
             _spectrumViewIndex = tuple(ii for ii in range(len(spectrumList)))
@@ -93,22 +80,12 @@ class OrderedSpectrumViews(object):
 
         # return the reordered spectrumList
         return tuple(spectrumList[index] for index in _spectrumViewIndex if index < len(spectrumList))
-        # if not spectrumList[index].isDeleted or includeDeleted)
 
     def getOrderedSpectrumViewsIndex(self) -> Optional[Tuple]:
         """
         The current indexing list
         :return: tuple of ints
         """
-        # if not self._spectrumViewIndex:
-        #
-        #     index = self._retrieveOrderedSpectrumViewIndex()
-        #     if index is None:
-        #         index = tuple(ii for ii in range(len(self._parent.spectrumViews)))
-        #
-        #     self._spectrumViewIndex = index
-        #     self._storeOrderedSpectrumViewIndex(index)
-
         _spectrumViewIndex = self._retrieveOrderedSpectrumViewIndex()
         if _spectrumViewIndex is None:
             _spectrumViewIndex = tuple(ii for ii in range(len(self._parent.spectrumViews)))
@@ -117,14 +94,6 @@ class OrderedSpectrumViews(object):
 
         # return the index list
         return _spectrumViewIndex
-
-    # def _setOrderedSpectrumViews(self, spectrumIndex: Tuple):
-    #     self._spectrumViewIndex = tuple(spectrumIndex)
-    #     self._storeOrderedSpectrumViewIndex(spectrumIndex)
-    #
-    # def _undoOrderedSpectrumViews(self, spectrumIndex: Tuple):
-    #     self._spectrumViewIndex = tuple(spectrumIndex)
-    #     self._storeOrderedSpectrumViewIndex(spectrumIndex)
 
     def setOrderedSpectrumViewsIndex(self, spectrumIndex: Tuple[int]):
         """

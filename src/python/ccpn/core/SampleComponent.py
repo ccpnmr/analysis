@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:25:07 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-16 19:06:53 +0100 (Thu, September 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -64,6 +64,9 @@ class SampleComponent(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiSampleComponent._metaclass.qualifiedName()
+
+    # Internal namespace
+    _ISOTOPECODE2FRACTION = 'isotopeCode2Fraction'
 
     # CCPN properties
     @property
@@ -184,7 +187,7 @@ class SampleComponent(AbstractWrapperObject):
 
         NBNB the internal dictionary is returned directly without checks or encapsulation"""
 
-        result = self._ccpnInternalData.get('isotopeCode2Fraction')
+        result = self._getInternalParameter(self._ISOTOPECODE2FRACTION)
         #
         return result
 
@@ -192,7 +195,7 @@ class SampleComponent(AbstractWrapperObject):
     def isotopeCode2Fraction(self, value):
         if not isinstance(value, dict):
             raise ValueError("SampleComponent.isotopeCode2Fraction must be a dictionary")
-        self._ccpnInternalData['isotopeCode2Fraction'] = value
+        self._setInternalParameter(self._ISOTOPECODE2FRACTION, value)
 
     #=========================================================================================
     # Implementation functions

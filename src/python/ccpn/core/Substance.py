@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:25:07 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-16 19:06:53 +0100 (Thu, September 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -90,6 +90,7 @@ class Substance(AbstractWrapperObject):
 
     # CCPN internal
     _linkedSpectraPids = '_linkedSpectraPids'
+    _SPECIFICATOMLABELLING = 'specificAtomLabelling'
 
     # CCPN properties
     @property
@@ -395,7 +396,7 @@ class Substance(AbstractWrapperObject):
           | 'B.211.ALA.CB':{'12C':0.32, '13C':0.68},}"""
 
         result = {}
-        dd = self._ccpnInternalData.get('_specificAtomLabelling')
+        dd = self._getInternalParameter(self._SPECIFICATOMLABELLING)
         if dd:
             for chain in self.chains:
                 # NBNB this relies on residues being sorted by seqId, and so being
@@ -429,13 +430,13 @@ class Substance(AbstractWrapperObject):
         if atom.residue.chain not in self.chains:
             raise ValueError("%s and its chain do not match the Substance" % atom.longPid)
 
-        dd = self._ccpnInternalData.get('_specificAtomLabelling')
-
+        dd = self._getInternalParameter(self._SPECIFICATOMLABELLING)
         if dd is None:
-            dd = self._ccpnInternalData['_specificAtomLabelling'] = {}
+            dd = {}
         residue = atom.residue
         residueIndex = residue.chain.residues.index(residue)
         dd[(residueIndex, atom.name)] = isotopeLabels
+        self._setInternalParameter(self._SPECIFICATOMLABELLING, dd)
 
     def removeSpecificAtomLabelling(self, atom: typing.Union[str, 'Atom']):
         """Remove specificAtomLabelling for atom designated by atomId
@@ -453,7 +454,7 @@ class Substance(AbstractWrapperObject):
         if atom.residue.chain not in self.chains:
             raise ValueError("%s and its chain do not match the Substance" % atom.longPid)
 
-        dd = self._ccpnInternalData.get('_specificAtomLabelling')
+        dd = self._getInternalParameter(self._SPECIFICATOMLABELLING)
 
         if dd is None:
             raise ValueError("Cannot remove - no atom labelling data present.")
@@ -484,7 +485,7 @@ class Substance(AbstractWrapperObject):
         if atom.residue.chain not in self.chains:
             raise ValueError("Atom %s and its chain do not match the Substance" % atom)
 
-        dd = self._ccpnInternalData.get('_specificAtomLabelling')
+        dd = self._getInternalParameter(self._SPECIFICATOMLABELLING)
         if dd:
             residue = atom.residue
             residueIndex = residue.chain.residues.index(residue)
@@ -492,7 +493,7 @@ class Substance(AbstractWrapperObject):
 
     def clearSpecificAtomLabelling(self):
         """Clear specificAtomLabelling"""
-        self._ccpnInternalData['_specificAtomLabelling'] = {}
+        self._setInternalParameter(self._SPECIFICATOMLABELLING, {})
 
     def updateSpecificAtomLabelling(self, dictionary: typing.Dict[str, typing.Dict[str, float]]):
         """Update Site-specific labelling for all chains matching Substance.

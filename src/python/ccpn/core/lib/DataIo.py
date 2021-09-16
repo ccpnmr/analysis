@@ -5,7 +5,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-01 11:22:50 +0000 (Mon, March 01, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-09-16 19:06:53 +0100 (Thu, September 16, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -566,10 +567,11 @@ def loadNmrStarChemicalShifts(project, nmrStarDatablock, chainOrder: str = None)
                     nmrAtom = nmrResidue.newNmrAtom(name=atomName, isotopeCode=isotopeCode)
                 except ValueError:
                     nmrAtom = nmrResidue.fetchNmrAtom(name=atomName)
-                dd = nmrAtom._ccpnInternalData
+
                 # NB when the same NmrAtom appears twice we get the ambiguity code
-                # and original name from the LAST occurrence
-                dd.update({'ambiguityCode': ambiguityCode, 'originalName': atomName})
+                #  and original name from the LAST occurrence
+                nmrAtom._ambiguityCode = ambiguityCode
+                nmrAtom._originalName = atomName
 
                 value = row.get('val')
                 error = row.get('val_err')
@@ -636,7 +638,7 @@ def collapseXH3Groups(nmrChain: 'NmrChain'):
 
 
 def convertBmrbAmbiguousAtoms(nmrChain):
-    """Convert NmrAtoms with na._ccpnInternalData['ambiguityCode'] 2 or 3
+    """Convert NmrAtoms with na._ambiguityCode 2 or 3
     to the 'xy' convention.
     Names are of form 'Nabi'  or 'Nabi%' or 'NAbi*' where 'N' is a one-letter nucleus code.
     'ab' is any string that is not an integer or '@' followed by an integer
@@ -666,7 +668,7 @@ def convertBmrbAmbiguousAtoms(nmrChain):
         for nmrAtom in nmrResidue.nmrAtoms:
             name = nmrAtom.name
 
-            ambiguityCode = nmrAtom._ccpnInternalData.get('ambiguityCode')
+            ambiguityCode = nmrAtom._ambiguityCode
 
             if ambiguityCode == 5:
                 # interresidue ambiguity
@@ -735,7 +737,7 @@ def convertBmrbAmbiguousAtoms(nmrChain):
 
                     na = ll[ii]
                     if na is not None:
-                        xx = na._ccpnInternalData.get('ambiguityCode')
+                        xx = na._ambiguityCode
                         if xx in (2, 3):
                             ambiguityCode = xx
                             break
@@ -774,11 +776,11 @@ def convertBmrbAmbiguousAtoms(nmrChain):
 def remapRestraintItems(project):
     """Remap restraintItems from original names to massaged names
 
-    - relies on NmrAtom._ccpnInternalData['originalName'] being set"""
+    - relies on NmrAtom._originalName being set"""
     remap = {}
     for nmrAtom in project.nmrAtoms:
         atomId = nmrAtom._id
-        originalName = nmrAtom._ccpnInternalData.get('originalName')
+        originalName = nmrAtom._originalName
         if originalName:
             if atomId.endswith('%'):
                 if atomId[-2] in 'XY':

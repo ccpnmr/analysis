@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:21:21 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-16 19:06:53 +0100 (Thu, September 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -45,7 +45,6 @@ from ccpn.core.lib.ContextManagers import newObject, renameObject, deleteV3Objec
 from ccpn.util.Logging import getLogger
 
 
-# ASSIGNEDPEAKSCHANGED = '_assignedPeaksChanged'
 UnknownIsotopeCode = '?'
 
 
@@ -79,6 +78,10 @@ class NmrAtom(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = Nmr.Resonance._metaclass.qualifiedName()
+
+    # Internal NameSpace
+    _AMBIGUITYCODE = '_ambiguityCode'
+    _ORIGINALNAME = '_originalName'
 
     def __init__(self, project: Project, wrappedData):
 
@@ -199,6 +202,32 @@ class NmrAtom(AbstractWrapperObject):
 
         data2Obj = self._project._data2Obj
         return tuple(data2Obj[x] for x in set(apiPeaks))
+
+    @property
+    def _ambiguityCode(self):
+        """Return the ambiguityCode
+        """
+        result = self._getInternalParameter(self._AMBIGUITYCODE)
+        return result
+
+    @_ambiguityCode.setter
+    def _ambiguityCode(self, value):
+        """Set the ambiguityCode
+        """
+        self._setInternalParameter(self._AMBIGUITYCODE, value)
+        
+    @property
+    def _originalName(self):
+        """Return the originalName
+        """
+        result = self._getInternalParameter(self._ORIGINALNAME)
+        return result
+
+    @_originalName.setter
+    def _originalName(self, value):
+        """Set the originalName
+        """
+        self._setInternalParameter(self._ORIGINALNAME, value)
 
     @logCommand(get='self')
     def deassign(self):

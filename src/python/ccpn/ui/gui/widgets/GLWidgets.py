@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-15 19:22:32 +0100 (Wed, September 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-16 11:08:01 +0100 (Thu, September 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -241,20 +241,19 @@ class GuiNdWidget(CcpnGLWidget):
         p0 = list(peak.position)
         for ii, ind in enumerate(indices[:2]):
             if ind is not None:
-
-                # move to the aliased position in the bounded spectrum
+                # update the peak position
                 p0[ind] += deltaPosition[ii]
 
-                aliasInds = peak.spectrum.aliasingIndexes
-                specLims = peak.spectrum.spectrumLimits
+        aliasInds = peak.spectrum.aliasingIndexes
+        lims = peak.spectrum.spectrumLimits
+        widths = peak.spectrum.spectralWidths
 
-                for dim, pos in enumerate(p0):
-                    # update the aliasing so that the peak stays within the bounds of the spectrum
-                    minSpectrumFrequency, maxSpectrumFrequency = sorted(specLims[dim])
-                    regionBounds = (minSpectrumFrequency + aliasInds[dim][0] * (maxSpectrumFrequency - minSpectrumFrequency),
-                                    minSpectrumFrequency + (aliasInds[dim][1] + 1) * (maxSpectrumFrequency - minSpectrumFrequency))
-
-                    p0[dim] = (pos - regionBounds[0]) % (regionBounds[1] - regionBounds[0]) + regionBounds[0]
+        for dim, pos in enumerate(p0):
+            # update the aliasing so that the peak stays within the bounds of the spectrumLimits/aliasingLimits
+            minSpectrumFrequency, maxSpectrumFrequency = sorted(lims[dim])
+            regionBounds = (minSpectrumFrequency + aliasInds[dim][0] * widths[dim],
+                            maxSpectrumFrequency + aliasInds[dim][1] * widths[dim])
+            p0[dim] = (pos - regionBounds[0]) % (regionBounds[1] - regionBounds[0]) + regionBounds[0]
 
         movePeak(peak, p0, updateHeight=True)
 

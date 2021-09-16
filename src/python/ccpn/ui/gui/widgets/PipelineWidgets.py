@@ -530,15 +530,16 @@ class GuiPipe(Dock, GuiPipeDrop):
             self._findChildren(i)
 
     def _formatLabelWidgets(self):
-
+        """
+        Replace the underscore with empty spaces in all labels
+        """
         self._findChildren(self)
         for num, w in enumerate(self._allChildren):
             if w.__class__.__name__ == Label.__name__:
                 text = w.get()
-                words = text.split('_')
-                words = [x.capitalize() for x in words]
-                newText = ' '.join(words)
-                w.setText(newText)
+                if '_' in text:
+                    newText = text.replace('_', ' ')
+                    w.setText(newText)
 
     def _updateWidgets(self):
         """

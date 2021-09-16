@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-15 19:22:31 +0100 (Wed, September 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-16 09:09:41 +0100 (Thu, September 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -4430,6 +4430,25 @@ class CcpnGLWidget(QOpenGLWidget):
                 spectrumView._traceScale = 1.0 / max(data) * 0.5
         return data
 
+    def _getSliceDataTest(self, spectrumView, points, sliceDim, ppmPositions, range):
+        # quick method for testing
+        # need to block logging
+        with notificationEchoBlocking(self.application):
+
+            code = spectrumView.spectrum.axisCodes[0]
+            vpps = spectrumView.spectrum.valuesPerPoint
+            axisCodes = spectrumView.spectrum.axisCodes
+
+            _region = {axis:(ppmPosition+0.5*vpp, ppmPosition+0.5*vpp)
+                       for axis, ppmPosition, vpp, in zip(axisCodes, ppmPositions, vpps)}
+            _region[code] = sorted(range)
+
+            data = spectrumView.spectrum.getRegion(**_region)
+
+            if spectrumView._traceScale is None:
+                spectrumView._traceScale = 1.0 / max(data) * 0.5
+        return data
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Code for traces
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4527,6 +4546,14 @@ class CcpnGLWidget(QOpenGLWidget):
                 data = Phasing.phaseRealData(data, ph0, ph1, pivot)
 
             x = spectrumView.spectrum.getPpmArray(dimension=dim)
+
+            # x = spectrumView.spectrum.getPpmAliasingLimitsArray(dimension=dim)  # this seems okay - need to check _getSliceData
+            # data = self._getSliceDataTest(spectrumView=spectrumView, points=point, sliceDim=dim,
+            #                               ppmPositions=positionPixel, range=[x[0], x[-1]])
+            # data = data[0]
+            # if ph0 is not None and ph1 is not None and pivot is not None:
+            #     data = Phasing.phaseRealData(data, ph0, ph1, pivot)
+
             y = positionPixel[1] + spectrumView._traceScale * (self.axisT - self.axisB) * data
             _posColour = spectrumView.posColours[0]
             colR, colG, colB = _posColour[0:3]

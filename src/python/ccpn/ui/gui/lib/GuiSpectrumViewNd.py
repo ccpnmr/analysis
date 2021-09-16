@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-30 20:44:25 +0100 (Fri, July 30, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-16 11:52:31 +0100 (Thu, September 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -35,7 +35,7 @@ from ccpnc.contour import Contourer2d
 from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
 
 
-_NEWCOMPILEDCONTOURS = True
+# _NEWCOMPILEDCONTOURS = True
 
 AxisPlaneData = namedtuple('AxisPlaneData', 'startPoint endPoint pointCount')
 
@@ -220,150 +220,153 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         posContoursAll = negContoursAll = None
         numDims = self.spectrum.dimensionCount
 
-        if _NEWCOMPILEDCONTOURS:
-            # new code for the recompiled glList
+        # if _NEWCOMPILEDCONTOURS:
 
-            # get the positive/negative contour colour lists
-            _posColours = self._interpolateColours(self.posColours, posLevels)
-            _negColours = self._interpolateColours(self.negColours, negLevels)
+        # new code for the recompiled glList
 
-            contourList = None
-            if numDims < 3 or self._application.preferences.general.generateSinglePlaneContours:
-                dataArrays = tuple()
+        # get the positive/negative contour colour lists
+        _posColours = self._interpolateColours(self.posColours, posLevels)
+        _negColours = self._interpolateColours(self.negColours, negLevels)
 
-                for position, dataArray in self._getPlaneData():
-                    dataArrays += (dataArray,)
+        contourList = None
+        if numDims < 3 or self._application.preferences.general.generateSinglePlaneContours:
+            dataArrays = tuple()
 
-                contourList = Contourer2d.contourerGLList(dataArrays,
+            for position, dataArray in self._getPlaneData():
+                # overlay all the planes into a single plane
+                dataArrays += (dataArray,)
+
+            # build the contours
+            contourList = Contourer2d.contourerGLList(dataArrays,
+                                                      posLevelsArray,
+                                                      negLevelsArray,
+                                                      np.array(_posColours, dtype=np.float32),
+                                                      np.array(_negColours, dtype=np.float32))
+        else:
+
+            specIndices = self.dimensionOrdering
+            stripIndices = tuple(specIndices.index(ii) for ii in range(numDims))
+            regionLimits = tuple(axis.region for axis in self.strip.orderedAxes)
+
+            # get the spectrumLimits bounded by the first/last points
+            axisLimits = {}
+            for axisCode in self.spectrum.axisCodes:
+                lim = self.spectrum.getPpmArray(axisCode=axisCode)
+                axisLimits[axisCode] = (min(lim[0], lim[-1]),
+                                        max(lim[0], lim[-1]))
+
+            # fill the others in from the strip
+            axisLimits.update(dict([(self.spectrum.axisCodes[ii], regionLimits[stripIndices[ii]])
+                                    for ii in range(numDims) if stripIndices[ii] is not None and stripIndices[ii] > 1]))
+
+            # use a single Nd dataArray and flatten to the visible axes - averages across the planes
+            data = self.spectrum.getRegion(**axisLimits)
+
+            if data is not None and data.size:
+                xyzDims = tuple((numDims - ind - 1) for ind in specIndices)
+                xyzDims = tuple(reversed(xyzDims))
+                tempDataArray = data.transpose(*xyzDims)
+
+                # flatten multidimensional arrays into single array
+                for maxCount in range(numDims - 2):
+                    tempDataArray = np.max(tempDataArray.clip(0.0, 1e15), axis=0) + np.min(tempDataArray.clip(-1e12, 0.0), axis=0)
+
+                contourList = Contourer2d.contourerGLList((tempDataArray,),
                                                           posLevelsArray,
                                                           negLevelsArray,
                                                           np.array(_posColours, dtype=np.float32),
                                                           np.array(_negColours, dtype=np.float32))
-            else:
 
-                specIndices = self.dimensionOrdering
-                stripIndices = tuple(specIndices.index(ii) for ii in range(numDims))
-                regionLimits = tuple(axis.region for axis in self.strip.orderedAxes)
-
-                # get the spectrumLimits bounded by the first/last points
-                axisLimits = {}
-                for axisCode in self.spectrum.axisCodes:
-                    lim = self.spectrum.getPpmArray(axisCode=axisCode)
-                    axisLimits[axisCode] = (min(lim[0], lim[-1]),
-                                            max(lim[0], lim[-1]))
-
-                # fill the others in from the strip
-                axisLimits.update(dict([(self.spectrum.axisCodes[ii], regionLimits[stripIndices[ii]])
-                                        for ii in range(numDims) if stripIndices[ii] is not None and stripIndices[ii] > 1]))
-
-                # use a single Nd dataArray and flatten to the visible axes - averages across the planes
-                data = self.spectrum.getRegion(**axisLimits)
-
-                if data is not None and data.size:
-                    xyzDims = tuple((numDims - ind - 1) for ind in specIndices)
-                    xyzDims = tuple(reversed(xyzDims))
-                    tempDataArray = data.transpose(*xyzDims)
-
-                    # flatten multidimensional arrays into single array
-                    for maxCount in range(numDims - 2):
-                        tempDataArray = np.max(tempDataArray.clip(0.0, 1e15), axis=0) + np.min(tempDataArray.clip(-1e12, 0.0), axis=0)
-
-                    contourList = Contourer2d.contourerGLList((tempDataArray,),
-                                                              posLevelsArray,
-                                                              negLevelsArray,
-                                                              np.array(_posColours, dtype=np.float32),
-                                                              np.array(_negColours, dtype=np.float32))
-
-            if contourList and contourList[1] > 0:
-                # set the contour arrays for the GL object
-                glList.numVertices = contourList[1]
-                glList.indices = contourList[2]
-                glList.vertices = contourList[3]
-                glList.colors = contourList[4]
-            else:
-                # clear the arrays
-                glList.numVertices = 0
-                glList.indices = np.array((), dtype=np.uint32)
-                glList.vertices = np.array((), dtype=np.float32)
-                glList.colors = np.array((), dtype=np.float32)
-
+        if contourList and contourList[1] > 0:
+            # set the contour arrays for the GL object
+            glList.numVertices = contourList[1]
+            glList.indices = contourList[2]
+            glList.vertices = contourList[3]
+            glList.colors = contourList[4]
         else:
-            # old contouring
-            doPosLevels = doNegLevels = True
+            # clear the arrays
+            glList.numVertices = 0
+            glList.indices = np.array((), dtype=np.uint32)
+            glList.vertices = np.array((), dtype=np.float32)
+            glList.colors = np.array((), dtype=np.float32)
 
-            for position, dataArray in self._getPlaneData():
-                if doPosLevels:
-                    posContours = Contourer2d.contourer2d(dataArray, posLevelsArray)
-                    if posContoursAll is None:
-                        posContoursAll = posContours
-                    else:
-                        for n, contourData in enumerate(posContours):
-                            if len(posContoursAll) == n:  # this can happen (if no contours at a given level then contourer immediately exits)
-                                posContoursAll.append(contourData)
-                            else:
-                                posContoursAll[n].extend(contourData)
-
-                if doNegLevels:
-                    negContours = Contourer2d.contourer2d(dataArray, negLevelsArray)
-                    if negContoursAll is None:
-                        negContoursAll = negContours
-                    else:
-                        for n, contourData in enumerate(negContours):
-                            if len(negContoursAll) == n:  # this can happen (if no contours at a given level then contourer immediately exits)
-                                negContoursAll.append(contourData)
-                            else:
-                                negContoursAll[n].extend(contourData)
-
-            glList.clearArrays()
-
-            if posContoursAll:
-                for n, contourData in enumerate(posContoursAll):
-                    for contour in contourData:
-                        glList.numVertices += len(contour)
-
-            if negContoursAll:
-                for n, contourData in enumerate(negContoursAll):
-                    for contour in contourData:
-                        glList.numVertices += len(contour)
-
-            glList.vertices = np.empty(glList.numVertices, dtype=np.float32)
-            glList.indices = np.empty(glList.numVertices, dtype=np.uint32)
-            glList.colors = np.empty(2 * glList.numVertices, dtype=np.float32)
-
-            thisIndex = 0
-            thisVertex = 0
-            thisColor = 0
-            indexCount = 0
-
-            if posContoursAll:
-                for n, contourData in enumerate(posContoursAll):
-                    for contour in contourData:
-                        count = len(contour)
-                        thisNumVertices = count // 2
-                        colCount = 2 * count
-
-                        glList.indices[thisIndex:thisIndex + count] = tuple((((ll + 1) // 2) % thisNumVertices) + indexCount for ll in range(count))
-                        glList.vertices[thisVertex:thisVertex + count] = contour
-                        glList.colors[thisColor:thisColor + colCount] = self.posColour * thisNumVertices
-                        indexCount += thisNumVertices
-                        thisIndex += count
-                        thisVertex += count
-                        thisColor += colCount
-
-            if negContoursAll:
-                for n, contourData in enumerate(negContoursAll):
-                    for contour in contourData:
-                        count = len(contour)
-                        thisNumVertices = count // 2
-                        colCount = 2 * count
-
-                        glList.indices[thisIndex:thisIndex + count] = tuple((((ll + 1) // 2) % thisNumVertices) + indexCount for ll in range(count))
-                        glList.vertices[thisVertex:thisVertex + count] = contour
-                        glList.colors[thisColor:thisColor + colCount] = self.negColour * thisNumVertices
-                        indexCount += thisNumVertices
-                        thisIndex += count
-                        thisVertex += count
-                        thisColor += colCount
+        # else:
+        #     # old contouring
+        #     doPosLevels = doNegLevels = True
+        #
+        #     for position, dataArray in self._getPlaneData():
+        #         if doPosLevels:
+        #             posContours = Contourer2d.contourer2d(dataArray, posLevelsArray)
+        #             if posContoursAll is None:
+        #                 posContoursAll = posContours
+        #             else:
+        #                 for n, contourData in enumerate(posContours):
+        #                     if len(posContoursAll) == n:  # this can happen (if no contours at a given level then contourer immediately exits)
+        #                         posContoursAll.append(contourData)
+        #                     else:
+        #                         posContoursAll[n].extend(contourData)
+        #
+        #         if doNegLevels:
+        #             negContours = Contourer2d.contourer2d(dataArray, negLevelsArray)
+        #             if negContoursAll is None:
+        #                 negContoursAll = negContours
+        #             else:
+        #                 for n, contourData in enumerate(negContours):
+        #                     if len(negContoursAll) == n:  # this can happen (if no contours at a given level then contourer immediately exits)
+        #                         negContoursAll.append(contourData)
+        #                     else:
+        #                         negContoursAll[n].extend(contourData)
+        #
+        #     glList.clearArrays()
+        #
+        #     if posContoursAll:
+        #         for n, contourData in enumerate(posContoursAll):
+        #             for contour in contourData:
+        #                 glList.numVertices += len(contour)
+        #
+        #     if negContoursAll:
+        #         for n, contourData in enumerate(negContoursAll):
+        #             for contour in contourData:
+        #                 glList.numVertices += len(contour)
+        #
+        #     glList.vertices = np.empty(glList.numVertices, dtype=np.float32)
+        #     glList.indices = np.empty(glList.numVertices, dtype=np.uint32)
+        #     glList.colors = np.empty(2 * glList.numVertices, dtype=np.float32)
+        #
+        #     thisIndex = 0
+        #     thisVertex = 0
+        #     thisColor = 0
+        #     indexCount = 0
+        #
+        #     if posContoursAll:
+        #         for n, contourData in enumerate(posContoursAll):
+        #             for contour in contourData:
+        #                 count = len(contour)
+        #                 thisNumVertices = count // 2
+        #                 colCount = 2 * count
+        #
+        #                 glList.indices[thisIndex:thisIndex + count] = tuple((((ll + 1) // 2) % thisNumVertices) + indexCount for ll in range(count))
+        #                 glList.vertices[thisVertex:thisVertex + count] = contour
+        #                 glList.colors[thisColor:thisColor + colCount] = self.posColour * thisNumVertices
+        #                 indexCount += thisNumVertices
+        #                 thisIndex += count
+        #                 thisVertex += count
+        #                 thisColor += colCount
+        #
+        #     if negContoursAll:
+        #         for n, contourData in enumerate(negContoursAll):
+        #             for contour in contourData:
+        #                 count = len(contour)
+        #                 thisNumVertices = count // 2
+        #                 colCount = 2 * count
+        #
+        #                 glList.indices[thisIndex:thisIndex + count] = tuple((((ll + 1) // 2) % thisNumVertices) + indexCount for ll in range(count))
+        #                 glList.vertices[thisVertex:thisVertex + count] = contour
+        #                 glList.colors[thisColor:thisColor + colCount] = self.negColour * thisNumVertices
+        #                 indexCount += thisNumVertices
+        #                 thisIndex += count
+        #                 thisVertex += count
+        #                 thisColor += colCount
 
     def _interpolateColours(self, colourList, levels):
         colours = []

@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-16 09:09:41 +0100 (Thu, September 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-16 11:52:31 +0100 (Thu, September 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -4915,45 +4915,46 @@ class CcpnGLWidget(QOpenGLWidget):
             for dd in deleteVList:
                 del self._vTraces[dd]
 
-    def _makeSpectrumArray(self, spectrumView, drawList):
-        drawList.renderMode = GLRENDERMODE_DRAW
-        drawList.clearArrays()
-
-        for position, dataArray in spectrumView._getPlaneData():
-            ma = np.amax(dataArray)
-            mi = np.amin(dataArray)
-            # min(  abs(  fract(P.z * gsize) - 0.5), 0.2);
-            # newData = np.clip(np.absolute(np.remainder((50.0*dataArray/ma), 1.0)-0.5), 0.2, 50.0)
-            dataScale = 15.0
-            newData = dataScale * dataArray / ma
-            npX = dataArray.shape[0]
-            npY = dataArray.shape[1]
-
-            indexing = (npX - 1) * (npY - 1)
-            elements = npX * npY
-            drawList.indices = np.zeros(int(indexing * 6), dtype=np.uint32)
-            drawList.vertices = np.zeros(int(elements * 4), dtype=np.float32)
-            drawList.colors = np.zeros(int(elements * 4), dtype=np.float32)
-
-            ii = 0
-            for y0 in range(0, npY):
-                for x0 in range(0, npX):
-                    vertex = [y0, x0, newData[x0, y0], 0.5 + newData[x0, y0] / (2.0 * dataScale)]
-                    color = [0.5, 0.5, 0.5, 1.0]
-                    drawList.vertices[ii * 4:ii * 4 + 4] = vertex
-                    drawList.colors[ii * 4:ii * 4 + 4] = color
-                    ii += 1
-            drawList.numVertices = elements
-
-            ii = 0
-            for y0 in range(0, npY - 1):
-                for x0 in range(0, npX - 1):
-                    corner = x0 + (y0 * npX)
-                    indices = [corner, corner + 1, corner + npX,
-                               corner + 1, corner + npX, corner + 1 + npX]
-                    drawList.indices[ii * 6:ii * 6 + 6] = indices
-                    ii += 1
-            break
+    # NOTE:ED - don't delete this yet
+    # def _makeSpectrumArray(self, spectrumView, drawList):
+    #     drawList.renderMode = GLRENDERMODE_DRAW
+    #     drawList.clearArrays()
+    #
+    #     for position, dataArray in spectrumView._getPlaneData():
+    #         ma = np.amax(dataArray)
+    #         mi = np.amin(dataArray)
+    #         # min(  abs(  fract(P.z * gsize) - 0.5), 0.2);
+    #         # newData = np.clip(np.absolute(np.remainder((50.0*dataArray/ma), 1.0)-0.5), 0.2, 50.0)
+    #         dataScale = 15.0
+    #         newData = dataScale * dataArray / ma
+    #         npX = dataArray.shape[0]
+    #         npY = dataArray.shape[1]
+    #
+    #         indexing = (npX - 1) * (npY - 1)
+    #         elements = npX * npY
+    #         drawList.indices = np.zeros(int(indexing * 6), dtype=np.uint32)
+    #         drawList.vertices = np.zeros(int(elements * 4), dtype=np.float32)
+    #         drawList.colors = np.zeros(int(elements * 4), dtype=np.float32)
+    #
+    #         ii = 0
+    #         for y0 in range(0, npY):
+    #             for x0 in range(0, npX):
+    #                 vertex = [y0, x0, newData[x0, y0], 0.5 + newData[x0, y0] / (2.0 * dataScale)]
+    #                 color = [0.5, 0.5, 0.5, 1.0]
+    #                 drawList.vertices[ii * 4:ii * 4 + 4] = vertex
+    #                 drawList.colors[ii * 4:ii * 4 + 4] = color
+    #                 ii += 1
+    #         drawList.numVertices = elements
+    #
+    #         ii = 0
+    #         for y0 in range(0, npY - 1):
+    #             for x0 in range(0, npX - 1):
+    #                 corner = x0 + (y0 * npX)
+    #                 indices = [corner, corner + 1, corner + npX,
+    #                            corner + 1, corner + npX, corner + 1 + npX]
+    #                 drawList.indices[ii * 6:ii * 6 + 6] = indices
+    #                 ii += 1
+    #         break
 
     def sizeHint(self):
         return QSize(self.w, self.h)

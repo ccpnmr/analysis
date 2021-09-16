@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-15 19:22:31 +0100 (Wed, September 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-16 11:52:31 +0100 (Thu, September 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -206,7 +206,7 @@ class SpectrumReference(AbstractWrapperObject):
     @property
     def isReversed(self) -> bool:
         """:return True if dimension is reversed
-        depricated!
+        deprecated!
         """
         return self._expDimRef.isAxisReversed
 
@@ -283,7 +283,7 @@ class SpectrumReference(AbstractWrapperObject):
         elif self.dimensionType == specLib.DIMENSION_TIME:
             return (self.pointToValue(0.5), self.pointToValue(float(self.pointCount) + 0.5))
         else:
-            raise RuntimeError('SpectrumReference.limits not implemented for sampled data')
+            raise RuntimeError('SpectrumReference.foldingLimits not implemented for sampled data')
 
     @property
     def isotopeCode(self) -> Optional[str]:

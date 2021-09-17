@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-07 12:11:50 +0100 (Mon, June 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-17 12:27:27 +0100 (Fri, September 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -301,6 +301,7 @@ class CcpnGLWidgetABC(QOpenGLWidget):
         self._visibleOrdering = []
         self._visibleOrderingDict = {}
         self._visibleOrderingAxisCodes = ()
+        self._tilePosition = (0, 0)
 
     def refreshDevicePixelRatio(self):
         """refresh the devicePixelRatio for the viewports

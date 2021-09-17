@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-16 11:52:31 +0100 (Thu, September 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-17 12:27:26 +0100 (Fri, September 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -465,6 +465,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self._matchingIsotopeCodes = False
         self._visibleOrderingDict = {}
         self._visibleOrderingAxisCodes = ()
+        self._tilePosition = (0, 0)
 
         self.viewports = None
 

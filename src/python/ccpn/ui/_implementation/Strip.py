@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-17 12:27:26 +0100 (Fri, September 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -38,10 +38,6 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, newObject
-
-
-STRIPTILING = 'stripTiling'
-STRIPTILEPOSITION = 'stripTilePosition'
 
 
 class Strip(AbstractWrapperObject):
@@ -67,6 +63,9 @@ class Strip(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiBoundStrip._metaclass.qualifiedName()
+
+    # internal namespace
+    _STRIPTILEPOSITION = '_stripTilePosition'
 
     # store the list of ordered spectrumViews
     _orderedSpectrumViews = None
@@ -255,7 +254,7 @@ class Strip(AbstractWrapperObject):
         """Returns a tuple of the tile coordinates (from top-left)
         tilePosition = (x, y)
         """
-        tilePosition = self.getParameter(STRIPTILING, STRIPTILEPOSITION)
+        tilePosition = self._getInternalParameter(self._STRIPTILEPOSITION) or (0, 0)
         return tilePosition
 
     @tilePosition.setter
@@ -270,7 +269,7 @@ class Strip(AbstractWrapperObject):
         if any(type(vv) != int for vv in value):
             raise ValueError('Tuple must be of type int')
 
-        self.setParameter(STRIPTILING, STRIPTILEPOSITION, value)
+        self._setInternalParameter(self._STRIPTILEPOSITION, value)
 
     #=========================================================================================
     # CCPN functions
@@ -480,17 +479,17 @@ class Strip(AbstractWrapperObject):
             return tuple(result)
 
 
-@newObject(Strip)
-def _newStrip(self):
-    """Create new strip that duplicates this one, appending it at the end
-    Does not handle any gui updating.
-    """
-    apiStrip = self._wrappedData.clone()
-    result = self._project._data2Obj.get(apiStrip)
-    if result is None:
-        raise RuntimeError('Unable to generate new Strip item')
-
-    return result
+# @newObject(Strip)
+# def _newStrip(self):
+#     """Create new strip that duplicates this one, appending it at the end
+#     Does not handle any gui updating.
+#     """
+#     apiStrip = self._wrappedData.clone()
+#     result = self._project._data2Obj.get(apiStrip)
+#     if result is None:
+#         raise RuntimeError('Unable to generate new Strip item')
+#
+#     return result
 
 
 # newStrip functions

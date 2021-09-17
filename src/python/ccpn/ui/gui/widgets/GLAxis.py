@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-15 19:22:32 +0100 (Wed, September 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-17 12:27:27 +0100 (Fri, September 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1047,6 +1047,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self.visiblePlaneListPointValues = {}
         self.visiblePlaneDimIndices = {}
         self._visibleSpectrumViewsChange = False
+        self._tilePosition = (0, 0)
+
         self._matchingIsotopeCodes = False
 
         self._menuActive = False

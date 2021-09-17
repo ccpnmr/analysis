@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-12 19:39:17 +0100 (Mon, April 12, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-09-17 15:13:06 +0100 (Fri, September 17, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,12 +28,12 @@ __date__ = "$Date: 2019-11-27 12:20:27 +0000 (Wed, November 27, 2019) $"
 
 from PyQt5 import QtWidgets
 from itertools import permutations
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, undoStackBlocking
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.ui.gui.lib.Strip import copyStripPosition
 
 
@@ -119,7 +120,8 @@ class CopyStripFlippedSpectraPopup(CcpnDialogMainWidget):
         self.accept()
 
         # open new spectrumDisplay here
-        with undoBlockWithoutSideBar():
+        # with undoBlockWithoutSideBar():
+        with undoStackBlocking() as _:  # Do not add to undo/redo stack
             spectra = self.strip.spectra
             if spectra:
                 # create a new spectrum display with the new axis order
@@ -129,4 +131,3 @@ class CopyStripFlippedSpectraPopup(CcpnDialogMainWidget):
 
                 # newDisplay.autoRange()
                 copyStripPosition(self.strip, newDisplay.strips[0])
-

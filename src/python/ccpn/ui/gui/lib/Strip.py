@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:21:22 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-17 15:13:06 +0100 (Fri, September 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,13 +28,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import typing
 
-from ccpn.util.isotopes import name2IsotopeCode
 from ccpn.core._OldChemicalShift import _OldChemicalShift
 from ccpn.core.NmrAtom import NmrAtom
+from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
+from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip
 from ccpn.util.Common import reorder
-from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.util.Logging import getLogger
+from ccpn.util.isotopes import name2IsotopeCode
 
 
 def _getCurrentZoomRatio(viewRange):
@@ -349,57 +350,60 @@ def navigateToNmrResidueInDisplay(nmrResidue, display, stripIndex=0, widths=None
         # if nextNmrResidue:
         #   nmrResidues.append(nextNmrResidue)
 
-        stripCount = len(nmrResidues)
-        while len(display.strips) < stripCount:
-            display.addStrip()
-        while len(display.strips) > stripCount:
-            display.deleteStrip(display.strips[-1])
-        strips = display.strips
+        with undoStackBlocking() as _:  # Do not add to undo/redo stack
+            stripCount = len(nmrResidues)
+            while len(display.strips) < stripCount:
+                display.addStrip()
+            while len(display.strips) > stripCount:
+                display.deleteStrip(display.strips[-1])
+            strips = display.strips
 
-        # widths = ['default'] * len(display.strips)
-        for ii, nr in enumerate(nmrResidues):
-            navigateToNmrAtomsInStrip(strips[ii], nr.nmrAtoms,
-                                      widths=widths, markPositions=markPositions, setNmrResidueLabel=True,
-                                      axisMask=axisMask)
+            # widths = ['default'] * len(display.strips)
+            for ii, nr in enumerate(nmrResidues):
+                navigateToNmrAtomsInStrip(strips[ii], nr.nmrAtoms,
+                                          widths=widths, markPositions=markPositions, setNmrResidueLabel=True,
+                                          axisMask=axisMask)
 
-            # add connection tags to start/end sequential strips - may later allow insertion of nmrResidues
-            if allNmrResidues.index(nr) == 0:
-                # enable dropping onto the left arrow
-                # strips[ii].header.setLabelText(position='l', text='<<<')
-                strips[ii].header.setLabelText(position='l', text='')
-                strips[ii].header.setLabelObject(position='c', obj=nr)
+                # add connection tags to start/end sequential strips - may later allow insertion of nmrResidues
+                if allNmrResidues.index(nr) == 0:
+                    # enable dropping onto the left arrow
+                    # strips[ii].header.setLabelText(position='l', text='<<<')
+                    strips[ii].header.setLabelText(position='l', text='')
+                    strips[ii].header.setLabelObject(position='c', obj=nr)
 
-                strips[ii].header.setEnabledLeftDrop(showDropHeaders)
+                    strips[ii].header.setEnabledLeftDrop(showDropHeaders)
 
-            if allNmrResidues.index(nr) == len(allNmrResidues) - 1:
-                # enable dropping onto the right label
-                # strips[ii].header.setLabelText(position='r', text='>>>')
-                strips[ii].header.setLabelText(position='r', text='')
-                strips[ii].header.setLabelObject(position='c', obj=nr)
+                if allNmrResidues.index(nr) == len(allNmrResidues) - 1:
+                    # enable dropping onto the right label
+                    # strips[ii].header.setLabelText(position='r', text='>>>')
+                    strips[ii].header.setLabelText(position='r', text='')
+                    strips[ii].header.setLabelObject(position='c', obj=nr)
 
-                strips[ii].header.setEnabledRightDrop(showDropHeaders)
+                    strips[ii].header.setEnabledRightDrop(showDropHeaders)
 
     else:
         # not showing sequential strips
         # widths = ['default'] * len(display.strips)
         # for strip in display.strips[stripIndex + 1:]:
         #     display.deleteStrip(strip)
-        while len(display.strips) > stripIndex + 1:
-            display.deleteStrip(display.strips[-1])
 
-        navigateToNmrAtomsInStrip(display.strips[stripIndex], nmrResidue.nmrAtoms,
-                                  widths=widths, markPositions=markPositions, setNmrResidueLabel=True)
-        strips.append(display.strips[stripIndex])
+        with undoStackBlocking() as _:  # Do not add to undo/redo stack
+            while len(display.strips) > stripIndex + 1:
+                display.deleteStrip(display.strips[-1])
 
-        # add connection tags to non-sequential strips
-        # strips[0].header.setLabelText(position='l', text='<<<')
-        # strips[0].header.setLabelText(position='r', text='>>>')
-        strips[0].header.setLabelText(position='l', text='')
-        strips[0].header.setLabelText(position='r', text='')
-        # set the object for the centre label
-        strips[0].header.setLabelObject(position='c', obj=nmrResidue)
+            navigateToNmrAtomsInStrip(display.strips[stripIndex], nmrResidue.nmrAtoms,
+                                      widths=widths, markPositions=markPositions, setNmrResidueLabel=True)
+            strips.append(display.strips[stripIndex])
 
-        strips[0].header.setEnabledLeftDrop(showDropHeaders)
-        strips[0].header.setEnabledRightDrop(showDropHeaders)
+            # add connection tags to non-sequential strips
+            # strips[0].header.setLabelText(position='l', text='<<<')
+            # strips[0].header.setLabelText(position='r', text='>>>')
+            strips[0].header.setLabelText(position='l', text='')
+            strips[0].header.setLabelText(position='r', text='')
+            # set the object for the centre label
+            strips[0].header.setLabelObject(position='c', obj=nmrResidue)
+
+            strips[0].header.setEnabledLeftDrop(showDropHeaders)
+            strips[0].header.setEnabledRightDrop(showDropHeaders)
 
     return strips

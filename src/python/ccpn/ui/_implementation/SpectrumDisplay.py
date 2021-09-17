@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-16 19:06:53 +0100 (Thu, September 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-17 15:13:05 +0100 (Fri, September 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -95,7 +95,6 @@ class SpectrumDisplay(AbstractWrapperObject):
         display = super()._restoreObject(project, apiObj)
         display._isotopeCodes = tuple(display.spectrumViews[0]._getByDisplayOrder('isotopeCodes'))
         return display
-
 
     #-----------------------------------------------------------------------------------------
     # CCPN properties
@@ -233,7 +232,8 @@ class SpectrumDisplay(AbstractWrapperObject):
     def units(self, value):
         # local import to avoid cycles
         from ccpn.ui.gui.lib.GuiSpectrumDisplay import AXISUNITS, AXISUNIT_NUMBER
-        options = AXISUNITS + [AXISUNIT_NUMBER] # To allow for 1D intensity axis unit
+
+        options = AXISUNITS + [AXISUNIT_NUMBER]  # To allow for 1D intensity axis unit
         for idx, val in enumerate(value):
             if val not in options:
                 raise ValueError('Invalid units[%d] %r; should be on of %r' % (idx, val, options))
@@ -247,7 +247,8 @@ class SpectrumDisplay(AbstractWrapperObject):
         CCPNINTERNAL: used CcppnOpenGl.initialiseAxes()
         """
         from ccpn.ui.gui.lib.GuiSpectrumDisplay import AXISUNITS, AXISUNIT_NUMBER
-        options = AXISUNITS + [AXISUNIT_NUMBER] # To allow for 1D intensity axis unit
+
+        options = AXISUNITS + [AXISUNIT_NUMBER]  # To allow for 1D intensity axis unit
         return [options.index(unit) for unit in self.units]
 
     # GWV WTF?? Why is this even here?????
@@ -378,7 +379,8 @@ class SpectrumDisplay(AbstractWrapperObject):
         if not all(isinstance(val, int) for val in spectrumIndex):
             raise ValueError("spectrum indexing values must be Int")
 
-        with undoBlockWithoutSideBar():
+        # with undoBlockWithoutSideBar():
+        with undoStackBlocking() as _:  # Do not add to undo/redo stack
 
             # rebuild the display when the ordering has changed
             with undoStackBlocking() as addUndoItem:
@@ -484,8 +486,8 @@ class SpectrumDisplay(AbstractWrapperObject):
 
     def _setFromLimits(self, axis, value):
         """Set width,position for axis from value tuple/list"""
-        width = value[1] - value[0] if value[1]>value[0] else value[0] - value[1]
-        pos = value[0] + width*0.5 if value[1]>value[0] else value[0] - width*0.5
+        width = value[1] - value[0] if value[1] > value[0] else value[0] - value[1]
+        pos = value[0] + width * 0.5 if value[1] > value[0] else value[0] - width * 0.5
 
         positions = list(self.positions)
         positions[axis] = pos
@@ -495,7 +497,7 @@ class SpectrumDisplay(AbstractWrapperObject):
         widths[axis] = width
         self.widths = widths
 
-    def _getDimensionsMapping(self, spectrum:Spectrum) -> list:
+    def _getDimensionsMapping(self, spectrum: Spectrum) -> list:
         """Get the spectrum dimensions in display order
         """
         # For now: do not allow spectrum mapping with higher dimensionality than the display
@@ -510,13 +512,13 @@ class SpectrumDisplay(AbstractWrapperObject):
 
         return dimensionOrder
 
-    def _getAxesMapping(self, spectrum:Spectrum) -> list:
+    def _getAxesMapping(self, spectrum: Spectrum) -> list:
         """Get the spectrum axes in display order
         CCPNMRINTERNAL: used in _newSpectrumDisplay
         """
-        return [dim-1 for dim in self._getDimensionsMapping(spectrum)]
+        return [dim - 1 for dim in self._getDimensionsMapping(spectrum)]
 
-    def _setLimits(self, spectrum:Spectrum):
+    def _setLimits(self, spectrum: Spectrum):
         """Define the relevant display limits from the dimensions of spectrum
         CCPNMRINTERNAL: used in _newSpectrumDisplay
         """
@@ -549,7 +551,6 @@ class SpectrumDisplay(AbstractWrapperObject):
         for strip in self.strips:
             strip.positions = self.positions
             strip.widths = self.widths
-
 
     #===========================================================================================
     # new'Object' and other methods
@@ -669,7 +670,6 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
 
             else:
                 raise NotImplementedError('No sampled axes (yet)')
-
 
     display._setLimits(spectrum)
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-17 15:13:05 +0100 (Fri, September 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -318,7 +318,6 @@ class GuiStrip(Frame):
         # For now, all dropEvents are not strip specific, use spectrumDisplay's handling
         self.setGuiNotifier(self, [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
                             self.spectrumDisplay._processDroppedItems)
-
 
     def viewRange(self):
         return self._CcpnGLWidget.viewRange()
@@ -2311,7 +2310,8 @@ class GuiStrip(Frame):
                                 % (newIndex, stripCount))
             newIndex = stripCount - 1
 
-        with undoBlockWithoutSideBar():
+        # with undoBlockWithoutSideBar():
+        with undoStackBlocking() as _:  # Do not add to undo/redo stack
             with undoStackBlocking() as addUndoItem:
                 # needs to be first as it uses currentOrdering
                 addUndoItem(undo=partial(self._moveToStripLayout, newIndex, currentIndex))

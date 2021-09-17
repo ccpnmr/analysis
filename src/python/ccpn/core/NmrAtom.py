@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-16 19:06:53 +0100 (Thu, September 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-17 15:13:05 +0100 (Fri, September 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -149,7 +149,7 @@ class NmrAtom(AbstractWrapperObject):
     def isotopeCode(self) -> str:
         """isotopeCode of NmrAtom. Used to facilitate the nmrAtom assignment."""
         value = self._wrappedData.isotopeCode
-        if value == self._NONE_VALUE_STRING:
+        if value == self._UNKNOWN_VALUE_STRING:
             value = None
         return value
 
@@ -165,7 +165,7 @@ class NmrAtom(AbstractWrapperObject):
             raise ValueError('isotopeCode must be of type string (or None); got {}'.format(value))
         if value is not None and value not in getIsotopeRecords().keys():
             raise ValueError('Invalid isotopeCode {}'.format(value))
-        self._wrappedData.isotopeCode = value if value else self._NONE_VALUE_STRING
+        self._wrappedData.isotopeCode = value if value else self._UNKNOWN_VALUE_STRING
 
     @property
     def boundNmrAtoms(self) -> 'NmrAtom':
@@ -452,7 +452,7 @@ class NmrAtom(AbstractWrapperObject):
         self._wrappedData.isotopeCode = UnknownIsotopeCode
         self._wrappedData.name = value
         # set isotopeCode to the correct value
-        self._wrappedData.isotopeCode = isotopeCode if isotopeCode else UnknownIsotopeCode  # self._NONE_VALUE_STRING
+        self._wrappedData.isotopeCode = isotopeCode if isotopeCode else UnknownIsotopeCode  # self._UNKNOWN_VALUE_STRING
 
         self._childActions.append(self._renameChemicalShifts)
         self._finaliseChildren.extend((sh, 'change') for sh in self.chemicalShifts)

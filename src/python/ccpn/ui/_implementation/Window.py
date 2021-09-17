@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-17 15:13:05 +0100 (Fri, September 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -42,7 +42,6 @@ from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, undoBlockWithoutSideBar, undoStackBlocking, \
     logCommandManager
 from ccpn.util.Logging import getLogger
-
 
 
 class Window(AbstractWrapperObject):
@@ -297,7 +296,7 @@ class Window(AbstractWrapperObject):
 
     #Command logging done inside the method
     def newSpectrumDisplay(self, spectra, axisCodes: Sequence[str] = (), stripDirection: str = 'Y',
-                              position='right', relativeTo=None):
+                           position='right', relativeTo=None):
         """Create new SpectrumDisplay
 
         :param spectra: a Spectrum or SpectrumGroup instance, or a list,tuple of Spectrum Instances to be displayed
@@ -348,7 +347,8 @@ class Window(AbstractWrapperObject):
         with logCommandManager('mainWindow.', 'newSpectrumDisplay',
                                spectra, axisCodes=axisCodes, stripDirection=stripDirection,
                                position=position, relativeTo=relativeTo):
-            with undoBlockWithoutSideBar():
+            # with undoBlockWithoutSideBar():
+            with undoStackBlocking() as _:  # Do not add to undo/redo stack
 
                 try:
                     zPlaneNavigationMode = ZPlaneNavigationModes(0).label
@@ -363,11 +363,11 @@ class Window(AbstractWrapperObject):
 
                 # create the new spectrumDisplay
                 display = _newSpectrumDisplay(self,
-                                              spectrum = spectrum,
+                                              spectrum=spectrum,
                                               axisCodes=axisCodes,
                                               stripDirection=stripDirection,
                                               zPlaneNavigationMode=zPlaneNavigationMode,
-                                              isGrouped = isGrouped
+                                              isGrouped=isGrouped
                                               )
 
                 # add the new module to mainWindow at the required position
@@ -406,7 +406,8 @@ class Window(AbstractWrapperObject):
         Removes the display to a hidden moduleArea of mainWindow, deletes the _wrappedData, and disables all notifiers
         Object is recovered through the deleteObject decorator
         """
-        with undoBlockWithoutSideBar():
+        # with undoBlockWithoutSideBar():
+        with undoStackBlocking() as _:  # Do not add to undo/redo stack
             # get the current state of the layout
             _list = self._getModuleInsertList(moduleArea=display.area)
 
@@ -463,6 +464,7 @@ class Window(AbstractWrapperObject):
             return _newMark(project, colour=colour, positions=pos, axisCodes=axes,
                             style=style, units=units, labels=lbls
                             )
+
 
 #=========================================================================================
 # Connections to parents:

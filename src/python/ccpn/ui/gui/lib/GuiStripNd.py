@@ -34,7 +34,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-17 15:13:05 +0100 (Fri, September 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -48,11 +48,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from PyQt5 import QtWidgets
 import numpy
 from ccpn.core.PeakList import PeakList
-from ccpn.ui.gui.widgets.PlaneToolbar import StripHeaderWidget, PlaneAxisWidget, StripLabelWidget, \
-    EMITSOURCE, EMITCLICKED, EMITIGNORESOURCE
-from ccpn.util.Logging import getLogger
-from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
+from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, undoStackBlocking
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, IntegralMenu, MultipletMenu, PhasingMenu, AxisMenu
 from ccpn.ui.gui.lib.GuiStripContextMenus import _getNdPhasingMenu, _getNdDefaultMenu, _getNdPeakMenu, \
     _getNdIntegralMenu, _getNdMultipletMenu, _getNdAxisMenu
@@ -60,9 +57,12 @@ from ccpn.ui.gui.lib.Strip import copyStripPosition
 from ccpn.ui.gui.guiSettings import ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Frame import OpenGLOverlayFrame
-from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.ui.gui.widgets.PlaneToolbar import ZPlaneToolbar
+from ccpn.ui.gui.widgets.PlaneToolbar import StripHeaderWidget, PlaneAxisWidget, StripLabelWidget, \
+    EMITSOURCE, EMITCLICKED, EMITIGNORESOURCE
 from ccpn.util.Colour import colorSchemeTable
+from ccpn.util.Logging import getLogger
+from ccpn.util.decorators import logCommand
 
 
 class GuiStripNd(GuiStrip):
@@ -280,7 +280,8 @@ class GuiStripNd(GuiStrip):
         """
         Copy the strip into new SpectrumDisplay
         """
-        with undoBlockWithoutSideBar():
+        # with undoBlockWithoutSideBar():
+        with undoStackBlocking() as _:  # Do not add to undo/redo stack
             # create a new spectrum display
             newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisCodes=self.axisOrder)
             for spectrum in self.spectra:
@@ -302,7 +303,8 @@ class GuiStripNd(GuiStrip):
             if nDim > len(axisOrder):
                 axisOrder.extend(self.axisOrder[2:])
 
-            with undoBlockWithoutSideBar():
+            # with undoBlockWithoutSideBar():
+            with undoStackBlocking() as _:  # Do not add to undo/redo stack
                 # create a new spectrum display with the new axis order
                 newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisCodes=axisOrder)
                 for spectrum in self.spectra:
@@ -326,7 +328,8 @@ class GuiStripNd(GuiStrip):
             if nDim > len(axisOrder):
                 axisOrder.extend(self.axisOrder[3:])
 
-            with undoBlockWithoutSideBar():
+            # with undoBlockWithoutSideBar():
+            with undoStackBlocking() as _:  # Do not add to undo/redo stack
                 # create a new spectrum display with the new axis order
                 newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisCodes=axisOrder)
                 for spectrum in self.spectra:  #[1:]:
@@ -350,7 +353,8 @@ class GuiStripNd(GuiStrip):
             if nDim > len(axisOrder):
                 axisOrder.extend(self.axisOrder[3:])
 
-            with undoBlockWithoutSideBar():
+            # with undoBlockWithoutSideBar():
+            with undoStackBlocking() as _:  # Do not add to undo/redo stack
                 # create a new spectrum display with the new axis order
                 newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisCodes=axisOrder)
                 for spectrum in self.spectra:
@@ -366,12 +370,11 @@ class GuiStripNd(GuiStrip):
         :returns: a list of Spectrum instances
         """
 
-        display=self.spectrumDisplay
+        display = self.spectrumDisplay
 
         result = []
 
         for specView in [spv for spv in display.spectrumViews if spv.isVisible]:
-
             ppmPositions = self.positions
 
             # spectrum = specView.spectrum
@@ -555,11 +558,11 @@ class GuiStripNd(GuiStrip):
                 # _minSpectrumFrequency, _maxSpectrumFrequency = sorted(spectrum.spectrumLimits[_index])
                 # _valuePerPoint = spectrum.valuesPerPoint[_index]
 
-                isTimeDimension = spectrumView._getByDisplayOrder('isTimeDomains')[n+2]
+                isTimeDimension = spectrumView._getByDisplayOrder('isTimeDomains')[n + 2]
 
-                _minAliasedFrequency, _maxAliasedFrequency = sorted(spectrumView.aliasingLimits[n+2])
-                _minSpectrumFrequency, _maxSpectrumFrequency = sorted(spectrumView.spectrumLimits[n+2])
-                _valuePerPoint = spectrumView.valuesPerPoint[n+2]
+                _minAliasedFrequency, _maxAliasedFrequency = sorted(spectrumView.aliasingLimits[n + 2])
+                _minSpectrumFrequency, _maxSpectrumFrequency = sorted(spectrumView.spectrumLimits[n + 2])
+                _valuePerPoint = spectrumView.valuesPerPoint[n + 2]
 
                 _minFreq = _minAliasedFrequency or _minSpectrumFrequency
                 _maxFreq = _maxAliasedFrequency or _maxSpectrumFrequency

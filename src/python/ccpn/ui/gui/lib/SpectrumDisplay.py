@@ -1,3 +1,31 @@
+"""
+Module Documentation here
+"""
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+#=========================================================================================
+# Last code modification
+#=========================================================================================
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-09-17 15:13:06 +0100 (Fri, September 17, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: CCPN $"
+__date__ = "$Date: 2021-09-17 15:02:29 +0100 (Fri, September 17, 2021) $"
+#=========================================================================================
+# Start of code
+#=========================================================================================
+
 #TODO:GEERTEN: Move to other places, like SpectrumDisplay or Strip
 
 from ccpn.core.NmrAtom import NmrAtom
@@ -6,7 +34,7 @@ from ccpn.core.Project import Project
 from typing import List
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip, navigateToNmrAtomsInStrip
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, undoStackBlocking
 from ccpn.util.Logging import getLogger
 
 
@@ -40,6 +68,7 @@ def navigateToCurrentPeakPosition(application):
                 navigateToPositionInStrip(strip, peak.position, peak.axisCodes)
 
         display.setZWidgets()
+
 
 def navigateToCurrentNmrResiduePosition(application):
     """
@@ -75,7 +104,8 @@ def makeStripPlot(spectrumDisplay: GuiSpectrumDisplay, nmrAtomPairs: List[List[N
     if not nmrAtomPairs:
         return
 
-    with undoBlockWithoutSideBar():
+    # with undoBlockWithoutSideBar():
+    with undoStackBlocking() as _:  # Do not add to undo/redo stack
         numberOfStrips = len(spectrumDisplay.strips)
 
         # Make sure there are enough strips to display nmrAtomPairs
@@ -100,24 +130,24 @@ def makeStripPlot(spectrumDisplay: GuiSpectrumDisplay, nmrAtomPairs: List[List[N
 def makeStripPlotFromSingles(spectrumDisplay: GuiSpectrumDisplay, nmrAtoms: List[NmrAtom], autoWidth=True):
     numberOfStrips = len(spectrumDisplay.strips)
 
-    # Make sure there are enough strips to display nmrAtomPairs
-    if numberOfStrips < len(nmrAtoms):
-        for ii in range(numberOfStrips, len(nmrAtoms)):
-            # spectrumDisplay.strips[-1].clone()
-            spectrumDisplay.addStrip()
+    with undoStackBlocking() as _:  # Do not add to undo/redo stack
+        # Make sure there are enough strips to display nmrAtomPairs
+        if numberOfStrips < len(nmrAtoms):
+            for ii in range(numberOfStrips, len(nmrAtoms)):
+                # spectrumDisplay.strips[-1].clone()
+                spectrumDisplay.addStrip()
 
-    # print(spectrumDisplay, nmrAtomPairs, len(nmrAtomPairs), len(spectrumDisplay.strips))
-    # loop through strips and navigate to appropriate position in strip
-    for ii, strip in enumerate(spectrumDisplay.strips):
-        if autoWidth:
-            widths = ['default'] * len(strip.axisCodes)
-        else:
-            widths = None
-        navigateToNmrAtomsInStrip(strip, [nmrAtoms[ii]], widths=widths)
+        # print(spectrumDisplay, nmrAtomPairs, len(nmrAtomPairs), len(spectrumDisplay.strips))
+        # loop through strips and navigate to appropriate position in strip
+        for ii, strip in enumerate(spectrumDisplay.strips):
+            if autoWidth:
+                widths = ['default'] * len(strip.axisCodes)
+            else:
+                widths = None
+            navigateToNmrAtomsInStrip(strip, [nmrAtoms[ii]], widths=widths)
 
 
 def navigateToPeakInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, peak, widths=None):
-
     from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 
     spCodes = spectrumDisplay.axisCodes
@@ -129,7 +159,7 @@ def navigateToPeakInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, peak, widt
         # set the width in case of nD (n>2)
         _widths = {'H': 0.3, 'C': 1.0, 'N': 1.0}
         # _ac = strip.axisCodes[0]
-        _ac = spCodes[index]                                # primary axisCode based in stripArrangement
+        _ac = spCodes[index]  # primary axisCode based in stripArrangement
         _w = _widths.setdefault(_ac[0], 1.0)
         newWidths[index] = _w
         # newWidths = [_w, 'full']
@@ -150,7 +180,6 @@ def navigateToPeakInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, peak, widt
 
 
 def navigateToNmrResidueInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, nmrResidue, widths=None, markPositions=False):
-
     spCodes = spectrumDisplay.axisCodes
     newWidths = ['full'] * len(spCodes)
     index = 'YXT'.index(spectrumDisplay.stripArrangement)
@@ -158,7 +187,7 @@ def navigateToNmrResidueInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, nmrR
     if widths == None and index < 2:
         # set the width in case of nD (n>2)
         _widths = {'H': 0.3, 'C': 1.0, 'N': 1.0}
-        _ac = spCodes[index]                                # primary axisCode based in stripArrangement
+        _ac = spCodes[index]  # primary axisCode based in stripArrangement
         _w = _widths.setdefault(_ac[0], 1.0)
         newWidths[index] = _w
         # newWidths = [_w, 'full']
@@ -171,5 +200,3 @@ def navigateToNmrResidueInStrip(spectrumDisplay: GuiSpectrumDisplay, strip, nmrR
     strip.header.reset()
     strip.header.setLabelText(position='c', text=nmrResidue.pid)
     # strip.header.headerVisible = True
-
-

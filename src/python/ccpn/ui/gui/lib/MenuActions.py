@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-22 13:40:13 +0100 (Thu, July 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-17 15:13:05 +0100 (Fri, September 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -65,6 +65,7 @@ from ccpn.ui.gui.popups.StructureEnsemblePopup import StructureEnsemblePopup
 from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
 from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, \
     undoBlockWithoutSideBar, undoStackBlocking
+
 
 MAXITEMLOGGING = 2
 
@@ -271,17 +272,21 @@ class _raiseNmrAtomNewPopup(RaisePopupABC):
     popupClass = NmrAtomNewPopup
     # objectArgumentName = 'nmrAtom'
 
+
 class _raiseAtomPopup(RaisePopupABC):
     popupClass = AtomEditPopup
     # objectArgumentName = 'Atom'
+
 
 class _raiseAtomNewPopup(RaisePopupABC):
     popupClass = AtomNewPopup
     # objectArgumentName = 'Atom'
 
+
 class _raiseNotePopup(RaisePopupABC):
     popupClass = NotesPopup
     # objectArgumentName = 'obj'
+
 
 class _raiseIntegralListPopup(RaisePopupABC):
     popupClass = IntegralListPropertiesPopup
@@ -457,7 +462,7 @@ class OpenItemABC():
         """
 
         try:
-            if len(objs)>0:
+            if len(objs) > 0:
                 getLogger().info('Deleting: %s' % ', '.join(map(str, objs)))
                 project = objs[-1].project
                 with undoBlockWithoutSideBar():
@@ -477,6 +482,7 @@ class OpenItemABC():
         Copy to clipboard quoted pids
         """
         from ccpn.util.Common import copyToClipboard
+
         copyToClipboard(objs)
 
 
@@ -530,6 +536,7 @@ class _openItemNmrAtomItem(OpenItemABC):
     objectArgumentName = 'nmrAtom'
     hasOpenMethod = False
 
+
 class _openItemAtomItem(OpenItemABC):
     objectArgumentName = 'Atom'
     hasOpenMethod = False
@@ -543,6 +550,7 @@ class _openItemAtomItem(OpenItemABC):
         contextMenu.addAction('Copy Pid to clipboard', partial(self._copyPidsToClipboard, objs))
         contextMenu.move(position)
         contextMenu.exec()
+
 
 class _openItemChainTable(OpenItemABC):
     openItemMethod = 'showResidueTable'
@@ -602,10 +610,11 @@ class _openItemSampleDisplay(OpenItemABC):
 
     @staticmethod
     def _openSampleSpectraOnDisplay(sample, spectrumDisplay, autoRange=False):
-        with undoBlockWithoutSideBar():
+        # with undoBlockWithoutSideBar():
+        with undoStackBlocking() as _:  # Do not add to undo/redo stack
             with notificationEchoBlocking():
                 if len(sample.spectra) > 0:
-                    if len(spectrumDisplay.strips)>0:
+                    if len(spectrumDisplay.strips) > 0:
                         spectrumDisplay.clearSpectra()
                         for sampleComponent in sample.sampleComponents:
                             if sampleComponent.substance is not None:
@@ -649,6 +658,7 @@ class _openItemSpectrumDisplay(OpenItemABC):
 
         # check whether a new spectrumDisplay is needed, and check axisOrdering
         from ccpn.ui.gui.popups.AxisOrderingPopup import checkSpectraToOpen
+
         checkSpectraToOpen(mainWindow, [spectrum])
 
         spectrumDisplay = mainWindow.newSpectrumDisplay(spectrum, position=position, relativeTo=relativeTo)
@@ -676,20 +686,27 @@ class _openItemSpectrumGroupDisplay(OpenItemABC):
 
             # check whether a new spectrumDisplay is needed, and check axisOrdering
             from ccpn.ui.gui.popups.AxisOrderingPopup import checkSpectraToOpen
+
             checkSpectraToOpen(mainWindow, [spectrumGroup])
 
-            spectrumDisplay = mainWindow.newSpectrumDisplay(spectrumGroup, position=position, relativeTo=relativeTo)
-            # set the spectrumView colours
-            # spectrumDisplay._colourChanged(spectrumGroup)
-            if len(spectrumDisplay.strips)>0:
+            # with undoBlockWithoutSideBar():
+            with undoStackBlocking() as _:  # Do not add to undo/redo stack
+                with notificationEchoBlocking():
 
-                with undoBlockWithoutSideBar():
-                    with notificationEchoBlocking():
+                    spectrumDisplay = mainWindow.newSpectrumDisplay(spectrumGroup, position=position, relativeTo=relativeTo)
+
+                    # set the spectrumView colours
+                    # spectrumDisplay._colourChanged(spectrumGroup)
+                    if len(spectrumDisplay.strips) > 0:
+
+                        # with undoBlockWithoutSideBar():
+                        #     with notificationEchoBlocking():
                         for spectrum in spectrumGroup.spectra[1:]:  # Add the other spectra
                             spectrumDisplay.displaySpectrum(spectrum)
-                current.strip = spectrumDisplay.strips[0]
-            # if any([sp.dimensionCount for sp in spectrumGroup.spectra]) == 1:
-            spectrumDisplay.autoRange()
+
+                        current.strip = spectrumDisplay.strips[0]
+                    # if any([sp.dimensionCount for sp in spectrumGroup.spectra]) == 1:
+                    spectrumDisplay.autoRange()
             return spectrumDisplay
 
     openItemDirectMethod = _openSpectrumGroup
@@ -698,6 +715,7 @@ class _openItemSpectrumGroupDisplay(OpenItemABC):
 class _openItemSpectrumInGroupDisplay(_openItemSpectrumDisplay):
     """Modified class for spectra that are in sideBar under a spectrumGroup
     """
+
     def _openContextMenu(self, parentWidget, position, objs):
         """Open a context menu.
         """
@@ -800,7 +818,7 @@ def _openItemObjects(mainWindow, objs, **kwds):
                             spectrumDisplay.displaySpectrum(obj)
 
                         except RuntimeError:
-                             # process objects to open
+                            # process objects to open
                             func = OpenObjAction[obj.__class__](useNone=True, **kwds)
                             returnObj = func._execOpenItem(mainWindow, obj)
 
@@ -809,7 +827,7 @@ def _openItemObjects(mainWindow, objs, **kwds):
                             spectrumDisplay._handleSpectrumGroup(obj)
 
                         except RuntimeError:
-                             # process objects to open
+                            # process objects to open
                             func = OpenObjAction[obj.__class__](useNone=True, **kwds)
                             returnObj = func._execOpenItem(mainWindow, obj)
                     else:
@@ -823,4 +841,4 @@ def _openItemObjects(mainWindow, objs, **kwds):
 
                 else:
                     showInfo('Not implemented yet!',
-                                    'This function has not been implemented in the current version')
+                             'This function has not been implemented in the current version')

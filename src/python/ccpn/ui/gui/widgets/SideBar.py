@@ -17,7 +17,8 @@ SidebarClassTreeItems: A Tree with a number of dynamically added items of type V
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -26,8 +27,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-23 15:38:09 +0000 (Tue, March 23, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-09-17 15:13:06 +0100 (Fri, September 17, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -893,13 +894,12 @@ class SideBarStructure(object):
                         SidebarClassTreeItems(klass=Residue, rebuildOnRename='Chain-ClassTreeItems',
                                               callback=NYI, menuAction=_openItemResidueTable(position='bottom', relativeTo=None), isDraggable=True,
                                               children=[
-                                # SidebarItem('<New Atom>', callback=_raiseAtomNewPopup(editMode=False)),
+                                                  # SidebarItem('<New Atom>', callback=_raiseAtomNewPopup(editMode=False)),
 
-                                SidebarClassItems(klass=Atom, rebuildOnRename='Chain-ClassTreeItems',
-                                                  callback=_raiseAtomPopup(),
-                                                  menuAction=_openItemAtomItem(position='left', relativeTo=None), isDraggable=True),
-                                ]),
-
+                                                  SidebarClassItems(klass=Atom, rebuildOnRename='Chain-ClassTreeItems',
+                                                                    callback=_raiseAtomPopup(),
+                                                                    menuAction=_openItemAtomItem(position='left', relativeTo=None), isDraggable=True),
+                                                  ]),
 
                         ]),
                 ]),
@@ -1323,7 +1323,9 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         if text is not None:
             objFromPid = self.project.getByPid(text)
             strip = self.application.current.strip
-            with undoBlockWithoutSideBar():
+
+            # with undoBlockWithoutSideBar():
+            with undoStackBlocking() as _:  # Do not add to undo/redo stack
                 with notificationEchoBlocking():
                     if strip:
                         spectrumDisplay = strip.spectrumDisplay

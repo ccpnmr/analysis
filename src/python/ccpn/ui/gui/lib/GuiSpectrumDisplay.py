@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:29:57 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-17 15:13:05 +0100 (Fri, September 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1692,7 +1692,8 @@ class GuiSpectrumDisplay(CcpnModule):
                         % (self.pid,))
             return
 
-        with undoBlockWithoutSideBar():
+        # with undoBlockWithoutSideBar():
+        with undoStackBlocking() as _:  # Do not add to undo/redo stack
             with undoStackBlocking() as addUndoItem:
                 with self._hideWidget(self.stripFrame):
                     # retrieve list of created items from the api
@@ -1996,7 +1997,8 @@ class GuiSpectrumDisplay(CcpnModule):
             showWarning(str(self.windowTitle()), 'Please disable Phasing Console before adding strips')
             return
 
-        with undoBlockWithoutSideBar():
+        # with undoBlockWithoutSideBar():
+        with undoStackBlocking() as _:  # Do not add to undo/redo stack
             with undoStackBlocking() as addUndoItem:
                 with self._hideWidget(self.stripFrame):
                     addUndoItem(undo=self._redrawAxes,
@@ -2439,20 +2441,23 @@ class GuiSpectrumDisplay(CcpnModule):
             getLogger().debug('displaySpectrum: Spectrum %s already in display %s' % (spectrum, self))
             return _specViews[0]
 
-        _oldOrdering = self.getOrderedSpectrumViewsIndex()
+        # _oldOrdering = self.getOrderedSpectrumViewsIndex()
 
-        # _getDimensionsMapping will check the match for axisCodes
-        dimensionOrder = (1, 0) if self.is1D else self._getDimensionsMapping(spectrum)
-        # check the isotopeCodes
-        dims = dimensionOrder[0:1] if self.is1D else dimensionOrder
-        for ic1, ic2 in zip(self.isotopeCodes, spectrum.getByDimensions('isotopeCodes', dims)):
-            if ic1 != ic2:
-                raise RuntimeError('Cannot display %s on %s; incompatible isotopeCodes' % (spectrum, self))
+        with undoStackBlocking() as _:  # Do not add to undo/redo stack
+            # _getDimensionsMapping will check the match for axisCodes
+            dimensionOrder = (1, 0) if self.is1D else self._getDimensionsMapping(spectrum)
+            # check the isotopeCodes
+            dims = dimensionOrder[0:1] if self.is1D else dimensionOrder
+            for ic1, ic2 in zip(self.isotopeCodes, spectrum.getByDimensions('isotopeCodes', dims)):
+                if ic1 != ic2:
+                    raise RuntimeError('Cannot display %s on %s; incompatible isotopeCodes' % (spectrum, self))
 
-        with undoStackRevert(self.application) as revertStack:
+            # with undoStackRevert(self.application) as revertStack:
             with undoBlockWithoutSideBar(self.application):
                 # push/pop ordering
                 with undoStackBlocking(self.application) as addUndoItem:
+
+                    _oldOrdering = self.getOrderedSpectrumViewsIndex()
 
                     # add toolbar ordering to the undo stack
                     addUndoItem(undo=partial(self.setToolbarButtons, tuple(_oldOrdering)))
@@ -2461,7 +2466,8 @@ class GuiSpectrumDisplay(CcpnModule):
                     if (spectrumView := _newSpectrumView(self, spectrum=spectrum, dimensionOrdering=dimensionOrder)) \
                             is None:
                         # notify the stack to revert to the pre-context manager stack
-                        revertStack(True)
+                        # revertStack(True)
+                        getLogger().warning(f'Could not create new spectrumView for {spectrum}')
 
                     else:
                         # add the spectrum to the end of the spectrum ordering in the toolbar
@@ -2488,13 +2494,14 @@ class GuiSpectrumDisplay(CcpnModule):
 
             _, specView = sv[0]
 
-            # explicitly change the ordering
-            _oldOrdering = self.getOrderedSpectrumViewsIndex()
-            _index = self.spectrumViews.index(specView)
-            _newOrdering = [od if od < _index else od - 1 for ii, od in enumerate(_oldOrdering) if od != _index]
-
             # need undo block stuff here
-            with undoBlockWithoutSideBar(self.application):
+            # with undoBlockWithoutSideBar(self.application):
+            with undoStackBlocking() as _:  # Do not add to undo/redo stack
+
+                # explicitly change the ordering
+                _oldOrdering = self.getOrderedSpectrumViewsIndex()
+                _index = self.spectrumViews.index(specView)
+                _newOrdering = [od if od < _index else od - 1 for ii, od in enumerate(_oldOrdering) if od != _index]
 
                 # push/pop ordering
                 with undoStackBlocking(self.application) as addUndoItem:
@@ -2564,7 +2571,8 @@ class GuiSpectrumDisplay(CcpnModule):
             #     nmrResidueStr = '[' + ','.join(["'%s'" % nmrRes.pid for nmrRes in nmrs]) + ']'
             #     log('addPeaks', peaks=peakStr, nmrResidues=nmrResidueStr)
 
-            with undoBlockWithoutSideBar():
+            # with undoBlockWithoutSideBar():
+            with undoStackBlocking() as _:  # Do not add to undo/redo stack
                 # _undo._newItem(undoPartial=partial(_updateGl, self, []))
 
                 if autoClearMarks:

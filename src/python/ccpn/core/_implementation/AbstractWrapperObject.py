@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-16 19:06:53 +0100 (Thu, September 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-17 15:13:05 +0100 (Fri, September 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -141,8 +141,8 @@ class AbstractWrapperObject(NotifierBase):
     _numberOfIdFields = 1
 
     #=========================================================================================
-    _NONE_VALUE_STRING = 'unknown'  # Used to emulate None for strings that otherwise have
-                                     # model restrictions
+    _NONE_VALUE_STRING = '__NONE__'  # Used to emulate None for strings that otherwise have model restrictions
+    _UNKNOWN_VALUE_STRING = 'unknown'  # Used to emulate unknown
     #=========================================================================================
 
     def __init__(self, project: 'Project', wrappedData: ApiImplementation.DataObject):
@@ -418,9 +418,11 @@ class AbstractWrapperObject(NotifierBase):
         result = self._wrappedData.ccpnInternalData
         if result is None:
             result = {}
-            with notificationBlanking():
-                with apiNotificationBlanking():
-                    self._wrappedData.ccpnInternalData = result
+            # with notificationBlanking():
+            #     with apiNotificationBlanking():
+            #         self._wrappedData.ccpnInternalData = result
+            # this avoids having to block everything
+            self._wrappedData.__dict__['ccpnInternalData'] = result
         return result
 
     @_ccpnInternalData.setter

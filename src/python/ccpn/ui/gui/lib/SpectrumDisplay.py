@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-17 15:13:06 +0100 (Fri, September 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-17 15:54:56 +0100 (Fri, September 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -38,7 +38,7 @@ from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, undoStackBloc
 from ccpn.util.Logging import getLogger
 
 
-def navigateToCurrentPeakPosition(application):
+def navigateToCurrentPeakPosition(application, selectFirstPeak=False):
     """
 
     Takes the current peak position and navigates (centres) to that position all strips and spectrum displays of the project.
@@ -50,7 +50,7 @@ def navigateToCurrentPeakPosition(application):
     displays = project.spectrumDisplays
     peak = application.current.peak
 
-    if len(application.current.peaks) > 1:
+    if len(application.current.peaks) > 1 and not selectFirstPeak:
         getLogger().warning('More than one peak selected. Select only one for the "navigateToCurrentPeakPosition" command.')
         return
 

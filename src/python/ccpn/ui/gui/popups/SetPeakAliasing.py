@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-15 19:22:31 +0100 (Wed, September 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-17 15:54:56 +0100 (Fri, September 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -36,6 +36,7 @@ from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, handleDialogApply
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+from ccpn.ui.gui.lib.SpectrumDisplay import navigateToCurrentPeakPosition
 from ccpn.core.Spectrum import MAXALIASINGRANGE
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 
@@ -50,6 +51,9 @@ class SetPeakAliasingPopup(CcpnDialogMainWidget):
     """
     FIXEDWIDTH = True
     FIXEDHEIGHT = True
+
+    # internal namespace
+    _NAVIGATETO = '_navigateTo'
 
     def __init__(self, parent=None, mainWindow=None, title='Set Aliasing', items=None, **kwds):
         """
@@ -92,6 +96,7 @@ class SetPeakAliasingPopup(CcpnDialogMainWidget):
         row += 1
 
         spectrumFrame = Frame(self.mainWidget, setLayout=True, showBorder=False, grid=(row, 0), gridSpan=(1, 2))
+        row += 1
 
         specRow = 0
         for peak in self.current.peaks:
@@ -125,7 +130,7 @@ class SetPeakAliasingPopup(CcpnDialogMainWidget):
                     aliasText = [str(aa) for aa in aliasRange]
 
                     self.spectraPulldowns[spectrum].append(PulldownList(spectrumFrame, texts=aliasText,
-                                                                        grid=(specRow, dim + 2)))  #, index=DEFAULTALIASING))
+                                                                        grid=(specRow, dim + 2)))
 
                     # may cause a problem if the peak dimension does not correspond to a visible XY axis
                     # peaks could disappear from all views
@@ -133,6 +138,14 @@ class SetPeakAliasingPopup(CcpnDialogMainWidget):
                 specRow += 1
 
             self.spectra[peak.peakList.spectrum].add(peak)
+
+        self.navigateToPeaks = CheckBoxCompoundWidget(
+                self.mainWidget,
+                grid=(row, 0), gridSpan=(1, 2), hAlign='left',
+                orientation='left',
+                labelText='Navigate to new peak position',
+                checked=False
+                )
 
     def _populate(self):
         """Populate the widgets
@@ -183,4 +196,24 @@ class SetPeakAliasingPopup(CcpnDialogMainWidget):
                 for peak in self.spectra[spec]:
                     peak.aliasing = newAlias
 
+        if self.navigateToPeaks.isChecked():
+            navigateToCurrentPeakPosition(self.application, selectFirstPeak=True)
+
         self.accept()
+
+    def storeWidgetState(self):
+        """Store the state of the checkBoxes between popups
+        """
+        nav = self.navigateToPeaks.isChecked()
+        SetPeakAliasingPopup._storedState[self._NAVIGATETO] = nav
+
+    def restoreWidgetState(self):
+        """Restore the state of the checkBoxes
+        """
+        self.navigateToPeaks.set(SetPeakAliasingPopup._storedState.get(self._NAVIGATETO, False))
+
+    def reject(self):
+        super().reject()
+
+        # store the state of any required widgets
+        self.storeWidgetState()

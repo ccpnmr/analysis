@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-17 12:27:26 +0100 (Fri, September 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-20 19:13:17 +0100 (Mon, September 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2337,7 +2337,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 if not self.mousePressInRegion(self._externalRegions._regions):
                     self.mousePressInIntegralLists()
 
-        if int(ev.buttons() & Qt.LeftButton):
+        if int(ev.buttons() & (Qt.LeftButton | Qt.RightButton)):
             # find the bounds for the region that has currently been clicked
             if (keyModifiers & (Qt.ShiftModifier | Qt.ControlModifier)):
 

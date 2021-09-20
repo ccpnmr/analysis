@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-28 19:12:26 +0100 (Mon, June 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-20 12:22:13 +0100 (Mon, September 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -51,7 +51,7 @@ def _matchSingleAxisCode(code1: str = None, code2: str = None, exactMatch: bool 
 
     'Jab' matches 'J' or 'Jab...', but NOT 'Ja...'      ie, 1 or 3 or more letter match
 
-    MQ gets no match
+    MQ gets no match - only with other MQ axis codes
 
     Hn* always matches Hcn*
 
@@ -75,7 +75,7 @@ def _matchSingleAxisCode(code1: str = None, code2: str = None, exactMatch: bool 
     ss = 0
 
     # add extra tests from v2.4
-    if code1.startswith('MQ') or code2.startswith('MQ'):
+    if (code1.startswith('MQ') and not code2.startswith('MQ')) or (code2.startswith('MQ') and not code1.startswith('MQ')):
         return mismatch
     # char followed by digit already accounted for
 

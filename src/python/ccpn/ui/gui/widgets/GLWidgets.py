@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-16 11:08:01 +0100 (Thu, September 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-21 09:57:42 +0100 (Tue, September 21, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -676,7 +676,19 @@ class GuiNdWidget(CcpnGLWidget):
 
                 if not diagonalCount:
                     # add lines to drawList
-                    self._addDiagonalLine(drawList, x0, x1, y0, y1, col)
+                    if self._matchingIsotopeCodes:
+                        mTypes = spectrumView.spectrum.measurementTypes
+                        xaxisType = mTypes[pIndex[0]]
+                        yaxisType = mTypes[pIndex[1]]
+
+                        # extra multiple-quantum diagonals
+                        if xaxisType == 'MQShift' and yaxisType == 'Shift':
+                            self._addDiagonalLine(drawList, x0, x1, 2 * y0, 2 * y1, col)
+                        elif xaxisType == 'Shift' and yaxisType == 'MQShift':
+                            self._addDiagonalLine(drawList, 2 * x0, 2 * x1, y0, y1, col)
+                        else:
+                            # add the standard diagonal
+                            self._addDiagonalLine(drawList, x0, x1, y0, y1, col)
                     diagonalCount += 1
 
                 spinningRate = spectrumView.spectrum.spinningRate
@@ -691,17 +703,6 @@ class GuiNdWidget(CcpnGLWidget):
                         if n:
                             # add lines to drawList
                             self._addDiagonalLine(drawListSideBands, x0 + n * spinningRate, x1 + n * spinningRate, y0, y1, col)
-
-                # extra multiple-quantum diagonals
-                if self._matchingIsotopeCodes:
-                    mTypes = spectrumView.spectrum.measurementTypes
-                    xaxisType = mTypes[pIndex[0]]
-                    yaxisType = mTypes[pIndex[1]]
-
-                    if xaxisType == 'MQShift' and yaxisType == 'Shift':
-                        self._addDiagonalLine(drawListSideBands, x0, x1, 2 * y0, 2 * y1, col)
-                    elif xaxisType == 'Shift' and yaxisType == 'MQShift':
-                        self._addDiagonalLine(drawListSideBands, 2 * x0, 2 * x1, y0, y1, col)
 
         drawList.defineIndexVBO()
         drawListSideBands.defineIndexVBO()

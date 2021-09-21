@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:31 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-21 09:57:10 +0100 (Tue, September 21, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -65,7 +65,7 @@ def rgbRatioToHex(r, g, b):
 
 def hexToRgb(hx):
     if not hx:
-        pass
+        return
 
     hx = hx.lstrip('#')
     lv = len(hx)
@@ -74,7 +74,7 @@ def hexToRgb(hx):
 
 def hexToRgbRatio(hx):
     if not hx:
-        pass
+        return
 
     hx = hx.lstrip('#')
     lv = len(hx)
@@ -83,7 +83,7 @@ def hexToRgbRatio(hx):
 
 def hexToRgba(hx, transparency=1.0):
     if hx is None:
-        pass
+        return
 
     hx = hx.lstrip('#')
     lv = len(hx)
@@ -1013,7 +1013,7 @@ def getAutoColourRgbRatio(inColour=None, sourceObject=None, colourAttribute=None
             # get the first item from the colour gradient
             listColour = colorSchemeTable[listColour][0]
 
-    return hexToRgbRatio(listColour)
+    return hexToRgbRatio(listColour) or defaultColour
 
 
 def findNearestHex(hexCol, colourHexList):

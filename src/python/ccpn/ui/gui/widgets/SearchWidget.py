@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-22 13:20:24 +0100 (Wed, September 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-22 17:05:10 +0100 (Wed, September 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -79,10 +79,7 @@ def _compareKeys(a, b, condition):
             a,b, = float(a), float(b)
             return SearchConditionsDict.get(condition)(a,b)
     except Exception as ex:
-        getLogger().debug('Error in comparing values for GuiTable filters.', ex)
-    return False
-
-
+        getLogger().debug2('Error in comparing values for GuiTable filters.', ex)
 
 
 class GuiTableFilter(ScrollArea):
@@ -232,6 +229,7 @@ class GuiTableFilter(ScrollArea):
         searchColumn = self.columnOptions.getText()
         visHeadings = self.table._dataFrameObject.visibleColumnHeadings if (searchColumn == VISIBLESEARCH) else searchColumn
 
+        _compareErrorCount = 0
         for row in range(self.table.rowCount()):
 
             for column in range(self.table.columnCount()):
@@ -239,13 +237,16 @@ class GuiTableFilter(ScrollArea):
                     item = table.item(row, column)
                     cellText =  item.data(QtCore.Qt.DisplayRole)
                     condition = self.conditionWidget.getText()
-                    match = _compareKeys(cellText, text, condition)
+                    if (match := _compareKeys(cellText, text, condition)) is None:
+                        _compareErrorCount += 1
 
                     if match:
                         if self._listRows is not None:
                             rows.add(list(self._listRows)[item.index])
                         else:
                             rows.add(item.index)
+        if _compareErrorCount > 0:
+            getLogger().debug('Error in comparing values for GuiTable filters, use debug2 for details')
 
         try:
             self._searchedDataFrame = df.iloc[list(rows)]

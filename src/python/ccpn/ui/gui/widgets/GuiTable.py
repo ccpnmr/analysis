@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:21:22 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-22 13:20:24 +0100 (Wed, September 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -388,15 +388,11 @@ GuiTable::item::selected {
         _height = getFontHeight(name=TABLEFONT, size='VLARGE')
         self.setMinimumSize(2 * _height, _height + self.horizontalScrollBar().height())
         self.searchWidget = None
-        # self._parent.layout().setVerticalSpacing(0)
 
         self.setDefaultTableData()
 
         self._currentSorted = False
         self._newSorted = False
-
-        # # update method for ccpn sorting
-        # TableWidgetItem.__lt__ = __ltForTableWidgetItem__
 
         _header.setHighlightSections(self.font().bold())
         setWidgetFont(self, name=TABLEFONT)
@@ -445,14 +441,6 @@ GuiTable::item::selected {
 
         # add a widget handler to give a clean corner widget for the scroll area
         self._cornerDisplay = ScrollBarVisibilityWatcher(self)
-
-        # self.setStyleSheet('''
-        #             NmrResidueTable {border-left-width: 1px solid  #a9a9a9;
-        #             border-right-width: 1px solid  #a9a9a9;
-        #             border-bottom-width: 1px solid  #a9a9a9;
-        #             border-bottom-right-radius: 2px;
-        #             border-bottom-left-radius: 2px;}
-        #             ''')
 
         self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
 
@@ -980,17 +968,11 @@ GuiTable::item::selected {
         self.hideColumn(i)
 
     def _setDefaultRowHeight(self):
-        # set a minimum height to the rows based on the fontmetrics of a generic character
+        # set a minimum height to the rows based on the fontMetrics of a generic character
         self.fontMetric = QtGui.QFontMetricsF(self.font())
         self.bbox = self.fontMetric.boundingRect
         rowHeight = self.bbox('A').height() + 8
 
-        # pyqt4
-        # headers = self.verticalHeader()
-        # headers.setResizeMode(QtWidgets.QHeaderView.Fixed)
-        # headers.setDefaultSectionSize(rowHeight)
-
-        # pyqt5
         headers = self.verticalHeader()
         headers.setSectionResizeMode(QtWidgets.QHeaderView.Fixed)
         headers.setDefaultSectionSize(rowHeight)
@@ -998,12 +980,6 @@ GuiTable::item::selected {
         # and hide the row labels
         if self.hideIndex:
             headers.hide()
-
-        # TODO:ED check pyqt5
-        # for qt5 and above
-        # QHeaderView * verticalHeader = myTableView->verticalHeader();
-        # verticalHeader->setSectionResizeMode(QHeaderView::Fixed);
-        # verticalHeader->setDefaultSectionSize(24);
 
     def pressingModifiers(self):
         """Is the user clicking while holding a modifier

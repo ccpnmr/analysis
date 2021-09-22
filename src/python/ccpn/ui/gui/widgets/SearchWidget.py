@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:51 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-22 13:20:24 +0100 (Wed, September 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -241,32 +241,32 @@ class GuiTableFilter(ScrollArea):
                     condition = self.conditionWidget.getText()
                     match = _compareKeys(cellText, text, condition)
 
-                    # if matchExactly:
-                    #     match = item and (text == item.data(QtCore.Qt.DisplayRole))
-                    # else:
-                    #     match = item and (text in item.data(QtCore.Qt.DisplayRole))
                     if match:
                         if self._listRows is not None:
                             rows.add(list(self._listRows)[item.index])
                         else:
                             rows.add(item.index)
 
-        self._searchedDataFrame = df.loc[list(rows)]
-        self._listRows = rows
+        try:
+            self._searchedDataFrame = df.iloc[list(rows)]
+        except Exception as es:
+            getLogger().warning(f'Encountered a problem searching the table {es}')
 
-        if not self._searchedDataFrame.empty:
-
-            with self.table._guiTableUpdate(self.table._dataFrameObject):
-                # self.table.setData(self._searchedDataFrame.values)
-                self.table.setDataFromSearchWidget(self._searchedDataFrame)
-
-            # self.table.refreshHeaders()
-            self.searchButtons.getButton('Reset').setEnabled(True)
         else:
-            self.searchButtons.getButton('Reset').setEnabled(False)
-            self.restoreTable(table)
-            if not ignoreNotFound:
-                MessageDialog.showWarning('Not found', text)
+            self._listRows = rows
+
+            if not self._searchedDataFrame.empty:
+
+                with self.table._guiTableUpdate(self.table._dataFrameObject):
+                    self.table.setDataFromSearchWidget(self._searchedDataFrame)
+                    self.table._setDefaultRowHeight()
+
+                self.searchButtons.getButton('Reset').setEnabled(True)
+            else:
+                self.searchButtons.getButton('Reset').setEnabled(False)
+                self.restoreTable(table)
+                if not ignoreNotFound:
+                    MessageDialog.showWarning('Not found', text)
 
     def selectSearchOption(self, sourceTable, columnObject, value):
         try:

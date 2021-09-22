@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:21:21 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-22 17:12:23 +0100 (Wed, September 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -400,18 +400,12 @@ class Project(AbstractWrapperObject):
         self._wrappedData._nextUniqueIdValues[className] += 1
         return nextUniqueId
 
-    def _getUniqueIdValue(self, className) -> int:
-        """Get the current uniqueId for klass
-        CCPNINTERNAL: used in _restoreObject to validate objects loaded from dataframes
+    def _setNextUniqueIdValue(self, className, value):
+        """Set the next uniqueId for class className
+        CCPNINTERNAL: should only be used in _restoreObject or Nef
         """
-        # _uniqueId: Some classes require a unique identifier per class
-        # use _uniqueId property defined in AbstractWrapperObject
-        # _nextUniqueIdValues = {}    # a (className, nexIdValue) dictionary
-        if not hasattr(self._wrappedData, '_nextUniqueIdValues'):
-            setattr(self._wrappedData, '_nextUniqueIdValues', {})
-
-        nextUniqueId = self._wrappedData._nextUniqueIdValues.setdefault(className, 0)
-        return nextUniqueId
+        self._queryNextUniqueIdValue(className)
+        self._wrappedData._nextUniqueIdValues[className] = value
 
     @property
     def versionHistory(self) -> tuple:

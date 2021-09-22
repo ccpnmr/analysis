@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:21:21 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-22 17:12:22 +0100 (Wed, September 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -556,7 +556,7 @@ class Peak(AbstractWrapperObject):
 
             # add those that are not already in the list - otherwise recalculate
             for nmrAtom in (_post - _pre - _thisNmr):
-                self.spectrum.chemicalShiftList._newChemicalShift(nmrAtom=nmrAtom)
+                self.spectrum.chemicalShiftList.newChemicalShift(nmrAtom=nmrAtom)
 
             self._recalculatePeakShifts(nmrResidues, shifts)
             with undoStackBlocking() as addUndoItem:
@@ -676,7 +676,7 @@ class Peak(AbstractWrapperObject):
 
             # add those that are not already in the list - otherwise recalculate
             for nmrAtom in (_post - _pre - _thisNmr):
-                self.spectrum.chemicalShiftList._newChemicalShift(nmrAtom=nmrAtom)
+                self.spectrum.chemicalShiftList.newChemicalShift(nmrAtom=nmrAtom)
 
             self._recalculatePeakShifts(nmrResidues, shifts)
             with undoStackBlocking() as addUndoItem:

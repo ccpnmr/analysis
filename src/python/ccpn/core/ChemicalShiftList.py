@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:21:20 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-22 17:12:22 +0100 (Wed, September 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -36,10 +36,9 @@ from ccpn.core.Spectrum import Spectrum
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.lib import Pid
 from ccpn.core.lib.ContextManagers import newObject, newV3Object, renameObject, \
-    undoBlockWithoutSideBar, undoStackBlocking, undoBlock, ccpNmrV3CoreSetter
+    undoBlockWithoutSideBar, undoStackBlocking, undoBlock
 from ccpn.util.decorators import logCommand
 from ccpn.util.OrderedSet import OrderedSet
-from ccpn.util.Common import makeIterableList
 
 
 CS_UNIQUEID = 'uniqueId'
@@ -216,7 +215,7 @@ class ChemicalShiftList(AbstractWrapperObject):
             self._wrappedData.experiments = set(x._wrappedData.experiment for x in value)
 
             for nmrAtom in _newNmr:
-                self._newChemicalShift(nmrAtom=nmrAtom)
+                self.newChemicalShift(nmrAtom=nmrAtom)
 
             self._recalculatePeakShifts(nmrResidues, shifts)
             with undoStackBlocking() as addUndoItem:
@@ -569,47 +568,31 @@ class ChemicalShiftList(AbstractWrapperObject):
         _data = chemicalShiftList._wrappedData.data
 
         if _data is not None:
-            # NOTE:ED - Need a conversion here to replace pandas objects with python OR do in getters
             _data = _data[_data[CS_ISDELETED] == False]
-            # _data.index = pd.RangeIndex(len(_data.index))  # re-index
             _data.set_index(_data[CS_UNIQUEID], inplace=True, )  # drop=False)
 
             chemicalShiftList._wrappedData.data = _data
 
-            maxUniqueId = -1
+            maxUniqueId = project._queryNextUniqueIdValue(CS_CLASSNAME)
             for ii in range(len(_data)):
                 _row = _data.iloc[ii]
 
                 # create a new shift with the uniqueId from the old shift
                 shift = _newShift(chemicalShiftList, _ignoreUniqueId=True)
                 _uniqueId = _row[CS_UNIQUEID]
-                maxUniqueId = max(maxUniqueId, _uniqueId)
                 shift._resetUniqueId(int(_uniqueId))
+
+                # set the new _nextUniqueId for the chemicalsShifts
+                maxUniqueId = max(maxUniqueId, _uniqueId)
+                project._setNextUniqueIdValue(CS_CLASSNAME, maxUniqueId + 1)
+
                 chemicalShiftList._shifts.append(shift)
 
                 # add the new object to the _pid2Obj dict
                 project._finalisePid2Obj(shift, 'create')
 
+                # restore the nmrAtom, etc., for the new shift
                 shift._restoreObject()
-
-                # Need to recover the nmrAtom.chemicalShifts and peak.assignedNmrAtoms
-
-            # TODO:ED - need to disable whilst half way through updating to the new objects
-            #   otherwise get a clash between names in the list
-            #   NEED TO RENAME TO _OldChemicalShifts (I think)
-            #   but should be okay after rename to chemicalShift commit
-            # check that there is not an error creating a new uniqueId number
-            if not hasattr(project._wrappedData, '_nextUniqueIdValues'):
-                setattr(project._wrappedData, '_nextUniqueIdValues', {})
-            else:
-                _num = project._wrappedData._nextUniqueIdValues.get('_OldChemicalShift', 0)
-                if _num > 0:
-                    project._wrappedData._nextUniqueIdValues.setdefault(CS_CLASSNAME, _num)
-                    del project._wrappedData._nextUniqueIdValues['_OldChemicalShift']
-
-            _nextUniqueId = project._getUniqueIdValue(CS_CLASSNAME)
-            if maxUniqueId >= _nextUniqueId:
-                raise RuntimeError(f'ChemicalShiftList._restoreObject: uniqueId {repr(maxUniqueId)} does not match next uniqueId for class {repr(CS_CLASSNAME)} -> {_nextUniqueId}')
 
         return chemicalShiftList
 
@@ -619,11 +602,11 @@ class ChemicalShiftList(AbstractWrapperObject):
     #===========================================================================================
 
     @logCommand(get='self')
-    def _newChemicalShift(self, value: float = None, valueError: float = None, figureOfMerit: float = 1.0,
-                          nmrAtom: Union[NmrAtom, str, None] = None,
-                          chainCode: str = None, sequenceCode: str = None, residueType: str = None, atomName: str = None,
-                          comment: str = None
-                          ):
+    def newChemicalShift(self, value: float = None, valueError: float = None, figureOfMerit: float = 1.0,
+                         nmrAtom: Union[NmrAtom, str, None] = None,
+                         chainCode: str = None, sequenceCode: str = None, residueType: str = None, atomName: str = None,
+                         comment: str = None
+                         ):
         """Create new ChemicalShift within ChemicalShiftList.
 
         See the ChemicalShift class for details.
@@ -756,28 +739,6 @@ class ChemicalShiftList(AbstractWrapperObject):
         _newDeletedShifts = self._deletedShifts[:]
 
         _val._deleteWrapper(self, _newDeletedShifts, _newShifts, _oldDeletedShifts, _oldShifts)
-
-    @logCommand(get='self')
-    def newChemicalShift(self, value: float, nmrAtom,
-                         valueError: float = 0.0, figureOfMerit: float = 1.0,
-                         comment: str = None, **kwds):
-        """Create new ChemicalShift within ChemicalShiftList.
-
-        See the ChemicalShift class for details.
-
-        Optional keyword arguments can be passed in; see Peak._newPeak for details.
-
-        :param value:
-        :param nmrAtom: nmrAtom as object or pid
-        :param valueError:
-        :param figureOfMerit:
-        :param comment: optional comment string
-        :return: a new ChemicalShift instance.
-        """
-        from ccpn.core._OldChemicalShift import _newChemicalShift
-
-        return _newChemicalShift(self, value, nmrAtom, valueError=valueError,
-                                 figureOfMerit=figureOfMerit, comment=comment, **kwds)
 
 
 #=========================================================================================

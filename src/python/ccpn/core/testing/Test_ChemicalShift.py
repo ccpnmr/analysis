@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:25:08 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-22 17:06:18 +0100 (Wed, September 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -79,9 +79,9 @@ class ChemicalShiftTestNew(WrapperTesting):
 
         if len(ch._shifts) == 0:
             for ii in range(5):
-                ch._newChemicalShift()
+                ch.newChemicalShift()
             self.undo.undo()
-            ch._newChemicalShift()
+            ch.newChemicalShift()
 
         if len(self.project.nmrAtoms) == 0:
             res = self.project.nmrChains[0].newNmrResidue()

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:21:20 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-22 19:28:22 +0100 (Wed, September 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -214,8 +214,11 @@ class ChemicalShift(NotifierBase):
     @value.setter
     @ccpNmrV3CoreSetter()
     def value(self, val: Optional[float]):
-        if not isinstance(val, (float, type(None))):
-            raise ValueError(f'{self.className}.value must be of type float or None')
+        """Set the value for the chemicalShift.
+        Integers will be cast as floats on the next get operation.
+        """
+        if not isinstance(val, (float, int, type(None))):
+            raise ValueError(f'{self.className}.value must be of type float, int or None')
         _nmrAtomPid = self._chemicalShiftList._getShiftAttribute(self._uniqueId, CS_NMRATOM, str)
         if _nmrAtomPid:
             raise ValueError(f'{self.className}.value cannot be changed with attached nmrAtom')
@@ -232,8 +235,11 @@ class ChemicalShift(NotifierBase):
     @valueError.setter
     @ccpNmrV3CoreSetter()
     def valueError(self, value: Optional[float]):
-        if not isinstance(value, (float, type(None))):
-            raise ValueError(f'{self.className}.valueError must be of type float or None')
+        """Set the valueError for the chemicalShift.
+        Integers will be cast as floats on the next get operation.
+        """
+        if not isinstance(value, (float, int, type(None))):
+            raise ValueError(f'{self.className}.valueError must be of type float, int or None')
         _nmrAtomPid = self._chemicalShiftList._getShiftAttribute(self._uniqueId, CS_NMRATOM, str)
         if _nmrAtomPid:
             raise ValueError(f'{self.className}.value cannot be changed with attached nmrAtom')
@@ -250,8 +256,11 @@ class ChemicalShift(NotifierBase):
     @figureOfMerit.setter
     @ccpNmrV3CoreSetter()
     def figureOfMerit(self, value: Optional[float]):
-        if not isinstance(value, (float, type(None))):
-            raise ValueError(f'{self.className}.figureOfMerit must be of type float or None')
+        """Set the figureOfMerit for the chemicalShift.
+        Integers will be cast as floats on the next get operation; only integers 0 and 1 are allowed.
+        """
+        if not isinstance(value, (float, int, type(None))):
+            raise ValueError(f'{self.className}.figureOfMerit must be of type float, int or None')
         if value is not None and not (MINFOM <= value <= MAXFOM):
             raise ValueError(f'{self.className}.figureOfMerit must be in range [{MINFOM} - {MAXFOM}]')
         self._chemicalShiftList._setShiftAttribute(self._uniqueId, CS_FIGUREOFMERIT, value)
@@ -635,8 +644,8 @@ def _getByTuple(chemicalShiftList,
         raise ValueError('nmrAtom must be of type nmrAtom or None')
     if not all(isinstance(val, (str, type(None))) for val in (chainCode, sequenceCode, residueType, atomName)):
         raise ValueError('chainCode, sequenceCode, residueType, atomName must be of type str or None')
-    if not all(isinstance(val, (float, type(None))) for val in (value, valueError, figureOfMerit)):
-        raise ValueError('value, valueError, figureOfMerit must be of type float or None')
+    if not all(isinstance(val, (float, int, type(None))) for val in (value, valueError, figureOfMerit)):
+        raise ValueError('value, valueError, figureOfMerit must be of type float, int or None')
     if figureOfMerit is not None and not (MINFOM <= figureOfMerit <= MAXFOM):
         raise ValueError(f'figureOfMerit must be in range [{MINFOM} - {MAXFOM}]')
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:31 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-22 19:27:06 +0100 (Wed, September 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -421,7 +421,7 @@ class RestraintTable(GuiTable):
         Empty str if not atoms.
         """
         atomPair = RestraintTable.getFirstRestraintAtomsPair(restraint)
-        if atomPair:
+        if atomPair and None not in atomPair:
              return ' - '.join([a.id for a in atomPair])
         else:
             return ''

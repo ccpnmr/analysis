@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-22 17:12:22 +0100 (Wed, September 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-22 17:44:37 +0100 (Wed, September 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -26,8 +26,9 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import pandas as pd
-from typing import Tuple, Sequence, List, Union
+from typing import Tuple, Sequence, List, Union, Optional
 from functools import partial
+from collections.abc import Iterable
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.PeakList import PeakList
@@ -188,11 +189,24 @@ class ChemicalShiftList(AbstractWrapperObject):
 
     @spectra.setter
     @logCommand(get='self', isProperty=True)
-    def spectra(self, value: Sequence[Spectrum]):
+    def spectra(self, _spectra: Optional[Sequence[Union[Spectrum, str]]]):
+        """Set the list of spectra attached to the chemicalShiftList
+        List must be iterable and of type Spectrum or str
+        :param _spectra: Iterable or None
+        """
+        if _spectra:
+            if not isinstance(_spectra, Iterable):
+                raise ValueError(f'ChemicalShiftList.spectra must be an iterable of items of type Spectrum or str')
+            getByPid = self._project.getByPid
+            _spectra = [getByPid(x) if isinstance(x, str) else x for x in _spectra]
+            if not all(isinstance(val, Spectrum) for val in _spectra):
+                raise ValueError(f'ChemicalShiftList.spectra must be an iterable of items of type Spectrum or str')
+        else:
+            _spectra = []
 
         # add a spectrum/remove a spectrum
-        _createSpectra = set(value) - set(self.spectra)
-        _deleteSpectra = set(self.spectra) - set(value)
+        _createSpectra = set(_spectra) - set(self.spectra)
+        _deleteSpectra = set(self.spectra) - set(_spectra)
         _createNmr = self._getNmrAtomsFromSpectra(_createSpectra)  # new nmrAtoms to add
         _deleteNmr = self._getNmrAtomsFromSpectra(_deleteSpectra)  # old nmrAtoms to update
 
@@ -212,7 +226,7 @@ class ChemicalShiftList(AbstractWrapperObject):
             with undoStackBlocking() as addUndoItem:
                 addUndoItem(undo=partial(self._recalculatePeakShifts, nmrResidues, shifts))
 
-            self._wrappedData.experiments = set(x._wrappedData.experiment for x in value)
+            self._wrappedData.experiments = set(x._wrappedData.experiment for x in _spectra)
 
             for nmrAtom in _newNmr:
                 self.newChemicalShift(nmrAtom=nmrAtom)

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-22 17:44:37 +0100 (Wed, September 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-22 19:27:36 +0100 (Wed, September 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -281,11 +281,11 @@ class ChemicalShiftList(AbstractWrapperObject):
         if nmrAtom:
             # get shift by nmrAtom
             nmrAtom = self.project.getByPid(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom
-            if not isinstance(nmrAtom, NmrAtom):
+            if not isinstance(nmrAtom, (NmrAtom, type(None))):
                 raise ValueError('ChemicalShiftList.getChemicalShift: nmrAtom must be of type NmrAtom or str')
-
-            # search dataframe
-            rows = _data[_data[CS_NMRATOM] == nmrAtom.pid]
+            if nmrAtom:
+                # search dataframe
+                rows = _data[_data[CS_NMRATOM] == nmrAtom.pid]
 
         elif uniqueId is not None:
             # get shift by uniqueId

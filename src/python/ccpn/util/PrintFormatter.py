@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-02 13:06:59 +0100 (Fri, July 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-22 11:47:47 +0100 (Wed, September 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,8 +28,8 @@ __date__ = "$Date: 2021-06-28 18:39:46 +0100 (Mon, June 28, 2021) $"
 
 from collections import OrderedDict
 from functools import partial
-from FrozenDict import FrozenDict
-from OrderedSet import OrderedSet, FrozenOrderedSet
+from ccpn.util.FrozenDict import FrozenDict
+from ccpn.util.OrderedSet import OrderedSet, FrozenOrderedSet
 
 
 class PrintFormatter(object):

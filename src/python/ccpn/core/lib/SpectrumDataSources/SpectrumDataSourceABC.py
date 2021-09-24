@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:01 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-24 11:47:41 +0100 (Fri, September 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1642,8 +1642,13 @@ class SpectrumDataSourceABC(CcpNmrJson):
             stdFactor = 2.0
 
         absData = numpy.array([v for v in map(abs, data)])
+        absData = absData[numpy.isfinite(absData)]
         median = numpy.median(absData)
-        std = numpy.std(data)
+        _temp = data[numpy.isfinite(data)].astype(numpy.float64)
+        std = numpy.std(_temp)
+        if std != std:
+            # std may still be nan because contains HUGE numbers
+            std = 0
         noiseLevel = median + stdFactor * std
         self.noiseLevel = noiseLevel
 

@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-09 17:31:08 +0100 (Wed, June 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-24 11:47:41 +0100 (Fri, September 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -118,31 +118,51 @@ class AzaraSpectrumDataSource(SpectrumDataSourceABC):
                     dim = int(data[1]) - 1
 
                 elif keyword == 'npts':
+                    if not self.pointCounts:
+                        # strange bug that sometimes the arrays were not defined to the correct size
+                        self.pointCounts[:] = [None] * self.dimensionCount
                     self.pointCounts[dim] = int(data[1])
 
                 elif keyword == 'block':
+                    if not self.blockSizes:
+                        self.blockSizes[:] = [None] * self.dimensionCount
                     self.blockSizes[dim] = int(data[1])
 
                 elif keyword == 'sw':
+                    if not self.spectralWidthsHz:
+                        self.spectralWidthsHz[:] = [None] * self.dimensionCount
                     self.spectralWidthsHz[dim] = float(data[1])
 
                 elif keyword == 'sf':
+                    if not self.spectrometerFrequencies:
+                        self.spectrometerFrequencies[:] = [None] * self.dimensionCount
                     self.spectrometerFrequencies[dim] = float(data[1])
 
                 elif keyword == 'refppm':
+                    if not self.referenceValues:
+                        self.referenceValues[:] = [None] * self.dimensionCount
                     self.referenceValues[dim] = float(data[1])
 
                 elif keyword == 'refpt':
+                    if not self.referencePoints:
+                        self.referencePoints[:] = [None] * self.dimensionCount
                     self.referencePoints[dim] = float(data[1])
 
                 # elif keyword == 'nuc':
                 #     self.isotopes[dim] = str(data[1])
 
                 elif keyword == 'params':
+                    if not self.sampledValues:
+                        self.sampledValues[:] = [None] * self.dimensionCount
                     self.sampledValues[dim] = [float(x) for x in data[1:]]
+
+                    if not self.isotopeCodes:
+                        self.isotopeCodes[:] = [None] * self.dimensionCount
                     self.isotopeCodes[dim] = None
 
                 elif keyword == 'sigmas':
+                    if not self.sampledSigmas:
+                        self.sampledSigmas[:] = [None] * self.dimensionCount
                     self.sampledSigmas[dim] = [float(x) for x in data[1:]]
 
         self.comment = ''.join(comments)

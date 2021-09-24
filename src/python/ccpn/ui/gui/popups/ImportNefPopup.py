@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-08 11:20:01 +0100 (Thu, July 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-24 10:12:36 +0100 (Fri, September 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -29,9 +29,9 @@ __date__ = "$Date: 2020-05-04 17:15:05 +0000 (Mon, May 04, 2020) $"
 import os
 from functools import partial
 from collections import OrderedDict as OD
-from ccpn.util.PrintFormatter import PrintFormatter
-from ccpn.ui.gui.widgets.Spacer import Spacer
 from PyQt5 import QtGui, QtWidgets, QtCore
+from contextlib import contextmanager
+from dataclasses import dataclass
 from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ImportTreeCheckBoxes, RENAMEACTION, BADITEMACTION
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.Frame import Frame
@@ -41,14 +41,17 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.util.nef import StarIo
+from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.core.lib import CcpnNefIo
 from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.core.Project import Project
+from ccpn.util.nef import StarIo
 from ccpn.util.nef import NefImporter as Nef
-from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.util.Logging import getLogger
+from ccpn.util.PrintFormatter import PrintFormatter
+from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
@@ -655,15 +658,15 @@ class NefDictFrame(Frame):
                 # editFrame = Frame(self.frameOptionsFrame, setLayout=True, grid=(row, 0), showBorder=False)
                 Label(self.frameOptionsFrame, text=singular, grid=(row, 0))
                 saveFrameData = LineEdit(self.frameOptionsFrame, text=str(itemName), grid=(row, 1))
-                # editFrame.setFixedHeight(24)
 
                 texts = ('Rename', 'Auto Rename')
                 callbacks = (partial(self._rename, item=item, parentName=plural, lineEdit=saveFrameData, saveFrame=saveFrame),
                              partial(self._rename, item=item, parentName=plural, lineEdit=saveFrameData, saveFrame=saveFrame, autoRename=True))
                 tipTexts = ('Rename', 'Automatically rename to the next available\n - dependent on saveframe type')
-                self.buttonList = ButtonList(self.frameOptionsFrame, texts=texts, tipTexts=tipTexts, callbacks=callbacks,
-                                             grid=(row, 2), gridSpan=(1, 1), direction='v',
-                                             setLastButtonFocus=False)
+                ButtonList(self.frameOptionsFrame, texts=texts, tipTexts=tipTexts, callbacks=callbacks,
+                           grid=(row, 2), gridSpan=(1, 1), direction='v',
+                           setLastButtonFocus=False)
+                saveFrameData.returnPressed.connect(callbacks[0])
                 row += 1
 
             if saveFrame.get('sf_category') == 'ccpn_assignment':
@@ -671,18 +674,47 @@ class NefDictFrame(Frame):
                 texts = ('Auto Rename SequenceCodes',)
                 callbacks = (partial(self._renameSequenceCode, item=item, parentName=plural, lineEdit=saveFrameData, saveFrame=saveFrame, autoRename=True),)
                 tipTexts = ('Automatically rename to the next available',)
-                self.buttonList = ButtonList(self.frameOptionsFrame, texts=texts, tipTexts=tipTexts, callbacks=callbacks,
-                                             grid=(row, 1), gridSpan=(1, 2), direction='v',
-                                             setLastButtonFocus=False)
+                ButtonList(self.frameOptionsFrame, texts=texts, tipTexts=tipTexts, callbacks=callbacks,
+                           grid=(row, 1), gridSpan=(1, 2), direction='v',
+                           setLastButtonFocus=False)
+                # _button = Button(self.frameOptionsFrame, text=texts[0], tipText=tipTexts[0], callback=callbacks[0],
+                #                  grid=(row, 1), gridSpan=(1, 2), direction='v',
+                #                  )
                 row += 1
 
+            if saveFrame.get('sf_category') in ['nef_rdc_restraint_list', 'nef_distance_restraint_list',
+                                                'nef_dihedral_restraint_list', 'ccpn_distance_restraint_violation_list',
+                                                'ccpn_rdc_restraint_violation_list', 'ccpn_dihedral_restraint_violation_list',
+                                                'ccpn_parameter']:
+
+                self._makeSetButton(item, plural, row, saveFrame, 'ccpn_dataset_id', self._editDataSetId)
+                row += 1
+                self._makeSetButton(item, plural, row, saveFrame, 'ccpn_dataset_serial', self._editDataSetSerial)
+                row += 1
+
+                if saveFrame.get('sf_category') in ['ccpn_parameter', ]:
+                    self._makeSetButton(item, plural, row, saveFrame, 'ccpn_parameter_name', self._editParameterName)
+                    row += 1
+
             Label(self.frameOptionsFrame, text='Comment', grid=(row, 0), enabled=False)
-            self._commentData = TextEditor(self.frameOptionsFrame, grid=(row, 1), gridSpan=(1, 2), enabled=False, addWordWrap=True)
-            self._commentData.set('to do ...')
+            self._commentData = TextEditor(self.frameOptionsFrame, grid=(row, 1), gridSpan=(1, 2), enabled=True, addWordWrap=True)
+
+            _comment = saveFrame.get('ccpn_comment')
+            if _comment:
+                self._commentData.set(_comment)
             self._commentData.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
             self._commentData.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
             _height = getFontHeight()
             self._commentData.setMinimumHeight(_height * 3)
+            row += 1
+
+            texts = ('Set Comment',)
+            callbacks = (partial(self._editComment, item=item, parentName=plural, lineEdit=self._commentData, saveFrame=saveFrame),)
+            tipTexts = ('Set the comment for the saveFrame',)
+            ButtonList(self.frameOptionsFrame, texts=texts, tipTexts=tipTexts, callbacks=callbacks,
+                       grid=(row, 2), gridSpan=(1, 1), direction='v',
+                       setLastButtonFocus=False)
+            row += 1
 
             if errorCode in _errors and itemName in _errors[errorCode]:
                 try:
@@ -703,6 +735,19 @@ class NefDictFrame(Frame):
         self.logData.append(pretty(_content))
         self.logData.append(('ERROR DICT'))
         self.logData.append(pretty(_errors))
+
+    def _makeSetButton(self, item, plural, row, saveFrame, attribName, func):
+        Label(self.frameOptionsFrame, text=attribName, grid=(row, 0))
+        # extract the ccpn_parameter_name
+        _attrib = saveFrame.get(attribName)
+        dataSetData = LineEdit(self.frameOptionsFrame, text=str(_attrib), grid=(row, 1))
+        texts = ('Set',)
+        callbacks = (partial(func, item=item, parentName=plural, lineEdit=dataSetData, saveFrame=saveFrame),)
+        tipTexts = (f'Set the {attribName} for the saveFrame',)
+        ButtonList(self.frameOptionsFrame, texts=texts, tipTexts=tipTexts, callbacks=callbacks,
+                   grid=(row, 2), gridSpan=(1, 1), direction='v',
+                   setLastButtonFocus=False)
+        dataSetData.returnPressed.connect(callbacks[0])
 
     def _renameValid(self, item=None, saveFrame=None):
         if not item:
@@ -753,25 +798,7 @@ class NefDictFrame(Frame):
             else:
 
                 # everything okay - rebuild all for now, could make selective later
-                self.nefTreeView._populateTreeView(self.project)
-                self._fillPopup(self._nefDict)
-
-                for ii, (_name, _, _treeParent) in enumerate(_checks):
-                    if _treeParent == parentGroup and _name == itemName:
-                        _name = newName
-
-                    _parent = self.nefTreeView.findSection(_treeParent)
-                    if _parent:
-                        _checkItem = self.nefTreeView.findSection(_name, _parent)
-                        if _checkItem:
-                            _checkItem.setCheckState(0, QtCore.Qt.Checked)
-
-                # _parent = self.nefTreeView._contentParent(self.project, saveFrame, cat)\
-                _parent = self.nefTreeView.findSection(parentName)
-                if _parent:
-                    newItem = self.nefTreeView.findSection(newName, _parent)
-                    if newItem:
-                        self._nefTreeClickedCallback(newItem, 0)
+                self._repopulateview(_checks, itemName, newName, parentGroup, parentName)
 
     def _renameSequenceCode(self, item=None, parentName=None, lineEdit=None, saveFrame=None, autoRename=False):
         """Handle clicking a rename button
@@ -810,25 +837,124 @@ class NefDictFrame(Frame):
             else:
 
                 # everything okay - rebuild all for now, could make selective later
-                self.nefTreeView._populateTreeView(self.project)
-                self._fillPopup(self._nefDict)
+                self._repopulateview(_checks, itemName, newName, parentGroup, parentName)
 
-                for ii, (_name, _, _treeParent) in enumerate(_checks):
-                    if _treeParent == parentGroup and _name == itemName:
-                        _name = newName
+    @contextmanager
+    def _editSaveFrameItem(self, item=None, parentName=None, lineEdit=None, saveFrame=None, autoRename=False, parameter=None):
+        """Handler for editing values in main saveFrame
+        """
+        if not item:
+            return
 
-                    _parent = self.nefTreeView.findSection(_treeParent)
-                    if _parent:
-                        _checkItem = self.nefTreeView.findSection(_name, _parent)
-                        if _checkItem:
-                            _checkItem.setCheckState(0, QtCore.Qt.Checked)
 
-                # _parent = self.nefTreeView._contentParent(self.project, saveFrame, cat)\
-                _parent = self.nefTreeView.findSection(parentName)
-                if _parent:
-                    newItem = self.nefTreeView.findSection(newName or itemName, _parent)
-                    if newItem:
-                        self._nefTreeClickedCallback(newItem, 0)
+        # simple class to export variables from the contextmanager
+        @dataclass
+        class _editValues:
+            newVal: str = ''
+            itemName: str = ''
+
+
+        _data = _editValues()
+        _data.itemName = item.data(0, 0)
+        parentGroup = item.parent().data(0, 0) if item.parent() else repr(None)
+
+        # find the primary handler class for the clicked item, .i.e. chains/peakLists etc.
+        # primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(parentGroup) or saveFrame.get('sf_category')
+
+        _data.newVal = lineEdit.get() if lineEdit else None
+        # remember tree checkbox selection
+        _checks = [[_itm.data(0, 0), _itm.data(1, 0), _itm.parent().data(0, 0) if _itm.parent() else repr(None)]
+                   for _itm in self.nefTreeView.traverseTree()
+                   if _itm.checkState(0) == QtCore.Qt.Checked]
+
+        # add item to saveframe
+        try:
+            yield _data
+
+        except Exception as es:
+            showWarning(f'Error editing {parameter}', str(es))
+        else:
+            # everything okay - rebuild all for now, could make selective later
+            self._repopulateview(_checks, _data.itemName, None, parentGroup, parentName)
+
+    def _editDataSetId(self, item=None, parentName=None, lineEdit=None, saveFrame=None, autoRename=False):
+        """Handle clicking rename dataset button
+        """
+        with self._editSaveFrameItem(item, parentName, lineEdit, saveFrame, autoRename, 'ccpn_dataset_id') as _edit:
+            # reads a non-empty string for a value
+            if not _edit.newVal and 'ccpn_dataset_id' in saveFrame:
+                if saveFrame.get('sf_category') in ['ccpn_parameter', ]:
+                    raise ValueError('ccpn_dataset_id cannot be empty')
+                else:
+                    del saveFrame['ccpn_dataset_id']
+            else:
+                _oldName = saveFrame.get('ccpn_dataset_id')
+                saveFrame['ccpn_dataset_id'] = str(_edit.newVal)
+                # rename itemName if a ccpn_parameter
+                if saveFrame.get('sf_category') in ['ccpn_parameter', ]:
+                    if _edit.itemName and _oldName and _edit.itemName.startswith(_oldName):
+                        _edit.itemName = _edit.newVal + _edit.itemName[len(_oldName):]
+
+    def _editDataSetSerial(self, item=None, parentName=None, lineEdit=None, saveFrame=None, autoRename=False):
+        """Handle clicking rename dataset serial button
+        """
+        with self._editSaveFrameItem(item, parentName, lineEdit, saveFrame, autoRename, 'ccpn_dataset_serial') as _edit:
+            # reads a non-empty string for a value
+            if not _edit.newVal and 'ccpn_dataset_serial' in saveFrame:
+                if saveFrame.get('sf_category') in ['ccpn_parameter', ]:
+                    raise ValueError('ccpn_dataset_serial cannot be empty')
+                else:
+                    del saveFrame['ccpn_dataset_serial']
+            else:
+                _val = int(_edit.newVal)
+                if _val < 0:
+                    raise ValueError('Serial must be positive')
+                saveFrame['ccpn_dataset_serial'] = _val
+
+    def _editComment(self, item=None, parentName=None, lineEdit=None, saveFrame=None, autoRename=False):
+        """Handle clicking Set Comment button
+        """
+        with self._editSaveFrameItem(item, parentName, lineEdit, saveFrame, autoRename, 'ccpn_comment') as _edit:
+            # reads a non-empty string for a value
+            if not _edit.newVal and 'ccpn_comment' in saveFrame:
+                del saveFrame['ccpn_comment']
+            else:
+                saveFrame['ccpn_comment'] = str(_edit.newVal)
+
+    def _editParameterName(self, item=None, parentName=None, lineEdit=None, saveFrame=None, autoRename=False):
+        """Handle clicking Set Parameter Name button
+        """
+        with self._editSaveFrameItem(item, parentName, lineEdit, saveFrame, autoRename, 'ccpn_parameter_name') as _edit:
+            # reads a non-empty string for a value
+            if not _edit.newVal and 'ccpn_parameter_name' in saveFrame:
+                raise ValueError('ccpn_parameter_name cannot be empty')
+            else:
+                _oldName = saveFrame.get('ccpn_parameter_name')
+                saveFrame['ccpn_parameter_name'] = str(_edit.newVal)
+
+                if saveFrame.get('sf_category') in ['ccpn_parameter', ]:
+                    if _edit.itemName and _oldName and _edit.itemName.endswith(_oldName):
+                        _edit.itemName = _edit.itemName[:-len(_oldName)] + _edit.newVal
+
+    def _repopulateview(self, _checks, itemName, newName, parentGroup, parentName):
+        # everything okay - rebuild all for now, could make selective later
+        self.nefTreeView._populateTreeView(self.project)
+        self._fillPopup(self._nefDict)
+        for ii, (_name, _, _treeParent) in enumerate(_checks):
+            if _treeParent == parentGroup and _name == itemName and newName is not None:
+                _name = newName
+
+            _parent = self.nefTreeView.findSection(_treeParent)
+            if _parent:
+                _checkItem = self.nefTreeView.findSection(_name, _parent)
+                if _checkItem:
+                    _checkItem.setCheckState(0, QtCore.Qt.Checked)
+        # _parent = self.nefTreeView._contentParent(self.project, saveFrame, cat)\
+        _parent = self.nefTreeView.findSection(parentName)
+        if _parent:
+            newItem = self.nefTreeView.findSection(newName or itemName, _parent)
+            if newItem:
+                self._nefTreeClickedCallback(newItem, 0)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1438,6 +1564,8 @@ class ImportNefPopup(CcpnDialogMainWidget):
         self.setDefaultButton(CcpnDialogMainWidget.CANCELBUTTON)
         self.__postInit__()
 
+        self._okButton = self.getButton(self.OKBUTTON)
+
     def setWidgets(self):
         """Initialise the main widgets for the form
         """
@@ -1464,6 +1592,13 @@ class ImportNefPopup(CcpnDialogMainWidget):
         """
         for nefWindow in self._nefWindows.values():
             nefWindow._populate()
+
+    def accept(self):
+        """Accept the dialog
+        """
+        # if the mouse is over the ok button and it has focus
+        if self._okButton.hasFocus() and self._okButton.underMouse():
+            super().accept()
 
     def setNefObjects(self, nefObjects):
         # create a list of nef dictionary objects here and add to splitter

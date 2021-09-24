@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-15 21:07:12 +0100 (Wed, September 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-24 10:12:36 +0100 (Fri, September 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -4389,7 +4389,8 @@ class CcpnNefReader(CcpnNefContent):
         name = re.sub(REGEXREMOVEENDQUOTES, '', name)  # substitute with ''
 
         # Make main object
-        dataSet = self.fetchDataSet(dataSetId, _serialFromName or dataSetSerial)
+        # dataSet = self.fetchDataSet(dataSetId, _serialFromName or dataSetSerial)
+        dataSet = self.fetchDataSet(dataSetId, dataSetSerial)
 
         # need to fix the names here... cannot contain '.'
 
@@ -7155,7 +7156,7 @@ class CcpnNefReader(CcpnNefContent):
         NB when reading, all DataSets with known serials should be instantiated BEFORE calling
         with input None"""
 
-        if serial is None:
+        if serial is None and dataSetId is None:
             serial = self.defaultDataSetSerial
 
         dataSet = self.project.getDataSet(dataSetId) if dataSetId else None

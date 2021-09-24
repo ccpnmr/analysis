@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:21:22 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-24 17:15:17 +0100 (Fri, September 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -732,9 +732,25 @@ class ChemicalShiftTable(GuiTable):
         """
 
         # define self._columns here
+        _tipTexts = ('Unique identifier for the chemicalShift',
+                     'isDeleted', # should never be visible
+                     'ChemicalShift value in ppm',
+                     'Error in the chemicalShift value in ppm',
+                     'Figure of merit, between 0 and 1',
+                     'Pid of nmrAtom if attached, or None',
+                     'ChainCode of attached nmrAtom, or None',
+                     'SequenceCode of attached nmrAtom, or None',
+                     'ResidueType of attached nmrAtom, or None',
+                     'AtomName of attached nmrAtom, or None',
+                     'List of assigned peaks associated with this chemicalShift',
+                     'Number of assigned peaks attached to a chemicalShift\nbelonging to spectra associated with parent chemicalShiftList',
+                     'Total number of assigned peaks attached to a chemicalShift\nbelonging to any spectra',
+                     'Optional comment for each chemicalShift',
+                     '1',
+                     )
         # create the column objects
         _cols = [
-            (col, lambda row: _getValueByHeader(row, col), f'TipText{ii}', None, None)
+            (col, lambda row: _getValueByHeader(row, col), _tipTexts[ii], None, None)
             for ii, col in enumerate(CS_TABLECOLUMNS)
             ]
 

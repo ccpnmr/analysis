@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-20 19:13:17 +0100 (Mon, September 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-24 17:13:35 +0100 (Fri, September 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2362,7 +2362,8 @@ class CcpnGLWidget(QOpenGLWidget):
                             continue
 
                     for ii in range(len(bounds)):
-                        bounds[ii].extend(list(specSettings[GLDefs.SPECTRUM_REGIONBOUNDS][ii]))
+                        _rb = list(specSettings[GLDefs.SPECTRUM_REGIONBOUNDS][ii])
+                        bounds[ii].extend(_rb[1:-1]) # skip the outer ppm values
 
                 bounds = [sorted(set([round(b, 12) for b in bnd])) for bnd in bounds]
 

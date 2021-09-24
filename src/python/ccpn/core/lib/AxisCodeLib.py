@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-20 12:22:13 +0100 (Mon, September 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-24 17:14:14 +0100 (Fri, September 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -226,6 +226,8 @@ def getAxisCodeMatch(axisCodes, refAxisCodes, exactMatch=False, allMatches=False
             if ind is not None and ii < len(refAxisCodes):
                 _found[axisCodes[ind]] = refAxisCodes[ii]
         return OrderedDict([(axis, _found.get(axis)) for axis in axisCodes])
+
+    return OrderedDict()
 
 
 def getAxisCodeMatchIndices(axisCodes, refAxisCodes, exactMatch=False, allMatches=False, checkBoundAtoms=False):

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-15 19:22:31 +0100 (Wed, September 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-24 17:14:49 +0100 (Fri, September 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -117,20 +117,25 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
             pointCount,                 number of points in the dimension
             minAliasingFrequency,       minimum aliasing frequency
             maxAliasingFrequency,       maximum aliasing frequency
-                                        aliasing frequencies define the span of the spectrum
-                                        beyond the range of the defined points
+                                        aliasing frequencies define the span of the spectrum, beyond the range of the defined points
+                                        for aliasingIndex (0, 0) this will correspond to points [0.5], [pointCount + 0.5]
             minSpectrumFrequency,       minimum spectrum frequency
-            maxSpectrumFrequency,       minimum spectrum frequency
-                                        spectrum frequencies defined the ppm positions of points n, and (n + pointCount)
+            maxSpectrumFrequency,       maximum spectrum frequency
+                                        spectrum frequencies defined the ppm positions of points [1] and [pointCount]
             axisReversed,               True of the pointn corresponds to the maximum spectrum frequency
             spectralWidth,              maxSpectrumFrequency - minSpectrumFrequency
             aliasingIndex               a tuple (min, max) defining how many integer multiples the aliasing frequencies span the spectrum
                                         (0, 0) implies the aliasing range matches the spectral range
-
                                         (s, t) implies:
                                             the minimum limit = minSpectrumFrequency - 's' spectral widths - should always be negative or zero
                                             the maximum limit = maxSpectrumFrequency + 't' spectral widths - should always be positive or zero
-            foldingMode                 is the type of folding 'circular', 'mirror' or None
+            foldingMode                 the type of folding: 'circular', 'mirror' or None
+            regionBounds                a tuple of ppm values (min, ..., max) in mulitples of the spectral width from the lower aliasingLimit
+                                        to the upper aliasingLimit
+            minFoldingFrequency,        minimum folding frequency
+            maxFoldingFrequency,        maximum folding frequency
+                                        folding frequencies defined the ppm positions of points [0.5] and [pointCount + 0.5]
+                                        currently the exact ppm at which the spectrum is folded
         """
 
         ii = self.dimensionOrdering[axisDim]

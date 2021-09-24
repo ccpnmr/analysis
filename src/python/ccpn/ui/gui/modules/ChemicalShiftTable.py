@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-24 17:15:17 +0100 (Fri, September 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-24 19:22:21 +0100 (Fri, September 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -753,6 +753,10 @@ class ChemicalShiftTable(GuiTable):
             (col, lambda row: _getValueByHeader(row, col), _tipTexts[ii], None, None)
             for ii, col in enumerate(CS_TABLECOLUMNS)
             ]
+        # NOTE:ED - hack to add the comment editor to the comment column
+        _temp = list(_cols[-2])
+        _temp[3] = lambda obj, value: self._setComment(obj, value)
+        _cols[-2] = tuple(_temp)
 
         # set the table _columns
         self._columns = ColumnClass(_cols)
@@ -774,7 +778,8 @@ class ChemicalShiftTable(GuiTable):
                 _stats = [self._derivedFromObject(obj) for obj in _objs]
                 _table[[CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT]] = _stats
 
-                # replace the visible nans with string 'None'
+                # replace the visible nans with '' for comment column and string 'None' elsewhere
+                _table[CS_COMMENT].fillna('', inplace=True)
                 _table.fillna('None', inplace=True)
         else:
             _table = pd.DataFrame(columns=CS_TABLECOLUMNS)
@@ -819,6 +824,9 @@ class ChemicalShiftTable(GuiTable):
             newRow = newRow.append([_extraCols, _comment])
             # append the actual object to the end - not sure whether this is required - check _highlightObjs
             newRow[CS_OBJECT] = obj
+
+            # replace the visible nans with '' for comment column and string 'None' elsewhere
+            newRow[CS_COMMENT:CS_COMMENT].fillna('', inplace=True)
             newRow.fillna('None', inplace=True)
             return newRow
 

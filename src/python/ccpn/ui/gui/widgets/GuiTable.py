@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-22 13:20:24 +0100 (Wed, September 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-24 19:22:21 +0100 (Fri, September 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -943,13 +943,12 @@ GuiTable::item::selected {
             else:
                 self._showColumn(colName)
 
-                if self.columnDefinitions:
-                    if self.columnDefinitions.setEditValues[i]:
-                        # need to put it into the header
-                        header = self.horizontalHeaderItem(i)
+                if self.columnDefinitions and self.columnDefinitions.setEditValues[i]:
+                    # need to put it into the header
+                    header = self.horizontalHeaderItem(i)
+                    if header:
                         icon = QtGui.QIcon(self._icons[0])
-                        if header:
-                            header.setIcon(icon)
+                        header.setIcon(icon)
 
     def _showColumn(self, name):
         if name not in self.columnTexts:
@@ -2431,6 +2430,9 @@ class GuiTableDelegate(QtWidgets.QStyledItemDelegate):
                 text = self._editorValue
             else:
                 text = widget.text()
+        else:
+            # cannot proceed without a widget
+            return
 
         row = index.row()
         col = index.column()
@@ -2464,6 +2466,22 @@ class GuiTableDelegate(QtWidgets.QStyledItemDelegate):
                             self._parent._dataFrameObject.dataFrame = df
                             self._parent.setTableFromDataFrameObject(dataFrameObject=self._parent._dataFrameObject,
                                                                      columnDefs=self._parent._dataFrameObject._columnDefinitions)
+                    else:
+                        try:
+                            # special case for chemicalShiftTable
+                            df = self._parent._dataFrameObject.dataFrame
+                            # get the ordering of the table and use the uniqueId, the index in this case, to get the correct row from the dataframe
+                            _tableIds = tuple(self._parent.item(rr, 0).value for rr in range(self._parent.rowCount()))
+                            obj = df['_object'].loc[_tableIds[row]]
+                            if func and obj is not None:
+                                # notifiers should take care of the rest
+                                func(obj, text)
+
+                        except Exception as es:
+                            # just ignore for the minute
+                            pass
+                        finally:
+                            return
 
                 getLogger().debug('table %s does not contain a Pid' % self)
                 # return super(GuiTableDelegate, self).setModelData(widget, mode, index)

@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-12 19:39:18 +0100 (Mon, April 12, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-09-27 19:08:31 +0100 (Mon, September 27, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -85,9 +86,9 @@ class ZoomPopup(CcpnDialog):
                     suffix = self.current.strip.axes[ii].unit
                     step = steps.setdefault(axisCode[0:1], 0.5)
                     # assure that we can zoom to the largest range of all displayed spectra (plus a bit extra)
-                    minVal = 0.9 * min([s.aliasingLimits[dim][0] for s in self.current.strip.spectra])
+                    minVal = min([(s.aliasingLimits[dim][0] - s.spectralWidths[dim] / 2) for s in self.current.strip.spectra])
                     minVal = _round(minVal, step, -0.5)
-                    maxVal = 1.1 * max([s.aliasingLimits[dim][1] for s in self.current.strip.spectra])
+                    maxVal = max([(s.aliasingLimits[dim][1] + s.spectralWidths[dim] / 2) for s in self.current.strip.spectra])
                     maxVal = _round(maxVal, step, 1.5)
 
                 region = list(self.current.strip.axes[ii].region)
@@ -97,14 +98,14 @@ class ZoomPopup(CcpnDialog):
                     region[ax] = _round(region[ax], step, 0.5)  # float(int(region[ax]/step+0.5)*step)
 
                 dim1MinLabel = Label(self, text='%s-min' % axisCode, grid=(2 + ii, 0), vAlign='t')
-                dim1MinDoubleSpinBox = ScientificDoubleSpinBox(self, step=step,
+                dim1MinDoubleSpinBox = DoubleSpinbox(self, step=step,
                                                      min=minVal, max=maxVal, value=region[0],
-                                                     decimals=4, grid=(2 + ii, 1), vAlign='t')
+                                                     decimals=3, grid=(2 + ii, 1), vAlign='t')
 
                 dim1MaxLabel = Label(self, text='%s-max' % axisCode, grid=(2 + ii, 2), vAlign='t')
-                dim1MaxDoubleSpinBox = ScientificDoubleSpinBox(self, step=step,
+                dim1MaxDoubleSpinBox = DoubleSpinbox(self, step=step,
                                                      min=minVal, max=maxVal, value=region[1],
-                                                     decimals=4, grid=(2 + ii, 3))
+                                                     decimals=3, grid=(2 + ii, 3))
 
                 self.minPositionBoxes.append(dim1MinDoubleSpinBox)
                 self.maxPositionBoxes.append(dim1MaxDoubleSpinBox)

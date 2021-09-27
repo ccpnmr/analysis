@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:49 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-27 19:10:24 +0100 (Mon, September 27, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -32,7 +32,8 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Flowable
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch, cm
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import SPECTRUM_STACKEDMATRIX, SPECTRUM_MATRIX, \
-    GLLINE_STYLES_ARRAY
+    GLLINE_STYLES_ARRAY, SPECTRUM_XLIMITS, SPECTRUM_AF, SPECTRUM_ALIASINGINDEX, SPECTRUM_FOLDINGMODE, \
+    SPECTRUM_YLIMITS, SPECTRUM_SCALE
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import viewportDimensions
 from collections import OrderedDict, Iterable
 import io
@@ -579,64 +580,123 @@ class GLExporter():
                 _height = self.displayScale * self.mainView.height
 
                 if spectrumView.spectrum.dimensionCount > 1:
+                    # draw nD spectra
+
                     if spectrumView in self._parent._spectrumSettings.keys():
                         # self.globalGL._shaderProgram1.setGLUniformMatrix4fv('mvMatrix',
                         #                                            1, GL.GL_FALSE,
                         #                                            self._spectrumSettings[spectrumView][SPECTRUM_MATRIX])
 
-                        mat = np.transpose(self._parent._spectrumSettings[spectrumView][SPECTRUM_MATRIX].reshape((4, 4)))
-                        # mat = np.transpose(self._parent._spectrumSettings[spectrumView][SPECTRUM_MATRIX].reshape((4, 4)))
-
+                        # get the spectrum settings for the spectrumView
+                        specSettings = self._parent._spectrumSettings[spectrumView]
+                        # get the contour list
                         thisSpec = self._parent._contourList[spectrumView]
 
-                        # # clip all colours first
-                        # _colors = np.clip(thisSpec.colors, 0.0, 0.9999)
+                        _, fxMax = specSettings[SPECTRUM_XLIMITS]
+                        _, fyMax = specSettings[SPECTRUM_YLIMITS]
+                        dxAF, dyAF = specSettings[SPECTRUM_AF]
+                        xScale, yScale = specSettings[SPECTRUM_SCALE]
+                        alias = specSettings[SPECTRUM_ALIASINGINDEX]
+                        folding = specSettings[SPECTRUM_FOLDINGMODE]
 
-                        # drawVertexColor
-                        # gr = Group()
-                        for ii in range(0, len(thisSpec.indices), 2):
-                            ii0 = int(thisSpec.indices[ii])
-                            ii1 = int(thisSpec.indices[ii + 1])
+                        _colourPathCount = 0
+                        for ii in range(alias[0][0], alias[0][1] + 1, 1):
+                            for jj in range(alias[1][0], alias[1][1] + 1, 1):
 
-                            vectStart = [thisSpec.vertices[ii0 * 2], thisSpec.vertices[ii0 * 2 + 1], 0.0, 1.0]
-                            vectStart = mat.dot(vectStart)
-                            vectEnd = [thisSpec.vertices[ii1 * 2], thisSpec.vertices[ii1 * 2 + 1], 0.0, 1.0]
-                            vectEnd = mat.dot(vectEnd)
-                            newLine = [vectStart[0], vectStart[1], vectEnd[0], vectEnd[1]]
+                                foldX = foldY = 1.0
+                                foldXOffset = foldYOffset = 0
+                                if folding[0] == 'mirror':
+                                    foldX = pow(-1, ii)
+                                    foldXOffset = -dxAF if foldX < 0 else 0
 
-                            colour = colors.Color(*thisSpec.colors[ii0 * 4:ii0 * 4 + 3], alpha=alphaClip(thisSpec.colors[ii0 * 4 + 3]))
-                            colourPath = 'spectrumViewContours%s%s%s%s%s' % (spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
+                                if folding[1] == 'mirror':
+                                    foldY = pow(-1, jj)
+                                    foldYOffset = -dyAF if foldY < 0 else 0
 
-                            newLine = self.lineVisible(self._parent, newLine, x=_x, y=_y, width=_width, height=_height)
-                            if newLine:
-                                if colourPath not in colourGroups:
-                                    colourGroups[colourPath] = {PDFLINES      : [],
-                                                                PDFSTROKEWIDTH: 0.5 * self.baseThickness * self.contourThickness,
-                                                                PDFSTROKECOLOR: colour, PDFSTROKELINECAP: 1}
-                                colourGroups[colourPath][PDFLINES].append(newLine)
+                                # build the spectrum transformation matrix
+                                specMatrix = np.array([xScale * foldX, 0.0, 0.0, 0.0,
+                                                    0.0, yScale * foldY, 0.0, 0.0,
+                                                    0.0, 0.0, 1.0, 0.0,
+                                                    fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset, 0.0, 1.0],
+                                                      dtype=np.float32)
+                                mat = np.transpose(specMatrix.reshape((4, 4)))
+                                # get the transformation matrix from the spectrumView
+                                # mat = np.transpose(self._parent._spectrumSettings[spectrumView][SPECTRUM_MATRIX].reshape((4, 4)))
+
+                                # # clip all colours first - not sure if needed now, but was causing overflow error in the past
+                                # _colors = np.clip(thisSpec.colors, 0.0, 0.9999)
+
+                                # generate colourPath
+                                for ppInd in range(0, len(thisSpec.indices), 2):
+                                    ppInd0 = int(thisSpec.indices[ppInd])
+                                    ppInd1 = int(thisSpec.indices[ppInd + 1])
+
+                                    vectStart = [thisSpec.vertices[ppInd0 * 2], thisSpec.vertices[ppInd0 * 2 + 1], 0.0, 1.0]
+                                    vectStart = mat.dot(vectStart)
+                                    vectEnd = [thisSpec.vertices[ppInd1 * 2], thisSpec.vertices[ppInd1 * 2 + 1], 0.0, 1.0]
+                                    vectEnd = mat.dot(vectEnd)
+                                    newLine = [vectStart[0], vectStart[1], vectEnd[0], vectEnd[1]]
+
+                                    colour = colors.Color(*thisSpec.colors[ppInd0 * 4:ppInd0 * 4 + 3], alpha=alphaClip(thisSpec.colors[ppInd0 * 4 + 3]))
+                                    colourPath = 'spectrumViewContours%s%s%s%s%s%s' % (spectrumView.pid, _colourPathCount, colour.red, colour.green, colour.blue, colour.alpha)
+
+                                    newLine = self.lineVisible(self._parent, newLine, x=_x, y=_y, width=_width, height=_height)
+                                    if newLine:
+                                        if colourPath not in colourGroups:
+                                            colourGroups[colourPath] = {PDFLINES      : [],
+                                                                        PDFSTROKEWIDTH: 0.5 * self.baseThickness * self.contourThickness,
+                                                                        PDFSTROKECOLOR: colour, PDFSTROKELINECAP: 1}
+                                        colourGroups[colourPath][PDFLINES].append(newLine)
+                                _colourPathCount += 1
 
                 else:
+                    # draw 1D spectra
 
                     # assume that the vertexArray is a GL_LINE_STRIP
                     if spectrumView in self._parent._contourList.keys():
-                        if self._parent._stackingMode:
-                            mat = np.transpose(self._parent._spectrumSettings[spectrumView][SPECTRUM_STACKEDMATRIX].reshape((4, 4)))
-                        else:
-                            mat = None
 
+                        # get the spectrum settings for the spectrumView
+                        specSettings = self._parent._spectrumSettings[spectrumView]
+                        # get the contour list
                         thisSpec = self._parent._contourList[spectrumView]
 
-                        # drawVertexColor
-                        self._appendVertexLineGroup(indArray=thisSpec,
-                                                    colourGroups=colourGroups,
-                                                    plotDim={PLOTLEFT  : _x,
-                                                             PLOTBOTTOM: _y,
-                                                             PLOTWIDTH : _width,
-                                                             PLOTHEIGHT: _height},
-                                                    name='spectrumContours%s' % spectrumView.pid,
-                                                    mat=mat,
-                                                    lineWidth=0.5 * self.baseThickness * self.contourThickness
-                                                    )
+                        # should move this to buildSpectrumSettings
+                        # and emit a signal when visibleAliasingRange or foldingModes are changed
+
+                        _, fxMax = specSettings[SPECTRUM_XLIMITS]
+                        dxAF, _ = specSettings[SPECTRUM_AF]
+                        alias = specSettings[SPECTRUM_ALIASINGINDEX]
+                        folding = specSettings[SPECTRUM_FOLDINGMODE]
+
+                        for ii in range(alias[0][0], alias[0][1] + 1, 1):
+
+                            if self._parent._stackingMode:
+                                _matrix = np.array(specSettings[SPECTRUM_STACKEDMATRIX])
+                            else:
+                                _matrix = np.array(self._parent._IMatrix)
+
+                            foldX = 1.0
+                            foldXOffset = foldYOffset = 0
+                            if folding[0] == 'mirror':
+                                foldX = pow(-1, ii)
+                                foldXOffset = (2 * fxMax - dxAF) if foldX < 0 else 0
+
+                            # take the stacking matrix and insert the correct x-scaling to map the pointPositions to the screen
+                            _matrix[0] = foldX
+                            _matrix[12] += (ii * dxAF) + foldXOffset
+                            _matrix = np.transpose(_matrix.reshape((4, 4)))
+
+                            # drawVertexColor
+                            self._appendVertexLineGroup(indArray=thisSpec,
+                                                        colourGroups=colourGroups,
+                                                        plotDim={PLOTLEFT  : _x,
+                                                                 PLOTBOTTOM: _y,
+                                                                 PLOTWIDTH : _width,
+                                                                 PLOTHEIGHT: _height},
+                                                        name='spectrumContours%s%s' % (spectrumView.pid, ii),
+                                                        mat=_matrix,
+                                                        lineWidth=0.5 * self.baseThickness * self.contourThickness
+                                                        )
 
         self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='boundaries')
 
@@ -645,52 +705,63 @@ class GLExporter():
         Add the spectrum boundaries to the main drawing area.
         """
         colourGroups = OrderedDict()
-        for spectrumView in self._ordering:
-            if spectrumView.isDeleted:
-                continue
+        self._appendIndexLineGroup(indArray=self._parent.boundingBoxes,
+                                   colourGroups=colourGroups,
+                                   plotDim={PLOTLEFT  : self.displayScale * self.mainView.left,
+                                            PLOTBOTTOM: self.displayScale * self.mainView.bottom,
+                                            PLOTWIDTH : self.displayScale * self.mainView.width,
+                                            PLOTHEIGHT: self.displayScale * self.mainView.height},
+                                   name='boundary',
+                                   lineWidth=0.5 * self.baseThickness)
+        self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='boundary')
 
-            # if spectrumView.isVisible() and spectrumView.spectrum.dimensionCount > 1:
-            if spectrumView.spectrum.pid in self.params[GLSELECTEDPIDS] and spectrumView.spectrum.dimensionCount > 1:
-                self._spectrumValues = spectrumView.getVisibleState(dimensionCount=2)
-
-                # get the bounding box of the spectra
-                fxMax, fxMin = self._spectrumValues[0].maxSpectrumFrequency, self._spectrumValues[0].minSpectrumFrequency
-                if spectrumView.spectrum.dimensionCount > 1:
-                    fyMax, fyMin = self._spectrumValues[1].maxSpectrumFrequency, self._spectrumValues[1].minSpectrumFrequency
-                    _col = spectrumView.posColours[0]
-                    colour = colors.Color(*_col[0:3], alpha=alphaClip(0.5))
-                else:
-                    if spectrumView.spectrum.intensities is not None and spectrumView.spectrum.intensities.size != 0:
-                        fyMax, fyMin = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
-                    else:
-                        fyMax, fyMin = 0.0, 0.0
-
-                    _col = spectrumView.posColours[0]
-                    colour = colors.Color(*_col[0:3], alpha=alphaClip(0.5))
-
-                colourPath = 'spectrumViewBoundaries%s%s%s%s%s' % (
-                    spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
-
-                _x = self.displayScale * self.mainView.left
-                _y = self.displayScale * self.mainView.bottom
-                _width = self.displayScale * self.mainView.width
-                _height = self.displayScale * self.mainView.height
-
-                # generate the bounding box
-                newLine = [fxMax, fyMax, fxMax, fyMin, fxMin, fyMin, fxMin, fyMax, fxMax, fyMax]
-                for ii in range(0, len(newLine) - 2, 2):
-                    # thisLine = newLine[ii:ii + 4]
-
-                    thisLine = self.lineVisible(self._parent, newLine, x=_x, y=_y, width=_width, height=_height)
-                    if thisLine:
-                        if colourPath not in colourGroups:
-                            colourGroups[colourPath] = {PDFLINES        : [],
-                                                        PDFSTROKEWIDTH  : 0.5 * self.baseThickness,
-                                                        PDFSTROKECOLOR  : colour,
-                                                        PDFSTROKELINECAP: 1, PDFCLOSEPATH: False}
-                        colourGroups[colourPath][PDFLINES].append(thisLine)
-
-        self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='boundaries')
+        # colourGroups = OrderedDict()
+        # for spectrumView in self._ordering:
+        #     if spectrumView.isDeleted:
+        #         continue
+        #
+        #     # if spectrumView.isVisible() and spectrumView.spectrum.dimensionCount > 1:
+        #     if spectrumView.spectrum.pid in self.params[GLSELECTEDPIDS] and spectrumView.spectrum.dimensionCount > 1:
+        #         self._spectrumValues = spectrumView.getVisibleState(dimensionCount=2)
+        #
+        #         # get the bounding box of the spectra
+        #         fxMax, fxMin = self._spectrumValues[0].maxSpectrumFrequency, self._spectrumValues[0].minSpectrumFrequency
+        #         if spectrumView.spectrum.dimensionCount > 1:
+        #             fyMax, fyMin = self._spectrumValues[1].maxSpectrumFrequency, self._spectrumValues[1].minSpectrumFrequency
+        #             _col = spectrumView.posColours[0]
+        #             colour = colors.Color(*_col[0:3], alpha=alphaClip(0.5))
+        #         else:
+        #             if spectrumView.spectrum.intensities is not None and spectrumView.spectrum.intensities.size != 0:
+        #                 fyMax, fyMin = np.max(spectrumView.spectrum.intensities), np.min(spectrumView.spectrum.intensities)
+        #             else:
+        #                 fyMax, fyMin = 0.0, 0.0
+        #
+        #             _col = spectrumView.posColours[0]
+        #             colour = colors.Color(*_col[0:3], alpha=alphaClip(0.5))
+        #
+        #         colourPath = 'spectrumViewBoundaries%s%s%s%s%s' % (
+        #             spectrumView.pid, colour.red, colour.green, colour.blue, colour.alpha)
+        #
+        #         _x = self.displayScale * self.mainView.left
+        #         _y = self.displayScale * self.mainView.bottom
+        #         _width = self.displayScale * self.mainView.width
+        #         _height = self.displayScale * self.mainView.height
+        #
+        #         # generate the bounding box
+        #         newLine = [fxMax, fyMax, fxMax, fyMin, fxMin, fyMin, fxMin, fyMax, fxMax, fyMax]
+        #         for ii in range(0, len(newLine) - 2, 2):
+        #             # thisLine = newLine[ii:ii + 4]
+        #
+        #             thisLine = self.lineVisible(self._parent, newLine, x=_x, y=_y, width=_width, height=_height)
+        #             if thisLine:
+        #                 if colourPath not in colourGroups:
+        #                     colourGroups[colourPath] = {PDFLINES        : [],
+        #                                                 PDFSTROKEWIDTH  : 0.5 * self.baseThickness,
+        #                                                 PDFSTROKECOLOR  : colour,
+        #                                                 PDFSTROKELINECAP: 1, PDFCLOSEPATH: False}
+        #                 colourGroups[colourPath][PDFLINES].append(thisLine)
+        #
+        # self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='boundaries')
 
     def _addPeakSymbols(self):
         """

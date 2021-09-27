@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-27 19:09:19 +0100 (Mon, September 27, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -222,7 +222,7 @@ class GuiStrip1d(GuiStrip):
         self.exportPdf = ExportDialog(parent=self.mainWindow,
                                       mainWindow=self.mainWindow,
                                       strips=self.spectrumDisplay.strips,
-                                      preferences=self.mainWindow.application.preferences)
+                                      )
         self.exportPdf.exec_()
 
     def _applyPhasing(self, phasingValues):

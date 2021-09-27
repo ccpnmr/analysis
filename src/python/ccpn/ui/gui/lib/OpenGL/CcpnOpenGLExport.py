@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-27 19:10:24 +0100 (Mon, September 27, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-27 19:29:50 +0100 (Mon, September 27, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -698,7 +698,7 @@ class GLExporter():
                                                         lineWidth=0.5 * self.baseThickness * self.contourThickness
                                                         )
 
-        self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='boundaries')
+        self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='spectrumContours')
 
     def _addSpectrumBoundaries(self):
         """
@@ -713,7 +713,7 @@ class GLExporter():
                                             PLOTHEIGHT: self.displayScale * self.mainView.height},
                                    name='boundary',
                                    lineWidth=0.5 * self.baseThickness)
-        self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='boundary')
+        self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='boundaries')
 
         # colourGroups = OrderedDict()
         # for spectrumView in self._ordering:

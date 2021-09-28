@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-09 19:13:27 +0000 (Tue, March 09, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-09-28 17:49:49 +0100 (Tue, September 28, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -410,7 +411,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                 child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
                 child.setData(1, 0, pp.peakList)
                 child.setText(0, pp.peakList.pid)
-                child.setCheckState(0, QtCore.Qt.Checked if specView.isVisible() else QtCore.Qt.Checked)
+                child.setCheckState(0, QtCore.Qt.Checked if pp.isVisible() else QtCore.Qt.Checked)
 
             printItems.extend((GLPEAKSYMBOLS,
                                GLPEAKLABELS))
@@ -425,7 +426,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                 child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
                 child.setData(1, 0, pp.integralList)
                 child.setText(0, pp.integralList.pid)
-                child.setCheckState(0, QtCore.Qt.Checked if specView.isVisible() else QtCore.Qt.Checked)
+                child.setCheckState(0, QtCore.Qt.Checked if pp.isVisible() else QtCore.Qt.Checked)
 
             printItems.extend((GLINTEGRALSYMBOLS,
                                GLINTEGRALLABELS))
@@ -440,7 +441,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                 child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
                 child.setData(1, 0, pp.multipletList)
                 child.setText(0, pp.multipletList.pid)
-                child.setCheckState(0, QtCore.Qt.Checked if specView.isVisible() else QtCore.Qt.Checked)
+                child.setCheckState(0, QtCore.Qt.Checked if pp.isVisible() else QtCore.Qt.Checked)
 
             printItems.extend((GLMULTIPLETSYMBOLS,
                                GLMULTIPLETLABELS))
@@ -562,18 +563,18 @@ class ExportStripToFilePopup(ExportDialogABC):
             strip = self.objects[selected][0]
             stripDirection = 'Y'
 
-        # prIndex = self.exportType.getIndex()
-        # prType = EXPORTTYPES[prIndex]
         prType = self.exportType.get()
         pageType = self.pageType.get()
         foregroundColour = hexToRgbRatio(self.foregroundColour)
         backgroundColour = hexToRgbRatio(self.backgroundColour)
         baseThickness = self.baseThicknessBox.getValue()
-        symbolThickness = self.application.preferences.general.symbolThickness
-        contourThickness = self.application.preferences.general.contourThickness
-        aliasEnabled = self.application.preferences.general.aliasEnabled
-        aliasShade = self.application.preferences.general.aliasShade
-        aliasLabelsEnabled = self.application.preferences.general.aliasLabelsEnabled
+
+        # there are now unique per-spectrumDisplay, may differ from preferences
+        symbolThickness = strip.symbolThickness
+        contourThickness = strip.contourThickness
+        aliasEnabled = strip.aliasEnabled
+        aliasShade = strip.aliasShade
+        aliasLabelsEnabled = strip.aliasLabelsEnabled
         stripPadding = self.stripPaddingBox.getValue()
         exportDpi = self.exportDpiBox.getValue()
 

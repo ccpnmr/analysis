@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:31 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-28 17:41:56 +0100 (Tue, September 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import typing
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from collections import Iterable
+from collections.abc import Iterable
 from ccpn.core.Chain import Chain
 from ccpn.core.Residue import Residue
 from ccpn.core.NmrResidue import NmrResidue

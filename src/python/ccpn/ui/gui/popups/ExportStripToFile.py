@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-28 17:49:49 +0100 (Tue, September 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-28 18:24:43 +0100 (Tue, September 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,27 +28,42 @@ __date__ = "$Date: 2017-07-06 15:51:11 +0000 (Thu, July 06, 2017) $"
 
 from collections import OrderedDict as OD
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from PyQt5 import QtGui, QtWidgets, QtCore
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from PyQt5 import QtWidgets, QtCore
+# from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
+from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.widgets.HLine import HLine
-from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ProjectTreeCheckBoxes, PrintTreeCheckBoxes
+from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import PrintTreeCheckBoxes
 from ccpn.ui.gui.popups.ExportDialog import ExportDialogABC
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
+# from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString
-from ccpn.util.Colour import rgbRatioToHex, hexToRgbRatio, colourNameNoSpace
+from ccpn.util.Colour import hexToRgbRatio, colourNameNoSpace
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
-from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
+# from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
+# from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning, showWarning
 from ccpn.ui.gui.widgets.CompoundWidgets import DoubleSpinBoxCompoundWidget
-from ccpn.ui.gui.widgets.MessageDialog import progressManager
+# from ccpn.ui.gui.widgets.MessageDialog import progressManager
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, \
+    GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMULTIPLETLABELS, \
+    GLMULTIPLETSYMBOLS, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLPAGETYPE, GLSELECTEDPIDS, \
+    GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, \
+    GLSPECTRUMDISPLAY, GLSTRIP, \
+    GLWIDGET, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, GLFOREGROUND, \
+    GLCONTOURTHICKNESS, GLSHOWSPECTRAONPHASE, \
+    GLSTRIPDIRECTION, GLSTRIPPADDING, GLEXPORTDPI, \
+    GLFULLLIST, GLEXTENDEDLIST, GLDIAGONALLINE, GLCURSORS, GLDIAGONALSIDEBANDS, \
+    GLALIASENABLED, GLALIASSHADE, GLALIASLABELSENABLED
+
+
+# from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLAXISLABELS, GLAXISMARKS, \
+#     GLMARKLABELS, GLMARKLINES, GLREGIONS, GLOTHERLINES, GLSPECTRUMLABELS, GLSTRIPLABELLING, GLTRACES, \
+#     GLPLOTBORDER, GLAXISLINES, GLAXISTITLES, GLAXISUNITS, GLAXISMARKSINSIDE
 
 
 EXPORTEXT = 'EXT'
@@ -78,17 +93,6 @@ EXPORTFILTERS = EXPORTPDFFILTER
 PAGEPORTRAIT = 'portrait'
 PAGELANDSCAPE = 'landscape'
 PAGETYPES = [PAGEPORTRAIT, PAGELANDSCAPE]
-
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, GLAXISLABELS, GLAXISMARKS, \
-    GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMARKLABELS, GLMARKLINES, GLMULTIPLETLABELS, GLREGIONS, \
-    GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLPAGETYPE, GLSELECTEDPIDS, \
-    GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSPECTRUMLABELS, \
-    GLSPECTRUMDISPLAY, GLSTRIP, GLSTRIPLABELLING, GLTRACES, \
-    GLWIDGET, GLPLOTBORDER, GLAXISLINES, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, GLFOREGROUND, \
-    GLCONTOURTHICKNESS, GLSHOWSPECTRAONPHASE, \
-    GLAXISTITLES, GLAXISUNITS, GLAXISMARKSINSIDE, GLSTRIPDIRECTION, GLSTRIPPADDING, GLEXPORTDPI, \
-    GLFULLLIST, GLEXTENDEDLIST, GLDIAGONALLINE, GLCURSORS, GLDIAGONALSIDEBANDS, \
-    GLALIASENABLED, GLALIASSHADE, GLALIASLABELSENABLED
 
 
 class ExportStripToFilePopup(ExportDialogABC):

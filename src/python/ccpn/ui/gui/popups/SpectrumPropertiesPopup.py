@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-15 19:22:32 +0100 (Wed, September 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-28 17:42:13 +0100 (Tue, September 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 from functools import partial
 from PyQt5 import QtWidgets, QtCore, QtGui
 from itertools import permutations
-from collections import Iterable, OrderedDict
+from collections.abc import Iterable
 
 from ccpn.core.Spectrum import MAXALIASINGRANGE, Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup

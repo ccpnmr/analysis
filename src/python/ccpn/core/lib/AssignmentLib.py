@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:21:21 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-29 17:34:05 +0100 (Wed, September 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1183,3 +1183,17 @@ def _assignNmrResiduesToPeaks(peaks, nmrResidues):
     """
     for nmrResidue in nmrResidues:
         _assignNmrAtomsToPeaks(peaks, nmrResidue.nmrAtoms, exactMatch=False)
+
+
+def _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments):
+    # go through all the peaks in the peakList
+    for peak in peakList.peaks:
+
+        # only process those that are empty OR those not empty when checkbox cleared
+        if not keepAssignments or all(not dimensionNmrAtoms for dimensionNmrAtoms in peak.dimensionNmrAtoms):
+
+            # make a new nmrResidue with new nmrAtoms and assign to the peak
+            nmrResidue = nmrChain.newNmrResidue()
+            for i, (axis, isotope) in enumerate(zip(peak.axisCodes, peak.spectrum.isotopeCodes)):
+                nmrAtom = nmrResidue.fetchNmrAtom(name=str(axis), isotopeCode=isotope)
+                peak.assignDimension(axisCode=axis, value=[nmrAtom])

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 15:57:59 +0100 (Tue, April 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-29 17:34:05 +0100 (Wed, September 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -30,26 +30,35 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
-from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
+from ccpn.core.lib.ContextManagers import undoBlock
+from ccpn.core.lib.AssignmentLib import _fetchNewPeakAssignments
 
 
 class SetupNmrResiduesPopup(CcpnDialogMainWidget):
+    """
+    Dialog to handle creating new nmrAtoms for peaks that have not been assigned
+    """
+    _PEAKLIST = '_peakList'
+    _NMRCHAIN = '_nmrChain'
+    _ASSIGNMENT = '_assignment'
+
     def __init__(self, parent=None, mainWindow=None,
                  title='Set up nmrResidues', **kwds):
+        """
+        Initialise the dialog
+
+        :param parent:
+        :param mainWindow:
+        :param title:
+        :param kwds:
+        """
         CcpnDialogMainWidget.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
 
         self._parent = parent
         self.mainWindow = mainWindow
         self.project = self.mainWindow.project
 
-        label1a = Label(self.mainWidget, text="Source PeakList ", grid=(0, 0))
-        self.peakListPulldown = PulldownList(self.mainWidget, grid=(0, 1))
-        self.peakListPulldown.setData([peakList.pid for peakList in self.project.peakLists if len(peakList.peaks) > 0])
-        label1a = Label(self.mainWidget, text="NmrChain ", grid=(0, 2))
-        self.nmrChainPulldown = PulldownList(self.mainWidget, grid=(0, 3))
-        self.nmrChainPulldown.setData([nmrChain.pid for nmrChain in self.project.nmrChains])
-        self.assignmentCheckBox = CheckBox(self.mainWidget, text="Keep existing assignments", checked=True, grid=(1, 0), gridSpan=(1,3))
+        self._setWidgets()
 
         self._acceptButtonText = 'Setup NMR Residues'
         self.BUTTON_CANCEL = 'Cancel'
@@ -57,7 +66,6 @@ class SetupNmrResiduesPopup(CcpnDialogMainWidget):
         self.setOkButton(callback=self._setupNmrResidues, text=self._acceptButtonText, tipText='Setup Nmr Residues and close')
         self.setCancelButton(callback=self.reject, text=self.BUTTON_CANCEL, tipText='Cancel and close')
         self.setDefaultButton(CcpnDialogMainWidget.OKBUTTON)
-
 
         self.__postInit__()
         self._applyButton = self.getButton(self.OKBUTTON)
@@ -79,22 +87,38 @@ class SetupNmrResiduesPopup(CcpnDialogMainWidget):
         # self._applyButton.setEnabled(True)
         # self._cancelButton = self.getButton(self.CLOSEBUTTON)
 
+    def _setWidgets(self):
+        """Setup widgets for the dialog
+        """
+        label1a = Label(self.mainWidget, text="Source PeakList ", grid=(0, 0))
+        self.peakListPulldown = PulldownList(self.mainWidget, grid=(0, 1))
+        self.peakListPulldown.setData([peakList.pid for peakList in self.project.peakLists if len(peakList.peaks) > 0])
+        label1a = Label(self.mainWidget, text="NmrChain ", grid=(0, 2))
+        self.nmrChainPulldown = PulldownList(self.mainWidget, grid=(0, 3))
+        self.nmrChainPulldown.setData([nmrChain.pid for nmrChain in self.project.nmrChains])
+        self.assignmentCheckBox = CheckBox(self.mainWidget, text="Keep existing assignments", checked=True, grid=(1, 0), gridSpan=(1, 3))
+
     def _setupNmrResidues(self):
-        with undoBlockWithoutSideBar():
+        with undoBlock():
             peakList = self.project.getByPid(self.peakListPulldown.currentText())
             nmrChain = self.project.getByPid(self.nmrChainPulldown.currentText())
             keepAssignments = self.assignmentCheckBox.isChecked()
 
-            # go through all the peaks in the peakList
-            for peak in peakList.peaks:
-
-                # only process those that are empty OR those not empty when checkbox cleared
-                if not keepAssignments or all(not dimensionNmrAtoms for dimensionNmrAtoms in peak.dimensionNmrAtoms):
-
-                    nmrResidue = nmrChain.newNmrResidue()
-                    for i, axisCode in enumerate(peak.axisCodes):
-                        nmrAtom = nmrResidue.fetchNmrAtom(name=str(axisCode))
-                        peak.assignDimension(axisCode=axisCode, value=[nmrAtom])
+            _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments)
 
         # remove if popup does not need to close
         self.accept()
+
+    def storeWidgetState(self):
+        """Store the state of the checkBoxes between popups
+        """
+        SetupNmrResiduesPopup._storedState[self._PEAKLIST] = self.peakListPulldown.get()
+        SetupNmrResiduesPopup._storedState[self._NMRCHAIN] = self.nmrChainPulldown.get()
+        SetupNmrResiduesPopup._storedState[self._ASSIGNMENT] = self.assignmentCheckBox.isChecked()
+
+    def restoreWidgetState(self):
+        """Restore the state of the checkBoxes
+        """
+        self.peakListPulldown.set(SetupNmrResiduesPopup._storedState.get(self._PEAKLIST, False))
+        self.nmrChainPulldown.set(SetupNmrResiduesPopup._storedState.get(self._NMRCHAIN, False))
+        self.assignmentCheckBox.set(SetupNmrResiduesPopup._storedState.get(self._ASSIGNMENT, False))

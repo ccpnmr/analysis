@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-28 18:15:17 +0100 (Tue, September 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-01 00:04:28 +0100 (Fri, October 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -65,7 +65,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLGRIDLINES, GLAXISLABELS, GLA
     MAINVIEW, MAINVIEWFULLHEIGHT, MAINVIEWFULLWIDTH, \
     RIGHTAXIS, RIGHTAXISBAR, FULLRIGHTAXIS, FULLRIGHTAXISBAR, \
     BOTTOMAXIS, BOTTOMAXISBAR, FULLBOTTOMAXIS, FULLBOTTOMAXISBAR, FULLVIEW, BLANKVIEW, \
-    GLALIASSHADE
+    GLALIASSHADE, GLSTRIPREGIONS
 # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLWIDGET, GLAXISLINES, GLAXISMARKSINSIDE, \
 #     GLFULLLIST, GLEXTENDEDLIST, GLALIASENABLED, GLALIASLABELSENABLED
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import getAliasSetting
@@ -197,7 +197,7 @@ class GLExporter():
     def _createStrip(self, strip, _parent=None, singleStrip=False, axesOnly=False):
         # point to the correct strip
         self.strip = strip
-        self._parent = self.strip._CcpnGLWidget if _parent == None else _parent
+        self._parent = self.strip._CcpnGLWidget if _parent is None else _parent
 
         self._buildPage(singleStrip=singleStrip)
         self._buildStrip(axesOnly=axesOnly)
@@ -448,6 +448,36 @@ class GLExporter():
         # get the list of required spectra
         self._ordering = self.strip.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
 
+        # set the range for the display
+        _oldValues = (self.strip._CcpnGLWidget.axisL, self.strip._CcpnGLWidget.axisR, self.strip._CcpnGLWidget.axisT, self.strip._CcpnGLWidget.axisB)
+        try:
+            _update = False
+            _dd = self.params[GLSTRIPREGIONS][self.strip.id]
+            _update = _dd.useRegion
+            if _update:
+                for ii, ddAxis in enumerate(_dd.axes):
+                    if _dd.minMaxMode == 0:
+                        self.strip.setAxisRegion(ii, (ddAxis['Min'], ddAxis['Max']), rescale=False, update=False)
+                    else:
+                        self.strip.setAxisPosition(ii, ddAxis['Centre'], rescale=False, update=False)
+                        self.strip.setAxisWidth(ii, ddAxis['Width'], rescale=False, update=False)
+
+                self._axisL = self.strip._CcpnGLWidget.axisL
+                self._axisR = self.strip._CcpnGLWidget.axisR
+                self._axisT = self.strip._CcpnGLWidget.axisT
+                self._axisB = self.strip._CcpnGLWidget.axisB
+                self.strip._CcpnGLWidget._rescaleAllAxes(update=False)
+                self.strip._CcpnGLWidget._buildGL()
+                self.strip._CcpnGLWidget.buildAxisLabels()
+
+            else:
+                self._axisL = self.strip._CcpnGLWidget.axisL
+                self._axisR = self.strip._CcpnGLWidget.axisR
+                self._axisT = self.strip._CcpnGLWidget.axisT
+                self._axisB = self.strip._CcpnGLWidget.axisB
+        except Exception as es:
+            pass
+
         # print the grid objects
         if self.params[GLGRIDLINES]: self._addGridLines()
 
@@ -498,6 +528,16 @@ class GLExporter():
             if self.params[GLCURSORS]: self._addCursors()
 
         if self.params[GLAXISLABELS] or self.params[GLAXISUNITS] or self.params[GLAXISTITLES]: self._addGridLabels()
+
+        try:
+            if _update:
+                # reset the strip to the original values
+                self.strip._CcpnGLWidget.axisL, self.strip._CcpnGLWidget.axisR, self.strip._CcpnGLWidget.axisT, self.strip._CcpnGLWidget.axisB = _oldValues
+                self.strip._CcpnGLWidget._rescaleAllZoom()
+                self.strip._CcpnGLWidget._buildGL()
+                self.strip._CcpnGLWidget.buildAxisLabels()
+        except Exception as es:
+            pass
 
     def _addGridLines(self):
         """
@@ -766,57 +806,58 @@ class GLExporter():
         """
         Add the peak symbols to the main drawing area.
         """
+        _symbols = self._parent._GLPeaks._GLSymbols
+
         for data in self._addSpectrumViewManager('peakSymbols'):
             attribList = data.spectrumView.peakListViews
-            validListViews = [pp for pp in attribList
-                              if pp.isVisible()
+            validListViews = [_symbols[pp] for pp in attribList
+                              if pp in _symbols.keys()
+                              and pp.isVisible()
                               and data.spectrumView.isVisible()
-                              and pp.peakList.pid in self.params[GLSELECTEDPIDS]]
+                              and pp.peakList.pid in self.params[GLSELECTEDPIDS]
+                              ]
 
-            for thisListView in validListViews:
-                if thisListView in self._parent._GLPeaks._GLSymbols.keys():
-                    thisSpec = self._parent._GLPeaks._GLSymbols[thisListView]
-
-                    self._appendIndexLineGroup(indArray=thisSpec,
-                                               colourGroups=data.colourGroups,
-                                               plotDim={PLOTLEFT  : data.x,
-                                                        PLOTBOTTOM: data.y,
-                                                        PLOTWIDTH : data.width,
-                                                        PLOTHEIGHT: data.height},
-                                               name='spectrumView%s%s%s' % ('peakSymbols', data.index, data.spectrumView.pid),
-                                               mat=data.matrix,
-                                               fillMode=None,
-                                               splitGroups=False,
-                                               lineWidth=0.5 * self.baseThickness * self.symbolThickness,
-                                               alias=data.alias)
+            for GLObject in validListViews:
+                self._appendIndexLineGroup(indArray=GLObject,
+                                           colourGroups=data.colourGroups,
+                                           plotDim={PLOTLEFT  : data.x,
+                                                    PLOTBOTTOM: data.y,
+                                                    PLOTWIDTH : data.width,
+                                                    PLOTHEIGHT: data.height},
+                                           name='spectrumView%s%s%s' % ('peakSymbols', data.index, data.spectrumView.pid),
+                                           mat=data.matrix,
+                                           fillMode=None,
+                                           splitGroups=False,
+                                           lineWidth=0.5 * self.baseThickness * self.symbolThickness,
+                                           alias=data.alias)
 
     def _addMultipletSymbols(self):
         """
         Add the multiplet symbols to the main drawing area.
         """
+        _symbols = self._parent._GLMultiplets._GLSymbols
+
         for data in self._addSpectrumViewManager('multipletSymbols'):
             attribList = data.spectrumView.multipletListViews
-            validListViews = [pp for pp in attribList
-                              if pp.isVisible()
+            validListViews = [_symbols[pp] for pp in attribList
+                              if pp in _symbols.keys()
+                              and pp.isVisible()
                               and data.spectrumView.isVisible()
                               and pp.multipletList.pid in self.params[GLSELECTEDPIDS]]
 
-            for thisListView in validListViews:
-                if thisListView in self._parent._GLMultiplets._GLSymbols.keys():
-                    thisSpec = self._parent._GLMultiplets._GLSymbols[thisListView]
-
-                    self._appendIndexLineGroup(indArray=thisSpec,
-                                               colourGroups=data.colourGroups,
-                                               plotDim={PLOTLEFT  : data.x,
-                                                        PLOTBOTTOM: data.y,
-                                                        PLOTWIDTH : data.width,
-                                                        PLOTHEIGHT: data.height},
-                                               name='spectrumView%s%s%s' % ('multipletSymbols', data.index, data.spectrumView.pid),
-                                               mat=data.matrix,
-                                               fillMode=None,
-                                               splitGroups=False,
-                                               lineWidth=0.5 * self.baseThickness * self.symbolThickness,
-                                               alias=data.alias)
+            for GLObject in validListViews:
+                self._appendIndexLineGroup(indArray=GLObject,
+                                           colourGroups=data.colourGroups,
+                                           plotDim={PLOTLEFT  : data.x,
+                                                    PLOTBOTTOM: data.y,
+                                                    PLOTWIDTH : data.width,
+                                                    PLOTHEIGHT: data.height},
+                                           name='spectrumView%s%s%s' % ('multipletSymbols', data.index, data.spectrumView.pid),
+                                           mat=data.matrix,
+                                           fillMode=None,
+                                           splitGroups=False,
+                                           lineWidth=0.5 * self.baseThickness * self.symbolThickness,
+                                           alias=data.alias)
 
     def _addMarkLines(self):
         """
@@ -1226,9 +1267,9 @@ class GLExporter():
                 colourPath = 'infiniteLines%s%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha, infLine.lineStyle)
 
                 if infLine.orientation == 'h':
-                    newLine = [self._parent.axisL, infLine.values, self._parent.axisR, infLine.values]
+                    newLine = [self._axisL, infLine.values, self._axisR, infLine.values]
                 else:
-                    newLine = [infLine.values, self._parent.axisT, infLine.values, self._parent.axisB]
+                    newLine = [infLine.values, self._axisT, infLine.values, self._axisB]
 
                 newLine = self.lineVisible(self._parent, newLine, x=_x, y=_y, width=_width, height=_height)
                 if newLine:
@@ -1243,8 +1284,8 @@ class GLExporter():
         self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='infiniteLines')
 
     def _scaleRatioToWindow(self, values):
-        return [values[0] * (self._parent.axisR - self._parent.axisL) + self._parent.axisL,
-                values[1] * (self._parent.axisT - self._parent.axisB) + self._parent.axisB]
+        return [values[0] * (self._axisR - self._axisL) + self._axisL,
+                values[1] * (self._axisT - self._axisB) + self._axisB]
 
     def _addOverlayText(self):
         """
@@ -1450,9 +1491,9 @@ class GLExporter():
                     colourPath = 'axisLabels%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
 
                     # add (0, 3) to mid-point
-                    # mid = self._parent.axisL + (0 + drawString.attribs[0]) * (self._parent.axisR - self._parent.axisL) / self._parent.AXIS_MARGINRIGHT
+                    # mid = self._axisL + (0 + drawString.attribs[0]) * (self._axisR - self._axisL) / self._parent.AXIS_MARGINRIGHT
                     # newLine = [mid, drawString.attribs[1] + (3 * self._parent.pixelY)]
-                    # mid = self._parent.axisL + drawString.attribs[0] * (self._parent.axisR - self._parent.axisL) * self._parent.pixelX
+                    # mid = self._axisL + drawString.attribs[0] * (self._axisR - self._axisL) * self._parent.pixelX
                     # newLine = [mid, drawString.attribs[1] + (3 * self._parent.deltaY)]
 
                     attribPos = (0.0, 0.0) if drawString.attribs.size < 2 else drawString.attribs[0:2]
@@ -1495,9 +1536,9 @@ class GLExporter():
                     colourPath = 'axisLabels%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
 
                     # add (0, 3) to mid
-                    # mid = self._parent.axisB + (3 + drawString.attribs[1]) * (self._parent.axisT - self._parent.axisB) / self._parent.AXIS_MARGINBOTTOM
+                    # mid = self._axisB + (3 + drawString.attribs[1]) * (self._axisT - self._axisB) / self._parent.AXIS_MARGINBOTTOM
                     # newLine = [drawString.attribs[0] + (0 * self._parent.pixelX), mid]
-                    # mid = self._parent.axisB + drawString.attribs[1] * (self._parent.axisT - self._parent.axisB)
+                    # mid = self._axisB + drawString.attribs[1] * (self._axisT - self._axisB)
                     # newLine = [drawString.attribs[0] + (0 * self._parent.deltaX), mid]
 
                     attribPos = (0.0, 0.0) if drawString.attribs.size < 2 else drawString.attribs[0:2]
@@ -1696,8 +1737,8 @@ class GLExporter():
                 else:
                     if ratioLine:
                         # convert ratio to axis coordinates
-                        # newLine.extend([self._scaleRatioToWindow(indArray.vertices[vv * 2], (self._parent.axisR - self._parent.axisL), self._parent.axisL),
-                        #                 self._scaleRatioToWindow(indArray.vertices[vv * 2 + 1], (self._parent.axisT - self._parent.axisB), self._parent.axisB)])
+                        # newLine.extend([self._scaleRatioToWindow(indArray.vertices[vv * 2], (self._axisR - self._axisL), self._axisL),
+                        #                 self._scaleRatioToWindow(indArray.vertices[vv * 2 + 1], (self._axisT - self._axisB), self._axisB)])
 
                         newLine.extend(self._scaleRatioToWindow(indArray.vertices[vv * 2:vv * 2 + 2]))
                     else:
@@ -1815,7 +1856,7 @@ class GLExporter():
     def pointVisible(self, _parent, lineList, x=0.0, y=0.0, width=0.0, height=0.0):
         """return true if the line has visible endpoints
         """
-        axisL, axisR, axisT, axisB = self._parent.axisL, self._parent.axisR, self._parent.axisT, self._parent.axisB
+        axisL, axisR, axisT, axisB = self._axisL, self._axisR, self._axisT, self._axisB
 
         if (self.between(lineList[0], axisL, axisR) and
                 (self.between(lineList[1], axisT, axisB))):
@@ -1836,7 +1877,7 @@ class GLExporter():
 
         try:
             if newList:
-                axisL, axisR, axisT, axisB = self._parent.axisL, self._parent.axisR, self._parent.axisT, self._parent.axisB
+                axisL, axisR, axisT, axisB = self._axisL, self._axisR, self._axisT, self._axisB
 
                 newList = [pp for outPoint in newList for pp in (x + width * (outPoint[0] - axisL) / (axisR - axisL),
                                                                  y + height * (outPoint[1] - axisB) / (axisT - axisB))]
@@ -1848,7 +1889,7 @@ class GLExporter():
     def clipPoly(self, _parent, subjectPolygon):
         """Apply Sutherland-Hodgman algorithm for clipping polygons
         """
-        axisL, axisR, axisT, axisB = self._parent.axisL, self._parent.axisR, self._parent.axisT, self._parent.axisB
+        axisL, axisR, axisT, axisB = self._axisL, self._axisR, self._axisT, self._axisB
 
         if self._parent.INVERTXAXIS != self._parent.INVERTYAXIS:
             clipPolygon = [[axisL, axisB],
@@ -1905,7 +1946,7 @@ class GLExporter():
     def clipLine(self, _parent, subjectPolygon):
         """Apply Sutherland-Hodgman algorithm for clipping polygons
         """
-        axisL, axisR, axisT, axisB = self._parent.axisL, self._parent.axisR, self._parent.axisT, self._parent.axisB
+        axisL, axisR, axisT, axisB = self._axisL, self._axisR, self._axisT, self._axisB
 
         if self._parent.INVERTXAXIS != self._parent.INVERTYAXIS:
             clipPolygon = [[axisL, axisB],
@@ -1960,7 +2001,7 @@ class GLExporter():
         return outputList
 
     def lineFit(self, _parent, lineList, x=0.0, y=0.0, width=0.0, height=0.0, checkIntegral=False):
-        axisL, axisR, axisT, axisB = self._parent.axisL, self._parent.axisR, self._parent.axisT, self._parent.axisB
+        axisL, axisR, axisT, axisB = self._axisL, self._axisR, self._axisT, self._axisB
 
         for pp in range(0, len(lineList), 2):
             if (self.between(lineList[pp], axisL, axisR) and

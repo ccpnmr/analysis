@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-28 18:24:43 +0100 (Tue, September 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-01 00:04:28 +0100 (Fri, October 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -27,27 +27,28 @@ __date__ = "$Date: 2017-07-06 15:51:11 +0000 (Thu, July 06, 2017) $"
 #=========================================================================================
 
 from collections import OrderedDict as OD
-from ccpn.ui.gui.widgets.Spacer import Spacer
 from PyQt5 import QtWidgets, QtCore
-# from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from dataclasses import dataclass
+from functools import partial
+# from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.guiSettings import getColours, DIVIDER
+from ccpn.ui.gui.guiSettings import getColours, DIVIDER, BORDERFOCUS
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import PrintTreeCheckBoxes
 from ccpn.ui.gui.popups.ExportDialog import ExportDialogABC
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-# from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
-from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString
-from ccpn.util.Colour import hexToRgbRatio, colourNameNoSpace
+from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
-# from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
+from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 from ccpn.ui.gui.widgets.Frame import Frame
-# from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning, showWarning
 from ccpn.ui.gui.widgets.CompoundWidgets import DoubleSpinBoxCompoundWidget
+from ccpn.ui.gui.widgets.HighlightBox import HighlightBox
 # from ccpn.ui.gui.widgets.MessageDialog import progressManager
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, \
     GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMULTIPLETLABELS, \
@@ -58,7 +59,9 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, \
     GLCONTOURTHICKNESS, GLSHOWSPECTRAONPHASE, \
     GLSTRIPDIRECTION, GLSTRIPPADDING, GLEXPORTDPI, \
     GLFULLLIST, GLEXTENDEDLIST, GLDIAGONALLINE, GLCURSORS, GLDIAGONALSIDEBANDS, \
-    GLALIASENABLED, GLALIASSHADE, GLALIASLABELSENABLED
+    GLALIASENABLED, GLALIASSHADE, GLALIASLABELSENABLED, GLSTRIPREGIONS
+from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString
+from ccpn.util.Colour import hexToRgbRatio, colourNameNoSpace
 
 
 # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLAXISLABELS, GLAXISMARKS, \
@@ -93,12 +96,63 @@ EXPORTFILTERS = EXPORTPDFFILTER
 PAGEPORTRAIT = 'portrait'
 PAGELANDSCAPE = 'landscape'
 PAGETYPES = [PAGEPORTRAIT, PAGELANDSCAPE]
+STRIPAXIS = 'Axis'
+STRIPMIN = 'Min'
+STRIPMAX = 'Max'
+STRIPCENTRE = 'Centre'
+STRIPWIDTH = 'Width'
+STRIPAXISINVERTED = 'AxisInverted'
+STRIPBUTTONS = [STRIPAXIS, STRIPMIN, STRIPMAX, STRIPCENTRE, STRIPWIDTH]
+STRIPAXES = ['X', 'Y']
+
+
+@dataclass
+class _StripData:
+    """Simple class to store strip widget state
+    """
+    strip = None
+    useRegion = True
+    minMaxMode = 0
+    axes = None
+
+    def _initialise(self):
+        """Initialise the new dataclas from the strip
+        """
+        self.axes = [{STRIPMIN         : 0.0,
+                      STRIPMAX         : 0.0,
+                      STRIPCENTRE      : 0.0,
+                      STRIPWIDTH       : 0.0,
+                      STRIPAXISINVERTED: False,  # not sure if this is needed
+                      },
+                     {STRIPMIN         : 0.0,
+                      STRIPMAX         : 0.0,
+                      STRIPCENTRE      : 0.0,
+                      STRIPWIDTH       : 0.0,
+                      STRIPAXISINVERTED: False,
+                      }]
+
+        if self.strip:
+            for ii in range(len(STRIPAXES)):
+                dd = self.axes[ii]
+                region = self.strip.getAxisRegion(ii)
+                dd[STRIPMIN], dd[STRIPMAX] = min(region), max(region)
+                dd[STRIPAXISINVERTED] = True if (region[0] > region[1]) else False  # probably not needed - use setAxisRegion
+                dd[STRIPCENTRE] = self.strip.getAxisPosition(ii)
+                dd[STRIPWIDTH] = self.strip.getAxisWidth(ii)
+
+    def __repr__(self):
+        """Output the string equivalent
+        """
+        return f'<{self.strip}: {self.useRegion}, {self.minMaxMode}, {self.axes}>'
 
 
 class ExportStripToFilePopup(ExportDialogABC):
     """
     Class to handle printing strips to file
     """
+    _SAVESTRIPS = '_strips'
+    _SAVECURRENTSTRIP = '_currentStrip'
+    _SAVECURRENTAXIS = '_currentAxis'
 
     def __init__(self, parent=None, mainWindow=None, title='Export Strip to File',
                  fileMode='anyFile',
@@ -106,7 +160,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                  selectFile=None,
                  fileFilter=EXPORTFILTERS,
                  strips=None,
-                 includeSpectumDisplays=True,
+                 includeSpectrumDisplays=True,
                  **kwds):
         """
         Initialise the widget
@@ -114,11 +168,13 @@ class ExportStripToFilePopup(ExportDialogABC):
         # initialise attributes
         self.strips = strips
         self.objects = {}
-        self.includeSpectumDisplays = includeSpectumDisplays
+        self.includeSpectrumDisplays = includeSpectrumDisplays
         self.strip = None
         self.spectrumDisplay = None
         self.spectrumDisplays = set()
         self.specToExport = None
+
+        self._initialiseStripList()
 
         super().__init__(parent=parent, mainWindow=mainWindow, title=title,
                          fileMode=fileMode, acceptMode=acceptMode,
@@ -199,37 +255,254 @@ class ExportStripToFilePopup(ExportDialogABC):
                                                         decimals=0, step=5, range=(36, 2400))
 
         row += 1
+
+        _rangeRow = self._setupRangeWidget(row, userFrame)
+        row += 1
+
         self.treeView = PrintTreeCheckBoxes(userFrame, project=None, grid=(row, 0), gridSpan=(1, 4))
-        Spacer(userFrame, 0, 0, hPolicy='expanding', vPolicy='expanding', grid=(row, 3))
+        userFrame.layout().setRowStretch(row, 100)
+        userFrame.addSpacer(5, 5, expandX=True, expandY=True, grid=(row, 3))
+
+    def _setupRangeWidget(self, row, userFrame):
+        """Set up the widgets for the range frame
+        """
+        _rangeFrame = Frame(userFrame, setLayout=True, grid=(row, 0), gridSpan=(1, 8), hAlign='left')
+        self._rangeLeft = Frame(_rangeFrame, setLayout=True, grid=(0, 0))
+        self._rangeRight = Frame(_rangeFrame, setLayout=True, grid=(0, 1), spacing=(0, 4))
+
+        _rangeRow = 0
+        self._useRegion = CheckBoxCompoundWidget(
+                self._rangeRight,
+                grid=(_rangeRow, 0), hAlign='left', gridSpan=(1, 6),
+                orientation='right',
+                labelText='Use override region for printing',
+                callback=self._useOverrideCallback
+                )
+        _rangeRow += 1
+
+        # radio buttons for setting mode
+        _texts = ['Use Min/Max', 'Use Centre/Width']
+        self._rangeRadio = RadioButtons(self._rangeRight, texts=_texts, direction='h', hAlign='l', selectedInd=1,
+                                        grid=(_rangeRow, 0), gridSpan=(1, 8),
+                                        callback=self._setModeCallback)
+        _rangeRow += 1
+
+        # row of labels
+        self._axisLabels = []
+        for ii, txt in enumerate(STRIPBUTTONS):
+            _label = Label(self._rangeRight, grid=(_rangeRow, ii), text=txt, hAlign='left')
+            self._axisLabels.append(_label)
+        _rangeRow += 1
+
+        # rows containing spinboxes
+        focusColour = getColours()[BORDERFOCUS]
+        axes = STRIPAXES
+        self._axisSpinboxes = []
+        for ii, axis in enumerate(axes):
+            _label = Label(self._rangeRight, text=axis, grid=(_rangeRow, 0), hAlign='left')
+
+            # add a box for the selected row
+            _colourBox = HighlightBox(self._rangeRight, grid=(_rangeRow, 0), gridSpan=(1, 6), colour=focusColour, lineWidth=1, showBorder=False)
+            _colourBox.setFixedHeight(_label.height() + 4)
+
+            _widgets = [_label]
+            for bt in range(len(STRIPBUTTONS[1:])):
+                _spinbox = DoubleSpinbox(self._rangeRight, grid=(_rangeRow, bt + 1), decimals=2, step=0.1,  # hAlign='left',
+                                         callback=partial(self._setSpinbox, ii, STRIPBUTTONS[bt + 1]))
+                _spinbox.setFixedWidth(100)
+                _spinbox._widgetRow = ii
+                _spinbox.installEventFilter(self)
+
+                _widgets.append(_spinbox)
+
+            _widgets.append(_colourBox)
+            _rangeRow += 1
+
+            # store the widgets for the callbacks...
+            self._axisSpinboxes.append(_widgets)
+
+        # buttons for setting the spinboxes from strip
+        _texts = ['Set Region', 'Set Min', 'Set Max', 'Set Centre', 'Set Width']
+        _tipTexts = ['Set the region from the strip', 'Set the maximum value from the strip', 'Set the minimum value from the strip',
+                     'Set the centre value from the strip', 'Set the width from the strip']
+        _callbacks = [self._setStripRegion, self._setStripMin, self._setStripMax, self._setStripCentre, self._setStripWidth]
+        self._setRangeButtons = ButtonList(self._rangeRight, texts=_texts, tipTexts=_tipTexts,
+                                           grid=(_rangeRow, 0), gridSpan=(1, 8), hAlign='l',
+                                           callbacks=_callbacks
+                                           )
+        _rangeRow += 1
+        self._rangeRight.addSpacer(5, 5, grid=(_rangeRow, 6), expandX=True)
+        self._rangeRight.addSpacer(4, 4, grid=(_rangeRow, 5))
+
+        # list to hold the current strips
+        Label(self._rangeLeft, grid=(0, 0), text='Strips', hAlign='left')
+        self._stripLists = ListWidget(self._rangeLeft, grid=(1, 0), callback=self._setRangeState)
+        self._rangeLeft.setFixedSize(130, 180)
+
+        _rangeFrame.getLayout().setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+        self._rangeRight.getLayout().setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+        self._rangeRight.layout().setColumnStretch(6, 1000)
+        self._rangeRight.getLayout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
+
+        return _rangeRow
+
+    def _initialiseStripList(self):
+        """Setup the lists containing strips.spectrumDisplays before populating
+        """
+        self.objects = None
+        self._currentStrip = None
+        self._currentStrips = []  # there may be multiple selected in the stripList
+        self._currentAxis = 0
+        self._stripDict = {}
+
+        if self.strips:
+            self.objects = {strip.id: (strip, strip.pid) for strip in self.strips}
+            for strip in self.strips:
+                _data = self._stripDict[strip.id] = _StripData()
+                _data.strip = strip
+                _data._initialise()
+
+            # define the contents for the object pulldown
+            if len(self.strips) > 1:
+                specDisplays = set()
+                if self.includeSpectrumDisplays:
+
+                    # get the list of spectrumDisplays containing the strips
+                    for strip in self.strips:
+                        if len(strip.spectrumDisplay.strips) > 1:
+                            specDisplays.add(strip.spectrumDisplay)
+
+                    # add to the pulldown objects
+                    for spec in specDisplays:
+                        self.objects['SpectrumDisplay: %s' % spec.id] = (spec, spec.pid)
+
+    def _setStripRegion(self, *args):
+        try:
+            dd = self._stripDict.get(self._currentStrip)
+            ii = self._currentAxis
+            ddAxis = dd.axes[ii]
+            if dd.minMaxMode == 0:
+                region = dd.strip.getAxisRegion(ii)
+                ddAxis[STRIPMIN], ddAxis[STRIPMAX] = min(region), max(region)
+            else:
+                ddAxis[STRIPCENTRE] = dd.strip.getAxisPosition(ii)
+                ddAxis[STRIPWIDTH] = dd.strip.getAxisWidth(ii)
+        except Exception as es:
+            pass
+        else:
+            self._setRangeState(self._currentStrip)
+
+    def _setStripMin(self, *args):
+        try:
+            dd = self._stripDict.get(self._currentStrip)
+            ddAxis = dd.axes[self._currentAxis]
+            if dd and dd.minMaxMode == 0:
+                region = dd.strip.getAxisRegion(self._currentAxis)
+                ddAxis[STRIPMIN] = min(region)
+        except Exception as es:
+            pass
+        else:
+            self._setRangeState(self._currentStrip)
+
+    def _setStripMax(self, *args):
+        try:
+            dd = self._stripDict.get(self._currentStrip)
+            ddAxis = dd.axes[self._currentAxis]
+            if dd and dd.minMaxMode == 0:
+                region = dd.strip.getAxisRegion(self._currentAxis)
+                ddAxis[STRIPMAX] = max(region)
+        except Exception as es:
+            pass
+        else:
+            self._setRangeState(self._currentStrip)
+
+    def _setStripCentre(self, *args):
+        try:
+            dd = self._stripDict.get(self._currentStrip)
+            ddAxis = dd.axes[self._currentAxis]
+            if dd and dd.minMaxMode == 1:
+                ddAxis[STRIPCENTRE] = dd.strip.getAxisPosition(self._currentAxis)
+        except Exception as es:
+            pass
+        else:
+            self._setRangeState(self._currentStrip)
+
+    def _setStripWidth(self, *args):
+        try:
+            dd = self._stripDict.get(self._currentStrip)
+            ddAxis = dd.axes[self._currentAxis]
+            if dd and dd.minMaxMode == 1:
+                ddAxis[STRIPWIDTH] = dd.strip.getAxisWidth(self._currentAxis)
+        except Exception as es:
+            pass
+        else:
+            self._setRangeState(self._currentStrip)
+
+    def _setSpinbox(self, row, button, value):
+        """Set the value in the storage dict from the spinbox change
+        """
+        self._setSpinboxAxis(row)
+        try:
+            _dd = self._stripDict.get(self._currentStrip)
+            _dd.axes[row][button] = value
+        except Exception as es:
+            pass
+
+    def _setSpinboxAxis(self, row):
+        """Change the current selected row of spinboxes"""
+        self._currentAxis = row
+        for ii in range(2):
+            self._axisSpinboxes[ii][-1].showBorder = (self._currentAxis == ii)
+
+    def eventFilter(self, obj, event):
+        """Event filter to handle focus change on spinboxes
+        """
+        if event.type() in [QtCore.QEvent.WindowActivate, QtCore.QEvent.FocusIn]:
+            self._setSpinboxAxis(obj._widgetRow)
+
+        return False
+
+    def _useOverrideCallback(self, value):
+        """User has checked/unchecked useOverride
+        """
+        try:
+            _dd = self._stripDict.get(self._currentStrip)
+            _dd.useRegion = value
+        except Exception as es:
+            pass
+        else:
+            self._setRangeState(self._currentStrip)
+
+    def _setModeCallback(self):
+        """User has changed minMax/centreWidth mode
+        """
+        try:
+            _dd = self._stripDict.get(self._currentStrip)
+            _dd.minMaxMode = self._rangeRadio.getIndex()
+        except Exception as es:
+            pass
+        else:
+            self._setRangeState(self._currentStrip)
 
     def populate(self, userframe):
         """Populate the widgets with project
         """
-
         with self.blockWidgetSignals(userframe):
             self._populate(userframe)
 
     def _populate(self, userframe):
         """Populate the widget
         """
-        self.objects = {strip.id: (strip, strip.pid) for strip in self.strips}
-
         # define the contents for the object pulldown
         if len(self.strips) > 1:
-            specDisplays = set()
-            if self.includeSpectumDisplays:
+            pulldownLabel = 'Select Strip:'
+            if self.includeSpectrumDisplays:
 
                 # get the list of spectrumDisplays containing the strips
                 for strip in self.strips:
                     if len(strip.spectrumDisplay.strips) > 1:
-                        specDisplays.add(strip.spectrumDisplay)
-
-                # add to the pulldown objects
-                for spec in specDisplays:
-                    self.objects['SpectrumDisplay: %s' % spec.id] = (spec, spec.pid)
-
-            pulldownLabel = 'Select Item:' if specDisplays else 'Select Strip:'
-
+                        pulldownLabel = 'Select Item:'
+                        break
         else:
             pulldownLabel = 'Current Strip:'
 
@@ -278,6 +551,8 @@ class ExportStripToFilePopup(ExportDialogABC):
             else:
                 self.strip = None
 
+        # fill the range widgets from the strips
+        self._populateRange()
         # fill the tree from the current strip
         self._populateTreeView()
 
@@ -289,6 +564,78 @@ class ExportStripToFilePopup(ExportDialogABC):
             raise ValueError('bad export type')
 
         self.setSave(self.objectPulldown.getText() + exportExtension)
+
+    def _populateRange(self):
+        """Populate the list/spinboxes in range widget
+        """
+        self._rangeLeft.setVisible(self.spectrumDisplay is not None)
+        if self.strip:
+            self._setRangeState(self.strip.id)
+
+        self._stripLists.clear()
+        self._stripLists.addItems(list(strip.id for strip in self.strips))
+        self._stripLists.select(self._currentStrip)
+
+    def _setRangeState(self, strip):
+        try:
+            stripId = strip.text()
+        except Exception as es:
+            stripId = strip
+        finally:
+            self._rangeRight.setVisible(False)
+
+            with self.blockWidgetSignals(self._rangeRight):
+                # set the current Id for updating range dict
+                self._currentStrip = stripId
+
+                _dd = self._stripDict.get(stripId, None)
+                if _dd:
+                    self._useRegion.set(_dd.useRegion)
+                    self._rangeRadio.setIndex(_dd.minMaxMode)
+
+                    for btn in [STRIPMIN, STRIPMAX]:
+                        self._axisLabels[STRIPBUTTONS.index(btn)].setVisible(_dd.minMaxMode == 0)
+                        for ii in range(len(STRIPAXES)):
+                            self._axisSpinboxes[ii][STRIPBUTTONS.index(btn)].setVisible(_dd.minMaxMode == 0)
+                        self._setRangeButtons.buttons[STRIPBUTTONS.index(btn)].setVisible(_dd.minMaxMode == 0)
+                    for btn in [STRIPCENTRE, STRIPWIDTH]:
+                        self._axisLabels[STRIPBUTTONS.index(btn)].setVisible(_dd.minMaxMode == 1)
+                        for ii in range(len(STRIPAXES)):
+                            self._axisSpinboxes[ii][STRIPBUTTONS.index(btn)].setVisible(_dd.minMaxMode == 1)
+                        self._setRangeButtons.buttons[STRIPBUTTONS.index(btn)].setVisible(_dd.minMaxMode == 1)
+
+                    for ii in range(len(STRIPAXES)):
+                        axis = _dd.axes[ii]
+                        self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPMIN)].set(axis[STRIPMIN])
+                        self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPMAX)].set(axis[STRIPMAX])
+                        self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPCENTRE)].set(axis[STRIPCENTRE])
+                        self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPWIDTH)].set(axis[STRIPWIDTH])
+
+                        for bb in self._axisSpinboxes[ii]:
+                            bb.setEnabled(_dd.useRegion)
+                        self._axisSpinboxes[ii][-1].showBorder = (_dd.useRegion and (self._currentAxis == ii))
+
+                    self._rangeRadio.setEnabled(_dd.useRegion)
+                    self._setRangeButtons.setEnabled(_dd.useRegion)
+
+            self._rangeRight.setVisible(True)
+
+    def storeWidgetState(self):
+        """Store the state of the checkBoxes between popups
+        """
+        # NOTE:ED - need to put the other settings in here
+        ExportStripToFilePopup._storedState[self._SAVESTRIPS] = self._stripDict.copy()
+        ExportStripToFilePopup._storedState[self._SAVECURRENTSTRIP] = self._currentStrip
+        ExportStripToFilePopup._storedState[self._SAVECURRENTAXIS] = self._currentAxis
+
+    def restoreWidgetState(self):
+        """Restore the state of the checkBoxes
+        """
+        self._stripDict.update(ExportStripToFilePopup._storedState.get(self._SAVESTRIPS, {}))
+        _val = ExportStripToFilePopup._storedState.get(self._SAVECURRENTSTRIP, None)
+        if _val:
+            self._currentStrip = _val
+        self._currentAxis = ExportStripToFilePopup._storedState.get(self._SAVECURRENTAXIS, 0)
 
     def _changeColourButton(self):
         """Popup a dialog and set the colour in the pulldowns
@@ -342,36 +689,16 @@ class ExportStripToFilePopup(ExportDialogABC):
             self.strip = self.spectrumDisplay.strips[0]
 
             self.updateFilename(self.spectrumDisplay.id + exportExtension)
+
         else:
             self.spectrumDisplay = None
             self.strip = self.objects[selected][0]
 
             self.updateFilename(self.strip.id + exportExtension)
 
+        self._populateRange()
         selectedList = self.treeView.getCheckStateItems()
         self._populateTreeView(selectedList)
-
-    # def _changeSpectrumDisplay(self):
-    #     selected = self.specToExport.get()
-    #     # if selected != self.strip.id:
-    #     #     self.strip = self.strips[self.stripIds.index(selected)]
-    #     self.spectrumDisplay = self.objects[selected][0]
-    #     self.strip = self.spectrumDisplay.strips[0]
-    #
-    #     selectedList = self.treeView.getItems()
-    #     self._populateTreeView(selectedList)
-    #     self.stripToExport.deselectAll()
-    #
-    # def _changeStrip(self):
-    #     selected = self.stripToExport.get()
-    #     # if selected != self.strip.id:
-    #     # self.strip = self.strips[self.stripIds.index(selected)]
-    #     self.strip = self.objects[selected][0]
-    #
-    #     selectedList = self.treeView.getItems()
-    #     self._populateTreeView(selectedList)
-    #     if self.specToExport:
-    #         self.specToExport.deselectAll()
 
     def _populateTreeView(self, selectList=None):
         self.treeView.clear()
@@ -507,10 +834,6 @@ class ExportStripToFilePopup(ExportDialogABC):
             ext = EXPORTTYPES[selected][EXPORTEXT]
             filt = EXPORTTYPES[selected][EXPORTFILTER]
 
-            # if not lastPath.endswith(ext):
-            #     # remove other extension
-            #     lastPath = os.path.splitext(lastPath)[0]
-            #     lastPath += ext
             lastPath.assureSuffix(ext)
             self._dialogFilter = filt
             self.updateDialog()
@@ -520,42 +843,10 @@ class ExportStripToFilePopup(ExportDialogABC):
         else:
             raise TypeError('bad export type')
 
-        # if selected == EXPORTPDF:
-        #     if not lastPath.endswith(EXPORTPDFEXTENSION):
-        #         # remove other extension
-        #         if lastPath.endswith(EXPORTSVGEXTENSION):
-        #             lastPath = os.path.splitext(lastPath)[0]
-        #         lastPath += EXPORTPDFEXTENSION
-        #     self._dialogFilter = EXPORTPDFFILTER
-        #     self.updateDialog()
-        #     self.updateFilename(lastPath)
-        #
-        # elif selected == EXPORTSVG:
-        #     if not lastPath.endswith(EXPORTSVGEXTENSION):
-        #         # remove other extension
-        #         if lastPath.endswith(EXPORTPDFEXTENSION):
-        #             lastPath = os.path.splitext(lastPath)[0]
-        #         lastPath += EXPORTSVGEXTENSION
-        #     self._dialogFilter = EXPORTSVGFILTER
-        #     self.updateDialog()
-        #     self.updateFilename(lastPath)
-
     def buildParameters(self):
         """build parameters dict from the user widgets, to be passed to the export method.
         :return: dict - user parameters
         """
-
-        # build the export dict and flags
-        # if self.specToExport and self.specToExport.isChecked:
-        #     selected = self.specToExport.get()
-        #     # thisPid = self.objects[pIndex][1]
-        #     spectrumDisplay = self.objects[selected][0]
-        #     strip = spectrumDisplay.strips[0]
-        # else:
-        #     selected = self.stripToExport.get()
-        #     # thisPid = self.stripPids[pIndex]
-        #     spectrumDisplay = None
-        #     strip = self.objects[selected][0]     #self.project.getByPid(thisPid)
 
         selected = self.objectPulldown.getText()
         if 'SpectrumDisplay' in selected:
@@ -601,7 +892,8 @@ class ExportStripToFilePopup(ExportDialogABC):
                       GLSTRIPDIRECTION    : stripDirection,
                       GLSTRIPPADDING      : stripPadding,
                       GLEXPORTDPI         : exportDpi,
-                      GLSELECTEDPIDS      : self.treeView.getSelectedObjectsPids()
+                      GLSELECTEDPIDS      : self.treeView.getSelectedObjectsPids(),
+                      GLSTRIPREGIONS      : self._stripDict,
                       }
             selectedList = self.treeView.getSelectedItems()
             for itemName in self.fullList:
@@ -641,14 +933,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.setOkButton(callback=self._saveAndCloseDialog, text='Save and Close', tipText='Export the strip and close the dialog')
         self.setCancelButton(callback=self._rejectDialog, text='Close', tipText='Close the dialog')
         self.setCloseButton(callback=self._saveDialog, text='Save', tipText='Export the strip')
-        self.setDefaultButton(ExportDialogABC.CANCELBUTTON)
-
-        # self.buttonFrame.addSpacer(0, 10, grid=(0, 1))
-        # self.buttons = ButtonList(self.buttonFrame, ['Close', 'Save', 'Save and Close'], [self._rejectDialog, self._saveDialog, self._saveAndCloseDialog],
-        #                           tipTexts=['Close the export dialog',
-        #                                     'Export the strip to a file, dialog will remain open',
-        #                                     'Export the strip and close the dialog'],
-        #                           grid=(1, 0), gridSpan=(1, 3))
+        self.setDefaultButton(self.CANCELBUTTON)
 
     def _saveDialog(self, exitSaveFileName=None):
         """save button has been clicked

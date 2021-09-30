@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-24 17:13:35 +0100 (Fri, September 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-01 00:01:58 +0100 (Fri, October 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2363,7 +2363,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
                     for ii in range(len(bounds)):
                         _rb = list(specSettings[GLDefs.SPECTRUM_REGIONBOUNDS][ii])
-                        bounds[ii].extend(_rb[1:-1]) # skip the outer ppm values
+                        bounds[ii].extend(_rb[1:-1])  # skip the outer ppm values
 
                 bounds = [sorted(set([round(b, 12) for b in bnd])) for bnd in bounds]
 
@@ -4436,12 +4436,11 @@ class CcpnGLWidget(QOpenGLWidget):
         # quick method for testing
         # need to block logging
         with notificationEchoBlocking(self.application):
-
             code = spectrumView.spectrum.axisCodes[0]
             vpps = spectrumView.spectrum.valuesPerPoint
             axisCodes = spectrumView.spectrum.axisCodes
 
-            _region = {axis:(ppmPosition+0.5*vpp, ppmPosition+0.5*vpp)
+            _region = {axis: (ppmPosition + 0.5 * vpp, ppmPosition + 0.5 * vpp)
                        for axis, ppmPosition, vpp, in zip(axisCodes, ppmPositions, vpps)}
             _region[code] = sorted(range)
 
@@ -5297,14 +5296,16 @@ class CcpnGLWidget(QOpenGLWidget):
             self.axisL = position - diff
             self.axisR = position + diff
 
-            self._rescaleXAxis(rescale=rescale, update=update)
+            if rescale:
+                self._rescaleXAxis(rescale=rescale, update=update)
 
         elif axisIndex == 1:
             diff = (self.axisT - self.axisB) / 2.0
             self.axisB = position - diff
             self.axisT = position + diff
 
-            self._rescaleYAxis(rescale=rescale, update=update)
+            if rescale:
+                self._rescaleYAxis(rescale=rescale, update=update)
 
     def getAxisWidth(self, axisIndex):
         width = None
@@ -5352,7 +5353,8 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisL = min(range)
                 self.axisR = max(range)
 
-            self._rescaleXAxis(rescale=rescale, update=update)
+            if rescale:
+                self._rescaleXAxis(rescale=rescale, update=update)
 
         elif axisIndex == 1:
             if self.INVERTXAXIS:
@@ -5362,7 +5364,8 @@ class CcpnGLWidget(QOpenGLWidget):
                 self.axisB = min(range)
                 self.axisT = max(range)
 
-            self._rescaleYAxis(rescale=rescale, update=update)
+            if rescale:
+                self._rescaleYAxis(rescale=rescale, update=update)
 
     @pyqtSlot(dict)
     def _glXAxisChanged(self, aDict):

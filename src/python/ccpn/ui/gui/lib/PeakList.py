@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:21:22 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-09-30 13:09:55 +0100 (Thu, September 30, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -47,8 +47,9 @@ def restrictedPick(peakListView, axisCodes, peak=None, nmrResidue=None):
     if not peak and not nmrResidue:
         return
 
+    positionCodeDict = None
     if peak:
-        positionCodeDict = {peak.peakList.axisCodes[ii]: peak.position[ii] for ii in len(peak.position)}
+        positionCodeDict = {peak.peakList.axisCodes[ii]: peak.position[ii] for ii in range(len(peak.position))}
 
     if nmrResidue:
         nmrResidueIsotopeCodes = [atom.isotopeCode for atom in nmrResidue.nmrAtoms]
@@ -64,6 +65,8 @@ def restrictedPick(peakListView, axisCodes, peak=None, nmrResidue=None):
         # sometimes get an error when using spectrum projections - but modification for the future
         # if ii in axisCodes and shiftIsotopeCode in shiftDict}
 
-    peaks = peakList.restrictedPick(positionCodeDict, doPos, doNeg)
+    if positionCodeDict:
+        peaks = peakList.restrictedPick(positionCodeDict, doPos, doNeg)
+        return peakList, peaks
 
-    return peakList, peaks
+    return peakList, []

@@ -4,8 +4,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-07-02 18:18:49 +0100 (Thu, July 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-10-01 00:00:20 +0100 (Fri, October 01, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -36,11 +37,12 @@ from ccpn.ui.gui.widgets.WebBrowser import WebBrowser
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.util.Logging import getLogger
 
+
 class ButtonListMixin:
     def getButton(self, buttonName: str):
         """
         Return the button with the given name or return None
-        :param buttonName(str) - name of the button:
+        :param buttonName(str) - name of the button
         """
         if buttonName in self.buttonNames.keys():
             return self.buttons[self.buttonNames[buttonName]]
@@ -51,8 +53,8 @@ class ButtonListMixin:
     def setButtonEnabled(self, buttonName: str, enable: bool = True):
         """
         Enable/Disable a button by name
-        :param buttonName(str) - name of the button:
-        :param enable(bool) - True or False:
+        :param buttonName(str) - name of the button
+        :param enable(bool) - True or False
         """
         if buttonName in self.buttonNames.keys():
             self.buttons[self.buttonNames[buttonName]].setEnabled(enable)
@@ -62,8 +64,8 @@ class ButtonListMixin:
     def setButtonVisible(self, buttonName: str, visible: bool = True):
         """
         Show/hide a button by name
-        :param buttonName(str) - name of the button:
-        :param visible(bool) - True or False:
+        :param buttonName(str) - name of the button
+        :param visible(bool) - True or False
         """
         if buttonName in self.buttonNames.keys():
             if visible:
@@ -107,15 +109,15 @@ class ButtonListMixin:
 class ButtonBoxList(QtWidgets.QDialogButtonBox, Base, ButtonListMixin):
 
     def __init__(self, parent=None, texts=None, callbacks=None, icons=None,
-                 tipTexts=None, direction='h', commands=None, ok='OK', cancel='cancel', destructive=("Discard","Don't Save"),
-                 images=None,**kwargs):
+                 tipTexts=None, direction='h', commands=None, ok='OK', cancel='cancel', destructive=("Discard", "Don't Save"),
+                 images=None, **kwargs):
 
         super().__init__(parent)  # ejb - added setLayout
-        Base._init(self,**kwargs)
+        Base._init(self, **kwargs)
 
         self._ok = ok.lower()
         self._cancel = cancel.lower()
-        self._destructive =  [item.lower() for item in destructive]
+        self._destructive = [item.lower() for item in destructive]
         self.buttonNames = {}
 
         if commands:
@@ -177,9 +179,9 @@ class ButtonBoxList(QtWidgets.QDialogButtonBox, Base, ButtonListMixin):
             button = Button(self, text, callbacks[i], icons[i],
                             tipText=tipTexts[i])
 
-            extraWidth = button.fontMetrics().boundingRect('W'*2).width()
+            extraWidth = button.fontMetrics().boundingRect('W' * 2).width()
             width = button.fontMetrics().boundingRect(text).width()
-            height  = button.fontMetrics().boundingRect(text).height()+8
+            height = button.fontMetrics().boundingRect(text).height() + 8
             button.setMinimumWidth(width + extraWidth)
             button.setMinimumHeight(height)
             button.setFocusPolicy(FOCUS_DICT['tab'])
@@ -193,9 +195,10 @@ class ButtonBoxList(QtWidgets.QDialogButtonBox, Base, ButtonListMixin):
             elif lowerText in self._destructive:
                 role = QtWidgets.QDialogButtonBox.DestructiveRole
 
-            self.addButton(button,role)
+            self.addButton(button, role)
             self.buttons.append(button)
             self.buttonNames[text] = i + j
+
 
 # this should be treated as deprecated?
 # see ButtonBoxList above
@@ -277,6 +280,7 @@ class ButtonList(Widget, ButtonListMixin):
 
             self.buttons.append(button)
             self.buttonNames[text] = i + j
+
 
 class UtilityButtonList(ButtonList):
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-09 18:47:58 +0100 (Wed, June 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-01 18:56:31 +0100 (Fri, October 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import sys
 import re
+import typing
 from contextlib import contextmanager
 from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtCore import pyqtSignal
@@ -54,6 +55,10 @@ KEYVALIDATELIST = (QtCore.Qt.Key_Return,
                    QtCore.Qt.Key_7,
                    QtCore.Qt.Key_8,
                    QtCore.Qt.Key_9,
+                   # QtCore.Qt.Key_Minus,
+                   # QtCore.Qt.Key_Plus,
+                   # QtCore.Qt.Key_E,
+                   # QtCore.Qt.Key_Period,
                    )
 KEYVALIDATEDECIMAL = (QtCore.Qt.Key_0,)  # need to discard if after decimal
 KEYVALIDATEDIGIT = (QtCore.Qt.Key_0,
@@ -87,7 +92,9 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
     returnPressed = pyqtSignal(float)
     wheelChanged = pyqtSignal(float)
 
-    defaultMinimumSizes = (0, 20)
+    _showValidation = True
+    _validationIntermediate = QtGui.QColor('lightpink')
+    _validationInvalid = QtGui.QColor('lightpink')  # red is a bit harsh
 
     def __init__(self, parent, value=None, min=None, max=None, step=None, prefix=None, suffix=None,
                  showButtons=True, decimals=None, callback=None, editable=True, locale=None, **kwds):
@@ -139,6 +146,7 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
 
         lineEdit = self.lineEdit()
         lineEdit.returnPressed.connect(self._returnPressed)
+        self.baseColour = self.lineEdit().palette().color(QtGui.QPalette.Base)
 
         # must be set after setting value/limits
         self._callback = None
@@ -205,22 +213,34 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
             self.valueChanged.connect(callback)
         self._callback = callback
 
-    def validate(self, text, position):
-        # activate the validator when
-        if self._keyPressed == 0:
-            return self.validator.Intermediate, text, position
-        elif self._keyPressed in KEYVALIDATEDECIMAL:
-            ii = position - 1
-            while ii > 0:
-                # allow the user to enter zeroes after the decimal point/decimal comma
-                if text[ii] in ['.', ',']:
-                    return self.validator.Intermediate, text, position
-                if text[ii] in ['e']:
-                    return self.validator.validate(text, position)
-                ii -= 1
-            return self.validator.validate(text, position)
-        else:
-            return self.validator.validate(text, position)
+    def textFromValue(self, v: float) -> str:
+        """Subclass to remove extra zeroes
+        """
+        return self._qLocale.toString(round(v, self.decimals()), 'g', QtCore.QLocale.FloatingPointShortest)
+
+    def validate(self, text: str, pos: int) -> typing.Tuple[QtGui.QValidator.State, str, int]:
+        _state = super().validate(text, pos)
+        if self._showValidation:
+            self._checkState(_state)
+        return _state
+
+    def _checkState(self, _state):
+        try:
+            state, text, position = _state
+            for obj in [self, self.lineEdit()]:
+
+                # set the validate colours for the object
+                palette = obj.palette()
+                if state == QtGui.QValidator.Acceptable:
+                    palette.setColor(QtGui.QPalette.Base, self.baseColour)
+                elif state == QtGui.QValidator.Intermediate:
+                    palette.setColor(QtGui.QPalette.Base, self._validationIntermediate)
+                else:  # Invalid
+                    palette.setColor(QtGui.QPalette.Base, self._validationInvalid)
+                obj.setPalette(palette)
+
+        except Exception as es:
+            pass
 
     def keyPressEvent(self, event):
         # allow the typing of other stuff into the box and validate only when required
@@ -280,7 +300,7 @@ class ScientificDoubleSpinBox(DoubleSpinbox):
         """Values in the spinbox are constrained to the correct sign if the min/max values are
         either both positive or both negative
         """
-        val = super(ScientificDoubleSpinBox, self).valueFromText(text)
+        val = super().valueFromText(text)
         if self.minimum() <= self.maximum() <= 0:
             # check for maximum
             _lineEdit = self.lineEdit()
@@ -339,6 +359,28 @@ class ScientificDoubleSpinBox(DoubleSpinbox):
         """
         return self.set(value)
 
+    def validate(self, text, position):
+        # activate the validator when
+        if self._keyPressed == 0:
+            _state = self.validator.Intermediate, text, position
+            return _state
+        if self._keyPressed in KEYVALIDATEDECIMAL:
+            ii = position - 1
+            while ii > 0:
+                # allow the user to enter zeroes after the decimal point/decimal comma
+                if text[ii] in ['.', ',']:
+                    _state = self.validator.Intermediate, text, position
+                    return _state
+                if text[ii] in ['e']:
+                    _state = self.validator.validate(text, position)
+                    return _state
+                ii -= 1
+            _state = self.validator.validate(text, position)
+            return _state
+        else:
+            _state = self.validator.validate(text, position)
+            return _state
+
 
 v = float("{0:.3f}".format(0.024))
 v1 = 24678.45
@@ -358,8 +400,9 @@ if __name__ == '__main__':
     # QtCore.QLocale.setDefault(QtCore.QLocale(QtCore.QLocale.French))
 
     fr = Frame(popup, setLayout=True)
-    sb = DoubleSpinbox(fr, value=v1, decimals=3, step=0.001, grid=(0, 0))
-    sb2 = ScientificDoubleSpinBox(fr, value=v1, decimals=3, grid=(1, 0), min=0.001)
+    sb = DoubleSpinbox(fr, value=v1, decimals=3, step=0.01, grid=(0, 0))
+    sb2 = ScientificDoubleSpinBox(fr, value=v1, decimals=3, grid=(1, 0), min=0.001, max=1e32)
+    sb3 = ScientificDoubleSpinBox(fr, value=v1, decimals=3, grid=(2, 0), max=-0.001, min=-1e32)
 
     popup.show()
     popup.raise_()

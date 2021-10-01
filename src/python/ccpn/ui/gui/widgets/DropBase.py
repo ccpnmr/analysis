@@ -20,7 +20,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-26 19:50:50 +0100 (Wed, May 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-01 19:35:36 +0100 (Fri, October 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -344,6 +344,10 @@ class DropBase:
                 #print "  not allowed"
                 parentModule.dropArea = None
                 # ev.ignore()
+
+            if 'urls' in data:
+                # override the drop area overlay if coming from outside
+                parentModule.dropArea = None
 
             # else:
             #     #print "  ok"

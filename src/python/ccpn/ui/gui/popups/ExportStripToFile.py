@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-01 00:04:28 +0100 (Fri, October 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-01 18:57:04 +0100 (Fri, October 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-07-06 15:51:11 +0000 (Thu, July 06, 2017) $"
 #=========================================================================================
 
 from collections import OrderedDict as OD
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from dataclasses import dataclass
 from functools import partial
 # from ccpn.ui.gui.widgets.Spacer import Spacer
@@ -111,7 +111,7 @@ class _StripData:
     """Simple class to store strip widget state
     """
     strip = None
-    useRegion = True
+    useRegion = False
     minMaxMode = 0
     axes = None
 
@@ -141,7 +141,7 @@ class _StripData:
                 dd[STRIPWIDTH] = self.strip.getAxisWidth(ii)
 
     def __repr__(self):
-        """Output the string equivalent
+        """Output the string representation
         """
         return f'<{self.strip}: {self.useRegion}, {self.minMaxMode}, {self.axes}>'
 
@@ -153,6 +153,8 @@ class ExportStripToFilePopup(ExportDialogABC):
     _SAVESTRIPS = '_strips'
     _SAVECURRENTSTRIP = '_currentStrip'
     _SAVECURRENTAXIS = '_currentAxis'
+
+    storeStateOnReject = True
 
     def __init__(self, parent=None, mainWindow=None, title='Export Strip to File',
                  fileMode='anyFile',
@@ -282,7 +284,8 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         # radio buttons for setting mode
         _texts = ['Use Min/Max', 'Use Centre/Width']
-        self._rangeRadio = RadioButtons(self._rangeRight, texts=_texts, direction='h', hAlign='l', selectedInd=1,
+        _tipTexts = ['Use minimum/maximum values to define the print region', 'Use centre/width values to define the print region']
+        self._rangeRadio = RadioButtons(self._rangeRight, texts=_texts, tipTexts=_tipTexts, direction='h', hAlign='l', selectedInd=1,
                                         grid=(_rangeRow, 0), gridSpan=(1, 8),
                                         callback=self._setModeCallback)
         _rangeRow += 1
@@ -291,6 +294,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self._axisLabels = []
         for ii, txt in enumerate(STRIPBUTTONS):
             _label = Label(self._rangeRight, grid=(_rangeRow, ii), text=txt, hAlign='left')
+            _label.setVisible(False if ii > 0 else True)
             self._axisLabels.append(_label)
         _rangeRow += 1
 
@@ -312,6 +316,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                 _spinbox.setFixedWidth(100)
                 _spinbox._widgetRow = ii
                 _spinbox.installEventFilter(self)
+                _spinbox.setVisible(False)
 
                 _widgets.append(_spinbox)
 
@@ -322,21 +327,31 @@ class ExportStripToFilePopup(ExportDialogABC):
             self._axisSpinboxes.append(_widgets)
 
         # buttons for setting the spinboxes from strip
-        _texts = ['Set Region', 'Set Min', 'Set Max', 'Set Centre', 'Set Width']
-        _tipTexts = ['Set the region from the strip', 'Set the maximum value from the strip', 'Set the minimum value from the strip',
-                     'Set the centre value from the strip', 'Set the width from the strip']
+        _texts = ['Set Print Region', 'Set Min', 'Set Max', 'Set Centre', 'Set Width']
+        _tipTexts = ['Set all values for the print region from the selected strip.\nValues are set for the highlighted row',
+                     'Set the maximum value for the print region from the selected strip.\nValue is set for the highlighted row',
+                     'Set the minimum value for the print region from the selected strip.\nValue is set for the highlighted row',
+                     'Set the centre value for the print region from the selected strip.\nValue is set for the highlighted row',
+                     'Set the width value for the print region from the selected strip.\nValue is set for the highlighted row']
         _callbacks = [self._setStripRegion, self._setStripMin, self._setStripMax, self._setStripCentre, self._setStripWidth]
         self._setRangeButtons = ButtonList(self._rangeRight, texts=_texts, tipTexts=_tipTexts,
                                            grid=(_rangeRow, 0), gridSpan=(1, 8), hAlign='l',
-                                           callbacks=_callbacks
+                                           callbacks=_callbacks,
+                                           setMinimumWidth=False, setLastButtonFocus=False,
                                            )
+        for _btn in self._setRangeButtons.buttons[1:]:
+            _btn.setVisible(False)
         _rangeRow += 1
+
         self._rangeRight.addSpacer(5, 5, grid=(_rangeRow, 6), expandX=True)
         self._rangeRight.addSpacer(4, 4, grid=(_rangeRow, 5))
+        _rangeRow += 1
 
         # list to hold the current strips
         Label(self._rangeLeft, grid=(0, 0), text='Strips', hAlign='left')
-        self._stripLists = ListWidget(self._rangeLeft, grid=(1, 0), callback=self._setRangeState)
+        self._stripLists = ListWidget(self._rangeLeft, grid=(1, 0), callback=self._setRangeState,
+                                      multiSelect=False, acceptDrops=False, copyDrop=False,
+                                      )
         self._rangeLeft.setFixedSize(130, 180)
 
         _rangeFrame.getLayout().setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
@@ -381,62 +396,106 @@ class ExportStripToFilePopup(ExportDialogABC):
             dd = self._stripDict.get(self._currentStrip)
             ii = self._currentAxis
             ddAxis = dd.axes[ii]
-            if dd.minMaxMode == 0:
-                region = dd.strip.getAxisRegion(ii)
-                ddAxis[STRIPMIN], ddAxis[STRIPMAX] = min(region), max(region)
-            else:
-                ddAxis[STRIPCENTRE] = dd.strip.getAxisPosition(ii)
-                ddAxis[STRIPWIDTH] = dd.strip.getAxisWidth(ii)
+            # set all values for the print region
+            region = dd.strip.getAxisRegion(ii)
+            ddAxis[STRIPMIN], ddAxis[STRIPMAX] = min(region), max(region)
+            ddAxis[STRIPCENTRE] = dd.strip.getAxisPosition(ii)
+            ddAxis[STRIPWIDTH] = dd.strip.getAxisWidth(ii)
         except Exception as es:
             pass
         else:
             self._setRangeState(self._currentStrip)
+            self._focusButton(self._currentAxis, STRIPMIN)
+
+    def _setStripMinValue(self, ddAxis, value):
+        """Set the minimum value
+        Update the row values and set the spinbox constraints"""
+        ddAxis[STRIPMIN] = value
+        # update the centre/width
+        ddAxis[STRIPMAX] = max(value, ddAxis[STRIPMAX])
+        _centre = (value + ddAxis[STRIPMAX]) / 2.0
+        ddAxis[STRIPCENTRE] = _centre
+        ddAxis[STRIPWIDTH] = abs(ddAxis[STRIPMAX] - value)
 
     def _setStripMin(self, *args):
         try:
             dd = self._stripDict.get(self._currentStrip)
             ddAxis = dd.axes[self._currentAxis]
-            if dd and dd.minMaxMode == 0:
-                region = dd.strip.getAxisRegion(self._currentAxis)
-                ddAxis[STRIPMIN] = min(region)
+            region = dd.strip.getAxisRegion(self._currentAxis)
+            self._setStripMinValue(ddAxis, min(region))
+
         except Exception as es:
             pass
         else:
             self._setRangeState(self._currentStrip)
+            self._focusButton(self._currentAxis, STRIPMIN)
+
+    def _setStripMaxValue(self, ddAxis, value):
+        """Set the maximum value
+        Update the row values and set the spinbox constraints"""
+        ddAxis[STRIPMAX] = value
+        # update the centre/width
+        ddAxis[STRIPMIN] = min(value, ddAxis[STRIPMIN])
+        _centre = (ddAxis[STRIPMIN] + value) / 2.0
+        ddAxis[STRIPCENTRE] = _centre
+        ddAxis[STRIPWIDTH] = abs(value - ddAxis[STRIPMIN])
 
     def _setStripMax(self, *args):
         try:
             dd = self._stripDict.get(self._currentStrip)
             ddAxis = dd.axes[self._currentAxis]
-            if dd and dd.minMaxMode == 0:
-                region = dd.strip.getAxisRegion(self._currentAxis)
-                ddAxis[STRIPMAX] = max(region)
+            region = dd.strip.getAxisRegion(self._currentAxis)
+            self._setStripMaxValue(ddAxis, max(region))
+
         except Exception as es:
             pass
         else:
             self._setRangeState(self._currentStrip)
+            self._focusButton(self._currentAxis, STRIPMAX)
+
+    def _setStripCentreValue(self, ddAxis, centre):
+        """Set the centre value
+        Update the row values and set the spinbox constraints"""
+        ddAxis[STRIPCENTRE] = centre
+        # update the min/max
+        diff = abs(ddAxis[STRIPWIDTH] / 2.0)
+        ddAxis[STRIPMIN] = centre - diff
+        ddAxis[STRIPMAX] = centre + diff
 
     def _setStripCentre(self, *args):
         try:
             dd = self._stripDict.get(self._currentStrip)
             ddAxis = dd.axes[self._currentAxis]
-            if dd and dd.minMaxMode == 1:
-                ddAxis[STRIPCENTRE] = dd.strip.getAxisPosition(self._currentAxis)
+            centre = dd.strip.getAxisPosition(self._currentAxis)
+            self._setStripCentreValue(ddAxis, centre)
+
         except Exception as es:
             pass
         else:
             self._setRangeState(self._currentStrip)
+            self._focusButton(self._currentAxis, STRIPCENTRE)
+
+    def _setStripWidthValue(self, ddAxis, width):
+        """Set the width value
+        Update the row values and set the spinbox constraints"""
+        ddAxis[STRIPWIDTH] = width
+        # update the min/max
+        centre = ddAxis[STRIPCENTRE]
+        ddAxis[STRIPMIN] = centre - abs(width / 2.0)
+        ddAxis[STRIPMAX] = centre + abs(width / 2.0)
 
     def _setStripWidth(self, *args):
         try:
             dd = self._stripDict.get(self._currentStrip)
             ddAxis = dd.axes[self._currentAxis]
-            if dd and dd.minMaxMode == 1:
-                ddAxis[STRIPWIDTH] = dd.strip.getAxisWidth(self._currentAxis)
+            width = dd.strip.getAxisWidth(self._currentAxis)
+            self._setStripWidthValue(ddAxis, width)
+
         except Exception as es:
             pass
         else:
             self._setRangeState(self._currentStrip)
+            self._focusButton(self._currentAxis, STRIPWIDTH)
 
     def _setSpinbox(self, row, button, value):
         """Set the value in the storage dict from the spinbox change
@@ -444,7 +503,19 @@ class ExportStripToFilePopup(ExportDialogABC):
         self._setSpinboxAxis(row)
         try:
             _dd = self._stripDict.get(self._currentStrip)
-            _dd.axes[row][button] = value
+
+            if button == STRIPMIN:
+                self._setStripMinValue(_dd.axes[row], value)
+            elif button == STRIPMAX:
+                self._setStripMaxValue(_dd.axes[row], value)
+            elif button == STRIPCENTRE:
+                self._setStripCentreValue(_dd.axes[row], value)
+            else:
+                self._setStripWidthValue(_dd.axes[row], value)
+
+            self._setRangeState(self._currentStrip)
+            self._focusButton(row, button)
+
         except Exception as es:
             pass
 
@@ -576,7 +647,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self._stripLists.addItems(list(strip.id for strip in self.strips))
         self._stripLists.select(self._currentStrip)
 
-    def _setRangeState(self, strip):
+    def _setRangeState(self, strip, setButton=None, setRow=None):
         try:
             stripId = strip.text()
         except Exception as es:
@@ -588,11 +659,14 @@ class ExportStripToFilePopup(ExportDialogABC):
                 # set the current Id for updating range dict
                 self._currentStrip = stripId
 
+                self._setSpinboxConstraints(stripId, state=False)
+
                 _dd = self._stripDict.get(stripId, None)
                 if _dd:
                     self._useRegion.set(_dd.useRegion)
                     self._rangeRadio.setIndex(_dd.minMaxMode)
 
+                    # change visibility of buttons dependent on minMaxMode
                     for btn in [STRIPMIN, STRIPMAX]:
                         self._axisLabels[STRIPBUTTONS.index(btn)].setVisible(_dd.minMaxMode == 0)
                         for ii in range(len(STRIPAXES)):
@@ -618,11 +692,40 @@ class ExportStripToFilePopup(ExportDialogABC):
                     self._rangeRadio.setEnabled(_dd.useRegion)
                     self._setRangeButtons.setEnabled(_dd.useRegion)
 
+                self._setSpinboxConstraints(stripId)
+
             self._rangeRight.setVisible(True)
+            self._rangeRight.update()
+
+    def _focusButton(self, row, button):
+        """Set the focus to the selected button
+        """
+        try:
+            self._axisSpinboxes[row][STRIPBUTTONS.index(button)].setFocus()
+        except Exception as es:
+            pass
+
+    def _setSpinboxConstraints(self, stripId, state=True):
+        """Set the min/max/width constraints for the spinboxes associated with the stripId
+        """
+        try:
+            _dd = self._stripDict.get(stripId, None)
+            if _dd:
+                for ii in range(len(STRIPAXES)):
+                    axis = _dd.axes[ii]
+                    # set min.max constraints for buttons
+                    # not sure if these need to change as the button values are changed
+                    # self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPMIN)].setMaximum(axis[STRIPMAX] if state else None)
+                    # self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPMAX)].setMinimum(axis[STRIPMIN] if state else None)
+                    self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPWIDTH)].setMinimum(0.0)
+
+        except Exception as es:
+            pass
 
     def storeWidgetState(self):
         """Store the state of the checkBoxes between popups
         """
+        print(f'  storing {self._stripDict}')
         # NOTE:ED - need to put the other settings in here
         ExportStripToFilePopup._storedState[self._SAVESTRIPS] = self._stripDict.copy()
         ExportStripToFilePopup._storedState[self._SAVECURRENTSTRIP] = self._currentStrip
@@ -631,7 +734,9 @@ class ExportStripToFilePopup(ExportDialogABC):
     def restoreWidgetState(self):
         """Restore the state of the checkBoxes
         """
+        print(f'  restoring {self._stripDict}')
         self._stripDict.update(ExportStripToFilePopup._storedState.get(self._SAVESTRIPS, {}))
+        print(f'  restoring {self._stripDict}')
         _val = ExportStripToFilePopup._storedState.get(self._SAVECURRENTSTRIP, None)
         if _val:
             self._currentStrip = _val
@@ -688,13 +793,13 @@ class ExportStripToFilePopup(ExportDialogABC):
             self.spectrumDisplay = self.objects[selected][0]
             self.strip = self.spectrumDisplay.strips[0]
 
-            self.updateFilename(self.spectrumDisplay.id + exportExtension)
+            self.setSave(self.spectrumDisplay.id + exportExtension)
 
         else:
             self.spectrumDisplay = None
             self.strip = self.objects[selected][0]
 
-            self.updateFilename(self.strip.id + exportExtension)
+            self.setSave(self.strip.id + exportExtension)
 
         self._populateRange()
         selectedList = self.treeView.getCheckStateItems()
@@ -976,6 +1081,13 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.exitFilename = lastPath
 
         self._acceptDialog()
+
+    def keyPressEvent(self, a0: QtGui.QKeyEvent) -> None:
+        """Subclass keypress to stop enter/return on default button
+        """
+        if a0.key() in [QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter]:
+            return
+        super().keyPressEvent(a0)
 
 
 if __name__ == '__main__':

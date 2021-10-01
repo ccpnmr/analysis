@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-17 15:13:05 +0100 (Fri, September 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-01 19:18:07 +0100 (Fri, October 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1116,7 +1116,10 @@ class GuiSpectrumDisplay(CcpnModule):
                         self.displaySpectrum(obj)
                     except RuntimeError as es:
                         errorTxt = str(es)
-                        showWarning('Incompatible drop', errorTxt)
+                        if self.mainWindow.application._isInDebugMode:
+                            showWarning('Incompatible drop', errorTxt)
+                        else:
+                            getLogger().warning(f'Incompatible drop: {errorTxt}')
                         # raise RuntimeError(errorTxt)
                         return success
 

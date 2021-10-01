@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-08 09:32:36 +0100 (Thu, July 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-01 18:51:16 +0100 (Fri, October 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -229,6 +229,7 @@ STRIPHEADER_BACKGROUND = 'STRIPHEADER_BACKGROUND'
 # border for focus/noFocus - QPlainTextEdit
 BORDERNOFOCUS = 'BORDER_NOFOCUS'
 BORDERFOCUS = 'BORDER_FOCUS'
+TOOLTIP_BACKGROUND = 'TOOLTIP_BACKGROUND'
 
 # Colours
 TEXT_COLOUR = '#555D85'
@@ -242,6 +243,7 @@ GREEN1 = '#009a00'
 WARNING_RED = '#e01010'
 FIREBRICK = hexToRgbRatio([k for k, v in allColours.items() if v == 'firebrick'][0])
 LIGHTCORAL = hexToRgbRatio([k for k, v in allColours.items() if v == 'lightcoral'][0])
+TOOLTIP_BACKGROUND_COLOUR = [k for k, v in allColours.items() if v == 'lightgoldenrodyellow'][0]
 
 BORDERNOFOCUS_COLOUR = '#A9A9A9'
 BORDERFOCUS_COLOUR = '#4E86F6'
@@ -328,6 +330,7 @@ colourSchemes = {
 
         BORDERFOCUS                      : BORDERFOCUS_COLOUR,
         BORDERNOFOCUS                    : BORDERNOFOCUS_COLOUR,
+        TOOLTIP_BACKGROUND               : TOOLTIP_BACKGROUND_COLOUR,
 
         MARKS_COLOURS                    : MARK_LINE_COLOUR_DICT,
         SPECTRUM_HEXCOLOURS              : spectrumHexDarkColours,

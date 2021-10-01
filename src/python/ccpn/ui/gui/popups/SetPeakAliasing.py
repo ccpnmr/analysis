@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-17 15:54:56 +0100 (Fri, September 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-01 20:51:43 +0100 (Fri, October 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -54,6 +54,7 @@ class SetPeakAliasingPopup(CcpnDialogMainWidget):
 
     # internal namespace
     _NAVIGATETO = '_navigateTo'
+    storeStateOnReject = True
 
     def __init__(self, parent=None, mainWindow=None, title='Set Aliasing', items=None, **kwds):
         """
@@ -69,6 +70,7 @@ class SetPeakAliasingPopup(CcpnDialogMainWidget):
         self.spectra = OrderedDict()
         self.spectraPulldowns = OrderedDict()
         self.spectraCheckBoxes = OrderedDict()
+        self.spectraPos = OrderedDict()
 
         # setup the widgets
         self._setWidgets()
@@ -105,6 +107,7 @@ class SetPeakAliasingPopup(CcpnDialogMainWidget):
 
                 spectrum = peak.peakList.spectrum
                 self.spectra[spectrum] = set()
+                self.spectraPos[spectrum] = None
                 dims = spectrum.dimensionCount
 
                 if specRow > 0:
@@ -123,19 +126,16 @@ class SetPeakAliasingPopup(CcpnDialogMainWidget):
                 self.spectraPulldowns[spectrum] = []
                 Label(spectrumFrame, text=' aliasing:', grid=(specRow, 1))
 
-                aliasInds = spectrum.aliasingIndexes
-
                 for dim in range(dims):
-                    aliasRange = list(range(aliasInds[dim][1], aliasInds[dim][0] - 1, -1))
-                    aliasText = [str(aa) for aa in aliasRange]
-
-                    self.spectraPulldowns[spectrum].append(PulldownList(spectrumFrame, texts=aliasText,
+                    self.spectraPulldowns[spectrum].append(PulldownList(spectrumFrame,  # texts=aliasText,
                                                                         grid=(specRow, dim + 2)))
 
                     # may cause a problem if the peak dimension does not correspond to a visible XY axis
                     # peaks could disappear from all views
 
                 specRow += 1
+
+                self.spectraPos[peak.spectrum] = tuple(peak.spectrum.point2ppm(pp, dimension=ind + 1) for ind, pp in enumerate(peak.pointPositions))
 
             self.spectra[peak.peakList.spectrum].add(peak)
 
@@ -151,49 +151,66 @@ class SetPeakAliasingPopup(CcpnDialogMainWidget):
         """Populate the widgets
         """
         for spectrum in self.spectra.keys():
-            dims = spectrum.dimensionCount
-            aliasCount = []
-            dimAlias = []
-            for dim in range(dims):
-                dimAlias.append(set())
-                aliasCount.append({})
+            if self.spectra[spectrum]:
+                dims = spectrum.dimensionCount
+                _specWidths = spectrum.spectralWidths
+                aliasInds = spectrum.aliasingIndexes
+                _pos = self.spectraPos[spectrum]
 
-            for peak in self.spectra[spectrum]:
-                pa = peak.aliasing
+                # initialise the counters
+                aliasCount = []
+                dimAlias = []
                 for dim in range(dims):
-                    dimAlias[dim].add(pa[dim])
+                    dimAlias.append(set())
+                    aliasCount.append({})
 
-                    if pa[dim] not in aliasCount[dim]:
-                        aliasCount[dim][pa[dim]] = 0
-                    aliasCount[dim][pa[dim]] += 1
+                # keep a count of how many times the alias values appear
+                for peak in self.spectra[spectrum]:
+                    pa = peak.aliasing
+                    for dim in range(dims):
+                        dimAlias[dim].add(pa[dim])
 
-            for dim in range(dims):
-                if len(dimAlias[dim]) == 1:
-                    self.spectraPulldowns[spectrum][dim].select(str(dimAlias[dim].pop()))
+                        if pa[dim] not in aliasCount[dim]:
+                            aliasCount[dim][pa[dim]] = 0
+                        aliasCount[dim][pa[dim]] += 1
 
-                elif len(dimAlias[dim]) > 1:
-                    self.spectraPulldowns[spectrum][dim].select('0')
+                for dim in range(dims):
+                    # make the pulldown texts from the alias values and the pointPosition of the first peak in each list
+                    # may not be the most clear for selection crossing multiple alias regions
+                    aliasRange = list(range(aliasInds[dim][1], aliasInds[dim][0] - 1, -1))
+                    aliasText = [f'{aa}   ({_pos[dim] + (aa * _specWidths[dim]):.3f})' for aa in aliasRange]
+                    self.spectraPulldowns[spectrum][dim].setData(texts=aliasText)
 
-                    # set to the most common aliasing
-                    maxAlias = max(aliasCount[dim].values())
-                    maxKey = [k for k, v in aliasCount[dim].items() if v == maxAlias]
-                    if maxKey:
-                        self.spectraPulldowns[spectrum][dim].select(str(maxKey[0]))
+                    if len(dimAlias[dim]) == 1:
+                        # set the index for the found alias
+                        self.spectraPulldowns[spectrum][dim].setIndex(aliasRange.index(dimAlias[dim].pop()))
 
-                else:
-                    # just set to 0
-                    self.spectraPulldowns[spectrum][dim].select('0')
+                    elif len(dimAlias[dim]) > 1:
+                        # set the index to the most common aliasing
+                        maxAlias = max(aliasCount[dim].values())
+                        maxKey = [k for k, v in aliasCount[dim].items() if v == maxAlias]
+                        if maxKey:
+                            self.spectraPulldowns[spectrum][dim].setIndex(aliasRange.index(maxKey[0]))
+
+                    else:
+                        # just set to 0 alias element
+                        self.spectraPulldowns[spectrum][dim].setIndex(aliasRange.index(0))
 
     def _okButton(self):
         """
         When ok button pressed: update and exit
         """
         with handleDialogApply(self):
-            for spec in self.spectra.keys():
-                # set the aliasing for the peaks
-                newAlias = tuple([int(pullDown.get()) for pullDown in self.spectraPulldowns[spec]])
+            for spectrum in self.spectra.keys():
+                # get the values for the spectrum
+                dims = spectrum.dimensionCount
+                aliasInds = spectrum.aliasingIndexes
+                aliasRange = [list(range(aliasInds[dim][1], aliasInds[dim][0] - 1, -1)) for dim in range(dims)]
 
-                for peak in self.spectra[spec]:
+                # set the aliasing for the peaks from the pulldown indexes
+                newAlias = tuple(aliasRange[ind][pullDown.getSelectedIndex()] for ind, pullDown in enumerate(self.spectraPulldowns[spectrum]))
+
+                for peak in self.spectra[spectrum]:
                     peak.aliasing = newAlias
 
         if self.navigateToPeaks.isChecked():
@@ -211,9 +228,3 @@ class SetPeakAliasingPopup(CcpnDialogMainWidget):
         """Restore the state of the checkBoxes
         """
         self.navigateToPeaks.set(SetPeakAliasingPopup._storedState.get(self._NAVIGATETO, False))
-
-    def reject(self):
-        super().reject()
-
-        # store the state of any required widgets
-        self.storeWidgetState()

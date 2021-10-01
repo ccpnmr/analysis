@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-26 19:50:50 +0100 (Wed, May 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-01 18:52:47 +0100 (Fri, October 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -33,6 +33,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.DialogButtonBox import DialogButtonBox
+from ccpn.ui.gui.guiSettings import getColours, TOOLTIP_BACKGROUND
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.ui.gui.lib.ChangeStateHandler import ChangeDict
 from ccpn.ui.gui.widgets.Spacer import Spacer
@@ -93,6 +94,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
 
     # a dict to store any required widgets' states between popups
     _storedState = {}
+    storeStateOnReject = False
 
     def __init__(self, parent=None, windowTitle='', setLayout=False,
                  orientation=HORIZONTAL, size=None, minimumSize=None, **kwds):
@@ -164,8 +166,9 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         self.setWindowFilePath('')
         self.setWindowIcon(QtGui.QIcon())
 
-        _styleSheet = 'QToolTip { font-size: %dpt }' % self.font().pointSize()
-        self.setStyleSheet(_styleSheet)
+        # set the background/fontSize for the tooltips
+        _toolBG = getColours()[TOOLTIP_BACKGROUND]
+        self.setStyleSheet(f'QToolTip {{ background-color: {_toolBG}; font-size: {self.font().pointSize()}pt ; }}')
 
     def __postInit__(self):
         """post initialise functions
@@ -508,6 +511,13 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
 
         # store the state of any required widgets
         self.storeWidgetState()
+
+    def reject(self) -> None:
+        super(CcpnDialogMainWidget, self).reject()
+
+        if self.storeStateOnReject:
+            # store the state of any required widgets
+            self.storeWidgetState()
 
     def _refreshGLItems(self):
         """emit a signal to rebuild any required GL items

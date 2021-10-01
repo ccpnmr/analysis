@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-04 13:40:09 +0100 (Wed, August 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-01 18:50:59 +0100 (Fri, October 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -58,7 +58,7 @@ from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.ToolButton import ToolButton
 from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
+from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS, TOOLTIP_BACKGROUND
 from ccpn.ui.gui.widgets.SideBar import SideBar, SideBarSearchListView
 from ccpn.ui.gui.widgets.PythonEditor import QCodeEditor
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
@@ -70,7 +70,7 @@ from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, TextEditorC
     RadioButtonsCompoundWidget, ScientificSpinBoxCompoundWidget, SpinBoxCompoundWidget
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 from ccpn.ui.gui.widgets.Entry import Entry
-from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
+from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight, getFont, DEFAULTFONT, CONSOLEFONT
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.lib.Pid import Pid, PREFIXSEP, createPid
 from ccpn.ui.gui.widgets.Base import Base
@@ -344,6 +344,11 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self.mainWidget.getLayout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
         self.setMinimumSize(6 * self.label.labelSize, 5 * self.label.labelSize)
         self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+
+        # set the background/fontSize for the tooltips
+        _font = getFont(name=DEFAULTFONT)
+        _toolBG = getColours()[TOOLTIP_BACKGROUND]
+        self.setStyleSheet(f'QToolTip {{ background-color: {_toolBG}; font-size: {_font.pointSize()}pt ; }}')
 
     #=========================================================================================
     # CCPN Properties

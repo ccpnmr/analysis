@@ -100,6 +100,7 @@ class RestraintAnalysisTableModule(CcpnModule):
     includeSpectrumTable = False
 
     className = 'RestraintAnalysisTableModule'
+    _allowRename = True
 
     activePulldownClass = None  # e.g., can make the table respond to current peakList
 

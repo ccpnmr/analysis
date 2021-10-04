@@ -59,6 +59,7 @@ class ResidueTableModule(CcpnModule):
     settingsPosition = 'left'
 
     className = 'ResidueTableModule'
+    _allowRename = True
 
     def __init__(self, mainWindow=None, name='Residue Table',
                  chain=None, selectFirstItem=False):

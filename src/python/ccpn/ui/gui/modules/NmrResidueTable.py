@@ -75,6 +75,7 @@ class NmrResidueTableModule(CcpnModule):
     activePulldownClass = NmrChain
 
     className = 'NmrResidueTableModule'
+    _allowRename = True
 
     # we are subclassing this Module, hence some more arguments to the init
     def __init__(self, mainWindow=None, name='NmrResidue Table',

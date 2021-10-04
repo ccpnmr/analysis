@@ -50,6 +50,7 @@ class IntegralTableModule(CcpnModule):
     settingsPosition = 'top'
 
     className = 'IntegralTableModule'
+    _allowRename = True
 
     # we are subclassing this Module, hence some more arguments to the init
     def __init__(self, mainWindow=None, name='Integral Table',

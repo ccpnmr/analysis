@@ -176,7 +176,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     _restored = False
     _onlySingleInstance = False
     _includeInLastSeen = True # whether to restore or not after closing it (in the same project)
-
+    _allowRename = False
     # _instances = set()
 
     def __init__(self, mainWindow, name, closable=True, closeFunc=None, settingsScrollBarPolicies=('asNeeded', 'asNeeded'), **kwds):
@@ -1267,7 +1267,7 @@ class CcpnModuleLabel(DockLabel):
     def _createContextMenu(self):
 
         contextMenu = Menu('', self, isFloatWidget=True)
-        contextMenu.addAction('Rename', self._showNameEditor)
+        renameAction = contextMenu.addAction('Rename', self._showNameEditor)
         contextMenu.addSeparator()
         contextMenu.addAction('Close', self.module._closeModule)
         if len(self.module.area.ccpnModules) > 1:
@@ -1276,6 +1276,7 @@ class CcpnModuleLabel(DockLabel):
         contextMenu.addSeparator()
         contextMenu.addAction('Copy Pid to clipboard', self._copyPidToClipboard)
 
+        renameAction.setEnabled(self.module._allowRename)
         # numDocks = len(self.module.getDocksInParentArea())
         #
         # if not self.module.maximised and numDocks > 1:

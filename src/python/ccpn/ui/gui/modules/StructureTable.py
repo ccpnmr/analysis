@@ -58,6 +58,7 @@ class StructureTableModule(CcpnModule):
     includeSpectrumTable = False
 
     className = 'StructureTableModule'
+    _allowRename = True
 
     # we are subclassing this Module, hence some more arguments to the init
     def __init__(self, mainWindow=None, name='Structure Table',

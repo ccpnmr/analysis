@@ -73,6 +73,7 @@ class ChemicalShiftTableWithAssignment(CcpnModule):
     includeSettingsWidget = True
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
     Position = 'top'
+    _allowRename = True
 
     def __init__(self, mainWindow, name='Chemical Shift Table',
                  chemicalShiftList=None, selectFirstItem=False):

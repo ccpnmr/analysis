@@ -74,6 +74,7 @@ class ChemicalShiftTableModule(CcpnModule):
     settingsPosition = 'left'
 
     className = 'ChemicalShiftTableModule'
+    _allowRename = True
 
     activePulldownClass = None  # e.g., can make the table respond to current peakList
 

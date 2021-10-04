@@ -2,7 +2,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -10,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-29 13:48:00 +0100 (Mon, March 29, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-10-04 20:04:00 +0100 (Mon, October 04, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -37,8 +38,8 @@ from ccpn.core.RestraintList import RestraintList
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking, undoBlockWithoutSideBar
 from ccpn.util.Common import _incrementObjectName, _validateName, name2IsotopeCode
 
-from ccpnmodel.ccpncore.lib import V2Upgrade
-from ccpnmodel.v_3_0_2.upgrade import getNmrMolSystems
+# from ccpnmodel.ccpncore.lib import V2Upgrade
+# from ccpnmodel.v_3_0_2.upgrade import getNmrMolSystems
 
 
 longRangeTransfers = ('through-space',)
@@ -2095,6 +2096,9 @@ def _getAtomSetCoords(atomSet, structure, model=None):
     return coordList
 
 def _getRestraintsMapping(constraintSet, molSystem=None):
+    from ccpnmodel.ccpncore.lib import V2Upgrade
+    from ccpnmodel.v_3_0_2.upgrade import getNmrMolSystems
+
     nmrConstraintStore = constraintSet
     if not molSystem:
         if len(list(getNmrMolSystems(constraintSet.nmrProject)))>0:

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-01 18:56:31 +0100 (Fri, October 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-04 16:28:22 +0100 (Mon, October 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import sys
 import re
 import typing
+from functools import partial
 from contextlib import contextmanager
 from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtCore import pyqtSignal
@@ -268,6 +269,23 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
         Internal. Called for saving/restoring the widget state.
         """
         return self.set(value)
+
+    def _flashColour(self, colour):
+        try:
+            # set the background colour for the object
+            for obj in [self, self.lineEdit()]:
+                # set the colours for the object
+                palette = obj.palette()
+                palette.setColor(QtGui.QPalette.Base, colour)
+                obj.setPalette(palette)
+
+        except Exception as es:
+            pass
+
+    def _flashError(self, timer=300):
+        # set the warning colour and then set back to background colour
+        self._flashColour(self._validationInvalid)
+        QtCore.QTimer.singleShot(timer, partial(self._flashColour, self.baseColour))
 
 
 # Regular expression to find floats. Match groups are the whole string, the

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-01 18:57:04 +0100 (Fri, October 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-04 16:28:22 +0100 (Mon, October 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -26,15 +26,18 @@ __date__ = "$Date: 2017-07-06 15:51:11 +0000 (Thu, July 06, 2017) $"
 # Start of code
 #=========================================================================================
 
+import numpy as np
 from collections import OrderedDict as OD
 from PyQt5 import QtWidgets, QtCore, QtGui
 from dataclasses import dataclass
 from functools import partial
 # from ccpn.ui.gui.widgets.Spacer import Spacer
+# from ccpn.core.lib.ContextManagers import queueStateChange
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER, BORDERFOCUS
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import PrintTreeCheckBoxes
+# from ccpn.ui.gui.popups.Dialog import handleDialogApply, _verifyPopupApply
 from ccpn.ui.gui.popups.ExportDialog import ExportDialogABC
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -42,13 +45,12 @@ from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
-from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
-from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
+from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, CheckBoxCompoundWidget, DoubleSpinBoxCompoundWidget
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning, showWarning
-from ccpn.ui.gui.widgets.CompoundWidgets import DoubleSpinBoxCompoundWidget
 from ccpn.ui.gui.widgets.HighlightBox import HighlightBox
+from ccpn.ui.gui.widgets.Font import DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR, getFontHeight
 # from ccpn.ui.gui.widgets.MessageDialog import progressManager
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, \
     GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMULTIPLETLABELS, \
@@ -59,9 +61,10 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, \
     GLCONTOURTHICKNESS, GLSHOWSPECTRAONPHASE, \
     GLSTRIPDIRECTION, GLSTRIPPADDING, GLEXPORTDPI, \
     GLFULLLIST, GLEXTENDEDLIST, GLDIAGONALLINE, GLCURSORS, GLDIAGONALSIDEBANDS, \
-    GLALIASENABLED, GLALIASSHADE, GLALIASLABELSENABLED, GLSTRIPREGIONS
-from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString
-from ccpn.util.Colour import hexToRgbRatio, colourNameNoSpace
+    GLALIASENABLED, GLALIASSHADE, GLALIASLABELSENABLED, GLSTRIPREGIONS, \
+    GLSCALINGMODE, GLSCALINGOPTIONS, GLSCALINGPERCENT, GLSCALINGBYUNITS, \
+    GLPRINTFONT, GLUSEPRINTFONT
+from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString, hexToRgbRatio, colourNameNoSpace
 
 
 # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLAXISLABELS, GLAXISMARKS, \
@@ -104,6 +107,8 @@ STRIPWIDTH = 'Width'
 STRIPAXISINVERTED = 'AxisInverted'
 STRIPBUTTONS = [STRIPAXIS, STRIPMIN, STRIPMAX, STRIPCENTRE, STRIPWIDTH]
 STRIPAXES = ['X', 'Y']
+
+_ARBITRARYLARGE = np.inf
 
 
 @dataclass
@@ -257,8 +262,21 @@ class ExportStripToFilePopup(ExportDialogABC):
                                                         decimals=0, step=5, range=(36, 2400))
 
         row += 1
+        HLine(userFrame, grid=(row, 0), gridSpan=(1, 4), colour=getColours()[DIVIDER], height=20)
+        row += 1
 
-        _rangeRow = self._setupRangeWidget(row, userFrame)
+        self._setupRangeWidget(row, userFrame)
+        row += 1
+
+        HLine(userFrame, grid=(row, 0), gridSpan=(1, 4), colour=getColours()[DIVIDER], height=20)
+        row += 1
+
+        # widgets for handling screen scaling
+        self._setupScalingWidget(row, userFrame)
+        row += 1
+
+        # widgets for handling fonts
+        self._setupFontWidget(row, userFrame)
         row += 1
 
         self.treeView = PrintTreeCheckBoxes(userFrame, project=None, grid=(row, 0), gridSpan=(1, 4))
@@ -278,7 +296,8 @@ class ExportStripToFilePopup(ExportDialogABC):
                 grid=(_rangeRow, 0), hAlign='left', gridSpan=(1, 6),
                 orientation='right',
                 labelText='Use override region for printing',
-                callback=self._useOverrideCallback
+                callback=self._useOverrideCallback,
+                tipText='If checked, use the regions selected below\notherwise use the visible print region for the strip'
                 )
         _rangeRow += 1
 
@@ -361,6 +380,43 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         return _rangeRow
 
+    def _setupScalingWidget(self, row, userFrame):
+        """Set up the widgets for the scaling frame
+        """
+        scalingList = ['Percentage', 'Cms / unit', 'Units / cm', 'Inches / unit', 'Units / inch']
+
+        _frame = Frame(userFrame, setLayout=True, grid=(row, 0), gridSpan=(1, 8), hAlign='left')
+
+        _row = 0
+        self.scaling = PulldownListCompoundWidget(_frame,
+                                                  grid=(_row, 0), hAlign='left',
+                                                  orientation='left',
+                                                  labelText='Scaling',
+                                                  texts=scalingList,
+                                                  callback=self._scalingCallback
+                                                  )
+        self.scalingPercentage = DoubleSpinbox(_frame, grid=(_row, 1), min=0.0, max=100.0, decimals=0, step=1)
+        self.scalingByUnits = ScientificDoubleSpinBox(_frame, grid=(_row, 2), gridSpan=(1, 2), min=0.0, max=1e10, step=0.1)
+        self.scalingPercentage.setMinimumCharacters(10)
+        self.scalingByUnits.setMinimumCharacters(10)
+        self.scalingByUnits.setVisible(False)
+
+    def _setupFontWidget(self, row, userFrame):
+        """Set up the widgets for the font frame
+        """
+        _frame = Frame(userFrame, setLayout=True, grid=(row, 0), gridSpan=(1, 8), hAlign='left')
+
+        _row = 0
+        self._useFontCheckbox = CheckBoxCompoundWidget(_frame,
+                                                       grid=(_row, 0), hAlign='left',
+                                                       orientation='right',
+                                                       labelText='Use override font for printing',
+                                                       callback=self._fontCheckBoxCallback,
+                                                       )
+
+        self._fontButton = Button(_frame, text='<No Font Set>', grid=(_row, 1), hAlign='l', callback=self._getFont)
+        self._fontButton.setEnabled(False)
+
     def _initialiseStripList(self):
         """Setup the lists containing strips.spectrumDisplays before populating
         """
@@ -405,53 +461,65 @@ class ExportStripToFilePopup(ExportDialogABC):
             pass
         else:
             self._setRangeState(self._currentStrip)
-            self._focusButton(self._currentAxis, STRIPMIN)
+            self._focusButton(self._currentAxis, STRIPMIN if dd.minMaxMode == 0 else STRIPCENTRE)
 
     def _setStripMinValue(self, ddAxis, value):
         """Set the minimum value
         Update the row values and set the spinbox constraints"""
-        ddAxis[STRIPMIN] = value
+        _value = min(value, ddAxis[STRIPMAX])
+        ddAxis[STRIPMIN] = _value
         # update the centre/width
-        ddAxis[STRIPMAX] = max(value, ddAxis[STRIPMAX])
-        _centre = (value + ddAxis[STRIPMAX]) / 2.0
+        _centre = (_value + ddAxis[STRIPMAX]) / 2.0
         ddAxis[STRIPCENTRE] = _centre
-        ddAxis[STRIPWIDTH] = abs(ddAxis[STRIPMAX] - value)
+        ddAxis[STRIPWIDTH] = abs(ddAxis[STRIPMAX] - _value)
+
+        # value has not been clipped to STRIPMAX value
+        return _value == value
 
     def _setStripMin(self, *args):
         try:
             dd = self._stripDict.get(self._currentStrip)
             ddAxis = dd.axes[self._currentAxis]
             region = dd.strip.getAxisRegion(self._currentAxis)
-            self._setStripMinValue(ddAxis, min(region))
+            okay = self._setStripMinValue(ddAxis, min(region))
 
         except Exception as es:
             pass
         else:
             self._setRangeState(self._currentStrip)
             self._focusButton(self._currentAxis, STRIPMIN)
+            if not okay:
+                # flash a quick warning to show that the value has been clipped to the max value
+                self._axisSpinboxes[self._currentAxis][STRIPBUTTONS.index(STRIPMIN)]._flashError()
 
     def _setStripMaxValue(self, ddAxis, value):
         """Set the maximum value
         Update the row values and set the spinbox constraints"""
-        ddAxis[STRIPMAX] = value
+        _value = max(value, ddAxis[STRIPMIN])
+        ddAxis[STRIPMAX] = _value
         # update the centre/width
-        ddAxis[STRIPMIN] = min(value, ddAxis[STRIPMIN])
-        _centre = (ddAxis[STRIPMIN] + value) / 2.0
+        _centre = (ddAxis[STRIPMIN] + _value) / 2.0
         ddAxis[STRIPCENTRE] = _centre
-        ddAxis[STRIPWIDTH] = abs(value - ddAxis[STRIPMIN])
+        ddAxis[STRIPWIDTH] = abs(_value - ddAxis[STRIPMIN])
+
+        # value has not been clipped to STRIPMIN value
+        return _value == value
 
     def _setStripMax(self, *args):
         try:
             dd = self._stripDict.get(self._currentStrip)
             ddAxis = dd.axes[self._currentAxis]
             region = dd.strip.getAxisRegion(self._currentAxis)
-            self._setStripMaxValue(ddAxis, max(region))
+            okay = self._setStripMaxValue(ddAxis, max(region))
 
         except Exception as es:
             pass
         else:
             self._setRangeState(self._currentStrip)
             self._focusButton(self._currentAxis, STRIPMAX)
+            if not okay:
+                # flash a quick warning to show that the value has been clipped to the min value
+                self._axisSpinboxes[self._currentAxis][STRIPBUTTONS.index(STRIPMAX)]._flashError()
 
     def _setStripCentreValue(self, ddAxis, centre):
         """Set the centre value
@@ -513,11 +581,11 @@ class ExportStripToFilePopup(ExportDialogABC):
             else:
                 self._setStripWidthValue(_dd.axes[row], value)
 
-            self._setRangeState(self._currentStrip)
-            self._focusButton(row, button)
-
         except Exception as es:
             pass
+        else:
+            self._setRangeState(self._currentStrip)
+            self._focusButton(row, button)
 
     def _setSpinboxAxis(self, row):
         """Change the current selected row of spinboxes"""
@@ -554,6 +622,20 @@ class ExportStripToFilePopup(ExportDialogABC):
             pass
         else:
             self._setRangeState(self._currentStrip)
+
+    def _scalingCallback(self, value):
+        """Handle selecting item from scaling pulldown
+        """
+        _ind = self.scaling.getIndex()
+        self.scalingPercentage.setVisible(False if _ind else True)
+        self.scalingByUnits.setVisible(True if _ind else False)
+
+    def _fontCheckBoxCallback(self, value):
+        """Handle checking/unchecking font checkbox
+        """
+        self._fontButton.setEnabled(self._useFontCheckbox.isChecked())
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def populate(self, userframe):
         """Populate the widgets with project
@@ -624,6 +706,10 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         # fill the range widgets from the strips
         self._populateRange()
+        # fill the scaling widgets
+        self._populateScaling()
+        # fill the font widgets
+        self._populateFont()
         # fill the tree from the current strip
         self._populateTreeView()
 
@@ -659,6 +745,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                 # set the current Id for updating range dict
                 self._currentStrip = stripId
 
+                # remove constraints so spinboxes can be updated
                 self._setSpinboxConstraints(stripId, state=False)
 
                 _dd = self._stripDict.get(stripId, None)
@@ -697,6 +784,23 @@ class ExportStripToFilePopup(ExportDialogABC):
             self._rangeRight.setVisible(True)
             self._rangeRight.update()
 
+    def _populateScaling(self):
+        """Populate the widgets in the scaling frame
+        """
+        self.scalingPercentage.set(100)
+        self.scalingByUnits.set(10.0)
+
+    def _populateFont(self):
+        """Populate the widgets in the font frame
+        """
+        fontString = self.application.preferences.printSettings.get('font')
+        if fontString:
+            self._printFont = fontString
+            self.setFontText(self._fontButton, fontString)
+        else:
+            self._printFont = None
+            self._fontButton.setText('<No Font Set>')
+
     def _focusButton(self, row, button):
         """Set the focus to the selected button
         """
@@ -715,8 +819,8 @@ class ExportStripToFilePopup(ExportDialogABC):
                     axis = _dd.axes[ii]
                     # set min.max constraints for buttons
                     # not sure if these need to change as the button values are changed
-                    # self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPMIN)].setMaximum(axis[STRIPMAX] if state else None)
-                    # self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPMAX)].setMinimum(axis[STRIPMIN] if state else None)
+                    self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPMIN)].setMaximum(axis[STRIPMAX] if state else _ARBITRARYLARGE)
+                    self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPMAX)].setMinimum(axis[STRIPMIN] if state else -_ARBITRARYLARGE)
                     self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPWIDTH)].setMinimum(0.0)
 
         except Exception as es:
@@ -725,8 +829,7 @@ class ExportStripToFilePopup(ExportDialogABC):
     def storeWidgetState(self):
         """Store the state of the checkBoxes between popups
         """
-        print(f'  storing {self._stripDict}')
-        # NOTE:ED - need to put the other settings in here
+        # NOTE:ED - need to put the other settings in here - or use Revert method
         ExportStripToFilePopup._storedState[self._SAVESTRIPS] = self._stripDict.copy()
         ExportStripToFilePopup._storedState[self._SAVECURRENTSTRIP] = self._currentStrip
         ExportStripToFilePopup._storedState[self._SAVECURRENTAXIS] = self._currentAxis
@@ -734,9 +837,7 @@ class ExportStripToFilePopup(ExportDialogABC):
     def restoreWidgetState(self):
         """Restore the state of the checkBoxes
         """
-        print(f'  restoring {self._stripDict}')
         self._stripDict.update(ExportStripToFilePopup._storedState.get(self._SAVESTRIPS, {}))
-        print(f'  restoring {self._stripDict}')
         _val = ExportStripToFilePopup._storedState.get(self._SAVECURRENTSTRIP, None)
         if _val:
             self._currentStrip = _val
@@ -999,6 +1100,11 @@ class ExportStripToFilePopup(ExportDialogABC):
                       GLEXPORTDPI         : exportDpi,
                       GLSELECTEDPIDS      : self.treeView.getSelectedObjectsPids(),
                       GLSTRIPREGIONS      : self._stripDict,
+                      GLSCALINGMODE       : self.scaling.getIndex(),
+                      GLSCALINGPERCENT    : self.scalingPercentage.get(),
+                      GLSCALINGBYUNITS    : self.scalingByUnits.get(),
+                      GLUSEPRINTFONT      : self._useFontCheckbox.isChecked(),
+                      GLPRINTFONT         : self._fontButton._fontString,
                       }
             selectedList = self.treeView.getSelectedItems()
             for itemName in self.fullList:
@@ -1088,6 +1194,47 @@ class ExportStripToFilePopup(ExportDialogABC):
         if a0.key() in [QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter]:
             return
         super().keyPressEvent(a0)
+
+    # @queueStateChange(_verifyPopupApply)
+    # def _queueSetFont(self, dim):
+    #     _fontAttr = getattr(self, FONTDATAFORMAT.format(dim))
+    #     value = _fontAttr._fontString
+    #     if value != self.preferences.appearance[FONTPREFS.format(dim)]:
+    #         return partial(self._setFont, dim, value)
+    #
+    # def _setFont(self, dim, value):
+    #     self.preferences.appearance[FONTPREFS.format(dim)] = value
+
+    def _getFont(self, value):
+        # Simple font grabber from the system
+        _fontAttr = self._fontButton
+        value = _fontAttr._fontString
+        _font = QtGui.QFont()
+        _font.fromString(value)
+        newFont, ok = QtWidgets.QFontDialog.getFont(_font, caption='Select Font')
+        if ok:
+            self.setFontText(self._fontButton, newFont.toString())
+            # add the font change to the apply queue
+            # self._queueSetFont(dim)
+
+    def setFontText(self, widget, fontString):
+        """Set the contents of the widget the details of the font
+        """
+        try:
+            fontList = fontString.split(',')
+            if len(fontList) == 10:
+                name, size, _, _, _, _, _, _, _, _ = fontList
+                type = None
+            elif len(fontList) == 11:
+                name, size, _, _, _, _, _, _, _, _, type = fontList
+            else:
+                name, size, type = DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
+        except:
+            name, size, type = DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
+
+        fontName = '{}, {}pt, {}'.format(name, size, type) if type else '{}, {}pt'.format(name, size, )
+        widget._fontString = fontString
+        widget.setText(fontName)
 
 
 if __name__ == '__main__':

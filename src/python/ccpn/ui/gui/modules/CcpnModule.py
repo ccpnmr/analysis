@@ -177,12 +177,16 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     _onlySingleInstance = False
     _includeInLastSeen = True # whether to restore or not after closing it (in the same project)
     _allowRename = False
+    _defaultName = MODULENAME # used only when renaming is allowed, so that its original name is stored in the lastSeen widgetsState.
+                              # After closing a renamed module, any new instance will be named as default.
+
     # _instances = set()
 
     def __init__(self, mainWindow, name, closable=True, closeFunc=None, settingsScrollBarPolicies=('asNeeded', 'asNeeded'), **kwds):
 
         self.maximised = False
         self.maximiseRestoreState = None
+        self._defaultName = name
 
         self.area = None
         if mainWindow is not None:
@@ -534,7 +538,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                         if isinstance(i, Container):
                             self._container = i
         if self._includeInLastSeen:
-            self.area._seenModuleStates[self.className] = {MODULENAME: self.moduleName, WIDGETSTATE: self.widgetsState}
+            self.area._seenModuleStates[self.className] = {MODULENAME: self._defaultName, WIDGETSTATE: self.widgetsState}
         super().close()
 
     #=========================================================================================

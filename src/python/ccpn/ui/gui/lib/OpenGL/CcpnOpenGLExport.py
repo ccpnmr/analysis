@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-01 00:04:28 +0100 (Fri, October 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-04 19:35:52 +0100 (Mon, October 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -27,9 +27,13 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 #=========================================================================================
 
 # import sys
+import os
 import io
 import numpy as np
-# from PyQt5 import QtWidgets
+from PyQt5 import QtGui
+from PyQt5.QtCore import QStandardPaths
+from PyQt5.QtGui import QFontDatabase
+from PyQt5.QtWidgets import QApplication
 from dataclasses import dataclass
 from collections import OrderedDict
 from collections.abc import Iterable
@@ -65,7 +69,9 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLGRIDLINES, GLAXISLABELS, GLA
     MAINVIEW, MAINVIEWFULLHEIGHT, MAINVIEWFULLWIDTH, \
     RIGHTAXIS, RIGHTAXISBAR, FULLRIGHTAXIS, FULLRIGHTAXISBAR, \
     BOTTOMAXIS, BOTTOMAXISBAR, FULLBOTTOMAXIS, FULLBOTTOMAXISBAR, FULLVIEW, BLANKVIEW, \
-    GLALIASSHADE, GLSTRIPREGIONS
+    GLALIASSHADE, GLSTRIPREGIONS, \
+    GLSCALINGMODE, GLSCALINGOPTIONS, GLSCALINGPERCENT, GLSCALINGBYUNITS, \
+    GLPRINTFONT, GLUSEPRINTFONT
 # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLWIDGET, GLAXISLINES, GLAXISMARKSINSIDE, \
 #     GLFULLLIST, GLEXTENDEDLIST, GLALIASENABLED, GLALIASLABELSENABLED
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import getAliasSetting
@@ -203,6 +209,41 @@ class GLExporter():
         self._buildStrip(axesOnly=axesOnly)
         self._addDrawingToStory()
 
+    def _getFontPaths(self):
+        font_paths = QStandardPaths.standardLocations(QStandardPaths.FontsLocation)
+
+        accounted = []
+        unloadable = []
+        family_to_path = {}
+
+        db = QFontDatabase()
+        for fpath in font_paths:  # go through all font paths
+            for filename in os.listdir(fpath):  # go through all files at each path
+                path = os.path.join(fpath, filename)
+
+                idx = db.addApplicationFont(path)  # add font path
+
+                if idx < 0:
+                    unloadable.append(path)  # font wasn't loaded if idx is -1
+                else:
+                    names = db.applicationFontFamilies(idx)  # load back font family name
+                    # for n in names:
+                    #     family_to_path[n] = set(names)
+
+                    for n in names:
+                        _paths = family_to_path.setdefault(n, set())
+                        _paths.add(path)
+                        # if n in family_to_path:
+                        #     accounted.append((n, path))
+                        # else:
+                        #     family_to_path[n] = path
+
+                    # this isn't a 1:1 mapping, for example
+                    # 'C:/Windows/Fonts/HTOWERT.TTF' (regular) and
+                    # 'C:/Windows/Fonts/HTOWERTI.TTF' (italic) are different
+                    # but applicationFontFamilies will return 'High Tower Text' for both
+        return unloadable, family_to_path, accounted
+
     def _importFonts(self):
         from ccpn.framework.PathsAndUrls import fontsPath
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import GLFONT_SUBSTITUTE
@@ -210,6 +251,24 @@ class GLExporter():
         # load all system fonts to find matches with OpenGl fonts
         for glFonts in self._parent.globalGL.fonts.values():
             pdfmetrics.registerFont(TTFont(glFonts.fontName, fontsPath / 'open-sans' / GLFONT_SUBSTITUTE + '.ttf'))
+
+        self._printFont = None
+        if self.params[GLUSEPRINTFONT]:
+            _fontName, _fontSize = self.params[GLPRINTFONT]
+            # self._printFont = QtGui.QFont()
+            # self._printFont.fromString(self.params[GLPRINTFONT])
+
+            unloadable, family_to_path, accounted = self._getFontPaths()
+            _paths = family_to_path.get(_fontName, [])
+            for _path in _paths:
+                try:
+                    pdfmetrics.registerFont(TTFont(_fontName, _path))
+                except Exception as es:
+                    print(f' Font could not be loaded for printing: {_fontName} - {_path}')
+                    self.params[GLUSEPRINTFONT] = False
+            if not _paths:
+                print(f' Font could not be loaded for printing: {_fontName}')
+                self.params[GLUSEPRINTFONT] = False
 
         # set a default fontName
         self.fontName = self._parent.getSmallFont().fontName
@@ -353,6 +412,12 @@ class GLExporter():
                 self.pixWidth *= modRatio
                 self.pixHeight *= modRatio
                 self.fontScale *= modRatio
+
+        # modify by the print dialog scaling factor
+        if self.params[GLSCALINGMODE] == 0 and (0 <= self.params[GLSCALINGPERCENT] <= 100):
+            self.pixWidth *= (self.params[GLSCALINGPERCENT] / 100.0)
+            self.pixHeight *= (self.params[GLSCALINGPERCENT] / 100.0)
+            self.fontScale *= (self.params[GLSCALINGPERCENT] / 100.0)
 
         self.fontXOffset = 0.75
         self.fontYOffset = 3.0
@@ -1024,11 +1089,18 @@ class GLExporter():
                         textGroup = drawString.text.split('\n')
                         textLine = len(textGroup) - 1
                         for text in textGroup:
-                            colourGroups[colourPath].add(String(newLine[0], newLine[1] + (textLine * drawString.font.fontSize * self.fontScale),
-                                                                text,
-                                                                fontSize=drawString.font.fontSize * self.fontScale,
-                                                                fontName=drawString.font.fontName,
-                                                                fillColor=colour))
+                            self._addString2(colourGroups, colourPath,
+                                             drawString,
+                                             (newLine[0], newLine[1]),  # + (textLine * drawString.font.fontSize * self.fontScale)),
+                                             colour,
+                                             text=text,
+                                             offset=textLine
+                                             )
+                            # colourGroups[colourPath].add(String(newLine[0], newLine[1] + (textLine * drawString.font.fontSize * self.fontScale),
+                            #                                     text,
+                            #                                     fontSize=drawString.font.fontSize * self.fontScale,
+                            #                                     fontName=drawString.font.fontName,
+                            #                                     fillColor=colour))
                             textLine -= 1
 
         for colourGroup in colourGroups.values():
@@ -1073,11 +1145,18 @@ class GLExporter():
                         textGroup = drawString.text.split('\n')
                         textLine = len(textGroup) - 1
                         for text in textGroup:
-                            colourGroups[colourPath].add(String(newLine[0], newLine[1] + (textLine * drawString.font.fontSize * self.fontScale),
-                                                                text,
-                                                                fontSize=drawString.font.fontSize * self.fontScale,
-                                                                fontName=drawString.font.fontName,
-                                                                fillColor=colour))
+                            self._addString2(colourGroups, colourPath,
+                                             drawString,
+                                             (newLine[0], newLine[1]),  # + (textLine * drawString.font.fontSize * self.fontScale)),
+                                             colour,
+                                             text=text,
+                                             offset=textLine
+                                             )
+                            # colourGroups[colourPath].add(String(newLine[0], newLine[1] + (textLine * drawString.font.fontSize * self.fontScale),
+                            #                                     text,
+                            #                                     fontSize=drawString.font.fontSize * self.fontScale,
+                            #                                     fontName=drawString.font.fontName,
+                            #                                     fillColor=colour))
                             textLine -= 1
 
         for colourGroup in colourGroups.values():
@@ -1131,11 +1210,18 @@ class GLExporter():
                         textGroup = drawString.text.split('\n')
                         textLine = len(textGroup) - 1
                         for text in textGroup:
-                            colourGroups[colourPath].add(String(newLine[0], newLine[1] + (textLine * drawString.font.fontSize * self.fontScale),
-                                                                text,
-                                                                fontSize=drawString.font.fontSize * self.fontScale,
-                                                                fontName=drawString.font.fontName,
-                                                                fillColor=colour))
+                            self._addString2(colourGroups, colourPath,
+                                             drawString,
+                                             (newLine[0], newLine[1]),  # + (textLine * drawString.font.fontSize * self.fontScale)),
+                                             colour,
+                                             text=text,
+                                             offset=textLine
+                                             )
+                            # colourGroups[colourPath].add(String(newLine[0], newLine[1] + (textLine * drawString.font.fontSize * self.fontScale),
+                            #                                     text,
+                            #                                     fontSize=drawString.font.fontSize * self.fontScale,
+                            #                                     fontName=drawString.font.fontName,
+                            #                                     fillColor=colour))
                             textLine -= 1
 
         for colourGroup in colourGroups.values():
@@ -1452,20 +1538,54 @@ class GLExporter():
             self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='gridAxes')
 
     def _addString(self, colourGroups, colourPath, drawString, position, colour, boxed=False):
-        newStr = String(position[0], position[1],
-                        drawString.text,
-                        fontSize=drawString.font.fontSize * self.fontScale,
-                        fontName=drawString.font.fontName,
+        self._addString2(colourGroups, colourPath, drawString, position, colour, boxed=boxed)
+
+        # newStr = String(position[0], position[1],
+        #                 drawString.text,
+        #                 fontSize=drawString.font.fontSize * self.fontScale,
+        #                 fontName=drawString.font.fontName,
+        #                 fillColor=colour)
+        # if boxed:
+        #     bounds = newStr.getBounds()
+        #     # arbitrary scaling
+        #     dx = drawString.font.fontSize * self.fontScale * 0.11  #bounds[0] - position[0]
+        #     dy = drawString.font.fontSize * self.fontScale * 0.125  #(position[1] - bounds[1]) / 2.0
+        #     colourGroups[colourPath].add(Rect(bounds[0] - dx, bounds[1] - dy,
+        #                                       (bounds[2] - bounds[0]) + 5 * dx, (bounds[3] - bounds[1]) + 2.0 * dy,
+        #                                       # newLine[0], newLine[1],
+        #                                       # drawString.font.fontSize * self.fontScale * len(newLine),
+        #                                       # drawString.font.fontSize * self.fontScale,
+        #                                       strokeColor=None,
+        #                                       fillColor=self.backgroundColour))
+        #
+        # colourGroups[colourPath].add(newStr)
+
+    def _addString2(self, colourGroups, colourPath, drawString, position, colour, boxed=False, text=None, offset=0):
+
+        if self.params[GLUSEPRINTFONT]:
+            _fontName, _fontSize = self.params[GLPRINTFONT]
+
+            # _fontSize = self._printFont.pointSize()
+            # if _fontSize < 0:
+            #     _fontSize = self._printFont.pixelSize()
+            # _fontName = self._printFont.family()
+        else:
+            _fontSize = drawString.font.fontSize * self.fontScale
+            _fontName = drawString.font.fontName
+
+        newStr = String(position[0], position[1] + (offset * _fontSize),
+                        text or drawString.text,
+                        fontSize=_fontSize,
+                        fontName=_fontName,
                         fillColor=colour)
+
         if boxed:
             bounds = newStr.getBounds()
-            dx = drawString.font.fontSize * self.fontScale * 0.11  #bounds[0] - position[0]
-            dy = drawString.font.fontSize * self.fontScale * 0.125  #(position[1] - bounds[1]) / 2.0
+            # arbitrary scaling
+            dx = _fontSize * 0.11
+            dy = _fontSize * 0.125
             colourGroups[colourPath].add(Rect(bounds[0] - dx, bounds[1] - dy,
                                               (bounds[2] - bounds[0]) + 5 * dx, (bounds[3] - bounds[1]) + 2.0 * dy,
-                                              # newLine[0], newLine[1],
-                                              # drawString.font.fontSize * self.fontScale * len(newLine),
-                                              # drawString.font.fontSize * self.fontScale,
                                               strokeColor=None,
                                               fillColor=self.backgroundColour))
 

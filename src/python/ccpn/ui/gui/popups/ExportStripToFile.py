@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-04 16:28:22 +0100 (Mon, October 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-04 19:35:52 +0100 (Mon, October 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -26,9 +26,12 @@ __date__ = "$Date: 2017-07-06 15:51:11 +0000 (Thu, July 06, 2017) $"
 # Start of code
 #=========================================================================================
 
+import os
 import numpy as np
 from collections import OrderedDict as OD
 from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5.QtCore import QStandardPaths
+from PyQt5.QtGui import QFontDatabase
 from dataclasses import dataclass
 from functools import partial
 # from ccpn.ui.gui.widgets.Spacer import Spacer
@@ -182,6 +185,9 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.specToExport = None
 
         self._initialiseStripList()
+
+        # load the available .ttf fonts - load everytime as user may move/add them
+        _, self.familyFonts, _ = self._getFontPaths()
 
         super().__init__(parent=parent, mainWindow=mainWindow, title=title,
                          fileMode=fileMode, acceptMode=acceptMode,
@@ -347,11 +353,11 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         # buttons for setting the spinboxes from strip
         _texts = ['Set Print Region', 'Set Min', 'Set Max', 'Set Centre', 'Set Width']
-        _tipTexts = ['Set all values for the print region from the selected strip.\nValues are set for the highlighted row',
-                     'Set the maximum value for the print region from the selected strip.\nValue is set for the highlighted row',
-                     'Set the minimum value for the print region from the selected strip.\nValue is set for the highlighted row',
-                     'Set the centre value for the print region from the selected strip.\nValue is set for the highlighted row',
-                     'Set the width value for the print region from the selected strip.\nValue is set for the highlighted row']
+        _tipTexts = ['Set all values for the print region from the selected strip.\nValues are set for the selected row',
+                     'Set the maximum value for the print region from the selected strip.\nValue is set for the selected row',
+                     'Set the minimum value for the print region from the selected strip.\nValue is set for the selected row',
+                     'Set the centre value for the print region from the selected strip.\nValue is set for the selected row',
+                     'Set the width value for the print region from the selected strip.\nValue is set for the selected row']
         _callbacks = [self._setStripRegion, self._setStripMin, self._setStripMax, self._setStripCentre, self._setStripWidth]
         self._setRangeButtons = ButtonList(self._rangeRight, texts=_texts, tipTexts=_tipTexts,
                                            grid=(_rangeRow, 0), gridSpan=(1, 8), hAlign='l',
@@ -414,8 +420,14 @@ class ExportStripToFilePopup(ExportDialogABC):
                                                        callback=self._fontCheckBoxCallback,
                                                        )
 
-        self._fontButton = Button(_frame, text='<No Font Set>', grid=(_row, 1), hAlign='l', callback=self._getFont)
-        self._fontButton.setEnabled(False)
+        # self._fontButton = Button(_frame, text='<No Font Set>', grid=(_row, 1), hAlign='l', callback=self._getFont)
+        # self._fontButton.setEnabled(False)
+        # self._fontButton.setVisible(False)  # hide for the minute - only .ttf fonts work so using a pulldown
+
+        self._fontPulldown = PulldownList(_frame, texts=['<No Font Set>'] + sorted(list(self.familyFonts.keys())), grid=(_row, 2))
+        self._fontSpinbox = DoubleSpinbox(_frame, min=1, max=100, decimals=0, step=1, grid=(_row, 3))
+        self._fontPulldown.setEnabled(False)
+        self._fontSpinbox.setEnabled(False)
 
     def _initialiseStripList(self):
         """Setup the lists containing strips.spectrumDisplays before populating
@@ -633,7 +645,9 @@ class ExportStripToFilePopup(ExportDialogABC):
     def _fontCheckBoxCallback(self, value):
         """Handle checking/unchecking font checkbox
         """
-        self._fontButton.setEnabled(self._useFontCheckbox.isChecked())
+        # self._fontButton.setEnabled(self._useFontCheckbox.isChecked())
+        self._fontPulldown.setEnabled(self._useFontCheckbox.isChecked())
+        self._fontSpinbox.setEnabled(self._useFontCheckbox.isChecked())
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -793,13 +807,18 @@ class ExportStripToFilePopup(ExportDialogABC):
     def _populateFont(self):
         """Populate the widgets in the font frame
         """
-        fontString = self.application.preferences.printSettings.get('font')
-        if fontString:
-            self._printFont = fontString
-            self.setFontText(self._fontButton, fontString)
-        else:
-            self._printFont = None
-            self._fontButton.setText('<No Font Set>')
+        # fontString = self.application.preferences.printSettings.get('font')
+        # if fontString:
+        #     self._printFont = fontString
+        #     self.setFontText(self._fontButton, fontString)
+        # else:
+        #     self._printFont = None
+        #     self._fontButton.setText('<No Font Set>')
+
+        fontName = self.application.preferences.printSettings.get('fontName')
+        fontSize = self.application.preferences.printSettings.get('fontSize')
+        self._fontPulldown.set(fontName)
+        self._fontSpinbox.set(fontSize)
 
     def _focusButton(self, row, button):
         """Set the focus to the selected button
@@ -830,18 +849,20 @@ class ExportStripToFilePopup(ExportDialogABC):
         """Store the state of the checkBoxes between popups
         """
         # NOTE:ED - need to put the other settings in here - or use Revert method
-        ExportStripToFilePopup._storedState[self._SAVESTRIPS] = self._stripDict.copy()
-        ExportStripToFilePopup._storedState[self._SAVECURRENTSTRIP] = self._currentStrip
-        ExportStripToFilePopup._storedState[self._SAVECURRENTAXIS] = self._currentAxis
+        # ExportStripToFilePopup._storedState[self._SAVESTRIPS] = self._stripDict.copy()
+        # ExportStripToFilePopup._storedState[self._SAVECURRENTSTRIP] = self._currentStrip
+        # ExportStripToFilePopup._storedState[self._SAVECURRENTAXIS] = self._currentAxis
+        pass
 
     def restoreWidgetState(self):
         """Restore the state of the checkBoxes
         """
-        self._stripDict.update(ExportStripToFilePopup._storedState.get(self._SAVESTRIPS, {}))
-        _val = ExportStripToFilePopup._storedState.get(self._SAVECURRENTSTRIP, None)
-        if _val:
-            self._currentStrip = _val
-        self._currentAxis = ExportStripToFilePopup._storedState.get(self._SAVECURRENTAXIS, 0)
+        # self._stripDict.update(ExportStripToFilePopup._storedState.get(self._SAVESTRIPS, {}))
+        # _val = ExportStripToFilePopup._storedState.get(self._SAVECURRENTSTRIP, None)
+        # if _val:
+        #     self._currentStrip = _val
+        # self._currentAxis = ExportStripToFilePopup._storedState.get(self._SAVECURRENTAXIS, 0)
+        pass
 
     def _changeColourButton(self):
         """Popup a dialog and set the colour in the pulldowns
@@ -1104,7 +1125,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                       GLSCALINGPERCENT    : self.scalingPercentage.get(),
                       GLSCALINGBYUNITS    : self.scalingByUnits.get(),
                       GLUSEPRINTFONT      : self._useFontCheckbox.isChecked(),
-                      GLPRINTFONT         : self._fontButton._fontString,
+                      GLPRINTFONT         : (self._fontPulldown.get(), self._fontSpinbox.get()),
                       }
             selectedList = self.treeView.getSelectedItems()
             for itemName in self.fullList:
@@ -1195,46 +1216,64 @@ class ExportStripToFilePopup(ExportDialogABC):
             return
         super().keyPressEvent(a0)
 
-    # @queueStateChange(_verifyPopupApply)
-    # def _queueSetFont(self, dim):
-    #     _fontAttr = getattr(self, FONTDATAFORMAT.format(dim))
+    def _getFontPaths(self):
+        font_paths = QStandardPaths.standardLocations(QStandardPaths.FontsLocation)
+
+        accounted = []
+        unloadable = []
+        family_to_path = {}
+
+        db = QFontDatabase()
+        for fpath in font_paths:  # go through all font paths
+            for filename in os.listdir(fpath):  # go through all files at each path
+                path = os.path.join(fpath, filename)
+                if not path.endswith('.ttf') or path.startswith('.'):
+                    continue
+
+                idx = db.addApplicationFont(path)  # add font path
+                if idx < 0:
+                    unloadable.append(path)  # font wasn't loaded if idx is -1
+                else:
+                    names = db.applicationFontFamilies(idx)  # load back font family name
+                    for n in names:
+                        _paths = family_to_path.setdefault(n, set())
+                        _paths.add(path)
+
+        return unloadable, family_to_path, accounted
+
+    # def _getFont(self, value):
+    #     # Simple font grabber from the system
+    #     _fontAttr = self._fontButton
     #     value = _fontAttr._fontString
-    #     if value != self.preferences.appearance[FONTPREFS.format(dim)]:
-    #         return partial(self._setFont, dim, value)
+    #     _font = QtGui.QFont()
+    #     _font.fromString(value)
+    #     newFont, ok = QtWidgets.QFontDialog.getFont(_font, caption='Select Font')
+    #     if ok:
+    #         self.setFontText(self._fontButton, newFont.toString())
+    #         # add the font change to the apply queue
+    #         # self._queueSetFont(dim)
+    #         _paths = self.familyFonts.get(newFont.family(), [])
+    #         if not _paths:
+    #             showWarning('Font error', f'TrueType font could not be found for {newFont.family()}')
     #
-    # def _setFont(self, dim, value):
-    #     self.preferences.appearance[FONTPREFS.format(dim)] = value
-
-    def _getFont(self, value):
-        # Simple font grabber from the system
-        _fontAttr = self._fontButton
-        value = _fontAttr._fontString
-        _font = QtGui.QFont()
-        _font.fromString(value)
-        newFont, ok = QtWidgets.QFontDialog.getFont(_font, caption='Select Font')
-        if ok:
-            self.setFontText(self._fontButton, newFont.toString())
-            # add the font change to the apply queue
-            # self._queueSetFont(dim)
-
-    def setFontText(self, widget, fontString):
-        """Set the contents of the widget the details of the font
-        """
-        try:
-            fontList = fontString.split(',')
-            if len(fontList) == 10:
-                name, size, _, _, _, _, _, _, _, _ = fontList
-                type = None
-            elif len(fontList) == 11:
-                name, size, _, _, _, _, _, _, _, _, type = fontList
-            else:
-                name, size, type = DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
-        except:
-            name, size, type = DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
-
-        fontName = '{}, {}pt, {}'.format(name, size, type) if type else '{}, {}pt'.format(name, size, )
-        widget._fontString = fontString
-        widget.setText(fontName)
+    # def setFontText(self, widget, fontString):
+    #     """Set the contents of the widget the details of the font
+    #     """
+    #     try:
+    #         fontList = fontString.split(',')
+    #         if len(fontList) == 10:
+    #             name, size, _, _, _, _, _, _, _, _ = fontList
+    #             type = None
+    #         elif len(fontList) == 11:
+    #             name, size, _, _, _, _, _, _, _, _, type = fontList
+    #         else:
+    #             name, size, type = DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
+    #     except:
+    #         name, size, type = DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
+    #
+    #     fontName = '{}, {}pt, {}'.format(name, size, type) if type else '{}, {}pt'.format(name, size, )
+    #     widget._fontString = fontString
+    #     widget.setText(fontName)
 
 
 if __name__ == '__main__':

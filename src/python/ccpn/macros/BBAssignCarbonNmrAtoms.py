@@ -28,8 +28,8 @@ before you move on to the next residue or go on to the backbone assignment stage
 ##############################     Settings      #################################
 
 assignAxCde = 'C'   # Carbon AxisCode to be assigned, may need changing for HNCO/HNcoCA expts
-assignDim = 2       # Spectrum dimension to be assigned (0,1,2 for 3Ds)
-rootDim = 0         # One of the root dimensions which has already been assigned (0,1,2 for 3Ds)
+assignIsotope = '13C'       # Isotope of dimension to be assigned
+rootIsotope = '1H'         # Isotope of one of the root dimensions which has already been assigned
 casPosCbsNeg = True # True if Ca peaks are positive and Cb peaks are negative in HNCACB,
                     # False if Cas are negative and Cb peaks are positive
 glyHasCaSign = True  # True if Glycine Ca peaks in the HNCACB spectrum have the same sign as the other Ca peaks,
@@ -144,6 +144,8 @@ with undoBlock():
 
     for peak in current.peaks:
         peakExptType = peak.peakList.spectrum.experimentType
+        assignDim = [ind for ind, value in enumerate(peak.peakList.spectrum.isotopeCodes) if value == assignIsotope][0]
+        rootDim = [ind for ind, value in enumerate(peak.peakList.spectrum.isotopeCodes) if value == rootIsotope][0]
         # Check peak root dim is assigned
         if peak.assignmentsByDimensions[rootDim]:
             peakNmrRes = peak.assignmentsByDimensions[rootDim][0].nmrResidue

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-04 12:28:20 +0100 (Wed, August 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-05 17:38:46 +0100 (Tue, October 05, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -117,6 +117,13 @@ measurementType2ElementCode = {
 PSEUDO_ATOM_NAME = 'Q'
 PSEUDO_ATOM_NAMES = {PSEUDO_ATOM_NAME: '1H'}
 PSEUDO_ATOMS = ['QA', 'QB', 'QD', 'QE', 'QG', 'QH', 'QH1', 'QH2', 'QR', 'QZ']
+
+SCALE_PERCENT = 'Percentage'
+SCALE_CM_UNIT = 'Cms / unit'
+SCALE_UNIT_CM = 'Units / cm'
+SCALE_INCH_UNIT = 'Inches / unit'
+SCALE_UNIT_INCH = 'Units / inch'
+SCALING_MODES = [SCALE_PERCENT, SCALE_CM_UNIT, SCALE_UNIT_CM, SCALE_INCH_UNIT, SCALE_UNIT_INCH]
 
 # GWV 210113: moved to Spectrum class
 # # Isotope-dependent assignment tolerances (in ppm)

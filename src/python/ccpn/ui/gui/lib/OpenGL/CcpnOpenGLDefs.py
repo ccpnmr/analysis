@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-04 19:35:52 +0100 (Mon, October 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-05 17:38:46 +0100 (Tue, October 05, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -159,6 +159,7 @@ GLSCALINGOPTIONS = 'Scaling Options'
 GLSCALINGMODE = 'Scaling Mode'
 GLSCALINGPERCENT = 'Scaling Percent'
 GLSCALINGBYUNITS = 'Scaling By Units'
+GLSCALINGAXIS = 'Scaling Axis'
 GLPRINTFONT = 'Print Font'
 GLUSEPRINTFONT = 'Use Print Font'
 # NOTE:ED - add tick marks?

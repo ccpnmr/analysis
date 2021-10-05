@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-01 00:04:28 +0100 (Fri, October 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-05 17:38:46 +0100 (Tue, October 05, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -34,6 +34,8 @@ from ccpn.ui.gui.widgets.Label import Label
 
 
 class HighlightBox(Widget):
+    """Widget to put a selection box around a span of cells in a grid layout
+    """
     SOLID_LINE = 'SolidLine'
     DASH_LINE = 'DashLine'
     DASH_DOT_LINE = 'DashDotLine'
@@ -47,7 +49,7 @@ class HighlightBox(Widget):
         }
 
     def __init__(self, parent=None, style: str = SOLID_LINE, colour: Union[str, QtGui.QColor] = QtCore.Qt.black, lineWidth: int = 2, showBorder=True, **kwds):
-        """
+        """Initialise the widget
         :param style: Options:
                               'SolidLine';
                                'DashLine';
@@ -57,15 +59,28 @@ class HighlightBox(Widget):
 
         super().__init__(parent, **kwds)
         self._parent = parent
+
+        if style not in self.styles:
+            raise ValueError(f'HighlightBox.style must be one of {[val for val in self.styles.keys()]}')
+        if not isinstance(colour, (str, QtGui.QColor)):
+            raise ValueError(f'HighlightBox.colour must be of type str or QtGui.QColor')
+        if not (isinstance(lineWidth, int) and lineWidth >= 0):
+            raise ValueError(f'HighlightBox.lineWidth must be an int >= 0')
+        if not isinstance(showBorder, bool):
+            raise ValueError(f'HighlightBox.showBorder must be True/False')
+
         self.style = style
         self.colour = colour
         self.lineWidth = lineWidth
         self._showBorder = showBorder
 
+        # don't intercept the mouse events
         self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
 
     @property
     def showBorder(self):
+        """Get the visible state of the border without hiding the widget
+        """
         return self._showBorder
 
     @showBorder.setter
@@ -76,9 +91,12 @@ class HighlightBox(Widget):
     def paintEvent(self, e):
         if self._showBorder:
             qp = QtGui.QPainter()
+
+            # offset ensures that the border widths are uniform for different devicePixelRatios
             _offset = (1 + self.lineWidth) // 2
             rgn = self.rect().adjusted(_offset, _offset, -_offset, -_offset)
 
+            # draw the border
             qp.begin(self)
             if self.style in self.styles:
                 style = self.styles[self.style]

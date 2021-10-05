@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-04 19:35:52 +0100 (Mon, October 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-05 17:38:46 +0100 (Tue, October 05, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -71,16 +71,18 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLGRIDLINES, GLAXISLABELS, GLA
     BOTTOMAXIS, BOTTOMAXISBAR, FULLBOTTOMAXIS, FULLBOTTOMAXISBAR, FULLVIEW, BLANKVIEW, \
     GLALIASSHADE, GLSTRIPREGIONS, \
     GLSCALINGMODE, GLSCALINGOPTIONS, GLSCALINGPERCENT, GLSCALINGBYUNITS, \
-    GLPRINTFONT, GLUSEPRINTFONT
+    GLPRINTFONT, GLUSEPRINTFONT, GLSCALINGAXIS
 # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLWIDGET, GLAXISLINES, GLAXISMARKSINSIDE, \
 #     GLFULLLIST, GLEXTENDEDLIST, GLALIASENABLED, GLALIASLABELSENABLED
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import getAliasSetting
-from ccpn.ui.gui.popups.ExportStripToFile import PAGEPORTRAIT
+from ccpn.ui.gui.popups.ExportStripToFile import PAGEPORTRAIT, DEFAULT_FONT
 # from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPDF, EXPORTSVG, EXPORTTYPES, \
 #     PAGELANDSCAPE, PAGETYPES
 from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPNG
 # from ccpn.util.Colour import colorSchemeTable
+from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.util.Report import Report
+from ccpn.util.Constants import SCALE_PERCENT, SCALE_UNIT_CM, SCALE_UNIT_INCH, SCALE_INCH_UNIT, SCALE_CM_UNIT, SCALING_MODES
 
 
 PLOTLEFT = 'plotLeft'
@@ -206,15 +208,18 @@ class GLExporter():
         self._parent = self.strip._CcpnGLWidget if _parent is None else _parent
 
         self._buildPage(singleStrip=singleStrip)
+        self._setStripAxes()
+        self._modifyScaling()
         self._buildStrip(axesOnly=axesOnly)
+        self._resetStripAxes()
+
         self._addDrawingToStory()
 
     def _getFontPaths(self):
         font_paths = QStandardPaths.standardLocations(QStandardPaths.FontsLocation)
 
-        accounted = []
         unloadable = []
-        family_to_path = {}
+        familyPath = {}
 
         db = QFontDatabase()
         for fpath in font_paths:  # go through all font paths
@@ -222,27 +227,15 @@ class GLExporter():
                 path = os.path.join(fpath, filename)
 
                 idx = db.addApplicationFont(path)  # add font path
-
                 if idx < 0:
                     unloadable.append(path)  # font wasn't loaded if idx is -1
                 else:
                     names = db.applicationFontFamilies(idx)  # load back font family name
-                    # for n in names:
-                    #     family_to_path[n] = set(names)
-
                     for n in names:
-                        _paths = family_to_path.setdefault(n, set())
+                        _paths = familyPath.setdefault(n, set())
                         _paths.add(path)
-                        # if n in family_to_path:
-                        #     accounted.append((n, path))
-                        # else:
-                        #     family_to_path[n] = path
 
-                    # this isn't a 1:1 mapping, for example
-                    # 'C:/Windows/Fonts/HTOWERT.TTF' (regular) and
-                    # 'C:/Windows/Fonts/HTOWERTI.TTF' (italic) are different
-                    # but applicationFontFamilies will return 'High Tower Text' for both
-        return unloadable, family_to_path, accounted
+        return unloadable, familyPath
 
     def _importFonts(self):
         from ccpn.framework.PathsAndUrls import fontsPath
@@ -255,20 +248,19 @@ class GLExporter():
         self._printFont = None
         if self.params[GLUSEPRINTFONT]:
             _fontName, _fontSize = self.params[GLPRINTFONT]
-            # self._printFont = QtGui.QFont()
-            # self._printFont.fromString(self.params[GLPRINTFONT])
 
-            unloadable, family_to_path, accounted = self._getFontPaths()
-            _paths = family_to_path.get(_fontName, [])
+            unloadable, familyPath = self._getFontPaths()
+            _paths = familyPath.get(_fontName, [])
             for _path in _paths:
                 try:
                     pdfmetrics.registerFont(TTFont(_fontName, _path))
                 except Exception as es:
-                    print(f' Font could not be loaded for printing: {_fontName} - {_path}')
-                    self.params[GLUSEPRINTFONT] = False
-            if not _paths:
-                print(f' Font could not be loaded for printing: {_fontName}')
-                self.params[GLUSEPRINTFONT] = False
+                    pass
+            #         # print(f' Font could not be loaded for printing: {_fontName} - {_path}')
+            #         self.params[GLUSEPRINTFONT] = False
+            # if not _paths:
+            #     # print(f' Font could not be loaded for printing: {_fontName}')
+            #     self.params[GLUSEPRINTFONT] = False
 
         # set a default fontName
         self.fontName = self._parent.getSmallFont().fontName
@@ -413,12 +405,6 @@ class GLExporter():
                 self.pixHeight *= modRatio
                 self.fontScale *= modRatio
 
-        # modify by the print dialog scaling factor
-        if self.params[GLSCALINGMODE] == 0 and (0 <= self.params[GLSCALINGPERCENT] <= 100):
-            self.pixWidth *= (self.params[GLSCALINGPERCENT] / 100.0)
-            self.pixHeight *= (self.params[GLSCALINGPERCENT] / 100.0)
-            self.fontScale *= (self.params[GLSCALINGPERCENT] / 100.0)
-
         self.fontXOffset = 0.75
         self.fontYOffset = 3.0
 
@@ -426,11 +412,74 @@ class GLExporter():
         self.displayScale = self.pixHeight / _parentH
 
         # don't think these are needed
-        pixBottom = pageHeight - self.pixHeight - self.margin
-        pixLeft = self.margin
+        # pixBottom = pageHeight - self.pixHeight - self.margin
+        # pixLeft = self.margin
 
-        # read the strip spacing form the params
+        # read the strip spacing from the params
         self.stripSpacing = self.params[GLSTRIPPADDING] * self.displayScale
+
+    def _modifyScaling(self):
+        # modify by the print dialog scaling factor
+        _scaleMode = self.params[GLSCALINGMODE]
+        _scalePercent = self.params[GLSCALINGPERCENT]
+        if _scaleMode == SCALING_MODES.index(SCALE_PERCENT):
+            if (0 <= _scalePercent <= 100):
+                self.pixWidth *= (_scalePercent / 100.0)
+                self.pixHeight *= (_scalePercent / 100.0)
+                self.fontScale *= (_scalePercent / 100.0)
+                self.displayScale *= (_scalePercent / 100.0)
+                self.stripSpacing *= (_scalePercent / 100.0)
+        else:
+            _newScale = 1.0
+            _scale = self.params[GLSCALINGBYUNITS]
+            try:
+                # scales are ratios
+                # NOTE:ED - base on self.mainView dimensions and ranges
+                if _scaleMode == SCALING_MODES.index(SCALE_CM_UNIT):
+                    # this is scaled to 72dpi
+                    if self.params[GLSCALINGAXIS] == 0:
+                        _cms = (self.displayScale * self.mainView.width * 2.54) / 72.0
+                        _axisScale = abs(self._axisL - self._axisR)
+                    else:
+                        _cms = (self.displayScale * self.mainView.height * 2.54) / 72.0
+                        _axisScale = abs(self._axisT - self._axisB)
+                    _newScale = _scale / (_cms / _axisScale)
+
+                elif _scaleMode == SCALING_MODES.index(SCALE_UNIT_CM):
+                    if self.params[GLSCALINGAXIS] == 0:
+                        _cms = (self.displayScale * self.mainView.width * 2.54) / 72.0
+                        _axisScale = abs(self._axisL - self._axisR)
+                    else:
+                        _cms = (self.displayScale * self.mainView.height * 2.54) / 72.0
+                        _axisScale = abs(self._axisT - self._axisB)
+                    _newScale = (_axisScale / _cms) / _scale
+
+                elif _scaleMode == SCALING_MODES.index(SCALE_INCH_UNIT):
+                    if self.params[GLSCALINGAXIS] == 0:
+                        _cms = (self.displayScale * self.mainView.width) / 72.0
+                        _axisScale = abs(self._axisL - self._axisR)
+                    else:
+                        _cms = (self.displayScale * self.mainView.height) / 72.0
+                        _axisScale = abs(self._axisT - self._axisB)
+                    _newScale = _scale / (_cms / _axisScale)
+
+                else:
+                    if self.params[GLSCALINGAXIS] == 0:
+                        _cms = (self.displayScale * self.mainView.width) / 72.0
+                        _axisScale = abs(self._axisL - self._axisR)
+                    else:
+                        _cms = (self.displayScale * self.mainView.height) / 72.0
+                        _axisScale = abs(self._axisT - self._axisB)
+                    _newScale = (_axisScale / _cms) / _scale
+
+            except:
+                pass
+            else:
+                self.pixWidth *= _newScale
+                self.pixHeight *= _newScale
+                self.fontScale *= _newScale
+                self.displayScale *= _newScale
+                self.stripSpacing *= _newScale
 
     def _addBackgroundBox(self, thisPlot):
         """Make a background box to cover the plot area
@@ -505,21 +554,15 @@ class GLExporter():
 
         thisPlot.add(gr, name='mainPlotBox')
 
-    def _buildStrip(self, axesOnly=False):
-        # create an object that can be added to a report
-        self._mainPlot = Drawing(self.pixWidth, self.pixHeight)
-        self._addBackgroundBox(self._mainPlot)
-
-        # get the list of required spectra
-        self._ordering = self.strip.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
+    def _setStripAxes(self):
 
         # set the range for the display
-        _oldValues = (self.strip._CcpnGLWidget.axisL, self.strip._CcpnGLWidget.axisR, self.strip._CcpnGLWidget.axisT, self.strip._CcpnGLWidget.axisB)
+        self._oldValues = (self.strip._CcpnGLWidget.axisL, self.strip._CcpnGLWidget.axisR, self.strip._CcpnGLWidget.axisT, self.strip._CcpnGLWidget.axisB)
         try:
-            _update = False
+            self._updateAxes = False
             _dd = self.params[GLSTRIPREGIONS][self.strip.id]
-            _update = _dd.useRegion
-            if _update:
+            self._updateAxes = _dd.useRegion
+            if self._updateAxes:
                 for ii, ddAxis in enumerate(_dd.axes):
                     if _dd.minMaxMode == 0:
                         self.strip.setAxisRegion(ii, (ddAxis['Min'], ddAxis['Max']), rescale=False, update=False)
@@ -542,6 +585,14 @@ class GLExporter():
                 self._axisB = self.strip._CcpnGLWidget.axisB
         except Exception as es:
             pass
+
+    def _buildStrip(self, axesOnly=False):
+        # create an object that can be added to a report
+        self._mainPlot = Drawing(self.pixWidth, self.pixHeight)
+        self._addBackgroundBox(self._mainPlot)
+
+        # get the list of required spectra
+        self._ordering = self.strip.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
 
         # print the grid objects
         if self.params[GLGRIDLINES]: self._addGridLines()
@@ -594,10 +645,11 @@ class GLExporter():
 
         if self.params[GLAXISLABELS] or self.params[GLAXISUNITS] or self.params[GLAXISTITLES]: self._addGridLabels()
 
+    def _resetStripAxes(self):
         try:
-            if _update:
+            if self._updateAxes:
                 # reset the strip to the original values
-                self.strip._CcpnGLWidget.axisL, self.strip._CcpnGLWidget.axisR, self.strip._CcpnGLWidget.axisT, self.strip._CcpnGLWidget.axisB = _oldValues
+                self.strip._CcpnGLWidget.axisL, self.strip._CcpnGLWidget.axisR, self.strip._CcpnGLWidget.axisT, self.strip._CcpnGLWidget.axisB = self._oldValues
                 self.strip._CcpnGLWidget._rescaleAllZoom()
                 self.strip._CcpnGLWidget._buildGL()
                 self.strip._CcpnGLWidget.buildAxisLabels()
@@ -1089,18 +1141,13 @@ class GLExporter():
                         textGroup = drawString.text.split('\n')
                         textLine = len(textGroup) - 1
                         for text in textGroup:
-                            self._addString2(colourGroups, colourPath,
-                                             drawString,
-                                             (newLine[0], newLine[1]),  # + (textLine * drawString.font.fontSize * self.fontScale)),
-                                             colour,
-                                             text=text,
-                                             offset=textLine
-                                             )
-                            # colourGroups[colourPath].add(String(newLine[0], newLine[1] + (textLine * drawString.font.fontSize * self.fontScale),
-                            #                                     text,
-                            #                                     fontSize=drawString.font.fontSize * self.fontScale,
-                            #                                     fontName=drawString.font.fontName,
-                            #                                     fillColor=colour))
+                            self._addString(colourGroups, colourPath,
+                                            drawString,
+                                            (newLine[0], newLine[1]),  # + (textLine * drawString.font.fontSize * self.fontScale)),
+                                            colour,
+                                            text=text,
+                                            offset=textLine
+                                            )
                             textLine -= 1
 
         for colourGroup in colourGroups.values():
@@ -1145,18 +1192,13 @@ class GLExporter():
                         textGroup = drawString.text.split('\n')
                         textLine = len(textGroup) - 1
                         for text in textGroup:
-                            self._addString2(colourGroups, colourPath,
-                                             drawString,
-                                             (newLine[0], newLine[1]),  # + (textLine * drawString.font.fontSize * self.fontScale)),
-                                             colour,
-                                             text=text,
-                                             offset=textLine
-                                             )
-                            # colourGroups[colourPath].add(String(newLine[0], newLine[1] + (textLine * drawString.font.fontSize * self.fontScale),
-                            #                                     text,
-                            #                                     fontSize=drawString.font.fontSize * self.fontScale,
-                            #                                     fontName=drawString.font.fontName,
-                            #                                     fillColor=colour))
+                            self._addString(colourGroups, colourPath,
+                                            drawString,
+                                            (newLine[0], newLine[1]),  # + (textLine * drawString.font.fontSize * self.fontScale)),
+                                            colour,
+                                            text=text,
+                                            offset=textLine
+                                            )
                             textLine -= 1
 
         for colourGroup in colourGroups.values():
@@ -1210,18 +1252,13 @@ class GLExporter():
                         textGroup = drawString.text.split('\n')
                         textLine = len(textGroup) - 1
                         for text in textGroup:
-                            self._addString2(colourGroups, colourPath,
-                                             drawString,
-                                             (newLine[0], newLine[1]),  # + (textLine * drawString.font.fontSize * self.fontScale)),
-                                             colour,
-                                             text=text,
-                                             offset=textLine
-                                             )
-                            # colourGroups[colourPath].add(String(newLine[0], newLine[1] + (textLine * drawString.font.fontSize * self.fontScale),
-                            #                                     text,
-                            #                                     fontSize=drawString.font.fontSize * self.fontScale,
-                            #                                     fontName=drawString.font.fontName,
-                            #                                     fillColor=colour))
+                            self._addString(colourGroups, colourPath,
+                                            drawString,
+                                            (newLine[0], newLine[1]),  # + (textLine * drawString.font.fontSize * self.fontScale)),
+                                            colour,
+                                            text=text,
+                                            offset=textLine
+                                            )
                             textLine -= 1
 
         for colourGroup in colourGroups.values():
@@ -1537,33 +1574,14 @@ class GLExporter():
 
             self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='gridAxes')
 
-    def _addString(self, colourGroups, colourPath, drawString, position, colour, boxed=False):
-        self._addString2(colourGroups, colourPath, drawString, position, colour, boxed=boxed)
-
-        # newStr = String(position[0], position[1],
-        #                 drawString.text,
-        #                 fontSize=drawString.font.fontSize * self.fontScale,
-        #                 fontName=drawString.font.fontName,
-        #                 fillColor=colour)
-        # if boxed:
-        #     bounds = newStr.getBounds()
-        #     # arbitrary scaling
-        #     dx = drawString.font.fontSize * self.fontScale * 0.11  #bounds[0] - position[0]
-        #     dy = drawString.font.fontSize * self.fontScale * 0.125  #(position[1] - bounds[1]) / 2.0
-        #     colourGroups[colourPath].add(Rect(bounds[0] - dx, bounds[1] - dy,
-        #                                       (bounds[2] - bounds[0]) + 5 * dx, (bounds[3] - bounds[1]) + 2.0 * dy,
-        #                                       # newLine[0], newLine[1],
-        #                                       # drawString.font.fontSize * self.fontScale * len(newLine),
-        #                                       # drawString.font.fontSize * self.fontScale,
-        #                                       strokeColor=None,
-        #                                       fillColor=self.backgroundColour))
-        #
-        # colourGroups[colourPath].add(newStr)
-
-    def _addString2(self, colourGroups, colourPath, drawString, position, colour, boxed=False, text=None, offset=0):
+    def _addString(self, colourGroups, colourPath, drawString, position, colour, boxed=False, text=None, offset=0):
 
         if self.params[GLUSEPRINTFONT]:
             _fontName, _fontSize = self.params[GLPRINTFONT]
+
+            # allows the user to set the font size
+            if _fontName == DEFAULT_FONT:
+                _fontName = drawString.font.fontName
 
             # _fontSize = self._printFont.pointSize()
             # if _fontSize < 0:
@@ -1756,29 +1774,33 @@ class GLExporter():
         """
         Output a PNG file for the GL widget.
         """
-        dpi = self.params[GLEXPORTDPI]
+        with catchExceptions(errorStringTemplate='Error writing PNG file: "%s"', printTraceBack=False):
+            dpi = self.params[GLEXPORTDPI]
 
-        # NOTE:ED - need to look at this as only saves the last created drawing, how to concatenate?
-        self._mainPlot.scale(dpi / 72, dpi / 72)
-        renderPM.drawToFile(self._mainPlot, self.filename, fmt='PNG', dpi=dpi, showBoundary=False)
+            # NOTE:ED - need to look at this as only saves the last created drawing, how to concatenate?
+            self._mainPlot.scale(dpi / 72, dpi / 72)
+            renderPM.drawToFile(self._mainPlot, self.filename, fmt='PNG', dpi=dpi, showBoundary=False)
 
     def writeSVGFile(self):
         """
         Output an SVG file for the GL widget.
         """
-        renderSVG.drawToFile(self._mainPlot, self.filename, showBoundary=False)
+        with catchExceptions(errorStringTemplate='Error writing SVG file: "%s"', printTraceBack=False):
+            renderSVG.drawToFile(self._mainPlot, self.filename, showBoundary=False)
 
     def writePDFFile(self):
         """
         Output a PDF file for the GL widget.
         """
-        self._report.writeDocument()
+        with catchExceptions(errorStringTemplate='Error writing PDF document: "%s"', printTraceBack=False):
+            self._report.writeDocument()
 
     def writePSFile(self):
         """
         Output a PS file for the GL widget.
         """
-        renderPS.drawToFile(self._mainPlot, self.filename, showBoundary=False)
+        with catchExceptions(errorStringTemplate='Error writing PS file: "%s"', printTraceBack=False):
+            renderPS.drawToFile(self._mainPlot, self.filename, showBoundary=False)
 
     def _appendVertexLineGroup(self, indArray, colourGroups, plotDim, name, mat=None,
                                includeLastVertex=False, lineWidth=0.5):
@@ -1951,8 +1973,7 @@ class GLExporter():
 
             newColour = dict((k, colourItem[k]) for k in wanted_keys if k in colourItem)
 
-            pl = Path(
-                    **newColour)  #  strokeWidth=colourItem[PDFSTROKEWIDTH], strokeColor=colourItem[PDFSTROKECOLOR], strokeLineCap=colourItem[PDFSTROKELINECAP])
+            pl = Path(**newColour)  #  strokeWidth=colourItem[PDFSTROKEWIDTH], strokeColor=colourItem[PDFSTROKECOLOR], strokeLineCap=colourItem[PDFSTROKELINECAP])
             for ll in colourItem[PDFLINES]:
                 if len(ll) == 4:
                     pl.moveTo(ll[0], ll[1])

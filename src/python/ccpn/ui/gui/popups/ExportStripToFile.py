@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-04 19:35:52 +0100 (Mon, October 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-05 17:38:46 +0100 (Tue, October 05, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -66,9 +66,10 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, \
     GLFULLLIST, GLEXTENDEDLIST, GLDIAGONALLINE, GLCURSORS, GLDIAGONALSIDEBANDS, \
     GLALIASENABLED, GLALIASSHADE, GLALIASLABELSENABLED, GLSTRIPREGIONS, \
     GLSCALINGMODE, GLSCALINGOPTIONS, GLSCALINGPERCENT, GLSCALINGBYUNITS, \
-    GLPRINTFONT, GLUSEPRINTFONT
+    GLPRINTFONT, GLUSEPRINTFONT, GLSCALINGAXIS
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString, hexToRgbRatio, colourNameNoSpace
-
+from ccpn.util.Constants import SCALING_MODES, POSINFINITY
+from ccpn.core.lib.ContextManagers import catchExceptions
 
 # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLAXISLABELS, GLAXISMARKS, \
 #     GLMARKLABELS, GLMARKLINES, GLREGIONS, GLOTHERLINES, GLSPECTRUMLABELS, GLSTRIPLABELLING, GLTRACES, \
@@ -110,8 +111,7 @@ STRIPWIDTH = 'Width'
 STRIPAXISINVERTED = 'AxisInverted'
 STRIPBUTTONS = [STRIPAXIS, STRIPMIN, STRIPMAX, STRIPCENTRE, STRIPWIDTH]
 STRIPAXES = ['X', 'Y']
-
-_ARBITRARYLARGE = np.inf
+DEFAULT_FONT = '<Default Font>'
 
 
 @dataclass
@@ -187,7 +187,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self._initialiseStripList()
 
         # load the available .ttf fonts - load everytime as user may move/add them
-        _, self.familyFonts, _ = self._getFontPaths()
+        _, self.familyFonts = self._getFontPaths()
 
         super().__init__(parent=parent, mainWindow=mainWindow, title=title,
                          fileMode=fileMode, acceptMode=acceptMode,
@@ -308,7 +308,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         _rangeRow += 1
 
         # radio buttons for setting mode
-        _texts = ['Use Min/Max', 'Use Centre/Width']
+        _texts = ['Min/Max', 'Centre/Width']
         _tipTexts = ['Use minimum/maximum values to define the print region', 'Use centre/width values to define the print region']
         self._rangeRadio = RadioButtons(self._rangeRight, texts=_texts, tipTexts=_tipTexts, direction='h', hAlign='l', selectedInd=1,
                                         grid=(_rangeRow, 0), gridSpan=(1, 8),
@@ -340,6 +340,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                                          callback=partial(self._setSpinbox, ii, STRIPBUTTONS[bt + 1]))
                 _spinbox.setFixedWidth(100)
                 _spinbox._widgetRow = ii
+                # add a filter to update the selected box around the row
                 _spinbox.installEventFilter(self)
                 _spinbox.setVisible(False)
 
@@ -389,8 +390,6 @@ class ExportStripToFilePopup(ExportDialogABC):
     def _setupScalingWidget(self, row, userFrame):
         """Set up the widgets for the scaling frame
         """
-        scalingList = ['Percentage', 'Cms / unit', 'Units / cm', 'Inches / unit', 'Units / inch']
-
         _frame = Frame(userFrame, setLayout=True, grid=(row, 0), gridSpan=(1, 8), hAlign='left')
 
         _row = 0
@@ -398,14 +397,16 @@ class ExportStripToFilePopup(ExportDialogABC):
                                                   grid=(_row, 0), hAlign='left',
                                                   orientation='left',
                                                   labelText='Scaling',
-                                                  texts=scalingList,
+                                                  texts=SCALING_MODES,
                                                   callback=self._scalingCallback
                                                   )
         self.scalingPercentage = DoubleSpinbox(_frame, grid=(_row, 1), min=0.0, max=100.0, decimals=0, step=1)
         self.scalingByUnits = ScientificDoubleSpinBox(_frame, grid=(_row, 2), gridSpan=(1, 2), min=0.0, max=1e10, step=0.1)
+        self.scalingAxis = PulldownListCompoundWidget(_frame, grid=(_row, 4), labelText='Scale Axis', texts=STRIPAXES)
         self.scalingPercentage.setMinimumCharacters(10)
         self.scalingByUnits.setMinimumCharacters(10)
         self.scalingByUnits.setVisible(False)
+        self.scalingAxis.setVisible(False)
 
     def _setupFontWidget(self, row, userFrame):
         """Set up the widgets for the font frame
@@ -424,7 +425,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         # self._fontButton.setEnabled(False)
         # self._fontButton.setVisible(False)  # hide for the minute - only .ttf fonts work so using a pulldown
 
-        self._fontPulldown = PulldownList(_frame, texts=['<No Font Set>'] + sorted(list(self.familyFonts.keys())), grid=(_row, 2))
+        self._fontPulldown = PulldownList(_frame, texts=[DEFAULT_FONT] + sorted(list(self.familyFonts.keys())), grid=(_row, 2))
         self._fontSpinbox = DoubleSpinbox(_frame, min=1, max=100, decimals=0, step=1, grid=(_row, 3))
         self._fontPulldown.setEnabled(False)
         self._fontSpinbox.setEnabled(False)
@@ -603,7 +604,9 @@ class ExportStripToFilePopup(ExportDialogABC):
         """Change the current selected row of spinboxes"""
         self._currentAxis = row
         for ii in range(2):
-            self._axisSpinboxes[ii][-1].showBorder = (self._currentAxis == ii)
+            _box = self._axisSpinboxes[ii][-1]
+            if _box.isEnabled():
+                _box.showBorder = (self._currentAxis == ii)
 
     def eventFilter(self, obj, event):
         """Event filter to handle focus change on spinboxes
@@ -641,6 +644,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         _ind = self.scaling.getIndex()
         self.scalingPercentage.setVisible(False if _ind else True)
         self.scalingByUnits.setVisible(True if _ind else False)
+        self.scalingAxis.setVisible(True if _ind else False)
 
     def _fontCheckBoxCallback(self, value):
         """Handle checking/unchecking font checkbox
@@ -790,7 +794,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                             bb.setEnabled(_dd.useRegion)
                         self._axisSpinboxes[ii][-1].showBorder = (_dd.useRegion and (self._currentAxis == ii))
 
-                    self._rangeRadio.setEnabled(_dd.useRegion)
+                    # self._rangeRadio.setEnabled(_dd.useRegion)
                     self._setRangeButtons.setEnabled(_dd.useRegion)
 
                 self._setSpinboxConstraints(stripId)
@@ -802,7 +806,8 @@ class ExportStripToFilePopup(ExportDialogABC):
         """Populate the widgets in the scaling frame
         """
         self.scalingPercentage.set(100)
-        self.scalingByUnits.set(10.0)
+        self.scalingByUnits.set(0.01)
+        self.scalingAxis.setIndex(0)
 
     def _populateFont(self):
         """Populate the widgets in the font frame
@@ -838,8 +843,8 @@ class ExportStripToFilePopup(ExportDialogABC):
                     axis = _dd.axes[ii]
                     # set min.max constraints for buttons
                     # not sure if these need to change as the button values are changed
-                    self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPMIN)].setMaximum(axis[STRIPMAX] if state else _ARBITRARYLARGE)
-                    self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPMAX)].setMinimum(axis[STRIPMIN] if state else -_ARBITRARYLARGE)
+                    self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPMIN)].setMaximum(axis[STRIPMAX] if state else POSINFINITY)
+                    self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPMAX)].setMinimum(axis[STRIPMIN] if state else -POSINFINITY)
                     self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPWIDTH)].setMinimum(0.0)
 
         except Exception as es:
@@ -1124,6 +1129,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                       GLSCALINGMODE       : self.scaling.getIndex(),
                       GLSCALINGPERCENT    : self.scalingPercentage.get(),
                       GLSCALINGBYUNITS    : self.scalingByUnits.get(),
+                      GLSCALINGAXIS       : self.scalingAxis.getIndex(),
                       GLUSEPRINTFONT      : self._useFontCheckbox.isChecked(),
                       GLPRINTFONT         : (self._fontPulldown.get(), self._fontSpinbox.get()),
                       }
@@ -1144,22 +1150,23 @@ class ExportStripToFilePopup(ExportDialogABC):
             glWidget = params[GLWIDGET]
             prType = params[GLPRINTTYPE]
 
-            if prType == EXPORTPDF:
-                pdfExport = glWidget.exportToPDF(filename, params)
-                if pdfExport:
-                    pdfExport.writePDFFile()
-            elif prType == EXPORTSVG:
-                svgExport = glWidget.exportToSVG(filename, params)
-                if svgExport:
-                    svgExport.writeSVGFile()
-            elif prType == EXPORTPNG:
-                pngExport = glWidget.exportToPNG(filename, params)
-                if pngExport:
-                    pngExport.writePNGFile()
-            elif prType == EXPORTPS:
-                pngExport = glWidget.exportToPS(filename, params)
-                if pngExport:
-                    pngExport.writePSFile()
+            with catchExceptions(errorStringTemplate='Error writing file; "%s"', printTraceBack=False):
+                if prType == EXPORTPDF:
+                    pdfExport = glWidget.exportToPDF(filename, params)
+                    if pdfExport:
+                        pdfExport.writePDFFile()
+                elif prType == EXPORTSVG:
+                    svgExport = glWidget.exportToSVG(filename, params)
+                    if svgExport:
+                        svgExport.writeSVGFile()
+                elif prType == EXPORTPNG:
+                    pngExport = glWidget.exportToPNG(filename, params)
+                    if pngExport:
+                        pngExport.writePNGFile()
+                elif prType == EXPORTPS:
+                    pngExport = glWidget.exportToPS(filename, params)
+                    if pngExport:
+                        pngExport.writePSFile()
 
     def actionButtons(self):
         self.setOkButton(callback=self._saveAndCloseDialog, text='Save and Close', tipText='Export the strip and close the dialog')
@@ -1219,9 +1226,8 @@ class ExportStripToFilePopup(ExportDialogABC):
     def _getFontPaths(self):
         font_paths = QStandardPaths.standardLocations(QStandardPaths.FontsLocation)
 
-        accounted = []
         unloadable = []
-        family_to_path = {}
+        familyPath = {}
 
         db = QFontDatabase()
         for fpath in font_paths:  # go through all font paths
@@ -1236,10 +1242,10 @@ class ExportStripToFilePopup(ExportDialogABC):
                 else:
                     names = db.applicationFontFamilies(idx)  # load back font family name
                     for n in names:
-                        _paths = family_to_path.setdefault(n, set())
+                        _paths = familyPath.setdefault(n, set())
                         _paths.add(path)
 
-        return unloadable, family_to_path, accounted
+        return unloadable, familyPath
 
     # def _getFont(self, value):
     #     # Simple font grabber from the system

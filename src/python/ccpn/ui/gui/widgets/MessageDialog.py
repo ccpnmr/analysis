@@ -122,7 +122,7 @@ class MessageDialog(QtWidgets.QMessageBox):
     Using the 'multiline' to emulate the windowTitle, as on Mac the windows do not get their title
     """
 
-    def __init__(self, title, basicText, message, icon=Information, iconPath=None, parent=None):
+    def __init__(self, title, basicText, message, icon=Information, iconPath=None, parent=None, scrollableMessage=False):
         QtWidgets.QMessageBox.__init__(self, None)
 
         # set modality to take control
@@ -175,7 +175,14 @@ class MessageDialog(QtWidgets.QMessageBox):
         if widgetBasic:
             widgetBasic.setFixedWidth(maxTextWidth)
         if widgetMessage:
-            widgetMessage.setFixedWidth(maxTextWidth)
+            if scrollableMessage: # insert the Label widgetMessage inside a scrollArea. Could be done automatically if len(text) > someValue...
+                scrollArea = QtWidgets.QScrollArea(self)
+                scrollArea.setWidgetResizable(True)
+                widgetMessage.setWordWrap(True)
+                scrollArea.setWidget(widgetMessage)
+                layout.addWidget(scrollArea, 1, 2)
+            else:
+                widgetMessage.setFixedWidth(maxTextWidth)
 
         palette = QtGui.QPalette()
         self.setPalette(palette)
@@ -335,8 +342,9 @@ def showSaveDiscardCancel(title, message, parent=None, iconPath=None):
         return None
 
 
-def showWarning(title, message, parent=None, iconPath=None):
-    dialog = MessageDialog('Warning', title, message, Warning, iconPath, parent)
+def showWarning(title, message, parent=None, iconPath=None, scrollableMessage=False):
+    dialog = MessageDialog(title='Warning', basicText=title, message=message, icon=Warning, iconPath=iconPath, parent=parent,
+                           scrollableMessage=scrollableMessage)
 
     dialog.setStandardButtons(Close)
     dialog.raise_()

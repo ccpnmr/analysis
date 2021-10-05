@@ -517,13 +517,15 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     def _checkForBadSpectra(self, project):
         """Report bad spectra in a popup
         """
-        badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.hasValidPath()]
+        badSpectra = [str(spectrum.pid) for spectrum in project.spectra if not spectrum.hasValidPath()]
+
         if badSpectra:
-            text = 'Detected invalid Spectrum file path(s) for:\n\n'
-            for sp in badSpectra:
+            text = 'Use menu "Spectrum --> Validate paths..." Or "VP" shortcut to correct.\n'
+            text += 'Please inspect file path(s) for:\n'
+            for sp in badSpectra: # these can be >1000 lines message. Added in a scrollable area.
                 text += '%s\n' % str(sp)
-            text += '\nUse menu "Spectrum --> Validate paths.." or "VP" shortcut to correct\n'
-            showWarning('Spectrum file paths', text)
+            title = 'Detected invalid Spectrum file paths'
+            showWarning(title=title, message=text, scrollableMessage=True)
 
     # def _loadProjectSingleTry(self, projectDir):
     #     """Load/Reload project after load dialog.

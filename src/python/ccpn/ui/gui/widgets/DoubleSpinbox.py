@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-04 16:28:22 +0100 (Mon, October 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-05 11:31:59 +0100 (Tue, October 05, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -214,10 +214,13 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
             self.valueChanged.connect(callback)
         self._callback = callback
 
-    def textFromValue(self, v: float) -> str:
+    def textFromValue(self, v: typing.Union[float, int]) -> str:
         """Subclass to remove extra zeroes
         """
-        return self._qLocale.toString(round(v, self.decimals()), 'g', QtCore.QLocale.FloatingPointShortest)
+        if isinstance(v, int):
+            return super(DoubleSpinbox, self).textFromValue(v)
+        else:
+            return self._qLocale.toString(round(v, self.decimals()), 'g', QtCore.QLocale.FloatingPointShortest)
 
     def validate(self, text: str, pos: int) -> typing.Tuple[QtGui.QValidator.State, str, int]:
         _state = super().validate(text, pos)

@@ -316,11 +316,14 @@ GuiTable::item::selected {
         self.setSortingEnabled(True)
         self.sortByColumn(0, QtCore.Qt.AscendingOrder)
 
-        # enable drag and drop operations on the table - why not working?
+        # enable drag and drop operations on the table
         self.setDragEnabled(True)
-        self.acceptDrops()
+        self.setAcceptDrops(True)
+        self.viewport().setAcceptDrops(True)
         self.setDragDropMode(self.InternalMove)
+        self.setDragDropOverwriteMode(False)
         self.setDropIndicatorShown(True)
+        self.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
 
         # stretchLastSection = False
 
@@ -584,6 +587,9 @@ GuiTable::item::selected {
                 openNew = showYesNo(title, msg)
                 if openNew:
                     _openItemObject(self.mainWindow, others)
+
+    # def dropEvent(self, event):
+    #     print('~~~ dropped. ', event)
 
     def _checkBoxCallback(self, data):
         getLogger().info('>>> %s _checkBoxCallback' % _moduleId(self.moduleParent))

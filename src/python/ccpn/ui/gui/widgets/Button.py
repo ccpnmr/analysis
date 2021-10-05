@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-30 20:44:25 +0100 (Fri, July 30, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-05 11:30:59 +0100 (Tue, October 05, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Icon import Icon
@@ -65,15 +65,11 @@ class Button(QtWidgets.QPushButton, Base):
         self.setCallback(callback)
 
     def setSelected(self, selected):
-
         if self.isCheckable():
-            if selected:
-                self.setChecked(CHECKED)
-            else:
-                self.setChecked(UNCHECKED)
+            self.setChecked(selected)
 
     def setCallback(self, callback=None):
-        "Sets callback; disconnects if callback=None"
+        """Sets callback; disconnects if callback=None"""
         if self._callback is not None:
             self.clicked.disconnect()
         if callback:
@@ -82,12 +78,12 @@ class Button(QtWidgets.QPushButton, Base):
         self._callback = callback
 
     def setText(self, text):
-        "Set the text of the button, applying the translator first"
+        """Set the text of the button, applying the translator first"""
         self._text = translator.translate(text)
         QtWidgets.QPushButton.setText(self, self._text)
 
     def getText(self):
-        "Get the text of the button"
+        """Get the text of the button"""
         return self._text
 
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-22 17:12:23 +0100 (Wed, September 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-06 08:55:40 +0100 (Wed, October 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -405,7 +405,7 @@ class Project(AbstractWrapperObject):
         CCPNINTERNAL: should only be used in _restoreObject or Nef
         """
         self._queryNextUniqueIdValue(className)
-        self._wrappedData._nextUniqueIdValues[className] = value
+        self._wrappedData._nextUniqueIdValues[className] = int(value)
 
     @property
     def versionHistory(self) -> tuple:

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-22 19:27:36 +0100 (Wed, September 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-06 08:55:40 +0100 (Wed, October 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -343,8 +343,8 @@ class ChemicalShiftList(AbstractWrapperObject):
 
             # create a new shift with the uniqueId from the dataframe
             shift = _newShift(ncsl, _ignoreUniqueId=True)
-            _uniqueId = _row[CS_UNIQUEID]
-            shift._resetUniqueId(int(_uniqueId))
+            _uniqueId = int(_row[CS_UNIQUEID])
+            shift._resetUniqueId(_uniqueId)
             ncsl._shifts.append(shift)
 
             # add the new object to the _pid2Obj dict
@@ -593,8 +593,8 @@ class ChemicalShiftList(AbstractWrapperObject):
 
                 # create a new shift with the uniqueId from the old shift
                 shift = _newShift(chemicalShiftList, _ignoreUniqueId=True)
-                _uniqueId = _row[CS_UNIQUEID]
-                shift._resetUniqueId(int(_uniqueId))
+                _uniqueId = int(_row[CS_UNIQUEID])
+                shift._resetUniqueId(_uniqueId)
 
                 # set the new _nextUniqueId for the chemicalsShifts
                 maxUniqueId = max(maxUniqueId, _uniqueId)

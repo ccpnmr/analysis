@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-06 12:27:51 +0100 (Wed, October 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-06 15:55:53 +0100 (Wed, October 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -235,7 +235,7 @@ class SetPeakAliasingPopup(CcpnDialogMainWidget):
             color = item.foreground().color()
             # use the palette to change the colour of the selection text - may not match for other themes
             palette = combo.palette()
-            palette.setColor(QtGui.QPalette.Text, color)
+            palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Text, color)
             combo.setPalette(palette)
 
             # update the selection flag

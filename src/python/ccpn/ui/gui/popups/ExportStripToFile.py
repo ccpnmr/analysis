@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-05 17:38:46 +0100 (Tue, October 05, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-06 15:55:53 +0100 (Wed, October 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -111,7 +111,7 @@ STRIPWIDTH = 'Width'
 STRIPAXISINVERTED = 'AxisInverted'
 STRIPBUTTONS = [STRIPAXIS, STRIPMIN, STRIPMAX, STRIPCENTRE, STRIPWIDTH]
 STRIPAXES = ['X', 'Y']
-DEFAULT_FONT = '<Default Font>'
+DEFAULT_FONT = 'Default Font'
 
 
 @dataclass
@@ -355,8 +355,10 @@ class ExportStripToFilePopup(ExportDialogABC):
         # buttons for setting the spinboxes from strip
         _texts = ['Set Print Region', 'Set Min', 'Set Max', 'Set Centre', 'Set Width']
         _tipTexts = ['Set all values for the print region from the selected strip.\nValues are set for the selected row',
-                     'Set the maximum value for the print region from the selected strip.\nValue is set for the selected row',
-                     'Set the minimum value for the print region from the selected strip.\nValue is set for the selected row',
+                     'Set the minimum value for the print region from the selected strip.\nValue is set for the selected row.\n'
+                     'If the maximum value is too low, the minimum value will be set to the closest allowed value',
+                     'Set the maximum value for the print region from the selected strip.\nValue is set for the selected row.\n'
+                     'If the minimum value is too high, the maximum value will be set to the closest allowed value',
                      'Set the centre value for the print region from the selected strip.\nValue is set for the selected row',
                      'Set the width value for the print region from the selected strip.\nValue is set for the selected row']
         _callbacks = [self._setStripRegion, self._setStripMin, self._setStripMax, self._setStripCentre, self._setStripWidth]
@@ -398,11 +400,14 @@ class ExportStripToFilePopup(ExportDialogABC):
                                                   orientation='left',
                                                   labelText='Scaling',
                                                   texts=SCALING_MODES,
+                                                  tipText='Set the scaling option for printing',
                                                   callback=self._scalingCallback
                                                   )
-        self.scalingPercentage = DoubleSpinbox(_frame, grid=(_row, 1), min=0.0, max=100.0, decimals=0, step=1)
+        self.scalingPercentage = DoubleSpinbox(_frame, grid=(_row, 1), min=1.0, max=100.0, decimals=0, step=1)
         self.scalingByUnits = ScientificDoubleSpinBox(_frame, grid=(_row, 2), gridSpan=(1, 2), min=0.0, max=1e10, step=0.1)
-        self.scalingAxis = PulldownListCompoundWidget(_frame, grid=(_row, 4), labelText='Scale Axis', texts=STRIPAXES)
+        self.scalingAxis = PulldownListCompoundWidget(_frame, grid=(_row, 4),
+                                                      labelText='Scale Axis', texts=STRIPAXES,
+                                                      tipText='Select the axis to apply the scaling to')
         self.scalingPercentage.setMinimumCharacters(10)
         self.scalingByUnits.setMinimumCharacters(10)
         self.scalingByUnits.setVisible(False)
@@ -414,10 +419,14 @@ class ExportStripToFilePopup(ExportDialogABC):
         _frame = Frame(userFrame, setLayout=True, grid=(row, 0), gridSpan=(1, 8), hAlign='left')
 
         _row = 0
+        _tip = "If checked, use the selected font and fontSize for printing.\n" \
+               "If the font selected is 'Default Font' then the default font will be used at the specified fontSize.\n" \
+               "If unchecked, the default font will be scaled proportional to the strip"
         self._useFontCheckbox = CheckBoxCompoundWidget(_frame,
                                                        grid=(_row, 0), hAlign='left',
                                                        orientation='right',
-                                                       labelText='Use override font for printing',
+                                                       labelText='Use selected font for printing',
+                                                       tipText=_tip,
                                                        callback=self._fontCheckBoxCallback,
                                                        )
 
@@ -425,10 +434,11 @@ class ExportStripToFilePopup(ExportDialogABC):
         # self._fontButton.setEnabled(False)
         # self._fontButton.setVisible(False)  # hide for the minute - only .ttf fonts work so using a pulldown
 
-        self._fontPulldown = PulldownList(_frame, texts=[DEFAULT_FONT] + sorted(list(self.familyFonts.keys())), grid=(_row, 2))
+        self._fontPulldown = PulldownList(_frame, grid=(_row, 2))
         self._fontSpinbox = DoubleSpinbox(_frame, min=1, max=100, decimals=0, step=1, grid=(_row, 3))
         self._fontPulldown.setEnabled(False)
         self._fontSpinbox.setEnabled(False)
+        self._fontPulldown.setCallback(partial(self._setPulldownTextColour, self._fontPulldown))
 
     def _initialiseStripList(self):
         """Setup the lists containing strips.spectrumDisplays before populating
@@ -820,10 +830,32 @@ class ExportStripToFilePopup(ExportDialogABC):
         #     self._printFont = None
         #     self._fontButton.setText('<No Font Set>')
 
+        self._fontPulldown.setData(texts = [DEFAULT_FONT,] + sorted(list(self.familyFonts.keys())),)
+
+        # add some colour to show the default option
+        model = self._fontPulldown.model()
+        color = QtGui.QColor('gray')
+        model.item(0).setForeground(color)
+
         fontName = self.application.preferences.printSettings.get('fontName')
         fontSize = self.application.preferences.printSettings.get('fontSize')
         self._fontPulldown.set(fontName)
         self._fontSpinbox.set(fontSize)
+
+        self._setPulldownTextColour(self._fontPulldown)
+
+    def _setPulldownTextColour(self, combo, value=None):
+        """Set the colour of the pulldown text
+        """
+        ind = combo.currentIndex()
+        model = combo.model()
+        item = model.item(ind)
+        if item is not None:  # and (ind == 0 or combo.isEnabled()):
+            color = item.foreground().color()
+            # use the palette to change the colour of the selection text - may not match for other themes
+            palette = combo.palette()
+            palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Text, color)
+            combo.setPalette(palette)
 
     def _focusButton(self, row, button):
         """Set the focus to the selected button

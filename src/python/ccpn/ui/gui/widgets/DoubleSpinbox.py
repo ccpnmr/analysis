@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-05 11:31:59 +0100 (Tue, October 05, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-06 15:55:53 +0100 (Wed, October 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -236,11 +236,11 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
                 # set the validate colours for the object
                 palette = obj.palette()
                 if state == QtGui.QValidator.Acceptable:
-                    palette.setColor(QtGui.QPalette.Base, self.baseColour)
+                    palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Base, self.baseColour)
                 elif state == QtGui.QValidator.Intermediate:
-                    palette.setColor(QtGui.QPalette.Base, self._validationIntermediate)
+                    palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Base, self._validationIntermediate)
                 else:  # Invalid
-                    palette.setColor(QtGui.QPalette.Base, self._validationInvalid)
+                    palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Base, self._validationInvalid)
                 obj.setPalette(palette)
 
         except Exception as es:
@@ -279,7 +279,7 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
             for obj in [self, self.lineEdit()]:
                 # set the colours for the object
                 palette = obj.palette()
-                palette.setColor(QtGui.QPalette.Base, colour)
+                palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Base, colour)
                 obj.setPalette(palette)
 
         except Exception as es:

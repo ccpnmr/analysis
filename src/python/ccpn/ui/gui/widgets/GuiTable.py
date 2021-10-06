@@ -25,8 +25,11 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+import random
+import time
 
 from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt5.QtWidgets import QAbstractItemView
 import pandas as pd
 import os
 from time import time_ns
@@ -202,22 +205,23 @@ class GuiTable(TableWidget, Base):
     ICON_FILE = os.path.join(os.path.dirname(__file__), 'icons', 'editable.png')
 
     styleSheet = """
-GuiTable {
-    background-color: %(GUITABLE_BACKGROUND)s;
-    alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
-    border: 1px solid %(BORDER_NOFOCUS)s;
-    border-radius: 2px;
-}
-
-GuiTable::item {
-    padding: 2px;
-    color: %(GUITABLE_ITEM_FOREGROUND)s;
-}
-
-GuiTable::item::selected {
-    background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
-    color: %(GUITABLE_SELECTED_FOREGROUND)s;
-}"""
+                    GuiTable {
+                        background-color: %(GUITABLE_BACKGROUND)s;
+                        alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
+                        border: 1px solid %(BORDER_NOFOCUS)s;
+                        border-radius: 2px;
+                    }
+                    
+                    GuiTable::item {
+                        padding: 2px;
+                        color: %(GUITABLE_ITEM_FOREGROUND)s;
+                    }
+                    
+                    GuiTable::item::selected {
+                        background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
+                        color: %(GUITABLE_SELECTED_FOREGROUND)s;
+                    }
+                """
 
     # define the class for the table widget items
     ITEMKLASS = CcpnTableWidgetItem
@@ -239,6 +243,7 @@ GuiTable::item::selected {
                  dataFrameObject=None,  # collate into a single object that can be changed quickly
                  actionCallback=None, selectionCallback=None, checkBoxCallback=None,
                  _pulldownKwds=None, enableMouseMoveEvent=True,
+                 allowRowDragAndDrop=True,
                  multiSelect=False, selectRows=True, numberRows=False, autoResize=False,
                  enableExport=True, enableDelete=True, enableSearch=True,
                  hideIndex=True, stretchLastSection=True,
@@ -284,8 +289,8 @@ GuiTable::item::selected {
 
         # set stylesheet
         self.colours = getColours()
-        styleSheet = self.styleSheet % self.colours
-        self.setStyleSheet(styleSheet)
+        self._defaultStyleSheet = self.styleSheet % self.colours
+        self.setStyleSheet(self._defaultStyleSheet)
         self.setAlternatingRowColors(True)
 
         # set the preferred scrolling behaviour
@@ -317,13 +322,14 @@ GuiTable::item::selected {
         self.sortByColumn(0, QtCore.Qt.AscendingOrder)
 
         # enable drag and drop operations on the table
+        self.allowRowDragAndDrop = allowRowDragAndDrop
+
         self.setDragEnabled(True)
         self.setAcceptDrops(True)
         self.viewport().setAcceptDrops(True)
-        self.setDragDropMode(self.InternalMove)
         self.setDragDropOverwriteMode(False)
         self.setDropIndicatorShown(True)
-        self.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
+        self._seenTables = set()
 
         # stretchLastSection = False
 
@@ -352,7 +358,6 @@ GuiTable::item::selected {
             self.setTableFromDataFrame(dataFrameObject.dataFrame)
 
         # enable callbacks
-        self.enableMouseMoveEvent = enableMouseMoveEvent  #this will fire callbacks
         self._actionCallback = actionCallback
         self._selectionCallback = selectionCallback
         self._lastSelection = (None,)
@@ -687,7 +692,7 @@ GuiTable::item::selected {
                     elif self._dataFrameObject and self._dataFrameObject.columnDefinitions.setEditValues[col]:  # ejb - editable fields don't actionCallback:
                         # item = self.item(row, col)
                         # item.setEditable(True)
-                        item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
+                            item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
                         # self.itemDelegate().closeEditor.connect(partial(self._changeMe, row, col))
                         # item.textChanged.connect(partial(self._changeMe, item))
                         # self.editItem(item)  # enter the editing mode
@@ -705,6 +710,7 @@ GuiTable::item::selected {
             val = vals[col]
             item = self.itemClass(val, row)
             item.setEditable(self.editable)
+            item.setDraggable(self.allowRowDragAndDrop)
             sortMode = self.sortModes.get(col, None)
             if sortMode is not None:
                 item.setSortMode(sortMode)
@@ -715,11 +721,8 @@ GuiTable::item::selected {
             # item.setValue(val)  # Required--the text-change callback is invoked
             # when we call setItem.
             if isinstance(val, bool):  # this will create a check box if the value is a bool
-                # item.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
-                # Very important: Set Flag so that user cannot check/uncheck directly the checkbox otherwise there are two parallel callbacks.
-                # The checkbox state is set automatically from the data.
-                item.setFlags(QtCore.Qt.NoItemFlags)
-                item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+                item.setCheckable(True) # Very important: Set Flag so that user cannot check/uncheck directly the checkbox otherwise there are two parallel callbacks.
+                # TODO Make sure it works with more testing. The checkbox state is set automatically from the data.
                 state = 2 if val else 0
                 item.setCheckState(state)
                 self.setItem(row, col, item)
@@ -762,6 +765,7 @@ GuiTable::item::selected {
             else:
                 self.setItem(row, col, item)
                 item.setValue(val)
+
 
     def _expandCell(self, itemWidget, item):
         _itemRow = item.row()
@@ -1026,6 +1030,9 @@ GuiTable::item::selected {
                     self._defaultDoubleClick(self.currentItem())
 
     def enterEvent(self, event):
+        # print('ENTERING ===> ', event)
+        self.setStyleSheet(self._defaultStyleSheet)
+
         try:
             # basic tables may not have preferences defined
             if self.mainWindow:
@@ -1036,6 +1043,90 @@ GuiTable::item::selected {
 
         finally:
             super(GuiTable, self).enterEvent(event)
+
+    def _clearTableOverlays(self, clearAll=False):
+        #make sure to remove highlights from seen tables.
+        seenTable = None
+        _seenTables = self._seenTables.copy()
+        for seenTable in _seenTables:
+            if clearAll:
+                seenTable.setStyleSheet(seenTable._defaultStyleSheet)
+                self._seenTables.remove(seenTable)
+
+            # if seenTable is not self:
+            #     seenTable.setStyleSheet(seenTable._defaultStyleSheet)
+            #     self._seenTables.remove(seenTable)
+
+    def leaveEvent(self, event):
+        print('leaveEvent ===> ', id(self))
+        self.setStyleSheet(self._defaultStyleSheet)
+        super(GuiTable, self).leaveEvent(event)
+
+    def dragMoveEvent(self, event):
+        # print('dragMoveEvent ===> ', id(self))
+        data = self.parseEvent(event)
+        source = data.get('source')
+        super(GuiTable, self).dragMoveEvent(event)
+
+    def dragLeaveEvent(self, event):
+        print('dragLeaveEvent ===> ', self)
+        # print('dragLeaveEvent source', event, 'SELF:',self)
+        data = self.parseEvent(event)
+        source = data.get('source')
+        self._clearTableOverlays(clearAll=True)
+        super(GuiTable, self).dragLeaveEvent(event)
+
+    def dragEnterEvent(self, event):
+        # print('dragEnterEvent ', event, 'SELF:', self)
+        data = self.parseEvent(event)
+        source = data.get('source')
+
+        if isinstance(source, GuiTable):
+            source._clearTableOverlays()
+            if self != source:
+                if self.allowRowDragAndDrop:
+                    source._seenTables.add(self)
+                    self._seenTables.add(self)
+                    self._setDraggingStyleSheet('#31e100')
+                else: # DROP NOT ALLOWED
+                    event.ignore()
+            else:
+                self._setDraggingStyleSheet('#0259a6')
+        super(GuiTable, self).dragEnterEvent(event)
+
+    def dropEvent(self, event):
+        print('DROPPING ===> ', event)
+        data = self.parseEvent(event)
+        source = data.get('source')
+        if source == self:
+            print('DROPPING on same table ===> ', self)
+            self.setStyleSheet(self._defaultStyleSheet)
+            event.ignore()
+            return
+        if source != self:
+            print('DROPPING on a diff table ===> ', self, 'SOURCE:' , source)
+            self.setStyleSheet(self._defaultStyleSheet)
+            source.setStyleSheet(source._defaultStyleSheet)
+            print('SELEC OBJ',source.getSelectedObjects())
+            event.accept()
+        # super().dropEvent(event)
+        return
+
+
+    def handleItemChanged(self, item):
+        print('itemChanged===>', item)
+        # item.itemChanged()
+
+    def _setDraggingStyleSheet(self, borderColour ='#00e117'):
+        """Set the focus/noFocus colours for the widget
+        """
+        from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS, HIGHLIGHT_COLOUR
+        styleSheet = "GuiTable { " \
+                     "border: 5px solid;" \
+                     "border-radius: 5px;" \
+                     "border-color: %s;" \
+                     "} " %borderColour
+        self.setStyleSheet(styleSheet)
 
     def setTimeDelay(self):
         # set a blocking waypoint if required - will disable selectionCallback in the following doubleClick interval
@@ -2554,35 +2645,37 @@ if __name__ == '__main__':
 
     class mockObj(object):
         """Mock object to test the table widget editing properties"""
-        pid = ''
-        integer = 3
-        exampleFloat = 3.1  # This will create a double spin box
-        exampleBool = True  # This will create a check box
-        string = 'white'  # This will create a line Edit
-        exampleList = [(' ', 'Mock', 'Test'), ]  # This will create a pulldown
-        color = QtGui.QColor('Red')
-        icon = Icon('icons/warning')
-        r = Colour.colourNameToHexDict['red']
-        y = Colour.colourNameToHexDict['yellow']
-        b = Colour.colourNameToHexDict['blue']
-        colouredIcons = [None, Icon(color=r), Icon(color=y), Icon(color=b)]
 
-        flagsList = [[''] * len(colouredIcons), [Icon] * len(colouredIcons), 1, colouredIcons]  # This will create a pulldown. Make a list with the
+        def __init__(self, integer = 3, exampleFloat=63.3, exampleBool=True):
+            pid = ''
+            self.integer = integer
+            self.exampleFloat = exampleFloat  # This will create a double spin box
+            self.exampleBool = exampleBool  # This will create a check box
+            self.string = 'white'  # This will create a line Edit
+            self.exampleList = [(' ', 'Mock', 'Test'), ]  # This will create a pulldown
+            self.color = QtGui.QColor('Red')
+            self.icon = Icon('icons/warning')
+            r = Colour.colourNameToHexDict['red']
+            y = Colour.colourNameToHexDict['yellow']
+            b = Colour.colourNameToHexDict['blue']
+            colouredIcons = [None, Icon(color=r), Icon(color=y), Icon(color=b)]
 
-        # same structure of pulldown setData function: (texts=None, objects=None, index=None,
-        # icons=None, clear=True, headerText=None, headerEnabled=False, headerIcon=None)
+            flagsList = [[''] * len(colouredIcons), [Icon] * len(colouredIcons), 1, colouredIcons]  # This will create a pulldown. Make a list with the
+
+            # same structure of pulldown setData function: (texts=None, objects=None, index=None,
+            # icons=None, clear=True, headerText=None, headerEnabled=False, headerIcon=None)
 
         def editBool(self, value):
-            mockObj.exampleBool = value
+            self.exampleBool = value
 
         def editFloat(self, value):
-            mockObj.exampleFloat = value
+            self.exampleFloat = value
 
         def editPulldown(self, value):
-            mockObj.exampleList = value
+            self.exampleList = value
 
         def editFlags(self, value):
-            print(value)
+            print('EDIT VALUE',value)
 
 
     def _comboboxCallBack(value):
@@ -2639,7 +2732,7 @@ if __name__ == '__main__':
         ])
     table_pulldownCallbackDict = {'callback': table_pulldownCallback, 'clickToShowCallback': table_pulldownCallbackShow}
     table = GuiTable(parent=popup, dataFrameObject=None, _pulldownKwds=table_pulldownCallbackDict, checkBoxCallback=_checkBoxCallBack, grid=(0, 0))
-    df = table.getDataFrameFromList(table, [mockObj] * 5, colDefs=columns)
+    df = table.getDataFrameFromList(table, [mockObj], colDefs=columns)
 
     table.setTableFromDataFrameObject(dataFrameObject=df)
     table.item(0, 0).setBackground(QtGui.QColor(100, 100, 150))  #color the first item
@@ -2656,6 +2749,6 @@ if __name__ == '__main__':
     table.horizontalHeaderItem(1).setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
     table.horizontalHeaderItem(1).setCheckState(QtCore.Qt.Unchecked)
 
-    popup.show()
-    popup.raise_()
-    app.start()
+    # popup.show()
+    # popup.raise_()
+    # app.start()

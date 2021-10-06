@@ -49,8 +49,58 @@ class CcpnTableWidgetItem(TableWidgetItem):
             else:
                 return False
 
+    def setDraggable(self, draggable):
+        """
+        Set whether this item is user-draggable.
+        """
+        if draggable:
+            self.setFlags(self.flags() |
+                          QtCore.Qt.ItemIsDragEnabled |
+                          QtCore.Qt.ItemIsDropEnabled
+                          )
+        else:
+            self.setFlags(self.flags() &
+                          ~QtCore.Qt.ItemIsDragEnabled &
+                          ~QtCore.Qt.ItemIsDropEnabled)
 
-class MultiColumnTableWidgetItem(TableWidgetItem):
+    def setEditable(self, editable):
+        """
+        Set whether this item is user-editable.
+        """
+        if editable:
+            self.setFlags(self.flags() | QtCore.Qt.ItemIsEditable)
+        else:
+            self.setFlags(self.flags() & ~QtCore.Qt.ItemIsEditable)
+
+    def setEnabled(self, enabled):
+        """
+        Set whether this item is enabled and selectable
+        """
+        if enabled:
+            self.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+        else:
+            self.removeFlags()
+            self.setFlags(~QtCore.Qt.ItemIsEnabled)
+
+    def setCheckable(self, checkable):
+        """
+        Set whether this item is checkable
+        """
+        if checkable:
+            self.setEnabled(True)
+            self.setFlags(self.flags() | QtCore.Qt.ItemIsUserCheckable)
+        else:
+            self.setFlags(self.flags() & ~QtCore.Qt.ItemIsUserCheckable)
+
+    def removeFlags(self):
+        """
+        Remove all flags
+        """
+        self.setFlags(QtCore.Qt.NoItemFlags)
+
+
+
+class MultiColumnTableWidgetItem(CcpnTableWidgetItem):
     """
     Class implementing new sorting applied to TableWidgetItem using universalSortKey.
 

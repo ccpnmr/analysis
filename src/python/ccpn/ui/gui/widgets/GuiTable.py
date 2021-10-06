@@ -1044,18 +1044,12 @@ class GuiTable(TableWidget, Base):
         finally:
             super(GuiTable, self).enterEvent(event)
 
-    def _clearTableOverlays(self, clearAll=False):
+    def _clearTableOverlays(self):
         #make sure to remove highlights from seen tables.
-        seenTable = None
         _seenTables = self._seenTables.copy()
         for seenTable in _seenTables:
-            if clearAll:
-                seenTable.setStyleSheet(seenTable._defaultStyleSheet)
-                self._seenTables.remove(seenTable)
-
-            # if seenTable is not self:
-            #     seenTable.setStyleSheet(seenTable._defaultStyleSheet)
-            #     self._seenTables.remove(seenTable)
+            seenTable.setStyleSheet(seenTable._defaultStyleSheet)
+            self._seenTables.remove(seenTable)
 
     def leaveEvent(self, event):
         print('leaveEvent ===> ', id(self))
@@ -1073,7 +1067,7 @@ class GuiTable(TableWidget, Base):
         # print('dragLeaveEvent source', event, 'SELF:',self)
         data = self.parseEvent(event)
         source = data.get('source')
-        self._clearTableOverlays(clearAll=True)
+        self._clearTableOverlays()
         super(GuiTable, self).dragLeaveEvent(event)
 
     def dragEnterEvent(self, event):
@@ -1082,16 +1076,15 @@ class GuiTable(TableWidget, Base):
         source = data.get('source')
 
         if isinstance(source, GuiTable):
-            source._clearTableOverlays()
-            if self != source:
+            if self != source: # this is the target table. Where we are dropping to.
                 if self.allowRowDragAndDrop:
                     source._seenTables.add(self)
                     self._seenTables.add(self)
-                    self._setDraggingStyleSheet('#31e100')
+                    self._setDraggingStyleSheet('#4ef66d')
                 else: # DROP NOT ALLOWED
                     event.ignore()
-            else:
-                self._setDraggingStyleSheet('#0259a6')
+            else: # this is the source table of the drop
+                self._setDraggingStyleSheet()
         super(GuiTable, self).dragEnterEvent(event)
 
     def dropEvent(self, event):
@@ -1117,15 +1110,17 @@ class GuiTable(TableWidget, Base):
         print('itemChanged===>', item)
         # item.itemChanged()
 
-    def _setDraggingStyleSheet(self, borderColour ='#00e117'):
+    def _setDraggingStyleSheet(self, focusColour = None):
         """Set the focus/noFocus colours for the widget
         """
-        from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS, HIGHLIGHT_COLOUR
+        from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS
+
+        focusColour = focusColour or getColours()[BORDERFOCUS]
         styleSheet = "GuiTable { " \
-                     "border: 5px solid;" \
-                     "border-radius: 5px;" \
+                     "border: 2px solid;" \
+                     "border-radius: 2px;" \
                      "border-color: %s;" \
-                     "} " %borderColour
+                     "} " %focusColour
         self.setStyleSheet(styleSheet)
 
     def setTimeDelay(self):

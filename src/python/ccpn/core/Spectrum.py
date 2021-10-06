@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-17 17:52:03 +0100 (Fri, September 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-06 12:27:51 +0100 (Wed, October 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2483,6 +2483,49 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         newSpectrum.comment = comment
 
         return newSpectrum
+
+    @logCommand(get='self')
+    def setPeakAliasing(self, peaks, aliasingIndexes, updateSpectrumAliasingIndexes=False):
+        """Set the peak aliasing for a set of peaks in the spectrum
+
+        Peaks is an iterable of type str of Peak - bad strings are ignored
+        Core objects that are not of type Peak will raise error
+
+
+        :param peaks:
+        :param aliasingIndexes: tuple(int, int)
+        :param updateSpectrumAliasingIndexes: True/False
+        :return:
+        """
+        # avoid circular import
+        from ccpn.core.Peak import Peak
+
+        if (pks := set(self.project.getByPid(pk) if isinstance(pk, str) else pk for pk in peaks) - {None}):
+            for pk in pks:
+                if not isinstance(pk, Peak):
+                    raise ValueError('Spectrum.setPeakAliasing: peaks must all be of type Peak')
+                if not any (pk in pkList.peaks for pkList in self.peakLists):
+                    raise ValueError('Spectrum.setPeakAliasing: peaks must belong to one of spectrum.peakLists')
+            if not isinstance(aliasingIndexes, (tuple, list)) and len(aliasingIndexes) == self.dimensionCount:
+                raise ValueError(f'Spectrum.setPeakAliasing: aliasingIndexes must be tuple/list of length {self.dimensionCount}')
+            if not all(-MAXALIASINGRANGE <= aa <= MAXALIASINGRANGE for aa in aliasingIndexes):
+                raise ValueError(f'Spectrum.setPeakAliasing: aliasingIndexes must be in range [{-MAXALIASINGRANGE}, {MAXALIASINGRANGE}]')
+            if not isinstance(updateSpectrumAliasingIndexes, bool):
+                raise ValueError('Spectrum.setPeakAliasing: updateSpectrumAliasingIndexes must be True/False')
+
+            if updateSpectrumAliasingIndexes:
+                # update the aliasing limits for the spectrum
+                aliasInds = self.aliasingIndexes
+                folding = self.foldingLimits
+                widths = self.spectralWidths
+
+                newLimits = [(min(fold) + (min(*aa, newAl) * width),
+                              max(fold) + (max(*aa, newAl) * width))
+                             for dim, (aa, fold, width, newAl) in enumerate(zip(aliasInds, folding, widths, aliasingIndexes))]
+                self.aliasingLimits = newLimits
+
+            for pk in pks:
+                pk.aliasing = aliasingIndexes
 
     #-----------------------------------------------------------------------------------------
     # Iterators

@@ -65,6 +65,7 @@ from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight, TABLEFONT
 from ccpn.util.AttrDict import AttrDict
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.RowExpander import RowExpander
+from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, GREEN1
 import math
 
 
@@ -1029,10 +1030,12 @@ class GuiTable(TableWidget, Base):
                 else:
                     self._defaultDoubleClick(self.currentItem())
 
-    def enterEvent(self, event):
-        # print('ENTERING ===> ', event)
-        self.setStyleSheet(self._defaultStyleSheet)
+    ####################################################################################################################
+    ######################################       Drop Events         ###################################################
+    ####################################################################################################################
 
+    def enterEvent(self, event):
+        self.setStyleSheet(self._defaultStyleSheet)
         try:
             # basic tables may not have preferences defined
             if self.mainWindow:
@@ -1045,33 +1048,29 @@ class GuiTable(TableWidget, Base):
             super(GuiTable, self).enterEvent(event)
 
     def _clearTableOverlays(self):
-        #make sure to remove highlights from seen tables.
+        # make sure to remove border highlights from seen tables.
         _seenTables = self._seenTables.copy()
         for seenTable in _seenTables:
             seenTable.setStyleSheet(seenTable._defaultStyleSheet)
             self._seenTables.remove(seenTable)
 
     def leaveEvent(self, event):
-        print('leaveEvent ===> ', id(self))
         self.setStyleSheet(self._defaultStyleSheet)
         super(GuiTable, self).leaveEvent(event)
 
     def dragMoveEvent(self, event):
-        # print('dragMoveEvent ===> ', id(self))
         data = self.parseEvent(event)
         source = data.get('source')
         super(GuiTable, self).dragMoveEvent(event)
 
     def dragLeaveEvent(self, event):
         print('dragLeaveEvent ===> ', self)
-        # print('dragLeaveEvent source', event, 'SELF:',self)
         data = self.parseEvent(event)
         source = data.get('source')
         self._clearTableOverlays()
         super(GuiTable, self).dragLeaveEvent(event)
 
     def dragEnterEvent(self, event):
-        # print('dragEnterEvent ', event, 'SELF:', self)
         data = self.parseEvent(event)
         source = data.get('source')
 
@@ -1080,7 +1079,7 @@ class GuiTable(TableWidget, Base):
                 if self.allowRowDragAndDrop:
                     source._seenTables.add(self)
                     self._seenTables.add(self)
-                    self._setDraggingStyleSheet('#4ef66d')
+                    self._setDraggingStyleSheet(GREEN1)
                 else: # DROP NOT ALLOWED
                     event.ignore()
             else: # this is the source table of the drop
@@ -1105,16 +1104,9 @@ class GuiTable(TableWidget, Base):
         # super().dropEvent(event)
         return
 
-
-    def handleItemChanged(self, item):
-        print('itemChanged===>', item)
-        # item.itemChanged()
-
     def _setDraggingStyleSheet(self, focusColour = None):
         """Set the focus/noFocus colours for the widget
         """
-        from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS
-
         focusColour = focusColour or getColours()[BORDERFOCUS]
         styleSheet = "GuiTable { " \
                      "border: 2px solid;" \
@@ -1122,6 +1114,13 @@ class GuiTable(TableWidget, Base):
                      "border-color: %s;" \
                      "} " %focusColour
         self.setStyleSheet(styleSheet)
+
+    ####################################################################################################################
+    ####################################################################################################################
+
+    def handleItemChanged(self, item):
+        print('itemChanged===>', item)
+        # item.itemChanged()
 
     def setTimeDelay(self):
         # set a blocking waypoint if required - will disable selectionCallback in the following doubleClick interval

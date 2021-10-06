@@ -1214,6 +1214,19 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         if callback:
             callback(self.mainWindow, dataPid, sideBarObject)
 
+    def getSelectedObjects(self):
+        """
+        Get a list of selected V3 Core objects
+        """
+        objs = []
+        for item in self.selectedItems():
+            if item is not None:
+                dataPid = item.data(0, QtCore.Qt.DisplayRole)
+                objFromPid = self.project.getByPid(dataPid)
+                if objFromPid is not None:
+                    objs.append(objFromPid)
+        return objs
+
     def clearSideBar(self):
         """Completely clear and reset the sidebar of widgets and notifiers.
         """

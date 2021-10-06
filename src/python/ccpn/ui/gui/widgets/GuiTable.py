@@ -60,12 +60,15 @@ from contextlib import contextmanager
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.core.lib.Util import getParentObjectFromPid
 from ccpn.core.lib.ContextManagers import catchExceptions
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight, TABLEFONT
 from ccpn.util.AttrDict import AttrDict
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.RowExpander import RowExpander
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, GREEN1
+from ccpn.ui.gui.widgets.SideBar import SideBar
+from ccpn.ui.gui.widgets.DropBase import DropBase
 import math
 
 
@@ -1059,14 +1062,9 @@ class GuiTable(TableWidget, Base):
         super(GuiTable, self).leaveEvent(event)
 
     def dragMoveEvent(self, event):
-        data = self.parseEvent(event)
-        source = data.get('source')
         super(GuiTable, self).dragMoveEvent(event)
 
     def dragLeaveEvent(self, event):
-        print('dragLeaveEvent ===> ', self)
-        data = self.parseEvent(event)
-        source = data.get('source')
         self._clearTableOverlays()
         super(GuiTable, self).dragLeaveEvent(event)
 
@@ -1074,7 +1072,7 @@ class GuiTable(TableWidget, Base):
         data = self.parseEvent(event)
         source = data.get('source')
 
-        if isinstance(source, GuiTable):
+        if isinstance(source, GuiTable): #do this to set the overlay border
             if self != source: # this is the target table. Where we are dropping to.
                 if self.allowRowDragAndDrop:
                     source._seenTables.add(self)
@@ -1084,25 +1082,47 @@ class GuiTable(TableWidget, Base):
                     event.ignore()
             else: # this is the source table of the drop
                 self._setDraggingStyleSheet()
+
+        data.update(self._getDraggedDataDict(source)) #get the selectedObjects and update the datadict for emitting the callback
+        if self._enterEventCallback:
+            self._enterEventCallback(data)
+
         super(GuiTable, self).dragEnterEvent(event)
 
     def dropEvent(self, event):
-        print('DROPPING ===> ', event)
         data = self.parseEvent(event)
         source = data.get('source')
-        if source == self:
-            print('DROPPING on same table ===> ', self)
+        if source == self: # DROPPING on same table. Ignore
             self.setStyleSheet(self._defaultStyleSheet)
             event.ignore()
             return
         if source != self:
-            print('DROPPING on a diff table ===> ', self, 'SOURCE:' , source)
             self.setStyleSheet(self._defaultStyleSheet)
             source.setStyleSheet(source._defaultStyleSheet)
-            print('SELEC OBJ',source.getSelectedObjects())
+            draggedDataDict = self._getDraggedDataDict(source)
+            data.update(draggedDataDict)
+            if self._dropEventCallback is not None:
+                self._dropEventCallback(data)
             event.accept()
-        # super().dropEvent(event)
-        return
+        super().dropEvent(event)
+
+    def _getDraggedDataDict(self, source):
+        dataDict = {}
+        pids = []
+        dfs = []
+        if not hasattr(source, 'getSelectedObjects'):
+            getLogger().debug(f'Cannot get selected items from {source}.'
+                              ' Object class needs to have implemented a "getSelectedObject" method ')
+            return dataDict
+        for obj in source.getSelectedObjects():
+            if isinstance(obj, AbstractWrapperObject):
+                pids.append(obj.pid)
+            if isinstance(obj, (pd.DataFrame, pd.Series)):
+                dfs.append(obj)
+
+        dataDict[DropBase.PIDS] = pids
+        dataDict[DropBase.DFS] = dfs
+        return dataDict
 
     def _setDraggingStyleSheet(self, focusColour = None):
         """Set the focus/noFocus colours for the widget
@@ -1119,8 +1139,9 @@ class GuiTable(TableWidget, Base):
     ####################################################################################################################
 
     def handleItemChanged(self, item):
-        print('itemChanged===>', item)
+        # print('itemChanged===>', item)
         # item.itemChanged()
+        pass
 
     def setTimeDelay(self):
         # set a blocking waypoint if required - will disable selectionCallback in the following doubleClick interval

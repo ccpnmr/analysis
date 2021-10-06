@@ -62,7 +62,8 @@ class DropBase:
     TEXT = 'text'
     PIDS = 'pids'
     IDS = 'ids'
-    _dropTargets = (URLS, TEXT, PIDS, IDS)
+    DFS = 'dfs'
+    _dropTargets = (URLS, TEXT, PIDS, IDS, DFS)
 
     from ccpn.util.Constants import ccpnmrJsonData as JSONDATA
     from ccpn.util.Constants import ccpnmrModelDataList as MODELDATALIST

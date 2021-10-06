@@ -1,14 +1,15 @@
 """Local enhancements to json, adding support for reading and writing
-pandas.Series, pandas.DataFrame, pandas.Panel, numpy.ndarray, OrderedDict,
+pandas.Series, pandas.DataFrame, numpy.ndarray, OrderedDict,
 and ccpnmodel.ccpncore.Tensor
 
-
+pandas.Panel is deprecated and will be loaded as a pandas.DataFrame
 """
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -16,9 +17,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:58 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-10-06 09:47:30 +0100 (Wed, October 06, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -91,10 +92,10 @@ class _CcpnMultiEncoder(json.JSONEncoder):
             typ = 'pandas.Series'
             data = obj.to_json(orient='split')
 
-        elif isinstance(obj, pandas.Panel):
-            # NBNB NOT TESTED
-            frame = obj.to_frame()
-            data = frame.to_json(orient='split')
+        # elif isinstance(obj, pandas.Panel):
+        #     # NBNB NOT TESTED
+        #     frame = obj.to_frame()
+        #     data = frame.to_json(orient='split')
 
         elif isinstance(obj, numpy.ndarray):
             typ = 'numpy.ndarray'
@@ -174,7 +175,10 @@ def _ccpnObjectPairHook(pairs):
 
             elif typ == 'pandas.Panel':
                 # NBNB NOT TESTED
-                return pandas.read_json(data, orient='split').to_panel()
+                # return pandas.read_json(data, orient='split').to_panel()
+
+                # pandas.Panel is deprecated so return as a DataFrame
+                return pandas.read_json(data, orient='split')
 
             elif typ == 'pandas.Series':
                 # columns = data.get('columns')

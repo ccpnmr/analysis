@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-17 15:13:05 +0100 (Fri, September 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-07 11:06:48 +0100 (Thu, October 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import math
 from typing import Union, Tuple, Sequence
-from functools import partial
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -39,9 +38,7 @@ from ccpnmodel.ccpncore.lib import Constants
 from ccpn.util.Common import makeIterableList
 from ccpn.util.decorators import logCommand
 from ccpn.util.isotopes import isotopeCode2Nucleus, getIsotopeRecords
-from ccpn.core.lib.ContextManagers import newObject, undoBlock, renameObjectContextManager, undoStackBlocking
-from ccpn.core.lib.ContextManagers import newObject, renameObject, deleteV3Object, \
-    undoBlock, undoStackBlocking
+from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlock, ccpNmrV3CoreSetter
 from ccpn.util.Logging import getLogger
 
 
@@ -90,7 +87,10 @@ class NmrAtom(AbstractWrapperObject):
 
         super().__init__(project, wrappedData)
 
+    #=========================================================================================
     # CCPN properties
+    #=========================================================================================
+
     @property
     def _apiResonance(self) -> Nmr.Resonance:
         """ CCPN atom matching Atom"""
@@ -211,11 +211,12 @@ class NmrAtom(AbstractWrapperObject):
         return result
 
     @_ambiguityCode.setter
+    @ccpNmrV3CoreSetter()
     def _ambiguityCode(self, value):
         """Set the ambiguityCode
         """
         self._setInternalParameter(self._AMBIGUITYCODE, value)
-        
+
     @property
     def _originalName(self):
         """Return the originalName
@@ -224,6 +225,7 @@ class NmrAtom(AbstractWrapperObject):
         return result
 
     @_originalName.setter
+    @ccpNmrV3CoreSetter()
     def _originalName(self, value):
         """Set the originalName
         """
@@ -581,11 +583,6 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None, com
 
     # Check/set isotopeCode; it has to be set after the creation to avoid API errors.
     result._setIsotopeCode(isotopeCode)
-
-    # # adjust the name if it was not supplied; needed to create the nmrAtom first to get an uniqueId, used by rename()
-    # if name is None:
-    #     with undoStackBlocking():
-    #         result.rename()
 
     if comment is not None and len(comment) > 0:
         result.comment = comment

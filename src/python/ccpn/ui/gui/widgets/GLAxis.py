@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-17 12:27:27 +0100 (Fri, September 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-07 20:05:59 +0100 (Thu, October 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2089,7 +2089,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             # create a dynamic menu based on the available axisCodes
             menu.clear()
             strip._addItemsToMarkAxesMenuAxesView(mouseInAxis, menu)
-            strip._addItemsToCopyAxisFromMenuesAxes(mouseInAxis, menu, self.is1D)
+            strip._addItemsToCopyAxisFromMenusAxes(mouseInAxis, menu, self.is1D)
 
             if menu is not None:
                 strip.viewStripMenu = menu

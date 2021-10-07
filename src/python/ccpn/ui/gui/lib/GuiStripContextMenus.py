@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-07 19:56:29 +0100 (Thu, October 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-07 20:05:58 +0100 (Thu, October 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -635,7 +635,7 @@ def _copyYAxisCodeRangeFromStripItem(strip):
                     callback=None)
 
 
-# axis items for the axis and corner menues
+# axis items for the axis and corner menus
 def _copyXAxisRangeFromStripItem2(strip):
     """Separate item needed for the new axis menu
     """

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-07 18:40:32 +0100 (Thu, October 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-07 20:05:57 +0100 (Thu, October 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -906,27 +906,27 @@ class GuiStrip(Frame):
             for multiplet in self.current.multiplets:
                 self._createObjectMark(multiplet, axisIndex)
 
-    def _addItemsToCopyAxisFromMenuesMainView(self):
+    def _addItemsToCopyAxisFromMenusMainView(self):
         """Setup the menu for the main view
         """
-        # self._addItemsToCopyAxisFromMenues([self.copyAllAxisFromMenu, self.copyXAxisFromMenu, self.copyYAxisFromMenu],
+        # self._addItemsToCopyAxisFromMenus([self.copyAllAxisFromMenu, self.copyXAxisFromMenu, self.copyYAxisFromMenu],
         #                                    ['All', 'X', 'Y'])
-        self._addItemsToCopyAxisFromMenues(((self.copyAllAxisFromMenu, 'All'),
-                                            (self.copyXAxisFromMenu, 'X'),
-                                            (self.copyYAxisFromMenu, 'Y')))
+        self._addItemsToCopyAxisFromMenus(((self.copyAllAxisFromMenu, 'All'),
+                                           (self.copyXAxisFromMenu, 'X'),
+                                           (self.copyYAxisFromMenu, 'Y')))
 
-    def _addItemsToCopyAxisFromMenuesAxes(self, viewPort, thisMenu, is1D):
+    def _addItemsToCopyAxisFromMenusAxes(self, viewPort, thisMenu, is1D):
         """Setup the menu for the axis views
         """
         from ccpn.ui.gui.lib.GuiStripContextMenus import _addCopyMenuItems
 
         copyAttribs, matchAttribs = _addCopyMenuItems(self, viewPort, thisMenu, is1D)
 
-        self._addItemsToCopyAxisFromMenues(copyAttribs)
+        self._addItemsToCopyAxisFromMenus(copyAttribs)
         for nm, ax in matchAttribs:
-            self._addItemsToCopyAxisCodesFromMenues(ax, nm)
+            self._addItemsToCopyAxisCodesFromMenus(ax, nm)
 
-    def _addItemsToCopyAxisFromMenues(self, copyAttribs):  #, axisNames, axisIdList):
+    def _addItemsToCopyAxisFromMenus(self, copyAttribs):  #, axisNames, axisIdList):
         """Copied from old viewbox. This function apparently take the current cursorPosition
          and uses to pan a selected display from the list of spectrumViews or the current cursor position.
         """
@@ -1012,19 +1012,19 @@ class GuiStrip(Frame):
     #     """
     #     axisName = self.markAxesMenu
 
-    def _addItemsToMatchAxisCodesFromMenuesMainView(self):
+    def _addItemsToMatchAxisCodesFromMenusMainView(self):
         """Setup the menu for the main view
         """
-        self._addItemsToCopyAxisCodesFromMenues(0, self.matchXAxisCodeToMenu)
-        self._addItemsToCopyAxisCodesFromMenues(1, self.matchYAxisCodeToMenu)
+        self._addItemsToCopyAxisCodesFromMenus(0, self.matchXAxisCodeToMenu)
+        self._addItemsToCopyAxisCodesFromMenus(1, self.matchYAxisCodeToMenu)
 
-    # def _addItemsToMatchAxisCodesFromMenuesAxes(self):
+    # def _addItemsToMatchAxisCodesFromMenusAxes(self):
     #     """Setup the menu for the axis views
     #     """
-    #     self._addItemsToCopyAxisCodesFromMenues(0, [self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2])
-    #     self._addItemsToCopyAxisCodesFromMenues(1, [self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2])
+    #     self._addItemsToCopyAxisCodesFromMenus(0, [self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2])
+    #     self._addItemsToCopyAxisCodesFromMenus(1, [self.matchXAxisCodeToMenu2, self.matchYAxisCodeToMenu2])
 
-    def _addItemsToCopyAxisCodesFromMenues(self, axisIndex, axisName):  #, axisList):
+    def _addItemsToCopyAxisCodesFromMenus(self, axisIndex, axisName):  #, axisList):
         """Copied from old viewbox. This function apparently take the current cursorPosition
          and uses to pan a selected display from the list of spectrumViews or the current cursor position.
         """

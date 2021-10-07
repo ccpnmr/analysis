@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-27 19:09:19 +0100 (Mon, September 27, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-07 20:05:58 +0100 (Thu, October 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -116,7 +116,7 @@ class GuiStrip1d(GuiStrip):
         # self.viewBox.menu = _get1dDefaultMenu(self)
         # self._defaultMenu = self.viewBox.menu
 
-        # keep a common stackItem for both menues
+        # keep a common stackItem for both menus
         self._stackSpectraMenuItem = None
 
         self._defaultMenu = _get1dDefaultMenu(self)

@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-07 18:40:33 +0100 (Thu, October 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-07 20:05:59 +0100 (Thu, October 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -6128,7 +6128,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 if PEAKSELECT not in selectedDict:
                     _setEnabledAllItems(strip._selectedPeaksMenu, True if self.current.peaks else False)
 
-                # check other menu items before raising menues
+                # check other menu items before raising menus
                 strip._addItemsToNavigateToCursorPosMenu()
                 strip._addItemsToMarkInCursorPosMenu()
 
@@ -6136,9 +6136,9 @@ class CcpnGLWidget(QOpenGLWidget):
                 strip.markAxesMenu.clear()
                 strip._addItemsToMarkAxesMenuMainView()
 
-                strip._addItemsToCopyAxisFromMenuesMainView()
+                strip._addItemsToCopyAxisFromMenusMainView()
                 if not self.is1D:
-                    strip._addItemsToMatchAxisCodesFromMenuesMainView()
+                    strip._addItemsToMatchAxisCodesFromMenusMainView()
                 strip._checkMenuItems()
 
             elif mouseInAxis in [GLDefs.BOTTOMAXIS, GLDefs.RIGHTAXIS, GLDefs.AXISCORNER]:
@@ -6148,7 +6148,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 # create a dynamic menu based on the available axisCodes
                 menu.clear()
                 strip._addItemsToMarkAxesMenuAxesView(mouseInAxis, menu)
-                strip._addItemsToCopyAxisFromMenuesAxes(mouseInAxis, menu, self.is1D)
+                strip._addItemsToCopyAxisFromMenusAxes(mouseInAxis, menu, self.is1D)
 
             if menu is not None:
                 strip.viewStripMenu = menu

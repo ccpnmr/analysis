@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:30 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-07 10:56:35 +0100 (Thu, October 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -81,6 +81,22 @@ class NotesEditorModule(CcpnModule):
             self.current = None
         self.note = None
 
+        # setup the widgets
+        self._setupWidgets()
+
+        self._noteNotifier = None
+        self.droppedNotifier = None
+        self._setNotifiers()
+
+        if note is not None:
+            self.selectNote(note)
+        elif selectFirstItem:
+            self.noWidget.selectFirstItem()
+
+    def _setupWidgets(self):
+        """
+        Setup the widgets in module
+        """
         self._widget = ScrollableFrame(self.mainWidget, setLayout=True, showBorder=False,
                                        scrollBarPolicies=('never', 'never'), spacing=DEFAULTSPACING, margins=DEFAULTMARGINS,
                                        grid=(2, 1))
@@ -105,6 +121,7 @@ class NotesEditorModule(CcpnModule):
                              grid=(row, 0), gridSpan=(1, 1))
 
         #~~~~~~~~~~ define noteWidget box to contain main editing
+
         row += 1
         self.noteWidget = Frame(self._widget, grid=(row, 0), gridSpan=(4, 5), setLayout=True)
         self.noteWidget.hide()
@@ -113,24 +130,23 @@ class NotesEditorModule(CcpnModule):
         self.label1 = Label(self.noteWidget, text='name', grid=(nRow, 0), vAlign='c', hAlign='r')
         self.lineEdit1 = LineEdit(self.noteWidget, grid=(nRow, 1), gridSpan=(1, 2), vAlign='top', textAlignment='l', backgroundText='> Enter name <')
         self.lineEdit1.editingFinished.connect(self._applyNote)  # *1
-        nRow += 1
 
+        nRow += 1
         self.labelComment = Label(self.noteWidget, text='comment', grid=(nRow, 0), vAlign='c', hAlign='r')
         self.lineEditComment = LineEdit(self.noteWidget, grid=(nRow, 1), gridSpan=(1, 2), vAlign='top', textAlignment='l', backgroundText='> Optional <')
         self.lineEditComment.editingFinished.connect(self._applyNote)  # *1
-        nRow += 1
 
+        nRow += 1
         self.spacer = Spacer(self.noteWidget, 5, 5,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
                              grid=(nRow, 3), gridSpan=(1, 1))
-        nRow += 1
 
+        nRow += 1
         self.textBox = TextEditor(self.noteWidget, grid=(nRow, 0), gridSpan=(1, 6))
         self.textBox.editingFinished.connect(self._applyNote)  # *1
 
         # NOTE: *1 Automatically save the note when it loses the focus.
         #       Otherwise is very dangerous of losing all the carefully written notes if you forget to press the button apply!
-
         #~~~~~~~~~~ end of noteWidget box
 
         row += 1
@@ -138,15 +154,6 @@ class NotesEditorModule(CcpnModule):
         self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                              grid=(row, 4), gridSpan=(1, 1))
-
-        self._noteNotifier = None
-        self.droppedNotifier = None
-        self._setNotifiers()
-
-        if note is not None:
-            self.selectNote(note)
-        elif selectFirstItem:
-            self.noWidget.selectFirstItem()
 
     def _processDroppedItems(self, data):
         """
@@ -226,6 +233,7 @@ class NotesEditorModule(CcpnModule):
                             self.note.rename(name)
                         self.note.text = text
                         self.note.comment = comment
+
             except Exception as es:
                 # need to immediately set back to stop error on loseFocus which also fires editingFinished
                 self.lineEdit1.setText(self.note.name)
@@ -255,7 +263,6 @@ class NotesEditorModule(CcpnModule):
         Notifier callback for updating module when a Note is create/delete/rename/change
         """
         thisNoteList = getattr(data[Notifier.THEOBJECT], self.attributeName)  # get the notesList
-        modifiedNote = data[Notifier.OBJECT]
 
         if self.note in thisNoteList:
             self._update(self.note)
@@ -268,8 +275,7 @@ class NotesEditorModule(CcpnModule):
         """
         self.textBox.setText(note.text)
         self.lineEdit1.setText(note.name)
-        if note.comment:
-            self.lineEditComment.setText(note.comment)
+        self.lineEditComment.setText(note.comment if note.comment else '')
         self.noteWidget.show()
         self.show()
 

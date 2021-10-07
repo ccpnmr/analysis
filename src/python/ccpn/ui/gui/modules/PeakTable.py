@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:30 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-07 18:40:33 +0100 (Thu, October 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -33,13 +33,15 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown
 from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.ui.gui.widgets.Column import ColumnClass
-from ccpn.core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
+from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.lib.GuiStripContextMenus import _selectedPeaksMenuItem, _addMenuItems, \
+    _getNdPeakMenuItems, _setEnabledAllItems
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Peak import Peak
 from ccpn.core.NmrAtom import NmrAtom
-from ccpn.util.Logging import getLogger
 from ccpn.core.lib.CallBack import CallBack
-from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
+from ccpn.util.Logging import getLogger
 
 
 logger = getLogger()
@@ -218,11 +220,31 @@ class PeakListTableWidget(GuiTable):
         super()._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
         _actions = self.tableMenu.actions()
         if _actions:
-            _topMenuItem = _actions[0]
-            _topSeparator = self.tableMenu.insertSeparator(_topMenuItem)
-            self._copyPeakMenuAction = self.tableMenu.addAction('Copy Peaks...', self._copyPeaks)
-            # move new actions to the top of the list
-            self.tableMenu.insertAction(_topSeparator, self._copyPeakMenuAction)
+            # _topMenuItem = _actions[0]
+            # _topSeparator = self.tableMenu.insertSeparator(_topMenuItem)
+            # self._copyPeakMenuAction = self.tableMenu.addAction('Copy Peaks...', self._copyPeaks)
+            # # move new actions to the top of the list
+            # self.tableMenu.insertAction(_topSeparator, self._copyPeakMenuAction)
+
+            # add the selected peaks menu to the bottom
+            self.tableMenu.addSeparator()
+            _peakItem = _selectedPeaksMenuItem(None)
+
+            _addMenuItems(self, self.tableMenu, [_peakItem])
+
+            # _selectedPeaksMenu submenu - add to Strip._selectedPeaksMenu
+            items = _getNdPeakMenuItems(menuId='Main')
+            # attach to the _selectedPeaksMenu submenu
+            _addMenuItems(self, self._selectedPeaksMenu, items)
+
+    def _raiseTableContextMenu(self, pos):
+        """Raise the right-mouse menu
+        """
+        # Enable/disable menu items as required
+        self.navigateToPeakMenuMain.setEnabled(False)
+        _setEnabledAllItems(self._selectedPeaksMenu, True if self.current.peaks else False)
+
+        super(PeakListTableWidget, self)._raiseTableContextMenu(pos)
 
     def _processDroppedItems(self, data):
         """CallBack for Drop events

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-07 18:40:33 +0100 (Thu, October 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -260,6 +260,14 @@ class GuiWindow():
     #     msg ='Delete %sselected multiplet%s?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
     #     if MessageDialog.showYesNo(title, msg, parent):
     #       current.project.deleteObjects(*multiplets)
+
+    def _openCopySelectedPeaks(self):
+        from ccpn.ui.gui.popups.CopyPeaksPopup import CopyPeaks
+
+        popup = CopyPeaks(parent=self, mainWindow=self)
+        peaks = self.current.peaks
+        popup._selectPeaks(peaks)
+        popup.exec_()
 
     def setPeakAliasing(self):
         """Set the aliasing for the currently selected peaks
@@ -971,3 +979,32 @@ class GuiWindow():
             self.current.strip.changeZPlane(None, planeCount=-1)
         else:
             getLogger().warning('No current strip. Select a strip first.')
+
+    @logCommand('mainWindow.')
+    def markSelectedPeaks(self, axisIndex=None):
+        """Mark the positions of all selected peaks
+        """
+        if self.current.strip:
+            with undoBlockWithoutSideBar():
+                for peak in self.current.peaks:
+                    self.current.strip._createObjectMark(peak, axisIndex)
+
+    @logCommand('mainWindow.')
+    def markSelectedMultiplets(self, axisIndex=None):
+        """Mark the positions of all selected multiplets
+        """
+        if self.current.strip:
+            with undoBlockWithoutSideBar():
+                for multiplet in self.current.multiplets:
+                    self.current.strip._createObjectMark(multiplet, axisIndex)
+
+    def makeStripPlot(self, includePeakLists=True, includeNmrChains=True, includeSpectrumTable=False):
+        """Make a strip plot in the current spectrumDisplay
+        """
+        if self.current.strip:
+            from ccpn.ui.gui.popups.StripPlotPopup import StripPlotPopup
+
+            popup = StripPlotPopup(parent=self, mainWindow=self, spectrumDisplay=self.current.strip.spectrumDisplay,
+                                   includePeakLists=includePeakLists, includeNmrChains=includeNmrChains, includeSpectrumTable=includeSpectrumTable)
+            popup.exec_()
+            popup._cleanupWidget()

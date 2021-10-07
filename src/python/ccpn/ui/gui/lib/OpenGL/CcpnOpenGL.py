@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-01 00:01:58 +0100 (Fri, October 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-07 18:40:33 +0100 (Thu, October 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -124,6 +124,7 @@ from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib import Pid
+from ccpn.ui.gui.lib.GuiStripContextMenus import _hidePeaksSingleActionItems, _setEnabledAllItems
 
 
 UNITS_PPM = 'ppm'
@@ -6098,13 +6099,12 @@ class CcpnGLWidget(QOpenGLWidget):
                     # Search if the event is in a range of a selected peak.
                     peaks = list(self.current.peaks)
 
-                    from ccpn.ui.gui.lib.GuiStripContextMenus import _hidePeaksSingleActionItems, _enableAllItems
-
-                    ii = strip._contextMenus.get(PeakMenu)
-                    if len(peaks) > 1:
-                        _hidePeaksSingleActionItems(strip, ii)
-                    else:
-                        _enableAllItems(ii)
+                    if self.is1D:
+                        ii = strip._contextMenus.get(PeakMenu)
+                        if len(peaks) > 1:
+                            _hidePeaksSingleActionItems(ii)
+                        else:
+                            _setEnabledAllItems(ii, True)
 
                     # will only work for self.current.peak
                     strip._addItemsToNavigateToPeakMenu(selectedDict[PEAKSELECT])
@@ -6123,6 +6123,10 @@ class CcpnGLWidget(QOpenGLWidget):
                     strip.contextMenuMode = MultipletMenu
                     menu = strip._contextMenus.get(strip.contextMenuMode)
                     strip._lastClickedObjects = selectedDict[MULTIPLETSELECT]
+
+                strip.navigateToPeakMenuMain.setEnabled(False)
+                if PEAKSELECT not in selectedDict:
+                    _setEnabledAllItems(strip._selectedPeaksMenu, True if self.current.peaks else False)
 
                 # check other menu items before raising menues
                 strip._addItemsToNavigateToCursorPosMenu()

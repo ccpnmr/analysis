@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-24 17:27:40 +0100 (Fri, September 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-07 18:40:32 +0100 (Thu, October 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -79,10 +79,16 @@ def _createMenu(strip, items):
             ff = getattr(menu, i.typeItem)
             if ff:
                 action = ff(i.name, **vars(i))
-                setattr(strip, i.stripMethodName, action)
-                strip._spectrumUtilActions[i.name] = action
+                if i.stripMethodName:
+                    if hasattr(strip, i.stripMethodName):
+                        # check whether items already in widget
+                        raise RuntimeError(f'Strip already contains action {i.stripMethodName}')
+                    setattr(strip, i.stripMethodName, action)
+                    if hasattr(strip, '_spectrumUtilActions'):
+                        strip._spectrumUtilActions[i.stripMethodName] = action
+
         except Exception as e:
-            getLogger().warning('Menu error: %s' % str(e))
+            getLogger().warning('_createMenu error: %s' % str(e))
     return menu
 
 
@@ -94,10 +100,16 @@ def _addMenuItems(widget, menu, items):
             ff = getattr(menu, i.typeItem)
             if ff:
                 action = ff(i.name, **vars(i))
-                setattr(widget, i.stripMethodName, action)
-                widget._spectrumUtilActions[i.name] = action
+                if i.stripMethodName:
+                    if hasattr(widget, i.stripMethodName):
+                        # check whether items already in widget
+                        raise RuntimeError(f'Strip already contains action {i.stripMethodName}')
+                    setattr(widget, i.stripMethodName, action)
+                    if hasattr(widget, '_spectrumUtilActions'):
+                        widget._spectrumUtilActions[i.stripMethodName] = action
+
         except Exception as e:
-            getLogger().warning('Menu error: %s' % str(e))
+            getLogger().warning('_addMenuItems error: %s' % str(e))
 
 
 ##############################  Common default  menu items ##############################
@@ -170,6 +182,12 @@ def _contoursItem(strip):
                     callback=strip.spectrumDisplay.adjustContours, shortcut='CO')
 
 
+def _coloursItem(strip):
+    return _SCMitem(name='Colours...',
+                    typeItem=ItemTypes.get(ITEM), icon='icons/contour-pos-neg', toolTip='Change colours',
+                    callback=strip.spectrumDisplay.adjustContours, shortcut='CO')
+
+
 def _raiseContoursItem(strip):
     return _SCMitem(name='Raise Base Level',
                     typeItem=ItemTypes.get(ITEM), icon='icons/contour-base-up', toolTip='Raise Contour Base Level',
@@ -188,6 +206,18 @@ def _resetZoom(strip):
                     callback=strip.resetZoom)
 
 
+def _zoomXItem(strip):
+    return _SCMitem(name='Zoom best X fit',
+                    typeItem=ItemTypes.get(ITEM), icon='icons/zoom-full-1d', toolTip='X Auto Scale',
+                    callback=strip._resetXZoom),
+
+
+def _zoomYItem(strip):
+    return _SCMitem(name='Zoom best Y fit',
+                    typeItem=ItemTypes.get(ITEM), icon='icons/zoom-best-fit-1d', toolTip='Y Auto Scale',
+                    callback=strip._resetYZoom),
+
+
 def _calibrateX(strip):
     return _SCMitem(name='Calibrate X',
                     typeItem=ItemTypes.get(ITEM), toolTip='Calibrate X Axis', checkable=True, checked=False,
@@ -196,15 +226,18 @@ def _calibrateX(strip):
 
 def _calibrateY(strip):
     return _SCMitem(name='Calibrate Y',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Calibrate Y Axis',
-                    checkable=True, checked=False,
+                    typeItem=ItemTypes.get(ITEM), toolTip='Calibrate Y Axis', checkable=True, checked=False,
                     callback=strip.toggleCalibrateY, stripMethodName='calibrateYAction')
 
 
-def _calibrateFromPeaks(strip):
+def _calibrateFromPeaks():
+    from ccpn.framework.Framework import getApplication
+
+    _app = getApplication()
     return _SCMitem(name='Calibrate Spectra from Peaks...',
                     typeItem=ItemTypes.get(ITEM), toolTip='Calibrate Spectra from Selected Peaks',
-                    callback=strip.calibrateFromPeaks)
+                    # callback=strip.calibrateFromPeaks
+                    )
 
 
 def _calibrateXY(strip):
@@ -267,6 +300,46 @@ def _separator():
     return _SCMitem(typeItem=ItemTypes.get(SEPARATOR))
 
 
+def _newStripPlotItem(strip):
+    return _SCMitem(name='New strip with same axes',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Create new spectrumDisplay from the current strip',
+                    callback=strip.copyStrip)
+
+
+def _newStripPlotXYItem(strip):
+    return _SCMitem(name='New strip with X-Y Axes flipped',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Create new spectrumDisplay from the current strip\n'
+                                                          'with the X-Y axes flipped',
+                    shortcut='xy',
+                    callback=strip.flipXYAxis)
+
+
+def _newStripPlotXZItem(strip):
+    return _SCMitem(name='New strip with X-Z Axes flipped',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Create new spectrumDisplay from the current strip\n'
+                                                          'with the X-Z axes flipped',
+                    shortcut='xz',
+                    callback=strip.flipXZAxis)
+
+
+def _newStripPlotYZItem(strip):
+    return _SCMitem(name='New strip with Y-Z Axes flipped',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Create new spectrumDisplay from the current strip\n'
+                                                          'with the Y-Z axes flipped',
+                    shortcut='yz',
+                    callback=strip.flipYZAxis)
+
+
+def _newStripPlotFAItem(strip):
+    from ccpn.framework.Application import getApplication
+
+    app = getApplication()
+    return _SCMitem(name='New strip with Axes Flipped...',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Create new spectrumDisplay from the current strip',
+                    shortcut='fa',
+                    callback=app.showFlipArbitraryAxisPopup)
+
+
 ##############################  Common Integral menu items ##############################
 ## These items are used to create both 1D and Nd integral menus
 
@@ -287,86 +360,135 @@ def _deleteMultipletItem(strip):
 ## These items are used to create both 1D and Nd Peak menus
 
 
-def _copyPeakItem(strip):
+def _copyPeakItem():
+    from ccpn.framework.Framework import getApplication
+
+    _app = getApplication()
     return _SCMitem(name='Copy Peak(s)',
                     typeItem=ItemTypes.get(ITEM), toolTip='Copy Peak(s) to a PeakList', shortcut='CP',
-                    callback=strip._openCopySelectedPeaks)
+                    callback=_app.mainWindow._openCopySelectedPeaks)
 
 
-def _deletePeakItem(strip):
+def _deletePeakItem():
+    from ccpn.framework.Framework import getApplication
+
+    _app = getApplication()
     return _SCMitem(name='Delete Peak(s)',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Delete Peak(s) from project', callback=strip.mainWindow.deleteSelectedItems)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Delete Peak(s) from project',
+                    callback=_app.mainWindow.deleteSelectedItems)
 
 
-def _editPeakAssignmentItem(strip):
+def _editPeakAssignmentItem():
+    from ccpn.framework.Framework import getApplication
+
+    _app = getApplication()
     return _SCMitem(name='Edit Peak Assignments',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Edit current peak assignments', callback=strip.application.showPeakAssigner)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Edit current peak assignments',
+                    callback=_app.showPeakAssigner, shortcut='AP')
+
 
 # def _viewPeakOnTableItem(strip):
 #     return _SCMitem(name='View Peak on PeakList Table',
 #                     typeItem=ItemTypes.get(ITEM), toolTip='View current peak on a PeakList table', callback=strip._showPeakOnPLTable)
 
-def _deassignPeaksItem(strip):
+def _deassignPeaksItem():
+    from ccpn.framework.Framework import getApplication
+
+    _app = getApplication()
     return _SCMitem(name='Deassign Peak(s)',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Deassign Peaks', callback=strip.mainWindow.deassignPeaks)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Deassign Peaks',
+                    callback=_app.mainWindow.deassignPeaks)
 
 
-def _setPeakAliasingItem(strip):
+def _setPeakAliasingItem():
+    from ccpn.framework.Framework import getApplication
+
+    _app = getApplication()
     return _SCMitem(name='Set Aliasing...',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Set aliasing for current peak(s)', callback=strip.mainWindow.setPeakAliasing)
+                    typeItem=ItemTypes.get(ITEM), toolTip='Set aliasing for current peak(s)',
+                    callback=_app.mainWindow.setPeakAliasing)
 
 
-def _refitPeakItem(strip):
+def _refitPeakItem():
+    from ccpn.framework.Framework import getApplication
+
+    _app = getApplication()
     return _SCMitem(name='Refit Peak(s) Singular',
                     typeItem=ItemTypes.get(ITEM), toolTip='Refit current peak(s) as singular', shortcut='RP',
-                    callback=partial(strip.mainWindow.refitCurrentPeaks, singularMode=True))
+                    callback=partial(_app.mainWindow.refitCurrentPeaks, singularMode=True))
 
 
-def _refitPeakGroupItem(strip):
+def _refitPeakGroupItem():
+    from ccpn.framework.Framework import getApplication
+
+    _app = getApplication()
     return _SCMitem(name='Refit Peak(s) Group',
                     typeItem=ItemTypes.get(ITEM), toolTip='Refit current peak(s) as a group', shortcut='RG',
-                    callback=partial(strip.mainWindow.refitCurrentPeaks, singularMode=False))
+                    callback=partial(_app.mainWindow.refitCurrentPeaks, singularMode=False))
 
 
-def _snapToExtremaItem(strip):
+def _snapToExtremaItem():
+    from ccpn.framework.Framework import getApplication
+
+    _app = getApplication()
     return _SCMitem(name='Snap Peak(s) to Extrema',
                     typeItem=ItemTypes.get(ITEM), toolTip='Snap current peak(s) to closest extrema', shortcut='SE',
-                    callback=strip.mainWindow.snapCurrentPeaksToExtremum)
+                    callback=_app.mainWindow.snapCurrentPeaksToExtremum)
 
 
-def _estimateVolumesItem(strip):
+def _estimateVolumesItem():
+    from ccpn.framework.Framework import getApplication
+
+    _app = getApplication()
     return _SCMitem(name='Estimate Volume(s)',
                     typeItem=ItemTypes.get(ITEM), toolTip='Estimate peak volume(s)', shortcut='EV',
-                    callback=strip.mainWindow.estimateVolumes)
+                    callback=_app.mainWindow.estimateVolumes)
 
-def _recalculatePeakHeightsItem(strip):
+
+def _recalculatePeakHeightsItem():
+    from ccpn.framework.Framework import getApplication
+
+    _app = getApplication()
     return _SCMitem(name='Recalculate Height(s)',
                     typeItem=ItemTypes.get(ITEM), toolTip='Recalculate peak height(s) for the same position',
                     shortcut='RH',
-                    callback=strip.mainWindow.recalculateCurrentPeakHeights)
+                    callback=_app.mainWindow.recalculateCurrentPeakHeights)
 
-def _reorderPeakListAxesItem(strip):
+
+def _reorderPeakListAxesItem():
+    from ccpn.framework.Framework import getApplication
+
+    _app = getApplication()
     return _SCMitem(name='Reorder PeakList Axes...',
                     typeItem=ItemTypes.get(ITEM), toolTip='Reorder axes for all peaks in peakList containing this peak', shortcut='RL',
-                    callback=strip.mainWindow.reorderPeakListAxes)
+                    callback=_app.mainWindow.reorderPeakListAxes)
 
 
-def _makeStripPlotItem(strip):
+def _makeStripPlotItem():
+    from ccpn.framework.Framework import getApplication
+
+    _app = getApplication()
     return _SCMitem(name='Make Strip Plot...',
                     typeItem=ItemTypes.get(ITEM), toolTip='Make Strip Plot from Selected Peaks', shortcut='SP',
-                    callback=partial(strip.makeStripPlot, includePeakLists=True, includeNmrChains=False))
+                    callback=partial(_app.mainWindow.makeStripPlot, includePeakLists=True, includeNmrChains=False))
 
 
-def _newMultipletItem(strip):
+def _newMultipletItem():
+    from ccpn.framework.Framework import getApplication
+
+    _app = getApplication()
     return _SCMitem(name='New Multiplet',
                     typeItem=ItemTypes.get(ITEM), toolTip='Add New Multiplet', shortcut='AM',
-                    callback=strip.mainWindow.addMultiplet)
+                    callback=_app.mainWindow.addMultiplet)
 
 
-def _integrate1DItem(strip):
+def _integrate1DItem():
+    from ccpn.framework.Framework import getApplication
+
+    _app = getApplication()
     return _SCMitem(name='Integrate Peak',
                     typeItem=ItemTypes.get(ITEM), toolTip='Add integral and link to peak',
-                    callback=strip.mainWindow.add1DIntegral)
+                    callback=_app.mainWindow.add1DIntegral)
 
 
 def _navigateToCursorPosItem(strip):
@@ -376,10 +498,38 @@ def _navigateToCursorPosItem(strip):
                     callback=None)
 
 
-def _navigateToPeakPosItem(strip):
+def _navigateToPeakPosItem(menuId):
     return _SCMitem(name='Navigate to:',
                     typeItem=ItemTypes.get(MENU), toolTip='Show current.peak.position in the selected strip ',
-                    stripMethodName='navigateToPeakMenu',
+                    stripMethodName=f'navigateToPeakMenu{menuId}',
+                    callback=None)
+
+
+def _customiseMenuItem(strip):
+    return _SCMitem(name='Customise:',
+                    typeItem=ItemTypes.get(MENU), toolTip='Change visible settings for the spectrumDisplay ',
+                    stripMethodName='_customiseMenu',
+                    callback=None)
+
+
+def _copyAxesMenuItem(strip):
+    return _SCMitem(name='Copy Axes:',
+                    typeItem=ItemTypes.get(MENU), toolTip='Copy selected axis ranges from selected strip to this strip ',
+                    stripMethodName='_copyAxesMenu',
+                    callback=None)
+
+
+def _selectedPeaksMenuItem(strip):
+    return _SCMitem(name='Selected Peaks:',
+                    typeItem=ItemTypes.get(MENU), toolTip='Actions availalbe on the currently selected peaks ',
+                    stripMethodName='_selectedPeaksMenu',
+                    callback=None)
+
+
+def _flipAxesMenuItem(strip):
+    return _SCMitem(name='New spectrumDisplay from strip:',
+                    typeItem=ItemTypes.get(MENU), toolTip='Create new spectrumDisplay from current strip with flipped axes ',
+                    stripMethodName='_flipAxesMenu',
                     callback=None)
 
 
@@ -398,16 +548,22 @@ def _markPeakPosItem(strip):
                     callback=None)
 
 
-def _markPeaksItem(strip):
+def _markPeaksItem():
+    from ccpn.framework.Framework import getApplication
+
+    _app = getApplication()
     return _SCMitem(name='Mark Peak(s)',
                     typeItem=ItemTypes.get(ITEM), toolTip='Mark positions of selected peaks',
-                    callback=strip._markSelectedPeaks)
+                    callback=_app.mainWindow.markSelectedPeaks, shortcut='PM')
 
 
-def _markMultipletsItem(strip):
+def _markMultipletsItem():
+    from ccpn.framework.Framework import getApplication
+
+    _app = getApplication()
     return _SCMitem(name='Mark Multiplet(s)',
                     typeItem=ItemTypes.get(ITEM), toolTip='Mark positions of selected multiplets',
-                    callback=strip._markSelectedMultiplets)
+                    callback=_app.mainWindow.markSelectedMultiplets, shortcut='UM')
 
 
 def _markAxesItem(strip):
@@ -537,16 +693,17 @@ def _showActivePhaseTraceItem(strip):
 #     # Not implemented
 #     return
 
-def _enableAllItems(menu):
+
+def _setEnabledAllItems(menu, state):
     for action in menu.actions():
-        action.setEnabled(True)
+        action.setEnabled(state)
 
 
-def _hidePeaksSingleActionItems(strip, menu):
+def _hidePeaksSingleActionItems(menu):
     """ Greys out items that should appear only if one single peak is selected"""
     hideItems = [
         # _editPeakAssignmentItem(strip).name if _editPeakAssignmentItem(strip) else None,
-        _integrate1DItem(strip).name if _integrate1DItem(strip) else None
+        _integrate1DItem().name if _integrate1DItem() else None
         ]
     hideItems = [itm for itm in hideItems if itm is not None]
 
@@ -619,55 +776,61 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
     Creates and returns the 1d default context menu. Opened when right clicked on the background canvas
     """
     items = [
+        _customiseMenuItem(guiStrip1d),
+        _separator(),
+
+        _coloursItem(guiStrip1d),
+        _calibrateX(guiStrip1d),
+        _calibrateY(guiStrip1d),
+        _stackSpectraDefaultItem(guiStrip1d),
+        _phasingConsoleItem(guiStrip1d),
+        _separator(),
+
+        _marksItem(guiStrip1d),
+        _markAxesItem(guiStrip1d),
+        _clearMarksItem(guiStrip1d),
+        _separator(),
+
+        _navigateToCursorPosItem(guiStrip1d),
+        _copyAxesMenuItem(guiStrip1d),
+        _separator(),
+
+        _estimateNoise(guiStrip1d),
+        _selectedPeaksMenuItem(guiStrip1d),
+        _separator(),
+        _printItem(guiStrip1d),
+        ]
+    items = [itm for itm in items if itm is not None]
+    menu = _createMenu(guiStrip1d, items)
+
+    # customise submenu - add to Strip._customiseMenu
+    items = [
         _toolBarItem(guiStrip1d),
         _spectrumToolBarItem(guiStrip1d),
         _crosshairItem(guiStrip1d),
         _gridItem(guiStrip1d),
         _cyclePeakLabelsItem(guiStrip1d),
-        _separator(),
-        _SCMitem(name='Colours...',
-                 typeItem=ItemTypes.get(ITEM), icon='icons/contour-pos-neg', toolTip='Change colours',
-                 callback=guiStrip1d.spectrumDisplay.adjustContours),
+        ]
+    items = [itm for itm in items if itm is not None]
+    # attach to the _customiseMenu submenu
+    _addMenuItems(guiStrip1d, guiStrip1d._customiseMenu, items)
 
-        _SCMitem(name='Zoom best Y fit',
-                 typeItem=ItemTypes.get(ITEM), icon='icons/zoom-best-fit-1d', toolTip='Y Auto Scale',
-                 callback=guiStrip1d._resetYZoom),
-
-        _SCMitem(name='Zoom best X fit',
-                 typeItem=ItemTypes.get(ITEM), icon='icons/zoom-full-1d', toolTip='X Auto Scale',
-                 callback=guiStrip1d._resetXZoom),
-        _separator(),
-        _SCMitem(name='Calibrate X',
-                 typeItem=ItemTypes.get(ITEM), toolTip='calibrate X points', checkable=True, checked=False,
-                 callback=guiStrip1d.toggleCalibrateX, stripMethodName='calibrateXAction'),
-
-        _SCMitem(name='Calibrate Y',
-                 typeItem=ItemTypes.get(ITEM), toolTip='calibrate Y points',
-                 checkable=True, checked=False,
-                 callback=guiStrip1d.toggleCalibrateY, stripMethodName='calibrateYAction'),
-
-        # _calibrateFromPeaks(guiStrip1d),
-        _stackSpectraDefaultItem(guiStrip1d),
-        _separator(),
-        _phasingConsoleItem(guiStrip1d),
-        _separator(),
-        _marksItem(guiStrip1d),
-        _clearMarksItem(guiStrip1d),
-        _separator(),
-        _navigateToCursorPosItem(guiStrip1d),
-        # _markCursorPosItem(guiStrip1d),
-        _markAxesItem(guiStrip1d),
-        _separator(),
+    # copy axes submenu - add to Strip._copyAxesMenu
+    items = [
         _copyAllAxisRangeFromStripItem(guiStrip1d),
         _copyXAxisRangeFromStripItem(guiStrip1d),
         _copyYAxisRangeFromStripItem(guiStrip1d),
-        _separator(),
-        _estimateNoise(guiStrip1d),
-        _separator(),
-        _printItem(guiStrip1d),
         ]
     items = [itm for itm in items if itm is not None]
-    return _createMenu(guiStrip1d, items)
+    # attach to the _copyAxesMenu submenu
+    _addMenuItems(guiStrip1d, guiStrip1d._copyAxesMenu, items)
+
+    # _selectedPeaksMenu submenu - add to Strip._selectedPeaksMenu
+    items = _getNdPeakMenuItems(menuId='Main')
+    # attach to the _selectedPeaksMenu submenu
+    _addMenuItems(guiStrip1d, guiStrip1d._selectedPeaksMenu, items)
+
+    return menu
 
 
 def _get1dPhasingMenu(guiStrip1d) -> Menu:
@@ -689,33 +852,38 @@ def _get1dPhasingMenu(guiStrip1d) -> Menu:
     return _createMenu(guiStrip1d, items)
 
 
+def _get1dPeakMenuItems(menuId) -> list:
+    items = [
+        _deletePeakItem(),
+        _copyPeakItem(),
+        _editPeakAssignmentItem(),
+        _deassignPeaksItem(),
+        _setPeakAliasingItem(),
+        _calibrateFromPeaks(),
+        _separator(),
+
+        _refitPeakItem(),
+        _refitPeakGroupItem(),
+        _recalculatePeakHeightsItem(),
+        _snapToExtremaItem(),
+        _estimateVolumesItem(),
+        _separator(),
+
+        _newMultipletItem(),
+        _integrate1DItem(),
+        _separator(),
+
+        _navigateToPeakPosItem(menuId),
+        _markPeaksItem()
+        ]
+    return [itm for itm in items if itm is not None]
+
+
 def _get1dPeakMenu(guiStrip1d) -> Menu:
     """
     Creates and returns the current peak 1d context menu. Opened when right clicked on selected peak/s
     """
-    items = [
-        _deletePeakItem(guiStrip1d),
-        _copyPeakItem(guiStrip1d),
-        _editPeakAssignmentItem(guiStrip1d),
-        # _viewPeakOnTableItem(guiStrip1d),
-        _deassignPeaksItem(guiStrip1d),
-        _setPeakAliasingItem(guiStrip1d),
-        _calibrateFromPeaks(guiStrip1d),
-        _separator(),
-        _refitPeakItem(guiStrip1d),
-        _refitPeakGroupItem(guiStrip1d),
-        _recalculatePeakHeightsItem(guiStrip1d),
-        _snapToExtremaItem(guiStrip1d),
-        _estimateVolumesItem(guiStrip1d),
-        _separator(),
-        _newMultipletItem(guiStrip1d),
-        _integrate1DItem(guiStrip1d),
-        _separator(),
-        _navigateToPeakPosItem(guiStrip1d),
-        # _markPeakPosItem(guiStrip1d),
-        _markPeaksItem(guiStrip1d)
-        ]
-    items = [itm for itm in items if itm is not None]
+    items = _get1dPeakMenuItems(menuId='Selected')
     return _createMenu(guiStrip1d, items)
 
 
@@ -737,7 +905,7 @@ def _get1dMultipletMenu(guiStrip1d) -> Menu:
     items = [
         _deleteMultipletItem(guiStrip1d),
         _separator(),
-        _markMultipletsItem(guiStrip1d),
+        _markMultipletsItem(),
         ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStrip1d, items)
@@ -766,6 +934,38 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
     Creates and returns the Nd default context menu. Opened when right clicked on the background canvas.
     """
     items = [
+        _customiseMenuItem(guiStripNd),
+        _separator(),
+
+        _contoursItem(guiStripNd),
+        _calibrateXY(guiStripNd),
+        _toggleHorizontalTraceItem(guiStripNd),
+        _toggleVerticalTraceItem(guiStripNd),
+        _phasingConsoleItem(guiStripNd),
+        _separator(),
+
+        _marksItem(guiStripNd),
+        _markAxesItem(guiStripNd),
+        _clearMarksItem(guiStripNd),
+        _separator(),
+
+        _navigateToCursorPosItem(guiStripNd),
+        _copyAxesMenuItem(guiStripNd),
+        _flipAxesMenuItem(guiStripNd),
+        _separator(),
+
+        _estimateNoise(guiStripNd),
+        _makeStripPlot(guiStripNd),
+        _selectedPeaksMenuItem(guiStripNd),
+        _separator(),
+
+        _printItem(guiStripNd),
+        ]
+    items = [itm for itm in items if itm is not None]
+    menu = _createMenu(guiStripNd, items)
+
+    # customise submenu - add to Strip._customiseMenu
+    items = [
         _toolBarItem(guiStripNd),
         _spectrumToolBarItem(guiStripNd),
         _crosshairItem(guiStripNd),
@@ -775,57 +975,41 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         _shareYAxisItem(guiStripNd),
         _cyclePeakLabelsItem(guiStripNd),
         _cyclePeakSymbolsItem(guiStripNd),
-        _separator(),
-        _contoursItem(guiStripNd),
-        # _raiseContoursItem(guiStripNd),
-        # _lowerContoursItem(guiStripNd),
-        _separator(),
+        ]
+    items = [itm for itm in items if itm is not None]
+    # attach to the _customiseMenu submenu
+    _addMenuItems(guiStripNd, guiStripNd._customiseMenu, items)
 
-        # _SCMitem(name='Add Contour Level',
-        #          typeItem=ItemTypes.get(ITEM), icon='icons/contour-add', toolTip='Add One Level',
-        #          callback=guiStripNd.spectrumDisplay.addContourLevel),
-        # _SCMitem(name='Remove Contour Level',
-        #          typeItem=ItemTypes.get(ITEM), icon='icons/contour-remove', toolTip='Remove One Level',
-        #          callback=guiStripNd.spectrumDisplay.removeContourLevel),
-        # _SCMitem(name='Store Zoom',
-        #          typeItem=ItemTypes.get(ITEM), icon='icons/zoom-store', toolTip='Store Zoom',
-        #          callback=guiStripNd.spectrumDisplay._storeZoom),
-        # _SCMitem(name='Restore Zoom',
-        #          typeItem=ItemTypes.get(ITEM), icon='icons/zoom-restore', toolTip='Restore Zoom',
-        #          callback=guiStripNd.spectrumDisplay._restoreZoom),
-        _resetZoom(guiStripNd),
-
-        _separator(),
-        # _calibrateX(guiStripNd),
-        # _calibrateY(guiStripNd),
-        _calibrateXY(guiStripNd),
-        # _calibrateFromPeaks(guiStripNd),
-
-        _separator(),
-        _toggleHorizontalTraceItem(guiStripNd),
-        _toggleVerticalTraceItem(guiStripNd),
-        _phasingConsoleItem(guiStripNd),
-        _separator(),
-        _marksItem(guiStripNd),
-        _clearMarksItem(guiStripNd),
-        _separator(),
-        _navigateToCursorPosItem(guiStripNd),
-        # _markCursorPosItem(guiStripNd),
-        _markAxesItem(guiStripNd),
-        _separator(),
+    # copy axes submenu - add to Strip._copyAxesMenu
+    items = [
         _copyAllAxisRangeFromStripItem(guiStripNd),
         _copyXAxisRangeFromStripItem(guiStripNd),
         _copyYAxisRangeFromStripItem(guiStripNd),
         _copyXAxisCodeRangeFromStripItem(guiStripNd),
         _copyYAxisCodeRangeFromStripItem(guiStripNd),
-        _separator(),
-        _estimateNoise(guiStripNd),
-        _makeStripPlot(guiStripNd),
-        _separator(),
-        _printItem(guiStripNd),
         ]
     items = [itm for itm in items if itm is not None]
-    return _createMenu(guiStripNd, items)
+    # attach to the _copyAxesMenu submenu
+    _addMenuItems(guiStripNd, guiStripNd._copyAxesMenu, items)
+
+    # _flipAxesMenu submenu - add to Strip._flipAxesMenu
+    items = [
+        _newStripPlotItem(guiStripNd),
+        _newStripPlotXYItem(guiStripNd),
+        _newStripPlotXZItem(guiStripNd),
+        _newStripPlotYZItem(guiStripNd),
+        _newStripPlotFAItem(guiStripNd),
+        ]
+    items = [itm for itm in items if itm is not None]
+    # attach to the _flipAxesMenu submenu
+    _addMenuItems(guiStripNd, guiStripNd._flipAxesMenu, items)
+
+    # _selectedPeaksMenu submenu - add to Strip._selectedPeaksMenu
+    items = _getNdPeakMenuItems(menuId='Main')
+    # attach to the _selectedPeaksMenu submenu
+    _addMenuItems(guiStripNd, guiStripNd._selectedPeaksMenu, items)
+
+    return menu
 
 
 def _getNdPhasingMenu(guiStripNd) -> Menu:
@@ -848,35 +1032,41 @@ def _getNdPhasingMenu(guiStripNd) -> Menu:
     return _createMenu(guiStripNd, items)
 
 
+def _getNdPeakMenuItems(menuId) -> list:
+    items = [
+        _deletePeakItem(),
+        _copyPeakItem(),
+        _editPeakAssignmentItem(),
+        _deassignPeaksItem(),
+        _setPeakAliasingItem(),
+        _separator(),
+
+        _refitPeakItem(),
+        _refitPeakGroupItem(),
+        _recalculatePeakHeightsItem(),
+        _snapToExtremaItem(),
+        _estimateVolumesItem(),
+        _reorderPeakListAxesItem(),
+        _separator(),
+
+        _makeStripPlotItem(),
+        _calibrateFromPeaks(),
+        _separator(),
+
+        _newMultipletItem(),
+        _separator(),
+
+        _navigateToPeakPosItem(menuId),
+        _markPeaksItem(),
+        ]
+    return [itm for itm in items if itm is not None]
+
+
 def _getNdPeakMenu(guiStripNd) -> Menu:
     """
     Creates and returns the current peak Nd context menu. Opened when right clicked on selected peak/s
     """
-    items = [
-        _deletePeakItem(guiStripNd),
-        _copyPeakItem(guiStripNd),
-        _editPeakAssignmentItem(guiStripNd),
-        # _viewPeakOnTableItem(guiStripNd),
-        _deassignPeaksItem(guiStripNd),
-        _setPeakAliasingItem(guiStripNd),
-        _separator(),
-        _refitPeakItem(guiStripNd),
-        _refitPeakGroupItem(guiStripNd),
-        _recalculatePeakHeightsItem(guiStripNd),
-        _snapToExtremaItem(guiStripNd),
-        _estimateVolumesItem(guiStripNd),
-        _reorderPeakListAxesItem(guiStripNd),
-        _separator(),
-        _makeStripPlotItem(guiStripNd),
-        _calibrateFromPeaks(guiStripNd),
-        _separator(),
-        _newMultipletItem(guiStripNd),
-        _separator(),
-        _navigateToPeakPosItem(guiStripNd),
-        # _markPeakPosItem(guiStripNd),
-        _markPeaksItem(guiStripNd),
-        ]
-    items = [itm for itm in items if itm is not None]
+    items = _getNdPeakMenuItems(menuId='Selected')
     return _createMenu(guiStripNd, items)
 
 
@@ -898,7 +1088,7 @@ def _getNdMultipletMenu(guiStripNd) -> Menu:
     items = [
         _deleteMultipletItem(guiStripNd),
         _separator(),
-        _markMultipletsItem(guiStripNd),
+        _markMultipletsItem(),
         ]
     items = [itm for itm in items if itm is not None]
     return _createMenu(guiStripNd, items)

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-17 15:13:06 +0100 (Fri, September 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-07 18:40:33 +0100 (Thu, October 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -125,7 +125,7 @@ class CopyStripFlippedSpectraPopup(CcpnDialogMainWidget):
             spectra = self.strip.spectra
             if spectra:
                 # create a new spectrum display with the new axis order
-                newDisplay = self.mainWindow.createSpectrumDisplay(spectra[0], axisOrder=tuple(self.axisCodes[ii] for ii in self._axisOrdering))
+                newDisplay = self.mainWindow.createSpectrumDisplay(spectra[0], axisCodes=tuple(self.axisCodes[ii] for ii in self._axisOrdering))
                 for spectrum in spectra:
                     newDisplay.displaySpectrum(spectrum)
 

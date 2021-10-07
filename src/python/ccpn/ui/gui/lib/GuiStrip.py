@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-17 15:13:05 +0100 (Fri, September 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-07 18:40:32 +0100 (Thu, October 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -477,16 +477,7 @@ class GuiStrip(Frame):
     def pythonConsole(self):
         return self.mainWindow.pythonConsole
 
-    def _openCopySelectedPeaks(self):
-        from ccpn.ui.gui.popups.CopyPeaksPopup import CopyPeaks
-
-        popup = CopyPeaks(parent=self.mainWindow, mainWindow=self.mainWindow)
-        peaks = self.current.peaks
-        popup._selectPeaks(peaks)
-        popup.exec_()
-
     def _showPeakOnPLTable(self):
-
         current = self.application.current
         peaks = current.peaks
         clickedPeaks = self._lastClickedObjects
@@ -831,8 +822,8 @@ class GuiStrip(Frame):
     def _addItemsToNavigateToPeakMenu(self, peaks):
         """Adds item to navigate to peak position from context menu.
         """
-        if peaks and self.navigateToPeakMenu:
-            self._addItemsToNavigateMenu(peaks[0].position, peaks[0].axisCodes, 'Peak', self.navigateToPeakMenu, includeAxisCodes=True)
+        if peaks and self.navigateToPeakMenuSelected:
+            self._addItemsToNavigateMenu(peaks[0].position, peaks[0].axisCodes, 'Peak', self.navigateToPeakMenuSelected, includeAxisCodes=True)
 
     def _addItemsToNavigateToCursorPosMenu(self):
         """Copied from old viewbox. This function apparently take the current cursorPosition

@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-06 17:58:20 +0100 (Mon, September 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-07 12:06:16 +0100 (Thu, October 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -52,6 +52,7 @@ from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot
 from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
 from ccpnc.clibrary import Clibrary
 from PyQt5 import QtCore
+
 
 logger = getLogger()
 ALL = '<all>'
@@ -570,8 +571,10 @@ class NmrResidueTable(GuiTable):
             _topSeparator = self.tableMenu.insertSeparator(_topMenuItem)
             self._mergeMenuAction = self.tableMenu.addAction('Merge NmrResidues', self._mergeNmrResidues)
             self._editMenuAction = self.tableMenu.addAction('Edit NmrResidue', self._editNmrResidue)
+            self._markMenuAction = self.tableMenu.addAction('Mark Position', self._markNmrResidue)
             # move new actions to the top of the list
-            self.tableMenu.insertAction(_topSeparator, self._mergeMenuAction)
+            self.tableMenu.insertAction(_topSeparator, self._markMenuAction)
+            self.tableMenu.insertAction(self._markMenuAction, self._mergeMenuAction)
             self.tableMenu.insertAction(self._mergeMenuAction, self._editMenuAction)
 
     def _raiseTableContextMenu(self, pos):
@@ -629,6 +632,22 @@ class NmrResidueTable(GuiTable):
 
                 popup = NmrResidueEditPopup(parent=self.mainWindow, mainWindow=self.mainWindow, obj=currentNmrResidue)
                 popup.exec_()
+
+    def _markNmrResidue(self):
+        """Mark the position of the nmrResidue
+        """
+        data = self.getRightMouseItem()
+        if data:
+            currentNmrResidue = data.get(DATAFRAME_OBJECT)
+
+            if currentNmrResidue:
+                from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import markNmrAtoms
+
+                # optionally clear the marks
+                if self.moduleParent.nmrResidueTableSettings.autoClearMarksWidget.checkBox.isChecked():
+                    self.mainWindow.clearMarks()
+
+                markNmrAtoms(self.mainWindow, currentNmrResidue.nmrAtoms)
 
 
 KD = 'Kd'

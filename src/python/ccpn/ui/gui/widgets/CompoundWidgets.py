@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-09 18:47:01 +0100 (Wed, June 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-07 11:00:39 +0100 (Thu, October 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -548,6 +548,9 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
         if sizeAdjustPolicy is not None:
             self.pulldownList.setSizeAdjustPolicy(sizeAdjustPolicy)
 
+        # strange that the widgets seem to be behaving differently
+        self.getLayout().setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
+
     def getText(self):
         """Convenience: Return selected text in Pulldown"""
         return self.pulldownList.currentText()
@@ -587,15 +590,14 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
         #     self.pulldownList.blockSignals(False)
 
     def modifyTexts(self, texts):
-        """Modify the pulldown texts, retaining the current selection"""
+        """Modify the pulldown texts, retaining the current selection
+        """
         current = self.getText()
 
-        self.pulldownList.blockSignals(True)
-        self.pulldownList.clear()
-        self.pulldownList.setData(texts=texts)
-        self.select(current, blockSignals=True)
-        self.pulldownList.blockSignals(False)
-        self.pulldownList.repaint()
+        with self.blockWidgetSignals():
+            self.pulldownList.clear()
+            self.pulldownList.setData(texts=texts)
+            self.pulldownList.select(current)
 
     def getTexts(self):
         return tuple(self.pulldownList.itemText(ii) for ii in range(self.pulldownList.count()))

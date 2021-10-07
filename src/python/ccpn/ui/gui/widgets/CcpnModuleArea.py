@@ -45,6 +45,7 @@ from ccpn.util.Colour import hexToRgb
 from ccpn.ui.gui.lib.mouseEvents import SELECT
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
+from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.ui.gui.widgets.Font import getFont
 from functools import partial
 from ccpn.framework.Application import getApplication
@@ -55,7 +56,7 @@ ModuleArea = DockArea
 Module = Dock
 DropAreaLabel = 'Drop Area'
 Failed = 'Failed'
-MODULEAREA_IGNORELIST = (ToolBar, _StripLabel)
+MODULEAREA_IGNORELIST = (ToolBar, _StripLabel, GuiTable)
 
 
 class TempAreaWindow(GuiWindow, MainWindow):

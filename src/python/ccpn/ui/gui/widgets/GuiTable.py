@@ -247,7 +247,7 @@ class GuiTable(TableWidget, Base):
                  dataFrameObject=None,  # collate into a single object that can be changed quickly
                  actionCallback=None, selectionCallback=None, checkBoxCallback=None,
                  _pulldownKwds=None, enableMouseMoveEvent=True,
-                 allowRowDragAndDrop=True,
+                 allowRowDragAndDrop=False,
                  multiSelect=False, selectRows=True, numberRows=False, autoResize=False,
                  enableExport=True, enableDelete=True, enableSearch=True,
                  hideIndex=True, stretchLastSection=True,
@@ -327,12 +327,11 @@ class GuiTable(TableWidget, Base):
 
         # enable drag and drop operations on the table
         self.allowRowDragAndDrop = allowRowDragAndDrop
-
-        self.setDragEnabled(True)
-        self.setAcceptDrops(True)
-        self.viewport().setAcceptDrops(True)
+        self.setDragEnabled(self.allowRowDragAndDrop)
+        self.setAcceptDrops(self.allowRowDragAndDrop)
+        self.viewport().setAcceptDrops(self.allowRowDragAndDrop)
         self.setDragDropOverwriteMode(False)
-        self.setDropIndicatorShown(True)
+        self.setDropIndicatorShown(self.allowRowDragAndDrop)
         self._seenTables = set()
 
         # stretchLastSection = False
@@ -1062,6 +1061,11 @@ class GuiTable(TableWidget, Base):
         super(GuiTable, self).leaveEvent(event)
 
     def dragMoveEvent(self, event):
+        data = self.parseEvent(event)
+        source = data.get('source')
+        data.update(self._getDraggedDataDict(source))
+        if self._dragMoveEventCallback:
+            self._dragMoveEventCallback(data)
         super(GuiTable, self).dragMoveEvent(event)
 
     def dragLeaveEvent(self, event):
@@ -1072,7 +1076,7 @@ class GuiTable(TableWidget, Base):
         data = self.parseEvent(event)
         source = data.get('source')
 
-        if isinstance(source, GuiTable): #do this to set the overlay border
+        if isinstance(source, GuiTable): # do this to set the overlay border and allow proper clean-up on other events
             if self != source: # this is the target table. Where we are dropping to.
                 if self.allowRowDragAndDrop:
                     source._seenTables.add(self)
@@ -1080,8 +1084,6 @@ class GuiTable(TableWidget, Base):
                     self._setDraggingStyleSheet(GREEN1)
                 else: # DROP NOT ALLOWED
                     event.ignore()
-            else: # this is the source table of the drop
-                self._setDraggingStyleSheet()
 
         data.update(self._getDraggedDataDict(source)) #get the selectedObjects and update the datadict for emitting the callback
         if self._enterEventCallback:

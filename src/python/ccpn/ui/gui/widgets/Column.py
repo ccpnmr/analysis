@@ -4,8 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2018-12-20 15:53:22 +0000 (Thu, December 20, 2018) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2021-10-07 11:07:41 +0100 (Thu, October 07, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,19 +33,24 @@ from ccpn.util.Logging import getLogger
 
 BG_COLOR = QtGui.QColor('#E0E0E0')
 
+COLUMN_COLNAME = 'colName'
+COLUMN_FUNC = 'func'
+COLUMN_TIPTEXT = 'tipText'
+COLUMN_SETEDITVALUE = 'setEditValue'
+COLUMN_FORMAT = 'format'
+COLUMN_COLDEFS = [COLUMN_COLNAME, COLUMN_FUNC, COLUMN_TIPTEXT, COLUMN_SETEDITVALUE, COLUMN_FORMAT]
 
 
 # TODO:ED add some documentation here
 class ColumnClass:
     def __init__(self, columnList):
         # ERROR checking for columnList. All of this as to be changed asap with a dict style and pass the kwargs and not rely on a tuple or tuple
-        ColDefs = ['colName', 'func', 'tipText', 'setEditValue', 'format']
         columnList_ = []
         for i in columnList:
             if isinstance(i, tuple):
-                if len(i) != len(ColDefs):
-                    missing = len(ColDefs)-len(i)
-                    i += (None,)*missing # this is still a bad fix!
+                if len(i) != len(COLUMN_COLDEFS):
+                    missing = len(COLUMN_COLDEFS) - len(i)
+                    i += (None,) * missing  # this is still a bad fix!
                 columnList_.append(i)
 
         self._columns = [Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat) for

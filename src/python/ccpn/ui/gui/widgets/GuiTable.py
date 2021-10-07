@@ -1092,6 +1092,11 @@ class GuiTable(TableWidget, Base):
         super(GuiTable, self).dragEnterEvent(event)
 
     def dropEvent(self, event):
+        """
+        Extension to the dropEvent of DropBase.
+        To setup this event in a module/table see the gui.lib.GuiNotifier.GuiNotifier class
+        example: module.setGuiNotifier(table, [GuiNotifier.DROPEVENT], [DropBase.PIDS], callback=module.theCallback)
+        """
         data = self.parseEvent(event)
         source = data.get('source')
         if source == self: # DROPPING on same table. Ignore

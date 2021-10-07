@@ -1081,7 +1081,7 @@ class GuiTable(TableWidget, Base):
                 if self.allowRowDragAndDrop:
                     source._seenTables.add(self)
                     self._seenTables.add(self)
-                    self._setDraggingStyleSheet(GREEN1)
+                    # self._setDraggingStyleSheet(GREEN1)
                 else: # DROP NOT ALLOWED
                     event.ignore()
 
@@ -1121,7 +1121,10 @@ class GuiTable(TableWidget, Base):
             getLogger().debug(f'Cannot get selected items from {source}.'
                               ' Object class needs to have implemented a "getSelectedObject" method ')
             return dataDict
-        for obj in source.getSelectedObjects():
+        objs = source.getSelectedObjects()
+        if objs is None:
+            return dataDict
+        for obj in objs:
             if isinstance(obj, AbstractWrapperObject):
                 pids.append(obj.pid)
             if isinstance(obj, (pd.DataFrame, pd.Series)):

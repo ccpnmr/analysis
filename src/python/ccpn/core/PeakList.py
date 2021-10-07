@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-30 13:09:55 +0100 (Thu, September 30, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-07 11:09:49 +0100 (Thu, October 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -86,6 +86,11 @@ class PeakList(PMIListABC):
             raise TypeError('PrimaryChildClass %s does not exist as child of %s' % (klass.className,
                                                                                     self.className))
         self._primaryChildClass = klass
+
+    @property
+    def chemicalShiftList(self):
+        """STUB: hot-fixed later"""
+        return None
 
     #=========================================================================================
     # Implementation functions

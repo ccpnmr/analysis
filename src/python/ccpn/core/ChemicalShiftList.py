@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-06 08:55:40 +0100 (Wed, October 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-07 11:19:30 +0100 (Thu, October 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -43,6 +43,7 @@ from ccpn.util.OrderedSet import OrderedSet
 
 
 CS_UNIQUEID = 'uniqueId'
+CS_PID = 'pid'
 CS_VALUE = 'value'
 CS_VALUEERROR = 'valueError'
 CS_FIGUREOFMERIT = 'figureOfMerit'
@@ -63,7 +64,7 @@ CS_COLUMNS = (CS_UNIQUEID, CS_ISDELETED,
               CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT,
               CS_NMRATOM, CS_CHAINCODE, CS_SEQUENCECODE, CS_RESIDUETYPE, CS_ATOMNAME,
               CS_COMMENT)
-CS_TABLECOLUMNS = (CS_UNIQUEID, CS_ISDELETED,
+CS_TABLECOLUMNS = (CS_UNIQUEID, CS_ISDELETED, CS_PID,
                    CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT,
                    CS_NMRATOM, CS_CHAINCODE, CS_SEQUENCECODE, CS_RESIDUETYPE, CS_ATOMNAME,
                    CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT,
@@ -255,9 +256,14 @@ class ChemicalShiftList(AbstractWrapperObject):
             _oldNmrAtoms = _data[_data[CS_ISDELETED] == False][CS_NMRATOM]
             _oldNmr = set(self.project.getByPid(nmr) for nmr in _oldNmrAtoms) - {None}  # remove any Nones
         except:
-            # dataframe may not have been ceated yet
+            # dataframe may not have been created yet
             _oldNmr = set()
         return _oldNmr
+
+    def _OldChemicalShifts(self):
+        """STUB: hot-fixed later
+        """
+        return ()
 
     @property
     def chemicalShifts(self):

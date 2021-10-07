@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-24 19:22:21 +0100 (Fri, September 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-07 11:19:31 +0100 (Thu, October 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,7 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets
 from functools import partial
 import pandas as pd
 from ccpn.core.lib.Notifiers import Notifier
@@ -36,15 +36,12 @@ from ccpn.core.lib.DataFrameObject import DataFrameObject
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
 from ccpn.core.lib.CallBack import CallBack
-from ccpn.core._OldChemicalShift import _OldChemicalShift
-from ccpn.core.NmrAtom import NmrAtom
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
-from ccpn.core.ChemicalShift import CS_UNIQUEID, CS_ISDELETED, \
-    CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT, \
-    CS_NMRATOM, CS_CHAINCODE, CS_SEQUENCECODE, CS_RESIDUETYPE, CS_ATOMNAME, \
+from ccpn.core.ChemicalShiftList import CS_UNIQUEID, CS_ISDELETED, CS_PID, \
+    CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT, CS_ATOMNAME, \
     CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT, \
     CS_COMMENT, CS_OBJECT, \
-    CS_COLUMNS, CS_TABLECOLUMNS, ChemicalShift
+    CS_TABLECOLUMNS
+from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import makeIterableList
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -55,9 +52,9 @@ from ccpn.ui.gui.widgets.GuiTable import GuiTable, _getValueByHeader
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.MessageDialog import showYesNo, showWarning
-from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySelectionWidget, ALL, UseCurrent
-from ccpn.ui.gui.lib.Strip import navigateToNmrResidueInDisplay, navigateToNmrAtomsInStrip, navigateToPositionInStrip
-from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget
+from ccpn.ui.gui.widgets.SettingsWidgets import ALL
+from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
+from ccpn.ui.gui.widgets.Column import COLUMN_COLDEFS, COLUMN_SETEDITVALUE, COLUMN_FORMAT
 
 
 logger = getLogger()
@@ -174,6 +171,7 @@ class ChemicalShiftTable(GuiTable):
             self.current = None
 
         # self._widget = Widget(parent=parent, **kwds)
+        self._selectedChemicalShiftList = None
 
         # Initialise the scroll widget and common settings
         self._initTableCommonWidgets(parent, **kwds)
@@ -222,10 +220,10 @@ class ChemicalShiftTable(GuiTable):
                                rowClass=ChemicalShift,
                                # cellClassNames=(NmrAtom, '_chemicalShifts'), # not required
                                tableName='chemicalShiftList', rowName='chemicalShift',
-                               # changeFunc=self.displayTableForChemicalShift,
+                               changeFunc=self.displayTableForChemicalShift,
                                className=self.attributeName,
                                # updateFunc=self._update,
-                               # tableSelection='chemicalShiftList',
+                               tableSelection='_selectedChemicalShiftList',
                                pullDownWidget=self._chemicalShiftListPulldown,
                                callBackClass=ChemicalShift,
                                selectCurrentCallBack=self._selectOnTableCurrentChemicalShiftNotifierCallback,
@@ -297,9 +295,12 @@ class ChemicalShiftTable(GuiTable):
         """
         Update the table
         """
-        self.populateTable(rowObjects=chemicalShiftList.chemicalShifts,
-                           # columnDefs=self.CScolumns,
-                           selectedObjects=self.current.chemicalShifts)
+        self._selectedChemicalShiftList = self.project.getByPid(self._chemicalShiftListPulldown.getText())
+
+        if self._selectedChemicalShiftList == chemicalShiftList:
+            self.populateTable(rowObjects=chemicalShiftList.chemicalShifts,
+                               # columnDefs=self.CScolumns,
+                               selectedObjects=self.current.chemicalShifts)
 
     def _getValidChemicalShift4Callback(self, objs):
         if not objs or not all(objs):
@@ -734,7 +735,8 @@ class ChemicalShiftTable(GuiTable):
 
         # define self._columns here
         _tipTexts = ('Unique identifier for the chemicalShift',
-                     'isDeleted', # should never be visible
+                     'isDeleted',  # should never be visible
+                     'ChemicalShift.pid',
                      'ChemicalShift value in ppm',
                      'Error in the chemicalShift value in ppm',
                      'Figure of merit, between 0 and 1',
@@ -754,10 +756,14 @@ class ChemicalShiftTable(GuiTable):
             (col, lambda row: _getValueByHeader(row, col), _tipTexts[ii], None, None)
             for ii, col in enumerate(CS_TABLECOLUMNS)
             ]
-        # NOTE:ED - hack to add the comment editor to the comment column
-        _temp = list(_cols[-2])
-        _temp[3] = lambda obj, value: self._setComment(obj, value)
-        _cols[-2] = tuple(_temp)
+        # NOTE:ED - hack to add the comment editor to the comment column, decimal places to value/valueError/figureOfMerit
+        _temp = list(_cols[CS_TABLECOLUMNS.index(CS_COMMENT)])
+        _temp[COLUMN_COLDEFS.index(COLUMN_SETEDITVALUE)] = lambda obj, value: self._setComment(obj, value)
+        _cols[CS_TABLECOLUMNS.index(CS_COMMENT)] = tuple(_temp)
+        for col in [CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT]:
+            _temp = list(_cols[CS_TABLECOLUMNS.index(col)])
+            _temp[COLUMN_COLDEFS.index(COLUMN_FORMAT)] = '%0.3f'
+            _cols[CS_TABLECOLUMNS.index(col)] = tuple(_temp)
 
         # set the table _columns
         self._columns = ColumnClass(_cols)
@@ -767,6 +773,7 @@ class ChemicalShiftTable(GuiTable):
             _table = _table[_table[CS_ISDELETED] == False]
             _table.set_index(_table[CS_UNIQUEID], inplace=True, )  # drop=False)
 
+            _table.insert(CS_TABLECOLUMNS.index(CS_PID), CS_PID, None)
             _table.insert(CS_TABLECOLUMNS.index(CS_ALLPEAKS), CS_ALLPEAKS, None)
             _table.insert(CS_TABLECOLUMNS.index(CS_SHIFTLISTPEAKSCOUNT), CS_SHIFTLISTPEAKSCOUNT, None)
             _table.insert(CS_TABLECOLUMNS.index(CS_ALLPEAKSCOUNT), CS_ALLPEAKSCOUNT, None)
@@ -775,6 +782,7 @@ class ChemicalShiftTable(GuiTable):
             if _objs:
                 # append the actual objects as the last column - not sure whether this is required - check _highlightObjs
                 _table[CS_OBJECT] = _objs
+                _table[CS_PID] = [_shift.pid for _shift in _objs]
 
                 _stats = [self._derivedFromObject(obj) for obj in _objs]
                 _table[[CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT]] = _stats
@@ -819,10 +827,14 @@ class ChemicalShiftTable(GuiTable):
             #   need to define a row handler rather than a column handler
             _row = data.loc[uniqueId]
             # make the new row - put into method
-            newRow = _row[:CS_ATOMNAME].copy()
+            newRow = _row[:CS_ISDELETED].copy()
+            _midRow = _row[CS_VALUE:CS_ATOMNAME]
             _comment = _row[CS_COMMENT:]
+            _pidCol = pd.Series(obj.pid, index=[CS_PID, ])
             _extraCols = pd.Series(self._derivedFromObject(obj), index=[CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT])
-            newRow = newRow.append([_extraCols, _comment])
+
+            newRow = newRow.append([_pidCol, _midRow, _extraCols, _comment])
+
             # append the actual object to the end - not sure whether this is required - check _highlightObjs
             newRow[CS_OBJECT] = obj
 

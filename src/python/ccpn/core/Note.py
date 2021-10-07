@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:19:59 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-07 10:57:27 +0100 (Thu, October 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -33,14 +33,8 @@ from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Note as ApiNote
-from ccpn.core.lib.ContextManagers import newObject, renameObject
+from ccpn.core.lib.ContextManagers import newObject, renameObject, ccpNmrV3CoreSetter
 from ccpn.util.decorators import logCommand
-from ccpn.util.Logging import getLogger
-from ccpn.util import Common as commonUtil
-
-
-NOTE = 'note'
-NOTECOMMENT = 'noteComment'
 
 
 class Note(AbstractWrapperObject):
@@ -62,7 +56,13 @@ class Note(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiNote._metaclass.qualifiedName()
 
+    # Internal NameSpace
+    _COMMENT = 'comment'
+
+    #=========================================================================================
     # CCPN properties
+    #=========================================================================================
+
     @property
     def _apiNote(self) -> ApiNote:
         """ CCPN Project Note"""
@@ -116,12 +116,13 @@ class Note(AbstractWrapperObject):
 
     @created.setter
     @logCommand(get='self', isProperty=True)
-    def created(self, created):
+    @ccpNmrV3CoreSetter()
+    def created(self, value):
         # bypass the api because frozen
         for timeFormat in (utilConstants.stdTimeFormat, utilConstants.isoTimeFormat):
             try:
                 # loop until the correct format is found
-                self._wrappedData.__dict__['created'] = datetime.strptime(created, timeFormat)
+                self._wrappedData.__dict__['created'] = datetime.strptime(value, timeFormat)
                 break
             except:
                 continue
@@ -135,12 +136,13 @@ class Note(AbstractWrapperObject):
 
     @lastModified.setter
     @logCommand(get='self', isProperty=True)
-    def lastModified(self, lastModified):
+    @ccpNmrV3CoreSetter()
+    def lastModified(self, value):
         # bypass the api because frozen
         for timeFormat in (utilConstants.stdTimeFormat, utilConstants.isoTimeFormat):
             try:
                 # loop until the correct format is found
-                self._wrappedData.__dict__['lastModified'] = datetime.strptime(lastModified, timeFormat)
+                self._wrappedData.__dict__['lastModified'] = datetime.strptime(value, timeFormat)
                 break
             except:
                 continue
@@ -161,17 +163,18 @@ class Note(AbstractWrapperObject):
     @property
     def comment(self) -> str:
         """Free-form text comment"""
-        comment = self.getParameter(NOTE, NOTECOMMENT)
+        comment = self._getInternalParameter(self._COMMENT)
         return comment
 
     @comment.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def comment(self, value: str):
         """set optional comment of note."""
         if not isinstance(value, (str, type(None))):
             raise ValueError("comment must be a string/None.")
 
-        self.setParameter(NOTE, NOTECOMMENT, value)
+        self._setInternalParameter(self._COMMENT, value)
 
     #=========================================================================================
     # Implementation functions

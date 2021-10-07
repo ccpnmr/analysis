@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-17 15:13:05 +0100 (Fri, September 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-07 19:56:29 +0100 (Thu, October 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -448,6 +448,9 @@ class OpenItemABC():
         if canBeCloned:
             contextMenu.addAction('Clone', partial(self._cloneObject, objs))
 
+        contextMenu.addSeparator()
+        contextMenu.addAction('Edit Properties', partial(parentWidget._raiseObjectProperties, self.node.widget))
+
         contextMenu.move(position)
         contextMenu.exec()
 
@@ -499,6 +502,10 @@ class _openItemChemicalShiftListTable(OpenItemABC):
         contextMenu.addAction('Copy Pid to clipboard', partial(self._copyPidsToClipboard, objs))
         contextMenu.addAction('Duplicate', partial(self._duplicateAction, objs))
         contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
+
+        contextMenu.addSeparator()
+        contextMenu.addAction('Edit Properties', partial(parentWidget._raiseObjectProperties, self.node.widget))
+
         contextMenu.move(position)
         contextMenu.exec()
 
@@ -548,6 +555,10 @@ class _openItemAtomItem(OpenItemABC):
         if self.openAction:
             contextMenu.addAction(self.contextMenuText, self.openAction)
         contextMenu.addAction('Copy Pid to clipboard', partial(self._copyPidsToClipboard, objs))
+
+        contextMenu.addSeparator()
+        contextMenu.addAction('Edit Properties', partial(parentWidget._raiseObjectProperties, self.node.widget))
+
         contextMenu.move(position)
         contextMenu.exec()
 
@@ -568,6 +579,10 @@ class _openItemResidueTable(OpenItemABC):
         if self.openAction:
             contextMenu.addAction(self.contextMenuText, self.openAction)
         contextMenu.addAction('Copy Pid to clipboard', partial(self._copyPidsToClipboard, objs))
+
+        contextMenu.addSeparator()
+        contextMenu.addAction('Edit Properties', partial(parentWidget._raiseObjectProperties, self.node.widget))
+
         contextMenu.move(position)
         contextMenu.exec()
 
@@ -740,6 +755,9 @@ class _openItemSpectrumInGroupDisplay(_openItemSpectrumDisplay):
                 break
         if canBeCloned:
             contextMenu.addAction('Clone', partial(self._cloneObject, objs))
+
+        contextMenu.addSeparator()
+        contextMenu.addAction('Edit Properties', partial(parentWidget._raiseObjectProperties, self.node.widget))
 
         contextMenu.move(position)
         contextMenu.exec()

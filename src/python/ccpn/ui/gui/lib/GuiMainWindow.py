@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:29:57 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-07 19:56:29 +0100 (Thu, October 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -431,6 +431,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self._attachCCPNMacrosMenuAction()
         # self._attachUserMacrosMenuAction()
         self._attachTutorialsMenuAction()
+
+        # hide this option for now
+        modulesMenu = self.searchMenuAction(SHOWMODULESMENU)
+        modulesMenu.setVisible(False)
 
     def _attachModulesMenuAction(self):
         # add a connect to call _fillModulesMenu when the menu item is about to show

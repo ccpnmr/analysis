@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-07 18:40:32 +0100 (Thu, October 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-07 19:56:29 +0100 (Thu, October 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -527,7 +527,7 @@ def _selectedPeaksMenuItem(strip):
 
 
 def _flipAxesMenuItem(strip):
-    return _SCMitem(name='New spectrumDisplay from strip:',
+    return _SCMitem(name='New spectrumDisplay from current strip:',
                     typeItem=ItemTypes.get(MENU), toolTip='Create new spectrumDisplay from current strip with flipped axes ',
                     stripMethodName='_flipAxesMenu',
                     callback=None)

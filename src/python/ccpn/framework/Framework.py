@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-24 10:12:36 +0100 (Fri, September 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-07 19:56:29 +0100 (Thu, October 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -52,7 +52,6 @@ from functools import partial
 from typing import List, Tuple, Sequence
 
 from tqdm import tqdm
-
 
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
@@ -104,6 +103,8 @@ from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_OVERVIEW
 from PyQt5.QtCore import QTimer
 
 import faulthandler
+
+
 faulthandler.enable()
 
 # from functools import partial
@@ -142,8 +143,8 @@ def _ccpnExceptionhook(ccpnType, value, tback):
 
     sys.__excepthook__(ccpnType, value, tback)
 
-sys.excepthook = _ccpnExceptionhook
 
+sys.excepthook = _ccpnExceptionhook
 
 
 def defineProgramArguments():
@@ -332,6 +333,7 @@ class Framework(NotifierBase):
 
         # register dataLoader for the first and only time
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders
+
         self._dataLoaders = getDataLoaders()
 
     @property
@@ -353,7 +355,7 @@ class Framework(NotifierBase):
         """:returns: MainWindow instance if application has a Gui or None otherwise
         """
         if self.hasGui:
-            return  self.ui.mainWindow
+            return self.ui.mainWindow
         return None
 
     def _testShortcuts0(self):
@@ -1318,19 +1320,19 @@ class Framework(NotifierBase):
             (),
             ("Quit", self._closeEvent, [('shortcut', '⌃q')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ]
-        ))
+                   ))
 
         ms.append(('Edit', [
             ("Undo", self.undo, [('shortcut', '⌃z')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Redo", self.redo, [('shortcut', '⌃y')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             (),
 
-            ("Cut", self._nyi,        [('shortcut', '⌃x'), ('enabled', False)]),
-            ("Copy", self._nyi,       [('shortcut', '⌃c'), ('enabled', False)]),
-            ("Paste", self._nyi,      [('shortcut', '⌃v'), ('enabled', False)]),
+            ("Cut", self._nyi, [('shortcut', '⌃x'), ('enabled', False)]),
+            ("Copy", self._nyi, [('shortcut', '⌃c'), ('enabled', False)]),
+            ("Paste", self._nyi, [('shortcut', '⌃v'), ('enabled', False)]),
             ("Select all", self._nyi, [('shortcut', '⌃a'), ('enabled', False)]),
             ]
-        ))
+                   ))
 
         ms.append(('View', [
             ("Chemical Shift Table", partial(self.showChemicalShiftTable, selectFirstItem=True), [('shortcut', 'ct')]),
@@ -1359,29 +1361,30 @@ class Framework(NotifierBase):
             #                                               ('checked', False)
             #                                               ]),
             (),
-            ("Current", (("Show/Hide Toolbar", self.toggleToolbar, [('shortcut', 'tb')]),
-                         ("Show/Hide Spectrum Toolbar", self.toggleSpectrumToolbar, [('shortcut', 'sb')]),
-                         ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')]),
-                         (),
-                         ("Set Zoom...", self._setZoomPopup, [('shortcut', 'sz')]),
-                         ("Reset Zoom", self.resetZoom, [('shortcut', 'rz')]),
-                         (),
-                         ("New SpectrumDisplay with strip", self.copyStrip, []),
-                         ("Copy with X-Y Axes flipped", self._flipXYAxisCallback, [('shortcut', 'xy')]),
-                         ("Copy with X-Z Axes flipped", self._flipXZAxisCallback, [('shortcut', 'xz')]),
-                         ("Copy with Y-Z Axes flipped", self._flipYZAxisCallback, [('shortcut', 'yz')]),
-                         ("Copy with Axes Flipped...", self.showFlipArbitraryAxisPopup, [('shortcut', 'fa')]),
-                         )),
+            ("In Active Spectrum Display", (("Show/Hide Toolbar", self.toggleToolbar, [('shortcut', 'tb')]),
+                                            ("Show/Hide Spectrum Toolbar", self.toggleSpectrumToolbar, [('shortcut', 'sb')]),
+                                            ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')]),
+                                            (),
+                                            ("Set Zoom...", self._setZoomPopup, [('shortcut', 'sz')]),
+                                            ("Reset Zoom", self.resetZoom, [('shortcut', 'rz')]),
+                                            (),
+                                            ("New SpectrumDisplay with New Strip", self.copyStrip, []),
+                                            (" .. New Strip with X-Y Axes Flipped", self._flipXYAxisCallback, [('shortcut', 'xy')]),
+                                            (" .. New Strip with X-Z Axes Flipped", self._flipXZAxisCallback, [('shortcut', 'xz')]),
+                                            (" .. New Strip with Y-Z Axes Flipped", self._flipYZAxisCallback, [('shortcut', 'yz')]),
+                                            (" .. New Strip with Axes Flipped...", self.showFlipArbitraryAxisPopup, [('shortcut', 'fa')]),
+                                            )),
             (),
             (SHOWMODULESMENU, ([
                 ("None", None, [('checkable', True),
                                 ('checked', False)])
                 ])),
             ("Python Console", self._toggleConsoleCallback, [('shortcut', '  '),
-                                                             ('checkable', True),
-                                                             ('checked', False)])
+                                                             # ('checkable', True),  # don't really need a checkbox :)
+                                                             # ('checked', False)
+                                                             ])
             ]
-        ))
+                   ))
 
         ms.append(('Spectrum', [
             ("Load Spectra...", self._loadSpectraCallback, [('shortcut', 'ls')]),
@@ -1405,7 +1408,7 @@ class Framework(NotifierBase):
             (),
             ("Print to File...", self.showPrintSpectrumDisplayPopup, [('shortcut', '⌃p')]),
             ]
-        ))
+                   ))
 
         ms.append(('Molecules', [
             ("Chain from FASTA...", lambda: self._loadDataFromMenu(text='Load FASTA')),
@@ -1417,7 +1420,7 @@ class Framework(NotifierBase):
             (),
             ("Reference Chemical Shifts", self.showReferenceChemicalShifts, [('shortcut', 'rc')]),
             ]
-        ))
+                   ))
 
         ms.append(('Macro', [
             ("New Macro Editor", self._showMacroEditorCallback),
@@ -1439,13 +1442,13 @@ class Framework(NotifierBase):
             ("Define Macro Shortcuts...", self.defineUserShortcuts, [('shortcut', 'du')]),
             ("Submit Macro...", self.showSubmitMacroPopup)
             ]
-        ))
+                   ))
 
         ms.append(('Plugins', [
             (CCPNPLUGINSMENU, ()),
             (PLUGINSMENU, ()),
             ]
-        ))
+                   ))
 
         ms.append(('Help', [
             (TUTORIALSMENU, ([
@@ -1500,7 +1503,7 @@ class Framework(NotifierBase):
             (),
             ("About CcpNmr V3...", self.showAboutPopup),
             ]
-        ))
+                   ))
 
     ###################################################################################################################
     ## These will eventually move to gui (probably via a set of lambda functions.
@@ -1756,6 +1759,7 @@ class Framework(NotifierBase):
                     with catchExceptions(application=self, errorStringTemplate='Error loading Sparky file: %s',
                                          printTraceBack=True):
                         sparkyReader.importSparkyProject(self.project, dataBlock)
+
         #end def
 
         if createNewProject and (dataBlock.getDataValues('sparky', firstOnly=True) == 'project file'):
@@ -1838,7 +1842,7 @@ class Framework(NotifierBase):
                 spectrumLoaders.append(dirLoader)
                 count += len(dirLoader)
 
-            elif (sLoader:= SpectrumDataLoader.checkForValidFormat(path)) is not None:
+            elif (sLoader := SpectrumDataLoader.checkForValidFormat(path)) is not None:
                 spectrumLoaders.append(sLoader)
                 count += 1
 
@@ -1873,7 +1877,7 @@ class Framework(NotifierBase):
                 result = dataLoader.load()
                 if not isIterable(result):
                     result = [result]
-                objs.extend( result )
+                objs.extend(result)
 
         return objs
 
@@ -2331,6 +2335,7 @@ class Framework(NotifierBase):
         """Restore a project from archive"""
 
         from ccpn.framework.lib._unpackCcpnTarFile import _unpackCcpnTarfile
+
         if not archivePath:
             archivesDirectory = Path.aPath(self.project.path) / Path.CCPN_ARCHIVES_DIRECTORY
             _filter = '*.tgz'
@@ -2859,7 +2864,7 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        peakTableModule = PeakTableModule(mainWindow,selectFirstItem=selectFirstItem)
+        peakTableModule = PeakTableModule(mainWindow, selectFirstItem=selectFirstItem)
         if peakList:
             peakTableModule.selectPeakList(peakList)
         mainWindow.moduleArea.addModule(peakTableModule, position=position, relativeTo=relativeTo)
@@ -2891,7 +2896,7 @@ class Framework(NotifierBase):
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
-        integralTableModule = IntegralTableModule(mainWindow=mainWindow,selectFirstItem=selectFirstItem)
+        integralTableModule = IntegralTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(integralTableModule, position=position, relativeTo=relativeTo)
         if integralList:
             integralTableModule.selectIntegralList(integralList)
@@ -2947,9 +2952,9 @@ class Framework(NotifierBase):
 
     @logCommand('application.')
     def showRestraintAnalysisTable(self,
-                           position: str = 'bottom',
-                           relativeTo: CcpnModule = None,
-                           peakList=None, selectFirstItem=False):
+                                   position: str = 'bottom',
+                                   relativeTo: CcpnModule = None,
+                                   peakList=None, selectFirstItem=False):
         """Displays restraint analysis table.
         """
         from ccpn.ui.gui.modules.RestraintAnalysisTable import RestraintAnalysisTableModule
@@ -3104,7 +3109,6 @@ class Framework(NotifierBase):
         path = dialog.selectedFile()
         if path is not None:
             self.mainWindow.newMacroEditor(path=path)
-
 
     def defineUserShortcuts(self):
 
@@ -3426,7 +3430,6 @@ if __name__ == '__main__':
 
     # from ccpn.framework.Framework import Framework
     # from ccpn.framework.Framework import Arguments
-
 
     _makeMainWindowVisible = False
 

@@ -272,6 +272,36 @@ def _getIntersectionPoints(x, y, line):
     return points
 
 
+def estimate1DPeakFWHM(peak):
+    """
+    Estimate the 1D peak Full Width at Half Maximum.
+
+    Returns
+    -------
+    width:  The width for the peak in points.
+    widthHeight: The height of the contour lines at which the `width` was evaluated.
+    limits: tuple, Interpolated positions of left and right intersection points of a
+        horizontal line at the respective evaluation height.
+
+    """
+    from scipy.signal import peak_widths
+    from ccpn.core.Peak import Peak
+    import numpy as np
+
+    if not isinstance(peak, Peak):
+        return [None, None, (None, None)]
+
+    if peak.spectrum.dimensionCount > 1:
+        return [None, None, (None, None)]
+
+    y = peak.spectrum.intensities
+    pointPositions = np.array([int(peak.pointPosition[0])])
+    widths, widthHeight, *limits = peak_widths(y, pointPositions, rel_height=0.5)
+    limits = tuple(zip(*limits))
+    if widths and len(widths)>0:
+        return widths[0], widthHeight[0], limits[0]
+    return [None, None, (None, None)]
+
 def _getAtomWeight(axisCode, atomWeights) -> float or int:
     """
 

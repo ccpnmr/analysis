@@ -9,8 +9,8 @@
         },
         "TITLE"         : "Tip of the Day",
         "MIN_SIZE"      : [
-            550,
-            385
+            498,
+            280
         ],
         "LAYOUT"        : [
             "Random",
@@ -26,10 +26,10 @@
         ],
         "EMPTY_TEXT"    : "All tips viewed to reset goto preferences->tips and click 'reset tips'",
         "DIRECTORIES"   : [
-            "/Users/garythompson/Dropbox/git/ccpnmr/ccpnmr_3.0.3.edge_gwv6/src/python/ccpn/ui/gui/widgets/tips"
+            "/Users/vad5/PycharmProjects/Git/AnalysisV3/doc/TipOfTheDay"
         ],
         "USE_DOTS"      : false,
-        "HAS_DIVIDER"   : true,
+        "HAS_DIVIDER"   : false,
         "DIVIDER_COLOR" : "#a9a9a9",
         "DIVIDER_WIDTH" : "1px"
     },
@@ -39,7 +39,7 @@
             "NextButton"   : "Next",
             "BackButton"   : "Previous"
         },
-        "TITLE"       : "Overview",
+        "TITLE"       : "Key Concepts",
         "MIN_SIZE"    : [
             800,
             400
@@ -56,7 +56,7 @@
         ],
         "EMPTY_TEXT"  : "<DOCTYPE html>\n    <html>\n        <head>\n        <style>\n            body { background-color: blue; }\n            p    { color: white;\n                  font-size: large;\n                  font-family: courier;\n            }\n            table {\n                margin: auto;\n            }\n        </style>\n        </head>\n        <body>\n            <table>\n                <tr>\n                    <td>\n                        <p>Overview files missing please correct your setup or contact the developers...</p>\n                    </td>\n                </tr>\n            </table>\n        </body>\n    </html>",
         "DIRECTORIES" : [
-            "/Users/garythompson/Dropbox/git/ccpnmr/ccpnmr_3.0.3.edge_gwv6/src/python/ccpn/ui/gui/widgets/overviews"
+            "/Users/vad5/PycharmProjects/Git/AnalysisV3/src/python/ccpn/ui/gui/widgets/overviews"
         ],
         "USE_DOTS"    : true,
         "HAS_DIVIDER" : false

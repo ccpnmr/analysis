@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-07 11:06:48 +0100 (Thu, October 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-11 20:55:07 +0100 (Mon, October 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -588,7 +588,7 @@ def _newNmrAtom(self: NmrResidue, name: str = None, isotopeCode: str = None, com
         result.comment = comment
 
     # Set additional optional attributes supplied as kwds arguments
-    for key, value in kwds:
+    for key, value in kwds.items():
         setattr(result, key, value)
 
     return result

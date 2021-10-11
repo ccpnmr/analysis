@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-07 19:56:29 +0100 (Thu, October 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-11 20:01:13 +0100 (Mon, October 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1368,11 +1368,11 @@ class Framework(NotifierBase):
                                             ("Set Zoom...", self._setZoomPopup, [('shortcut', 'sz')]),
                                             ("Reset Zoom", self.resetZoom, [('shortcut', 'rz')]),
                                             (),
-                                            ("New SpectrumDisplay with New Strip", self.copyStrip, []),
-                                            (" .. New Strip with X-Y Axes Flipped", self._flipXYAxisCallback, [('shortcut', 'xy')]),
-                                            (" .. New Strip with X-Z Axes Flipped", self._flipXZAxisCallback, [('shortcut', 'xz')]),
-                                            (" .. New Strip with Y-Z Axes Flipped", self._flipYZAxisCallback, [('shortcut', 'yz')]),
-                                            (" .. New Strip with Axes Flipped...", self.showFlipArbitraryAxisPopup, [('shortcut', 'fa')]),
+                                            ("New SpectrumDisplay with New Strip, Same Axes", self.copyStrip, []),
+                                            (" .. with X-Y Axes Flipped", self._flipXYAxisCallback, [('shortcut', 'xy')]),
+                                            (" .. with X-Z Axes Flipped", self._flipXZAxisCallback, [('shortcut', 'xz')]),
+                                            (" .. with Y-Z Axes Flipped", self._flipYZAxisCallback, [('shortcut', 'yz')]),
+                                            (" .. with Axes Flipped...", self.showFlipArbitraryAxisPopup, [('shortcut', 'fa')]),
                                             )),
             (),
             (SHOWMODULESMENU, ([

@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:03 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-11 20:43:40 +0100 (Mon, October 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -30,23 +30,21 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from functools import partial
-from PyQt5.QtCore import pyqtSignal, pyqtSlot
-import json
+from PyQt5.QtCore import pyqtSlot
+# import json
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
-from ccpn.ui.gui.widgets.Label import Label, VerticalLabel, ActiveLabel
+from ccpn.ui.gui.widgets.Label import Label, ActiveLabel
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
-from ccpn.ui.gui.widgets.ToolBar import ToolBar
-from ccpn.ui.gui.widgets.Widget import Widget
+# from ccpn.ui.gui.widgets.ToolBar import ToolBar
+# from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Frame import Frame, OpenGLOverlayFrame
-from ccpn.ui.gui.guiSettings import getColours, STRIPHEADER_BACKGROUND, \
-    STRIPHEADER_FOREGROUND, GUINMRRESIDUE, CCPNGLWIDGET_BACKGROUND, \
-    CCPNGLWIDGET_HEXHIGHLIGHT, CCPNGLWIDGET_HEXFOREGROUND, ZPlaneNavigationModes
+from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXHIGHLIGHT, CCPNGLWIDGET_HEXFOREGROUND, ZPlaneNavigationModes
 # from ccpn.ui.gui.guiSettings import textFont, textFontLarge
 from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
-from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore
 from ccpn.core.Peak import Peak
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.lib.Notifiers import Notifier
@@ -107,7 +105,7 @@ class _StripLabel(ActiveLabel):  #  VerticalLabel): could use Vertical label so 
             getLogger().warning('%s is not a draggable object' % self.text())
             return
 
-        mimeData = QtCore.QMimeData()
+        # mimeData = QtCore.QMimeData()
         # create the dataDict
         dataDict = {self._dragKey: [self.text()],
                     DropBase.TEXT: self.text()
@@ -932,7 +930,7 @@ STRIPPOSITION_CENTRE = 'c'
 STRIPPOSITION_RIGHT = 'r'
 STRIPPOSITIONS = (STRIPPOSITION_MINUS, STRIPPOSITION_PLUS, STRIPPOSITION_LEFT, STRIPPOSITION_CENTRE, STRIPPOSITION_RIGHT)
 
-STRIPDICT = 'stripHeaderDict'
+# STRIPDICT = 'stripHeaderDict'
 STRIPTEXT = 'stripText'
 STRIPCOLOUR = 'stripColour'
 STRIPLABELPOS = 'StripLabelPos'
@@ -1021,7 +1019,7 @@ class StripHeaderWidget(_OpenGLFrameABC):
                                 (self._nmrChainLeft, self._nmrChainRight, self._stripLabel, self._stripDirection, self._stripPercent)))
 
         # set the visible state of the header
-        self.strip.setParameter(STRIPDICT, STRIPHEADERVISIBLE, False)
+        self.strip._setInternalParameter(STRIPHEADERVISIBLE, False)
         self.setVisible(False)
 
         # labelsVisible = False
@@ -1086,7 +1084,7 @@ class StripHeaderWidget(_OpenGLFrameABC):
         if self.strip.isDeleted or self.strip._flaggedForDelete:
             return
 
-        params = self.strip.getParameter(STRIPDICT, stripPos)
+        params = self.strip._getInternalParameter(stripPos)
         if not params:
             params = {}
 
@@ -1099,12 +1097,12 @@ class StripHeaderWidget(_OpenGLFrameABC):
 
         # currently writes directly into _ccpnInternal
         params.update({subParameterName: value})
-        self.strip.setParameter(STRIPDICT, stripPos, params)
+        self.strip._setInternalParameter(stripPos, params)
 
     def _getPositionParameter(self, stripPos, subParameterName, default):
         """Return the item from the position dict
         """
-        params = self.strip.getParameter(STRIPDICT, stripPos)
+        params = self.strip._getInternalParameter(stripPos)
         if params:
             if subParameterName in params:
                 value = params.get(subParameterName)
@@ -1141,8 +1139,8 @@ class StripHeaderWidget(_OpenGLFrameABC):
                       STRIPVISIBLE : False,
                       STRIPENABLED : True
                       }
-            self.strip.setParameter(STRIPDICT, stripPos, params)
-        self.strip.setParameter(STRIPDICT, STRIPHANDLE, None)
+            self.strip._setInternalParameter(stripPos, params)
+        self.strip._setInternalParameter(STRIPHANDLE, None)
         self._resize()
 
     def getLabelObject(self, position=STRIPPOSITION_CENTRE):
@@ -1222,7 +1220,7 @@ class StripHeaderWidget(_OpenGLFrameABC):
 
         lv = [self._getPositionParameter(pp, STRIPVISIBLE, False) for pp in STRIPPOSITIONS]
         headerVisible = any(lv)
-        self.strip.setParameter(STRIPDICT, STRIPHEADERVISIBLE, headerVisible)
+        self.strip._setInternalParameter(STRIPHEADERVISIBLE, headerVisible)
         self.setVisible(headerVisible)
         self._resize()
 
@@ -1297,21 +1295,21 @@ class StripHeaderWidget(_OpenGLFrameABC):
 
     @property
     def headerVisible(self):
-        return self.strip.getParameter(STRIPDICT, STRIPHEADERVISIBLE)
+        return self.strip._getInternalParameter(STRIPHEADERVISIBLE)
 
     @headerVisible.setter
     def headerVisible(self, visible):
-        self.strip.setParameter(STRIPDICT, STRIPHEADERVISIBLE, visible)
+        self.strip._setInternalParameter(STRIPHEADERVISIBLE, visible)
         self.setVisible(visible)
         self._resize()
 
     @property
     def handle(self):
-        return self.strip.getParameter(STRIPDICT, STRIPHANDLE)
+        return self.strip._getInternalParameter(STRIPHANDLE)
 
     @handle.setter
-    def handle(self, handle):
-        self.strip.setParameter(STRIPDICT, STRIPHANDLE, handle)
+    def handle(self, value):
+        self.strip._setInternalParameter(STRIPHANDLE, value)
         self._resize()
 
 
@@ -1353,18 +1351,18 @@ class StripLabelWidget(_OpenGLFrameABC):
     def _setPositionParameter(self, subParameterName, value):
         """Set the item in the position dict
         """
-        params = self.strip.getParameter(STRIPDICT, STRIPLABELPOS)
+        params = self.strip._getInternalParameter(STRIPLABELPOS)
         if not params:
             params = {}
 
         # currently writes directly into _ccpnInternal
         params.update({subParameterName: value})
-        self.strip.setParameter(STRIPDICT, STRIPLABELPOS, params)
+        self.strip._setInternalParameter(STRIPLABELPOS, params)
 
     def _getPositionParameter(self, subParameterName, default):
         """Return the item from the position dict
         """
-        params = self.strip.getParameter(STRIPDICT, STRIPLABELPOS)
+        params = self.strip._getInternalParameter(STRIPLABELPOS)
         if params:
             if subParameterName in params:
                 value = params.get(subParameterName)
@@ -1378,7 +1376,7 @@ class StripLabelWidget(_OpenGLFrameABC):
         # clear the store
         params = {STRIPTEXT: '',
                   }
-        self.strip.setParameter(STRIPDICT, STRIPLABELPOS, params)
+        self.strip._setInternalParameter(STRIPLABELPOS, params)
         self._resize()
 
     def setLabel(self, text='', colour=DEFAULTCOLOUR):

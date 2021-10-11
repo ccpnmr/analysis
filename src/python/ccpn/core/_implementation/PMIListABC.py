@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:26:48 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-11 20:43:40 +0100 (Mon, October 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -33,15 +33,6 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.Spectrum import Spectrum
 from ccpn.util.decorators import logCommand
 
-
-MERITSETTINGS = 'meritSettings'
-MERITCOLOUR = 'meritColour'
-MERITENABLED = 'meritEnabled'
-MERITTHRESHOLD = 'meritThreshold'
-LINESETTINGS = 'lineSettings'
-LINECOLOUR = 'lineColour'
-SYMBOLCOLOUR = 'symbolColour'
-TEXTCOLOUR = 'textColour'
 
 COLOURCHECK = '#[a-fA-F0-9]{6}$'
 INHERITCOLOUR = '#'
@@ -70,6 +61,14 @@ class PMIListABC(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = None
+
+    # internal namespace
+    _MERITCOLOUR = 'meritColour'
+    _MERITENABLED = 'meritEnabled'
+    _MERITTHRESHOLD = 'meritThreshold'
+    _LINECOLOUR = 'lineColour'
+    _SYMBOLCOLOUR = 'symbolColour'
+    _TEXTCOLOUR = 'textColour'
 
     # Special error-raising functions as this is a container for a list
     def __iter__(self):
@@ -194,7 +193,7 @@ class PMIListABC(AbstractWrapperObject):
         meritColour must be a valid hex colour string '#ABCDEF' or '#' to denote an auto-colour (take colour from spectrum).
         Lowercase will be changed to uppercase.
         """
-        return self.getParameter(MERITSETTINGS, MERITCOLOUR)
+        return self._getInternalParameter(self._MERITCOLOUR)
 
     @meritColour.setter
     @logCommand(get='self', isProperty=True)
@@ -205,14 +204,14 @@ class PMIListABC(AbstractWrapperObject):
             raise ValueError("meritColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '%s')" % (value, INHERITCOLOUR))
 
         value = value.upper()
-        self.setParameter(MERITSETTINGS, MERITCOLOUR, value)
+        self._setInternalParameter(self._MERITCOLOUR, value)
 
     @property
     def meritEnabled(self) -> Optional[bool]:
         """Flag to enable merit threshold for annotation display in all displays.
         Must be True/False.
         """
-        return self.getParameter(MERITSETTINGS, MERITENABLED)
+        return self._getInternalParameter(self._MERITENABLED)
 
     @meritEnabled.setter
     @logCommand(get='self', isProperty=True)
@@ -220,14 +219,14 @@ class PMIListABC(AbstractWrapperObject):
         if not isinstance(value, bool):
             raise TypeError("meritEnabled must be True/False.")
 
-        self.setParameter(MERITSETTINGS, MERITENABLED, value)
+        self._setInternalParameter(self._MERITENABLED, value)
 
     @property
     def meritThreshold(self) -> float:
         """Threshold to determine merit colouring for annotation display in all displays.
         Must be a float in the range [0.0, 1.0]
         """
-        return self.getParameter(MERITSETTINGS, MERITTHRESHOLD)
+        return self._getInternalParameter(self._MERITTHRESHOLD)
 
     @meritThreshold.setter
     @logCommand(get='self', isProperty=True)
@@ -238,7 +237,7 @@ class PMIListABC(AbstractWrapperObject):
             raise ValueError("meritThreshold must be in the range [0.0, 1.0]")
         value = float(value)
 
-        self.setParameter(MERITSETTINGS, MERITTHRESHOLD, value)
+        self._setInternalParameter(self._MERITTHRESHOLD, value)
 
     @property
     def lineColour(self) -> str:
@@ -246,7 +245,7 @@ class PMIListABC(AbstractWrapperObject):
         lineColour must be a valid hex colour string '#ABCDEF' or '#' to denote an auto-colour (take colour from spectrum).
         Lowercase will be changed to uppercase.
         """
-        return self.getParameter(LINESETTINGS, LINECOLOUR)
+        return self._getInternalParameter(self._LINECOLOUR)
 
     @lineColour.setter
     @logCommand(get='self', isProperty=True)
@@ -257,13 +256,41 @@ class PMIListABC(AbstractWrapperObject):
             raise ValueError("lineColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '%s')" % (value, INHERITCOLOUR))
 
         value = value.upper()
-        self.setParameter(LINESETTINGS, LINECOLOUR, value)
+        self._setInternalParameter(self._LINECOLOUR, value)
 
     #=========================================================================================
     # Implementation functions
     #=========================================================================================
 
-    # None
+    @classmethod
+    def _restoreObject(cls, project, apiObj):
+        """Restore the object and update ccpnInternalData
+        """
+        MERITSETTINGS = 'meritSettings'
+        MERITCOLOUR = 'meritColour'
+        MERITENABLED = 'meritEnabled'
+        MERITTHRESHOLD = 'meritThreshold'
+        LINESETTINGS = 'lineSettings'
+        LINECOLOUR = 'lineColour'
+        SYMBOLCOLOUR = 'symbolColour'
+        TEXTCOLOUR = 'textColour'
+
+        result = super()._restoreObject(project, apiObj)
+
+        for namespace, param, newVar in [(MERITSETTINGS, MERITCOLOUR, cls._MERITCOLOUR),
+                                         (MERITSETTINGS, MERITENABLED, cls._MERITENABLED),
+                                         (MERITSETTINGS, MERITTHRESHOLD, cls._MERITTHRESHOLD),
+                                         (LINESETTINGS, LINECOLOUR, cls._LINECOLOUR),
+                                         (LINESETTINGS, SYMBOLCOLOUR, cls._SYMBOLCOLOUR),
+                                         (LINESETTINGS, TEXTCOLOUR, cls._TEXTCOLOUR),
+                                         ]:
+            if result.hasParameter(namespace, param):
+                # move the internal parameter to the correct namespace
+                value = result.getParameter(namespace, param)
+                result.deleteParameter(namespace, param)
+                result._setInternalParameter(newVar, value)
+
+        return result
 
     #=========================================================================================
     # CCPN functions

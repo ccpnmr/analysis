@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:26:48 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-11 20:43:40 +0100 (Mon, October 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -41,8 +41,8 @@ from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, _verifyPopupApply
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.core.lib.ContextManagers import undoStackBlocking, queueStateChange, notificationEchoBlocking
-from ccpn.core._implementation.PMIListABC import MERITENABLED, MERITTHRESHOLD, \
-    SYMBOLCOLOUR, TEXTCOLOUR, LINECOLOUR, MERITCOLOUR
+from ccpn.core._implementation.PMIListABC import PMIListABC  #, MERITENABLED, MERITTHRESHOLD, \
+# SYMBOLCOLOUR, TEXTCOLOUR, LINECOLOUR, MERITCOLOUR
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState
@@ -52,8 +52,8 @@ from ccpn.ui.gui.popups.AttributeEditorPopupABC import _attribContainer
 
 
 # define two groups of buttons for above/below the merit checkbox
-BUTTONOPTIONS1 = (SYMBOLCOLOUR, TEXTCOLOUR, LINECOLOUR, None)
-BUTTONOPTIONS2 = (None, None, None, MERITCOLOUR)
+BUTTONOPTIONS1 = (PMIListABC._SYMBOLCOLOUR, PMIListABC._TEXTCOLOUR, PMIListABC._LINECOLOUR, None)
+BUTTONOPTIONS2 = (None, None, None, PMIListABC._MERITCOLOUR)
 BUTTONOPTIONS = tuple(b1 or b2 for b1, b2 in zip(BUTTONOPTIONS1, BUTTONOPTIONS2))
 
 
@@ -61,15 +61,15 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
     """Abstract Base Class for popups for Peak/Multiplet/Integral
     """
 
-    klass = None    # The class whose properties are edited/displayed
-    attributes = [] # A list of (attributeName, getFunction, setFunction, kwds) tuples;
+    klass = None  # The class whose properties are edited/displayed
+    attributes = []  # A list of (attributeName, getFunction, setFunction, kwds) tuples;
     # options for displaying colours
     _symbolColourOption = False
     _textColourOption = False
     _lineColourOption = False
     _meritColourOption = False
     _meritOptions = False
-    LIVEDIALOG = True           # changes are reflected instantly
+    LIVEDIALOG = True  # changes are reflected instantly
     EDITMODE = True
 
     def __init__(self, parent=None, mainWindow=None, ccpnList=None, spectrum=None, title=None, editMode=None, **kwds):
@@ -113,8 +113,8 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         # row += 1
 
         # add initial dialog options as specified by attributes list
-        self.labels = {}    # An (attributeName, Label-widget) dict
-        self.edits = {}     # An (attributeName, LineEdit-widget) dict
+        self.labels = {}  # An (attributeName, Label-widget) dict
+        self.edits = {}  # An (attributeName, LineEdit-widget) dict
 
         for _label, getFunction, setFunction, kwds in self.attributes:
             attr = stringToCamelCase(_label)
@@ -123,7 +123,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
             editable = setFunction is not None
             self.labels[attr] = Label(self.mainWidget, _label, grid=(row, 0))
             self.edits[attr] = LineEdit(self.mainWidget, textAlignment='left', editable=editable,
-                                    vAlign='t', grid=(row, 1), **kwds)
+                                        vAlign='t', grid=(row, 1), **kwds)
             self.edits[attr].textChanged.connect(partial(self._queueSetValue, attr, getFunction, setFunction, row))
 
             if tipText:
@@ -139,19 +139,20 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         # add the meritOption buttons
         if self._meritOptions:
             row += 1
-            self.meritEnabledLabel = Label(self.mainWidget, text="Use Merit Threshold: ", grid=(row, 0))
-            tipText = getAttributeTipText(self.klass, MERITENABLED)
+            self.meritEnabledLabel = Label(self.mainWidget, text="Use Merit Threshold ", grid=(row, 0))
+            tipText = getAttributeTipText(self.klass, PMIListABC._MERITENABLED)
             if tipText:
                 self.meritEnabledLabel.setToolTip(tipText)
             self.meritEnabledBox = CheckBox(self.mainWidget, grid=(row, 1), )
             self.meritEnabledBox.toggled.connect(self._queueSetMeritEnabled)
 
             row += 1
-            self.meritThresholdLabel = Label(self.mainWidget, text=camelCaseToString(MERITTHRESHOLD), grid=(row, 0))
-            tipText = getAttributeTipText(self.klass, MERITTHRESHOLD)
+            self.meritThresholdLabel = Label(self.mainWidget, text=camelCaseToString(PMIListABC._MERITTHRESHOLD), grid=(row, 0))
+            tipText = getAttributeTipText(self.klass, PMIListABC._MERITTHRESHOLD)
             if tipText:
                 self.meritThresholdLabel.setToolTip(tipText)
             self.meritThresholdData = DoubleSpinbox(self.mainWidget, grid=(row, 1), hAlign='l', decimals=2, step=0.01, min=0.0, max=1.0)
+            self.meritThresholdData.setMinimumCharacters(7)
             self.meritThresholdData.valueChanged.connect(self._queueSetMeritThreshold)
 
             # add second set of default colours as required
@@ -228,8 +229,8 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         _colourPulldownList = PulldownList(self.mainWidget, grid=(row, 1))
         Colour.fillColourPulldown(_colourPulldownList, allowAuto=True, includeGradients=False)
         pulldowns.append((_colourLabel, _colourPulldownList, attrib))
-        _colourButton = Button(self.mainWidget, hAlign='l', grid=(row, 2), hPolicy='fixed', #vAlign='t',
-                              callback=partial(self._queueSetColourButton, _colourPulldownList), icon='icons/colours')
+        _colourButton = Button(self.mainWidget, hAlign='l', grid=(row, 2), hPolicy='fixed',  #vAlign='t',
+                               callback=partial(self._queueSetColourButton, _colourPulldownList), icon='icons/colours')
 
         _colourPulldownList.currentIndexChanged.connect(partial(self._queueSetColour, _colourPulldownList, attrib, row))
 
@@ -243,8 +244,8 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
             c = getattr(self.ccpnList, attrib, None)
             self.listViewSettings[attrib] = c
 
-        self.listViewSettings[MERITENABLED] = getattr(self.ccpnList, MERITENABLED, False)
-        self.listViewSettings[MERITTHRESHOLD] = getattr(self.ccpnList, MERITTHRESHOLD, 0.0)
+        self.listViewSettings[PMIListABC._MERITENABLED] = getattr(self.ccpnList, PMIListABC._MERITENABLED, False)
+        self.listViewSettings[PMIListABC._MERITTHRESHOLD] = getattr(self.ccpnList, PMIListABC._MERITTHRESHOLD, 0.0)
 
     def _setWidgetSettings(self):
         """Populate the widgets from the settings dict
@@ -273,8 +274,8 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
             c = self.listViewSettings[attrib]
             Colour.selectPullDownColour(pl, c, allowAuto=True)
 
-        self.meritEnabledBox.setChecked(self.listViewSettings[MERITENABLED] or False)
-        self.meritThresholdData.setValue(self.listViewSettings[MERITTHRESHOLD] or 0.0)
+        self.meritEnabledBox.setChecked(self.listViewSettings[PMIListABC._MERITENABLED] or False)
+        self.meritThresholdData.setValue(self.listViewSettings[PMIListABC._MERITTHRESHOLD] or 0.0)
 
     def _setListViewFromWidgets(self):
         """Set listView object from the widgets
@@ -295,9 +296,9 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
                         setattr(self.ccpnList, attrib, colour)
 
                 meritEnabled = self.meritEnabledBox.isChecked()
-                setattr(self.ccpnList, MERITENABLED, meritEnabled)
+                setattr(self.ccpnList, PMIListABC._MERITENABLED, meritEnabled)
                 meritThreshold = self.meritThresholdData.get()
-                setattr(self.ccpnList, MERITTHRESHOLD, meritThreshold)
+                setattr(self.ccpnList, PMIListABC._MERITTHRESHOLD, meritThreshold)
 
     def _setListViewFromSettings(self):
         """Set listView object from the original settings dict
@@ -311,10 +312,10 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
                     if colour is not None:
                         setattr(self.ccpnList, attrib, colour)
 
-                if self.listViewSettings[MERITENABLED] is not None:
-                    setattr(self.ccpnList, MERITENABLED, self.listViewSettings[MERITENABLED])
-                if self.listViewSettings[MERITTHRESHOLD] is not None:
-                    setattr(self.ccpnList, MERITTHRESHOLD, self.listViewSettings[MERITTHRESHOLD])
+                if self.listViewSettings[PMIListABC._MERITENABLED] is not None:
+                    setattr(self.ccpnList, PMIListABC._MERITENABLED, self.listViewSettings[PMIListABC._MERITENABLED])
+                if self.listViewSettings[PMIListABC._MERITTHRESHOLD] is not None:
+                    setattr(self.ccpnList, PMIListABC._MERITTHRESHOLD, self.listViewSettings[PMIListABC._MERITTHRESHOLD])
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -413,13 +414,13 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         """Queue the function for setting merit
         """
         value = self.meritEnabledBox.get()
-        if value != getattr(self.COMPARELIST, MERITENABLED, False):
+        if value != getattr(self.COMPARELIST, PMIListABC._MERITENABLED, False):
             return partial(self._setMeritEnabled, value)
 
     def _setMeritEnabled(self, value):
         """Function for setting merit, called by _applyAllChanges
         """
-        setattr(self.ccpnList, MERITENABLED, value)
+        setattr(self.ccpnList, PMIListABC._MERITENABLED, value)
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetMeritThreshold(self, _value):
@@ -428,13 +429,13 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         value = self.meritThresholdData.get()
         # set the state of the other buttons
         textFromValue = self.meritThresholdData.textFromValue
-        if textFromValue(value) != textFromValue(getattr(self.COMPARELIST, MERITTHRESHOLD, 0.0) or 0.0):
+        if textFromValue(value) != textFromValue(getattr(self.COMPARELIST, PMIListABC._MERITTHRESHOLD, 0.0) or 0.0):
             return partial(self._setMeritThreshold, value)
 
     def _setMeritThreshold(self, value):
         """Function for setting merit threshold, called by _applyAllChanges
         """
-        setattr(self.ccpnList, MERITTHRESHOLD, value)
+        setattr(self.ccpnList, PMIListABC._MERITTHRESHOLD, value)
 
     def _newContainer(self):
         """Make a new container to hold attributes for objects not created yet

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:19:59 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-11 20:43:39 +0100 (Mon, October 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -41,12 +41,9 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
 from ccpn.util.Constants import AMOUNT_UNITS, IONICSTRENGTH_UNITS
-from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, renameObject, undoBlock
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, renameObject, undoBlock
 
 
-SAMPLE = 'sample'
-SAMPLEAMOUNTUNITS = 'sampleAmountUnits'
-SAMPLEIONICSTRENGTHUNITS = 'sampleIonicStrengthUnits'
 DEFAULTAMOUNTUNITS = 'µL'
 DEFAULTIONICSTRENGTHUNITS = 'mM'
 
@@ -74,7 +71,14 @@ class Sample(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiSample._metaclass.qualifiedName()
 
+    # internal namespace
+    _AMOUNTUNITS = 'amountUnits'
+    _IONICSTRENGTHUNITS = 'ionicStrengthUnits'
+
+    #=========================================================================================
     # CCPN properties
+    #=========================================================================================
+
     @property
     def _apiSample(self) -> ApiSample:
         """ CCPN sample matching Sample"""
@@ -111,6 +115,8 @@ class Sample(AbstractWrapperObject):
         return self._wrappedData.ph
 
     @pH.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def pH(self, value: float):
         self._wrappedData.ph = value
 
@@ -120,6 +126,8 @@ class Sample(AbstractWrapperObject):
         return self._wrappedData.ionicStrength
 
     @ionicStrength.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def ionicStrength(self, value: float):
         self._wrappedData.ionicStrength = value
 
@@ -130,6 +138,8 @@ class Sample(AbstractWrapperObject):
         return self._wrappedData.amount
 
     @amount.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def amount(self, value: float):
         self._wrappedData.amount = value
 
@@ -145,6 +155,8 @@ class Sample(AbstractWrapperObject):
         return result
 
     @amountUnit.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def amountUnit(self, value: str):
         # if value not in Constants.amountUnits:
         #   self._project._logger.warning(
@@ -158,6 +170,8 @@ class Sample(AbstractWrapperObject):
         return self._wrappedData.isHazardous
 
     @isHazardous.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def isHazardous(self, value: bool):
         self._wrappedData.isHazardous = value
 
@@ -168,6 +182,8 @@ class Sample(AbstractWrapperObject):
         return self._wrappedData.isVirtual
 
     @isVirtual.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def isVirtual(self, value: bool):
         self._wrappedData.isVirtual = value
 
@@ -177,6 +193,8 @@ class Sample(AbstractWrapperObject):
         return self._wrappedData.creationDate
 
     @creationDate.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def creationDate(self, value: datetime):
         self._wrappedData.creationDate = value
 
@@ -186,6 +204,8 @@ class Sample(AbstractWrapperObject):
         return self._wrappedData.batchIdentifier
 
     @batchIdentifier.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def batchIdentifier(self, value: str):
         self._wrappedData.batchIdentifier = value
 
@@ -195,6 +215,8 @@ class Sample(AbstractWrapperObject):
         return self._wrappedData.plateIdentifier
 
     @plateIdentifier.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def plateIdentifier(self, value: str):
         self._wrappedData.plateIdentifier = value
 
@@ -204,6 +226,8 @@ class Sample(AbstractWrapperObject):
         return self._wrappedData.rowPosition
 
     @rowNumber.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def rowNumber(self, value):
         self._wrappedData.rowPosition = value
 
@@ -213,6 +237,8 @@ class Sample(AbstractWrapperObject):
         return self._wrappedData.colPosition
 
     @columnNumber.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def columnNumber(self, value: int):
         self._wrappedData.colPosition = value
 
@@ -225,6 +251,8 @@ class Sample(AbstractWrapperObject):
                             for y in x.dataSources))
 
     @spectra.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def spectra(self, value: Sequence[Spectrum]):
         self._wrappedData.nmrExperiments = set(x._wrappedData.experiment for x in value)
 
@@ -243,13 +271,9 @@ class Sample(AbstractWrapperObject):
     def _fetchSampleComponent(self, name: str):
         """Fetch SampleComponent with name=name, creating it if necessary"""
 
-        # self._startCommandEchoBlock('fetchSampleComponent', name, parName='newSampleComponent')
         ff = self._project._data2Obj.get
-        # try:
         result = (ff(self._wrappedData.findFirstSampleComponent(name=name)) or
                   self.newSampleComponent(name=name))
-        # finally:
-        #   self._endCommandEchoBlock()
 
         return result
 
@@ -257,47 +281,51 @@ class Sample(AbstractWrapperObject):
     def amountUnits(self) -> str:
         """amountUnits for sample, one of list AMOUNT_UNITS
         """
-        if not self.hasParameter(SAMPLE, SAMPLEAMOUNTUNITS):
-            # set a default value if it has never been accessed before
-            self.setParameter(SAMPLE, SAMPLEAMOUNTUNITS, DEFAULTAMOUNTUNITS)
+        if not self._hasInternalParameter(self._AMOUNTUNITS):
+            # return default if not set
             return DEFAULTAMOUNTUNITS
 
-        value = self.getParameter(SAMPLE, SAMPLEAMOUNTUNITS)
+        # can return a value of None
+        value = self._getInternalParameter(self._AMOUNTUNITS)
         return value
 
     @amountUnits.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def amountUnits(self, value: str):
         """Set value for the amountUnits
         """
         if not isinstance(value, (str, type(None))):
-            raise ValueError("amountUnits must be a string/None.")
+            raise ValueError('amountUnits must be a string/None.')
         if value not in (None,) + AMOUNT_UNITS:
-            raise ValueError("amountUnits must be of type None/{}".format(AMOUNT_UNITS))
+            raise ValueError(f'amountUnits must be of type None/{AMOUNT_UNITS}')
 
-        self.setParameter(SAMPLE, SAMPLEAMOUNTUNITS, value)
+        self._setInternalParameter(self._AMOUNTUNITS, value)
 
     @property
     def ionicStrengthUnits(self) -> str:
         """ionicStrengthUnits for sample, one of list IONICSTRENGTH_UNITS
         """
-        if not self.hasParameter(SAMPLE, SAMPLEIONICSTRENGTHUNITS):
-            # set a default value if it has never been accessed before
-            self.setParameter(SAMPLE, SAMPLEIONICSTRENGTHUNITS, DEFAULTIONICSTRENGTHUNITS)
+        if not self._hasInternalParameter(self._IONICSTRENGTHUNITS):
+            # return default if not set
             return DEFAULTIONICSTRENGTHUNITS
 
-        value = self.getParameter(SAMPLE, SAMPLEIONICSTRENGTHUNITS)
+        # can return a value of None
+        value = self._getInternalParameter(self._IONICSTRENGTHUNITS)
         return value
 
     @ionicStrengthUnits.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def ionicStrengthUnits(self, value: str):
         """Set value for the ionicStrengthUnits
         """
         if not isinstance(value, (str, type(None))):
-            raise ValueError("ionicStrengthUnits must be a string/None.")
+            raise ValueError('ionicStrengthUnits must be a string/None.')
         if value not in (None,) + IONICSTRENGTH_UNITS:
-            raise ValueError("ionicStrengthUnits must be of type None/{}".format(IONICSTRENGTH_UNITS))
+            raise ValueError(f'ionicStrengthUnits must be of type None/{IONICSTRENGTH_UNITS}')
 
-        self.setParameter(SAMPLE, SAMPLEIONICSTRENGTHUNITS, value)
+        self._setInternalParameter(self._IONICSTRENGTHUNITS, value)
 
     #=========================================================================================
     # Implementation functions
@@ -322,6 +350,28 @@ class Sample(AbstractWrapperObject):
         self._wrappedData.__dict__['name'] = name
 
         return (oldName,)
+
+    @classmethod
+    def _restoreObject(cls, project, apiObj):
+        """Restore the object and update ccpnInternalData
+        """
+        # keep the original names removed from the top of the module
+        SAMPLE = 'sample'
+        SAMPLEAMOUNTUNITS = 'sampleAmountUnits'
+        SAMPLEIONICSTRENGTHUNITS = 'sampleIonicStrengthUnits'
+
+        result = super()._restoreObject(project, apiObj)
+
+        for namespace, param, newVar in [(SAMPLE, SAMPLEAMOUNTUNITS, cls._AMOUNTUNITS),
+                                         (SAMPLE, SAMPLEIONICSTRENGTHUNITS, cls._IONICSTRENGTHUNITS),
+                                         ]:
+            if result.hasParameter(namespace, param):
+                # move the internal parameter to the correct namespace
+                value = result.getParameter(namespace, param)
+                result.deleteParameter(namespace, param)
+                result._setInternalParameter(newVar, value)
+
+        return result
 
     #=========================================================================================
     # CCPN functions
@@ -375,7 +425,7 @@ def _newSample(self: Project, name: str = None, pH: float = None, ionicStrength:
                amount: float = None, amountUnit: str = None, isVirtual: bool = False, isHazardous: bool = None,
                creationDate: datetime = None, batchIdentifier: str = None, plateIdentifier: str = None,
                rowNumber: int = None, columnNumber: int = None, comment: str = None,
-               amountUnits = None, ionicStrengthUnits = None) -> Sample:
+               amountUnits=None, ionicStrengthUnits=None) -> Sample:
     """Create new Sample.
 
     See the Sample class for details.
@@ -469,6 +519,7 @@ def _fetchSample(project, name: str = None):
         result = (ff(project._wrappedData.sampleStore.findFirstSample(name=name)) or
                   project.newSample(name=name))
     return result
+
 
 #EJB 20181205: moved to Project
 # Project.newSample = _newSample

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:19:59 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-11 20:43:39 +0100 (Mon, October 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -36,11 +36,7 @@ from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import ChainGroup as ApiChainGroup
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, renameObject
-
-
-COMPLEX = 'complex'
-COMPLEXCOMMENT = 'complexComment'
+from ccpn.core.lib.ContextManagers import newObject, renameObject, ccpNmrV3CoreSetter
 
 
 class Complex(AbstractWrapperObject):
@@ -62,6 +58,9 @@ class Complex(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiChainGroup._metaclass.qualifiedName()
+
+    # internal namespace
+    _COMMENT = 'comment'
 
     # CCPN properties
     @property
@@ -102,6 +101,7 @@ class Complex(AbstractWrapperObject):
 
     @chains.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def chains(self, value):
         getDataObj = self._project._data2Obj.get
         value = [getDataObj(x) if isinstance(x, str) else x for x in value]
@@ -110,17 +110,18 @@ class Complex(AbstractWrapperObject):
     @property
     def comment(self) -> str:
         """Free-form text comment"""
-        comment = self.getParameter(COMPLEX, COMPLEXCOMMENT)
+        comment = self._getInternalParameter(self._COMMENT)
         return comment
 
     @comment.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def comment(self, value: str):
         """set optional comment of Complex."""
         if not isinstance(value, (str, type(None))):
             raise ValueError("comment must be a string/None.")
 
-        self.setParameter(COMPLEX, COMPLEXCOMMENT, value)
+        self._setInternalParameter(self._COMMENT, value)
 
     #=========================================================================================
     # Implementation functions
@@ -147,6 +148,25 @@ class Complex(AbstractWrapperObject):
         self._oldPid = self.pid
         self._wrappedData.__dict__['name'] = name
         return (oldName,)
+
+    @classmethod
+    def _restoreObject(cls, project, apiObj):
+        """Restore the object and update ccpnInternalData
+        """
+        COMPLEX = 'complex'
+        COMPLEXCOMMENT = 'complexComment'
+
+        result = super()._restoreObject(project, apiObj)
+
+        for namespace, param, newVar in [(COMPLEX, COMPLEXCOMMENT, cls._COMMENT),
+                                         ]:
+            if result.hasParameter(namespace, param):
+                # move the internal parameter to the correct namespace
+                value = result.getParameter(namespace, param)
+                result.deleteParameter(namespace, param)
+                result._setInternalParameter(newVar, value)
+
+        return result
 
     #=========================================================================================
     # CCPN functions

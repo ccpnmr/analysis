@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 17:35:46 +0100 (Fri, June 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-11 20:43:39 +0100 (Mon, October 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -30,17 +30,15 @@ from ccpn.core.Spectrum import Spectrum
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import MultipletList as ApiMultipletList
 from typing import Tuple, Sequence, Union
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter
 from ccpn.util.Logging import getLogger
 from ccpn.core._implementation.PMIListABC import PMIListABC
 
 
-MULTIPLETSETTINGS = 'multipletSettings'
-MULTIPLETAVERAGING = 'multipletAveraging'
 MULTIPLETAVERAGE = 'Average'
 MULTIPLETWEIGHTEDAVERAGE = 'Weighted Average'
-MULTIPLETLINECOLOURDEFAULT = '#7f7f7f'
 MULTIPLETAVERAGINGTYPES = [MULTIPLETAVERAGE, MULTIPLETWEIGHTEDAVERAGE]
+_MULTIPLETLINECOLOURDEFAULT = '#7f7f7f'
 
 
 class MultipletList(PMIListABC):
@@ -68,6 +66,9 @@ class MultipletList(PMIListABC):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiMultipletList._metaclass.qualifiedName()
 
+    # internal namespace
+    _MULTIPLETAVERAGING = 'multipletAveraging'
+
     #=========================================================================================
     # CCPN properties
     #=========================================================================================
@@ -91,18 +92,20 @@ class MultipletList(PMIListABC):
     def multipletAveraging(self) -> str:
         """Multiplet averaging method
         """
-        value = self.getParameter(MULTIPLETSETTINGS, MULTIPLETAVERAGING)
+        value = self._getInternalParameter(self._MULTIPLETAVERAGING)
         return MULTIPLETAVERAGINGTYPES[value] if value is not None and \
                                                  0 <= value < len(MULTIPLETAVERAGINGTYPES) else None
 
     @multipletAveraging.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def multipletAveraging(self, value: str):
         if not isinstance(value, str):
             raise ValueError("multipletAveraging must be a string")
         if value not in MULTIPLETAVERAGINGTYPES:
             raise ValueError("multipletAveraging %s not defined correctly, must be in %s" % (value, MULTIPLETAVERAGINGTYPES))
 
-        self.setParameter(MULTIPLETSETTINGS, MULTIPLETAVERAGING, MULTIPLETAVERAGINGTYPES.index(value))
+        self._setInternalParameter(self._MULTIPLETAVERAGING, MULTIPLETAVERAGINGTYPES.index(value))
 
     #=========================================================================================
     # Implementation functions
@@ -161,7 +164,7 @@ def _newMultipletList(self: Spectrum, title: str = None, comment: str = None,
                       symbolStyle: str = None, symbolColour: str = None,
                       textColour: str = None,
                       meritColour: str = None, meritEnabled: bool = False, meritThreshold: float = None,
-                      lineColour: str = MULTIPLETLINECOLOURDEFAULT, multipletAveraging=MULTIPLETAVERAGE,
+                      lineColour: str = _MULTIPLETLINECOLOURDEFAULT, multipletAveraging=MULTIPLETAVERAGE,
                       multiplets: Sequence[Union['Multiplet', str]] = None,
                       ) -> MultipletList:
     """Create new MultipletList within Spectrum.

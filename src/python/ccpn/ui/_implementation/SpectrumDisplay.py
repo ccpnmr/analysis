@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-17 15:13:05 +0100 (Fri, September 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-11 20:43:40 +0100 (Mon, October 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -92,9 +92,28 @@ class SpectrumDisplay(AbstractWrapperObject):
     def _restoreObject(cls, project, apiObj):
         """Subclassed to allow for initialisations on restore
         """
-        display = super()._restoreObject(project, apiObj)
-        display._isotopeCodes = tuple(display.spectrumViews[0]._getByDisplayOrder('isotopeCodes'))
-        return display
+        result = super()._restoreObject(project, apiObj)
+        result._isotopeCodes = tuple(result.spectrumViews[0]._getByDisplayOrder('isotopeCodes'))
+
+        SPECTRUMGROUPS = 'spectrumGroups'
+        SPECTRUMISGROUPED = 'spectrumIsGrouped'
+        SPECTRUMGROUPLIST = 'spectrumGroupList'
+        SPECTRUMDISPLAY = 'spectrumDisplay'
+        STRIPARRANGEMENT = 'stripArrangement'
+        ZPLANENAVIGATIONMODE = 'zPlaneNavigationMode'
+
+        for namespace, param, newVar in [(SPECTRUMGROUPS, SPECTRUMISGROUPED, result._ISGROUPED),
+                                         (SPECTRUMGROUPS, SPECTRUMGROUPLIST, result._SPECTRUMGROUPS),
+                                         (SPECTRUMDISPLAY, STRIPARRANGEMENT, result._STRIPARRANGEMENT),
+                                         (SPECTRUMDISPLAY, ZPLANENAVIGATIONMODE, result._ZPLANENAVIGATIONMODE),
+                                         ]:
+            if result.hasParameter(namespace, param):
+                # move the internal parameter to the correct namespace
+                value = result.getParameter(namespace, param)
+                result.deleteParameter(namespace, param)
+                result._setInternalParameter(newVar, value)
+
+        return result
 
     #-----------------------------------------------------------------------------------------
     # CCPN properties

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-01 19:18:07 +0100 (Fri, October 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-11 20:43:40 +0100 (Mon, October 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -30,16 +30,16 @@ import numpy as np
 from PyQt5 import QtWidgets, QtCore, QtGui
 from functools import partial
 from copy import deepcopy
-from collections import namedtuple
+# from collections import namedtuple
 from contextlib import contextmanager
-from ccpn.core.Project import Project
+# from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.Sample import Sample
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
-from typing import Tuple, Optional
+from typing import Tuple
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.PhasingFrame import PhasingFrame
@@ -48,15 +48,15 @@ from ccpn.ui.gui.widgets.SpectrumGroupToolBar import SpectrumGroupToolBar
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea, SpectrumDisplayScrollArea
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.DropBase import DropBase
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.Spacer import Spacer
+# from ccpn.ui.gui.widgets.Label import Label
+# from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks, _assignNmrResiduesToPeaks
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import PEAKSELECT, MULTIPLETSELECT
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget
-from ccpn.ui.gui.widgets.GLAxis import Gui1dWidgetAxis, GuiNdWidgetAxis
+from ccpn.ui.gui.widgets.GLAxis import GuiNdWidgetAxis
 from ccpn.ui.gui.lib.GuiSpectrumView import _spectrumViewHasChanged
 from ccpn.ui.gui.widgets.SpectrumGroupToolBar import _spectrumGroupViewHasChanged
 from ccpn.util.Logging import getLogger
@@ -73,12 +73,12 @@ from ccpn.ui._implementation.MultipletListView import MultipletListView
 from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySettings
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, \
-    BlankedPartial, undoBlockWithoutSideBar, notificationEchoBlocking, undoBlockWithoutSideBar, undoStackRevert
+    BlankedPartial, ccpNmrV3CoreSetter, notificationEchoBlocking, undoBlockWithoutSideBar
 from ccpn.util.decorators import logCommand
 from ccpn.util.Common import makeIterableList
 from ccpn.core.lib import Undo
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_BACKGROUND, ZPlaneNavigationModes
+from ccpn.ui.gui.guiSettings import ZPlaneNavigationModes
 
 
 STRIP_SPACING = 5
@@ -91,13 +91,7 @@ AXISUNIT_NUMBER = 'number'
 # AXISUNITS = ['ppm', 'Hz', 'point']
 AXISUNITS = [AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT]
 
-SPECTRUMGROUPS = 'spectrumGroups'
-SPECTRUMISGROUPED = 'spectrumIsGrouped'
-SPECTRUMGROUPLIST = 'spectrumGroupList'
 STRIPDIRECTIONS = ['Y', 'X', 'T']
-SPECTRUMDISPLAY = 'spectrumDisplay'
-STRIPARRANGEMENT = 'stripArrangement'
-ZPLANENAVIGATIONMODE = 'zPlaneNavigationMode'
 
 MAXITEMLOGGING = 4
 MAXTILEBOUND = 65536
@@ -194,6 +188,12 @@ class GuiSpectrumDisplay(CcpnModule):
     settingsPosition = 'left'
     settingsMinimumSizes = (250, 50)
     _allowRename = True
+
+    # internal namespace
+    _ISGROUPED = 'isGrouped'
+    _SPECTRUMGROUPS = 'groupList'
+    _STRIPARRANGEMENT = 'stripArrangement'
+    _ZPLANENAVIGATIONMODE = 'zPlaneNavigationMode'
 
     def __init__(self, mainWindow, useScrollArea=False):
         """
@@ -827,19 +827,19 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         # Using AbstractWrapperObject because there seems to already be a setParameter
         # belonging to spectrumDisplay
-        grouped = AbstractWrapperObject.getParameter(self, SPECTRUMGROUPS, SPECTRUMISGROUPED)
+        grouped = AbstractWrapperObject._getInternalParameter(self, self._ISGROUPED)
         if grouped is not None:
             return grouped
 
-        # set default to False
-        AbstractWrapperObject.setParameter(self, SPECTRUMGROUPS, SPECTRUMISGROUPED, False)
         return False
 
     @isGrouped.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def isGrouped(self, grouped):
         """Set whether the spectrumDisplay contains grouped spectra
         """
-        AbstractWrapperObject.setParameter(self, SPECTRUMGROUPS, SPECTRUMISGROUPED, grouped)
+        AbstractWrapperObject._setInternalParameter(self, self._ISGROUPED, grouped)
 
     @property
     def stripArrangement(self):
@@ -847,16 +847,17 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         # Using AbstractWrapperObject because there seems to already be a setParameter
         # belonging to spectrumDisplay
-        arrangement = AbstractWrapperObject.getParameter(self, SPECTRUMDISPLAY, STRIPARRANGEMENT)
+        arrangement = AbstractWrapperObject._getInternalParameter(self, self._STRIPARRANGEMENT)
         if arrangement is not None:
             return arrangement
 
-        # set default values in the ccpnInternal store
+        # get default values in the ccpnInternal store
         arrangement = self._wrappedData.stripDirection  # SHOULD always be 'Y', if it makes a difference
-        AbstractWrapperObject.setParameter(self, SPECTRUMDISPLAY, STRIPARRANGEMENT, arrangement)
         return arrangement
 
     @stripArrangement.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def stripArrangement(self, value):
         """Set the new strip direction ('X', 'Y', 'T', None) - None only for non-strip plots
         """
@@ -865,7 +866,7 @@ class GuiSpectrumDisplay(CcpnModule):
         elif value not in STRIPDIRECTIONS:
             raise ValueError("stripArrangement must be either 'X', 'Y' or 'T'")
 
-        AbstractWrapperObject.setParameter(self, SPECTRUMDISPLAY, STRIPARRANGEMENT, value)
+        AbstractWrapperObject._setInternalParameter(self, self._STRIPARRANGEMENT, value)
 
         self.setVisibleAxes()
 
@@ -875,13 +876,15 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         # Using AbstractWrapperObject because there seems to already be a setParameter
         # belonging to spectrumDisplay
-        arrangement = AbstractWrapperObject.getParameter(self, SPECTRUMDISPLAY, ZPLANENAVIGATIONMODE)
+        arrangement = AbstractWrapperObject._getInternalParameter(self, self._ZPLANENAVIGATIONMODE)
         if arrangement is not None:
             return arrangement
 
         return ZPlaneNavigationModes(0).label
 
     @zPlaneNavigationMode.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def zPlaneNavigationMode(self, value):
         """Set the new position of zPlane navigation buttons
         """
@@ -891,7 +894,7 @@ class GuiSpectrumDisplay(CcpnModule):
         elif value not in labels:
             raise ValueError(f"zPlaneNavigationMode must be in {repr(labels)}")
 
-        AbstractWrapperObject.setParameter(self, SPECTRUMDISPLAY, ZPLANENAVIGATIONMODE, value)
+        AbstractWrapperObject._setInternalParameter(self, self._ZPLANENAVIGATIONMODE, value)
 
     def _updateAxesVisibility(self):
         if not self.is1D:
@@ -1037,17 +1040,16 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         # Using AbstractWrapperObject because there seems to already be a setParameter
         # belonging to spectrumDisplay
-        _spectrumGroups = AbstractWrapperObject.getParameter(self, SPECTRUMGROUPS, SPECTRUMGROUPLIST)
+        _spectrumGroups = AbstractWrapperObject._getInternalParameter(self, self._SPECTRUMGROUPS)
         if _spectrumGroups is not None:
             return _spectrumGroups
 
-        AbstractWrapperObject.setParameter(self, SPECTRUMGROUPS, SPECTRUMGROUPLIST, ())
         return ()
 
     def _setSpectrumGroups(self, groups):
         """Set the groups in the spectrumDisplay
         """
-        AbstractWrapperObject.setParameter(self, SPECTRUMGROUPS, SPECTRUMGROUPLIST, groups)
+        AbstractWrapperObject._setInternalParameter(self, self._SPECTRUMGROUPS, groups)
 
     def getSettings(self):
         """get the settings dict from the settingsWidget

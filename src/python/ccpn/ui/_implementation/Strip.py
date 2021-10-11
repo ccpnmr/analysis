@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-17 12:27:26 +0100 (Fri, September 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-11 20:43:40 +0100 (Mon, October 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -270,6 +270,21 @@ class Strip(AbstractWrapperObject):
             raise ValueError('Tuple must be of type int')
 
         self._setInternalParameter(self._STRIPTILEPOSITION, value)
+
+    @classmethod
+    def _restoreObject(cls, project, apiObj):
+        """Subclassed to allow for initialisations on restore
+        """
+        result = super()._restoreObject(project, apiObj)
+        result._isotopeCodes = tuple(result.spectrumViews[0]._getByDisplayOrder('isotopeCodes'))
+
+        # move everything from stripHeaderDict in one operation - same names
+        STRIPDICT = 'stripHeaderDict'
+        space = result._ccpnInternalData.pop(STRIPDICT, None)
+        if space is not None:
+            result._ccpnInternalData[result._CCPNMR_NAMESPACE].update(space)
+
+        return result
 
     #=========================================================================================
     # CCPN functions

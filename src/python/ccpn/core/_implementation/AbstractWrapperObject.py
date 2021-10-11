@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-17 15:13:05 +0100 (Fri, September 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-11 20:43:39 +0100 (Mon, October 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -469,8 +469,12 @@ class AbstractWrapperObject(NotifierBase):
         return self.getParameter(self._CCPNMR_NAMESPACE, parameterName)
 
     def _hasInternalParameter(self, parameterName: str):
-        """Returns true if parameterName for CCPNINTERNAl namespace exists"""
+        """Returns true if parameterName for CCPNINTERNAL namespace exists"""
         return self.hasParameter(self._CCPNMR_NAMESPACE, parameterName)
+
+    def _deleteInternalParameter(self, parameterName: str):
+        """Delete the parameter from CCPNINTERNAL namespace if exists and remove namespace if empty"""
+        self.deleteParameter(self._CCPNMR_NAMESPACE, parameterName)
 
     def setParameter(self, namespace: str, parameterName: str, value):
         """Sets parameterName for namespace to value; value must be json serialisable"""
@@ -494,11 +498,24 @@ class AbstractWrapperObject(NotifierBase):
 
     def hasParameter(self, namespace: str, parameterName: str):
         """Returns true if parameterName for namespace exists"""
+        space = self._ccpnInternalData.get(namespace)
+        if space is None:
+            return False
+        return parameterName in space
+
+    def deleteParameter(self, namespace: str, parameterName: str):
+        """Delete the parameter from namespace if exists and remove namespace if empty
+        """
         data = self._ccpnInternalData
         space = data.get(namespace)
         if space is None:
             return False
-        return parameterName in space
+        # remove the parameterName and namespace
+        space.pop(parameterName, None)
+        if not space:
+            data.pop(namespace, None)
+        # Explicit flag assignment to enforce saving
+        self._wrappedData.__dict__['isModified'] = True
 
     def _setNonApiAttributes(self, attribs):
         """Set the non-api attributes that are stored in ccpnInternal

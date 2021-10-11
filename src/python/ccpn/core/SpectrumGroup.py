@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:19:59 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-11 20:43:39 +0100 (Mon, October 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,15 +37,6 @@ from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, renameO
 from ccpn.util.decorators import logCommand
 from ccpn.util.Logging import getLogger
 from ccpn.util.LabelledEnum import LabelledEnum
-
-SPECTRUMGROUP = 'spectrumGroup'
-SPECTRUMGROUPCOMMENT = 'spectrumGroupComment'
-SPECTRUMGROUPSERIES = 'spectrumGroupSeries'
-SPECTRUMGROUPSERIESUNITS = 'spectrumGroupSeriesUnits'
-SPECTRUMGROUPSERIESTYPE = 'spectrumGroupSeriesType'
-SPECTRUMGROUPPOSITIVECONTOURCOLOUR = 'spectrumGroupPositiveContourColour'
-SPECTRUMGROUPNEGATIVECONTOURCOLOUR = 'spectrumGroupNegativeContourColour'
-SPECTRUMGROUPSLICECOLOUR = 'spectrumGroupSliceColour'
 
 
 class SeriesTypes(LabelledEnum):
@@ -81,7 +72,19 @@ class SpectrumGroup(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiSpectrumGroup._metaclass.qualifiedName()
 
+    # internal namespace
+    _COMMENT = 'comment'
+    _SERIES = 'series'
+    _SERIESUNITS = 'seriesUnits'
+    _SERIESTYPE = 'seriesType'
+    _POSITIVECONTOURCOLOUR = 'positiveContourColour'
+    _NEGATIVECONTOURCOLOUR = 'negativeContourColour'
+    _SLICECOLOUR = 'sliceColour'
+
+    #=========================================================================================
     # CCPN properties
+    #=========================================================================================
+
     @property
     def _apiSpectrumGroup(self) -> ApiSpectrumGroup:
         """ CCPN Project SpectrumGroup"""
@@ -123,59 +126,66 @@ class SpectrumGroup(AbstractWrapperObject):
     @property
     def comment(self) -> str:
         """Free-form text comment"""
-        comment = self.getParameter(SPECTRUMGROUP, SPECTRUMGROUPCOMMENT)
+        comment = self._getInternalParameter(self._COMMENT)
         return comment
 
     @comment.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def comment(self, value: str):
         """set optional comment of SpectrumGroup."""
         if not isinstance(value, (str, type(None))):
             raise ValueError("comment must be a string/None.")
 
-        self.setParameter(SPECTRUMGROUP, SPECTRUMGROUPCOMMENT, value)
+        self._setInternalParameter(self._COMMENT, value)
 
     @property
     def sliceColour(self) -> str:
         """1D slice colour for group"""
-        colour = self.getParameter(SPECTRUMGROUP, SPECTRUMGROUPSLICECOLOUR)
+        colour = self._getInternalParameter(self._SLICECOLOUR)
         return colour
 
     @sliceColour.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def sliceColour(self, value: str):
         """1D slice colour for group"""
         if not isinstance(value, (str, type(None))):
             raise ValueError("sliceColour must be a string/None.")
 
-        self.setParameter(SPECTRUMGROUP, SPECTRUMGROUPSLICECOLOUR, value)
+        self._setInternalParameter(self._SLICECOLOUR, value)
 
     @property
     def positiveContourColour(self) -> str:
         """nD positive contour colour for group"""
-        colour = self.getParameter(SPECTRUMGROUP, SPECTRUMGROUPPOSITIVECONTOURCOLOUR)
+        colour = self._getInternalParameter(self._POSITIVECONTOURCOLOUR)
         return colour
 
     @positiveContourColour.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def positiveContourColour(self, value: str):
         """nD positive contour colour for group"""
         if not isinstance(value, (str, type(None))):
             raise ValueError("positiveContourColour must be a string/None.")
 
-        self.setParameter(SPECTRUMGROUP, SPECTRUMGROUPPOSITIVECONTOURCOLOUR, value)
+        self._setInternalParameter(self._POSITIVECONTOURCOLOUR, value)
 
     @property
     def negativeContourColour(self) -> str:
         """nD negative contour colour for group"""
-        colour = self.getParameter(SPECTRUMGROUP, SPECTRUMGROUPNEGATIVECONTOURCOLOUR)
+        colour = self._getInternalParameter(self._NEGATIVECONTOURCOLOUR)
         return colour
 
     @negativeContourColour.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def negativeContourColour(self, value: str):
         """nD negative contour colour for group"""
         if not isinstance(value, (str, type(None))):
             raise ValueError("negativeContourColour must be a string/None.")
 
-        self.setParameter(SPECTRUMGROUP, SPECTRUMGROUPNEGATIVECONTOURCOLOUR, value)
+        self._setInternalParameter(self._NEGATIVECONTOURCOLOUR, value)
 
     #-------------------------------------------------------------------------------------------------------
     # GWV hack to alleviate (temporarily) the loss of order on spectra
@@ -261,33 +271,37 @@ class SpectrumGroup(AbstractWrapperObject):
     def seriesUnits(self):
         """Return the seriesUnits for the spectrumGroup
         """
-        units = self.getParameter(SPECTRUMGROUPSERIES, SPECTRUMGROUPSERIESUNITS)
+        units = self._getInternalParameter(self._SERIESUNITS)
         return units
 
     @seriesUnits.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def seriesUnits(self, value):
         """Set the seriesUnits for the spectrumGroup
         """
         if not isinstance(value, (str, type(None))):
             raise ValueError("seriesUnits must be a string or None.")
 
-        self.setParameter(SPECTRUMGROUPSERIES, SPECTRUMGROUPSERIESUNITS, value)
+        self._setInternalParameter(self._SERIESUNITS, value)
 
     @property
     def seriesType(self):
         """Return the seriesType for the spectrumGroup
         """
-        seriesType = self.getParameter(SPECTRUMGROUPSERIES, SPECTRUMGROUPSERIESTYPE)
+        seriesType = self._getInternalParameter(self._SERIESTYPE)
         return seriesType
 
     @seriesType.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def seriesType(self, value):
         """Set the seriesType for the spectrumGroup
         """
         if not isinstance(value, (int, type(None))):
             raise ValueError("seriesType must be an int or None.")
 
-        self.setParameter(SPECTRUMGROUPSERIES, SPECTRUMGROUPSERIESTYPE, value)
+        self._setInternalParameter(self._SERIESTYPE, value)
 
     @property
     def seriesPeakHeightForPosition(self):
@@ -305,6 +319,7 @@ class SpectrumGroup(AbstractWrapperObject):
 
             """
         from ccpn.core.lib.peakUtils import getSpectralPeakHeights
+
         return getSpectralPeakHeights(self.spectra)
 
     @property
@@ -322,6 +337,7 @@ class SpectrumGroup(AbstractWrapperObject):
 
             """
         from ccpn.core.lib.peakUtils import getSpectralPeakHeightForNmrResidue
+
         return getSpectralPeakHeightForNmrResidue(self.spectra)
 
     def sortSpectraBySeries(self, reverse=True):
@@ -336,6 +352,7 @@ class SpectrumGroup(AbstractWrapperObject):
 
     def sortSpectraByName(self, reverse=True):
         from ccpn.util.Common import sortObjectByName
+
         spectra = list(self.spectra)
         sortObjectByName(spectra, reverse=reverse)
         self.spectra = spectra
@@ -344,13 +361,13 @@ class SpectrumGroup(AbstractWrapperObject):
         # name = _incrementObjectName(self.project, self._pluralLinkName, self.name)
         newSpectrumGroup = self.project.newSpectrumGroup(name=self.name, spectra=self.spectra)
         attrNames = ['series', 'seriesType', 'seriesUnits', 'sliceColour',
-                 'positiveContourColour', 'negativeContourColour', 'comment']
+                     'positiveContourColour', 'negativeContourColour', 'comment']
         for name in attrNames:
             val = getattr(self, name, None)
             try:
                 setattr(newSpectrumGroup, name, val)
             except Exception as e:
-                getLogger().warning('Error cloning: %s. Invalid attr: %s - %s' %(self.pid, name, str(e)))
+                getLogger().warning('Error cloning: %s. Invalid attr: %s - %s' % (self.pid, name, str(e)))
 
         return newSpectrumGroup
 
@@ -392,6 +409,36 @@ class SpectrumGroup(AbstractWrapperObject):
             # rename the items in _seriesValues as they are referenced by pid
             for spectrum in self.spectra:
                 spectrum._renameSeriesItems(self, oldPid)
+
+    @classmethod
+    def _restoreObject(cls, project, apiObj):
+        """Restore the object and update ccpnInternalData
+        """
+        SPECTRUMGROUP = 'spectrumGroup'
+        SPECTRUMGROUPCOMMENT = 'spectrumGroupComment'
+        SPECTRUMGROUPPOSITIVECONTOURCOLOUR = 'spectrumGroupPositiveContourColour'
+        SPECTRUMGROUPNEGATIVECONTOURCOLOUR = 'spectrumGroupNegativeContourColour'
+        SPECTRUMGROUPSLICECOLOUR = 'spectrumGroupSliceColour'
+        SPECTRUMGROUPSERIES = 'spectrumGroupSeries'
+        SPECTRUMGROUPSERIESUNITS = 'spectrumGroupSeriesUnits'
+        SPECTRUMGROUPSERIESTYPE = 'spectrumGroupSeriesType'
+
+        result = super()._restoreObject(project, apiObj)
+
+        for namespace, param, newVar in [(SPECTRUMGROUP, SPECTRUMGROUPCOMMENT, cls._COMMENT),
+                                         (SPECTRUMGROUP, SPECTRUMGROUPPOSITIVECONTOURCOLOUR, cls._POSITIVECONTOURCOLOUR),
+                                         (SPECTRUMGROUP, SPECTRUMGROUPNEGATIVECONTOURCOLOUR, cls._NEGATIVECONTOURCOLOUR),
+                                         (SPECTRUMGROUP, SPECTRUMGROUPSLICECOLOUR, cls._SLICECOLOUR),
+                                         (SPECTRUMGROUPSERIES, SPECTRUMGROUPSERIESUNITS, cls._SERIESUNITS),
+                                         (SPECTRUMGROUPSERIES, SPECTRUMGROUPSERIESTYPE, cls._SERIESTYPE),
+                                         ]:
+            if result.hasParameter(namespace, param):
+                # move the internal parameter to the correct namespace
+                value = result.getParameter(namespace, param)
+                result.deleteParameter(namespace, param)
+                result._setInternalParameter(newVar, value)
+
+        return result
 
     #=========================================================================================
     # CCPN functions

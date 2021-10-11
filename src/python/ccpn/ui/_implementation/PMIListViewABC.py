@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:32 +0000 (Thu, February 04, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-10-11 20:43:40 +0100 (Mon, October 11, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,8 +30,7 @@ import re
 import typing
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.ui._implementation.SpectrumView import SpectrumView
-from ccpn.core._implementation.PMIListABC import MERITCOLOUR, MERITTHRESHOLD, MERITENABLED, MERITSETTINGS, \
-    COLOURCHECK, LINECOLOUR, LINESETTINGS, INHERITCOLOUR
+from ccpn.core._implementation.PMIListABC import COLOURCHECK, INHERITCOLOUR
 
 
 class PMIListViewABC(AbstractWrapperObject):
@@ -58,6 +58,14 @@ class PMIListViewABC(AbstractWrapperObject):
     _apiListView = None
     _apiListSerial = None
     _apiList = None
+
+    # internal namespace
+    _MERITCOLOUR = 'meritColour'
+    _MERITENABLED = 'meritEnabled'
+    _MERITTHRESHOLD = 'meritThreshold'
+    _LINECOLOUR = 'lineColour'
+    _SYMBOLCOLOUR = 'symbolColour'
+    _TEXTCOLOUR = 'textColour'
 
     def _setListClasses(self):
         """Set the primary classType for the child list attached to this container
@@ -202,7 +210,7 @@ class PMIListViewABC(AbstractWrapperObject):
         If not set for ListView gives you the value for List.
         If set for ListView overrides List value.
         Set ListView value to None to return to non-local value"""
-        result = self.getParameter(MERITSETTINGS, MERITCOLOUR)
+        result = self._getInternalParameter(self._MERITCOLOUR)
         if result in (INHERITCOLOUR, None):
             obj = self._childClass
             result = obj and obj.meritColour
@@ -218,7 +226,7 @@ class PMIListViewABC(AbstractWrapperObject):
                 raise ValueError("meritColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '%s')" % (value, INHERITCOLOUR))
             value = value.upper()
 
-        self.setParameter(MERITSETTINGS, MERITCOLOUR, value or INHERITCOLOUR)
+        self._setInternalParameter(self._MERITCOLOUR, value or INHERITCOLOUR)
 
     @property
     def meritEnabled(self) -> typing.Optional[bool]:
@@ -227,7 +235,7 @@ class PMIListViewABC(AbstractWrapperObject):
         If not set for ListView gives you the value for List.
         If set for ListView overrides List value.
         Set ListView value to None to return to non-local value"""
-        result = self.getParameter(MERITSETTINGS, MERITENABLED)
+        result = self._getInternalParameter(self._MERITENABLED)
         if result is None:
             obj = self._childClass
             result = obj and obj.meritEnabled
@@ -238,7 +246,7 @@ class PMIListViewABC(AbstractWrapperObject):
         if not isinstance(value, bool):
             raise TypeError("meritEnabled must be True/False.")
 
-        self.setParameter(MERITSETTINGS, MERITENABLED, value)
+        self._setInternalParameter(self._MERITENABLED, value)
 
     @property
     def meritThreshold(self) -> typing.Optional[float]:
@@ -247,7 +255,7 @@ class PMIListViewABC(AbstractWrapperObject):
         If not set for ListView gives you the value for List.
         If set for ListView overrides List value.
         Set ListView value to None to return to non-local value"""
-        result = self.getParameter(MERITSETTINGS, MERITTHRESHOLD)
+        result = self._getInternalParameter(self._MERITTHRESHOLD)
         if result is None:
             obj = self._childClass
             result = obj and obj.meritThreshold
@@ -261,7 +269,7 @@ class PMIListViewABC(AbstractWrapperObject):
             raise ValueError("meritThreshold must be in the range [0.0, 1.0]")
         value = float(value)
 
-        self.setParameter(MERITSETTINGS, MERITTHRESHOLD, value)
+        self._setInternalParameter(self._MERITTHRESHOLD, value)
 
     @property
     def lineColour(self) -> str:
@@ -273,7 +281,7 @@ class PMIListViewABC(AbstractWrapperObject):
         If not set for ListView gives you the value for List.
         If set for ListView overrides List value.
         Set ListView value to None to return to non-local value"""
-        result = self.getParameter(LINESETTINGS, LINECOLOUR)
+        result = self._getInternalParameter(self._LINECOLOUR)
         if result in (INHERITCOLOUR, None):
             obj = self._childClass
             result = obj and obj.lineColour
@@ -289,13 +297,41 @@ class PMIListViewABC(AbstractWrapperObject):
                 raise ValueError("lineColour %s not defined correctly, must be a hex colour string (e.g. '#ABCDEF' or '%s')" % (value, INHERITCOLOUR))
             value = value.upper()
 
-        self.setParameter(LINESETTINGS, LINECOLOUR, value or INHERITCOLOUR)
+        self._setInternalParameter(self._LINECOLOUR, value or INHERITCOLOUR)
 
     #=========================================================================================
     # Implementation functions
     #=========================================================================================
 
-    # None
+    @classmethod
+    def _restoreObject(cls, project, apiObj):
+        """Restore the object and update ccpnInternalData
+        """
+        MERITSETTINGS = 'meritSettings'
+        MERITCOLOUR = 'meritColour'
+        MERITENABLED = 'meritEnabled'
+        MERITTHRESHOLD = 'meritThreshold'
+        LINESETTINGS = 'lineSettings'
+        LINECOLOUR = 'lineColour'
+        SYMBOLCOLOUR = 'symbolColour'
+        TEXTCOLOUR = 'textColour'
+
+        result = super()._restoreObject(project, apiObj)
+
+        for namespace, param, newVar in [(MERITSETTINGS, MERITCOLOUR, cls._MERITCOLOUR),
+                                         (MERITSETTINGS, MERITENABLED, cls._MERITENABLED),
+                                         (MERITSETTINGS, MERITTHRESHOLD, cls._MERITTHRESHOLD),
+                                         (LINESETTINGS, LINECOLOUR, cls._LINECOLOUR),
+                                         (LINESETTINGS, SYMBOLCOLOUR, cls._SYMBOLCOLOUR),
+                                         (LINESETTINGS, TEXTCOLOUR, cls._TEXTCOLOUR),
+                                         ]:
+            if result.hasParameter(namespace, param):
+                # move the internal parameter to the correct namespace
+                value = result.getParameter(namespace, param)
+                result.deleteParameter(namespace, param)
+                result._setInternalParameter(newVar, value)
+
+        return result
 
     #=========================================================================================
     # CCPN functions

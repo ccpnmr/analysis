@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-07 11:00:39 +0100 (Thu, October 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-11 19:40:44 +0100 (Mon, October 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -482,6 +482,14 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
             top=[(0, 0), (1, 0)],
             bottom=[(1, 0), (0, 0)],
             )
+    _layoutStretchDict = dict(
+            # list of (stretchType, row, col, stretchValue) for the different orientations
+            # makes the pulldownList stretch to stop flickering
+            left=[(0, None, 0, 0), (0, None, 1, 1)],
+            right=[(0, None, 0, 1), (0, None, 1, 0)],
+            top=[(1, 0, None, 0), (1, 1, None, 1)],
+            bottom=[(1, 0, None, 1), (1, 1, None, 0)],
+            )
 
     def __init__(self, parent=None, mainWindow=None,
                  showBorder=False, orientation='left',
@@ -549,7 +557,16 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
             self.pulldownList.setSizeAdjustPolicy(sizeAdjustPolicy)
 
         # strange that the widgets seem to be behaving differently
-        self.getLayout().setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
+        _layout = self.getLayout()
+        # _layout.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
+        # _layout.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+        # set the stretches for the rows/columns
+        _stretchs = self._layoutStretchDict.get(orientation)
+        for _stretch, row, col, value in _stretchs:
+            if _stretch == 0:
+                _layout.setColumnStretch(col, value)
+            else:
+                _layout.setRowStretch(row, value)
 
     def getText(self):
         """Convenience: Return selected text in Pulldown"""
@@ -568,12 +585,6 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
         else:
             self.pulldownList.select(item)
 
-        # if blockSignals:
-        #     self.pulldownList.blockSignals(True)
-        # self.pulldownList.select(item)
-        # if blockSignals:
-        #     self.pulldownList.blockSignals(False)
-
     def setIndex(self, index, blockSignals=False):
         """Convenience: set item in Pulldown by index"""
 
@@ -583,12 +594,6 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
         else:
             self.pulldownList.setIndex(index)
 
-        # if blockSignals:
-        #     self.pulldownList.blockSignals(True)
-        # self.pulldownList.setIndex(index)
-        # if blockSignals:
-        #     self.pulldownList.blockSignals(False)
-
     def modifyTexts(self, texts):
         """Modify the pulldown texts, retaining the current selection
         """
@@ -596,6 +601,9 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
 
         with self.blockWidgetSignals():
             self.pulldownList.clear()
+            # if texts:
+            #     _minLength = min(30, max(10, *(len(tt) for tt in texts)))
+            #     self.pulldownList.setMinimumContentsLength(_minLength)
             self.pulldownList.setData(texts=texts)
             self.pulldownList.select(current)
 

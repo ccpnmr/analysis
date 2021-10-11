@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:30 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-11 19:40:43 +0100 (Mon, October 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -204,6 +204,7 @@ class MultipletListTableWidget(GuiTable):
         self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
                              grid=(row, gridHPos + 1), gridSpan=(1, 1))
+        self._widget.getLayout().setColumnStretch(gridHPos + 1, 2)
 
         self._hiddenColumns = ['Pid', 'Spectrum', 'MultipletList', 'Id']
         self.dataFrameObject = None

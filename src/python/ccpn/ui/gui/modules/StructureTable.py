@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-12 19:29:19 +0100 (Thu, August 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-11 19:40:44 +0100 (Mon, October 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -269,6 +269,8 @@ class StructureTable(GuiTableStructure):
         self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
                              grid=(2, 5), gridSpan=(1, 1))
+        self._widget.getLayout().setColumnStretch(5, 2)
+
         self._widgetScrollArea.setFixedHeight(35)
 
         # self._columnNames = [header.headerText for header in self.STcolumns]

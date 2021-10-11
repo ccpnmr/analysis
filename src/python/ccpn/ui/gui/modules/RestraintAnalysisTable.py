@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:29:57 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-11 19:40:43 +0100 (Mon, October 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -372,6 +372,7 @@ class RestraintAnalysisTableWidget(GuiTable):
         self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
                              grid=(row, gridHPos + 1), gridSpan=(1, 1))
+        self._widget.getLayout().setColumnStretch(gridHPos + 1, 2)
 
         # not the cleanest way for the minute
         self._hiddenColumns = ['Restraint_1', 'Restraint_2', 'Restraint_3', 'Restraint_4', 'Restraint_5',

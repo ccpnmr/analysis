@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-22 19:27:06 +0100 (Wed, September 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-11 19:40:44 +0100 (Mon, October 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -43,6 +43,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Button import Button
 import ccpn.ui.gui.modules.PyMolUtil as pyMolUtil
 from ccpn.ui.gui.widgets import MessageDialog
+
 
 logger = getLogger()
 ALL = '<all>'
@@ -176,7 +177,6 @@ class RestraintTable(GuiTable):
                                        lambda restraint, value: RestraintTable._setComment(restraint, value), None)
                                       ])  # [Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat)
 
-
         row = 0
         self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
@@ -199,7 +199,8 @@ class RestraintTable(GuiTable):
         gridHPos += 1
         self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
-                             grid=(row, gridHPos), gridSpan=(1,2))
+                             grid=(row, gridHPos), gridSpan=(1, 2))
+        self._widget.getLayout().setColumnStretch(gridHPos, 2)
 
         # initialise the currently attached dataFrame
         self._hiddenColumns = ['Pid']
@@ -297,7 +298,6 @@ class RestraintTable(GuiTable):
         """
         self.highlightObjects(currentRestraints)
 
-
     def _showOnMolecularViewer(self):
 
         restraintList = self.rtWidget.getSelectedObject()
@@ -314,7 +314,6 @@ class RestraintTable(GuiTable):
 
         if not restraintList:
             MessageDialog.showWarning('Nothing to show', 'Select a RestraintList first')
-
 
     def _updateCallback(self, data):
         """
@@ -423,7 +422,7 @@ class RestraintTable(GuiTable):
         """
         atomPair = RestraintTable.getFirstRestraintAtomsPair(restraint)
         if atomPair and None not in atomPair:
-             return ' - '.join([a.id for a in atomPair])
+            return ' - '.join([a.id for a in atomPair])
         else:
             return ''
 

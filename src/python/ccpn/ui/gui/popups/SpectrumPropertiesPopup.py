@@ -2325,7 +2325,11 @@ class ColourFrameABC(Frame):
             self.sliceColourButton = Button(self, grid=(row, 2), vAlign='t', hAlign='l',
                                             icon='icons/colours', hPolicy='fixed')
             self.sliceColourButton.clicked.connect(partial(self._queueChangeSliceColour, self.spectrumGroup))
+            self.copySliceColourButton = Button(self, text='Copy to All Spectra', grid=(row, 3), vAlign='t', hAlign='l',
+                                           hPolicy='fixed')
+            self.copySliceColourButton.clicked.connect(partial(self._queueChangeSliceColourToAll, self.spectrumGroup))
             row += 1
+
 
         self._fillPullDowns()
 
@@ -2437,6 +2441,10 @@ class ColourFrameABC(Frame):
             addNewColour(newColour)
             self._container._fillPullDowns()
             self.sliceColourBox.setCurrentText(spectrumColours[newColour.name()])
+
+    def _queueChangeSliceColourToAll(self, spectrumGroup):
+        for spectrum in spectrumGroup.spectra:
+            self._changedSliceComboIndex(spectrum, value='')
 
     @queueStateChange(_verifyPopupApply)
     def _queueChangeSliceComboIndex(self, spectrumGroup, value):

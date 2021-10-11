@@ -24,6 +24,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 from multiprocessing.pool import ThreadPool as Pool
 import os
+from ccpn.util.Path import aPath
 from os.path import isfile, join
 import pathlib
 import pandas as pd
@@ -32,6 +33,7 @@ from ccpn.util.Logging import getLogger
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from tqdm import tqdm, tqdm_gui
 from ccpn.util.Common import sortObjectByName, naturalSortList
+from ccpn.ui.gui.widgets.MessageDialog import showError, showInfo
 
 ################################       Excel Headers Warning      ######################################################
 """The excel headers for sample, sampleComponents, substances properties are named as the appear on the wrapper.
@@ -203,17 +205,20 @@ class ExcelReader(object):
         from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
 
         self._project = project
-        self.excelPath = excelPath
+        self.excelPath = aPath(excelPath)
         self.pandasFile = pd.ExcelFile(self.excelPath)
         self.sheets = self._getSheets(self.pandasFile)
         self.dataframes = self._getDataFrameFromSheets(self.sheets)
 
-        # self._project.blankNotification()
-        # getLogger().info('Loading Excel File...')
+        # create new dataSet
+        datasetName  = self.excelPath.basename
+        if project.getDataSet(datasetName): # No point in loaded twice the same. We might create a merge tool if needed.
+            msgs = 'Data loading error', 'An identical Excel file was already loaded. Check your data or start a new project.'
+            getLogger().error('. '.join(msgs))
+            showError(*msgs)
+            return
+        dataset = project.newDataSet(datasetName)
 
-        # with undoBlockWithoutSideBar():
-        #     getLogger().info('Loading Excel File...')
-        #     with notificationEchoBlocking():
         self._tempSpectrumGroupsSpectra = {}  # needed to improve the loading speed
         self.substancesDicts = self._createSubstancesDataFrames(self.dataframes)
         self.samplesDicts = self._createSamplesDataDicts(self.dataframes)
@@ -230,6 +235,7 @@ class ExcelReader(object):
         getLogger().info('Loading SpectrumGroups...')
         self._fillSpectrumGroups()
         getLogger().info('Loading from Excel completed...')
+        showInfo('Data loading completed', 'Your data is available from the Sidebar')
 
         # self._project.unblankNotification()
 

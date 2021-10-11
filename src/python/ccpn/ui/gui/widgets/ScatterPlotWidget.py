@@ -136,6 +136,7 @@ class ScatterROI(pg.ROI):
         self.handleSize = 8
         self.translatable = False # keep False otherwise it doesn't allow normal pan/selection of the plotItems within the ROI region.
         self._setROIhandles()
+        self.roiIsLinkedToSelection = True
         # self._isEnabled = True
 
     def _setROIhandles(self):
@@ -172,10 +173,14 @@ class ScatterROI(pg.ROI):
         :return:  set the ROI box
         """
         state = {'pos': [], 'size': [], 'angle': 0}
-        xSize = abs(xMax) - abs(xMin)
-        ySize = abs(yMax) - abs(yMin)
-        state['pos'] = [xMin, yMin]
-        state['size'] = [xSize, ySize]
+        xMin = np.array([xMin]) # convert to arrays to deal with positives and negatives
+        xMax = np.array([xMax])
+        yMin = np.array([yMin])
+        yMax = np.array([yMax])
+        xSize = xMax - xMin
+        ySize = yMax - yMin
+        state['pos'] = [xMin[0], yMin[0]]
+        state['size'] = [xSize[0], ySize[0]]
         self.setState(state)
 
     def getInnerPoints(self):
@@ -255,6 +260,7 @@ class ScatterPlot(Widget):
         self.scatterPlot.mouseDoubleClickEvent = self._scatterMouseDoubleClickEvent
         setWidgetFont(self)
         ## adjustable ROI box
+        self.roiIsLinkedToSelection = True
         self.roiItem = ScatterROI(self, *DefaultRoiLimits, pen=ROIPen)
         self.roiItem.sigRegionChangeFinished.connect(self._roiChangedCallback)
         self._plotItem.addItem(self.roiItem)
@@ -293,7 +299,6 @@ class ScatterPlot(Widget):
         self.setAxesWidgets()
         self._selectedData = []
         self._tipTextIsEnabled = True
-
 
     @property
     def dataFrame(self):
@@ -899,7 +904,10 @@ class ScatterPlot(Widget):
         minY = r.topLeft().y()
         maxX = minX + r.width()
         maxY = minY + r.height()
-        return [minX, maxX, minY, maxY]
+        limits = [minX, maxX, minY, maxY]
+        if self.roiIsLinkedToSelection:
+            self.roiItem.setLimits(*limits)
+        return limits
 
     def _resetSelectionBox(self):
         "Reset/Hide the boxes "

@@ -1,0 +1,15 @@
+{
+  "header": "<p style=%(para)s>Quickly find spectra, NmrResidues or other items of data with the (case-insensitive) Search Box in the bottom left-hand corner. You can use <span style=%(purple)s>*</span> as a wildcard.</p>",
+
+  "type": "picture",
+
+  "styles": {
+    "style_file": "tip_styles.txt"
+  },
+
+  "color": "#ffffff",
+
+  "order":  1,
+
+  "contents" : ["./graphics/SearchBoxUsage.png"]
+}

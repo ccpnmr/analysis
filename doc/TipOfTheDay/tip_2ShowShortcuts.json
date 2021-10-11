@@ -1,0 +1,15 @@
+{
+  "header": "<p style=%(para)s>Find a PDF file with all the mouse actions and keyboard shortcuts in the Help menu. Note that keyboard shortcuts are NOT case-sensitive.</p>",
+
+  "type": "picture",
+
+  "styles": {
+    "style_file": "tip_styles.txt"
+  },
+
+  "color": "#ffffff",
+
+  "order":  2,
+
+  "contents" : ["./graphics/ShowShortcuts1.png"]
+}

@@ -33,7 +33,6 @@ from ccpn.util.Logging import getLogger
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from tqdm import tqdm, tqdm_gui
 from ccpn.util.Common import sortObjectByName, naturalSortList
-from ccpn.ui.gui.widgets.MessageDialog import showError, showInfo
 
 ################################       Excel Headers Warning      ######################################################
 """The excel headers for sample, sampleComponents, substances properties are named as the appear on the wrapper.
@@ -203,6 +202,7 @@ class ExcelReader(object):
 
         """
         from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
+        from ccpn.ui.gui.widgets.MessageDialog import showError, showInfo
 
         self._project = project
         self.excelPath = aPath(excelPath)

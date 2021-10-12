@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-07 11:19:30 +0100 (Thu, October 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-12 11:18:55 +0100 (Tue, October 12, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -662,10 +662,10 @@ class ChemicalShiftList(AbstractWrapperObject):
         _row = _getByTuple(self, value, valueError, figureOfMerit,
                            nmrAtom, chainCode, sequenceCode, residueType, atomName,
                            comment)
-        _nextId = self.project._getNextUniqueIdValue(CS_CLASSNAME)
+        _nextUniqueId = self.project._getNextUniqueIdValue(CS_CLASSNAME)
         # add to dataframe - this is in undo stack and marked as modified
-        # _dfRow = pd.DataFrame(((_nextId, False) + _row[2:],), columns=CS_COLUMNS)
-        _dfRow = pd.DataFrame(((_nextId, False, value, valueError, figureOfMerit, None) + _row[6:],), columns=CS_COLUMNS)
+        # _dfRow = pd.DataFrame(((_nextUniqueId, False) + _row[2:],), columns=CS_COLUMNS)
+        _dfRow = pd.DataFrame(((_nextUniqueId, False, value, valueError, figureOfMerit, None) + _row[6:],), columns=CS_COLUMNS)
 
         if data is None:
             self._wrappedData.data = _dfRow
@@ -679,7 +679,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         # create new shift object
         # new Shift only needs chemicalShiftList and uniqueId - properties are linked to dataframe
         shift = _newShift(self, _ignoreUniqueId=True)
-        shift._resetUniqueId(int(_nextId))
+        shift._resetUniqueId(int(_nextUniqueId))
         if nmrAtom:
             shift.nmrAtom = nmrAtom
 

@@ -92,6 +92,34 @@ def getCcpFileString(fileNameString):
     return convertStringToFileName(fileNameString, validFileNamePartChars,
                                    defaultFileNameChar)
 
+def _isValidInput(value, allowSpace=False, allowNonAlpha=False, extraAllowedCharacters=['_']):
+    """
+    Check if the value is a valid string. (for example for an object name.
+    """
+    import re
+    if isinstance(extraAllowedCharacters, list):
+        extras = ''.join(extraAllowedCharacters)
+    else:
+        extras = ''
+    notAllowedSequences = {
+                            'No_strings'            : '^\s*$'   ,
+                            'Space_At_Start'        : '^\s'     ,
+                            'Space_At_End'          : '\s$'     ,
+                            'Empty_Spaces'          : '\s'      ,
+                            'Non-Alphanumeric'      : '\W'      ,
+                            'Illegal_Characters'    :'[^A-Za-z0-9%s]+'%extras # exclude non-alpha but include the extras
+                          }
+    valids = [True]
+    if value is None:
+        valids.append(False)
+    if allowSpace:
+        notAllowedSequences.pop('Empty_Spaces')
+    if allowNonAlpha:
+        notAllowedSequences.pop('Non-Alphanumeric')
+    for key, seq in notAllowedSequences.items():
+        if re.findall(seq, str(value)):
+            valids.append(False)
+    return all(valids)
 
 def incrementName(name):
     """Add '_1' to name or change suffix '_n' to '_(n+1) """

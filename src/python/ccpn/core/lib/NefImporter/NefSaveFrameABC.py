@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-29 20:46:52 +0100 (Thu, July 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-12 16:04:27 +0100 (Tue, October 12, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,8 @@ from collections import OrderedDict
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 # from ccpn.util.traits.CcpNmrTraits import CFloat, CInt, CBool, CString
 from ccpn.util.Logging import getLogger
+
+
 # from ccpn.util.Common import loadModules
 # from ccpn.framework.PathsAndUrls import nefSaveFramePath
 
@@ -173,17 +175,6 @@ class SaveFrameABC(CcpNmrJson):
         # This can check the common parameters, subclassing can check local
         # MUST BE SUBCLASSED
         raise NotImplementedError("Code error: function not implemented")
-
-        # # Get ccpn-to-nef mapping for saveframe
-        # category = saveFrame['sf_category']
-        # framecode = saveFrame['sf_framecode']
-        # name = framecode[len(category) + 1:]
-        #
-        # # Verify main object
-        # result = project.getCcpnNefLogging(name)
-        # if result is not None:
-        #     self.error('ccpn_logging - ccpnLogging {} already exists'.format(result), saveFrame, (result,))
-        #     saveFrame._rowErrors[category] = (name,)
 
     def contents(self):
         """list the contents of the saveframe

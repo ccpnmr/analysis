@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-24 10:12:36 +0100 (Fri, September 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-12 16:04:27 +0100 (Tue, October 12, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1097,27 +1097,27 @@ class CcpnNefWriter:
     def ccpnLogging2Nef(self, project: Project):
         """Convert ccpn logging dataSet to CCPN NEF saveframe"""
 
-        from ccpn.core.lib.CcpnNefLogging import CCPNHISTORY, CCPNLOGGING
+        from ccpn.core.lib.CcpnNefLogging import CCPNDEFAULT, getCcpnNefLogNames, getCcpnNefLog
 
         results = []
         category = 'ccpn_logging'
-        ds = project.getDataSet(CCPNLOGGING)
-        if ds:
-            for dd in ds.data:
+
+        _logs = getCcpnNefLogNames(project)
+        if _logs:
+            result = self._newNefSaveFrame(project, category, CCPNDEFAULT)
+
+            for logName in _logs:
                 try:
-                    history = dd.parameters.get(CCPNHISTORY)
-                    result = self._newNefSaveFrame(dd, category, str(dd.name))
-                    self.ccpn2SaveFrameName[dd] = result['sf_framecode']
+                    value = getCcpnNefLog(project, logName)
+                    if isinstance(value, pd.DataFrame):
+                        # Fill in loops
+                        loop = result[logName]
+                        for obj in value.itertuples():
+                            loop.newRow(self._loopRowData(logName, obj))
 
-                    # Fill in loops
-                    loopName = 'ccpn_history'
-                    loop = result[loopName]
-                    for obj in history.itertuples():
-                        loop.newRow(self._loopRowData(loopName, obj))
-
-                    results.append(result)
                 except Exception as es:
                     pass
+            results.append(result)
 
         return results
 
@@ -2901,36 +2901,42 @@ class CcpnNefReader(CcpnNefContent):
             loop = saveFrame.get(loopName)
             if loop:
                 importer = self.importers[loopName]
-                importer(self, project, loop, saveFrame, name)
+                # special case, uses the loopName for the storage name
+                importer(self, project, loop, saveFrame, loopName)
 
     importers['ccpn_logging'] = load_ccpn_logging
 
     def verify_ccpn_logging(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         """verify ccpn_logging saveFrame"""
+        from ccpn.core.lib.CcpnNefLogging import CCPNHISTORY, CCPNLOGGING
+
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        name = framecode[len(category) + 1:]
+        # name = framecode[len(category) + 1:]
 
         # Verify main object
-        result = project.getCcpnNefLogging(name)
+        # result = project.getCcpnNefLogging(name)
+        data = project._wrappedData.data or {}
+        result = data.get(CCPNLOGGING)
         if result is not None:
             self.error('ccpn_logging - ccpnLogging {} already exists'.format(result), saveFrame, (result,))
-            saveFrame._rowErrors[category] = (name,)
+            saveFrame._rowErrors[category] = (CCPNLOGGING,)
 
     verifiers['ccpn_logging'] = verify_ccpn_logging
     verifiers['ccpn_history'] = _noLoopVerify
 
     def load_ccpn_history(self, project: Project, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame,
                           name: str):
-        """Serves to load ccpn_distance_restraint_violation loops"""
+        """Serves to load ccpn_history loops"""
+        from ccpn.core.lib.CcpnNefLogging import setCcpnNefLog
 
         if loop and loop.data:
             # if loop.data exists then load as a pandas dataFrame
             _df = pd.DataFrame(loop.data)
 
             # store in the project
-            project.setCcpnNefLogging(name, _df)
+            setCcpnNefLog(project, name, _df, overwrite=True)
 
     importers['ccpn_history'] = load_ccpn_history
 

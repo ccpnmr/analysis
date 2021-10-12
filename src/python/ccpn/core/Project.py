@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-11 20:43:39 +0100 (Mon, October 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-12 16:04:27 +0100 (Tue, October 12, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1539,20 +1539,6 @@ class Project(AbstractWrapperObject):
         from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import getExpClassificationDict
 
         return getExpClassificationDict(self._wrappedData)
-
-    def getCcpnNefLogging(self, name):
-        """Get the ccpn logging information from the meta data
-        """
-        from ccpn.core.lib.CcpnNefLogging import getCcpnNefLogging
-
-        return getCcpnNefLogging(self, name)
-
-    def setCcpnNefLogging(self, name, value, overwrite=False):
-        """Get the ccpn logging information from the meta data
-        """
-        from ccpn.core.lib.CcpnNefLogging import setCcpnNefLogging
-
-        return setCcpnNefLogging(self, name, value, overwrite=overwrite)
 
     #===========================================================================================
     # new'Object' and other methods

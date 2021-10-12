@@ -9,7 +9,7 @@
 
 import sys
 from functools import singledispatchmethod
-from typing import Optional, List
+from typing import Optional, List, Union
 
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtCore import QRectF, Qt, QRect, QPoint, pyqtProperty, QTimer, QEvent, QSize
@@ -276,7 +276,7 @@ class SpeechBalloon(QWidget):
         return result
 
     @singledispatchmethod
-    def showAt(self, point: QPoint, preferred_side=Side.RIGHT,
+    def showAt(self, point: Union[QPoint, QRect], preferred_side=Side.RIGHT,
                side_priority=(Side.RIGHT, Side.LEFT, Side.BOTTOM, Side.TOP), target_screen=None):
 
         self._showAtRect(QRect(point, QSize(1, 1)), preferred_side=preferred_side, side_priority=side_priority,

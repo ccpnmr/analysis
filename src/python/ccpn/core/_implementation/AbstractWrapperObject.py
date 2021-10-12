@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-11 20:43:39 +0100 (Mon, October 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-12 12:36:25 +0100 (Tue, October 12, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -219,6 +219,43 @@ class AbstractWrapperObject(NotifierBase):
         if oldId in dd:
             del dd[oldId]
         dd[_id] = self
+
+    @classmethod
+    def _nextKey(cls):
+        """Get the next available key from _serialDict
+        Limited functionality but helps to get potential Pid of the next _wrapped object """
+        from ccpn.framework.Application import getApplication
+
+        # get the current project - doesn't require instance of core objects
+        _project = getApplication().project
+
+        try:
+            # extract the plural name from the Api name
+            _metaName = cls._apiClassQualifiedName.split('.')[-1]
+            _metaName = _metaName[0].lower() + _metaName[1:] + 's'
+            _serials = _project._wrappedData.topObject._serialDict
+            _name = f'@{_serials[_metaName] + 1}'
+        except Exception as es:
+            _name = 'None'
+
+        return _name
+
+    @classmethod
+    def _nextId(cls):
+        """Create potential Pid for the next object to be created"""
+        from ccpn.core.Project import Project
+
+        # try and create the next Id
+        parentClass = cls._parentClass
+        if parentClass is None:
+            # This is the project
+            _id = 'Project'
+        elif parentClass == Project:
+            _id = str(cls._nextKey())
+        else:
+            _id = '%s%s%s' % (parentClass._nextId(), Pid.IDSEP, cls._nextKey())
+
+        return _id
 
     def __bool__(self):
         """Truth value: true - wrapper classes are never empty"""

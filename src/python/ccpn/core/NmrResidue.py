@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:25:07 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-12 12:36:25 +0100 (Tue, October 12, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -130,6 +130,23 @@ class NmrResidue(AbstractWrapperObject):
     def _key(self) -> str:
         """Residue local ID"""
         return Pid.createId(self.sequenceCode, self.residueType)
+
+    @classmethod
+    def _nextKey(cls):
+        """Get the next available key from _serialDict
+        Limited functionality but helps to get potential Pid of the next _wrapped object
+        In this case Pid element is of the form '@<num>.<residueType>' but subject to change
+        residueType will default to ''
+        """
+        from ccpn.framework.Application import getApplication
+
+        _project = getApplication().project
+
+        _metaName = cls._apiClassQualifiedName.split('.')[-1]
+        _metaName = _metaName[0].lower() + _metaName[1:] + 's'
+        _name = f'@{_project._wrappedData.topObject._serialDict[_metaName] + 1}'
+
+        return Pid.createId(_name, '')
 
     @property
     def _ccpnSortKey(self) -> tuple:

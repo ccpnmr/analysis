@@ -1755,6 +1755,9 @@ GuiTable::item::selected {
         self.setCurrentIndex(rowIndex)
         self.scrollToSelectedIndex()
 
+    def selectFirstRow(self, doCallback=True):
+        self.selectIndex(0, doCallback=doCallback)
+
     def getSelectedRowAsDataFrame(self):
         values = []
         headers = []

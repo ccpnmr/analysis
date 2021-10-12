@@ -249,6 +249,7 @@ class ScatterPlot(Widget):
         self._addScatterSelectionBox()
         self._scatterViewbox.mouseClickEvent = self._scatterViewboxMouseClickEvent # click on the background canvas
         self._scatterViewbox.mouseDragEvent = self._scatterMouseDragEvent
+        self._scatterViewbox.scene().mouseReleaseEvent = self._scatterMouseReleaseEvent
         # self._scatterViewbox.hoverEvent = self._scatterHoverEvent
         self._scatterViewbox.scene().sigMouseMoved.connect(self.mouseMoved) #use this if you need the mouse Posit
         # self._scatterViewbox.setLimits(**{'xMin':0, 'xMax':1, 'yMin':0, 'yMax':1})
@@ -808,6 +809,15 @@ class ScatterPlot(Widget):
     def _getDataForPoints(self, points):
         return list(map(lambda s: s.data(), points))
 
+    def _scatterMouseReleaseEvent(self, event):
+        """
+        re-implementation to allow proper cleaning up of the selection box when releasing the Cmd/Ctrl
+        button before the mouse button.
+        """
+        self._resetSelectionBox()
+        pg.GraphicsScene.mouseReleaseEvent(self._scatterViewbox.scene(), event)
+
+
     def _scatterMouseDragEvent(self, event, *args):
         """
         Re-implementation of PyQtGraph mouse drag event to allow custom actions off of different mouse
@@ -825,7 +835,6 @@ class ScatterPlot(Widget):
                 limits = self._updateScatterSelectionBox(event.buttonDownPos(), event.pos())
                 selectedData = self._getDataForPoints(_getPointsWithinLimits(self.scatterPlot.points(), limits))
                 self.selectedData += selectedData
-                # self._setPointPens(self._getPointPens())
                 self._resetSelectionBox()
         else:
             self._resetSelectionBox()

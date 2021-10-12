@@ -59,7 +59,7 @@ from ccpn.ui.gui.widgets.PipelineWidgets import GuiPipe, PipesTree
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, _stoppableProgressBar, progressManager
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.pipes import loadedPipes as LP
-from ccpn.util.Path import aPath
+from ccpn.util.Path import aPath, joinPath
 from ccpn.ui.gui.widgets import MessageDialog
 
 
@@ -138,7 +138,9 @@ class GuiPipeline(CcpnModule, Pipeline):
     def widgetsState(self):
         """Special case of saving widgets for this module. the only thing to be saved is the filePath of the pipeline.
         The guiPipeline has its own mechanism for restoring """
-        return {PipelinePath: self._savePipeline()}
+        savePath = self.filePath
+        self.pipeline2Json(savePath)
+        return {PipelinePath: savePath}
 
     def restoreWidgetsState(self, **widgetsState):
         """ Overriden method from ccpnModule
@@ -147,9 +149,9 @@ class GuiPipeline(CcpnModule, Pipeline):
         """
         if PipelinePath in widgetsState:
             if widgetsState[PipelinePath]:
-                if os.path.exists(widgetsState[PipelinePath]):
-                    self._openSavedPipeline(widgetsState[PipelinePath])
-
+                path =  aPath(widgetsState[PipelinePath])
+                path = path.assureSuffix('.json')
+                self._openSavedPipeline(path)
 
     def _getGuiFromPipes(self, pipes):
         allGuiPipes = []
@@ -265,7 +267,7 @@ class GuiPipeline(CcpnModule, Pipeline):
         row = 0
         self.pipelineReNameLabel = Label(self.inputFrame, 'Name', grid=(row, 0))
         self.pipelineReNameTextEdit = LineEdit(self.inputFrame, PipelineName, grid=(row, 1))
-        # self.pipelineReNameTextEdit.editingFinished.connect(self._renamePipelineCallback)
+        self.pipelineReNameTextEdit.editingFinished.connect(self._renamePipelineCallback)
         row += 1
         self.inputDataLabel = Label(self.inputFrame, 'Input Data', grid=(row, 0))
         self.inputDataList = ListWidget(self.inputFrame, acceptDrops=True, grid=(row, 1), emptyText=DropHereLabel)
@@ -545,9 +547,6 @@ class GuiPipeline(CcpnModule, Pipeline):
                     pipelineBoxes.append(pipelineBox)
         return pipelineBoxes
 
-    def _getPipelineStatePath(self):
-        """ used to auto-restore when opening/saving modules in projects"""
-        return self._savePipeline()
 
     def _getSettingsDict(self):
 
@@ -625,6 +624,13 @@ class GuiPipeline(CcpnModule, Pipeline):
                                            fileFilter=".json ")
         self.saveDialog._show()
         path = self.saveDialog.selectedFile()
+        self.pipeline2Json(path)
+
+    def pipeline2Json(self, path):
+        """
+        save the pipeline state to json file.
+        path: absolute path for a json file
+        """
         if path:
             path = aPath(path)
             pipelineFilePath = path.assureSuffix('.json')
@@ -633,7 +639,6 @@ class GuiPipeline(CcpnModule, Pipeline):
                 json.dump(jsonData, fp, indent=2)
                 fp.close()
                 getLogger().info('Pipeline File saved in: ' + str(pipelineFilePath))
-
 
 
     #################################### _________ GUI PIPELINE SETTINGS ____________ ####################################
@@ -713,9 +718,8 @@ class GuiPipeline(CcpnModule, Pipeline):
             for guiPipe in guiPipes:
                 guiPipe._updateWidgets()
 
-    # def _renamePipelineCallback(self,):
-    #     self.pipelineName = self.pipelineReNameTextEdit.get()
-    #     self.pipelineNameLabel.set(self.pipelineName)
+    def _renamePipelineCallback(self,):
+        self.pipelineName = self.pipelineReNameTextEdit.get()
 
     def _addPipeDirectionCallback(self):
         value = self.addBoxPosition.getSelectedText()

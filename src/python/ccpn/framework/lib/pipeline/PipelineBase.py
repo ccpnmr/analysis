@@ -25,6 +25,8 @@ __date__ = "$Date: 2017-04-07 10:28:42 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+from ccpn.util.Path import aPath, joinPath
+
 
 class Pipeline(object):
     '''
@@ -74,6 +76,22 @@ class Pipeline(object):
             self._pipes = allPipes
         else:
             self._pipes = []
+
+    @property
+    def filePath(self):
+        return self._filePath
+
+    @filePath.setter
+    def filePath(self, filePath):
+        self._filePath = filePath
+
+    @filePath.getter
+    def filePath(self):
+        projectPipelinePath = aPath(self.application.pipelinePath)
+        pipelineName = self.pipelineName
+        savePath = joinPath(projectPipelinePath, pipelineName)
+        self._filePath = str(savePath)
+        return self._filePath
 
     def _updateRunArgs(self, arg, value):
         self._kwargs[arg] = value

@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-02 14:37:54 +0000 (Tue, March 02, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-10-12 18:07:10 +0100 (Tue, October 12, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,7 +35,6 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLArrays import GLRENDERMODE_REBUILD, GLREND
 from ccpn.core.Integral import Integral
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLREGIONTYPE, GLLINETYPE
-
 
 from ccpn.ui.gui.lib.OpenGL import GL, GLU, GLUT
 
@@ -250,12 +250,14 @@ class GLRegion(QtWidgets.QWidget):
 
             if self._object.integralList.spectrum.intensities is not None and self._object.integralList.spectrum.intensities.size != 0:
 
-                intArea = self._integralArea = GLVertexArray(numLists=1,
-                                                             renderMode=GLRENDERMODE_DRAW, blendMode=False,
-                                                             drawMode=GL.GL_QUAD_STRIP, fillMode=GL.GL_FILL,
-                                                             dimension=2, GLContext=self._parent)
-
+                if not hasattr(self, '_integralArea'):
+                    self._integralArea = GLVertexArray(numLists=1,
+                                                       renderMode=GLRENDERMODE_DRAW, blendMode=False,
+                                                       drawMode=GL.GL_QUAD_STRIP, fillMode=GL.GL_FILL,
+                                                       dimension=2, GLContext=self._parent)
+                intArea = self._integralArea
                 thisRegion = self._object._1Dregions
+
                 if thisRegion:
                     intArea.numVertices = len(thisRegion[1]) * 2
                     intArea.vertices = np.empty(intArea.numVertices * 2, dtype=np.float32)
@@ -264,15 +266,15 @@ class GLRegion(QtWidgets.QWidget):
                     intArea.vertices[1::4] = thisRegion[0]
                     intArea.vertices[3::4] = thisRegion[2]
 
-                if self._object and self._object in self._glList._parent.current.integrals:
-                    solidColour = list(self._glList._parent.highlightColour)
-                else:
-                    solidColour = list(self._brush)
-                solidColour[3] = 1.0
+                    if self._object and self._object in self._glList._parent.current.integrals:
+                        solidColour = list(self._glList._parent.highlightColour)
+                    else:
+                        solidColour = list(self._brush)
+                    solidColour[3] = 1.0
 
-                intArea.colors = np.array(solidColour * intArea.numVertices, dtype=np.float32)
+                    intArea.colors = np.array(solidColour * intArea.numVertices, dtype=np.float32)
 
-                intArea.defineVertexColorVBO()
+                    intArea.defineVertexColorVBO()
 
 
 class GLInfiniteLine(GLRegion):

@@ -1,5 +1,5 @@
 {
-  "header": "<p style=%(para)s>Find a PDF file with all the mouse actions and keyboard shortcuts in the Help menu. Note that keyboard shortcuts are NOT case-sensitive.</p>",
+  "header": "<p style=%(para)s>Find a PDF file with all the mouse actions and keyboard shortcuts in the <span style=%(purple)s>Help</span> menu. Note that keyboard shortcuts are <span style=%(purple)s>NOT</span> case-sensitive.</p>",
 
   "type": "picture",
 
@@ -11,5 +11,5 @@
 
   "order":  2,
 
-  "contents" : ["./graphics/ShowShortcuts1.png"]
+  "contents" : ["./graphics/ShowShortcuts.png"]
 }

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-21 09:57:42 +0100 (Tue, September 21, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-14 12:10:14 +0100 (Thu, October 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1214,26 +1214,37 @@ class Gui1dWidget(CcpnGLWidget):
                 # xScale = specSettings[GLDefs.SPECTRUM_XSCALE]
 
                 _, fxMax = specSettings[GLDefs.SPECTRUM_XLIMITS]
+                dxAF, _ = specSettings[GLDefs.SPECTRUM_AF]
                 xScale, _ = specSettings[GLDefs.SPECTRUM_SCALE]
+                alias = specSettings[GLDefs.SPECTRUM_ALIASINGINDEX]
+                folding = specSettings[GLDefs.SPECTRUM_FOLDINGMODE]
 
-                if self._stackingMode:
-                    _matrix = np.array(specSettings[GLDefs.SPECTRUM_STACKEDMATRIX])
-                else:
-                    _matrix = np.array(self._IMatrix)
+                for ii in range(alias[0][0], alias[0][1] + 1, 1):
 
-                # take the stacking matrix and insert the correct x-scaling to map the pointPositions to the screen
-                _matrix[0] = xScale
-                _matrix[12] += fxMax
-                _shader.setMVMatrix(_matrix)
+                    foldX = 1.0
+                    foldXOffset = 0
+                    if folding[0] == 'mirror':
+                        foldX = pow(-1, ii)
+                        foldXOffset = -dxAF if foldX < 0 else 0
 
-                self._axisScale[0:4] = [self.pixelX / xScale,
-                                        self.pixelY,
-                                        0.0, 1.0]
-                _shader.setAxisScale(self._axisScale)
-                _shader.setAliasPosition(0, 0)
+                    if self._stackingMode:
+                        _matrix = np.array(specSettings[GLDefs.SPECTRUM_STACKEDMATRIX])
+                    else:
+                        _matrix = np.array(self._IMatrix)
 
-                self._GLPeaks.drawLabels(specView)
-                self._GLMultiplets.drawLabels(specView)
+                    # take the stacking matrix and insert the correct x-scaling to map the pointPositions to the screen
+                    _matrix[0] = xScale * foldX
+                    _matrix[12] += (fxMax + (ii * dxAF) + foldXOffset)
+                    _shader.setMVMatrix(_matrix)
+
+                    self._axisScale[0:4] = [foldX * self.pixelX / xScale,
+                                            self.pixelY,
+                                            0.0, 1.0]
+                    _shader.setAxisScale(self._axisScale)
+                    _shader.setAliasPosition(ii, 0)
+
+                    self._GLPeaks.drawLabels(specView)
+                    self._GLMultiplets.drawLabels(specView)
 
     def drawAliasedSymbols(self):
         """Draw all the symbols that require aliasing to multiple regions
@@ -1250,7 +1261,6 @@ class Gui1dWidget(CcpnGLWidget):
 
         # change to correct value for shader
         _shader.setAliasShade(self._aliasShade / 100.0)
-        _shader.setAliasPosition(0, 0)
 
         for specView in self._ordering:  #self._ordering:                             # strip.spectrumViews:       #.orderedSpectrumViews():
 
@@ -1267,21 +1277,33 @@ class Gui1dWidget(CcpnGLWidget):
                 # xScale = specSettings[GLDefs.SPECTRUM_XSCALE]
 
                 _, fxMax = specSettings[GLDefs.SPECTRUM_XLIMITS]
+                dxAF, _ = specSettings[GLDefs.SPECTRUM_AF]
                 xScale, _ = specSettings[GLDefs.SPECTRUM_SCALE]
+                alias = specSettings[GLDefs.SPECTRUM_ALIASINGINDEX]
+                folding = specSettings[GLDefs.SPECTRUM_FOLDINGMODE]
 
-                if self._stackingMode:
-                    _matrix = np.array(specSettings[GLDefs.SPECTRUM_STACKEDMATRIX])
-                else:
-                    _matrix = np.array(self._IMatrix)
+                for ii in range(alias[0][0], alias[0][1] + 1, 1):
 
-                # take the stacking matrix and insert the correct x-scaling to map the pointPositions to the screen
-                _matrix[0] = xScale
-                _matrix[12] += fxMax
-                _shader.setMVMatrix(_matrix)
+                    foldX = 1.0
+                    foldXOffset = 0
+                    if folding[0] == 'mirror':
+                        foldX = pow(-1, ii)
+                        foldXOffset = -dxAF if foldX < 0 else 0
 
-                # draw the symbols
-                self._GLPeaks.drawSymbols(specView)
-                self._GLMultiplets.drawSymbols(specView)
+                    if self._stackingMode:
+                        _matrix = np.array(specSettings[GLDefs.SPECTRUM_STACKEDMATRIX])
+                    else:
+                        _matrix = np.array(self._IMatrix)
+
+                    # take the stacking matrix and insert the correct x-scaling to map the pointPositions to the screen
+                    _matrix[0] = xScale * foldX
+                    _matrix[12] += (fxMax + (ii * dxAF) + foldXOffset)
+                    _shader.setMVMatrix(_matrix)
+                    _shader.setAliasPosition(ii, 0)
+
+                    # draw the symbols
+                    self._GLPeaks.drawSymbols(specView)
+                    self._GLMultiplets.drawSymbols(specView)
 
         GL.glLineWidth(GLDefs.GLDEFAULTLINETHICKNESS * self.viewports.devicePixelRatio)
 

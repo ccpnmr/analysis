@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-14 13:10:31 +0100 (Tue, September 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-14 12:10:14 +0100 (Thu, October 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -542,11 +542,13 @@ class GLmultiplet1dLabelling(GL1dLabelling, GLmultipletNdLabelling):
                 posList += p0
             else:
                 posList += p1
+        peakAlias = multiplet.peaks[0].aliasing
+        alias = getAliasSetting(peakAlias[0], 0)
 
         numVertices = len(multiplet.peaks) + 1
         drawList.vertices[vertexPtr:vertexPtr + 2 * numVertices] = posList
         drawList.colors[2 * vertexPtr:2 * vertexPtr + 4 * numVertices] = (*cols, fade) * numVertices
-        drawList.attribs[vertexPtr // 2:(vertexPtr // 2) + numVertices] = (0.0,) * numVertices
+        drawList.attribs[vertexPtr // 2:(vertexPtr // 2) + numVertices] = (alias,) * numVertices
         drawList.offsets[vertexPtr:vertexPtr + 2 * numVertices] = p0 * numVertices
 
         return numVertices

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:29:57 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-14 12:10:14 +0100 (Thu, October 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1929,6 +1929,8 @@ class GL1dLabelling():
             if None in p0:
                 getLogger().warning(f'Object {str(obj)} contains undefined position {str(p0)}')
                 return
+        _alias = obj.aliasing
+        alias = getAliasSetting(_alias[0], 0)
 
         if self._isSelected(obj):
             cols = self._GLParent.highlightColour[:3]
@@ -1941,7 +1943,7 @@ class GL1dLabelling():
             iCount, _selected = self._makePlusSymbol(drawList, indexEnd, vertexStart, 0, obj)
 
         self._insertSymbolItemVertices(True, True, _selected, cols, drawList, 1.0, iCount,
-                                       indexing, obj, objNum, p0, 0, 0, r, vertexPtr, w, 0.0)
+                                       indexing, obj, objNum, p0, 0, 0, r, vertexPtr, w, alias)
 
     def _buildSymbols(self, spectrumView, objListView):
         spectrum = spectrumView.spectrum
@@ -2093,6 +2095,8 @@ class GL1dLabelling():
         if not obj.pointPositions:
             return
         p0 = (obj.pointPositions[pIndex[0]] - 1, obj.height)
+        _alias = obj.aliasing
+        alias = getAliasSetting(_alias[0], 0)
 
         if None in p0:
             getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
@@ -2106,7 +2110,7 @@ class GL1dLabelling():
                 iCount, _selected = self._appendPlusSymbol(drawList, indexing.vertexStart, 0, obj)
 
             self._appendSymbolItemVertices(True, True, _selected, cols, drawList, 1.0, iCount, indexing, obj, p0, pIndex,
-                                           0, r, w, 0.0)
+                                           0, r, w, alias)
 
     def _removeSymbol(self, spectrumView, objListView, delObj):
         """Remove a symbol from the list
@@ -2172,6 +2176,8 @@ class GL1dLabelling():
         if None in p0:
             getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
             return
+        _alias = obj.aliasing
+        alias = getAliasSetting(_alias[0], 0)
 
         if self._isSelected(obj):
             cols = self._GLParent.highlightColour[:3]
@@ -2198,7 +2204,8 @@ class GL1dLabelling():
                              # x=self._screenZero[0], y=self._screenZero[1]
                              colour=(*cols, 1.0),
                              GLContext=self._GLParent,
-                             obj=obj)
+                             obj=obj,
+                             alias=alias)
         newString.stringOffset = None
         stringList.append(newString)
 

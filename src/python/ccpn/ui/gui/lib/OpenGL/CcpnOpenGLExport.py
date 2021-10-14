@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-05 17:38:46 +0100 (Tue, October 05, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-14 12:10:57 +0100 (Thu, October 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -54,7 +54,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import viewportDimensions
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import SPECTRUM_STACKEDMATRIX, SPECTRUM_MATRIX, \
     GLLINE_STYLES_ARRAY, SPECTRUM_XLIMITS, SPECTRUM_AF, SPECTRUM_ALIASINGINDEX, SPECTRUM_FOLDINGMODE, \
-    SPECTRUM_YLIMITS, SPECTRUM_SCALE
+    SPECTRUM_YLIMITS, SPECTRUM_SCALE, SPECTRUM_STACKEDMATRIXOFFSET
 
 from ccpn.ui.gui.lib.OpenGL import GL
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLGRIDLINES, GLAXISLABELS, GLAXISMARKS, \
@@ -622,7 +622,10 @@ class GLExporter():
                 if self.params[GLMULTIPLETLABELS]: self._addMultipletLabels()
                 if self.params[GLMARKLABELS]: self._addMarkLabels()
             else:
-                # currently only in stacking mode
+                if self.params[GLPEAKSYMBOLS]: self._addPeakSymbols()
+                if self.params[GLMULTIPLETSYMBOLS]: self._addMultipletSymbols()
+                if self.params[GLPEAKLABELS]: self._addPeakLabels()
+                if self.params[GLMULTIPLETLABELS]: self._addMultipletLabels()
                 if self.params[GLSPECTRUMLABELS]: self._addSpectrumLabels()
 
             if self.params[GLTRACES]: self._addTraces()
@@ -746,6 +749,7 @@ class GLExporter():
             spectrum = None
             dimensionCount = 0
             matrix = None
+            matrixSymbols = None
             spectrumView = None
             x = 0
             y = 0
@@ -816,6 +820,7 @@ class GLExporter():
                                                        fxMax + (ii * dxAF) + foldXOffset, fyMax + (jj * dyAF) + foldYOffset, 0.0, 1.0],
                                                       dtype=np.float32)
                                 _data.matrix = np.transpose(specMatrix.reshape((4, 4)))
+                                _data.matrixSymbols = np.transpose(specMatrix.reshape((4, 4)))
                                 _data.alias = getAliasSetting(ii, jj)
                                 # get the transformation matrix from the spectrumView
                                 # mat = np.transpose(self._parent._spectrumSettings[spectrumView][SPECTRUM_MATRIX].reshape((4, 4)))
@@ -830,31 +835,40 @@ class GLExporter():
                     else:
                         # draw 1D spectra
 
-                        # # assume that the vertexArray is a GL_LINE_STRIP
-                        # if spectrumView in self._parent._contourList.keys():
-
+                        # assume that the vertexArray is a GL_LINE_STRIP
                         _, fxMax = specSettings[SPECTRUM_XLIMITS]
                         dxAF, _ = specSettings[SPECTRUM_AF]
+                        xScale, _ = specSettings[SPECTRUM_SCALE]
                         alias = specSettings[SPECTRUM_ALIASINGINDEX]
                         folding = specSettings[SPECTRUM_FOLDINGMODE]
+                        stackX, stackY = specSettings[SPECTRUM_STACKEDMATRIXOFFSET]
 
                         for ii in range(alias[0][0], alias[0][1] + 1, 1):
+
+                            foldX = 1.0
+                            foldXOffsetSym = foldXOffset = 0
+                            if folding[0] == 'mirror':
+                                foldX = pow(-1, ii)
+                                foldXOffset = (2 * fxMax - dxAF) if foldX < 0 else 0
+                                foldXOffsetSym = -dxAF if foldX < 0 else 0
 
                             if self._parent._stackingMode:
                                 _matrix = np.array(specSettings[SPECTRUM_STACKEDMATRIX])
                             else:
                                 _matrix = np.array(self._parent._IMatrix)
 
-                            foldX = 1.0
-                            foldXOffset = foldYOffset = 0
-                            if folding[0] == 'mirror':
-                                foldX = pow(-1, ii)
-                                foldXOffset = (2 * fxMax - dxAF) if foldX < 0 else 0
+                            # build the spectrum transformation matrices
+                            _matrixSym = np.array([xScale * foldX, 0.0, 0.0, 0.0,
+                                                   0.0, 1.0, 0.0, 0.0,
+                                                   0.0, 0.0, 1.0, 0.0,
+                                                   fxMax + (ii * dxAF) + foldXOffsetSym + stackX, stackY, 0.0, 1.0],
+                                                  dtype=np.float32)
 
                             # take the stacking matrix and insert the correct x-scaling to map the pointPositions to the screen
                             _matrix[0] = foldX
-                            _matrix[12] += (ii * dxAF) + foldXOffset
+                            _matrix[12] += (ii * dxAF) + foldXOffset  # add to the stacked offset
                             _data.matrix = np.transpose(_matrix.reshape((4, 4)))
+                            _data.matrixSymbols = np.transpose(_matrixSym.reshape((4, 4)))
                             _data.alias = getAliasSetting(ii, 0)
 
                             yield _data  # pass object back to the calling method
@@ -925,6 +939,7 @@ class GLExporter():
         """
         _symbols = self._parent._GLPeaks._GLSymbols
 
+        # iterate through the visible regions with the viewManager
         for data in self._addSpectrumViewManager('peakSymbols'):
             attribList = data.spectrumView.peakListViews
             validListViews = [_symbols[pp] for pp in attribList
@@ -942,7 +957,7 @@ class GLExporter():
                                                     PLOTWIDTH : data.width,
                                                     PLOTHEIGHT: data.height},
                                            name='spectrumView%s%s%s' % ('peakSymbols', data.index, data.spectrumView.pid),
-                                           mat=data.matrix,
+                                           mat=data.matrixSymbols,
                                            fillMode=None,
                                            splitGroups=False,
                                            lineWidth=0.5 * self.baseThickness * self.symbolThickness,
@@ -954,6 +969,7 @@ class GLExporter():
         """
         _symbols = self._parent._GLMultiplets._GLSymbols
 
+        # iterate through the visible regions with the viewManager
         for data in self._addSpectrumViewManager('multipletSymbols'):
             attribList = data.spectrumView.multipletListViews
             validListViews = [_symbols[pp] for pp in attribList
@@ -970,7 +986,7 @@ class GLExporter():
                                                     PLOTWIDTH : data.width,
                                                     PLOTHEIGHT: data.height},
                                            name='spectrumView%s%s%s' % ('multipletSymbols', data.index, data.spectrumView.pid),
-                                           mat=data.matrix,
+                                           mat=data.matrixSymbols,
                                            fillMode=None,
                                            splitGroups=False,
                                            lineWidth=0.5 * self.baseThickness * self.symbolThickness,
@@ -1099,6 +1115,7 @@ class GLExporter():
         """
         colourGroups = OrderedDict()
 
+        # iterate through the visible regions with the viewManager
         for data in self._addSpectrumViewManager('peakLabels'):
 
             validPeakListViews = [pp for pp in data.spectrumView.peakListViews
@@ -1125,9 +1142,9 @@ class GLExporter():
                     colourPath = 'spectrumViewPeakLabels%s%s%s%s%s%s' % (
                         data.spectrumView.pid, data.index, colour.red, colour.green, colour.blue, colour.alpha)
 
-                    if data.matrix is not None:
+                    if data.matrixSymbols is not None:
                         newLine = [drawString.attribs[0], drawString.attribs[1], 0.0, 1.0]
-                        newLine = data.matrix.dot(newLine)[0:2]
+                        newLine = data.matrixSymbols.dot(newLine)[0:2]
                     else:
                         newLine = [drawString.attribs[0], drawString.attribs[1]]
 
@@ -1210,6 +1227,7 @@ class GLExporter():
         """
         colourGroups = OrderedDict()
 
+        # iterate through the visible regions with the viewManager
         for data in self._addSpectrumViewManager('multipletLabels'):
 
             validMultipletListViews = [pp for pp in data.spectrumView.multipletListViews
@@ -1236,9 +1254,9 @@ class GLExporter():
                     colourPath = 'spectrumViewMultipletLabels%s%s%s%s%s%s' % (
                         data.spectrumView.pid, data.index, colour.red, colour.green, colour.blue, colour.alpha)
 
-                    if data.matrix is not None:
+                    if data.matrixSymbols is not None:
                         newLine = [drawString.attribs[0], drawString.attribs[1], 0.0, 1.0]
-                        newLine = data.matrix.dot(newLine)[0:2]
+                        newLine = data.matrixSymbols.dot(newLine)[0:2]
                     else:
                         newLine = [drawString.attribs[0], drawString.attribs[1]]
 

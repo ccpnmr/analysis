@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-28 17:42:13 +0100 (Tue, September 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-14 12:07:16 +0100 (Thu, October 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -864,6 +864,7 @@ class DimensionsTab(Widget):
         self.spectralDoubleCursorOffset = [i for i in range(dimensions)]
 
         self.foldingModesCheckBox = [i for i in range(dimensions)]
+        # self.invertedCheckBox = [i for i in range(dimensions)]
         self.minAliasingPullDowns = [i for i in range(dimensions)]
         self.maxAliasingPullDowns = [i for i in range(dimensions)]
 
@@ -920,6 +921,10 @@ class DimensionsTab(Widget):
 
         row += 1
         Label(self, text="Dimension is Circular", grid=(row, 0), hAlign='l', tipText=getAttributeTipText(Spectrum, 'foldingModes'))
+
+        # # Not implemented yet
+        # row += 1
+        # Label(self, text="Dimension is Inverted", grid=(row, 0), hAlign='l', tipText=getAttributeTipText(Spectrum, 'invertedModes'))
 
         row += 1
         Label(self, text="Aliasing Limits         Upperbound", grid=(row, 0), hAlign='r', tipText=getAttributeTipText(Spectrum, 'aliasingLimits'))
@@ -1032,8 +1037,15 @@ class DimensionsTab(Widget):
             row += 1
             self.foldingModesCheckBox[i] = CheckBox(self, grid=(row, i + 1), vAlign='t')
             self.foldingModesCheckBox[i].clicked.connect(partial(self._queueSetFoldingModes, spectrum, self.foldingModesCheckBox[i].isChecked, i))
-            # disabled until getRegion correctly fetches mirrored regions
+            # disabled until getRegion correctly fetches mirrored/inverted regions
             self.foldingModesCheckBox[i].setEnabled(False)
+
+            # # Not implemented yet
+            # row += 1
+            # self.invertedCheckBox[i] = CheckBox(self, grid=(row, i + 1), vAlign='t')
+            # self.invertedCheckBox[i].clicked.connect(partial(self._queueSetInvertedModes, spectrum, self.invertedCheckBox[i].isChecked, i))
+            # # disabled until getRegion correctly fetches mirrored/inverted regions
+            # self.invertedCheckBox[i].setEnabled(False)
 
             # max aliasing
             row += 1
@@ -1229,6 +1241,7 @@ class DimensionsTab(Widget):
                 fModes = self.spectrum.foldingModes
                 dd = {'circular': True, 'mirror': False, None: True}  # swapped because inverted checkbox
                 self.foldingModesCheckBox[i].setChecked(dd[fModes[i]])
+                # self.invertedCheckBox[i].setChecked(False)  # not implemented yet
 
                 # pullDown for min/max aliasing
                 aliasMaxRange = list(max(self.foldLim[i]) + rr * self.deltaLim[i] for rr in range(MAXALIASINGRANGE, -1, -1))
@@ -1474,6 +1487,15 @@ class DimensionsTab(Widget):
         folding = list(spectrum.foldingModes)
         folding[dim] = value
         spectrum.foldingModes = tuple(folding)
+
+    # @queueStateChange(_verifyPopupApply)
+    # def _queueSetInvertedModes(self, spectrum, valueGetter, dim, _value):
+    #     # not implemented yet
+    #     pass
+    #
+    # def _setInvertedModes(self, spectrum, dim, value):
+    #     # not implemented yet
+    #     pass
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetDisplayFoldedContours(self, spectrum, valueGetter, _value):

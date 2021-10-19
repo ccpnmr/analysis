@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-11 20:01:13 +0100 (Mon, October 11, 2021) $"
+__modifiedBy__ = "$modifiedBy: VickyAH $"
+__dateModified__ = "$dateModified: 2021-10-19 12:27:13 +0100 (Tue, October 19, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -98,7 +98,7 @@ from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideB
     notificationEchoBlocking, logCommandManager
 
 from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU, CCPNPLUGINSMENU, PLUGINSMENU
-from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_OVERVIEW
+from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_KEY_CONCEPTS
 
 from PyQt5.QtCore import QTimer
 
@@ -906,7 +906,7 @@ class Framework(NotifierBase):
 
     def _displayKeyConcepts(self):
         if not self._key_concepts:
-            self._key_concepts = TipOfTheDayWindow(mode=MODE_OVERVIEW)
+            self._key_concepts = TipOfTheDayWindow(mode=MODE_KEY_CONCEPTS)
         self._key_concepts.show()
         self._key_concepts.raise_()
 

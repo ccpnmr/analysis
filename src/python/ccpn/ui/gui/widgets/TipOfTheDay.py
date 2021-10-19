@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-07 09:53:45 +0100 (Fri, May 07, 2021) $"
+__modifiedBy__ = "$modifiedBy: VickyAH $"
+__dateModified__ = "$dateModified: 2021-10-19 12:27:13 +0100 (Tue, October 19, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -53,7 +53,7 @@ HAVE_RANDOM_TIP_BUTTON = QWizard.HaveCustomButton1
 HAVE_DONT_SHOW_TIPS_BUTTON = QWizard.HaveCustomButton2
 
 MODE_TIP_OF_THE_DAY = 'TIP_OF_THE_DAY'
-MODE_OVERVIEW = 'OVERVIEW'
+MODE_KEY_CONCEPTS = 'KEY_CONCEPTS'
 
 TITLE = 'TITLE'
 BUTTONS = 'BUTTONS'
@@ -490,8 +490,8 @@ class TipOfTheDayWindow(QWizard):
 
         if len(self._page_list) == 0:
 
-            if self._mode == MODE_OVERVIEW:
-                header = "Note: the overview is not correctly configured..."
+            if self._mode == MODE_KEY_CONCEPTS:
+                header = "Note: the key concept viewer is not correctly configured..."
             else:
                 header = "All Tips viewed: no more tips to show..."
 
@@ -607,7 +607,7 @@ class TipOfTheDayWindow(QWizard):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    # wizard = TipOfTheDayWindow(mode=MODE_OVERVIEW)
+    # wizard = TipOfTheDayWindow(mode=MODE_KEY_CONCEPTS)
     wizard = TipOfTheDayWindow(mode=MODE_TIP_OF_THE_DAY)
 
     wizard.show()

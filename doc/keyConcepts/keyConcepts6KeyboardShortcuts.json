@@ -1,0 +1,9 @@
+{
+  "type": "picture",
+
+  "color": "#ffffff",
+
+  "order":  6,
+
+  "contents" : ["./graphics/keyConcepts6KeyboardShortcuts.png"]
+}

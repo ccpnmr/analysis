@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>Find links to our PDF-based tutorials on a range of topics in the <span style=%(purple)s>Help</span> menu. You can download example data and projects from our <a href=\"https://www.ccpn.ac.uk/v3-software/tutorials\">website</a>.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 4,
+  "contents": [
+    "./graphics/PDFTutorials.png"
+  ]
+}

@@ -26,7 +26,7 @@
         ],
         "EMPTY_TEXT"    : "All tips viewed to reset go to Project / Preferences -> Tips and click 'reset tips'",
         "DIRECTORIES"   : [
-            "/Users/vad5/PycharmProjects/Git/AnalysisV3/doc/TipOfTheDay"
+            "/Users/vad5/PycharmProjects/Git/AnalysisV3/doc/tipOfTheDay"
         ],
         "USE_DOTS"      : false,
         "HAS_DIVIDER"   : false,

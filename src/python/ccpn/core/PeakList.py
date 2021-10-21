@@ -442,10 +442,18 @@ class PeakList(PMIListABC):
 
 
     @logCommand(get='self')
-    def copyTo(self, targetSpectrum: Spectrum, **kwargs) -> 'PeakList':
-        """Make (and return) a copy of the PeakList attached to targetSpectrum.
+    def copyTo(self, targetSpectrum: Spectrum, targetPeakList=None, **kwargs) -> 'PeakList':
+        """
+        Copy the origin PeakList peaks to a targetSpectrum.
+        If targetPeakList is given, peaks will be added to it, otherwise a new PeakList is created (default behaviour).
+        return the target PeakList with the newly copied peaks.
 
-        Peaklist attributes can be passed in as keyword arguments"""
+
+        :param targetSpectrum:  object: Core.Spectrum or Str: Pid
+        :param targetPeakList:  object: Core.PeakList or Str: Pid
+        :param kwargs:          any extra Peaklist attributes for newly created peakLists.
+                                Not used if it is given a targetPeakList
+        """
 
         singleValueTags = ['isSimulated', 'symbolColour', 'symbolStyle', 'textColour', 'textColour',
                            'title', 'comment', 'meritThreshold', 'meritEnabled', 'meritColour']
@@ -455,7 +463,14 @@ class PeakList(PMIListABC):
             raise TypeError('targetSpectrum not defined')
         if not isinstance(targetSpectrum, Spectrum):
             raise TypeError('targetSpectrum is not of type Spectrum')
+        if targetPeakList:
+            targetPeakList = self.project.getByPid(targetPeakList) if isinstance(targetPeakList,str) else targetPeakList
+            if not isinstance(targetPeakList, PeakList):
+                raise TypeError('targetPeakList is not of type PeakList')
+            if not targetPeakList in targetSpectrum.peakLists:
+                raise TypeError('targetPeakList is not a PeakList of: %s'%targetSpectrum.pid)
 
+        # TODO enable copying across different dimensionility
         dimensionCount = self.spectrum.dimensionCount
         if dimensionCount != targetSpectrum.dimensionCount:
             raise ValueError("Cannot copy %sD %s to %sD %s"
@@ -471,13 +486,13 @@ class PeakList(PMIListABC):
                 raise ValueError("PeakList has no attribute %s" % key)
 
         with undoBlockWithoutSideBar():
-            newPeakList = targetSpectrum.newPeakList(**params)
-            # newPeakList.symbolColour = targetSpectrum.positiveContourColour
-            # newPeakList.textColour = targetSpectrum.positiveContourColour
+            if not targetPeakList:
+                targetPeakList = targetSpectrum.newPeakList(**params)
+
             for peak in self.peaks:
-                peak.copyTo(newPeakList)
-        #
-        return newPeakList
+                peak.copyTo(targetPeakList)
+
+        return targetPeakList
 
     @logCommand(get='self')
     def subtractPeakLists(self, peakList: 'PeakList') -> 'PeakList':

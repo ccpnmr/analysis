@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-24 17:14:49 +0100 (Fri, September 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-25 18:09:07 +0100 (Mon, October 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -213,18 +213,19 @@ def _spectrumViewHasChanged(data):
         # add spectrum action for non-grouped action
         _addActionIcon(action, self, spectrumDisplay)
 
-    if spectrumDisplay.isGrouped and self in spectrumDisplay.spectrumViews:
-        if hasattr(self, '_guiChanged'):
-            del self._guiChanged
+    # if spectrumDisplay.isGrouped and self in spectrumDisplay.spectrumViews:
+    #     if hasattr(self, '_guiChanged'):
+    if self in spectrumDisplay.spectrumViews and hasattr(self, '_guiChanged'):
+        del self._guiChanged
 
-            from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 
-            GLSignals = GLNotifier(parent=self)
+        GLSignals = GLNotifier(parent=self)
 
-            self.buildContoursOnly = True
+        self.buildContoursOnly = True
 
-            # repaint
-            GLSignals.emitPaintEvent()
+        # repaint
+        GLSignals.emitPaintEvent()
 
     # Update strip
     self.strip.update()

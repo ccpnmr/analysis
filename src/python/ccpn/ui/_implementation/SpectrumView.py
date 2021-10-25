@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-15 19:22:31 +0100 (Wed, September 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-25 18:09:06 +0100 (Mon, October 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,15 +28,16 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import operator
 from typing import Tuple
-from functools import partial
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
-from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, deleteWrapperWithoutSideBar
+from ccpn.core.lib.ContextManagers import newObject, deleteWrapperWithoutSideBar, \
+    ccpNmrV3CoreUndoBlock, ccpNmrV3CoreSetter
 from ccpn.ui._implementation.Strip import Strip
+from ccpn.util.decorators import logCommand
 
 
 class SpectrumView(AbstractWrapperObject):
@@ -60,7 +61,17 @@ class SpectrumView(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiStripSpectrumView._metaclass.qualifiedName()
 
+    _CONTOURATTRIBUTELIST = '''negativeContourBase negativeContourCount negativeContourFactor
+                            displayNegativeContours negativeContourColour
+                            positiveContourBase positiveContourCount positiveContourFactor
+                            displayPositiveContours positiveContourColour
+                            sliceColour
+                            '''
+
+    #=========================================================================================
     # CCPN properties
+    #=========================================================================================
+
     @property
     def _apiStripSpectrumView(self) -> ApiStripSpectrumView:
         """ CCPN SpectrumView matching SpectrumView"""
@@ -118,19 +129,14 @@ class SpectrumView(AbstractWrapperObject):
         return result
 
     @positiveContourColour.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def positiveContourColour(self, value: str):
         if not isinstance(value, (str, type(None))):
             raise ValueError("positiveContourColour must be a string/None.")
 
-        with undoStackBlocking() as addUndoItem:
-            # add undo/redo items to flag change of colour for the spectrumViews
-            addUndoItem(redo=partial(setattr, self, '_guiChanged', True))
-
         self._guiChanged = True
         self._wrappedData.spectrumView.positiveContourColour = value
-
-        with undoStackBlocking() as addUndoItem:
-            addUndoItem(undo=partial(setattr, self, '_guiChanged', True))
 
     @property
     def positiveContourCount(self) -> int:
@@ -213,19 +219,14 @@ class SpectrumView(AbstractWrapperObject):
         return result
 
     @negativeContourColour.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def negativeContourColour(self, value: str):
         if not isinstance(value, (str, type(None))):
             raise ValueError("negativeContourColour must be a string/None.")
 
-        with undoStackBlocking() as addUndoItem:
-            # add undo/redo items to flag change of colour for the spectrumViews
-            addUndoItem(redo=partial(setattr, self, '_guiChanged', True))
-
         self._guiChanged = True
         self._wrappedData.spectrumView.negativeContourColour = value
-
-        with undoStackBlocking() as addUndoItem:
-            addUndoItem(undo=partial(setattr, self, '_guiChanged', True))
 
     @property
     def negativeContourCount(self) -> int:
@@ -336,19 +337,14 @@ class SpectrumView(AbstractWrapperObject):
         return result
 
     @sliceColour.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def sliceColour(self, value: str):
         if not isinstance(value, (str, type(None))):
             raise ValueError("sliceColour must be a string/None.")
 
-        with undoStackBlocking() as addUndoItem:
-            # add undo/redo items to flag change of colour for the spectrumViews
-            addUndoItem(redo=partial(setattr, self, '_guiChanged', True))
-
         self._guiChanged = True
         self._wrappedData.spectrumView.sliceColour = value
-
-        with undoStackBlocking() as addUndoItem:
-            addUndoItem(undo=partial(setattr, self, '_guiChanged', True))
 
     @property
     def spectrum(self) -> Spectrum:
@@ -370,7 +366,7 @@ class SpectrumView(AbstractWrapperObject):
     #     return tuple((x or None) and x - 1 for x in ll)
 
     #=========================================================================================
-    # Spectrum properties in displayOrder; conveniance methods
+    # Spectrum properties in displayOrder; convenience methods
     #=========================================================================================
 
     @property
@@ -453,15 +449,26 @@ class SpectrumView(AbstractWrapperObject):
         return sorted(parent._wrappedData.stripSpectrumViews,
                       key=operator.attrgetter('spectrumView.spectrumName'))
 
-    def _finaliseAction(self, action: str):
-        if not super()._finaliseAction(action):
-            return
+    @ccpNmrV3CoreUndoBlock()
+    def clearContourAttributes(self):
+        """Clear all the contour attributes associated with the spectrumView
+        Values will revert to the spectrum values
+        """
+        _spectrum = self.spectrum
+        for param in self._CONTOURATTRIBUTELIST.split():
+            if hasattr(_spectrum, param):
+                setattr(self, param, None)
 
-        # all are attached to the same click
-        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
-        GLSignals = GLNotifier(parent=self)
-        GLSignals.emitPaintEvent()
+    @ccpNmrV3CoreUndoBlock()
+    def copyContourAttributesFromParent(self):
+        """Copy all the contour attributes associated with the spectrum
+        to the spectrumView
+        """
+        _spectrum = self.spectrum
+        for param in self._CONTOURATTRIBUTELIST.split():
+            if hasattr(_spectrum, param):
+                value = getattr(_spectrum, param)
+                setattr(self, param, value)
 
 
 #=========================================================================================
@@ -508,15 +515,19 @@ def _newSpectrumView(display, spectrum, dimensionOrdering):
     if newSpecView is None:
         raise RuntimeError('Failed to generate new SpectrumView instance')
 
-    for param in '''negativeContourBase negativeContourCount negativeContourFactor 
-                    displayNegativeContours negativeContourColour 
-                    positiveContourBase positiveContourCount positiveContourFactor 
-                    displayPositiveContours positiveContourColour
-                    sliceColour
-                 '''.split():
-        if hasattr(spectrum, param):
-            value = getattr(spectrum, param)
-            setattr(newSpecView, param, value)
+    # NOTE:ED - 2021oct25 - @GWV not sure why this is here as overrides the .getter logic
+    #   replaced with method
+    # newSpecView.copyContourAttributesFromParent()
+    #
+    # for param in '''negativeContourBase negativeContourCount negativeContourFactor
+    #                 displayNegativeContours negativeContourColour
+    #                 positiveContourBase positiveContourCount positiveContourFactor
+    #                 displayPositiveContours positiveContourColour
+    #                 sliceColour
+    #              '''.split():
+    #     if hasattr(spectrum, param):
+    #         value = getattr(spectrum, param)
+    #         setattr(newSpecView, param, value)
 
     return newSpecView
 

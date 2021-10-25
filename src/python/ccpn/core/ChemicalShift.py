@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-07 11:19:30 +0100 (Thu, October 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-25 18:40:04 +0100 (Mon, October 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -313,9 +313,10 @@ class ChemicalShift(NotifierBase):
             if self._chemicalShiftList.autoUpdate:
                 value, valueError = _nmrAtom._recalculateShiftValue(self._chemicalShiftList.spectra)
 
-                # if value/valueError are both None, i.e., no assignments should it just ignore?
-                self._chemicalShiftList._setShiftAttribute(self._uniqueId, CS_VALUE, value)
-                self._chemicalShiftList._setShiftAttribute(self._uniqueId, CS_VALUEERROR, valueError)
+                if not (value is None and valueError is None):
+                    # if value/valueError are both None, i.e., no assignments should it just ignore?
+                    self._chemicalShiftList._setShiftAttribute(self._uniqueId, CS_VALUE, value)
+                    self._chemicalShiftList._setShiftAttribute(self._uniqueId, CS_VALUEERROR, valueError)
 
     #~~~~~~~~~~~~~~~~
 
@@ -574,9 +575,10 @@ class ChemicalShift(NotifierBase):
             else:
                 value, valueError = None, None
 
-            # update the dataframe
-            self._chemicalShiftList._setShiftAttribute(self._uniqueId, CS_VALUE, value)
-            self._chemicalShiftList._setShiftAttribute(self._uniqueId, CS_VALUEERROR, valueError)
+            if not (value is None and valueError is None):
+                # update the dataframe
+                self._chemicalShiftList._setShiftAttribute(self._uniqueId, CS_VALUE, value)
+                self._chemicalShiftList._setShiftAttribute(self._uniqueId, CS_VALUEERROR, valueError)
 
     def _renameNmrAtom(self, nmrAtom):
         """Update the values in the table for the renamed nmrAtom

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-25 18:09:06 +0100 (Mon, October 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-25 18:29:04 +0100 (Mon, October 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -452,7 +452,7 @@ class SpectrumView(AbstractWrapperObject):
     @ccpNmrV3CoreUndoBlock()
     def clearContourAttributes(self):
         """Clear all the contour attributes associated with the spectrumView
-        Values will revert to the spectrum values
+        Attributes will revert to the spectrum values
         """
         _spectrum = self.spectrum
         for param in self._CONTOURATTRIBUTELIST.split():
@@ -460,8 +460,8 @@ class SpectrumView(AbstractWrapperObject):
                 setattr(self, param, None)
 
     @ccpNmrV3CoreUndoBlock()
-    def copyContourAttributesFromParent(self):
-        """Copy all the contour attributes associated with the spectrum
+    def copyContourAttributesFromSpectrum(self):
+        """Copy all the contour attributes associated with the spectrumView.spectrum
         to the spectrumView
         """
         _spectrum = self.spectrum
@@ -517,7 +517,7 @@ def _newSpectrumView(display, spectrum, dimensionOrdering):
 
     # NOTE:ED - 2021oct25 - @GWV not sure why this is here as overrides the .getter logic
     #   replaced with method
-    # newSpecView.copyContourAttributesFromParent()
+    # newSpecView.copyContourAttributesFromSpectrum()
     #
     # for param in '''negativeContourBase negativeContourCount negativeContourFactor
     #                 displayNegativeContours negativeContourColour

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-11 20:43:40 +0100 (Mon, October 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-25 18:29:05 +0100 (Mon, October 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2692,6 +2692,22 @@ class GuiSpectrumDisplay(CcpnModule):
         if _row and len(_row) > 1 and (_row[-1] == strip):
             self._rightGLAxis.highlightCurrentStrip(state)
             self._bottomGLAxis.highlightCurrentStrip(state)
+
+    def clearContourAttributes(self):
+        """Clear all the contour attributes associated with the spectrumViews in the spectrumDisplay
+        Attributes will revert to the spectrum values
+        """
+        with undoBlockWithoutSideBar():
+            for specView in self.spectrumViews:
+                specView.clearContourAttributes()
+
+    def copyContourAttributesFromSpectra(self):
+        """Copy all the contour attributes associated with a spectrumView.spectrum
+        to the spectrumView for all spectrumViews in the spectrumDisplay
+        """
+        with undoBlockWithoutSideBar():
+            for specView in self.spectrumViews:
+                specView.copyContourAttributesFromSpectrum()
 
     #===========================================================================================
     # new'Object' and other methods

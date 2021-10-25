@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-07 18:40:33 +0100 (Thu, October 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-25 15:56:55 +0100 (Mon, October 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -277,6 +277,12 @@ class GuiWindow():
 
             popup = SetPeakAliasingPopup(parent=self, mainWindow=self, items=self.current.peaks)
             popup.exec_()
+
+    def calibrateFromPeaks(self):
+        """Calibrate the current strip from the selected peaks
+        """
+        if self.current.strip:
+            self.current.strip.calibrateFromPeaks()
 
     def getCurrentPositionAndStrip(self):
         current = self.application.current

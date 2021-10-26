@@ -1,0 +1,10 @@
+{
+  "header": "<p style=%(para)s>Go to <span style=%(purple)s>Help / Tutorials / Video Tutorials & Manual</span> to find a set of html pages with YouTube video tutorials and explanatory text on a wide range of topics.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 3,
+  "contents": ["./graphics/VideoTutorials.png"]
+}

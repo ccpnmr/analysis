@@ -1,0 +1,9 @@
+{
+  "type": "picture",
+
+  "color": "#ffffff",
+
+  "order":  5,
+
+  "contents" : ["./graphics/keyConcepts5MouseMenus.png"]
+}

@@ -1,0 +1,9 @@
+{
+  "type": "picture",
+
+  "color": "#ffffff",
+
+  "order":  7,
+
+  "contents" : ["./graphics/keyConcepts7ModuleSettings.png"]
+}

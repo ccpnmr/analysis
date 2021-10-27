@@ -1087,17 +1087,39 @@ def _getBins(y, binCount=None):
 
 
 def snap1DPeaksAndRereferenceSpectrum(peaks, maximumLimit=0.1, useAdjacientPeaksAsLimits=False,
-                                    doNeg=True, figOfMeritLimit=1, spectrum=None):
+                                    doNeg=True, figOfMeritLimit=1, spectrum=None, autoRereferenceSpectrum=False):
+    """
+    Snap all peaks to closest maxima
 
+    Process
+    - reorder the peaks by heights to give higher peaks priority to the snap
+    - 1st iteration: search for nearest maxima and calculate deltas
+    - use deltas to fit patterns of shifts and detect the most probable global shift
+    - use the global shift to re-reference the spectrum
+    - 2nd iteration: re-search for nearest maxima
+    - set newly detected position if found better fits
+    - re-set the spectrum referencing to original (if not requested as argument)
+
+    :param peaks:
+    :param maximumLimit:
+    :param useAdjacientPeaksAsLimits:
+    :param doNeg:
+    :param figOfMeritLimit:
+    :param spectrum:
+    :return:
+    """
     if not peaks:
         getLogger().warning('Cannot snap peaks. No peaks found')
         return []
-
     if not spectrum:
         spectrum = peaks[0].peakList.spectrum
-    peaks.sort(key=lambda x: x.position[0], reverse=False)  # reorder peaks by position
+
+    # - reorder the peaks by heights to give higher peaks priority to the snap
+    peaks.sort(key=lambda x: x.height, reverse=True) # reorder peaks by height
     oPositions, oHeights = [x.position for x in peaks], [x.height for x in peaks]
     nPositions, nHeights = [], []
+
+    # - 1st iteration: search for nearest maxima and calculate deltas
     for peak in peaks:
         if peak is not None:
             position, height = _get1DClosestExtremum(peak, maximumLimit=maximumLimit,
@@ -1107,18 +1129,42 @@ def snap1DPeaksAndRereferenceSpectrum(peaks, maximumLimit=0.1, useAdjacientPeaks
             nHeights.append(height)
     deltas = np.array(nPositions) - np.array(oPositions)
     deltas = deltas.flatten()
+
+    if len(peaks) == 1:
+        peaks[0].position = nPositions[0]
+        peaks[0].height = nHeights[0]
+        return deltas[0]
+
+    # - use deltas to fit patterns of shifts and detect the most probable global shift
     stats, edges, binNumbers, fittedCurve, mostCommonBinNumber, highestValues, fittedCurveExtremum = _getBins(deltas)
     shift = max(highestValues)
+    oReferenceValues = spectrum.referenceValues
+    oPositions = spectrum.positions
+    #  - use the global shift to re-reference the spectrum
     spectrum.referenceValues = [spectrum.referenceValues[0] - shift]
     spectrum.positions = spectrum.positions - shift
+
+    #  - 2nd iteration: re-search for nearest maxima
     for peak in peaks:
         if peak is not None:
-            peak.position = [peak.position[0] + shift,]
+            oPosition = peak.position
+            peak.position = [peak.position[0] + shift,] #  - use the shift to re-reference the peak to the moved spectrum
             position, height = _get1DClosestExtremum(peak, maximumLimit=maximumLimit,
                                                      useAdjacientPeaksAsLimits=useAdjacientPeaksAsLimits, doNeg=doNeg,
                                                      figOfMeritLimit=figOfMeritLimit)
-            peak.position = position
-            peak.height = height
+            #  - set newly detected position if found better fits
+            if peak.position == position: # Same position detected. Revert
+                peak.height = peak.peakList.spectrum.getHeight(oPosition)
+                peak.position = oPosition
+            else:
+                peak.position = position
+                peak.height = height
+    # - re-set the spectrum referencing to original (if not requested as argument)
+    if not autoRereferenceSpectrum:
+        spectrum.referenceValues = oReferenceValues
+        spectrum.positions = oPositions
+
+    # check for missed maxima or peaks snapped to height at position but some other unpicked maxima was close-by
     return shift
 
 def _add(x, y):
@@ -1209,10 +1255,18 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
                 position = [float(nearestPosition), ]
                 height = nearestHeight[0]
         else:
-            position = [float(nearestPosition), ]
-            height = nearestHeight[0]
+
+            existingPositions = [p.position[0] for p in peak.peakList.peaks]
+            a, b = _getAdjacentPeakPositions1D(peak)
+            if float(nearestPosition) in (a,b):
+                height = peak.peakList.spectrum.getHeight(peak.position)
+
+            else:
+                position = [float(nearestPosition), ]
+                height = nearestHeight[0]
     else:
         height = peak.peakList.spectrum.getHeight(peak.position)
+
     return position, height
 
 def _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1, doNeg=True, figOfMeritLimit=1):

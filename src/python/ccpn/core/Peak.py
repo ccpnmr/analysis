@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-22 17:12:22 +0100 (Wed, September 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-27 17:35:06 +0100 (Wed, October 27, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,7 @@ import itertools
 import operator
 import numpy as np
 from functools import partial
-from typing import Optional, Tuple, Union, Sequence, TypeVar, Any
+from typing import Optional, Tuple, Union, Sequence, Any
 
 from ccpn.core.lib.AxisCodeLib import _axisCodeMapIndices
 from ccpn.util import Common as commonUtil
@@ -40,8 +40,8 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.core.lib.peakUtils import _getPeakSNRatio, snapToExtremum as peakUtilsSnapToExtremum
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, \
-    ccpNmrV3CoreSetter, undoBlock, undoBlockWithoutSideBar, undoStackBlocking, ccpNmrV3CoreUndoBlock
+from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, \
+    undoBlock, undoBlockWithoutSideBar, undoStackBlocking
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import makeIterableList, isIterable
 from ccpn.util.Constants import SCALETOLERANCE
@@ -859,6 +859,21 @@ class Peak(AbstractWrapperObject):
             else:
                 newValues.append(values[dim - 1])
         setattr(self, attributeName, newValues)
+
+    @property
+    def clusterId(self):
+        """Get/set the clusterId for the peak
+        """
+        return self._wrappedData.clusterId
+
+    @clusterId.setter
+    def clusterId(self, value):
+        if not isinstance(value, (int, type(None))):
+            raise ValueError('Peak.clusterId must be of type int >= 0, None')
+        if value is not None and value < 0:
+            raise ValueError('Peak.clusterId must be >= 0')
+
+        self._wrappedData.clusterId = value
 
     #=========================================================================================
     # Implementation functions

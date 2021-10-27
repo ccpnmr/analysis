@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-07 10:57:27 +0100 (Thu, October 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-27 17:32:31 +0100 (Wed, October 27, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -70,10 +70,7 @@ class Note(AbstractWrapperObject):
 
     @property
     def _key(self) -> str:
-        """Residue local ID"""
-        # return Pid.IDSEP.join((str(self._wrappedData.serial),
-        #                        self._wrappedData.name.translate(Pid.remapSeparators), 'HELP'))
-        # return str(self.name)+'_'+str(self.serial)
+        """Note local ID"""
         return self._wrappedData.name.translate(Pid.remapSeparators)
 
     @property
@@ -87,6 +84,7 @@ class Note(AbstractWrapperObject):
         return self._wrappedData.name
 
     @name.setter
+    @logCommand(get='self')
     def name(self, value: str):
         """set Name of note, part of identifier"""
         self.rename(value)
@@ -103,6 +101,7 @@ class Note(AbstractWrapperObject):
 
     @text.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def text(self, value: str):
         if value is not None:
             if not isinstance(value, str):

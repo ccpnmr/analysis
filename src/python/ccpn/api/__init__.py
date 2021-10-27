@@ -26,7 +26,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 __modifiedBy__ = "$Author: Luca Mureddu $"
 __dateModified__ = "$Date: 2021-06-23 17:58:44 +0000 (Wed, June 23, 2021) $"
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-06 17:58:19 +0100 (Mon, September 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-27 18:19:48 +0100 (Wed, October 27, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -75,7 +75,7 @@ from ccpn.core.Note import Note
 from ccpn.core.PeakCluster import PeakCluster
 from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Multiplet import Multiplet
-
+from ccpn.core.Collection import Collection
 
 ############################################
 ############   UI Core objects       #######

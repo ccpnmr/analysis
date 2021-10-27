@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-12 16:04:27 +0100 (Tue, October 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-27 18:19:48 +0100 (Wed, October 27, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -81,6 +81,7 @@ COMPLEXES = 'complexes'
 SPECTRUMGROUPS = 'spectrumGroups'
 NOTES = 'notes'
 PEAKCLUSTERS = 'peakClusters'
+COLLECTIONS = 'collections'
 
 
 class Project(AbstractWrapperObject):
@@ -1701,6 +1702,21 @@ class Project(AbstractWrapperObject):
         from ccpn.core.PeakCluster import _newPeakCluster
 
         return _newPeakCluster(self, peaks=peaks, **kwds)
+
+    @logCommand('project.')
+    def newCollection(self, items: Sequence[typing.Any] = None, **kwds) -> Optional['Collection']:
+        """Create new Collection.
+
+        See the Collection class for details.
+
+        Optional keyword arguments can be passed in; see Collection._newCollection for details.
+
+        :param items: optional list of core objects as objects or pids.
+        :return: a new Collection instance.
+        """
+        from ccpn.core.Collection import _newCollection
+
+        return _newCollection(self, items=items, **kwds)
 
     @logCommand('project.')
     def newSample(self, name: str = None, pH: float = None, ionicStrength: float = None,

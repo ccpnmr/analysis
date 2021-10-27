@@ -294,7 +294,7 @@ _coreImportOrder = (
     'ChemicalShiftList', '_OldChemicalShift',
     'DataSet', 'RestraintList', 'Restraint',
     'RestraintContribution', 'CalculationStep', 'Data', 'StructureEnsemble', 'Model', 'Note',
-    'PeakCluster', 'MultipletList', 'Multiplet'
+    'PeakCluster', 'MultipletList', 'Multiplet', 'Collection'
     )
 
 # This list includes ui classes (added below)

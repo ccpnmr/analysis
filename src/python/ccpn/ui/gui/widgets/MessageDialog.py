@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-06 17:46:10 +0100 (Mon, September 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-27 11:58:49 +0100 (Wed, October 27, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -407,28 +407,26 @@ def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, o
             if lower_text == 'ok' or lower_text == okText.strip().lower():
                 dialog.setDefaultButton(button)
 
-        if checkbox != None:
-            _checkbox = CheckBox(parent=dialog, text=checkbox)
-            _checkbox.setChecked(checked)
+        if checkbox is not None:
+            _checkbox = CheckBox(parent=dialog, text=checkbox, checked=checked)
             dialog.setCheckBox(_checkbox)
 
-    if _checkbox != None:
+    if _checkbox is not None:
         _checkbox.setFocus()
 
-    dialog.raise_()
+    # dialog.raise_()
     index = dialog.exec_()
 
     result = ''
-    if dialog.clickedButton() != None:
+    if dialog.clickedButton() is not None:
         if objects:
             result = objects[index]
 
         else:
             result = texts[index]
 
-    if checkbox != None:
-        if _checkbox.isChecked():
-            result = ' %s %s ' % (result, checkbox)
+    if checkbox is not None and _checkbox.isChecked():
+        result = ' %s %s ' % (result, checkbox)
 
     return result
 

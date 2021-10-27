@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-10 14:59:40 +0100 (Thu, June 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-27 11:58:49 +0100 (Wed, October 27, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -108,9 +108,10 @@ class UpdatePopup(CcpnDialogMainWidget, UpdateAgent):
 
         # set some padding for the buttons
         _height = getFontHeight()
+        _style = f'QPushButton {{padding-left: {_height}px; padding-right: {_height}px; padding-top: 1px; padding-bottom: 1px;}}'
         for button in self.buttonList.buttons:
-            button.setStyleSheet("padding-left: {}px; padding-right: {}px; padding-top: 0px; padding-bottom: 0px;".format(_height, _height))
-        self._updateButton.setStyleSheet("padding-left: {}px; padding-right: {}px; padding-top: 0px; padding-bottom: 0px;".format(_height, _height))
+            button.setStyleSheet(_style)
+        self._updateButton.setStyleSheet(_style)
 
         row += 1
 

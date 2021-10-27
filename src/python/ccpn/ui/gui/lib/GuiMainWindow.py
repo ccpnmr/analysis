@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-07 19:56:29 +0100 (Thu, October 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-27 11:58:49 +0100 (Wed, October 27, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1007,6 +1007,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         QtWidgets.QApplication.setActiveWindow(self)
 
         QUIT = 'Quit Program'
+        SAVE_QUIT = 'Save and Quit'
         MESSAGE = QUIT
         CANCEL = 'Cancel'
         QUIT_WITHOUT_SAVING = 'Quit without saving'
@@ -1015,19 +1016,22 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # add to preferences SAVE_DATA .
         if disableCancel:
             if undos.isDirty():
-                reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT], checkbox=SAVE_DATA, okText=QUIT,
-                                                checked=False)
+                # reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT], checkbox=SAVE_DATA, okText=QUIT,
+                #                                 checked=False)
+                reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT, SAVE_QUIT], okText=QUIT)
             else:
                 reply = QUIT_WITHOUT_SAVING
 
         else:
             if undos.isDirty():
-                reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT, CANCEL], checkbox=SAVE_DATA, okText=QUIT,
-                                                checked=False)
+                # reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT, CANCEL], checkbox=SAVE_DATA, okText=QUIT,
+                #                                 checked=False)
+                reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT, SAVE_QUIT, CANCEL], okText=QUIT)
             else:
                 reply = QUIT_WITHOUT_SAVING
 
-        if (QUIT in reply) and (SAVE_DATA in reply):
+        # if (QUIT in reply) and (SAVE_DATA in reply or SAVE_QUIT in reply):
+        if (reply in [SAVE_QUIT, SAVE_DATA]):
             if event:
                 event.accept()
             # prefFile = open(userPreferencesPath, 'w+')
@@ -1047,7 +1051,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 if event:  # ejb - don't close the project
                     event.ignore()
 
-        elif (QUIT in reply and SAVE_DATA not in reply) or (reply == QUIT_WITHOUT_SAVING):
+        # elif (QUIT in reply and SAVE_DATA not in reply) or (reply == QUIT_WITHOUT_SAVING):
+        elif (reply in [QUIT, QUIT_WITHOUT_SAVING]):
             if event:
                 event.accept()
             # prefFile = open(userPreferencesPath, 'w+')

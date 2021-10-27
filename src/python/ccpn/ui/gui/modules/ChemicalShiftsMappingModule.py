@@ -1398,7 +1398,7 @@ class ChemicalShiftsMapping(CcpnModule):
         label = 'Fitted Function: %.2f, %.3f' % (A, K)
         self.fittingPlot.plot(xs, ys, symbol='o', pen=None)
         self.fittingPlot.plot(xf, yf, name=label)
-        self.fittingPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=None)
+        self.fittingPlot.setLimits(xMin=0, xMax=None, yMin=-1, yMax=None)
         self.bindingPlot.autoRange()
 
     def _openSpectra(self):

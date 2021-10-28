@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-27 18:19:48 +0100 (Wed, October 27, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-28 19:32:34 +0100 (Thu, October 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -36,6 +36,7 @@ from ccpn.core.lib.ContextManagers import newObject, undoBlockWithoutSideBar, \
     renameObject, ccpNmrV3CoreSetter
 from ccpn.util.Common import makeIterableList
 from ccpn.util.decorators import logCommand
+from ccpn.util.OrderedSet import OrderedSet
 
 
 class Collection(AbstractWrapperObject):
@@ -128,7 +129,7 @@ class Collection(AbstractWrapperObject):
 
     @classmethod
     def _getAllWrappedData(cls, parent: 'Project') -> Tuple[apiCollection]:
-        """get wrappedData (Collections) for all Collection children of parent CollectionList"""
+        """get _wrappedData (Collections) for all Collection children of parent"""
         return parent._wrappedData.sortedPrimaryCollections()
 
     @renameObject()
@@ -196,20 +197,58 @@ class Collection(AbstractWrapperObject):
                 for itm in items:
                     self._wrappedData.removeCollectionItem(itm._wrappedData)
 
-    # @property
-    # def collections(self):
-    #     """Return the list of collections containing this core object
-    #     """
-    #     try:
-    #         return tuple([self._project._data2Obj[itm] for itm in self._wrappedData.collections])
-    #     except:
-    #         return None
+    @logCommand(get='self')
+    def getByObjectType(self, objectType=None, recursive=False):
+        """Return a list of items of type objectType
+        """
 
+        class _recurseCollections():
+            # iterator to search through nested collections and collate all items
+            def __init__(self, collection):
+                self.items = OrderedSet(collection)
 
-#===========================================================================================
-# new'Object' and other methods
-# Call appropriate routines in their respective locations
-#===========================================================================================
+            def __iter__(self):
+                # initial iterator settings
+                self._len = 0
+                return self
+
+            def __next__(self):
+                if not recursive:
+                    # if not recursive then only return the original list
+                    raise StopIteration
+
+                # get the newly added, nested collections
+                collections = list(filter(lambda obj: isinstance(obj, Collection),
+                                          list(self.items)[self._len:]))
+                if not collections:
+                    # if no more then reached the bottom
+                    raise StopIteration
+
+                self._len = len(self.items)
+                for coll in collections:
+                    # update the list of items
+                    self.items |= OrderedSet(coll.items)
+
+                return self
+
+        # create an iterator
+        val = _recurseCollections(self.items)
+        for count, _ in enumerate(val):
+            if count == 50:
+                # set an arbitrary limit to stop searching too deep
+                # - should never happen though because using orderedSet
+                raise RuntimeError('Max search depth reached')
+
+        if objectType:
+            # filter by objectType if specified
+            return tuple(filter(lambda obj: isinstance(obj, objectType), val.items))
+        else:
+            return tuple(val.items)
+
+    #===========================================================================================
+    # new'Object' and other methods
+    # Call appropriate routines in their respective locations
+    #===========================================================================================
 
 
 #=========================================================================================

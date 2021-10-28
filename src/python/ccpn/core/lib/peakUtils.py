@@ -1204,7 +1204,6 @@ def _getAdjacentPeakPositions1D(peak):
 
 def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=False, doNeg=True, figOfMeritLimit=1):
     """
-
     :param peak:
     :param maximumLimit:
     :param useAdjacientPeaksAsLimits:
@@ -1267,8 +1266,6 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
                 position = [float(nearestPosition), ]
                 height = nearestHeight[0]
         else:
-
-            existingPositions = [p.position[0] for p in peak.peakList.peaks]
             a, b = _getAdjacentPeakPositions1D(peak)
             if float(nearestPosition) in (a,b): # avoid snapping to an existing peak,
                 height = peak.peakList.spectrum.getHeight(peak.position)

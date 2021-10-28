@@ -1091,21 +1091,21 @@ def snap1DPeaksAndRereferenceSpectrum(peaks, maximumLimit=0.1, useAdjacientPeaks
     """
     Snap all peaks to closest maxima
 
-    Process
+    Steps:
     - reorder the peaks by heights to give higher peaks priority to the snap
-    - 1st iteration: search for nearest maxima and calculate deltas
+    - 1st iteration: search for nearest maxima and calculate delta positions (don't set peak.position here yet)
     - use deltas to fit patterns of shifts and detect the most probable global shift
     - use the global shift to re-reference the spectrum
     - 2nd iteration: re-search for nearest maxima
-    - set newly detected position if found better fits
+    - set newly detected position to peak if found better fits
     - re-set the spectrum referencing to original (if not requested as argument)
 
-    :param peaks:
-    :param maximumLimit:
-    :param useAdjacientPeaksAsLimits:
-    :param doNeg:
-    :param figOfMeritLimit:
-    :param spectrum:
+    :param peaks: list of peaks to snap
+    :param maximumLimit: float to use as + left-right limits from peak position where to search new maxima
+    :param useAdjacientPeaksAsLimits: bool. use adj peak position as left-right limits. don't search maxima after adjacent peaks
+    :param doNeg: snap also negative peaks
+    :param figOfMeritLimit: float. don't snap peaks with FOM below limit threshold
+    :param spectrum: the spectum obj. optional if all peaks belong to the same spectrum
     :return:
     """
     if not peaks:
@@ -1164,7 +1164,7 @@ def snap1DPeaksAndRereferenceSpectrum(peaks, maximumLimit=0.1, useAdjacientPeaks
         spectrum.referenceValues = oReferenceValues
         spectrum.positions = oPositions
 
-    # check for missed maxima or peaks snapped to height at position but some other unpicked maxima was close-by
+    # check for missed maxima or peaks snapped to height@position but had other unpicked maxima close-by
     return shift
 
 def _add(x, y):
@@ -1203,8 +1203,20 @@ def _getAdjacentPeakPositions1D(peak):
 
 
 def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=False, doNeg=True, figOfMeritLimit=1):
+    """
+
+    :param peak:
+    :param maximumLimit:
+    :param useAdjacientPeaksAsLimits:
+    :param doNeg:
+    :param figOfMeritLimit:
+    :return: position, height : position is a list of length 1,  height is a float
+
+    search  maxima close to a given peak based on the maximumLimit (left/right) or using the adjacent peaks position as limits.
+     return the nearest coordinates position, height
+
+    """
     from ccpn.core.lib.SpectrumLib import estimateNoiseLevel1D
-    from ccpn.util.Logging import getLogger
     spectrum = peak.peakList.spectrum
     x = spectrum.positions
     y = spectrum.intensities
@@ -1258,7 +1270,7 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
 
             existingPositions = [p.position[0] for p in peak.peakList.peaks]
             a, b = _getAdjacentPeakPositions1D(peak)
-            if float(nearestPosition) in (a,b):
+            if float(nearestPosition) in (a,b): # avoid snapping to an existing peak,
                 height = peak.peakList.spectrum.getHeight(peak.position)
 
             else:

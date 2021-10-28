@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-27 11:58:49 +0100 (Wed, October 27, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-28 17:22:07 +0100 (Thu, October 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -377,7 +377,6 @@ def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, o
         assert len(objects) == len(texts)
 
     dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
-    dialog.setFocus()
 
     _checkbox = None
 
@@ -414,7 +413,6 @@ def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, o
     if _checkbox is not None:
         _checkbox.setFocus()
 
-    # dialog.raise_()
     index = dialog.exec_()
 
     result = ''

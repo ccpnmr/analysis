@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-27 11:58:49 +0100 (Wed, October 27, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-28 17:22:07 +0100 (Thu, October 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -125,11 +125,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             layout.setSpacing(0)
 
         self.setGeometry(200, 40, 1100, 900)
-
-        # connect a close event, cleaning up things as needed
-        self.closeEvent = self._closeEvent
-        # self.connect(self, QtCore.PYQT_SIGNAL('triggered()'), self._closeEvent)
-        # self.triggered.connect(self._closeEvent)    # ejb
 
         # GuiWindow.__init__(self, application)
         self.application = application
@@ -977,8 +972,16 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self._closeWindow(event=event, disableCancel=disableCancel)
         os._exit(0)
 
+    def closeEvent(self, event: QtGui.QCloseEvent) -> None:
+        """handle close event from the X button
+        """
+        event.ignore()
+        # pass control to _closeEvent - this cleans up the focus between windows/popups
+        QtCore.QTimer.singleShot(0, self._closeWindow)
+
     def _closeEvent(self, event=None, disableCancel=False):
-        # set the active window to mainWindow so that the quit popup centres correctly.
+        """Handle close event from other methods
+        """
         self._closeWindow(event=event, disableCancel=disableCancel)
 
     def _closeWindow(self, event=None, disableCancel=False):
@@ -986,20 +989,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         Saves application preferences. Displays message box asking user to save project or not.
         Closes Application.
         """
-        #GWV 20181214: moved to Framework._savePreferences
-        #from ccpn.framework.PathsAndUrls import userPreferencesPath
-        #prefPath = os.path.expanduser("~/.ccpn/v3settings.json")
-        # directory = os.path.dirname(userPreferencesPath)
-        # if not os.path.exists(directory):
-        #     try:
-        #         os.makedirs(directory)
-        #     except Exception as e:
-        #         self._project._logger.warning('Preferences not saved: %s' % (directory, e))
-        #         return
-        #
-        # prefFile = open(userPreferencesPath, 'w+')
-        # json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
-        # prefFile.close()
 
         undos = self.application.project._undo
 
@@ -1008,6 +997,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         QUIT = 'Quit Program'
         SAVE_QUIT = 'Save and Quit'
+        SAVE = 'Save'
         MESSAGE = QUIT
         CANCEL = 'Cancel'
         QUIT_WITHOUT_SAVING = 'Quit without saving'
@@ -1018,7 +1008,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             if undos.isDirty():
                 # reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT], checkbox=SAVE_DATA, okText=QUIT,
                 #                                 checked=False)
-                reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT, SAVE_QUIT], okText=QUIT)
+                reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT, SAVE_QUIT], parent=self, okText=QUIT)
             else:
                 reply = QUIT_WITHOUT_SAVING
 
@@ -1026,17 +1016,14 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             if undos.isDirty():
                 # reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT, CANCEL], checkbox=SAVE_DATA, okText=QUIT,
                 #                                 checked=False)
-                reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT, SAVE_QUIT, CANCEL], okText=QUIT)
+                reply = MessageDialog.showMulti(MESSAGE, DETAIL, texts=[QUIT, SAVE_QUIT, CANCEL], parent=self, okText=QUIT)
             else:
                 reply = QUIT_WITHOUT_SAVING
 
         # if (QUIT in reply) and (SAVE_DATA in reply or SAVE_QUIT in reply):
-        if (reply in [SAVE_QUIT, SAVE_DATA]):
+        if (reply in [SAVE_QUIT, SAVE_DATA, SAVE]):
             if event:
                 event.accept()
-            # prefFile = open(userPreferencesPath, 'w+')
-            # json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
-            # prefFile.close()
 
             self.application._savePreferences()
             success = self.application.saveProject()
@@ -1055,9 +1042,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         elif (reply in [QUIT, QUIT_WITHOUT_SAVING]):
             if event:
                 event.accept()
-            # prefFile = open(userPreferencesPath, 'w+')
-            # json.dump(self.application.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
-            # prefFile.close()
 
             self.application._savePreferences()
             self.deleteAllNotifiers()

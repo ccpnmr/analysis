@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: VickyAH $"
-__dateModified__ = "$dateModified: 2021-10-19 12:27:13 +0100 (Tue, October 19, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-10-28 17:22:07 +0100 (Thu, October 28, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2437,54 +2437,6 @@ class Framework(NotifierBase):
         Closes Application.
         """
         self.ui.mainWindow._closeEvent(event=event)
-
-        # prefPath = os.path.expanduser("~/.ccpn/v3settings.json")
-        # directory = os.path.dirname(prefPath)
-        # if not os.path.exists(directory):
-        #     try:
-        #         os.makedirs(directory)
-        #     except Exception as e:
-        #         getLogger().warning('Preferences not saved: %s' % (directory, e))
-        #         return
-        #
-        # prefFile = open(prefPath, 'w+')
-        # json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
-        # prefFile.close()
-        #
-        # reply = MessageDialog.showMulti("Quit Program", "Do you want to save changes before quitting?",
-        #                                 ['Save and Quit', 'Quit without Saving', 'Cancel'])  # ejb
-        # if reply == 'Save and Quit':
-        #     if event:
-        #         event.accept()
-        #     prefFile = open(prefPath, 'w+')
-        #     json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
-        #     prefFile.close()
-        #
-        #     success = self.saveProject()
-        #     if success is True:
-        #         # Close and clean up project
-        #         self._closeProject()
-        #         QtWidgets.QApplication.quit()
-        #         os._exit(0)
-        #
-        #     else:
-        #         if event:  # ejb - don't close the project
-        #             event.ignore()
-        #
-        # elif reply == 'Quit without Saving':
-        #     if event:
-        #         event.accept()
-        #     prefFile = open(prefPath, 'w+')
-        #     json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
-        #     prefFile.close()
-        #     self._closeProject()
-        #
-        #     QtWidgets.QApplication.quit()
-        #     os._exit(0)
-        #
-        # else:
-        #     if event:
-        #         event.ignore()
 
     def _closeMainWindows(self):
         tempModules = self.ui.mainWindow.application.ccpnModules

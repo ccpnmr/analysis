@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-28 19:32:34 +0100 (Thu, October 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-29 12:07:22 +0100 (Fri, October 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,6 +37,88 @@ from ccpn.core.lib.ContextManagers import newObject, undoBlockWithoutSideBar, \
 from ccpn.util.Common import makeIterableList
 from ccpn.util.decorators import logCommand
 from ccpn.util.OrderedSet import OrderedSet
+
+
+class _searchCollections():
+    """
+    Iterator to recursively search collections for items of type specified in objectTypes
+
+    If recursive is True, or depth=1, will return the items in the first collection.
+    depth defines the maximum number of nested collections that the search will through.
+
+    Search is protected against infinite loops of collections
+
+    objectTypes must be a tuple of types
+    collection must be a list of core objects
+    """
+    _MAXITERATIONS = 100
+
+    # iterator to search through nested collections and collate all items
+    def __init__(self, collection, objectTypes=None, recursive=True, depth=0):
+        """Initialise the iterator
+        """
+        if not isinstance(recursive, bool):
+            raise ValueError('recursive must be True/False')
+        if not (isinstance(depth, int) and depth >= 0):
+            raise ValueError('depth must be an int >= 0')
+
+        self._items = OrderedSet(collection)
+        self._objectTypes = objectTypes
+        self._recursive = recursive
+        self._maxDepth = depth
+
+    def __iter__(self):
+        # initial iterator settings
+        self._len = 0
+        self._iteration = 0
+        return self
+
+    def __next__(self):
+        """Generate the next ordered set of collection items
+        """
+        self._iteration += 1
+        if self._iteration > self._MAXITERATIONS:
+            # code check, just to make sure that a bug doesn't cause an infinite loop
+            raise RuntimeError('Max search depth reached')
+
+        if not self._recursive or (self._maxDepth and self._iteration >= self._maxDepth):
+            # if not recursive then only return the original list
+            raise StopIteration
+
+        # get the newly added, nested collections
+        collections = list(filter(lambda obj: isinstance(obj, Collection),
+                                  list(self._items)[self._len:]))
+        if not collections:
+            # if no more added to the orderedSet then reached the bottom
+            raise StopIteration
+
+        self._len = len(self._items)
+        for coll in collections:
+            # update the list of items
+            self._items |= OrderedSet(coll.items)
+
+        return self.items
+
+    def __bool__(self):
+        """Return True if there are items
+        """
+        return len(self._items) > 0
+
+    __nonzero__ = __bool__
+
+    def __len__(self):
+        """Current number of filtered items in the iterator
+        """
+        return len(self.items)
+
+    @property
+    def items(self):
+        """Return the filtered list of items
+        """
+        if self._objectTypes:
+            return tuple(filter(lambda obj: isinstance(obj, self._objectTypes), self._items))
+        else:
+            return tuple(self._items)
 
 
 class Collection(AbstractWrapperObject):
@@ -198,52 +280,62 @@ class Collection(AbstractWrapperObject):
                     self._wrappedData.removeCollectionItem(itm._wrappedData)
 
     @logCommand(get='self')
-    def getByObjectType(self, objectType=None, recursive=False):
+    def getByObjectType(self, objectTypes=None, recursive=True, depth=0):
         """Return a list of items of type objectType
+
+        ObjectTypes is a list of core objects expressed as object classes or short/long classnames.
+        For example, class Note can be specified as Note, 'Note' or 'NO'
+
+        ObjectTypes can be a single item or tuple/list, or None to return all items.
+
+        Any Nones in lists will be ignored
+
+        If recursive is True, will search through all nested collections, set by default
+        recursion=False or depth=1 will only search through the top list, ignoring nested collections
+
+        Examples:
+
+        ::
+
+            collection.getByObjectTypes()
+            collection.getByObjectTypes(objectTypes=Note, recursive=False)
+            collection.getByObjectTypes(objectTypes='NO')
+            collection.getByObjectTypes(objectTypes='Note')
+            collection.getByObjectTypes(objectTypes='Note', depth=2)
+
+        :param objectTypes: single item, or list of core objects as object class or classnames
+        :param recursive: True/False
+        :return: tuple of core items.
         """
 
-        class _recurseCollections():
-            # iterator to search through nested collections and collate all items
-            def __init__(self, collection):
-                self.items = OrderedSet(collection)
+        if isinstance(objectTypes, (str, type(AbstractWrapperObject))):
+            # change a single item to a list, if is a str or a core object
+            objectTypes = [objectTypes,]
+        if not isinstance(objectTypes, (list, tuple, type(None))):
+            raise ValueError('objectTypes must be list/tuple of core objects or classnames, or single core object or None')
+        # remove any Nones from the list
+        objectTypes = list(filter(lambda itm: itm is not None, objectTypes))
 
-            def __iter__(self):
-                # initial iterator settings
-                self._len = 0
-                return self
+        _objectTypes = None
+        if objectTypes:
+            # check the list of object types against the project classNames
+            _allObjectTypes = self.project._className2Class
+            _objectTypes = list(filter(lambda itm: (itm in _allObjectTypes.keys() or itm in _allObjectTypes.values()), objectTypes))
 
-            def __next__(self):
-                if not recursive:
-                    # if not recursive then only return the original list
-                    raise StopIteration
+            if len(_objectTypes) != len(objectTypes):
+                _badObjectTypes = list(filter(lambda itm: not (itm in _allObjectTypes.keys() or itm in _allObjectTypes.values()), objectTypes))
+                raise ValueError(f'objectTypes contains bad items: {_badObjectTypes}')
 
-                # get the newly added, nested collections
-                collections = list(filter(lambda obj: isinstance(obj, Collection),
-                                          list(self.items)[self._len:]))
-                if not collections:
-                    # if no more then reached the bottom
-                    raise StopIteration
-
-                self._len = len(self.items)
-                for coll in collections:
-                    # update the list of items
-                    self.items |= OrderedSet(coll.items)
-
-                return self
+            # change all valid strings to core object types
+            _objectTypes = tuple(_allObjectTypes[itm] if isinstance(itm, str) else itm for itm in _objectTypes)
 
         # create an iterator
-        val = _recurseCollections(self.items)
-        for count, _ in enumerate(val):
-            if count == 50:
-                # set an arbitrary limit to stop searching too deep
-                # - should never happen though because using orderedSet
-                raise RuntimeError('Max search depth reached')
+        recurse = _searchCollections(self.items, _objectTypes, recursive, depth=depth)
+        for _ in recurse:
+            pass
 
-        if objectType:
-            # filter by objectType if specified
-            return tuple(filter(lambda obj: isinstance(obj, objectType), val.items))
-        else:
-            return tuple(val.items)
+        # return the filtered list
+        return recurse.items if recurse else ()
 
     #===========================================================================================
     # new'Object' and other methods

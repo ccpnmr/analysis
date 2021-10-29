@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-06 09:47:30 +0100 (Wed, October 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-29 16:59:20 +0100 (Fri, October 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -64,18 +64,21 @@ class _CcpnMultiEncoder(json.JSONEncoder):
         # Sentinel - reset if we find a supported type
         typ = None
 
-        try:
-            from ccpn.util.StructureData import EnsembleData
-        except ImportError:
-            EnsembleData = None
+        # from ccpn.util.StructureData import EnsembleData
+        from ccpn.core._implementation.DataFrameABC import DataFrameABC
 
         if isinstance(obj, OrderedDict):
             typ = 'OrderedDict'
             data = list(obj.items())
 
-        elif EnsembleData is not None and isinstance(obj, EnsembleData):
+        # elif EnsembleData is not None and isinstance(obj, EnsembleData):
+        #     # Works like pandas.DataFrame (see comments there), but instantiates subclass.
+        #     typ = 'ccpn.EnsembleData'
+        #     data = obj.to_json(orient='split')
+
+        elif isinstance(obj, DataFrameABC):
             # Works like pandas.DataFrame (see comments there), but instantiates subclass.
-            typ = 'ccpn.EnsembleData'
+            typ = f'ccpn.{obj.__class__.__name__}'
             data = obj.to_json(orient='split')
 
         elif isinstance(obj, pandas.DataFrame):
@@ -128,44 +131,23 @@ def _ccpnObjectPairHook(pairs):
         tag2, data = pairs[1]
         if tag1 == '__type__' and tag2 == '__data__':
 
+            from ccpn.util.StructureData import EnsembleData
+            from ccpn.core.DataTable import TableFrame
+
+            _dataFrameTypes = {'ccpn.EnsembleData': EnsembleData,
+                               'ccpn.TableFrame': TableFrame,
+                               }
+
             if typ == 'OrderedDict':
                 return OrderedDict(data)
 
-            elif typ == 'ccpn.EnsembleData':
+            elif typ in _dataFrameTypes:
 
+                result = None
                 try:
-                    from ccpn.util.StructureData import EnsembleData
-                except ImportError:
-                    EnsembleData = None
-
-                if EnsembleData is None:
-                    return pandas.read_json(data, orient='split')
-                else:
-
-                    # NBNB HACK:
-                    # We want the pandas read_json to instantiate EnsembleData, which is a subclass
-                    # of DataFrame. Hence this temporary monkeypatching
-                    # from pandas.io import json as pandasJson
-                    #
-                    # backup = pandasJson.DataFrame
-                    # pandasJson.DataFrame = EnsembleData
-                    # result = None
-                    # try:
-                    #     result = pandas.read_json(data, orient='split')
-                    # finally:
-                    #     pandasJson.DataFrame = backup
-                    # return result
-
-                    # TODO:ED create a structureEnsemble here
-                    # backup = pandas.DataFrame
-                    # pandas.DataFrame = EnsembleData
-                    result = None
-                    try:
-                        result = pandas.read_json(data, orient='split')
-                        result = EnsembleData(result)
-                    finally:
-                        # pandas.DataFrame = backup
-                        pass
+                    result = pandas.read_json(data, orient='split')
+                    result = _dataFrameTypes[typ](result)
+                finally:
                     return result
 
             elif typ == 'pandas.DataFrame':

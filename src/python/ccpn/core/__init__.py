@@ -48,6 +48,8 @@ IntegralList are both children of Spectrum; and Peak is a child of PeakList.
   \-------StructureEnsemble
           \-------Model
   \-------Note
+  \-------Collection
+  \-------DataTable
 
 The **Project** object serves as container for all other data objects and the starting
 point for navigation.
@@ -112,6 +114,10 @@ A **StructureEnsemble** object is a container for ensembles of coordinate struct
 coordinate structure defined by a **Model** object.
 
 **Note** objects contain free-text information to be stored in a project.
+
+A **Collection** is a container, a list of core objects. It can also contain nested collections.
+
+A **DataTable** is a container for a pandas dataFrame object.
 
 
 Common Class elements
@@ -294,7 +300,7 @@ _coreImportOrder = (
     'ChemicalShiftList', '_OldChemicalShift',
     'DataSet', 'RestraintList', 'Restraint',
     'RestraintContribution', 'CalculationStep', 'Data', 'StructureEnsemble', 'Model', 'Note',
-    'PeakCluster', 'MultipletList', 'Multiplet', 'Collection'
+    'PeakCluster', 'MultipletList', 'Multiplet', 'DataTable', 'Collection'
     )
 
 # This list includes ui classes (added below)

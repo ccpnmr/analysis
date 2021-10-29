@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-28 11:41:02 +0100 (Mon, June 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-29 18:30:39 +0100 (Fri, October 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -272,6 +272,37 @@ def _getIntersectionPoints(x, y, line):
     points = x_intersect[negatives]
 
     return points
+
+
+def estimate1DPeakFWHM(peak):
+    """
+    Estimate the 1D peak Full Width at Half Maximum.
+
+    Returns
+    -------
+    width:  The width for the peak in points.
+    widthHeight: The height of the contour lines at which the `width` was evaluated.
+    limits: tuple, Interpolated positions of left and right intersection points of a
+        horizontal line at the respective evaluation height.
+
+    """
+    from scipy.signal import peak_widths
+    from ccpn.core.Peak import Peak
+    import numpy as np
+
+    if not isinstance(peak, Peak):
+        return [None, None, (None, None)]
+
+    if peak.spectrum.dimensionCount > 1:
+        return [None, None, (None, None)]
+
+    y = peak.spectrum.intensities
+    pointPositions = np.array([int(peak.pointPosition[0])])
+    widths, widthHeight, *limits = peak_widths(y, pointPositions, rel_height=0.5)
+    limits = tuple(zip(*limits))
+    if widths and len(widths)>0:
+        return widths[0], widthHeight[0], limits[0]
+    return [None, None, (None, None)]
 
 
 def _getAtomWeight(axisCode, atomWeights) -> float or int:
@@ -847,17 +878,39 @@ def _getBins(y, binCount=None):
 
 
 def snap1DPeaksAndRereferenceSpectrum(peaks, maximumLimit=0.1, useAdjacientPeaksAsLimits=False,
-                                    doNeg=True, figOfMeritLimit=1, spectrum=None):
+                                    doNeg=True, figOfMeritLimit=1, spectrum=None, autoRereferenceSpectrum=False):
+    """
+    Snap all peaks to closest maxima
 
+    Steps:
+    - reorder the peaks by heights to give higher peaks priority to the snap
+    - 1st iteration: search for nearest maxima and calculate delta positions (don't set peak.position here yet)
+    - use deltas to fit patterns of shifts and detect the most probable global shift
+    - use the global shift to re-reference the spectrum
+    - 2nd iteration: re-search for nearest maxima
+    - set newly detected position to peak if found better fits
+    - re-set the spectrum referencing to original (if not requested as argument)
+
+    :param peaks: list of peaks to snap
+    :param maximumLimit: float to use as + left-right limits from peak position where to search new maxima
+    :param useAdjacientPeaksAsLimits: bool. use adj peak position as left-right limits. don't search maxima after adjacent peaks
+    :param doNeg: snap also negative peaks
+    :param figOfMeritLimit: float. don't snap peaks with FOM below limit threshold
+    :param spectrum: the spectum obj. optional if all peaks belong to the same spectrum
+    :return:
+    """
     if not peaks:
         getLogger().warning('Cannot snap peaks. No peaks found')
         return []
-
     if not spectrum:
         spectrum = peaks[0].peakList.spectrum
-    peaks.sort(key=lambda x: x.position[0], reverse=False)  # reorder peaks by position
+
+    # - reorder the peaks by heights to give higher peaks priority to the snap
+    peaks.sort(key=lambda x: x.height, reverse=True) # reorder peaks by height
     oPositions, oHeights = [x.position for x in peaks], [x.height for x in peaks]
     nPositions, nHeights = [], []
+
+    # - 1st iteration: search for nearest maxima and calculate deltas
     for peak in peaks:
         if peak is not None:
             position, height = _get1DClosestExtremum(peak, maximumLimit=maximumLimit,
@@ -867,18 +920,42 @@ def snap1DPeaksAndRereferenceSpectrum(peaks, maximumLimit=0.1, useAdjacientPeaks
             nHeights.append(height)
     deltas = np.array(nPositions) - np.array(oPositions)
     deltas = deltas.flatten()
+
+    if len(peaks) == 1:
+        peaks[0].position = nPositions[0]
+        peaks[0].height = nHeights[0]
+        return deltas[0]
+
+    # - use deltas to fit patterns of shifts and detect the most probable global shift
     stats, edges, binNumbers, fittedCurve, mostCommonBinNumber, highestValues, fittedCurveExtremum = _getBins(deltas)
     shift = max(highestValues)
+    oReferenceValues = spectrum.referenceValues
+    oPositions = spectrum.positions
+    #  - use the global shift to re-reference the spectrum
     spectrum.referenceValues = [spectrum.referenceValues[0] - shift]
     spectrum.positions = spectrum.positions - shift
+
+    #  - 2nd iteration: re-search for nearest maxima
     for peak in peaks:
         if peak is not None:
-            peak.position = [peak.position[0] + shift, ]
+            oPosition = peak.position
+            peak.position = [peak.position[0] + shift,] #  - use the shift to re-reference the peak to the moved spectrum
             position, height = _get1DClosestExtremum(peak, maximumLimit=maximumLimit,
                                                      useAdjacientPeaksAsLimits=useAdjacientPeaksAsLimits, doNeg=doNeg,
                                                      figOfMeritLimit=figOfMeritLimit)
-            peak.position = position
-            peak.height = height
+            #  - set newly detected position if found better fits
+            if peak.position == position: # Same position detected. Revert
+                peak.height = peak.peakList.spectrum.getHeight(oPosition)
+                peak.position = oPosition
+            else:
+                peak.position = position
+                peak.height = height
+    # - re-set the spectrum referencing to original (if not requested as argument)
+    if not autoRereferenceSpectrum:
+        spectrum.referenceValues = oReferenceValues
+        spectrum.positions = oPositions
+
+    # check for missed maxima or peaks snapped to height@position but had other unpicked maxima close-by
     return shift
 
 
@@ -920,8 +997,19 @@ def _getAdjacentPeakPositions1D(peak):
 
 
 def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=False, doNeg=True, figOfMeritLimit=1):
+    """
+    :param peak:
+    :param maximumLimit:
+    :param useAdjacientPeaksAsLimits:
+    :param doNeg:
+    :param figOfMeritLimit:
+    :return: position, height : position is a list of length 1,  height is a float
+
+    search  maxima close to a given peak based on the maximumLimit (left/right) or using the adjacent peaks position as limits.
+     return the nearest coordinates position, height
+
+    """
     from ccpn.core.lib.SpectrumLib import estimateNoiseLevel1D
-    from ccpn.util.Logging import getLogger
 
     spectrum = peak.peakList.spectrum
     x = spectrum.positions
@@ -974,9 +1062,13 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
                 position = [float(nearestPosition), ]
                 height = nearestHeight[0]
         else:
-            position = [float(nearestPosition), ]
-            height = nearestHeight[0]
+            a, b = _getAdjacentPeakPositions1D(peak)
+            if float(nearestPosition) in (a,b): # avoid snapping to an existing peak,
+                height = peak.peakList.spectrum.getHeight(peak.position)
 
+            else:
+                position = [float(nearestPosition), ]
+                height = nearestHeight[0]
     else:
         height = peak.peakList.spectrum.getHeight(peak.position)
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-25 18:29:05 +0100 (Mon, October 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-29 18:30:40 +0100 (Fri, October 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2522,6 +2522,27 @@ class GuiSpectrumDisplay(CcpnModule):
                     addUndoItem(redo=partial(self.setToolbarButtons, tuple(_newOrdering)))
         else:
             getLogger().warning('No spectrumView found')
+
+    def _setVisibleSpectrum(self, spectrum, visible:bool):
+        """ Set visible the spectrumView of the spectrum in the spectrumDisplay.
+        """
+        for specView in self.strips[0].spectrumViews:
+                if specView.spectrum == spectrum:
+                    specView.setVisible(visible)
+
+    def setVisibleSpectrum(self, spectrum, visible):
+        """
+        Toggle on/off a spectrum from the visible spectra
+        :param spectrum:
+        :param visible: bool. True to show, False to hide
+        :return:
+        """
+        with undoStackBlocking(self.application) as addUndoItem:
+            self._setVisibleSpectrum(spectrum, visible)
+            addUndoItem(
+                    undo=partial(self._setVisibleSpectrum, spectrum, not visible),
+                    redo=partial(self._setVisibleSpectrum, spectrum, visible))
+
 
     def setToolbarButtons(self, order=None):
         """Setup the buttons in the toolbar for each spectrum

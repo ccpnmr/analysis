@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-24 19:22:21 +0100 (Fri, September 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-29 18:30:40 +0100 (Fri, October 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1916,6 +1916,9 @@ class GuiTable(TableWidget, Base):
         selectionModel.select(rowIndex, selectionModel.Select | selectionModel.Rows)
         self.setCurrentIndex(rowIndex)
         self.scrollToSelectedIndex()
+
+    def selectFirstRow(self, doCallback=True):
+        self.selectIndex(0, doCallback=doCallback)
 
     def getSelectedRowAsDataFrame(self):
         values = []

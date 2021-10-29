@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-14 12:07:16 +0100 (Thu, October 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-29 18:30:40 +0100 (Fri, October 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2361,7 +2361,11 @@ class ColourFrameABC(Frame):
             self.sliceColourButton = Button(self, grid=(row, 2), vAlign='t', hAlign='l',
                                             icon='icons/colours', hPolicy='fixed')
             self.sliceColourButton.clicked.connect(partial(self._queueChangeSliceColour, self.spectrumGroup))
+            self.copySliceColourButton = Button(self, text='Copy to All Spectra', grid=(row, 3), vAlign='t', hAlign='l',
+                                           hPolicy='fixed')
+            self.copySliceColourButton.clicked.connect(partial(self._queueChangeSliceColourToAll, self.spectrumGroup))
             row += 1
+
 
         self._fillPullDowns()
 
@@ -2473,6 +2477,10 @@ class ColourFrameABC(Frame):
             addNewColour(newColour)
             self._container._fillPullDowns()
             self.sliceColourBox.setCurrentText(spectrumColours[newColour.name()])
+
+    def _queueChangeSliceColourToAll(self, spectrumGroup):
+        for spectrum in spectrumGroup.spectra:
+            self._changedSliceComboIndex(spectrum, value='')
 
     @queueStateChange(_verifyPopupApply)
     def _queueChangeSliceComboIndex(self, spectrumGroup, value):

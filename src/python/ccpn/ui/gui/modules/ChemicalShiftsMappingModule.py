@@ -69,7 +69,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:30 +0100 (Fri, June 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-29 18:30:40 +0100 (Fri, October 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1398,7 +1398,7 @@ class ChemicalShiftsMapping(CcpnModule):
         label = 'Fitted Function: %.2f, %.3f' % (A, K)
         self.fittingPlot.plot(xs, ys, symbol='o', pen=None)
         self.fittingPlot.plot(xf, yf, name=label)
-        self.fittingPlot.setLimits(xMin=0, xMax=None, yMin=0, yMax=None)
+        self.fittingPlot.setLimits(xMin=0, xMax=None, yMin=-1, yMax=None)
         self.bindingPlot.autoRange()
 
     def _openSpectra(self):

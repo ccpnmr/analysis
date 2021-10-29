@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-30 20:44:26 +0100 (Fri, July 30, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-29 18:30:40 +0100 (Fri, October 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -84,11 +84,12 @@ class PulldownList(QtWidgets.QComboBox, Base):
         self.backgroundText = backgroundText
 
         # replace with a simple listView - fixes stylesheet hassle; default QComboBox listview can't be changed
-        _list = QtWidgets.QListView()
-        self.setView(_list)
-        setWidgetFont(_list, )
+        self._list = QtWidgets.QListView()
+        self.setView(self._list)
+        setWidgetFont(self._list, )
         # add a scrollBar for long lists
-        _list.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        self._list.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        self._list.setMinimumSize(self.sizeHint())
 
         self.setEditable(editable)
         if iconSize:
@@ -140,6 +141,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
 
     def showPopup(self):
         self.popupAboutToBeShown.emit()
+        self._list.setMinimumSize(self.sizeHint())
         super(PulldownList, self).showPopup()
 
     def currentObject(self):

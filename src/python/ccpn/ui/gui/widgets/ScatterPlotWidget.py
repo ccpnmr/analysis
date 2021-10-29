@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-30 20:44:26 +0100 (Fri, July 30, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-29 18:30:41 +0100 (Fri, October 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -141,6 +141,7 @@ class ScatterROI(pg.ROI):
         self.handleSize = 8
         self.translatable = False  # keep False otherwise it doesn't allow normal pan/selection of the plotItems within the ROI region.
         self._setROIhandles()
+        self.roiIsLinkedToSelection = True
         # self._isEnabled = True
 
     def _setROIhandles(self):
@@ -177,10 +178,14 @@ class ScatterROI(pg.ROI):
         :return:  set the ROI box
         """
         state = {'pos': [], 'size': [], 'angle': 0}
-        xSize = abs(xMax) - abs(xMin)
-        ySize = abs(yMax) - abs(yMin)
-        state['pos'] = [xMin, yMin]
-        state['size'] = [xSize, ySize]
+        xMin = np.array([xMin]) # convert to arrays to deal with positives and negatives
+        xMax = np.array([xMax])
+        yMin = np.array([yMin])
+        yMax = np.array([yMax])
+        xSize = xMax - xMin
+        ySize = yMax - yMin
+        state['pos'] = [xMin[0], yMin[0]]
+        state['size'] = [xSize[0], ySize[0]]
         self.setState(state)
 
     def getInnerPoints(self):
@@ -248,6 +253,7 @@ class ScatterPlot(Widget):
         self._addScatterSelectionBox()
         self._scatterViewbox.mouseClickEvent = self._scatterViewboxMouseClickEvent  # click on the background canvas
         self._scatterViewbox.mouseDragEvent = self._scatterMouseDragEvent
+        self._scatterViewbox.scene().mouseReleaseEvent = self._scatterMouseReleaseEvent
         # self._scatterViewbox.hoverEvent = self._scatterHoverEvent
         self._scatterViewbox.scene().sigMouseMoved.connect(self.mouseMoved)  #use this if you need the mouse Posit
         # self._scatterViewbox.setLimits(**{'xMin':0, 'xMax':1, 'yMin':0, 'yMax':1})
@@ -259,6 +265,7 @@ class ScatterPlot(Widget):
         self.scatterPlot.mouseDoubleClickEvent = self._scatterMouseDoubleClickEvent
         setWidgetFont(self)
         ## adjustable ROI box
+        self.roiIsLinkedToSelection = True
         self.roiItem = ScatterROI(self, *DefaultRoiLimits, pen=ROIPen)
         self.roiItem.sigRegionChangeFinished.connect(self._roiChangedCallback)
         self._plotItem.addItem(self.roiItem)
@@ -806,6 +813,15 @@ class ScatterPlot(Widget):
     def _getDataForPoints(self, points):
         return list(map(lambda s: s.data(), points))
 
+    def _scatterMouseReleaseEvent(self, event):
+        """
+        re-implementation to allow proper cleaning up of the selection box when releasing the Cmd/Ctrl
+        button before the mouse button.
+        """
+        self._resetSelectionBox()
+        pg.GraphicsScene.mouseReleaseEvent(self._scatterViewbox.scene(), event)
+
+
     def _scatterMouseDragEvent(self, event, *args):
         """
         Re-implementation of PyQtGraph mouse drag event to allow custom actions off of different mouse
@@ -823,7 +839,6 @@ class ScatterPlot(Widget):
                 limits = self._updateScatterSelectionBox(event.buttonDownPos(), event.pos())
                 selectedData = self._getDataForPoints(_getPointsWithinLimits(self.scatterPlot.points(), limits))
                 self.selectedData += selectedData
-                # self._setPointPens(self._getPointPens())
                 self._resetSelectionBox()
         else:
             self._resetSelectionBox()
@@ -902,7 +917,10 @@ class ScatterPlot(Widget):
         minY = r.topLeft().y()
         maxX = minX + r.width()
         maxY = minY + r.height()
-        return [minX, maxX, minY, maxY]
+        limits = [minX, maxX, minY, maxY]
+        if self.roiIsLinkedToSelection:
+            self.roiItem.setLimits(*limits)
+        return limits
 
     def _resetSelectionBox(self):
         "Reset/Hide the boxes "

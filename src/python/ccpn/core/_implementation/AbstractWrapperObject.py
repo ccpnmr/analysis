@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-27 18:19:48 +0100 (Wed, October 27, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-29 16:55:44 +0100 (Fri, October 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -41,7 +41,7 @@ from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking, \
-    apiNotificationBlanking, inactivity
+    apiNotificationBlanking, inactivity, ccpNmrV3CoreSetter
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.lib.ContextManagers import deleteObject
 from ccpn.core.lib.Notifiers import NotifierBase
@@ -477,6 +477,7 @@ class AbstractWrapperObject(NotifierBase):
 
     @comment.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def comment(self, value: str):
         self._wrappedData.details = self._str2none(value)
 

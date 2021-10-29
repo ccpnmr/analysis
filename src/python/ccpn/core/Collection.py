@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-29 12:09:00 +0100 (Fri, October 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-29 15:34:37 +0100 (Fri, October 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -310,7 +310,7 @@ class Collection(AbstractWrapperObject):
 
         if isinstance(objectTypes, (str, type(AbstractWrapperObject))):
             # change a single item to a list, if is a str or a core object
-            objectTypes = [objectTypes,]
+            objectTypes = [objectTypes, ]
         if not isinstance(objectTypes, (list, tuple, type(None))):
             raise ValueError('objectTypes must be list/tuple of core objects or classnames, or single core object or None')
         # remove any Nones from the list
@@ -318,12 +318,14 @@ class Collection(AbstractWrapperObject):
 
         _objectTypes = None
         if objectTypes:
+
             # check the list of object types against the project classNames
             _allObjectTypes = self.project._className2Class
-            _objectTypes = list(filter(lambda itm: (itm in _allObjectTypes.keys() or itm in _allObjectTypes.values()), objectTypes))
+            _all = list(_allObjectTypes.keys()) + list(_allObjectTypes.values())
+            _objectTypes = list(filter(lambda itm: (itm in _all), objectTypes))
 
             if len(_objectTypes) != len(objectTypes):
-                _badObjectTypes = list(filter(lambda itm: not (itm in _allObjectTypes.keys() or itm in _allObjectTypes.values()), objectTypes))
+                _badObjectTypes = list(filter(lambda itm: itm not in _all, objectTypes))
                 raise ValueError(f'objectTypes contains bad items: {_badObjectTypes}')
 
             # change all valid strings to core object types

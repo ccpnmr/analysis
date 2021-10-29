@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:25:08 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-29 17:03:38 +0100 (Fri, October 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,12 +28,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import math
 import sys
-import os
-from ccpn.util import StructureData
-from ccpn.core.testing.WrapperTesting import WrapperTesting, checkGetSetAttr
-from ccpnmodel.ccpncore.testing.CoreTesting import TEST_PROJECTS_PATH
 import pandas as pd
-import numpy as np
+from ccpn.util import StructureData
+from ccpn.core.testing.WrapperTesting import WrapperTesting
+from ccpn.core._implementation.DataFrameABC import valueToOptionalInt, valueToOptionalType
 
 
 nan = math.nan
@@ -661,7 +659,7 @@ class TestSelectors_Iterator(WrapperTesting):
         with self.assertRaisesRegexp(ValueError, 'must be a Pandas series or None'):
             self.ed = self.data.extract(42)
 
-        with self.assertRaisesRegexp(ValueError, 'number of atom records'):
+        with self.assertRaisesRegexp(ValueError, 'number of records'):
             self.ed = self.data.extract(pd.Series((True,)))  # only 1 element
 
         self.ed = self.data.extract(index=range(1, 5))  # select nothing
@@ -787,136 +785,136 @@ class TestStructureData_properties(WrapperTesting):
             self.ensemble = self.project.newStructureEnsemble()
 
     #=========================================================================================
-    # test_valuetoOptionalInt      force is False
+    # test_valueToOptionalInt      force is False
     #=========================================================================================
 
-    def test_valuetoOptionalInt_Int(self):
+    def test_valueToOptionalInt_Int(self):
         """
-        Test that passing 42 (int) to valuetoOptionalInt returns an int.
+        Test that passing 42 (int) to valueToOptionalInt returns an int.
         """
-        self.assertEquals(StructureData.valueToOptionalInt(42), 42)
+        self.assertEquals(valueToOptionalInt(42), 42)
 
-    def test_valuetoOptionalInt_None(self):
+    def test_valueToOptionalInt_None(self):
         """
-        Test that passing None to valuetoOptionalInt returns None.
+        Test that passing None to valueToOptionalInt returns None.
         """
-        self.assertEquals(StructureData.valueToOptionalInt(None), None)
+        self.assertEquals(valueToOptionalInt(None), None)
 
-    def test_valuetoOptionalInt_NaN(self):
+    def test_valueToOptionalInt_NaN(self):
         """
-        Test that passing NaN to valuetoOptionalInt returns None.
+        Test that passing NaN to valueToOptionalInt returns None.
         """
-        self.assertEquals(StructureData.valueToOptionalInt(float('NaN')), None)
+        self.assertEquals(valueToOptionalInt(float('NaN')), None)
 
-    def test_valuetoOptionalInt_IntFloat(self):
+    def test_valueToOptionalInt_IntFloat(self):
         """
-        Test that passing int value float to valuetoOptionalInt returns int.
+        Test that passing int value float to valueToOptionalInt returns int.
         """
-        vtoint = StructureData.valueToOptionalInt(float(42.0))
+        vtoint = valueToOptionalInt(float(42.0))
         self.assertIsInstance(vtoint, int)
 
-    def test_valuetoOptionalInt_Float(self):
+    def test_valueToOptionalInt_Float(self):
         """
-        Test that passing float to valuetoOptionalInt raises error.
+        Test that passing float to valueToOptionalInt raises error.
         """
         with self.assertRaisesRegexp(TypeError, 'does not correspond to an integer'):
-            StructureData.valueToOptionalInt(42.42)
+            valueToOptionalInt(42.42)
 
-    def test_valuetoOptionalInt_String(self):
+    def test_valueToOptionalInt_String(self):
         """
-        Test that passing string to valuetoOptionalInt raises error.
+        Test that passing string to valueToOptionalInt raises error.
         Can assume that all other non-number will raise error
         """
         with self.assertRaisesRegexp(TypeError, 'does not correspond to an integer'):
-            StructureData.valueToOptionalInt('Invalid')
+            valueToOptionalInt('Invalid')
 
     #=========================================================================================
-    # test_valuetoOptionalType      force is True - overrides the error and returns None
+    # test_valueToOptionalType      force is True - overrides the error and returns None
     #=========================================================================================
 
-    def test_valuetoOptionalInt_forceInt(self):
+    def test_valueToOptionalInt_forceInt(self):
         """
-        Test that passing 42 (int) to valuetoOptionalInt returns an int.
+        Test that passing 42 (int) to valueToOptionalInt returns an int.
         """
-        self.assertEquals(StructureData.valueToOptionalInt(42, True), 42)
+        self.assertEquals(valueToOptionalInt(42, True), 42)
 
-    def test_valuetoOptionalInt_forceFloat(self):
+    def test_valueToOptionalInt_forceFloat(self):
         """
-        Test that passing float to valuetoOptionalInt returns None.
+        Test that passing float to valueToOptionalInt returns None.
         """
-        self.assertEquals(StructureData.valueToOptionalInt(42.42, True), None)
+        self.assertEquals(valueToOptionalInt(42.42, True), None)
 
-    def test_valuetoOptionalInt_forceFloatInt(self):
+    def test_valueToOptionalInt_forceFloatInt(self):
         """
-        Test that passing int value float to valuetoOptionalInt returns int.
+        Test that passing int value float to valueToOptionalInt returns int.
         """
-        self.assertEquals(StructureData.valueToOptionalInt(float(42.0), True), 42)
+        self.assertEquals(valueToOptionalInt(float(42.0), True), 42)
 
-    def test_valuetoOptionalInt_forceString(self):
+    def test_valueToOptionalInt_forceString(self):
         """
-        Test that passing string to valuetoOptionalInt returns None.
+        Test that passing string to valueToOptionalInt returns None.
         """
-        self.assertEquals(StructureData.valueToOptionalInt('Invalid', True), None)
+        self.assertEquals(valueToOptionalInt('Invalid', True), None)
 
     #=========================================================================================
-    # test_valuetoOptionalType      force is False
+    # test_valueToOptionalType      force is False
     #=========================================================================================
 
-    def test_valuetoOptionalType_None(self):
+    def test_valueToOptionalType_None(self):
         """
-        Test that passing None to valuetoOptionalType returns None.
+        Test that passing None to valueToOptionalType returns None.
         """
-        self.assertEquals(StructureData.valueToOptionalType(None, int), None)
+        self.assertEquals(valueToOptionalType(None, int), None)
 
-    def test_valuetoOptionalType_Nan(self):
+    def test_valueToOptionalType_Nan(self):
         """
-        Test that passing NaN to valuetoOptionalType returns None.
+        Test that passing NaN to valueToOptionalType returns None.
         """
-        self.assertEquals(StructureData.valueToOptionalType(float('NaN'), str), None)
+        self.assertEquals(valueToOptionalType(float('NaN'), str), None)
 
-    def test_valuetoOptionalType_Int(self):
+    def test_valueToOptionalType_Int(self):
         """
-        Test that passing 42 (int=int) to valuetoOptionalType returns 42.
+        Test that passing 42 (int=int) to valueToOptionalType returns 42.
         """
-        self.assertEquals(StructureData.valueToOptionalType(42, int), 42)
+        self.assertEquals(valueToOptionalType(42, int), 42)
 
-    def test_valuetoOptionalType_String(self):
+    def test_valueToOptionalType_String(self):
         """
-        Test that passing 42 (string=string) to valuetoOptionalType returns 42.
+        Test that passing 42 (string=string) to valueToOptionalType returns 42.
         """
-        self.assertEquals(StructureData.valueToOptionalType('42', str), '42')
+        self.assertEquals(valueToOptionalType('42', str), '42')
 
-    def test_valuetoOptionalType_ES(self):
+    def test_valueToOptionalType_ES(self):
         """
-        Test that passing 42 (int<>float) to valuetoOptionalType returns None.
+        Test that passing 42 (int<>float) to valueToOptionalType returns None.
         """
         with self.assertRaisesRegexp(TypeError, 'does not correspond to type'):
-            StructureData.valueToOptionalType(42, float)
+            valueToOptionalType(42, float)
 
     #=========================================================================================
-    # test_valuetoOptionalType      force is True
+    # test_valueToOptionalType      force is True
     #=========================================================================================
 
-    def test_valuetoOptionalType_IntFloat(self):
+    def test_valueToOptionalType_IntFloat(self):
         """
-        Test that passing 42 (int<>float) to valuetoOptionalType returns float.
+        Test that passing 42 (int<>float) to valueToOptionalType returns float.
         """
-        self.assertEquals(StructureData.valueToOptionalType(42, float, True), 42.0)
+        self.assertEquals(valueToOptionalType(42, float, True), 42.0)
 
-    def test_valuetoOptionalType_IntString(self):
+    def test_valueToOptionalType_IntString(self):
         """
-        Test that passing 42 (int<>string) to valuetoOptionalType returns string.
+        Test that passing 42 (int<>string) to valueToOptionalType returns string.
         """
-        self.assertEquals(StructureData.valueToOptionalType(42, str, True), '42')
+        self.assertEquals(valueToOptionalType(42, str, True), '42')
 
-    def test_valuetoOptionalType_IntTuple(self):
+    def test_valueToOptionalType_IntTuple(self):
         """
-        Test that passing 42 (int<>tuple) to valuetoOptionalType raises error.
+        Test that passing 42 (int<>tuple) to valueToOptionalType raises error.
 
         This is an expectedFailure needs to be expected type
         """
         with self.assertRaisesRegexp(TypeError, 'does not correspond to type'):
-            StructureData.valueToOptionalType(42, tuple, True)
+            valueToOptionalType(42, tuple, True)
 
 
 #=========================================================================================
@@ -968,7 +966,7 @@ class TestContainer(WrapperTesting):
         :return:
         """
         self.newData = self.data.extract(index=range(4, 5))  # get the 4th-5th elements in list
-        with self.assertRaisesRegexp(AssertionError, 'Only single row ensembles'):
+        with self.assertRaisesRegexp(ValueError, 'Only single row EnsembleDatas'):
             self.data.setValues(self.data)
 
     def testContainerTypes_SingleEnsemble_Proton(self):
@@ -1079,7 +1077,7 @@ class TestContainer(WrapperTesting):
           returns correctly for item in list even if selection is too long
         :return:
         """
-        with self.assertRaisesRegexp(AssertionError, 'Boolean selector must select a single row'):
+        with self.assertRaisesRegexp(ValueError, 'Boolean selector must select a single row'):
             self.data.setValues(pd.Series((False,) * 33, index=range(1, 34)))
 
         self.data.setValues(pd.Series((True,) + (False,) * 32, index=range(1, 34)))
@@ -1109,10 +1107,10 @@ class TestContainer(WrapperTesting):
                                                       sequenceId=6,
                                                       modelNumber=6)))  # check set correctly
 
-        with self.assertRaisesRegexp(AssertionError, 'Boolean selector must select a single row'):
+        with self.assertRaisesRegexp(ValueError, 'Boolean selector must select a single row'):
             self.data.setValues(self.data.methylSelector)
 
-        with self.assertRaisesRegexp(AssertionError, 'Boolean selector must select an existing row'):
+        with self.assertRaisesRegexp(ValueError, 'Boolean selector must select an existing row'):
             self.data.setValues(pd.Series((False,) * 45 + (True,), index=range(1, 47)))
 
         namedTuples = self.data.as_namedtuples()

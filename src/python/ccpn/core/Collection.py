@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-29 15:34:37 +0100 (Fri, October 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-29 18:16:16 +0100 (Fri, October 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -314,7 +314,8 @@ class Collection(AbstractWrapperObject):
         if not isinstance(objectTypes, (list, tuple, type(None))):
             raise ValueError('objectTypes must be list/tuple of core objects or classnames, or single core object or None')
         # remove any Nones from the list
-        objectTypes = list(filter(lambda itm: itm is not None, objectTypes))
+        if objectTypes is not None:
+            objectTypes = list(filter(lambda itm: itm is not None, objectTypes))
 
         _objectTypes = None
         if objectTypes:

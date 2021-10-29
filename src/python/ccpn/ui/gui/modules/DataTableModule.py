@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-29 17:00:13 +0100 (Fri, October 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-29 17:04:30 +0100 (Fri, October 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -26,19 +26,19 @@ __date__ = "$Date: 2021-10-29 16:38:09 +0100 (Fri, October 29, 2021) $"
 # Start of code
 #=========================================================================================
 
-import pandas as pd
-from ccpn.core.lib.CallBack import CallBack
+# import pandas as pd
+# from ccpn.core.lib.CallBack import CallBack
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+# from ccpn.ui.gui.widgets.Spacer import Spacer
+# from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.GuiTable import GuiTable
-from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.widgets.PulldownListsForObjects import StructureEnsemblePulldown
-from ccpn.ui.gui.widgets.Column import ColumnClass
-from PyQt5 import QtWidgets
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.core.StructureEnsemble import StructureEnsemble
-from ccpn.util.Logging import getLogger
+# from ccpn.core.lib.Notifiers import Notifier
+# from ccpn.ui.gui.widgets.PulldownListsForObjects import StructureEnsemblePulldown
+# from ccpn.ui.gui.widgets.Column import ColumnClass
+# from PyQt5 import QtWidgets
+# from ccpn.ui.gui.widgets.MessageDialog import showWarning
+# from ccpn.core.StructureEnsemble import StructureEnsemble
+# from ccpn.util.Logging import getLogger
 
 
 ALL = '<all>'

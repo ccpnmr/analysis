@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-29 12:07:22 +0100 (Fri, October 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-29 12:09:00 +0100 (Fri, October 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -300,7 +300,7 @@ class Collection(AbstractWrapperObject):
             collection.getByObjectTypes()
             collection.getByObjectTypes(objectTypes=Note, recursive=False)
             collection.getByObjectTypes(objectTypes='NO')
-            collection.getByObjectTypes(objectTypes='Note')
+            collection.getByObjectTypes(objectTypes=['Note', Spectrum])
             collection.getByObjectTypes(objectTypes='Note', depth=2)
 
         :param objectTypes: single item, or list of core objects as object class or classnames

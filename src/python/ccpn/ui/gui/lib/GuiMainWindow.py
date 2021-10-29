@@ -41,6 +41,7 @@ from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.ui.gui.widgets.MessageDialog import progressManager
 from ccpn.util.Logging import getLogger
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
+from ccpn.ui.gui.widgets.Icon import Icon
 
 from ccpn.util.Svg import Svg
 from ccpn.ui.gui.lib.mouseEvents import SELECT, setCurrentMouseMode, getCurrentMouseMode
@@ -152,8 +153,9 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self.feedbackPopup = None
         self.updatePopup = None
 
-        self.fileIcon = self.style().standardIcon(QtWidgets.QStyle.SP_FileIcon, None, self)
-        self.disabledFileIcon = self.makeDisabledFileIcon(self.fileIcon)
+        self.setWindowIcon(Icon('icons/ccpn-icon'))
+        # self.fileIcon = self.style().standardIcon(QtWidgets.QStyle.SP_FileIcon, None, self)
+        # self.disabledFileIcon = self.makeDisabledFileIcon(self.fileIcon)
 
         # blank display opened later by the _initLayout if there is nothing to show otherwise
         self.pythonConsoleModule = None
@@ -165,6 +167,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         # install handler to resize when moving between displays
         self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
+
 
     @property
     def project(self):
@@ -184,12 +187,13 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         else:
             self.setWindowFilePath("")
 
-        if self.project.isTemporary:
-            self.setWindowIcon(QtGui.QIcon())
-        elif amDirty:
-            self.setWindowIcon(self.disabledFileIcon)
-        else:
-            self.setWindowIcon(self.fileIcon)
+        ## Why do we need to set this icons? Very odd behaviour.
+        # if self.project.isTemporary:
+        #     self.setWindowIcon(QtGui.QIcon())
+        # elif amDirty:
+        #     self.setWindowIcon(self.disabledFileIcon)
+        # else:
+        #     self.setWindowIcon(self.fileIcon)
 
     @pyqtSlot()
     def _screenChangedEvent(self, *args):

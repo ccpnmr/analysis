@@ -54,8 +54,10 @@ class FeedbackPopup(CcpnDialogMainWidget):
     FIXEDWIDTH = False
 
     def __init__(self, parent=None, title='Feedback Form', **kwds):
-        super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
 
+        raise RuntimeError('This Popup is depreciated. To submit a feedback, please visit the CcpnForum instead')
+
+        super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
         self.setContentsMargins(5, 5, 5, 5)
         self._registrationDict = Register.loadDict()
 

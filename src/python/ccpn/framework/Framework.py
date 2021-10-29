@@ -1239,7 +1239,6 @@ class Framework(NotifierBase):
             ("Open...", self.openProject, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Open Recent", ()),
 
-            #      ("Load Spectrum...", lambda: self.loadData(text='Load Spectrum'), [('shortcut', 'ls')]),
             ("Load Data...", self.loadData, [('shortcut', 'ld')]),
             (),
             ("Save", self.saveProject, [('shortcut', '⌃s')]),  # Unicode U+2303, NOT the carrot on your keyboard.
@@ -1277,7 +1276,6 @@ class Framework(NotifierBase):
         ms.append(('Spectrum', [
             ("Load Spectra...", self.loadSpectra, [('shortcut', 'ls')]),
             (),
-            # ("Spectrum Groups...", self.showSpectrumGroupsPopup, [('shortcut', 'ss')]), # multiple edit temporarly disabled
             ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
             ("Validate Paths...", self.showValidateSpectraPopup, [('shortcut', 'vp')]),
             (),
@@ -1326,17 +1324,6 @@ class Framework(NotifierBase):
             ("Notes Editor", partial(self.showNotesEditor, selectFirstItem=True), [('shortcut', 'no'),
                                                                                    ('icon', 'icons/null')]),
             (),
-            # (),
-            ###("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),
-            ###("Atom Selector", self.showAtomSelector, [('shortcut', 'as')]),
-            ###(),
-
-            # sequenceModule has been incorporated into sequence graph
-            # ("Show Sequence", self.toggleSequenceModule, [('shortcut', 'sq'),
-            #                                               ('checkable', True),
-            #                                               ('checked', False)
-            #                                               ]),
-            (),
             ("Current", (("Show/Hide Toolbar", self.toggleToolbar, [('shortcut', 'tb')]),
                          ("Show/Hide Spectrum Toolbar", self.toggleSpectrumToolbar, [('shortcut', 'sb')]),
                          ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')]),
@@ -1373,13 +1360,8 @@ class Framework(NotifierBase):
                 ("None", None, [('checkable', True),
                                 ('checked', False)])
                 ])),
-            # (USERMACROSMENU, ([
-            #     ("None", None, [('checkable', True),
-            #                     ('checked', False)])
-            #     ])),
             (),
             ("Define Macro Shortcuts...", self.defineUserShortcuts, [('shortcut', 'du')]),
-            ("Submit Macro...", self.showSubmitMacroPopup)
             ]
                    ))
 
@@ -1396,31 +1378,6 @@ class Framework(NotifierBase):
                                 ('checked', False)])
                 ])),
 
-            # # Submenu
-            # ("Beginners Tutorial", self.showBeginnersTutorial),
-            # ("Backbone Tutorial", self.showBackboneTutorial),
-            # ("CSP Tutorial", self.showCSPtutorial),
-            # ("More...", self.showTutorials)
-            # ])),
-
-            # ("Show Shortcuts", self.showShortcuts),
-            # ("Show API Documentation", self.showVersion3Documentation),
-            # ("CcpNmr V3 Forum", self.showForum),
-            # (),
-            # ("About CcpNmr V3...", self.showAboutPopup),
-            # ("CcpNmr Homepage", self.showAboutCcpn),
-            # ("Show License", self.showCcpnLicense),
-            # (),
-            # # ("Inspect Code...", self.showCodeInspectionPopup, [('shortcut', 'gv'),
-            # #                                                    ('enabled', False)]),
-            # # ("Show Issues...", self.showIssuesList),
-            #
-            # ("Check for Updates...", self.showUpdatePopup),
-            # ("Register...", self.showRegisterPopup),
-            # (),
-            # ("Submit Feedback...", self.showFeedbackPopup),
-            # # ("Submit Macro...", self.showSubmitMacroPopup)
-
             ("Show Shortcuts", self.showShortcuts),
             ("Show API Documentation", self.showVersion3Documentation),
             ("Show License", self.showCcpnLicense),
@@ -1428,15 +1385,8 @@ class Framework(NotifierBase):
             ("CcpNmr Homepage", self.showAboutCcpn),
             ("CcpNmr V3 Forum", self.showForum),
             (),
-            # ("Inspect Code...", self.showCodeInspectionPopup, [('shortcut', 'gv'),
-            #                                                    ('enabled', False)]),
-            # ("Show Issues...", self.showIssuesList),
-
             ("Check for Updates...", self.showUpdatePopup),
             ("Register...", self.showRegisterPopup),
-            (),
-            ("Submit Feedback...", self.showFeedbackPopup),
-            # ("Submit Macro...", self.showSubmitMacroPopup)
             (),
             ("About CcpNmr V3...", self.showAboutPopup),
             ]
@@ -3328,42 +3278,6 @@ class Framework(NotifierBase):
         """Open the registration popup
         """
         self.ui._registerDetails()
-
-    def showFeedbackPopup(self):
-        """Open the submit feedback popup
-        """
-        from ccpn.ui.gui.popups.FeedbackPopup import FeedbackPopup
-        from ccpn.util import Url
-
-        # check valid internet connection first
-        if Url.checkInternetConnection():
-
-            # this is non-modal so you can copy/paste from the project as required
-            if not self.feedbackPopup:
-                self.feedbackPopup = FeedbackPopup(parent=self.ui.mainWindow)
-            self.feedbackPopup.show()
-            self.feedbackPopup.raise_()
-
-        else:
-            MessageDialog.showWarning('Submit Feedback',
-                                      'Could not connect to the server, please check your internet connection.')
-
-    def showSubmitMacroPopup(self):
-        """Open the submit macro popup
-        """
-        from ccpn.ui.gui.popups.SubmitMacroPopup import SubmitMacroPopup
-        from ccpn.util import Url
-
-        # check valid internet connection first
-        if Url.checkInternetConnection():
-            if not self.submitMacroPopup:
-                self.submitMacroPopup = SubmitMacroPopup(parent=self.ui.mainWindow)
-            self.submitMacroPopup.show()
-            self.submitMacroPopup.raise_()
-
-        else:
-            MessageDialog.showWarning('Submit Macro',
-                                      'Could not connect to the server, please check your internet connection.')
 
     def showLicense(self):
         from ccpn.framework.PathsAndUrls import licensePath

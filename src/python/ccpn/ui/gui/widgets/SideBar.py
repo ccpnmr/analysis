@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-17 15:13:06 +0100 (Fri, September 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-29 17:03:23 +0100 (Fri, October 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -66,6 +66,8 @@ from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.DataSet import DataSet
 from ccpn.core.Restraint import RestraintList
 from ccpn.core.Note import Note
+from ccpn.core.DataTable import DataTable
+from ccpn.core.Collection import Collection
 
 from ccpn.core.lib.Pid import Pid
 # from ccpn.ui.gui.guiSettings import sidebarFont
@@ -93,7 +95,8 @@ from ccpn.ui.gui.lib.MenuActions import _createNewDataSet, _createNewPeakList, _
     _raiseDataSetPopup, _raiseChemicalShiftListPopup, _raisePeakListPopup, _raiseMultipletListPopup, _raiseCreateNmrChainPopup, _raiseNmrChainPopup, \
     _raiseNmrResiduePopup, _raiseNmrResidueNewPopup, _raiseNmrAtomPopup, _raiseNmrAtomNewPopup, _raiseNotePopup, _raiseIntegralListPopup, \
     _raiseRestraintListEditPopup, _raiseRestraintListNewPopup, _raiseSamplePopup, _raiseAtomNewPopup, _raiseAtomPopup, \
-    _raiseSampleComponentPopup, _raiseSpectrumPopup, _raiseSpectrumGroupEditorPopup, _raiseStructureEnsemblePopup, _raiseSubstancePopup
+    _raiseSampleComponentPopup, _raiseSpectrumPopup, _raiseSpectrumGroupEditorPopup, _raiseStructureEnsemblePopup, \
+    _raiseSubstancePopup, _raiseDataTablePopup, _raiseCollectionPopup
 
 from ccpn.ui.gui.lib.MenuActions import _openItemNoteTable, _openItemChemicalShiftListTable, \
     _openItemIntegralListTable, _openItemMultipletListTable, _openItemNmrChainTable, \
@@ -101,7 +104,7 @@ from ccpn.ui.gui.lib.MenuActions import _openItemNoteTable, _openItemChemicalShi
     _openItemSpectrumGroupDisplay, _openItemStructureEnsembleTable, _openItemDataSetTable, \
     _openItemSpectrumDisplay, _openItemSampleDisplay, _openItemComplexTable, _openItemResidueTable, \
     _openItemSubstanceTable, _openItemSampleComponentTable, _openItemNmrResidueItem, _openItemNmrAtomItem, \
-    _openItemSpectrumInGroupDisplay, _openItemAtomItem
+    _openItemSpectrumInGroupDisplay, _openItemAtomItem, _openItemDataTable, _openItemCollectionModule
 
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, \
@@ -937,12 +940,28 @@ class SideBarStructure(object):
                         ]),
                 ]),
 
+            #------ DataTables ------
+            SidebarTree('DataTables', closed=True, children=[
+                SidebarItem('<New DataTable>', callback=_raiseDataTablePopup(editMode=False, useNone=True)),
+
+                SidebarClassItems(klass=DataTable, callback=_raiseDataTablePopup(),
+                                  menuAction=_openItemDataTable(position='bottom', relativeTo=None), isDraggable=True),
+                ]),
+
             #------ Notes ------
             SidebarTree('Notes', closed=True, children=[
                 SidebarItem('<New Note>', callback=_raiseNotePopup(editMode=False, useNone=True)),
 
                 SidebarClassItems(klass=Note, callback=_raiseNotePopup(),
                                   menuAction=_openItemNoteTable(position='bottom', relativeTo=None), isDraggable=True),
+                ]),
+
+            #------ Collections ------
+            SidebarTree('Collections', closed=True, children=[
+                SidebarItem('<New Collection>', callback=_raiseCollectionPopup(editMode=False, useNone=True)),
+
+                SidebarClassItems(klass=Collection, callback=_raiseCollectionPopup(),
+                                  menuAction=_openItemCollectionModule(position='bottom', relativeTo=None), isDraggable=True),
                 ]),
             ])
 

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-28 17:22:07 +0100 (Thu, October 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-29 17:03:23 +0100 (Fri, October 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1344,6 +1344,7 @@ class Framework(NotifierBase):
             ("Multiplet Table", partial(self.showMultipletTable, selectFirstItem=True), [('shortcut', 'mt')]),
             ("Restraint Table", partial(self.showRestraintTable, selectFirstItem=True), [('shortcut', 'rt')]),
             ("Structure Table", partial(self.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
+            ("Data Table", partial(self.showDataTable, selectFirstItem=True), [('shortcut', 'dt')]),
             ("Restraint Analysis Table", partial(self.showRestraintAnalysisTable, selectFirstItem=True), [('shortcut', 'at')]),
             (),
             ("Chemical Shift Mapping", self.showChemicalShiftMapping, [('shortcut', 'cm')]),
@@ -2885,6 +2886,30 @@ class Framework(NotifierBase):
         if structureEnsemble:
             structureTableModule.selectStructureEnsemble(structureEnsemble)
         return structureTableModule
+
+    @logCommand('application.')
+    def showDataTable(self, position='bottom', relativeTo=None,
+                           dataTable=None, selectFirstItem=False):
+        """Displays DataTable Table
+        """
+        pass
+        # from ccpn.ui.gui.modules.DataTable import DataTableModule
+        #
+        # mainWindow = self.ui.mainWindow
+        # if not relativeTo:
+        #     relativeTo = mainWindow.moduleArea
+        # _dataTableModule = DataTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
+        # mainWindow.moduleArea.addModule(_dataTableModule, position=position, relativeTo=relativeTo)
+        # if dataTable:
+        #     _dataTableModule.selectDataTable(dataTable)
+        # return _dataTableModule
+
+    @logCommand('application.')
+    def showCollectionModule(self, position='bottom', relativeTo=None,
+                            collection=None, selectFirstItem=False):
+        """Displays Collection Module
+        """
+        pass
 
     @logCommand('application.')
     def showNotesEditor(self, position: str = 'bottom', relativeTo: CcpnModule = None,

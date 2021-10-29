@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-27 18:19:48 +0100 (Wed, October 27, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-29 17:03:23 +0100 (Fri, October 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1687,6 +1687,23 @@ class Project(AbstractWrapperObject):
         from ccpn.core.StructureEnsemble import _newStructureEnsemble
 
         return _newStructureEnsemble(self, name=name, data=data, comment=comment, **kwds)
+
+    @logCommand('project.')
+    def newDataTable(self, name: str = None, data=None, comment: str = None, **kwds):
+        """Create new DataTable.
+
+        See the DataTable class for details.
+
+        Optional keyword arguments can be passed in; see DataTable._newDataTable for details.
+
+        :param name: new name for the DataTable.
+        :param data: Pandas dataframe.
+        :param comment: optional comment string
+        :return: a new DataTable instance.
+        """
+        from ccpn.core.DataTable import _newDataTable
+
+        return _newDataTable(self, name=name, data=data, comment=comment, **kwds)
 
     @logCommand('project.')
     def newPeakCluster(self, peaks: Sequence[Union['Peak', str]] = None, **kwds) -> Optional['PeakCluster']:

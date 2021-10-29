@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-28 17:22:07 +0100 (Thu, October 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-29 17:03:23 +0100 (Fri, October 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -661,6 +661,15 @@ class DataTablePulldown(_PulldownABC):
     from ccpn.core.DataTable import DataTable
 
     _klass, _className, _shortClassName, _attributeName = _definedBy(DataTable)
+    _currentAttributeName = None
+
+
+class CollectionPulldown(_PulldownABC):
+    """A PulldownListCompoundWidget class for Collections
+    """
+    from ccpn.core.Collection import Collection
+
+    _klass, _className, _shortClassName, _attributeName = _definedBy(Collection)
     _currentAttributeName = None
 
 

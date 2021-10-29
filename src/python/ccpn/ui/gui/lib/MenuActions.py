@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-07 19:56:29 +0100 (Thu, October 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-29 17:03:23 +0100 (Fri, October 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -40,6 +40,8 @@ from ccpn.core.NmrChain import NmrChain
 from ccpn.core.Chain import Chain
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.RestraintList import RestraintList
+from ccpn.core.DataTable import DataTable
+from ccpn.core.Collection import Collection
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.MessageDialog import showInfo, showWarning
@@ -63,6 +65,8 @@ from ccpn.ui.gui.popups.SamplePropertiesPopup import SamplePropertiesPopup
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpn.ui.gui.popups.StructureEnsemblePopup import StructureEnsemblePopup
 from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
+from ccpn.ui.gui.popups.DataTablePopup import DataTablePopup
+from ccpn.ui.gui.popups.CollectionPopup import CollectionPopup
 from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, \
     undoBlockWithoutSideBar, undoStackBlocking
 
@@ -85,7 +89,7 @@ class CreateNewObjectABC():
         return self.node.obj
 
     def __init__(self, **kwds):
-        # store kewyword as attributes and as dict; acts as partial to popupClass
+        # store keyword as attributes and as dict; acts as partial to popupClass
         for key, value in kwds.items():
             setattr(self, key, value)
         self.kwds = kwds
@@ -159,6 +163,14 @@ class _createNewSubstance(CreateNewObjectABC):
 
 class _createNewStructureEnsemble(CreateNewObjectABC):
     parentMethodName = 'newStructureEnsemble'
+
+
+class _createNewDataTable(CreateNewObjectABC):
+    parentMethodName = 'newDataTable'
+
+
+class _createNewCollection(CreateNewObjectABC):
+    parentMethodName = 'newCollection'
 
 
 class RaisePopupABC():
@@ -343,6 +355,16 @@ class _raiseSubstancePopup(RaisePopupABC):
     objectArgumentName = 'substance'
 
 
+class _raiseDataTablePopup(RaisePopupABC):
+    popupClass = DataTablePopup
+    # objectArgumentName = 'obj'
+
+
+class _raiseCollectionPopup(RaisePopupABC):
+    popupClass = CollectionPopup
+    # objectArgumentName = 'obj'
+
+
 class OpenItemABC():
     """
     An ABC to implement an abstract openItem in moduleArea class
@@ -359,7 +381,7 @@ class OpenItemABC():
 
     validActionTargets = (Spectrum, PeakList, MultipletList, IntegralList,
                           NmrChain, Chain, SpectrumGroup, Sample, ChemicalShiftList,
-                          RestraintList, Note, StructureEnsemble
+                          RestraintList, Note, StructureEnsemble, DataTable, Collection
                           )
 
     # This can be subclassed
@@ -788,6 +810,16 @@ class _openItemStructureEnsembleTable(OpenItemABC):
     objectArgumentName = 'structureEnsemble'
 
 
+class _openItemDataTable(OpenItemABC):
+    openItemMethod = 'showDataTable'
+    objectArgumentName = 'dataTable'
+
+
+class _openItemCollectionModule(OpenItemABC):
+    openItemMethod = 'showCollectionModule'
+    objectArgumentName = 'collection'
+
+
 OpenObjAction = {
     Spectrum         : _openItemSpectrumDisplay,
     PeakList         : _openItemPeakListTable,
@@ -800,7 +832,9 @@ OpenObjAction = {
     RestraintList    : _openItemRestraintListTable,
     Note             : _openItemNoteTable,
     IntegralList     : _openItemIntegralListTable,
-    StructureEnsemble: _openItemStructureEnsembleTable
+    StructureEnsemble: _openItemStructureEnsembleTable,
+    DataTable        : _openItemDataTable,
+    Collection       : _openItemCollectionModule,
     }
 
 

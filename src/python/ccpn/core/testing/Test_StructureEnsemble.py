@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:25:08 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-10-29 16:56:11 +0100 (Fri, October 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,10 +37,10 @@ import unittest
 #=========================================================================================
 
 class StructureEnsembleTesting_None(WrapperTesting):
-
     #=========================================================================================
     # setUp       initialise a newStructureEnsemble
     #=========================================================================================
+
     projectPath = '../structures/2CPP.pdb'
 
     @unittest.skip('ISSUE: causing test leakage?')
@@ -79,7 +79,6 @@ class StructureEnsembleTesting_None(WrapperTesting):
 #=========================================================================================
 
 class StructureEnsembleTesting_Project(WrapperTesting):
-
     #=========================================================================================
     # setUp       initialise a newStructureEnsemble
     #=========================================================================================
@@ -87,7 +86,6 @@ class StructureEnsembleTesting_Project(WrapperTesting):
     projectPath = 'V3ProjectForTests.ccpn'
 
     def test_haveEnsemble(self):
-
         self.assertGreater(len(self.project.structureEnsembles), 0)
 
         # fix the bad structure for the test

@@ -30,7 +30,6 @@ from itertools import product
 from collections import namedtuple
 from PyQt5 import QtCore
 from ccpn.util import Colour
-from ccpnc.contour import Contourer2d
 from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
 
 
@@ -219,7 +218,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         """Construct the contours for this spectrum using an OpenGL display list
         The way this is done here, any change in contour level needs to call this function.
         """
-
+        from ccpnc.contour import Contourer2d
         posLevelsArray = np.array(posLevels, np.float32)
         negLevelsArray = np.array(negLevels, np.float32)
 

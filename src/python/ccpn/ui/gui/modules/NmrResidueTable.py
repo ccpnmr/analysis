@@ -50,12 +50,11 @@ from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot
 from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
-from ccpnc.clibrary import Clibrary
+
 from PyQt5 import QtCore
 
 logger = getLogger()
 ALL = '<all>'
-_getNmrIndex = Clibrary.getNmrResidueIndex
 
 LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 
@@ -289,6 +288,8 @@ class NmrResidueTable(GuiTable):
         CCPN-INTERNAL: Insert an index into ObjectTable
         """
         try:
+            from ccpnc.clibrary import Clibrary
+            _getNmrIndex = Clibrary.getNmrResidueIndex
             return _getNmrIndex(nmrRes)
             # return nmrRes.nmrChain.nmrResidues.index(nmrRes)                # ED: THIS IS VERY SLOW
         except Exception as es:

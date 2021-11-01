@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-11 19:40:43 +0100 (Mon, October 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-01 11:20:56 +0000 (Mon, November 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -770,6 +770,7 @@ class ChemicalShiftTable(GuiTable):
         self._columns = ColumnClass(_cols)
 
         if self.chemicalShiftList._wrappedData.data is not None:
+            # is of type _ChemicalShiftListFrame - should move functionality to there
             _table = self.chemicalShiftList._wrappedData.data.copy()
             _table = _table[_table[CS_ISDELETED] == False]
             _table.set_index(_table[CS_UNIQUEID], inplace=True, )  # drop=False)

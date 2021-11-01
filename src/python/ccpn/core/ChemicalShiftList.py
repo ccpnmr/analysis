@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-12 11:18:55 +0100 (Tue, October 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-01 11:20:56 +0000 (Mon, November 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,7 @@ from functools import partial
 from collections.abc import Iterable
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core._implementation.DataFrameABC import DataFrameABC
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
@@ -74,6 +75,18 @@ CS_TABLECOLUMNS = (CS_UNIQUEID, CS_ISDELETED, CS_PID,
 #   it is the name used in the dataframe and in project._getNextUniqueIdValue
 CS_CLASSNAME = 'ChemicalShift'
 CS_PLURALNAME = 'chemicalShifts'
+
+
+class _ChemicalShiftListFrame(DataFrameABC):
+    """
+    ChemicalShiftList data - as a Pandas DataFrame.
+    CCPNInternal - only for access from ChemicalShiftList
+    """
+    # NOT USED YET
+    # Class added to wrap the model data in a core class
+    # functionality can be moved from main class below to here at some point as required
+    # - currently not using undo/redo ability of superclass
+    pass
 
 
 class ChemicalShiftList(AbstractWrapperObject):
@@ -334,6 +347,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         ncsl = self.project.newChemicalShiftList()
 
         # duplicate the chemicalShiftList dataframe - remove the deleted shifts (not required)
+        # will copy the correct type if changed to _ChemicalShiftListFrame
         df = self._wrappedData.data.copy()
         df = df[df[CS_ISDELETED] == False]
         df.set_index(df[CS_UNIQUEID], inplace=True, )
@@ -408,10 +422,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         """
         row = self._getShiftByUniqueId(uniqueId)
         if name in row:
-            # row[name] = value
-            # _data = self._wrappedData.data
             try:
-                # _data.loc[_data.index[_data[UNIQUEID] == uniqueId], name] = value
                 self._wrappedData.data.loc[uniqueId, name] = value
             except Exception as es:
                 raise ValueError(f'ChemicalShiftList._setShiftAttribute: error setting attribute {name} in chemicalShift {self}')
@@ -419,24 +430,22 @@ class ChemicalShiftList(AbstractWrapperObject):
         else:
             raise ValueError(f'ChemicalShiftList._setShiftAttribute: attribute {name} not found in chemicalShift {self}')
 
-    # def _getShiftAttributes(self, uniqueId, startName, endName):
-    #     """Get the named attributes from the chemicalShift with supplied uniqueId
-    #     """
-    #     row = self._getShiftByUniqueId(uniqueId)
-    #     if startName in row and endName in row:
-    #         return row[startName:endName]
-    #     else:
-    #         raise ValueError(f'ChemicalShiftList._getShiftAttributes: attribute {startName}|{endName} not found in chemicalShift')
+    def _getShiftAttributes(self, uniqueId, startName, endName):
+        """Get the named attributes from the chemicalShift with supplied uniqueId
+        """
+        raise NotImplementedError('ChemicalShiftList._setShiftAttributes is not available')
+        # row = self._getShiftByUniqueId(uniqueId)
+        # if startName in row and endName in row:
+        #     return row[startName:endName]
+        # else:
+        #     raise ValueError(f'ChemicalShiftList._getShiftAttributes: attribute {startName}|{endName} not found in chemicalShift')
 
     def _setShiftAttributes(self, uniqueId, startName, endName, value):
         """Set the attributes of the chemicalShift with the supplied uniqueId
         """
         row = self._getShiftByUniqueId(uniqueId)
         if startName in row and endName in row:
-            # row[name] = value
-            # _data = self._wrappedData.data
             try:
-                # _data.loc[_data.index[_data[UNIQUEID] == uniqueId], startName:endName] = value
                 self._wrappedData.data.loc[uniqueId, startName:endName] = value
             except Exception as es:
                 raise ValueError(f'ChemicalShiftList._setShiftAttributes: error setting attribute {startName}|{endName} in chemicalShift {self}')
@@ -551,7 +560,8 @@ class ChemicalShiftList(AbstractWrapperObject):
             df = pd.DataFrame(shifts, columns=CS_COLUMNS)
             df.set_index(df[CS_UNIQUEID], inplace=True, )  # drop=False)
 
-            self._wrappedData.data = df
+            # set as the new subclassed DataFrameABC - not using yet, may have undo/redo issues
+            self._wrappedData.data = df  #_ChemicalShiftListFrame(df)
 
     @classmethod
     def _restoreObject(cls, project, apiObj):
@@ -588,6 +598,11 @@ class ChemicalShiftList(AbstractWrapperObject):
         _data = chemicalShiftList._wrappedData.data
 
         if _data is not None:
+            # check that is the new DataFrameABC class, update as required - for later use
+            # if not isinstance(_data, DataFrameABC):
+            #     getLogger().debug(f'updating classType {chemicalShiftList} -> _ChemicalShiftListFrame')
+            #     _data = _ChemicalShiftListFrame(_data)
+
             _data = _data[_data[CS_ISDELETED] == False]
             _data.set_index(_data[CS_UNIQUEID], inplace=True, )  # drop=False)
 
@@ -664,14 +679,13 @@ class ChemicalShiftList(AbstractWrapperObject):
                            comment)
         _nextUniqueId = self.project._getNextUniqueIdValue(CS_CLASSNAME)
         # add to dataframe - this is in undo stack and marked as modified
-        # _dfRow = pd.DataFrame(((_nextUniqueId, False) + _row[2:],), columns=CS_COLUMNS)
         _dfRow = pd.DataFrame(((_nextUniqueId, False, value, valueError, figureOfMerit, None) + _row[6:],), columns=CS_COLUMNS)
 
         if data is None:
-            self._wrappedData.data = _dfRow
+            # set as the new subclassed DataFrameABC
+            self._wrappedData.data = _dfRow  # _ChemicalShiftListFrame(_dfRow)
         else:
             self._wrappedData.data = self._wrappedData.data.append(_dfRow)
-        # self._wrappedData.data.index = pd.RangeIndex(len(self._wrappedData.data.index))
 
         _data = self._wrappedData.data
         _data.set_index(_data[CS_UNIQUEID], inplace=True, )  # drop=False)
@@ -692,10 +706,6 @@ class ChemicalShiftList(AbstractWrapperObject):
             with undoStackBlocking() as addUndoItem:
                 addUndoItem(undo=partial(self._undoRedoShifts, _oldShifts),
                             redo=partial(self._undoRedoShifts, _newShifts))
-                # if nmrAtom:
-                #     addUndoItem(undo=partial(setattr, shift, CS_NMRATOM, None),
-                #                 redo=partial(setattr, shift, CS_NMRATOM, nmrAtom))
-                # addUndoItem(redo=shift._recalculateShiftValue)
 
         return shift
 
@@ -750,7 +760,6 @@ class ChemicalShiftList(AbstractWrapperObject):
         uniqueId = rows.iloc[0].uniqueId
         _shs = [sh for sh in self._shifts if sh._uniqueId == uniqueId]
         _val = _shs[0]
-        # _val._deleted = True
 
         self._shifts.remove(_val)
         self._deletedShifts.append(_val)  # not sorted - sort?
@@ -831,7 +840,9 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
     # instantiate a new empty dataframe
     df = pd.DataFrame(columns=CS_COLUMNS)
     df.set_index(df[CS_UNIQUEID], inplace=True, )
-    apiChemicalShiftList.data = df
+
+    # set as the new subclassed DataFrameABC
+    apiChemicalShiftList.data = df  # _ChemicalShiftListFrame(df)
 
     return result
 

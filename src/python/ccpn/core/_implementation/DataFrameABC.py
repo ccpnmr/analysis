@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-29 16:58:34 +0100 (Fri, October 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-01 11:20:56 +0000 (Mon, November 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -762,7 +762,13 @@ class DataFrameABC(pd.DataFrame):
 
         firstData = not (self.shape[0])
 
-        columnTypeData = self._reservedColumns.get(key) or (None, None)
+        try:
+            # may be a multi-column set, which is not implemented yet
+            columnTypeData = self._reservedColumns.get(key) or (None, None)
+        except Exception as es:
+            # proceed as normal without dataType check
+            columnTypeData = (None, None)
+
         if columnTypeData is None:
             # Not a reserved column name - set the value. No echoing or undo. - currently bypassed?
             super().__setitem__(key, value)
@@ -790,8 +796,8 @@ class DataFrameABC(pd.DataFrame):
                         else:
                             raise RuntimeError("Code Error. Invalid type converter name %s for column %s"
                                                % (typeConverterName, key))
-                    else:
-                        # We set again to make sure of the dataType
+                    elif dataType:
+                        # We set again to make sure of the dataType, None can be ignored
                         ll = fitToDataType(self[key], dataType)
                         if dataType is int and None in ll:
                             super().__setitem__(key, pd.Series(ll, self.index, dtype=object))
@@ -835,15 +841,14 @@ class DataFrameABC(pd.DataFrame):
                                     else:
                                         raise RuntimeError("Code Error. Invalid type converter name %s for column %s"
                                                            % (typeConverterName, key))
-                                else:
-                                    if dataType:
-                                        # We set again to make sure of the dataType
-                                        ll = fitToDataType(self[key], dataType)
-                                        if dataType is int and None in ll:
-                                            super().__setitem__(key, pd.Series(ll, self.index, dtype=object))
-                                        else:
-                                            # not always guaranteed a .loc can change ints to floats :|
-                                            super().__setitem__(key, pd.Series(ll, self.index, dtype=dataType))
+                                elif dataType:
+                                    # We set again to make sure of the dataType
+                                    ll = fitToDataType(self[key], dataType)
+                                    if dataType is int and None in ll:
+                                        super().__setitem__(key, pd.Series(ll, self.index, dtype=object))
+                                    else:
+                                        # not always guaranteed a .loc can change ints to floats :|
+                                        super().__setitem__(key, pd.Series(ll, self.index, dtype=dataType))
 
                                 if firstData:
                                     self.reset_index(drop=True, inplace=True)

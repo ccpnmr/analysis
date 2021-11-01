@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-29 16:59:20 +0100 (Fri, October 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-01 11:20:56 +0000 (Mon, November 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -133,9 +133,11 @@ def _ccpnObjectPairHook(pairs):
 
             from ccpn.util.StructureData import EnsembleData
             from ccpn.core.DataTable import TableFrame
+            # from ccpn.core.ChemicalShiftList import _ChemicalShiftListFrame  # not used yet
 
             _dataFrameTypes = {'ccpn.EnsembleData': EnsembleData,
-                               'ccpn.TableFrame': TableFrame,
+                               'ccpn.TableFrame'  : TableFrame,
+                               # 'ccpn._ChemicalShiftListFrame': _ChemicalShiftListFrame,  # not used yet
                                }
 
             if typ == 'OrderedDict':

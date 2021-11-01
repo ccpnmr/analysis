@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-28 17:22:07 +0100 (Thu, October 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-01 16:04:48 +0000 (Mon, November 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -555,6 +555,8 @@ def progressManager(parent, title=None, progressMax=100):
         QtWidgets.QApplication.processEvents()  # hopefully it will redraw the popup
         thisProg.close()
 
+        # return correct focus control to the parent
+        QtWidgets.QApplication.setActiveWindow(parent)
 
 def _stoppableProgressBar(data, title='Calculating...', buttonText='Cancel'):
     """ Use this for opening a _stoppableProgressBar before time consuming operations. the cancel button allows

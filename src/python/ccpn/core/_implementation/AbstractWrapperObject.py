@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-29 16:55:44 +0100 (Fri, October 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-02 11:47:06 +0000 (Tue, November 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -36,16 +36,16 @@ from copy import deepcopy
 import ccpn.core._implementation.resetSerial
 from ccpn.core import _importOrder
 # from ccpn.core.lib import CcpnSorting
-from ccpn.util import Common as commonUtil
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
-from ccpn.util.Logging import getLogger
 from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking, \
     apiNotificationBlanking, inactivity, ccpNmrV3CoreSetter
-from ccpn.core.lib.Notifiers import NotifierBase, Notifier
+# from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.lib.ContextManagers import deleteObject
 from ccpn.core.lib.Notifiers import NotifierBase
+from ccpn.util import Common as commonUtil
 from ccpn.util.decorators import logCommand
+from ccpn.util.Logging import getLogger
 
 
 @functools.total_ordering
@@ -809,6 +809,17 @@ class AbstractWrapperObject(NotifierBase):
             return tuple([self._project._data2Obj[itm] for itm in self._wrappedData.collections])
         except:
             return ()
+
+    @logCommand(get='self')
+    def addToCollection(self, collection):
+        """Add core object to the named collection
+        """
+        from ccpn.core.Collection import Collection
+
+        if not isinstance(collection, Collection):
+            raise ValueError(f'{self.__class__.__name__}.addToCollection: {collection} is not a collection')
+
+        collection.addItems([self])
 
     #=========================================================================================
     # Restore methods

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-29 17:03:23 +0100 (Fri, October 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-02 11:47:07 +0000 (Tue, November 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -461,6 +461,7 @@ class OpenItemABC():
                                           self.mainWindow, self.getObj(), self.node))
 
         contextMenu.addAction('Copy Pid to clipboard', partial(self._copyPidsToClipboard, objs))
+        self._addCollectionMenu(contextMenu, objs)
         contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
         canBeCloned = True
         for obj in objs:
@@ -510,6 +511,66 @@ class OpenItemABC():
 
         copyToClipboard(objs)
 
+    def _addCollectionMenu(self, menu, objs):
+        """Add a quick submenu containing a list of collections
+        """
+        subMenu = menu.addMenu('Add to Collection')
+        collections = self.mainWindow.application.project.collections
+        for col in collections:
+            # add action to add to the collection
+            subMenu.addAction(col.pid, partial(col.addItems, objs))
+
+    def _addToCollection(self, objs):
+        """Add the objects to a collection
+        Show popup to allow adding objects to specified collection
+        For later when a more complex selector is required
+
+        :param objs: list of sidebar objects
+        """
+        collectionPopup = AddToCollectionPopup(mainWindow=self.mainWindow, project=None, on_top=True)
+        collectionPopup.hide()
+
+        # show the collection popup
+        pos = QtGui.QCursor().pos()
+        mouse_screen = None
+        for screen in QtGui.QGuiApplication.screens():
+            if screen.geometry().contains(pos):
+                mouse_screen = screen
+                break
+        collectionPopup.showAt(pos, preferred_side=Side.RIGHT,
+                              side_priority=(Side.TOP, Side.BOTTOM, Side.RIGHT, Side.LEFT),
+                              target_screen=mouse_screen)
+
+
+from ccpn.ui.gui.widgets.SpeechBalloon import SpeechBalloon, Side
+from PyQt5 import QtCore, QtGui
+from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Label import Label
+
+
+class AddToCollectionPopup(SpeechBalloon):
+    """Balloon to hold the collection list
+    For later when a more complex selector is required
+    """
+
+    def __init__(self, mainWindow=None, project=None, *args, **kwds):
+        super().__init__(*args, **kwds)
+
+        # simplest way to make the popup function as modal and disappear as required
+        self.setWindowFlags(int(self.windowFlags()) | QtCore.Qt.Popup)
+        self._mainWindow = mainWindow
+        self._project = project
+
+        # hide the speech pointer
+        self._metrics.pointer_height = 0
+        self._metrics.pointer_width = 0
+        self._metrics.corner_radius = 2
+
+        # add a small widget to the centre
+        fr = Frame(self, setLayout=True)
+        Label(fr, text='Test collection popup', grid=(0, 0))
+        self.setCentralWidget(fr)
+
 
 class _openItemChemicalShiftListTable(OpenItemABC):
     openItemMethod = 'showChemicalShiftTable'
@@ -522,6 +583,7 @@ class _openItemChemicalShiftListTable(OpenItemABC):
         if self.openAction:
             contextMenu.addAction(self.contextMenuText, self.openAction)
         contextMenu.addAction('Copy Pid to clipboard', partial(self._copyPidsToClipboard, objs))
+        self._addCollectionMenu(contextMenu, objs)
         contextMenu.addAction('Duplicate', partial(self._duplicateAction, objs))
         contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))
 
@@ -577,6 +639,7 @@ class _openItemAtomItem(OpenItemABC):
         if self.openAction:
             contextMenu.addAction(self.contextMenuText, self.openAction)
         contextMenu.addAction('Copy Pid to clipboard', partial(self._copyPidsToClipboard, objs))
+        self._addCollectionMenu(contextMenu, objs)
 
         contextMenu.addSeparator()
         contextMenu.addAction('Edit Properties', partial(parentWidget._raiseObjectProperties, self.node.widget))
@@ -601,6 +664,7 @@ class _openItemResidueTable(OpenItemABC):
         if self.openAction:
             contextMenu.addAction(self.contextMenuText, self.openAction)
         contextMenu.addAction('Copy Pid to clipboard', partial(self._copyPidsToClipboard, objs))
+        self._addCollectionMenu(contextMenu, objs)
 
         contextMenu.addSeparator()
         contextMenu.addAction('Edit Properties', partial(parentWidget._raiseObjectProperties, self.node.widget))
@@ -767,6 +831,7 @@ class _openItemSpectrumInGroupDisplay(_openItemSpectrumDisplay):
                                           self.mainWindow, self.getObj(), self.node))
 
             contextMenu.addAction('Remove from SpectrumGroup', partial(self._removeSpectrumObject, objs))
+            self._addCollectionMenu(contextMenu, objs)
             contextMenu.addSeparator()
 
         contextMenu.addAction('Delete', partial(self._deleteItemObject, objs))

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-29 16:58:34 +0100 (Fri, October 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-02 11:47:06 +0000 (Tue, November 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -112,11 +112,11 @@ class DataTable(AbstractWrapperObject):
         self._wrappedData.data = value
 
     @property
-    def parameters(self) -> dict:
-        """Keyword-value dictionary of parameters.
+    def metadata(self) -> dict:
+        """Keyword-value dictionary of metadata.
         NB the value is a copy - modifying it will not modify the actual data.
-        Use the setParameter, deleteParameter, clearParameters, and updateParameters
-        methods to modify the parameters.
+        Use the setMetadata, deleteMetadata, clearMetadata, and updateMetadata
+        methods to modify the metadata.
 
         Dictionary values can be anything that can be exported to JSON,
         including OrderedDict, numpy.ndarray, ccpn.util.Tensor,
@@ -125,49 +125,49 @@ class DataTable(AbstractWrapperObject):
         return dict((x.name, x.value) for x in self._wrappedData.dataTableParameters)
 
     @logCommand(get='self')
-    def getParameter(self, name: str):
-        """Return value of parameter."""
+    def getMetadata(self, name: str):
+        """Return value from metadata."""
         apiData = self._wrappedData
-        parameter = apiData.findFirstDataTableParameter(name=name)
-        if parameter is not None:
-            return parameter.value
+        metadata = apiData.findFirstDataTableParameter(name=name)
+        if metadata is not None:
+            return metadata.value
 
     @logCommand(get='self')
     @ccpNmrV3CoreUndoBlock()
-    def setParameter(self, name: str, value):
-        """Add name:value to parameters, overwriting existing entries."""
+    def setMetadata(self, name: str, value):
+        """Add name:value to metadata, overwriting existing entry."""
         apiData = self._wrappedData
-        parameter = apiData.findFirstDataTableParameter(name=name)
-        if parameter is None:
+        metadata = apiData.findFirstDataTableParameter(name=name)
+        if metadata is None:
             apiData.newDataTableParameter(name=name, value=value)
         else:
-            parameter.value = value
+            metadata.value = value
 
     @logCommand(get='self')
     @ccpNmrV3CoreUndoBlock()
-    def deleteParameter(self, name: str):
-        """Delete parameter named 'name'."""
+    def deleteMetadata(self, name: str):
+        """Delete metadata named 'name'."""
         apiData = self._wrappedData
-        parameter = apiData.findFirstDataTableParameter(name=name)
-        if parameter is None:
-            raise KeyError("No parameter named %s" % name)
+        metadata = apiData.findFirstDataTableParameter(name=name)
+        if metadata is None:
+            raise KeyError("No metadata named %s" % name)
         else:
-            parameter.delete()
+            metadata.delete()
 
     @logCommand(get='self')
     @ccpNmrV3CoreUndoBlock()
-    def clearParameters(self):
-        """Delete all parameters."""
-        for parameter in self._wrappedData.dataTableParameters:
-            parameter.delete()
+    def clearMetadata(self):
+        """Delete all metadata."""
+        for metadata in self._wrappedData.dataTableParameters:
+            metadata.delete()
 
     @logCommand(get='self')
     @ccpNmrV3CoreUndoBlock()
-    def updateParameters(self, value: dict):
+    def updateMetadata(self, value: dict):
         """Convenience routine, similar to dict.update().
-        Calls self.setParameter(key, value) for each key,value pair in the input."""
+        Calls self.setMetadata(key, value) for each key,value pair in the input."""
         for key, val in value.items():
-            self.setParameter(key, val)
+            self.setMetadata(key, val)
 
     #=========================================================================================
     # Implementation functions

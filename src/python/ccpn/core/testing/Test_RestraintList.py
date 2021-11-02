@@ -4,8 +4,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:34 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -33,7 +34,7 @@ class RestraintListTest(WrapperTesting):
     projectPath = None
 
     def test_newDistanceRestraintList(self):
-        dataSet = self.project.newDataSet()
+        dataSet = self.project.newStructureData()
         newList = dataSet.newRestraintList('Distance')
         # Undo and redo all operations
         self.undo.undo()
@@ -43,7 +44,7 @@ class RestraintListTest(WrapperTesting):
         self.assertEquals(dataSet.restraintLists[0].restraintType, 'Distance')
 
     def test_newDihedralRestraintList(self):
-        dataSet = self.project.newDataSet()
+        dataSet = self.project.newStructureData()
         newList = dataSet.newRestraintList('Dihedral')
         # Undo and redo all operations
         self.undo.undo()
@@ -53,7 +54,7 @@ class RestraintListTest(WrapperTesting):
         self.assertEquals(dataSet.restraintLists[0].restraintType, 'Dihedral')
 
     def test_newCsaRestraintList(self):
-        dataSet = self.project.newDataSet()
+        dataSet = self.project.newStructureData()
         newList = dataSet.newRestraintList('Csa')
         # Undo and redo all operations
         self.undo.undo()
@@ -63,7 +64,7 @@ class RestraintListTest(WrapperTesting):
         self.assertEquals(dataSet.restraintLists[0].restraintType, 'Csa')
 
     def test_newRdcRestraintList(self):
-        dataSet = self.project.newDataSet()
+        dataSet = self.project.newStructureData()
         newList = dataSet.newRestraintList('Rdc')
         # Undo and redo all operations
         self.undo.undo()
@@ -73,7 +74,7 @@ class RestraintListTest(WrapperTesting):
         self.assertEquals(dataSet.restraintLists[0].restraintType, 'Rdc')
 
     def test_newChemicalShiftRestraintList(self):
-        dataSet = self.project.newDataSet()
+        dataSet = self.project.newStructureData()
         newList = dataSet.newRestraintList('ChemicalShift')
         # Undo and redo all operations
         self.undo.undo()
@@ -83,7 +84,7 @@ class RestraintListTest(WrapperTesting):
         self.assertEquals(dataSet.restraintLists[0].restraintType, 'ChemicalShift')
 
     def test_newJCouplingRestraintList(self):
-        dataSet = self.project.newDataSet()
+        dataSet = self.project.newStructureData()
         newList = dataSet.newRestraintList('JCoupling')
         # Undo and redo all operations
         self.undo.undo()
@@ -93,7 +94,7 @@ class RestraintListTest(WrapperTesting):
         self.assertEquals(dataSet.restraintLists[0].restraintType, 'JCoupling')
 
     def test_renameDistanceRestraintList(self):
-        dataSet = self.project.newDataSet()
+        dataSet = self.project.newStructureData()
         newList = dataSet.newRestraintList('Distance', name='Boom', comment='blah', unit='A',
                                            potentialType='logNormal', tensorMagnitude=1.0,
                                            tensorRhombicity=1.0, tensorIsotropicValue=0.0,

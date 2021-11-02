@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-07 20:15:17 +0100 (Wed, July 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-02 18:40:29 +0000 (Tue, November 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,7 @@ from ccpn.core.PeakCluster import PeakCluster
 from ccpn.core.Sample import Sample
 from ccpn.core.Substance import Substance
 from ccpn.core.NmrChain import NmrChain
-from ccpn.core.DataSet import DataSet
+from ccpn.core.StructureData import StructureData
 from ccpn.core.Complex import Complex
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.Note import Note
@@ -81,7 +81,7 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         Sample._pluralLinkName,
         Substance._pluralLinkName,
         NmrChain._pluralLinkName,
-        DataSet._pluralLinkName,
+        StructureData._pluralLinkName,
         Complex._pluralLinkName,
         SpectrumGroup._pluralLinkName,
         Note._pluralLinkName,
@@ -406,7 +406,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         Sample._pluralLinkName,
         Substance._pluralLinkName,
         NmrChain._pluralLinkName,
-        DataSet._pluralLinkName,
+        StructureData._pluralLinkName,
         Complex._pluralLinkName,
         SpectrumGroup._pluralLinkName,
         Note._pluralLinkName,
@@ -437,7 +437,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         'ccpn_substance'                        : (Substance._pluralLinkName, Substance.className),
         # 'ccpn_assignment': NmrChain._pluralLinkName,XXXXX.className),
         'nmr_chain'                             : (NmrChain._pluralLinkName, NmrChain.className),
-        'ccpn_dataset'                          : (DataSet._pluralLinkName, DataSet.className),
+        'ccpn_dataset'                          : (StructureData._pluralLinkName, StructureData.className),
         'ccpn_complex'                          : (Complex._pluralLinkName, Complex.className),
         'ccpn_spectrum_group'                   : (SpectrumGroup._pluralLinkName, SpectrumGroup.className),
         'ccpn_notes'                            : (Note._pluralLinkName, Note.className),
@@ -455,27 +455,27 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         # Chain._pluralLinkName : [],
         Chain._pluralLinkName            : ['nef_sequence'],
         ChemicalShiftList._pluralLinkName: ['nef_chemical_shift_list', 'nef_chemical_shift'],
-        RestraintList._pluralLinkName    : ['nef_distance_restraint_list', 'nef_distance_restraint',
+        RestraintList._pluralLinkName: ['nef_distance_restraint_list', 'nef_distance_restraint',
                                             'nef_dihedral_restraint_list', 'nef_dihedral_restraint',
                                             'nef_rdc_restraint_list', 'nef_rdc_restraint',
                                             'ccpn_restraint_list', 'ccpn_restraint'],
-        PeakList._pluralLinkName         : ['ccpn_peak_list', 'nef_peak', 'nef_spectrum_dimension', 'nef_spectrum_dimension_transfer'],
-        IntegralList._pluralLinkName     : ['ccpn_integral_list', 'ccpn_integral'],
-        MultipletList._pluralLinkName    : ['ccpn_multiplet_list', 'ccpn_multiplet', 'ccpn_multiplet_peaks'],
-        Sample._pluralLinkName           : ['ccpn_sample', 'ccpn_sample_component'],
-        Substance._pluralLinkName        : ['ccpn_substance'],
-        NmrChain._pluralLinkName         : ['nmr_chain', 'nmr_residue', 'nmr_atom'],
+        PeakList._pluralLinkName     : ['ccpn_peak_list', 'nef_peak', 'nef_spectrum_dimension', 'nef_spectrum_dimension_transfer'],
+        IntegralList._pluralLinkName : ['ccpn_integral_list', 'ccpn_integral'],
+        MultipletList._pluralLinkName: ['ccpn_multiplet_list', 'ccpn_multiplet', 'ccpn_multiplet_peaks'],
+        Sample._pluralLinkName       : ['ccpn_sample', 'ccpn_sample_component'],
+        Substance._pluralLinkName    : ['ccpn_substance'],
+        NmrChain._pluralLinkName     : ['nmr_chain', 'nmr_residue', 'nmr_atom'],
         # TODO:ED - not done yet
-        DataSet._pluralLinkName          : ['ccpn_dataset', 'ccpn_calculation_step', 'ccpn_calculation_data'],
-        Complex._pluralLinkName          : ['ccpn_complex', 'ccpn_complex_chain'],
-        SpectrumGroup._pluralLinkName    : ['ccpn_spectrum_group', 'ccpn_group_spectrum'],
-        Note._pluralLinkName             : ['ccpn_note'],
-        PeakCluster._pluralLinkName      : ['ccpn_peak_cluster_list', 'ccpn_peak_cluster', 'ccpn_peak_cluster_peaks'],
-        'restraintLinks'                 : ['nef_peak_restraint_link'],
-        'additionalData'                 : ['ccpn_internal_data'],
-        'restraintViolations'            : ['ccpn_distance_restraint_violation_list', 'ccpn_distance_restraint_violation'],
-        'ccpnLogging'                    : ['ccpn_logging', 'ccpn_history'],
-        'ccpnDataSetParameters'          : ['ccpn_parameter', 'ccpn_dataframe']
+        StructureData._pluralLinkName: ['ccpn_dataset', 'ccpn_calculation_step', 'ccpn_calculation_data'],
+        Complex._pluralLinkName      : ['ccpn_complex', 'ccpn_complex_chain'],
+        SpectrumGroup._pluralLinkName: ['ccpn_spectrum_group', 'ccpn_group_spectrum'],
+        Note._pluralLinkName         : ['ccpn_note'],
+        PeakCluster._pluralLinkName  : ['ccpn_peak_cluster_list', 'ccpn_peak_cluster', 'ccpn_peak_cluster_peaks'],
+        'restraintLinks'             : ['nef_peak_restraint_link'],
+        'additionalData'             : ['ccpn_internal_data'],
+        'restraintViolations'        : ['ccpn_distance_restraint_violation_list', 'ccpn_distance_restraint_violation'],
+        'ccpnLogging'                : ['ccpn_logging', 'ccpn_history'],
+        'ccpnDataSetParameters'      : ['ccpn_parameter', 'ccpn_dataframe']
         }
 
     nefProjectToHandlerMapping = {
@@ -490,7 +490,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         Substance._pluralLinkName        : None,
         NmrChain._pluralLinkName         : 'nmr_chain',
         # TODO:ED - not done yet
-        DataSet._pluralLinkName          : None,
+        StructureData._pluralLinkName    : None,
         Complex._pluralLinkName          : None,
         SpectrumGroup._pluralLinkName    : None,
         Note._pluralLinkName             : 'ccpn_note',

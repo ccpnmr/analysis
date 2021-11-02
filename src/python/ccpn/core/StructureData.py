@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:19:59 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -39,20 +39,20 @@ from ccpn.util.isotopes import name2IsotopeCode
 from ccpn.util.Logging import getLogger
 
 
-class DataSet(AbstractWrapperObject):
+class StructureData(AbstractWrapperObject):
     """Data set. Used to store the input to (or output from) a calculation, including data
     selection and parameters, to group Restraints that are used together, to track
     data history and file loads. """
 
     #: Short class name, for PID.
-    shortClassName = 'DS'
+    shortClassName = 'SD'
     # Attribute it necessary as subclasses must use superclass className
-    className = 'DataSet'
+    className = 'StructureData'
 
     _parentClass = Project
 
     #: Name of plural link to instances of class
-    _pluralLinkName = 'dataSets'
+    _pluralLinkName = 'structureData'
 
     #: List of child classes.
     _childClasses = []
@@ -63,7 +63,7 @@ class DataSet(AbstractWrapperObject):
     # CCPN properties
     @property
     def _apiDataSet(self) -> ApiNmrConstraintStore:
-        """ CCPN NmrConstraintStore matching DataSet"""
+        """ CCPN NmrConstraintStore matching StructureData"""
         return self._wrappedData
 
     @property
@@ -99,12 +99,12 @@ class DataSet(AbstractWrapperObject):
 
     @property
     def name(self) -> str:
-        """Name of DataSet.
+        """Name of StructureData.
         """
         # Reading V2 project resulted in name being None; create one on the fly
         if self._wrappedData.name is None:
             # needed to stop recursion of generating unique names
-            name = DataSet._uniqueApiName(self.project)
+            name = StructureData._uniqueApiName(self.project)
             self._wrappedData.__dict__['name'] = name  # The only way to access this
 
         return self._wrappedData.name
@@ -205,6 +205,16 @@ class DataSet(AbstractWrapperObject):
         #
         return result
 
+    @property
+    def inputCalculationSteps(self):
+        """STUB: hot-fixed later"""
+        return ()
+
+    @property
+    def outputCalculationSteps(self):
+        """STUB: hot-fixed later"""
+        return ()
+
     #=========================================================================================
     # Implementation functions
     #=========================================================================================
@@ -272,8 +282,8 @@ class DataSet(AbstractWrapperObject):
     def newCalculationStep(self, programName: str = None, programVersion: str = None,
                            scriptName: str = None, script: str = None,
                            inputDataUuid: str = None, outputDataUuid: str = None,
-                           inputDataSet=None, outputDataSet=None, **kwds):
-        """Create new CalculationStep within DataSet.
+                           inputStructureData=None, outputStructureData=None, **kwds):
+        """Create new CalculationStep within StructureData.
 
         See the CalculationStep class for details.
 
@@ -285,8 +295,8 @@ class DataSet(AbstractWrapperObject):
         :param script:
         :param inputDataUuid:
         :param outputDataUuid:
-        :param inputDataSet:
-        :param outputDataSet:
+        :param inputStructureData:
+        :param outputStructureData:
         :return: a new CalculationStep instance.
         """
         from ccpn.core.CalculationStep import _newCalculationStep
@@ -294,7 +304,7 @@ class DataSet(AbstractWrapperObject):
         return _newCalculationStep(self, programName=programName, programVersion=programVersion,
                                    scriptName=scriptName, script=script,
                                    inputDataUuid=inputDataUuid, outputDataUuid=outputDataUuid,
-                                   inputDataSet=inputDataSet, outputDataSet=outputDataSet,
+                                   inputStructureData=inputStructureData, outputStructureData=outputStructureData,
                                    **kwds)
 
     @logCommand(get='self')
@@ -321,13 +331,13 @@ class DataSet(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
-@newObject(DataSet)
-def _newDataSet(self: Project, name: str = None, title: str = None, programName: str = None, programVersion: str = None,
-                dataPath: str = None, creationDate: datetime.datetime = None, uuid: str = None,
-                comment: str = None) -> DataSet:
-    """Create new DataSet
+@newObject(StructureData)
+def _newStructureData(self: Project, name: str = None, title: str = None, programName: str = None, programVersion: str = None,
+                      dataPath: str = None, creationDate: datetime.datetime = None, uuid: str = None,
+                      comment: str = None) -> StructureData:
+    """Create new StructureData
 
-    See the DataSet class for details.
+    See the StructureData class for details.
 
     :param name:
     :param programName:
@@ -336,16 +346,16 @@ def _newDataSet(self: Project, name: str = None, title: str = None, programName:
     :param creationDate:
     :param uuid:
     :param comment:
-    :return: a new DataSet instance.
+    :return: a new StructureData instance.
     """
 
     if title and name:
-        raise TypeError('Cannot create new DataSet with title and name; DataSet.title is deprecated, please use DataSet.name')
+        raise TypeError('Cannot create new StructureData with title and name; StructureData.title is deprecated, please use StructureData.name')
     if title:
-        getLogger().warning('DataSet.title is deprecated, please use DataSet.name')
+        getLogger().warning('StructureData.title is deprecated, please use StructureData.name')
         name = title
 
-    name = DataSet._uniqueName(project=self, name=name)
+    name = StructureData._uniqueName(project=self, name=name)
 
     nmrProject = self._wrappedData
 

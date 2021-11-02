@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:50 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-02 18:40:29 +0000 (Tue, November 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -43,8 +43,8 @@ class RestraintListPopupABC(AttributeEditorPopupABC):
     attributes = []  # A list of (attributeName, getFunction, setFunction, kwds) tuples;
 
     def __init__(self, parent=None, mainWindow=None, obj=None,
-                 restraintList=None, dataSet=None, **kwds):
-        self.dataSet = dataSet
+                 restraintList=None, structureData=None, **kwds):
+        self.structureData = structureData
 
         super().__init__(parent=parent, mainWindow=mainWindow, obj=obj, **kwds)
 
@@ -58,7 +58,7 @@ class RestraintListPopupABC(AttributeEditorPopupABC):
                 self.obj.restraintType = self.restraintType.getText()
 
             # use the blank container as a dict for creating the new restraintList
-            self.dataSet.newRestraintList(**self.obj)
+            self.structureData.newRestraintList(**self.obj)
 
     # def _populateInitialValues(self):
     #     """Populate the initial values for an empty object

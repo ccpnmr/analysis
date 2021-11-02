@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-12 16:04:27 +0100 (Tue, October 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -73,7 +73,7 @@ from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 # from ccpn.core.ChemicalShift import ChemicalShift
-from ccpn.core.DataSet import DataSet
+from ccpn.core.StructureData import StructureData
 from ccpn.core.Data import Data
 from ccpn.core.RestraintList import RestraintList
 from ccpn.core.Note import Note
@@ -411,7 +411,7 @@ class CcpnNefWriter:
                       samples: typing.Sequence[Sample] = (),
                       substances: typing.Sequence[Substance] = (),
                       nmrChains: typing.Sequence[NmrChain] = (),
-                      dataSets: typing.Sequence[DataSet] = (),
+                      dataSets: typing.Sequence[StructureData] = (),
                       complexes: typing.Sequence[Complex] = (),
                       spectrumGroups: typing.Sequence[SpectrumGroup] = (),
                       notes: typing.Sequence[Note] = (),
@@ -669,7 +669,7 @@ class CcpnNefWriter:
         #
         return result
 
-    def exportDataSet(self, dataSet: DataSet) -> StarIo.NmrDataBlock:
+    def exportDataSet(self, dataSet: StructureData) -> StarIo.NmrDataBlock:
         """Get dataSet and all objects linked to therein as NEF object tree for export"""
 
         saveFrames = list()
@@ -837,7 +837,7 @@ class CcpnNefWriter:
         # #
         # return result
 
-    def makeNefMetaData(self, headObject: Union[Project, DataSet],
+    def makeNefMetaData(self, headObject: Union[Project, StructureData],
                         coordinateFileName: str = None) -> StarIo.NmrSaveFrame:
         """make NEF metadata saveframe from Project"""
 
@@ -1018,7 +1018,7 @@ class CcpnNefWriter:
         #
         return result
 
-    def dataSet2Nef(self, dataSets: Sequence[DataSet]) -> StarIo.NmrSaveFrame:
+    def dataSet2Nef(self, dataSets: Sequence[StructureData]) -> StarIo.NmrSaveFrame:
         """Convert DataSets to CCPN NEF saveframes"""
 
         results = []
@@ -4486,9 +4486,9 @@ class CcpnNefReader(CcpnNefContent):
         #       next three lines remove all occurrences of `n` from name
         name = re.sub(REGEXREMOVEENDQUOTES, '', name)  # substitute with ''
 
-        dataSet = self.project.getDataSet(dataSetId) if dataSetId else None
+        dataSet = self.project.getStructureData(dataSetId) if dataSetId else None
         # Make main object
-        dataSet = dataSet or self.getDataSet(dataSetSerial)
+        dataSet = dataSet or self.getStructureData(dataSetSerial)
         if dataSet is not None:
             # find the restraintList
             restraintList = dataSet.getRestraintList(name)
@@ -5947,9 +5947,9 @@ class CcpnNefReader(CcpnNefContent):
                 if not restraintList:
                     # restraintList not found in a saveframe so try and load from project
                     dataSetCode = self._frameCodeToSpectra.get(_restraintPid)
-                    _dataSet = project.getDataSet(dataSetCode)  # could be the name
-                    _dataSet = _dataSet or project.getDataSet('myDataSet_{}'.format(dataSetCode))
-                    _dataSet = _dataSet or self.getDataSet(dataSetCode)
+                    _dataSet = project.getStructureData(dataSetCode)  # could be the name
+                    _dataSet = _dataSet or project.getStructureData('myStructureData_{}'.format(dataSetCode))
+                    _dataSet = _dataSet or self.getStructureData(dataSetCode)
                     if _dataSet is not None:
                         for prefix in ['nef_distance_restraint_list',
                                        'nef_dihedral_restraint_list',
@@ -6751,7 +6751,7 @@ class CcpnNefReader(CcpnNefContent):
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        creatorFunc = project.newDataSet
+        creatorFunc = project.newStructureData
         mapping = nef2CcpnMap.get(category) or {}
 
         name = framecode[len(category) + 1:]
@@ -6789,7 +6789,7 @@ class CcpnNefReader(CcpnNefContent):
         name = framecode[len(category) + 1:]
 
         # Verify main object
-        dataSet = project.getDataSet(name)
+        dataSet = project.getStructureData(name)
         if dataSet is not None:
             self.error('ccpn_dataset - dataSet {} already exists'.format(dataSet), saveFrame, (dataSet,))
             saveFrame._rowErrors[category] = (name,)
@@ -6798,7 +6798,7 @@ class CcpnNefReader(CcpnNefContent):
 
     verifiers['ccpn_dataset'] = verify_ccpn_dataset
 
-    def load_ccpn_calculation_step(self, parent: DataSet, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame,
+    def load_ccpn_calculation_step(self, parent: StructureData, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame,
                                    name: str):
         """load dataSet.calculation_step loop"""
         # NOTE:ED - not checked yet
@@ -6813,7 +6813,7 @@ class CcpnNefReader(CcpnNefContent):
 
     importers['ccpn_calculation_step'] = load_ccpn_calculation_step
 
-    def verify_ccpn_calculation_step(self, parent: DataSet, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
+    def verify_ccpn_calculation_step(self, parent: StructureData, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
                                      name: str):
         """verify dataSet.calculation_step loop"""
         _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
@@ -6827,7 +6827,7 @@ class CcpnNefReader(CcpnNefContent):
 
     verifiers['ccpn_calculation_step'] = verify_ccpn_calculation_step
 
-    def load_ccpn_calculation_data(self, parent: DataSet, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame,
+    def load_ccpn_calculation_data(self, parent: StructureData, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame,
                                    name: str):
         """load dataSet.calculation_step loop"""
         mapping = nef2CcpnMap.get(loop.name) or {}
@@ -6841,7 +6841,7 @@ class CcpnNefReader(CcpnNefContent):
 
     importers['ccpn_calculation_data'] = load_ccpn_calculation_data
 
-    def verify_ccpn_calculation_data(self, parent: DataSet, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
+    def verify_ccpn_calculation_data(self, parent: StructureData, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
                                      name: str):
         """verify dataSet.calculation_step loop"""
         _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
@@ -7165,17 +7165,17 @@ class CcpnNefReader(CcpnNefContent):
         if serial is None and dataSetId is None:
             serial = self.defaultDataSetSerial
 
-        dataSet = self.project.getDataSet(dataSetId) if dataSetId else None
+        dataSet = self.project.getStructureData(dataSetId) if dataSetId else None
         if serial is None:
             # default not set - create one
-            dataSet = dataSet or self.project.newDataSet(dataSetId)
+            dataSet = dataSet or self.project.newStructureData(dataSetId)
             self.defaultDataSetSerial = dataSet.serial
         else:
-            dataSet = dataSet or self.getDataSet(serial)
+            dataSet = dataSet or self.getStructureData(serial)
             if dataSet is None:
-                _name = dataSetId or self._defaultName(DataSet, serial)
-                _name = DataSet._uniqueName(project=self.project, name=_name)
-                dataSet = self.project.newDataSet(name=_name, )
+                _name = dataSetId or self._defaultName(StructureData, serial)
+                _name = StructureData._uniqueName(project=self.project, name=_name)
+                dataSet = self.project.newStructureData(name=_name, )
 
             # # # take or create dataSet matching serial
             # # dataSet = dataSet or self.getDataSet(serial)
@@ -7191,7 +7191,7 @@ class CcpnNefReader(CcpnNefContent):
         self._dataSet2ItemMap[dataSet] = dataSet._getTempItemMap()
         return dataSet
 
-    def getDataSet(self, serial: int = None):
+    def getStructureData(self, serial: int = None):
         """Get the required DataSet with given serial.
         If input is None, use self.defaultDataSetSerial
         If that too is None, create a new DataSet and use its serial as the default

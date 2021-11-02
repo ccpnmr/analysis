@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-02 11:47:07 +0000 (Tue, November 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -50,7 +50,7 @@ from ccpn.ui.gui.popups.ChemicalShiftListPopup import ChemicalShiftListEditor
 from ccpn.ui.gui.popups.ComplexEditorPopup import ComplexEditorPopup
 from ccpn.ui.gui.popups.CreateChainPopup import CreateChainPopup
 from ccpn.ui.gui.popups.CreateNmrChainPopup import CreateNmrChainPopup
-from ccpn.ui.gui.popups.DataSetPopup import DataSetPopup
+from ccpn.ui.gui.popups.StructureDataPopup import StructureDataPopup
 from ccpn.ui.gui.popups.IntegralListPropertiesPopup import IntegralListPropertiesPopup
 from ccpn.ui.gui.popups.MultipletListPropertiesPopup import MultipletListPropertiesPopup
 from ccpn.ui.gui.popups.NmrAtomPopup import NmrAtomEditPopup, NmrAtomNewPopup
@@ -109,8 +109,8 @@ class CreateNewObjectABC():
         return newObj
 
 
-class _createNewDataSet(CreateNewObjectABC):
-    parentMethodName = 'newDataSet'
+class _createNewStructureData(CreateNewObjectABC):
+    parentMethodName = 'newStructureData'
 
 
 class _createNewPeakList(CreateNewObjectABC):
@@ -233,8 +233,8 @@ class _raiseComplexEditorPopup(RaisePopupABC):
     popupClass = ComplexEditorPopup
 
 
-class _raiseDataSetPopup(RaisePopupABC):
-    popupClass = DataSetPopup
+class _raiseStructureDataPopup(RaisePopupABC):
+    popupClass = StructureDataPopup
     # objectArgumentName = 'obj'
 
 
@@ -309,7 +309,7 @@ class _raiseIntegralListPopup(RaisePopupABC):
 class _raiseRestraintListEditPopup(RaisePopupABC):
     popupClass = RestraintListEditPopup
     # objectArgumentName = 'restraintList'
-    parentObjectArgumentName = 'dataSet'
+    parentObjectArgumentName = 'structureData'
 
 
 class _raiseRestraintListNewPopup(_raiseRestraintListEditPopup):
@@ -683,8 +683,8 @@ class _openItemRestraintListTable(OpenItemABC):
     objectArgumentName = 'restraintList'
 
 
-class _openItemDataSetTable(OpenItemABC):
-    objectArgumentName = 'dataSet'
+class _openItemStructureDataTable(OpenItemABC):
+    objectArgumentName = 'structureData'
     hasOpenMethod = False
 
 

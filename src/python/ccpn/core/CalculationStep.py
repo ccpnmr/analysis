@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 17:35:45 +0100 (Fri, June 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ from typing import Optional, List
 
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import CalculationStep as ApiCalculationStep
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.core.DataSet import DataSet
+from ccpn.core.StructureData import StructureData
 from ccpn.core.lib.ContextManagers import newObject
 
 
@@ -44,7 +44,7 @@ class CalculationStep(AbstractWrapperObject):
     # Attribute it necessary as subclasses must use superclass className
     className = 'CalculationStep'
 
-    _parentClass = DataSet
+    _parentClass = StructureData
 
     #: Name of plural link to instances of class
     _pluralLinkName = 'calculationSteps'
@@ -72,7 +72,7 @@ class CalculationStep(AbstractWrapperObject):
         return self._wrappedData.serial
 
     @property
-    def _parent(self) -> DataSet:
+    def _parent(self) -> StructureData:
         """DataSet containing RestraintList."""
         return self._project._data2Obj[self._wrappedData.nmrConstraintStore]
 
@@ -133,7 +133,7 @@ class CalculationStep(AbstractWrapperObject):
         self._wrappedData.outputDataUuid = value
 
     @property
-    def inputDataSet(self) -> Optional[DataSet]:
+    def inputStructureData(self) -> Optional[StructureData]:
         """Calculation input data set."""
         uuid = self._wrappedData.inputDataUuid
         apiDataSet = self._project._wrappedData.findFirstNmrConstraintStore(uuid=uuid)
@@ -142,12 +142,12 @@ class CalculationStep(AbstractWrapperObject):
         else:
             return None
 
-    @inputDataSet.setter
-    def inputDataSet(self, value: str):
+    @inputStructureData.setter
+    def inputStructureData(self, value: str):
         self._wrappedData.inputDataUuid = value if value is None else value.uuid
 
     @property
-    def outputDataSet(self) -> Optional[DataSet]:
+    def outputStructureData(self) -> Optional[StructureData]:
         """Calculation output data set."""
         uuid = self._wrappedData.outputDataUuid
         apiDataSet = self._project._wrappedData.findFirstNmrConstraintStore(uuid=uuid)
@@ -156,8 +156,8 @@ class CalculationStep(AbstractWrapperObject):
         else:
             return None
 
-    @outputDataSet.setter
-    def outputDataSet(self, value: str):
+    @outputStructureData.setter
+    def outputStructureData(self, value: str):
         self._wrappedData.outputDataUuid = value if value is None else value.uuid
 
     #=========================================================================================
@@ -165,7 +165,7 @@ class CalculationStep(AbstractWrapperObject):
     #=========================================================================================
 
     @classmethod
-    def _getAllWrappedData(cls, parent: DataSet) -> list:
+    def _getAllWrappedData(cls, parent: StructureData) -> list:
         """get wrappedData - all ConstraintList children of parent NmrConstraintStore"""
         return parent._wrappedData.sortedCalculationSteps()
 
@@ -182,21 +182,21 @@ class CalculationStep(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
-def getter(self: DataSet) -> List[CalculationStep]:
+def getter(self: StructureData) -> List[CalculationStep]:
     uuid = self.uuid
     return [x for x in self.project.calculationSteps if x.inputDataUuid == uuid]
 
 
-DataSet.outputCalculationSteps = property(getter, None, None,
+StructureData.outputCalculationSteps = property(getter, None, None,
                                           "ccpn.CalculationSteps (from other DataSets) that used DataSet as input")
 
 
-def getter(self: DataSet) -> List[CalculationStep]:
+def getter(self: StructureData) -> List[CalculationStep]:
     uuid = self.uuid
     return [x for x in self.calculationSteps if x.outputDataUuid == uuid]
 
 
-DataSet.inputCalculationSteps = property(getter, None, None,
+StructureData.inputCalculationSteps = property(getter, None, None,
                                          "ccpn.CalculationSteps (from this DataSet) that yielded DataSet as output"
                                          "\nNB there can be more than one, because the DataSet may result from\n"
                                          "multiple calculations that do not have intermediate DataSets stored")
@@ -207,11 +207,11 @@ del getter
 
 
 @newObject(CalculationStep)
-def _newCalculationStep(self: DataSet, programName: str = None, programVersion: str = None,
+def _newCalculationStep(self: StructureData, programName: str = None, programVersion: str = None,
                         scriptName: str = None, script: str = None,
                         inputDataUuid: str = None, outputDataUuid: str = None,
-                        inputDataSet: DataSet = None, outputDataSet: DataSet = None) -> CalculationStep:
-    """Create new CalculationStep within DataSet.
+                        inputStructureData: StructureData = None, outputStructureData: StructureData = None) -> CalculationStep:
+    """Create new CalculationStep within StructureData.
 
     See the CalculationStep class for details.
 
@@ -221,27 +221,27 @@ def _newCalculationStep(self: DataSet, programName: str = None, programVersion: 
     :param script:
     :param inputDataUuid:
     :param outputDataUuid:
-    :param inputDataSet:
-    :param outputDataSet:
+    :param inputStructureData:
+    :param outputStructureData:
     :return: a new CalculationStep instance.
     """
 
     project = self.project
     programName = programName or project.application.applicationName
 
-    if inputDataSet is not None:
+    if inputStructureData is not None:
         if inputDataUuid is None:
-            inputDataUuid = inputDataSet.uuid
+            inputDataUuid = inputStructureData.uuid
         else:
-            raise ValueError("Either inputDataSet or inputDataUuid must be None - values were %s and %s"
-                             % (inputDataSet, inputDataUuid))
+            raise ValueError("Either inputStructureData or inputDataUuid must be None - values were %s and %s"
+                             % (inputStructureData, inputDataUuid))
 
-    if outputDataSet is not None:
+    if outputStructureData is not None:
         if outputDataUuid is None:
-            outputDataUuid = outputDataSet.uuid
+            outputDataUuid = outputStructureData.uuid
         else:
-            raise ValueError("Either outputDataSet or inputDataUuid must be None - values were %s and %s"
-                             % (outputDataSet, outputDataUuid))
+            raise ValueError("Either outputStructureData or inputDataUuid must be None - values were %s and %s"
+                             % (outputStructureData, outputDataUuid))
 
     obj = self._wrappedData.newCalculationStep(programName=programName, programVersion=programVersion,
                                                scriptName=scriptName, script=script,

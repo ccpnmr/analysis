@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-29 21:10:24 +0100 (Thu, July 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -54,7 +54,7 @@ def getCcpnNefParameter(project: 'Project', dataSet, serial, name, parameterName
     """
     try:
         # get the correct parameters from the dataSet
-        dSet = project.getDataSet(dataSet)
+        dSet = project.getStructureData(dataSet)
         if dSet and dSet.serial != serial:        
             getLogger().debug(f'dataSet serials do not match: {dSet.serial} != {serial}')
         
@@ -89,7 +89,7 @@ def setCcpnNefParameter(project: 'Project', dataSet, serial, name, parameterName
         raise ValueError(f'name {repr(name)} must be a string')
 
     # get the required dataSet
-    dSet = project.getDataSet(dataSet) or project.newDataSet(dataSet)
+    dSet = project.getStructureData(dataSet) or project.newStructureData(dataSet)
     if not dSet:
         raise RuntimeError(f'Error creating dataSet {repr(dataSet)}')
 

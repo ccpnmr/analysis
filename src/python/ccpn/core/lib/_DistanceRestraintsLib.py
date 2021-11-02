@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-29 18:30:39 +0100 (Fri, October 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -33,7 +33,7 @@ from math import sqrt
 import numpy as np
 from collections import defaultdict
 from ccpn.util.Logging import getLogger
-from ccpn.core.DataSet import DataSet
+from ccpn.core.StructureData import StructureData
 from ccpn.core.RestraintList import RestraintList
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking, undoBlockWithoutSideBar
 from ccpn.util.isotopes import name2IsotopeCode
@@ -2141,17 +2141,17 @@ def _getRestraintsMapping(constraintSet, molSystem=None):
 ############################## V3 #########################################
 ###########################################################################
 
-def _newDataSet(project, name=None, **kwargs):
-    name = name or 'my%s'%DataSet.className
-    name = DataSet._uniqueName(project=project, name=name)
-    ds = project.newDataSet(name=name, **kwargs)
+def _newStructureData(project, name=None, **kwargs):
+    name = name or 'my%s' % StructureData.className
+    name = StructureData._uniqueName(project=project, name=name)
+    ds = project.newStructureData(name=name, **kwargs)
     return ds
 
 def _newDistanceRestraintList(project, dataset=None, name=None):
     name  = name or 'my%s'%RestraintList.className
     name = RestraintList._uniqueName(project=project, name=name)
     if not dataset:
-        dataset = _newDataSet(project, name=name)
+        dataset = _newStructureData(project, name=name)
     return dataset.newRestraintList(restraintType='Distance', name=name)
 
 def _newV3DistanceRestraint(v3PeakList,

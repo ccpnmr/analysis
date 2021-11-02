@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-29 17:03:23 +0100 (Fri, October 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1782,16 +1782,16 @@ class Project(AbstractWrapperObject):
         return _fetchSample(self, name)
 
     @logCommand('project.')
-    def newDataSet(self, name: str = None, title: str = None, programName: str = None, programVersion: str = None,
-                   dataPath: str = None, creationDate: datetime = None, uuid: str = None,
-                   comment: str = None, **kwds):
-        """Create new DataSet
+    def newStructureData(self, name: str = None, title: str = None, programName: str = None, programVersion: str = None,
+                         dataPath: str = None, creationDate: datetime = None, uuid: str = None,
+                         comment: str = None, **kwds):
+        """Create new StructureData
 
-        See the DataSet class for details.
+        See the StructureData class for details.
 
-        Optional keyword arguments can be passed in; see DataSet._newDataSet for details.
+        Optional keyword arguments can be passed in; see StructureData._newStructureData for details.
 
-        :param title: deprecated - original name for dataSet, please use .name
+        :param title: deprecated - original name for StructureData, please use .name
         :param name:
         :param programName:
         :param programVersion:
@@ -1799,12 +1799,12 @@ class Project(AbstractWrapperObject):
         :param creationDate:
         :param uuid:
         :param comment:
-        :return: a new DataSet instance.
+        :return: a new StructureData instance.
         """
-        from ccpn.core.DataSet import _newDataSet
+        from ccpn.core.StructureData import _newStructureData
 
-        return _newDataSet(self, name=name, title=title, programName=programName, programVersion=programVersion,
-                           dataPath=dataPath, creationDate=creationDate, uuid=uuid, comment=comment, **kwds)
+        return _newStructureData(self, name=name, title=title, programName=programName, programVersion=programVersion,
+                                 dataPath=dataPath, creationDate=creationDate, uuid=uuid, comment=comment, **kwds)
 
     @logCommand('project.')
     def newSpectrumGroup(self, name: str, spectra=(), **kwds):

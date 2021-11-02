@@ -298,7 +298,7 @@ _coreImportOrder = (
     'IntegralList', 'Integral', 'PseudoDimension', 'SpectrumHit', 'Sample', 'SampleComponent',
     'Substance', 'Chain', 'Residue', 'Atom', 'Complex', 'NmrChain', 'NmrResidue', 'NmrAtom',
     'ChemicalShiftList', '_OldChemicalShift',
-    'DataSet', 'RestraintList', 'Restraint',
+    'StructureData', 'RestraintList', 'Restraint',
     'RestraintContribution', 'CalculationStep', 'Data', 'StructureEnsemble', 'Model', 'Note',
     'PeakCluster', 'MultipletList', 'Multiplet', 'DataTable', 'Collection'
     )

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:19:59 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -33,7 +33,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import Data as ApiData
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import Parameter as ApiParameter
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
-from ccpn.core.DataSet import DataSet
+from ccpn.core.StructureData import StructureData
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
 
@@ -47,7 +47,7 @@ class Data(AbstractWrapperObject):
     # Attribute it necessary as subclasses must use superclass className
     className = 'Data'
 
-    _parentClass = DataSet
+    _parentClass = StructureData
 
     #: Name of plural link to instances of class
     _pluralLinkName = 'data'
@@ -84,7 +84,7 @@ class Data(AbstractWrapperObject):
         self.rename(value)
 
     @property
-    def _parent(self) -> DataSet:
+    def _parent(self) -> StructureData:
         """DataSet containing Data."""
         return self._project._data2Obj[self._wrappedData.nmrConstraintStore]
 
@@ -168,7 +168,7 @@ class Data(AbstractWrapperObject):
     #=========================================================================================
 
     @classmethod
-    def _getAllWrappedData(cls, parent: DataSet) -> list:
+    def _getAllWrappedData(cls, parent: StructureData) -> list:
         """get wrappedData - all Data children of parent NmrConstraintStore"""
         return parent._wrappedData.sortedData()
 
@@ -202,16 +202,16 @@ class Data(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(Data)
-def _newData(self: DataSet, name: str, attachedObjectPid: str = None,
+def _newData(self: StructureData, name: str, attachedObjectPid: str = None,
              attachedObject: AbstractWrapperObject = None) -> Data:
-    """Create new Data within DataSet.
+    """Create new Data within StructureData.
 
     See the Data class for details.
 
     :param name:
     :param attachedObjectPid:
     :param attachedObject:
-    :return: a new DataSet instance.
+    :return: a new Data instance.
     """
 
     project = self.project

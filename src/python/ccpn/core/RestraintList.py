@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-16 19:06:53 +0100 (Thu, September 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ from typing import Sequence, Union
 from ccpn.core.lib import Pid
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
-from ccpn.core.DataSet import DataSet
+from ccpn.core.StructureData import StructureData
 from ccpnmodel.ccpncore.lib import Constants as coreConstants
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraintList as ApiAbstractConstraintList
 from ccpn.util.Tensor import Tensor
@@ -52,7 +52,7 @@ class RestraintList(AbstractWrapperObject):
     # Attribute it necessary as subclasses must use superclass className
     className = 'RestraintList'
 
-    _parentClass = DataSet
+    _parentClass = StructureData
 
     #: Name of plural link to instances of class
     _pluralLinkName = 'restraintLists'
@@ -129,8 +129,8 @@ class RestraintList(AbstractWrapperObject):
         return self._wrappedData.serial
 
     @property
-    def _parent(self) -> DataSet:
-        """DataSet containing RestraintList."""
+    def _parent(self) -> StructureData:
+        """StructureData containing RestraintList."""
         return self._project._data2Obj[self._wrappedData.nmrConstraintStore]
 
     dataSet = _parent
@@ -264,7 +264,7 @@ class RestraintList(AbstractWrapperObject):
     #=========================================================================================
 
     @classmethod
-    def _getAllWrappedData(cls, parent: DataSet) -> list:
+    def _getAllWrappedData(cls, parent: StructureData) -> list:
         """get wrappedData - all ConstraintList children of parent NmrConstraintStore"""
         return parent._wrappedData.sortedConstraintLists()
 
@@ -366,13 +366,13 @@ class RestraintList(AbstractWrapperObject):
 #=========================================================================================
 
 @newObject(RestraintList)
-def _newRestraintList(self: DataSet, restraintType, name: str = None, origin: str = None,
+def _newRestraintList(self: StructureData, restraintType, name: str = None, origin: str = None,
                       comment: str = None, unit: str = None, potentialType: str = 'unknown',
                       tensorMagnitude: float = 0.0, tensorRhombicity: float = 0.0,
                       tensorIsotropicValue: float = 0.0, tensorChainCode: str = None,
                       tensorSequenceCode: str = None, tensorResidueType: str = None,
                       restraintItemLength=None, **kwargs) -> RestraintList:
-    """Create new RestraintList of type restraintType within DataSet.
+    """Create new RestraintList of type restraintType within StructureData.
 
     See the RestraintList class for details.
 

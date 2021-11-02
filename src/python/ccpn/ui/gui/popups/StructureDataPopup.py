@@ -4,8 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:53 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-11-02 18:40:29 +0000 (Tue, November 02, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,16 +26,16 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.core.DataSet import DataSet
+from ccpn.core.StructureData import StructureData
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget
 
 
-class DataSetPopup(AttributeEditorPopupABC):
-    """DataSet attributes editor popup
+class StructureDataPopup(AttributeEditorPopupABC):
+    """StructureData attributes editor popup
     """
 
-    klass = DataSet
+    klass = StructureData
     attributes = [('Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
                   ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
                   ('Program Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
@@ -44,20 +45,20 @@ class DataSetPopup(AttributeEditorPopupABC):
                   ]
 
     def _applyAllChanges(self, changes):
-        """Apply all changes - add new dataSet
+        """Apply all changes - add new StructureData
         """
         super()._applyAllChanges(changes)
         if not self.EDITMODE:
 
-            # keep in-case we change dataSet to 'name'
+            # keep in-case we change structureData to 'name'
             # if 'name' in self.obj:
-            #     # dataSet needs title attribute instead of name
+            #     # structureData needs title attribute instead of name
             #     _name = self.obj.name
             #     del self.obj['name']
             #     self.obj.title = _name
 
-            # create the new restraintList from the dataSet
-            self.project.newDataSet(**self.obj)
+            # create the new restraintList from StructureData
+            self.project.newStructureData(**self.obj)
 
     # def _populateInitialValues(self):
     #     """Populate the initial values for an empty object

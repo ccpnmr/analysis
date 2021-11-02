@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:25:08 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -51,7 +51,7 @@ class DataSetTest(WrapperTesting):
             'uuid'          : 'blah',
             'comment'       : 'why?'
             }
-        dataSet = self.project.newDataSet(**dd)
+        dataSet = self.project.newStructureData(**dd)
         undo.undo()
         undo.redo()
         for key, val in sorted(dd.items()):
@@ -63,16 +63,16 @@ class CalculationStepTest(WrapperTesting):
     projectPath = None
 
     def test_simple_creation(self):
-        dataSet = self.project.newDataSet()
+        dataSet = self.project.newStructureData()
         step1 = dataSet.newCalculationStep(programName='CcpNmr')
         self.assertEqual(step1.programName, 'CcpNmr')
 
     def test_complex_creation(self):
         undo = self.project._undo
         self.project.newUndoPoint()
-        dataSet = self.project.newDataSet()
-        dataSet2 = self.project.newDataSet(uuid='dataSet2-12345')
-        dataSet3 = self.project.newDataSet(uuid='dataSet3-67890')
+        dataSet = self.project.newStructureData()
+        dataSet2 = self.project.newStructureData(uuid='dataSet2-12345')
+        dataSet3 = self.project.newStructureData(uuid='dataSet3-67890')
         dd = {
             'programName'   : 'aaa.aaa',
             'programVersion': 'bbb.bbb',
@@ -84,16 +84,16 @@ class CalculationStepTest(WrapperTesting):
         step1 = dataSet.newCalculationStep(**dd)
         for key, val in sorted(dd.items()):
             self.assertEqual(getattr(step1, key), val)
-        self.assertEqual(step1.inputDataSet, dataSet2)
-        self.assertEqual(step1.outputDataSet, dataSet3)
+        self.assertEqual(step1.inputStructureData, dataSet2)
+        self.assertEqual(step1.outputStructureData, dataSet3)
         self.assertEqual(dataSet2.outputCalculationSteps, [step1])
         self.assertEqual(dataSet3.inputCalculationSteps, [])
         undo.undo()
         undo.redo()
         for key, val in sorted(dd.items()):
             self.assertEqual(getattr(step1, key), val)
-        self.assertEqual(step1.inputDataSet, dataSet2)
-        self.assertEqual(step1.outputDataSet, dataSet3)
+        self.assertEqual(step1.inputStructureData, dataSet2)
+        self.assertEqual(step1.outputStructureData, dataSet3)
         self.assertEqual(dataSet2.outputCalculationSteps, [step1])
         # NB inputCalculationSteps MUST be part of the data set itself, hence this shoudl be empty
         self.assertEqual(dataSet3.inputCalculationSteps, [])
@@ -101,24 +101,24 @@ class CalculationStepTest(WrapperTesting):
     def test_link_setting(self):
         undo = self.project._undo
         self.project.newUndoPoint()
-        dataSet = self.project.newDataSet(uuid='dataSet-1')
-        dataSet2 = self.project.newDataSet(uuid='dataSet-2')
-        dataSet3 = self.project.newDataSet(uuid='dataSet-3')
+        dataSet = self.project.newStructureData(uuid='dataSet-1')
+        dataSet2 = self.project.newStructureData(uuid='dataSet-2')
+        dataSet3 = self.project.newStructureData(uuid='dataSet-3')
         step1 = dataSet.newCalculationStep()
-        step1.inputDataSet = dataSet2
+        step1.inputStructureData = dataSet2
         self.assertEqual(step1.inputDataUuid, dataSet2.uuid)
-        step1.inputDataSet = dataSet3
+        step1.inputStructureData = dataSet3
         self.assertEqual(step1.inputDataUuid, dataSet3.uuid)
-        step1.inputDataSet = None
+        step1.inputStructureData = None
         undo.undo()
         undo.redo()
         self.assertEqual(step1.inputDataUuid, None)
 
     def test_uuid_error(self):
-        dataSet = self.project.newDataSet(uuid='dataSet-13579')
-        dataSet2 = self.project.newDataSet(uuid='daytaSet2-24680')
+        dataSet = self.project.newStructureData(uuid='dataSet-13579')
+        dataSet2 = self.project.newStructureData(uuid='daytaSet2-24680')
         with self.assertRaises(ValueError):
-            dataSet.newCalculationStep(inputDataUuid=dataSet2.uuid, inputDataSet=dataSet2)
+            dataSet.newCalculationStep(inputDataUuid=dataSet2.uuid, inputStructureData=dataSet2)
 
 
 class DataTest(WrapperTesting):
@@ -128,7 +128,7 @@ class DataTest(WrapperTesting):
     def test_create_data(self):
         undo = self.project._undo
         self.project.newUndoPoint()
-        dataSet = self.project.newDataSet()
+        dataSet = self.project.newStructureData()
         data1 = dataSet.newData(name='try1', attachedObjectPid='blah')
         undo.undo()
         undo.redo()
@@ -139,7 +139,7 @@ class DataTest(WrapperTesting):
     def test_data_object_link(self):
         undo = self.project._undo
         self.project.newUndoPoint()
-        dataSet = self.project.newDataSet()
+        dataSet = self.project.newStructureData()
         data1 = dataSet.newData(name='try1', attachedObjectPid=dataSet.pid)
         self.assertEqual(data1.attachedObject, dataSet)
 
@@ -160,7 +160,7 @@ class DataTest(WrapperTesting):
             ]:
             testpars[key] = val
 
-        dataSet = self.project.newDataSet()
+        dataSet = self.project.newStructureData()
         data1 = dataSet.newData(name='try1', attachedObjectPid=dataSet.pid)
         undo = self.project._undo
         self.project.newUndoPoint()
@@ -181,14 +181,14 @@ class DataTest(WrapperTesting):
         data1.clearParameters()
         self.assertEqual(data1.parameters, {})
 
-        self.assertEqual(data1.pid, 'DA:myDataSet.try1')
+        self.assertEqual(data1.pid, 'DA:myStructureData.try1')
         data1.rename('different')
         undo.undo()
         undo.redo()
-        self.assertEqual(data1.pid, 'DA:myDataSet.different')
+        self.assertEqual(data1.pid, 'DA:myStructureData.different')
 
     def test_numpy_parameter(self):
-        dataSet = self.project.newDataSet()
+        dataSet = self.project.newStructureData()
         data1 = dataSet.newData(name='try1', attachedObjectPid=dataSet.pid)
         undo = self.project._undo
         self.project.newUndoPoint()
@@ -198,7 +198,7 @@ class DataTest(WrapperTesting):
         self.assertTrue(isinstance(data1.parameters['ndarray'], numpy.ndarray))
 
     def test_tensor_parameter(self):
-        dataSet = self.project.newDataSet()
+        dataSet = self.project.newStructureData()
         data1 = dataSet.newData(name='try1', attachedObjectPid=dataSet.pid)
         undo = self.project._undo
         self.project.newUndoPoint()
@@ -216,7 +216,7 @@ class DataTest(WrapperTesting):
         """
         Test that a Pandas Dataframe can be stored as a Dataset parameter
         """
-        dataSet = self.project.newDataSet()
+        dataSet = self.project.newStructureData()
         data1 = dataSet.newData(name='Pandas', attachedObjectPid=dataSet.pid)
         self.assertEqual(data1.attachedObject, dataSet)
         undo = self.project._undo
@@ -234,7 +234,7 @@ class DataTest(WrapperTesting):
         """
         Test that an EnsembleData can be stored as a Dataset parameter
         """
-        dataSet = self.project.newDataSet()
+        dataSet = self.project.newStructureData()
         data1 = dataSet.newData(name='EnsembleData', attachedObjectPid=dataSet.pid)
         self.assertEqual(data1.attachedObject, dataSet)
         undo = self.project._undo

@@ -86,7 +86,7 @@ print(dataFrame)
 shifts = calculateChemicalShift(dataFrame)
 # getChemicalShifts(shifts)
 
-ds = project.newDataSet(title='name')
+ds = project.newStructureData(title='name')
 ds.newData(ds.title)
 
 for n, i in sorted(shifts.items()):

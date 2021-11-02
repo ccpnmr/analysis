@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-29 17:03:23 +0100 (Fri, October 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-02 18:40:29 +0000 (Tue, November 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -421,12 +421,12 @@ class DataPulldown(_PulldownABC):
     _currentAttributeName = None
 
 
-class DataSetPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for DataSets
+class StructureDataPulldown(_PulldownABC):
+    """A PulldownListCompoundWidget class for StructureData
     """
-    from ccpn.core.DataSet import DataSet
+    from ccpn.core.StructureData import StructureData
 
-    _klass, _className, _shortClassName, _attributeName = _definedBy(DataSet)
+    _klass, _className, _shortClassName, _attributeName = _definedBy(StructureData)
     _currentAttributeName = None
 
 

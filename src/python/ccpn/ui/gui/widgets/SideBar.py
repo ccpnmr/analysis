@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-29 17:03:23 +0100 (Fri, October 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-02 18:40:29 +0000 (Tue, November 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -63,7 +63,7 @@ from ccpn.core.Atom import Atom
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.Complex import Complex
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
-from ccpn.core.DataSet import DataSet
+from ccpn.core.StructureData import StructureData
 from ccpn.core.Restraint import RestraintList
 from ccpn.core.Note import Note
 from ccpn.core.DataTable import DataTable
@@ -89,10 +89,10 @@ from ccpn.ui.gui.guiSettings import getColours, LABEL_FOREGROUND
 # from PyQt5.QtCore import QStringListModel
 # from PyQt5.QtGui import QListView, QAbstractItemView
 
-from ccpn.ui.gui.lib.MenuActions import _createNewDataSet, _createNewPeakList, _createNewChemicalShiftList, _createNewMultipletList, _createNewNmrResidue, \
+from ccpn.ui.gui.lib.MenuActions import _createNewStructureData, _createNewPeakList, _createNewChemicalShiftList, _createNewMultipletList, _createNewNmrResidue, \
     _createNewNmrAtom, _createNewComplex, _createNewRestraintList, _createNewSampleComponent, _createNewSubstance, \
     _createNewNote, _createNewIntegralList, _createNewSample, _createNewStructureEnsemble, _raiseNewChainPopup, _raiseChainPopup, _raiseComplexEditorPopup, \
-    _raiseDataSetPopup, _raiseChemicalShiftListPopup, _raisePeakListPopup, _raiseMultipletListPopup, _raiseCreateNmrChainPopup, _raiseNmrChainPopup, \
+    _raiseStructureDataPopup, _raiseChemicalShiftListPopup, _raisePeakListPopup, _raiseMultipletListPopup, _raiseCreateNmrChainPopup, _raiseNmrChainPopup, \
     _raiseNmrResiduePopup, _raiseNmrResidueNewPopup, _raiseNmrAtomPopup, _raiseNmrAtomNewPopup, _raiseNotePopup, _raiseIntegralListPopup, \
     _raiseRestraintListEditPopup, _raiseRestraintListNewPopup, _raiseSamplePopup, _raiseAtomNewPopup, _raiseAtomPopup, \
     _raiseSampleComponentPopup, _raiseSpectrumPopup, _raiseSpectrumGroupEditorPopup, _raiseStructureEnsemblePopup, \
@@ -101,7 +101,7 @@ from ccpn.ui.gui.lib.MenuActions import _createNewDataSet, _createNewPeakList, _
 from ccpn.ui.gui.lib.MenuActions import _openItemNoteTable, _openItemChemicalShiftListTable, \
     _openItemIntegralListTable, _openItemMultipletListTable, _openItemNmrChainTable, \
     _openItemPeakListTable, _openItemChainTable, _openItemRestraintListTable, \
-    _openItemSpectrumGroupDisplay, _openItemStructureEnsembleTable, _openItemDataSetTable, \
+    _openItemSpectrumGroupDisplay, _openItemStructureEnsembleTable, _openItemStructureDataTable, \
     _openItemSpectrumDisplay, _openItemSampleDisplay, _openItemComplexTable, _openItemResidueTable, \
     _openItemSubstanceTable, _openItemSampleComponentTable, _openItemNmrResidueItem, _openItemNmrAtomItem, \
     _openItemSpectrumInGroupDisplay, _openItemAtomItem, _openItemDataTable, _openItemCollectionModule
@@ -925,16 +925,16 @@ class SideBarStructure(object):
                                   menuAction=_openItemStructureEnsembleTable(position='bottom', relativeTo=None), isDraggable=True),
                 ]),
 
-            #------ DataSets ------
-            SidebarTree('DataSets', closed=True, children=[
-                SidebarItem('<New DataSet>', callback=_raiseDataSetPopup(editMode=False, useNone=True)),
+            #------ StructureData ------
+            SidebarTree('StructureData', closed=True, children=[
+                SidebarItem('<New StructureData>', callback=_raiseStructureDataPopup(editMode=False, useNone=True)),
 
-                SidebarClassTreeItems(klass=DataSet, rebuildOnRename='DataSet-ClassTreeItems',
-                                      callback=_raiseDataSetPopup(),
-                                      menuAction=_openItemDataSetTable(position='left', relativeTo=None), isDraggable=True, children=[
+                SidebarClassTreeItems(klass=StructureData, rebuildOnRename='StructureData-ClassTreeItems',
+                                      callback=_raiseStructureDataPopup(),
+                                      menuAction=_openItemStructureDataTable(position='left', relativeTo=None), isDraggable=True, children=[
                         SidebarItem('<New RestraintList>', callback=_raiseRestraintListNewPopup(editMode=False, useNone=False, useParent=True)),
 
-                        SidebarClassTreeItems(klass=RestraintList, rebuildOnRename='DataSet-ClassTreeItems',
+                        SidebarClassTreeItems(klass=RestraintList, rebuildOnRename='StructureData-ClassTreeItems',
                                               callback=_raiseRestraintListEditPopup(),
                                               menuAction=_openItemRestraintListTable(position='left', relativeTo=None), isDraggable=True),
                         ]),

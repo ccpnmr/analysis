@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-02 11:47:06 +0000 (Tue, November 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-02 18:39:23 +0000 (Tue, November 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -107,9 +107,16 @@ class DataTable(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def data(self, value: TableFrame):
+        """Set the data for the dataTable, must be of type TableFrame or None.
+        None will create a new empty dataFrame
+        """
         if not isinstance(value, (TableFrame, type(None))):
-            raise RuntimeError(f'data not of type {TableFrame.__class__.__name__}')
-        self._wrappedData.data = value
+            raise RuntimeError(f'data not of type {TableFrame} or None')
+
+        if value is None:
+            self._wrappedData.data = TableFrame()
+        else:
+            self._wrappedData.data = value
 
     @property
     def metadata(self) -> dict:
@@ -184,6 +191,20 @@ class DataTable(AbstractWrapperObject):
         """Rename DataTable, changing its name and Pid."""
         return self._rename(value)
 
+    @classmethod
+    def _restoreObject(cls, project, apiObj):
+        """Restore the object and update ccpnInternalData as required
+        """
+        result = super()._restoreObject(project, apiObj)
+
+        _data = result._wrappedData.data
+        if not isinstance(_data, TableFrame):
+            # make sure that data is the correct type
+            getLogger().debug(f'_restoreObject {result.pid}: data not of type {TableFrame} - resetting')
+            result._wrappedData.data = TableFrame()
+
+        return result
+
     #=========================================================================================
     # CCPN functions
     #=========================================================================================
@@ -204,13 +225,16 @@ def _newDataTable(self: Project, name: str = None, data: Optional[TableFrame] = 
 
     See the DataTable class for details.
 
+    data must be of type TableFrame or None.
+    If data is None, an empty dataFrame wll be created.
+
     :param name: name of the dataTable
-    :param data: a Pandas DataFrame instance
+    :param data: a Pandas DataFrame instance or None
     :param comment: optional comment string
     :return: a new DataTable instance.
     """
     if not isinstance(data, (TableFrame, type(None))):
-        raise RuntimeError(f'Unable to generate new DataTable: data not of type {TableFrame.__class__.__name__}')
+        raise RuntimeError(f'Unable to generate new DataTable: data not of type {TableFrame}')
 
     name = DataTable._uniqueName(project=self, name=name)
 
@@ -222,6 +246,7 @@ def _newDataTable(self: Project, name: str = None, data: Optional[TableFrame] = 
         raise RuntimeError('Unable to generate new DataTable item')
 
     if data is None:
+        # create new, empty dataFrame
         result._wrappedData.data = TableFrame()
     else:
         # insert the subclassed pandas dataFrame

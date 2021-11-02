@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-29 17:03:23 +0100 (Fri, October 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-02 11:51:19 +0000 (Tue, November 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1499,7 +1499,7 @@ class Framework(NotifierBase):
             ("Check for Updates...", self.showUpdatePopup),
             ("Register...", self.showRegisterPopup),
             (),
-            ("Submit Feedback...", self.showFeedbackPopup),
+            # ("Submit Feedback...", self.showFeedbackPopup),
             # ("Submit Macro...", self.showSubmitMacroPopup)
             (),
             ("About CcpNmr V3...", self.showAboutPopup),

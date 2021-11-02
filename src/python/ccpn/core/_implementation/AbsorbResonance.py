@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-03 17:21:34 +0100 (Fri, September 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-02 15:29:59 +0000 (Tue, November 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -32,11 +32,23 @@ from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.util.Logging import getLogger
 
 
-def _recalculateShifts(project, selfApi):
-    # Must be after resonance merge, so that links to peaks are properly set
-    for shiftA in selfApi.shifts:
-        shiftA.recalculateValue()
-        project._data2Obj[shiftA]._refreshPid()
+# def _recalculateShifts(project, selfApi):
+#     # Must be after resonance merge, so that links to peaks are properly set
+#     for shiftA in selfApi.shifts:
+#         shiftA.recalculateValue()
+#         project._data2Obj[shiftA]._refreshPid()
+
+
+def _recalculateChemShifts(nmrAtoms, peaks, shifts):
+    # update the assigned nmrAtom chemical shift values - notify the nmrResidues and chemicalShifts
+    for sh in shifts:
+        sh._recalculateShiftValue()
+    for nmr in nmrAtoms:
+        nmr._finaliseAction('change')
+    for pk in peaks:
+        pk._finaliseAction('change')
+    for sh in shifts:
+        sh._finaliseAction('change')
 
 
 def absorbResonance(self: 'NmrAtom', nmrAtom) -> 'NmrAtom':
@@ -81,23 +93,14 @@ def absorbResonance(self: 'NmrAtom', nmrAtom) -> 'NmrAtom':
                                 'Attempt to merge nmrAtoms with different isotope codes')
             return
 
-    # from ccpn.core.NmrAtom import ASSIGNEDPEAKSCHANGED
-
-    _changedAssigned = tuple(set(self.assignedPeaks) | set(nmrAtom.assignedPeaks))
+    shifts = list(set(cs for nmrAt in [self, nmrAtom] for cs in nmrAt.chemicalShifts))
+    pks = list(set(pk for pk in nmrAtom.assignedPeaks))
 
     with undoStackBlocking() as addUndoItem:
         # recalculate shifts in undo stack
-
-        # NOTE:ED - make explicit _finaliseAction on peaks - not in nmrAtom
-
-        addUndoItem(undo=partial(nmrAtom._finaliseAction, 'change'))
-        # addUndoItem(undo=partial(setattr, nmrAtom, ASSIGNEDPEAKSCHANGED, _changedAssigned))
-        addUndoItem(undo=partial(self._finaliseAction, 'change'))
-        # addUndoItem(undo=partial(_recalculateShifts, project, selfApi))
-        # addUndoItem(undo=partial(_recalculateShifts, project, resonanceB))
+        addUndoItem(undo=partial(_recalculateChemShifts, [self, nmrAtom], pks, shifts))
 
     # attributes where we have object.resonance
-    # NB Shifts are handled separately below
     controlData = {'findFirstMeasurement'   : ('shiftDifferences', 'hExchRates',
                                                'hExchProtections', 'shiftAnisotropies',
                                                't1s', 't1Rhos', 't2s'),
@@ -134,22 +137,6 @@ def absorbResonance(self: 'NmrAtom', nmrAtom) -> 'NmrAtom':
                 if objectB is not None:
                     mergeObjects(project, objectB, objectA, _useV3Delete=True)
 
-    # # merge shifts in the same shiftlist
-    # # NB must be done after other measurements
-    # for shiftA in selfApi.shifts:
-    #     for shiftB in resonanceB.shifts:
-    #         if shiftA.parentList is shiftB.parentList:
-    #             # average the shift, but take the maximum figureOfMerit and error
-    #             _value = ((shiftA.value + shiftB.value) / 2.0) #if None not in (shiftA.value, shiftB.value) else None
-    #             _figOfMerit = max(shiftA.figOfMerit, shiftB.figOfMerit) #if None not in (shiftA.figOfMerit, shiftB.figOfMerit) else None
-    #             _error = max(shiftA.error, shiftB.error) #if None not in (shiftA.error, shiftB.error) else None
-    #             shiftA = mergeObjects(project, shiftB, shiftA, _useV3Delete=True)
-    #             shiftA.value = _value
-    #             shiftA.figOfMerit = _figOfMerit
-    #             shiftA.error = _error
-
-    # need v3 shifts merge here
-
     # Get rid of duplicate appData
     for appData in selfApi.applicationData:
         matchAppData = resonanceB.findFirstApplicationData(application=appData.application,
@@ -158,16 +145,13 @@ def absorbResonance(self: 'NmrAtom', nmrAtom) -> 'NmrAtom':
             resonanceB.removeApplicationData(matchAppData)
             # NOTE:ED - need undo/redo here?
 
-    # setattr(self, ASSIGNEDPEAKSCHANGED, _changedAssigned)
     mergeObjects(project, resonanceB, selfApi, _useV3Delete=True, )  #_mergeFunc=_mergeResonances)
 
     # Must be after resonance merge, so that links to peaks are properly set
-    _recalculateShifts(project, selfApi)
+    _recalculateChemShifts([self], pks, shifts)
 
     with undoStackBlocking() as addUndoItem:
         # recalculate shifts in undo stack
-        # addUndoItem(redo=partial(_recalculateShifts, project, selfApi))
-        # addUndoItem(redo=partial(setattr, self, ASSIGNEDPEAKSCHANGED, _changedAssigned))
-        addUndoItem(redo=partial(self._finaliseAction, 'change'))
+        addUndoItem(redo=partial(_recalculateChemShifts, [self], pks, shifts))
 
     return self

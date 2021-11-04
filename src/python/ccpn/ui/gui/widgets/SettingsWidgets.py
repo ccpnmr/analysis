@@ -55,6 +55,7 @@ from ccpn.util.Common import getAxisCodeMatchIndices, ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.Base import SignalBlocking
 from ccpn.core.Chain import Chain
 from ccpn.core.RestraintList import RestraintList
+from ccpn.core.DataSet import DataSet
 
 
 ALL = '<all>'
@@ -1504,6 +1505,9 @@ class ChainSelectionWidget(ObjectSelectionWidget):
 class RestraintListSelectionWidget(ObjectSelectionWidget):
     KLASS = RestraintList
 
+
+class DatasetSelectionWidget(ObjectSelectionWidget):
+    KLASS = DataSet
 
 if __name__ == '__main__':
     import os

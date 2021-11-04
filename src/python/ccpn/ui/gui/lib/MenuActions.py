@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:14:00 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,7 @@ from ccpn.core.IntegralList import IntegralList
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.Chain import Chain
 from ccpn.core.StructureEnsemble import StructureEnsemble
-from ccpn.core.RestraintList import RestraintList
+from ccpn.core.RestraintTable import RestraintTable
 from ccpn.core.DataTable import DataTable
 from ccpn.core.Collection import Collection
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
@@ -59,7 +59,7 @@ from ccpn.ui.gui.popups.AtomPopup import AtomNewPopup, AtomEditPopup
 from ccpn.ui.gui.popups.NmrResiduePopup import NmrResidueEditPopup, NmrResidueNewPopup
 from ccpn.ui.gui.popups.NotesPopup import NotesPopup
 from ccpn.ui.gui.popups.PeakListPropertiesPopup import PeakListPropertiesPopup
-from ccpn.ui.gui.popups.RestraintListPopup import RestraintListEditPopup, RestraintListNewPopup
+from ccpn.ui.gui.popups.RestraintTablePopup import RestraintTableEditPopup, RestraintTableNewPopup
 from ccpn.ui.gui.popups.SampleComponentPropertiesPopup import SampleComponentPopup
 from ccpn.ui.gui.popups.SamplePropertiesPopup import SamplePropertiesPopup
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
@@ -137,8 +137,8 @@ class _createNewComplex(CreateNewObjectABC):
     parentMethodName = 'newComplex'
 
 
-class _createNewRestraintList(CreateNewObjectABC):
-    parentMethodName = 'newRestraintList'
+class _createNewRestraintTable(CreateNewObjectABC):
+    parentMethodName = 'newRestraintTable'
 
 
 class _createNewNote(CreateNewObjectABC):
@@ -306,14 +306,14 @@ class _raiseIntegralListPopup(RaisePopupABC):
     parentObjectArgumentName = 'spectrum'
 
 
-class _raiseRestraintListEditPopup(RaisePopupABC):
-    popupClass = RestraintListEditPopup
-    # objectArgumentName = 'restraintList'
+class _raiseRestraintTableEditPopup(RaisePopupABC):
+    popupClass = RestraintTableEditPopup
+    # objectArgumentName = 'restraintTable'
     parentObjectArgumentName = 'structureData'
 
 
-class _raiseRestraintListNewPopup(_raiseRestraintListEditPopup):
-    popupClass = RestraintListNewPopup
+class _raiseRestraintTableNewPopup(_raiseRestraintTableEditPopup):
+    popupClass = RestraintTableNewPopup
 
 
 class _raiseSamplePopup(RaisePopupABC):
@@ -381,7 +381,7 @@ class OpenItemABC():
 
     validActionTargets = (Spectrum, PeakList, MultipletList, IntegralList,
                           NmrChain, Chain, SpectrumGroup, Sample, ChemicalShiftList,
-                          RestraintList, Note, StructureEnsemble, DataTable, Collection
+                          RestraintTable, Note, StructureEnsemble, DataTable, Collection
                           )
 
     # This can be subclassed
@@ -678,9 +678,9 @@ class _openItemNoteTable(OpenItemABC):
     objectArgumentName = 'note'
 
 
-class _openItemRestraintListTable(OpenItemABC):
+class _openItemRestraintTable(OpenItemABC):
     openItemMethod = 'showRestraintTable'
-    objectArgumentName = 'restraintList'
+    objectArgumentName = 'restraintTable'
 
 
 class _openItemStructureDataTable(OpenItemABC):
@@ -894,7 +894,7 @@ OpenObjAction = {
     SpectrumGroup    : _openItemSpectrumGroupDisplay,
     Sample           : _openItemSampleDisplay,
     ChemicalShiftList: _openItemChemicalShiftListTable,
-    RestraintList    : _openItemRestraintListTable,
+    RestraintTable   : _openItemRestraintTable,
     Note             : _openItemNoteTable,
     IntegralList     : _openItemIntegralListTable,
     StructureEnsemble: _openItemStructureEnsembleTable,

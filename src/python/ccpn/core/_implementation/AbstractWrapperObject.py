@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-02 11:47:06 +0000 (Tue, November 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:10:10 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -143,6 +143,7 @@ class AbstractWrapperObject(NotifierBase):
     #=========================================================================================
     _NONE_VALUE_STRING = '__NONE__'  # Used to emulate None for strings that otherwise have model restrictions
     _UNKNOWN_VALUE_STRING = 'unknown'  # Used to emulate unknown
+
     #=========================================================================================
 
     def __init__(self, project: 'Project', wrappedData: ApiImplementation.DataObject):
@@ -986,7 +987,7 @@ class AbstractWrapperObject(NotifierBase):
         return self._getDescendant(self.project, newName)
 
     @classmethod
-    def _linkWrapperClasses(cls, ancestors: list = None, Project: 'Project' = None):
+    def _linkWrapperClasses(cls, ancestors: list = None, Project: 'Project' = None, _allGetters=None):
         """Recursively set up links and functions involving children for wrapper classes
 
         NB classes that have already been linked are ignored, but their children are still processed"""
@@ -1009,6 +1010,7 @@ class AbstractWrapperObject(NotifierBase):
 
                     func.__doc__ = "Get contained %s object by relative ID" % classFullName
                     setattr(ancestor, funcName, func)
+                    _allGetters.append(f'{ancestor.__name__}.{funcName}')
 
                 # Add descendant links
                 linkName = cls._pluralLinkName
@@ -1052,6 +1054,7 @@ class AbstractWrapperObject(NotifierBase):
 
                     prop = property(func, None, None, docTemplate % (classFullName, cls.className))
                     setattr(ancestor, linkName, prop)
+                    _allGetters.append(f'{ancestor.__name__}.{linkName}')
 
                 # Add standard Notifiers:
                 if cls._registerClassNotifiers:
@@ -1079,7 +1082,7 @@ class AbstractWrapperObject(NotifierBase):
 
         # recursively call next level down the tree
         for cc in cls._childClasses:
-            cc._linkWrapperClasses(newAncestors, Project=Project)
+            cc._linkWrapperClasses(newAncestors, Project=Project, _allGetters=_allGetters)
 
     @classmethod
     def _getChildClasses(cls, recursion: bool = False) -> list:

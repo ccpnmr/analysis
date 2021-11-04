@@ -12,7 +12,7 @@ Class Hierarchy
 
 Classes are organised in a hierarchy, with all data objects ultimately contained within the Project:
 The diagram shows the hierarchy, with child objects displaced to the right of the containing parent
-object. E.g. Spectrum, SpectrumGroup, and DataSet are all children of Project; PeakList and
+object. E.g. Spectrum, SpectrumGroup, and StructureData are all children of Project; PeakList and
 IntegralList are both children of Spectrum; and Peak is a child of PeakList.
 
 ::
@@ -39,8 +39,8 @@ IntegralList are both children of Spectrum; and Peak is a child of PeakList.
                   \-------NmrAtom
   \-------ChemicalShiftList
           \-------ChemicalShift
-  \-------DataSet
-          \-------RestraintList
+  \-------StructureData
+          \-------RestraintTable
                   \-------Restraint
                           \-------RestraintContribution
           \-------CalculationStep
@@ -97,18 +97,18 @@ peaks are assigned to NmrAtoms.
 A **ChemicalShiftList** object is a container for **ChemicalShift** objects, which represent
 observed chemical shifts.
 
-**DataSet** objects serve to group RestraintLists and other input and output from a
+**StructureData** objects serve to group RestraintTables and other input and output from a
 calculation.
 
-A **RestraintList** contains **Restraint** Objects of a specific type (distance, dihedral, etc.).
+A **RestraintTable** contains **Restraint** Objects of a specific type (distance, dihedral, etc.).
 **RestraintContribution** objects hold the detailed information; they are needed for
 complex restraints, like coupled phi and psi dihedral restraints.
 
-The **CalculatioinStep** object is used to track the calculation history of DataSets, storing
-input and output DataSet IDs, and the names of the programs used.
+The **CalculationStep** object is used to track the calculation history of StructureData, storing
+input and output StructureData IDs, and the names of the programs used.
 
 **Data** object storing links to the data structures (PeakLists, Spectra, StructureEnsembles
-etc.) connected to a given DataSet, and their associated calculation parameters.
+etc.) connected to a given StructureData, and their associated calculation parameters.
 
 A **StructureEnsemble** object is a container for ensembles of coordinate structures, with each
 coordinate structure defined by a **Model** object.
@@ -194,14 +194,14 @@ Similarly, a given peak can be found by either myProject.getPeak('HSQC2.1.593'),
 mySpectrum.getPeak('1.593'), or myPeakList.getPeak('593')
 
 Most objects can be created using a *newXyzObject* method on the parent.
-E.g. you can create a new Restraint object with the myRestraintList.newRestraint(...) function.
+E.g. you can create a new Restraint object with the myRestraintTable.newRestraint(...) function.
 'new' functions create a single objects, using the passed-in parameters.
 There is no 'newSpectrum' function; spectra are created with 'loadSpectrum' as a complete spectrum
 object requires an external file with the data.
 
 More complex object creation is done with 'create...()' functions, that may create multiple
 objects, and use heuristics to fill in missing parameters.
-E.g. the myRestraintList.createRestraint(....) function creates a Restraint with the
+E.g. the myRestraintTable.createRestraint(....) function creates a Restraint with the
 contained RestraintContributions and restraintItems.
 
 Functions whose names start with 'get' (e.g. getNmrAtom(...)) mostly take some kind of identifier
@@ -257,7 +257,6 @@ NmrResidue objects behave in there different ways:
 #
 # .. autofunction:: ccpn.newProject
 
-
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -282,6 +281,184 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+#=========================================================================================
+# current list of getters for core objects - inserted by _linkWrapperClasses
+#     Chain.atoms
+#     Chain.getAtom
+#     Chain.getResidue
+#     Chain.residues
+#     ChemicalShiftList._oldChemicalShifts
+#     ChemicalShiftList.get_OldChemicalShift
+#     IntegralList.getIntegral
+#     IntegralList.integrals
+#     MultipletList.getMultiplet
+#     MultipletList.multiplets
+#     NmrChain.getNmrAtom
+#     NmrChain.getNmrResidue
+#     NmrChain.nmrAtoms
+#     NmrChain.nmrResidues
+#     NmrResidue.getNmrAtom
+#     NmrResidue.nmrAtoms
+#     PeakList.getPeak
+#     PeakList.peaks
+#     Project._oldChemicalShifts
+#     Project.atoms
+#     Project.axes
+#     Project.calculationSteps
+#     Project.chains
+#     Project.chemicalShiftLists
+#     Project.collections
+#     Project.complexes
+#     Project.data
+#     Project.dataTables
+#     Project.getAtom
+#     Project.getAxis
+#     Project.getCalculationStep
+#     Project.getChain
+#     Project.getChemicalShiftList
+#     Project.getCollection
+#     Project.getComplex
+#     Project.getData
+#     Project.getDataTable
+#     Project.getIntegral
+#     Project.getIntegralList
+#     Project.getIntegralListView
+#     Project.getMark
+#     Project.getModel
+#     Project.getMultiplet
+#     Project.getMultipletList
+#     Project.getMultipletListView
+#     Project.getNmrAtom
+#     Project.getNmrChain
+#     Project.getNmrResidue
+#     Project.getNote
+#     Project.getPeak
+#     Project.getPeakCluster
+#     Project.getPeakList
+#     Project.getPeakListView
+#     Project.getPseudoDimension
+#     Project.getResidue
+#     Project.getRestraint
+#     Project.getRestraintContribution
+#     Project.getRestraintTable
+#     Project.getSample
+#     Project.getSampleComponent
+#     Project.getSpectrum
+#     Project.getSpectrumDisplay
+#     Project.getSpectrumGroup
+#     Project.getSpectrumHit
+#     Project.getSpectrumReference
+#     Project.getSpectrumView
+#     Project.getStrip
+#     Project.getStructureData
+#     Project.getStructureEnsemble
+#     Project.getSubstance
+#     Project.getWindow
+#     Project.get_OldChemicalShift
+#     Project.integralListViews
+#     Project.integralLists
+#     Project.integrals
+#     Project.marks
+#     Project.models
+#     Project.multipletListViews
+#     Project.multipletLists
+#     Project.multiplets
+#     Project.nmrAtoms
+#     Project.nmrChains
+#     Project.nmrResidues
+#     Project.notes
+#     Project.peakClusters
+#     Project.peakListViews
+#     Project.peakLists
+#     Project.peaks
+#     Project.pseudoDimensions
+#     Project.residues
+#     Project.restraintContributions
+#     Project.restraintTables
+#     Project.restraints
+#     Project.sampleComponents
+#     Project.samples
+#     Project.spectra
+#     Project.spectrumDisplays
+#     Project.spectrumGroups
+#     Project.spectrumHits
+#     Project.spectrumReferences
+#     Project.spectrumViews
+#     Project.strips
+#     Project.structureData
+#     Project.structureEnsembles
+#     Project.substances
+#     Project.windows
+#     Residue.atoms
+#     Residue.getAtom
+#     Restraint.getRestraintContribution
+#     Restraint.restraintContributions
+#     RestraintTable.getRestraint
+#     RestraintTable.getRestraintContribution
+#     RestraintTable.restraintContributions
+#     RestraintTable.restraints
+#     Sample.getSampleComponent
+#     Sample.sampleComponents
+#     Spectrum.getIntegral
+#     Spectrum.getIntegralList
+#     Spectrum.getMultiplet
+#     Spectrum.getMultipletList
+#     Spectrum.getPeak
+#     Spectrum.getPeakList
+#     Spectrum.getPseudoDimension
+#     Spectrum.getSpectrumHit
+#     Spectrum.getSpectrumReference
+#     Spectrum.integralLists
+#     Spectrum.integrals
+#     Spectrum.multipletLists
+#     Spectrum.multiplets
+#     Spectrum.peakLists
+#     Spectrum.peaks
+#     Spectrum.pseudoDimensions
+#     Spectrum.spectrumHits
+#     Spectrum.spectrumReferences
+#     SpectrumDisplay.axes
+#     SpectrumDisplay.getAxis
+#     SpectrumDisplay.getIntegralListView
+#     SpectrumDisplay.getMultipletListView
+#     SpectrumDisplay.getPeakListView
+#     SpectrumDisplay.getSpectrumView
+#     SpectrumDisplay.getStrip
+#     SpectrumDisplay.integralListViews
+#     SpectrumDisplay.multipletListViews
+#     SpectrumDisplay.peakListViews
+#     SpectrumDisplay.spectrumViews
+#     SpectrumDisplay.strips
+#     SpectrumView.getIntegralListView
+#     SpectrumView.getMultipletListView
+#     SpectrumView.getPeakListView
+#     SpectrumView.integralListViews
+#     SpectrumView.multipletListViews
+#     SpectrumView.peakListViews
+#     Strip.axes
+#     Strip.getAxis
+#     Strip.getIntegralListView
+#     Strip.getMultipletListView
+#     Strip.getPeakListView
+#     Strip.getSpectrumView
+#     Strip.integralListViews
+#     Strip.multipletListViews
+#     Strip.peakListViews
+#     Strip.spectrumViews
+#     StructureData.calculationSteps
+#     StructureData.data
+#     StructureData.getCalculationStep
+#     StructureData.getData
+#     StructureData.getRestraint
+#     StructureData.getRestraintContribution
+#     StructureData.getRestraintTable
+#     StructureData.restraintContributions
+#     StructureData.restraintTables
+#     StructureData.restraints
+#     StructureEnsemble.getModel
+#     StructureEnsemble.models
+#=========================================================================================
+
 import importlib
 import collections
 
@@ -298,7 +475,7 @@ _coreImportOrder = (
     'IntegralList', 'Integral', 'PseudoDimension', 'SpectrumHit', 'Sample', 'SampleComponent',
     'Substance', 'Chain', 'Residue', 'Atom', 'Complex', 'NmrChain', 'NmrResidue', 'NmrAtom',
     'ChemicalShiftList', '_OldChemicalShift',
-    'StructureData', 'RestraintList', 'Restraint',
+    'StructureData', 'RestraintTable', 'Restraint',
     'RestraintContribution', 'CalculationStep', 'Data', 'StructureEnsemble', 'Model', 'Note',
     'PeakCluster', 'MultipletList', 'Multiplet', 'DataTable', 'Collection'
     )
@@ -338,4 +515,6 @@ for className in _uiImportOrder:
 # connect classes to project
 # NB - customisation for different UIs is done by inserting _factoryFunctions
 # from the UI class setUp
-_coreClassMap['Project']._linkWrapperClasses()
+_allGetters = []
+_coreClassMap['Project']._linkWrapperClasses(_allGetters=_allGetters)
+# print('\n    '.join(sorted(_allGetters)))

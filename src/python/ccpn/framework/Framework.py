@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-02 11:51:19 +0000 (Tue, November 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:13:37 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1345,8 +1345,8 @@ class Framework(NotifierBase):
             ("Restraint Table", partial(self.showRestraintTable, selectFirstItem=True), [('shortcut', 'rt')]),
             ("Structure Table", partial(self.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
             ("Data Table", partial(self.showDataTable, selectFirstItem=True), [('shortcut', 'dt')]),
-            ("Restraint Analysis Table", partial(self.showRestraintAnalysisTable, selectFirstItem=True), [('shortcut', 'at')]),
             (),
+            ("Restraint Analysis Table", partial(self.showRestraintAnalysisTable, selectFirstItem=True), [('shortcut', 'at')]),
             ("Chemical Shift Mapping", self.showChemicalShiftMapping, [('shortcut', 'cm')]),
             ("Notes Editor", partial(self.showNotesEditor, selectFirstItem=True), [('shortcut', 'no'),
                                                                                    ('icon', 'icons/null')]),
@@ -2857,7 +2857,7 @@ class Framework(NotifierBase):
 
     @logCommand('application.')
     def showRestraintTable(self, position: str = 'bottom', relativeTo: CcpnModule = None,
-                           restraintList: PeakList = None, selectFirstItem=False):
+                           restraintTable: PeakList = None, selectFirstItem=False):
         """Displays Peak table on left of main window with specified list selected.
         """
         from ccpn.ui.gui.modules.RestraintTable import RestraintTableModule
@@ -2867,8 +2867,8 @@ class Framework(NotifierBase):
             relativeTo = mainWindow.moduleArea
         restraintTableModule = RestraintTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(restraintTableModule, position=position, relativeTo=relativeTo)
-        if restraintList:
-            restraintTableModule.selectRestraintList(restraintList)
+        if restraintTable:
+            restraintTableModule.selectRestraintTable(restraintTable)
         return restraintTableModule
 
     @logCommand('application.')

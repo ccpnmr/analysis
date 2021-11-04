@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 __modifiedBy__ = "$Author: Luca Mureddu $"
 __dateModified__ = "$Date: 2021-04-27 16:04:57 +0100 (Tue, April 27, 2021) $"
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:48 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:17:44 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ __date__ = "$Date: 2021-04-27 16:04:57 +0100 (Tue, April 27, 2021) $"
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 import ccpn.ui.gui.widgets.CompoundWidgets as cw
-from ccpn.ui.gui.widgets.PulldownListsForObjects import RestraintListPulldown, PeakListPulldown, ChemicalShiftListPulldown, ChainPulldown
+from ccpn.ui.gui.widgets.PulldownListsForObjects import RestraintTablePulldown, PeakListPulldown, ChemicalShiftListPulldown, ChainPulldown
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.ListWidget import ListWidgetPair
@@ -108,13 +108,13 @@ class SRemoveUnwantedRestraintsPopup(CcpnDialogMainWidget):
 
         row = 0
 
-        self.rlWidget = RestraintListPulldown(parent=self.mainWidget,
-                                         mainWindow=self.mainWindow,
-                                         grid=(row, 0), gridSpan=(1,3),
-                                         showSelectName=True,
-                                         minimumWidths=(0, 100),
-                                         sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
-                                         callback=None)
+        self.rlWidget = RestraintTablePulldown(parent=self.mainWidget,
+                                               mainWindow=self.mainWindow,
+                                               grid=(row, 0), gridSpan=(1,3),
+                                               showSelectName=True,
+                                               minimumWidths=(0, 100),
+                                               sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
+                                               callback=None)
 
         row += 1
         self.plsWidget = PeakListPulldown(parent=self.mainWidget,

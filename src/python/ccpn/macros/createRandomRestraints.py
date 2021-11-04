@@ -13,7 +13,7 @@ with undoBlockWithoutSideBar():
         rs.delete()
     
     _index = 0
-    for rl in project.restraintLists:
+    for rl in project.restraintTables:
         for rsCount in range(8):
     
             pks = ()

@@ -15,12 +15,12 @@ printAverage = True
 _results = {}
 
 # get the dataSets that contain data with a matching name - should be violations
-violationDataItems = [(restraintList, data) for restraintList in project.restraintLists 
-                                  for data in restraintList.dataSet.data
-                                  if restraintList.name == data.name]
+violationDataItems = [(restraintTable, data) for restraintTable in project.restraintTables 
+                                  for data in restraintTable.structureData.data
+                                  if restraintTable.name == data.name]
 
 print(f'Available data containing violationLists:')
-for (restraintList, violationDataItem) in violationDataItems:
+for (restraintTable, violationDataItem) in violationDataItems:
     
     print(f'  {violationDataItem}')
     for k, violationRun in violationDataItem.parameters.items():
@@ -47,7 +47,7 @@ for (restraintList, violationDataItem) in violationDataItems:
             
             # use the serial to get the restraint from the peak
             for serial in models[0]['restraint_id']:
-                restraintId = Pid.IDSEP.join(('' if x is None else str(x)) for x in (restraintList.dataSet.name, restraintList.name, serial))
+                restraintId = Pid.IDSEP.join(('' if x is None else str(x)) for x in (restraintTable.structureData.name, restraintTable.name, serial))
                 modelRestraint = project.getObjectsByPartialId(className='Restraint', idStartsWith=restraintId)
                 restraintsFromModel.append(modelRestraint[0].pid if modelRestraint else None)
             
@@ -70,10 +70,10 @@ for (restraintList, violationDataItem) in violationDataItems:
             result = pd.concat([pids, atoms, average], ignore_index=True, axis=1)
     
             # rename the columns (lambda just gives the name 'lambda')
-            result.columns = ('RestraintPid', 'Atoms', 'Min', 'Max', 'Mean', 'STD', 'Count>0.3', 'Count>0.5')
+            result.columns = ('RestraintId', 'Atoms', 'Min', 'Max', 'Mean', 'STD', 'Count>0.3', 'Count>0.5')
 
             if printAverage:
-                val = result[['RestraintPid', 'Atoms', 'Mean']]
+                val = result[['RestraintId', 'Atoms', 'Mean']]
                 # print generated dataFrame (selected columns)
                 print(f'\n{val}')
                 
@@ -94,6 +94,6 @@ for (restraintList, violationDataItem) in violationDataItems:
     #         # insert results into the parameters as 'results'
     #         violationDataItem.setParameter('results', result)
 
-            if restraintList in _results:
+            if restraintTable in _results:
                 print('   Already found')
-            _results[restraintList] = result
+            _results[restraintTable] = result

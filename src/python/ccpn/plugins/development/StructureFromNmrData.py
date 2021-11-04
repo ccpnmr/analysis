@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:49 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:16:51 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -185,7 +185,7 @@ class StructureFromNmrDataGuiPlugin(PluginModule):
                 self.settings['Spectra'][self.project.spectra[i].id] = OD()
 
         # for restraintType in restraintTypes:
-        for restraintList in self.project.restraintLists:
+        for restraintList in self.project.restraintTables:
             # Separate Hbonds from distance restraints
             restraintType = restraintList.restraintType
             try:

@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:12:04 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,8 +37,8 @@ CCPNPARAMETER = 'ccpnDataSetParameter'
 CCPNLOOP = 'ccpnDataFrame'
 
 
-def getCcpnNefParameter(project: 'Project', dataSet, serial, name, parameterName):
-    """Get the required dataSet parameter from the project
+def getCcpnNefParameter(project: 'Project', structureData, serial, name, parameterName):
+    """Get the required structureData parameter from the project
     Returns a python object/pandas dataFrame of the ccpn nef log for use in nef import/export
     If a dataFrame cannot be found, logs an error and returns None
 
@@ -47,14 +47,14 @@ def getCcpnNefParameter(project: 'Project', dataSet, serial, name, parameterName
     Raises an error if there are any issues reading dataSet parameters
 
     :param project: instance of type Project
-    :param dataSet: dataSet name
-    :param serial: dataSet serial
+    :param structureData: structureData name
+    :param serial: structureData serial
     :param name: data item name
     :return: pandas dataFrame or None
     """
     try:
         # get the correct parameters from the dataSet
-        dSet = project.getStructureData(dataSet)
+        dSet = project.getStructureData(structureData)
         if dSet and dSet.serial != serial:        
             getLogger().debug(f'dataSet serials do not match: {dSet.serial} != {serial}')
         
@@ -65,38 +65,38 @@ def getCcpnNefParameter(project: 'Project', dataSet, serial, name, parameterName
         return params.get(parameterName)
 
     except Exception as es:
-        getLogger().debug(f"Cannot read dataSet parameter '{dataSet}:{name}:{parameterName}'")
+        getLogger().debug(f"Cannot read structureData parameter '{structureData}:{name}:{parameterName}'")
 
 
-def setCcpnNefParameter(project: 'Project', dataSet, serial, name, parameterName, value, overwrite=False):
-    """Set the required dataSet parameter in the project for use in nef import/export
+def setCcpnNefParameter(project: 'Project', structureData, serial, name, parameterName, value, overwrite=False):
+    """Set the required structureData parameter in the project for use in nef import/export
 
     Raises an error if name or value are of the wrong types
-    Returns False if the dataSet parameter already exists and overwrite is False
+    Returns False if the structureData parameter already exists and overwrite is False
 
     :param project: instance of type Project
-    :param dataSet: dataSet name
-    :param serial: dataSet serial
+    :param structureData: structureData name
+    :param serial: structureData serial
     :param name: data item name
     :param value: pandas dataFrame or None
     :param overwrite: True/False
     :return: True if successful
     """
     # check parameters
-    if not isinstance(dataSet, str):
-        raise ValueError(f'dataSet {repr(dataSet)} must be a string')
+    if not isinstance(structureData, str):
+        raise ValueError(f'structureData {repr(structureData)} must be a string')
     if not isinstance(name, str):
         raise ValueError(f'name {repr(name)} must be a string')
 
     # get the required dataSet
-    dSet = project.getStructureData(dataSet) or project.newStructureData(dataSet)
+    dSet = project.getStructureData(structureData) or project.newStructureData(structureData)
     if not dSet:
-        raise RuntimeError(f'Error creating dataSet {repr(dataSet)}')
+        raise RuntimeError(f'Error creating structureData {repr(structureData)}')
 
     # check whether the data already exists in the dataSet
     # dd = dSet.getData(name)
     # if dd and not overwrite:
-    #     getLogger().warning(f'dataSet.data {repr(name)} exists')
+    #     getLogger().warning(f'structureData.data {repr(name)} exists')
     #     return
 
     try:
@@ -104,12 +104,12 @@ def setCcpnNefParameter(project: 'Project', dataSet, serial, name, parameterName
         # try and write the information to the parameters
         dd = dSet.getData(name) or dSet.newData(name=name)
         if parameterName in dd.parameters and not overwrite:
-            getLogger().warning(f'dataSet.data parameter {repr(parameterName)} exists')
+            getLogger().warning(f'structureData.data parameter {repr(parameterName)} exists')
             return
 
         dd.setParameter(parameterName, value)
     except Exception as es:
-        raise RuntimeError(f'Error creating dataSet parameter {repr(parameterName)}')
+        raise RuntimeError(f'Error creating structureData parameter {repr(parameterName)}')
 
     # operation was successful
     return True

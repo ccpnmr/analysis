@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-16 19:06:53 +0100 (Thu, September 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:12:04 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -68,9 +68,9 @@ def importCyanaRestraints(project, dataPath, restraintType='Distance'):
     with open(dataPath) as fp:
         text = fp.read()
 
-    dataSet = project.dataSets[-1]
-    restraintList = dataSet.newRestraintList(restraintType=restraintType,
-                                             comment="Cyana restraint list load")
+    dataSet = project.structureData[-1]
+    restraintList = dataSet.newRestraintTable(restraintType=restraintType,
+                                              comment="Cyana restraint list load")
     extractCyanaRestraints(restraintList, text)
 
 
@@ -78,9 +78,9 @@ def importInsightRestraints(project, dataPath, restraintType='Distance'):
     with open(dataPath) as fp:
         text = fp.read()
 
-    dataSet = project.dataSets[-1]
-    restraintList = dataSet.newRestraintList(restraintType=restraintType,
-                                             comment="Insight restraint list load")
+    dataSet = project.structureData[-1]
+    restraintList = dataSet.newRestraintTable(restraintType=restraintType,
+                                              comment="Insight restraint list load")
     extractInsightRestraints(restraintList, text)
 
 
@@ -272,7 +272,7 @@ def loadCasdRdcList(project, path):
     """Load RDC constraint lists from CASD rdc file"""
     chainCode = project.chains[0].shortName
 
-    dataSet = project.dataSets[-1]
+    dataSet = project.structureData[-1]
 
     # Get list name
     dirname, basename = os.path.split(path)
@@ -303,10 +303,10 @@ def loadCasdRdcList(project, path):
                     orientation, magnitude, rhombicity = [eval(x) for x in ll[:3]]
                     sequenceCode = ll[3]
                     usename = '%s-%s' % (name, orientation)
-                    restraintList = dataSet.newRestraintList('Rdc', name=usename, serial=orientation,
-                                                             tensorMagnitude=magnitude,
-                                                             tensorRhombicity=rhombicity,
-                                                             tensorSequenceCode=sequenceCode)
+                    restraintList = dataSet.newRestraintTable('Rdc', name=usename, serial=orientation,
+                                                              tensorMagnitude=magnitude,
+                                                              tensorRhombicity=rhombicity,
+                                                              tensorSequenceCode=sequenceCode)
                     restraintLists[orientation] = restraintList
     finally:
         project._appBase._echoBlocking -= 1
@@ -857,8 +857,8 @@ def loadCasdData(project, casdDirectory):
     """"AD-HOC function: Load Montelione CASD data - with file names hardwired"""
 
     # Remove restraint lists = we read in those from the CASD data
-    dataSet = project.dataSets[-1]
-    for restraintList in dataSet.restraintLists:
+    dataSet = project.structureData[-1]
+    for restraintList in dataSet.singleStructureData:
         if restraintList.restraintType == 'Rdc':
             restraintList.delete()
 

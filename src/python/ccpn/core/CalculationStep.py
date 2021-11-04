@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:12:04 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -73,7 +73,7 @@ class CalculationStep(AbstractWrapperObject):
 
     @property
     def _parent(self) -> StructureData:
-        """DataSet containing RestraintList."""
+        """StructureData containing RestraintTable."""
         return self._project._data2Obj[self._wrappedData.nmrConstraintStore]
 
     dataSet = _parent
@@ -188,7 +188,7 @@ def getter(self: StructureData) -> List[CalculationStep]:
 
 
 StructureData.outputCalculationSteps = property(getter, None, None,
-                                          "ccpn.CalculationSteps (from other DataSets) that used DataSet as input")
+                                          "ccpn.CalculationSteps (from other StructureData) that used StructureData as input")
 
 
 def getter(self: StructureData) -> List[CalculationStep]:
@@ -197,9 +197,9 @@ def getter(self: StructureData) -> List[CalculationStep]:
 
 
 StructureData.inputCalculationSteps = property(getter, None, None,
-                                         "ccpn.CalculationSteps (from this DataSet) that yielded DataSet as output"
-                                         "\nNB there can be more than one, because the DataSet may result from\n"
-                                         "multiple calculations that do not have intermediate DataSets stored")
+                                         "ccpn.CalculationSteps (from this StructureData) that yielded StructureData as output"
+                                         "\nNB there can be more than one, because the StructureData may result from\n"
+                                         "multiple calculations that do not have intermediate StructureDatas stored")
 del getter
 
 
@@ -252,10 +252,3 @@ def _newCalculationStep(self: StructureData, programName: str = None, programVer
         raise RuntimeError('Unable to generate new CalculationStep item')
 
     return result
-
-
-#EJB 20181204: moved to DataSet
-# DataSet.newCalculationStep = _newCalculationStep
-# del _newCalculationStep
-
-# Notifiers:

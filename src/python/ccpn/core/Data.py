@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:12:04 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -40,7 +40,7 @@ from ccpn.core.lib.ContextManagers import newObject, renameObject
 
 class Data(AbstractWrapperObject):
     """Object storing links to the data structures (PeakLists, Spectra, StructureEnsembles etc.)
-    connected to a given DataSet, and their associated calculation parameters."""
+    connected to a given StructureData, and their associated calculation parameters."""
 
     #: Short class name, for PID.
     shortClassName = 'DA'
@@ -85,7 +85,7 @@ class Data(AbstractWrapperObject):
 
     @property
     def _parent(self) -> StructureData:
-        """DataSet containing Data."""
+        """StructureData containing Data."""
         return self._project._data2Obj[self._wrappedData.nmrConstraintStore]
 
     calculationStep = _parent

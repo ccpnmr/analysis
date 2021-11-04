@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:12:04 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -26,6 +26,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import datetime
+import pandas as pd
 from typing import Optional
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -62,7 +63,7 @@ class StructureData(AbstractWrapperObject):
 
     # CCPN properties
     @property
-    def _apiDataSet(self) -> ApiNmrConstraintStore:
+    def _apiStructureData(self) -> ApiNmrConstraintStore:
         """ CCPN NmrConstraintStore matching StructureData"""
         return self._wrappedData
 
@@ -75,7 +76,7 @@ class StructureData(AbstractWrapperObject):
 
     @property
     def serial(self) -> int:
-        """serial number of DataSet, used in Pid and to identify the DataSet. """
+        """serial number of StructureData, used in Pid and to identify the StructureData. """
         return self._wrappedData.serial
 
     @property
@@ -85,16 +86,16 @@ class StructureData(AbstractWrapperObject):
 
     @property
     def title(self) -> str:
-        """Title of DataSet.
+        """Title of StructureData.
         """
-        getLogger().warning('Deprecated, please use DataSet.name')
+        getLogger().warning('Deprecated, please use StructureData.name')
         return self.name
 
     @title.setter
     def title(self, value: str):
-        """Set title of the DataSet.
+        """Set title of the StructureData.
         """
-        getLogger().warning('Deprecated, please use DataSet.name')
+        getLogger().warning('Deprecated, please use StructureData.name')
         self.name = value
 
     @property
@@ -135,7 +136,7 @@ class StructureData(AbstractWrapperObject):
 
     @property
     def dataPath(self) -> Optional[str]:
-        """File path where dataSet is stored"""
+        """File path where structureData is stored"""
         return self._none2str(self._wrappedData.dataPath)
 
     @dataPath.setter
@@ -144,7 +145,7 @@ class StructureData(AbstractWrapperObject):
 
     @property
     def creationDate(self) -> Optional[datetime.datetime]:
-        """Creation timestamp for DataSet"""
+        """Creation timestamp for StructureData"""
         return self._wrappedData.creationDate
 
     @creationDate.setter
@@ -153,7 +154,7 @@ class StructureData(AbstractWrapperObject):
 
     @property
     def uuid(self) -> Optional[str]:
-        """Universal identifier for dataSet"""
+        """Universal identifier for structureData"""
         return self._none2str(self._wrappedData.uuid)
 
     @uuid.setter
@@ -227,10 +228,38 @@ class StructureData(AbstractWrapperObject):
     @renameObject()
     @logCommand(get='self')
     def rename(self, value: str):
-        """Rename DataSet, changing its name and Pid.
+        """Rename StructureData, changing its name and Pid.
         NB, the serial remains immutable.
         """
         return self._rename(value)
+
+    # @classmethod
+    # def _restoreObject(cls, project, apiObj):
+    #     """Subclassed to allow for initialisations on restore
+    #     """
+    #     from ccpn.ui.gui.modules.RestraintAnalysisTable import Headers
+    #
+    #     _headers = [(['restraintpid', 'atoms', 'min', 'max', 'mean', 'std', 'count_0_3', 'count_0_5'],
+    #                 Headers),
+    #                ]
+    #
+    #     result = super()._restoreObject(project, apiObj)
+    #
+    #     for data in result.data:
+    #         parameters = data.parameters
+    #         modified = False
+    #         for k, df in parameters.items():
+    #             if isinstance(df, pd.DataFrame):
+    #                 headers = list(df.columns)
+    #                 for oldHeaders, newHeaders in _headers:
+    #                     if headers == oldHeaders:
+    #                         df.rename(columns={old: new for old, new in zip(oldHeaders, newHeaders)}, inplace=True)
+    #                         modified = True
+    #
+    #         if modified:
+    #             data.updateParameters(parameters)
+    #
+    #     return result
 
     #=========================================================================================
     # CCPN functions
@@ -242,17 +271,17 @@ class StructureData(AbstractWrapperObject):
     #===========================================================================================
 
     @logCommand(get='self')
-    def newRestraintList(self, restraintType, name: str = None, origin: str = None,
-                         comment: str = None, unit: str = None, potentialType: str = 'unknown',
-                         tensorMagnitude: float = 0.0, tensorRhombicity: float = 0.0,
-                         tensorIsotropicValue: float = 0.0, tensorChainCode: str = None,
-                         tensorSequenceCode: str = None, tensorResidueType: str = None,
-                         restraintItemLength=None, **kwds):
-        """Create new RestraintList of type restraintType within DataSet.
+    def newRestraintTable(self, restraintType, name: str = None, origin: str = None,
+                          comment: str = None, unit: str = None, potentialType: str = 'unknown',
+                          tensorMagnitude: float = 0.0, tensorRhombicity: float = 0.0,
+                          tensorIsotropicValue: float = 0.0, tensorChainCode: str = None,
+                          tensorSequenceCode: str = None, tensorResidueType: str = None,
+                          restraintItemLength=None, **kwds):
+        """Create new RestraintTable of type restraintType within StructureData.
 
-        See the RestraintList class for details.
+        See the RestraintTable class for details.
 
-        Optional keyword arguments can be passed in; see RestraintList._newRestraintList for details.
+        Optional keyword arguments can be passed in; see RestraintTable._newRestraintTable for details.
 
         :param restraintType:
         :param name:
@@ -267,16 +296,16 @@ class StructureData(AbstractWrapperObject):
         :param tensorSequenceCode:
         :param tensorResidueType:
         :param restraintItemLength:
-        :return: a new RestraintList instance.
+        :return: a new RestraintTable instance.
         """
-        from ccpn.core.RestraintList import _newRestraintList
+        from ccpn.core.RestraintTable import _newRestraintTable
 
-        return _newRestraintList(self, restraintType, name=name, origin=origin,
-                                 comment=comment, unit=unit, potentialType=potentialType,
-                                 tensorMagnitude=tensorMagnitude, tensorRhombicity=tensorRhombicity,
-                                 tensorIsotropicValue=tensorIsotropicValue, tensorChainCode=tensorChainCode,
-                                 tensorSequenceCode=tensorSequenceCode, tensorResidueType=tensorResidueType,
-                                 restraintItemLength=restraintItemLength, **kwds)
+        return _newRestraintTable(self, restraintType, name=name, origin=origin,
+                                  comment=comment, unit=unit, potentialType=potentialType,
+                                  tensorMagnitude=tensorMagnitude, tensorRhombicity=tensorRhombicity,
+                                  tensorIsotropicValue=tensorIsotropicValue, tensorChainCode=tensorChainCode,
+                                  tensorSequenceCode=tensorSequenceCode, tensorResidueType=tensorResidueType,
+                                  restraintItemLength=restraintItemLength, **kwds)
 
     @logCommand(get='self')
     def newCalculationStep(self, programName: str = None, programVersion: str = None,
@@ -310,7 +339,7 @@ class StructureData(AbstractWrapperObject):
     @logCommand(get='self')
     def newData(self, name: str, attachedObjectPid: str = None,
                 attachedObject: AbstractWrapperObject = None, **kwds):
-        """Create new Data within DataSet.
+        """Create new Data within StructureData.
 
         See the Data class for details.
 
@@ -374,6 +403,6 @@ def _newStructureData(self: Project, name: str = None, title: str = None, progra
                                                                   details=comment)
     result = self._data2Obj.get(apiNmrConstraintStore)
     if result is None:
-        raise RuntimeError('Unable to generate new DataSet item')
+        raise RuntimeError('Unable to generate new StructureData item')
 
     return result

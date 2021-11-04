@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:12:04 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -38,9 +38,9 @@ from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
 
 
-class RestraintList(AbstractWrapperObject):
+class RestraintTable(AbstractWrapperObject):
     """ An object containing Restraints. Note: the object is not a (subtype of a) Python list.
-    To access all Restraint objects, use RestraintList.restraints.
+    To access all Restraint objects, use RestraintTable.restraints.
 
     The type of restraint is determined by the restraintType attribute.
     Typical examples are Distance, Dihedral and Rdc restraints, but can also be used to store
@@ -48,14 +48,14 @@ class RestraintList(AbstractWrapperObject):
     """
 
     #: Short class name, for PID.
-    shortClassName = 'RL'
+    shortClassName = 'RT'
     # Attribute it necessary as subclasses must use superclass className
-    className = 'RestraintList'
+    className = 'RestraintTable'
 
     _parentClass = StructureData
 
     #: Name of plural link to instances of class
-    _pluralLinkName = 'restraintLists'
+    _pluralLinkName = 'restraintTables'
 
     #: List of child classes.
     _childClasses = []
@@ -72,8 +72,8 @@ class RestraintList(AbstractWrapperObject):
 
     def __init__(self, project, wrappedData):
 
-        # NB The name will only be unique within the DataSet.
-        # NEF I/O therefore adds a prefix to distinguish the DataSet
+        # NB The name will only be unique within the StructureData.
+        # NEF I/O therefore adds a prefix to distinguish the StructureData
 
         self._wrappedData = wrappedData
         self._project = project
@@ -81,28 +81,31 @@ class RestraintList(AbstractWrapperObject):
         try:
             namePrefix = self._wrappedData.constraintType[:3].capitalize() + '-'
         except:
-            namePrefix = 'myRestraintList_'
+            namePrefix = 'myRestraintTable_'
         defaultName = ('%s%s' % (namePrefix, wrappedData.serial))
         self._setUniqueStringKey(defaultName)
         super().__init__(project, wrappedData)
 
-    # Special error-raising functions for people who think RestraintList is a list
+    # Special error-raising functions for people who think RestraintTable is a list
     def __iter__(self):
-        raise TypeError("'RestraintList object is not iterable"
-                        " - for a list of restraints use RestraintList.restraints")
+        raise TypeError("'RestraintTable object is not iterable"
+                        " - for a list of restraints use RestraintTable.restraints")
 
     def __getitem__(self, index):
-        raise TypeError("'RestraintList object does not support indexing"
-                        " - for a list of restraints use RestraintList.restraints")
+        raise TypeError("'RestraintTable object does not support indexing"
+                        " - for a list of restraints use RestraintTable.restraints")
 
     def __len__(self):
-        raise TypeError("'RestraintList object has no length"
-                        " - for a list of restraints use RestraintList.restraints")
+        raise TypeError("'RestraintTable object has no length"
+                        " - for a list of restraints use RestraintTable.restraints")
 
+    #=========================================================================================
     # CCPN properties
+    #=========================================================================================
+
     @property
-    def _apiRestraintList(self) -> ApiAbstractConstraintList:
-        """ CCPN ConstraintList matching RestraintList"""
+    def _apiRestraintTable(self) -> ApiAbstractConstraintList:
+        """CCPN ConstraintList matching RestraintTable"""
         return self._wrappedData
 
     @property
@@ -125,15 +128,15 @@ class RestraintList(AbstractWrapperObject):
 
     @property
     def serial(self) -> int:
-        """serial number of RestraintList, used in Pid and to identify the RestraintList. """
+        """serial number of RestraintTable, used in Pid and to identify the RestraintTable. """
         return self._wrappedData.serial
 
     @property
     def _parent(self) -> StructureData:
-        """StructureData containing RestraintList."""
+        """StructureData containing RestraintTable."""
         return self._project._data2Obj[self._wrappedData.nmrConstraintStore]
 
-    dataSet = _parent
+    structureData = _parent
 
     @property
     def name(self) -> str:
@@ -141,8 +144,8 @@ class RestraintList(AbstractWrapperObject):
         return self._wrappedData.name
 
     @name.setter
-    def name(self, value:str):
-        """Set name of RestraintList."""
+    def name(self, value: str):
+        """Set name of RestraintTable."""
         self.rename(value)
 
     @property
@@ -188,10 +191,10 @@ class RestraintList(AbstractWrapperObject):
     @property
     def tensor(self) -> Tensor:
         """orientation tensor for restraints. """
-        apiRestraintList = self._wrappedData
-        return Tensor(axial=apiRestraintList.tensorMagnitude,
-                      rhombic=apiRestraintList.tensorRhombicity,
-                      isotropic=apiRestraintList.tensorIsotropicValue)
+        apiRestraintTable = self._wrappedData
+        return Tensor(axial=apiRestraintTable.tensorMagnitude,
+                      rhombic=apiRestraintTable.tensorRhombicity,
+                      isotropic=apiRestraintTable.tensorIsotropicValue)
 
     @tensor.setter
     def tensor(self, value: Tensor):
@@ -252,7 +255,7 @@ class RestraintList(AbstractWrapperObject):
         return path
 
     @moleculeFilePath.setter
-    def moleculeFilePath(self, filePath:str=None):
+    def moleculeFilePath(self, filePath: str = None):
         """
         :param filePath: a filePath for corresponding molecule
         :return: None
@@ -271,7 +274,7 @@ class RestraintList(AbstractWrapperObject):
     @renameObject()
     @logCommand(get='self')
     def rename(self, value: str):
-        """Rename RestraintList, changing its name and Pid.
+        """Rename RestraintTable, changing its name and Pid.
         """
         return self._rename(value)
 
@@ -299,8 +302,8 @@ class RestraintList(AbstractWrapperObject):
 
     @logCommand(get='self')
     def newRestraint(self, figureOfMerit: float = None, comment: str = None,
-                      peaks: Sequence[Union['Peak', str]] = (), vectorLength: float = None, **kwds):
-        """Create new Restraint within RestraintList.
+                     peaks: Sequence[Union['Peak', str]] = (), vectorLength: float = None, **kwds):
+        """Create new Restraint within RestraintTable.
 
         ADVANCED: Note that you just create at least one RestraintContribution afterwards in order to
         have valid data. Use the simpler createSimpleRestraint instead, unless you have specific
@@ -323,11 +326,11 @@ class RestraintList(AbstractWrapperObject):
 
     @logCommand(get='self')
     def createSimpleRestraint(self, comment: str = None, figureOfMerit: float = None,
-                               peaks: Sequence = (), targetValue: float = None, error: float = None,
-                               weight: float = 1.0, upperLimit: float = None, lowerLimit: float = None,
-                               additionalUpperLimit: float = None, additionalLowerLimit: float = None,
-                               scale=1.0, vectorLength=None, restraintItems: Sequence = (), **kwds):
-        """Create a Restraint with a single RestraintContribution within the RestraintList.
+                              peaks: Sequence = (), targetValue: float = None, error: float = None,
+                              weight: float = 1.0, upperLimit: float = None, lowerLimit: float = None,
+                              additionalUpperLimit: float = None, additionalLowerLimit: float = None,
+                              scale=1.0, vectorLength=None, restraintItems: Sequence = (), **kwds):
+        """Create a Restraint with a single RestraintContribution within the RestraintTable.
         The function takes all the information needed and creates the RestraintContribution as
         well as the Restraint proper.
 
@@ -356,25 +359,26 @@ class RestraintList(AbstractWrapperObject):
         from ccpn.core.Restraint import _createSimpleRestraint
 
         return _createSimpleRestraint(self, comment=comment, figureOfMerit=figureOfMerit,
-                               peaks=peaks, targetValue=targetValue, error=error,
-                               weight=weight, upperLimit=upperLimit, lowerLimit=lowerLimit,
-                               additionalUpperLimit=additionalUpperLimit, additionalLowerLimit=additionalLowerLimit,
-                               scale=scale, vectorLength=vectorLength, restraintItems=restraintItems, **kwds)
+                                      peaks=peaks, targetValue=targetValue, error=error,
+                                      weight=weight, upperLimit=upperLimit, lowerLimit=lowerLimit,
+                                      additionalUpperLimit=additionalUpperLimit, additionalLowerLimit=additionalLowerLimit,
+                                      scale=scale, vectorLength=vectorLength, restraintItems=restraintItems, **kwds)
+
 
 #=========================================================================================
 # Connections to parents:
 #=========================================================================================
 
-@newObject(RestraintList)
-def _newRestraintList(self: StructureData, restraintType, name: str = None, origin: str = None,
-                      comment: str = None, unit: str = None, potentialType: str = 'unknown',
-                      tensorMagnitude: float = 0.0, tensorRhombicity: float = 0.0,
-                      tensorIsotropicValue: float = 0.0, tensorChainCode: str = None,
-                      tensorSequenceCode: str = None, tensorResidueType: str = None,
-                      restraintItemLength=None, **kwargs) -> RestraintList:
-    """Create new RestraintList of type restraintType within StructureData.
+@newObject(RestraintTable)
+def _newRestraintTable(self: StructureData, restraintType, name: str = None, origin: str = None,
+                       comment: str = None, unit: str = None, potentialType: str = 'unknown',
+                       tensorMagnitude: float = 0.0, tensorRhombicity: float = 0.0,
+                       tensorIsotropicValue: float = 0.0, tensorChainCode: str = None,
+                       tensorSequenceCode: str = None, tensorResidueType: str = None,
+                       restraintItemLength=None, **kwargs) -> RestraintTable:
+    """Create new RestraintTable of type restraintType within StructureData.
 
-    See the RestraintList class for details.
+    See the RestraintTable class for details.
 
     :param restraintType:
     :param name:
@@ -389,10 +393,10 @@ def _newRestraintList(self: StructureData, restraintType, name: str = None, orig
     :param tensorSequenceCode:
     :param tensorResidueType:
     :param restraintItemLength:
-    :return: a new RestraintList instance.
+    :return: a new RestraintTable instance.
     """
 
-    name = RestraintList._uniqueName(project=self.project, name=name)
+    name = RestraintTable._uniqueName(project=self.project, name=name)
 
     if restraintItemLength is None:
         restraintItemLength = coreConstants.constraintListType2ItemLength.get(restraintType)
@@ -412,10 +416,10 @@ def _newRestraintList(self: StructureData, restraintType, name: str = None, orig
                                                      tensorResidueType=tensorResidueType)
     result = self._project._data2Obj.get(obj)
     if result is None:
-        raise RuntimeError('Unable to generate new RestraintList item')
+        raise RuntimeError('Unable to generate new RestraintTable item')
 
     kwargs.pop('serial', None)
-    for k,v in kwargs.items():
+    for k, v in kwargs.items():
         try:
             setattr(result, k, v)
         except Exception:
@@ -423,10 +427,6 @@ def _newRestraintList(self: StructureData, restraintType, name: str = None, orig
 
     return result
 
-
-#EJB 20181206: moved to DataSet
-# DataSet.newRestraintList = _newRestraintList
-# del _newRestraintList
 
 # Notifiers:
 for clazz in ApiAbstractConstraintList._metaclass.getNonAbstractSubtypes():

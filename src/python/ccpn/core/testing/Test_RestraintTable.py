@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:12:05 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -29,86 +29,86 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 
-class RestraintListTest(WrapperTesting):
+class RestraintTableTest(WrapperTesting):
     # Path of project to load (None for new project)
     projectPath = None
 
-    def test_newDistanceRestraintList(self):
+    def test_newDistanceRestraintTable(self):
         dataSet = self.project.newStructureData()
-        newList = dataSet.newRestraintList('Distance')
+        newList = dataSet.newRestraintTable('Distance')
         # Undo and redo all operations
         self.undo.undo()
-        self.assertEquals(len(dataSet.restraintLists), 0)
+        self.assertEquals(len(dataSet.restraintTables), 0)
         self.undo.redo()
-        self.assertEquals(len(dataSet.restraintLists), 1)
-        self.assertEquals(dataSet.restraintLists[0].restraintType, 'Distance')
+        self.assertEquals(len(dataSet.restraintTables), 1)
+        self.assertEquals(dataSet.restraintTables[0].restraintType, 'Distance')
 
-    def test_newDihedralRestraintList(self):
+    def test_newDihedralRestraintTable(self):
         dataSet = self.project.newStructureData()
-        newList = dataSet.newRestraintList('Dihedral')
+        newList = dataSet.newRestraintTable('Dihedral')
         # Undo and redo all operations
         self.undo.undo()
-        self.assertEquals(len(dataSet.restraintLists), 0)
+        self.assertEquals(len(dataSet.restraintTables), 0)
         self.undo.redo()
-        self.assertEquals(len(dataSet.restraintLists), 1)
-        self.assertEquals(dataSet.restraintLists[0].restraintType, 'Dihedral')
+        self.assertEquals(len(dataSet.restraintTables), 1)
+        self.assertEquals(dataSet.restraintTables[0].restraintType, 'Dihedral')
 
-    def test_newCsaRestraintList(self):
+    def test_newCsaRestraintTable(self):
         dataSet = self.project.newStructureData()
-        newList = dataSet.newRestraintList('Csa')
+        newList = dataSet.newRestraintTable('Csa')
         # Undo and redo all operations
         self.undo.undo()
-        self.assertEquals(len(dataSet.restraintLists), 0)
+        self.assertEquals(len(dataSet.restraintTables), 0)
         self.undo.redo()
-        self.assertEquals(len(dataSet.restraintLists), 1)
-        self.assertEquals(dataSet.restraintLists[0].restraintType, 'Csa')
+        self.assertEquals(len(dataSet.restraintTables), 1)
+        self.assertEquals(dataSet.restraintTables[0].restraintType, 'Csa')
 
-    def test_newRdcRestraintList(self):
+    def test_newRdcRestraintTable(self):
         dataSet = self.project.newStructureData()
-        newList = dataSet.newRestraintList('Rdc')
+        newList = dataSet.newRestraintTable('Rdc')
         # Undo and redo all operations
         self.undo.undo()
-        self.assertEquals(len(dataSet.restraintLists), 0)
+        self.assertEquals(len(dataSet.restraintTables), 0)
         self.undo.redo()
-        self.assertEquals(len(dataSet.restraintLists), 1)
-        self.assertEquals(dataSet.restraintLists[0].restraintType, 'Rdc')
+        self.assertEquals(len(dataSet.restraintTables), 1)
+        self.assertEquals(dataSet.restraintTables[0].restraintType, 'Rdc')
 
-    def test_newChemicalShiftRestraintList(self):
+    def test_newChemicalShiftRestraintTable(self):
         dataSet = self.project.newStructureData()
-        newList = dataSet.newRestraintList('ChemicalShift')
+        newList = dataSet.newRestraintTable('ChemicalShift')
         # Undo and redo all operations
         self.undo.undo()
-        self.assertEquals(len(dataSet.restraintLists), 0)
+        self.assertEquals(len(dataSet.restraintTables), 0)
         self.undo.redo()
-        self.assertEquals(len(dataSet.restraintLists), 1)
-        self.assertEquals(dataSet.restraintLists[0].restraintType, 'ChemicalShift')
+        self.assertEquals(len(dataSet.restraintTables), 1)
+        self.assertEquals(dataSet.restraintTables[0].restraintType, 'ChemicalShift')
 
-    def test_newJCouplingRestraintList(self):
+    def test_newJCouplingRestraintTable(self):
         dataSet = self.project.newStructureData()
-        newList = dataSet.newRestraintList('JCoupling')
+        newList = dataSet.newRestraintTable('JCoupling')
         # Undo and redo all operations
         self.undo.undo()
-        self.assertEquals(len(dataSet.restraintLists), 0)
+        self.assertEquals(len(dataSet.restraintTables), 0)
         self.undo.redo()
-        self.assertEquals(len(dataSet.restraintLists), 1)
-        self.assertEquals(dataSet.restraintLists[0].restraintType, 'JCoupling')
+        self.assertEquals(len(dataSet.restraintTables), 1)
+        self.assertEquals(dataSet.restraintTables[0].restraintType, 'JCoupling')
 
-    def test_renameDistanceRestraintList(self):
+    def test_renameDistanceRestraintTable(self):
         dataSet = self.project.newStructureData()
-        newList = dataSet.newRestraintList('Distance', name='Boom', comment='blah', unit='A',
-                                           potentialType='logNormal', tensorMagnitude=1.0,
-                                           tensorRhombicity=1.0, tensorIsotropicValue=0.0,
-                                           tensorChainCode='A', tensorSequenceCode='11',
-                                           tensorResidueType='TENSOR', origin='NOE')
+        newList = dataSet.newRestraintTable('Distance', name='Boom', comment='blah', unit='A',
+                                            potentialType='logNormal', tensorMagnitude=1.0,
+                                            tensorRhombicity=1.0, tensorIsotropicValue=0.0,
+                                            tensorChainCode='A', tensorSequenceCode='11',
+                                            tensorResidueType='TENSOR', origin='NOE')
         self.project.newUndoPoint()
         # Undo and redo all operations
         newList.rename('Chikka')
         self.undo.undo()
         self.assertEqual(newList.name, 'Boom')
         self.undo.undo()
-        self.assertEquals(len(dataSet.restraintLists), 0)
+        self.assertEquals(len(dataSet.restraintTables), 0)
         self.undo.redo()
-        self.assertEquals(len(dataSet.restraintLists), 1)
+        self.assertEquals(len(dataSet.restraintTables), 1)
         self.assertEqual(newList.name, 'Boom')
         self.undo.redo()
         self.assertEqual(newList.name, 'Chikka')

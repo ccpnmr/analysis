@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-30 15:41:11 +0100 (Fri, July 30, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:12:04 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -283,8 +283,8 @@ nef2CcpnMap = {
         ('ccpn_tensor_rhombicity', 'tensorRhombicity'),
         ('ccpn_tensor_isotropic_value', 'tensorIsotropicValue'),
         ('ccpn_serial', 'serial'),
-        ('ccpn_dataset_id', 'dataSet.id'),
-        ('ccpn_dataset_serial', 'dataSet.serial'),
+        ('ccpn_dataset_id', 'structureData.id'),
+        ('ccpn_dataset_serial', 'structureData.serial'),
         ('ccpn_unit', 'unit'),
         ('ccpn_comment', 'comment'),
         ('nef_distance_restraint', _isALoop),
@@ -323,8 +323,8 @@ nef2CcpnMap = {
         ('ccpn_tensor_rhombicity', 'tensorRhombicity'),
         ('ccpn_tensor_isotropic_value', 'tensorIsotropicValue'),
         ('ccpn_serial', 'serial'),
-        ('ccpn_dataset_id', 'dataSet.id'),
-        ('ccpn_dataset_serial', 'dataSet.serial'),
+        ('ccpn_dataset_id', 'structureData.id'),
+        ('ccpn_dataset_serial', 'structureData.serial'),
         ('ccpn_unit', 'unit'),
         ('ccpn_comment', 'comment'),
         ('nef_dihedral_restraint', _isALoop),
@@ -372,8 +372,8 @@ nef2CcpnMap = {
         ('tensor_residue_name', 'tensorResidueType'),
         ('ccpn_tensor_isotropic_value', 'tensorIsotropicValue'),
         ('ccpn_serial', 'serial'),
-        ('ccpn_dataset_id', 'dataSet.id'),
-        ('ccpn_dataset_serial', 'dataSet.serial'),
+        ('ccpn_dataset_id', 'structureData.id'),
+        ('ccpn_dataset_serial', 'structureData.serial'),
         ('ccpn_unit', 'unit'),
         ('ccpn_comment', 'comment'),
         ('nef_rdc_restraint', _isALoop),
@@ -873,7 +873,7 @@ nef2CcpnMap = {
 
     # saveframe to handle dataSet.data storage
     'ccpn_parameter'                        : OD((
-        ('ccpn_dataset_id', 'dataSet'),
+        ('ccpn_dataset_id', 'structureData'),
         ('ccpn_dataset_serial', 'serial'),
         ('ccpn_data_id', 'name'),
         ('ccpn_parameter_name', 'parameterName'),
@@ -902,8 +902,8 @@ nef2CcpnMap = {
         ('measurement_type', 'measurementType'),
         ('comment', 'comment'),
         ('ccpn_serial', 'serial'),
-        ('ccpn_dataset_id', 'dataSet.id'),
-        ('ccpn_dataset_serial', 'dataSet.serial'),
+        ('ccpn_dataset_id', 'structureData.id'),
+        ('ccpn_dataset_serial', 'structureData.serial'),
         ('ccpn_restraint', _isALoop),
         )),
 
@@ -966,14 +966,14 @@ nef2CcpnMap = {
 
     'ccpn_distance_restraint_violation_list': OD((
         ('nef_spectrum', None),
-        ('nef_restraint_list', 'restraintList.pid'),
+        ('nef_restraint_list', 'restraintTable.pid'),
         ('run_id', 'runId'),
         ('program', None),
         ('program_version', None),
         ('protocol', None),
         ('protocol_version', None),
         ('protocol_parameters', None),
-        ('ccpn_dataset_id', 'dataSet.id'),
+        ('ccpn_dataset_id', 'structureData.id'),
         ('ccpn_distance_restraint_violation', _isALoop),
         )),
 

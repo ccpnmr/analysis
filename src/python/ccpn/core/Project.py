@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:12:04 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -65,18 +65,19 @@ from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlankin
 from ccpn.util.Logging import getLogger
 
 
-# TODO These should be merged with the sams constants in CcpnNefIo
+# TODO These should be merged with the same constants in CcpnNefIo
 # (and likely those in ExportNefPopup) and moved elsewhere
 CHAINS = 'chains'
 CHEMICALSHIFTLISTS = 'chemicalShiftLists'
-RESTRAINTLISTS = 'restraintLists'
+RESTRAINTTABLES = 'restraintTables'
 PEAKLISTS = 'peakLists'
 INTEGRALLISTS = 'integralLists'
 MULTIPLETLISTS = 'multipletLists'
 SAMPLES = 'samples'
 SUBSTANCES = 'substances'
 NMRCHAINS = 'nmrChains'
-DATASETS = 'dataSets'
+# DATASETS = 'dataSets'
+STRUCTUREDATA = 'structureData'
 COMPLEXES = 'complexes'
 SPECTRUMGROUPS = 'spectrumGroups'
 NOTES = 'notes'
@@ -89,7 +90,7 @@ class Project(AbstractWrapperObject):
     navigating between them.
 
     There are eleven top-level data objects directly within a project, of which seven have child
-    objects of their own, namely Spectrum, Sample, Chain, NmrChain, ChemicalShiftList, DataSet
+    objects of their own, namely Spectrum, Sample, Chain, NmrChain, ChemicalShiftList, StructureData
     and StructureEnsemble. The child data objects are organised in a logical hierarchy; for example,
     a Spectrum has PeakLists, which in turn, are made up of Peaks, whereas a Chain is made up of Residues,
     which are made up of Atoms.
@@ -170,6 +171,56 @@ class Project(AbstractWrapperObject):
 
     @property
     def chemicalShiftLists(self):
+        """STUB: hot-fixed later"""
+        return None
+
+    @property
+    def chains(self):
+        """STUB: hot-fixed later"""
+        return None
+
+    @property
+    def restraintTables(self):
+        """STUB: hot-fixed later"""
+        return None
+
+    @property
+    def samples(self):
+        """STUB: hot-fixed later"""
+        return None
+
+    @property
+    def substances(self):
+        """STUB: hot-fixed later"""
+        return None
+
+    @property
+    def nmrChains(self):
+        """STUB: hot-fixed later"""
+        return None
+
+    @property
+    def structureData(self):
+        """STUB: hot-fixed later"""
+        return None
+
+    @property
+    def complexes(self):
+        """STUB: hot-fixed later"""
+        return None
+
+    @property
+    def spectrumGroups(self):
+        """STUB: hot-fixed later"""
+        return None
+
+    @property
+    def notes(self):
+        """STUB: hot-fixed later"""
+        return None
+
+    @property
+    def peakClusters(self):
         """STUB: hot-fixed later"""
         return None
 

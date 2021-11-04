@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:12:05 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,7 @@ import numpy as np
 from collections import defaultdict
 from ccpn.util.Logging import getLogger
 from ccpn.core.StructureData import StructureData
-from ccpn.core.RestraintList import RestraintList
+from ccpn.core.RestraintTable import RestraintTable
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking, undoBlockWithoutSideBar
 from ccpn.util.isotopes import name2IsotopeCode
 # from ccpnmodel.ccpncore.lib import V2Upgrade
@@ -2147,15 +2147,15 @@ def _newStructureData(project, name=None, **kwargs):
     ds = project.newStructureData(name=name, **kwargs)
     return ds
 
-def _newDistanceRestraintList(project, dataset=None, name=None):
-    name  = name or 'my%s'%RestraintList.className
-    name = RestraintList._uniqueName(project=project, name=name)
+def _newDistanceRestraintTable(project, dataset=None, name=None):
+    name  = name or 'my%s' % RestraintTable.className
+    name = RestraintTable._uniqueName(project=project, name=name)
     if not dataset:
         dataset = _newStructureData(project, name=name)
-    return dataset.newRestraintList(restraintType='Distance', name=name)
+    return dataset.newRestraintTable(restraintType='Distance', name=name)
 
 def _newV3DistanceRestraint(v3PeakList,
-                            v3RestraintList=None,
+                            v3RestraintTable=None,
                             newDsName=None,
                             intensityType='height',
                             normalise=True,
@@ -2167,8 +2167,8 @@ def _newV3DistanceRestraint(v3PeakList,
                             ):
 
     project = v3PeakList.project
-    if not v3RestraintList:
-        v3RestraintList = _newDistanceRestraintList(project, name=newDsName)
+    if not v3RestraintTable:
+        v3RestraintTable = _newDistanceRestraintTable(project, name=newDsName)
 
     # get the needed V2 objects
     v2PeakList = v3PeakList._wrappedData
@@ -2190,7 +2190,7 @@ def _newV3DistanceRestraint(v3PeakList,
             for tempConstraint in tempDistConstraintList.sortedConstraints():
                 dd = dict((x, getattr(tempConstraint, x)) for x in
                           ('targetValue', 'error', 'upperLimit', 'lowerLimit', 'weight'))
-                newV3Restraint = v3RestraintList.newRestraint(peaks=tempConstraint.peaks)
+                newV3Restraint = v3RestraintTable.newRestraint(peaks=tempConstraint.peaks)
                 rc = newV3Restraint.newRestraintContribution(**dd)
                 for constraintItem in tempConstraint.sortedItems():
                     _assignments = []
@@ -2204,7 +2204,7 @@ def _newV3DistanceRestraint(v3PeakList,
 
 
 def _newV3AmbigDistRestraints(v3PeakList,
-                            v3RestraintList=None,
+                            v3RestraintTable=None,
                             minTolerances = (0.1, 0.1, 0.1),
                             maxTolerances = (0.1, 0.1, 0.1),
                             chemShiftRangesDim1 = ((-4.0, 20.0)),
@@ -2221,8 +2221,8 @@ def _newV3AmbigDistRestraints(v3PeakList,
                             ):
 
     project = v3PeakList.project
-    if not v3RestraintList:
-        v3RestraintList = _newDistanceRestraintList(project)
+    if not v3RestraintTable:
+        v3RestraintTable = _newDistanceRestraintTable(project)
 
     # get the needed V2 objects
     v2PeakList = v3PeakList._wrappedData
@@ -2256,7 +2256,7 @@ def _newV3AmbigDistRestraints(v3PeakList,
             for tempConstraint in temAmbDistConstList.sortedConstraints():
                 dd = dict((x, getattr(tempConstraint, x)) for x in
                           ('targetValue', 'error', 'upperLimit', 'lowerLimit', 'weight'))
-                newV3Restraint = v3RestraintList.newRestraint(peaks=tempConstraint.peaks)
+                newV3Restraint = v3RestraintTable.newRestraint(peaks=tempConstraint.peaks)
                 rc = newV3Restraint.newRestraintContribution(**dd)
                 for constraintItem in tempConstraint.sortedItems():
                     _assignments = (assignmentMap[resonanceMap.get(x, x)] for x in constraintItem.resonances)

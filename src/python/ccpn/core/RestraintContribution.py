@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 17:35:47 +0100 (Fri, June 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:12:04 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -242,8 +242,8 @@ class RestraintContribution(AbstractWrapperObject):
         Example value: ('A.127.ALA.HA','A.130.SER.H')
 
         The optional _string2Item dictionary speeds up the generation of many restraintItems
-        in a single operation. It must be initialised with DataSet._getTempItemMap(),
-        and serves only for a single DataSet.
+        in a single operation. It must be initialised with StructureData._getTempItemMap(),
+        and serves only for a single StructureData.
         On principle it must be used for a closed set of operations and then discarded,
         since it is a cache of underlying FixedResonance objects
         which are in theory mutable (don't ask)"""

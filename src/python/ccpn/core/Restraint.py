@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 17:35:46 +0100 (Fri, June 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:12:04 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ import collections
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
-from ccpn.core.RestraintList import RestraintList
+from ccpn.core.RestraintTable import RestraintTable
 from ccpn.core.Peak import Peak
 from ccpnmodel.ccpncore.api.ccp.nmr import NmrConstraint
 from ccpn.util.decorators import logCommand
@@ -38,7 +38,7 @@ from ccpn.core.lib.ContextManagers import newObject
 
 
 class Restraint(AbstractWrapperObject):
-    """Restraint. The type is defined in the containing RestraintList.
+    """Restraint. The type is defined in the containing RestraintTable.
 
     Most of the values are the consensus of the values in the contained
     RestraintContributions. In the normal case, where you have only one
@@ -50,7 +50,7 @@ class Restraint(AbstractWrapperObject):
     # Attribute it necessary as subclasses must use superclass className
     className = 'Restraint'
 
-    _parentClass = RestraintList
+    _parentClass = RestraintTable
 
     #: Name of plural link to instances of class
     _pluralLinkName = 'restraints'
@@ -68,11 +68,11 @@ class Restraint(AbstractWrapperObject):
         return self._wrappedData
 
     @property
-    def _parent(self) -> RestraintList:
-        """RestraintList object containing restraint."""
+    def _parent(self) -> RestraintTable:
+        """RestraintTable object containing restraint."""
         return self._project._data2Obj[self._wrappedData.parentList]
 
-    restraintList = _parent
+    restraintTable = _parent
 
     @property
     def _key(self) -> str:
@@ -222,7 +222,7 @@ class Restraint(AbstractWrapperObject):
     #=========================================================================================
 
     @classmethod
-    def _getAllWrappedData(cls, parent: RestraintList) -> list:
+    def _getAllWrappedData(cls, parent: RestraintTable) -> list:
         """get wrappedData - all Constraint children of parent ConstraintList"""
         return parent._wrappedData.sortedConstraints()
 
@@ -277,12 +277,12 @@ def getter(self: Peak) -> Tuple[Restraint, ...]:
     getDataObj = self._project._data2Obj.get
     result = []
     apiPeak = self._wrappedData
-    # for restraintList in self._project.restraintLists:
-    #     for apiRestraint in restraintList._wrappedData.constraints:
+    # for restraintTable in self._project.restraintTables:
+    #     for apiRestraint in restraintTable._wrappedData.constraints:
     #         if apiPeak in apiRestraint.peaks:
     #             result.append(getDataObj(apiRestraint))
-    result = [getDataObj(apiRestraint) for restraintList in self._project.restraintLists
-              for apiRestraint in restraintList._wrappedData.constraints if apiPeak in apiRestraint.peaks]
+    result = [getDataObj(apiRestraint) for restraintTable in self._project.restraintTables
+              for apiRestraint in restraintTable._wrappedData.constraints if apiPeak in apiRestraint.peaks]
     return tuple(sorted(result))
 
 
@@ -302,9 +302,9 @@ del setter
 #=========================================================================================
 
 @newObject(Restraint)
-def _newRestraint(self: RestraintList, figureOfMerit: float = None, comment: str = None,
+def _newRestraint(self: RestraintTable, figureOfMerit: float = None, comment: str = None,
                   peaks: Sequence[Union['Peak', str]] = (), vectorLength: float = None) -> Restraint:
-    """Create new Restraint within RestraintList.
+    """Create new Restraint within RestraintTable.
 
     ADVANCED: Note that you just create at least one RestraintContribution afterwards in order to
     have valid data. Use the simpler createSimpleRestraint instead, unless you have specific
@@ -335,12 +335,12 @@ def _newRestraint(self: RestraintList, figureOfMerit: float = None, comment: str
     return result
 
 
-def _createSimpleRestraint(self: RestraintList, comment: str = None, figureOfMerit: float = None,
-                          peaks: Sequence[Peak] = (), targetValue: float = None, error: float = None,
-                          weight: float = 1.0, upperLimit: float = None, lowerLimit: float = None,
-                          additionalUpperLimit: float = None, additionalLowerLimit: float = None,
-                          scale=1.0, vectorLength=None, restraintItems: Sequence = ()) -> Restraint:
-    """Create a Restraint with a single RestraintContribution within the RestraintList.
+def _createSimpleRestraint(self: RestraintTable, comment: str = None, figureOfMerit: float = None,
+                           peaks: Sequence[Peak] = (), targetValue: float = None, error: float = None,
+                           weight: float = 1.0, upperLimit: float = None, lowerLimit: float = None,
+                           additionalUpperLimit: float = None, additionalLowerLimit: float = None,
+                           scale=1.0, vectorLength=None, restraintItems: Sequence = ()) -> Restraint:
+    """Create a Restraint with a single RestraintContribution within the RestraintTable.
     The function takes all the information needed and creates the RestraintContribution as
     well as the Restraint proper.
 
@@ -390,10 +390,10 @@ def _createSimpleRestraint(self: RestraintList, comment: str = None, figureOfMer
     return restraint
 
 
-#EJB 20181205: moved to RestraintList
-# RestraintList.newRestraint = _newRestraint
+#EJB 20181205: moved to RestraintTable
+# RestraintTable.newRestraint = _newRestraint
 # del _newRestraint
-# RestraintList.createSimpleRestraint = _createSimpleRestraint
+# RestraintTable.createSimpleRestraint = _createSimpleRestraint
 
 # Notifiers:
 for clazz in NmrConstraint.ConstraintPeakContrib._metaclass.getNonAbstractSubtypes():

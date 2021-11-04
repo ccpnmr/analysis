@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:12:04 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -75,7 +75,7 @@ from ccpn.core.ChemicalShiftList import ChemicalShiftList
 # from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.StructureData import StructureData
 from ccpn.core.Data import Data
-from ccpn.core.RestraintList import RestraintList
+from ccpn.core.RestraintTable import RestraintTable
 from ccpn.core.Note import Note
 from ccpn.core.lib import SpectrumLib
 from ccpn.core.lib.MoleculeLib import extraBoundAtomPairs
@@ -99,14 +99,15 @@ minimumNefVersion = 0.9
 # (and likely those in ExportNefPopup) and likely replaced with a list of classes
 CHAINS = 'chains'
 CHEMICALSHIFTLISTS = 'chemicalShiftLists'
-RESTRAINTLISTS = 'restraintLists'
+RESTRAINTTABLES = 'restraintTables'
 PEAKLISTS = 'peakLists'
 INTEGRALLISTS = 'integralLists'
 MULTIPLETLISTS = 'multipletLists'
 SAMPLES = 'samples'
 SUBSTANCES = 'substances'
 NMRCHAINS = 'nmrChains'
-DATASETS = 'dataSets'
+# DATASETS = 'dataSets'
+STRUCTUREDATA = 'structureData'
 COMPLEXES = 'complexes'
 SPECTRUMGROUPS = 'spectrumGroups'
 NOTES = 'notes'
@@ -129,8 +130,8 @@ DEFAULTUPDATEPARAMETERS = ('comment',)
 
 # NAMETOOBJECTMAPPING = {obj.className.lower(): obj for obj in (Project, Spectrum, SpectrumGroup, Complex, PeakList,
 #                                                               IntegralList, MultipletList, PeakCluster, Sample,
-#                                                               Substance, Chain, NmrChain, ChemicalShiftList, DataSet,
-#                                                               RestraintList, Note)}
+#                                                               Substance, Chain, NmrChain, ChemicalShiftList, StructureData,
+#                                                               RestraintTable, Note)}
 
 NAMETOOBJECTMAPPING = {'nef_chemical_shift_list'               : ChemicalShiftList,
                        'ccpn_spectrum_group'                   : SpectrumGroup,
@@ -143,11 +144,11 @@ NAMETOOBJECTMAPPING = {'nef_chemical_shift_list'               : ChemicalShiftLi
                        'ccpn_substance'                        : Substance,
                        'nef_molecular_system'                  : Chain,
                        'ccpn_assignment'                       : NmrChain,
-                       'nef_distance_restraint_list'           : RestraintList,
-                       'nef_dihedral_restraint_list'           : RestraintList,
-                       'nef_rdc_restraint_list'                : RestraintList,
-                       'ccpn_restraint_list'                   : RestraintList,
-                       'ccpn_distance_restraint_violation_list': RestraintList,
+                       'nef_distance_restraint_list'           : RestraintTable,
+                       'nef_dihedral_restraint_list'           : RestraintTable,
+                       'nef_rdc_restraint_list'                : RestraintTable,
+                       'ccpn_restraint_list'                   : RestraintTable,
+                       'ccpn_distance_restraint_violation_list': RestraintTable,
                        'ccpn_notes'                            : Note,
                        }
 
@@ -404,14 +405,14 @@ class CcpnNefWriter:
     def exportObjects(self, expandSelection: bool = True,
                       chains: typing.Sequence[Chain] = (),
                       chemicalShiftLists: typing.Sequence[ChemicalShiftList] = (),
-                      restraintLists: typing.Sequence[RestraintList] = (),
+                      restraintTables: typing.Sequence[RestraintTable] = (),
                       peakLists: typing.Sequence[PeakList] = (),
                       integralLists: typing.Sequence[IntegralList] = (),
                       multipletLists: typing.Sequence[MultipletList] = (),
                       samples: typing.Sequence[Sample] = (),
                       substances: typing.Sequence[Substance] = (),
                       nmrChains: typing.Sequence[NmrChain] = (),
-                      dataSets: typing.Sequence[StructureData] = (),
+                      structureData: typing.Sequence[StructureData] = (),
                       complexes: typing.Sequence[Complex] = (),
                       spectrumGroups: typing.Sequence[SpectrumGroup] = (),
                       notes: typing.Sequence[Note] = (),
@@ -423,7 +424,7 @@ class CcpnNefWriter:
             Samples and ChemicalShiftLists from peakLists (Spectra)
             Samples from SpectrumHits,
             Substances from Samples
-            RestraintLists from DataSets
+            RestraintTables from StructureData
             NmrChains from ChemicalShifts
             and Chains from Substances, SampleComponents, NmrChains, and Complexes"""
 
@@ -500,9 +501,9 @@ class CcpnNefWriter:
             samples = sorted(sampleSet)
 
             # restraintLists
-            restraintListSet = set(restraintLists)
-            for dataSet in dataSets:
-                restraintListSet.update(dataSet.restraintLists)
+            restraintListSet = set(restraintTables)
+            for dSet in structureData:
+                restraintListSet.update(dSet.restraintTables)
             restraintLists = sorted(restraintListSet)
 
             # ChemicalShiftLists and NmrChains
@@ -562,9 +563,9 @@ class CcpnNefWriter:
 
         # RestraintLists and
         restraintLists = sorted(restraintLists, key=attrgetter('restraintType', 'serial'))
-        singleDataSet = bool(restraintLists) and len(set(x.dataSet for x in restraintLists)) == 1
+        singleStructureTable = bool(restraintLists) and len(set(x.structureData for x in restraintLists)) == 1
         for obj in restraintLists:
-            saveFrames.append(self.restraintList2Nef(obj, singleDataSet=singleDataSet))
+            saveFrames.append(self.restraintTable2Nef(obj, singleStructureTable=singleStructureTable))
 
         # NOTE:ED - need to make an active list of spectra and export from there with the required
         #           PeakLists/IntegralLists/MultipletLists
@@ -649,8 +650,8 @@ class CcpnNefWriter:
         for obj in project.complexes:
             saveFrames.append(self.complex2Nef(obj))
 
-        if project.dataSets:
-            saveFrames.extend(self.dataSet2Nef(project.dataSets))
+        if project.structureData:
+            saveFrames.extend(self.structureData2Nef(project.structureData))
 
         # Notes
         saveFrame = self.notes2Nef(sorted(notes))
@@ -706,10 +707,10 @@ class CcpnNefWriter:
 
             return self.exportObjects(expandSelection=expandSelection,
                                       chains=project.chains, chemicalShiftLists=project.chemicalShiftLists,
-                                      restraintLists=project.restraintLists, peakLists=project.peakLists,
+                                      restraintTables=project.restraintTables, peakLists=project.peakLists,
                                       integralLists=project.integralLists, multipletLists=project.multipletLists,
                                       samples=project.samples, substances=project.substances,
-                                      nmrChains=project.nmrChains, dataSets=project.dataSets,
+                                      nmrChains=project.nmrChains, structureData=project.structureData,
                                       complexes=project.complexes, spectrumGroups=project.spectrumGroups,
                                       notes=project.notes, peakClusters=project.peakClusters)
         else:
@@ -721,23 +722,23 @@ class CcpnNefWriter:
 
             self.chains = []
             self.chemicalShiftLists = []
-            self.restraintLists = []
+            self.restraintTables = []
             self.peakLists = []
             self.integralLists = []
             self.multipletLists = []
             self.samples = []
             self.substances = []
             self.nmrChains = []
-            self.dataSets = []
+            self.structureData = []
             self.complexes = []
             self.spectrumGroups = []
             self.notes = []
             self.peakClusters = []
 
-            checkList = [CHAINS, CHEMICALSHIFTLISTS, RESTRAINTLISTS, PEAKLISTS,
+            checkList = [CHAINS, CHEMICALSHIFTLISTS, RESTRAINTTABLES, PEAKLISTS,
                          INTEGRALLISTS, MULTIPLETLISTS,
                          SAMPLES, SUBSTANCES, NMRCHAINS,
-                         DATASETS, COMPLEXES, SPECTRUMGROUPS, NOTES, PEAKCLUSTERS]
+                         STRUCTUREDATA, COMPLEXES, SPECTRUMGROUPS, NOTES, PEAKCLUSTERS]
 
             # put the pids in the correct lists
             for name in checkList:
@@ -757,10 +758,10 @@ class CcpnNefWriter:
 
             return self.exportObjects(expandSelection=expandSelection,
                                       chains=self.chains, chemicalShiftLists=self.chemicalShiftLists,
-                                      restraintLists=self.restraintLists, peakLists=self.peakLists,
+                                      restraintTables=self.restraintTables, peakLists=self.peakLists,
                                       integralLists=self.integralLists, multipletLists=self.multipletLists,
                                       samples=self.samples, substances=self.substances,
-                                      nmrChains=self.nmrChains, dataSets=self.dataSets,
+                                      nmrChains=self.nmrChains, structureData=self.structureData,
                                       complexes=self.complexes, spectrumGroups=self.spectrumGroups,
                                       notes=self.notes, peakClusters=self.peakClusters)
 
@@ -780,11 +781,11 @@ class CcpnNefWriter:
         #     saveFrames.append(self.chemicalShiftList2Nef(obj))
         #
         # # RestraintLists and
-        # restraintLists = sorted(project.restraintLists,
+        # restraintLists = sorted(project.restraintTables,
         #                         key=attrgetter('restraintType', 'serial'))
-        # singleDataSet = bool(restraintLists) and len(set(x.dataSet for x in restraintLists)) == 1
+        # singleStructureData = bool(restraintLists) and len(set(x.structureData for x in restraintLists)) == 1
         # for obj in restraintLists:
-        #     saveFrames.append(self.restraintList2Nef(obj, singleDataSet=singleDataSet))
+        #     saveFrames.append(self.restraintTable2Nef(obj, singleStructureData=singleStructureData))
         #
         # # Spectra
         # for obj in sorted(project.spectra):
@@ -816,9 +817,9 @@ class CcpnNefWriter:
         # for obj in sorted(project.substances):
         #     saveFrames.append(self.substance2Nef(obj))
         #
-        # # # DataSets - NB does not include RestraintLists, which are given above
-        # # for obj in project.dataSets:
-        # #   saveFrames.append(self.dataSet2Nef(obj))
+        # # # StructureData - NB does not include RestraintLists, which are given above
+        # # for obj in project.structureData:
+        # #   saveFrames.append(self.structureData2Nef(obj))
         #
         # # Notes
         # saveFrame = self.notes2Nef(sorted(project.notes))
@@ -857,9 +858,9 @@ class CcpnNefWriter:
             result['creation_date'] = timeStamp = commonUtil.getTimeStamp()
             result['uuid'] = '%s-%s-%s' % (self.programName, timeStamp, random.randint(0, maxRandomInt))
 
-            # This loop is only set when exporting DataSets
+            # This loop is only set when exporting StructureData
             del result['nef_related_entries']
-            # This loop is only set when exporting DataSets
+            # This loop is only set when exporting StructureData
             del result['nef_run_history']
 
             loop = result['nef_program_script']
@@ -1018,11 +1019,11 @@ class CcpnNefWriter:
         #
         return result
 
-    def dataSet2Nef(self, dataSets: Sequence[StructureData]) -> StarIo.NmrSaveFrame:
-        """Convert DataSets to CCPN NEF saveframes"""
+    def structureData2Nef(self, structureData: Sequence[StructureData]) -> StarIo.NmrSaveFrame:
+        """Convert StructureData to CCPN NEF saveframes"""
 
         results = []
-        for dataSet in dataSets:
+        for dataSet in structureData:
 
             # # skip the ccpnLogging
             # if dataSet.id == CCPNLOGGING:
@@ -1057,7 +1058,7 @@ class CcpnNefWriter:
 
         paramNum = 1
         category = 'ccpn_parameter'
-        for dataSet in dataSets:
+        for dataSet in structureData:
 
             calculationData = dataSet.data
             if calculationData:
@@ -1074,7 +1075,21 @@ class CcpnNefWriter:
                         if isinstance(val, pd.DataFrame):
                             # create a loop from a pd.dataFrame - needs improvement
                             loopName = f'ccpn_dataframe'
-                            loop = result.newLoop(loopName, list(val.columns))
+                            cols = list(val.columns)
+
+                            # NOTE:ED - need to modify the headers somewhere more sensible
+                            from ccpn.ui.gui.modules.RestraintAnalysisTable import nefHeaders, Headers
+
+                            # list of header types that need swapping - need the opposite to load
+                            _headers = [(nefHeaders, Headers),
+                                        ]
+
+                            for oldHeaders, newHeaders in _headers:
+                                if all(hh in newHeaders for hh in cols) and len(cols) == len(newHeaders):
+                                    # rename all the column headers to the correct names
+                                    cols = [oldHeaders[newHeaders.index(cc)] if cc in newHeaders else cc for cc in cols]
+
+                            loop = result.newLoop(loopName, list(cols))
                             for _row in val.itertuples(index=False):
                                 loop.newRow(_row)
 
@@ -1121,15 +1136,15 @@ class CcpnNefWriter:
 
         return results
 
-    def restraintList2Nef(self, restraintList: RestraintList, singleDataSet: bool = False
+    def restraintTable2Nef(self, restraintTable: RestraintTable, singleStructureTable: bool = False
                           ) -> StarIo.NmrSaveFrame:
-        """Convert RestraintList to CCPN NEF saveframe"""
+        """Convert RestraintTable to CCPN NEF restraint_list saveframe"""
 
-        project = restraintList._project
+        project = restraintTable._project
 
         # Set up frame
-        restraintType = restraintList.restraintType
-        itemLength = restraintList.restraintItemLength
+        restraintType = restraintTable.restraintType
+        itemLength = restraintTable.restraintItemLength
 
         if restraintType == 'Distance':
             category = 'nef_distance_restraint_list'
@@ -1152,16 +1167,16 @@ class CcpnNefWriter:
             ('atomNames', tuple('atom_name_%s' % ii for ii in range(1, max))),
             ))
 
-        name = restraintList.name
-        if not singleDataSet:
-            # If there are multiple DataSets, add the dataSet serial for disambiguation
-            ss = '`%s`' % restraintList.dataSet.serial
+        name = restraintTable.name
+        if not singleStructureTable:
+            # If there are multiple StructureData, add the structureData serial for disambiguation
+            ss = '`%s`' % restraintTable.structureData.serial
             if not name.startswith(ss):
                 name = ss + name
 
-        result = self._newNefSaveFrame(restraintList, category, name)
+        result = self._newNefSaveFrame(restraintTable, category, name)
 
-        self.ccpn2SaveFrameName[restraintList] = result['sf_framecode']
+        self.ccpn2SaveFrameName[restraintTable] = result['sf_framecode']
 
         # for tag in ('tensor_magnitude', 'tensor_rhombicity', 'tensor_isotropic_value',
         #             'ccpn_tensor_magnitude', 'ccpn_tensor_rhombicity', 'ccpn_tensor_isotropic_value'):
@@ -1169,7 +1184,7 @@ class CcpnNefWriter:
         #     # Tensor components default to 0
         #     result[tag] = None
         #
-        # tensor = restraintList.tensor
+        # tensor = restraintTable.tensor
         # if tensor is not None:
         #   result['tensor_magnitude'] = tensor.axial or None
         #   result['tensor_rhombicity'] = tensor.rhombic or None
@@ -1188,7 +1203,7 @@ class CcpnNefWriter:
                     loop.removeColumn(tag, removeData=True)
 
         index = 0
-        for contribution in sorted(restraintList.restraintContributions):
+        for contribution in sorted(restraintTable.restraintContributions):
             rowdata = self._loopRowData(loopName, contribution)
             for item in contribution.restraintItems:
                 row = loop.newRow(rowdata)
@@ -1597,10 +1612,10 @@ class CcpnNefWriter:
 
         return result
 
-    def peakRestraintLinks2Nef(self, restraintLists: Sequence[RestraintList]) -> StarIo.NmrSaveFrame:
+    def peakRestraintLinks2Nef(self, restraintTables: Sequence[RestraintTable]) -> StarIo.NmrSaveFrame:
 
         data = []
-        for restraintList in sorted(restraintLists):
+        for restraintList in sorted(restraintTables):
             restraintListFrame = self.ccpn2SaveFrameName.get(restraintList)
             if restraintListFrame is not None:
                 for restraint in sorted(restraintList.restraints):
@@ -1613,7 +1628,7 @@ class CcpnNefWriter:
             category = 'nef_peak_restraint_links'
             columns = ('nmr_spectrum_id', 'peak_id', 'restraint_list_id', 'restraint_id',)
             # Set up frame
-            result = self._newNefSaveFrame(restraintLists[0].project, category, category)
+            result = self._newNefSaveFrame(restraintTables[0].project, category, category)
             loopName = 'nef_peak_restraint_link'
             loop = result[loopName]
             for rowdata in sorted(data):
@@ -4395,12 +4410,12 @@ class CcpnNefReader(CcpnNefContent):
         name = re.sub(REGEXREMOVEENDQUOTES, '', name)  # substitute with ''
 
         # Make main object
-        # dataSet = self.fetchDataSet(dataSetId, _serialFromName or dataSetSerial)
-        dataSet = self.fetchDataSet(dataSetId, dataSetSerial)
+        # dataSet = self.fetchStructureData(dataSetId, _serialFromName or dataSetSerial)
+        dataSet = self.fetchStructureData(dataSetId, dataSetSerial)
 
         # need to fix the names here... cannot contain '.'
 
-        previous = dataSet.getRestraintList(name)
+        previous = dataSet.getRestraintTable(name)
         if previous is not None:
             # NEF but NOT CCPN has separate namespaces for different restraint types
             # so we may get name clashes
@@ -4409,13 +4424,13 @@ class CcpnNefReader(CcpnNefContent):
                 # Add prefix for disambiguation since NEF but NOT CCPN has separate namespaces
                 # for different constraint types
                 name = namePrefix + name
-                while dataSet.getRestraintList(name) is not None:
+                while dataSet.getRestraintTable(name) is not None:
                     # This way we get a unique name even in the most bizarre cases
                     name = '`%s`' % name
 
         parameters['name'] = name
         serial = parameters.pop('serial', 1)
-        result = dataSet.newRestraintList(**parameters)
+        result = dataSet.newRestraintTable(**parameters)
         try:
             result._resetSerial(serial)
         except Exception as es:
@@ -4491,9 +4506,9 @@ class CcpnNefReader(CcpnNefContent):
         dataSet = dataSet or self.getStructureData(dataSetSerial)
         if dataSet is not None:
             # find the restraintList
-            restraintList = dataSet.getRestraintList(name)
+            restraintList = dataSet.getRestraintTable(name)
             if restraintList is not None:
-                self.error('nef_restraint_list - RestraintList {} already exists'.format(restraintList), saveFrame, (restraintList,))
+                self.error('nef_restraint_list - RestraintTable {} already exists'.format(restraintList), saveFrame, (restraintList,))
                 # _rowErrors.add(name)
                 saveFrame._rowErrors[category] = (name,)
 
@@ -4504,7 +4519,7 @@ class CcpnNefReader(CcpnNefContent):
     verifiers['nef_rdc_restraint_list'] = verify_nef_restraint_list
     verifiers['ccpn_restraint_list'] = verify_nef_restraint_list
 
-    def load_nef_restraint(self, restraintList: RestraintList, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame,
+    def load_nef_restraint(self, restraintTable: RestraintTable, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame,
                            itemLength: int = None):
         """Serves to load nef_distance_restraint, nef_dihedral_restraint,
         nef_rdc_restraint and ccpn_restraint loops"""
@@ -4514,11 +4529,11 @@ class CcpnNefReader(CcpnNefContent):
 
         result = []
 
-        string2ItemMap = self._dataSet2ItemMap[restraintList.dataSet]
+        string2ItemMap = self._dataSet2ItemMap[restraintTable.structureData]
 
         # set itemLength if not passed in:
         if not itemLength:
-            itemLength = coreConstants.constraintListType2ItemLength.get(restraintList.restraintType)
+            itemLength = coreConstants.constraintListType2ItemLength.get(restraintTable.restraintType)
 
         mapping = nef2CcpnMap.get(loop.name) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
@@ -4553,7 +4568,7 @@ class CcpnNefReader(CcpnNefContent):
                 val = row.get('ccpn_comment')
                 if val is not None:
                     dd['comment'] = str(val)
-                restraint = restraintList.newRestraint(**dd)
+                restraint = restraintTable.newRestraint(**dd)
                 try:
                     restraint._resetSerial(serial)
                 except Exception as es:
@@ -4602,17 +4617,17 @@ class CcpnNefReader(CcpnNefContent):
     importers['nef_rdc_restraint'] = load_nef_restraint
     importers['ccpn_restraint'] = load_nef_restraint
 
-    def verify_nef_restraint(self, restraintList: RestraintList, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
+    def verify_nef_restraint(self, restraintTable: RestraintTable, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
                              name=None, itemLength: int = None):
         """Verify the contents of nef_distance_restraint, nef_dihedral_restraint,
         nef_rdc_restraint and ccpn_restraint loops"""
         _rowErrors = parentFrame._rowErrors[loop.name] = OrderedSet()
 
-        # string2ItemMap = self._dataSet2ItemMap[restraintList.dataSet]
+        # string2ItemMap = self._dataSet2ItemMap[restraintTable.structureData]
         #
         # # set itemLength if not passed in:
         # if not itemLength:
-        #     itemLength = coreConstants.constraintListType2ItemLength.get(restraintList.restraintType)
+        #     itemLength = coreConstants.constraintListType2ItemLength.get(restraintTable.restraintType)
         #
         # mapping = nef2CcpnMap.get(loop.name) or {}
         # map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
@@ -4633,7 +4648,7 @@ class CcpnNefReader(CcpnNefContent):
         for row in loop.data:
             # get restraint
             serial = row.get('restraint_id')
-            restraint = restraintList.getRestraint(serial)
+            restraint = restraintTable.getRestraint(serial)
             if restraint is not None:
                 self.error('nef_restraint - Restraint {} already exists'.format(restraint), loop, (restraint,))
                 _rowErrors.add(loop.data.index(row))
@@ -4687,16 +4702,16 @@ class CcpnNefReader(CcpnNefContent):
         run_id = parameters.get('runId')
 
         restraintId = Pid.IDSEP.join(('' if x is None else str(x)) for x in (dataSetId, name))
-        previous = project.getObjectsByPartialId(className='RestraintList', idStartsWith=restraintId)
+        previous = project.getObjectsByPartialId(className='RestraintTable', idStartsWith=restraintId)
 
         # need to fix the names here... cannot contain '.'
 
-        # previous = dataSet.getRestraintList(name)
+        # previous = dataSet.getRestraintTable(name)
         if previous and len(previous) == 1:
-            dataSet = previous[0].dataSet
+            dataSet = previous[0].structureData
         else:
             # dataSet = project.newDataSet()
-            dataSet = self.fetchDataSet(dataSetId)
+            dataSet = self.fetchStructureData(dataSetId)
 
         # read list
         parameters['name'] = name
@@ -4790,7 +4805,7 @@ class CcpnNefReader(CcpnNefContent):
 
     importers['ccpn_distance_restraint_violation'] = load_ccpn_restraint_violation
 
-    def verify_ccpn_restraint_violation(self, restraintList: RestraintList, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
+    def verify_ccpn_restraint_violation(self, restraintTable: RestraintTable, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
                                         name=None, itemLength: int = None):
         """Verify the contents of ccpn_distance_restraint_violation loops"""
         result = []
@@ -5882,7 +5897,7 @@ class CcpnNefReader(CcpnNefContent):
 
         # NBNB TODO:RASMUS There was a very strange bug in this function
         # When I was using PeakList.getPeak(str(serial))
-        # and RestraintList.getRestraint(str(serial), peaks and restraints were
+        # and RestraintTable.getRestraint(str(serial), peaks and restraints were
         # sometimes missed even though the data were present.
         # Doing the test at the API level (as now) fixed the problem
         # THIS SHOULD BE IMPOSSIBLE
@@ -5901,7 +5916,7 @@ class CcpnNefReader(CcpnNefContent):
                 restraintList = self.frameCode2Object.get(row.get('restraint_list_id'))
                 if restraintList is None:
                     self.warning(
-                            "No RestraintList saveframe found with framecode %s. Skipping peak_restraint_link"
+                            "No restraint_list saveframe found with framecode %s. Skipping peak_restraint_link"
                             % row.get('restraint_list_id'),
                             loop
                             )
@@ -5942,11 +5957,11 @@ class CcpnNefReader(CcpnNefContent):
                 if not (_spectrum and peakListNum):
                     continue
 
-                _restraintPid = row.get('restraint_list_id')
-                restraintList = self.frameCode2Object.get(_restraintPid)
+                _restraintId = row.get('restraint_list_id')
+                restraintList = self.frameCode2Object.get(_restraintId)
                 if not restraintList:
                     # restraintList not found in a saveframe so try and load from project
-                    dataSetCode = self._frameCodeToSpectra.get(_restraintPid)
+                    dataSetCode = self._frameCodeToSpectra.get(_restraintId)
                     _dataSet = project.getStructureData(dataSetCode)  # could be the name
                     _dataSet = _dataSet or project.getStructureData('myStructureData_{}'.format(dataSetCode))
                     _dataSet = _dataSet or self.getStructureData(dataSetCode)
@@ -5955,9 +5970,9 @@ class CcpnNefReader(CcpnNefContent):
                                        'nef_dihedral_restraint_list',
                                        'nef_rdc_restraint_list',
                                        'ccpn_restraint_list']:
-                            if _restraintPid.startswith(prefix):
-                                _name = _restraintPid[len(prefix) + 1:]
-                                restraintList = _dataSet.getRestraintList(_name)
+                            if _restraintId.startswith(prefix):
+                                _name = _restraintId[len(prefix) + 1:]
+                                restraintList = _dataSet.getRestraintTable(_name)
                                 if restraintList:
                                     break
                 if not restraintList:
@@ -6912,9 +6927,27 @@ class CcpnNefReader(CcpnNefContent):
             _df = pd.DataFrame(loop.data)
 
             if _df is not None:
+
+                # NOTE:ED - need to modify the headers somewhere more sensible
+                from ccpn.ui.gui.modules.RestraintAnalysisTable import nefHeaders, Headers
+
+                # list of header types that need swapping - need the opposite to save
+                _headers = [(nefHeaders, Headers),
+                           ]
+
+                dfHeaders = list(_df.columns)
+                for oldHeaders, newHeaders in _headers:
+                    if all(hh in oldHeaders for hh in dfHeaders):
+                        # rename all the column headers to the correct names
+                        _df.rename(columns={old: new for old, new in zip(oldHeaders, newHeaders)}, inplace=True)
+
                 parameters['value'] = _df
+
                 # store in the project
-                result = setCcpnNefParameter(project, **parameters)
+                try:
+                    setCcpnNefParameter(project, **parameters)
+                except Exception as es:
+                    raise
 
     importers['ccpn_dataframe'] = load_ccpn_dataframe
 
@@ -7147,19 +7180,19 @@ class CcpnNefReader(CcpnNefContent):
 
         # NBNB NOT WORKING YET!
 
-        # dataSet = self.fetchDataSet(self.mainDataSetSerial)
+        # dataSet = self.fetchStructureData(self.mainDataSetSerial)
         self.mainDataSetSerial = None
 
     def _defaultName(self, cls, serial):
         # Get the next class name using serial, this may already exist
         return '%s_%s' % (cls._defaultName(), serial)
 
-    def fetchDataSet(self, dataSetId: str = None, serial: int = None):
-        """Fetch DataSet with given serial.
+    def fetchStructureData(self, dataSetId: str = None, serial: int = None):
+        """Fetch StructureData with given serial.
         If input is None, use self.defaultDataSetSerial
         If that too is None, create a new DataSet and use its serial as the default
 
-        NB when reading, all DataSets with known serials should be instantiated BEFORE calling
+        NB when reading, all StructureData with known serials should be instantiated BEFORE calling
         with input None"""
 
         if serial is None and dataSetId is None:
@@ -7178,7 +7211,7 @@ class CcpnNefReader(CcpnNefContent):
                 dataSet = self.project.newStructureData(name=_name, )
 
             # # # take or create dataSet matching serial
-            # # dataSet = dataSet or self.getDataSet(serial)
+            # # dataSet = dataSet or self.getStructureData(serial)
             # if dataSet is None:
             #     _name = dataSetId or self._defaultName(DataSet, serial)
             #     dataSet = self.project.newDataSet(name=_name, )  #serial=serial)
@@ -7196,17 +7229,17 @@ class CcpnNefReader(CcpnNefContent):
         If input is None, use self.defaultDataSetSerial
         If that too is None, create a new DataSet and use its serial as the default
 
-        NB when reading, all DataSets with known serials should be instantiated BEFORE calling
+        NB when reading, all StructureData with known serials should be instantiated BEFORE calling
         with input None"""
 
         if serial is None:
             serial = self.defaultDataSetSerial or 1
         # _name = self._defaultName(DataSet, serial)
-        # return self.project.getDataSet(_name)
-        dataSets = [ds for ds in self.project.dataSets if ds.serial == serial]
+        # return self.project.getStructureData(_name)
+        dataSets = [ds for ds in self.project.structureData if ds.serial == serial]
         if dataSets:
             if len(dataSets) > 1:
-                raise RuntimeError('CcpnNefReader.getDataSet: too many dataSets with the same serial')
+                raise RuntimeError('CcpnNefReader.getStructureData: too many structureData with the same serial')
             return dataSets[0]
 
 

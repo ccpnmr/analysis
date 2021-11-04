@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-07 20:15:17 +0100 (Wed, July 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:12:04 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -42,7 +42,7 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core.Substance import Substance
 from ccpn.core.Sample import Sample
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
-from ccpn.core.RestraintList import RestraintList
+from ccpn.core.RestraintTable import RestraintTable
 from ccpn.util.Logging import getLogger
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.AttrDict import AttrDict
@@ -799,7 +799,7 @@ class CcpnNefContent:
 
     contents['ccpn_substance_reference_spectra'] = content_ccpn_substance_reference_spectra
 
-    def content_nef_restraint(self, restraintList: RestraintList, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
+    def content_nef_restraint(self, restraintTable: RestraintTable, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
                               itemLength: int = None) -> Optional[OrderedSet]:
         """Get the contents for nef_distance_restraint, nef_dihedral_restraint,
         nef_rdc_restraint and ccpn_restraint loops"""
@@ -875,7 +875,7 @@ class CcpnNefContent:
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def content_ccpn_restraint_violation(self, restraintList: RestraintList, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
+    def content_ccpn_restraint_violation(self, restraintTable: RestraintTable, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
                                          itemLength: int = None) -> Optional[OrderedSet]:
         """Get the contents for ccpn_restraint_violation loops
         """

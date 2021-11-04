@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-02 18:40:29 +0000 (Tue, November 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:15:05 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -27,38 +27,38 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
-from ccpn.core.RestraintList import RestraintList
+from ccpn.core.RestraintTable import RestraintTable
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, PulldownListCompoundWidget
 
 
-class RestraintListPopupABC(AttributeEditorPopupABC):
-    """Base class for RestraintList attributes editor popups
+class RestraintTablePopupABC(AttributeEditorPopupABC):
+    """Base class for RestraintTable attributes editor popups
     """
 
     def _getRestraintTypes(self, obj=None):
-        self.restraintType.modifyTexts(RestraintList.restraintTypes)
+        self.restraintType.modifyTexts(RestraintTable.restraintTypes)
         self.restraintType.setIndex(0)
 
-    klass = RestraintList  # The class whose properties are edited/displayed
+    klass = RestraintTable  # The class whose properties are edited/displayed
     attributes = []  # A list of (attributeName, getFunction, setFunction, kwds) tuples;
 
     def __init__(self, parent=None, mainWindow=None, obj=None,
-                 restraintList=None, structureData=None, **kwds):
+                 restraintTable=None, structureData=None, **kwds):
         self.structureData = structureData
 
         super().__init__(parent=parent, mainWindow=mainWindow, obj=obj, **kwds)
 
     def _applyAllChanges(self, changes):
-        """Apply all changes - add new restraintList
+        """Apply all changes - add new restraintTable
         """
         super()._applyAllChanges(changes)
         if not self.EDITMODE:
-            # restraintList constraint, restraintType MUST be set
+            # restraintTable constraint, restraintType MUST be set
             if not self.obj.restraintType:
                 self.obj.restraintType = self.restraintType.getText()
 
-            # use the blank container as a dict for creating the new restraintList
-            self.structureData.newRestraintList(**self.obj)
+            # use the blank container as a dict for creating the new restraintTable
+            self.structureData.newRestraintTable(**self.obj)
 
     # def _populateInitialValues(self):
     #     """Populate the initial values for an empty object
@@ -66,8 +66,8 @@ class RestraintListPopupABC(AttributeEditorPopupABC):
     #     self.obj.name = self.klass._nextAvailableName(self.klass, self.project)
 
 
-class RestraintListEditPopup(RestraintListPopupABC):
-    """RestraintList attributes editor popup
+class RestraintTableEditPopup(RestraintTablePopupABC):
+    """RestraintTable attributes editor popup
     """
 
     attributes = [('Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
@@ -77,13 +77,13 @@ class RestraintListEditPopup(RestraintListPopupABC):
                   ]
 
 
-class RestraintListNewPopup(RestraintListPopupABC):
-    """RestraintList attributes editor popup
+class RestraintTableNewPopup(RestraintTablePopupABC):
+    """RestraintTable attributes editor popup
     """
 
     # new requires a pulldown list for restraintType - in edit it is fixed
     attributes = [('Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
                   ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
-                  ('Restraint Type', PulldownListCompoundWidget, getattr, setattr, RestraintListPopupABC._getRestraintTypes, None, {}),
+                  ('Restraint Type', PulldownListCompoundWidget, getattr, setattr, RestraintTablePopupABC._getRestraintTypes, None, {}),
                   ('Molecule FilePath', EntryCompoundWidget, getattr, setattr, None, None, {})
                   ]

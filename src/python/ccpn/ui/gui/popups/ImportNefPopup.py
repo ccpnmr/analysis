@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-24 10:12:36 +0100 (Fri, September 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:15:04 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -67,7 +67,7 @@ INVALIDTABLEFILLNOCHECKCOLOUR = QtGui.QColor('navajowhite')
 
 CHAINS = 'chains'
 NMRCHAINS = 'nmrChains'
-RESTRAINTLISTS = 'restraintLists'
+RESTRAINTTABLES = 'restraintTables'
 CCPNTAG = 'ccpn'
 SKIPPREFIXES = 'skipPrefixes'
 EXPANDSELECTION = 'expandSelection'
@@ -1849,7 +1849,7 @@ if __name__ == '__main__':
     # NOTE:ED - by default pidList=None selects everything in the project
     # from ccpn.core.Chain import Chain
     # from ccpn.core.ChemicalShiftList import ChemicalShiftList
-    # from ccpn.core.RestraintList import RestraintList
+    # from ccpn.core.RestraintTable import RestraintTable
     # from ccpn.core.PeakList import PeakList
     # from ccpn.core.IntegralList import IntegralList
     # from ccpn.core.MultipletList import MultipletList
@@ -1857,7 +1857,7 @@ if __name__ == '__main__':
     # from ccpn.core.Sample import Sample
     # from ccpn.core.Substance import Substance
     # from ccpn.core.NmrChain import NmrChain
-    # from ccpn.core.DataSet import DataSet
+    # from ccpn.core.StructureData import StructureData
     # from ccpn.core.Complex import Complex
     # from ccpn.core.SpectrumGroup import SpectrumGroup
     # from ccpn.core.Note import Note
@@ -1866,14 +1866,14 @@ if __name__ == '__main__':
     # checkList = [
     #     Chain._pluralLinkName,
     #     ChemicalShiftList._pluralLinkName,
-    #     RestraintList._pluralLinkName,
+    #     RestraintTable._pluralLinkName,
     #     PeakList._pluralLinkName,
     #     IntegralList._pluralLinkName,
     #     MultipletList._pluralLinkName,
     #     Sample._pluralLinkName,
     #     Substance._pluralLinkName,
     #     NmrChain._pluralLinkName,
-    #     DataSet._pluralLinkName,
+    #     StructureData._pluralLinkName,
     #     Complex._pluralLinkName,
     #     SpectrumGroup._pluralLinkName,
     #     Note._pluralLinkName,

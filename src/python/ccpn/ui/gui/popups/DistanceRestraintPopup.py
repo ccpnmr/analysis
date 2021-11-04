@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:15:04 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -35,7 +35,7 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 # from ccpn.util.Common import _incrementObjectName, _validateName
 from ccpn.core.StructureData import StructureData
-from ccpn.core.RestraintList import RestraintList
+from ccpn.core.RestraintTable import RestraintTable
 
 A = str(u"\u212B")
 
@@ -171,7 +171,7 @@ class CalculateDistanceRestraintsPopup(CcpnDialogMainWidget):
     def _populateWsFromProjectInfo(self):
         if self.project:
             self.pLwidget.selectFirstItem()
-            # name = _incrementObjectName(self.project, DataSet._pluralLinkName, self.nameWidget.getText())
+            # name = _incrementObjectName(self.project, StructureData._pluralLinkName, self.nameWidget.getText())
             # self.nameWidget.setText(name)
 
     @property

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-02 18:40:29 +0000 (Tue, November 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:15:50 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ from collections import OrderedDict as OD
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.core.Chain import Chain
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
-from ccpn.core.RestraintList import RestraintList
+from ccpn.core.RestraintTable import RestraintTable
 from ccpn.core.PeakList import PeakList
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.MultipletList import MultipletList
@@ -57,7 +57,7 @@ from ccpn.ui.gui.widgets.Menu import Menu
 # (and likely those in Project)
 CHAINS = 'chains'
 NMRCHAINS = 'nmrChains'
-RESTRAINTLISTS = 'restraintLists'
+RESTRAINTTABLES = 'restraintTables'
 CCPNTAG = 'ccpn'
 SKIPPREFIXES = 'skipPrefixes'
 EXPANDSELECTION = 'expandSelection'
@@ -74,7 +74,7 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
     checkList = [
         Chain._pluralLinkName,
         ChemicalShiftList._pluralLinkName,
-        RestraintList._pluralLinkName,
+        RestraintTable._pluralLinkName,
         PeakList._pluralLinkName,
         IntegralList._pluralLinkName,
         MultipletList._pluralLinkName,
@@ -92,7 +92,7 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
     selectableItems = [
         Chain._pluralLinkName,
         ChemicalShiftList._pluralLinkName,
-        RestraintList._pluralLinkName,
+        RestraintTable._pluralLinkName,
         NmrChain._pluralLinkName,
         PeakList._pluralLinkName,
         IntegralList._pluralLinkName,
@@ -103,7 +103,7 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
     lockedItems = {
         # Sample._pluralLinkName       : QtCore.Qt.Checked,
         # Substance._pluralLinkName    : QtCore.Qt.Checked,
-        # DataSet._pluralLinkName      : QtCore.Qt.Checked,
+        # StructureData._pluralLinkName: QtCore.Qt.Checked,
         # Complex._pluralLinkName      : QtCore.Qt.Checked,
         # SpectrumGroup._pluralLinkName: QtCore.Qt.Checked,
         # Note._pluralLinkName         : QtCore.Qt.Checked
@@ -399,7 +399,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
     checkList = [
         Chain._pluralLinkName,
         ChemicalShiftList._pluralLinkName,
-        RestraintList._pluralLinkName,
+        RestraintTable._pluralLinkName,
         PeakList._pluralLinkName,
         IntegralList._pluralLinkName,
         MultipletList._pluralLinkName,
@@ -425,10 +425,10 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         # 'nef_sequence': Chain._pluralLinkName,
         'nef_sequence_chain_code'               : (Chain._pluralLinkName, Chain.className),
         'nef_chemical_shift_list'               : (ChemicalShiftList._pluralLinkName, ChemicalShiftList.className),
-        'nef_distance_restraint_list'           : (RestraintList._pluralLinkName, RestraintList.className),
-        'nef_dihedral_restraint_list'           : (RestraintList._pluralLinkName, RestraintList.className),
-        'nef_rdc_restraint_list'                : (RestraintList._pluralLinkName, RestraintList.className),
-        'ccpn_restraint_list'                   : (RestraintList._pluralLinkName, RestraintList.className),
+        'nef_distance_restraint_list'           : (RestraintTable._pluralLinkName, RestraintTable.className),
+        'nef_dihedral_restraint_list'           : (RestraintTable._pluralLinkName, RestraintTable.className),
+        'nef_rdc_restraint_list'                : (RestraintTable._pluralLinkName, RestraintTable.className),
+        'ccpn_restraint_list'                   : (RestraintTable._pluralLinkName, RestraintTable.className),
         # 'nef_nmr_spectrum': PeakList._pluralLinkName,XXXXX.className),
         'nef_peak'                              : (PeakList._pluralLinkName, PeakList.className),
         'ccpn_integral_list'                    : (IntegralList._pluralLinkName, IntegralList.className),
@@ -455,7 +455,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         # Chain._pluralLinkName : [],
         Chain._pluralLinkName            : ['nef_sequence'],
         ChemicalShiftList._pluralLinkName: ['nef_chemical_shift_list', 'nef_chemical_shift'],
-        RestraintList._pluralLinkName: ['nef_distance_restraint_list', 'nef_distance_restraint',
+        RestraintTable._pluralLinkName: ['nef_distance_restraint_list', 'nef_distance_restraint',
                                             'nef_dihedral_restraint_list', 'nef_dihedral_restraint',
                                             'nef_rdc_restraint_list', 'nef_rdc_restraint',
                                             'ccpn_restraint_list', 'ccpn_restraint'],
@@ -482,7 +482,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         # Chain._pluralLinkName : [],
         Chain._pluralLinkName            : 'nef_sequence',
         ChemicalShiftList._pluralLinkName: None,
-        RestraintList._pluralLinkName    : None,
+        RestraintTable._pluralLinkName   : None,
         PeakList._pluralLinkName         : 'ccpn_peak_list',
         IntegralList._pluralLinkName     : 'ccpn_integral_list',
         MultipletList._pluralLinkName    : 'ccpn_multiplet_list',
@@ -645,7 +645,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
     def content_nef_restraint_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         pass
 
-    def content_nef_restraint(self, restraintList: RestraintList, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
+    def content_nef_restraint(self, restraintTable: RestraintTable, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
                               itemLength: int = None) -> Optional[OrderedSet]:
         pass
 

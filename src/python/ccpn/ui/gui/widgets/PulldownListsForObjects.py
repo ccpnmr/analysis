@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-02 18:40:29 +0000 (Tue, November 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:15:50 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -574,12 +574,12 @@ class RestraintContributionPulldown(_PulldownABC):
     _currentAttributeName = None
 
 
-class RestraintListPulldown(_PulldownABC):
-    """A PulldownListCompoundWidget class for RestraintLists
+class RestraintTablePulldown(_PulldownABC):
+    """A PulldownListCompoundWidget class for RestraintTables
     """
-    from ccpn.core.RestraintList import RestraintList
+    from ccpn.core.RestraintTable import RestraintTable
 
-    _klass, _className, _shortClassName, _attributeName = _definedBy(RestraintList)
+    _klass, _className, _shortClassName, _attributeName = _definedBy(RestraintTable)
     _currentAttributeName = None
 
 

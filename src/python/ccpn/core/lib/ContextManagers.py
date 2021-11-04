@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-06 17:47:50 +0100 (Mon, September 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 13:25:04 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -801,7 +801,6 @@ def deleteObject():
 
         with notificationBlanking(application=application):
             with undoStackBlocking(application=application) as addUndoItem:
-
                 # retrieve list of created items from the api
                 apiObjectsCreated = self._getApiObjectTree()
                 addUndoItem(undo=BlankedPartial(self._wrappedData.root._unDelete,
@@ -1055,11 +1054,16 @@ def ccpNmrV3CoreSetter(doNotify=True):
 
         with notificationBlanking(application=application):
             with undoStackBlocking(application=application) as addUndoItem:
-                # call the wrapped function
-                result = func(*args, **kwds)
 
-                addUndoItem(undo=BlankedPartial(func, self, 'change', False, self, oldValue),
-                            redo=BlankedPartial(func, self, 'change', False, self, args[1]))
+                try:
+                    # call the wrapped function
+                    result = func(*args, **kwds)
+                except Exception as es:
+                    raise
+
+                finally:
+                    addUndoItem(undo=BlankedPartial(func, self, 'change', False, self, oldValue),
+                                redo=BlankedPartial(func, self, 'change', False, self, args[1]))
 
         if doNotify:
             self._finaliseAction('change')
@@ -1091,14 +1095,18 @@ def ccpNmrV3CoreUndoBlock():
                     addUndoItem(undo=application.project.unblankNotification,
                                 redo=application.project.blankNotification)
 
-                # call the wrapped function
-                result = func(*args, **kwds)
+                try:
+                    # call the wrapped function
+                    result = func(*args, **kwds)
+                except Exception as es:
+                    raise
 
-                with undoStackBlocking(application=application) as addUndoItem:
-                    # incorporate the change notifier to simulate the decorator
-                    addUndoItem(undo=application.project.blankNotification,
-                                redo=application.project.unblankNotification)
-                    addUndoItem(redo=partial(self._finaliseAction, 'change'))
+                finally:
+                    with undoStackBlocking(application=application) as addUndoItem:
+                        # incorporate the change notifier to simulate the decorator
+                        addUndoItem(undo=application.project.blankNotification,
+                                    redo=application.project.unblankNotification)
+                        addUndoItem(redo=partial(self._finaliseAction, 'change'))
 
         self._finaliseAction('change')
 
@@ -1127,14 +1135,18 @@ def ccpNmrV3CoreSimple():
 
         with undoBlockWithoutSideBar(application=application):
             with undoStackBlocking(application=application) as addUndoItem:
-                # call the wrapped function
-                result = func(*args, **kwds)
 
-                addUndoItem(undo=partial(func, self, oldValue),
-                            redo=partial(func, self, args[1])
-                            )
+                try:
+                    # call the wrapped function
+                    result = func(*args, **kwds)
+                except Exception as es:
+                    raise
 
-        # self._finaliseAction('change')
+                finally:
+                    addUndoItem(undo=partial(func, self, oldValue),
+                                redo=partial(func, self, args[1])
+                                )
+
         return result
 
     return theDecorator

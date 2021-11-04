@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-01 11:20:56 +0000 (Mon, November 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 13:25:04 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -313,9 +313,9 @@ class ChemicalShiftTable(GuiTable):
         if not cShift:
             showWarning('Cannot perform action', 'No selected ChemicalShift')
             return
-        if not cShift.nmrAtom:
-            showWarning('Cannot perform action', 'No NmrAtom found for ChemicalShift')
-            return
+        # if not cShift.nmrAtom:
+        #     showWarning('Cannot perform action', 'No NmrAtom found for ChemicalShift')
+        #     return
         return cShift
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -466,9 +466,9 @@ class ChemicalShiftTable(GuiTable):
         if data and selection:
             cShift = data.get(DATAFRAME_OBJECT)
             currentNmrAtom = cShift.nmrAtom if cShift else None
-            matching = [ch.nmrAtom for ch in selection if ch and ch.nmrAtom != currentNmrAtom and
+            matching = [ch.nmrAtom for ch in selection if ch and ch.nmrAtom and ch.nmrAtom != currentNmrAtom and
                         ch.nmrAtom.isotopeCode == currentNmrAtom.isotopeCode]
-            nonMatching = [ch.nmrAtom for ch in selection if ch and ch.nmrAtom != currentNmrAtom and
+            nonMatching = [ch.nmrAtom for ch in selection if ch and ch.nmrAtom and ch.nmrAtom != currentNmrAtom and
                            ch.nmrAtom.isotopeCode != currentNmrAtom.isotopeCode]
 
             if len(matching) < 1:

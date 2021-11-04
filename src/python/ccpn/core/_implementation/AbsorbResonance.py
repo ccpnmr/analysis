@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-02 15:29:59 +0000 (Tue, November 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 13:25:04 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -130,20 +130,26 @@ def absorbResonance(self: 'NmrAtom', nmrAtom) -> 'NmrAtom':
                 testKey.remove(selfApi)
                 testKey.add(resonanceB)
                 testKey = frozenset(testKey)
-
-                # NOTE:ED - need undo/redo here
                 objectB = getattr(objectA.parent, funcName)(resonances=testKey)
 
                 if objectB is not None:
                     mergeObjects(project, objectB, objectA, _useV3Delete=True)
 
-    # Get rid of duplicate appData
-    for appData in selfApi.applicationData:
-        matchAppData = resonanceB.findFirstApplicationData(application=appData.application,
-                                                           keyword=appData.keyword)
-        if matchAppData:
-            resonanceB.removeApplicationData(matchAppData)
-            # NOTE:ED - need undo/redo here?
+    # # Get rid of duplicate appData
+    # for appData in selfApi.applicationData:
+    #     matchAppData = resonanceB.findFirstApplicationData(application=appData.application,
+    #                                                        keyword=appData.keyword)
+    #     if matchAppData:
+    #         resonanceB.removeApplicationData(matchAppData)
+    #         # NOTE:ED - need undo/redo here?
+
+    # # pre-merge the peak assignments
+    # _assignNew = nmrAtom.assignedPeaks
+    # for pk in _assignNew:
+    #     _assigned = list(pk.dimensionNmrAtoms)
+    #     # swap the nmrAto assignment in the lists
+    #     _newAssigned = tuple(tuple(set(self if nmrAt == nmrAtom else nmrAt for nmrAt in _assignDim)) for _assignDim in _assigned)
+    #     pk.dimensionNmrAtoms = _newAssigned
 
     mergeObjects(project, resonanceB, selfApi, _useV3Delete=True, )  #_mergeFunc=_mergeResonances)
 

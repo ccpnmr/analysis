@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-01 11:20:56 +0000 (Mon, November 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 13:25:03 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -430,15 +430,16 @@ class ChemicalShiftList(AbstractWrapperObject):
         else:
             raise ValueError(f'ChemicalShiftList._setShiftAttribute: attribute {name} not found in chemicalShift {self}')
 
-    def _getShiftAttributes(self, uniqueId, startName, endName):
+    def _getShiftAttributes(self, uniqueId, startName, endName, attribTypes):
         """Get the named attributes from the chemicalShift with supplied uniqueId
         """
-        raise NotImplementedError('ChemicalShiftList._setShiftAttributes is not available')
-        # row = self._getShiftByUniqueId(uniqueId)
-        # if startName in row and endName in row:
-        #     return row[startName:endName]
-        # else:
-        #     raise ValueError(f'ChemicalShiftList._getShiftAttributes: attribute {startName}|{endName} not found in chemicalShift')
+        row = self._getShiftByUniqueId(uniqueId)
+        if startName in row and endName in row:
+            _val = row[startName:endName]
+            _val = tuple(None if (val is None or (val != val)) else attribType(val) for val, attribType in zip(_val, attribTypes))
+            return _val
+        else:
+            raise ValueError(f'ChemicalShiftList._getShiftAttributes: attribute {startName}|{endName} not found in chemicalShift')
 
     def _setShiftAttributes(self, uniqueId, startName, endName, value):
         """Set the attributes of the chemicalShift with the supplied uniqueId

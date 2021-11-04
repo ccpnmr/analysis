@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-12 12:36:25 +0100 (Tue, October 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 13:25:03 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -332,26 +332,34 @@ class NmrAtom(AbstractWrapperObject):
                                          " and merging is disallowed")
 
             else:
-
                 if result is self:
-                    if nmrResidue.getNmrAtom(self.name) is None:
-                        self._apiResonance.resonanceGroup = nmrResidue._apiResonanceGroup
-                        if name != self.name:
-                            # self._wrappedData.name = name or None
-                            self.rename(name or None)
+                    # if nmrResidue.getNmrAtom(self.name) is None:
+                    #     if name != self.name:
+                    #         # self._wrappedData.name = name or None
+                    #         self.rename(name or None)
+                    #     # self._apiResonance.resonanceGroup = nmrResidue._apiResonanceGroup
+                    #     self._setApiResonanceGroup(self._apiResonance, nmrResidue)
+                    #
+                    # elif name is None or oldNmrResidue.getNmrAtom(name) is None:
+                    #     if name != self.name:
+                    #         # self._wrappedData.name = name or None
+                    #         self.rename(name or None)
+                    #     # self._apiResonance.resonanceGroup = nmrResidue._apiResonanceGroup
+                    #     self._setApiResonanceGroup(self._apiResonance, nmrResidue)
+                    #
+                    # else:
+                    #     # self._wrappedData.name = None  # Necessary to avoid name clashes
+                    #     self.rename(None)  # Necessary to avoid name clashes
+                    #     self._apiResonance.resonanceGroup = nmrResidue._apiResonanceGroup
+                    #     # self._setApiResonanceGroup(self._apiResonance, nmrResidue)
+                    #     # self._wrappedData.name = name
+                    #     self.rename(name or None)
 
-                    elif name is None or oldNmrResidue.getNmrAtom(name) is None:
-                        if name != self.name:
-                            # self._wrappedData.name = name or None
-                            self.rename(name or None)
-
-                        self._apiResonance.resonanceGroup = nmrResidue._apiResonanceGroup
-                    else:
-                        # self._wrappedData.name = None  # Necessary to avoid name clashes
-                        self.rename(None)
-                        self._apiResonance.resonanceGroup = nmrResidue._apiResonanceGroup
-                        # self._wrappedData.name = name
-                        self.rename(name or None)
+                    # Necessary to avoid name clashes - also handles all notifiers
+                    #   is it firing too many now though?
+                    self.rename(None)
+                    self._apiResonance.resonanceGroup = nmrResidue._apiResonanceGroup
+                    self.rename(name or None)
 
                 elif mergeToExisting:
                     result.mergeNmrAtoms(self)
@@ -363,7 +371,7 @@ class NmrAtom(AbstractWrapperObject):
         return result
 
     @logCommand(get='self')
-    def mergeNmrAtoms(self, nmrAtoms: Sequence['NmrAtom']):
+    def mergeNmrAtoms(self, nmrAtoms: Union['NmrAtom', Sequence['NmrAtom']]):
         nmrAtoms = makeIterableList(nmrAtoms)
         nmrAtoms = [self.project.getByPid(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom for nmrAtom in nmrAtoms]
         if not all(isinstance(nmrAtom, NmrAtom) for nmrAtom in nmrAtoms):
@@ -374,8 +382,6 @@ class NmrAtom(AbstractWrapperObject):
         with undoBlock():
             for nmrAtom in nmrAtoms:
                 absorbResonance(self, nmrAtom)
-
-                # TODO:ED - update shifts
 
     @property
     def _oldChemicalShifts(self) -> Tuple:

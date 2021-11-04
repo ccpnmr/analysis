@@ -36,7 +36,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-06 17:58:20 +0100 (Mon, September 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 13:25:04 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -52,6 +52,7 @@ from ccpnmodel.ccpncore.memops.metamodel import Constants as metaConstants
 from ccpnmodel.ccpncore.memops.ApiError import ApiError
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpn.core.lib.ContextManagers import undoStackBlocking
+
 
 _OVERRIDE = 'override'
 
@@ -83,6 +84,13 @@ def _changeDictDel(targetDd, nextSerial, oo, sourceDd, parentName, targetObj, to
     del sourceDd[nextSerial]
     oo.__dict__[parentName] = targetObj
     oo.__dict__['topObject'] = topObj
+
+
+def _changeAttrib(sourceObj, targetObj, linkName, var1, var2):
+    """Function to undo/redo dict changes in api
+    """
+    setattr(sourceObj, linkName, var1)
+    setattr(targetObj, linkName, var2)
 
 
 def _setSerial(targetObj, attrName, nextSerial):
@@ -133,6 +141,7 @@ def mergeObjects(project, sourceObj, targetObj, _useV3Delete=False, _mergeFunc=N
     objClass = targetObj.metaclass
 
     for a in objClass.getAllAttributes():
+        # if the objects are the same, this SHOULDN'T do anything
         attrName = a.name
 
         if a.isDerived or a.isAutomatic or a.changeability == metaConstants.frozen:
@@ -143,9 +152,9 @@ def mergeObjects(project, sourceObj, targetObj, _useV3Delete=False, _mergeFunc=N
 
         elif a.hicard == 1:
             if targetObj.__dict__[attrName] is None:
-                # undo/redo
                 _newVal = sourceObj.__dict__[attrName]
                 if _newVal != None:
+                    # undo/redo
                     # addUndoItem(undo=partial(setattr, targetObj, attrName, None),
                     #             redo=partial(setattr, targetObj, attrName, _newVal))
                     setattr(targetObj, attrName, _newVal)
@@ -384,6 +393,7 @@ def mergeObjects(project, sourceObj, targetObj, _useV3Delete=False, _mergeFunc=N
                         #print linkName, a.locard, a.hicard, o.locard, o.hicard
 
                         if a.hicard == 1:
+                            # print(f'  merge nastylinks hicard1   {a}   {linkName}')
                             #print "C1", linkName
 
                             if getattr(targetObj, linkName) is None:
@@ -459,6 +469,7 @@ def mergeObjects(project, sourceObj, targetObj, _useV3Delete=False, _mergeFunc=N
                             # unlikely ever to arise.
 
                             #
+                            # print(f'  merge nastylinks hicard!=1   {a}   {linkName}')
                             #print "C2", linkName
                             # set up
                             keepList = list(getattr(targetObj, linkName))
@@ -490,13 +501,22 @@ def mergeObjects(project, sourceObj, targetObj, _useV3Delete=False, _mergeFunc=N
                             _keepList = list(keepList)
                             _moveList = list(keepList + moveList)
 
-                            setattr(sourceObj, linkName, ignoreList)
-                            setattr(targetObj, linkName, keepList + moveList)
-                            # undo/redo
-                            addUndoItem(undo=partial(setattr, sourceObj, linkName, _ll),
-                                        redo=partial(setattr, sourceObj, linkName, _ignoreList))
-                            addUndoItem(undo=partial(setattr, targetObj, linkName, _keepList),
-                                        redo=partial(setattr, targetObj, linkName, _moveList))
+                            # print(f'   {_keepList}')
+                            # print(f'   {_ll}')
+                            # print(f'   {_ignoreList}')
+                            # print(f'   {_moveList}')
+
+                            # setattr(sourceObj, linkName, _ignoreList)  # ignoreList)
+                            # setattr(targetObj, linkName, _moveList)  # keepList + moveList)
+                            # # undo/redo
+                            # addUndoItem(undo=partial(setattr, sourceObj, linkName, _ll),
+                            #             redo=partial(setattr, sourceObj, linkName, _ignoreList))
+                            # addUndoItem(undo=partial(setattr, targetObj, linkName, _keepList),
+                            #             redo=partial(setattr, targetObj, linkName, _moveList))
+
+                            _changeAttrib(sourceObj, targetObj, linkName, _ignoreList, _moveList)
+                            addUndoItem(undo=partial(_changeAttrib, sourceObj, targetObj, linkName, _ll, _keepList),
+                                        redo=partial(_changeAttrib, sourceObj, targetObj, linkName, _ignoreList, _moveList))
 
                             if backName in keyNames:
                                 newKeys = []
@@ -520,16 +540,18 @@ def mergeObjects(project, sourceObj, targetObj, _useV3Delete=False, _mergeFunc=N
                                         newKeys.append(newKey)
                                         # del childDict[oldKey]
                                         # TJS edit: to be checked
-                                        _oldVal = childDict[oldKeys[ii]]
-                                        _setDict(childDict, oldKeys[ii], newKey, attrObj)
+                                        _key = oldKeys[ii]
+                                        _oldVal = childDict[_key]
+                                        _setDict(childDict, _key, newKey, attrObj)
                                         # undo/redo
-                                        addUndoItem(undo=partial(_setDict, childDict, newKey, oldKeys[ii], _oldVal),
-                                                    redo=partial(_setDict, childDict, oldKeys[ii], newKey, attrObj))
+                                        addUndoItem(undo=partial(_setDict, childDict, newKey, _key, _oldVal),
+                                                    redo=partial(_setDict, childDict, _key, newKey, attrObj))
 
                             # test
                             try:
                                 targetObj.checkValid()
-                                for attrObj in moveList:
+                                for attrObj in _moveList:
+                                    # NOTE:ED - this can catch an error for peakDims if there are not on matching dimensions
                                     attrObj.checkValid()
 
                             # undo
@@ -563,6 +585,7 @@ def mergeObjects(project, sourceObj, targetObj, _useV3Delete=False, _mergeFunc=N
                     targetDd = targetObj.__dict__[a.name]
                     topObj = targetObj.topObject
 
+                    # print(f'  merge childlinks {a}')
                     if a.hicard == 1:
                         # single kid (rare case)
                         _changeDict(targetObj, a.name, sourceObj, parentName, topObj)
@@ -574,7 +597,6 @@ def mergeObjects(project, sourceObj, targetObj, _useV3Delete=False, _mergeFunc=N
                         # multiple kid with serial key
                         nextSerial = targetObj.__dict__['_serialDict'][a.name] + 1
                         for junk, oo in sorted(sourceDd.items()):
-
                             _changeDictDel(targetDd, nextSerial, oo, sourceDd, parentName, targetObj, topObj)
                             # undo/redo
                             addUndoItem(undo=partial(_changeDictDel, sourceDd, nextSerial - 1, oo, targetDd, parentName, sourceObj, topObj),

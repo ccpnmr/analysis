@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-27 17:35:06 +0100 (Wed, October 27, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 13:25:03 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -41,7 +41,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.core.lib.peakUtils import _getPeakSNRatio, snapToExtremum as peakUtilsSnapToExtremum
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, \
-    undoBlock, undoBlockWithoutSideBar, undoStackBlocking
+    undoBlock, undoBlockWithoutSideBar, undoStackBlocking, ccpNmrV3CoreUndoBlock
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import makeIterableList, isIterable
 from ccpn.util.Constants import SCALETOLERANCE
@@ -474,7 +474,7 @@ class Peak(AbstractWrapperObject):
         return self.dimensionNmrAtoms
 
     @_dimensionNmrAtoms.setter
-    @ccpNmrV3CoreSetter()
+    @ccpNmrV3CoreUndoBlock()
     def _dimensionNmrAtoms(self, value: Sequence):
         """Assign by Dimensions
         Ccpn Internal:used by assignDimension/dimensionNmrAtoms - not to be called elsewhere
@@ -533,7 +533,6 @@ class Peak(AbstractWrapperObject):
 
     @dimensionNmrAtoms.setter
     @logCommand(get='self', isProperty=True)
-    # @ccpNmrV3CoreSetter()
     def dimensionNmrAtoms(self, value: Sequence):
 
         _pre = set(makeIterableList(self.assignedNmrAtoms))
@@ -612,7 +611,7 @@ class Peak(AbstractWrapperObject):
         return self.assignedNmrAtoms
 
     @_assignedNmrAtoms.setter
-    @ccpNmrV3CoreSetter()
+    @ccpNmrV3CoreUndoBlock()
     def _assignedNmrAtoms(self, value: Sequence):
         """Assign by Contributions
         Ccpn Internal: used by assignedNmrAtoms - not to be called elsewhere
@@ -653,7 +652,6 @@ class Peak(AbstractWrapperObject):
 
     @assignedNmrAtoms.setter
     @logCommand(get='self', isProperty=True)
-    # @ccpNmrV3CoreSetter()
     def assignedNmrAtoms(self, value: Sequence):
 
         _pre = set(makeIterableList(self.assignedNmrAtoms))
@@ -1003,20 +1001,20 @@ class Peak(AbstractWrapperObject):
     @integral.setter
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
-    def integral(self, integral: Union['Integral'] = None):
+    def integral(self, value: Union['Integral'] = None):
         """Link an integral to the peak.
         The peak must belong to the spectrum containing the peakList.
         :param integral: single integral."""
         spectrum = self._parent.spectrum
-        if integral:
+        if value:
             from ccpn.core.Integral import Integral
 
-            if not isinstance(integral, Integral):
-                raise TypeError('%s is not of type Integral' % integral)
-            if integral not in spectrum.integrals:
-                raise ValueError('%s does not belong to spectrum: %s' % (integral.pid, spectrum.pid))
+            if not isinstance(value, Integral):
+                raise TypeError('%s is not of type Integral' % value)
+            if value not in spectrum.integrals:
+                raise ValueError('%s does not belong to spectrum: %s' % (value.pid, spectrum.pid))
 
-        self._wrappedData.integral = integral._wrappedData if integral else None
+        self._wrappedData.integral = value._wrappedData if value else None
 
     # def _linkPeaks(self, peaks):
     #     """

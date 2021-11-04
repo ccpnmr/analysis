@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-11 19:40:43 +0100 (Mon, October 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:14:38 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,7 @@ from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Restraint import Restraint
-from ccpn.core.RestraintList import RestraintList
+from ccpn.core.RestraintTable import RestraintTable
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.DataFrameObject import DataFrameObject
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -53,7 +53,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.TableSorting import MultiColumnTableWidgetItem
 from ccpn.ui.gui.widgets.SettingsWidgets import ModuleSettingsWidget, \
-    RestraintListSelectionWidget, SpectrumDisplaySelectionWidget
+    RestraintTableSelectionWidget, SpectrumDisplaySelectionWidget
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import makeIterableList
 import ccpn.ui.gui.modules.PyMolUtil as pyMolUtil
@@ -79,8 +79,10 @@ HeaderMean = 'Mean'
 HeaderStd = 'STD'
 HeaderCount1 = 'Count>0.3'
 HeaderCount2 = 'Count>0.5'
+nefHeaders = ['restraintpid', 'atoms', 'min', 'max', 'mean', 'std', 'count_0_3', 'count_0_5']
+Headers = [HeaderRestraint, HeaderAtoms, HeaderMin, HeaderMax, HeaderMean, HeaderStd, HeaderCount1, HeaderCount2]
 
-ALL = '<all>'
+ALL = '<Use all>'
 PymolScriptName = 'Restraint_Pymol_Template.py'
 
 
@@ -122,7 +124,7 @@ class RestraintAnalysisTableModule(CcpnModule):
         # add the settings widgets defined from the following orderedDict - test for refactored
         settingsDict = OrderedDict((('SpectrumDisplays', {'label'   : '',
                                                           'tipText' : '',
-                                                          'callBack': None,  #self.restraintListPulldown,
+                                                          'callBack': None,  #self.restraintTablePulldown,
                                                           'enabled' : True,
                                                           '_init'   : None,
                                                           'type'    : SpectrumDisplaySelectionWidget,
@@ -131,16 +133,16 @@ class RestraintAnalysisTableModule(CcpnModule):
                                                                        'defaults'   : [],
                                                                        'objectName' : 'SpectrumDisplaysSelection'},
                                                           }),
-                                    ('RestraintLists', {'label'   : '',
+                                    ('RestraintTables', {'label'   : '',
                                                         'tipText' : '',
-                                                        'callBack': None,  #self.restraintListPulldown,
+                                                        'callBack': None,  #self.restraintTablePulldown,
                                                         'enabled' : True,
                                                         '_init'   : None,
-                                                        'type'    : RestraintListSelectionWidget,
+                                                        'type'    : RestraintTableSelectionWidget,
                                                         'kwds'    : {'texts'      : [],
                                                                      'displayText': [],
                                                                      'defaults'   : [],
-                                                                     'objectName' : 'RestraintListsSelection'},
+                                                                     'objectName' : 'RestraintTablesSelection'},
                                                         }),
                                     # ('autoExpand', {'label'   : '',
                                     #                 'tipText' : '',
@@ -168,7 +170,7 @@ class RestraintAnalysisTableModule(CcpnModule):
                                                                      'value'    : 0.3},
                                                         }),
                                     ('autoExpand', {'label'   : 'Auto-expand Groups',
-                                                    'tipText' : 'Automatically expand/collapse groups on\nadding new restraintList, or sorting.',
+                                                    'tipText' : 'Automatically expand/collapse groups on\nadding new restraintTable, or sorting.',
                                                     'callBack': self._updateAutoExpand,
                                                     'enabled' : True,
                                                     'checked' : False,
@@ -210,10 +212,10 @@ class RestraintAnalysisTableModule(CcpnModule):
                                                settingsDict=settingsDict,
                                                grid=(0, 0))
         # self._displayListWidget = self._RATwidget.checkBoxes['SpectrumDisplays']['widget']
-        # self._restraintList = self._RATwidget.checkBoxes['RestraintLists']['widget']
+        # self._restraintTable = self._RATwidget.checkBoxes['RestraintTables']['widget']
         self._displayListWidget = self._RATwidget.getWidget('SpectrumDisplays')
-        self._restraintList = self._RATwidget.getWidget('RestraintLists')
-        self._restraintList.listWidget.changed.connect(self._updateRestraintLists)
+        self._restraintTable = self._RATwidget.getWidget('RestraintTables')
+        self._restraintTable.listWidget.changed.connect(self._updateRestraintTables)
         # self._expandSelector = self._RATwidget.checkBoxes['autoExpand']['widget']
 
         self._meanLowerLimitSpinBox = self._RATwidget.checkBoxes['meanLowerLimit']['widget']
@@ -271,17 +273,17 @@ class RestraintAnalysisTableModule(CcpnModule):
     def dataFrame(self, dataFrame):
         self.restraintAnalysisTable.dataFrame = dataFrame
 
-    def _updateRestraintLists(self, *args):
-        """Update the selected restraintLists
+    def _updateRestraintTables(self, *args):
+        """Update the selected restraintTables
         """
-        restraintLists = self._restraintList.getTexts()
-        if '<all>' in restraintLists:
-            restraintLists = self.project.restraintLists
+        restraintTables = self._restraintTable.getTexts()
+        if ALL in restraintTables:
+            restraintTables = self.project.restraintTables
         else:
-            restraintLists = [self.project.getByPid(rList) for rList in restraintLists]
-            restraintLists = [rList for rList in restraintLists if rList is not None and isinstance(rList, RestraintList)]
+            restraintTables = [self.project.getByPid(rList) for rList in restraintTables]
+            restraintTables = [rList for rList in restraintTables if rList is not None and isinstance(rList, RestraintTable)]
 
-        self.restraintAnalysisTable.updateRestraintLists(restraintLists)
+        self.restraintAnalysisTable.updateRestraintTables(restraintTables)
 
     def _updateAutoExpand(self, expand):
         # index = self._expandSelector.getIndex()
@@ -335,7 +337,7 @@ class RestraintAnalysisTableWidget(GuiTable):
         self.settingWidgets = None
         self._selectedPeakList = None
         kwds['setLayout'] = True  # Assure we have a layout with the widget
-        self._restraintLists = []
+        self._restraintTables = []
         self._autoExpand = False
         self._meanLowerLimit = 0.0
 
@@ -430,10 +432,10 @@ class RestraintAnalysisTableWidget(GuiTable):
         """
         self._updateTable()
 
-    def updateRestraintLists(self, restraintLists):
+    def updateRestraintTables(self, restraintTables):
         """Update the selected restraint lists from the parent module
         """
-        self._restraintLists = restraintLists
+        self._restraintTables = restraintTables
         self._updateTable()
 
     def _updateTable(self, useSelectedPeakList=True, peaks=None, peakList=None):
@@ -526,7 +528,7 @@ class RestraintAnalysisTableWidget(GuiTable):
         else:
             self.current.peaks = peaks
             self.current.restraints = list(set(res for pk in peaks
-                                               for res in pk.restraints if res and res.restraintList in self._restraintLists))
+                                               for res in pk.restraints if res and res.restraintTable in self._restraintTables))
 
     def _pulldownPLcallback(self, data):
         self._updateTable()
@@ -542,7 +544,7 @@ class RestraintAnalysisTableWidget(GuiTable):
         self.updateTableExpanders(expand)
 
     def updateAutoExpand(self, expand):
-        """Set the auto-expand/collapsed state for adding new restraintLists, or sorting table
+        """Set the auto-expand/collapsed state for adding new restraintTables, or sorting table
         """
         self._autoExpand = expand
 
@@ -716,11 +718,11 @@ class RestraintAnalysisTableWidget(GuiTable):
             (HeaderObject, lambda row: _getValueByHeader(row, HeaderObject), 'TipTex3', None, None),
             ]
 
-        if len(self._restraintLists) > 0:
+        if len(self._restraintTables) > 0:
             _buildColumns.append((HeaderExpand, lambda pk, rt: self._downIcon))
             _cols.append((HeaderExpand, lambda row: None, 'TipTex4', None, None))
 
-        # for col in range(len(self._restraintLists)):
+        # for col in range(len(self._restraintTables)):
         #     for _colID in (HeaderRestraint, HeaderAtoms, HeaderMin, HeaderMax, HeaderMean, HeaderStd, HeaderCount1, HeaderCount2):
         #         _cols.append((f'{_colID}_{col + 1}', lambda row: _getValueByHeader(row, f'{_colID}_{col + 1}'), f'{_colID}_Tip{col + 1}', None, None))
         #
@@ -734,10 +736,10 @@ class RestraintAnalysisTableWidget(GuiTable):
         #     for col, obj in enumerate(buildList):
         #
         #         # ids = pd.DataFrame({'#': [pk.serial for pk in buildList], 'Peak': [pk.pid for pk in buildList], '_object': [pk for pk in buildList], 'Expand': [None for pk in buildList]})
-        #         # df1 = pd.DataFrame([(pk, res) for pk in buildList for res in pk.restraints if res.restraintList == rl], columns=['Peak', 'Pid_1'])
+        #         # df1 = pd.DataFrame([(pk, res) for pk in buildList for res in pk.restraints if res.restraintTable == rl], columns=['Peak', 'Pid_1'])
         #         # rl1 = pd.merge(ids['Peak'], df1, how='right')
         #
-        #         if not obj.restraints or len(self._restraintLists) < 1:
+        #         if not obj.restraints or len(self._restraintTables) < 1:
         #             listItem = OrderedDict()
         #             for headerText, func in _buildColumns:
         #                 listItem[headerText] = func(obj, None)
@@ -749,10 +751,10 @@ class RestraintAnalysisTableWidget(GuiTable):
         #             for headerText, func in _buildColumns:
         #                 listItem[headerText] = func(obj, None)
         #
-        #             _resLists = OrderedDict([(res, []) for res in self._restraintLists])
+        #             _resLists = OrderedDict([(res, []) for res in self._restraintTables])
         #
         #             # get the result from the dataSet.data
-        #             # rl = self._restraintLists[0]; rl.dataSet.data[0].parameters.get('results')
+        #             # rl = self._restraintTables[0]; rl.structureData.data[0].parameters.get('results')
         #             #
         #             # rename the columns to match
         #             # viols.columns = [col+'_{ii+1}' for col in viols.columns]
@@ -760,10 +762,10 @@ class RestraintAnalysisTableWidget(GuiTable):
         #             # pd.merge(blank, viols, on=['Pid_1', 'Atoms_1'], how='left').fillna(0.0)
         #
         #             for _res in _restraints:
-        #                 if _res and _res.restraintList in _resLists:
+        #                 if _res and _res.restraintTable in _resLists:
         #                     _atoms = self._getContributions(_res)
         #                     for _atom in _atoms:
-        #                         _resLists[_res.restraintList].append((_res, _atom, 0.0))
+        #                         _resLists[_res.restraintTable].append((_res, _atom, 0.0))
         #
         #             for val in zip_longest(*_resLists.values()):
         #                 copyItem = listItem.copy()
@@ -798,7 +800,7 @@ class RestraintAnalysisTableWidget(GuiTable):
 
         # get the target peakLists
         pks = buildList
-        resLists = self._restraintLists
+        resLists = self._restraintTables
 
         if resLists:
             # make references for quicker access later
@@ -816,7 +818,7 @@ class RestraintAnalysisTableWidget(GuiTable):
 
             # get the maximum number of restraintItems from each restraint list
             counts = [np.array([sum([
-                len(contribs[res]) for res in (pkRestraints.get(pk.serial) or ()) if res and res.restraintList == rList
+                len(contribs[res]) for res in (pkRestraints.get(pk.serial) or ()) if res and res.restraintTable == rList
                 ])
                 for pk in pks])
                 for rList in resLists]
@@ -829,13 +831,13 @@ class RestraintAnalysisTableWidget(GuiTable):
             index = pd.DataFrame([ii for ii in range(1, len(allPkSerials) + 1)], columns=['index', ])
             allPks = pd.DataFrame([(pk.serial, pk.pid, self._downIcon) for pk, count in zip(pks, maxCount) for rr in range(count)], columns=['PeakSerial', '_object', 'Expand'])
 
-            # make matching length tables for each of the restraintLists for each peak so the rows match up in the table
+            # make matching length tables for each of the restraintTables for each peak so the rows match up in the table
             dfs = {}
             ll = [(None, None)] * sum(maxCount)
             for lCount, rl in enumerate(resLists):
                 head = 0
                 for pk, cc, maxcc in zip(pks, counts[lCount], maxCount):
-                    _res = [(res.pid, _atom) for res in (pkRestraints.get(pk.serial) or ()) if res.restraintList == rl
+                    _res = [(res.pid, _atom) for res in (pkRestraints.get(pk.serial) or ()) if res.restraintTable == rl
                             for _atom in contribs[res]]
                     if _res:
                         ll[head:head + len(_res)] = _res
@@ -844,21 +846,21 @@ class RestraintAnalysisTableWidget(GuiTable):
 
                 # put the serial and atoms into another table to be concatenated to the right, lCount = index in resLists
                 dfs[rl] = pd.concat([allPkSerials,
-                                     pd.DataFrame(ll, columns=[f'RestraintPid_{lCount + 1}',
+                                     pd.DataFrame(ll, columns=[f'{HeaderRestraint}_{lCount + 1}',
                                                                f'Atoms_{lCount + 1}'])], axis=1)
 
             # get the dataSets that contain data with a matching 'result' name - should be violations
             violationResults = {resList: viols.copy() if viols is not None else None
                                 for resList in resLists
-                                for data in resList.dataSet.data if resList.name == data.name
+                                for data in resList.structureData.data if resList.name == data.name
                                 for k, viols in data.parameters.items() if k == 'results'}
 
-            # rename the columns to match the order in visible list - number must match the position in the selected restraintLists
+            # rename the columns to match the order in visible list - number must match the position in the selected restraintTables
             for ii, (k, resViol) in enumerate(violationResults.items()):
                 ind = resLists.index(k)
                 resViol.columns = [vv + f'_{ind + 1}' for vv in resViol.columns]
 
-            # merge all the tables for each restraintList
+            # merge all the tables for each restraintTable
             _out = {}
             zeroCols = []
             for ii, resList in enumerate(resLists):
@@ -866,9 +868,9 @@ class RestraintAnalysisTableWidget(GuiTable):
 
                     _left = dfs[resList]
                     _right = violationResults[resList]
-                    if (f'RestraintPid_{ii + 1}' in _left.columns and f'Atoms_{ii + 1}' in _left.columns) and \
-                            (f'RestraintPid_{ii + 1}' in _right.columns and f'Atoms_{ii + 1}' in _right.columns):
-                        _out[resList] = pd.merge(_left, _right, on=[f'RestraintPid_{ii + 1}', f'Atoms_{ii + 1}'], how='left').drop(columns=['PeakSerial']).fillna(0.0)
+                    if (f'{HeaderRestraint}_{ii + 1}' in _left.columns and f'Atoms_{ii + 1}' in _left.columns) and \
+                            (f'{HeaderRestraint}_{ii + 1}' in _right.columns and f'Atoms_{ii + 1}' in _right.columns):
+                        _out[resList] = pd.merge(_left, _right, on=[f'{HeaderRestraint}_{ii + 1}', f'Atoms_{ii + 1}'], how='left').drop(columns=['PeakSerial']).fillna(0.0)
                         zeroCols.append(f'{HeaderMean}_{ii + 1}')
 
                     for _colID in (HeaderRestraint, HeaderAtoms, HeaderMin, HeaderMax, HeaderMean, HeaderStd, HeaderCount1, HeaderCount2):
@@ -1018,17 +1020,17 @@ class RestraintAnalysisTableWidget(GuiTable):
         selectedPeaks = self.getSelectedObjects() or []
         ## get the restraints to display
         restraints = flattenLists([pk.restraints for pk in selectedPeaks])
-        ## get the PDB file from the parent restraintList.
+        ## get the PDB file from the parent restraintTable.
         for rs in restraints:
-            if rs.restraintList.moleculeFilePath:
-                pdbPath = rs.restraintList.moleculeFilePath
+            if rs.restraintTable.moleculeFilePath:
+                pdbPath = rs.restraintTable.moleculeFilePath
                 getLogger().info('Using pdb file %s for displaying violation on Molecular viewer.' % pdbPath)
                 break
         ## run Pymol
         pymolScriptPath = joinPath(self.application.pymolScriptsPath, PymolScriptName)
         if pdbPath is None:
             MessageDialog.showWarning('No Molecule File found',
-                                      '''To add a molecule file path to the RestraintList: Find the restraintList on sideBar, 
+                                      '''To add a molecule file path to the RestraintTable: Find the restraintTable on sideBar, 
                                       open the properties popup, add a full PDB file path in the entry widget.''')
             return
         pymolScriptPath = pyMolUtil._restraintsSelection2PyMolFile(pymolScriptPath, pdbPath, restraints)

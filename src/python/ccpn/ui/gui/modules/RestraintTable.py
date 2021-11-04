@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-11 19:40:44 +0100 (Mon, October 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:14:38 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -33,8 +33,8 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.widgets.PulldownListsForObjects import RestraintListPulldown
-from ccpn.core.RestraintList import RestraintList
+from ccpn.ui.gui.widgets.PulldownListsForObjects import RestraintTablePulldown
+from ccpn.core.RestraintTable import RestraintTable
 from ccpn.core.Restraint import Restraint
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.util.Logging import getLogger
@@ -67,7 +67,7 @@ class RestraintTableModule(CcpnModule):
 
     # we are subclassing this Module, hence some more arguments to the init
     def __init__(self, mainWindow=None, name='Restraint Table',
-                 restraintList=None, selectFirstItem=False):
+                 restraintTable=None, selectFirstItem=False):
         """
         Initialise the Module widgets
         """
@@ -99,8 +99,8 @@ class RestraintTableModule(CcpnModule):
                                              setLayout=True,
                                              grid=(0, 0))
 
-        if restraintList is not None:
-            self.selectRestraintList(restraintList)
+        if restraintTable is not None:
+            self.selectRestraintTable(restraintTable)
         elif selectFirstItem:
             self.restraintTable.rtWidget.selectFirstItem()
 
@@ -113,11 +113,11 @@ class RestraintTableModule(CcpnModule):
         """
         self.restraintTable._maximise()
 
-    def selectRestraintList(self, restraintList=None):
+    def selectRestraintTable(self, restraintTable=None):
         """
         Manually select a restraintTable from the pullDown
         """
-        self.restraintTable._selectRestraintList(restraintList)
+        self.restraintTable._selectRestraintTable(restraintTable)
 
     def _closeModule(self):
         """
@@ -132,12 +132,12 @@ class RestraintTable(GuiTable):
     Class to present a RestraintTable pulldown list, wrapped in a Widget
     """
     className = 'RestraintTable'
-    attributeName = 'restraintLists'
+    attributeName = 'restraintTables'
 
     OBJECT = 'object'
     TABLE = 'table'
 
-    def __init__(self, parent=None, mainWindow=None, moduleParent=None, restraintList=None, **kwds):
+    def __init__(self, parent=None, mainWindow=None, moduleParent=None, restraintTable=None, **kwds):
         """
         Initialise the widgets for the module.
         """
@@ -158,7 +158,7 @@ class RestraintTable(GuiTable):
         RestraintTable.project = self.project
 
         kwds['setLayout'] = True  ## Assure we have a layout with the widget
-        self.restraintList = None
+        self.restraintTable = None
 
         # create the column objects
         self.RLcolumns = ColumnClass([('#', '_key', 'Restraint Id', None, None),
@@ -184,12 +184,12 @@ class RestraintTable(GuiTable):
 
         row += 1
         gridHPos = 0
-        self.rtWidget = RestraintListPulldown(parent=self._widget,
-                                              mainWindow=self.mainWindow, default=None,
-                                              grid=(row, gridHPos), minimumWidths=(0, 100),
-                                              showSelectName=True,
-                                              sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
-                                              callback=self._selectionPulldownCallback)
+        self.rtWidget = RestraintTablePulldown(parent=self._widget,
+                                               mainWindow=self.mainWindow, default=None,
+                                               grid=(row, gridHPos), minimumWidths=(0, 100),
+                                               showSelectName=True,
+                                               sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
+                                               callback=self._selectionPulldownCallback)
         gridHPos += 1
         self.showOnViewerButton = Button(self._widget, tipText='Show on Molecular Viewer',
                                          icon=Icon('icons/showStructure'),
@@ -218,18 +218,18 @@ class RestraintTable(GuiTable):
                          grid=(3, 0), gridSpan=(1, 6))
         self.moduleParent = moduleParent
 
-        ## populate the table if there are restraintLists in the project
-        if restraintList is not None:
-            self._selectRestraintList(restraintList)
+        ## populate the table if there are restraintTables in the project
+        if restraintTable is not None:
+            self._selectRestraintTable(restraintTable)
 
-        self.setTableNotifiers(tableClass=RestraintList,
+        self.setTableNotifiers(tableClass=RestraintTable,
                                rowClass=Restraint,
                                cellClassNames=None,
-                               tableName='restraintList', rowName='restraint',
+                               tableName='restraintTable', rowName='restraint',
                                changeFunc=self.displayTableForRestraint,
                                className=self.attributeName,
                                updateFunc=self._update,
-                               tableSelection='restraintList',
+                               tableSelection='restraintTable',
                                pullDownWidget=self.RLcolumns,
                                callBackClass=Restraint,
                                selectCurrentCallBack=self._selectOnTableCurrentRestraintNotifierCallback,
@@ -249,7 +249,7 @@ class RestraintTable(GuiTable):
         CallBack for Drop events
         """
         pids = data.get('pids', [])
-        self._handleDroppedItems(pids, RestraintList, self.rtWidget)
+        self._handleDroppedItems(pids, RestraintTable, self.rtWidget)
 
     def addWidgetToTop(self, widget, col=2, colSpan=1):
         """
@@ -259,30 +259,30 @@ class RestraintTable(GuiTable):
             raise RuntimeError('Col has to be >= 2')
         self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
 
-    def _selectRestraintList(self, restraintList=None):
+    def _selectRestraintTable(self, restraintTable=None):
         """
-        Manually select a restraintList from the pullDown
+        Manually select a restraintTable from the pullDown
         """
-        if restraintList is None:
-            # logger.debug('select: No RestraintList selected')
-            # raise ValueError('select: No RestraintList selected')
+        if restraintTable is None:
+            # logger.debug('select: No RestraintTable selected')
+            # raise ValueError('select: No RestraintTable selected')
             self.rtWidget.selectFirstItem()
         else:
-            if not isinstance(restraintList, RestraintList):
-                logger.debug('select: Object is not of type RestraintList')
-                raise TypeError('select: Object is not of type RestraintList')
+            if not isinstance(restraintTable, RestraintTable):
+                logger.debug('select: Object is not of type RestraintTable')
+                raise TypeError('select: Object is not of type RestraintTable')
             else:
                 for widgetObj in self.rtWidget.textList:
-                    if restraintList.pid == widgetObj:
-                        self.restraintList = restraintList
-                        self.rtWidget.select(self.restraintList.pid)
+                    if restraintTable.pid == widgetObj:
+                        self.restraintTable = restraintTable
+                        self.rtWidget.select(self.restraintTable.pid)
 
-    def displayTableForRestraint(self, restraintList):
+    def displayTableForRestraint(self, restraintTable):
         """
         Display the table for all Restraints"
         """
-        self.rtWidget.select(restraintList.pid)
-        self._update(restraintList)
+        self.rtWidget.select(restraintTable.pid)
+        self._update(restraintTable)
 
     def _selectOnTableCurrentRestraintNotifierCallback(self, data):
         """
@@ -300,28 +300,28 @@ class RestraintTable(GuiTable):
 
     def _showOnMolecularViewer(self):
 
-        restraintList = self.rtWidget.getSelectedObject()
+        restraintTable = self.rtWidget.getSelectedObject()
         restraints = self.getSelectedObjects() or []
 
-        if restraintList is not None:
+        if restraintTable is not None:
             pymolScriptPath = os.path.join(self.application.pymolScriptsPath, PymolScriptName)
-            pdbPath = restraintList.moleculeFilePath
+            pdbPath = restraintTable.moleculeFilePath
             if pdbPath is None:
-                MessageDialog.showWarning('No Molecule File found', 'Add a molecule file path to the RestraintList from SideBar.')
+                MessageDialog.showWarning('No Molecule File found', 'Add a molecule file path to the RestraintTable from SideBar.')
                 return
             pymolScriptPath = pyMolUtil._restraintsSelection2PyMolFile(pymolScriptPath, pdbPath, restraints)
             pyMolUtil.runPymolWithScript(self.application, pymolScriptPath)
 
-        if not restraintList:
-            MessageDialog.showWarning('Nothing to show', 'Select a RestraintList first')
+        if not restraintTable:
+            MessageDialog.showWarning('Nothing to show', 'Select a RestraintTable first')
 
     def _updateCallback(self, data):
         """
         Notifier callback for updating the table
         """
-        thisRestraintList = getattr(data[Notifier.THEOBJECT], self.attributeName)  # get the restraintList
-        if self.restraintList in thisRestraintList:
-            self.displayTableForRestraint(self.restraintList)
+        thisRestraintTable = getattr(data[Notifier.THEOBJECT], self.attributeName)  # get the restraintTable
+        if self.restraintTable in thisRestraintTable:
+            self.displayTableForRestraint(self.restraintTable)
         else:
             self.clear()
 
@@ -329,16 +329,16 @@ class RestraintTable(GuiTable):
         """
         Redraw the table on a maximise event
         """
-        if self.restraintList:
-            self.displayTableForRestraint(self.restraintList)
+        if self.restraintTable:
+            self.displayTableForRestraint(self.restraintTable)
         else:
             self.clear()
 
-    def _update(self, restraintList):
+    def _update(self, restraintTable):
         """
         Update the table
         """
-        self.populateTable(rowObjects=restraintList.restraints,
+        self.populateTable(rowObjects=restraintTable.restraints,
                            columnDefs=self.RLcolumns
                            )
         self._highLightObjs(self.current.restraints)
@@ -349,7 +349,7 @@ class RestraintTable(GuiTable):
         """
         restraints = self.getSelectedObjects()
         self.current.restraints = restraints
-        RestraintTableModule.currentCallback = {'object': self.restraintList, 'table': self}
+        RestraintTableModule.currentCallback = {'object': self.restraintTable, 'table': self}
 
     def _actionCallback(self, data, *args):
         """
@@ -396,11 +396,11 @@ class RestraintTable(GuiTable):
         """
         Notifier Callback for selecting restraint from the pull down menu
         """
-        self.restraintList = self.project.getByPid(item)
-        logger.debug('>selectionPulldownCallback>', item, type(item), self.restraintList)
-        if self.restraintList is not None:
+        self.restraintTable = self.project.getByPid(item)
+        logger.debug('>selectionPulldownCallback>', item, type(item), self.restraintTable)
+        if self.restraintTable is not None:
             # self.thisDataSet = self._getAttachedDataSet(item)
-            self.displayTableForRestraint(self.restraintList)
+            self.displayTableForRestraint(self.restraintTable)
         else:
             self.clearTable()
 

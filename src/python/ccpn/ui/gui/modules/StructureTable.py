@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-11 19:40:44 +0100 (Mon, October 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:14:38 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -382,13 +382,13 @@ class StructureTable(GuiTableStructure):
 
         # self.stWidget.select(structureEnsemble.pid)
 
-        # ejb - doesn't work, can't store in a DataSet
+        # ejb - doesn't work, can't store in a StructureData
         if self.thisDataSet is not None:
             self._updateDataSet(self.thisDataSet)
 
     def _getAttachedDataSet(self, thisObj):
         """
-        Get the DataSet object attached to this StructureEnsemble
+        Get the StructureData object attached to this StructureEnsemble
         """
         if len(self.stButtons.radioButtons) > 0:
             self.stButtons.radioButtons[1].setEnabled(False)
@@ -396,8 +396,8 @@ class StructureTable(GuiTableStructure):
             Found = False
             dd = dt = None
             self.thisDataSet = None
-            if self._project.dataSets:
-                for dd in self._project.dataSets:
+            if self._project.structureData:
+                for dd in self._project.structureData:
                     if dd.title == thisObj.name:
                         for dt in dd.data:
                             if dt.name == 'Derived':
@@ -429,9 +429,9 @@ class StructureTable(GuiTableStructure):
             # dt.parameters['average'] = averageStructure(item.data)
             # dt.setParameter(name='average', value=averageStructure(item.data))
             # dt.attachedObject = averageStructure(item.data)
-            # ejb - does't work, can't store in a DataSet
+            # ejb - does't work, can't store in a StructureData
 
-            # for dd in self._project.dataSets:
+            # for dd in self._project.structureData:
             #
             #   if dd.title == thisObj.longPid:
             #
@@ -449,8 +449,8 @@ class StructureTable(GuiTableStructure):
 
         # if item:
         #   thisObj = self._project.getByPid(item)
-        #   if self._project.dataSets:
-        #     for dd in self._project.dataSets:
+        #   if self._project.structureData:
+        #     for dd in self._project.structureData:
         #       if dd.title == thisObj.longPid:
         #
         #         self.thisDataSet = dd
@@ -769,14 +769,14 @@ class StructureTable(GuiTableStructure):
     #
     #   # make a test dataset in here
     #
-    #   self.dataSet = self.project.newDataSet(self.ensemble.longPid)    # title - should be ensemble name/title/longPid
+    #   self.structureData = self.project.newStructureData(self.ensemble.longPid)    # title - should be ensemble name/title/longPid
     #
-    #   self.dataItem = self.dataSet.newData('derivedConformers')
-    #   self.dataSet.attachedObject = self.ensemble       # the newest object
+    #   self.dataItem = self.structureData.newData('derivedConformers')
+    #   self.structureData.attachedObject = self.ensemble       # the newest object
     #   self.dataItem.setParameter(name='backboneSelector', value=self.ensemble.data.backboneSelector)
     #
     #   StructureTableModule.defined=True
-    #   # should be a DataSet with the corresponding stuff in it
+    #   # should be a StructureData with the corresponding stuff in it
     #   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
     # finally:
     #   pass

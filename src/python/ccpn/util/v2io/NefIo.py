@@ -44,7 +44,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-04 12:28:20 +0100 (Wed, August 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-04 20:16:19 +0000 (Thu, November 04, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1186,7 +1186,7 @@ class CcpnNefReader:
             restraintList = self.frameCode2Object.get(row.get('restraint_list_id'))
             if restraintList is None:
                 self.warning(
-                        "No RestraintList saveframe found with framecode %s. Skipping peak_restraint_link"
+                        "No restraint_list saveframe found with framecode %s. Skipping peak_restraint_link"
                         % row.get('restraint_list_id')
                         )
                 continue

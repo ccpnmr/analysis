@@ -653,7 +653,7 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
 
     import math
     from ccpn.core.Peak import Peak
-    from ccpnc.peak import Peak as CPeak
+
     from ccpn.framework.Application import getApplication
 
     getApp = getApplication()
@@ -675,6 +675,7 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
         return
 
     if searchBoxMode and numDim > 1:
+        from ccpnc.peak import Peak as CPeak
         # NOTE:ED get the peakDim axisCode here and define the new half boxwidths based on the ValuePerPoint
         searchBoxWidths = getApp.preferences.general.searchBoxWidthsNd
 

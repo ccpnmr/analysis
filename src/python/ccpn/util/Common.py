@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-04 12:28:19 +0100 (Wed, August 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-08 17:43:51 +0000 (Mon, November 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -442,12 +442,14 @@ def contains_whitespace_nospace(s):
 
 def makeIterableList(inList=None):
     """
-    Take a list of lists and concatenate into a single list.
-    Remove any Nones from the list
-    :param inList:
-    :return single list:
+    Take a nested collection of (tuples, lists or sets) and concatenate into a single list.
+    Also changes a single item into a list.
+    Removes any Nones from the list
+    :param inList: list of tuples, lists, sets or single items
+    :return: a single list
     """
-    if isinstance(inList, Iterable) and not isinstance(inList, str):
+    # if isinstance(inList, Iterable) and not isinstance(inList, str):
+    if isinstance(inList, (tuple, list, set)):
         return [y for x in inList for y in makeIterableList(x) if inList]
     else:
         if inList is not None:

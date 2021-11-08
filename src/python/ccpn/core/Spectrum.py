@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-11 20:43:39 +0100 (Mon, October 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-08 17:44:26 +0000 (Mon, November 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2892,7 +2892,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
             # delete the connected lists, should undo in the correct order
             for obj in listsToDelete:
-                obj.delete()
+                obj._delete()
 
             with undoStackBlocking() as addUndoItem:
                 # notify spectrumViews of delete/create

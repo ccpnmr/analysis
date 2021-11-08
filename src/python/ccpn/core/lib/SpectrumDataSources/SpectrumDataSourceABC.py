@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-08 15:20:42 +0000 (Mon, November 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-08 18:06:51 +0000 (Mon, November 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -607,6 +607,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
             return True
 
         return False
+
+    def nameFromPath(self):
+        """Return a name derived from path (to be subclassed for specific cases; e.g. Bruker)
+        """
+        return self.path.stem
 
     def getByDimensions(self, parameterName: str, dimensions: Sequence[int]):
         """Return values defined by parameterName in order defined by dimensions (1..dimensionCount).

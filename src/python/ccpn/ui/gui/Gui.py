@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:25:09 +0100 (Mon, September 13, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-11-08 18:06:51 +0000 (Mon, November 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -346,9 +346,6 @@ class Gui(Ui):
 #
 #######################################################################################
 
-#TODO: move to individual files containing the wrapped class and Gui-class
-# Any Factory function to _implementation or abstractWrapper
-
 
 ## Window class
 coreClass = _coreClassMap['Window']
@@ -380,7 +377,7 @@ class MainWindow(coreClass, _GuiMainWindow):
 
         application._mainWindow = self
         application.ui.mainWindow = self
-        logger.debug('MainWindow>> application from QtCore..: %s' % application)
+        logger.debug('MainWindow>> application: %s' % application)
         logger.debug('MainWindow>> application.project: %s' % application.project)
         logger.debug('MainWindow>> application._mainWindow: %s' % application._mainWindow)
         logger.debug('MainWindow>> application.ui.mainWindow: %s' % application.ui.mainWindow)

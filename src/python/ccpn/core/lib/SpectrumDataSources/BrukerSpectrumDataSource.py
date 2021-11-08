@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-08 15:20:42 +0000 (Mon, November 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-08 18:06:50 +0000 (Mon, November 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -203,15 +203,24 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
             getLogger().debug2(errorMsg)
             raise RuntimeError(errorMsg)
 
+    def _hasBinaryData(self, path=None):
+        """Return True if path (defaults to self._pdataDir) contains binary data
+        """
+        if path is None:
+            path = self._pdataDir
+        return len(path.globList('[1-8][r,i]*')) > 0
+
     def _isBrukerPdataDir(self, path):
         """Return True if path (of type Path) is a Bruker pdata directory with
         proc files and binary data
         """
+        if path is None:
+            return False
         hasProcFiles = len(path.globList('proc*')) > 0
-        hasBinarydata = len(path.globList('[1-8][r,i]*')) > 0
-
-        return path is not None and path.exists() and path.is_dir() and \
-               hasProcFiles and hasBinarydata
+        hasBrukerTopdir = self._isBrukerTopDir(path.parent.parent)
+        hasPdata = path.parent.stem == self._PDATA
+        return path.exists() and path.is_dir() and \
+               hasPdata and hasBrukerTopdir and hasProcFiles
 
     def _checkBrukerPdataDir(self, path):
         """Check if path (of type Path) is a valid Bruker pdata directory with
@@ -233,8 +242,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
             getLogger().debug2(errorMsg)
             raise RuntimeError(errorMsg)
 
-        hasBinarydata = len(path.globList('[1-8][r,i]*')) > 0
-        if not hasBinarydata:
+        if not self._hasBinaryData():
             errorMsg = 'Bruker pdata directory "%s": has no valid processed data' % path
             getLogger().debug2(errorMsg)
             raise RuntimeError(errorMsg)
@@ -249,6 +257,31 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 break
             dimensionality += 1
         return dimensionality
+
+    def _findFirstPdataDir(self):
+        """Find and return first pdata subdir with valid data, starting from Bruker topDir
+        :return path of valid pdata 'proc'-directory or None if not found
+        """
+        _pdata = self._brukerRoot / self._PDATA
+        _procDirs = []
+        # add numeric proc dirs only; to sort later
+        for p in _pdata.globList('[1-9]*'):
+            try:
+                _procDirs.append(int(p.basename))
+            except:
+                pass
+        _procDirs.sort(key=int)
+
+        for p in _procDirs:
+            _path = _pdata / str(p)
+            if self._isBrukerPdataDir(_path) and self._hasBinaryData(_path):
+                return _path
+        return None
+
+    def nameFromPath(self):
+        """Return a name derived from pdataDir
+        """
+        return '%s_pdata%s' % (self._brukerRoot.stem, self._pdataDir.stem)
 
     def setPath(self, path, substituteSuffix=False):
         """Parse and set path, assure there is the directory with acqus and pdata dirs
@@ -272,27 +305,41 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         else:
             _path = Path(path)
 
-            if _path.stem in self._processedDataFiles:
+            if _path.is_file() and _path.stem in self._processedDataFiles:
                 # Bruker binary processed data file
                 self._pdataDir = _path.parent
                 self._brukerRoot = _path.parent.parent.parent
                 self._binaryData = _path
 
+            elif _path.is_file() and _path.stem in self._procFiles:
+                # Bruker proc file
+                self._pdataDir = _path.basename
+                self._brukerRoot = _path.parent.parent.parent
+                self._binaryData = None
+
             elif self._isBrukerTopDir(_path):
                 # Bruker top directory
                 self._brukerRoot = _path
-                self._pdataDir = _path / self._PDATA / '1'
+                self._pdataDir = self._findFirstPdataDir()
+                self._binaryData = None
+
+            elif _path.is_dir() and _path.stem == self._PDATA and self._isBrukerTopDir(_path.parent):
+                # Bruker/pdata directory
+                self._brukerRoot = _path.parent
+                self._pdataDir = self._findFirstPdataDir()
+                self._binaryData = None
 
             elif self._isBrukerPdataDir(_path):
-                # Bruker pdata directory
+                # Bruker pdata 'proc'-directory
                 self._pdataDir = _path
                 self._brukerRoot = _path.parent.parent
+                self._binaryData = None
 
             else:
                 logger.debug2('"%s" does not define a valid path with Bruker data' % path)
                 return None
 
-            # check the directories; raise errors when not correct
+            # check the directories; From now on, raise errors when not correct
             self._checkBrukerTopDir(self._brukerRoot)
             self._checkBrukerPdataDir(self._pdataDir)
 

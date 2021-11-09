@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
 __dateModified__ = "$Date: 2021-04-26 12:13:48 +0100 (Mon, April 26, 2021) $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:50 +0100 (Thu, May 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-09 18:38:41 +0000 (Tue, November 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -222,7 +222,7 @@ def _restraintsSelection2PyMolFile(pymolScriptPath, pdbPath, restraints):
     It fills the file pymolScriptPath with a PyMol script.
 
     """
-    import ccpn.ui.gui.modules.RestraintTable as rt
+    import ccpn.ui.gui.modules.RestraintTableModule as rt
 
     pseudoAtomColour = 'teal'
     atomTextColour = 'teal'
@@ -243,7 +243,7 @@ def _restraintsSelection2PyMolFile(pymolScriptPath, pdbPath, restraints):
 
     for restraint in restraints:
         rID = str(restraint.serial)
-        atomPair = rt.RestraintTable.getFirstRestraintAtomsPair(restraint)
+        atomPair = rt.GuiRestraintTable.getFirstRestraintAtomsPair(restraint)
         selAtoms = {}
         for i, atom in enumerate(atomPair):
             _selName = f'Sel_RS_{rID}_{"Atom"}_{str(i+1)}'

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-09 15:26:00 +0000 (Tue, November 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-09 18:38:41 +0000 (Tue, November 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2860,7 +2860,7 @@ class Framework(NotifierBase):
                            restraintTable: PeakList = None, selectFirstItem=False):
         """Displays Peak table on left of main window with specified list selected.
         """
-        from ccpn.ui.gui.modules.RestraintTable import RestraintTableModule
+        from ccpn.ui.gui.modules.RestraintTableModule import RestraintTableModule
 
         mainWindow = self.ui.mainWindow
         if not relativeTo:

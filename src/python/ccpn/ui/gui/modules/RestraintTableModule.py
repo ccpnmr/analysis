@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-04 20:14:38 +0000 (Thu, November 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-09 18:38:41 +0000 (Tue, November 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -93,11 +93,11 @@ class RestraintTableModule(CcpnModule):
                                    grid=(0, 0))
 
         # main window
-        self.restraintTable = RestraintTable(parent=self.mainWidget,
-                                             mainWindow=self.mainWindow,
-                                             moduleParent=self,
-                                             setLayout=True,
-                                             grid=(0, 0))
+        self.restraintTable = GuiRestraintTable(parent=self.mainWidget,
+                                                mainWindow=self.mainWindow,
+                                                moduleParent=self,
+                                                setLayout=True,
+                                                grid=(0, 0))
 
         if restraintTable is not None:
             self.selectRestraintTable(restraintTable)
@@ -127,7 +127,7 @@ class RestraintTableModule(CcpnModule):
         super()._closeModule()
 
 
-class RestraintTable(GuiTable):
+class GuiRestraintTable(GuiTable):
     """
     Class to present a RestraintTable pulldown list, wrapped in a Widget
     """
@@ -155,7 +155,7 @@ class RestraintTable(GuiTable):
         # Initialise the scroll widget and common settings
         self._initTableCommonWidgets(parent, **kwds)
 
-        RestraintTable.project = self.project
+        # GuiRestraintTable.project = self.project  # why? ancient...
 
         kwds['setLayout'] = True  ## Assure we have a layout with the widget
         self.restraintTable = None
@@ -164,17 +164,17 @@ class RestraintTable(GuiTable):
         self.RLcolumns = ColumnClass([('#', '_key', 'Restraint Id', None, None),
                                       ('Pid', lambda restraint: restraint.pid, 'Pid of integral', None, None),
                                       ('_object', lambda restraint: restraint, 'Object', None, None),
-                                      ('Atoms', lambda restraint: RestraintTable._getContributions(restraint),
+                                      ('Atoms', lambda restraint: GuiRestraintTable._getContributions(restraint),
                                        'Atoms involved in the restraint', None, None),
                                       ('Target Value.', 'targetValue', 'Target value for the restraint', None, None),
                                       ('Upper Limit', 'upperLimit', 'Upper limit for the restraint', None, None),
                                       ('Lower Limit', 'lowerLimit', 'Lower limit or the restraint', None, None),
                                       ('Error', 'error', 'Error on the restraint', None, None),
-                                      ('Peaks', lambda restraint: '%3d ' % RestraintTable._getRestraintPeakCount(restraint),
+                                      ('Peaks', lambda restraint: '%3d ' % GuiRestraintTable._getRestraintPeakCount(restraint),
                                        'Number of peaks used to derive this restraint', None, None),
                                       # ('Peak count', lambda chemicalShift: '%3d ' % self._getShiftPeakCount(chemicalShift), None, None)
-                                      ('Comment', lambda restraint: RestraintTable._getCommentText(restraint), 'Notes',
-                                       lambda restraint, value: RestraintTable._setComment(restraint, value), None)
+                                      ('Comment', lambda restraint: GuiRestraintTable._getCommentText(restraint), 'Notes',
+                                       lambda restraint, value: GuiRestraintTable._setComment(restraint, value), None)
                                       ])  # [Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat)
 
         row = 0
@@ -222,7 +222,7 @@ class RestraintTable(GuiTable):
         if restraintTable is not None:
             self._selectRestraintTable(restraintTable)
 
-        self.setTableNotifiers(tableClass=RestraintTable,
+        self.setTableNotifiers(tableClass=GuiRestraintTable,
                                rowClass=Restraint,
                                cellClassNames=None,
                                tableName='restraintTable', rowName='restraint',
@@ -249,7 +249,7 @@ class RestraintTable(GuiTable):
         CallBack for Drop events
         """
         pids = data.get('pids', [])
-        self._handleDroppedItems(pids, RestraintTable, self.rtWidget)
+        self._handleDroppedItems(pids, GuiRestraintTable, self.rtWidget)
 
     def addWidgetToTop(self, widget, col=2, colSpan=1):
         """
@@ -268,7 +268,7 @@ class RestraintTable(GuiTable):
             # raise ValueError('select: No RestraintTable selected')
             self.rtWidget.selectFirstItem()
         else:
-            if not isinstance(restraintTable, RestraintTable):
+            if not isinstance(restraintTable, GuiRestraintTable):
                 logger.debug('select: Object is not of type RestraintTable')
                 raise TypeError('select: Object is not of type RestraintTable')
             else:
@@ -420,7 +420,7 @@ class RestraintTable(GuiTable):
         CCPN-INTERNAL:  Get the first pair of atoms Ids from the first restraintContribution of a restraint.
         Empty str if not atoms.
         """
-        atomPair = RestraintTable.getFirstRestraintAtomsPair(restraint)
+        atomPair = GuiRestraintTable.getFirstRestraintAtomsPair(restraint)
         if atomPair and None not in atomPair:
             return ' - '.join([a.id for a in atomPair])
         else:

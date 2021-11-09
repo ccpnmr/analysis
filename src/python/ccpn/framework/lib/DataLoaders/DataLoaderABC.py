@@ -21,8 +21,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:01 +0100 (Tue, July 20, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-11-09 07:58:47 +0000 (Tue, November 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -75,18 +75,21 @@ def getDataLoaders():
     return DataLoaderABC._dataLoaders
 
 
-def checkPathForDataLoader(path):
-    """Check path if it corresponds to any defined data format
+def checkPathForDataLoader(path, exclude=()):
+    """Check path if it corresponds to any defined data format.
+    Exclude any dataLoader defined in the exclude argument (a tuple/list
+    of datFormat strings)
 
     return: a DataLoader instance or None if there was no match
     """
     for fmt, cls in getDataLoaders().items():
-        instance = cls.checkForValidFormat(path)
-        if instance is None:
-            getLogger().debug('path "%s" is not valid for dataFormat "%s"' % (path, cls.dataFormat))
-        else:
-            getLogger().debug('path "%s" is valid for dataFormat "%s"' % (path, cls.dataFormat))
-            return instance  # we found a valid format for path
+        if cls.dataFormat not in exclude:
+            instance = cls.checkForValidFormat(path)
+            if instance is None:
+                getLogger().debug('path "%s" is not valid for dataFormat "%s"' % (path, cls.dataFormat))
+            else:
+                getLogger().debug('path "%s" is valid for dataFormat "%s"' % (path, cls.dataFormat))
+                return instance  # we found a valid format for path
     return None
 
 #--------------------------------------------------------------------------------------------

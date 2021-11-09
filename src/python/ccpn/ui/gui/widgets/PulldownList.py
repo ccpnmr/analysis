@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-29 18:30:40 +0100 (Fri, October 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-09 17:06:00 +0000 (Tue, November 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -119,6 +119,10 @@ class PulldownList(QtWidgets.QComboBox, Base):
             self.lineEdit().editingFinished.connect(self._textReady)
         if toolTips:
             self.setToolTips(toolTips)
+
+        # possibly for later if gray 'Select' preferred
+        # self.currentIndexChanged.connect(self._highlightCurrentText)
+        # self.currentTextChanged.connect(self._highlightCurrentText)
 
     def setEditable(self, editable: bool) -> None:
         super(PulldownList, self).setEditable(editable)
@@ -395,6 +399,22 @@ class PulldownList(QtWidgets.QComboBox, Base):
         Internal. Called for saving/restoring the widget state.
         """
         return self.set(value)
+
+    # possibly for later if gray 'Select' preferred
+    # def _highlightCurrentText(self):
+    #     """Highlight the selected text the colour from the current items
+    #     """
+    #     ind = self.currentIndex()
+    #     model = self.model()
+    #     item = model.item(ind)
+    #     print(f'  select {ind}')
+    #
+    #     if item is not None:
+    #         color = item.foreground().color()
+    #         # use the palette to change the colour of the selection text - may not match for other themes
+    #         palette = self.palette()
+    #         palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Text, color)
+    #         self.setPalette(palette)
 
 
 if __name__ == '__main__':

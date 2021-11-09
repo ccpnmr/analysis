@@ -4,8 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-11-02 17:47:54 +0000 (Mon, November 02, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-11-09 17:06:00 +0000 (Tue, November 09, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,7 +35,7 @@ from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, ScientificS
 
 SELECT = '> Select <'
 TYPECOMPONENT = [SELECT, 'Compound', 'Solvent', 'Buffer', 'Target', 'Inhibitor ', 'Other']
-C_COMPONENT_UNIT = concentrationUnits
+C_COMPONENT_UNIT = (SELECT,) + concentrationUnits
 TYPENEW = 'Type_New'
 LABELLING = ['', TYPENEW, '15N', '15N,13C', '15N,13C,2H', 'ILV', 'ILVA', 'ILVAT', 'SAIL', '1,3-13C- and 2-13C-Glycerol']
 BUTTONSTATES = ['New', 'From Substances']
@@ -64,13 +65,20 @@ class SampleComponentPopup(ComplexAttributeEditorPopupABC):
         """Populate the role pulldown
         """
         self.role.modifyTexts(TYPECOMPONENT)
-        self.role.select(self.obj.role)
+        self.role.select(self.obj.role or SELECT)
 
     def _getConcentrationUnits(self, sampleComponent):
         """Populate the concentrationUnit pulldown
         """
         self.concentrationUnit.modifyTexts(C_COMPONENT_UNIT)
-        self.concentrationUnit.select(self.obj.role)
+        self.concentrationUnit.select(self.obj.role or SELECT)
+
+    def _setSampleComponentAttrib(self, attr, value):
+        """Set the valid attrib from pulldown
+        Remove the 'Select item' and replace with None
+        """
+        value = value if value != SELECT else None
+        setattr(self, attr, value)
 
     def _getLabelling(self, sampleComponent):
         """Populate the labelling pulldown
@@ -109,10 +117,11 @@ class SampleComponentPopup(ComplexAttributeEditorPopupABC):
                               group=1,
                               ),
                         ('Name', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Enter name <'}),
-                        ('Labelling', PulldownListCompoundWidget, getattr, _setLabelling, _getLabelling, None, {'editable': True}),
+                        ('Labelling', PulldownListCompoundWidget, getattr, _setLabelling, _getLabelling, None, {'editable': True,
+                                                                                                                'backgroundText': '> Enter user label <'}),
                         ('Comment', EntryCompoundWidget, getattr, setattr, None, None, {'backgroundText': '> Optional <'}),
-                        ('Role', PulldownListCompoundWidget, getattr, setattr, _getRoleTypes, None, {'editable': False}),
-                        ('Concentration Unit', PulldownListCompoundWidget, getattr, setattr, _getConcentrationUnits, None, {'editable': False}),
+                        ('Role', PulldownListCompoundWidget, getattr, _setSampleComponentAttrib, _getRoleTypes, None, {'editable': False}),
+                        ('Concentration Unit', PulldownListCompoundWidget, getattr, _setSampleComponentAttrib, _getConcentrationUnits, None, {'editable': False}),
                         ('Concentration', ScientificSpinBoxCompoundWidget, getattr, setattr, None, None, {'min': 0}),
                         ],
                        hWidth=None,
@@ -157,6 +166,10 @@ class SampleComponentPopup(ComplexAttributeEditorPopupABC):
             self.currentSubstances.pulldownList.activated.connect(self._fillInfoFromSubstance)
 
         self.labelling.pulldownList.activated.connect(self._labellingSpecialCases)
+
+        # possibly for later if gray 'Select' preferred
+        # self.role.pulldownList._highlightCurrentText()
+        # self.concentrationUnit.pulldownList._highlightCurrentText()
 
         self._firstSize = self.sizeHint()
         self._size = self.sizeHint()

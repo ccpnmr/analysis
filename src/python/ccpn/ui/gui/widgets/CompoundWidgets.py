@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-11 19:40:44 +0100 (Mon, October 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-09 17:06:00 +0000 (Tue, November 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -474,6 +474,7 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
                         Label
 
     """
+    SELECTTEXT = '> Select <'
 
     layoutDict = dict(
             # grid positions for label and pulldown for the different orientations
@@ -605,6 +606,15 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
             #     _minLength = min(30, max(10, *(len(tt) for tt in texts)))
             #     self.pulldownList.setMinimumContentsLength(_minLength)
             self.pulldownList.setData(texts=texts)
+
+            # possibly for later if gray 'Select' preferred
+            # # set a default colour if SELECTTEXT is found
+            # color = QtGui.QColor('gray')
+            # model = self.pulldownList.model()
+            # for ind, tt in enumerate(texts):
+            #     if tt == self.SELECTTEXT:
+            #         model.item(ind).setForeground(color)
+
             self.pulldownList.select(current)
 
     def getTexts(self):

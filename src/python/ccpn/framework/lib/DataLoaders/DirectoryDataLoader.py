@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-09 13:54:10 +0000 (Tue, November 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-09 14:52:24 +0000 (Tue, November 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -85,6 +85,7 @@ class DirectoryDataLoader(DataLoaderABC):
         """
         super().__init__(path=path)
         self.recursive = recursive
+        self.dataLoaders = []
         self.count = 0
 
         # scan all the files in the directory, skipping dotted files and only processing
@@ -109,8 +110,8 @@ class DirectoryDataLoader(DataLoaderABC):
                 dataLoader = DirectoryDataLoader(path=f, recursive=recursive, filterForDataFormats=filterForDataFormats)
                 if dataLoader is not None and len(dataLoader) > 0:
                     # Loadable files were found
-                    self.count += len(dataLoader)
                     self.dataLoaders.append(dataLoader)
+                    self.count += len(dataLoader)
 
     def __len__(self):
         return self.count

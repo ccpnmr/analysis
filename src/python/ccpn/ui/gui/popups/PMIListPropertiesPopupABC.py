@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:26:48 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-09 14:06:37 +0000 (Tue, November 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -372,7 +372,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
             fillColourPulldown(pl, allowAuto=False, includeGradients=False)
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetValue(self, attr, getFunction, setFunction, dim):
+    def _queueSetValue(self, attr, getFunction, setFunction, dim, _value):
         """Queue the function for setting the attribute in the calling object
         """
         value = self.edits[attr].text()
@@ -395,7 +395,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
             pulldown.setCurrentText(spectrumColours[newColour.name()])
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetColour(self, pl, attrib, dim):
+    def _queueSetColour(self, pl, attrib, dim, _value):
         """Queue the function for setting a colour attribute
         """
         value = pl.currentText()
@@ -409,7 +409,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         setattr(self.ccpnList, attrib, value)
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetMeritEnabled(self):
+    def _queueSetMeritEnabled(self, _value):
         """Queue the function for setting merit
         """
         value = self.meritEnabledBox.get()
@@ -422,7 +422,7 @@ class PMIListPropertiesPopupABC(CcpnDialogMainWidget):
         setattr(self.ccpnList, MERITENABLED, value)
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetMeritThreshold(self):
+    def _queueSetMeritThreshold(self, _value):
         """Queue the function for setting merit threshold
         """
         value = self.meritThresholdData.get()

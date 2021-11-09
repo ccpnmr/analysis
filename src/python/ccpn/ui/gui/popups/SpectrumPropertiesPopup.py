@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:26:48 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-09 14:06:37 +0000 (Tue, November 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -756,7 +756,7 @@ class GeneralTab(Widget):
         self.spectrum.chemicalShiftList = spectrum.project.getByPid(item)
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSampleChange(self, spectrum, value):
+    def _queueSampleChange(self, spectrum, _value):
         _text, sample = self.samplesPulldownList.getSelected()
         return partial(self._changeSampleSpectrum, spectrum, sample)
 
@@ -1268,7 +1268,7 @@ class DimensionsTab(Widget):
         spectrum.doubleCrosshairOffsets = doubleCrosshairOffsets
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetAxisCodes(self, spectrum, ): #valueGetter, dim): # dim required to make the changeState unique per dim
+    def _queueSetAxisCodes(self, spectrum, _value):  #valueGetter, dim): # dim required to make the changeState unique per dim
         # set the axisCodes in single operation
         value = tuple(val.text() for val in self.axisCodeEdits)
         if value != spectrum.axisCodes:
@@ -1283,7 +1283,7 @@ class DimensionsTab(Widget):
         spectrum.axisCodes = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetIsotopeCodes(self, spectrum, valueGetter, dim):
+    def _queueSetIsotopeCodes(self, spectrum, valueGetter, dim, _value):
         value = valueGetter()
         if value != spectrum.isotopeCodes[dim]:
             return partial(self._setIsotopeCodes, spectrum, dim, value)
@@ -1316,7 +1316,7 @@ class DimensionsTab(Widget):
         spectrum.experimentType = expType
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetReferenceDimensions(self, spectrum, ): #valueGetter, dim):
+    def _queueSetReferenceDimensions(self, spectrum, _value):  #valueGetter, dim):
         # set the referenceDimensions in single operation
         value = tuple(val.getText() or None for val in self.referenceDimensionPullDowns)
 
@@ -1422,7 +1422,7 @@ class DimensionsTab(Widget):
         spectrum.referencePoints = spectrumReferencing
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetMinAliasing(self, spectrum, valueGetter, dim):
+    def _queueSetMinAliasing(self, spectrum, valueGetter, dim, _value):
         _index = self.minAliasingPullDowns[dim].getSelectedIndex()
         minValue = min(self.specLim[dim]) - _index * self.deltaLim[dim]
         if abs(minValue - min(spectrum.aliasingLimits[dim])) > 1e-8:  # for rounding errors
@@ -1436,7 +1436,7 @@ class DimensionsTab(Widget):
         spectrum.aliasingLimits = tuple(alias)
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetMaxAliasing(self, spectrum, valueGetter, dim):
+    def _queueSetMaxAliasing(self, spectrum, valueGetter, dim, _value):
         _index = MAXALIASINGRANGE - self.maxAliasingPullDowns[dim].getSelectedIndex()
         maxValue = max(self.specLim[dim]) + _index * self.deltaLim[dim]
         if abs(maxValue - max(spectrum.aliasingLimits[dim])) > 1e-8:  # for rounding errors
@@ -1450,7 +1450,7 @@ class DimensionsTab(Widget):
         spectrum.aliasingLimits = tuple(alias)
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetFoldingModes(self, spectrum, valueGetter, dim):
+    def _queueSetFoldingModes(self, spectrum, valueGetter, dim, _value):
         dd = {False: 'mirror', True: 'circular', None: None}  # swapped because inverted checkbox
         value = dd[valueGetter()]
         if value != spectrum.foldingModes[dim]:
@@ -1462,7 +1462,7 @@ class DimensionsTab(Widget):
         spectrum.foldingModes = tuple(folding)
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetDisplayFoldedContours(self, spectrum, valueGetter):
+    def _queueSetDisplayFoldedContours(self, spectrum, valueGetter, _value):
         value = valueGetter()
         if value != spectrum.displayFoldedContours:
             return partial(self._setDisplayFoldedContours, spectrum, value)

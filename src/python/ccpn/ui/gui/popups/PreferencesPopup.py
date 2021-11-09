@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-27 15:34:01 +0100 (Tue, April 27, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-09 14:06:37 +0000 (Tue, November 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1235,7 +1235,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             return False
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetUserDataPath(self):
+    def _queueSetUserDataPath(self, _value):
         value = self.userDataPathText.get()
         if value != self.preferences.general.dataPath:
             return partial(self._setUserDataPath, value)
@@ -1255,7 +1255,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self.userDataPathText.setText(directory[0])
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetUserWorkingPath(self):
+    def _queueSetUserWorkingPath(self, _value):
         value = self.userWorkingPathData.get()
         if value != self.preferences.general.userWorkingPath:
             return partial(self._setUserWorkingPath, value)
@@ -1275,7 +1275,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self.userWorkingPathData.setText(directory[0])
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetAuxiliaryFilesPath(self):
+    def _queueSetAuxiliaryFilesPath(self, _value):
         value = self.auxiliaryFilesData.get()
         if value != self.preferences.general.auxiliaryFilesPath:
             return partial(self._setAuxiliaryFilesPath, value)
@@ -1317,7 +1317,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             return partial(self._validateFrame.filePathFunc, spectrum, filePath)
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetuserLayoutsPath(self):
+    def _queueSetuserLayoutsPath(self, _value):
         value = self.userLayoutsPathData.get()
         if value != self.preferences.general.userLayoutsPath:
             return partial(self._setUserLayoutsPath, value)
@@ -1337,7 +1337,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self.userLayoutsPathData.setText(directory[0])
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetMacroFilesPath(self):
+    def _queueSetMacroFilesPath(self, _value):
         value = self.macroPathData.get()
         if value != self.preferences.general.userMacroPath:
             return partial(self._setMacroFilesPath, value)
@@ -1357,7 +1357,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self.macroPathData.setText(directory[0])
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetPluginFilesPath(self):
+    def _queueSetPluginFilesPath(self, _value):
         value = self.pluginPathData.get()
         if value != self.preferences.general.userPluginPath:
             return partial(self._setPluginFilesPath, value)
@@ -1377,7 +1377,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self.pluginPathData.setText(directory[0])
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetPipesFilesPath(self):
+    def _queueSetPipesFilesPath(self, _value):
         value = self.userPipesPath.get()
         if value != self.preferences.general.userPipesPath:
             return partial(self._setPipesFilesPath, value)
@@ -1445,7 +1445,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
     #~~~~~~~~~~~~~~~~~~~~~~~~`
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetExternalPath(self, external, dim):
+    def _queueSetExternalPath(self, external, dim, _value):
         """Queue the change to the correct item in preferences
         """
         if external not in self.preferences.externalPrograms:
@@ -1499,7 +1499,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             raise RuntimeError(f'{external} does not contain the correct widgets')
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetAutoBackupFrequency(self):
+    def _queueSetAutoBackupFrequency(self, _value):
         textFromValue = self.autoBackupFrequencyData.textFromValue
         value = self.autoBackupFrequencyData.get()
         prefValue = textFromValue(self.preferences.general.autoBackupFrequency)
@@ -1511,7 +1511,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.application.updateAutoBackup()
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetRegionPadding(self):
+    def _queueSetRegionPadding(self, _value):
         textFromValue = self.regionPaddingData.textFromValue
         value = self.regionPaddingData.get()
         prefValue = textFromValue(100 * self.preferences.general.stripRegionPadding)
@@ -1522,7 +1522,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.stripRegionPadding = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetDropFactor(self):
+    def _queueSetDropFactor(self, _value):
         textFromValue = self.dropFactorData.textFromValue
         value = self.dropFactorData.get()
         prefValue = textFromValue(100 * self.preferences.general.peakDropFactor)
@@ -1533,15 +1533,18 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.peakDropFactor = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetDropFactor1D(self):
+    def _queueSetDropFactor1D(self, _value):
+        textFromValue = self.peakFactor1D.textFromValue
         value = self.peakFactor1D.get()
-        return partial(self._set1DPeakFactor, value)
+        prefValue = textFromValue(self.preferences.general.peakFactor1D)
+        if value >= 0 and textFromValue(value) != prefValue:
+            return partial(self._set1DPeakFactor, value)
 
     def _set1DPeakFactor(self, value):
         self.preferences.general.peakFactor1D = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetSymbolSizePixel(self):
+    def _queueSetSymbolSizePixel(self, _value):
         value = self.symbolSizePixelData.get()
         if value != self.preferences.general.symbolSizePixel:
             return partial(self._setSymbolSizePixel, value)
@@ -1552,7 +1555,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.symbolSizePixel = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetSymbolThickness(self):
+    def _queueSetSymbolThickness(self, _value):
         value = self.symbolThicknessData.get()
         if value != self.preferences.general.symbolThickness:
             return partial(self._setSymbolThickness, value)
@@ -1563,7 +1566,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.symbolThickness = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetContourThickness(self):
+    def _queueSetContourThickness(self, _value):
         value = self.contourThicknessData.get()
         if value != self.preferences.general.contourThickness:
             return partial(self._setContourThickness, value)
@@ -1662,7 +1665,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.zoomCentreType = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetZoomPercent(self):
+    def _queueSetZoomPercent(self, _value):
         textFromValue = self.zoomPercentData.textFromValue
         value = self.zoomPercentData.get()
         prefValue = textFromValue(self.preferences.general.zoomPercent)
@@ -1675,7 +1678,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.zoomPercent = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetStripWidthZoomPercent(self):
+    def _queueSetStripWidthZoomPercent(self, _value):
         textFromValue = self.stripWidthZoomPercentData.textFromValue
         value = self.stripWidthZoomPercentData.get()
         prefValue = textFromValue(self.preferences.general.stripWidthZoomPercent)
@@ -1688,7 +1691,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.stripWidthZoomPercent = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetNumSideBands(self):
+    def _queueSetNumSideBands(self, _value):
         textFromValue = self.showSideBandsData.textFromValue
         value = self.showSideBandsData.get()
         prefValue = textFromValue(self.preferences.general.numSideBands)
@@ -1734,7 +1737,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.peakFittingMethod = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetAspect(self, aspect, dim):
+    def _queueSetAspect(self, aspect, dim, _value):
         """dim is required by the decorator to give a unique id for aspect dim
         """
         textFromValue = self.aspectData[aspect].textFromValue
@@ -1749,7 +1752,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.aspectRatios[aspect] = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetUseSearchBoxMode(self):
+    def _queueSetUseSearchBoxMode(self, _value):
         value = self.useSearchBoxModeBox.get()
         if value != self.preferences.general.searchBoxMode:
             return partial(self._setUseSearchBoxMode, value)
@@ -1758,7 +1761,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.searchBoxMode = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetUseSearchBoxDoFit(self):
+    def _queueSetUseSearchBoxDoFit(self, _value):
         value = self.useSearchBoxDoFitBox.get()
         if value != self.preferences.general.searchBoxDoFit:
             return partial(self._setUseSearchBoxDoFit, value)
@@ -1767,7 +1770,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.searchBoxDoFit = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetSearchBox1d(self, searchBox1d, dim):
+    def _queueSetSearchBox1d(self, searchBox1d, dim, _value):
         """dim is required by the decorator to give a unique id for searchBox dim
         """
         textFromValue = self.searchBox1dData[searchBox1d].textFromValue
@@ -1782,7 +1785,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.searchBoxWidths1d[searchBox1d] = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetSearchBoxNd(self, searchBoxNd, dim):
+    def _queueSetSearchBoxNd(self, searchBoxNd, dim, _value):
         """dim is required by the decorator to give a unique id for searchBox dim
         """
         textFromValue = self.searchBoxNdData[searchBoxNd].textFromValue
@@ -1797,7 +1800,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.searchBoxWidthsNd[searchBoxNd] = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetIntensityLimit(self):
+    def _queueSetIntensityLimit(self, _value):
         textFromValue = self.showIntensityLimitBox.textFromValue
         value = self.showIntensityLimitBox.get()
         prefValue = textFromValue(self.preferences.general.intensityLimit)
@@ -1821,7 +1824,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.multipletAveraging = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetVolumeIntegralLimit(self):
+    def _queueSetVolumeIntegralLimit(self, _value):
         textFromValue = self.volumeIntegralLimitData.textFromValue
         value = self.volumeIntegralLimitData.get()
         prefValue = textFromValue(self.preferences.general.volumeIntegralLimit)
@@ -1834,7 +1837,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general.volumeIntegralLimit = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetVerifySSL(self):
+    def _queueSetVerifySSL(self, _value):
         value = self.verifySSLBox.get()
         if value != self.preferences.proxySettings.verifySSL:
             return partial(self._setVerifySSL, value)
@@ -1843,7 +1846,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.proxySettings.verifySSL = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetUseProxy(self):
+    def _queueSetUseProxy(self, _value):
         value = self.useProxyBox.get()
         # set the state of the other buttons
         self._setProxyButtons()
@@ -1865,7 +1868,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.proxySettings.useSystemProxy = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetProxyAddress(self):
+    def _queueSetProxyAddress(self, _value):
         value = self.proxyAddressData.get()
         if value != self.preferences.proxySettings.proxyAddress:
             return partial(self._setProxyAddress, value)
@@ -1874,7 +1877,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.proxySettings.proxyAddress = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetProxyPort(self):
+    def _queueSetProxyPort(self, _value):
         value = self.proxyPortData.get()
         if value != self.preferences.proxySettings.proxyPort:
             return partial(self._setProxyPort, value)
@@ -1883,7 +1886,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.proxySettings.proxyPort = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetUseProxyPassword(self):
+    def _queueSetUseProxyPassword(self, _value):
         value = self.useProxyPasswordBox.get()
         # set the state of the other buttons
         self._setProxyButtons()
@@ -1894,7 +1897,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.proxySettings.useProxyPassword = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetProxyUsername(self):
+    def _queueSetProxyUsername(self, _value):
         value = self.proxyUsernameData.get()
         if value != self.preferences.proxySettings.proxyUsername:
             return partial(self._setProxyUsername, value)
@@ -1903,7 +1906,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.proxySettings.proxyUsername = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetProxyPassword(self):
+    def _queueSetProxyPassword(self, _value):
         value = self._userPreferences.encodeValue(str(self.proxyPasswordData.get()))
         if value != self.preferences.proxySettings.proxyPassword:
             return partial(self._setProxyPassword, value)

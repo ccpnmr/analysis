@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-04 13:38:44 +0100 (Wed, August 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-09 15:26:01 +0000 (Tue, November 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1763,8 +1763,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetDropFactor1D(self, _value):
+        textFromValue = self.peakFactor1D.textFromValue
         value = self.peakFactor1D.get()
-        return partial(self._set1DPeakFactor, value)
+        prefValue = textFromValue(self.preferences.general.peakFactor1D)
+        if value >= 0 and textFromValue(value) != prefValue:
+            return partial(self._set1DPeakFactor, value)
 
     def _set1DPeakFactor(self, value):
         self.preferences.general.peakFactor1D = value

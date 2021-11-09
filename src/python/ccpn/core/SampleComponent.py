@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-16 19:06:53 +0100 (Thu, September 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-09 16:56:14 +0000 (Tue, November 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -315,6 +315,7 @@ def _newSampleComponent(self: Sample, name: str = None, labelling: str = None, r
     # NB - using substance._wrappedData.labelling because we need the API labelling value,
     # which is different for the default case
     obj = apiSample.newSampleComponent(name=name, labeling=substance._wrappedData.labeling,
+                                       role=role,
                                        concentration=concentration,
                                        concentrationError=concentrationError,
                                        concentrationUnit=concentrationUnit, details=comment,

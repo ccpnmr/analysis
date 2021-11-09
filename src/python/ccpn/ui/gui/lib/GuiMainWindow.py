@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-28 17:22:07 +0100 (Thu, October 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-09 17:40:32 +0000 (Tue, November 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1144,6 +1144,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         does not do the actual loading
         :returns a tuple (dataLoader, createNewProject, ignore)
         """
+
         dataLoader = checkPathForDataLoader(url)
 
         if dataLoader is None:
@@ -1168,15 +1169,16 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             choice = showMulti('Load %s' % dataLoader.dataFormat,
                                'How do you want to handle the file:',
                                choices, parent=self)
-            if choice == choices[0]:
+            if choice == choices[0]:  # import
                 dataLoader.createNewProject = False
                 createNewProject = False
-            elif choice == choices[1]:
+            elif choice == choices[1]:  # new project
                 dataLoader.createNewProject = True
                 createNewProject = True
-            else:
+            else:  # cancel
                 dataLoader = None
                 createNewProject = False
+                ignore = True
 
         elif dataLoader.dataFormat == SpectrumDataLoader.dataFormat and dataLoader.existsInProject():
             choice = showYesNo('Spectrum "%s"' % dataLoader.path,
@@ -1203,13 +1205,18 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         dataLoaders = []
         # analyse the Urls
         for url in urls:
-            dataLoader, createsNewProject, ignore = self._getDataLoader(url)
-            dataLoaders.append((url, dataLoader, createsNewProject, ignore))
+            # try finding a data loader, catch any errors for recognised but
+            # incomplete/invalid url's (i.e. incomplete spectral data)
+            try:
+                dataLoader, createsNewProject, ignore = self._getDataLoader(url)
+                dataLoaders.append((url, dataLoader, createsNewProject, ignore))
+            except (RuntimeError, ValueError) as es:
+                MessageDialog.showError('Load Data', '%s' % str(es), parent=self)
 
         # analyse for potential errors
         errorUrls = [url for url, dl, createNew, ignore in dataLoaders if (dl is None and not ignore)]
         if len(errorUrls) == 1:
-            MessageDialog.showError('Load Data', 'Dropped item "%s" was not unrecognised' % errorUrls[0], parent=self)
+            MessageDialog.showError('Load Data', 'Dropped item "%s" was not recognised' % errorUrls[0], parent=self)
         elif len(errorUrls) > 1:
             MessageDialog.showError('Load Data', '%d dropped items were not recognised (see log for details)' % \
                                     len(errorUrls), parent=self)

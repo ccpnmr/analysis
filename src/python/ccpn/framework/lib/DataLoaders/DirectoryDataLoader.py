@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:01 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-09 17:40:32 +0000 (Tue, November 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -34,11 +34,12 @@ from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC, checkPat
 from ccpn.util.traits.CcpNmrTraits import Bool, List, Int
 from ccpn.core.lib.ContextManagers import logCommandManager
 
+_DIRECTORY_DATA = 'directoryData'
 
 class DirectoryDataLoader(DataLoaderABC):
     """A directory data loader
     """
-    dataFormat = 'directoryData'
+    dataFormat = _DIRECTORY_DATA
     suffixes = []  # a list of suffixes that get matched to path
     allowDirectory = True  # Can/Can't open a directory
 
@@ -84,34 +85,33 @@ class DirectoryDataLoader(DataLoaderABC):
         """
         super().__init__(path=path)
         self.recursive = recursive
+        self.dataLoaders = []
         self.count = 0
 
-        # scan all the files in the directory, skipping dotted files and only processing directories
-        # if recursion is True
+        # scan all the files in the directory, skipping dotted files and only processing
+        # directories if recursion is True
         for f in self.path.glob('*'):
             dataLoader = None
-            if f.name.startswith("."):  # Exclude dotted-files
+            if f.stem.startswith("."):  # Exclude dotted-files
                 pass
+
+            elif (dataLoader := checkPathForDataLoader(f, exclude=(_DIRECTORY_DATA,))) is not None:
+                # check if we can find a data loader for f, but exclude a directory data loader
+                if filterForDataFormats is not None and \
+                   len(filterForDataFormats) > 0 and \
+                   dataLoader.dataFormat not in filterForDataFormats:
+                    # we are filtering and this dataLoader is not for a desired format
+                    pass
+                else:
+                    self.dataLoaders.append(dataLoader)
+                    self.count += 1
 
             elif f.is_dir() and self.recursive: # get directories if recursive is True
                 dataLoader = DirectoryDataLoader(path=f, recursive=recursive, filterForDataFormats=filterForDataFormats)
                 if dataLoader is not None and len(dataLoader) > 0:
                     # Loadable files were found
-                    self.count += len(dataLoader)
                     self.dataLoaders.append(dataLoader)
-
-            elif not f.is_dir():
-                # "f" is a file: check if it is of a recognisable dataFormat
-                dataLoader = checkPathForDataLoader(f)
-                if dataLoader is not None:
-                    if filterForDataFormats is not None and \
-                       len(filterForDataFormats) > 0 and \
-                       dataLoader.dataFormat not in filterForDataFormats:
-                        # we are filtering and this dataLoader is not for a desired format
-                        pass
-                    else:
-                        self.dataLoaders.append(dataLoader)
-                        self.count += 1
+                    self.count += len(dataLoader)
 
     def __len__(self):
         return self.count

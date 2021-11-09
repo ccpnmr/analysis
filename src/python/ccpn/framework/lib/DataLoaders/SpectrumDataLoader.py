@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:01 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-09 17:40:32 +0000 (Tue, November 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -50,10 +50,10 @@ class SpectrumDataLoader(DataLoaderABC):
 
     @classmethod
     def checkForValidFormat(cls, path):
-        """check if valid format corresponding to dataFormat
+        """check if path defines one of the valid spectrum data formats
         :return: None or instance of the class
         """
-        dataStore, dataSoure = cls._check(path)
+        dataStore, dataSoure = cls._checkPathForSpectrumFormat(path)
         if dataSoure is not None:
             instance = cls(path)
             instance.dataSource = dataSoure
@@ -63,8 +63,8 @@ class SpectrumDataLoader(DataLoaderABC):
         return None
 
     @staticmethod
-    def _check(path):
-        """Check if path yields a valid dataSource
+    def _checkPathForSpectrumFormat(path):
+        """Check if path yields a valid Spectrum dataSource
         return: (dataStore, dataSource) tuple, or None's if some failed
         """
         dataStore = DataStore.newFromPath(path)
@@ -85,13 +85,14 @@ class SpectrumDataLoader(DataLoaderABC):
         """
         with logCommandManager('application', 'loadData', self.path):
             if self.dataSource is None:
-                self.dataStore, self.dataSource = self._check(self.path)
+                self.dataStore, self.dataSource = self._checkPathForSpectrumFormat(self.path)
 
             if self.dataSource is None:
                 raise RuntimeError('Error loading "%s"' % self.path)
 
             try:
-                spectrum = _newSpectrumFromDataSource(project=self.project, dataStore=self.dataStore,
+                spectrum = _newSpectrumFromDataSource(project=self.project,
+                                                      dataStore=self.dataStore,
                                                       dataSource=self.dataSource)
             except (RuntimeError, ValueError) as es:
                 raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))

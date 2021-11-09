@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:01 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-09 17:40:30 +0000 (Tue, November 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -42,6 +42,7 @@ from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumData
 
 SPECTRUM_DATASET_NAME = 'spectrumData'
 VERSION = 'version'
+NONE_STR = '__NONE__'
 
 
 class String(bytes):
@@ -87,7 +88,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
     compressionModes = ('lzf', 'gzip')  # 'szip' not in conda distribution
     defaultCompressionMode = None  # hdf5 compression modes
 
-    _NONE = bytes('__NONE__', 'utf8')
+    _NONE = bytes(NONE_STR, 'utf8')
 
     #=========================================================================================
 
@@ -160,6 +161,17 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         """Read the parameters from the hdf5 data structure
         Returns self
         """
+        def _convertValue(trait, value):
+            """Convert a value,  checking for bytes and CString type
+            return: converted value
+            """
+            if value == self._NONE or value == NONE_STR:
+                newValue = None
+            elif isinstance(trait, CString):
+                newValue = trait.fromBytes(value)
+            else:
+                newValue = value
+            return newValue
 
         def _decode(parName, value):
             """Encode CString traits as bytes, accouting for None values as well
@@ -171,21 +183,24 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
                 itemTrait = self.getItemTrait(parName)
                 newValue = []
                 for val in value:
-                    if val == self._NONE:
-                        newValue.append(None)
-                    elif itemTrait is not None and isinstance(itemTrait, CString):
-                        newValue.append(itemTrait.fromBytes(val))
-                    else:
-                        newValue.append(val)
+                    _convertedVal = _convertValue(itemTrait, val)
+                    newValue.append(_convertedVal)
+                    # if val == self._NONE:
+                    #     newValue.append(None)
+                    # elif itemTrait is not None and isinstance(itemTrait, CString):
+                    #     newValue.append(itemTrait.fromBytes(val))
+                    # else:
+                    #     newValue.append(val)
             else:
                 # non-dimensional parameter: optionally decode
                 trait = self.getTrait(parName)
-                if value == self._NONE:
-                    newValue = None
-                elif isinstance(trait, CString):
-                    newValue = trait.fromBytes(value)
-                else:
-                    newValue = value
+                newValue = _convertValue(trait, value)
+                # if value == self._NONE:
+                #     newValue = None
+                # elif isinstance(trait, CString):
+                #     newValue = trait.fromBytes(value)
+                # else:
+                #     newValue = value
 
             return newValue
 

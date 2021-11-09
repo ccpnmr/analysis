@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-09 15:26:00 +0000 (Tue, November 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-09 17:40:30 +0000 (Tue, November 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -78,7 +78,8 @@ from ccpn.core.lib import Pid
 
 import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple, _getProjection, getDefaultSpectrumColours
-from ccpn.core.lib.SpectrumLib import _includeInDimensionalCopy, _includeInCopy, _includeInCopyList, checkSpectrumPropertyValue
+from ccpn.core.lib.SpectrumLib import _includeInDimensionalCopy, _includeInCopy, _includeInCopyList, \
+    checkSpectrumPropertyValue, _setDefaultAxisOrdering
 
 from ccpn.core.lib.ContextManagers import \
     newObject, deleteObject, ccpNmrV3CoreSimple, \
@@ -1644,6 +1645,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         self._setInternalParameter(self._PREFERREDAXISORDERING, order)
 
+    def _setDefaultAxisOrdering(self):
+        """Set the default axis ordering based on some hierarchy rules (defined in the
+        core/lib/SpectrumLib.oy file
+        """
+        _setDefaultAxisOrdering(self)
+
     #-----------------------------------------------------------------------------------------
     # Library functions
     #-----------------------------------------------------------------------------------------
@@ -1727,46 +1734,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         result = np.linspace(aliasLims[0] + vpp, aliasLims[1] - vpp, pr - pl + 1)
 
         return result
-
-    def getDefaultOrdering(self, axisOrder):
-        if not axisOrder:
-            # axisOption = self.project.application.preferences.general.axisOrderingOptions
-
-            preferredAxisOrder = self.preferredAxisOrdering
-            if preferredAxisOrder is not None:
-
-                specAxisOrder = self.axisCodes
-                axisOrder = [specAxisOrder[ii] for ii in preferredAxisOrder]
-
-            else:
-
-                # sets an Nd default to HCN (or possibly 2d to HC)
-                specAxisOrder = self.axisCodes
-                pOrder = self.searchAxisCodePermutations(('H', 'C', 'N'))
-                if pOrder:
-                    self.preferredAxisOrdering = pOrder
-                    axisOrder = [specAxisOrder[ii] for ii in pOrder]
-                    getLogger().debug('setting default axisOrdering: ', str(axisOrder))
-
-                else:
-
-                    # just set to the normal ordering
-                    self.preferredAxisOrdering = tuple(ii for ii in range(self.dimensionCount))
-                    axisOrder = specAxisOrder
-
-                    # try permutations of repeated codes
-                    duplicates = [('H', 'H'), ('C', 'C'), ('N', 'N')]
-                    for dCode in duplicates:
-                        pOrder = self.searchAxisCodePermutations(dCode)
-
-                        # if permutation found and matches first axis
-                        if pOrder and pOrder[0] == 0:
-                            self.preferredAxisOrdering = pOrder
-                            axisOrder = [specAxisOrder[ii] for ii in pOrder]
-                            getLogger().debug('setting duplicate axisOrdering: ', str(axisOrder))
-                            break
-
-        return axisOrder
 
     # def automaticIntegration(self, spectralData):
     #     return self._apiDataSource.automaticIntegration(spectralData)
@@ -1905,27 +1872,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             setattr(self, parameterName, newValues)
         except AttributeError:
             raise ValueError('Unable to set parameter "%s" of %s to "%s"' % (parameterName, self, values))
-
-    def searchAxisCodePermutations(self, checkCodes: Tuple[str, ...]) -> Optional[Tuple[int]]:
-        """Generate the permutations of the current axisCodes
-        """
-        if not checkCodes:
-            raise ValueError('checkCodes is not defined')
-        if not isinstance(checkCodes, (tuple, list)):
-            raise TypeError('checkCodes is not a list/tuple')
-        if not all(isinstance(ss, str) for ss in checkCodes):
-            raise TypeError('checkCodes elements must be strings')
-
-        from itertools import permutations
-
-        # add permutations for the axes
-        axisPerms = tuple(permutations([axisCode for axisCode in self.axisCodes]))
-        axisOrder = tuple(permutations(list(range(len(self.axisCodes)))))
-
-        for ii, perm in enumerate(axisPerms):
-            n = min(len(checkCodes), len(perm))
-            if n and all(pCode[0] == cCode[0] for pCode, cCode in zip(perm[:n], checkCodes[:n])):
-                return axisOrder[ii]
 
     def _setDefaultContourValues(self, base=None, multiplier=1.41, count=10):
         """Set default contour values
@@ -3172,7 +3118,7 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
         raise ValueError('dataSource.dimensionCount = 0')
 
     if name is None:
-        name = dataStore.path.basename
+        name = dataSource.nameFromPath()
     # assure unique name
     name = Spectrum._uniqueName(project=project, name=name)
 
@@ -3235,6 +3181,7 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
 
         spectrum._updateParameterValues()
         spectrum._saveSpectrumMetaData()
+        spectrum._setDefaultAxisOrdering()
 
     return spectrum
 

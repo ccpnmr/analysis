@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-30 20:35:20 +0100 (Fri, July 30, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-09 17:40:32 +0000 (Tue, November 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -403,7 +403,9 @@ class CString(TraitType, _Ordered):
 
     def fromBytes(self, value):
         "Return value decoded from bytes object; decode NONE_VALUE to None"
-        value = value.decode(self.encoding)
+        # 3.1.0.alfa2: encoutered error that value was of type str
+        if isinstance(value, bytes):
+            value = value.decode(self.encoding)
         if value == self.NONE_VALUE:
             value = None
         return value

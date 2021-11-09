@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-16 19:06:53 +0100 (Thu, September 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-09 17:40:31 +0000 (Tue, November 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1815,6 +1815,9 @@ def _setApiRefExperiment(experiment, refExperiment):
                             del refData[jj]
                             break
 
+#===========================================================================================================
+# Peak-related stuff
+#===========================================================================================================
 
 def _createPeak(spectrum, peakList=None, **ppmPositions) -> Optional['Peak']:
     """Create peak at position specified by the ppmPositions dict.
@@ -1983,38 +1986,6 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
                 getLogger().warning(f'could not pick peaks for {spectrum} in region {axisDict}')
 
 
-# def _createPeakPicker(spectrum):
-#     """Create a PeakPicker from preferences; resort to default types when not set
-#
-#     :param spectrum: instance of type Spectrum
-#     :return: new peakPicker instance of type defined in 1d or Nd section of preferences or None
-#     """
-#     from ccpn.framework.Application import getApplication
-#     from ccpn.core.lib.PeakPickers.PeakPickerABC import getPeakPicker
-#     from ccpn.core.lib.PeakPickers.PeakPickerNd import PeakPickerNd
-#     from ccpn.core.lib.PeakPickers.Simple1DPeakPicker import Simple1DPeakPicker
-#
-#     app = getApplication()
-#
-#     if app and spectrum:
-#         prefsGeneral = app.preferences.general
-#
-#         if spectrum.dimensionCount == 1:
-#             _pickerType = prefsGeneral.peakPicker1d if prefsGeneral.peakPicker1d is not None \
-#                           else Simple1DPeakPicker.peakPickerType
-#         else:
-#             _pickerType = prefsGeneral.peakPickerNd if prefsGeneral.peakPickerNd is not None \
-#                           else PeakPickerNd.peakPickerType
-#
-#         _picker = None
-#         if _pickerType and (_picker := getPeakPicker(_pickerType, spectrum)) is not None:
-#             getLogger().debug(f'{spectrum}: creating default peakPicker {_picker}')
-#         else:
-#             getLogger().warning(f'{spectrum}: unable to define peakPicker')
-#
-#         return _picker
-
-
 def fetchPeakPicker(spectrum):
     """Get a peakPicker; either by restore from spectrum or the default relevant for spectrum
     :return a PeakPicker instance or None on errors
@@ -2063,6 +2034,59 @@ def fetchPeakPicker(spectrum):
 
     return _picker
 
+#===========================================================================================================
+# Spectrum axis permutations
+#===========================================================================================================
+
+def _searchAxisCodePermutations(spectrum, checkCodes: Tuple[str, ...]) -> Optional[Tuple[int]]:
+    """Generate the permutations of the current axisCodes
+    """
+    if not checkCodes:
+        raise ValueError('checkCodes is not defined')
+    if not isinstance(checkCodes, (tuple, list)):
+        raise TypeError('checkCodes is not a list/tuple')
+    if not all(isinstance(ss, str) for ss in checkCodes):
+        raise TypeError('checkCodes elements must be strings')
+
+    from itertools import permutations
+
+    # add permutations for the axes
+    axisPerms = tuple(permutations(spectrum.axisCodes))
+    axisOrder = tuple(permutations(spectrum.axes))
+
+    for ii, perm in enumerate(axisPerms):
+        n = min(len(checkCodes), len(perm))
+        if n and all(pCode[0] == cCode[0] for pCode, cCode in zip(perm[:n], checkCodes[:n])):
+            return axisOrder[ii]
+
+def _setDefaultAxisOrdering(spectrum):
+    """Establish and set a preferred axis ordering, based on some default rules;
+    e.g. HCN for triple-resonance experiment
+    called once from _newSpectrum to set the preferredAxisOrdering
+    """
+    pOrder = None
+    # Define the preferred orderings
+    if spectrum.dimensionCount == 2:
+        dCodes = ['H N'.split(), 'H C'.split(), ('H',)]
+    elif spectrum.dimensionCount == 3:
+        dCodes = ['H C N'.split(), 'H H'.split(), 'C C'. split(), 'N N'.split()]
+    elif spectrum.dimensionCount == 4:
+        dCodes = ['H C H N'.split(), 'H C H C'.split()]
+    else:
+        dCodes = []
+
+    # See if we can map one of the preferred orderings
+    for dCode in dCodes:
+        pOrder = _searchAxisCodePermutations(spectrum, dCode)
+        if pOrder and pOrder[0] == spectrum.X_AXIS:
+            spectrum.preferredAxisOrdering = pOrder
+            break
+
+    if not pOrder:
+        # didn't find anything; revert to default [0...dimensionCount-1]
+        pOrder = spectrum.axes
+
+    return
 
 #===========================================================================================================
 # GWV testing only

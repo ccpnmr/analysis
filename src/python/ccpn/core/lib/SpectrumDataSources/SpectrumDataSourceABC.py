@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-24 11:47:41 +0100 (Fri, September 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-09 17:40:31 +0000 (Tue, November 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -607,6 +607,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
             return True
 
         return False
+
+    def nameFromPath(self):
+        """Return a name derived from path (to be subclassed for specific cases; e.g. Bruker)
+        """
+        return self.path.stem
 
     def getByDimensions(self, parameterName: str, dimensions: Sequence[int]):
         """Return values defined by parameterName in order defined by dimensions (1..dimensionCount).
@@ -1122,17 +1127,17 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         # checking path
         if instance.setPath(path, substituteSuffix=False) is None:
-            logger.debug2('path "%s" is not valid for dataFormat "%s"' %
+            logger.debug2('path "%s" is not valid for SpectrumDataSource dataFormat "%s"' %
                          (path, instance.dataFormat))
             return None
 
         if not instance.checkPath(instance.path, mode=instance.defaultOpenReadMode):
-            logger.debug2('path "%s" is not valid for reading dataFormat "%s"' %
+            logger.debug2('path "%s" is not valid for reading SpectrumDataSource dataFormat "%s"' %
                          (path, instance.dataFormat))
             return None
 
         if not instance.allowDirectory and instance.path.is_dir():
-            logger.debug2('path "%s" is directory and not valid for reading dataFormat "%s"' %
+            logger.debug2('path "%s" is directory and not valid for reading SpectrumDataSource dataFormat "%s"' %
                          (path, instance.dataFormat))
             return None
 
@@ -1142,18 +1147,18 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 pass
                 # instance.readParameters()
         except RuntimeError as es:
-            logger.debug2('path "%s", dataFormat "%s": bailing on reading with error: "%s"' %
+            logger.debug2('path "%s", SpectrumDataSource dataFormat "%s": bailing on reading with error: "%s"' %
                          (path, instance.dataFormat, es))
             return None
 
         # Check dimensionality; should be > 0
         if instance.dimensionCount == 0:
-            logger.debug2('path "%s": reading parameters in dataFormat "%s" yielded dimensionCount 0' %
+            logger.debug2('path "%s": reading parameters in SpectrumDataSource dataFormat "%s" yielded dimensionCount 0' %
                          (path, instance.dataFormat))
             return None
 
         elif instance.dimensionCount > 0:
-            logger.debug2('path "%s" is valid for dataFormat "%s"' %
+            logger.debug2('path "%s" is valid for SpectrumDataSource dataFormat "%s"' %
                          (path, instance.dataFormat))
             return instance  # found the file with right attributes
 

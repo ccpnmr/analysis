@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-25 09:46:16 +0100 (Wed, August 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-09 14:44:13 +0000 (Tue, November 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1545,11 +1545,41 @@ class Framework(NotifierBase):
             if subType == ioFormats.CCPN:
                 sys.stderr.write('==> Loading %s project "%s"\n' % (subType, path))
 
-                if self.project is not None:  # always close for Ccpn
-                    self._closeProject()
-                project = coreIo.loadProject(path, useFileLogger=self.useFileLogger, level=self.level)
-                project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
-                self._initialiseProject(project)
+                from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY, ccpnVersionHistory
+
+                # warning for projects that predate 3.1.0.alpha - these will no longer be backwards compatible with
+                #   3.0.4.edge and earlier
+                _lastVersion = None
+                try:
+                    _path = Path.aPath(path)
+                    if not _path.exists():
+                        raise ValueError('path "%s" does not exist' % path)
+
+                    with open(_path / CCPN_STATE_DIRECTORY / ccpnVersionHistory, 'r') as fp:
+                        # load the current version history from the state folder - this should be a list of version strings
+                        _history = json.load(fp)
+
+                except Exception as es:
+                    if self.project is not None:  # always close for Ccpn
+                        self._closeProject()
+                    project = coreIo.loadProject(path, useFileLogger=self.useFileLogger, level=self.level)
+                    project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
+                    self._initialiseProject(project)
+
+                else:
+                    # show an error - the file was created with a version >= 3.1
+                    if self.ui and self.ui.mainWindow:
+                        # file already exists, so the file is created with a later version
+                        MessageDialog.showWarning('Load Project',
+                                                  f'Project {_path} was created with a later version of AnalysisV3.\n'
+                                                  '\n'
+                                                  'The file cannot be loaded, version 3.1.0 or higher is required.')
+                    else:
+                        getLogger().warning(f'Project {_path} was created with a later version of AnalysisV3. '
+                                            f'The file cannot be loaded, version 3.1.0 or higher is required.')
+
+                    # skip loading bad file
+                    return
 
             elif subType == ioFormats.NEF:
                 sys.stderr.write('==> Loading %s NEF project "%s"\n' % (subType, path))

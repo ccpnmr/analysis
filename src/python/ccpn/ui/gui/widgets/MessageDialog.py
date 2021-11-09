@@ -5,7 +5,8 @@ This file contains the routines for message dialogues
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-01-24 17:58:25 +0000 (Sun, January 24, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-11-09 14:44:13 +0000 (Tue, November 09, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,6 +30,8 @@ import textwrap
 from PyQt5 import QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Font import setWidgetFont
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from PyQt5.QtCore import QEvent
+
 
 # from ccpn.ui.gui.guiSettings import messageFont, messageFontBold
 
@@ -56,7 +59,7 @@ default_icons = (Information, Question, Warning, Critical)
 if _isDarwin():
     Question = Warning
 
-LINELENGTH = 80
+LINELENGTH = 100
 WRAPBORDER = 5
 WRAPSCALE = 1.01
 
@@ -65,37 +68,52 @@ def _wrapString(text, lineLength=LINELENGTH):
     """Wrap a line of text to the desired width of the dialog
     Returns list of individual lines and the concatenated string for dialog
     """
-    wrapped = textwrap.wrap(text, width=lineLength, replace_whitespace=False, break_long_words=False)
-
     newWrapped = []
-    for mm in wrapped:
-        if len(mm) > LINELENGTH:
-            for chPos in range(0, len(mm), lineLength):
-                newWrapped.append(mm[chPos:chPos + lineLength])
-        else:
-            newWrapped.append(mm)
 
-    # merge lines that have now been created by splitting longer lines (if no newlines in first line)
-    newWrapped2 = []
-    if len(newWrapped) > 1:
-        lineNum = 0
-        while lineNum < len(newWrapped) - 1:
-            l1 = newWrapped[lineNum]
-            l2 = newWrapped[lineNum + 1]
+    _text = text.split('\n')
+    for text in _text:
+        wrapped = textwrap.wrap(text, width=lineLength, replace_whitespace=False, break_long_words=False)
 
-            if (len(l1) + len(l2) < LINELENGTH) and '\n' not in l1:
-                newWrapped2.append(l1 + ' ' + l2)
-                lineNum += 1
+        if not text:
+            newWrapped.append('')
+        for mm in wrapped:
+            if len(mm) > LINELENGTH:
+                for chPos in range(0, len(mm), lineLength):
+                    newWrapped.append(mm[chPos:chPos + lineLength])
             else:
-                newWrapped2.append(l1)
-                if lineNum == len(newWrapped) - 2:
-                    newWrapped2.append(l2)
+                newWrapped.append(mm)
 
-            lineNum += 1
-    else:
-        newWrapped2 = newWrapped
+    return newWrapped, '\n'.join(newWrapped)
 
-    return newWrapped2, '\n'.join(newWrapped2)
+    # # merge lines that have now been created by splitting longer lines (if no newlines in first line)
+    # newWrapped2 = []
+    # if len(newWrapped) > 1:
+    #     lineNum = 0
+    #     while lineNum < len(newWrapped):
+    #         l1 = newWrapped[lineNum]
+    #         if lineNum == len(newWrapped) - 1:
+    #             newWrapped2.append(l1)
+    #             break
+    #
+    #         l2 = newWrapped[lineNum + 1]
+    #         if not l2:
+    #             newWrapped2.append(l1)
+    #             newWrapped2.append(l2)
+    #             lineNum += 1
+    #         elif (len(l1) + len(l2) < LINELENGTH) and '\n' not in l1:
+    #             # not sure it will get here now
+    #             newWrapped2.append(l1 + ' ' + l2)
+    #             lineNum += 1
+    #         else:
+    #             newWrapped2.append(l1)
+    #             if lineNum == len(newWrapped) - 2:
+    #                 newWrapped2.append(l2)
+    #
+    #         lineNum += 1
+    # else:
+    #     newWrapped2 = newWrapped
+    #
+    # return newWrapped2, '\n'.join(newWrapped2)
 
 
 class MessageDialog(QtWidgets.QMessageBox):
@@ -104,9 +122,11 @@ class MessageDialog(QtWidgets.QMessageBox):
     Using the 'multiline' to emulate the windowTitle, as on Mac the windows do not get their title
     """
 
-    def __init__(self, title, basicText, message, icon=Information, iconPath=None, parent=None):
+    def __init__(self, title, basicText, message, icon=Information, iconPath=None, parent=None, scrollableMessage=False):
         QtWidgets.QMessageBox.__init__(self, None)
-        self.setWindowModality(QtCore.Qt.WindowModal)
+
+        # set modality to take control
+        self.setWindowModality(QtCore.Qt.ApplicationModal)
 
         self._parent = parent
         self.setWindowTitle(title)
@@ -135,6 +155,7 @@ class MessageDialog(QtWidgets.QMessageBox):
         item = layout.itemAtPosition(0, 2)  # grid position of basic text item
         if item:
             widgetBasic = item.widget()
+            setWidgetFont(widgetBasic, bold=True)
 
             # get the bounding rectangle for each line of basicText
             for wrapLine in basicTextWrap:
@@ -154,7 +175,14 @@ class MessageDialog(QtWidgets.QMessageBox):
         if widgetBasic:
             widgetBasic.setFixedWidth(maxTextWidth)
         if widgetMessage:
-            widgetMessage.setFixedWidth(maxTextWidth)
+            if scrollableMessage: # insert the Label widgetMessage inside a scrollArea. Could be done automatically if len(text) > someValue...
+                scrollArea = QtWidgets.QScrollArea(self)
+                scrollArea.setWidgetResizable(True)
+                widgetMessage.setWordWrap(True)
+                scrollArea.setWidget(widgetMessage)
+                layout.addWidget(scrollArea, 1, 2)
+            else:
+                widgetMessage.setFixedWidth(maxTextWidth)
 
         palette = QtGui.QPalette()
         self.setPalette(palette)
@@ -261,8 +289,9 @@ def showSaveDiscardCancel(title, message, parent=None, iconPath=None):
         return None
 
 
-def showWarning(title, message, parent=None, iconPath=None):
-    dialog = MessageDialog('Warning', title, message, Warning, iconPath, parent)
+def showWarning(title, message, parent=None, iconPath=None, scrollableMessage=False):
+    dialog = MessageDialog(title='Warning', basicText=title, message=message, icon=Warning, iconPath=iconPath, parent=parent,
+                           scrollableMessage=scrollableMessage)
 
     dialog.setStandardButtons(Close)
     dialog.raise_()
@@ -295,7 +324,6 @@ def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, o
         assert len(objects) == len(texts)
 
     dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
-    dialog.setFocus()
 
     _checkbox = None
 
@@ -325,28 +353,25 @@ def showMulti(title, message, texts, objects=None, parent=None, iconPath=None, o
             if lower_text == 'ok' or lower_text == okText.strip().lower():
                 dialog.setDefaultButton(button)
 
-        if checkbox != None:
-            _checkbox = CheckBox(parent=dialog, text=checkbox)
-            _checkbox.setChecked(checked)
+        if checkbox is not None:
+            _checkbox = CheckBox(parent=dialog, text=checkbox, checked=checked)
             dialog.setCheckBox(_checkbox)
 
-    if _checkbox != None:
+    if _checkbox is not None:
         _checkbox.setFocus()
 
-    dialog.raise_()
     index = dialog.exec_()
 
     result = ''
-    if dialog.clickedButton() != None:
+    if dialog.clickedButton() is not None:
         if objects:
             result = objects[index]
 
         else:
             result = texts[index]
 
-    if checkbox != None:
-        if _checkbox.isChecked():
-            result = ' %s %s ' % (result, checkbox)
+    if checkbox is not None and _checkbox.isChecked():
+        result = ' %s %s ' % (result, checkbox)
 
     return result
 
@@ -374,7 +399,6 @@ def showMessage(title, message, parent=None, iconPath=None):
 from PyQt5 import QtCore
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtCore import Qt
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.Label import Label
 from contextlib import contextmanager
@@ -402,7 +426,7 @@ class progressPopup(CcpnDialog):
         self.busyFunc = busyFunc
 
         # progress bar
-        self.progressbar = QtGui.QProgressBar()
+        self.progressbar = QtWidgets.QProgressBar()
         self.progressbar.reset()  # resets the progress bar
         self.progressbar.setAlignment(Qt.AlignCenter)  # centers the text
         # 'valueChanged()' signal
@@ -478,6 +502,8 @@ def progressManager(parent, title=None, progressMax=100):
         QtWidgets.QApplication.processEvents()  # hopefully it will redraw the popup
         thisProg.close()
 
+        # return correct focus control to the parent
+        QtWidgets.QApplication.setActiveWindow(parent)
 
 def _stoppableProgressBar(data, title='Calculating...', buttonText='Cancel'):
     """ Use this for opening a _stoppableProgressBar before time consuming operations. the cancel button allows

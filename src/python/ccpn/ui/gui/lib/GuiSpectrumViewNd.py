@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-16 11:52:31 +0100 (Thu, September 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-10 12:57:00 +0000 (Wed, November 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -30,9 +30,9 @@ import numpy as np
 from itertools import product
 from collections import namedtuple
 from PyQt5 import QtCore
+from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
 from ccpn.util import Colour
 from ccpnc.contour import Contourer2d
-from ccpn.ui.gui.lib.GuiSpectrumView import GuiSpectrumView
 
 
 # _NEWCOMPILEDCONTOURS = True
@@ -229,66 +229,72 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         _negColours = self._interpolateColours(self.negColours, negLevels)
 
         contourList = None
-        if numDims < 3 or self._application.preferences.general.generateSinglePlaneContours:
-            dataArrays = tuple()
+        try:
 
-            for position, dataArray in self._getPlaneData():
-                # overlay all the planes into a single plane
-                dataArrays += (dataArray,)
+            if numDims < 3 or self._application.preferences.general.generateSinglePlaneContours:
+                dataArrays = tuple()
 
-            # build the contours
-            contourList = Contourer2d.contourerGLList(dataArrays,
-                                                      posLevelsArray,
-                                                      negLevelsArray,
-                                                      np.array(_posColours, dtype=np.float32),
-                                                      np.array(_negColours, dtype=np.float32))
-        else:
+                for position, dataArray in self._getPlaneData():
+                    # overlay all the planes into a single plane
+                    dataArrays += (dataArray,)
 
-            specIndices = self.dimensionOrdering
-            stripIndices = tuple(specIndices.index(ii) for ii in range(numDims))
-            regionLimits = tuple(axis.region for axis in self.strip.orderedAxes)
-
-            # get the spectrumLimits bounded by the first/last points
-            axisLimits = {}
-            for axisCode in self.spectrum.axisCodes:
-                lim = self.spectrum.getPpmArray(axisCode=axisCode)
-                axisLimits[axisCode] = (min(lim[0], lim[-1]),
-                                        max(lim[0], lim[-1]))
-
-            # fill the others in from the strip
-            axisLimits.update(dict([(self.spectrum.axisCodes[ii], regionLimits[stripIndices[ii]])
-                                    for ii in range(numDims) if stripIndices[ii] is not None and stripIndices[ii] > 1]))
-
-            # use a single Nd dataArray and flatten to the visible axes - averages across the planes
-            data = self.spectrum.getRegion(**axisLimits)
-
-            if data is not None and data.size:
-                xyzDims = tuple((numDims - ind - 1) for ind in specIndices)
-                xyzDims = tuple(reversed(xyzDims))
-                tempDataArray = data.transpose(*xyzDims)
-
-                # flatten multidimensional arrays into single array
-                for maxCount in range(numDims - 2):
-                    tempDataArray = np.max(tempDataArray.clip(0.0, 1e15), axis=0) + np.min(tempDataArray.clip(-1e12, 0.0), axis=0)
-
-                contourList = Contourer2d.contourerGLList((tempDataArray,),
+                # build the contours
+                contourList = Contourer2d.contourerGLList(dataArrays,
                                                           posLevelsArray,
                                                           negLevelsArray,
                                                           np.array(_posColours, dtype=np.float32),
                                                           np.array(_negColours, dtype=np.float32))
+            else:
 
-        if contourList and contourList[1] > 0:
-            # set the contour arrays for the GL object
-            glList.numVertices = contourList[1]
-            glList.indices = contourList[2]
-            glList.vertices = contourList[3]
-            glList.colors = contourList[4]
-        else:
-            # clear the arrays
-            glList.numVertices = 0
-            glList.indices = np.array((), dtype=np.uint32)
-            glList.vertices = np.array((), dtype=np.float32)
-            glList.colors = np.array((), dtype=np.float32)
+                specIndices = self.dimensionOrdering
+                stripIndices = tuple(specIndices.index(ii) for ii in range(numDims))
+                regionLimits = tuple(axis.region for axis in self.strip.orderedAxes)
+
+                # get the spectrumLimits bounded by the first/last points
+                axisLimits = {}
+                for axisCode in self.spectrum.axisCodes:
+                    lim = self.spectrum.getPpmArray(axisCode=axisCode)
+                    axisLimits[axisCode] = (min(lim[0], lim[-1]),
+                                            max(lim[0], lim[-1]))
+
+                # fill the others in from the strip
+                axisLimits.update(dict([(self.spectrum.axisCodes[ii], regionLimits[stripIndices[ii]])
+                                        for ii in range(numDims) if stripIndices[ii] is not None and stripIndices[ii] > 1]))
+
+                # use a single Nd dataArray and flatten to the visible axes - averages across the planes
+                data = self.spectrum.getRegion(**axisLimits)
+
+                if data is not None and data.size:
+                    xyzDims = tuple((numDims - ind - 1) for ind in specIndices)
+                    xyzDims = tuple(reversed(xyzDims))
+                    tempDataArray = data.transpose(*xyzDims)
+
+                    # flatten multidimensional arrays into single array
+                    for maxCount in range(numDims - 2):
+                        tempDataArray = np.max(tempDataArray.clip(0.0, 1e15), axis=0) + np.min(tempDataArray.clip(-1e12, 0.0), axis=0)
+
+                    contourList = Contourer2d.contourerGLList((tempDataArray,),
+                                                              posLevelsArray,
+                                                              negLevelsArray,
+                                                              np.array(_posColours, dtype=np.float32),
+                                                              np.array(_negColours, dtype=np.float32))
+
+        except Exception as es:
+            pass
+
+        finally:
+            if contourList and contourList[1] > 0:
+                # set the contour arrays for the GL object
+                glList.numVertices = contourList[1]
+                glList.indices = contourList[2]
+                glList.vertices = contourList[3]
+                glList.colors = contourList[4]
+            else:
+                # clear the arrays
+                glList.numVertices = 0
+                glList.indices = np.array((), dtype=np.uint32)
+                glList.vertices = np.array((), dtype=np.float32)
+                glList.colors = np.array((), dtype=np.float32)
 
         # else:
         #     # old contouring

@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-07 20:05:59 +0100 (Thu, October 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-10 13:01:21 +0000 (Wed, November 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2928,7 +2928,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     from ccpn.util.decorators import profile
 
-    @profile
+    @profile()
     def _buildGLWithProfile(self):
         """A new test method for profiling the _buildGL
         """

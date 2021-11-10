@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-02 11:47:06 +0000 (Tue, November 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-10 12:57:37 +0000 (Wed, November 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -267,13 +267,6 @@ class Collection(AbstractWrapperObject):
         if values:
             self._wrappedData.collectionItems = [itm._wrappedData for itm in values]
 
-    def __bool__(self):
-        """Return True if there are items
-        """
-        return len(self._wrappedData.collectionItems) > 0
-
-    __nonzero__ = __bool__
-
     def __len__(self):
         """Return the number of items in the collection
         """
@@ -371,7 +364,7 @@ class Collection(AbstractWrapperObject):
         The items must belong to the collection.
         Action is ignored if the list is empty.
 
-        Raise an error if there are any non-core objects
+        Raise an error if there are any non-core objects.
 
         :param items: single object or list of core objects, as objects or pid strings.
         """
@@ -391,40 +384,51 @@ class Collection(AbstractWrapperObject):
                     self._wrappedData.removeCollectionItem(itm._wrappedData)
 
     @logCommand(get='self')
-    def getByObjectType(self, objectTypes=None, recursive=True, depth=0):
-        """Return a list of items of type objectType
+    def getByObjectType(self, objectTypes=None, recursive=None, depth=None):
+        """Return a list of items of types specified in objectTypes list.
 
         ObjectTypes is a list of core objects expressed as object classes or short/long classnames.
-        For example, class Note can be specified as Note, 'Note' or 'NO'
+        If objectTypes is not specified then all objects will be returned.
+
+        For example, class Note can be specified as Note, 'Note' or 'NO'.
 
         ObjectTypes can be a single item or tuple/list, or None to return all items.
+        Any Nones in lists will be ignored.
 
-        Any Nones in lists will be ignored
+        Set depth=0 or recursive=True to search through all nested collections,
+        recursion=False or depth=1 will only search through the top collection, ignoring nested collections.
+        Full recursion is the default setting.
 
-        If recursive is True, will search through all nested collections, set by default
-        recursion=False or depth=1 will only search through the top list, ignoring nested collections
-        Set depth=0 for fully recursive, default=0
+        Please specify either recursive OR depth.
 
         Examples:
 
         ::
 
             collection.getByObjectTypes()
-            collection.getByObjectTypes(objectTypes=Note, recursive=False)
-            collection.getByObjectTypes(objectTypes='NO')
-            collection.getByObjectTypes(objectTypes=['Note', Spectrum])
+            collection.getByObjectTypes(objectTypes=Note)
+            collection.getByObjectTypes(objectTypes='NO', recursive=False)
             collection.getByObjectTypes(objectTypes='Note', depth=2)
+            collection.getByObjectTypes(objectTypes=['Note', Spectrum])
 
-        :param objectTypes: single item, or list of core objects as object class or classnames
-        :param recursive: True/False
+        :param objectTypes: optional single item, or list of core objects as object class or classnames
+        :param recursive: optional True/False
+        :param depth: optional int >= 0
         :return: tuple of core items.
         """
 
+        if (recursive is not None and depth is not None):
+            raise ValueError('Please specify either recursive OR depth')
+        if depth is not None and not (isinstance(depth, int) and depth >=0):
+            raise ValueError('depth must be int >= 0; use 0 for full depth')
+        if recursive not in [None, True, False]:
+            raise ValueError('recursive must be True/False')
         if isinstance(objectTypes, (str, type(AbstractWrapperObject))):
             # change a single item to a list, if is a str or a core object
             objectTypes = [objectTypes, ]
         if not isinstance(objectTypes, (list, tuple, type(None))):
             raise ValueError('objectTypes must be list/tuple of core objects or classnames, or single core object or None')
+
         # remove any Nones from the list
         if objectTypes is not None:
             objectTypes = list(filter(lambda itm: itm is not None, objectTypes))
@@ -445,7 +449,7 @@ class Collection(AbstractWrapperObject):
             _objectTypes = tuple(_allObjectTypes[itm] if isinstance(itm, str) else itm for itm in _objectTypes)
 
         # create an iterator
-        recurse = _searchCollections(self.items, _objectTypes, depth=0 if recursive else depth)
+        recurse = _searchCollections(self.items, _objectTypes, depth=depth or (1 if recursive == False else 0))
         for _ in recurse:
             pass
 

@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: VickyAH $"
-__dateModified__ = "$dateModified: 2021-10-19 12:27:13 +0100 (Tue, October 19, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-11-10 11:00:56 +0000 (Wed, November 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -261,9 +261,9 @@ class Framework(NotifierBase):
         self.args = args
         self.applicationName = applicationName
         self.applicationVersion = applicationVersion
-
         # NOTE:ED - what is revision for? there are no uses and causes a new error for sphinx documentation unless a string
-        self.revision = Version.revision
+        # self.revision = Version.revision
+
         self.plugins = []  # Hack for now, how should we store these?
         self.ccpnModules = []
 

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-11 19:40:43 +0100 (Mon, October 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-10 12:56:37 +0000 (Wed, November 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -245,8 +245,8 @@ class IntegralTable(GuiTable):
             self.itWidget.selectFirstItem()
         else:
             if not isinstance(integralList, IntegralList):
-                logger.debug('select: Object is not of type IntegralList')
-                raise TypeError('select: Object is not of type IntegralList')
+                getLogger().warning(f'select: Object {integralList} is not of type IntegralList')
+                return
             else:
                 for widgetObj in self.itWidget.textList:
                     if integralList.pid == widgetObj:

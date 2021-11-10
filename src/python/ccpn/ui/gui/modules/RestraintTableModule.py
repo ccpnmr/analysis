@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-09 18:38:41 +0000 (Tue, November 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-10 12:56:37 +0000 (Wed, November 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -269,8 +269,8 @@ class GuiRestraintTable(GuiTable):
             self.rtWidget.selectFirstItem()
         else:
             if not isinstance(restraintTable, GuiRestraintTable):
-                logger.debug('select: Object is not of type RestraintTable')
-                raise TypeError('select: Object is not of type RestraintTable')
+                getLogger().warning(f'select: Object {restraintTable} is not of type RestraintTable')
+                return
             else:
                 for widgetObj in self.rtWidget.textList:
                     if restraintTable.pid == widgetObj:

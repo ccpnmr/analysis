@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-09 16:57:02 +0000 (Tue, November 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-10 11:00:37 +0000 (Wed, November 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -280,22 +280,24 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     # References to DataStore / DataSource instances for filePath manipulation and (binary) data reading;
     _dataStore = DataStoreTrait(default_value=None, read_only=True).tag(
-            saveToJson=True,
-            info="""
+                                saveToJson=True,
+                                info="""
                                 A DataStore instance encoding the path and dataFormat of the (binary) spectrum data.
                                 None indicates no spectrum data file path has been defined"""
-            )
+    )
 
     # CCPNINTERNAL: Also used in PeakPickers
     _dataSource = DataSourceTrait(default_value=None, read_only=True).tag(
-            saveToJson=True,
-            info="""
+                                  saveToJson=True,
+                                  info="""
                                   A SpectrumDataSource instance for reading (writing) of the (binary) spectrum data.
-                                  None indicates no valid spectrum data file has been defined""")
+                                  None indicates no valid spectrum data file has been defined"""
+    )
 
     _peakPicker = PeakPickerTrait(default_value=None).tag(
-            saveToJson=True,
-            info="A PeakPicker instance")
+                                  saveToJson=True,
+                                  info="A PeakPicker instance"
+    )
 
     @property
     def peakPicker(self):

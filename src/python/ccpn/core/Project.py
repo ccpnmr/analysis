@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-11 15:07:56 +0000 (Thu, November 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-11 16:54:53 +0000 (Thu, November 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -423,15 +423,6 @@ class Project(AbstractWrapperObject):
         self._queryNextUniqueIdValue(className)
         self._wrappedData._nextUniqueIdValues[className] = int(value)
 
-    # @property
-    # def versionHistory(self) -> tuple:
-    #     """Return the tuple of versions that the project has been saved under
-    #     The last element is the most recent
-    #     Defaults to ('3.0.4',) if project saved before version 3.1.0.alpha
-    #     """
-    #     _history = getattr(self._wrappedData, 'versionHistory', []) or ['3.0.4']
-    #     return tuple(_history)
-
     @property
     def _parent(self) -> AbstractWrapperObject:
         """Parent (containing) object."""
@@ -442,10 +433,9 @@ class Project(AbstractWrapperObject):
              checkValid: bool = False, changeDataLocations: bool = False) -> bool:
         """Save project with all data, optionally to new location or with new name.
         Unlike lower-level functions, this function ensures that data in high level caches are saved.
-        Return True if save succeeded otherwise return False (or throw error)"""
+        Return True if save succeeded otherwise return False (or throw error)
+        """
         # self._flushCachedData()
-
-        from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY, ccpnVersionHistory
 
         # path is empty for save under the same name
         if newPath:
@@ -473,12 +463,6 @@ class Project(AbstractWrapperObject):
         except Exception as es:
             getLogger().warning('Error checking project status: %s' % str(es))
 
-        # # keep a list of the versions that the project has been saved under
-        # if not hasattr(self._wrappedData, 'versionHistory') or self._wrappedData.versionHistory is None:
-        #     setattr(self._wrappedData, 'versionHistory', [])
-        # if self.application.applicationVersion not in self._wrappedData.versionHistory:
-        #     self._wrappedData.versionHistory.append(self.application.applicationVersion)
-
         # don't check valid inside this routine as it is not optimised and only results in a crash. Use apiStatus object.
         savedOk = apiIo.saveProject(self._wrappedData.root, newPath=path,
                                     changeBackup=changeBackup, createFallback=createFallback,
@@ -494,9 +478,6 @@ class Project(AbstractWrapperObject):
 
             # store the version history in state subfolder json file - not the best as a duplication which could cause issues later
             self._saveHistory.addSaveRecord().save()
-            # _tmpPath = aPath(path).fetchDir(CCPN_STATE_DIRECTORY)
-            # with open(_tmpPath / ccpnVersionHistory, 'w') as fp:
-            #     json.dump(self._wrappedData.versionHistory, fp)
 
         return savedOk
 

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-06 17:54:15 +0100 (Mon, September 06, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-11-11 07:54:02 +0000 (Thu, November 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -104,6 +104,13 @@ CCPN_PLUGINS_DIRECTORY   = 'data/plugins'
 CCPN_SPECTRA_DIRECTORY   = 'data/spectra'
 CCPN_SCRIPTS_DIRECTORY   = 'scripts'
 CCPN_STATE_DIRECTORY     = 'state'
+
+CCPN_SUB_DIRECTORIES = [
+    CCPN_API_DIRECTORY, CCPN_ARCHIVES_DIRECTORY, CCPN_BACKUPS_DIRECTORY,
+    CCPN_SUMMARIES_DIRECTORY, CCPN_LOGS_DIRECTORY, CCPN_DATA_DIRECTORY,
+    CCPN_PLUGINS_DIRECTORY, CCPN_SPECTRA_DIRECTORY, CCPN_SCRIPTS_DIRECTORY,
+    CCPN_STATE_DIRECTORY
+]
 
 ccpnVersionHistory       = 'versionHistory.json'
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-10 11:00:56 +0000 (Wed, November 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-11 07:54:03 +0000 (Thu, November 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -56,7 +56,7 @@ def _codeMajorV(v1, v2):
 
 def _check(key=None, doDecode=True):
     from ccpn.framework.Version import applicationVersion as appVersion
-    applicationVersion = appVersion.withoutDevelopment()
+    applicationVersion = appVersion.withoutRelease()
 
     def message(*chars):
         return ''.join([c for c in map(chr, chars)])

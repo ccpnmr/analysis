@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-10 11:00:56 +0000 (Wed, November 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-11 07:54:02 +0000 (Thu, November 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -34,13 +34,13 @@ class VersionString(str):
     A VersionString is a string with extra functionality.
     It consists of three non-empty and one optional substrings separated by a mandatory dot '.' character:
 
-        majorVersion.minorVersion.revision[.development]
+        majorVersion.minorVersion.microVersion[.release]
 
      Examples: 3.0.4; 3.1.0.alfa
 
     The isValid function checks for validity
 
-    The majorVersion, minorVersion, revision and development fields are available as properties.
+    The majorVersion, minorVersion, microVersion and release fields are available as properties.
 
     A VersionString instance supports comparisons with either another VersionString instance or a suitable
     formatted string; e.g.
@@ -60,7 +60,7 @@ class VersionString(str):
         if len(self._fields) < 3:
             raise ValueError('Invalid VersionString "%s"; expected at least 3 fields' % self)
 
-        for name, val in zip('majorVersion minorVersion revision'.split(), self._fields[:3]):
+        for name, val in zip('majorVersion minorVersion microVersion'.split(), self._fields[:3]):
             try:
                 int(val)
             except:
@@ -69,22 +69,22 @@ class VersionString(str):
 
     @property
     def majorVersion(self) -> str:
-        """return majorVersion of self"""
+        """return majorVersion field of self"""
         return self.fields[0]
 
     @property
     def minorVersion(self) -> str:
-        """return minorVersion of self"""
+        """return minorVersion field of self"""
         return self.fields[1]
 
     @property
-    def revision(self) -> str:
-        """return revision of self"""
+    def microVersion(self) -> str:
+        """return microVersion field of self"""
         return self.fields[2]
 
     @property
-    def development(self) -> str:
-        """return development of self, or None if it doed not exist
+    def release(self) -> str:
+        """return release field of self, or None if it does not exist
         """
         fields = self.fields
         if len(fields) >= 4:
@@ -105,8 +105,8 @@ class VersionString(str):
         """
         return str(self)
 
-    def withoutDevelopment(self) -> str:
-        """Convenience: return self as str with the development field
+    def withoutRelease(self) -> str:
+        """Convenience: return self as str with the release field
         """
         return '.'.join(self.fields[:3])
 
@@ -196,8 +196,17 @@ class VersionString(str):
 
         return False
 
+    def __le__(self, other):
+        return self.__lt__(other) or self.__eq__(other)
+
+    def __ge__(self, other):
+        return self.__gt__(other) or self.__eq__(other)
+
 
 
 applicationVersion = VersionString('3.1.0.alfa2')
 # applicationVersion = '3.1.0'
 revision = '3'
+
+
+

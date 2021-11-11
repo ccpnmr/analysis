@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-12 16:04:27 +0100 (Tue, October 12, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-11-11 07:54:02 +0000 (Thu, November 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -39,6 +39,7 @@ import json
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpn.core.lib import Undo
+from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory, newProjectSaveHistory
 from ccpn.util import Logging
 from ccpn.util.ExcelReader import ExcelReader
 from ccpn.util.nef.GenericStarParser import DataBlock
@@ -282,6 +283,11 @@ class Project(AbstractWrapperObject):
         # Set for Pre-May-2016 version. NBNB TODO remove when no longer needed
         self._appBase = None
 
+        # reference to a ProjectSaveHistory instance
+        self._saveHistory = None
+
+        self._checkProjectSubDirectories()
+
     # GWV: 20181102: insert to retain consistency with future changes
     @property
     def application(self):
@@ -313,6 +319,13 @@ class Project(AbstractWrapperObject):
         """
         return self._apiNmrProject.root._upgradedFromV2
 
+    def _checkProjectSubDirectories(self):
+        """if need be, create all project subdirectories"""
+        from ccpn.framework.PathsAndUrls import CCPN_SUB_DIRECTORIES
+        _path = aPath(self.path)
+        for dir in CCPN_SUB_DIRECTORIES:
+            _path.fetchDir((dir))
+
     def _initialiseProject(self):
         """Complete initialisation of project,
         set up logger and notifiers, and wrap underlying data
@@ -336,6 +349,8 @@ class Project(AbstractWrapperObject):
             # we always have the default chemicalShift list
             if len(self.chemicalShiftLists) == 0:
                 self.newChemicalShiftList(name='default')
+
+        self._saveHistory = getProjectSaveHistory(self.path)
 
     def _close(self):
         self.close()
@@ -457,11 +472,11 @@ class Project(AbstractWrapperObject):
         except Exception as es:
             getLogger().warning('Error checking project status: %s' % str(es))
 
-        # keep a list of the versions that the project has been saved under
-        if not hasattr(self._wrappedData, 'versionHistory') or self._wrappedData.versionHistory is None:
-            setattr(self._wrappedData, 'versionHistory', [])
-        if self.application.applicationVersion not in self._wrappedData.versionHistory:
-            self._wrappedData.versionHistory.append(self.application.applicationVersion)
+        # # keep a list of the versions that the project has been saved under
+        # if not hasattr(self._wrappedData, 'versionHistory') or self._wrappedData.versionHistory is None:
+        #     setattr(self._wrappedData, 'versionHistory', [])
+        # if self.application.applicationVersion not in self._wrappedData.versionHistory:
+        #     self._wrappedData.versionHistory.append(self.application.applicationVersion)
 
         # don't check valid inside this routine as it is not optimised and only results in a crash. Use apiStatus object.
         savedOk = apiIo.saveProject(self._wrappedData.root, newPath=path,
@@ -477,9 +492,10 @@ class Project(AbstractWrapperObject):
             #     application._refreshAfterSave()
 
             # store the version history in state subfolder json file - not the best as a duplication which could cause issues later
-            _tmpPath = aPath(path).fetchDir(CCPN_STATE_DIRECTORY)
-            with open(_tmpPath / ccpnVersionHistory, 'w') as fp:
-                json.dump(self._wrappedData.versionHistory, fp)
+            self._saveHistory.addSaveRecord().save()
+            # _tmpPath = aPath(path).fetchDir(CCPN_STATE_DIRECTORY)
+            # with open(_tmpPath / ccpnVersionHistory, 'w') as fp:
+            #     json.dump(self._wrappedData.versionHistory, fp)
 
         return savedOk
 
@@ -1995,3 +2011,5 @@ class Project(AbstractWrapperObject):
         from ccpn.core.ChemicalShiftList import _getChemicalShiftList
 
         return _getChemicalShiftList(self, name=name, **kwds)
+
+

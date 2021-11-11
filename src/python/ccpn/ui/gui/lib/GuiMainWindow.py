@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-08 15:20:42 +0000 (Mon, November 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-11 07:54:03 +0000 (Thu, November 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1167,14 +1167,31 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         ignore = False
 
         # local import here, as checkPathForDataLoaders needs to be called first to assure proper import orer
+        from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
+        from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
         from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
         from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
 
         # check-for and set any specific attributes of the dataLoader instance
         # depending on the dataFormat
+        if dataLoader.dataFormat == CcpNmrV2ProjectDataLoader.dataFormat:
+            choice = showYesNo('CCPN Version-2 project "%s"' % dataLoader.path,
+                               'will be converted to a Version-3 project and saved, do you want to load?')
+            if choice == False:
+                dataLoader = None
+                createNewProject = False
+                ignore = True
 
-        if dataLoader.dataFormat == NefDataLoader.dataFormat or \
+        # elif dataLoader.dataFormat == CcpNmrV3ProjectDataLoader.dataFormat:
+        #     choice = showYesNo('CCPN Version-2 project "%s"' % dataLoader.path,
+        #                        'will be converted to a Version-3 project and saved, do you want to load?')
+        #     if choice == False:
+        #         dataLoader = None
+        #         createNewProject = False
+        #         ignore = True
+
+        elif dataLoader.dataFormat == NefDataLoader.dataFormat or \
                 dataLoader.dataFormat == SparkyDataLoader.dataFormat:
             choices = ['Import', 'New project', 'Cancel']
             choice = showMulti('Load %s' % dataLoader.dataFormat,
@@ -1373,7 +1390,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         :returns project instance or None
         """
         if dataLoader is None and path is not None:
-            dataLoader = checkPathForDataLoader(path)
+            dataLoader, _tmp, _tmp2 = self._getDataLoader(path)
 
         if dataLoader is None:
             MessageDialog.showError('Load Project', 'No suitable dataLoader found', parent=self)

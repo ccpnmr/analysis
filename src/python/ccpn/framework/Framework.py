@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-10 11:00:56 +0000 (Wed, November 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-11 07:54:02 +0000 (Thu, November 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -102,16 +102,12 @@ from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_KEY_CONCEPTS
 
 from PyQt5.QtCore import QTimer
 
+
 import faulthandler
-
-
 faulthandler.enable()
 
-# from functools import partial
 
 _DEBUG = False
-
-# componentNames = ('Assignment', 'Screening', 'Structure')
 
 AnalysisAssign = 'AnalysisAssign'
 AnalysisScreen = 'AnalysisScreen'
@@ -301,7 +297,6 @@ class Framework(NotifierBase):
         self._backupTimerQ = None
         self.autoBackupThread = None
 
-        # NBNB TODO The following block should maybe be moved into _getUi
         # Assure that .ccpn exists
         ccpnDir = Path.aPath(userPreferencesDirectory)
         if not ccpnDir.exists():
@@ -1550,6 +1545,8 @@ class Framework(NotifierBase):
     def newProject(self, name='default'):
         """Create new, empty project; return Project instance
         """
+        # local import to avoid cycles
+        from ccpn.core.lib.ProjectSaveHistory import newProjectSaveHistory
 
         # NB _closeProject includes a gui cleanup call
         if self.project is not None:
@@ -1563,6 +1560,7 @@ class Framework(NotifierBase):
 
         project = coreIo.newProject(name=newName, useFileLogger=self.useFileLogger, level=self.level)
         project._isNew = True
+        newProjectSaveHistory(project.path)
         # Needs to know this for restoring the GuiSpectrum Module. Could be removed after decoupling Gui and Data!
         # GST note change of order required for undo dirty system not consistent
         # order in other place elsewhise
@@ -1603,12 +1601,12 @@ class Framework(NotifierBase):
         """Actual V3 project loader
         CCPNINTERNAL: called from CcpNmrV3ProjectDataLoader
         """
-        from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY, ccpnVersionHistory
-        from ccpn.util.Path import aPath
+        from ccpn.core.lib.ProjectLib import getProjectSaveHistory
+
+        if not isinstance(path, (Path.Path, str)):
+            raise ValueError('invalid path "%s"' % path)
 
         with logCommandManager('application.', 'loadProject', path):
-            if not isinstance(path, (Path.Path, str)):
-                raise ValueError('invalid path "%s"' % path)
 
             _path = Path.aPath(path)
             if not _path.exists():
@@ -1616,39 +1614,26 @@ class Framework(NotifierBase):
 
             # warning for projects that predate 3.1.0.alpha - these will no longer be backwards compatible with
             #   3.0.4.edge and earlier
-            _lastVersion = None
-            try:
-                with open(_path / CCPN_STATE_DIRECTORY / ccpnVersionHistory, 'r') as fp:
-                    # load the current version history from the state folder - this should be a list of version strings
-                    _history = json.load(fp)
+            projectHistory = getProjectSaveHistory(_path)
+            if projectHistory.lastSavedVersion <= '3.0.4':
 
-                _lastVersion = _history[-1]
-            except:
-                # TODO:ED - this should really be separated into NoUi and Gui class
-                if self.ui and self.ui.mainWindow:
-                    # file does not exists, or contains the wrong information/json structure
-                    ok = MessageDialog.showYesNoWarning('Load Project',
-                                                        f'Project {_path} was created with an earlier version of AnalysisV3.\n'
-                                                        '\n'
-                                                        'CAUTION: After saving in version 3.1 the project cannot currently be loaded '
-                                                        'back into versions 3.0.4 or earlier. If you are in any doubt, please make a copy of '
-                                                        'the project folder before loading/saving this project.\n'
-                                                        '\n'
-                                                        'Do you want to continue loading?')
-                else:
-                    ok = True
+                ok = MessageDialog.showYesNoWarning('Load Project',
+                                                    f'Project {_path} was created with an earlier version of AnalysisV3.\n'
+                                                    '\n'
+                                                    'CAUTION: After saving in version %s the project cannot currently be loaded '
+                                                    'back into versions 3.0.4 or earlier. If you are in any doubt, please make a copy of '
+                                                    'the project folder before loading/saving this project.\n'
+                                                    '\n'
+                                                    'Do you want to continue loading?' % self.applicationVersion.withoutRelease())
 
                 if not ok:
                     # skip loading so that user can backup/copy project
+                    getLogger().info('==> Cancelled loading ccpn project "%s"' % path)
                     return []
-
-            else:
-                # project contains a versionHistory
-                # this is okay as there is no file for projects pre-dating 3.1.0.alpha
-                pass
 
             if self.project is not None:  # always close for Ccpn
                 self._closeProject()
+
             project = coreIo.loadProject(str(_path), useFileLogger=self.useFileLogger, level=self.level)
             # project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
             self._initialiseProject(project)

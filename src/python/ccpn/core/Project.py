@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-11 07:54:02 +0000 (Thu, November 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-11 15:07:56 +0000 (Thu, November 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -335,6 +335,9 @@ class Project(AbstractWrapperObject):
         # so just get it
         self._logger = Logging.getLogger()
 
+        # get the save history
+        self._saveHistory = getProjectSaveHistory(self.path)
+
         # Set up notifiers
         self._registerPresetApiNotifiers()
 
@@ -349,8 +352,6 @@ class Project(AbstractWrapperObject):
             # we always have the default chemicalShift list
             if len(self.chemicalShiftLists) == 0:
                 self.newChemicalShiftList(name='default')
-
-        self._saveHistory = getProjectSaveHistory(self.path)
 
     def _close(self):
         self.close()
@@ -422,14 +423,14 @@ class Project(AbstractWrapperObject):
         self._queryNextUniqueIdValue(className)
         self._wrappedData._nextUniqueIdValues[className] = int(value)
 
-    @property
-    def versionHistory(self) -> tuple:
-        """Return the tuple of versions that the project has been saved under
-        The last element is the most recent
-        Defaults to ('3.0.4',) if project saved before version 3.1.0.alpha
-        """
-        _history = getattr(self._wrappedData, 'versionHistory', []) or ['3.0.4']
-        return tuple(_history)
+    # @property
+    # def versionHistory(self) -> tuple:
+    #     """Return the tuple of versions that the project has been saved under
+    #     The last element is the most recent
+    #     Defaults to ('3.0.4',) if project saved before version 3.1.0.alpha
+    #     """
+    #     _history = getattr(self._wrappedData, 'versionHistory', []) or ['3.0.4']
+    #     return tuple(_history)
 
     @property
     def _parent(self) -> AbstractWrapperObject:

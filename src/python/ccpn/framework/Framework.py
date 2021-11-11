@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-11 07:54:02 +0000 (Thu, November 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-11 15:07:57 +0000 (Thu, November 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1601,7 +1601,7 @@ class Framework(NotifierBase):
         """Actual V3 project loader
         CCPNINTERNAL: called from CcpNmrV3ProjectDataLoader
         """
-        from ccpn.core.lib.ProjectLib import getProjectSaveHistory
+        from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory
 
         if not isinstance(path, (Path.Path, str)):
             raise ValueError('invalid path "%s"' % path)

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-12 11:18:55 +0100 (Tue, October 12, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-11-11 15:07:56 +0000 (Thu, November 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -569,7 +569,8 @@ class ChemicalShiftList(AbstractWrapperObject):
                           )
 
         # check version history (defaults to 3.0.4)
-        history = project.versionHistory[-1]
+        # history = project.versionHistory[-1]
+        history = project._saveHistory.lastSavedVersion.withoutRelease()
 
         try:
             # get the index of the saved version, this SHOULD always work

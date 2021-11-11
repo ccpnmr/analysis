@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-11 07:54:02 +0000 (Thu, November 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-11 15:07:57 +0000 (Thu, November 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -63,29 +63,52 @@ def newProjectSaveHistory(projectPath):
     return sv
 
 
-class ProjectSaveHistory(list):
+class ProjectSaveHistory(object):
     """A simple class to maintain a project save history as
     a list, to be saved to and restored from a json file
-    store (versionHistory, date-time, user and platform) tuples
+    stores (version, datetime, user, platform, comment) tuples
     """
 
     SaveRecord = namedtuple('SaveRecord', 'version datetime user platform comment'.split())
 
     def __init__(self, projectPath):
+        """
+        :param projectPath: path of project
+        """
         super().__init__()
 
         _path = aPath(projectPath)
         if not _path.exists():
             raise ValueError('Project path "%s" does not exist' % projectPath)
-
+        # The path of the file
         self.path = _path / CCPN_STATE_DIRECTORY / ccpnVersionHistory
+        # the list of entries
+        self.records = []
 
     @property
     def lastSavedVersion(self) -> VersionString:
         """Return the program version of which the project was last saved as a
         VersionString instance
         """
-        return VersionString(self[-1].version)
+        return VersionString(self.records[-1].version)
+
+    def _newRecord(self, version, datetime=None, user=None, platform=None, comment=None):
+        """Return a new record, set default for all None values
+        """
+        if not isinstance(version, (VersionString, str)):
+            raise ValueError('Invalid version parameter "%s"' % version)
+        version = VersionString(version)
+
+        if datetime is None:
+            datetime = str(now())
+        if user is None:
+            user = getpass.getuser()
+        if platform is None:
+            platform = sys.platform
+        # record = self.SaveRecord(version=version, datetime=datetime,
+        #                          user=user, platform=platform, comment=comment)
+        record = self.SaveRecord( version, datetime, user, platform, comment )
+        return record
 
     def addSaveRecord(self, version=None, comment=None):
         """Add a save record to the history;
@@ -94,8 +117,8 @@ class ProjectSaveHistory(list):
         """
         if version is None:
             version = getApplication().applicationVersion
-        s = self.SaveRecord(version, str(now()), getpass.getuser(), sys.platform, comment)
-        self.append(s)
+        record = self._newRecord(version=version, comment=comment)
+        self.records.append(record)
         return self
 
     def exists(self) -> bool:
@@ -106,24 +129,35 @@ class ProjectSaveHistory(list):
     def save(self):
         """Save to (json) file
         """
-
-        #Save as a json file
         with self.path.open('w') as fp:
-            json.dump(self, fp, indent=4)
+            json.dump(self.records, fp, indent=4)
 
     def restore(self):
         """Restore self from a json file.
-        Convert the items to VersionString objects
+        Convert the version strings of each record to VersionString objects
         """
         if not self.exists():
             raise RuntimeError('Path "%s" does not exist; unable to restore project save history' % self.path)
 
         with self.path.open('r') as fp:
-            items = json.load(fp)
+            records = json.load(fp)
 
-        for item in items:
+        self.records = []
+        for item in records:
             if not isIterable(item):
-                # patch to accomodate ed's earlier files; only version string
+                # patch to accomodate ed's earlier files; only a version string
                 self.addSaveRecord(item)
             else:
-                self.append(self.SaveRecord(*item))
+                # item is a [version, datetime, user, platform, comment] list
+                record = self._newRecord(*item)
+                self.records.append(record)
+
+    def __getitem__(self, item):
+        return self.records[item]
+
+    def __len__(self):
+        return len(self.records)
+
+    def __str__(self):
+        return '<%s: len=%s, lastSavedVersion=%r>' % \
+               (self.__class__.__name__, len(self), self.lastSavedVersion)

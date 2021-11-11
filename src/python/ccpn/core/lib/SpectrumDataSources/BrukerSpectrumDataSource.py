@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-08 18:06:50 +0000 (Mon, November 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-11 15:07:57 +0000 (Thu, November 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,7 @@ from ccpn.util.Common import flatten
 import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
 
-from nmrglue.fileio.bruker import read_acqus_file, read_jcamp
+from nmrglue.fileio.bruker import read_jcamp
 
 
 class BrukerSpectrumDataSource(SpectrumDataSourceABC):
@@ -449,54 +449,3 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
 # Register this format
 BrukerSpectrumDataSource._registerFormat()
 
-#=========================================================================
-# Bug fix from NMRglue
-#=========================================================================
-
-def read_procs_file(dir='.', procs_files=None):
-    """
-    Read Bruker processing files from a directory.
-
-    Parameters
-    ----------
-    dir : str
-        Directory to read from.
-    procs_files : list, optional
-        List of filename(s) of procs parameter files in directory. None uses
-        standard files.
-
-    Returns
-    -------
-    dic : dict
-        Dictionary of Bruker parameters.
-    """
-    if procs_files is None:
-        procs_files = []
-        for f in ["procs", "proc2s", "proc3s", "proc4s"]:
-            if os.path.isfile(os.path.join(dir, f)):
-                procs_files.append(f)
-        pdata_path = dir
-
-    elif procs_files == []:
-        if os.path.isdir(os.path.join(dir, 'pdata')):
-            pdata_folders = [folder for folder in
-                             os.walk(os.path.join(dir, 'pdata'))][0][1]
-            if '1' in pdata_folders:
-                pdata_path = os.path.join(dir, 'pdata', '1')
-            else:
-                pdata_path = os.path.join(dir, 'pdata', pdata_folders[0])
-
-        for f in ["procs", "proc2s", "proc3s", "proc4s"]:
-            if os.path.isfile(os.path.join(pdata_path, f)):
-                procs_files.append(f)
-
-    else:
-        pdata_path = dir
-
-    # create an empty dictionary
-    dic = dict()
-
-    # read the acqus_files and add to the dictionary
-    for f in procs_files:
-        dic[f] = read_jcamp(os.path.join(pdata_path, f))
-    return dic

@@ -25,7 +25,7 @@
         "autoBackupFrequency"                  : 30,
         "stripRegionPadding"                   : 0.0,
         "peakDropFactor"                       : 0.1,
-        "peakFactor1D"                         : 15,
+        "peakFactor1D"                         : 0.15,
         "peakFittingMethod"                    : "parabolic",
         "annotationType"                       : 0,
         "symbolSizePixel"                      : 9,
@@ -105,6 +105,8 @@
         "firstTimeShowKeyConcepts"             : true,
         "seenTipsOfTheDay"                     : [],
         "aliasLabelsEnabled"                   : true,
+        "peakLabelsEnabled"                    : true,
+        "multipletLabelsEnabled"               : true,
         "peakPicker1d"                         : null,
         "peakPickerNd"                         : null
     },
@@ -138,7 +140,7 @@
         "autoOpenPythonConsoleOnMacroEditor" : true
     },
     "printSettings"    : {
-        "font" : "Helvetica,15,-1,5,50,0,0,0,0,0,Regular",
+        "font"     : "Helvetica,15,-1,5,50,0,0,0,0,0,Regular",
         "fontName" : "Default Font",
         "fontSize" : 12
     },

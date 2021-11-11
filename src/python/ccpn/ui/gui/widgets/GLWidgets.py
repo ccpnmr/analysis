@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-14 12:10:14 +0100 (Thu, October 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-11 18:57:51 +0000 (Thu, November 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -391,8 +391,10 @@ class GuiNdWidget(CcpnGLWidget):
                         _shader.setMVMatrix(specMatrix)
                         _shader.setAliasPosition(ii, jj)
 
-                        self._GLPeaks.drawLabels(specView)
-                        self._GLMultiplets.drawLabels(specView)
+                        if self._peakLabelsEnabled:
+                            self._GLPeaks.drawLabels(specView)
+                        if self._multipletLabelsEnabled:
+                            self._GLMultiplets.drawLabels(specView)
 
     def drawAliasedSymbols(self):
         """Draw all the symbols that require aliasing to multiple regions
@@ -1243,8 +1245,10 @@ class Gui1dWidget(CcpnGLWidget):
                     _shader.setAxisScale(self._axisScale)
                     _shader.setAliasPosition(ii, 0)
 
-                    self._GLPeaks.drawLabels(specView)
-                    self._GLMultiplets.drawLabels(specView)
+                    if self._peakLabelsEnabled:
+                        self._GLPeaks.drawLabels(specView)
+                    if self._multipletLabelsEnabled:
+                        self._GLMultiplets.drawLabels(specView)
 
     def drawAliasedSymbols(self):
         """Draw all the symbols that require aliasing to multiple regions

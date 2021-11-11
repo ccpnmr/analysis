@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-07 20:05:59 +0100 (Thu, October 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-11 18:57:51 +0000 (Thu, November 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -990,6 +990,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._aliasEnabled = True
         self._aliasShade = 0.0
         self._aliasLabelsEnabled = True
+        self._peakLabelsEnabled = True
+        self._multipletLabelsEnabled = True
         self._contourThickness = 0
 
         self._contourList = {}

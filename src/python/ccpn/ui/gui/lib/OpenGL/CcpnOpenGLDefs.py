@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-05 17:38:46 +0100 (Tue, October 05, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-11 18:57:51 +0000 (Thu, November 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -151,6 +151,8 @@ GLCONTOURTHICKNESS = 'Contour Thickness'
 GLALIASENABLED = 'Alias Peaks Enabled'
 GLALIASSHADE = 'Alias Shade'
 GLALIASLABELSENABLED = 'Alias Labels Enabled'
+GLPEAKLABELSENABLED = 'Peak Labels Enabled'
+GLMULTIPLETLABELSENABLED = 'Multiplet Labels Enabled'
 GLSTRIPDIRECTION = 'Strip Direction'
 GLSTRIPPADDING = 'Strip Padding'
 GLEXPORTDPI = 'Image dpi'
@@ -260,6 +262,8 @@ SIDEBANDSVISIBLE = 'sideBandsVisible'
 ALIASENABLED = 'aliasEnabled'
 ALIASSHADE = 'aliasShade'
 ALIASLABELSENABLED = 'aliasLabelsEnabled'
+PEAKLABELSENABLED = 'peakLabelsEnabled'
+MULTIPLETLABELSENABLED = 'multipletLabelsEnabled'
 STRINGSCALE = 0.7
 
 PEAKLABEL_MINIMAL = 'peaklabelMinimal'

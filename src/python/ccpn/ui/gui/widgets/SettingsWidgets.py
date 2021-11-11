@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-04 20:15:50 +0000 (Thu, November 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-11 18:57:52 +0000 (Thu, November 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -50,7 +50,7 @@ from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
     SYMBOLTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, ANNOTATIONTYPES, AXISASPECTRATIOS, \
-    AXISASPECTRATIOMODE, ALIASENABLED, ALIASSHADE, ALIASLABELSENABLED, CONTOURTHICKNESS
+    AXISASPECTRATIOMODE, ALIASENABLED, ALIASSHADE, ALIASLABELSENABLED, CONTOURTHICKNESS, PEAKLABELSENABLED, MULTIPLETLABELSENABLED
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.ui.gui.widgets.Base import SignalBlocking
@@ -59,9 +59,10 @@ from ccpn.core.NmrChain import NmrChain
 from ccpn.core.RestraintTable import RestraintTable
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 
+
 ALL = '<Use all>'
 UseCurrent = '<Use current>'
-UseLastOpened = '<Use last opened>' # used for last opened display
+UseLastOpened = '<Use last opened>'  # used for last opened display
 
 StandardSelections = [ALL, UseCurrent, UseLastOpened]
 
@@ -91,6 +92,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                  symbolType=0, annotationType=0, symbolSize=0, symbolThickness=0,
                  aliasEnabled=False, aliasShade=0,
                  aliasLabelsEnabled=False,
+                 peakLabelsEnabled=False,
+                 multipletLabelsEnabled=False,
                  stripArrangement=0,
                  _baseAspectRatioAxisCode='H', _aspectRatios={},
                  _aspectRatioMode=0, contourThickness=0, zPlaneNavigationMode=0,
@@ -124,7 +127,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         # populate the widgets
         self._populateWidgets(_aspectRatioMode, _aspectRatios, annotationType, stripArrangement,
                               symbolSize, symbolThickness, symbolType, xAxisUnits, yAxisUnits,
-                              aliasEnabled, aliasShade, aliasLabelsEnabled,
+                              aliasEnabled, aliasShade, aliasLabelsEnabled, peakLabelsEnabled, multipletLabelsEnabled,
                               contourThickness, zPlaneNavigationMode)
 
         # connect to the lock/symbol/ratio changed pyqtSignals
@@ -310,7 +313,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             _texts = _texts[:self._spectrumDisplay.MAXPEAKSYMBOLTYPES]
             _names = _names[:self._spectrumDisplay.MAXPEAKSYMBOLTYPES]
 
-            self.symbolsLabel = Label(parent, text="Symbol",  hAlign='r', grid=(row, 0))
+            self.symbolsLabel = Label(parent, text="Symbol", hAlign='r', grid=(row, 0))
             self.symbol = RadioButtons(parent, texts=_texts,
                                        objectNames=_names,
                                        objectName='symSDS',
@@ -347,6 +350,20 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         HLine(parent, grid=(row, 0), gridSpan=(1, 5), colour=getColours()[DIVIDER], height=15)
 
         row += 1
+        self.peakLabelsEnabledLabel = Label(parent, text="Show peak labels", grid=(row, 0))
+        self.peakLabelsEnabledData = CheckBox(parent,
+                                              # checked=peakLabelsEnabled,
+                                              grid=(row, 1), objectName='SDS_peakLabelsEnabled')
+        self.peakLabelsEnabledData.clicked.connect(self._symbolsChanged)
+
+        row += 1
+        self.multipletLabelsEnabledLabel = Label(parent, text="Show multiplet labels", grid=(row, 0))
+        self.multipletLabelsEnabledData = CheckBox(parent,
+                                                   # checked=multipletLabelsEnabled,
+                                                   grid=(row, 1), objectName='SDS_multipletLabelsEnabled')
+        self.multipletLabelsEnabledData.clicked.connect(self._symbolsChanged)
+
+        row += 1
         Label(parent, text="Aliased Peaks", hAlign='l', grid=(row, 0))
 
         row += 1
@@ -381,7 +398,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
     def _populateWidgets(self, aspectRatioMode, aspectRatios, annotationType, stripArrangement,
                          symbolSize, symbolThickness, symbolType, xAxisUnits, yAxisUnits,
-                         aliasEnabled, aliasShade, aliasLabelsEnabled,
+                         aliasEnabled, aliasShade, aliasLabelsEnabled, peakLabelsEnabled, multipletLabelsEnabled,
                          contourThickness, zPlaneNavigationMode):
         """Populate the widgets
         """
@@ -390,7 +407,6 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             # put the values into the correct widgets
 
             self._setAxesUnits(xAxisUnits, yAxisUnits)
-
 
             self.useAspectRatioModeButtons.setIndex(aspectRatioMode)
             for ii, aspect in enumerate(sorted(aspectRatios.keys())):
@@ -408,12 +424,16 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.contourThicknessData.setValue(int(contourThickness))
 
             self.stripArrangementButtons.setIndex(stripArrangement)
-            self.aliasEnabledData.set(aliasEnabled)
-            self.aliasShadeData.set(aliasShade)
-            self.aliasLabelsEnabledData.set(aliasLabelsEnabled)
+            self.zPlaneNavigationModeData.setIndex(zPlaneNavigationMode)
+
+            self.aliasEnabledData.setChecked(aliasEnabled)
+            self.aliasShadeData.setValue(aliasShade)
+            self.aliasLabelsEnabledData.setChecked(aliasLabelsEnabled)
             self.aliasLabelsEnabledData.setEnabled(aliasEnabled)
             self.aliasShadeData.setEnabled(aliasEnabled)
-            self.zPlaneNavigationModeData.setIndex(zPlaneNavigationMode)
+
+            self.peakLabelsEnabledData.set(peakLabelsEnabled)
+            self.multipletLabelsEnabledData.set(multipletLabelsEnabled)
 
     def _setAxesUnits(self, xAxisUnits, yAxisUnits):
         """Set the unit's checkboxes
@@ -433,18 +453,20 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
         # NOTE:ED - should really use an intermediate data structure here
 
-        return {AXISXUNITS         : self.xAxisUnitsData.getIndex(),
-                AXISYUNITS         : self.yAxisUnitsData.getIndex(),
-                AXISASPECTRATIOMODE: self.useAspectRatioModeButtons.getIndex(),
-                AXISASPECTRATIOS   : aspectRatios,
-                SYMBOLTYPES        : self.symbol.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
-                ANNOTATIONTYPES    : self.annotationsData.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
-                SYMBOLSIZE         : int(self.symbolSizePixelData.text()),
-                SYMBOLTHICKNESS    : int(self.symbolThicknessData.text()),
-                CONTOURTHICKNESS   : int(self.contourThicknessData.text()),
-                ALIASENABLED       : self.aliasEnabledData.isChecked(),
-                ALIASSHADE         : int(self.aliasShadeData.get()),
-                ALIASLABELSENABLED : self.aliasLabelsEnabledData.isChecked(),
+        return {AXISXUNITS            : self.xAxisUnitsData.getIndex(),
+                AXISYUNITS            : self.yAxisUnitsData.getIndex(),
+                AXISASPECTRATIOMODE   : self.useAspectRatioModeButtons.getIndex(),
+                AXISASPECTRATIOS      : aspectRatios,
+                SYMBOLTYPES           : self.symbol.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
+                ANNOTATIONTYPES       : self.annotationsData.getIndex(),  # if not self._spectrumDisplay.is1D else 0,
+                SYMBOLSIZE            : int(self.symbolSizePixelData.text()),
+                SYMBOLTHICKNESS       : int(self.symbolThicknessData.text()),
+                CONTOURTHICKNESS      : int(self.contourThicknessData.text()),
+                ALIASENABLED          : self.aliasEnabledData.isChecked(),
+                ALIASSHADE            : int(self.aliasShadeData.get()),
+                ALIASLABELSENABLED    : self.aliasLabelsEnabledData.isChecked(),
+                PEAKLABELSENABLED     : self.peakLabelsEnabledData.isChecked(),
+                MULTIPLETLABELSENABLED: self.multipletLabelsEnabledData.isChecked(),
                 }
 
     def _aspectRatioModeChanged(self):
@@ -569,9 +591,13 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.symbolSizePixelData.set(values[SYMBOLSIZE])
             self.symbolThicknessData.set(values[SYMBOLTHICKNESS])
             self.contourThicknessData.set(values[CONTOURTHICKNESS])
+
             self.aliasEnabledData.set(values[ALIASENABLED])
             self.aliasShadeData.set(values[ALIASSHADE])
             self.aliasLabelsEnabledData.set(values[ALIASLABELSENABLED])
+
+            self.peakLabelsEnabledData.set(values[PEAKLABELSENABLED])
+            self.multipletLabelsEnabledData.set(values[MULTIPLETLABELSENABLED])
 
             _enabled = self.aliasEnabledData.get()
             self.aliasLabelsEnabledData.setEnabled(_enabled)
@@ -1455,7 +1481,7 @@ class ObjectSelectionWidget(ListCompoundWidget):
         self._objectWidgetChangedCallback = objectWidgetChangedCallback
         self._selectObjectInListCallback = callback
         self.standardListItems = standardListItems
-        labelName = self.KLASS._pluralLinkName[0].upper() + self.KLASS._pluralLinkName[1:] #Keep CamelCase intact
+        labelName = self.KLASS._pluralLinkName[0].upper() + self.KLASS._pluralLinkName[1:]  #Keep CamelCase intact
         labelText = labelText or 'Select {}'.format(labelName)
         tipText = tipText or 'Set active {} for module:'.format(labelName)
 
@@ -1475,7 +1501,7 @@ class ObjectSelectionWidget(ListCompoundWidget):
         model.rowsRemoved.connect(self._objectWidgetChanged)
         self.listWidget.cleared.connect(self._objectWidgetChanged)
 
-    #     Notifiers
+        #     Notifiers
         self._notifierRename = None
         if self.project:
             self._notifierRename = Notifier(theObject=self.project,
@@ -1528,7 +1554,6 @@ class ObjectSelectionWidget(ListCompoundWidget):
             ll += [obj.pid for obj in getattr(self.project, self.KLASS._pluralLinkName, [])]
         self.pulldownList.setData(texts=ll)
 
-
     def _getObjects(self):
         """Return list of objects in the listWidget selection
         """
@@ -1537,7 +1562,6 @@ class ObjectSelectionWidget(ListCompoundWidget):
         pids = self.getTexts()
         objects = self.project.getObjectsByPids(pids)
         return objects
-
 
     def _getSaveState(self):
         """
@@ -1552,12 +1576,13 @@ class ObjectSelectionWidget(ListCompoundWidget):
         return self.setTexts(value)
 
 
-
 class ChainSelectionWidget(ObjectSelectionWidget):
     KLASS = Chain
 
+
 class NmrChainSelectionWidget(ObjectSelectionWidget):
     KLASS = NmrChain
+
 
 class RestraintTableSelectionWidget(ObjectSelectionWidget):
     KLASS = RestraintTable
@@ -1607,6 +1632,7 @@ class SpectrumDisplaySelectionWidget(ObjectSelectionWidget):
                     toRemoveTexts.append(i)
         self.removeTexts(toRemoveTexts)
         self.addText(obj.pid)
+
 
 if __name__ == '__main__':
     import os

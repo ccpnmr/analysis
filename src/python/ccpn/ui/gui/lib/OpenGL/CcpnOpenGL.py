@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-10 13:01:21 +0000 (Wed, November 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-11 18:57:51 +0000 (Thu, November 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -407,6 +407,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self._aliasEnabled = True
         self._aliasShade = 0.0
         self._aliasLabelsEnabled = True
+        self._peakLabelsEnabled = True
+        self._multipletLabelsEnabled = True
 
         self._contourList = {}
 
@@ -3104,7 +3106,8 @@ class CcpnGLWidget(QOpenGLWidget):
         self.enableTexture()
         self.enableTextClientState()
 
-        self.drawAliasedLabels()
+        if self._peakLabelsEnabled or self._multipletLabelsEnabled:
+            self.drawAliasedLabels()
 
         # change to the text shader
         currentShader = self.globalGL._shaderProgramTex.makeCurrent()

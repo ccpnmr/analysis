@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-07 20:05:57 +0100 (Thu, October 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-11 18:57:51 +0000 (Thu, November 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -43,7 +43,8 @@ from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME, DOUBLEAXI
 from functools import partial
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
     SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISASPECTRATIOS, AXISASPECTRATIOMODE, \
-    BOTTOMAXIS, RIGHTAXIS, ALIASENABLED, ALIASSHADE, ALIASLABELSENABLED, CONTOURTHICKNESS
+    BOTTOMAXIS, RIGHTAXIS, ALIASENABLED, ALIASSHADE, ALIASLABELSENABLED, CONTOURTHICKNESS, \
+    PEAKLABELSENABLED, MULTIPLETLABELSENABLED
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, \
     notificationBlanking, undoBlockWithoutSideBar
 from ccpn.util.decorators import logCommand
@@ -177,6 +178,8 @@ class GuiStrip(Frame):
             self.aliasShade = _firstStrip.aliasShade
             self.aliasLabelsEnabled = _firstStrip.aliasLabelsEnabled
             self.contourThickness = _firstStrip.contourThickness
+            self.peakLabelsEnabled = _firstStrip.peakLabelsEnabled
+            self.multipletLabelsEnabled = _firstStrip.multipletLabelsEnabled
 
             self.gridVisible = _firstStrip.gridVisible
             self.crosshairVisible = _firstStrip.crosshairVisible
@@ -222,6 +225,8 @@ class GuiStrip(Frame):
             self.aliasEnabled = settings[ALIASENABLED]
             self.aliasShade = settings[ALIASSHADE]
             self.aliasLabelsEnabled = settings[ALIASLABELSENABLED]
+            self.peakLabelsEnabled = settings[PEAKLABELSENABLED]
+            self.multipletLabelsEnabled = settings[MULTIPLETLABELSENABLED]
 
             self.spectrumDisplay._setFloatingAxes(xUnits=settings[AXISXUNITS],
                                                   yUnits=settings[AXISYUNITS],
@@ -1447,14 +1452,16 @@ class GuiStrip(Frame):
     def _emitSymbolChanged(self):
         # spawn a redraw of the GL windows
         self._CcpnGLWidget.GLSignals._emitSymbolsChanged(source=None, strip=self,
-                                                         symbolDict={SYMBOLTYPES       : self.symbolType,
-                                                                     ANNOTATIONTYPES   : self.symbolLabelling,
-                                                                     SYMBOLSIZE        : self.symbolSize,
-                                                                     SYMBOLTHICKNESS   : self.symbolThickness,
-                                                                     CONTOURTHICKNESS  : self.contourThickness,
-                                                                     ALIASENABLED      : self.aliasEnabled,
-                                                                     ALIASSHADE        : self.aliasShade,
-                                                                     ALIASLABELSENABLED: self.aliasLabelsEnabled,
+                                                         symbolDict={SYMBOLTYPES           : self.symbolType,
+                                                                     ANNOTATIONTYPES       : self.symbolLabelling,
+                                                                     SYMBOLSIZE            : self.symbolSize,
+                                                                     SYMBOLTHICKNESS       : self.symbolThickness,
+                                                                     CONTOURTHICKNESS      : self.contourThickness,
+                                                                     ALIASENABLED          : self.aliasEnabled,
+                                                                     ALIASSHADE            : self.aliasShade,
+                                                                     ALIASLABELSENABLED    : self.aliasLabelsEnabled,
+                                                                     PEAKLABELSENABLED     : self.peakLabelsEnabled,
+                                                                     MULTIPLETLABELSENABLED: self.multipletLabelsEnabled,
                                                                      })
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1520,49 +1527,59 @@ class GuiStrip(Frame):
     def _symbolsChangedInSettings(self, aDict):
         """Respond to changes in the symbol values in the settings widget
         """
-        symbolType = aDict[SYMBOLTYPES]
-        annotationsType = aDict[ANNOTATIONTYPES]
-        symbolSize = aDict[SYMBOLSIZE]
-        symbolThickness = aDict[SYMBOLTHICKNESS]
-        aliasEnabled = aDict[ALIASENABLED]
-        aliasShade = aDict[ALIASSHADE]
-        aliasLabelsEnabled = aDict[ALIASLABELSENABLED]
-        contourThickness = aDict[CONTOURTHICKNESS]
+        _symbolType = aDict[SYMBOLTYPES]
+        _annotationsType = aDict[ANNOTATIONTYPES]
+        _symbolSize = aDict[SYMBOLSIZE]
+        _symbolThickness = aDict[SYMBOLTHICKNESS]
+        _aliasEnabled = aDict[ALIASENABLED]
+        _aliasShade = aDict[ALIASSHADE]
+        _aliasLabelsEnabled = aDict[ALIASLABELSENABLED]
+        _peakLabelsEnabled = aDict[PEAKLABELSENABLED]
+        _multipletLabelsEnabled = aDict[MULTIPLETLABELSENABLED]
+        _contourThickness = aDict[CONTOURTHICKNESS]
 
         if self.isDeleted:
             return
 
         with self.spectrumDisplay._spectrumDisplaySettings.blockWidgetSignals():
             # update the current settings from the dict
-            if symbolType != self.symbolType:
-                self.setPeakSymbols(symbolType)
+            if _symbolType != self.symbolType:
+                self.setPeakSymbols(_symbolType)
 
-            elif annotationsType != self.symbolLabelling:
-                self.setSymbolLabelling(annotationsType)
+            elif _annotationsType != self.symbolLabelling:
+                self.setSymbolLabelling(_annotationsType)
 
-            elif symbolSize != self.symbolSize:
-                self.symbolSize = symbolSize
+            elif _symbolSize != self.symbolSize:
+                self.symbolSize = _symbolSize
                 self._setSymbolsPaintEvent()
 
-            elif symbolThickness != self.symbolThickness:
-                self.symbolThickness = symbolThickness
+            elif _symbolThickness != self.symbolThickness:
+                self.symbolThickness = _symbolThickness
                 self._setSymbolsPaintEvent()
 
-            elif aliasEnabled != self.aliasEnabled:
-                self.aliasEnabled = aliasEnabled
+            elif _aliasEnabled != self.aliasEnabled:
+                self.aliasEnabled = _aliasEnabled
                 self._setSymbolsPaintEvent()
 
-            elif aliasShade != self.aliasShade:
-                self.aliasShade = aliasShade
+            elif _aliasShade != self.aliasShade:
+                self.aliasShade = _aliasShade
                 self._setSymbolsPaintEvent()
 
-            elif aliasLabelsEnabled != self.aliasLabelsEnabled:
-                self.aliasLabelsEnabled = aliasLabelsEnabled
+            elif _aliasLabelsEnabled != self.aliasLabelsEnabled:
+                self.aliasLabelsEnabled = _aliasLabelsEnabled
                 self._setSymbolsPaintEvent()
 
-            elif contourThickness != self.contourThickness:
-                self.contourThickness = contourThickness
+            elif _contourThickness != self.contourThickness:
+                self.contourThickness = _contourThickness
                 self._setContoursPaintEvent()
+
+            elif _peakLabelsEnabled != self.peakLabelsEnabled:
+                self.peakLabelsEnabled = _peakLabelsEnabled
+                self._setSymbolsPaintEvent()
+
+            elif _multipletLabelsEnabled != self.multipletLabelsEnabled:
+                self.multipletLabelsEnabled = _multipletLabelsEnabled
+                self._setSymbolsPaintEvent()
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # symbolSize
@@ -1699,6 +1716,52 @@ class GuiStrip(Frame):
 
         oldValue = self._CcpnGLWidget._aliasLabelsEnabled
         self._CcpnGLWidget._aliasLabelsEnabled = value
+        if value != oldValue:
+            self._setSymbolLabelling()
+            if self.spectrumViews:
+                self._emitSymbolChanged()
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # peakLabelsEnabled
+
+    @property
+    def peakLabelsEnabled(self):
+        """Get peakLabelsEnabled for the strip
+        """
+        return self._CcpnGLWidget._peakLabelsEnabled
+
+    @peakLabelsEnabled.setter
+    def peakLabelsEnabled(self, value):
+        """Set peakLabelsEnabled for the strip
+        """
+        if not isinstance(value, bool):
+            raise TypeError('Error: peakLabelsEnabled not a bool')
+
+        oldValue = self._CcpnGLWidget._peakLabelsEnabled
+        self._CcpnGLWidget._peakLabelsEnabled = value
+        if value != oldValue:
+            self._setSymbolLabelling()
+            if self.spectrumViews:
+                self._emitSymbolChanged()
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # multipletLabelsEnabled
+
+    @property
+    def multipletLabelsEnabled(self):
+        """Get multipletLabelsEnabled for the strip
+        """
+        return self._CcpnGLWidget._multipletLabelsEnabled
+
+    @multipletLabelsEnabled.setter
+    def multipletLabelsEnabled(self, value):
+        """Set multipletLabelsEnabled for the strip
+        """
+        if not isinstance(value, bool):
+            raise TypeError('Error: multipletLabelsEnabled not a bool')
+
+        oldValue = self._CcpnGLWidget._multipletLabelsEnabled
+        self._CcpnGLWidget._multipletLabelsEnabled = value
         if value != oldValue:
             self._setSymbolLabelling()
             if self.spectrumViews:

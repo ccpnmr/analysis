@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-10 13:02:23 +0000 (Wed, November 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-11 18:57:51 +0000 (Thu, November 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -120,7 +120,7 @@ def _makeLabel(parent, text, grid, **kwds) -> Label:
     :return Label instance
     """
     kwds.setdefault('hAlign', 'r')
-    kwds.setdefault('margins', (0,3,10,3))
+    kwds.setdefault('margins', (0, 3, 10, 3))
     label = Label(parent, text=text, grid=grid, **kwds)
     return label
 
@@ -128,7 +128,7 @@ def _makeLabel(parent, text, grid, **kwds) -> Label:
 def _makeLine(parent, grid, text=None, **kwds):
     """Convenience routine to make a horizontal Line, optionally with text and with uniform settings
     """
-    kwds.setdefault('gridSpan', (1,3))
+    kwds.setdefault('gridSpan', (1, 3))
     kwds.setdefault('colour', getColours()[DIVIDER])
     kwds.setdefault('height', 30)
     if text is None:
@@ -137,12 +137,13 @@ def _makeLine(parent, grid, text=None, **kwds):
         result = LabeledHLine(parent=parent, text=text, grid=grid, **kwds)
     return result
 
+
 def _makeCheckBox(parent, row, text, callback, toolTip=None, **kwds):
     """Convenience routine to make a row with a label and a checkbox
     :return CheckBox instance
     """
     _label = _makeLabel(parent, text=text, grid=(row, 0), **kwds)
-    _checkBox = CheckBox(parent, grid=(row, 1), hAlign='l', hPolicy='minimal', spacing=(0,0))
+    _checkBox = CheckBox(parent, grid=(row, 1), hAlign='l', hPolicy='minimal', spacing=(0, 0))
     _checkBox.toggled.connect(callback)
     if toolTip is not None:
         _label.setToolTip(toolTip)
@@ -269,6 +270,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
                     strip.aliasEnabled = self.application.preferences.general.aliasEnabled
                     strip.aliasShade = self.application.preferences.general.aliasShade
                     strip.aliasLabelsEnabled = self.application.preferences.general.aliasLabelsEnabled
+
+                    strip.peakLabelsEnabled = self.application.preferences.general.peakLabelsEnabled
+                    strip.multipletLabelsEnabled = self.application.preferences.general.multipletLabelsEnabled
 
                 strip._frameGuide.resetColourTheme()
 
@@ -434,7 +438,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         self.restoreLayoutOnOpeningBox = _makeCheckBox(parent, row=row, text="Restore on 'Open'",
-                                                       callback = partial(self._queueToggleGeneralOptions, 'restoreLayoutOnOpening'))
+                                                       callback=partial(self._queueToggleGeneralOptions, 'restoreLayoutOnOpening'))
 
         #====== Auto Backups ======
         row += 1
@@ -457,7 +461,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         row += 1
         self.useProjectPathBox = _makeCheckBox(parent, row=row, text="Application uses project path",
                                                callback=partial(self._queueToggleGeneralOptions, 'useProjectPath'),
-                                               toolTip = 'Set the application working path to the project folder on loading')
+                                               toolTip='Set the application working path to the project folder on loading')
 
         row += 1
         self.userWorkingPathLabel = _makeLabel(parent, "Application working path ", grid=(row, 0), )
@@ -638,7 +642,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.glFontSizeData.setMinimumWidth(PulldownListsMinimumWidth)
         self.glFontSizeData.currentIndexChanged.connect(self._queueChangeGLFontSize)
 
-
         row += 1
         parent.addSpacer(15, 2, expandX=True, expandY=True, grid=(row, 1), gridSpan=(1, 1))
 
@@ -768,7 +771,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
         userPipesPath = _fetchUserPipesPath(self.application)  # gets from preferences or creates the default dir
         self.userPipesPath.setText(str(userPipesPath))
 
-
         self.verifySSLBox.setChecked(self.preferences.proxySettings.verifySSL)
         self.useProxyBox.setChecked(self.preferences.proxySettings.useProxy)
         self.proxyAddressData.setText(str(self.preferences.proxySettings.proxyAddress))
@@ -849,6 +851,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC, getPeakPickerTypes
 
+        self.dropFactorData.set(self.preferences.general.peakDropFactor * 100.0)
+        self.peakFactor1D.set(self.preferences.general.peakFactor1D * 100.0)
+
         _peakPickers = getPeakPickerTypes()
         self.peakPicker1dData.setData(texts=[''] + sorted([pp for pp in _peakPickers.keys()]))
         self.peakPickerNdData.setData(texts=[''] + sorted([pp for pp in _peakPickers.keys()]))
@@ -856,6 +861,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.peakPickerNdData.set(self.preferences.general.peakPickerNd)
 
         self.peakFittingMethod.setIndex(PEAKFITTINGDEFAULTS.index(self.preferences.general.peakFittingMethod))
+
+        self.volumeIntegralLimitData.set(self.preferences.general.volumeIntegralLimit)
 
         multipletAveraging = self.preferences.general.multipletAveraging
         self.multipletAveraging.setIndex(MULTIPLETAVERAGINGTYPES.index(multipletAveraging) if multipletAveraging in MULTIPLETAVERAGINGTYPES else 0)
@@ -870,6 +877,16 @@ class PreferencesPopup(CcpnDialogMainWidget):
         for key, value in self.preferences.general.searchBoxWidthsNd.items():
             if key in self.searchBoxNdData:
                 self.searchBoxNdData[key].setValue(value)
+
+        _enabled = self.preferences.general.aliasEnabled
+        self.aliasEnabledData.setChecked(_enabled)
+        self.aliasShadeData.setValue(self.preferences.general.aliasShade)
+        self.aliasLabelsEnabledData.setChecked(self.preferences.general.aliasLabelsEnabled)
+        self.aliasLabelsEnabledData.setEnabled(_enabled)
+        self.aliasShadeData.setEnabled(_enabled)
+
+        self.peakLabelsEnabledData.setChecked(self.preferences.general.peakLabelsEnabled)
+        self.multipletLabelsEnabledData.setChecked(self.preferences.general.multipletLabelsEnabled)
 
     def _populateExternalProgramsTab(self):
         """Populate the widgets in the externalProgramsTab
@@ -946,7 +963,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.showLastAxisOnlyLabel = _makeLabel(parent, text="Strips share X- or Y-axis", grid=(row, 0))
         self.showLastAxisOnlyBox = CheckBox(parent, grid=(row, 1))
         self.showLastAxisOnlyBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'lastAxisOnly'))
-
 
         # # add validate frame
         # row += 1
@@ -1220,6 +1236,17 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                                      min=1.0, max=5.0, grid=(row, 1), hAlign='l')
         self.volumeIntegralLimitData.setMinimumWidth(LineEditsMinimumWidth)
         self.volumeIntegralLimitData.valueChanged.connect(self._queueSetVolumeIntegralLimit)
+
+        row += 1
+        self.peakLabelsEnabledLabel = _makeLabel(parent, text="Show peak labels", grid=(row, 0))
+        self.peakLabelsEnabledData = CheckBox(parent, grid=(row, 1))
+        self.peakLabelsEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions, 'peakLabelsEnabled'))
+
+        row += 1
+        self.multipletLabelsEnabledLabel = _makeLabel(parent, text="Show multiplet labels", grid=(row, 0))
+        self.multipletLabelsEnabledData = CheckBox(parent, grid=(row, 1))
+        self.multipletLabelsEnabledData.toggled.connect(partial(self._queueToggleGeneralOptions, 'multipletLabelsEnabled'))
+
         row += 1
         self.aliasEnabledLabel = _makeLabel(parent, text="Show aliased peaks", grid=(row, 0))
         self.aliasEnabledData = CheckBox(parent, grid=(row, 1))
@@ -1646,6 +1673,10 @@ class PreferencesPopup(CcpnDialogMainWidget):
         elif option == 'autoBackupEnabled':
             self._enableAutoBackupFrequency()
 
+        elif option == 'aliasEnabled':
+            _enabled = self.aliasEnabledData.get()
+            self.aliasLabelsEnabledData.setEnabled(_enabled)
+            self.aliasShadeData.setEnabled(_enabled)
 
         if checked != self.preferences.general[option]:
             # change the enabled state of checkboxes as required
@@ -1743,7 +1774,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
     def _queueSetRegionPadding(self, _value):
         textFromValue = self.regionPaddingData.textFromValue
         value = self.regionPaddingData.get()
-        prefValue = textFromValue(100 * self.preferences.general.stripRegionPadding)
+        prefValue = textFromValue(100.0 * self.preferences.general.stripRegionPadding)
         if value >= 0 and textFromValue(value) != prefValue:
             return partial(self._setRegionPadding, 0.01 * value)
 
@@ -1754,7 +1785,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
     def _queueSetDropFactor(self, _value):
         textFromValue = self.dropFactorData.textFromValue
         value = self.dropFactorData.get()
-        prefValue = textFromValue(100 * self.preferences.general.peakDropFactor)
+        prefValue = textFromValue(100.0 * self.preferences.general.peakDropFactor)
         if value >= 0 and textFromValue(value) != prefValue:
             return partial(self._setDropFactor, 0.01 * value)
 
@@ -1765,9 +1796,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
     def _queueSetDropFactor1D(self, _value):
         textFromValue = self.peakFactor1D.textFromValue
         value = self.peakFactor1D.get()
-        prefValue = textFromValue(self.preferences.general.peakFactor1D)
+        prefValue = textFromValue(100.0 * self.preferences.general.peakFactor1D)
         if value >= 0 and textFromValue(value) != prefValue:
-            return partial(self._set1DPeakFactor, value)
+            return partial(self._set1DPeakFactor, 0.01 * value)
 
     def _set1DPeakFactor(self, value):
         self.preferences.general.peakFactor1D = value

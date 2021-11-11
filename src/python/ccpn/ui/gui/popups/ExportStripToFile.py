@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-06 15:55:53 +0100 (Wed, October 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-11 18:57:51 +0000 (Thu, November 11, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -66,10 +66,11 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, \
     GLFULLLIST, GLEXTENDEDLIST, GLDIAGONALLINE, GLCURSORS, GLDIAGONALSIDEBANDS, \
     GLALIASENABLED, GLALIASSHADE, GLALIASLABELSENABLED, GLSTRIPREGIONS, \
     GLSCALINGMODE, GLSCALINGOPTIONS, GLSCALINGPERCENT, GLSCALINGBYUNITS, \
-    GLPRINTFONT, GLUSEPRINTFONT, GLSCALINGAXIS
+    GLPRINTFONT, GLUSEPRINTFONT, GLSCALINGAXIS, GLPEAKLABELSENABLED, GLMULTIPLETLABELSENABLED
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString, hexToRgbRatio, colourNameNoSpace
 from ccpn.util.Constants import SCALING_MODES, POSINFINITY
 from ccpn.core.lib.ContextManagers import catchExceptions
+
 
 # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLAXISLABELS, GLAXISMARKS, \
 #     GLMARKLABELS, GLMARKLINES, GLREGIONS, GLOTHERLINES, GLSPECTRUMLABELS, GLSTRIPLABELLING, GLTRACES, \
@@ -830,7 +831,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         #     self._printFont = None
         #     self._fontButton.setText('<No Font Set>')
 
-        self._fontPulldown.setData(texts = [DEFAULT_FONT,] + sorted(list(self.familyFonts.keys())),)
+        self._fontPulldown.setData(texts=[DEFAULT_FONT, ] + sorted(list(self.familyFonts.keys())), )
 
         # add some colour to show the default option
         model = self._fontPulldown.model()
@@ -1134,36 +1135,40 @@ class ExportStripToFilePopup(ExportDialogABC):
         aliasEnabled = strip.aliasEnabled
         aliasShade = strip.aliasShade
         aliasLabelsEnabled = strip.aliasLabelsEnabled
+        peakLabelsEnabled = strip.peakLabelsEnabled
+        multipletLabelsEnabled = strip.multipletLabelsEnabled
         stripPadding = self.stripPaddingBox.getValue()
         exportDpi = self.exportDpiBox.getValue()
 
         if strip:
             # return the parameters
-            params = {GLFILENAME          : self.exitFilename,
-                      GLSPECTRUMDISPLAY   : spectrumDisplay,
-                      GLSTRIP             : strip,
-                      GLWIDGET            : strip._CcpnGLWidget,
-                      GLPRINTTYPE         : prType,
-                      GLPAGETYPE          : pageType,
-                      GLFOREGROUND        : foregroundColour,
-                      GLBACKGROUND        : backgroundColour,
-                      GLBASETHICKNESS     : baseThickness,
-                      GLSYMBOLTHICKNESS   : symbolThickness,
-                      GLCONTOURTHICKNESS  : contourThickness,
-                      GLALIASENABLED      : aliasEnabled,
-                      GLALIASSHADE        : aliasShade,
-                      GLALIASLABELSENABLED: aliasLabelsEnabled,
-                      GLSTRIPDIRECTION    : stripDirection,
-                      GLSTRIPPADDING      : stripPadding,
-                      GLEXPORTDPI         : exportDpi,
-                      GLSELECTEDPIDS      : self.treeView.getSelectedObjectsPids(),
-                      GLSTRIPREGIONS      : self._stripDict,
-                      GLSCALINGMODE       : self.scaling.getIndex(),
-                      GLSCALINGPERCENT    : self.scalingPercentage.get(),
-                      GLSCALINGBYUNITS    : self.scalingByUnits.get(),
-                      GLSCALINGAXIS       : self.scalingAxis.getIndex(),
-                      GLUSEPRINTFONT      : self._useFontCheckbox.isChecked(),
-                      GLPRINTFONT         : (self._fontPulldown.get(), self._fontSpinbox.get()),
+            params = {GLFILENAME              : self.exitFilename,
+                      GLSPECTRUMDISPLAY       : spectrumDisplay,
+                      GLSTRIP                 : strip,
+                      GLWIDGET                : strip._CcpnGLWidget,
+                      GLPRINTTYPE             : prType,
+                      GLPAGETYPE              : pageType,
+                      GLFOREGROUND            : foregroundColour,
+                      GLBACKGROUND            : backgroundColour,
+                      GLBASETHICKNESS         : baseThickness,
+                      GLSYMBOLTHICKNESS       : symbolThickness,
+                      GLCONTOURTHICKNESS      : contourThickness,
+                      GLALIASENABLED          : aliasEnabled,
+                      GLALIASSHADE            : aliasShade,
+                      GLALIASLABELSENABLED    : aliasLabelsEnabled,
+                      GLPEAKLABELSENABLED     : peakLabelsEnabled,
+                      GLMULTIPLETLABELSENABLED: multipletLabelsEnabled,
+                      GLSTRIPDIRECTION        : stripDirection,
+                      GLSTRIPPADDING          : stripPadding,
+                      GLEXPORTDPI             : exportDpi,
+                      GLSELECTEDPIDS          : self.treeView.getSelectedObjectsPids(),
+                      GLSTRIPREGIONS          : self._stripDict,
+                      GLSCALINGMODE           : self.scaling.getIndex(),
+                      GLSCALINGPERCENT        : self.scalingPercentage.get(),
+                      GLSCALINGBYUNITS        : self.scalingByUnits.get(),
+                      GLSCALINGAXIS           : self.scalingAxis.getIndex(),
+                      GLUSEPRINTFONT          : self._useFontCheckbox.isChecked(),
+                      GLPRINTFONT             : (self._fontPulldown.get(), self._fontSpinbox.get()),
                       }
             selectedList = self.treeView.getSelectedItems()
             for itemName in self.fullList:

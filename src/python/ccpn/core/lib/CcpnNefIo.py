@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-04 20:12:04 +0000 (Thu, November 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-12 09:22:34 +0000 (Fri, November 12, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -504,7 +504,7 @@ class CcpnNefWriter:
             restraintListSet = set(restraintTables)
             for dSet in structureData:
                 restraintListSet.update(dSet.restraintTables)
-            restraintLists = sorted(restraintListSet)
+            restraintTables = sorted(restraintListSet)
 
             # ChemicalShiftLists and NmrChains
             nmrChainSet = set(nmrChains)
@@ -562,9 +562,9 @@ class CcpnNefWriter:
             saveFrames.append(self.chemicalShiftList2Nef(obj))
 
         # RestraintLists and
-        restraintLists = sorted(restraintLists, key=attrgetter('restraintType', 'serial'))
-        singleStructureTable = bool(restraintLists) and len(set(x.structureData for x in restraintLists)) == 1
-        for obj in restraintLists:
+        restraintTables = sorted(restraintTables, key=attrgetter('restraintType', 'serial'))
+        singleStructureTable = bool(restraintTables) and len(set(x.structureData for x in restraintTables)) == 1
+        for obj in restraintTables:
             saveFrames.append(self.restraintTable2Nef(obj, singleStructureTable=singleStructureTable))
 
         # NOTE:ED - need to make an active list of spectra and export from there with the required
@@ -619,7 +619,7 @@ class CcpnNefWriter:
         #     _exportedSpectra.add(obj.spectrum)
 
         # restraint-peak links
-        saveFrame = self.peakRestraintLinks2Nef(restraintLists)
+        saveFrame = self.peakRestraintLinks2Nef(restraintTables)
         if saveFrame:
             saveFrames.append(saveFrame)
 

@@ -27,6 +27,7 @@ __date__ = "$Date: 2021-10-27 20:54:49 +0100 (Wed, October 27, 2021) $"
 #=========================================================================================
 
 from typing import Optional
+import pandas as pd
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataTable as ApiDataTable
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -111,7 +112,9 @@ class DataTable(AbstractWrapperObject):
         None will create a new empty dataFrame
         """
         if not isinstance(value, (TableFrame, type(None))):
-            raise RuntimeError(f'data not of type {TableFrame} or None')
+            if isinstance(value, pd.DataFrame):
+                value = TableFrame(value)
+                getLogger().warning(f'Data must be of type {TableFrame}. The value pd.DataFrame was converted to {TableFrame}.')
 
         if value is None:
             self._wrappedData.data = TableFrame()

@@ -2892,17 +2892,15 @@ class Framework(NotifierBase):
                            dataTable=None, selectFirstItem=False):
         """Displays DataTable Table
         """
-        pass
-        # from ccpn.ui.gui.modules.DataTable import DataTableModule
-        #
-        # mainWindow = self.ui.mainWindow
-        # if not relativeTo:
-        #     relativeTo = mainWindow.moduleArea
-        # _dataTableModule = DataTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
-        # mainWindow.moduleArea.addModule(_dataTableModule, position=position, relativeTo=relativeTo)
-        # if dataTable:
-        #     _dataTableModule.selectDataTable(dataTable)
-        # return _dataTableModule
+        from ccpn.ui.gui.modules.DataTableModuleABC import DataTableModuleBC
+
+        mainWindow = self.ui.mainWindow
+        if not relativeTo:
+            relativeTo = mainWindow.moduleArea
+        if dataTable:
+            _dataTableModule = DataTableModuleBC(dataTable,name=dataTable.name, mainWindow=mainWindow)
+            mainWindow.moduleArea.addModule(_dataTableModule, position=position, relativeTo=relativeTo)
+            return _dataTableModule
 
     @logCommand('application.')
     def showCollectionModule(self, position='bottom', relativeTo=None,

@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-09 17:40:30 +0000 (Tue, November 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-12 13:58:30 +0000 (Fri, November 12, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2275,6 +2275,9 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             else:
                 stopPoint = int(self.ppm2point(stopPpm, dimension=idx + 1) + 0.5)
 
+            # check that the point values are not outside the maximum aliasing limits
+            startPoint = max(startPoint, -MAXALIASINGRANGE * self.pointCounts[axis])
+            stopPoint = min(stopPoint, (MAXALIASINGRANGE + 1) * self.pointCounts[axis])
             sliceTuples[axis] = (startPoint, stopPoint)
 
         getLogger().debug('Spectrum._axisDictToSliceTuples: axisDict = %s; sliceTuples = %s' %

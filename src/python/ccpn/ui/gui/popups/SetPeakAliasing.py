@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-06 15:55:53 +0100 (Wed, October 06, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-12 13:59:23 +0000 (Fri, November 12, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -40,7 +40,6 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, handleDialogApply
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.ui.gui.lib.SpectrumDisplay import navigateToCurrentPeakPosition
 from ccpn.core.Spectrum import MAXALIASINGRANGE
-from ccpn.core.lib.ContextManagers import undoStackBlocking
 
 
 DEFAULTALIASING = MAXALIASINGRANGE
@@ -58,7 +57,7 @@ class SetPeakAliasingPopup(CcpnDialogMainWidget):
     _NAVIGATETO = '_navigateTo'
     storeStateOnReject = True
 
-    def __init__(self, parent=None, mainWindow=None, title='Set Aliasing', items=None, **kwds):
+    def __init__(self, parent=None, mainWindow=None, title='Set Aliasing', peaks=None, **kwds):
         """
         Initialise the widget
         """
@@ -73,6 +72,7 @@ class SetPeakAliasingPopup(CcpnDialogMainWidget):
         self.spectraPulldowns = OrderedDict()
         self.spectraCheckBoxes = OrderedDict()
         self.spectraPos = OrderedDict()
+        self.peaks = peaks or []
 
         # max to min to match the spectrum properties popup
         self._aliasRange = [rr for rr in range(MAXALIASINGRANGE, -MAXALIASINGRANGE - 1, -1)]
@@ -106,7 +106,7 @@ class SetPeakAliasingPopup(CcpnDialogMainWidget):
         row += 1
 
         specRow = 0
-        for peak in self.current.peaks:
+        for peak in self.peaks:
 
             if peak.peakList.spectrum not in self.spectra:
 

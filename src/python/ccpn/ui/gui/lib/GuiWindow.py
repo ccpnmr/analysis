@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-25 15:56:55 +0100 (Mon, October 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-12 13:59:23 +0000 (Fri, November 12, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -275,7 +275,7 @@ class GuiWindow():
         if self.current.peaks:
             from ccpn.ui.gui.popups.SetPeakAliasing import SetPeakAliasingPopup
 
-            popup = SetPeakAliasingPopup(parent=self, mainWindow=self, items=self.current.peaks)
+            popup = SetPeakAliasingPopup(parent=self, mainWindow=self, peaks=self.current.peaks)
             popup.exec_()
 
     def calibrateFromPeaks(self):

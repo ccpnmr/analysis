@@ -34,7 +34,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-17 15:13:05 +0100 (Fri, September 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-12 14:54:02 +0000 (Fri, November 12, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -559,6 +559,8 @@ class GuiStripNd(GuiStrip):
                 # _valuePerPoint = spectrum.valuesPerPoint[_index]
 
                 isTimeDimension = spectrumView._getByDisplayOrder('isTimeDomains')[n + 2]
+
+                # _params = spectrumView._getSpectrumViewParams(n + 2)
 
                 _minAliasedFrequency, _maxAliasedFrequency = sorted(spectrumView.aliasingLimits[n + 2])
                 _minSpectrumFrequency, _maxSpectrumFrequency = sorted(spectrumView.spectrumLimits[n + 2])

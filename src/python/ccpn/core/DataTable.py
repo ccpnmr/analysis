@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-02 18:39:23 +0000 (Tue, November 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-13 10:54:15 +0000 (Sat, November 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -115,8 +115,11 @@ class DataTable(AbstractWrapperObject):
             if isinstance(value, pd.DataFrame):
                 value = TableFrame(value)
                 getLogger().warning(f'Data must be of type {TableFrame}. The value pd.DataFrame was converted to {TableFrame}.')
+            else:
+                raise RuntimeError(f'Data must be of type {TableFrame}, pd.DataFrame or None')
 
         if value is None:
+            # create a new, empty table
             self._wrappedData.data = TableFrame()
         else:
             self._wrappedData.data = value
@@ -232,12 +235,16 @@ def _newDataTable(self: Project, name: str = None, data: Optional[TableFrame] = 
     If data is None, an empty dataFrame wll be created.
 
     :param name: name of the dataTable
-    :param data: a Pandas DataFrame instance or None
+    :param data: a TableFrame, Pandas DataFrame instance or None
     :param comment: optional comment string
     :return: a new DataTable instance.
     """
     if not isinstance(data, (TableFrame, type(None))):
-        raise RuntimeError(f'Unable to generate new DataTable: data not of type {TableFrame}')
+        if isinstance(data, pd.DataFrame):
+            data = TableFrame(data)
+            getLogger().warning(f'Data must be of type {TableFrame}. The value pd.DataFrame was converted to {TableFrame}.')
+        else:
+            raise RuntimeError(f'Unable to generate new DataTable: data not of type {TableFrame}, pd.DataFrame or None')
 
     name = DataTable._uniqueName(project=self, name=name)
 

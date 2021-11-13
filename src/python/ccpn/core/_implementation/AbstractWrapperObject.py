@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-04 20:10:10 +0000 (Thu, November 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-13 10:56:11 +0000 (Sat, November 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1079,6 +1079,12 @@ class AbstractWrapperObject(NotifierBase):
         # Fill in Project._className2Class map
         dd = Project._className2Class
         dd[cls.className] = dd[cls.shortClassName] = cls
+        Project._className2ClassList.extend([cls.className, cls.shortClassName, cls])
+
+        # 20211113:ED - extra lists to make Collection search quicker as these are immutable at runtime
+        dd = Project._classNameLower2Class
+        dd[cls.className.lower()] = dd[cls.shortClassName.lower()] = cls
+        Project._classNameLower2ClassList.extend([cls.className.lower(), cls.shortClassName.lower(), cls])
 
         # recursively call next level down the tree
         for cc in cls._childClasses:

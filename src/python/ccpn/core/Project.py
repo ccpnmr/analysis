@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-04 20:12:04 +0000 (Thu, November 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-13 10:56:11 +0000 (Sat, November 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -112,6 +112,11 @@ class Project(AbstractWrapperObject):
 
     # Utility map - class shortName and longName to class.
     _className2Class = {}
+
+    # 20211113:ED - added extra for searching the Collection objects as these are immutable
+    _classNameLower2Class = {}
+    _className2ClassList = []
+    _classNameLower2ClassList = []
 
     # List of CCPN pre-registered api notifiers
     # Format is (wrapperFuncName, parameterDict, apiClassName, apiFuncName)

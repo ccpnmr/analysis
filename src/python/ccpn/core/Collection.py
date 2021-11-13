@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-10 12:57:37 +0000 (Wed, November 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-13 10:56:11 +0000 (Sat, November 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ __date__ = "$Date: 2021-10-26 15:52:47 +0100 (Tue, October 26, 2021) $"
 
 from typing import Optional, Tuple, Any, Sequence
 from collections import Counter
+import fnmatch
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Collection as apiCollection
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -52,11 +53,15 @@ class _searchCollections():
 
     objectTypes must be a tuple of types
     collection must be a list of core objects
+    search must be None or regex string, * is automatically added at beginning and end, unless disabled
+    caseSensitive must be True/False
     """
     _MAXITERATIONS = 100
 
     # iterator to search through nested collections and collate all items
-    def __init__(self, collection, objectTypes=None, depth=0):
+    def __init__(self, collection, objectTypes=None,
+                 search=None, useLongPid=None, caseSensitive=False, disableLeadingTrailingSearch=None,
+                 depth=0):
         """Initialise the iterator
         """
         if not (isinstance(depth, int) and depth >= 0):
@@ -64,6 +69,17 @@ class _searchCollections():
 
         self._items = OrderedSet(collection)
         self._objectTypes = objectTypes
+        self._search = None
+        self._caseSensitive = caseSensitive
+        self._useLongPid = useLongPid
+        self._disableLeadingTrailingSearch = disableLeadingTrailingSearch
+        if search:
+            # add extra wildcard searches to the leading/trailing edges
+            if not search.endswith('*') and not disableLeadingTrailingSearch:
+                search = search + '*'
+            if not search.startswith('*') and not disableLeadingTrailingSearch:
+                search = '*' + search
+            self._search = search
         self._maxDepth = depth
 
     def __iter__(self):
@@ -116,6 +132,14 @@ class _searchCollections():
         """
         if self._objectTypes:
             return tuple(filter(lambda obj: isinstance(obj, self._objectTypes), self._items))
+        elif self._search and self._useLongPid:
+            return tuple(filter(lambda obj: fnmatch.fnmatch(obj.longPid, self._search) or
+                                            (False if self._caseSensitive else
+                                             fnmatch.fnmatch(obj.longPid.lower(), self._search.lower())), self._items))
+        elif self._search:
+            return tuple(filter(lambda obj: fnmatch.fnmatch(obj.pid, self._search) or
+                                            (False if self._caseSensitive else
+                                             fnmatch.fnmatch(obj.pid.lower(), self._search.lower())), self._items))
         else:
             return tuple(self._items)
 
@@ -384,16 +408,28 @@ class Collection(AbstractWrapperObject):
                     self._wrappedData.removeCollectionItem(itm._wrappedData)
 
     @logCommand(get='self')
-    def getByObjectType(self, objectTypes=None, recursive=None, depth=None):
+    def getByObjectType(self, objectTypes=None,
+                        search=None, useLongPid=None, caseSensitive=None, disableLeadingTrailingSearch=None,
+                        recursive=None, depth=None,
+                        ):
         """Return a list of items of types specified in objectTypes list.
 
         ObjectTypes is a list of core objects expressed as object classes or short/long classnames.
         If objectTypes is not specified then all objects will be returned.
 
-        For example, class Note can be specified as Note, 'Note' or 'NO'.
+        For example, class Note can be specified as Note, 'Note', 'NO', 'note' or 'no'.
+        caseSensitive is False by default, if caseSensitive is True, objectTypes as class names must be specified exactly.
 
         ObjectTypes can be a single item or tuple/list, or None to return all items.
         Any Nones in lists will be ignored.
+
+        search is a regex search string applied to the pids of objects in the collection.
+        useLongPid can be specified with the search option to use the londPid descriptor of core objects as the search item.
+        if caseSensitive is True, the exact pid or longPid is used for simple searches, although more detailed regex searches
+        can be used to override this.
+
+        Simple searches can use * as wildcard to represent 1 or more characters. Use ? to specify a single charaacter.
+        Leading and trailing *'s are added by default. This can be disabled with disableLeadingTrailingSearch=True
 
         Set depth=0 or recursive=True to search through all nested collections,
         recursion=False or depth=1 will only search through the top collection, ignoring nested collections.
@@ -410,21 +446,42 @@ class Collection(AbstractWrapperObject):
             collection.getByObjectTypes(objectTypes='NO', recursive=False)
             collection.getByObjectTypes(objectTypes='Note', depth=2)
             collection.getByObjectTypes(objectTypes=['Note', Spectrum])
+            collection.getByObjectTypes(search='someNotes', useLongPid=True, caseSensiive=True)
 
         :param objectTypes: optional single item, or list of core objects as object class or classnames
-        :param recursive: optional True/False
+        :param search: optional regex search string
+        :param useLongPid: optional True/False, only use with search
+        :param caseSensitive: optional True/False
+        :param disableLeadingTrailingSearch: optional True/False
+        :param recursive: optional True/False, only use with search
         :param depth: optional int >= 0
         :return: tuple of core items.
         """
 
+        # check that the parameters are the correct, compatible types
         if (recursive is not None and depth is not None):
-            raise ValueError('Please specify either recursive OR depth')
-        if depth is not None and not (isinstance(depth, int) and depth >=0):
+            raise ValueError('Please specify either recursive or depth')
+        if (objectTypes is not None and search is not None):
+            raise ValueError('Please specify either objectTypes or search')
+        if depth is not None and not (isinstance(depth, int) and depth >= 0):
             raise ValueError('depth must be int >= 0; use 0 for full depth')
-        if recursive not in [None, True, False]:
-            raise ValueError('recursive must be True/False')
+        if not isinstance(search, (str, type(None))):
+            raise ValueError('search must be a regex string')
+
+        for param, paramName in [(useLongPid, 'useLongPid'),
+                                 (caseSensitive, 'caseSensitive'),
+                                 (recursive, 'recursive'),
+                                 (disableLeadingTrailingSearch, 'disableLeadingTrailingSearch')]:
+            if param not in [None, True, False]:
+                raise ValueError(f'{paramName} must be True/False')
+
+        if useLongPid is not None and not search:
+            raise ValueError('useLongPid only valid when search is specified')
+        if disableLeadingTrailingSearch is not None and not search:
+            raise ValueError('disableLeadingTrailingSearch only valid when search is specified')
+
         if isinstance(objectTypes, (str, type(AbstractWrapperObject))):
-            # change a single item to a list, if is a str or a core object
+            # change a single item to a list, if is a str or a core object, strings are checked later
             objectTypes = [objectTypes, ]
         if not isinstance(objectTypes, (list, tuple, type(None))):
             raise ValueError('objectTypes must be list/tuple of core objects or classnames, or single core object or None')
@@ -437,19 +494,46 @@ class Collection(AbstractWrapperObject):
         if objectTypes:
 
             # check the list of object types against the project classNames
-            _allObjectTypes = self.project._className2Class
-            _all = list(_allObjectTypes.keys()) + list(_allObjectTypes.values())
-            _objectTypes = list(filter(lambda itm: (itm in _all), objectTypes))
 
-            if len(_objectTypes) != len(objectTypes):
-                _badObjectTypes = list(filter(lambda itm: itm not in _all, objectTypes))
-                raise ValueError(f'objectTypes contains bad items: {_badObjectTypes}')
+            if caseSensitive:
+                _allObjectTypes = self.project._className2Class
+                _allList = self.project._className2ClassList
 
-            # change all valid strings to core object types
-            _objectTypes = tuple(_allObjectTypes[itm] if isinstance(itm, str) else itm for itm in _objectTypes)
+                # case sensitive search - check against all defined core objects in project
+                # _all = list(_allObjectTypes.keys()) + list(_allObjectTypes.values())
+                _objectTypes = list(filter(lambda itm: (itm in _allList), objectTypes))
+
+                if len(_objectTypes) != len(objectTypes):
+                    _badObjectTypes = list(filter(lambda itm: itm not in _allList, objectTypes))
+                    raise ValueError(f'objectTypes contains bad items: {_badObjectTypes}')
+
+                # change all valid strings to core object types
+                _objectTypes = tuple(_allObjectTypes[itm] if isinstance(itm, str) else itm for itm in _objectTypes)
+
+            else:
+                _allObjectTypes = self.project._classNameLower2Class
+                _allList = self.project._classNameLower2ClassList
+
+                # case insensitive search - change all to lowercase
+                # _allLowerObjectTypes = {k.lower(): v for k, v in _allObjectTypes.items()}
+                # _all = list(_allLowerObjectTypes.keys()) + list(_allLowerObjectTypes.values())
+                _objectTypes = list(filter(lambda itm: (itm.lower() if isinstance(itm, str) else itm) in _allList, objectTypes))
+
+                if len(_objectTypes) != len(objectTypes):
+                    _badObjectTypes = list(filter(lambda itm: (itm.lower() if isinstance(itm, str) else itm) not in _allList, objectTypes))
+                    raise ValueError(f'objectTypes contains bad items: {_badObjectTypes}')
+
+                # change all valid strings to core object types
+                _objectTypes = tuple(_allObjectTypes[itm] if isinstance(itm, str) else itm for itm in _objectTypes)
 
         # create an iterator
-        recurse = _searchCollections(self.items, _objectTypes, depth=depth or (1 if recursive == False else 0))
+        recurse = _searchCollections(self.items,
+                                     objectTypes=_objectTypes,
+                                     search=search,
+                                     useLongPid=useLongPid,
+                                     caseSensitive=caseSensitive,
+                                     disableLeadingTrailingSearch=disableLeadingTrailingSearch,
+                                     depth=depth or (1 if recursive == False else 0))
         for _ in recurse:
             pass
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-16 12:26:01 +0100 (Thu, September 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-13 10:51:05 +0000 (Sat, November 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -384,7 +384,7 @@ class SpectrumReference(AbstractWrapperObject):
     def spectralWidth(self, value: float):
         swOld = self.spectralWidth
         # self._dataDimRef.spectralWidth = value  # This is not allowed; it needs to go via valuePerPoint
-        self._valuePerPoint = (value / swOld)
+        self._valuePerPoint *= (value / swOld)
 
     # This is a crucial property that effectively governs the spectral width (both in Hz and ppm)
     #     # We assume that the number of points is constant, so setting SW changes valuePerPoint

@@ -4,7 +4,7 @@
   "type": "picture",
 
   "styles": {
-    "style_file": "tip_styles.txt"
+    "style_file": "tipStyles.txt"
   },
 
   "color": "#ffffff",

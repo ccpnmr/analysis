@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-08 13:06:29 +0100 (Thu, July 08, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-11-15 12:08:45 +0000 (Mon, November 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -56,7 +56,8 @@ from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 from ccpnmodel.ccpncore.lib.Io import Pdb as pdbIo
 # from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, undoBlock, undoBlockWithoutSideBar
+from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, undoBlock, \
+    undoBlockWithoutSideBar, inactivity
 from ccpn.util.Logging import getLogger
 
 
@@ -170,6 +171,14 @@ class Project(AbstractWrapperObject):
         # Notification blanking level - to allow for nested notification disabling
         self._notificationBlanking = 0
 
+        # api 'change' notification blanking level - to allow for api 'change' call to be
+        # disabled in the _modifiedApiObject method.
+        # To be used with the apiNotificationBlanking contact manager; e.g.
+        # with apiNotificationBlanking():
+        #   do something
+        #
+        self._apiNotificationBlanking = 0
+
         # Wrapper level notifier tracking.  APPLICATION ONLY
         # {(className,action):OrderedDict(notifier:onceOnly)}
         self._context2Notifiers = {}
@@ -221,8 +230,13 @@ class Project(AbstractWrapperObject):
         # for tt in self._coreNotifiers:
         #     self.registerNotifier(*tt)
 
-        # initialise, creating the wrapped objects
-        self._initializeAll()
+        # initialise, creating the children
+        self._resetUndo()
+        with inactivity():
+            self._restoreChildren()
+            # we always have the default chemicalShift list
+            if len(self.chemicalShiftLists) == 0:
+                self.newChemicalShiftList(name='default')
 
         # 20190520:ED routines that use core objects, not sure whether the correct place
         self._setContourColours()
@@ -233,11 +247,11 @@ class Project(AbstractWrapperObject):
 
     def close(self):
         """Clean up the wrapper project previous to deleting or replacing
-
-        Cleanup includes wrapped data graphics objects (e.g. Window, Strip, ...)"""
-        # Remove undo stack:
+        Cleanup includes wrapped data graphics objects (e.g. Window, Strip, ...)
+        """
         self._logger.info("Closing %s" % self.path)
 
+        # Remove undo stack:
         self._resetUndo(maxWaypoints=0)
 
         apiIo.cleanupProject(self)
@@ -319,15 +333,11 @@ class Project(AbstractWrapperObject):
     def name(self) -> str:
         """name of Project"""
         return self._wrappedData.root.name
-        # apiNmrProject = self._wrappedData
-        # if len(apiNmrProject.root.nmrProjects) == 1:
-        #   return apiNmrProject.root.name
-        # else:
-        #   return apiNmrProject.name
 
     @property
     def path(self) -> str:
-        """path to directory containing Project"""
+        """return absolute path to directory containing Project
+        """
         return apiIo.getRepositoryPath(self._wrappedData.root, 'userData')
 
     @property
@@ -677,28 +687,6 @@ class Project(AbstractWrapperObject):
         #
         return notifier
 
-    #GWV 20181123
-    # def duplicateNotifier(self,  className:str, target:str,
-    #                       notifier:typing.Callable[..., None]):
-    #   """register copy of notifier for a new className and target.
-    #   Intended for onceOnly=True notifiers. It is up to the user to make sure the calling
-    #   interface matches the action"""
-    #   if target in self._notifierActions:
-    #
-    #     tt = (className, target)
-    #   else:
-    #     # This is right, it just looks strange. But if target is not an action it is
-    #     # another className, and if so the names must be sorted.
-    #     tt = tuple(sorted([className, target]))
-    #
-    #   for od in self._context2Notifiers.values():
-    #     onceOnly = od.get(notifier)
-    #     if onceOnly is not None:
-    #       self._context2Notifiers.setdefault(tt, OrderedDict())[notifier] = onceOnly
-    #       break
-    #   else:
-    #     raise ValueError("Unknown notifier: %s" % notifier)
-
     def unRegisterNotifier(self, className: str, target: str, notifier: typing.Callable[..., None]):
         """Unregister the notifier from this className, and target"""
         if target in self._notifierActions:
@@ -829,8 +817,9 @@ class Project(AbstractWrapperObject):
     def _modifiedApiObject(self, wrappedData):
         """ call object-has-changed notifiers
         """
-        obj = self._data2Obj[wrappedData]
-        obj._finaliseAction('change')
+        if self._apiNotificationBlanking == 0:
+            obj = self._data2Obj[wrappedData]
+            obj._finaliseAction('change')
 
     def _finaliseApiDelete(self, wrappedData):
         """Clean up after object deletion
@@ -890,32 +879,34 @@ class Project(AbstractWrapperObject):
         pathToObject is a navigation path (may contain dots) and must yield an API object
         or an iterable of API objects"""
 
-        getDataObj = self._data2Obj.get
+        if self._apiNotificationBlanking == 0:
+            getDataObj = self._data2Obj.get
 
-        target = operator.attrgetter(pathToObject)(wrappedData)
+            target = operator.attrgetter(pathToObject)(wrappedData)
 
-        # GWV: a bit too much for now; should be the highest debug level only
-        #self._project._logger.debug('%s: %s.%s = %s'
-        #                            % (action, wrappedData, pathToObject, target))
+            # GWV: a bit too much for now; should be the highest debug level only
+            #self._project._logger.debug('%s: %s.%s = %s'
+            #                            % (action, wrappedData, pathToObject, target))
 
-        if not target:
-            pass
-        elif hasattr(target, '_metaclass'):
-            if not target.isDeleted:
-                # Hack. This is an API object - only if exists
-                getDataObj(target)._finaliseAction(action)
-        else:
-            # This must be an iterable
-            for obj in target:
-                if not obj.isDeleted:
-                    getDataObj(obj)._finaliseAction(action)
+            if not target:
+                pass
+            elif hasattr(target, '_metaclass'):
+                if not target.isDeleted:
+                    # Hack. This is an API object - only if exists
+                    getDataObj(target)._finaliseAction(action)
+            else:
+                # This must be an iterable
+                for obj in target:
+                    if not obj.isDeleted:
+                        getDataObj(obj)._finaliseAction(action)
 
     def _finaliseApiRename(self, wrappedData):
         """Reset Finalise rename - called from APi object (for API notifiers)
         """
 
-        obj = self._data2Obj.get(wrappedData)
-        obj._finaliseAction('rename')
+        if self._apiNotificationBlanking == 0:
+            obj = self._data2Obj.get(wrappedData)
+            obj._finaliseAction('rename')
 
     def _modifiedLink(self, dummy, classNames: typing.Tuple[str, str]):
         """ call link-has-changed notifiers

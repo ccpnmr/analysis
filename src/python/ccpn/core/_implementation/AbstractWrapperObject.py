@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:20:00 +0100 (Fri, August 20, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-11-15 12:08:45 +0000 (Mon, November 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -651,33 +651,33 @@ class AbstractWrapperObject(NotifierBase):
         result = list(getDataObj(y) for x in self._childClasses for y in x._getAllWrappedData(self))
         return result
 
-    def _restoreChildren(self, classes=['all']):
-        """GWV: A method to restore the children of self
-        classes is either 'gui' or 'nonGui' or 'all' or explicit enumeration of classNames
-        For restore 3.1 branch
-        """
-        _classMap = dict([(cls.className, cls) for cls in self._childClasses])
-
-        # loop over all the child-classses
-        for clsName, apiChildren in self._getApiChildren(classes=classes).items():
-
-            cls = _classMap.get(clsName)
-            if cls is None:
-                raise RuntimeError('Undefined class "%s"' % clsName)
-
-            for apiChild in apiChildren:
-
-                newInstance = self._newInstanceWithApiData(cls=cls, apiData=apiChild)
-                if newInstance is None:
-                    raise RuntimeError('Error creating new instance of class "%s"' % clsName)
-
-                # add the newInstance to the appropriate mapping dictionaries
-                self._project._data2Obj[apiChild] = newInstance
-                _d = self._project._pid2Obj.setdefault(clsName, {})
-                _d[newInstance.pid] = newInstance
-
-                # recursively do the children of newInstance
-                newInstance._restoreChildren(classes=classes)
+    # def _restoreChildren(self, classes=['all']):
+    #     """GWV: A method to restore the children of self
+    #     classes is either 'gui' or 'nonGui' or 'all' or explicit enumeration of classNames
+    #     For restore 3.1 branch
+    #     """
+    #     _classMap = dict([(cls.className, cls) for cls in self._childClasses])
+    #
+    #     # loop over all the child-classses
+    #     for clsName, apiChildren in self._getApiChildren(classes=classes).items():
+    #
+    #         cls = _classMap.get(clsName)
+    #         if cls is None:
+    #             raise RuntimeError('Undefined class "%s"' % clsName)
+    #
+    #         for apiChild in apiChildren:
+    #
+    #             newInstance = self._newInstanceWithApiData(cls=cls, apiData=apiChild)
+    #             if newInstance is None:
+    #                 raise RuntimeError('Error creating new instance of class "%s"' % clsName)
+    #
+    #             # add the newInstance to the appropriate mapping dictionaries
+    #             self._project._data2Obj[apiChild] = newInstance
+    #             _d = self._project._pid2Obj.setdefault(clsName, {})
+    #             _d[newInstance.pid] = newInstance
+    #
+    #             # recursively do the children of newInstance
+    #             newInstance._restoreChildren(classes=classes)
 
     def _newInstanceWithApiData(self, cls, apiData):
         """Return a new instance of cls, initialised with apiData
@@ -771,9 +771,112 @@ class AbstractWrapperObject(NotifierBase):
     # In addition each class (except for Project) must define a  newClass method
     # The function (e.g. Project.newMolecule), ... must create a new child object
     # AND ALL UNDERLYING DATA, taking in all parameters necessary to do so.
-    # This can be done by defining a function (not a method)
-    # def newMolecule( self, *args, **kwds):
-    # and then doing Project.newMolecule = newMolecule
+
+    #=========================================================================================
+    # Restore methods
+    #=========================================================================================
+
+    @classmethod
+    def _restoreObject(cls, project, apiObj):
+        """Restores object from apiObj; checks for _factoryFunction.
+        Restores the children
+        :return Restored obj
+
+        CCPNINTERNAL: subclassed in special cases
+        """
+        if apiObj is None:
+            raise ValueError('_restoreObject: undefined apiObj')
+
+        factoryFunction = cls._factoryFunction
+        if factoryFunction is None:
+            obj = cls(project, apiObj)
+        else:
+            obj = factoryFunction(project, apiObj)
+
+        if obj is None:
+            raise RuntimeError('Error restoring object encoded by %s' % apiObj)
+
+        # restore the children
+        obj._restoreChildren()
+
+        return obj
+
+    def _restoreChildren(self):
+        """Initialize children, using existing objects in data model"""
+
+        project = self._project
+        data2Obj = project._data2Obj
+
+        for childClass in self._childClasses:
+            # print('>>> childClass', childClass)
+            # recursively create children
+            for apiObj in childClass._getAllWrappedData(self):
+                obj = data2Obj.get(apiObj)
+
+                if obj is None:
+                    try:
+                        obj = childClass._restoreObject(project, apiObj)
+                    except RuntimeError as es:
+
+                        _text = 'Error restoring child object %s of %s' % (apiObj, self)
+                        getLogger().warning(_text)
+                        raise RuntimeError(_text)
+
+    #  For restore 3.2 branch
+
+    # def _restoreChildren(self, classes=['all']):
+    #     """GWV: A method to restore the children of self
+    #     classes is either 'gui' or 'nonGui' or 'all' or explicit enumeration of classNames
+    #     """
+    #     _classMap = dict([(cls.className, cls) for cls in self._childClasses])
+    #
+    #     # loop over all the child-classses
+    #     for clsName, apiChildren in self._getApiChildren(classes=classes).items():
+    #
+    #         cls = _classMap.get(clsName)
+    #         if cls is None:
+    #             raise RuntimeError('Undefined class "%s"' % clsName)
+    #
+    #         for apiChild in apiChildren:
+    #
+    #             newInstance = self._newInstanceWithApiData(cls=cls, apiData=apiChild)
+    #             if newInstance is None:
+    #                 raise RuntimeError('Error creating new instance of class "%s"' % clsName)
+    #
+    #             # add the newInstance to the appropriate mapping dictionaries
+    #             self._project._data2Obj[apiChild] = newInstance
+    #             _d = self._project._pid2Obj.setdefault(clsName, {})
+    #             _d[newInstance.pid] = newInstance
+    #
+    #             # recursively do the children of newInstance
+    #             newInstance._restoreChildren(classes=classes)
+    #
+    # def _newInstanceWithApiData(self, cls, apiData):
+    #     """Return a new instance of cls, initialised with apiData
+    #     For restore 3.2 branch
+    #     """
+    #     if apiData in self._project._data2Obj:
+    #         # This happens with Window, as it get initialised by the Windowstore and then once
+    #         # more as child of Project
+    #         newInstance = self._project._data2Obj[apiData]
+    #
+    #     elif hasattr(cls, '_factoryFunction') and getattr(cls, '_factoryFunction') is not None:
+    #         newInstance = cls._factoryFunction(self._project, apiData)
+    #
+    #     else:
+    #         newInstance = cls(self._project, apiData)
+    #
+    #     if newInstance is None:
+    #         raise RuntimeError('Error creating new instance of class "%s"' % cls.className)
+    #
+    #     return newInstance
+
+    # def _newInstance(self, *kwds):
+    #     """Instantiate a new instance, including the wrappedData
+    # future v3.2
+    #     Should be subclassed
+    #     """
+    #     pass
 
     #=========================================================================================
     # CCPN functions
@@ -1048,47 +1151,47 @@ class AbstractWrapperObject(NotifierBase):
             objs.extend(children)
         return objs
 
-    def _initAllNoUIchildren(self):
-        """Initialise NoUI children: spectra, peaks..."""
-        pass
+    # def _initAllNoUIchildren(self):
+    #     """Initialise NoUI children: spectra, peaks..."""
+    #     pass
+    #
+    # def _initAllUIchildren(self):
+    #     """Initialise UI children: spectrumDisplays"""
+    #     pass
 
-    def _initAllUIchildren(self):
-        """Initialise UI children: spectrumDisplays"""
-        pass
-
-    def _initializeAll(self):
-        """Initialize children, using existing objects in data model"""
-
-        project = self._project
-        data2Obj = project._data2Obj
-
-        for childClass in self._childClasses:
-            if not childClass._isGuiClass:
-                try:
-                    self._initChildClass(childClass, data2Obj, project)
-                except Exception as er:
-                    getLogger().warning('Error initialising Object %s. %s1' % (childClass, er))
-            else:
-                try:
-                    self._initChildClass(childClass, data2Obj, project)
-                except Exception as er:
-                    getLogger().warning('Error initialising Gui Object %s. %s1' % (childClass, er))
-
-    def _initChildClass(self, childClass, data2Obj, project):
-        # recursively create children
-        for apiObj in childClass._getAllWrappedData(self):
-            obj = data2Obj.get(apiObj)
-            if obj is None:
-                factoryFunction = childClass._factoryFunction
-                if factoryFunction is None:
-                    obj = childClass(project, apiObj)
-                else:
-                    obj = factoryFunction(project, apiObj)
-            try:
-                obj._initializeAll()
-            except Exception as er:
-                getLogger().warning('Error initialising object %s. %s1' % (obj, er))
-            # getLogger().info(str(obj))   # ejb - temp
+    # def _initializeAll(self):
+    #     """Initialize children, using existing objects in data model"""
+    #
+    #     project = self._project
+    #     data2Obj = project._data2Obj
+    #
+    #     for childClass in self._childClasses:
+    #         if not childClass._isGuiClass:
+    #             try:
+    #                 self._initChildClass(childClass, data2Obj, project)
+    #             except Exception as er:
+    #                 getLogger().warning('Error initialising Object %s. %s1' % (childClass, er))
+    #         else:
+    #             try:
+    #                 self._initChildClass(childClass, data2Obj, project)
+    #             except Exception as er:
+    #                 getLogger().warning('Error initialising Gui Object %s. %s1' % (childClass, er))
+    #
+    # def _initChildClass(self, childClass, data2Obj, project):
+    #     # recursively create children
+    #     for apiObj in childClass._getAllWrappedData(self):
+    #         obj = data2Obj.get(apiObj)
+    #         if obj is None:
+    #             factoryFunction = childClass._factoryFunction
+    #             if factoryFunction is None:
+    #                 obj = childClass(project, apiObj)
+    #             else:
+    #                 obj = factoryFunction(project, apiObj)
+    #         try:
+    #             obj._initializeAll()
+    #         except Exception as er:
+    #             getLogger().warning('Error initialising object %s. %s1' % (obj, er))
+    #         # getLogger().info(str(obj))   # ejb - temp
 
     def _unwrapAll(self):
         """remove wrapper from object and child objects

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-04 20:14:00 +0000 (Thu, November 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-15 16:30:39 +0000 (Mon, November 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -514,11 +514,31 @@ class OpenItemABC():
     def _addCollectionMenu(self, menu, objs):
         """Add a quick submenu containing a list of collections
         """
+        # create subMenu for adding selected items to a single collection
         subMenu = menu.addMenu('Add to Collection')
         collections = self.mainWindow.application.project.collections
         for col in collections:
-            # add action to add to the collection
-            subMenu.addAction(col.pid, partial(col.addItems, objs))
+            # only select items that are in the collection
+            _objs = [obj for obj in objs if obj not in col.items]
+            if _objs:
+                # add action to add to the collection
+                subMenu.addAction(col.pid, partial(col.addItems, _objs))
+        if not len(subMenu.actions()):
+            # disable menu if empty
+            subMenu.setEnabled(False)
+
+        # create subMenu for removing selected items from a single collection - items are not deleted
+        subMenu = menu.addMenu('Remove from Collection')
+        collections = self.mainWindow.application.project.collections
+        for col in collections:
+            # only select items that are in the collection
+            _objs = [obj for obj in objs if obj in col.items]
+            if _objs:
+                # add action to remove from the collection
+                subMenu.addAction(col.pid, partial(col.removeItems, _objs))
+        if not len(subMenu.actions()):
+            # disable menu if empty
+            subMenu.setEnabled(False)
 
     def _addToCollection(self, objs):
         """Add the objects to a collection

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-16 14:46:25 +0000 (Tue, November 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-16 16:39:07 +0000 (Tue, November 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -460,18 +460,21 @@ class Framework(NotifierBase):
     def _initialiseProject(self, project: Project):
         """Initialise project and set up links and objects that involve it"""
 
+        # Linkages
         self._project = project
         project._application = self
+        # project._appBase = self  # _appBase is defined in project so the UI instantiation can happen
 
-        # # Pass an instance of framework to project so the UI instantiation can happen
-        # project._appBase = self
+        # Logging
+        logger = getLogger()
+        Logging.setLevel(logger, self.level)
+        logger.debug('Framework._initialiseProject>>>')
 
-        # Set up current
+        # Set up current; we need it when restoring
         self.current = Current(project=project)
 
         # This wraps the underlying data, including the wrapped graphics data
         #  - the project is now ready to use
-
         project._initialiseProject()
 
         # Adapt project to preferences
@@ -486,11 +489,11 @@ class Framework(NotifierBase):
         self.spectraPath = self.spectraPath
         self.pluginDataPath = self.pluginDataPath
 
+
         # restore current
         self.current._restoreStateFromFile(self.statePath)
 
-        if hasattr(self, '_mainWindow'):
-            Logging.getLogger().debug('Framework._initialiseProject>>>')
+        if self.hasGui:
 
             project._blockSideBar = True
             self.ui.initialize(self._mainWindow)
@@ -1558,25 +1561,13 @@ class Framework(NotifierBase):
         if self.project is not None:
             self._closeProject()
 
-        project = None
         sys.stderr.write('==> Creating new, empty project\n')
         newName = re.sub('[^0-9a-zA-Z]+', '', name)
         if newName != name:
             getLogger().info('Removing whitespace from name: %s' % name)
 
-        # project = coreIo.newProject(name=newName, useFileLogger=self.useFileLogger, level=self.level)
-        # project._isNew = True
-        # newProjectSaveHistory(project.path)
-        # # Needs to know this for restoring the GuiSpectrum Module. Could be removed after decoupling Gui and Data!
-        # # GST note change of order required for undo dirty system not consistent
-        # # order in other place elsewhise
-        # project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
         project = _newProject(self, name=newName)
-        self._initialiseProject(project)
-
-        # # 20190424:ED reset the flag so that spectrumDisplays open correctly again
-        # project._isNew = None
-        # self.project = project
+        self._initialiseProject(project)    # This also set the linkages
 
         return project
 
@@ -1589,13 +1580,40 @@ class Framework(NotifierBase):
         """Actual V2 project loader
         CCPNINTERNAL: called from CcpNmrV2ProjectDataLoader
         """
+        from ccpn.core._implementation.updates.update_v2 import updateProject_fromV2
         with logCommandManager('application.', 'loadProject', path):
             logger = getLogger()
-            project = self._loadV3Project(path)
-            # returns a list or None
-            if project and isinstance(project, list):
-                project = project[0]
+
+            ok = MessageDialog.showYesNoWarning('Load Project',
+                                                f'Project {path} was created with version-2 Analysis.\n'
+                                                '\n'
+                                                'CAUTION: The project will be coverted to a version-3 project and saved '
+                                                'as a new directory with .cppn extension. If you are in any doubt, please '
+                                                'make a copy of the project folder before loading/saving this project.\n'
+                                                '\n'
+                                                'Do you want to continue loading?')
+
+            if not ok:
+                # skip loading so that user can backup/copy project
+                getLogger().info('==> Cancelled loading ccpn project "%s"' % path)
+                return []
+
+            # project = self._loadV3Project(path)
+            # # returns a list or None
+            # if project and isinstance(project, list):
+            #     project = project[0]
+            if self.project is not None:  # always close for Ccpn
+                self._closeProject()
+
+            project = coreIo.loadProject(str(path), useFileLogger=self.useFileLogger, level=self.level)
+            self._initialiseProject(project)    # This also set the linkages
+            getLogger().info('==> Loaded ccpn project "%s"' % path)
+
+            # call the update
+            updateProject_fromV2(project)
             logger.info('==> Upgraded %s to version-3' % project)
+
+            # Save the result
             try:
                 project.save()
                 logger.info('==> Saved %s as "%s"' % (project, project.path))
@@ -1604,11 +1622,12 @@ class Framework(NotifierBase):
 
         return [project]
 
-    def _loadV3Project(self, path):
+    def _loadV3Project(self, path) -> List[Project]:
         """Actual V3 project loader
         CCPNINTERNAL: called from CcpNmrV3ProjectDataLoader
         """
         from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory
+        from ccpn.core.Project import _loadProject
 
         if not isinstance(path, (Path.Path, str)):
             raise ValueError('invalid path "%s"' % path)
@@ -1625,13 +1644,15 @@ class Framework(NotifierBase):
             if projectHistory.lastSavedVersion <= '3.0.4':
 
                 ok = MessageDialog.showYesNoWarning('Load Project',
-                                                    f'Project {_path} was created with an earlier version of AnalysisV3.\n'
+                                                    f'Project %s was created with an earlier version of AnalysisV3.\n'
                                                     '\n'
                                                     'CAUTION: After saving in version %s the project cannot currently be loaded '
                                                     'back into versions 3.0.4 or earlier. If you are in any doubt, please make a copy of '
                                                     'the project folder before loading/saving this project.\n'
                                                     '\n'
-                                                    'Do you want to continue loading?' % self.applicationVersion.withoutRelease())
+                                                    'Do you want to continue loading?' % (
+                                                        _path, self.applicationVersion.withoutRelease())
+                                                    )
 
                 if not ok:
                     # skip loading so that user can backup/copy project
@@ -1641,8 +1662,8 @@ class Framework(NotifierBase):
             if self.project is not None:  # always close for Ccpn
                 self._closeProject()
 
-            project = coreIo.loadProject(str(_path), useFileLogger=self.useFileLogger, level=self.level)
-            self._initialiseProject(project)
+            project = _loadProject(application=self, path=path)
+            self._initialiseProject(project)    # This also set the linkages
             getLogger().info('==> Loaded ccpn project "%s"' % path)
 
         return [project]

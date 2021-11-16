@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-16 14:46:25 +0000 (Tue, November 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-16 16:39:07 +0000 (Tue, November 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -45,15 +45,16 @@ def loadProject(path: str, useFileLogger: bool = True, level=logging.INFO) -> Pr
     Logging.setLevel(logger, level)
     apiProject = project._wrappedData.root
 
-    if apiProject._upgradedFromV2:
-        # Regrettably this V2 upgrade operation must be done at the wrapper level.
-        # No good place except here
-        for structureEnsemble in project.structureEnsembles:
-            data = structureEnsemble.data
-            if data is None:
-                project._logger.warning("%s has no data. This should never happen")
-            else:
-                data._containingObject = structureEnsemble
+    #
+    # if apiProject._upgradedFromV2:
+    #     # Regrettably this V2 upgrade operation must be done at the wrapper level.
+    #     # No good place except here
+    #     for structureEnsemble in project.structureEnsembles:
+    #         data = structureEnsemble.data
+    #         if data is None:
+    #             project._logger.warning("%s has no data. This should never happen")
+    #         else:
+    #             data._containingObject = structureEnsemble
 
     projectPath = project.path
     oldName = project.name
@@ -74,7 +75,8 @@ def _loadNmrProject(path: str, nmrProjectName: str = None, useFileLogger: bool =
     """Open project matching the API Project stored at path. ADVANCED - requires post-processing
 
     If the API project contains several NmrProjects (rare, and only for legacy projects),
-    nmrProjectName lets you select which one to open"""
+    nmrProjectName lets you select which one to open
+    """
     path = aPath(path)
     apiProject = apiIo.loadProject(path.asString(), useFileLogger=useFileLogger)
 
@@ -83,11 +85,13 @@ def _loadNmrProject(path: str, nmrProjectName: str = None, useFileLogger: bool =
 
     if apiProject is None:
         raise ValueError("No valid project loaded from %s" % path)
-    else:
-        apiNmrProject = apiProject.fetchNmrProject(name=nmrProjectName)
-        apiNmrProject.initialiseData()
-        apiNmrProject.initialiseGraphicsData()
-        return Project(apiNmrProject)
+
+    apiNmrProject = apiProject.fetchNmrProject(name=nmrProjectName)
+    apiNmrProject.initialiseData()
+    apiNmrProject.initialiseGraphicsData()
+    project = Project(apiNmrProject)
+
+    return project
 
 
 # def newProject(name: str = 'default', path: str = None, useFileLogger: bool = True, level=logging.INFO) -> Project:

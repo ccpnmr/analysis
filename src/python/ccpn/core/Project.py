@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-16 14:46:25 +0000 (Tue, November 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-16 16:39:07 +0000 (Tue, November 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -58,16 +58,17 @@ from ccpnmodel.ccpncore.lib.spectrum import NmrExpPrototype
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrExpPrototype import RefExperiment
 from ccpnmodel.ccpncore.lib import Constants
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
+from ccpnmodel.ccpncore.lib import ApiPath
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
-# from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
+
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
     notificationEchoBlocking, inactivity, logCommandManager
 from ccpn.util.Logging import getLogger
 
 
-# TODO These should be merged with the sams constants in CcpnNefIo
+# TODO These should be merged with the same constants in CcpnNefIo
 # (and likely those in ExportNefPopup) and moved elsewhere
 CHAINS = 'chains'
 CHEMICALSHIFTLISTS = 'chemicalShiftLists'
@@ -237,18 +238,17 @@ class Project(AbstractWrapperObject):
             raise ValueError("Project initialised with %s, should be ccp.nmr.Nmr.NmrProject."
                              % wrappedData)
 
-        # set up attributes
+        # Define linkage attributes
         self._project = self
         self._wrappedData = wrappedData
-        # self._id = _id = ''
+
+        # self._appBase = None (delt with below)
+        # Reference to application; defined by Framework
+        self._application = None
 
         # setup object handling dictionaries
         self._data2Obj = {wrappedData: self}
         self._pid2Obj = {}
-
-        # self._pid2Obj[self.className] =  dd = {}
-        # self._pid2Obj[self.shortClassName] = dd
-        # dd[_id] = self
 
         self._id = wrappedData.name
         self._resetIds()
@@ -282,11 +282,11 @@ class Project(AbstractWrapperObject):
         # Special attributes:
         self._implExperimentTypeMap = None
 
-        # self._appBase = None
-        self._application = None
-
-        # reference to a ProjectSaveHistory instance
+        # reference to a ProjectSaveHistory instance; defined _newProject() or _loadProject()
         self._saveHistory = None
+
+        # reference to the logger; defined in call to _initialiseProject())
+        self._logger = None
 
         self._checkProjectSubDirectories()
 
@@ -339,8 +339,8 @@ class Project(AbstractWrapperObject):
         # so just get it
         self._logger = Logging.getLogger()
 
-        # get the save history
-        self._saveHistory = getProjectSaveHistory(self.path)
+        # # get the save history
+        # self._saveHistory = getProjectSaveHistory(self.path)
 
         # Set up notifiers
         self._registerPresetApiNotifiers()
@@ -350,7 +350,7 @@ class Project(AbstractWrapperObject):
         #     self.registerNotifier(*tt)
 
         # initialise, creating the children
-        self._resetUndo()
+        # self._resetUndo()
         with inactivity():
             self._restoreChildren()
             # we always have the default chemicalShift list
@@ -1981,32 +1981,71 @@ class Project(AbstractWrapperObject):
 
         return _getChemicalShiftList(self, name=name, **kwds)
 
+#=========================================================================================
+# Code adapted from previously _implementation/Io.py
+#=========================================================================================
 
-
-def _newProject(application, name: str = 'default', path: str = None) -> Project:
-    """Make RAW new project, putting underlying data storage (API project) at path
+def _loadProject(application, path: str) -> Project:
+    """Load the project defined by path
+    :return Project instance
     """
-    apiProject = apiIo.newProject(name, path, overwriteExisting=True, useFileLogger=True)
-    if apiProject is None:
-        raise ValueError("New project could not be created (overlaps exiting project?) name:%s, path:%s"
-                         % (name, path))
+    _path = aPath(path)
+    if not _path.exists():
+        raise ValueError('Path {_path} does not exist')
+
+    if (apiProject := apiIo.loadProject(str(path), useFileLogger=True)) is None:
+        raise RuntimeError("No valid project loaded from %s" % path)
+
+    apiNmrProject = apiProject.fetchNmrProject()
+    apiNmrProject.initialiseData()
+    apiNmrProject.initialiseGraphicsData()
+    project = Project(apiNmrProject)
+    project._isNew = False
+    # NB: linkages are set in Framework._intialiseProject()
+
+    # check if it has been moved
+    projectPath = project.path
+    oldName = project.name
+    newName = aPath(projectPath).basename
+    if oldName != newName:
+        # Directory name has changed. Change project name and move Project xml file.
+        oldProjectFilePath = aPath(ApiPath.getProjectFile(projectPath, oldName))
+        if oldProjectFilePath.exists():
+            oldProjectFilePath.removeFile()
+        apiProject.__dict__['name'] = newName
+        apiProject.touch()
+        apiProject.save()
+
+    project._resetUndo(debug=application.level <= Logging.DEBUG2, application=application)
+
+    # Do some admin
+    project._saveHistory = getProjectSaveHistory(path)
+
+    # Any updates will go here
+    project._objectVersion = application.applicationVersion
+
+    return project
+
+
+def _newProject(application, name: str = 'default', path: str = None, overwrite=True) -> Project:
+    """Make RAW new project, putting underlying data storage (API project) at path
+    :return Project instance
+    """
+    # apiIo.newProject will create a temp path if path is None
+    if (apiProject := apiIo.newProject(name, path, overwriteExisting=overwrite, useFileLogger=True)) is None:
+        raise RuntimeError("New project could not be created (overlaps exiting project?) name:%s, path:%s, overwrite:"
+                         % (name, path, overwrite))
 
     apiNmrProject = apiProject.fetchNmrProject()
     apiNmrProject.initialiseData()
     apiNmrProject.initialiseGraphicsData()
     project = Project(apiNmrProject)
     project._isNew = True
-
-    # linkages
-    # application._project = project
-    # project._application = application
-    # # # Pass an instance of application/framework to project so the UI instantiation can happen
-    # # # (Old-school)
-    # # project._appBase = application
-
-    saveHistory = newProjectSaveHistory(project.path)
-    project._objectVersion = saveHistory.lastSavedVersion
+    # NB: linkages are set in Framework._intialiseProject()
 
     project._resetUndo(debug=application.level <= Logging.DEBUG2, application=application)
+    project._saveHistory = newProjectSaveHistory(project.path)
+
+    project._objectVersion = application.applicationVersion
 
     return project

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-16 12:02:37 +0000 (Tue, November 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-16 20:13:45 +0000 (Tue, November 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -45,16 +45,13 @@ from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking, \
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.lib.ContextManagers import deleteObject
 from ccpn.core.lib.Notifiers import NotifierBase
-from ccpn.framework.Version import VersionString
+from ccpn.framework.Version import VersionString, applicationVersion
 from ccpn.util.decorators import logCommand
 
 
 @functools.total_ordering
 class AbstractWrapperObject(NotifierBase):
     """Abstract class containing common functionality for subclasses.
-
-    ADVANCED. Core programmers only.
-
 
     **Rules for subclasses:**
 
@@ -64,7 +61,7 @@ class AbstractWrapperObject(NotifierBase):
     Non-child collection attributes must have addElement() and removeElement
     functions as appropriate.
 
-    For each child class there will be a newChild factory function, to crate
+    For each child class there will be a newChild factory function, to create
     the child object. There will be a collection attribute for each child,
     grandchild, and generally descendant.
 
@@ -100,8 +97,8 @@ class AbstractWrapperObject(NotifierBase):
     must have teh standard class-level attributes, such as  shortClassName, _childClasses,
     and _pluralLinkName.
     Each class must implement the properties id and _parent, and the methods
-    _getAllWrappedData,  and rename. Note that the
-    properties and the _getAllWrappedData function
+    _getAllWrappedData, and rename.
+    Note that the properties and the _getAllWrappedData function
     must work from the underlying data, as they will be called before the pid
     and object dictionary data are set up.
     """
@@ -814,8 +811,8 @@ class AbstractWrapperObject(NotifierBase):
     _OBJECT_VERSION = '_objectVersion'
     @property
     def _objectVersion(self) -> VersionString:
-        """Return the versionString of the object; used in _restoreObject / _newObject
-        to implement the upgrade mechanism
+        """Return the versionString of the object; used in _restoreObject / _createObject
+        to implement the update mechanism
         """
         if not self._hasInternalParameter(self._OBJECT_VERSION):
             version = str(self.project._saveHistory.lastSavedVersion)
@@ -830,31 +827,39 @@ class AbstractWrapperObject(NotifierBase):
         self._setInternalParameter(self._OBJECT_VERSION, version)
 
     @classmethod
-    def _newObject(cls, project, apiObj):
+    def _createObject(cls, project, apiObj):
         """Create new object from apiObj; checks for _factoryFunction.
-        :return obj
+        Updates objject from the _updateFunctions stack
 
-        CCPNINTERNAL: can be subclassed for upgrade mechanism
+        :return object
         """
-        factoryFunction = cls._factoryFunction
         if (factoryFunction := cls._factoryFunction) is None:
             obj = cls(project, apiObj)
         else:
             obj = factoryFunction(project, apiObj)
+
+        # upgrade the object
+        for version, func in obj._updateFunctions:
+            currentVersion = obj._objectVersion
+            if version < currentVersion:
+                func(obj)
+        obj._objectVersion = applicationVersion
+
         return obj
 
     @classmethod
     def _restoreObject(cls, project, apiObj):
         """Restores object from apiObj;
         Restores the children
-        :return Restored obj
+
+        :return Restored object
 
         CCPNINTERNAL: can be subclassed in special cases
         """
         if apiObj is None:
             raise ValueError('_restoreObject: undefined apiObj')
 
-        if (obj := cls._newObject(project, apiObj)) is None:
+        if (obj := cls._createObject(project, apiObj)) is None:
             raise RuntimeError('Error restoring object encoded by %s' % apiObj)
         # restore the children
         obj._restoreChildren()
@@ -1318,8 +1323,10 @@ class AbstractWrapperObject(NotifierBase):
                 oldPid = self.pid
             # Wrapper-level processing
             self._resetIds()
+
         elif action == 'create':
             self._flaggedForDelete = False
+
         elif action == 'delete':
             self._flaggedForDelete = True
 

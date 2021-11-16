@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:25:09 +0100 (Mon, September 13, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-11-16 14:46:25 +0000 (Tue, November 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -135,7 +135,8 @@ class Ui(NotifierBase):
         from ccpn.framework.Version import applicationVersion
         # applicationVersion = __version__.split()[1]  # ejb - read from the header
 
-        updateAgent = UpdateAgent(applicationVersion, dryRun=False)
+        _version = applicationVersion.withoutRelease()
+        updateAgent = UpdateAgent(_version, dryRun=False)
         numUpdates = updateAgent.checkNumberUpdates()
         # sys.stderr.write('==> Updates available: %s\n' % str(numUpdates))
 

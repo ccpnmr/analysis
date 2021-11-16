@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-16 12:02:37 +0000 (Tue, November 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-16 14:46:25 +0000 (Tue, November 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -282,18 +282,20 @@ class Project(AbstractWrapperObject):
         # Special attributes:
         self._implExperimentTypeMap = None
 
-        # Set for Pre-May-2016 version. NBNB TODO remove when no longer needed
-        self._appBase = None
+        # self._appBase = None
+        self._application = None
 
         # reference to a ProjectSaveHistory instance
         self._saveHistory = None
 
         self._checkProjectSubDirectories()
 
-    # GWV: 20181102: insert to retain consistency with future changes
     @property
     def application(self):
-        return self._appBase
+        return self._application
+
+    # GWV: 20181102: insert _appBase to retain consistency with current data loading models
+    _appBase = application
 
     @property
     def isNew(self):
@@ -1980,3 +1982,31 @@ class Project(AbstractWrapperObject):
         return _getChemicalShiftList(self, name=name, **kwds)
 
 
+
+def _newProject(application, name: str = 'default', path: str = None) -> Project:
+    """Make RAW new project, putting underlying data storage (API project) at path
+    """
+    apiProject = apiIo.newProject(name, path, overwriteExisting=True, useFileLogger=True)
+    if apiProject is None:
+        raise ValueError("New project could not be created (overlaps exiting project?) name:%s, path:%s"
+                         % (name, path))
+
+    apiNmrProject = apiProject.fetchNmrProject()
+    apiNmrProject.initialiseData()
+    apiNmrProject.initialiseGraphicsData()
+    project = Project(apiNmrProject)
+    project._isNew = True
+
+    # linkages
+    # application._project = project
+    # project._application = application
+    # # # Pass an instance of application/framework to project so the UI instantiation can happen
+    # # # (Old-school)
+    # # project._appBase = application
+
+    saveHistory = newProjectSaveHistory(project.path)
+    project._objectVersion = saveHistory.lastSavedVersion
+
+    project._resetUndo(debug=application.level <= Logging.DEBUG2, application=application)
+
+    return project

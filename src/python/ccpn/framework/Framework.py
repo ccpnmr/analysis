@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-11 15:07:57 +0000 (Thu, November 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-16 14:46:25 +0000 (Tue, November 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -288,7 +288,7 @@ class Framework(NotifierBase):
         self._mainWindow = None
 
         # This is needed to make project available in NoUi (if nothing else)
-        self.project = None
+        self._project = None
 
         # Blocking level for command echo and logging
         self._echoBlocking = 0
@@ -352,6 +352,11 @@ class Framework(NotifierBase):
         if self.hasGui:
             return self.ui.mainWindow
         return None
+
+    @property
+    def project(self):
+        """Return project"""
+        return self._project
 
     def _testShortcuts0(self):
         print('>>> Testing shortcuts0')
@@ -455,10 +460,11 @@ class Framework(NotifierBase):
     def _initialiseProject(self, project: Project):
         """Initialise project and set up links and objects that involve it"""
 
-        self.project = project
+        self._project = project
+        project._application = self
 
-        # Pass an instance of framework to project so the UI instantiation can happen
-        project._appBase = self
+        # # Pass an instance of framework to project so the UI instantiation can happen
+        # project._appBase = self
 
         # Set up current
         self.current = Current(project=project)
@@ -483,7 +489,6 @@ class Framework(NotifierBase):
         # restore current
         self.current._restoreStateFromFile(self.statePath)
 
-        self.project = project
         if hasattr(self, '_mainWindow'):
             Logging.getLogger().debug('Framework._initialiseProject>>>')
 
@@ -1547,6 +1552,7 @@ class Framework(NotifierBase):
         """
         # local import to avoid cycles
         from ccpn.core.lib.ProjectSaveHistory import newProjectSaveHistory
+        from ccpn.core.Project import _newProject
 
         # NB _closeProject includes a gui cleanup call
         if self.project is not None:
@@ -1558,18 +1564,19 @@ class Framework(NotifierBase):
         if newName != name:
             getLogger().info('Removing whitespace from name: %s' % name)
 
-        project = coreIo.newProject(name=newName, useFileLogger=self.useFileLogger, level=self.level)
-        project._isNew = True
-        newProjectSaveHistory(project.path)
-        # Needs to know this for restoring the GuiSpectrum Module. Could be removed after decoupling Gui and Data!
-        # GST note change of order required for undo dirty system not consistent
-        # order in other place elsewhise
-        project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
+        # project = coreIo.newProject(name=newName, useFileLogger=self.useFileLogger, level=self.level)
+        # project._isNew = True
+        # newProjectSaveHistory(project.path)
+        # # Needs to know this for restoring the GuiSpectrum Module. Could be removed after decoupling Gui and Data!
+        # # GST note change of order required for undo dirty system not consistent
+        # # order in other place elsewhise
+        # project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
+        project = _newProject(self, name=newName)
         self._initialiseProject(project)
 
-        # 20190424:ED reset the flag so that spectrumDisplays open correctly again
-        project._isNew = None
-        self.project = project
+        # # 20190424:ED reset the flag so that spectrumDisplays open correctly again
+        # project._isNew = None
+        # self.project = project
 
         return project
 
@@ -1635,7 +1642,6 @@ class Framework(NotifierBase):
                 self._closeProject()
 
             project = coreIo.loadProject(str(_path), useFileLogger=self.useFileLogger, level=self.level)
-            # project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
             self._initialiseProject(project)
             getLogger().info('==> Loaded ccpn project "%s"' % path)
 
@@ -2540,7 +2546,7 @@ class Framework(NotifierBase):
         if self.project is not None:
             # Cleans up wrapper project, including graphics data objects (Window, Strip, etc.)
             self.project._close()
-            self.project = None
+            self._project = None
 
         # self.ui.mainWindow = None
         # self.project = None

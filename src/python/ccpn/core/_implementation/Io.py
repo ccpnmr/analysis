@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-27 12:17:06 +0100 (Tue, July 27, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-11-16 14:46:25 +0000 (Tue, November 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -90,18 +90,18 @@ def _loadNmrProject(path: str, nmrProjectName: str = None, useFileLogger: bool =
         return Project(apiNmrProject)
 
 
-def newProject(name: str = 'default', path: str = None, useFileLogger: bool = True, level=logging.INFO) -> Project:
-    """Make RAW new project, putting underlying data storage (API project) at path"""
-    apiProject = apiIo.newProject(name, path, overwriteExisting=True,
-                                  useFileLogger=useFileLogger)
-    if apiProject is None:
-        raise ValueError("New project could not be created (overlaps exiting project?) name:%s, path:%s"
-                         % (name, path))
-    else:
-        apiNmrProject = apiProject.fetchNmrProject()
-        apiNmrProject.initialiseData()
-        apiNmrProject.initialiseGraphicsData()
-        project = Project(apiNmrProject)
-        logger = Logging.getLogger()
-        Logging.setLevel(logger, level)
-        return project
+# def newProject(name: str = 'default', path: str = None, useFileLogger: bool = True, level=logging.INFO) -> Project:
+#     """Make RAW new project, putting underlying data storage (API project) at path"""
+#     apiProject = apiIo.newProject(name, path, overwriteExisting=True,
+#                                   useFileLogger=useFileLogger)
+#     if apiProject is None:
+#         raise ValueError("New project could not be created (overlaps exiting project?) name:%s, path:%s"
+#                          % (name, path))
+#     else:
+#         apiNmrProject = apiProject.fetchNmrProject()
+#         apiNmrProject.initialiseData()
+#         apiNmrProject.initialiseGraphicsData()
+#         project = Project(apiNmrProject)
+#         logger = Logging.getLogger()
+#         Logging.setLevel(logger, level)
+#         return project

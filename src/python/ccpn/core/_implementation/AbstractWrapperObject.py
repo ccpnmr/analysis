@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-12 12:36:25 +0100 (Tue, October 12, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-11-16 12:02:37 +0000 (Tue, November 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -45,6 +45,7 @@ from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking, \
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.lib.ContextManagers import deleteObject
 from ccpn.core.lib.Notifiers import NotifierBase
+from ccpn.framework.Version import VersionString
 from ccpn.util.decorators import logCommand
 
 
@@ -132,6 +133,12 @@ class AbstractWrapperObject(NotifierBase):
 
     # Function to generate custom subclass instances -= overridden in some subclasses
     _factoryFunction = None
+
+    # List of (versionString, updateFunction) tuples.
+    # updateFunction to be called (in _newObject) immediately after creation of the
+    # object if versionString < current version; i.e. object needs updating.
+    # The list is populated by the updateObject class decorator
+    _updateFunctions = []
 
     # Default values for parameters to 'new' function. Overridden in subclasses
     _defaultInitValues = None
@@ -804,29 +811,53 @@ class AbstractWrapperObject(NotifierBase):
     # Restore methods
     #=========================================================================================
 
+    _OBJECT_VERSION = '_objectVersion'
+    @property
+    def _objectVersion(self) -> VersionString:
+        """Return the versionString of the object; used in _restoreObject / _newObject
+        to implement the upgrade mechanism
+        """
+        if not self._hasInternalParameter(self._OBJECT_VERSION):
+            version = str(self.project._saveHistory.lastSavedVersion)
+            self._setInternalParameter(self._OBJECT_VERSION, version)
+        return VersionString(self._getInternalParameter(self._OBJECT_VERSION))
+
+    @_objectVersion.setter
+    def _objectVersion(self, version):
+        # call the VersionString class, as it checks for compliance
+        # Value is stored as an actual str object, not VersionString object
+        version = str(VersionString(version))
+        self._setInternalParameter(self._OBJECT_VERSION, version)
+
+    @classmethod
+    def _newObject(cls, project, apiObj):
+        """Create new object from apiObj; checks for _factoryFunction.
+        :return obj
+
+        CCPNINTERNAL: can be subclassed for upgrade mechanism
+        """
+        factoryFunction = cls._factoryFunction
+        if (factoryFunction := cls._factoryFunction) is None:
+            obj = cls(project, apiObj)
+        else:
+            obj = factoryFunction(project, apiObj)
+        return obj
+
     @classmethod
     def _restoreObject(cls, project, apiObj):
-        """Restores object from apiObj; checks for _factoryFunction.
+        """Restores object from apiObj;
         Restores the children
         :return Restored obj
 
-        CCPNINTERNAL: subclassed in special cases
+        CCPNINTERNAL: can be subclassed in special cases
         """
         if apiObj is None:
             raise ValueError('_restoreObject: undefined apiObj')
 
-        factoryFunction = cls._factoryFunction
-        if factoryFunction is None:
-            obj = cls(project, apiObj)
-        else:
-            obj = factoryFunction(project, apiObj)
-
-        if obj is None:
+        if (obj := cls._newObject(project, apiObj)) is None:
             raise RuntimeError('Error restoring object encoded by %s' % apiObj)
-
         # restore the children
         obj._restoreChildren()
-
         return obj
 
     def _restoreChildren(self):

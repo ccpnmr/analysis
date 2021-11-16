@@ -1,5 +1,5 @@
 """
-Patch code for 3.0.4
+updateObject class decorator
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -26,32 +26,28 @@ __date__ = "$Date: 2021-11-10 10:28:41 +0000 (Wed, November 10, 2021) $"
 # Start of code
 #=========================================================================================
 
-from nmrglue.fileio.bruker import read_jcamp
+from decorator import decorator
 
-def getNCprocDataScale(spectrum):
+@decorator
+def updateObject(version, updateFunction):
+    """Class decorator to register updateFunction for a core-class in the _updateFunctions list.
+    updateFunction with updating version to the next higher version
 
-    "Read the procs file"
-    procs = spectrum.path.parent  / 'procs'
-    if not procs.exists():
-        raise RuntimeError('Invalid acqus file "%s"' % procs)
-    params = read_jcamp(procs)
+    profile updateFunction:
 
-    if 'NC_proc' in params:
-        dataScale = pow(2, float(params['NC_proc']))
-    else:
-        dataScale = 1.0
+        updateFunction(obj) -> versionString
 
-    return dataScale
-
-
-def scaleBrukerSpectrum(spectrum):
-    """Adjust the scaling in a Bruker spectrum; store it in the internal store for later
+        obj: object that is being restored
+        :return
     """
-    dataScale = getNCprocDataScale(spectrum)
 
-    spectrum.scale *= dataScale
-    if spectrum.dimensionCount >=2:
-        spectrum.positiveContourBase *= dataScale
-        spectrum.negativeContourBase *= dataScale
+    def theDecorator(cls):
+        """This function will decorate cls with _update, _updateHandler list and registers the updateHandler
+        """
+        if not hasattr(cls, '_updateFunctions'):
+            raise RuntimeError('class %s does not have the attribute _updateFunctions')
 
-    spectrum._setInternalParameter('NC_proc', dataScale)
+        cls._updateFunctions.append( (version, updateFunction) )
+        return cls
+
+    return theDecorator

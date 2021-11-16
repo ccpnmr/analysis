@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-11 16:54:53 +0000 (Thu, November 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-16 12:02:37 +0000 (Tue, November 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -45,8 +45,9 @@ from ccpn.util.ExcelReader import ExcelReader
 from ccpn.util.nef.GenericStarParser import DataBlock
 from ccpn.util.Path import aPath, Path
 from ccpn.util.Common import isIterable
-from ccpn.framework.PathsAndUrls import CCPN_EXTENSION
 
+from ccpn.framework.Version import VersionString
+from ccpn.framework.PathsAndUrls import CCPN_EXTENSION
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
@@ -84,12 +85,13 @@ NOTES = 'notes'
 PEAKCLUSTERS = 'peakClusters'
 
 
+
 class Project(AbstractWrapperObject):
     """ The Project is the object that contains all data objects and serves as the hub for
     navigating between them.
 
-    There are eleven top-level data objects directly within a project, of which seven have child
-    objects of their own, namely Spectrum, Sample, Chain, NmrChain, ChemicalShiftList, DataSet
+    There are 15 top-level data objects directly within a project, of which 8 have child
+    objects of their own, e.g. Spectrum, Sample, Chain, NmrChain, ChemicalShiftList, DataSet
     and StructureEnsemble. The child data objects are organised in a logical hierarchy; for example,
     a Spectrum has PeakLists, which in turn, are made up of Peaks, whereas a Chain is made up of Residues,
     which are made up of Atoms.
@@ -472,11 +474,8 @@ class Project(AbstractWrapperObject):
             self._resetIds()
             if self.application.hasGui:
                 self.application.mainWindow.sideBar.setProjectName(self)
-            # application = self._appBase
-            # if application is not None:
-            #     application._refreshAfterSave()
 
-            # store the version history in state subfolder json file - not the best as a duplication which could cause issues later
+            # store the version history in state subfolder json file
             self._saveHistory.addSaveRecord().save()
 
         return savedOk
@@ -505,12 +504,6 @@ class Project(AbstractWrapperObject):
         backupPath = backupUrl.path
         return backupPath
 
-    # @property
-    # def programName(self) -> str:
-    #     """Name of running program - defaults to 'CcpNmr'"""
-    #     appBase = self._appBase if hasattr(self, '_appBase') else None
-    #     return 'CcpNmr' if appBase is None else appBase.applicationName
-
     @logCommand('project.')
     def deleteObjects(self, *objs: typing.Sequence[typing.Union[Pid.Pid, AbstractWrapperObject]]):
         """Delete one or more objects, given as either objects or Pids
@@ -523,29 +516,21 @@ class Project(AbstractWrapperObject):
                 if obj and not obj.isDeleted:
                     obj.delete()
 
-    # def renameObject(self, objectOrPid:typing.Union[str,AbstractWrapperObject], newName:str):
-    #   """Rename object indicated by objectOrPid to name newName
-    #   NB at last one class (Substance) has a two-part name - these are passed as one,
-    #   dot-separated string (e.g. 'Lysozyme.U13C'"""
-    #   obj = self._data2Obj.get(objectOrPid) if isinstance(objectOrPid, str) else objectOrPid
-    #   names = newName.split('.')
-    #   obj.rename(*names)
-
-    def execute(self, pid, funcName, *params, **kwparams):
-        """Get the object identified by pid, execute object.funcName(\*params, \*\*kwparams)
-        and return the result"""
-
-        # NBNB TODO - probably not useful - remove?
-
-        obj = self.getByPid(pid)
-        if obj is None:
-            raise ValueError("No objet found with pid %s" % pid)
-        else:
-            func = getattr(obj, funcName)
-            if func is None:
-                raise ValueError("Object *s has no method named %s" % funcName)
-            else:
-                return func(*params, **kwparams)
+    # def execute(self, pid, funcName, *params, **kwparams):
+    #     """Get the object identified by pid, execute object.funcName(\*params, \*\*kwparams)
+    #     and return the result"""
+    #
+    #     # NBNB TODO - probably not useful - remove?
+    #
+    #     obj = self.getByPid(pid)
+    #     if obj is None:
+    #         raise ValueError("No objet found with pid %s" % pid)
+    #     else:
+    #         func = getattr(obj, funcName)
+    #         if func is None:
+    #             raise ValueError("Object *s has no method named %s" % funcName)
+    #         else:
+    #             return func(*params, **kwparams)
 
     @property
     def _apiNmrProject(self) -> ApiNmrProject:

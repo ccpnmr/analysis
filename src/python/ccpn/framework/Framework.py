@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-16 16:39:07 +0000 (Tue, November 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-16 17:00:00 +0000 (Tue, November 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -57,7 +57,6 @@ from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
 from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Project import Project
-from ccpn.core._implementation import Io as coreIo
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.lib.Pid import Pid, PREFIXSEP
 
@@ -1576,11 +1575,13 @@ class Framework(NotifierBase):
         """
         return self.ui.mainWindow._openProject()
 
-    def _loadV2Project(self, path):
+    def _loadV2Project(self, path) -> List[Project]:
         """Actual V2 project loader
         CCPNINTERNAL: called from CcpNmrV2ProjectDataLoader
         """
         from ccpn.core._implementation.updates.update_v2 import updateProject_fromV2
+        from ccpn.core.Project import _loadProject
+
         with logCommandManager('application.', 'loadProject', path):
             logger = getLogger()
 
@@ -1598,20 +1599,16 @@ class Framework(NotifierBase):
                 getLogger().info('==> Cancelled loading ccpn project "%s"' % path)
                 return []
 
-            # project = self._loadV3Project(path)
-            # # returns a list or None
-            # if project and isinstance(project, list):
-            #     project = project[0]
             if self.project is not None:  # always close for Ccpn
                 self._closeProject()
 
-            project = coreIo.loadProject(str(path), useFileLogger=self.useFileLogger, level=self.level)
-            self._initialiseProject(project)    # This also set the linkages
-            getLogger().info('==> Loaded ccpn project "%s"' % path)
-
+            project = _loadProject(application=self, path=str(path))
             # call the update
             updateProject_fromV2(project)
             logger.info('==> Upgraded %s to version-3' % project)
+
+            self._initialiseProject(project)    # This also sets the linkages
+            getLogger().info('==> Loaded ccpn project "%s"' % path)
 
             # Save the result
             try:

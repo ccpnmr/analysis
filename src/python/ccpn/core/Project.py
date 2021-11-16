@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-16 16:39:07 +0000 (Tue, November 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-16 16:51:10 +0000 (Tue, November 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2024,6 +2024,9 @@ def _loadProject(application, path: str) -> Project:
     # Any updates will go here
     project._objectVersion = application.applicationVersion
 
+    # the initialisation is completed once Framework has done it's things
+    # project._initialiseProject()
+
     return project
 
 
@@ -2047,5 +2050,8 @@ def _newProject(application, name: str = 'default', path: str = None, overwrite=
     project._saveHistory = newProjectSaveHistory(project.path)
 
     project._objectVersion = application.applicationVersion
+
+    # the initialisation is completed once Framework has done it's things
+    # project._initialiseProject()
 
     return project

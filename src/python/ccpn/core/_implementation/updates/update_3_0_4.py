@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-16 16:39:07 +0000 (Tue, November 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-17 21:07:35 +0000 (Wed, November 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -26,10 +26,39 @@ __date__ = "$Date: 2021-11-10 10:28:41 +0000 (Wed, November 10, 2021) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.framework.Version import VersionString, applicationVersion
+from ccpn.framework.Version import applicationVersion
 
-def _updateSpectrum_3_0_4(spectrum) -> VersionString:
-    """Update the _ccpnInternal settings from version3.0.4 -> 3.1.0.alpha
+def _updateSpectrum_3_0_4(spectrum):
+    """Update the _ccpnInternal settings from version 3.0.4 -> 3.1.0.alpha2
+    """
+    _updateSpectrum_settings(spectrum)
+    _updateSpectrum_NC_proc(spectrum)
+    spectrum._objectVersion = '3.1.0.alfa2'
+
+
+def _updateSpectrum_NC_proc(spectrum):
+    """Update spectrum from 3.1.0.alpha to 3.1.0.alpha2
+    Correct Bruker NC_proc related issues
+    """
+    from ccpn.core._implementation.patches.patch_3_0_4 import NC_PROC, getNCprocDataScale
+    from ccpn.core.lib.SpectrumDataSources.BrukerSpectrumDataSource import BrukerSpectrumDataSource
+
+    if spectrum.dataFormat == BrukerSpectrumDataSource.dataFormat:
+        if spectrum._hasInternalParameter(NC_PROC):
+            # Spectrum was adjusted in 3.0.4
+            scale = spectrum._getInternalParameter(NC_PROC)
+            # restore the spectrum scale to its original value as it was 'misused' in 3.0.4
+            spectrum.scale /= scale
+
+        else:
+            scale = getNCprocDataScale()  # Use this routine to directly get it from proc file,
+                                          # as spectrum._dataSource has not yet been initialised
+        for pk in spectrum.peaks:
+            pk.height *= scale
+
+
+def _updateSpectrum_settings(spectrum):
+    """Update the _ccpnInternal settings from version3.0.4 -> 3.1.0.alpha2
     """
     if not isinstance(spectrum._ccpnInternalData, dict):
         raise ValueError('Invalid _ccpnInternalData')
@@ -92,5 +121,3 @@ def _updateSpectrum_3_0_4(spectrum) -> VersionString:
         value = spectrum.getParameter(spectrum._AdditionalAttribute, NEGATIVENOISELEVEL)
         spectrum.deleteParameter(spectrum._AdditionalAttribute, NEGATIVENOISELEVEL)
         spectrum._setInternalParameter(spectrum._NEGATIVENOISELEVEL, value)
-
-    return applicationVersion

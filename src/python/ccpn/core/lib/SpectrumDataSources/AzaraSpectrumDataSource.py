@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-09 17:16:18 +0000 (Tue, November 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-17 21:07:35 +0000 (Wed, November 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -61,7 +61,8 @@ class AzaraSpectrumDataSource(SpectrumDataSourceABC):
         """
         if path is not None:
             path = aPath(path)
-            if path.suffixes[-1] == '.par' and path.suffixes[-2] == '.spc':
+            if len(path.suffixes) == 2 and \
+                    path.suffixes[-1] == '.par' and path.suffixes[-2] == '.spc':
                 path = path.withoutSuffix()
             path = str(path)
         return super().setPath(path, substituteSuffix=substituteSuffix)

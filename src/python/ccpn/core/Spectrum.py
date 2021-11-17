@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-17 10:23:33 +0000 (Wed, November 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-17 21:07:35 +0000 (Wed, November 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -112,15 +112,17 @@ from ccpn.util.Path import Path, aPath
 
 MAXALIASINGRANGE = 3
 
-def _testUpdate(spectrum):
-    getLogger().debug('TEST-UPDATE: objectVersion: %s' % spectrum._objectVersion)
-    spectrum._objectVersion = getApplication().applicationVersion
+# def _testUpdate(spectrum):
+#     getLogger().debug('TEST-UPDATE: objectVersion: %s' % spectrum._objectVersion)
+#     spectrum._objectVersion = getApplication().applicationVersion
 
 #=========================================================================================
 # Spectrum class
 #=========================================================================================
 
-@updateObject('3.0.4', _testUpdate)
+from ccpn.core._implementation.updates.update_3_0_4 import _updateSpectrum_3_0_4
+
+# @updateObject('3.0.4', _updateSpectrum_3_0_4)
 class Spectrum(AbstractWrapperObject, CcpNmrJson):
     """A Spectrum object contains all the stored properties of an NMR spectrum, as well as the
     path to the NMR (binary) data file. The Spectrum object has methods to get the binary data
@@ -3044,7 +3046,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     #-----------------------------------------------------------------------------------------
 
     def __str__(self):
-        return '<%s; %dD (%s)>' % (self.pid, self.dimensionCount, ','.join(self.axisCodes))
+        return '<%s (%s); %dD (%s)>' % (self.pid, self.dataFormat,
+                                        self.dimensionCount, ','.join(self.axisCodes))
 
     def _infoString(self, includeDimensions=False):
         """Return info string about self, optionally including dimensional

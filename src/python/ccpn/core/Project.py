@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-17 10:21:10 +0000 (Wed, November 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-17 21:07:35 +0000 (Wed, November 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -333,14 +333,13 @@ class Project(AbstractWrapperObject):
     def _initialiseProject(self):
         """Complete initialisation of project,
         set up logger and notifiers, and wrap underlying data
+        This routine is called from Framework, as some other machinery first needs to set up
+        (linkages, Current, notifiers and such)
         """
 
         # The logger has already been set up when creating/loading the API project
         # so just get it
         self._logger = Logging.getLogger()
-
-        # # get the save history
-        # self._saveHistory = getProjectSaveHistory(self.path)
 
         # Set up notifiers
         self._registerPresetApiNotifiers()
@@ -350,7 +349,6 @@ class Project(AbstractWrapperObject):
         #     self.registerNotifier(*tt)
 
         # initialise, creating the children
-        # self._resetUndo()
         with inactivity():
             self._restoreChildren()
             # we always have the default chemicalShift list
@@ -1109,6 +1107,13 @@ class Project(AbstractWrapperObject):
         root = self._apiNmrProject.root
         apiStatus = APIStatus(apiObj=root, completeScan=completeScan, includeDefaultChildren=includeDefaultChildren)
         return apiStatus
+
+    def _update(self):
+        """Call the _updateObject method on all objects, including self
+        """
+        self._updateObject()
+        for obj in self._getAllDecendants():
+            obj._updateObject()
 
     # def _checkUpgradedFromV2(self):
     #     """Check whether the project has been upgraded from V2
@@ -2022,8 +2027,7 @@ def _loadProject(application, path: str) -> Project:
     project._saveHistory = getProjectSaveHistory(path)
 
     # Call any updates
-    project._updateObject()
-    project._objectVersion = application.applicationVersion
+    project._update()
 
     # the initialisation is completed by Framework when it has done its things
     # project._initialiseProject()

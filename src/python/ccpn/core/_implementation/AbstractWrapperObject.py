@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-17 10:21:10 +0000 (Wed, November 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-17 21:07:35 +0000 (Wed, November 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ import functools
 import typing
 import re
 from contextlib import contextmanager
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from copy import deepcopy
 
 from decorator import decorator
@@ -137,11 +137,11 @@ class AbstractWrapperObject(NotifierBase):
     # Function to generate custom subclass instances -= overridden in some subclasses
     _factoryFunction = None
 
-    # List of (versionString, updateFunction) tuples.
-    # updateFunction to be called (in _newObject) immediately after creation of the
-    # object if versionString < current version; i.e. object needs updating.
-    # The list is populated by the updateObject class decorator
-    _updateFunctions = []
+    # A dict of (className, list[(versionString, updateFunction)]) (key, value) pairs.
+    # updateFunction to be called (in _updateObject) after creation of the
+    # object if versionString <= _objectVersion; i.e. object needs updating.
+    # The list for className is populated by the updateObject class decorator
+    _updateFunctions = defaultdict(list)
 
     # Default values for parameters to 'new' function. Overridden in subclasses
     _defaultInitValues = None
@@ -699,7 +699,9 @@ class AbstractWrapperObject(NotifierBase):
                     children.append(child)
                     if recursion:
                         childData = child._getChildren(classes=classes, recursion=recursion)
-                        data.update(childData)
+                        for className, objlist in childData.items():
+                            data.setdefault(className, [])
+                            data[className].extend(objlist)
         return data
 
     def _getApiChildren(self, classes=['all']) -> OrderedDict:
@@ -846,10 +848,10 @@ class AbstractWrapperObject(NotifierBase):
         """
         # upgrade the object
         logger = getLogger()
-        for version, func in self._updateFunctions:
+        for version, func in self._updateFunctions[self.className]:
             currentVersion = self._objectVersion
-            logger.debug('Updating object: currentVersion: %s, version: %s, func: %s' %
-                         (currentVersion, version, func)
+            logger.debug('Updating %s: currentVersion: %s, version: %s, func: %s' %
+                         (self, currentVersion, version, func)
                          )
             if version <= currentVersion:
                 func(self)
@@ -858,7 +860,6 @@ class AbstractWrapperObject(NotifierBase):
     @classmethod
     def _restoreObject(cls, project, apiObj):
         """Restores object from apiObj; checks for _factoryFunction.
-        Updates object calling the _updateObject method
         Restores the children
 
         :return Restored object
@@ -875,22 +876,19 @@ class AbstractWrapperObject(NotifierBase):
         if obj is None:
             raise RuntimeError('Error restoring object encoded by %s' % apiObj)
 
-        # check/apply the updates
-        obj._updateObject()
-
         # restore the children
         obj._restoreChildren()
 
         return obj
 
     def _restoreChildren(self):
-        """Initialize children, using existing objects in data model"""
+        """Recursively restore children, using existing objects in data model
+        """
 
         project = self._project
         data2Obj = project._data2Obj
 
         for childClass in self._childClasses:
-            # print('>>> childClass', childClass)
             # recursively create children
             for apiObj in childClass._getAllWrappedData(self):
                 obj = data2Obj.get(apiObj)
@@ -898,8 +896,8 @@ class AbstractWrapperObject(NotifierBase):
                 if obj is None:
                     try:
                         obj = childClass._restoreObject(project, apiObj)
-                    except RuntimeError as es:
 
+                    except RuntimeError as es:
                         _text = 'Error restoring child object %s of %s' % (apiObj, self)
                         getLogger().warning(_text)
                         raise RuntimeError(_text)
@@ -1447,7 +1445,7 @@ def updateObject(version, updateFunction):
         if not hasattr(cls, '_updateFunctions'):
             raise RuntimeError('class %s does not have the attribute _updateFunctions')
 
-        cls._updateFunctions.append( (version, updateFunction) )
+        cls._updateFunctions[cls.className].append( (version, updateFunction) )
         return cls
 
     return theDecorator

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-16 12:02:37 +0000 (Tue, November 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-17 21:07:35 +0000 (Wed, November 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,8 @@ __date__ = "$Date: 2021-11-10 10:28:41 +0000 (Wed, November 10, 2021) $"
 
 from nmrglue.fileio.bruker import read_jcamp
 
+NC_PROC = 'NC_proc'
+
 def getNCprocDataScale(spectrum):
 
     "Read the procs file"
@@ -36,8 +38,8 @@ def getNCprocDataScale(spectrum):
         raise RuntimeError('Invalid acqus file "%s"' % procs)
     params = read_jcamp(procs)
 
-    if 'NC_proc' in params:
-        dataScale = pow(2, float(params['NC_proc']))
+    if NC_PROC in params:
+        dataScale = pow(2, float(params[NC_PROC]))
     else:
         dataScale = 1.0
 
@@ -54,4 +56,4 @@ def scaleBrukerSpectrum(spectrum):
         spectrum.positiveContourBase *= dataScale
         spectrum.negativeContourBase *= dataScale
 
-    spectrum._setInternalParameter('NC_proc', dataScale)
+    spectrum._setInternalParameter(NC_PROC, dataScale)

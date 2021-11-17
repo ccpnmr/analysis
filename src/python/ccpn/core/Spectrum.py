@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-17 10:21:10 +0000 (Wed, November 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-17 10:23:33 +0000 (Wed, November 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -119,6 +119,7 @@ def _testUpdate(spectrum):
 #=========================================================================================
 # Spectrum class
 #=========================================================================================
+
 @updateObject('3.0.4', _testUpdate)
 class Spectrum(AbstractWrapperObject, CcpNmrJson):
     """A Spectrum object contains all the stored properties of an NMR spectrum, as well as the

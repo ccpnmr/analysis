@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-16 20:13:45 +0000 (Tue, November 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-17 08:59:20 +0000 (Wed, November 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -101,6 +101,10 @@ class AbstractWrapperObject(NotifierBase):
     Note that the properties and the _getAllWrappedData function
     must work from the underlying data, as they will be called before the pid
     and object dictionary data are set up.
+
+    The core classes (except for Project) must define newClass method(s) to
+    create any children, AND ALL UNDERLYING DATA, taking in all parameters
+    necessary to do so.
     """
 
     #: Short class name, for PID. Must be overridden for each subclass
@@ -295,7 +299,7 @@ class AbstractWrapperObject(NotifierBase):
     __hash__ = object.__hash__
 
     #=========================================================================================
-    # CCPN Properties
+    # CcpNmr Properties
     #=========================================================================================
 
     @property
@@ -485,7 +489,7 @@ class AbstractWrapperObject(NotifierBase):
         self._wrappedData.details = self._str2none(value)
 
     #=========================================================================================
-    # CCPN functionalities
+    # CcpNmr functionalities
     #=========================================================================================
 
     @classmethod
@@ -609,7 +613,7 @@ class AbstractWrapperObject(NotifierBase):
         return result
 
     #=========================================================================================
-    # CCPN abstract properties
+    # CcpNmr abstract properties
     #=========================================================================================
 
     @property
@@ -658,6 +662,14 @@ class AbstractWrapperObject(NotifierBase):
         for child in node._childClasses:
             self._printClassTree(child, tabs=tabs + 1)
 
+    def _getAllDecendants(self) -> list:
+        """Get all objects decending from self; i.e. children, grandchildren, etc
+        """
+        result = []
+        for val in self._getChildren(recursion=True).values():
+            result.extend(val)
+        return result
+
     def _getChildrenByClass(self, klass) -> list:
         """GWV: Convenience: get the children of type klass of self.
         klass is string (e.g. 'Peak') or V3 core class
@@ -669,9 +681,10 @@ class AbstractWrapperObject(NotifierBase):
             return []
         return result
 
-    def _getChildren(self, classes=['all']) -> OrderedDict:
+    def _getChildren(self, classes=['all'], recursion=False) -> OrderedDict:
         """GWV; Return a dict of (className, ChildrenList) pairs
         classes is either 'gui' or 'nonGui' or 'all' or explicit enumeration of classNames
+        Optionally recurse (depth-first)
         CCPNINTERNAL: used throughout
         """
         _get = self._project._data2Obj.get
@@ -682,6 +695,9 @@ class AbstractWrapperObject(NotifierBase):
                 child = _get(apiChild)
                 if child is not None:
                     children.append(child)
+                    if recursion:
+                        childData = child._getChildren(classes=classes, recursion=recursion)
+                        data.update(childData)
         return data
 
     def _getApiChildren(self, classes=['all']) -> OrderedDict:
@@ -800,10 +816,6 @@ class AbstractWrapperObject(NotifierBase):
            Some Objects (Chain, Residue, Atom) cannot be renamed"""
         raise ValueError("%s objects cannot be renamed" % self.__class__.__name__)
 
-    # In addition each class (except for Project) must define a  newClass method
-    # The function (e.g. Project.newMolecule), ... must create a new child object
-    # AND ALL UNDERLYING DATA, taking in all parameters necessary to do so.
-
     #=========================================================================================
     # Restore methods
     #=========================================================================================
@@ -811,7 +823,7 @@ class AbstractWrapperObject(NotifierBase):
     _OBJECT_VERSION = '_objectVersion'
     @property
     def _objectVersion(self) -> VersionString:
-        """Return the versionString of the object; used in _restoreObject / _createObject
+        """Return the versionString of the object; used in _updateObject
         to implement the update mechanism
         """
         if not self._hasInternalParameter(self._OBJECT_VERSION):
@@ -826,30 +838,20 @@ class AbstractWrapperObject(NotifierBase):
         version = str(VersionString(version))
         self._setInternalParameter(self._OBJECT_VERSION, version)
 
-    @classmethod
-    def _createObject(cls, project, apiObj):
-        """Create new object from apiObj; checks for _factoryFunction.
-        Updates objject from the _updateFunctions stack
-
-        :return object
+    def _updateObject(self):
+        """Updates object from the _updateFunctions stack
         """
-        if (factoryFunction := cls._factoryFunction) is None:
-            obj = cls(project, apiObj)
-        else:
-            obj = factoryFunction(project, apiObj)
-
         # upgrade the object
-        for version, func in obj._updateFunctions:
-            currentVersion = obj._objectVersion
+        for version, func in self._updateFunctions:
+            currentVersion = self._objectVersion
             if version < currentVersion:
-                func(obj)
-        obj._objectVersion = applicationVersion
-
-        return obj
+                func(self)
+        self._objectVersion = applicationVersion
 
     @classmethod
     def _restoreObject(cls, project, apiObj):
-        """Restores object from apiObj;
+        """Restores object from apiObj; checks for _factoryFunction.
+        Updates object calling the _updateObject method
         Restores the children
 
         :return Restored object
@@ -859,10 +861,19 @@ class AbstractWrapperObject(NotifierBase):
         if apiObj is None:
             raise ValueError('_restoreObject: undefined apiObj')
 
-        if (obj := cls._createObject(project, apiObj)) is None:
+        if (factoryFunction := cls._factoryFunction) is None:
+            obj = cls(project, apiObj)
+        else:
+            obj = factoryFunction(project, apiObj)
+        if obj is None:
             raise RuntimeError('Error restoring object encoded by %s' % apiObj)
+
+        # check/apply the updates
+        obj._updateObject()
+
         # restore the children
         obj._restoreChildren()
+
         return obj
 
     def _restoreChildren(self):

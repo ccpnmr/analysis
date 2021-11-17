@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-16 16:51:10 +0000 (Tue, November 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-17 08:59:20 +0000 (Wed, November 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1982,7 +1982,7 @@ class Project(AbstractWrapperObject):
         return _getChemicalShiftList(self, name=name, **kwds)
 
 #=========================================================================================
-# Code adapted from previously _implementation/Io.py
+# Code adapted from prior _implementation/Io.py
 #=========================================================================================
 
 def _loadProject(application, path: str) -> Project:
@@ -2024,18 +2024,18 @@ def _loadProject(application, path: str) -> Project:
     # Any updates will go here
     project._objectVersion = application.applicationVersion
 
-    # the initialisation is completed once Framework has done it's things
+    # the initialisation is completed by Framework has done its things
     # project._initialiseProject()
 
     return project
 
 
 def _newProject(application, name: str = 'default', path: str = None, overwrite=True) -> Project:
-    """Make RAW new project, putting underlying data storage (API project) at path
+    """Make new project, putting underlying data storage (API project) at path
     :return Project instance
     """
     # apiIo.newProject will create a temp path if path is None
-    if (apiProject := apiIo.newProject(name, path, overwriteExisting=overwrite, useFileLogger=True)) is None:
+    if (apiProject := apiIo.newProject(name, str(path), overwriteExisting=overwrite, useFileLogger=True)) is None:
         raise RuntimeError("New project could not be created (overlaps exiting project?) name:%s, path:%s, overwrite:"
                          % (name, path, overwrite))
 
@@ -2051,7 +2051,7 @@ def _newProject(application, name: str = 'default', path: str = None, overwrite=
 
     project._objectVersion = application.applicationVersion
 
-    # the initialisation is completed once Framework has done it's things
+    # the initialisation is completed by Framework has done its things
     # project._initialiseProject()
 
     return project

@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can raise and lower the contour level of the spectra in your active Strip (the one with highlighted axes) by scrolling the <span style=%(purple)s>mouse wheel</span> and holding down the <span style=%(purple)s>Shift</span> key.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 14,
+  "contents": [
+    "./graphics/ContourChangeWithMouse.png"
+  ]
+}

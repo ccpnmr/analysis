@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can save the Zoom level of a Spectrum Display using the buttons in the toolbar. Alternatively use the shortcuts <span style=%(purple)s>ZS</span> (save zoom) and <span style=%(purple)s>ZR</span> (restore zoom) for the active strip (the one with highlighted axes).</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 9,
+  "contents": [
+    "./graphics/SaveRestoreZoom.png"
+  ]
+}

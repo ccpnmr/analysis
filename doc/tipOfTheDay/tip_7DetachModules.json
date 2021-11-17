@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>Drag the top bar of a module outside the main Analysis Window to give the modules its own window. If you like, you can place all your modules into separate windows.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 7,
+  "contents": [
+    "./graphics/DetachModules.png"
+  ]
+}

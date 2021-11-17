@@ -9,7 +9,7 @@
 
   "color": "#ffffff",
 
-  "order":  2,
+  "order":  10,
 
   "contents" : ["./graphics/ShowShortcuts.png"]
 }

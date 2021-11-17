@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-17 08:59:20 +0000 (Wed, November 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-17 10:21:10 +0000 (Wed, November 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,8 @@ import re
 from contextlib import contextmanager
 from collections import OrderedDict
 from copy import deepcopy
+
+from decorator import decorator
 
 import ccpn.core._implementation.resetSerial
 from ccpn.core import _importOrder
@@ -839,12 +841,17 @@ class AbstractWrapperObject(NotifierBase):
         self._setInternalParameter(self._OBJECT_VERSION, version)
 
     def _updateObject(self):
-        """Updates object from the _updateFunctions stack
+        """Updates object from the _updateFunctions stack; to be populate by the
+        updateObject decorator defined below
         """
         # upgrade the object
+        logger = getLogger()
         for version, func in self._updateFunctions:
             currentVersion = self._objectVersion
-            if version < currentVersion:
+            logger.debug('Updating object: currentVersion: %s, version: %s, func: %s' %
+                         (currentVersion, version, func)
+                         )
+            if version <= currentVersion:
                 func(self)
         self._objectVersion = applicationVersion
 
@@ -1422,56 +1429,25 @@ class AbstractWrapperObject(NotifierBase):
                 getLogger().warning('Potential error for the property %s in creating dictionary from object: %s . Error: %s' % (i, self, e))
         return od
 
-    # def _startCommandEchoBlock(self, funcName, *params, values=None, defaults=None, parName=None, propertySetter=False,
-    #                            quiet=False):
-    #     """Start block for command echoing, set undo waypoint, and echo command to ui and logger
-    #
-    #     *params, values, and defaults are used by coreUtil.commandParameterString to set the function
-    #     parameter string - see the documentation of commandParameterString for details
-    #     """
-    #
-    #     # if not hasattr(self, 'blockindent'):
-    #     #   self.blockindent = 1
-    #     # getLogger().info('.'*self.blockindent+'>>>start_'+str(funcName))
-    #     # self.blockindent+=4
-    #
-    #     #CCPNINTERNAL
-    #
-    #     project = self._project
-    #
-    #     parameterString = coreUtil.commandParameterString(*params, values=values, defaults=defaults)
-    #
-    #     if self is project:
-    #         if propertySetter:
-    #             if parameterString:
-    #                 command = "project.%s = %s" % (funcName, parameterString)
-    #             else:
-    #                 command = "project.%s" % funcName
-    #         else:
-    #             command = "project.%s(%s)" % (funcName, parameterString)
-    #     else:
-    #         if propertySetter:
-    #             if parameterString:
-    #                 command = "project.getByPid('%s').%s = %s" % (self.pid, funcName, parameterString)
-    #             else:
-    #                 command = "project.getByPid('%s').%s" % (self.pid, funcName)
-    #         else:
-    #             command = "project.getByPid('%s').%s(%s)" % (self.pid, funcName, parameterString)
-    #
-    #     if parName:
-    #         command = ''.join((parName, ' = ', command))
-    #
-    #     project._appBase._startCommandBlock(command, quiet=quiet)
-
-    # def _endCommandEchoBlock(self):
-    #     """End block for command echoing"""
-    #     # self.blockindent-=4
-    #     # if self.blockindent<0:
-    #     #   print ('****')
-    #     #   self.blockindent=0
-    #     # getLogger().info('..'+'.'*self.blockindent+'>>>end_')
-    #
-    #     self._project._appBase._endCommandBlock()
-
-
 AbstractWrapperObject.getByPid.__annotations__['return'] = AbstractWrapperObject
+
+
+def updateObject(version, updateFunction):
+    """Class decorator to register updateFunction for a core-class in the _updateFunctions list.
+    updateFunction updates version to the next higher version
+    updateFunction needs to set obj._objectVersion
+
+    def updateFunction(obj)
+        obj: object that is being restored
+    """
+
+    def theDecorator(cls):
+        """This function will decorate cls with _update, _updateHandler list and registers the updateHandler
+        """
+        if not hasattr(cls, '_updateFunctions'):
+            raise RuntimeError('class %s does not have the attribute _updateFunctions')
+
+        cls._updateFunctions.append( (version, updateFunction) )
+        return cls
+
+    return theDecorator

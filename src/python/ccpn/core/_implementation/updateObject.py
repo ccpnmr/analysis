@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-16 12:02:37 +0000 (Tue, November 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-17 10:21:10 +0000 (Wed, November 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -38,7 +38,7 @@ def updateObject(version, updateFunction):
         updateFunction(obj) -> versionString
 
         obj: object that is being restored
-        :return
+
     """
 
     def theDecorator(cls):

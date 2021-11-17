@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-10 11:00:37 +0000 (Wed, November 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-17 10:21:10 +0000 (Wed, November 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -72,7 +72,7 @@ import numpy
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.api.ccp.general import DataLocation
 
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject, updateObject
 from ccpn.core.Project import Project
 from ccpn.core.lib import Pid
 
@@ -100,6 +100,7 @@ from ccpn.util.traits.CcpNmrTraits import Int, Float, Instance, Any
 from ccpn.core.lib.SpectrumLib import SpectrumDimensionTrait
 
 from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY
+from ccpn.framework.Application import getApplication
 
 from ccpn.util.Constants import SCALETOLERANCE
 from ccpn.util.Common import isIterable, _getObjectsByPids
@@ -111,11 +112,14 @@ from ccpn.util.Path import Path, aPath
 
 MAXALIASINGRANGE = 3
 
+def _testUpdate(spectrum):
+    getLogger().debug('TEST-UPDATE: objectVersion: %s' % spectrum._objectVersion)
+    spectrum._objectVersion = getApplication().applicationVersion
 
 #=========================================================================================
 # Spectrum class
 #=========================================================================================
-
+@updateObject('3.0.4', _testUpdate)
 class Spectrum(AbstractWrapperObject, CcpNmrJson):
     """A Spectrum object contains all the stored properties of an NMR spectrum, as well as the
     path to the NMR (binary) data file. The Spectrum object has methods to get the binary data

@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-18 13:08:57 +0000 (Thu, November 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-18 13:15:17 +0000 (Thu, November 18, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1300,20 +1300,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             checkSpectraToOpen(self, objs)
             _openItemObject(self, objs, position=position, relativeTo=relativeTo)
 
-    # def _checkUrlsForProject(self, urls):
-    #     """Check whether there is a project in the dropped url list,
-    #     and return the first project
-    #     """
-    #     for url in urls:
-    #         getLogger().debug('>>> dropped: ' + str(url))
-    #
-    #         dataType, subType, usePath = ioFormats.analyseUrl(url)
-    #         if dataType == 'Project' and subType in (ioFormats.CCPN,
-    #                                                  ioFormats.NEF,
-    #                                                  ioFormats.NMRSTAR,
-    #                                                  ioFormats.SPARKY):
-    #             return url
-
     def _queryCloseProject(self, title, phrase):
         """Query if project can be closed; always True for temporary projects
         :returns True/False
@@ -1417,73 +1403,3 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             return None
 
         return newProject
-
-    # def _processUrls(self, urls):
-    #     """Handle the dropped urls
-    #     """
-    #     # CCPNINTERNAL. Called also from module area and GuiStrip. They should have same behaviour
-    #
-    #     objs = []
-    #     for url in urls:
-    #         url = str(url)
-    #         getLogger().debug('>>> dropped: ' + url)
-    #
-    #         dataLoader = checkPathForDataLoader(url)
-    #
-    #         if dataLoader is None:
-    #             txt = 'Loading "%s" failed' % url
-    #             MessageDialog.showError('Load Data', txt)
-    #             getLogger().warning(txt)
-    #
-    #         if dataLoader.createsNewProject:
-    #             okToContinue = self._queryCloseProject(title='Load %s project' % dataLoader.dataFormat,
-    #                                                     phrase='create a new')
-    #             if okToContinue:
-    #                 with progressManager(self, 'Loading project... ' + url):
-    #                     obj = self._loadProjectLastValid(url)
-
-    # dataType, subType, usePath = ioFormats.analyseUrl(url)
-    # if subType == ioFormats.NMRSTAR:  # NMRStar file is available only as import of metadata not as stand alone project
-    #     self.application._loadNMRStarFile(url)
-    #     return objs
-    #
-    # if subType == ioFormats.NEF and self.application.preferences.appearance.openImportPopupOnDroppedNef:
-    #     self.application._importNef(url)
-    #     return objs
-    #
-    # if dataType == 'Project' and subType in (ioFormats.CCPN,
-    #                                          ioFormats.NEF,
-    #                                          ioFormats.SPARKY):
-    #
-    #     try:
-    #         okToContinue = self._queryCloseProject(title='Load %s project' % subType,
-    #                                                phrase='create a new')
-    #         if okToContinue:
-    #             with progressManager(self, 'Loading project... ' + url):
-    #                 obj = None
-    #                 obj = self._loadProjectLastValid(url)
-    #
-    #     except Exception as es:
-    #         MessageDialog.showError('Load Project', 'loadProject Error: %s' % str(es))
-    #         getLogger().warning('loadProject Error: %s' % str(es), )
-    #         getLogger().exception(str(es))
-    #
-    # else:
-    #     # with progressManager(self.mainWindow, 'Loading data... ' + url):
-    #     try:  #  Why do we need this try?
-    #         spectraPathsCount = len(ioFormats._searchSpectraPathsInSubDir(url))
-    #         askBeforeOpen_lenght = 20  # Ask user if want to open all (spectra) before start loading the full set.
-    #         if spectraPathsCount > askBeforeOpen_lenght:
-    #             okToOpenAll = MessageDialog.showYesNo('Load data', 'The directory contains multiple items (~%s).'
-    #                                                                ' Do you want to open all?' % str(spectraPathsCount))
-    #             if not okToOpenAll:
-    #                 continue
-    #         with notificationEchoBlocking():
-    #             data = self.project.loadData(url)
-    #             if data:
-    #                 objs.extend(data)
-    #
-    #     except Exception as es:
-    #         MessageDialog.showError('Load Data', 'Loading "%s" encountered error: %s' % (url,str(es)))
-    #         getLogger().warning('loadData Error: %s' % str(es))
-    # return objs

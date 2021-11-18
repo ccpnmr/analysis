@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-18 11:05:00 +0000 (Thu, November 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-18 18:13:07 +0000 (Thu, November 18, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -198,18 +198,18 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
             self.stripArrangementButtons.setEnabled(False)
 
         row += 1
-        self.zPlaneNavigationModeLabel = Label(parent, text="zPlane Navigation Mode", grid=(row, 0))
+        self.zPlaneNavigationModeLabel = Label(parent, text="Plane Navigation Mode", grid=(row, 0))
         self.zPlaneNavigationModeData = RadioButtons(parent, texts=[val.description for val in ZPlaneNavigationModes],
                                                      objectNames=[f'zPlaneSDS_{val.label}' for val in ZPlaneNavigationModes],
                                                      objectName='zPlaneSDS',
                                                      callback=self._zPlaneNavigationModeChanged,
                                                      direction='h',
                                                      grid=(row, 1), hAlign='l', gridSpan=(1, 2),
-                                                     tipTexts=('zPlane navigation tools are located at the bottom of the spectrumDisplay,\nand will operate on the selected strip in that spectrumDisplay',
-                                                               'zPlane navigation tools are located at the bottom of each strip',
-                                                               'zPlane navigation tools are displayed in the upper-left corner of each strip'),
+                                                     tipTexts=('Plane navigation tools are located at the bottom of the spectrumDisplay,\nand will operate on the selected strip in that spectrumDisplay',
+                                                               'Plane navigation tools are located at the bottom of each strip',
+                                                               'Plane navigation tools are displayed in the upper-left corner of each strip'),
                                                      )
-        self.zPlaneNavigationModeLabel.setToolTip('Select where the zPlane navigation tools are located')
+        self.zPlaneNavigationModeLabel.setToolTip('Select where the Plane navigation tools are located')
 
         if len(self._spectrumDisplay.axisCodes) < 3:
             self.zPlaneNavigationModeLabel.setVisible(False)

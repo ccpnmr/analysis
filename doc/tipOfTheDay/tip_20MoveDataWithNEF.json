@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can easily move data between projects by saving data from one project in NEF format (go to <span style=%(purple)s>File / Export / Nef File</span> or using shortcut <span style=%(purple)s>EX</span>) and then importing that NEF file into another project (go to <span style=%(purple)s>File / Import / Nef File</span> or using shortcut <span style=%(purple)s>IN</span>). Both the export and import steps allow you select only certain elements to export/import.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 20,
+  "contents": [
+    "./graphics/MoveDataWithNEF.png"
+  ]
+}

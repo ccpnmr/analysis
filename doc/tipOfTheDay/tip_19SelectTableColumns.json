@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s><span style=%(purple)s>Right-click</span> on a table column heading and select <span style=%(purple)s>Column settings...</span> to bring up a pop-up in which you can select which columns to show or hide in your table.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 19,
+  "contents": [
+    "./graphics/SelectTableColumns.png"
+  ]
+}

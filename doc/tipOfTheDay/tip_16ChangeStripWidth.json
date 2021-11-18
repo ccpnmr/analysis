@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can increase or decrease the width of the strips in your Spectrum Display using the buttons in the Spectrum Display toolbar. If all strips can't be visualised in one go or are too wide for the spectrum display, a scroll bar will appear at the bottom of the Spectrum Display to allow you to scroll through your strips.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 16,
+  "contents": [
+    "./graphics/ChangeStripWidths.png"
+  ]
+}

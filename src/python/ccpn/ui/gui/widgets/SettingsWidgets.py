@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-11 18:57:52 +0000 (Thu, November 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-18 11:05:00 +0000 (Thu, November 18, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -205,9 +205,9 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
                                                      callback=self._zPlaneNavigationModeChanged,
                                                      direction='h',
                                                      grid=(row, 1), hAlign='l', gridSpan=(1, 2),
-                                                     tipTexts=('Tools are located at the bottom of the spectrumDisplay,\nand will operate on the last strip selected in that spectrumDisplay',
-                                                               'Tools are located at the bottom of each strip',
-                                                               'Tools are displayed in the upper-left corner of each strip display'),
+                                                     tipTexts=('zPlane navigation tools are located at the bottom of the spectrumDisplay,\nand will operate on the selected strip in that spectrumDisplay',
+                                                               'zPlane navigation tools are located at the bottom of each strip',
+                                                               'zPlane navigation tools are displayed in the upper-left corner of each strip'),
                                                      )
         self.zPlaneNavigationModeLabel.setToolTip('Select where the zPlane navigation tools are located')
 

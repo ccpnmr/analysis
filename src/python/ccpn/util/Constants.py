@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-05 17:38:46 +0100 (Tue, October 05, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-18 18:17:58 +0000 (Thu, November 18, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -71,7 +71,13 @@ sequenceCodePattern = re.compile('(\-?\d+)?(.*?)(\+\d+|\-\d+)?$')
 amountUnits = ('L', 'g', 'mole')
 
 # Units allowed for the visible axes
-AXIS_UNITS = ['ppm', 'Hz', 'points']
+AXISUNIT_PPM = 'ppm'
+AXISUNIT_HZ = 'Hz'
+AXISUNIT_POINT = 'point'  # Cannot be 'points' because of the v2-model; Grrrr
+AXISUNIT_POINTS = 'points'
+AXISUNIT_NUMBER = 'number'
+AXISUNITS = [AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT]
+AXISUNITSPLURAL = [AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINTS]
 
 #  Units allowed for concentrations (e.g. SampleComponents)
 concentrationUnits = ('Molar', 'g/L', 'L/L', 'mol/mol', 'g/g', 'eq', 'sec')

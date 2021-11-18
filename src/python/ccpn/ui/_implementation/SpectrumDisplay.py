@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-11 20:43:40 +0100 (Mon, October 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-18 18:17:58 +0000 (Thu, November 18, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -245,17 +245,17 @@ class SpectrumDisplay(AbstractWrapperObject):
     @property
     def units(self) -> Tuple[str, ...]:
         """Axis units, in display order"""
-        return [a.unit for a in self.axes]
+        return tuple(a.unit for a in self.axes)
 
     @units.setter
     def units(self, value):
         # local import to avoid cycles
-        from ccpn.ui.gui.lib.GuiSpectrumDisplay import AXISUNITS, AXISUNIT_NUMBER
+        from ccpn.util.Constants import AXISUNITS, AXISUNIT_NUMBER
 
         options = AXISUNITS + [AXISUNIT_NUMBER]  # To allow for 1D intensity axis unit
         for idx, val in enumerate(value):
             if val not in options:
-                raise ValueError('Invalid units[%d] %r; should be on of %r' % (idx, val, options))
+                raise ValueError('Invalid units[%d] %r; should be one of %r' % (idx, val, options))
             self.axes[idx].unit = val
         # assure the update of the widgets is done
         self._updateAxesUnits()
@@ -265,7 +265,7 @@ class SpectrumDisplay(AbstractWrapperObject):
         """Conveniance function to get units as an index
         CCPNINTERNAL: used CcppnOpenGl.initialiseAxes()
         """
-        from ccpn.ui.gui.lib.GuiSpectrumDisplay import AXISUNITS, AXISUNIT_NUMBER
+        from ccpn.util.Constants import AXISUNITS, AXISUNIT_NUMBER
 
         options = AXISUNITS + [AXISUNIT_NUMBER]  # To allow for 1D intensity axis unit
         return [options.index(unit) for unit in self.units]
@@ -597,7 +597,7 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
     :return: a new SpectrumDisplay instance.
     """
     # local import to avoid cycles
-    from ccpn.ui.gui.lib.GuiSpectrumDisplay import AXISUNIT_PPM, AXISUNIT_POINT, AXISUNIT_NUMBER
+    from ccpn.util.Constants import AXISUNIT_NUMBER, AXISUNIT_POINT, AXISUNIT_PPM
 
     if window is None or not isinstance(window, Window):
         raise ValueError('Expected window argument; got %r' % window)
@@ -666,18 +666,18 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
         for ii, axis in enumerate(spectrumAxes):
             displayAxisCode = axisCodes[ii]
 
-            # if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y' or
-            #    not stripDirection):
-            # Reactivate this code if we reintroduce non-strip displays (stripDirection == None)
-            if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y'):
-                stripSerial = 0
-            else:
-                stripSerial = 1
-
-            # NOTE: ED setting to 1 notifies api to create a full axis set for each additional spectrum
-            #       required for dynamic switching of strip arrangement
-            #       stripDirection is no longer used in the api
-            stripSerial = 1
+            # # if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y' or
+            # #    not stripDirection):
+            # # Reactivate this code if we reintroduce non-strip displays (stripDirection == None)
+            # if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y'):
+            #     stripSerial = 0
+            # else:
+            #     stripSerial = 1
+            #
+            # # NOTE: ED setting to 1 notifies api to create a full axis set for each additional spectrum
+            # #       required for dynamic switching of strip arrangement
+            # #       stripDirection is no longer used in the api
+            # stripSerial = 1
 
             if spectrum.dimensionTypes[axis] == specLib.DIMENSION_FREQUENCY:
                 apiSpectrumDisplay.newFrequencyAxis(code=displayAxisCode, stripSerial=1, unit=AXISUNIT_PPM)

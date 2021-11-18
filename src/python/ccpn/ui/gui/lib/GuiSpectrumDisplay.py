@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-11 18:57:51 +0000 (Thu, November 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-18 18:17:58 +0000 (Thu, November 18, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -52,20 +52,20 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 # from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+from ccpn.ui.gui.lib.GuiStrip import GuiStrip, STRIP_MINIMUMWIDTH, STRIP_MINIMUMHEIGHT
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks, _assignNmrResiduesToPeaks
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import PEAKSELECT, MULTIPLETSELECT
-from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import PEAKSELECT, MULTIPLETSELECT, CcpnGLWidget
 from ccpn.ui.gui.widgets.GLAxis import GuiNdWidgetAxis
 from ccpn.ui.gui.lib.GuiSpectrumView import _spectrumViewHasChanged
 from ccpn.ui.gui.widgets.SpectrumGroupToolBar import _spectrumGroupViewHasChanged
+from ccpn.util.Constants import AXISUNITS
 from ccpn.util.Logging import getLogger
 from ccpn.util import Colour
 from ccpn.core.Substance import Substance
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrChain import NmrChain
-from ccpn.ui.gui.lib.GuiStrip import GuiStrip, STRIP_MINIMUMWIDTH, STRIP_MINIMUMHEIGHT
 
 from ccpn.ui._implementation.PeakListView import PeakListView
 from ccpn.ui._implementation.IntegralListView import IntegralListView
@@ -83,13 +83,6 @@ from ccpn.ui.gui.guiSettings import ZPlaneNavigationModes
 
 STRIP_SPACING = 5
 AXIS_WIDTH = 30
-
-AXISUNIT_PPM = 'ppm'
-AXISUNIT_HZ = 'Hz'
-AXISUNIT_POINT = 'point'  # Cannot be 'points' because of the v2-model; Grrrr
-AXISUNIT_NUMBER = 'number'
-# AXISUNITS = ['ppm', 'Hz', 'point']
-AXISUNITS = [AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT]
 
 STRIPDIRECTIONS = ['Y', 'X', 'T']
 
@@ -1374,7 +1367,7 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         # showInfo(title='Mark nmrResidue "%s"' % nmrResidue.pid, message='mark nmrResidue in strips')
 
-        from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import nmrAtomsFromResidue, nmrAtomsFromOffsets, markNmrAtoms
+        from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import nmrAtomsFromOffsets, markNmrAtoms
 
         nmrAtoms = nmrAtomsFromOffsets(nmrResidue)
         if nmrAtoms:
@@ -2423,7 +2416,6 @@ class GuiSpectrumDisplay(CcpnModule):
     #             inactivePeakItems = self.inactivePeakItemDict.get(peakListView)
     #             if inactivePeakItems:
     #                 inactivePeakItems.add(peakItem)
-    from ccpn.util.decorators import profile
 
     @logCommand(get='self')
     def displaySpectrum(self, spectrum):

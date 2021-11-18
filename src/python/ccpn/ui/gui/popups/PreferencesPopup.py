@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-18 11:05:00 +0000 (Thu, November 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-18 18:17:58 +0000 (Thu, November 18, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -35,7 +35,7 @@ from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.LineEdit import LineEdit, PasswordEdit
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
-from ccpn.ui.gui.widgets.MessageDialog import showYesNo
+# from ccpn.ui.gui.widgets.MessageDialog import showYesNo
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
@@ -53,9 +53,9 @@ from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
 from ccpn.core.MultipletList import MULTIPLETAVERAGINGTYPES
 from ccpn.util.UserPreferences import UserPreferences
-from ccpn.util.Common import camelCaseToString
+# from ccpn.util.Common import camelCaseToString
 from ccpn.util.Path import aPath
-from ccpn.util.Constants import AXIS_UNITS
+from ccpn.util.Constants import AXISUNITS
 from ccpn.ui.gui.lib.GuiPath import PathEdit
 # from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForPreferences
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
@@ -978,7 +978,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         self.xAxisUnits = _makeLabel(parent, text="Default X-axis units", grid=(row, 0))
-        self.xAxisUnitsData = RadioButtons(parent, texts=AXIS_UNITS,
+        self.xAxisUnitsData = RadioButtons(parent, texts=AXISUNITS,
                                            # selectedInd=xAxisUnits,
                                            callback=self._queueSetXUnits,
                                            direction='h',
@@ -987,8 +987,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                            )
 
         row += 1
-        self.yAxisUnits = _makeLabel(parent, text="Default Y-xis units", grid=(row, 0))
-        self.yAxisUnitsData = RadioButtons(parent, texts=AXIS_UNITS,
+        self.yAxisUnits = _makeLabel(parent, text="Default Y-axis units", grid=(row, 0))
+        self.yAxisUnitsData = RadioButtons(parent, texts=AXISUNITS,
                                            # selectedInd=yAxisUnits,
                                            callback=self._queueSetYUnits,
                                            direction='h',
@@ -1001,11 +1001,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                                      callback=self._queueSetZPlaneNavigationMode,
                                                      direction='h',
                                                      grid=(row, 1), hAlign='l', gridSpan=(1, 2),
-                                                     tipTexts=('zPlane navigation tools are located at the bottom of the spectrumDisplay,\nand will operate on the selected strip in that spectrumDisplay',
-                                                               'zPlane navigation tools are located at the bottom of each strip',
-                                                               'zPlane navigation tools are displayed in the upper-left corner of each strip'),
+                                                     tipTexts=('Plane navigation tools are located at the bottom of the spectrumDisplay,\nand will operate on the selected strip in that spectrumDisplay',
+                                                               'Plane navigation tools are located at the bottom of each strip',
+                                                               'Plane navigation tools are displayed in the upper-left corner of each strip'),
                                                      )
-        self.zPlaneNavigationModeLabel.setToolTip('Select where the zPlane navigation tools are located')
+        self.zPlaneNavigationModeLabel.setToolTip('Select where the Plane navigation tools are located')
 
         row += 1
         self.useApplyToSpectrumDisplaysLabel = _makeLabel(parent, text="Apply to open SpectrumDisplay's", grid=(row, 0))

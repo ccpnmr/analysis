@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-11 20:43:40 +0100 (Mon, October 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-18 18:20:21 +0000 (Thu, November 18, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -49,11 +49,12 @@ from ccpn.core.Peak import Peak
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+from ccpn.ui.gui.lib.mouseEvents import makeDragEvent
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.util.Logging import getLogger
-from ccpn.ui.gui.lib.mouseEvents import makeDragEvent
+from ccpn.util.Constants import AXISUNIT_POINT
 
 
 STRIPLABEL_CONNECTDIR = '_connectDir'
@@ -340,23 +341,13 @@ class PlaneSelectorWidget(Frame):
 
         self.strip.refresh()
 
-    def updatePosition(self):
-        """Set new axis position
-        """
-        axis = self.strip.orderedAxes[self.axis]
-
-        ppmPosition = axis.position
-        ppmWidth = axis.width
-
-        self.setPosition(ppmPosition, ppmWidth)
-
     def setPosition(self, ppmPosition, ppmWidth):
         """Set the new ppmPosition/ppmWidth
         """
         with self.blockWidgetSignals():
             self.spinBox.setValue(ppmPosition)
 
-    def setPlaneValues(self, minZPlaneSize=None, minAliasedFrequency=None, maxAliasedFrequency=None, ppmPosition=None):
+    def setPlaneValues(self, minZPlaneSize=None, minAliasedFrequency=None, maxAliasedFrequency=None, ppmPosition=None, unit=None):
         """Set new values for the plane selector
         """
         with self.blockWidgetSignals(root=self._mainWidget):
@@ -367,6 +358,9 @@ class PlaneSelectorWidget(Frame):
             if minAliasedFrequency is not None:
                 self.spinBox.setMinimum(minAliasedFrequency)
             self.spinBox.setValue(ppmPosition)
+
+            # override the spinBox to only allow integer points
+            # self.spinBox.setDecimals(0 if unit == AXISUNIT_POINT else 3)
 
     def getPlaneValues(self):
         """Return the current settings for this axis
@@ -638,15 +632,6 @@ class PlaneAxisWidget(_OpenGLFrameABC):
                                         EMITIGNORESOURCE: True})
         self._resize()
 
-    def updatePosition(self):
-        """Set new axis position
-        """
-        axis = self.strip.orderedAxes[self.axis]
-        ppmPosition = axis.position
-        ppmWidth = axis.width
-
-        self.setPosition(ppmPosition, ppmWidth)
-
     def setPosition(self, ppmPosition, ppmWidth):
         """Set the new ppmPosition/ppmWidth
         """
@@ -659,11 +644,11 @@ class PlaneAxisWidget(_OpenGLFrameABC):
         """
         return self._axisSelector.getPlaneValues()
 
-    def setPlaneValues(self, minZPlaneSize=None, minAliasedFrequency=None, maxAliasedFrequency=None, ppmPosition=None):
+    def setPlaneValues(self, minZPlaneSize=None, minAliasedFrequency=None, maxAliasedFrequency=None, ppmPosition=None, unit=None):
         """Set new values for the plane selector
         """
         planeBox = self._axisSelector
-        planeBox.setPlaneValues(minZPlaneSize, minAliasedFrequency, maxAliasedFrequency, ppmPosition)
+        planeBox.setPlaneValues(minZPlaneSize, minAliasedFrequency, maxAliasedFrequency, ppmPosition, unit)
 
         self._axisPpmPosition.setText('%.3f' % ppmPosition)
         self._axisPlaneCount.setText('[' + str(planeBox.planeCount) + ']')
@@ -677,10 +662,7 @@ class PlaneAxisWidget(_OpenGLFrameABC):
         Changes the number of planes displayed simultaneously.
         """
         if self.strip:
-            zAxis = self.strip.orderedAxes[self.axis]
-            zAxis.width = value * self._axisSelector.spinBox.singleStep()
-            self._axisPlaneCount.setText('[' + str(value) + ']')
-            self.strip.refresh()
+            self.strip.changeZPlane(self.axis)
 
     def _nextPlane(self, *args):
         """

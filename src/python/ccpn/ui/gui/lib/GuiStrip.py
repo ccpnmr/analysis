@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-11 18:57:51 +0000 (Thu, November 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-18 18:20:21 +0000 (Thu, November 18, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2319,31 +2319,13 @@ class GuiStrip(Frame):
     def axisRegionChanged(self, axis):
         """Notifier function: Update strips etc. for when axis position or width changes.
         """
-        # axis = data[Notifier.OBJECT]
-        strip = self  #axis.strip
-        if not strip: return
+        if self.isDeleted:
+            return
 
-        position = axis.position
-        width = axis.width
+        self._setZWidgets(axis=axis)
 
-        index = strip.axisOrder.index(axis.code)
-        if not strip.beingUpdated and index > 1:
-            strip.beingUpdated = True
-
-            if len(strip.axisOrder) > 2:
-                n = index - 2
-                if n >= 0:
-
-                    if strip.planeAxisBars and n < len(strip.planeAxisBars):
-                        # strip.planeAxisBars[n].setPosition(ppmPosition, ppmWidth)
-                        strip.planeAxisBars[n].updatePosition()
-
-                    # planeLabel = strip.planeToolbar.planeLabels[n]
-                    # planeSize = planeLabel.singleStep()
-                    # planeLabel.setValue(position)
-                    # strip.planeToolbar.planeCounts[n].setValue(width / planeSize)
-
-        strip.beingUpdated = False
+        # can't remember why this is here
+        self.beingUpdated = False
 
     @logCommand(get='self')
     def moveTo(self, newIndex: int):
@@ -2573,47 +2555,47 @@ def _updateSelectedMultiplets(data):
     GLSignals.emitEvent(triggers=[GLNotifier.GLHIGHLIGHTMULTIPLETS], targets=data[Notifier.OBJECT].multiplets)
 
 
-def _axisRegionChanged(cDict):
-    """Notifier function: Update strips etc. for when axis position or width changes.
-    """
-    axis = cDict[Notifier.OBJECT]
-    strip = axis.strip
-
-    position = axis.position
-    width = axis.width
-    region = (position - width / 2., position + width / 2.)
-
-    index = strip.axisOrder.index(axis.code)
-    if not strip.beingUpdated:
-
-        strip.beingUpdated = True
-
-        try:
-            if index == 0:
-                # X axis
-                padding = strip.application.preferences.general.stripRegionPadding
-                strip.viewBox.setXRange(*region, padding=padding)
-            elif index == 1:
-                # Y axis
-                padding = strip.application.preferences.general.stripRegionPadding
-                strip.viewBox.setYRange(*region, padding=padding)
-            else:
-
-                if len(strip.axisOrder) > 2:
-                    n = index - 2
-                    if n >= 0:
-
-                        if strip.planeAxisBars and n < len(strip.planeAxisBars):
-                            # strip.planeAxisBars[n].setPosition(ppmPosition, ppmWidth)
-                            strip.planeAxisBars[n].updatePosition()
-
-                        # planeLabel = strip.planeToolbar.planeLabels[n]
-                        # planeSize = planeLabel.singleStep()
-                        # planeLabel.setValue(position)
-                        # strip.planeToolbar.planeCounts[n].setValue(width / planeSize)
-
-        finally:
-            strip.beingUpdated = False
+# def _axisRegionChanged(cDict):
+#     """Notifier function: Update strips etc. for when axis position or width changes.
+#     """
+#     axis = cDict[Notifier.OBJECT]
+#     strip = axis.strip
+#
+#     position = axis.position
+#     width = axis.width
+#     region = (position - width / 2., position + width / 2.)
+#
+#     index = strip.axisOrder.index(axis.code)
+#     if not strip.beingUpdated:
+#
+#         strip.beingUpdated = True
+#
+#         try:
+#             if index == 0:
+#                 # X axis
+#                 padding = strip.application.preferences.general.stripRegionPadding
+#                 strip.viewBox.setXRange(*region, padding=padding)
+#             elif index == 1:
+#                 # Y axis
+#                 padding = strip.application.preferences.general.stripRegionPadding
+#                 strip.viewBox.setYRange(*region, padding=padding)
+#             else:
+#
+#                 if len(strip.axisOrder) > 2:
+#                     n = index - 2
+#                     if n >= 0:
+#
+#                         if strip.planeAxisBars and n < len(strip.planeAxisBars):
+#                             # strip.planeAxisBars[n].setPosition(ppmPosition, ppmWidth)
+#                             strip.planeAxisBars[n].updatePosition()
+#
+#                         # planeLabel = strip.planeToolbar.planeLabels[n]
+#                         # planeSize = planeLabel.singleStep()
+#                         # planeLabel.setValue(position)
+#                         # strip.planeToolbar.planeCounts[n].setValue(width / planeSize)
+#
+#         finally:
+#             strip.beingUpdated = False
 
 # NB The following two notifiers could be replaced by wrapper notifiers on
 # Mark, 'change'. But it would be rather more clumsy, so leave it as it is.

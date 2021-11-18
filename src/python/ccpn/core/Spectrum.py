@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-12 13:58:30 +0000 (Fri, November 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-18 18:20:21 +0000 (Thu, November 18, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -63,10 +63,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import numpy as np
-import sys
 from typing import Sequence, Tuple, Optional, Union, List
 from functools import partial
 from itertools import permutations
+from tabulate import tabulate
 import numpy
 
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
@@ -600,7 +600,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @_includeInCopy
     def negativeNoiseLevel(self) -> float:
         """Negative noise level value. Stored in Internal"""
-        # propertyName = sys._getframe().f_code.co_name
         value = self._getInternalParameter(self._NEGATIVENOISELEVEL)
         if value is None:
             getLogger().debug2('Returning negativeNoiseLevel=None')
@@ -890,15 +889,19 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         None for sampled dimensions
         """
         result = []
+        _widths = self.spectralWidths
+        _widthsHz = self.spectralWidthsHz
+        _pCounts = self.pointCounts
+        _isComplex = self.isComplex
         for axis, dimType in enumerate(self.dimensionTypes):
 
             if dimType == specLib.DIMENSION_FREQUENCY:
-                valuePerPoint = self.spectralWidths[axis] / self.pointCounts[axis]
+                valuePerPoint = _widths[axis] / _pCounts[axis]
 
             elif dimType == specLib.DIMENSION_TIME:
                 # valuePerPoint is dwell time
-                valuePerPoint = 1.0 / self.spectralWidthsHz[axis] if self.isComplex[axis] \
-                    else 0.5 / self.spectralWidthsHz[axis]
+                valuePerPoint = 1.0 / _widthsHz[axis] if _isComplex[axis] \
+                    else 0.5 / _widthsHz[axis]
             else:
                 valuePerPoint = None
 
@@ -1252,9 +1255,13 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         # crude check that the centre is always included
         _specLimMeans = [(sl[0] + sl[1]) / 2 for sl in self.spectrumLimits]
         if any(val >= specLim for val, specLim in zip(minVals, _specLimMeans)):
-            raise ValueError(f'invalid aliasingLimit; lower aliasingLimit exceeds minimum spectrumLimit  {minVals}  {self.spectrumLimits}')
+            table = zip(minVals, self.spectrumLimits)
+            _msg = tabulate(table, floatfmt=".6f")
+            raise ValueError(f'invalid aliasingLimit; lower aliasingLimit exceeds minimum spectrumLimit\n{_msg}')
         if any(val <= specLim for val, specLim in zip(maxVals, _specLimMeans)):
-            raise ValueError(f'invalid aliasingLimit; upper aliasingLimit exceeds maximum spectrumLimit  {maxVals}  {self.spectrumLimits}')
+            table = zip(maxVals, self.spectrumLimits)
+            _msg = tabulate(table, floatfmt=".6f")
+            raise ValueError(f'invalid aliasingLimit; upper aliasingLimit exceeds maximum spectrumLimit\n{_msg}')
 
         self._setDimensionalAttributes('minAliasedFrequency', minVals)
         self._setDimensionalAttributes('maxAliasedFrequency', maxVals)
@@ -1307,7 +1314,17 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """Return True if the axis is reversed per dimension
         """
         return tuple(self._getDimensionalAttributes('isReversed'))
-        # return tuple((x and x.isAxisReversed) for x in self._mainExpDimRefs())
+
+    @axesReversed.setter
+    @ccpNmrV3CoreSetter()
+    def axesReversed(self, value):
+        """Checking axes
+        """
+        self._setDimensionalAttributes('isReversed', value)
+        # # do I need to flip the aliasingLimits?
+        # _aliasingLimits = self.aliasingLimits
+        # _aliasingLimits = tuple(tuple(al for al in reversed(aLimits)) for aLimits in _aliasingLimits)
+        # self.aliasingLimits = _aliasingLimits
 
     @property
     def magnetisationTransfers(self) -> Tuple[MagnetisationTransferTuple, ...]:
@@ -1708,32 +1725,59 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         return result
 
-    def getPpmAliasingLimitsArray(self, axisCode=None, dimension=None):
-        """Return a numpy array with ppm values of the grid points along axisCode or dimension
-        for the points contained by the aliasing limits
+    def _verifyAxisCodeDimension(self, axisCode, dimension):
+        """Verify the axisCode and dimension
+        Return the aliasing information for the given axis
         """
         if dimension is None and axisCode is None:
             raise ValueError('Spectrum.getPpmAliasingLimits: either axisCode or dimension needs to be defined')
         if dimension is not None and axisCode is not None:
             raise ValueError('Spectrum.getPpmAliasingLimits: axisCode and dimension cannot be both defined')
-
         if axisCode is not None:
             dimension = self.getByAxisCodes('dimensions', [axisCode], exactMatch=False)[0]
-
         if dimension is None or dimension < 1 or dimension > self.dimensionCount:
             raise RuntimeError('Invalid dimension (%s)' % (dimension,))
 
         aliasLims = self.aliasingLimits[dimension - 1]
         axisRevd = self.axesReversed[dimension - 1]
+        pCount = self.pointCounts[dimension - 1]
         vpp = self.valuesPerPoint[dimension - 1] * 0.5  # offset for aliasingLimits
         if axisRevd:
             aliasLims = list(reversed(aliasLims))
             vpp = -vpp
-        pl = round(self.ppm2point(aliasLims[0] + vpp, dimension=dimension))
-        pr = round(self.ppm2point(aliasLims[1] - vpp, dimension=dimension))
-        result = np.linspace(aliasLims[0] + vpp, aliasLims[1] - vpp, pr - pl + 1)
+        ppmL, ppmR = aliasLims[0] + vpp, aliasLims[1] - vpp
+        pL, pR = round(self.ppm2point(ppmL, dimension=dimension)), round(self.ppm2point(ppmR, dimension=dimension))
 
-        return result
+        # clip to the maximum allowed aliasing limits
+        pL = min((MAXALIASINGRANGE + 1) * pCount, max(-MAXALIASINGRANGE * pCount, pL))
+        pR = min((MAXALIASINGRANGE + 1) * pCount, max(-MAXALIASINGRANGE * pCount, pR))
+        return ppmL, ppmR, pL, pR
+
+    def getPpmAliasingLimitsArray(self, axisCode=None, dimension=None):
+        """Return a numpy array of ppm values of the grid points along axisCode or dimension
+        for the points contained by the aliasing limits, end points are inclusive
+        """
+        ppmL, ppmR, pL, pR = self._verifyAxisCodeDimension(axisCode, dimension)
+        return np.linspace(ppmL, ppmR, pR - pL + 1)
+
+    def getPpmAliasingLimits(self, axisCode=None, dimension=None):
+        """Return a tuple of ppm values of the (first, last) grid points along axisCode or dimension
+        for the points contained by the aliasing limits, end points are inclusive
+        """
+        ppmL, ppmR, _, _ = self._verifyAxisCodeDimension(axisCode, dimension)
+        return (ppmL, ppmR)
+
+    def getPointAliasingLimitsArray(self, axisCode=None, dimension=None):
+        """Return a numpy array with point values of the grid points along axisCode or dimension
+        """
+        _, _, pL, pR = self._verifyAxisCodeDimension(axisCode, dimension)
+        return np.linspace(pL, pR, pR - pL + 1)
+
+    def getPointAliasingLimits(self, axisCode=None, dimension=None):
+        """Return a tuple of point values of the (first, last) grid points along axisCode or dimension
+        """
+        _, _, pL, pR = self._verifyAxisCodeDimension(axisCode, dimension)
+        return (pL, pR)
 
     # def automaticIntegration(self, spectralData):
     #     return self._apiDataSource.automaticIntegration(spectralData)

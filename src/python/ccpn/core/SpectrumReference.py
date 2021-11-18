@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-13 10:51:05 +0000 (Sat, November 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-18 18:20:21 +0000 (Thu, November 18, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -205,10 +205,17 @@ class SpectrumReference(AbstractWrapperObject):
 
     @property
     def isReversed(self) -> bool:
-        """:return True if dimension is reversed
+        """Set whether the axis is reversed - isReversed implies that ppm values decrease as point values increase
         deprecated!
+        :return True if dimension is reversed
         """
         return self._expDimRef.isAxisReversed
+
+    @isReversed.setter
+    def isReversed(self, value):
+        """Set whether the axis is reversed - isReversed implies that ppm values decrease as point values increase
+        """
+        self._expDimRef.__dict__['isAxisReversed'] = value
 
     @property
     def spectrometerFrequency(self) -> float:

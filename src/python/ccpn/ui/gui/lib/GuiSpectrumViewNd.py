@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-12 14:54:02 +0000 (Fri, November 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-18 18:20:21 +0000 (Thu, November 18, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -351,7 +351,12 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 return
 
             position = dimensionCount * [1]
-            for z in range(axisData.startPoint, axisData.endPoint):
+            # if axisData.startPoint <= axisData.endPoint:  # need to check after other bits working
+            #     _loopArgs = range(axisData.startPoint, axisData.endPoint)
+            # else:
+            #     _loopArgs = range(axisData.startPoint - 1, axisData.endPoint - 1, -1)
+            # for z in _loopArgs:
+            for z in range(axisData.startPoint, axisData.endPoint, 1 if axisData.endPoint > axisData.startPoint else -1):
                 position[dimIndices[2]] = (z % axisData.pointCount) + 1
                 planeData = spectrum.getPlaneData(position, xDim=xDim + 1, yDim=yDim + 1)
                 yield position, planeData
@@ -364,7 +369,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 return
 
             # create a tuple of the ranges for the planes
-            _loopArgs = tuple(range(axis.startPoint, axis.endPoint) for axis in axes)
+            _loopArgs = tuple(range(axis.startPoint, axis.endPoint, 1 if axis.endPoint > axis.startPoint else -1) for axis in axes)
 
             position = dimensionCount * [1]
             _offset = dimensionCount - len(_loopArgs)  # should always be 2?

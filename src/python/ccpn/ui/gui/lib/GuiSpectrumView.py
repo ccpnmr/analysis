@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-25 18:09:07 +0100 (Mon, October 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-18 18:20:21 +0000 (Thu, November 18, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -38,7 +38,7 @@ from typing import Optional, Tuple
 SpectrumViewParams = collections.namedtuple('SpectrumViewParams', 'valuePerPoint pointCount minAliasedFrequency maxAliasedFrequency '
                                                                   'minSpectrumFrequency maxSpectrumFrequency axisReversed '
                                                                   'spectralWidth aliasingIndex foldingMode regionBounds '
-                                                                  'minFoldingFrequency maxFoldingFrequency ')
+                                                                  'minFoldingFrequency maxFoldingFrequency isTimeDomain ')
 TraceParameters = collections.namedtuple('TraceParameters', 'inRange pointPositions startPoint, endPoint')
 
 
@@ -134,8 +134,9 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
                                         to the upper aliasingLimit
             minFoldingFrequency,        minimum folding frequency
             maxFoldingFrequency,        maximum folding frequency
-                                        folding frequencies defined the ppm positions of points [0.5] and [pointCount + 0.5]
+                                        folding frequencies define the ppm positions of points [0.5] and [pointCount + 0.5]
                                         currently the exact ppm at which the spectrum is folded
+            isTimeDomain                True if the axis is a time domain, otherwise False
         """
 
         ii = self.dimensionOrdering[axisDim]
@@ -155,13 +156,15 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
             foldingMode = (_spectrum.foldingModes)[ii]
             regionBounds = tuple(minFoldingFrequency + ii * spectralWidth
                                  for ii in range(aliasingIndex[0], aliasingIndex[1] + 2))
+            isTimeDomain = (_spectrum.isTimeDomains)[ii]
 
             return SpectrumViewParams(valuePerPoint, pointCount,
                                       minAliasedFrequency, maxAliasedFrequency,
                                       minSpectrumFrequency, maxSpectrumFrequency,
                                       axisReversed, spectralWidth, aliasingIndex,
                                       foldingMode, regionBounds,
-                                      minFoldingFrequency, maxFoldingFrequency, )
+                                      minFoldingFrequency, maxFoldingFrequency,
+                                      isTimeDomain)
 
     def getTraceParameters(self, position, dim):
         # dim  = spectrumView index, i.e. 0 for X, 1 for Y

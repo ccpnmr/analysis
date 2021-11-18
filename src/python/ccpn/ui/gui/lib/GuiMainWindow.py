@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-18 13:15:17 +0000 (Thu, November 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-18 17:36:46 +0000 (Thu, November 18, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1176,13 +1176,13 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         # check-for and set any specific attributes of the dataLoader instance
         # depending on the dataFormat
-        if dataLoader.dataFormat == CcpNmrV2ProjectDataLoader.dataFormat:
-            choice = showYesNo('CCPN Version-2 project "%s"' % dataLoader.path,
-                               'will be converted to a Version-3 project and saved, do you want to load?')
-            if choice == False:
-                dataLoader = None
-                createNewProject = False
-                ignore = True
+        # if dataLoader.dataFormat == CcpNmrV2ProjectDataLoader.dataFormat:
+        #     choice = showYesNo('CCPN Version-2 project "%s"' % dataLoader.path,
+        #                        'will be converted to a Version-3 project and saved, do you want to load?')
+        #     if choice == False:
+        #         dataLoader = None
+        #         createNewProject = False
+        #         ignore = True
 
         # elif dataLoader.dataFormat == CcpNmrV3ProjectDataLoader.dataFormat:
         #     choice = showYesNo('CCPN Version-2 project "%s"' % dataLoader.path,
@@ -1192,7 +1192,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         #         createNewProject = False
         #         ignore = True
 
-        elif dataLoader.dataFormat == NefDataLoader.dataFormat or \
+        if dataLoader.dataFormat == NefDataLoader.dataFormat or \
                 dataLoader.dataFormat == SparkyDataLoader.dataFormat:
             choices = ['Import', 'New project', 'Cancel']
             choice = showMulti('Load %s' % dataLoader.dataFormat,
@@ -1368,6 +1368,24 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                                     parent=self
                                     )
             return None
+
+        from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
+
+        path = dataLoader.path
+        if dataLoader.dataFormat == CcpNmrV2ProjectDataLoader.dataFormat:
+            ok = MessageDialog.showYesNoWarning('Load Project',
+                                                f'Project {path} was created with version-2 Analysis.\n'
+                                                '\n'
+                                                'CAUTION: The project will be coverted to a version-3 project and saved '
+                                                'as a new directory with .cppn extension. If you are in any doubt, please '
+                                                'make a copy of the project folder before loading/saving this project.\n'
+                                                '\n'
+                                                'Do you want to continue loading?')
+
+            if not ok:
+                # skip loading so that user can backup/copy project
+                getLogger().info('==> Cancelled loading ccpn project "%s"' % path)
+                return None
 
         if not self._queryCloseProject(title='Load Project', phrase='open another'):
             return None

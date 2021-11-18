@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-18 13:08:57 +0000 (Thu, November 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-18 17:36:46 +0000 (Thu, November 18, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1585,27 +1585,27 @@ class Framework(NotifierBase):
         with logCommandManager('application.', 'loadProject', path):
             logger = getLogger()
 
-            ok = MessageDialog.showYesNoWarning('Load Project',
-                                                f'Project {path} was created with version-2 Analysis.\n'
-                                                '\n'
-                                                'CAUTION: The project will be coverted to a version-3 project and saved '
-                                                'as a new directory with .cppn extension. If you are in any doubt, please '
-                                                'make a copy of the project folder before loading/saving this project.\n'
-                                                '\n'
-                                                'Do you want to continue loading?')
-
-            if not ok:
-                # skip loading so that user can backup/copy project
-                getLogger().info('==> Cancelled loading ccpn project "%s"' % path)
-                return []
+            # ok = MessageDialog.showYesNoWarning('Load Project',
+            #                                     f'Project {path} was created with version-2 Analysis.\n'
+            #                                     '\n'
+            #                                     'CAUTION: The project will be coverted to a version-3 project and saved '
+            #                                     'as a new directory with .cppn extension. If you are in any doubt, please '
+            #                                     'make a copy of the project folder before loading/saving this project.\n'
+            #                                     '\n'
+            #                                     'Do you want to continue loading?')
+            #
+            # if not ok:
+            #     # skip loading so that user can backup/copy project
+            #     getLogger().info('==> Cancelled loading ccpn project "%s"' % path)
+            #     return []
 
             if self.project is not None:  # always close for Ccpn
                 self._closeProject()
 
             project = _loadProject(application=self, path=str(path))
-            # call the update
-            updateProject_fromV2(project)
-            logger.info('==> Upgraded %s to version-3' % project)
+            # # call the update
+            # updateProject_fromV2(project)
+            # logger.info('==> Upgraded %s to version-3' % project)
 
             self._initialiseProject(project)    # This also sets the linkages
             getLogger().info('==> Loaded ccpn project "%s"' % path)
@@ -1637,8 +1637,10 @@ class Framework(NotifierBase):
 
             # warning for projects that predate 3.1.0.alpha - these will no longer be backwards compatible with
             #   3.0.4.edge and earlier
-            projectHistory = getProjectSaveHistory(_path)
-            if projectHistory.lastSavedVersion <= '3.0.4':
+            # projectHistory = getProjectSaveHistory(_path)
+            # if projectHistory.lastSavedVersion <= '3.0.4':
+
+            if Project._needsUpgrading(path):
 
                 ok = MessageDialog.showYesNoWarning('Load Project',
                                                     f'Project %s was created with an earlier version of AnalysisV3.\n'

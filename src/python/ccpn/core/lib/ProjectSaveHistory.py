@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-11 15:07:57 +0000 (Thu, November 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-18 17:36:46 +0000 (Thu, November 18, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,6 @@ from ccpn.framework.Version import VersionString
 from ccpn.framework.Application import getApplication
 from ccpn.util.Time import now
 from ccpn.util.Common import isIterable
-
 
 
 def getProjectSaveHistory(projectPath):

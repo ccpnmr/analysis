@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-17 21:07:35 +0000 (Wed, November 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-18 17:36:46 +0000 (Thu, November 18, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -323,6 +323,16 @@ class Project(AbstractWrapperObject):
         """
         return self._apiNmrProject.root._upgradedFromV2
 
+    @staticmethod
+    def _needsUpgrading(path) -> bool:
+        """
+        Check if project defined by path needs upgrading
+        :param path: a ccpn project-path
+        :return: True/False
+        """
+        projectHistory = getProjectSaveHistory(path)
+        return projectHistory.lastSavedVersion <= '3.0.4'
+
     def _checkProjectSubDirectories(self):
         """if need be, create all project subdirectories"""
         from ccpn.framework.PathsAndUrls import CCPN_SUB_DIRECTORIES
@@ -472,7 +482,9 @@ class Project(AbstractWrapperObject):
                                     changeDataLocations=changeDataLocations)
         if savedOk:
             self._resetIds()
-            if self.application.hasGui:
+            # check for application and Gui; might not yet be there (e.g. on save of converted V2
+            # project)
+            if self.application and self.application.hasGui:
                 self.application.mainWindow.sideBar.setProjectName(self)
 
             # store the version history in state subfolder json file
@@ -1994,6 +2006,8 @@ def _loadProject(application, path: str) -> Project:
     """Load the project defined by path
     :return Project instance
     """
+    from ccpn.core._implementation.updates.update_v2 import updateProject_fromV2
+
     _path = aPath(path)
     if not _path.exists():
         raise ValueError('Path {_path} does not exist')
@@ -2008,23 +2022,39 @@ def _loadProject(application, path: str) -> Project:
     project._isNew = False
     # NB: linkages are set in Framework._intialiseProject()
 
-    # check if it has been moved
-    projectPath = project.path
-    oldName = project.name
-    newName = aPath(projectPath).basename
-    if oldName != newName:
-        # Directory name has changed. Change project name and move Project xml file.
-        oldProjectFilePath = aPath(ApiPath.getProjectFile(projectPath, oldName))
-        if oldProjectFilePath.exists():
-            oldProjectFilePath.removeFile()
-        apiProject.__dict__['name'] = newName
-        apiProject.touch()
-        apiProject.save()
+    # If path pointed to a V2 project, save the result
+    if project.isUpgradedFromV2:
+        try:
+            # call the update
+            getLogger().info('==> Upgrading %s to version-3' % project)
+            updateProject_fromV2(project)
+            # Using api calls as V3-Project has not yet been fully instantiated
+            apiProject.touch()
+            apiProject.save()
+            getLogger().info('==> Writing model data')
+        except Exception as es:
+            getLogger().warning('Failed upgrading %s (%s)' % (project, str(es)))
+
+    else:
+        # check if it has been moved
+        projectPath = project.path
+        oldName = project.name
+        newName = aPath(projectPath).basename
+        if oldName != newName:
+            # Directory name has changed. Change project name and move Project xml file.
+            oldProjectFilePath = aPath(ApiPath.getProjectFile(projectPath, oldName))
+            if oldProjectFilePath.exists():
+                oldProjectFilePath.removeFile()
+            apiProject.__dict__['name'] = newName
+            # Using api calls as V3-Project has not yet been fully instantiated
+            apiProject.touch()
+            apiProject.save()
 
     project._resetUndo(debug=application.level <= Logging.DEBUG2, application=application)
 
     # Do some admin
-    project._saveHistory = getProjectSaveHistory(path)
+    # need project.path, as it may have have changed; e.g. for a V2 project
+    project._saveHistory = getProjectSaveHistory(project.path)
 
     # Call any updates
     project._update()

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-16 17:00:00 +0000 (Tue, November 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-18 13:08:57 +0000 (Thu, November 18, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1573,7 +1573,7 @@ class Framework(NotifierBase):
     def _openProjectMenuCallback(self):
         """Just a stub for the menu setup to pass on to mainWindow, to be moved later
         """
-        return self.ui.mainWindow._openProject()
+        return self.ui.mainWindow._openProjectCallback()
 
     def _loadV2Project(self, path) -> List[Project]:
         """Actual V2 project loader

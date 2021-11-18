@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-08 18:06:51 +0000 (Mon, November 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-18 13:08:57 +0000 (Thu, November 18, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -338,7 +338,7 @@ class Gui(Ui):
     def loadProject(self, path):
         """Just a stub for now; calling MainWindow methods as it initialises the Gui
         """
-        return self.mainWindow._openProject(path)
+        return self.mainWindow._loadProject(path)
 
 #######################################################################################
 #

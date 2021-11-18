@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can change the colour of your standard peak marks by going to <span style=%(purple)s>File / Preferences</span> (or use shortcut <span style=%(purple)s>Ctrl/Cmd ,</span> and going to the <span style=%(purple)s>Spectrum</span> tab. Select a new <span style=%(purple)s>Default marks colour</span> of your choice.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 21,
+  "contents": [
+    "./graphics/DefaultMarkColour.png"
+  ]
+}

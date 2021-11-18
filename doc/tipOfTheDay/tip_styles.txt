@@ -1,4 +1,0 @@
-{
-    "purple": "'color: #6a3b71; font-weight:bold;'",
-    "para": "'margin-right: 20px;font-size: 14pt; font-face:Lucida-Grande; font-weight:normal;'"
-}

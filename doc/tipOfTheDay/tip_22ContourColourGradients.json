@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can set your contour colour to a colour gradient rather than a single colour. Use shortcut <span style=%(purple)s>CO</span> to edit your contours and use the colour drop-down menu to select from a range of single, double and multi-colour gradients at the bottom of the list.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 22,
+  "contents": [
+    "./graphics/ContourColourGradients.png"
+  ]
+}

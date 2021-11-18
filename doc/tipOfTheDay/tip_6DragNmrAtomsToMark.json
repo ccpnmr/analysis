@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>Drag NmrAtoms or NmrResidues from the sidebar onto a Spectrum Display in order to create marks at the chemical shifts belonging to that NmrAtom or NmrResidue.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 6,
+  "contents": [
+    "./graphics/DragNmrAtomsToMark.png"
+  ]
+}

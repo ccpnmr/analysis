@@ -1,5 +1,5 @@
 {
-  "header": "<p style=%(para)s>You can drag multiple spectra from the <span style=%(purple)s>Sidebar</span> into the <span style=%(purple)s>DropArea</span> in one go. If they share the same axes, they will open in a single <span style=%(purple)s>SpectrumDisplay</span>, otherwise they will open in separate <span style=%(purple)s>SpectrumDisplays</span>. (Use <span style=%(purple)s>Shift</span> or <span style=%(purple)s>Ctrl/Cmd</span> to select multiple items in the <span style=%(purple)s>Sidebar</span> in one go.)</p>",
+  "header": "<p style=%(para)s>You can drag multiple spectra from the Sidebar into the DropArea in one go. If they share the same axes, they will open in a single SpectrumDisplay, otherwise they will open in separate SpectrumDisplays. (Use <span style=%(purple)s>Shift</span> or <span style=%(purple)s>Ctrl/Cmd</span> to select multiple items in the Sidebar in one go.)</p>",
   "type": "picture",
   "styles": {
     "style_file": "tipStyles.txt"

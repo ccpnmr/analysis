@@ -1,5 +1,5 @@
 {
-  "header": "<p style=%(para)s>When you placee a module in its own window (by dragged the top bar of the module outside the main Analysis Window), this creates a second drop area. You can add other modules to this drop area, resize it as you wish and place it on a second screen/monitor. You can create as many drop areas as you like.</p>",
+  "header": "<p style=%(para)s>When you place a module in its own window (by dragging the top bar of the module outside the main Analysis Window), this creates a second drop area. You can add other modules to this drop area, resize it as you wish and place it on a second screen/monitor. You can create as many drop areas as you like.</p>",
   "type": "picture",
   "styles": {
     "style_file": "tipStyles.txt"

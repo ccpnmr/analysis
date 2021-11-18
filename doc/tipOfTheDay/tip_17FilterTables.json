@@ -1,5 +1,5 @@
 {
-  "header": "<p style=%(para)s><span style=%(purple)s>Right-click</span> on the table heading and select <span style=%(purple)s>Filter...</span> to bring up a table filtering panel. You can choose to filter with various operations (equal, include, >, >=, <, <=) and on the whole Visible Table or just an individual column. Repeated filtering will give you further subsets. Click <span style=%(purple)s>Reset</span> to show the full table again and filter on that.</p>",
+  "header": "<p style=%(para)s><span style=%(purple)s>Right-click</span> on the table heading and select <span style=%(purple)s>Filter...</span> to bring up a table filtering panel. You can choose to filter with various operations (equal, include, greater/smaller than) and on the whole Visible Table or just an individual column. Repeated filtering will give you further subsets. Click <span style=%(purple)s>Reset</span> to show the full table again and filter on that.</p>",
   "type": "picture",
   "styles": {
     "style_file": "tipStyles.txt"

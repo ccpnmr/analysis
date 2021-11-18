@@ -1,5 +1,5 @@
 {
-  "header": "<p style=%(para)s>You can move through the z-dimension of your active spectrum Strip (the one with highlighted axes) with the keyboard shortcuts <span style=%(purple)s>XX</span> and <span style=%(purple)s>YY</span>.</p>",
+  "header": "<p style=%(para)s>You can move through the z-dimension of your active Strip (the one with highlighted axes) with the keyboard shortcuts <span style=%(purple)s>XX</span> and <span style=%(purple)s>YY</span>.</p>",
   "type": "picture",
   "styles": {
     "style_file": "tipStyles.txt"

@@ -1,5 +1,5 @@
 {
-  "header": "<p style=%(para)s><span style=%(purple)s>Right-click</span> anywhere in a table and select <span style=%(purple)s>Export All Columns</span> to export the full set of data (with no rounding of figures). Alternatively, select <span style=%(purple)s>Export Visible Table</span> to export only the currently shown columns and rows (i.e. it will not export 'deselected'/'hidden' columns or rows not shown due to table filtering)</p>. Export file types include Excel (.xlsx), .csv, .tsv. and .json",
+  "header": "<p style=%(para)s><span style=%(purple)s>Right-click</span> anywhere in a table and select <span style=%(purple)s>Export All Columns</span> to export the full set of data (with no rounding of figures). Alternatively, select <span style=%(purple)s>Export Visible Table</span> to export only the currently shown columns and rows (i.e. it will not export 'deselected'/'hidden' columns or rows not shown due to table filtering). Export file types include Excel (.xlsx), .csv, .tsv. and .json.</p>",
   "type": "picture",
   "styles": {
     "style_file": "tipStyles.txt"

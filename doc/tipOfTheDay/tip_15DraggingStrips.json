@@ -1,5 +1,5 @@
 {
-  "header": "<p style=%(para)s>You can move strips around within a Spectrum Display by dragging them. Simply click on the Strip ID at the top of the strip and then drag and drop it on top of another strip to move your original strip in either direction.</p>",
+  "header": "<p style=%(para)s>You can move strips around within a Spectrum Display by dragging them. Simply click on the Strip ID at the top of the strip and then drag and drop it on top of another strip to move your original strip wherever you wish.</p>",
   "type": "picture",
   "styles": {
     "style_file": "tipStyles.txt"

@@ -1,5 +1,5 @@
 {
-  "header": "<p style=%(para)s>You can move through the z-dimension of your active spectrum Strip (the one with highlighted axes) by scrolling the <span style=%(purple)s>mouse-wheel</span> while holding down the <span style=%(purple)s>Ctrl</span> key (<span style=%(purple)s>Cmd</span> on a Mac).</p>",
+  "header": "<p style=%(para)s>You can move through the z-dimension of your active Strip (the one with highlighted axes) by scrolling the <span style=%(purple)s>mouse-wheel</span> while holding down the <span style=%(purple)s>Ctrl</span> key (<span style=%(purple)s>Cmd</span> on a Mac).</p>",
   "type": "picture",
   "styles": {
     "style_file": "tipStyles.txt"

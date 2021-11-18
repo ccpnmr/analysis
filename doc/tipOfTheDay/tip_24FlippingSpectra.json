@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can flip the orientation of the axes of a spectrum with the shortcuts <span style=%(purple)s>XY</span>, <span style=%(purple)s>XZ</span> and <span style=%(purple)s>YZ</span>. This will open a new spectrum display with the relevant axes swapped.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 24,
+  "contents": [
+    "./graphics/FlippingSpectra.png"
+  ]
+}

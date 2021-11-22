@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-22 12:39:42 +0000 (Mon, November 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-22 16:53:56 +0000 (Mon, November 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -442,8 +442,8 @@ class NmrAtom(AbstractWrapperObject):
     def _uniqueName(cls, project, name=None) -> str:
         """Subclassed to get the '@' default name behavior"""
         if name is None:
-            id = project._queryNextUniqueIdValue(cls.className)
-            name = '%s_%d' % (cls._defaultName(), id)
+            _id = project._queryNextUniqueIdValue(cls.className)
+            name = '%s_%d' % (cls._defaultName(), _id)
         return super(NmrAtom, cls)._uniqueName(project=project, name=name)
 
     def _finaliseAction(self, action: str):

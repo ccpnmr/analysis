@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-04 13:25:04 +0000 (Thu, November 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-22 12:39:43 +0000 (Mon, November 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1073,9 +1073,9 @@ def ccpNmrV3CoreSetter(doNotify=True):
     return theDecorator
 
 
-def ccpNmrV3CoreUndoBlock():
+def ccpNmrV3CoreUndoBlock(action='change'):
     """A decorator wrap the property setters method in an undo block and triggering the
-    'change' notification
+    action notification; default is 'change' but occasionally may use 'rename'
     """
 
     @decorator.decorator
@@ -1091,7 +1091,7 @@ def ccpNmrV3CoreUndoBlock():
                 # must be done like this as the undo functions are not known
                 with undoStackBlocking(application=application) as addUndoItem:
                     # incorporate the change notifier to simulate the decorator
-                    addUndoItem(undo=partial(self._finaliseAction, 'change'))
+                    addUndoItem(undo=partial(self._finaliseAction, action))
                     addUndoItem(undo=application.project.unblankNotification,
                                 redo=application.project.blankNotification)
 
@@ -1106,9 +1106,9 @@ def ccpNmrV3CoreUndoBlock():
                         # incorporate the change notifier to simulate the decorator
                         addUndoItem(undo=application.project.blankNotification,
                                     redo=application.project.unblankNotification)
-                        addUndoItem(redo=partial(self._finaliseAction, 'change'))
+                        addUndoItem(redo=partial(self._finaliseAction, action))
 
-        self._finaliseAction('change')
+        self._finaliseAction(action)
 
         return result
 

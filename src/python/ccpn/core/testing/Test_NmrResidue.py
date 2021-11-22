@@ -5,7 +5,8 @@ Test code for NmrResidue
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-30 16:58:51 +0100 (Tue, March 30, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-11-22 12:39:43 +0000 (Mon, November 22, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -780,11 +781,10 @@ class NmrResidueTest(WrapperTesting):
         # nr2.residue = None
         nr2.deassign()
 
-        # self.assertEqual(nr2.longPid, "NmrResidue:A.@2.ARG")
         self.assertEqual(nr2.longPid, "NmrResidue:A.@15.")
 
         target = self.project.getByPid('NR:A.2.GLU')
-        target.rename('.GLU')
+        target.rename(residueType='GLU')
         self.assertEqual(target.longPid, "NmrResidue:A.@12.GLU")
         newNr = nchain0.newNmrResidue()
         self.assertEqual(newNr.longPid, "NmrResidue:@-.@21.")
@@ -814,11 +814,11 @@ class NmrResidueTest(WrapperTesting):
         self.assertEqual(nr1.id, "A.@14.")
         nr1.rename('999')
         self.assertEqual(nr1.id, "A.999.")
-        nr1.rename('999.ALA')
+        nr1.rename(sequenceCode='999', residueType='ALA')
         self.assertEqual(nr1.id, "A.999.ALA")
-        nr1.rename('998.VAL')
+        nr1.rename(sequenceCode='998', residueType='VAL')
         self.assertEqual(nr1.id, "A.998.VAL")
-        nr1.rename('.THR')
+        nr1.rename(residueType='THR')
         self.assertEqual(nr1.id, "A.@14.THR")
         nr1.rename('997')
         nr1.moveToNmrChain()

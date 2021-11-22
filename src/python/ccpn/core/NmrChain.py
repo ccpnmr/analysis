@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:25:07 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-22 12:39:42 +0000 (Mon, November 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -38,7 +38,8 @@ from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrChain as ApiNmrChain
 from ccpnmodel.ccpncore.lib import Constants
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, renameObject, undoBlock
+from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, renameObject, \
+    undoBlock, ccpNmrV3CoreUndoBlock
 
 
 class NmrChain(AbstractWrapperObject):
@@ -113,7 +114,7 @@ class NmrChain(AbstractWrapperObject):
         self._wrappedData.label = value
 
     @name.setter
-    def name(self, value:str):
+    def name(self, value: str):
         """set name of nmrResidue."""
         self.rename(value)
 
@@ -167,12 +168,11 @@ class NmrChain(AbstractWrapperObject):
     #     self.rename(value._wrappedData.code)
 
     @logCommand(get='self')
+    @ccpNmrV3CoreUndoBlock(action='rename')
     def deassign(self):
         """Reset NmrChain back to its originalName, cutting all assignment links
         """
-        # self.rename(None)
-        with undoBlock():
-            self._wrappedData.code = None
+        self._wrappedData.code = None
 
     @logCommand(get='self')
     def assignSingleResidue(self, thisNmrResidue: typing.Union['NmrResidue'], firstResidue: typing.Union['Residue', str]):
@@ -215,7 +215,7 @@ class NmrChain(AbstractWrapperObject):
             return
 
         if not self.isConnected:
-          raise ValueError("assignConnectedResidues only allowed for connected NmrChains")
+            raise ValueError("assignConnectedResidues only allowed for connected NmrChains")
 
         if isinstance(firstResidue, str):
             xx = project.getByPid(firstResidue)
@@ -303,12 +303,11 @@ class NmrChain(AbstractWrapperObject):
                             and (stop is None or code <= stop)):
                         newSequenceCode = MoleculeLib._incrementedSequenceCode(nmrResidue.sequenceCode, offset)
 
-                        nmrResidue.rename('%s.%s' % (newSequenceCode, nmrResidue.residueType or ''))
+                        nmrResidue.rename(newSequenceCode, nmrResidue.residueType or '')
                         changedNmrResidues.append(nmrResidue)
 
             for nmrResidue in changedNmrResidues:
                 nmrResidue._finaliseAction('rename')
-                # nmrResidue._finaliseAction('change')
 
         if start is not None and stop is not None:
             if len(changedNmrResidues) != stop + 1 - start:

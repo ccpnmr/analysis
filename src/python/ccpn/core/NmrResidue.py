@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-12 12:36:25 +0100 (Tue, October 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-22 12:39:42 +0000 (Mon, November 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -963,8 +963,6 @@ class NmrResidue(AbstractWrapperObject):
         then renamed; consider moving to temporary chain first.
         """
 
-        values = dict(newNmrChain=newNmrChain, sequenceCode=sequenceCode, residueType=residueType)
-
         apiResonanceGroup = self._apiResonanceGroup
         if apiResonanceGroup.relativeOffset is not None:
             raise ValueError("Cannot reset NmrChain for offset NmrResidue %s" % self.id)
@@ -985,17 +983,16 @@ class NmrResidue(AbstractWrapperObject):
                 if newNmrChain != nmrChain:
                     apiResonanceGroup.moveToNmrChain(newNmrChain._wrappedData)
                     movedChain = True
+
                 # optionally rename
                 if self.sequenceCode != sequenceCode or self.residueType != residueType:
                     if sequenceCode is None:
                         sequenceCode = self.sequenceCode
                     if residueType is None:
                         residueType = self.residueType
-                    newSeqCode = '.'.join((sequenceCode, residueType))
-                    self.rename(newSeqCode)
+                    self.rename(sequenceCode, residueType)
 
             except Exception as es:
-                #print('>>> exception')
                 getLogger().warning(str(es))
                 if movedChain:
                     # Need to undo this
@@ -1235,44 +1232,36 @@ class NmrResidue(AbstractWrapperObject):
 
     @renameObject()
     @logCommand(get='self')
-    def rename(self, value: str = None):
-        """Rename NmrResidue. changing its sequenceCode, residueType, or both.
+    def rename(self, sequenceCode: str = None, residueType: str = None):
+        """Rename NmrResidue. changing its sequenceCode and residueType.
 
-        The value is a dot-separated string `sequenceCode`.`residueType`.
-        Values like None, 'abc', or 'abc.' will set the residueType to None.
-        Values like None or '.abc' will set the sequenceCode to None,
-        resetting it to its canonical form, '@`serial`."""
+        Specifying None for the sequenceCode will reset the nmrResidue to its canonical form, '@<serial>."""
 
-        # NBNB TODO - consider changing signature to sequenceCode, residueType
-
-        # use noBlanking for the minute to ensure that the adjacent nmrResidues are notified
         apiResonanceGroup = self._apiResonanceGroup
-        sequenceCode = residueType = None
-        if value:
-            if Pid.altCharacter in value:
-                raise ValueError("Character %s not allowed in ccpn.NmrResidue id: %s" %
-                                 (Pid.altCharacter, value))
-            ll = value.split(Pid.IDSEP, 1)
-            sequenceCode = ll[0] or None
-            if len(ll) > 1:
-                residueType = ll[1] or None
+        self._validateStringValue('sequenceCode', sequenceCode, allowNone=True)
+        self._validateStringValue('residueType', residueType, allowNone=True, allowEmpty=True)
+        sequenceCode = sequenceCode or None
+        residueType = residueType or None
 
         if sequenceCode:
             # Check if name is not already used
             partialId = '%s.%s.' % (self._parent._id, sequenceCode.translate(Pid.remapSeparators))
             ll = self._project.getObjectsByPartialId(className=self.className, idStartsWith=partialId)
             if ll and ll != [self]:
-                raise ValueError("Cannot rename %s to %s.%s - assignment already exists" % (self, self.nmrChain.id, value))
+                raise ValueError(f'Cannot rename {self} to {self.nmrChain.id}.{sequenceCode}.{residueType or ""} - assignment already exists')
 
-        oldName = '.'.join((apiResonanceGroup.sequenceCode, apiResonanceGroup.residueType or ''))
+        oldSequenceCode = apiResonanceGroup.sequenceCode
+        oldResidueType = apiResonanceGroup.residueType
         self._oldPid = self.pid
 
-        # rename functions from here
+        # rename functions from here - both values are always changed
         apiResonanceGroup.sequenceCode = sequenceCode
         apiResonanceGroup.resetResidueType(residueType)
-        self._renameChildren()
 
-        return (oldName,)
+        # now handled by _finaliseAction
+        # self._renameChildren()
+
+        return (oldSequenceCode, oldResidueType)
 
     def _renameChildren(self):
         """Update the chemicalShifts to the rename

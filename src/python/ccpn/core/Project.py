@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-13 10:56:11 +0000 (Sat, November 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-22 12:39:43 +0000 (Mon, November 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1090,7 +1090,7 @@ class Project(AbstractWrapperObject):
         del wrappedData._oldWrapperObject
         oldWrapperObject._wrappedData = wrappedData
 
-        oldWrapperObject._finaliseAction('create')
+        # oldWrapperObject._finaliseAction('create')  # EJB: 20211119: now as notify('delete') decorator on delete method
 
     def _notifyRelatedApiObject(self, wrappedData, pathToObject: str, action: str):
         """ call 'action' type notifiers for getattribute(pathToObject)(wrappedData)
@@ -1119,12 +1119,13 @@ class Project(AbstractWrapperObject):
                         getDataObj(obj)._finaliseAction(action)
 
     def _finaliseApiRename(self, wrappedData):
-        """Reset Finalise rename - called from APi object (for API notifiers)
+        """Reset Finalise rename - called from API object (for API notifiers)
         """
-
+        # Should be handled by decorators
         if self._apiNotificationBlanking == 0:
-            obj = self._data2Obj.get(wrappedData)
-            obj._finaliseAction('rename')
+            getLogger().debug2(f'***   SHOULD THIS BE CALLED? {self._data2Obj.get(wrappedData)}')
+            # obj = self._data2Obj.get(wrappedData)
+            # obj._finaliseAction('rename')
 
     def _modifiedLink(self, dummy, classNames: typing.Tuple[str, str]):
         """ call link-has-changed notifiers

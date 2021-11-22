@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-13 10:56:11 +0000 (Sat, November 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-22 12:39:43 +0000 (Mon, November 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -398,21 +398,22 @@ class AbstractWrapperObject(NotifierBase):
             raise ValueError('%s: None not allowed for %r' %
                              (cls.__name__, attribName))
 
-        if not isinstance(value, str):
-            raise ValueError('%s: %r must be a string' %
-                             (cls.__name__, attribName))
+        if value is not None:
+            if not isinstance(value, str):
+                raise ValueError('%s: %r must be a string' %
+                                 (cls.__name__, attribName))
 
-        if len(value) == 0 and not allowEmpty:
-            raise ValueError('%s: %r must be set' %
-                             (cls.__name__, attribName))
+            if len(value) == 0 and not allowEmpty:
+                raise ValueError('%s: %r must be set' %
+                                 (cls.__name__, attribName))
 
-        if Pid.altCharacter in value:
-            raise ValueError('%s: Character %r not allowed in %r; got %r' %
-                             (cls.__name__, Pid.altCharacter, attribName, value))
+            if Pid.altCharacter in value:
+                raise ValueError('%s: Character %r not allowed in %r; got %r' %
+                                 (cls.__name__, Pid.altCharacter, attribName, value))
 
-        if not allowWhitespace and commonUtil.contains_whitespace(value):
-            raise ValueError('%s: Whitespace not allowed in %r; got %r' %
-                             (cls.__name__, attribName, value))
+            if not allowWhitespace and commonUtil.contains_whitespace(value):
+                raise ValueError('%s: Whitespace not allowed in %r; got %r' %
+                                 (cls.__name__, attribName, value))
 
     # @staticmethod
     # def _nextAvailableName(cls, project):
@@ -1304,10 +1305,8 @@ class AbstractWrapperObject(NotifierBase):
 
     def _finaliseAction(self, action: str):
         """Do wrapper level finalisation, and execute all notifiers
-
         action is one of: 'create', 'delete', 'change', 'rename'"""
 
-        # print(f'>>>  _finaliseAction {self} - {action}')
         # Special case - always update _ids
         if action == 'rename':
             try:

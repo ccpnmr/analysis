@@ -5,7 +5,8 @@ Module Documentation here
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-04-14 19:56:58 +0100 (Wed, April 14, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-11-22 12:39:43 +0000 (Mon, November 22, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -47,7 +48,7 @@ class PeakListCreationTest(WrapperTesting):
         self.assertIs(self.spectrum1.peakLists[1], peakList)
 
         peakList1 = self.spectrum1.peakLists[0]
-        peakPos = [(0.1*xx, 0.1*xx) for xx in range(0, 5)]
+        peakPos = [(0.1 * xx, 0.1 * xx) for xx in range(0, 5)]
         peakList1Peaks = [peakList1.newPeak(ppmPositions=pk) for pk in peakPos]
 
         peakList2 = self.spectrum2.peakLists[0]
@@ -63,7 +64,7 @@ class PeakListCreationTest(WrapperTesting):
 
         pkCluster.addPeaks(peaks=peakList2.peaks)
         self.assertEqual(len(pkCluster.peaks), 10)
-        self.assertListEqual(peakList1Peaks+peakList2Peaks, list(pkCluster.peaks))
+        self.assertListEqual(peakList1Peaks + peakList2Peaks, list(pkCluster.peaks))
 
         pkCluster.removePeaks(peaks=peakList1.peaks)
         self.assertEqual(len(pkCluster.peaks), 5)
@@ -78,9 +79,9 @@ class PeakListCreationTest(WrapperTesting):
         with self.assertRaisesRegexp(TypeError, 'is not of type Peak'):
             pkCluster.removePeaks(peaks=12)
 
-        with self.assertRaisesRegexp(TypeError, 'PeakList object is not iterable'):
+        with self.assertRaisesRegexp(TypeError, 'is not of type Peak'):
+            # makeIterableList was modified to exclude traits
             pkCluster.removePeaks(peaks=peakList3)
 
         with self.assertRaisesRegexp(TypeError, 'is not of type Peak'):
             pkCluster.removePeaks(peaks=['not a peak'])
-

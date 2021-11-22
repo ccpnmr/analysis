@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-04 13:25:03 +0000 (Thu, November 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-22 12:39:42 +0000 (Mon, November 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -318,8 +318,8 @@ class ChemicalShift(NotifierBase):
             return
 
         if value is not None:
-            # check the new value is valid
-            _nmrAtom = self._project.getByPid(value) if isinstance(value, str) else value
+            # check the new value is valid - allow core object, str or Pid
+            _nmrAtom = self._project.getByPid(value) if isinstance(value, (str, type(Pid))) else value
             if not _nmrAtom:
                 raise ValueError(f'{self.className}.nmrAtom: {value} not found')
             if _nmrAtom == nat:
@@ -330,6 +330,7 @@ class ChemicalShift(NotifierBase):
                 raise ValueError(f'{self.className}.nmrAtom: {value} must be of type NmrAtom')
             if self._chemicalShiftList._searchChemicalShifts(nmrAtom=_nmrAtom):
                 raise ValueError(f'{self.className}.nmrAtom: {_nmrAtom.pid} already exists')
+            value = _nmrAtom
 
         with undoStackBlocking() as addUndoItem:
             if _oldNmrAt is None:

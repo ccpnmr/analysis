@@ -34,7 +34,7 @@ def convertNmrChain1to3LetterCode(nmrChain, molType='protein'):
         if len(nmrResidue.residueType) == 1:
             newNmrResidueName = convertResidueCode(nmrResidue.residueType, inputCodeType='oneLetter', outputCodeType='threeLetter', molType=molType)
             try:
-                nmrResidue.rename('.'.join([nmrResidue.sequenceCode, newNmrResidueName]))
+                nmrResidue.rename(nmrResidue.sequenceCode, newNmrResidueName)
             except Exception as err:
                 print('Error renaming NmrResidue %s.' %nmrResidue.pid, err)
         else:

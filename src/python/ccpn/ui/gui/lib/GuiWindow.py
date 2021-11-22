@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-12 13:59:23 +0000 (Fri, November 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-22 16:51:30 +0000 (Mon, November 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -477,11 +477,16 @@ class GuiWindow():
 
             if not spectrumDisplay.is1D:
                 for strip in spectrumDisplay.strips:
+                    _update = False
                     for spectrumView in strip.spectrumViews:
-                        spectrumView.traceScale *= scale
+                        if spectrumView.traceScale is not None:
+                            # may not have been initialised as no trace
+                            spectrumView.traceScale *= scale
+                            _update = True
 
-                    # spawn a redraw of the strip
-                    strip._updatePivot()
+                    if _update:
+                        # spawn a redraw of the strip
+                        strip._updatePivot()
 
     def traceScaleUp(self, window: 'GuiWindow', scale=1.4):
         """

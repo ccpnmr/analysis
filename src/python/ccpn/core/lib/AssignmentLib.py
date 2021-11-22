@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-29 17:34:05 +0100 (Wed, September 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-22 17:49:17 +0000 (Mon, November 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -197,7 +197,7 @@ def assignBetas(nmrResidue: NmrResidue, peaks: typing.List[Peak], axisCode='C'):
         peaks[0].assignDimension(axisCode=axisCode, value=[nmrResidue.fetchNmrAtom(name='CB')])
 
 
-def getNmrResiduePrediction(nmrResidue: NmrResidue, chemicalShiftList: ChemicalShiftList, prior: float = 0.05, resShifts=None) -> list:
+def getNmrResiduePrediction(nmrResidue: NmrResidue, chemicalShiftList: ChemicalShiftList, prior: float = 0.05, chemicalShifts=None) -> list:
     """
     Takes an NmrResidue and a ChemicalShiftList and returns a dictionary of the residue type to
     confidence levels for that NmrResidue.
@@ -205,15 +205,15 @@ def getNmrResiduePrediction(nmrResidue: NmrResidue, chemicalShiftList: ChemicalS
 
     predictions = {}
     spinSystem = nmrResidue._wrappedData
-    shiftList = chemicalShiftList._wrappedData
 
-    if not resShifts:
-        resShifts = [(resonance, shift) for resonance in spinSystem.resonances
-                     for shift in [resonance.findFirstShift(parentList=shiftList)] if shift]
+    if not chemicalShifts:
+        # get the non-empty shifts of the nmrAtoms
+        chemicalShifts = [(nmrAtom._wrappedData, shift) for nmrAtom in nmrResidue.nmrAtoms
+                     for shift in nmrAtom.chemicalShifts if shift.chemicalShiftList == chemicalShiftList and shift.value is not None]
 
     for code in CCP_CODES:
         predictions[code] = float(getSpinSystemResidueProbability(spinSystem, chemicalShiftList._wrappedData, code,
-                                                                  prior=prior, resShifts=resShifts))
+                                                                  prior=prior, resShifts=chemicalShifts))
     tot = sum(predictions.values())
     refinedPredictions = {}
     for code in CCP_CODES:
@@ -355,10 +355,10 @@ def propagateAssignments(peaks: typing.List[Peak] = None, referencePeak: Peak = 
     #     spectrum.assignmentTolerances = spectrumTolerances
     shiftRanges = {}
     for peak in peaksIn:
-        for i, axisCode in enumerate(peak.peakList.spectrum.axisCodes):
+        for i, axisCode in enumerate(peak.spectrum.axisCodes):
 
             if axisCode not in shiftRanges:
-                shiftMin, shiftMax = sorted(peak.peakList.spectrum.spectrumLimits[i])
+                shiftMin, shiftMax = sorted(peak.spectrum.spectrumLimits[i])
                 shiftRanges[axisCode] = (shiftMin, shiftMax)
 
             else:
@@ -367,7 +367,7 @@ def propagateAssignments(peaks: typing.List[Peak] = None, referencePeak: Peak = 
             if i < len(tolerances):
                 tolerance = tolerances[i]
             else:
-                tolerance = peak.peakList.spectrum.assignmentTolerances[i]
+                tolerance = peak.spectrum.assignmentTolerances[i]
 
             pValue = peak.position[i]
 
@@ -381,7 +381,7 @@ def propagateAssignments(peaks: typing.List[Peak] = None, referencePeak: Peak = 
 
             for nmrAtom in dimNmrAtoms[axisCode]:
                 if nmrAtom not in extantNmrAtoms:
-                    shiftList = peak.spectrum.chemicalShiftList
+                    shiftList = peak.chemicalShiftList
                     shift = shiftList.getChemicalShift(nmrAtom)
 
                     if shift:
@@ -412,14 +412,13 @@ def getAllSpinSystems(project: Project, nmrResidues: typing.List[NmrResidue],
         apiProject = project._wrappedData
         apiSpinSystems = [nmrResidue._wrappedData for nmrResidue in nmrResidues]
         apiChains = [chain._wrappedData for chain in chains]
-        apiShiftLists = [shiftList._wrappedData for shiftList in shiftLists]
 
-        apiShifts = [[(apiSpinSystem, [(resonance, shift)
-                                       for resonance in apiSpinSystem.resonances
-                                       for shift in [resonance.findFirstShift(parentList=apiShiftList)] if shift])
-                      for apiSpinSystem in apiSpinSystems
+        shifts = [[(nmrResidue._wrappedData, [(nmrAtom._wrappedData, shift)
+                                       for nmrAtom in nmrResidue.nmrAtoms
+                                       for shift in nmrAtom.chemicalShifts if shift.chemicalShiftList == shiftList and shift.value is not None])
+                      for nmrResidue in nmrResidues
                       ]
-                     for apiShiftList in apiShiftLists]
+                     for shiftList in shiftLists]
 
         chainCodes = [[('Cyss' if (residue.ccpCode == 'Cys' and residue.descriptor == 'link:SG') else residue.ccpCode, residue.molType)
                        for residue in apiChain.residues] for apiChain in apiChains]
@@ -439,7 +438,7 @@ def getAllSpinSystems(project: Project, nmrResidues: typing.List[NmrResidue],
             hash = ii
             probHash = probs[hash] = {}
 
-            for jj, _spinSystems in enumerate(apiShifts):
+            for jj, _spinSystems in enumerate(shifts):
 
                 spinHash = probHash[jj] = {}
 
@@ -574,7 +573,8 @@ def getAllSpinSystems(project: Project, nmrResidues: typing.List[NmrResidue],
         return matchesDict
 
     except Exception as es:
-        print(str(es))
+        getLogger().warning(str(es))
+        return {}
 
 
 def getSpinSystemsLocation(project: Project, nmrResidues: typing.List[NmrResidue],
@@ -595,32 +595,22 @@ def getSpinSystemsLocation(project: Project, nmrResidues: typing.List[NmrResidue
     shiftList = chemicalShiftList._wrappedData
 
     scoreMatrix = []
-
     ccpCodes = getCcpCodes(chain)
-
     N = len(ccpCodes)
 
-    for spinSystem0 in spinSystems:
-        # scoreList = [None] * N
+    for nmrResidue in nmrResidues:
+        spinSystem0 = nmrResidue._wrappedData
 
         if spinSystem0:
-            # shifts = []
-            # for resonance in spinSystem0.resonances:
-            #     shift = resonance.findFirstShift(parentList=shiftList)
-            #     if shift:
-            #         shifts.append(shift)
-            shifts = [(resonance, shift) for resonance in spinSystem0.resonances for shift in [resonance.findFirstShift(parentList=shiftList)] if shift]
-            # if shifts != _shifts: raise RuntimeError("shift difference")
+            shifts = [(nmrAtom._wrappedData, shift)
+                      for nmrAtom in nmrResidue.nmrAtoms
+                      for shift in nmrAtom.chemicalShifts
+                      if shift and shift.chemicalShiftList == shiftList and shift.value is not None]
 
             scores = getSpinSystemScore(spinSystem0, shifts, chain, shiftList)
-
-            # for i, ccpCode in enumerate(ccpCodes):
-            #     scoreList[i] = (scores[ccpCode], ccpCode)
             scoreList = [(scores[ccpCode], ccpCode) for ccpCode in ccpCodes]
-            # if scoreList != _scoreList: raise RuntimeError("scoreList difference")
 
             scoreList.sort(reverse=True)
-            # scoreList.reverse()
         else:
             scoreList = [None] * N
 

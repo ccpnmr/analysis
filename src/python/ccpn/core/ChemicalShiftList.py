@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-04 20:12:04 +0000 (Thu, November 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-23 13:56:39 +0000 (Tue, November 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -273,7 +273,8 @@ class ChemicalShiftList(AbstractWrapperObject):
             _oldNmr = set()
         return _oldNmr
 
-    def _OldChemicalShifts(self):
+    @property
+    def _oldChemicalShifts(self):
         """STUB: hot-fixed later
         """
         return ()
@@ -362,16 +363,14 @@ class ChemicalShiftList(AbstractWrapperObject):
             _row = df.iloc[ii]
 
             # create a new shift with the uniqueId from the dataframe
-            shift = _newShift(ncsl, _ignoreUniqueId=True)
-            _uniqueId = int(_row[CS_UNIQUEID])
-            shift._resetUniqueId(_uniqueId)
+            shift = _newShift(ncsl, _uniqueId=int(_row[CS_UNIQUEID]))
             ncsl._shifts.append(shift)
 
             # add the new object to the _pid2Obj dict
             self.project._finalisePid2Obj(shift, 'create')
 
             # add the shift to the nmrAtom
-            shift._restoreObject()
+            shift._updateNmrAtomShifts()
 
         ncsl.autoUpdate = autoUpdate
         for att in ['unit', 'isSimulated', 'comment']:
@@ -554,7 +553,12 @@ class ChemicalShiftList(AbstractWrapperObject):
                     # ignore deleted as not needed - this SHOULDN'T happen here, but just to be safe
                     shifts.append(newRow)
 
-                # delete the old shift
+                    # get the id from the shift and update the _uniqueId dict
+                    _uniqueId = newRow.uniqueId
+                    _nextId = self.project._queryNextUniqueIdValue(CS_CLASSNAME)
+                    self.project._setNextUniqueIdValue(CS_CLASSNAME, 1 + max(_nextId, _uniqueId))
+
+                # delete the old shift object
                 oldShift.delete()
 
             # instantiate the dataframe
@@ -609,26 +613,18 @@ class ChemicalShiftList(AbstractWrapperObject):
 
             chemicalShiftList._wrappedData.data = _data
 
-            maxUniqueId = project._queryNextUniqueIdValue(CS_CLASSNAME)
             for ii in range(len(_data)):
                 _row = _data.iloc[ii]
 
                 # create a new shift with the uniqueId from the old shift
-                shift = _newShift(chemicalShiftList, _ignoreUniqueId=True)
-                _uniqueId = int(_row[CS_UNIQUEID])
-                shift._resetUniqueId(_uniqueId)
-
-                # set the new _nextUniqueId for the chemicalsShifts
-                maxUniqueId = max(maxUniqueId, _uniqueId)
-                project._setNextUniqueIdValue(CS_CLASSNAME, maxUniqueId + 1)
-
+                shift = _newShift(chemicalShiftList, _uniqueId=int(_row[CS_UNIQUEID]))
                 chemicalShiftList._shifts.append(shift)
 
                 # add the new object to the _pid2Obj dict
                 project._finalisePid2Obj(shift, 'create')
 
                 # restore the nmrAtom, etc., for the new shift
-                shift._restoreObject()
+                shift._updateNmrAtomShifts()
 
         return chemicalShiftList
 
@@ -639,11 +635,16 @@ class ChemicalShiftList(AbstractWrapperObject):
 
     @logCommand(get='self')
     def newChemicalShift(self, value: float = None, valueError: float = None, figureOfMerit: float = 1.0,
-                         nmrAtom: Union[NmrAtom, str, None] = None,
+                         nmrAtom: Union[NmrAtom, str, Pid.Pid, None] = None,
                          chainCode: str = None, sequenceCode: str = None, residueType: str = None, atomName: str = None,
                          comment: str = None
                          ):
         """Create new ChemicalShift within ChemicalShiftList.
+
+        An nmrAtom can be attached to the shift as required.
+        nmrAtom can be core object, Pid or pid string
+        If attached (chainCode, sequenceCode, residueType, atomName) will be derived from the nmrAtom.pid
+        If nmrAtom is not specified, (chainCode, sequenceCode, residueType, atomName) can be set as string values.
 
         See the ChemicalShift class for details.
 
@@ -651,15 +652,21 @@ class ChemicalShiftList(AbstractWrapperObject):
         :param valueError: float
         :param figureOfMerit: float, default = 1.0
         :param nmrAtom: nmrAtom as object or pid, or None if not required
+        :param chainCode:
+        :param sequenceCode:
+        :param residueType:
+        :param atomName:
         :param comment: optional comment string
         :return: a new ChemicalShift tuple.
         """
 
         data = self._wrappedData.data
         if nmrAtom:
-            _nmrAtom = self.project.getByPid(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom
+            _nmrAtom = self.project.getByPid(nmrAtom) if isinstance(nmrAtom, (str, type(Pid))) else nmrAtom
             if not _nmrAtom:
                 raise ValueError(f'ChemicalShiftList.newChemicalShift: nmrAtom {_nmrAtom} not found')
+            nmrAtom = _nmrAtom
+
         if data is not None and nmrAtom and nmrAtom.pid in list(data[CS_NMRATOM]):
             raise ValueError(f'ChemicalShiftList.newChemicalShift: nmrAtom {nmrAtom} already exists')
 
@@ -693,8 +700,7 @@ class ChemicalShiftList(AbstractWrapperObject):
 
         # create new shift object
         # new Shift only needs chemicalShiftList and uniqueId - properties are linked to dataframe
-        shift = _newShift(self, _ignoreUniqueId=True)
-        shift._resetUniqueId(int(_nextUniqueId))
+        shift = _newShift(self, _uniqueId=int(_nextUniqueId))
         if nmrAtom:
             shift.nmrAtom = nmrAtom
 

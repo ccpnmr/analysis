@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-22 12:39:42 +0000 (Mon, November 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-23 13:56:39 +0000 (Tue, November 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -80,12 +80,17 @@ class ChemicalShift(NotifierBase):
     # the attribute name used by current
     _currentAttributeName = 'chemicalShifts'
 
-    def __init__(self, chemicalShiftList, _ignoreUniqueId=False):
+    def __init__(self, chemicalShiftList, _uniqueId):
         """Create a new instance of v3 Shift
+
+        _unique Id links the shift to the dataFrame storage and MUST be specified
+        before the shift can be used
         """
         self._chemicalShiftList = chemicalShiftList
         self._project = chemicalShiftList.project
-        self._uniqueId = None if _ignoreUniqueId else self.project._getNextUniqueIdValue(CS_CLASSNAME)
+        if not isinstance(_uniqueId, (int, type(None))):
+            raise ValueError(f'{self.className}.__init__: uniqueId {_uniqueId} must be int or None')
+        self._uniqueId = _uniqueId
         self._deletedId = None
         self._isDeleted = False
         # this should never change as cannot rename
@@ -304,7 +309,7 @@ class ChemicalShift(NotifierBase):
     @nmrAtom.setter
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreUndoBlock()
-    def nmrAtom(self, value: Union[NmrAtom, str, None]):
+    def nmrAtom(self, value: Union[NmrAtom, str, Pid.Pid, None]):
         """Set the nmrAtom for the chemicalShift
         nmrAtom can be core object of type NmrAtom, or string pid or None
 
@@ -566,8 +571,8 @@ class ChemicalShift(NotifierBase):
         self.chemicalShiftList.deleteChemicalShift(uniqueId=self._uniqueId)
         # raise RuntimeError(f'{self.className}.delete: Please use ChemicalShiftList.deleteChemicalShift()')  # optional error-trap
 
-    def _restoreObject(self):
-        """enable a notifier on the attached nmrAtom
+    def _updateNmrAtomShifts(self):
+        """Restore the links to the nmrAtoms
         CCPN Internal - called from first creation from _restoreObject
         """
         _nmrAtom = self.nmrAtom
@@ -688,19 +693,16 @@ class ChemicalShift(NotifierBase):
                         redo=partial(chemicalShiftList._undoRedoDeletedShifts, _newDeletedShifts))
 
 
-def _newChemicalShift(chemicalShiftList, _ignoreUniqueId: bool = False
+def _newChemicalShift(chemicalShiftList, _uniqueId: Optional[int] = None
                       ):
     """Create a new chemicalShift attached to the chemicalShiftList.
 
-    An nmrAtom can be attached to the shift as required.
-    If attached (chainCode, sequenceCode, residueType, atomName) will be derived from the nmrAtom.pid
-    If nmrAtom suplied as None, they can be set as string values.
-
     :param chemicalShiftList: parent chemicalShiftList
+    :param _uniqueId: _unique int identifier
     :return: a new ChemicalShift instance.
     """
 
-    result = ChemicalShift(chemicalShiftList, _ignoreUniqueId=_ignoreUniqueId)
+    result = ChemicalShift(chemicalShiftList, _uniqueId=_uniqueId)
     if result is None:
         raise RuntimeError('ChemicalShiftList._newChemicalShift: unable to generate new ChemicalShift item')
 

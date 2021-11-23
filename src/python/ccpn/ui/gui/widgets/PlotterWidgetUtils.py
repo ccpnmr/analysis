@@ -31,7 +31,6 @@ import matplotlib.backend_bases as backends
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.backend_tools import ToolBase, ToolToggleBase, ZoomPanBase, cursors, _views_positions
-from matplotlib.backends.qt_editor.formsubplottool import UiSubplotTool
 from matplotlib.backend_managers import ToolManager
 import matplotlib.pyplot as plt
 from PyQt5 import QtWidgets, QtCore
@@ -114,6 +113,7 @@ class PyPlotToolbar(ToolBar, backends.NavigationToolbar2):
         self.base_scale = 2.
         self.scrollthresh = .5  # .5 second scroll threshold
         self.lastscroll = time.time() - self.scrollthresh
+        self._initToolbarActions()
 
     def _getToolBarDefs(self):
         """
@@ -161,7 +161,7 @@ class PyPlotToolbar(ToolBar, backends.NavigationToolbar2):
             )
         return toolBarDefs
 
-    def _init_toolbar(self):
+    def _initToolbarActions(self):
         for v in self._getToolBarDefs():
             if len(v) == 2:
                 if isinstance(v[1], od):

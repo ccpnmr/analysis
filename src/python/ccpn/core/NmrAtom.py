@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-22 16:53:56 +0000 (Mon, November 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-23 17:21:29 +0000 (Tue, November 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -418,10 +418,19 @@ class NmrAtom(AbstractWrapperObject):
         """
         return parent._wrappedData.sortedResonances()
 
-    def _setApiName(self, name):
-        # set a serial format name of the form ?@<n> from the current serial number
-        # functionality provided by the api
-        self._wrappedData.name = None
+    @renameObject()
+    def _setApiName(self, value):
+        """Set a serial format name of the form ?@<n> from the current serial number
+        functionality provided by the api
+        CCPN Internal - should only be used during nef import
+        """
+        oldName = self._wrappedData.name
+        self._oldPid = self.pid
+
+        self._wrappedData.name = value
+        self._resetIds()
+
+        return (oldName,)
 
     def _makeUniqueName(self) -> str:
         """Generate a unique name in the form @n (e.g. @_123) or @symbol_n (e.g. @H_34)

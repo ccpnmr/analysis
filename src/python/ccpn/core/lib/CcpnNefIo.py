@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-12 09:22:34 +0000 (Fri, November 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-23 17:21:29 +0000 (Tue, November 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -122,7 +122,7 @@ DEFAULTRESTRAINTLINKLOAD = False
 REGEXREMOVEENDQUOTES = u'\`\d*`+?'
 REGEXPREFIXQUOTEDNUMBER = u'^\`(\d+)\`'
 REGEXPOSTFIXQUOTEDNUMBER = u'\`(\d+)\`$'
-REGEXCHECKNMRATOM = u'^\?\@\d+$|^\w+\@\d+$'  # u'^\?\@\d+$'
+REGEXCHECKNMRATOM = u'^\?\@\d+$|^\w+\@\d+$'
 
 NEFEXTENSION = '.nef'
 
@@ -6500,8 +6500,10 @@ class CcpnNefReader(CcpnNefContent):
                 nmrAtom._resetSerial(row['serial'])
                 if _match:
                     # reset name based on the serial number of the nmrAtom
-                    # as newNmrAtom creates with name 'nmrAtom_<n>'
-                    nmrAtom._setApiName(_name)
+                    # as newNmrAtom creates with name 'nmrAtom@<n>'
+                    # can reset the name and _id as serial number is valid
+                    nmrAtom._setApiName(None)
+
             except Exception as es:
                 self.warning("Could not set serial of nmrAtom %s" % nmrAtom,
                              saveFrame[nmrAtomLoopName]

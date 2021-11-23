@@ -24,11 +24,9 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 #=========================================================================================
 
 import os
-from os.path import isfile, join
-import pathlib
 import pandas as pd
 from ccpn.util.Logging import getLogger
-
+from ccpn.util.Path import aPath, joinPath
 
 ################################       Excel Headers Warning      ######################################################
 """The excel headers for sample, sampleComponents, substances properties are named as the appear on the wrapper.
@@ -110,9 +108,9 @@ def makeTemplate(path, fileName='lookupTemplate.xlsx', ):
     :param fileName: name of template
     :return:  the file path where is saved
     """
-    if path is not None:
-        path = path + '/' if not path.endswith('/') else path
-    file = path + fileName
+    if path is None:
+       raise ValueError("path cannot be None.")
+    file = joinPath(path, fileName)
     substanceDf = getDefaultSubstancesDF()
     sampleDF = getDefaultSampleDF()
     writer = pd.ExcelWriter(file, engine='xlsxwriter')
@@ -136,29 +134,30 @@ def _filterBrukerExperiments(brukerFilePaths, fileType='1r', multipleExp=False, 
     :param brukerFilePaths:
     :param fileType:
     :param multipleExp: whether or not there are subdirectories after the spectrum top dir before the  acqu files and pdata dir (even one).
-                        eg.a)  SpectumDir > pdata > 1 > 1r     ====  multipleExp=False
-                        eg.b)  SpectumDir > 1 > pdata > 1 > 1r ====  multipleExp=True
+                        eg.a)  SpectrumDir > pdata > 1 > 1r     ====  multipleExp=False
+                        eg.b)  SpectrumDir > 1 > pdata > 1 > 1r ====  multipleExp=True
 
     :param expDirName: if there are: str of folder name. e.g. '1','2'... '700'
-                        eg)  SpectumDir > |1|   > pdata > 1 > 1r
+                        eg)  SpectrumDir > |1|   > pdata > 1 > 1r
                                         > |2|   > pdata > 1 > 1r
                                         > |700| > pdata > 1 > 1r
                             Default: 1
     :param procDirName: dir name straight
-                         eg)  SpectumDir > 1  > pdata > |1| > 1r
+                         eg)  SpectrumDir > 1  > pdata > |1| > 1r
                                                       > |2| > 1r
                         default: 1
     :return: list of filtered global path
     """
     filteredPaths = []
     for path in brukerFilePaths:
-        if path.endswith(fileType):
-            d = os.path.dirname(path)  ## directory of  1r file has to be as defaultProcsNumber
-            if d.endswith(procDirName):
+        path = aPath(path)
+        if path.basename == fileType:
+            dirBasename = path.filepath.basename  ## directory of  1r file has to be as defaultProcsNumber
+            if dirBasename == procDirName:
                 if multipleExp:  # search for other expeiments and take only the one of interest.
-                    pdata = os.path.dirname(d)
-                    expP = os.path.dirname(pdata)
-                    if expP.endswith(expDirName):
+                    expP = path.filepath
+                    # pdata = expP.parents[0]
+                    if expP.basename == expDirName:
                         filteredPaths.append(path)
                 else:
                     filteredPaths.append(path)
@@ -200,7 +199,7 @@ class ExcelReader(object):
         from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
 
         self._project = project
-        self.excelPath = excelPath
+        self.excelPath = aPath(excelPath)
         self.pandasFile = pd.ExcelFile(self.excelPath)
         self.sheets = self._getSheets(self.pandasFile)
         self.dataframes = self._getDataFrameFromSheets(self.sheets)
@@ -372,43 +371,37 @@ class ExcelReader(object):
 
     def _loadSpectraForSheet(self, dictLists):
         """
-        If only the file name is given:
-        - All paths are relative to the excel file! So the spectrum file of bruker top directory must be in the same directory
-        of the excel file.
-        If the full path is given, from the root to the spectrum file name, then it uses that.
+        Paths in an Excel sheet can be:
+            - absolute (full path)
+            - relative (path starts from the excel directory)
+            - file name only (path is reconstructed)
         """
         _args = []
-        # todo change hardcoded / for path
         if self._project is not None:
             for objDict in dictLists:
                 for obj, dct in objDict.items():
                     for key, value in dct.items():
                         if key == SPECTRUM_PATH:
-                            value = str(value)  # no point of being int/float
-                            if os.path.exists(value):
-                                # if isinstance(value, str):  # means it's a pathlike str### the full path is given:
-                                self._addSpectrum(filePath=value, dct=dct, obj=obj)
+                            excelSpectrumPath = aPath(str(value))
+                            if excelSpectrumPath.exists():
+                                ### We have the absolute (full path)
+                                self._addSpectrum(filePath=excelSpectrumPath, dct=dct, obj=obj)
+                            else:
+                                ### We are in a relative path scenario
+                                self.directoryPath = self.excelPath.filepath
+                                globalFilePath = aPath(joinPath(self.directoryPath, excelSpectrumPath))
+                                if globalFilePath.exists():
+                                    ### it is a folder, e.g Bruker type. We can handle it already.
+                                    self._addSpectrum(filePath=globalFilePath, dct=dct, obj=obj)
+                                else:
+                                    ### it is a single spectrum file name or relative path for a single file,
+                                    ### e.g.: "mySpectrum" or "mySpectrum.hdf5" or "myDir/mySpectrum.hdf5"
+                                    globalDirFilePath = globalFilePath.filepath
+                                    globalfilePaths = globalDirFilePath.listDirFiles()
+                                    for _globalfilePath in globalfilePaths:
+                                        if _globalfilePath.basename == excelSpectrumPath.basename:
+                                            self._addSpectrum(filePath=_globalfilePath, dct=dct, obj=obj)
 
-                            else:  ### needs to find the path from the excel file:
-                                self.directoryPath = str(pathlib.Path(self.excelPath).parent)
-                                filePath = self.directoryPath + '/' + str(value)
-                                if os.path.exists(filePath):  ### is a folder, e.g Bruker type. The project can handle.
-                                    self._addSpectrum(filePath=filePath, dct=dct, obj=obj)
-
-
-                                else:  ### is a spectrum file, The project needs to get the extension: e.g .hdf5
-                                    newFilePath = os.path.dirname(filePath)
-                                    try:
-                                        filesWithExtension = [f for f in os.listdir(newFilePath) if isfile(join(newFilePath, f))]
-                                        for fileWithExtension in filesWithExtension:
-                                            if len(os.path.splitext(fileWithExtension)) > 0:
-                                                if '/' in value:  # is a relative path from the excel plus file without extension
-                                                    value = value.split('/')[-1]
-                                                if os.path.splitext(fileWithExtension)[0] == value:
-                                                    filePath = newFilePath + '/' + fileWithExtension
-                                                    self._addSpectrum(filePath=filePath, dct=dct, obj=obj)
-                                    except Exception as e:
-                                        getLogger().warning(e)
 
     def _addSpectrum(self, filePath, dct, obj):
         """
@@ -419,11 +412,6 @@ class ExcelReader(object):
         name = dct.get(SPECTRUM_NAME)
         if not name:
             name = obj.name
-
-        # GWV 23/06/2021: Project._loadSpectrum does no longer exist
-        # if filePath.endswith('1r'):  # Not ideal implementation. But makes the loader much faster down the model by skipping internal loops.
-        #     data = self._project._loadSpectrum(filePath, 'Bruker', str(name))
-        # else:
 
         data = self._project.application.loadData(filePath)
         if data is not None and len(data) > 0:
@@ -443,7 +431,6 @@ class ExcelReader(object):
     def _linkSpectrumToObj(self, obj, spectrum, dct):
         from ccpn.core.Sample import Sample
         from ccpn.core.Substance import Substance
-        from ccpn.core.Spectrum import SERIESITEMS
 
         if isinstance(obj, Substance):
             obj.referenceSpectra += (spectrum,)
@@ -460,7 +447,7 @@ class ExcelReader(object):
                 # if spectrumGroup is not None: # this strategy is very slow. do not use here.
                 #     spectrumGroup.spectra += (spectrum,)
                 if SERIES in dct:  # direct insertion of series values for speed optimisation
-                    spectrum._setInternalParameter(SERIESITEMS, {'SG:' + str(value): dct[SERIES]})
+                    spectrum._setInternalParameter(spectrum._SERIESITEMS, {'SG:' + str(value): dct[SERIES]})
 
     def _fillSpectrumGroups(self):
         for sgName, spectra in self._tempSpectrumGroupsSpectra.items():

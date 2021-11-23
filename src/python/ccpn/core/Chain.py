@@ -614,11 +614,12 @@ def _newChainFromChemComp(project, chemComp,
             Note. Also a substance will be added in the project.
 
     """
-    from ccpn.util.Common import _incrementObjectName
     if chemComp:
         with undoBlock():
             root = project._wrappedData.root
-            moleculeName = _incrementObjectName(root, 'molecules', chemComp.ccpCode)
+            moleculeName = chemComp.ccpCode
+            while root.findFirstMolecule(name=moleculeName):
+                moleculeName = moleculeName + '_1'
             molecule = project._wrappedData.root.newMolecule(name=moleculeName)
             chemCompVar = (chemComp.findFirstChemCompVar(linking='none') or chemComp.findFirstChemCompVar())
             molResidue = molecule.newMolResidue(seqCode=1, chemCompVar=chemCompVar)
@@ -627,7 +628,7 @@ def _newChainFromChemComp(project, chemComp,
             # will need to add to mcompp all possible info we can harvest from the chemcomp. This will appear in the substance
             # create a v3 chain. which is not frozen to changes.
             apiMolSystem = project._wrappedData.molSystem
-            chainCode = _incrementObjectName(project, Chain._pluralLinkName, chainCode)
+            chainCode = Chain._uniqueName(project, name=chainCode)
             newApiChain = apiMolSystem.newChain(molecule=molecule, code=chainCode)
             chain = project._data2Obj[newApiChain]
             if expandFromAtomSets:

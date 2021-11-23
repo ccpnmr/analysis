@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-17 21:07:35 +0000 (Wed, November 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-23 11:03:36 +0100 (Tue, November 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -137,11 +137,13 @@ class AbstractWrapperObject(NotifierBase):
     # Function to generate custom subclass instances -= overridden in some subclasses
     _factoryFunction = None
 
-    # A dict of (className, list[(versionString, updateFunction)]) (key, value) pairs.
+    # A dict of (className, list[(fromVersionString, toVersionString, updateFunction)]) (key, value) pairs.
     # updateFunction to be called (in _updateObject) after creation of the
-    # object if versionString <= _objectVersion; i.e. object needs updating.
+    # project if versionString <= _objectVersion; i.e. object needs updating.
     # The list for className is populated by the updateObject class decorator
     _updateFunctions = defaultdict(list)
+    # dict of update functions for the api part; to be called before object creation in _restoreObject
+    _updateApiFunctions = defaultdict(list)
 
     # Default values for parameters to 'new' function. Overridden in subclasses
     _defaultInitValues = None
@@ -846,15 +848,22 @@ class AbstractWrapperObject(NotifierBase):
         """Updates object from the _updateFunctions stack; to be populate by the
         updateObject decorator defined below
         """
-        # upgrade the object
+        # update the object
         logger = getLogger()
-        for version, func in self._updateFunctions[self.className]:
+        for fromVersion, toVersion, func in self._updateFunctions[self.className]:
             currentVersion = self._objectVersion
-            logger.debug('Updating %s: currentVersion: %s, version: %s, func: %s' %
-                         (self, currentVersion, version, func)
-                         )
-            if version <= currentVersion:
+
+            if fromVersion is not None and currentVersion < fromVersion:
+                raise RuntimeError('Error trying to update object from version %s to version %s; invalid current version %s' % \
+                                   (fromVersion, toVersion, currentVersion))
+            if currentVersion < toVersion:
+                logger.debug('Updating %s: fromVersion: %s, currentVersion: %s, toVersion: %s, func: %s' %
+                         (self, fromVersion, currentVersion, toVersion, func)
+                )
                 func(self)
+            self._objectVersion = toVersion
+
+        # we have now ran all the updates; hence the object is a at the current application version
         self._objectVersion = applicationVersion
 
     @classmethod
@@ -1430,13 +1439,13 @@ class AbstractWrapperObject(NotifierBase):
 AbstractWrapperObject.getByPid.__annotations__['return'] = AbstractWrapperObject
 
 
-def updateObject(version, updateFunction):
+def updateObject(fromVersion, toVersion, updateFunction):
     """Class decorator to register updateFunction for a core-class in the _updateFunctions list.
-    updateFunction updates version to the next higher version
-    updateFunction needs to set obj._objectVersion
+    updateFunction updates fromVersion to the next higher version toVersion
+    fromVersion can be None, in which case no initial check on objectVersion is done
 
     def updateFunction(obj)
-        obj: object that is being restored
+        obj: object that is being updated
     """
 
     def theDecorator(cls):
@@ -1445,7 +1454,7 @@ def updateObject(version, updateFunction):
         if not hasattr(cls, '_updateFunctions'):
             raise RuntimeError('class %s does not have the attribute _updateFunctions')
 
-        cls._updateFunctions[cls.className].append( (version, updateFunction) )
+        cls._updateFunctions[cls.className].append( (fromVersion, toVersion, updateFunction) )
         return cls
 
     return theDecorator

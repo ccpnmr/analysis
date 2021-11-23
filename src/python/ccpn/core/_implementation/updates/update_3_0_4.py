@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-17 21:07:35 +0000 (Wed, November 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-23 11:03:36 +0100 (Tue, November 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,8 +28,8 @@ __date__ = "$Date: 2021-11-10 10:28:41 +0000 (Wed, November 10, 2021) $"
 
 from ccpn.framework.Version import applicationVersion
 
-def _updateSpectrum_3_0_4(spectrum):
-    """Update the _ccpnInternal settings from version 3.0.4 -> 3.1.0.alpha2
+def _updateSpectrum_3_0_4_to_3_1_0(spectrum):
+    """Update the _ccpnInternal settings from version 3.0.4 -> 3.1.0
     """
     _updateSpectrum_settings(spectrum)
     _updateSpectrum_NC_proc(spectrum)

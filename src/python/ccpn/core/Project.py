@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-18 17:36:46 +0000 (Thu, November 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-23 11:03:35 +0100 (Tue, November 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -330,7 +330,17 @@ class Project(AbstractWrapperObject):
         :param path: a ccpn project-path
         :return: True/False
         """
-        projectHistory = getProjectSaveHistory(path)
+        from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
+        from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
+
+        # Check for V2 project; always needs upgrading
+        if (dataloader := CcpNmrV2ProjectDataLoader.checkForValidFormat(path)) is not None:
+            return True
+
+        if (dataloader := CcpNmrV3ProjectDataLoader.checkForValidFormat(path)) is None:
+            raise ValueError('Path "%s" doe not define a valid ccpn project' % path)
+
+        projectHistory = getProjectSaveHistory(dataloader.path)
         return projectHistory.lastSavedVersion <= '3.0.4'
 
     def _checkProjectSubDirectories(self):
@@ -1124,7 +1134,8 @@ class Project(AbstractWrapperObject):
         """Call the _updateObject method on all objects, including self
         """
         self._updateObject()
-        for obj in self._getAllDecendants():
+        objs = self._getAllDecendants()
+        for obj in objs:
             obj._updateObject()
 
     # def _checkUpgradedFromV2(self):

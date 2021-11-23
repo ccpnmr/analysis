@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-17 21:07:35 +0000 (Wed, November 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-23 11:03:36 +0100 (Tue, November 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -72,7 +72,7 @@ import numpy
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.api.ccp.general import DataLocation
 
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject, updateObject
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.lib import Pid
 
@@ -120,9 +120,10 @@ MAXALIASINGRANGE = 3
 # Spectrum class
 #=========================================================================================
 
-from ccpn.core._implementation.updates.update_3_0_4 import _updateSpectrum_3_0_4
+from ccpn.core._implementation.updates.update_3_0_4 import _updateSpectrum_3_0_4_to_3_1_0
+from ccpn.core._implementation.AbstractWrapperObject import updateObject
 
-# @updateObject('3.0.4', _updateSpectrum_3_0_4)
+@updateObject('3.0.4', '3.1.0', _updateSpectrum_3_0_4_to_3_1_0)
 class Spectrum(AbstractWrapperObject, CcpNmrJson):
     """A Spectrum object contains all the stored properties of an NMR spectrum, as well as the
     path to the NMR (binary) data file. The Spectrum object has methods to get the binary data

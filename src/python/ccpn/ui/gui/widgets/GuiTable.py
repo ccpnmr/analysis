@@ -1502,11 +1502,12 @@ class GuiTable(TableWidget, Base):
         # outside of the with to spawn a repaint
         self.show()
 
-    def getDataFromFrame(self, table, df, colDefs, columnsMap):
+    def _getDataFromFrame(self, table, df, colDefs, columnsMap):
         """
+        columnsMap a dictionary, key = the columnName as in the raw dataFrame and value = the columnName
+        to show in the new Guitable
         """
         objects = []
-
         defDict = defaultdict(list)
         newColumns = []
         for rawDFColumnName, newDFcolumnName in columnsMap.items():
@@ -1516,8 +1517,27 @@ class GuiTable(TableWidget, Base):
                 objects.append(theSeries)
                 newColumns.append(newDFcolumnName)
         newDf = pd.DataFrame(defDict, columns=newColumns)
-
         return DataFrameObject(dataFrame=newDf,
+                               objectList=objects or [],
+                               columnDefs=colDefs or [],
+                               table=table)
+
+    def getDataFromFrame(self, table, df, colDefs, columnsMap=None):
+        """
+        """
+        if columnsMap:
+            return self._getDataFromFrame(table, df, colDefs, columnsMap)
+
+        objects = []
+        allItems = []
+        for index, row in df.iterrows():
+            listItem = OrderedDict()
+            for header in colDefs.columns:
+                listItem[header.headerText] = header.getValue(row)
+            allItems.append(listItem)
+            objects.append(row)
+
+        return DataFrameObject(dataFrame=pd.DataFrame(allItems, columns=colDefs.headings),
                                objectList=objects or [],
                                columnDefs=colDefs or [],
                                table=table)

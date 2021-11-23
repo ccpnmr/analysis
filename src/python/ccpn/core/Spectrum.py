@@ -50,8 +50,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-18 18:20:21 +0000 (Thu, November 18, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-11-23 11:38:08 +0100 (Tue, November 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -100,6 +100,7 @@ from ccpn.util.traits.CcpNmrTraits import Int, Float, Instance, Any
 from ccpn.core.lib.SpectrumLib import SpectrumDimensionTrait
 
 from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY
+from ccpn.framework.Application import getApplication
 
 from ccpn.util.Constants import SCALETOLERANCE
 from ccpn.util.Common import isIterable, _getObjectsByPids
@@ -111,11 +112,18 @@ from ccpn.util.Path import Path, aPath
 
 MAXALIASINGRANGE = 3
 
+# def _testUpdate(spectrum):
+#     getLogger().debug('TEST-UPDATE: objectVersion: %s' % spectrum._objectVersion)
+#     spectrum._objectVersion = getApplication().applicationVersion
 
 #=========================================================================================
 # Spectrum class
 #=========================================================================================
 
+from ccpn.core._implementation.updates.update_3_0_4 import _updateSpectrum_3_0_4_to_3_1_0
+from ccpn.core._implementation.AbstractWrapperObject import updateObject
+
+@updateObject('3.0.4', '3.1.0', _updateSpectrum_3_0_4_to_3_1_0)
 class Spectrum(AbstractWrapperObject, CcpNmrJson):
     """A Spectrum object contains all the stored properties of an NMR spectrum, as well as the
     path to the NMR (binary) data file. The Spectrum object has methods to get the binary data
@@ -280,22 +288,24 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     # References to DataStore / DataSource instances for filePath manipulation and (binary) data reading;
     _dataStore = DataStoreTrait(default_value=None, read_only=True).tag(
-            saveToJson=True,
-            info="""
+                                saveToJson=True,
+                                info="""
                                 A DataStore instance encoding the path and dataFormat of the (binary) spectrum data.
                                 None indicates no spectrum data file path has been defined"""
-            )
+    )
 
     # CCPNINTERNAL: Also used in PeakPickers
     _dataSource = DataSourceTrait(default_value=None, read_only=True).tag(
-            saveToJson=True,
-            info="""
+                                  saveToJson=True,
+                                  info="""
                                   A SpectrumDataSource instance for reading (writing) of the (binary) spectrum data.
-                                  None indicates no valid spectrum data file has been defined""")
+                                  None indicates no valid spectrum data file has been defined"""
+    )
 
     _peakPicker = PeakPickerTrait(default_value=None).tag(
-            saveToJson=True,
-            info="A PeakPicker instance")
+                                  saveToJson=True,
+                                  info="A PeakPicker instance"
+    )
 
     @property
     def peakPicker(self):
@@ -3084,7 +3094,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     #-----------------------------------------------------------------------------------------
 
     def __str__(self):
-        return '<%s; %dD (%s)>' % (self.pid, self.dimensionCount, ','.join(self.axisCodes))
+        return '<%s (%s); %dD (%s)>' % (self.pid, self.dataFormat,
+                                        self.dimensionCount, ','.join(self.axisCodes))
 
     def _infoString(self, includeDimensions=False):
         """Return info string about self, optionally including dimensional

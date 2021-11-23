@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-04 20:12:04 +0000 (Thu, November 04, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-11-23 11:38:08 +0100 (Tue, November 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -580,13 +580,13 @@ class ChemicalShiftList(AbstractWrapperObject):
                           )
 
         # check version history (defaults to 3.0.4)
-        history = project.versionHistory[-1]
+        savedVersion = project._saveHistory.lastSavedVersion.withoutRelease()
 
         try:
             # get the index of the saved version, this SHOULD always work
-            startIndex = [_ver for _ver, _ in versionUpdates].index(history)
+            startIndex = [_ver for _ver, _ in versionUpdates].index(savedVersion)
         except:
-            raise RuntimeError(f'ChemicalShiftList._restoreObject: current version is not defined {history}')
+            raise RuntimeError(f'ChemicalShiftList._restoreObject: saved version is not defined {savedVersion}')
 
         lastIndex = len(versionUpdates)
 

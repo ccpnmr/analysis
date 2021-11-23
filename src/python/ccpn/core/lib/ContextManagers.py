@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-22 12:39:43 +0000 (Mon, November 22, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-11-23 11:38:09 +0100 (Tue, November 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -725,6 +725,10 @@ def newObject(klass):
                 _storeNewObjectCurrent(result, addUndoItem)
 
         result._finaliseAction('create')
+
+        # set the _objectVersion
+        result._objectVersion = application.applicationVersion
+
         return result
 
     return theDecorator
@@ -771,6 +775,9 @@ def newObjectList(klasses):
         # handle notifying all objects in the list - e.g. sampleComponent also makes a substance
         for result in results:
             result._finaliseAction('create')
+            # set the _objectVersion
+            result._objectVersion = application.applicationVersion
+
         # return the primary object
         return results[0] if results else None
 
@@ -892,6 +899,10 @@ def newV3Object():
                                 redo=partial(result._finaliseAction, 'create'))
 
         result._finaliseAction('create')
+
+        # set the _objectVersion
+        result._objectVersion = application.applicationVersion
+
         return result
 
     return theDecorator

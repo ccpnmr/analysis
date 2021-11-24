@@ -167,6 +167,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         # install handler to resize when moving between displays
         self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
+        # self.setUnifiedTitleAndToolBarOnMac(True) #uncomment this to remove the extra title bar on osx 10.14+
 
 
     @property

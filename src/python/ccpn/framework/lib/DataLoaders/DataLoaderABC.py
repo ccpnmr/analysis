@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-09 17:40:31 +0000 (Tue, November 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-24 18:52:43 +0000 (Wed, November 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -64,6 +64,7 @@ def getDataLoaders():
     from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
     from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
     from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
+    from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
     from ccpn.framework.lib.DataLoaders.FastaDataLoader import FastaDataLoader
     from ccpn.framework.lib.DataLoaders.ExelDataLoader import ExcelDataLoader
     from ccpn.framework.lib.DataLoaders.PdbDataLoader import PdbDataLoader

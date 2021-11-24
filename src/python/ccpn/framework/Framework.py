@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-09 18:38:41 +0000 (Tue, November 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-24 18:52:43 +0000 (Wed, November 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -43,7 +43,7 @@ import tarfile
 import tempfile
 import re
 import subprocess
-from typing import Union
+from typing import Union, Optional
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
 from distutils.dir_util import copy_tree
@@ -1679,7 +1679,6 @@ class Framework(NotifierBase):
             self.project = self.newProject(dataBlock.name)
 
         self.project.shiftAveraging = False
-        # with suspendSideBarNotifications(project=self.project):
 
         with undoBlockWithoutSideBar():
             with notificationEchoBlocking():
@@ -1693,22 +1692,37 @@ class Framework(NotifierBase):
         getLogger().info('==> Loaded NEF file: "%s"' % (path,))
         return self.project
 
-    def _loadNMRStarFileCallback(self, path=None):
+    def _loadNMRStarFileCallback(self, path=None, makeNewProject=False) -> Optional[Project]:
         if not path:
             dialog = NMRStarFileDialog(parent=self.ui.mainWindow, acceptMode='import')
             dialog._show()
             path = dialog.selectedFile()
             if not path:
                 return
-        from ccpn.ui.gui.popups.ImportStarPopup import StarImporterPopup
 
+        from ccpn.ui.gui.popups.ImportStarPopup import StarImporterPopup
+        from ccpn.core.lib import CcpnNefIo
+
+        _nefReader = CcpnNefIo.CcpnNefReader(self)
         relativePath = os.path.dirname(os.path.realpath(path))
-        dataBlock = self.nefReader.getNMRStarData(path)
+        dataBlock = _nefReader.getNMRStarData(path)
+
         self._importedStarDataBlock = dataBlock
 
+        if makeNewProject:
+            if self.project is not None:
+                self._closeProject()
+            self.project = self.newProject(dataBlock.name)
+
+        self.project.shiftAveraging = False
+
         popup = StarImporterPopup(project=self.project, bmrbFilePath=path, directory=relativePath, dataBlock=dataBlock)
-        popup.show()
-        popup.raise_()
+        popup.exec_()
+
+        self.project.shiftAveraging = True
+
+        getLogger().info('==> Loaded Star file: "%s"' % (path,))
+        return self.project
 
     # """Load Project from NEF file at path, and do necessary setup"""
     #

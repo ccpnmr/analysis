@@ -299,11 +299,12 @@ def makeCSLfromDF(project, df):
                 getLogger().warn('Error setting the IsotopeCode: %s for the nmrAtom %s. %s.' %(isotopeCode, nmrAtom.pid, icError))
             try:
                 if _isfloat(row[Val]):
-                    cs = chemicalShiftList.newChemicalShift(value=float(row[Val]), nmrAtom=nmrAtom)
-                    cs.comment = cs.comment+ ' Imported: '+row[Details]
-                    valueErr = row[Val_err]
-                    if _isfloat(valueErr):
-                        cs.valueError = float(valueErr)
+                    val = float(row[Val]) if _isfloat(row[Val]) else None
+                    valueErr = float(row[Val_err]) if _isfloat(row[Val_err]) else None
+                    cs = chemicalShiftList.newChemicalShift(value=val, valueError=valueErr, nmrAtom=nmrAtom)
+                    cs.comment = ' '.join([cs.comment or '',
+                                           'Imported: '+row[Details]])
+
             except Exception as e:
                 getLogger().warn('Error creating a new ChemicalShift: %s' %e)
             nmrChains.add(nmrChain)

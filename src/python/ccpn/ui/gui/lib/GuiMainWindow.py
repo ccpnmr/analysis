@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-09 17:40:32 +0000 (Tue, November 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-24 17:59:36 +0000 (Wed, November 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1188,7 +1188,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         elif dataLoader.dataFormat == SpectrumDataLoader.dataFormat and dataLoader.existsInProject():
             choice = showYesNo('Spectrum "%s"' % dataLoader.path,
                                'already exists in the project, do you want to load?')
-            if choice == False:
+            if choice is False:
                 ignore = True
 
         return (dataLoader, createNewProject, ignore)

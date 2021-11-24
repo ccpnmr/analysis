@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-23 13:56:39 +0000 (Tue, November 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-24 17:59:35 +0000 (Wed, November 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -885,15 +885,15 @@ def _getChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
 # Notifiers
 className = Nmr.ShiftList._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
-        (('_finaliseApiRename', {}, className, 'setName'),
-         ('_modifiedLink', {'classNames': ('ChemicalShiftList', 'Spectrum')}, className, 'addExperiment'),
-         ('_modifiedLink', {'classNames': ('ChemicalShiftList', 'Spectrum')}, className,
-          'removeExperiment'),
-         ('_modifiedLink', {'classNames': ('ChemicalShiftList', 'Spectrum')}, className, 'setExperiments'),
-         ('_modifiedLink', {'classNames': ('ChemicalShiftList', 'PeakList')}, className, 'addPeakList'),
-         ('_modifiedLink', {'classNames': ('ChemicalShiftList', 'PeakList')}, className, 'removePeakList'),
-         ('_modifiedLink', {'classNames': ('ChemicalShiftList', 'PeakList')}, className, 'setPeakLists'),
-         )
+        (  # ('_finaliseApiRename', {}, className, 'setName'),
+            ('_modifiedLink', {'classNames': ('ChemicalShiftList', 'Spectrum')}, className, 'addExperiment'),
+            ('_modifiedLink', {'classNames': ('ChemicalShiftList', 'Spectrum')}, className,
+             'removeExperiment'),
+            ('_modifiedLink', {'classNames': ('ChemicalShiftList', 'Spectrum')}, className, 'setExperiments'),
+            ('_modifiedLink', {'classNames': ('ChemicalShiftList', 'PeakList')}, className, 'addPeakList'),
+            ('_modifiedLink', {'classNames': ('ChemicalShiftList', 'PeakList')}, className, 'removePeakList'),
+            ('_modifiedLink', {'classNames': ('ChemicalShiftList', 'PeakList')}, className, 'setPeakLists'),
+            )
         )
 Project._apiNotifiers.append(('_modifiedLink', {'classNames': ('ChemicalShiftList', 'PeakList')},
                               Nmr.PeakList._metaclass.qualifiedName(), 'setSpecificShiftList')

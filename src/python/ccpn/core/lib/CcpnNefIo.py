@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-23 17:21:29 +0000 (Tue, November 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-24 17:59:36 +0000 (Wed, November 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1137,7 +1137,7 @@ class CcpnNefWriter:
         return results
 
     def restraintTable2Nef(self, restraintTable: RestraintTable, singleStructureTable: bool = False
-                          ) -> StarIo.NmrSaveFrame:
+                           ) -> StarIo.NmrSaveFrame:
         """Convert RestraintTable to CCPN NEF restraint_list saveframe"""
 
         project = restraintTable._project
@@ -3051,10 +3051,8 @@ class CcpnNefReader(CcpnNefContent):
                             atom = residue.getAtom(code[1:])
                             if code[0] == '-':
                                 if atom is None:
-                                    residue._project._logger.error(
-                                            "Incorrect variantCode %s: No atom named %s found in %s. Skipping ..."
-                                            % (variantCode, code, residue)
-                                            )
+                                    self.error("Incorrect variantCode %s: No atom named %s found in %s. Skipping ..."
+                                               % (variantCode, code, residue), loop)
                                 else:
                                     atom.delete()
 
@@ -3062,16 +3060,12 @@ class CcpnNefReader(CcpnNefContent):
                                 if atom is None:
                                     residue.newAtom(name=code[1:])
                                 else:
-                                    residue._project._logger.error(
-                                            "Incorrect variantCode %s: Atom named %s already present in %s. Skipping ..."
-                                            % (variantCode, code, residue)
-                                            )
+                                    self.warning("Incorrect variantCode %s: Atom named %s already present in %s. Skipping ..."
+                                                 % (variantCode, code, residue), loop)
 
                             else:
-                                residue._project._logger.error(
-                                        "Incorrect variantCode %s: must start with '+' or '-'. Skipping ..."
-                                        % variantCode
-                                        )
+                                self.error("Incorrect variantCode %s: must start with '+' or '-'. Skipping ..."
+                                           % variantCode, loop)
 
             else:
                 newChain = lastChain.clone(shortName=chainCode)
@@ -6935,7 +6929,7 @@ class CcpnNefReader(CcpnNefContent):
 
                 # list of header types that need swapping - need the opposite to save
                 _headers = [(nefHeaders, Headers),
-                           ]
+                            ]
 
                 dfHeaders = list(_df.columns)
                 for oldHeaders, newHeaders in _headers:
@@ -7000,7 +6994,7 @@ class CcpnNefReader(CcpnNefContent):
         self.errors.append((template.format(self._saveFrameName, message), source, objects))
 
     def warning(self, message: str, loopName=None):
-        template = "WARNING in saveFrame%s\n%s"
+        template = "Warning in saveFrame%s\n%s"
         self.warnings.append(template % (self._saveFrameName, message))
 
     def storeContent(self, source, objects: Optional[dict] = None):

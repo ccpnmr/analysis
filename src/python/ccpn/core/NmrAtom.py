@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-23 17:21:29 +0000 (Tue, November 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-24 17:59:36 +0000 (Wed, November 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -701,12 +701,12 @@ def _produceNmrAtom(self: Project, atomId: str = None, chainCode: str = None,
 # Project._produceNmrAtom = _produceNmrAtom
 
 # Notifiers:
-className = Nmr.Resonance._metaclass.qualifiedName()
-Project._apiNotifiers.extend(
-        (('_finaliseApiRename', {}, className, 'setImplName'),
-         ('_finaliseApiRename', {}, className, 'setResonanceGroup'),
-         )
-        )
+# className = Nmr.Resonance._metaclass.qualifiedName()
+# Project._apiNotifiers.extend(
+#         (('_finaliseApiRename', {}, className, 'setImplName'),
+#          ('_finaliseApiRename', {}, className, 'setResonanceGroup'),
+#          )
+#         )
 for clazz in Nmr.AbstractPeakDimContrib._metaclass.getNonAbstractSubtypes():
     className = clazz.qualifiedName()
     Project._apiNotifiers.extend(

@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-18 18:20:21 +0000 (Thu, November 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-24 17:59:36 +0000 (Wed, November 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -721,7 +721,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def reload(self):
         """Reload the spectrum defined by filePath
         """
-        # setting filePath will re-initialiase a dataSource instance
+        # setting filePath will re-initialise a dataSource instance
         _filePath = self.filePath
         self.filePath = _filePath
         self._dataSource.exportToSpectrum(self, includePath=False)
@@ -3243,7 +3243,7 @@ def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], name: str =
 
     dataStore = DataStore()
 
-    # Intialise a dataSource instance
+    # Initialise a dataSource instance
     dataSource = EmptySpectrumDataSource()
     if dataSource is None:
         raise RuntimeError('Error creating empty DataSource')

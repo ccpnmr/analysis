@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:25:07 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-24 17:59:36 +0000 (Wed, November 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -276,7 +276,7 @@ class DataStore(CcpNmrJson):
         instance = cls(autoRedirect=autoRedirect, autoVersioning=autoVersioning)
         instance.path = _p
 
-        instance.dataFormat= dataFormat
+        instance.dataFormat = dataFormat
 
         return instance
 

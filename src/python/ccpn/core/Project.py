@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-22 12:39:43 +0000 (Mon, November 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-24 17:59:36 +0000 (Wed, November 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -253,30 +253,6 @@ class Project(AbstractWrapperObject):
             return dd.get(key)
         else:
             return None
-
-    def _finalisePid2Obj(self, obj, action):
-        """New/Delete object to the general dict for v3 pids
-        """
-        # update pid:object mapping dictionary
-        dd = self._pid2Obj.get(obj.className)
-        if dd is None:
-            # create new dict item if not found
-            dd = {}
-            self._pid2Obj[obj.className] = dd
-            self._pid2Obj[obj.shortClassName] = dd
-
-        # set/delete on action
-        if action == 'create':
-            dd[obj.id] = obj
-        elif action == 'delete':
-            del dd[obj.id]
-
-    # Inherited from AbstractWrapperObject
-
-    # @property
-    # def project(self) -> 'Project':
-    #     """The Project (root)containing the object."""
-    #     return self._project
 
     #-----------------------------------------------------------------------------------------
 
@@ -1118,14 +1094,27 @@ class Project(AbstractWrapperObject):
                     if not obj.isDeleted:
                         getDataObj(obj)._finaliseAction(action)
 
-    def _finaliseApiRename(self, wrappedData):
-        """Reset Finalise rename - called from API object (for API notifiers)
+    # def _finaliseApiRename(self, wrappedData):
+    #     """Reset Finalise rename - called from API object (for API notifiers)
+    #     """
+    #     # Should be handled by decorators
+    #     if self._apiNotificationBlanking == 0:
+    #         getLogger().debug2(f'***   SHOULD THIS BE CALLED? {self._data2Obj.get(wrappedData)}')
+    #         # obj = self._data2Obj.get(wrappedData)
+    #         # obj._finaliseAction('rename')
+
+    def _finalisePid2Obj(self, obj, action):
+        """New/Delete object to the general dict for v3 pids
         """
-        # Should be handled by decorators
-        if self._apiNotificationBlanking == 0:
-            getLogger().debug2(f'***   SHOULD THIS BE CALLED? {self._data2Obj.get(wrappedData)}')
-            # obj = self._data2Obj.get(wrappedData)
-            # obj._finaliseAction('rename')
+        # update pid:object mapping dictionary
+        self._pid2Obj[obj.shortClassName] = dd = self._pid2Obj.setdefault(obj.className, {})
+
+        # set/delete on action
+        if action == 'create':
+            dd[obj.id] = obj
+        elif action == 'delete':
+            # should never fail
+            del dd[obj.id]
 
     def _modifiedLink(self, dummy, classNames: typing.Tuple[str, str]):
         """ call link-has-changed notifiers

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-04 20:12:04 +0000 (Thu, November 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-24 17:59:36 +0000 (Wed, November 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -427,11 +427,10 @@ def _newRestraintTable(self: StructureData, restraintType, name: str = None, ori
 
     return result
 
-
-# Notifiers:
-for clazz in ApiAbstractConstraintList._metaclass.getNonAbstractSubtypes():
-    className = clazz.qualifiedName()
-    Project._apiNotifiers.extend(
-            (('_finaliseApiRename', {}, className, 'setName'),
-             )
-            )
+# # Notifiers:
+# for clazz in ApiAbstractConstraintList._metaclass.getNonAbstractSubtypes():
+#     className = clazz.qualifiedName()
+#     Project._apiNotifiers.extend(
+#             (('_finaliseApiRename', {}, className, 'setName'),
+#              )
+#             )

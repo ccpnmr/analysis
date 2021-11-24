@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:19:59 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-24 17:59:36 +0000 (Wed, November 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -299,7 +299,6 @@ class Residue(AbstractWrapperObject):
             raise TypeError('Cannot delete residue that has assigned nmrResidues')
 
         if self._wrappedData in chainFragment.residues:
-
             with undoBlock():
                 oldResidues = list(chainFragment.residues)
                 newResidues = list(chainFragment.residues)
@@ -508,9 +507,9 @@ class Residue(AbstractWrapperObject):
         return atomGroups
 
     def _addAtomsFromChemSets(self):
-        if not self._chemCompVar: return
+        if not self._chemCompVar:
+            return
         atomSets = self._chemCompVar.chemAtomSets
-
 
     def _getChemAtomNames(self):
         """
@@ -523,7 +522,6 @@ class Residue(AbstractWrapperObject):
             chemAtoms = self._wrappedData.chemCompVar.chemAtoms
             chemAtomNames = [atom.name for atom in chemAtoms]
         return chemAtomNames
-
 
 #=========================================================================================
 # Connections to parents:
@@ -556,10 +554,10 @@ class Residue(AbstractWrapperObject):
 
 # No 'new' function - chains are made elsewhere
 
-# Notifiers:
-Project._apiNotifiers.extend(
-        (
-            ('_finaliseApiRename', {}, ApiResidue._metaclass.qualifiedName(), 'setSeqCode'),
-            ('_finaliseApiRename', {}, ApiResidue._metaclass.qualifiedName(), 'setSeqInsertCode'),
-            )
-        )
+# # Notifiers:
+# Project._apiNotifiers.extend(
+#         (
+#             ('_finaliseApiRename', {}, ApiResidue._metaclass.qualifiedName(), 'setSeqCode'),
+#             ('_finaliseApiRename', {}, ApiResidue._metaclass.qualifiedName(), 'setSeqInsertCode'),
+#             )
+#         )

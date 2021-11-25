@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-12 16:04:27 +0100 (Tue, October 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-25 12:04:18 +0000 (Thu, November 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ __date__ = "$Date: 2021-07-01 17:37:42 +0100 (Thu, July 01, 2021) $"
 
 import pandas as pd
 import numpy as np
+from typing import Optional
 from ccpn.core.lib.CcpnNefCommon import nef2CcpnMap
 from ccpn.util.Logging import getLogger
 
@@ -44,22 +45,23 @@ def getCcpnNefLogNames(project: 'Project'):
     """Return a tuple of CcpnNef log names
 
     :param project: instance of type Project
-    :return: tuple of log names or ()
+    :return: tuple of log names, or None if undefined
     """
     try:
         # get the correct parameters from data
         data = project._wrappedData.data
         ccpnLogging = data.get(CCPNLOGGING)
-        if ccpnLogging:
-            return tuple(ccpnLogging.keys())
+        keys = tuple(ccpnLogging.keys())
 
     except Exception as es:
+        # cannot read, return None
         getLogger().debug(f'Cannot read ccpnLogging: {es}')
 
-    return ()
+    else:
+        return keys
 
 
-def getCcpnNefLog(project: 'Project', name):
+def getCcpnNefLog(project: 'Project', name: str):
     """Get the required ccpnNefLogging dataframe from the project
     Returns a COPY of pandas dataFrame of the ccpn nef log for use in nef import/export
     to ensure integrity
@@ -72,7 +74,7 @@ def getCcpnNefLog(project: 'Project', name):
 
     :param project: instance of type Project
     :param name: string name of the log
-    :return: pandas dataFrame or None
+    :return: pandas dataFrame, value or None
     """
     if not (name and isinstance(name, str)):
         raise ValueError(f'ccpnLogging.name {repr(name)} must be a string')
@@ -81,29 +83,36 @@ def getCcpnNefLog(project: 'Project', name):
         # get the correct parameters from data
         data = project._wrappedData.data
         ccpnLogging = data.get(CCPNLOGGING)
-        df = ccpnLogging.get(name)
-        if isinstance(df, pd.DataFrame):
+        val = ccpnLogging[name].copy()
+        if isinstance(val, pd.DataFrame):
             # remove any NaN that may be there from load/save
-            df = df.replace([np.nan], [None])
-
-        return df
+            val.replace([np.nan], [None], inplace=True)
+        else:
+            raise ValueError('pd.DataFrame not found')
 
     except Exception as es:
+        # cannot read, return None
         getLogger().debug(f'Cannot read ccpnLogging {repr(name)}: {es}')
 
+    else:
+        return val
 
-def setCcpnNefLog(project: 'Project', name, value, overwrite=False):
+
+def setCcpnNefLog(project: 'Project', name: str, dataFrame: Optional[pd.DataFrame]=None, overwrite=False):
     """Set the required ccpnNefLogging dataframe in the project for use in nef import/export
+    Stores a COPY of the dataFrame in the log
 
     Raise an error if name or value are of the wrong types
     Returns False if the ccpnLogging already exists and overwrite is False
 
     Columns are enforced to be:
         date, username, program_name, program_version, script_name, input_uuid, saveframe, comment
+    Other columns will be ignored
+    If value is None, wll create an empty dataFrame
 
     :param project: instance of type Project
     :param name: string name of the log
-    :param value: pandas dataFrame or None
+    :param dataFrame: pandas dataFrame or None
     :param overwrite: True/False
     :return: True if successful
     """
@@ -111,8 +120,8 @@ def setCcpnNefLog(project: 'Project', name, value, overwrite=False):
     # check parameters
     if not (name and isinstance(name, str)):
         raise ValueError(f'ccpnLogging.name {repr(name)} must be a string')
-    if not isinstance(value, (pd.DataFrame, type(None))):
-        raise ValueError(f'ccpnLogging.value {repr(value)} must be a pandas dataFrame or None')
+    if not isinstance(dataFrame, (pd.DataFrame, type(None))):
+        raise ValueError(f'ccpnLogging.value {repr(dataFrame)} must be a pandas dataFrame or None')
 
     # set the empty data
     data = project._wrappedData.data
@@ -120,8 +129,8 @@ def setCcpnNefLog(project: 'Project', name, value, overwrite=False):
         data = project._wrappedData.data = {}
 
     ccpnLogging = data.setdefault(CCPNLOGGING, {})
-    _param = ccpnLogging.get(name)
-    if _param is not None and not overwrite:
+    param = ccpnLogging.get(name)
+    if param is not None and not overwrite:
         getLogger().warning(f'ccpnLogging {repr(name)} exists')
         return
 
@@ -129,28 +138,32 @@ def setCcpnNefLog(project: 'Project', name, value, overwrite=False):
         # try and write the information to the parameters
         mapping = nef2CcpnMap[NEFMAPPING]
         df = pd.DataFrame(columns=list(mapping.keys()))
-        # enforce the correct columns
-        for col in df.columns:
-            if col in value.columns:
-                df[col] = value[col]
+        if dataFrame is not None:
+            # enforce the correct columns
+            for col in df.columns:
+                if col in dataFrame.columns:
+                    df[col] = dataFrame[col]
+            # remove any NaN that may be there from load/save
+            df.replace([np.nan], [None], inplace=True)
 
         # write a copy into data
-        ccpnLogging[name] = df.replace([np.nan], [None])
-
-        # Explicit flag assignment to enforce saving
-        project._wrappedData.__dict__['isModified'] = True
+        ccpnLogging[name] = df
 
     except Exception as es:
         raise RuntimeError(f'Error creating ccpnLogging history {repr(name)}: {es}')
 
-    # operation was successful
-    return True
+    else:
+        # Explicit flag assignment to enforce saving
+        project._wrappedData.__dict__['isModified'] = True
+
+        # operation was successful
+        return True
 
 
-def resetCcpnNefLog(project: 'Project', name, overwrite=False):
+def resetCcpnNefLog(project: 'Project', name: str, overwrite=False):
     """reset the required ccpnNefLogging dataframe in the project for use in nef import/export
 
-    Raise an error if name or value are of the wrong types
+    Raise an error if name is not a string
     Returns False if the ccpnLogging already exists and overwrite is False
 
     Creates empty dataframe with columns:
@@ -171,8 +184,8 @@ def resetCcpnNefLog(project: 'Project', name, overwrite=False):
             data = project._wrappedData.data = {}
 
         ccpnLogging = data.setdefault(CCPNLOGGING, {})
-        _param = ccpnLogging.get(name)
-        if _param is not None and not overwrite:
+        param = ccpnLogging.get(name)
+        if param is not None and not overwrite:
             getLogger().warning(f'ccpnLogging {repr(name)} exists')
             return
 
@@ -180,9 +193,12 @@ def resetCcpnNefLog(project: 'Project', name, overwrite=False):
         mapping = nef2CcpnMap[NEFMAPPING]
         ccpnLogging[name] = pd.DataFrame(columns=list(mapping.keys()))
 
-        # Explicit flag assignment to enforce saving
-        project._wrappedData.__dict__['isModified'] = True
-        return True
-
     except Exception as es:
         getLogger().debug(f'Error resetting ccpnLogging {repr(name)}: {es}')
+
+    else:
+        # Explicit flag assignment to enforce saving
+        project._wrappedData.__dict__['isModified'] = True
+
+        # operation was successful
+        return True

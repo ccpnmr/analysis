@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-24 17:59:36 +0000 (Wed, November 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-25 12:04:17 +0000 (Thu, November 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1118,20 +1118,17 @@ class CcpnNefWriter:
         category = 'ccpn_logging'
 
         _logs = getCcpnNefLogNames(project)
-        if _logs:
+        if _logs is not None:
             result = self._newNefSaveFrame(project, category, CCPNDEFAULT)
 
             for logName in _logs:
-                try:
-                    value = getCcpnNefLog(project, logName)
-                    if isinstance(value, pd.DataFrame):
-                        # Fill in loops
-                        loop = result[logName]
-                        for obj in value.itertuples():
-                            loop.newRow(self._loopRowData(logName, obj))
+                value = getCcpnNefLog(project, logName)
+                if isinstance(value, pd.DataFrame):
+                    # Fill in loops
+                    loop = result[logName]
+                    for obj in value.itertuples():
+                        loop.newRow(self._loopRowData(logName, obj))
 
-                except Exception as es:
-                    pass
             results.append(result)
 
         return results

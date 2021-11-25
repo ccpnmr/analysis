@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-18 18:17:58 +0000 (Thu, November 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-25 13:38:51 +0000 (Thu, November 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -492,12 +492,6 @@ class SpectrumDisplay(AbstractWrapperObject):
         apiGuiTask = (parent._wrappedData.findFirstGuiTask(nameSpace='user', name='View') or
                       parent._wrappedData.root.newGuiTask(nameSpace='user', name='View'))
         return [x for x in apiGuiTask.sortedModules() if isinstance(x, ApiBoundDisplay)]
-
-    # @deleteObject()
-    # def delete(self):
-    #     """Delete object, with all contained objects and underlying data.
-    #     """
-    #     self._wrappedData.delete()
 
     #=========================================================================================
     # CCPN functions

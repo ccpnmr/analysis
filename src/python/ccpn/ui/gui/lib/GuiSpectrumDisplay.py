@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-18 18:17:58 +0000 (Thu, November 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-25 17:59:14 +0000 (Thu, November 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -784,7 +784,7 @@ class GuiSpectrumDisplay(CcpnModule):
     def _zPlaneNavigationModeChangedInSettings(self, value):
         """Handle changing the zPlaneNavigation mode from the settings widget
         """
-        if value not in range(len(ZPlaneNavigationModes)):
+        if value not in ZPlaneNavigationModes.values():
             raise ValueError('zPlaneNavigation not in ', ZPlaneNavigationModes)
 
         newDirection = ZPlaneNavigationModes(value).label
@@ -2640,7 +2640,7 @@ class GuiSpectrumDisplay(CcpnModule):
     def attachZPlaneWidgets(self):
         """Attach the strip zPlane navigation widgets for the strips to the correct containers
         """
-        if self.is1D:
+        if self.is1D or len(self.axisCodes) <= 2:
             return
 
         try:

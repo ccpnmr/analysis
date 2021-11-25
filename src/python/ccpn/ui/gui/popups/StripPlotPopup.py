@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-17 12:24:46 +0100 (Fri, September 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-25 17:59:14 +0000 (Thu, November 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -80,7 +80,6 @@ class StripPlotPopup(CcpnDialogMainWidget):
 
         self.__postInit__()
 
-    # @profile
     def _accept(self, dummy=None):
         """OK button pressed
         """
@@ -144,21 +143,21 @@ class StripPlotPopup(CcpnDialogMainWidget):
         # loop through the spectrumDisplays
         for specDisplay in spectrumDisplays:
 
-            with specDisplay.stripFrame.blockWidgetSignals():
-                if peaks:
-                    specDisplay.makeStripPlot(peaks=peaks, nmrResidues=None,
-                                              autoClearMarks=autoClearMarks,
-                                              sequentialStrips=sequentialStrips,
-                                              markPositions=markPositions
-                                              )
-                elif nmrResidues:
-                    specDisplay.makeStripPlot(peaks=None, nmrResidues=nmrResidues,
-                                              autoClearMarks=autoClearMarks,
-                                              sequentialStrips=sequentialStrips,
-                                              markPositions=markPositions
-                                              )
+            # with specDisplay.stripFrame.blockWidgetSignals():  # was blocking the hide/show events
+            if peaks:
+                specDisplay.makeStripPlot(peaks=peaks, nmrResidues=None,
+                                          autoClearMarks=autoClearMarks,
+                                          sequentialStrips=sequentialStrips,
+                                          markPositions=markPositions
+                                          )
+            elif nmrResidues:
+                specDisplay.makeStripPlot(peaks=None, nmrResidues=nmrResidues,
+                                          autoClearMarks=autoClearMarks,
+                                          sequentialStrips=sequentialStrips,
+                                          markPositions=markPositions
+                                          )
 
-                specDisplay.setColumnStretches(stretchValue=True, widths=True, minimumWidth=STRIPPLOTMINIMUMWIDTH)
+            specDisplay.setColumnStretches(stretchValue=True, widths=True, minimumWidth=STRIPPLOTMINIMUMWIDTH)
 
     def _cleanupWidget(self):
         """Cleanup the notifiers that are left behind after the widget is closed

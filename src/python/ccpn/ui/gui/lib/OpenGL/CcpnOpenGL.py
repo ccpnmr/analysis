@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-11 18:57:51 +0000 (Thu, November 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-25 17:59:14 +0000 (Thu, November 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2288,10 +2288,6 @@ class CcpnGLWidget(QOpenGLWidget):
         cursorCoordinate = self.getCurrentCursorCoordinate()
         self._mousePressed = True
         self.lastPos = ev.pos()
-
-        if self.strip:
-            for toolbar in self.strip.planeAxisBars:
-                toolbar.hideWidgets()
 
         mx = ev.pos().x()
         if self._drawBottomAxis:

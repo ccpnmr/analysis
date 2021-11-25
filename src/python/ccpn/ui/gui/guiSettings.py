@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-01 18:51:16 +0100 (Fri, October 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-25 17:59:13 +0000 (Thu, November 25, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -453,7 +453,6 @@ def getColours():
     return colourDict
 
 
-@singleton
 class ZPlaneNavigationModes(LabelledEnum):
     PERSPECTRUMDISPLAY = 0, 'Per spectrum display', 'spectrumdisplay'
     PERSTRIP = 1, 'Per strip', 'strip'

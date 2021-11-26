@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-09 17:06:00 +0000 (Tue, November 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-26 10:13:38 +0000 (Fri, November 26, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -284,18 +284,18 @@ class PulldownList(QtWidgets.QComboBox, Base):
         self.setIndex(idx)
         return idx
 
-    def addItem(self, text, object=NULL, icon=None, ):
+    def addItem(self, text, item=NULL, icon=None, ):
 
         if icon and isinstance(icon, QtGui.QIcon):
             super().addItem(icon, str(text))
         else:
             super().addItem(str(text))
 
-        if object is NULL:
-            object = str(text)
+        if item is NULL:
+            item = str(text)
 
         self.texts.append(text)
-        self.objects.append(object)
+        self.objects.append(item)
 
     def setItemText(self, index, text):
 
@@ -417,7 +417,9 @@ class PulldownList(QtWidgets.QComboBox, Base):
     #         self.setPalette(palette)
 
 
-if __name__ == '__main__':
+def main():
+    """A few small tests
+    """
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
     from functools import partial
@@ -440,7 +442,7 @@ if __name__ == '__main__':
 
 
     def callback21():
-        print('clciked')
+        print('clicked')
         print('callback2')
 
 
@@ -500,3 +502,7 @@ if __name__ == '__main__':
     # combo.show()
     #
     # sys.exit(app.exec_())
+
+if __name__ == '__main__':
+    # call testing
+    main()

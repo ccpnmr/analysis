@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-23 11:38:10 +0100 (Tue, November 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-29 15:02:11 +0000 (Mon, November 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -279,9 +279,9 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         return None
 
     def nameFromPath(self):
-        """Return a name derived from pdataDir
+        """Return a name derived from _brukerRoot and pdataDir
         """
-        return '%s_pdata%s' % (self._brukerRoot.stem, self._pdataDir.stem)
+        return '%s-%s' % (self._brukerRoot.stem, self._pdataDir.stem)
 
     def setPath(self, path, substituteSuffix=False):
         """Parse and set path, assure there is the directory with acqus and pdata dirs

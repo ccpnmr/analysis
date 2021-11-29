@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-29 12:01:53 +0000 (Mon, November 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-29 21:13:12 +0000 (Mon, November 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2269,6 +2269,27 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         return newSpectrum
 
+    def cloneAsHdf5(self):
+        """Clone self and all peakLists as an Hdf type file
+        :return: a Spectrum instance of the cloned spectrum
+        """
+        from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
+        _path = self.path.withoutSuffix() + '_cloned'
+        # the extractToFile routine assures the proper suffix
+        newSpectrum = self._extractToFile(self.axisCodes, [1]*self.dimensionCount,
+                                          path = _path,
+                                          dataFormat=Hdf5SpectrumDataSource.dataFormat,
+                                          tag = ''
+                                          )
+        # Copy the peakList/peaks
+        for idx, pl in enumerate(self.peakLists):
+            if idx+1 < len(newSpectrum.peakLists):
+                newSpectrum.newPeakList()
+            targetPl = newSpectrum.peakLists[idx]
+            pl.copyTo(targetSpectrum=newSpectrum, targetPeakList=targetPl)
+
+        return newSpectrum
+
     def _clone1D(self):
         """Clone 1D spectrum to a new spectrum."""
         #FIXME Crude approach / hack
@@ -2450,7 +2471,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def _extractToFile(self, axisCodes, position, path, dataFormat, tag):
         """Local routine to prevent code duplication across extractSliceToFile, extractPlaneToFile,
         extractProjectionToFile.
-        Return new spectrum instance
+        :return: new Spectrum instance
         """
         dimensions = self.getByAxisCodes('dimensions', axisCodes)
 

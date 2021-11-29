@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-09 17:40:30 +0000 (Tue, November 09, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-11-29 16:23:50 +0000 (Mon, November 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -76,7 +76,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
     isFloatData = True
     hasWritingAbility = True  # flag that defines if dataFormat implements writing methods
 
-    suffixes = ['.hdf5']
+    suffixes = ['.ndf5', '.hdf5']
     openMethod = h5py.File
     defaultOpenReadMode = 'r+'
     defaultOpenWriteMode = 'w'

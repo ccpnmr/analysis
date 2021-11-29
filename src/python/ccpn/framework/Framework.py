@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-29 14:58:40 +0000 (Mon, November 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-29 17:41:00 +0000 (Mon, November 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1779,10 +1779,6 @@ class Framework(NotifierBase):
         from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
 
         if paths is None:
-            # if self.preferences.general.useNative:
-            #     m = 'Native dialog not available on multiple selections. ' \
-            #         'For loading a single file (not Dir) through a native dialog please use: Project > Load Data...'
-            #     getLogger().info(m)
             dialog = SpectrumFileDialog(parent=self.ui.mainWindow, acceptMode='load', fileFilter=filter, useNative=False)
 
             dialog._show()
@@ -1797,7 +1793,7 @@ class Framework(NotifierBase):
         for path in paths:
             _path = Path.aPath(path)
             if _path.is_dir():
-                dirLoader = DirectoryDataLoader(path, recursive=True,
+                dirLoader = DirectoryDataLoader(path, recursive=False,
                                                 filterForDataFormats=(SpectrumDataLoader.dataFormat,))
                 spectrumLoaders.append(dirLoader)
                 count += len(dirLoader)

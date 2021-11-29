@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-23 11:38:08 +0100 (Tue, November 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-29 09:59:55 +0000 (Mon, November 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -670,11 +670,11 @@ class AbstractWrapperObject(NotifierBase):
             self._printClassTree(child, tabs=tabs + 1)
 
     def _getAllDecendants(self) -> list:
-        """Get all objects decending from self; i.e. children, grandchildren, etc
+        """Get all objects descending from self; i.e. children, grandchildren, etc
         """
         result = []
-        for val in self._getChildren(recursion=True).values():
-            result.extend(val)
+        for children in self._getChildren(recursion=True).values():
+            result.extend(children)
         return result
 
     def _getChildrenByClass(self, klass) -> list:
@@ -688,30 +688,41 @@ class AbstractWrapperObject(NotifierBase):
             return []
         return result
 
-    def _getChildren(self, classes=['all'], recursion=False) -> OrderedDict:
-        """GWV; Return a dict of (className, ChildrenList) pairs
-        classes is either 'gui' or 'nonGui' or 'all' or explicit enumeration of classNames
-        Optionally recurse (depth-first)
+    def _getChildren(self, classes=('all',), recursion:bool=False) -> OrderedDict:
+        """GWV; Construct a dict of (className, ChildrenList) pairs
+
+        :param classes is either 'gui' or 'nonGui' or 'all' or explicit enumeration of classNames
+        :param recursion: Optionally recurse (breath-first)
+        :return: a OrderedDict of (className, ChildrenList) pairs
+
         CCPNINTERNAL: used throughout
         """
         _get = self._project._data2Obj.get
         data = OrderedDict()
         for className, apiChildren in self._getApiChildren(classes=classes).items():
-            children = data.setdefault(className, [])
+            data.setdefault(className, [])
             for apiChild in apiChildren:
                 child = _get(apiChild)
                 if child is not None:
-                    children.append(child)
-                    if recursion:
-                        childData = child._getChildren(classes=classes, recursion=recursion)
-                        for className, objlist in childData.items():
-                            data.setdefault(className, [])
-                            data[className].extend(objlist)
+                    data[className].append(child)
+        # check for recursion
+        if recursion:
+            children = [child for childList in data.values() for child in childList]
+            # for children in data.values():
+            for child in children:
+                childData = child._getChildren(classes=classes, recursion=recursion)
+                for childClassName, childList in childData.items():
+                    data.setdefault(childClassName, [])
+                    data[childClassName].extend(childList)
+            print('>>>', data)
         return data
 
-    def _getApiChildren(self, classes=['all']) -> OrderedDict:
-        """GWV; Return a dict of (className, apiChildrenList) pairs
-         classes is either 'gui' or 'nonGui' or 'all' or explicit enumeration of classNames
+    def _getApiChildren(self, classes=('all',)) -> OrderedDict:
+        """GWV; Construct a dict of (className, apiChildrenList) pairs
+
+         :param classes is either 'gui' or 'nonGui' or 'all' or explicit enumeration of classNames
+         :return: a OrderedDict of (className, apiChildrenList) pairs
+
          CCPNINTERNAL: used throughout
          """
         data = OrderedDict()

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-29 12:01:53 +0000 (Mon, November 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-29 14:58:40 +0000 (Mon, November 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1550,18 +1550,15 @@ class Framework(NotifierBase):
         """Create new, empty project; return Project instance
         """
         # local import to avoid cycles
-        from ccpn.core.lib.ProjectSaveHistory import newProjectSaveHistory
         from ccpn.core.Project import _newProject
 
-        # NB _closeProject includes a gui cleanup call
-        if self.project is not None:
-            self._closeProject()
-
-        sys.stderr.write('==> Creating new, empty project\n')
         newName = re.sub('[^0-9a-zA-Z]+', '', name)
         if newName != name:
             getLogger().info('Removing whitespace from name: %s' % name)
 
+        sys.stderr.write('==> Creating new, empty project\n')
+        # NB _closeProject includes a gui cleanup call
+        self._closeProject()
         project = _newProject(self, name=newName)
         self._initialiseProject(project)    # This also set the linkages
 
@@ -1582,28 +1579,9 @@ class Framework(NotifierBase):
         with logCommandManager('application.', 'loadProject', path):
             logger = getLogger()
 
-            # ok = MessageDialog.showYesNoWarning('Load Project',
-            #                                     f'Project {path} was created with version-2 Analysis.\n'
-            #                                     '\n'
-            #                                     'CAUTION: The project will be coverted to a version-3 project and saved '
-            #                                     'as a new directory with .cppn extension. If you are in any doubt, please '
-            #                                     'make a copy of the project folder before loading/saving this project.\n'
-            #                                     '\n'
-            #                                     'Do you want to continue loading?')
-            #
-            # if not ok:
-            #     # skip loading so that user can backup/copy project
-            #     getLogger().info('==> Cancelled loading ccpn project "%s"' % path)
-            #     return []
-
-            if self.project is not None:  # always close for Ccpn
-                self._closeProject()
-
+            # always close first
+            self._closeProject()
             project = _loadProject(application=self, path=str(path))
-            # # call the update
-            # updateProject_fromV2(project)
-            # logger.info('==> Upgraded %s to version-3' % project)
-
             self._initialiseProject(project)    # This also sets the linkages
             getLogger().info('==> Loaded ccpn project "%s"' % path)
 
@@ -1632,32 +1610,8 @@ class Framework(NotifierBase):
             if not _path.exists():
                 raise ValueError('path "%s" does not exist' % path)
 
-            # warning for projects that predate 3.1.0.alpha - these will no longer be backwards compatible with
-            #   3.0.4.edge and earlier
-            # projectHistory = getProjectSaveHistory(_path)
-            # if projectHistory.lastSavedVersion <= '3.0.4':
-
-            if Project._needsUpgrading(path):
-
-                ok = MessageDialog.showYesNoWarning('Load Project',
-                                                    f'Project %s was created with an earlier version of AnalysisV3.\n'
-                                                    '\n'
-                                                    'CAUTION: After saving in version %s the project cannot currently be loaded '
-                                                    'back into versions 3.0.4 or earlier. If you are in any doubt, please make a copy of '
-                                                    'the project folder before loading/saving this project.\n'
-                                                    '\n'
-                                                    'Do you want to continue loading?' % (
-                                                        _path, self.applicationVersion.withoutRelease())
-                                                    )
-
-                if not ok:
-                    # skip loading so that user can backup/copy project
-                    getLogger().info('==> Cancelled loading ccpn project "%s"' % path)
-                    return []
-
-            if self.project is not None:  # always close for Ccpn
-                self._closeProject()
-
+            # always close first
+            self._closeProject()
             project = _loadProject(application=self, path=path)
             self._initialiseProject(project)    # This also set the linkages
             getLogger().info('==> Loaded ccpn project "%s"' % path)
@@ -1681,8 +1635,7 @@ class Framework(NotifierBase):
         dataBlock = _nefReader.getNefData(path)
 
         if makeNewProject:
-            if self.project is not None:
-                self._closeProject()
+            self._closeProject()
             self.project = self.newProject(dataBlock.name)
 
         self.project.shiftAveraging = False
@@ -1761,12 +1714,12 @@ class Framework(NotifierBase):
         sparkyName = dataBlock.getDataValues(SPARKY_NAME, firstOnly=True)
 
         # Just a helper function for cleaner code below"
-        def _import():
+        def _importData(project):
             with undoBlockWithoutSideBar():
                 with notificationEchoBlocking():
                     with catchExceptions(application=self, errorStringTemplate='Error loading Sparky file: %s',
                                          printTraceBack=True):
-                        sparkyReader.importSparkyProject(self.project, dataBlock)
+                        sparkyReader.importSparkyProject(project, dataBlock)
 
         #end def
 
@@ -1774,14 +1727,14 @@ class Framework(NotifierBase):
             with logCommandManager('application.', 'loadProject', path):
                 self._closeProject()
                 project = self.newProject(sparkyName)
-                _import()
+                _importData(project)
                 self.project.shiftAveraging = True
             getLogger().info('==> Created project from Sparky file: "%s"' % (path,))
 
         else:
             project = self.project
             with logCommandManager('application.', 'loadData', path):
-                _import()
+                _importData(project)
             getLogger().info('==> Imported Sparky file: "%s"' % (path,))
 
         return project
@@ -1803,7 +1756,6 @@ class Framework(NotifierBase):
         mainWindow = self.mainWindow
         with logCommandManager('application.', 'loadData', path):
             path = Path.aPath(path)
-            # title = path.basename
             mainWindow.newHtmlModule(urlPath=str(path), position='top', relativeTo=mainWindow.moduleArea)
         return []
 
@@ -2042,8 +1994,7 @@ class Framework(NotifierBase):
             _nefReader = dialog.getActiveNefReader()
 
             if makeNewProject:
-                if self.project is not None:
-                    self._closeProject()
+                self._closeProject()
                 self.project = self.newProject(_loader._nefDict.name)
 
             # import from the loader into the current project
@@ -2493,7 +2444,8 @@ class Framework(NotifierBase):
                     pass
 
     def _closeProject(self):
-        """Close project and clean up - when opening another or quitting application"""
+        """Close project and clean up - when opening another or quitting application
+        """
 
         # NB: this function must clean up both wrapper and ui/gui
 
@@ -2516,9 +2468,6 @@ class Framework(NotifierBase):
             # Cleans up wrapper project, including graphics data objects (Window, Strip, etc.)
             self.project._close()
             self._project = None
-
-        # self.ui.mainWindow = None
-        # self.project = None
 
     ###################################################################################################################
     ## MENU callbacks:  Spectrum

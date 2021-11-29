@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-29 09:59:55 +0000 (Mon, November 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-29 12:01:53 +0000 (Mon, November 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,8 +37,10 @@ from decorator import decorator
 
 import ccpn.core._implementation.resetSerial
 from ccpn.core import _importOrder
-# from ccpn.core.lib import CcpnSorting
 from ccpn.core.lib import Pid
+from ccpn.core._implementation.Updater import Updater, \
+    UPDATE_POST_OBJECT_INITIALISATION, UPDATE_POST_PROJECT_INITIALISATION
+
 from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
 from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking, \
     apiNotificationBlanking, inactivity, ccpNmrV3CoreSetter
@@ -137,13 +139,8 @@ class AbstractWrapperObject(NotifierBase):
     # Function to generate custom subclass instances -= overridden in some subclasses
     _factoryFunction = None
 
-    # A dict of (className, list[(fromVersionString, toVersionString, updateFunction)]) (key, value) pairs.
-    # updateFunction to be called (in _updateObject) after creation of the
-    # project if versionString <= _objectVersion; i.e. object needs updating.
-    # The list for className is populated by the updateObject class decorator
-    _updateFunctions = defaultdict(list)
-    # dict of update functions for the api part; to be called before object creation in _restoreObject
-    _updateApiFunctions = defaultdict(list)
+    # The updater instance
+    _updater = Updater()
 
     # Default values for parameters to 'new' function. Overridden in subclasses
     _defaultInitValues = None
@@ -714,7 +711,7 @@ class AbstractWrapperObject(NotifierBase):
                 for childClassName, childList in childData.items():
                     data.setdefault(childClassName, [])
                     data[childClassName].extend(childList)
-            print('>>>', data)
+            # print('>>>', data)
         return data
 
     def _getApiChildren(self, classes=('all',)) -> OrderedDict:
@@ -882,27 +879,13 @@ class AbstractWrapperObject(NotifierBase):
         version = str(VersionString(version))
         self._setInternalParameter(self._OBJECT_VERSION, version)
 
-    def _updateObject(self):
-        """Updates object from the _updateFunctions stack; to be populate by the
-        updateObject decorator defined below
+    def _updateObject(self, updateMethod):
+        """Use post-object or post-project updateMethod (as defined in Updater)
+        to update the project
         """
-        # update the object
-        logger = getLogger()
-        for fromVersion, toVersion, func in self._updateFunctions[self.className]:
-            currentVersion = self._objectVersion
-
-            if fromVersion is not None and currentVersion < fromVersion:
-                raise RuntimeError('Error trying to update object from version %s to version %s; invalid current version %s' % \
-                                   (fromVersion, toVersion, currentVersion))
-            if currentVersion < toVersion:
-                logger.debug('Updating %s: fromVersion: %s, currentVersion: %s, toVersion: %s, func: %s' %
-                         (self, fromVersion, currentVersion, toVersion, func)
-                )
-                func(self)
-            self._objectVersion = toVersion
-
-        # we have now ran all the updates; hence the object is a at the current application version
-        self._objectVersion = applicationVersion
+        if updateMethod not in (UPDATE_POST_OBJECT_INITIALISATION, UPDATE_POST_PROJECT_INITIALISATION):
+            raise ValueError('Invalid updateMethod "%s"' % updateMethod)
+        self._updater.update(updateMethod, obj=self)
 
     @classmethod
     def _restoreObject(cls, project, apiObj):

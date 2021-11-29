@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-23 11:38:08 +0100 (Tue, November 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-29 12:01:53 +0000 (Mon, November 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -121,9 +121,9 @@ MAXALIASINGRANGE = 3
 #=========================================================================================
 
 from ccpn.core._implementation.updates.update_3_0_4 import _updateSpectrum_3_0_4_to_3_1_0
-from ccpn.core._implementation.AbstractWrapperObject import updateObject
+from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_PROJECT_INITIALISATION
 
-@updateObject('3.0.4', '3.1.0', _updateSpectrum_3_0_4_to_3_1_0)
+@updateObject('3.0.4', '3.1.0', _updateSpectrum_3_0_4_to_3_1_0, UPDATE_POST_PROJECT_INITIALISATION)
 class Spectrum(AbstractWrapperObject, CcpNmrJson):
     """A Spectrum object contains all the stored properties of an NMR spectrum, as well as the
     path to the NMR (binary) data file. The Spectrum object has methods to get the binary data

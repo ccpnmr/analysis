@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-23 11:38:10 +0100 (Tue, November 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-29 12:01:53 +0000 (Mon, November 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -493,11 +493,7 @@ class Framework(NotifierBase):
         self.current._restoreStateFromFile(self.statePath)
 
         if self.hasGui:
-
-            project._blockSideBar = True
             self.ui.initialize(self._mainWindow)
-            project._blockSideBar = False
-
             # Get the mainWindow out of the application top level once it's been transferred to ui
             del self._mainWindow
         else:

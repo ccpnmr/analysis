@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-23 11:38:08 +0100 (Tue, November 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-29 12:01:53 +0000 (Mon, November 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,6 +37,8 @@ import json
 
 # from ccpn.util.Common import isValidPath, isValidFileNameLength
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core._implementation.Updater import UPDATE_POST_PROJECT_INITIALISATION
+
 from ccpn.core.lib import Pid
 from ccpn.core.lib import Undo
 from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory, newProjectSaveHistory
@@ -421,16 +423,15 @@ class Project(AbstractWrapperObject):
         # Set up notifiers
         self._registerPresetApiNotifiers()
 
-        # GWV 20181123: deactivated
-        # for tt in self._coreNotifiers:
-        #     self.registerNotifier(*tt)
-
         # initialise, creating the children
         with inactivity():
             self._restoreChildren()
             # we always have the default chemicalShift list
             if len(self.chemicalShiftLists) == 0:
                 self.newChemicalShiftList(name='default')
+
+        # Call any updates
+        self._update()
 
     def _close(self):
         self.close()
@@ -1175,181 +1176,10 @@ class Project(AbstractWrapperObject):
     def _update(self):
         """Call the _updateObject method on all objects, including self
         """
-        self._updateObject()
+        self._updateObject(UPDATE_POST_PROJECT_INITIALISATION)
         objs = self._getAllDecendants()
         for obj in objs:
-            obj._updateObject()
-
-    # def _checkUpgradedFromV2(self):
-    #     """Check whether the project has been upgraded from V2
-    #     """
-    #     if self._apiNmrProject.root._upgradedFromV2:
-    #         # reset the noise levels
-    #         self._setNoiseLevels(alwaysSetNoise=True)
-
-    # def _validateDataUrlAndFilePaths(self, newDataUrlPath=None):
-    #     """Perform validate operation for setting dataUrl from preferences - to be called after loading
-    #     """
-    #
-    #     # read the dataPath from the preferences of defined
-    #     project = self
-    #     general = self.application.preferences.general if self.application.preferences and self.application.preferences.general else None
-    #     autoSet = general.autoSetDataPath if general.autoSetDataPath else False
-    #
-    #     getLogger().info('Validating dataUrls and filePaths')
-    #
-    #     newDataUrlPath = newDataUrlPath if newDataUrlPath else general.dataPath \
-    #         if general and general.dataPath else general.userWorkingPath \
-    #         if general.userWorkingPath else os.path.expanduser('~')
-    #     newDataUrlPath = os.path.expanduser(newDataUrlPath)
-    #
-    #     def _findDataUrl(project, storeType):
-    #         """find the dataStores of the given type
-    #         """
-    #         dataUrl = project._apiNmrProject.root.findFirstDataLocationStore(
-    #                 name='standard').findFirstDataUrl(name=storeType)
-    #         if dataUrl:
-    #             return (dataUrl,)
-    #         else:
-    #             return ()
-    #
-    #     # get the dataPaths from the project
-    #     dataUrlData = {}
-    #     # dataUrlData['remoteData'] = _findDataUrl(project, 'remoteData')
-    #
-    #     # # skip setting the path if autoSetDataPath is false
-    #     # if autoSet:
-    #     #
-    #     #     # update dataUrl here to the value in preferences
-    #     #     if dataUrlData['remoteData'] and len(dataUrlData['remoteData']) == 1:
-    #     #         # must only be one dataUrl
-    #     #         primaryDataUrl = dataUrlData['remoteData'][0]
-    #     #         primaryDataUrl.url = primaryDataUrl.url.clone(path=newDataUrlPath)
-    #
-    #     # reset the dataStores
-    #     dataUrlData['remoteData'] = _findDataUrl(project, 'remoteData')
-    #     dataUrlData['insideData'] = _findDataUrl(project, 'insideData')
-    #     dataUrlData['alongsideData'] = _findDataUrl(project, 'alongsideData')
-    #     dataUrlData['otherData'] = [dataUrl for store in project._wrappedData.memopsRoot.sortedDataLocationStores()
-    #                                 for dataUrl in store.sortedDataUrls() if dataUrl.name not in ('insideData', 'alongsideData', 'remoteData')]
-    #
-    #     # standardStore = self.project._wrappedData.memopsRoot.findFirstDataLocationStore(name='standard')
-    #     # stores = [(store.name, store.url.dataLocation, url.path,) for store in standardStore.sortedDataUrls() for url in store.sortedDataStores()]
-    #     # urls = [(store.dataUrl.name, store.dataUrl.url.dataLocation, store.path,) for store in standardStore.sortedDataStores()]
-    #
-    #     self._validateCleanUrls()
-    #
-    #     delList = set()
-    #     if autoSet:
-    #         from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import forceChangeDataStoreUrl, repointToDataUrl
-    #
-    #         # NOTE:ED - must remove all other dataUrls first, otherwise the dataUrl rename won't work
-    #
-    #         # force the change of the other dataUrls
-    #         for spec in self.project.spectra:
-    #             apiDataStore = spec._wrappedData.dataStore
-    #             if apiDataStore is None:
-    #                 getLogger().warning("Spectrum is not stored, cannot change file path")
-    #
-    #             else:
-    #                 # dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
-    #                 dataUrlName = apiDataStore.dataUrl.name
-    #                 # print('>>>    dataUrlName', dataUrlName)
-    #                 if dataUrlName not in ('insideData', 'alongsideData', 'remoteData'):
-    #                     # move all other objects that are not in the correct remoteData
-    #                     # to the correct remoteData created above
-    #
-    #                     primaryDataUrl = dataUrlData['remoteData'][0]
-    #                     delList.add(apiDataStore.dataUrl)
-    #                     repointToDataUrl(apiDataStore, primaryDataUrl)
-    #
-    #         # force the change of the dataUrl
-    #         for spec in self.project.spectra:
-    #             apiDataStore = spec._wrappedData.dataStore
-    #             if apiDataStore is None:
-    #                 getLogger().warning("Spectrum is not stored, cannot change file path")
-    #
-    #             else:
-    #                 # dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
-    #                 dataUrlName = apiDataStore.dataUrl.name
-    #                 # print('>>>    dataUrlName', dataUrlName, newDataUrlPath)
-    #                 if dataUrlName == 'remoteData':
-    #                     # if dataUrlName not in ('insideData', 'alongsideData'):
-    #
-    #                     # force existing remoteData to the new location
-    #                     # a new remoteData in the correct place
-    #
-    #                     getLogger().info('>>>  validate autoset: %s' % str(apiDataStore))
-    #                     # delList.add(apiDataStore.dataUrl.url)
-    #                     apiDataStore.dataUrl.url = apiDataStore.dataUrl.url.clone(path=newDataUrlPath)
-    #                     # forceChangeDataStoreUrl(apiDataStore, newDataUrlPath)
-    #
-    #     for delObj in delList:
-    #         # print('>>>    delete', delObj)
-    #         delObj.delete()
-    #
-    #     self._validateCleanUrls()
-    #
-    #     # # skip setting the path if autoSetDataPath is false
-    #     # if autoSet:
-    #     #
-    #     #     # update dataUrl here to the value in preferences
-    #     #     if dataUrlData['remoteData'] and len(dataUrlData['remoteData']) == 1:
-    #     #         # must only be one dataUrl
-    #     #         getLogger().info('>>>repointing dataUrl to %s...' % newDataUrlPath)
-    #     #
-    #     #         primaryDataUrl = dataUrlData['remoteData'][0]
-    #     #         primaryDataUrl.url = primaryDataUrl.url.clone(path=newDataUrlPath)
-    #
-    # def _validateCleanUrls(self):
-    #
-    #     # update the pointers to the urls and delete the spares
-    #     standardStore = self.project._wrappedData.memopsRoot.findFirstDataLocationStore(name='standard')
-    #
-    #     spectraStores = [spec._wrappedData.dataStore for spec in self.project.spectra]
-    #     badUrls = [url for store in standardStore.sortedDataUrls() for url in store.sortedDataStores() if url not in spectraStores]
-    #     otherUrls = [dataUrl for store in self.project._wrappedData.memopsRoot.sortedDataLocationStores()
-    #                  for dataUrl in store.sortedDataUrls() if dataUrl.name not in ('insideData', 'alongsideData', 'remoteData')]
-    #
-    #     allRemoteUrls = [url for url in standardStore.sortedDataUrls() if url.name == 'remoteData' if url.dataStores]
-    #     remoteUrls = [url for url in standardStore.sortedDataUrls() if url.name == 'remoteData' if not url.dataStores]
-    #
-    #     for bb in badUrls:
-    #         getLogger().debug2('>>>validate cleanup urls: %s' % str(bb))
-    #         bb.delete()
-    #
-    #     for url in otherUrls:
-    #         if not url.dataStores:
-    #             getLogger().debug2('>>>validate cleanup stores: %s' % str(url))
-    #             url.delete()
-    #
-    #     for bb in (allRemoteUrls + remoteUrls)[1:]:
-    #         getLogger().debug2('>>>validate cleanup remoteUrls: %s' % str(bb))
-    #         bb.delete()
-    #
-    #     # from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import forceChangeDataStoreUrl
-    #     #
-    #     # for spec in self.project.spectra:
-    #     #     apiDataStore = spec._wrappedData.dataStore
-    #     #     if apiDataStore is None:
-    #     #         raise ValueError("Spectrum is not stored, cannot change file path")
-    #     #
-    #     #     else:
-    #     #         # dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
-    #     #         dataUrlName = apiDataStore.dataUrl.name
-    #     #         if dataUrlName == 'remoteData':
-    #     #
-    #     #             forceChangeDataStoreUrl(apiDataStore, '/Users/ejb66/Desktop/')
-    #
-    #     # # skip setting the path if autoSetDataPath is false
-    #     # if not autoSet:
-    #     #     return
-    #     #
-    #     # # update dataUrl here to the value in preferences
-    #     # if dataUrlData['remoteData'] and len(dataUrlData['remoteData']) == 1:
-    #     #     # must only be one dataUrl
-    #     #     primaryDataUrl = dataUrlData['remoteData'][0]
-    #     #     primaryDataUrl.url = primaryDataUrl.url.clone(path=newDataUrlPath)
+            obj._updateObject(UPDATE_POST_PROJECT_INITIALISATION)
 
     @logCommand('project.')
     def exportNef(self, path: str = None,
@@ -2141,21 +1971,18 @@ def _loadProject(application, path: str) -> Project:
     # need project.path, as it may have have changed; e.g. for a V2 project
     project._saveHistory = getProjectSaveHistory(project.path)
 
-    # Call any updates
-    project._update()
-
     # the initialisation is completed by Framework when it has done its things
     # project._initialiseProject()
 
     return project
 
 
-def _newProject(application, name: str = 'default', path: str = None, overwrite=True) -> Project:
+def _newProject(application, name: str = 'default', path: str = None, overwrite=False) -> Project:
     """Make new project, putting underlying data storage (API project) at path
     :return Project instance
     """
     # apiIo.newProject will create a temp path if path is None
-    if (apiProject := apiIo.newProject(name, str(path), overwriteExisting=overwrite, useFileLogger=True)) is None:
+    if (apiProject := apiIo.newProject(name, path, overwriteExisting=overwrite, useFileLogger=True)) is None:
         raise RuntimeError("New project could not be created (overlaps exiting project?) name:%s, path:%s, overwrite:"
                          % (name, path, overwrite))
 

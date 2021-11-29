@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-23 11:38:10 +0100 (Tue, November 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-29 15:35:08 +0000 (Mon, November 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -145,110 +145,6 @@ class Gui(Ui):
             project = self.application.project
             current = self.application.current
 
-        # Wrapper Notifiers
-        from ccpn.ui.gui.lib import GuiStrip
-
-        # GWV 20181123: Callback does not have right signature and does not do anything
-        # Notifier(project, [Notifier.CREATE, Notifier.DELETE], 'Strip',
-        #                     GuiStrip.GuiStrip._resetRemoveStripAction)
-
-        # notifier = project.registerNotifier('Strip', 'create', GuiStrip.GuiStrip._resetRemoveStripAction)
-        # project.duplicateNotifier('Strip', 'delete', notifier)
-
-        # GWV 20181216: moved to GuiMainWindow
-        # project.registerNotifier('Mark', 'create', GuiStrip._updateDisplayedMarks)
-        # project.registerNotifier('Mark', 'change', GuiStrip._updateDisplayedMarks)
-        # project.registerNotifier('Mark', 'delete', GuiStrip._updateDisplayedMarks)
-
-        # GWV 20181216: moved to GuiMainWindow
-        # self._currentPeakNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'peaks', GuiStrip._updateSelectedPeaks)
-        # self._currentIntegralNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'integrals', GuiStrip._updateSelectedIntegrals)
-        # self._currentMultipletNotifier = Notifier(project._appBase.current, [Notifier.CURRENT], 'multiplets', GuiStrip._updateSelectedMultiplets)
-
-        # from ccpn.ui.gui.lib.GuiSpectrumDisplay import _spectrumHasChanged
-        #
-        # # project.registerNotifier('Peak', 'delete', GuiSpectrumDisplay._deletedPeak)
-        #
-        # # project.registerNotifier('Spectrum', 'change', GuiSpectrumDisplay._spectrumHasChanged)
-        # self.setNotifier(project, [Notifier.CHANGE], 'Spectrum', _spectrumHasChanged)
-
-        # from ccpn.ui.gui.lib.GuiSpectrumView import _spectrumViewHasChanged
-        # from ccpn.ui.gui.widgets.SpectrumGroupToolBar import _spectrumGroupViewHasChanged
-
-        # project.registerNotifier('SpectrumView', 'change', GuiSpectrumView._spectrumViewHasChanged)
-        # self.setNotifier(project, [Notifier.CHANGE], 'SpectrumView', _spectrumViewHasChanged)
-        # self.setNotifier(project, [Notifier.CHANGE], 'SpectrumGroup', _spectrumGroupViewHasChanged)
-
-        from ccpn.ui.gui.lib import GuiPeakListView
-
-        # project.registerNotifier('PeakListView', 'create',
-        #                          GuiPeakListView.GuiPeakListView._createdPeakListView)
-        # project.registerNotifier('PeakListView', 'delete',
-        #                          GuiPeakListView.GuiPeakListView._deletedStripPeakListView)
-        # project.registerNotifier('PeakListView', 'change',
-        #                          GuiPeakListView.GuiPeakListView._changedPeakListView)
-        #
-        # from ccpn.ui.gui.lib import GuiIntegralListView
-        # project.registerNotifier('IntegralListView', 'create',
-        #                          GuiIntegralListView.GuiIntegralListView._createdIntegralListView)
-        # project.registerNotifier('IntegralListView', 'delete',
-        #                          GuiIntegralListView.GuiIntegralListView._deletedStripIntegralListView)
-        # project.registerNotifier('IntegralListView', 'change',
-        #                          GuiIntegralListView.GuiIntegralListView._changedIntegralListView)
-        #
-        # from ccpn.ui.gui.lib import GuiMultipletListView
-        # project.registerNotifier('MultipletListView', 'create',
-        #                          GuiMultipletListView.GuiMultipletListView._createdMultipletListView)
-        # project.registerNotifier('MultipletListView', 'delete',
-        #                          GuiMultipletListView.GuiMultipletListView._deletedStripMultipletListView)
-        # project.registerNotifier('MultipletListView', 'change',
-        #                          GuiMultipletListView.GuiMultipletListView._changedMultipletListView)
-
-        # GWV 20181216: moved to GuiMainWindow
-        # self._updateNotifier1 = Notifier(project,
-        #                                  triggers=[Notifier.RENAME],
-        #                                  targetName='NmrAtom',
-        #                                  callback=GuiPeakListView._updateAssignmentsNmrAtom)
-        # self._updateNotifier2 = Notifier(project,
-        #                                 triggers=[Notifier.CREATE],
-        #                                 targetName='NmrAtom',
-        #                                 callback=GuiPeakListView._editAssignmentsNmrAtom)
-
-        # project.registerNotifier('Peak', 'change', _coreClassMap['Peak']._refreshPeakPosition, onceOnly=True)
-
-        # API notifiers - see functions for comments on why this is done this way
-        # project._registerApiNotifier(GuiPeakListView._upDateAssignmentsPeakDimContrib,
-        #                              'ccp.nmr.Nmr.AbstractPeakDimContrib', 'postInit')
-        # project._registerApiNotifier(GuiPeakListView._deleteAssignmentsNmrAtomDelete,
-        #                             'ccp.nmr.Nmr.AbstractPeakDimContrib', 'preDelete')
-
-        # ejb - new notifier to catch the deletion of an nmrAtom and update peak labels
-        # project._registerApiNotifier(GuiPeakListView._deleteAssignmentsNmrAtomDelete,
-        #                              'ccp.nmr.Nmr.AbstractPeakDimContrib', 'delete')
-
-        # from ccpn.ui.gui.modules import SpectrumDisplayNd
-        #
-        # project._registerApiNotifier(SpectrumDisplayNd._changedBoundDisplayAxisOrdering,
-        #                              SpectrumDisplayNd.ApiBoundDisplay, 'setAxisOrder')
-
-        # from ccpn.ui.gui.modules import SpectrumDisplay1d
-        # project._registerApiNotifier(SpectrumDisplay1d._updateSpectrumPlotColour,
-        #                              SpectrumDisplay1d.ApiDataSource, 'setSliceColour')
-        #
-        # project._registerApiNotifier(SpectrumDisplay1d._updateSpectrumViewPlotColour,
-        #                              SpectrumDisplay1d.ApiSpectrumView, 'setSliceColour')
-
-        # project._registerApiNotifier(GuiStrip._rulerCreated, 'ccpnmr.gui.Task.Ruler', 'postInit')
-        # project._registerApiNotifier(GuiStrip._rulerDeleted, 'ccpnmr.gui.Task.Ruler', 'preDelete')
-        # project._registerApiNotifier(GuiStrip._setupGuiStrip, 'ccpnmr.gui.Task.Strip', 'postInit')
-
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        #       # TODO:ED   added so that some modules are cleared on changing projects
-        #
-        # from ccpn.ui.gui.modules.SequenceModule import SequenceModule
-        #
-        # SequenceModule._alreadyOpened = False
-
     def start(self):
         self.mainWindow._fillRecentMacrosMenu()
         self.mainWindow._updateRestoreArchiveMenu()
@@ -311,9 +207,6 @@ class Gui(Ui):
                 command = re.sub(REMOVEDEBUG, '', command)
                 console._write(command + '\n')
 
-
-
-    #TODO: should discuss how application should deal with it
     def getByGid(self, gid):
         return self.application.getByGid(gid)
 
@@ -414,20 +307,12 @@ Gui._factoryFunctions[coreClass.className] = _factoryFunction
 ## Mark class - put in namespace for documentation
 Mark = _coreClassMap['Mark']
 
-#TODO: move to individual files containing the wrapped class and Gui-class
-# Any Factory function to _implementation or abstractWrapper
-# Also Rename
-# SpectrumDisplay1d.py; contains SpectrumDisplay1d (formerly StripDisplay1d) and
-#                       GuiStripDisplay
-# SpectrumDisplayNd.py: likeWise
-
-
 ## SpectrumDisplay class
 coreClass = _coreClassMap['SpectrumDisplay']
 from ccpn.ui.gui.modules.SpectrumDisplay1d import SpectrumDisplay1d as _SpectrumDisplay1d
 
 
-#TODO: also change for this class as done for the Nd variant below; this involves
+#also change for this class as done for the Nd variant below; this involves
 #chaning the init signature of the SpectrumDisplay1d and passing the parameters along to
 # GuiSpectrumDisplay
 

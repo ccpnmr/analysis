@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-12 09:22:34 +0000 (Fri, November 12, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-11-29 20:29:05 +0000 (Mon, November 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -7267,18 +7267,15 @@ def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict
         filePath = spectrumParameters.get('filePath')
         if filePath and os.path.exists(filePath):
             try:
-                dataType, subType, usePath = ioFormats.analyseUrl(filePath)
-                if dataType == 'Spectrum':
-                    spectra = project.loadData(filePath)
-                    # spectra = project.loadSpectrum(usePath, subType)
-                    if spectra:
-                        spectrum = spectra[0]
+                spectra = project.application.loadData(filePath)
+                if spectra and isinstance(spectra[0], Spectrum):
+                    spectrum = spectra[0]
             except Exception as es:
                 # Deliberate - any error should be skipped
                 getLogger().warning(str(es))
 
             if spectrum is None:
-                project._logger.warning("Failed to load spectrum from spectrum path %s" % filePath)
+                getLogger().warning("Failed to load spectrum from spectrum path %s" % filePath)
             elif 'axisCodes' in dimensionData:
                 # set axisCodes
                 spectrum.axisCodes = dimensionData['axisCodes']

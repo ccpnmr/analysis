@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-29 12:01:53 +0000 (Mon, November 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-29 12:57:01 +0000 (Mon, November 29, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -32,8 +32,10 @@ __date__ = "$Date: 2021-11-10 10:28:41 +0000 (Wed, November 10, 2021) $"
 # Start of code
 #========================================================================================
 
-from ccpn.util.decorators import singleton
 from collections import defaultdict
+
+from ccpn.util.decorators import singleton
+from ccpn.core.lib.ContextManagers import inactivity
 
 from ccpn.util.Logging import getLogger
 from ccpn.framework.Version import applicationVersion
@@ -67,19 +69,25 @@ class Updater(object):
     def _updateV3Object(self, obj, updateFunctions):
         """Updates obj using the updateFunctions stack for obj.className;
         """
-        logger = getLogger()
-        for fromVersion, toVersion, func in updateFunctions:
-            currentVersion = obj._objectVersion
+        if len(updateFunctions) == 0:
+            return
 
-            if fromVersion is not None and currentVersion < fromVersion:
-                raise RuntimeError('Error trying to update %s from version %s to version %s; invalid current version %s' % \
-                                   (obj, fromVersion, toVersion, currentVersion))
-            if currentVersion < toVersion:
-                logger.debug('Updating %s: fromVersion: %s, currentVersion: %s, toVersion: %s, func: %s' %
-                         (obj, fromVersion, currentVersion, toVersion, func)
-                )
-                func(obj)
-            obj._objectVersion = toVersion
+        logger = getLogger()
+
+        with inactivity(application=obj.project.application):
+
+            for fromVersion, toVersion, func in updateFunctions:
+                currentVersion = obj._objectVersion
+
+                if fromVersion is not None and currentVersion < fromVersion:
+                    raise RuntimeError('Error trying to update %s from version %s to version %s; invalid current version %s' % \
+                                       (obj, fromVersion, toVersion, currentVersion))
+                if currentVersion < toVersion:
+                    logger.debug('Updating %s: fromVersion: %s, currentVersion: %s, toVersion: %s, func: %s' %
+                             (obj, fromVersion, currentVersion, toVersion, func)
+                    )
+                    func(obj)
+                obj._objectVersion = toVersion
 
     def update(self, updateMethod, obj, klass=None):
         """Updates obj using the various updateFunctions stacks for

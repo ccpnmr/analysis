@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-29 21:13:12 +0000 (Mon, November 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-30 15:54:58 +0000 (Tue, November 30, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -62,7 +62,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import numpy as np
 from typing import Sequence, Tuple, Optional, Union, List
 from functools import partial
 from itertools import permutations
@@ -301,6 +300,11 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                                   A SpectrumDataSource instance for reading (writing) of the (binary) spectrum data.
                                   None indicates no valid spectrum data file has been defined"""
     )
+
+    @property
+    def dataSource(self):
+        """Return the dataSource instance"""
+        return self._dataSource
 
     _peakPicker = PeakPickerTrait(default_value=None).tag(
                                   saveToJson=True,
@@ -1422,13 +1426,13 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                   Use axisCodes to set magnetisation transfers instead.""")
 
     @property
-    def intensities(self) -> np.ndarray:
+    def intensities(self) -> numpy.array:
         """ spectral intensities as NumPy array for 1D spectra
         """
 
         if self.dimensionCount != 1:
             getLogger().warning('Currently this method only works for 1D spectra')
-            return np.array([])
+            return numpy.array([])
 
         if self._intensities is None:
             self._intensities = self.getSliceData()  # Assignment is Redundant as getSliceData does that;
@@ -1436,12 +1440,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             # Nevertheless for clarity
             if self._intensities is None:
                 getLogger().warning('Unable to get 1D slice data for %s' % self)
-                return np.array([])
+                return numpy.array([])
 
         return self._intensities
 
     @intensities.setter
-    def intensities(self, value: np.ndarray):
+    def intensities(self, value: numpy.array):
         self._intensities = value
 
         # NOTE:ED - temporary hack for showing straight the result of intensities change
@@ -1449,12 +1453,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             spectrumView.refreshData()
 
     @property
-    def positions(self) -> np.array:
+    def positions(self) -> numpy.array:
         """ spectral region in ppm as NumPy array for 1D spectra """
 
         if self.dimensionCount != 1:
             getLogger().warning('Currently this method only works for 1D spectra')
-            return np.array([])
+            return numpy.array([])
 
         if self._positions is None:
             self._positions = self.getPpmArray(dimension=1)
@@ -1716,7 +1720,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         return self.spectrumReferences[dimension - 1].pointToValue(value)
 
-    def getPpmArray(self, axisCode=None, dimension=None):
+    def getPpmArray(self, axisCode=None, dimension=None) -> numpy.array:
         """Return a numpy array with ppm values of the grid points along axisCode or dimension
         """
         if dimension is None and axisCode is None:
@@ -1731,7 +1735,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             raise RuntimeError('Invalid dimension (%s)' % (dimension,))
 
         spectrumLimits = self.spectrumLimits[dimension - 1]
-        result = np.linspace(spectrumLimits[0], spectrumLimits[1], self.pointCounts[dimension - 1])
+        result = numpy.linspace(spectrumLimits[0], spectrumLimits[1], self.pointCounts[dimension - 1])
 
         return result
 
@@ -1763,12 +1767,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         pR = min((MAXALIASINGRANGE + 1) * pCount, max(-MAXALIASINGRANGE * pCount, pR))
         return ppmL, ppmR, pL, pR
 
-    def getPpmAliasingLimitsArray(self, axisCode=None, dimension=None):
+    def getPpmAliasingLimitsArray(self, axisCode=None, dimension=None) -> numpy.array:
         """Return a numpy array of ppm values of the grid points along axisCode or dimension
         for the points contained by the aliasing limits, end points are inclusive
         """
         ppmL, ppmR, pL, pR = self._verifyAxisCodeDimension(axisCode, dimension)
-        return np.linspace(ppmL, ppmR, pR - pL + 1)
+        return numpy.linspace(ppmL, ppmR, pR - pL + 1)
 
     def getPpmAliasingLimits(self, axisCode=None, dimension=None):
         """Return a tuple of ppm values of the (first, last) grid points along axisCode or dimension
@@ -1777,11 +1781,11 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         ppmL, ppmR, _, _ = self._verifyAxisCodeDimension(axisCode, dimension)
         return (ppmL, ppmR)
 
-    def getPointAliasingLimitsArray(self, axisCode=None, dimension=None):
+    def getPointAliasingLimitsArray(self, axisCode=None, dimension=None) -> numpy.array:
         """Return a numpy array with point values of the grid points along axisCode or dimension
         """
         _, _, pL, pR = self._verifyAxisCodeDimension(axisCode, dimension)
-        return np.linspace(pL, pR, pR - pL + 1)
+        return numpy.linspace(pL, pR, pR - pL + 1)
 
     def getPointAliasingLimits(self, axisCode=None, dimension=None):
         """Return a tuple of point values of the (first, last) grid points along axisCode or dimension
@@ -2008,7 +2012,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     #-----------------------------------------------------------------------------------------
 
     @logCommand(get='self')
-    def getIntensity(self, ppmPositions):
+    def getIntensity(self, ppmPositions) -> float:
         """Returns the interpolated height at the ppm position
         """
         # The height below is not derived from any fitting
@@ -2018,7 +2022,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self.getHeight(ppmPositions)
 
     @logCommand(get='self')
-    def getHeight(self, ppmPositions):
+    def getHeight(self, ppmPositions) -> float:
         """Returns the interpolated height at the ppm position
         """
         if len(ppmPositions) != self.dimensionCount:
@@ -2030,7 +2034,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self.getPointValue(pointPositions)
 
     @logCommand(get='self')
-    def getPointValue(self, pointPositions):
+    def getPointValue(self, pointPositions) -> float:
         """Return the value interpolated at the position given in points (1-based, float values).
         """
         if len(pointPositions) != self.dimensionCount:
@@ -2056,8 +2060,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return value * self.scale
 
     @logCommand(get='self')
-    def getSliceData(self, position=None, sliceDim: int = 1):
-        """Get a slice defined by sliceDim and a position vector
+    def getSliceData(self, position=None, sliceDim: int = 1) -> numpy.array:
+        """Get a slice defined by sliceDim and a position vector as numpy array.
 
         :param position: An optional list/tuple of point positions (1-based);
                          defaults to [1,1,1,1]
@@ -2087,7 +2091,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @logCommand(get='self')
     def getSlice(self, axisCode, position) -> numpy.array:
-        """Get a slice defined by axisCode and a position vector
+        """Get a slice defined by axisCode and a position vector s numpy array
 
         :param axisCode: valid axisCode of the slice axis
         :param position: An optional list/tuple of point positions (1-based);
@@ -2102,7 +2106,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @logCommand(get='self')
     def extractSliceToFile(self, axisCode, position, path=None, dataFormat='Hdf5'):
-        """Extract 1D slice from self as new Spectrum; saved to path
+        """Extract 1D slice from self as new Spectrum instance;
+        saved to path (autogenerated if None)
         if 1D it effectively yields a copy of self
 
         :param axisCode: axiscode of slice to extract
@@ -2132,8 +2137,9 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return newSpectrum
 
     @logCommand(get='self')
-    def getPlaneData(self, position=None, xDim: int = 1, yDim: int = 2):
+    def getPlaneData(self, position=None, xDim: int = 1, yDim: int = 2) -> numpy.ndarray:
         """Get a plane defined by by xDim and yDim ('1'-based), and a position vector ('1'-based)
+        as an numpy ndarray.
         Dimensionality must be >= 2
 
         :param position: A list/tuple of point-positions (1-based)
@@ -2165,8 +2171,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return data
 
     @logCommand(get='self')
-    def getPlane(self, axisCodes, position=None):
-        """Get a plane defined by axisCodes and position
+    def getPlane(self, axisCodes, position=None) -> numpy.ndarray:
+        """Get a plane defined by axisCodes and position as a numpy ndarray.
         Dimensionality must be >= 2
 
         :param axisCodes: tuple/list of two axisCodes; expand if exactMatch=False
@@ -2215,7 +2221,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return newSpectrum
 
     @logCommand(get='self')
-    def getProjection(self, axisCodes: (tuple, list), method: str = 'max', threshold=None):
+    def getProjection(self, axisCodes: (tuple, list), method: str = 'max', threshold=None) -> numpy.ndarray:
         """Get projected plane defined by two axisCodes, using method and an optional threshold
 
         :param axisCodes: tuple/list of two axisCodes; expand if exactMatch=False
@@ -2269,18 +2275,32 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         return newSpectrum
 
+    @logCommand(get='self')
     def cloneAsHdf5(self):
-        """Clone self and all peakLists as an Hdf type file
+        """Clone self and all peakLists as an Hdf5 type file
         :return: a Spectrum instance of the cloned spectrum
         """
         from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
-        _path = self.path.withoutSuffix() + '_cloned'
-        # the extractToFile routine assures the proper suffix
-        newSpectrum = self._extractToFile(self.axisCodes, [1]*self.dimensionCount,
-                                          path = _path,
-                                          dataFormat=Hdf5SpectrumDataSource.dataFormat,
-                                          tag = ''
-                                          )
+
+        if not self.hasValidPath():
+            raise RuntimeError('Not valid path for %s ' % self)
+
+        name = self.name + '_cloned'
+
+        _path = self._dataSource.parentPath / name
+        suffix = Hdf5SpectrumDataSource.suffixes[0]
+        dataFormat = Hdf5SpectrumDataSource.dataFormat
+
+        dataStore = DataStore.newFromPath(path=_path,
+                                          autoVersioning=True, withSuffix=suffix,
+                                          dataFormat=dataFormat)
+
+        newSpectrum = _extractRegionToFile(spectrum=self,
+                                           dimensions=self.dimensions,
+                                           position=[1]*self.dimensionCount,
+                                           dataStore=dataStore,
+                                           name=name)
+
         # Copy the peakList/peaks
         for idx, pl in enumerate(self.peakLists):
             if idx+1 < len(newSpectrum.peakLists):
@@ -2288,6 +2308,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             targetPl = newSpectrum.peakLists[idx]
             pl.copyTo(targetSpectrum=newSpectrum, targetPeakList=targetPl)
 
+        newSpectrum.appendComment('Cloned from %s' % self.name)
         return newSpectrum
 
     def _clone1D(self):
@@ -2359,9 +2380,10 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                           (axisDict, sliceTuples))
         return sliceTuples
 
-    def getRegion(self, **axisDict):
+    @logCommand(get='self')
+    def getRegion(self, **axisDict) -> numpy.ndarray:
         """
-        Return the region of the spectrum data defined by the axis limits in ppm as numpy array
+        Return the region of the spectrum data defined by the axis limits in ppm as numpy ndarray
         of the same dimensionality as defined by the Spectrum instance.
 
         Axis limits  are passed in as a dict of (axisCode, tupleLimit) key, value pairs
@@ -2391,11 +2413,11 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         sliceTuples = self._axisDictToSliceTuples(axisDict)
         return self._dataSource.getRegionData(sliceTuples, aliasingFlags=[1] * self.dimensionCount)
 
-    def getRegionData(self, exclusionBuffer: Optional[Sequence] = None, minimumDimensionSize: int = 3, **axisDict):
-        """Return the region of the spectrum data defined by the axis limits.
-        GWV: Old routine replaced by getRegion
-        """
-        raise NotImplementedError('replace by getRegion')
+    # def getRegionData(self, exclusionBuffer: Optional[Sequence] = None, minimumDimensionSize: int = 3, **axisDict):
+    #     """Return the region of the spectrum data defined by the axis limits.
+    #     GWV: Old routine replaced by getRegion
+    #     """
+    #     raise NotImplementedError('replace by getRegion')
 
     @logCommand(get='self')
     def createPeak(self, peakList=None, **ppmPositions) -> Optional['Peak']:
@@ -2469,7 +2491,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return _pickPeaks(self, peakList, positiveThreshold, negativeThreshold, **ppmRegions)
 
     def _extractToFile(self, axisCodes, position, path, dataFormat, tag):
-        """Local routine to prevent code duplication across extractSliceToFile, extractPlaneToFile,
+        """Local helper routine to prevent code duplication across extractSliceToFile, extractPlaneToFile,
         extractProjectionToFile.
         :return: new Spectrum instance
         """
@@ -2485,27 +2507,19 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         suffix = klass.suffixes[0] if len(klass.suffixes) > 0 else '.dat'
 
         tagStr = '%s_%s' % (tag, '_'.join(axisCodes))
-        appendToFilename = '_%s_%s' % (tagStr, '_'.join([str(p) for p in position]))
-
         if path is None:
-            dataStore = DataStore.newFromPath(path=self.filePath, appendToName=appendToFilename,
-                                              autoVersioning=True, withSuffix=suffix,
-                                              dataFormat=klass.dataFormat)
-        else:
-            dataStore = DataStore.newFromPath(path=path,
-                                              autoVersioning=True, withSuffix=suffix,
-                                              dataFormat=klass.dataFormat)
+            appendToFilename = '_%s_%s' % (tagStr, '_'.join([str(p) for p in position]))
+            path = self._dataSource.parentPath / self.name + appendToFilename
+
+        dataStore = DataStore.newFromPath(path=path,
+                                          autoVersioning=True, withSuffix=suffix,
+                                          dataFormat=klass.dataFormat)
 
         newSpectrum = _extractRegionToFile(self, dimensions=dimensions, position=position, dataStore=dataStore)
 
         # add some comment as to the origin of the data
-        comment = newSpectrum.comment
-        if comment is None:
-            comment = ''
-        if len(comment) > 0:
-            comment += '; '
-        comment += '%s at (%s) from %s' % (tagStr, ','.join([str(p) for p in position]), self)
-        newSpectrum.comment = comment
+        comment = '%s at (%s) from %s' % (tagStr, ','.join([str(p) for p in position]), self)
+        newSpectrum.appendComment(comment)
 
         return newSpectrum
 
@@ -3317,12 +3331,16 @@ def _newSpectrum(project: Project, path: (str, Path), name: str = None) -> (Spec
     return spectrum
 
 
-def _extractRegionToFile(spectrum, dimensions, position, dataStore) -> Spectrum:
+def _extractRegionToFile(spectrum, dimensions, position, dataStore, name=None) -> Spectrum:
     """Extract a region of spectrum, defined by dimensions, position to path defined by dataStore
     (optionally auto-generated from spectrum.path)
 
+    :spectrum: the spectrum from which a regions is to be extracted
     :param dimensions:  [dim_a, dim_b, ...];  defining dimensions to be extracted (1-based)
     :param position, spectrum position-vector of length spectrum.dimensionCount (list, tuple; 1-based)
+    :param dataStore: a DataStore instance, defining the path and dataFormat of the new spectrum
+    :param name: optional name for the new spectrum
+    :return: a Spectrum instance
     """
 
     getLogger().debug('Extracting from %s, dimensions=%r, position=%r, dataStore=%s, dataFormat %r' %
@@ -3389,7 +3407,8 @@ def _extractRegionToFile(spectrum, dimensions, position, dataStore) -> Spectrum:
     # create the new spectrum from the dataSource
     newSpectrum = _newSpectrumFromDataSource(project=spectrum.project,
                                              dataStore=dataStore,
-                                             dataSource=dataSource)
+                                             dataSource=dataSource,
+                                             name=name)
 
     # copy/set some more parameters (e.g. noiseLevel)
     spectrum._copyNonDimensionalParameters(newSpectrum)

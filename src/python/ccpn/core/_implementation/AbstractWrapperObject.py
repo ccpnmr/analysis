@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-29 12:57:01 +0000 (Mon, November 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-30 15:54:58 +0000 (Tue, November 30, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,8 @@ import ccpn.core._implementation.resetSerial
 from ccpn.core import _importOrder
 from ccpn.core.lib import Pid
 from ccpn.core._implementation.Updater import Updater, \
-    UPDATE_POST_OBJECT_INITIALISATION, UPDATE_POST_PROJECT_INITIALISATION
+    UPDATE_POST_OBJECT_INITIALISATION, UPDATE_POST_PROJECT_INITIALISATION, \
+    UPDATE_PRE_OBJECT_INITIALISATION
 
 from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
 from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking, \
@@ -492,6 +493,15 @@ class AbstractWrapperObject(NotifierBase):
     def comment(self, value: str):
         self._wrappedData.details = self._str2none(value)
 
+    def appendComment(self, value):
+        """Conveniance function to append to comment
+        """
+        comment = self.comment
+        if len(comment) > 0:
+            comment += '; '
+        comment += value
+        self.comment = comment
+
     #=========================================================================================
     # CcpNmr functionalities
     #=========================================================================================
@@ -898,6 +908,9 @@ class AbstractWrapperObject(NotifierBase):
         """
         if apiObj is None:
             raise ValueError('_restoreObject: undefined apiObj')
+
+        # # call any pre-initialisation updates
+        # cls._updater.update(UPDATE_PRE_OBJECT_INITIALISATION, apipObj, cls)
 
         if (factoryFunction := cls._factoryFunction) is None:
             obj = cls(project, apiObj)

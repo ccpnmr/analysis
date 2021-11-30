@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-29 15:02:11 +0000 (Mon, November 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-11-30 09:00:43 +0000 (Tue, November 30, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -33,7 +33,7 @@ __date__ = "$Date: 2020-11-20 10:28:48 +0000 (Fri, November 20, 2020) $"
 import os
 from typing import Sequence
 
-from ccpn.util.Path import Path
+from ccpn.util.Path import Path, aPath
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import flatten
 import ccpn.core.lib.SpectrumLib as specLib
@@ -282,6 +282,14 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         """Return a name derived from _brukerRoot and pdataDir
         """
         return '%s-%s' % (self._brukerRoot.stem, self._pdataDir.stem)
+
+    @property
+    def parentPath(self) -> aPath:
+        """Return an absolute path of parent directory, i.e. _BrukerRoot, as a Path instance
+        or None when dataFile is not defined.
+        Subclassed to accommodate the special Bruker directory structure
+        """
+        return (None if self.dataFile is None else self._brukerRoot.parent)
 
     def setPath(self, path, substituteSuffix=False):
         """Parse and set path, assure there is the directory with acqus and pdata dirs

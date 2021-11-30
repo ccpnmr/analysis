@@ -92,8 +92,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-09 17:40:31 +0000 (Tue, November 09, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-11-30 09:00:44 +0000 (Tue, November 30, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -560,9 +560,18 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     @property
     def path(self) -> aPath:
-        """Return an absolute path of datapath as a Path instance or None when not defined
+        """Return an absolute path of datapath as a Path instance or None when dataFile is
+        not defined.
         """
         return (None if self.dataFile is None else aPath(self.dataFile))
+
+    @property
+    def parentPath(self) -> aPath:
+        """Return an absolute path of parent of self.dataFile as a Path instance or None
+        when dataFile is not defined.
+        For subclassing; e.g. in case of Bruker
+        """
+        return (None if self.dataFile is None else self.path.parent)
 
     def setPath(self, path, substituteSuffix=False):
         """define valid path to a (binary) data file, if needed appends or substitutes

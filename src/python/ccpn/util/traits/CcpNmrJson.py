@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-01 10:03:42 +0000 (Wed, December 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-01 13:51:21 +0000 (Wed, December 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -52,7 +52,6 @@ class Constants(TraitBase):
 
     # update handler routines
     UPDATEHANDLERS = '_updateHandlers'
-    UPDATE = '_update'
 
     # metadata
     METADATA = '_metadata'
@@ -123,56 +122,21 @@ class _GenericFileHandler(object):
 
 def fileHandler(extension, toString, fromString):
     """Define toString, fromString methods for a file with extension.
-    Decorates the class with the _save and _restore routines;
-    It also defines the _fileHandler dict for the class, used to store the handlers. 
+    It defines the _fileHandler dict for the class, used to store the various fileHandlers
+    (for each extension type).
     """
 
     def theDecorator(cls):
-        """This function will decorate cls with filehandler dict and save and restore routines
+        """This function will decorate cls with fileHandler dict and save and restore routines
         """
-
-        def getExtension(path):
-            "Return extension of path or None is not present"
-            extension = Path(path).suffix
-            if len(extension) == 0:
-                extension = None
-            return extension
-
-        def _save(self, path, **kwds):
-            """This is the _save method for the class; select the handler on the basis of the 
-            extension of path.
-            """
-            extension = getExtension(path)
-            if extension is None:
-                raise ValueError('invalid path "%s"; cannot determine type from extension "%s"' % (path, extension))
-            if extension not in self._fileHandlers:
-                raise ValueError('invalid extension "%s", no handler defined' % extension)
-            self._fileHandlers[extension].save(self, path, **kwds)
-
-        setattr(cls, constants.SAVE, _save)
-
-        def _restore(self, path, **kwds):
-            """This is the restore method for the class; select the handler on the basis of the 
-            extension of path.
-            Return self
-            """
-            extension = getExtension(path)
-            if extension is None:
-                raise ValueError('invalid path "%s"; cannot determine type from extension "%s"' % (path, extension))
-            if extension not in self._fileHandlers:
-                raise ValueError('invalid extension "%s", no handler defined' % extension)
-            self._fileHandlers[extension].restore(self, path, **kwds)
-            return self
-
-        setattr(cls, constants.RESTORE, _restore)
-
-        # assure that the filehandlers can be stored
+        # assure that the fileHandlers can be stored; doing it this way assures each class (when sub-classing) has
+        # its own version
         if not hasattr(cls, constants.FILEHANDLERS):
             setattr(cls, constants.FILEHANDLERS, {})
         handlers = getattr(cls, constants.FILEHANDLERS)
         # add the handler
-        handlers[extension] = _GenericFileHandler(extension=extension, cls=cls, toString=toString,
-                                                  fromString=fromString)
+        handlers[extension] = _GenericFileHandler(extension=extension, cls=cls,
+                                                  toString=toString, fromString=fromString)
 
         return cls
 
@@ -183,7 +147,7 @@ def update(updateHandler, push=False):
     """Decorator to register updateHandler function
     It also defines the _update method and _updateHandlers list for the class. 
     
-    profile updatHandler: 
+    profile updateHandler function:
     
         updateHandler(obj, dataDict) -> dataDict
         
@@ -196,21 +160,8 @@ def update(updateHandler, push=False):
     def theDecorator(cls):
         """This function will decorate cls with _update, _updateHandler list and registers the updateHandler
         """
-
-        def _update(self, dataDict):
-            """Process the updates using all the handlers; returns dataDict dict
-            """
-            for handler in getattr(self, constants.UPDATEHANDLERS):
-                dataDict = handler(self, dataDict)
-            # check if updates went ok
-            currentVersion = dataDict[constants.METADATA][constants.JSONVERSION]
-            if currentVersion < self._jsonVersion:
-                raise RuntimeError('invalid version "%s" of json data; cannot restore' % currentVersion)
-            return dataDict
-
-        setattr(cls, constants.UPDATE, _update)
-
-        # assure that the update handlers can be stored
+        # assure that the update handlers can be stored; doing it here assures that every class has its own
+        # updateHandlers list
         if not hasattr(cls, constants.UPDATEHANDLERS):
             setattr(cls, constants.UPDATEHANDLERS, [])
         handlers = getattr(cls, constants.UPDATEHANDLERS)
@@ -575,10 +526,8 @@ class CcpNmrJson(TraitBase):
             getLogger().warning('%s.fromJson: error decoding, retaining default values' % self.__class__.__name__)
             return self
 
-        # check for upgrade method and optionally execute
-        if hasattr(self, constants.UPDATE):
-            updateFunc = getattr(self, constants.UPDATE)
-            dataDict = updateFunc(dataDict)
+        # check for updates
+        dataDict = self._update(dataDict)
 
         # at this point, we expect dataDict to be compatible with the data structure of the object
         if constants.METADATA in dataDict:
@@ -608,26 +557,57 @@ class CcpNmrJson(TraitBase):
 
     #--------------------------------------------------------------------------------------------
 
+    def _update(self, dataDict) -> dict:
+        """Process any updates using  the handlers; returns dataDict dict
+        """
+        if hasattr(self, constants.UPDATEHANDLERS):
+            # We have updates
+            for handler in getattr(self, constants.UPDATEHANDLERS):
+                dataDict = handler(self, dataDict)
+        # check if all is ok
+        currentVersion = dataDict[constants.METADATA][constants.JSONVERSION]
+        if currentVersion < self._jsonVersion:
+            raise RuntimeError('invalid version "%s" of json data; cannot restore %s' %
+                               (currentVersion, self))
+        return dataDict
+
     def save(self, path, **kwds):
         """Save using appropriate handlers depending on extension.
-        Non-functional until the constants.SAVE method is added by fileHandler decorators.
+        Non-functional unless a handler is added by fileHandler decorator.
         **kwds do get passed on to the 'toX' method defined by the fileHandler decorator.
         """
-        if not hasattr(self, constants.SAVE):
-            raise RuntimeError('Unable to save; no fileHandlers defined for "%s"' % self)
+        extension = Path(path).suffix
+        if not extension:
+            raise ValueError('Unable to save: invalid path "%s"; cannot determine type from extension "%s"' % (path, extension))
+
+        if not hasattr(self, constants.FILEHANDLERS):
+            raise RuntimeError('Unable to save; No fileHandlers defined for %s' % self)
+        _fileHandlers = getattr(self, constants.FILEHANDLERS)
+
+        if (handler := _fileHandlers.get(extension)) is None:
+            raise RuntimeError('Unable to save; no fileHandler defined for extension "%s"' % extension)
+
+        handler.save(self, path, **kwds)
         self.metadata[constants.LASTPATH] = str(path)
-        saveFunc = getattr(self, constants.SAVE)
-        saveFunc(path, **kwds)
 
     def restore(self, path, **kwds):
         """Restore from file using appropriate handlers depending on extension; return self
-        Non-functional until the constants.RESTORE method is added by fileHandler decorators
+        Non-functional unless a handler is added by fileHandler decorator.
         **kwds do get passed on to the 'fromX' method defined by the fileHandler decorator.
+        :return self
         """
-        if not hasattr(self, constants.RESTORE):
-            raise RuntimeError('Unable to restore; no fileHandlers defined for "%s"' % self)
-        restoreFunc = getattr(self, constants.RESTORE)
-        restoreFunc(path, **kwds)
+        extension = Path(path).suffix
+        if not extension:
+            raise ValueError('Unable to restore: invalid path "%s"; cannot determine type from extension "%s"' % (path, extension))
+
+        if not hasattr(self, constants.FILEHANDLERS):
+            raise RuntimeError('Unable to restore: no fileHandlers defined for %s' % self)
+        _fileHandlers = getattr(self, constants.FILEHANDLERS)
+
+        if (handler := _fileHandlers.get(extension)) is None:
+            raise RuntimeError('Unable to restore; no fileHandler defined for extension "%s"' % extension)
+
+        handler.restore(self, path, **kwds)
         self.metadata[constants.LASTPATH] = str(path)
         return self
 

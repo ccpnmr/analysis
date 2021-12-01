@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-01 10:03:42 +0000 (Wed, December 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-01 13:51:59 +0000 (Wed, December 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -33,8 +33,7 @@ from collections import namedtuple
 
 from ccpn.util.Path import aPath
 from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY, ccpnVersionHistory
-from ccpn.framework.Version import VersionString
-from ccpn.framework.Application import getApplication
+from ccpn.framework.Version import VersionString, applicationVersion
 from ccpn.util.Time import now
 from ccpn.util.Common import isIterable
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson, TraitJsonHandlerBase
@@ -58,8 +57,7 @@ def newProjectSaveHistory(projectPath):
     """Create and return a new ProjectSaveHistory instance
     """
     sv = ProjectSaveHistory(projectPath)
-    version = getApplication().applicationVersion
-    sv.addSaveRecord(version, 'created')
+    sv.addSaveRecord(applicationVersion, 'created')
     sv.save()
     return sv
 
@@ -130,7 +128,7 @@ class ProjectSaveHistory(CcpNmrJson):
         :return self
         """
         if version is None:
-            version = getApplication().applicationVersion
+            version = applicationVersion
         record = self._newRecord(version=version, comment=comment)
         self.records.append(record)
         return self
@@ -143,27 +141,34 @@ class ProjectSaveHistory(CcpNmrJson):
     def save(self):
         """Save to (json) file
         """
-        # with self.path.open('w') as fp:
-        #     json.dump(self.records, fp, indent=4)
         super().save(self.path)
 
     def restore(self):
         """Restore self from a json file.
-        Convert the version strings of each record to VersionString objects
+        Check for prior 'ed'-formatted file
+        :return self
         """
         if not self.exists():
             raise RuntimeError('Path "%s" does not exist; unable to restore project save history' % self.path)
 
-        # test for old 'ed' files
-        with self.path.open('r') as fp:
-            records = json.load(fp)
-
-        if isinstance(records, list) and len(records) > 0 and isinstance(records[0], str):
-            for item in records:
-                self.addSaveRecord(item, 'reconstructed')
-        else:
+        try:
             super().restore(self.path)
 
+        except (RuntimeError, ValueError) as es:
+
+            # test for old 'ed' files
+            with self.path.open('r') as fp:
+                records = json.load(fp)
+
+            self.records = []
+            if isinstance(records, list) and len(records) > 0 and isinstance(records[0], str):
+                for item in records:
+                    self.addSaveRecord(item, 'reconstructed')
+            else:
+                self.addSaveRecord('3.0.4', 'created retroactively')
+            self.save()
+
+        return self
 
     def __getitem__(self, item):
         return self.records[item]

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-22 13:40:13 +0100 (Thu, July 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-01 16:07:14 +0000 (Wed, December 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -82,7 +82,7 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
         else:
             options.update(cert_reqs=ssl.CERT_NONE)
             urllib3.disable_warnings()
-            getLogger().warn('SSL certificates validity check skipped.')
+            getLogger().warning('SSL certificates validity check skipped.')
 
     if proxySettings and proxySettings.get(USEPROXY):
 
@@ -193,23 +193,92 @@ def checkInternetConnection():
 
 
 ## testing
+def mainTesting():
+    # from ccpn.util.UserPreferences import UserPreferences, USEPROXY, USEPROXYPASSWORD, PROXYADDRESS, \
+    #     PROXYPORT, PROXYUSERNAME, PROXYPASSWORD, USESYSTEMPROXY, VERIFYSSL
+    #
+    # # bad urls certificates from  https://badssl.com/dashboard/
+    # expiredCertificate = 'https://expired.badssl.com'
+    # wrongHost ='https://wrong.host.badssl.com'
+    # proxySettings = {
+    #                 # USEPROXYPASSWORD:'admin',
+    #                 PROXYADDRESS:'187.9.212.50',
+    #                 PROXYPORT:'3128',
+    #                 PROXYUSERNAME:'',
+    #                 # PROXYPASSWORD:'admin',
+    #                 USEPROXY:True,
+    #                 VERIFYSSL:True,
+    #                 }
+    #
+    #
+    # print(fetchHttpResponse('Post', expiredCertificate, proxySettings=proxySettings))
+    # # fetchUrl(wrongHost)
+
+    url = 'https://www.ccpn.ac.uk/cgi-bin/checkInternet'
+    data = {'fileName': 'ccpNmrUpdate3.1.0/__UpdateData.db'}
+    headers = None
+    proxySettings = {'useProxy': False,
+                     'proxyAddress': '',
+                     'proxyPort': '',
+                     'useProxyPassword': False,
+                     'proxyUsername': '',
+                     'proxyPassword': '',
+                     'verifySSL': False}
+
+    _response = fetchHttpResponse('POST', url, data, headers, proxySettings)
+    print(_response.data.decode('utf-8')[:256])
+
+    url = 'https://www.ccpn.ac.uk/cgi-bin/update/downloadFile'
+    data = {'fileName': 'ccpNmrUpdate3.1.0/__UpdateData.db'}
+    headers = None
+    proxySettings = {'useProxy': False,
+                     'proxyAddress': '',
+                     'proxyPort': '',
+                     'useProxyPassword': False,
+                     'proxyUsername': '',
+                     'proxyPassword': '',
+                     'verifySSL': False}
+
+    _response = fetchHttpResponse('POST', url, data, headers, proxySettings)
+    print(_response.data.decode('utf-8')[:256])
+
+    url = 'https://www.ccpn.ac.uk/cgi-bin/register/downloadRegistryFile.py'
+    data = {'fileName': 'register/registerV3.db'}
+    headers = None
+    proxySettings = {'useProxy': False,
+                     'proxyAddress': '',
+                     'proxyPort': '',
+                     'useProxyPassword': False,
+                     'proxyUsername': '',
+                     'proxyPassword': '',
+                     'verifySSL': False}
+
+    _response = fetchHttpResponse('POST', url, data, headers, proxySettings)
+    print(_response.data[:128])
+
+    # from ccpn.framework.PathsAndUrls import ccpnUrl
+
+    ccpnUrl = 'http://testing.ccpn.info'
+    ccpnUrls = 'https://testing.ccpn.info'
+
+    _response = fetchUrl('/'.join([ccpnUrl, 'cgi-bin/checkInternet']))
+    print(_response[:256])
+
+    _response = fetchUrl('/'.join([ccpnUrl, 'cgi-bin/checkInternet.cgi']))
+    print(_response[:256])
+
+    _response = fetchUrl('/'.join([ccpnUrls, 'cgi-bin/checkInternet']))
+    print(_response[:256])
+
+    _response = fetchUrl('/'.join([ccpnUrls, 'cgi-bin/checkInternet.cgi']))
+    print(_response[:256])
+
+    _response = fetchUrl('/'.join([ccpnUrl, 'cgi-bin/index.cgi']))
+    print(_response[:256])
+
+    _response = fetchUrl('/'.join([ccpnUrls, 'cgi-bin/index.cgi']))
+    print(_response[:256])
+
+
 if __name__ == '__main__':
-    from ccpn.util.UserPreferences import UserPreferences, USEPROXY, USEPROXYPASSWORD, PROXYADDRESS, \
-        PROXYPORT, PROXYUSERNAME, PROXYPASSWORD, USESYSTEMPROXY, VERIFYSSL
-
-    # bad urls certificates from  https://badssl.com/dashboard/
-    expiredCertificate = 'https://expired.badssl.com'
-    wrongHost ='https://wrong.host.badssl.com'
-    proxySettings = {
-                    # USEPROXYPASSWORD:'admin',
-                    PROXYADDRESS:'187.9.212.50',
-                    PROXYPORT:'3128',
-                    PROXYUSERNAME:'',
-                    # PROXYPASSWORD:'admin',
-                    USEPROXY:True,
-                    VERIFYSSL:True,
-                    }
-
-
-    print(fetchHttpResponse('Post', expiredCertificate, proxySettings=proxySettings))
-    # fetchUrl(wrongHost)
+    mainTesting()

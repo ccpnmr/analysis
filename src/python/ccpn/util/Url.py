@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-01 16:07:14 +0000 (Wed, December 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-01 16:52:03 +0000 (Wed, December 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -55,11 +55,11 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
 
     # create the options list for creating an http connection
     options = {
-               'cert_reqs': 'CERT_REQUIRED',
-               'ca_certs' : certifi.where(),
-               # 'timeout'  : urllib3.Timeout(connect=3.0, read=3.0),
-               # 'retries'  : urllib3.Retry(1, redirect=False)
-               }
+        'cert_reqs': 'CERT_REQUIRED',
+        'ca_certs' : certifi.where(),
+        # 'timeout'  : urllib3.Timeout(connect=3.0, read=3.0),
+        # 'retries'  : urllib3.Retry(1, redirect=False)
+        }
 
     # check whether a proxy is required
     from ccpn.util.UserPreferences import UserPreferences, USEPROXY, USEPROXYPASSWORD, PROXYADDRESS, \
@@ -149,13 +149,8 @@ def fetchUrl(url, data=None, headers=None, timeout=2.0, proxySettings=None, deco
                 for name in proxyNames:
                     proxySettings[name] = _userPreferences._getPreferencesParameter(name)
 
-
         response = fetchHttpResponse('POST', url, data=data, headers=headers,
                                      proxySettings=proxySettings)
-
-        # if response:
-        #     ll = len(response.data)
-        #     print('>>>>>>responseUrl', proxySettings, response.data[0:min(ll, 20)])
 
     return response.data.decode('utf-8') if decodeResponse else response
 
@@ -190,95 +185,3 @@ def checkInternetConnection():
     except Exception as es:
         getLogger().exception(es)
         return False
-
-
-## testing
-def mainTesting():
-    # from ccpn.util.UserPreferences import UserPreferences, USEPROXY, USEPROXYPASSWORD, PROXYADDRESS, \
-    #     PROXYPORT, PROXYUSERNAME, PROXYPASSWORD, USESYSTEMPROXY, VERIFYSSL
-    #
-    # # bad urls certificates from  https://badssl.com/dashboard/
-    # expiredCertificate = 'https://expired.badssl.com'
-    # wrongHost ='https://wrong.host.badssl.com'
-    # proxySettings = {
-    #                 # USEPROXYPASSWORD:'admin',
-    #                 PROXYADDRESS:'187.9.212.50',
-    #                 PROXYPORT:'3128',
-    #                 PROXYUSERNAME:'',
-    #                 # PROXYPASSWORD:'admin',
-    #                 USEPROXY:True,
-    #                 VERIFYSSL:True,
-    #                 }
-    #
-    #
-    # print(fetchHttpResponse('Post', expiredCertificate, proxySettings=proxySettings))
-    # # fetchUrl(wrongHost)
-
-    url = 'https://www.ccpn.ac.uk/cgi-bin/checkInternet'
-    data = {'fileName': 'ccpNmrUpdate3.1.0/__UpdateData.db'}
-    headers = None
-    proxySettings = {'useProxy': False,
-                     'proxyAddress': '',
-                     'proxyPort': '',
-                     'useProxyPassword': False,
-                     'proxyUsername': '',
-                     'proxyPassword': '',
-                     'verifySSL': False}
-
-    _response = fetchHttpResponse('POST', url, data, headers, proxySettings)
-    print(_response.data.decode('utf-8')[:256])
-
-    url = 'https://www.ccpn.ac.uk/cgi-bin/update/downloadFile'
-    data = {'fileName': 'ccpNmrUpdate3.1.0/__UpdateData.db'}
-    headers = None
-    proxySettings = {'useProxy': False,
-                     'proxyAddress': '',
-                     'proxyPort': '',
-                     'useProxyPassword': False,
-                     'proxyUsername': '',
-                     'proxyPassword': '',
-                     'verifySSL': False}
-
-    _response = fetchHttpResponse('POST', url, data, headers, proxySettings)
-    print(_response.data.decode('utf-8')[:256])
-
-    url = 'https://www.ccpn.ac.uk/cgi-bin/register/downloadRegistryFile.py'
-    data = {'fileName': 'register/registerV3.db'}
-    headers = None
-    proxySettings = {'useProxy': False,
-                     'proxyAddress': '',
-                     'proxyPort': '',
-                     'useProxyPassword': False,
-                     'proxyUsername': '',
-                     'proxyPassword': '',
-                     'verifySSL': False}
-
-    _response = fetchHttpResponse('POST', url, data, headers, proxySettings)
-    print(_response.data[:128])
-
-    # from ccpn.framework.PathsAndUrls import ccpnUrl
-
-    ccpnUrl = 'http://testing.ccpn.info'
-    ccpnUrls = 'https://testing.ccpn.info'
-
-    _response = fetchUrl('/'.join([ccpnUrl, 'cgi-bin/checkInternet']))
-    print(_response[:256])
-
-    _response = fetchUrl('/'.join([ccpnUrl, 'cgi-bin/checkInternet.cgi']))
-    print(_response[:256])
-
-    _response = fetchUrl('/'.join([ccpnUrls, 'cgi-bin/checkInternet']))
-    print(_response[:256])
-
-    _response = fetchUrl('/'.join([ccpnUrls, 'cgi-bin/checkInternet.cgi']))
-    print(_response[:256])
-
-    _response = fetchUrl('/'.join([ccpnUrl, 'cgi-bin/index.cgi']))
-    print(_response[:256])
-
-    _response = fetchUrl('/'.join([ccpnUrls, 'cgi-bin/index.cgi']))
-    print(_response[:256])
-
-
-if __name__ == '__main__':
-    mainTesting()

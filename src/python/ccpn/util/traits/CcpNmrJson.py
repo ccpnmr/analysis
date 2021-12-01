@@ -1,8 +1,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2018"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                )
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -12,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: geertenv $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:36 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b3 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-01 09:02:18 +0000 (Wed, December 01, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -203,7 +204,7 @@ def update(updateHandler, push=False):
                 dataDict = handler(self, dataDict)
             # check if updates went ok
             currentVersion = dataDict[constants.METADATA][constants.JSONVERSION]
-            if currentVersion < self.jsonVersion:
+            if currentVersion < self._jsonVersion:
                 raise RuntimeError('invalid version "%s" of json data; cannot restore' % currentVersion)
             return dataDict
 
@@ -335,13 +336,13 @@ class CcpNmrJson(TraitBase):
     #--------------------------------------------------------------------------------------------
 
     saveAllTraitsToJson = False  # This flag effectively sets saveToJson to True/False for all traits
-    version = None  # The version idetifier for the specific class (usefull when upgrading is required)
+    classVersion = None  # The version identifier for the specific class (usefull when upgrading is required)
 
     #--------------------------------------------------------------------------------------------
     # end to be subclassed
     #--------------------------------------------------------------------------------------------
 
-    jsonVersion = 3.0
+    _jsonVersion = 3.0       # A version id, stored in metadata, to track any changes to this code
 
     _registeredClasses = {}  # A dict that contains the (className, class) mappings for restoring
                              # CcpNmrJson (sub-)classes from json files
@@ -433,9 +434,9 @@ class CcpNmrJson(TraitBase):
     @default(constants.METADATA)
     def _metadata_default(self):
         defaults = {}
-        defaults[constants.JSONVERSION] = self.jsonVersion
+        defaults[constants.JSONVERSION] = self._jsonVersion
         defaults[constants.CLASSNAME] = self.__class__.__name__
-        defaults[constants.CLASSVERSION] = self.version
+        defaults[constants.CLASSVERSION] = self.classVersion
         defaults[constants.USER] = getpass.getuser()
         defaults[constants.LASTPATH] = 'undefined'
         return defaults

@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-30 09:00:44 +0000 (Tue, November 30, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-01 09:02:18 +0000 (Wed, December 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -258,7 +258,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     _bigEndian = (sys.byteorder == 'big')
 
     saveAllTraitsToJson = True
-    version = 1.0  # for json saving
+    classVersion = 1.0  # for json saving
 
     date = CString(allow_none=True, default_value=None).tag(isDimensional=False,
                                                             doCopy=True,

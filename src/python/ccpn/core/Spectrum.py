@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-30 15:54:58 +0000 (Tue, November 30, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-01 09:02:18 +0000 (Wed, December 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -191,7 +191,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     _DISPLAYFOLDEDCONTOURS = 'displayFoldedContours'
     _NEGATIVENOISELEVEL = 'negativeNoiseLevel'
 
-    version = 1.0  # for json saving
+    classVersion = 1.0  # for json saving
 
     #-----------------------------------------------------------------------------------------
     # Attributes of the data structure (incomplete?)

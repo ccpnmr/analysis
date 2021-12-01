@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-12 16:04:27 +0100 (Tue, October 12, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-01 09:02:18 +0000 (Wed, December 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -119,7 +119,7 @@ class SaveFrameABC(CcpNmrJson):
     keysInOrder = True  # maintain the definition order
 
     saveAllTraitsToJson = True
-    version = 1.0  # for json saving
+    classVersion = 1.0  # for json saving
 
     # list of core saveFrame attributes
 

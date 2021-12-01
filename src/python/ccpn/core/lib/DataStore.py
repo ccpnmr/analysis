@@ -23,8 +23,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:25:07 +0100 (Mon, September 13, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-01 09:02:18 +0000 (Wed, December 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -204,7 +204,7 @@ class DataStore(CcpNmrJson):
     # Once linked to a Spectrum, it stores the path and other relevant info as json-encoded string
     # in the spectrum instance internal parameter storage
 
-    version = 1.0
+    classVersion = 1.0
 
     _path = CPath(allow_none=True, default_value=None).tag(saveToJson=True)
     dataFormat = CString(allow_none=True, default_value=None).tag(saveToJson=True)

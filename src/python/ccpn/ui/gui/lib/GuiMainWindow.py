@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-30 15:55:35 +0000 (Tue, November 30, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-01 13:51:43 +0000 (Wed, December 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1370,7 +1370,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                                                 f'Project "{path}" was created with version-2 Analysis.\n'
                                                 '\n'
                                                 'CAUTION:\n'
-                                                '\tThe project will be coverted to a version-3 project and saved '
+                                                '\tThe project will be converted to a version-3 project and saved '
                                                 '\tas a new directory with .cppn extension.\n'
                                                 '\n'
                                                 'Do you want to continue loading?')
@@ -1382,12 +1382,12 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         elif Project._needsUpgrading(path):
             ok = MessageDialog.showYesNoWarning('Load Project',
-                                                f'Project "%s" was saved with an earlier version of AnalysisV3.\n'
+                                                f'Project "%s" was saved with an earlier version of AnalysisV3, '
+                                                'and will be converted to version %s.\n'
                                                 '\n'
                                                 'CAUTION:\n' 
-                                                '\tThe project will be converted to version %s.\n'
-                                                '\tAfter saving, it can no longer be loaded in earlier AnalysisV3 versions.\n'
-                                                '\t(If you are in any doubt, please make a copy of the project folder)\n'
+                                                '\tAfter saving, it can NO LONGER be loaded in earlier AnalysisV3 versions.\n'
+                                                '\t(If you are in any doubt, use "File --> Save As..)\n'
                                                 '\n'
                                                 'Do you want to continue loading?' % (
                                                     path, self.application.applicationVersion.withoutRelease())

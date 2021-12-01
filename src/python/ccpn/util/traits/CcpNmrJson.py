@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-01 13:51:21 +0000 (Wed, December 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-01 16:01:43 +0000 (Wed, December 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ __date__ = "$Date: 2018-05-14 10:28:41 +0000 (Fri, April 07, 2017) $"
 import json
 from collections import OrderedDict
 import getpass
+from enum import Enum, unique
 
 from ccpn.util.decorators import singleton
 from ccpn.util.Path import aPath, Path
@@ -39,15 +40,12 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import debug2Enter, debug3Enter, debug3Leave  # Not used now to avoid circular import
 
 
-@singleton
-class Constants(TraitBase):
+class Constants(object):
     # jsonHandlers
     JSONHANDLER = 'jsonHandler'
     RECURSION = 'recursion'
 
-    # used for file handler routines
-    SAVE = '_save'
-    RESTORE = '_restore'
+    # file handler routines
     FILEHANDLERS = '_fileHandlers'
 
     # update handler routines
@@ -63,9 +61,6 @@ class Constants(TraitBase):
     USER = 'user'
     LASTPATH = 'lastPath'
 # end class
-
-# create one instance
-constants = Constants()
 
 
 def jsonHandler(trait):
@@ -131,9 +126,9 @@ def fileHandler(extension, toString, fromString):
         """
         # assure that the fileHandlers can be stored; doing it this way assures each class (when sub-classing) has
         # its own version
-        if not hasattr(cls, constants.FILEHANDLERS):
-            setattr(cls, constants.FILEHANDLERS, {})
-        handlers = getattr(cls, constants.FILEHANDLERS)
+        if not hasattr(cls, Constants.FILEHANDLERS):
+            setattr(cls, Constants.FILEHANDLERS, {})
+        handlers = getattr(cls, Constants.FILEHANDLERS)
         # add the handler
         handlers[extension] = _GenericFileHandler(extension=extension, cls=cls,
                                                   toString=toString, fromString=fromString)
@@ -162,9 +157,9 @@ def update(updateHandler, push=False):
         """
         # assure that the update handlers can be stored; doing it here assures that every class has its own
         # updateHandlers list
-        if not hasattr(cls, constants.UPDATEHANDLERS):
-            setattr(cls, constants.UPDATEHANDLERS, [])
-        handlers = getattr(cls, constants.UPDATEHANDLERS)
+        if not hasattr(cls, Constants.UPDATEHANDLERS):
+            setattr(cls, Constants.UPDATEHANDLERS, [])
+        handlers = getattr(cls, Constants.UPDATEHANDLERS)
         # add the handler
         indx = 0 if push else len(handlers)
         handlers.insert(indx, updateHandler)
@@ -178,31 +173,31 @@ def update(updateHandler, push=False):
 # def _updateJson_1_0(obj, dataDict):
 #     "dummy to try"
 #
-#     if not constants.METADATA in dataDict:
+#     if not Constants.METADATA in dataDict:
 #         # invalid file without metadata
 #         raise RuntimeError('No metadata dict')
 #
-#     version = dataDict[constants.METADATA][constants.JSONVERSION]
+#     version = dataDict[Constants.METADATA][Constants.JSONVERSION]
 #     if version > 1.0:
 #         print('>>> skipping _upgradeJson_1.0 (%s)' % obj.__class__.__name__)
 #         return dataDict
 #     print('>>> upgrading version %s to 2.0 (%s)' % (version, obj.__class__.__name__))
-#     dataDict[constants.METADATA][constants.JSONVERSION] = 2.0
+#     dataDict[Constants.METADATA][Constants.JSONVERSION] = 2.0
 #     return dataDict
 #
 #
 # def _updateJson_2_0(obj, dataDict):
 #     "dummy to try"
-#     if not constants.METADATA in dataDict:
+#     if not Constants.METADATA in dataDict:
 #         # invalid file without metadata
 #         raise RuntimeError('No metadata dict')
 #
-#     version = dataDict[constants.METADATA][constants.JSONVERSION]
+#     version = dataDict[Constants.METADATA][Constants.JSONVERSION]
 #     if version > 2.0:
 #         print('>>> skipping _upgradeJson_1.0 (%s)' % obj.__class__.__name__)
 #         return dataDict
 #     print('>>> upgrading version %s to 2.0 (%s)' % (version, obj.__class__.__name__))
-#     dataDict[constants.METADATA][constants.JSONVERSION] = 3.0
+#     dataDict[Constants.METADATA][Constants.JSONVERSION] = 3.0
 #     return dataDict
 
 
@@ -315,11 +310,11 @@ class CcpNmrJson(TraitBase):
     def _getClassFromDict(theDict):
         """Return the class from theDict
         """
-        metadata = theDict.get(constants.METADATA)
+        metadata = theDict.get(Constants.METADATA)
         if metadata is None:
             raise ValueError('theDict is not a valid representation of a CcpNmrJson (sub-)type')
 
-        className = metadata.get(constants.CLASSNAME)
+        className = metadata.get(Constants.CLASSNAME)
         if className is None:
             raise ValueError('metadata does not contain the classname of a CcpNmrJson (sub-)type')
 
@@ -335,8 +330,8 @@ class CcpNmrJson(TraitBase):
         metadata dict.
         """
         if isinstance(theList, list) and len(theList) > 0 and \
-           isinstance(theList[0], (list,tuple)) and len(theList[0]) == 2 and theList[0][0] == constants.METADATA and \
-           isinstance(theList[0][1], dict) and constants.JSONVERSION in theList[0][1]:
+           isinstance(theList[0], (list,tuple)) and len(theList[0]) == 2 and theList[0][0] == Constants.METADATA and \
+           isinstance(theList[0][1], dict) and Constants.JSONVERSION in theList[0][1]:
             return True
         return False
 
@@ -379,17 +374,17 @@ class CcpNmrJson(TraitBase):
 
     #--------------------------------------------------------------------------------------------
 
-    # _metadata(should be in-sinc with constants.METADATA)
+    # _metadata(should be in-sinc with Constants.METADATA)
     _metadata = Dict().tag(saveToJson=True)
 
-    @default(constants.METADATA)
+    @default(Constants.METADATA)
     def _metadata_default(self):
         defaults = {}
-        defaults[constants.JSONVERSION] = self._jsonVersion
-        defaults[constants.CLASSNAME] = self.__class__.__name__
-        defaults[constants.CLASSVERSION] = self.classVersion
-        defaults[constants.USER] = getpass.getuser()
-        defaults[constants.LASTPATH] = 'undefined'
+        defaults[Constants.JSONVERSION] = self._jsonVersion
+        defaults[Constants.CLASSNAME] = self.__class__.__name__
+        defaults[Constants.CLASSVERSION] = self.classVersion
+        defaults[Constants.USER] = getpass.getuser()
+        defaults[Constants.LASTPATH] = 'undefined'
         return defaults
 
     # _metadata-specific json handler; note the invocation with the attribute, not a string!
@@ -402,7 +397,7 @@ class CcpNmrJson(TraitBase):
 
         def decode(self, obj, trait, value):
             # retain current metadata; just update the ones from value
-            currentMetaData = getattr(obj, constants.METADATA)
+            currentMetaData = getattr(obj, Constants.METADATA)
             currentMetaData.update(value)
             setattr(obj, trait, currentMetaData)
     # end class
@@ -410,7 +405,7 @@ class CcpNmrJson(TraitBase):
     @property
     def metadata(self):
         "Return metadata dict"
-        return getattr(self, constants.METADATA)
+        return getattr(self, Constants.METADATA)
 
     def setMetadata(self, **kwds):
         "Update metadata with kwds (key,value) pairs"
@@ -426,8 +421,8 @@ class CcpNmrJson(TraitBase):
         """
         keys = super().keys(**metadata)
         # check if we have to remove the _metadata key
-        if constants.METADATA in keys:
-            idx = keys.index(constants.METADATA)
+        if Constants.METADATA in keys:
+            idx = keys.index(Constants.METADATA)
             keys.pop(idx)
         return keys
 
@@ -469,18 +464,18 @@ class CcpNmrJson(TraitBase):
         Return handler or None
         """
         # check for trait specific handler
-        handler = self.trait_metadata(trait, constants.JSONHANDLER)
+        handler = self.trait_metadata(trait, Constants.JSONHANDLER)
         if handler is not None:
             return handler
 
         # check for traitlet class specific handler
         traitObj = self.getTraitObject(trait)
-        if hasattr(traitObj, constants.JSONHANDLER):
-            return getattr(traitObj, constants.JSONHANDLER)
+        if hasattr(traitObj, Constants.JSONHANDLER):
+            return getattr(traitObj, Constants.JSONHANDLER)
 
         # check for TraitBase class specific handler
-        if hasattr(self, constants.JSONHANDLER):
-            return getattr(self, constants.JSONHANDLER)
+        if hasattr(self, Constants.JSONHANDLER):
+            return getattr(self, Constants.JSONHANDLER)
 
         return None
 
@@ -497,7 +492,7 @@ class CcpNmrJson(TraitBase):
 
         # get all traits that need saving to json
         # Subtle but important implementation change relative to the previous one-liner (~2 commits ago)
-        traits = [constants.METADATA]
+        traits = [Constants.METADATA]
         traits += self.keys() if self.saveAllTraitsToJson else self.keys(saveToJson=lambda i: i)
 
         # create a list of (trait, value) tuples
@@ -530,8 +525,8 @@ class CcpNmrJson(TraitBase):
         dataDict = self._update(dataDict)
 
         # at this point, we expect dataDict to be compatible with the data structure of the object
-        if constants.METADATA in dataDict:
-            if dataDict[constants.METADATA][constants.CLASSNAME] != self.__class__.__name__:
+        if Constants.METADATA in dataDict:
+            if dataDict[Constants.METADATA][Constants.CLASSNAME] != self.__class__.__name__:
                 raise RuntimeError(
                         'trying to restore from json file incompatible with class "%s"' % self.__class__.__name__)
 
@@ -544,7 +539,7 @@ class CcpNmrJson(TraitBase):
     def _decode(self, dataDict):
         """Populate/update self with data from dataDict
         """
-        for trait in [constants.METADATA] + self.keys():
+        for trait in [Constants.METADATA] + self.keys():
             if trait in dataDict:
                 # update the trait with value from dataDict after optional decoding
                 value = dataDict[trait]
@@ -560,12 +555,12 @@ class CcpNmrJson(TraitBase):
     def _update(self, dataDict) -> dict:
         """Process any updates using  the handlers; returns dataDict dict
         """
-        if hasattr(self, constants.UPDATEHANDLERS):
+        if hasattr(self, Constants.UPDATEHANDLERS):
             # We have updates
-            for handler in getattr(self, constants.UPDATEHANDLERS):
+            for handler in getattr(self, Constants.UPDATEHANDLERS):
                 dataDict = handler(self, dataDict)
         # check if all is ok
-        currentVersion = dataDict[constants.METADATA][constants.JSONVERSION]
+        currentVersion = dataDict[Constants.METADATA][Constants.JSONVERSION]
         if currentVersion < self._jsonVersion:
             raise RuntimeError('invalid version "%s" of json data; cannot restore %s' %
                                (currentVersion, self))
@@ -580,15 +575,15 @@ class CcpNmrJson(TraitBase):
         if not extension:
             raise ValueError('Unable to save: invalid path "%s"; cannot determine type from extension "%s"' % (path, extension))
 
-        if not hasattr(self, constants.FILEHANDLERS):
+        if not hasattr(self, Constants.FILEHANDLERS):
             raise RuntimeError('Unable to save; No fileHandlers defined for %s' % self)
-        _fileHandlers = getattr(self, constants.FILEHANDLERS)
+        _fileHandlers = getattr(self, Constants.FILEHANDLERS)
 
         if (handler := _fileHandlers.get(extension)) is None:
             raise RuntimeError('Unable to save; no fileHandler defined for extension "%s"' % extension)
 
         handler.save(self, path, **kwds)
-        self.metadata[constants.LASTPATH] = str(path)
+        self.metadata[Constants.LASTPATH] = str(path)
 
     def restore(self, path, **kwds):
         """Restore from file using appropriate handlers depending on extension; return self
@@ -600,15 +595,15 @@ class CcpNmrJson(TraitBase):
         if not extension:
             raise ValueError('Unable to restore: invalid path "%s"; cannot determine type from extension "%s"' % (path, extension))
 
-        if not hasattr(self, constants.FILEHANDLERS):
+        if not hasattr(self, Constants.FILEHANDLERS):
             raise RuntimeError('Unable to restore: no fileHandlers defined for %s' % self)
-        _fileHandlers = getattr(self, constants.FILEHANDLERS)
+        _fileHandlers = getattr(self, Constants.FILEHANDLERS)
 
         if (handler := _fileHandlers.get(extension)) is None:
             raise RuntimeError('Unable to restore; no fileHandler defined for extension "%s"' % extension)
 
         handler.restore(self, path, **kwds)
-        self.metadata[constants.LASTPATH] = str(path)
+        self.metadata[Constants.LASTPATH] = str(path)
         return self
 
 # end class

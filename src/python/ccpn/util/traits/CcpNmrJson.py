@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-01 09:02:18 +0000 (Wed, December 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-01 10:03:42 +0000 (Wed, December 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -616,7 +616,8 @@ class CcpNmrJson(TraitBase):
         if not hasattr(self, constants.SAVE):
             raise RuntimeError('Unable to save; no fileHandlers defined for "%s"' % self)
         self.metadata[constants.LASTPATH] = str(path)
-        getattr(self, constants.SAVE)(path, **kwds)
+        saveFunc = getattr(self, constants.SAVE)
+        saveFunc(path, **kwds)
 
     def restore(self, path, **kwds):
         """Restore from file using appropriate handlers depending on extension; return self
@@ -625,8 +626,8 @@ class CcpNmrJson(TraitBase):
         """
         if not hasattr(self, constants.RESTORE):
             raise RuntimeError('Unable to restore; no fileHandlers defined for "%s"' % self)
-        getattr(self, constants.RESTORE)(path, **kwds)
-        # print('>>> restore:', self.metadata.setdefault(constants.LASTPATH,'undefined'), path)
+        restoreFunc = getattr(self, constants.RESTORE)
+        restoreFunc(path, **kwds)
         self.metadata[constants.LASTPATH] = str(path)
         return self
 

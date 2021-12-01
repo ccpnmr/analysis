@@ -1,4 +1,4 @@
-"""Project-related additional routines
+"""Project-History related  routines
 
 """
 #=========================================================================================
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-23 11:38:09 +0100 (Tue, November 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-01 10:03:42 +0000 (Wed, December 01, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,6 +37,8 @@ from ccpn.framework.Version import VersionString
 from ccpn.framework.Application import getApplication
 from ccpn.util.Time import now
 from ccpn.util.Common import isIterable
+from ccpn.util.traits.CcpNmrJson import CcpNmrJson, TraitJsonHandlerBase
+from ccpn.util.traits.CcpNmrTraits import List, Path
 
 
 def getProjectSaveHistory(projectPath):
@@ -62,13 +64,31 @@ def newProjectSaveHistory(projectPath):
     return sv
 
 
-class ProjectSaveHistory(object):
+class ProjectSaveHistory(CcpNmrJson):
     """A simple class to maintain a project save history as
     a list, to be saved to and restored from a json file
     stores (version, datetime, user, platform, comment) tuples
     """
 
+    classVersion = 1.0  # Json classVersion
+
     SaveRecord = namedtuple('SaveRecord', 'version datetime user platform comment'.split())
+
+    # The path of the file
+    path = Path()
+
+    class RecordListHandler(TraitJsonHandlerBase):
+        "Record-list handling by Json"
+        def decode(self, obj, trait, value):
+            "uses value to generate and set the new (or modified) obj"
+            newValue = []
+            for item in value:
+                record = obj._newRecord(*item)
+                newValue.append(record)
+            setattr(obj, trait, newValue)
+
+    # the list of entries
+    records = List(default_value=[]).tag(saveToJson=True, jsonHandler=RecordListHandler)
 
     def __init__(self, projectPath):
         """
@@ -79,10 +99,7 @@ class ProjectSaveHistory(object):
         _path = aPath(projectPath)
         if not _path.exists():
             raise ValueError('Project path "%s" does not exist' % projectPath)
-        # The path of the file
         self.path = _path / CCPN_STATE_DIRECTORY / ccpnVersionHistory
-        # the list of entries
-        self.records = []
 
     @property
     def lastSavedVersion(self) -> VersionString:
@@ -104,8 +121,6 @@ class ProjectSaveHistory(object):
             user = getpass.getuser()
         if platform is None:
             platform = sys.platform
-        # record = self.SaveRecord(version=version, datetime=datetime,
-        #                          user=user, platform=platform, comment=comment)
         record = self.SaveRecord( version, datetime, user, platform, comment )
         return record
 
@@ -128,8 +143,9 @@ class ProjectSaveHistory(object):
     def save(self):
         """Save to (json) file
         """
-        with self.path.open('w') as fp:
-            json.dump(self.records, fp, indent=4)
+        # with self.path.open('w') as fp:
+        #     json.dump(self.records, fp, indent=4)
+        super().save(self.path)
 
     def restore(self):
         """Restore self from a json file.
@@ -138,18 +154,16 @@ class ProjectSaveHistory(object):
         if not self.exists():
             raise RuntimeError('Path "%s" does not exist; unable to restore project save history' % self.path)
 
+        # test for old 'ed' files
         with self.path.open('r') as fp:
             records = json.load(fp)
 
-        self.records = []
-        for item in records:
-            if not isIterable(item):
-                # patch to accomodate ed's earlier files; only a version string
-                self.addSaveRecord(item)
-            else:
-                # item is a [version, datetime, user, platform, comment] list
-                record = self._newRecord(*item)
-                self.records.append(record)
+        if isinstance(records, list) and len(records) > 0 and isinstance(records[0], str):
+            for item in records:
+                self.addSaveRecord(item, 'reconstructed')
+        else:
+            super().restore(self.path)
+
 
     def __getitem__(self, item):
         return self.records[item]
@@ -160,3 +174,6 @@ class ProjectSaveHistory(object):
     def __str__(self):
         return '<%s: len=%s, lastSavedVersion=%r>' % \
                (self.__class__.__name__, len(self), self.lastSavedVersion)
+
+# Register this class
+ProjectSaveHistory.register()

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-29 12:32:55 +0100 (Sun, August 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-02 16:52:21 +0000 (Thu, December 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -499,6 +499,8 @@ class UpdateAgent(object):
             lfile = os.path.join(userPreferencesDirectory, fname)
             if not os.path.exists(lfile):
                 lfile = os.path.join(ccpnConfigPath, fname)
+            msg = ''.join([c for c in map(chr, (117, 112, 100, 97, 116, 105, 110, 103, 32, 108, 105, 99, 101, 110, 99, 101))])
+            self.showInfo('installing', msg)
             with open(lfile, 'w', encoding='UTF-8') as fp:
                 fp.write(self._found)
 

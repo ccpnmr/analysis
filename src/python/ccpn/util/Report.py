@@ -4,8 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-05-13 14:34:26 +0100 (Wed, May 13, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-12-02 09:36:45 +0000 (Thu, December 02, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,7 +30,8 @@ import sys
 from PyQt5 import QtWidgets
 from ccpn.util.Path import aPath
 from reportlab.pdfgen import canvas
-from reportlab.platypus import SimpleDocTemplate, BaseDocTemplate, NextPageTemplate, PageTemplate, Paragraph
+from reportlab.platypus import SimpleDocTemplate, BaseDocTemplate, NextPageTemplate, PageTemplate, Paragraph, Frame
+from reportlab.platypus.doctemplate import _doNothing
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4, LETTER
@@ -44,6 +46,35 @@ from reportlab.graphics.shapes import Drawing, Rect, String, PolyLine, Line, Gro
 from reportlab.lib.units import mm
 
 DEFAULTMARGIN = 2.0 * cm
+
+
+class SimpleDocTemplateNoPadding(SimpleDocTemplate):
+
+    def build(self,flowables,onFirstPage=_doNothing, onLaterPages=_doNothing, canvasmaker=canvas.Canvas):
+        """build the document using the flowables.  Annotate the first page using the onFirstPage
+               function and later pages using the onLaterPages function.  The onXXX pages should follow
+               the signature
+
+                  def myOnFirstPage(canvas, document):
+                      # do annotations and modify the document
+                      ...
+
+               The functions can do things like draw logos, page numbers,
+               footers, etcetera. They can use external variables to vary
+               the look (for example providing page numbering or section names).
+        """
+        self._calc()    #in case we changed margins sizes etc
+        frameT = Frame(self.leftMargin, self.bottomMargin, self.width, self.height, id='normal',
+                       leftPadding=0, bottomPadding=0,
+                       rightPadding=0, topPadding=0,
+                       showBoundary=0)
+        self.addPageTemplates([PageTemplate(id='First',frames=frameT, onPage=onFirstPage,pagesize=self.pagesize),
+                        PageTemplate(id='Later',frames=frameT, onPage=onLaterPages,pagesize=self.pagesize)])
+        if onFirstPage is _doNothing and hasattr(self,'onFirstPage'):
+            self.pageTemplates[0].beforeDrawPage = self.onFirstPage
+        if onLaterPages is _doNothing and hasattr(self,'onLaterPages'):
+            self.pageTemplates[1].beforeDrawPage = self.onLaterPages
+        BaseDocTemplate.build(self,flowables, canvasmaker=canvasmaker)
 
 
 class Report():
@@ -76,7 +107,7 @@ class Report():
         # buffer for exporting
         self.buf = io.BytesIO()
 
-        self.doc = SimpleDocTemplate(
+        self.doc = SimpleDocTemplateNoPadding(
                 self.buf,
                 rightMargin=rightMargin,
                 leftMargin=leftMargin,

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-11 18:57:51 +0000 (Thu, November 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-02 09:36:45 +0000 (Thu, December 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -34,14 +34,14 @@ from PyQt5.QtCore import QStandardPaths
 from PyQt5.QtGui import QFontDatabase
 from dataclasses import dataclass
 from functools import partial
-# from ccpn.ui.gui.widgets.Spacer import Spacer
-# from ccpn.core.lib.ContextManagers import queueStateChange
-from ccpn.ui.gui.widgets.Label import Label
+from ccpn.core.lib.ContextManagers import catchExceptions, queueStateChange
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER, BORDERFOCUS
+from ccpn.ui.gui.popups.ExportDialog import ExportDialogABC
+from ccpn.ui.gui.popups.Dialog import handleDialogApply, _verifyPopupApply
+# from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import PrintTreeCheckBoxes
-# from ccpn.ui.gui.popups.Dialog import handleDialogApply, _verifyPopupApply
-from ccpn.ui.gui.popups.ExportDialog import ExportDialogABC
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Button import Button
@@ -57,7 +57,7 @@ from ccpn.ui.gui.widgets.Font import DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFO
 # from ccpn.ui.gui.widgets.MessageDialog import progressManager
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, \
     GLINTEGRALLABELS, GLINTEGRALSYMBOLS, GLMULTIPLETLABELS, \
-    GLMULTIPLETSYMBOLS, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLPAGETYPE, GLSELECTEDPIDS, \
+    GLMULTIPLETSYMBOLS, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLPAGETYPE, GLPAGESIZE, GLSELECTEDPIDS, \
     GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, \
     GLSPECTRUMDISPLAY, GLSTRIP, \
     GLWIDGET, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, GLFOREGROUND, \
@@ -69,7 +69,6 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, \
     GLPRINTFONT, GLUSEPRINTFONT, GLSCALINGAXIS, GLPEAKLABELSENABLED, GLMULTIPLETLABELSENABLED
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString, hexToRgbRatio, colourNameNoSpace
 from ccpn.util.Constants import SCALING_MODES, POSINFINITY
-from ccpn.core.lib.ContextManagers import catchExceptions
 
 
 # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLAXISLABELS, GLAXISMARKS, \
@@ -114,6 +113,17 @@ STRIPBUTTONS = [STRIPAXIS, STRIPMIN, STRIPMAX, STRIPCENTRE, STRIPWIDTH]
 STRIPAXES = ['X', 'Y']
 DEFAULT_FONT = 'Default Font'
 
+PAGESIZEA0 = 'A0'
+PAGESIZEA1 = 'A1'
+PAGESIZEA2 = 'A2'
+PAGESIZEA3 = 'A3'
+PAGESIZEA4 = 'A4'
+PAGESIZEA5 = 'A5'
+PAGESIZEA6 = 'A6'
+PAGESIZELETTER = 'letter'
+PAGESIZES = [PAGESIZEA0, PAGESIZEA1, PAGESIZEA2, PAGESIZEA3, PAGESIZEA4, PAGESIZEA5, PAGESIZEA6, PAGESIZELETTER]
+PAGESIZE = 'pageSize'
+
 
 @dataclass
 class _StripData:
@@ -125,7 +135,7 @@ class _StripData:
     axes = None
 
     def _initialise(self):
-        """Initialise the new dataclas from the strip
+        """Initialise the new dataclass from the strip
         """
         self.axes = [{STRIPMIN         : 0.0,
                       STRIPMAX         : 0.0,
@@ -216,21 +226,23 @@ class ExportStripToFilePopup(ExportDialogABC):
         # add a spacer to separate from the common save widgets
         row += 1
         HLine(userFrame, grid=(row, 0), gridSpan=(1, 4), colour=getColours()[DIVIDER], height=20)
+
         row += 1
         topRow = row
-        Label(userFrame, text='Print Type', grid=(row, 0), hAlign='left', vAlign='centre')
-
-        # row += 1
-        self.exportType = RadioButtons(userFrame, list(EXPORTTYPES.keys()),
-                                       grid=(row, 1), direction='h', hAlign='left', spacing=(20, 0),
-                                       callback=self._changePrintType)
+        Label(userFrame, text='Page Size', grid=(row, 0), hAlign='left', vAlign='centre')
+        self.pageSize = PulldownList(userFrame, vAlign='t', grid=(row, 1))
+        self.pageSize.setData(texts=PAGESIZES)
 
         row += 1
         Label(userFrame, text='Page orientation', grid=(row, 0), hAlign='left', vAlign='centre')
-
-        # row += 1
         self.pageType = RadioButtons(userFrame, PAGETYPES,
                                      grid=(row, 1), direction='h', hAlign='left', spacing=(20, 0))
+
+        row += 1
+        Label(userFrame, text='Print Type', grid=(row, 0), hAlign='left', vAlign='centre')
+        self.exportType = RadioButtons(userFrame, list(EXPORTTYPES.keys()),
+                                       grid=(row, 1), direction='h', hAlign='left', spacing=(20, 0),
+                                       callback=self._changePrintType)
 
         # create a pulldown for the foreground (axes) colour
         row += 1
@@ -692,8 +704,9 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.objectPulldown.pulldownList.setData(sorted([ky for ky in self.objects.keys()]))
 
         # set the page types
-        self.exportType.set(EXPORTPDF)
+        self.pageSize.set(PAGESIZEA4)
         self.pageType.set(PAGEPORTRAIT)
+        self.exportType.set(EXPORTPDF)
 
         # populate pulldown from foreground colour
         spectrumColourKeys = list(spectrumColours.keys())
@@ -816,7 +829,7 @@ class ExportStripToFilePopup(ExportDialogABC):
     def _populateScaling(self):
         """Populate the widgets in the scaling frame
         """
-        self.scalingPercentage.set(100)
+        self.scalingPercentage.set(80)
         self.scalingByUnits.set(0.01)
         self.scalingAxis.setIndex(0)
 
@@ -915,12 +928,12 @@ class ExportStripToFilePopup(ExportDialogABC):
 
             return newColour
 
-    def _changeForegroundPulldown(self, int):
+    def _changeForegroundPulldown(self, value):
         newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.foregroundColourBox.currentText()))]
         if newColour:
             self.foregroundColour = newColour
 
-    def _changeForegroundButton(self, int):
+    def _changeForegroundButton(self, value):
         """Change the colour from the foreground colour button
         """
         newColour = self._changeColourButton()
@@ -928,12 +941,12 @@ class ExportStripToFilePopup(ExportDialogABC):
             self.foregroundColourBox.setCurrentText(spectrumColours[newColour.name()])
             self.foregroundColour = newColour.name()
 
-    def _changeBackgroundPulldown(self, int):
+    def _changeBackgroundPulldown(self, value):
         newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.backgroundColourBox.currentText()))]
         if newColour:
             self.backgroundColour = newColour
 
-    def _changeBackgroundButton(self, int):
+    def _changeBackgroundButton(self, value):
         """Change the colour from the background colour button
         """
         newColour = self._changeColourButton()
@@ -941,7 +954,7 @@ class ExportStripToFilePopup(ExportDialogABC):
             self.backgroundColourBox.setCurrentText(spectrumColours[newColour.name()])
             self.backgroundColour = newColour.name()
 
-    def _changePulldown(self, int):
+    def _changePulldown(self, value):
         selected = self.objectPulldown.getText()
         exType = self.exportType.get()
         if exType in EXPORTTYPES:
@@ -975,11 +988,11 @@ class ExportStripToFilePopup(ExportDialogABC):
         if self.strip.spectrumViews:
             item = QtWidgets.QTreeWidgetItem(self.treeView)
             item.setText(0, 'Spectra')
-            item.setFlags(item.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+            item.setFlags(int(item.flags()) | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
 
             for specView in self.strip.spectrumViews:
                 child = QtWidgets.QTreeWidgetItem(item)
-                child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
+                child.setFlags(int(child.flags()) | QtCore.Qt.ItemIsUserCheckable)
                 child.setData(1, 0, specView.spectrum)
                 child.setText(0, specView.spectrum.pid)
                 child.setCheckState(0, QtCore.Qt.Checked if specView.isVisible() else QtCore.Qt.Checked)
@@ -1000,11 +1013,11 @@ class ExportStripToFilePopup(ExportDialogABC):
         if peakLists:
             item = QtWidgets.QTreeWidgetItem(self.treeView)
             item.setText(0, 'Peak Lists')
-            item.setFlags(item.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+            item.setFlags(int(item.flags()) | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
 
             for pp in peakLists:
                 child = QtWidgets.QTreeWidgetItem(item)
-                child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
+                child.setFlags(int(child.flags()) | QtCore.Qt.ItemIsUserCheckable)
                 child.setData(1, 0, pp.peakList)
                 child.setText(0, pp.peakList.pid)
                 child.setCheckState(0, QtCore.Qt.Checked if pp.isVisible() else QtCore.Qt.Checked)
@@ -1015,11 +1028,11 @@ class ExportStripToFilePopup(ExportDialogABC):
         if integralLists:
             item = QtWidgets.QTreeWidgetItem(self.treeView)
             item.setText(0, 'Integral Lists')
-            item.setFlags(item.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+            item.setFlags(int(item.flags()) | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
 
             for pp in integralLists:
                 child = QtWidgets.QTreeWidgetItem(item)
-                child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
+                child.setFlags(int(child.flags()) | QtCore.Qt.ItemIsUserCheckable)
                 child.setData(1, 0, pp.integralList)
                 child.setText(0, pp.integralList.pid)
                 child.setCheckState(0, QtCore.Qt.Checked if pp.isVisible() else QtCore.Qt.Checked)
@@ -1030,11 +1043,11 @@ class ExportStripToFilePopup(ExportDialogABC):
         if multipletLists:
             item = QtWidgets.QTreeWidgetItem(self.treeView)
             item.setText(0, 'Multiplet Lists')
-            item.setFlags(item.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+            item.setFlags(int(item.flags()) | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
 
             for pp in multipletLists:
                 child = QtWidgets.QTreeWidgetItem(item)
-                child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
+                child.setFlags(int(child.flags()) | QtCore.Qt.ItemIsUserCheckable)
                 child.setData(1, 0, pp.multipletList)
                 child.setText(0, pp.multipletList.pid)
                 child.setCheckState(0, QtCore.Qt.Checked if pp.isVisible() else QtCore.Qt.Checked)
@@ -1123,22 +1136,22 @@ class ExportStripToFilePopup(ExportDialogABC):
             strip = self.objects[selected][0]
             stripDirection = 'Y'
 
-        prType = self.exportType.get()
-        pageType = self.pageType.get()
-        foregroundColour = hexToRgbRatio(self.foregroundColour)
-        backgroundColour = hexToRgbRatio(self.backgroundColour)
-        baseThickness = self.baseThicknessBox.getValue()
-
-        # there are now unique per-spectrumDisplay, may differ from preferences
-        symbolThickness = strip.symbolThickness
-        contourThickness = strip.contourThickness
-        aliasEnabled = strip.aliasEnabled
-        aliasShade = strip.aliasShade
-        aliasLabelsEnabled = strip.aliasLabelsEnabled
-        peakLabelsEnabled = strip.peakLabelsEnabled
-        multipletLabelsEnabled = strip.multipletLabelsEnabled
-        stripPadding = self.stripPaddingBox.getValue()
-        exportDpi = self.exportDpiBox.getValue()
+        # prType = self.exportType.get()
+        # pageType = self.pageType.get()
+        # foregroundColour = hexToRgbRatio(self.foregroundColour)
+        # backgroundColour = hexToRgbRatio(self.backgroundColour)
+        # baseThickness = self.baseThicknessBox.getValue()
+        #
+        # # there are now unique per-spectrumDisplay, may differ from preferences
+        # symbolThickness = strip.symbolThickness
+        # contourThickness = strip.contourThickness
+        # aliasEnabled = strip.aliasEnabled
+        # aliasShade = strip.aliasShade
+        # aliasLabelsEnabled = strip.aliasLabelsEnabled
+        # peakLabelsEnabled = strip.peakLabelsEnabled
+        # multipletLabelsEnabled = strip.multipletLabelsEnabled
+        # stripPadding = self.stripPaddingBox.getValue()
+        # exportDpi = self.exportDpiBox.getValue()
 
         if strip:
             # return the parameters
@@ -1146,21 +1159,23 @@ class ExportStripToFilePopup(ExportDialogABC):
                       GLSPECTRUMDISPLAY       : spectrumDisplay,
                       GLSTRIP                 : strip,
                       GLWIDGET                : strip._CcpnGLWidget,
-                      GLPRINTTYPE             : prType,
-                      GLPAGETYPE              : pageType,
-                      GLFOREGROUND            : foregroundColour,
-                      GLBACKGROUND            : backgroundColour,
-                      GLBASETHICKNESS         : baseThickness,
-                      GLSYMBOLTHICKNESS       : symbolThickness,
-                      GLCONTOURTHICKNESS      : contourThickness,
-                      GLALIASENABLED          : aliasEnabled,
-                      GLALIASSHADE            : aliasShade,
-                      GLALIASLABELSENABLED    : aliasLabelsEnabled,
-                      GLPEAKLABELSENABLED     : peakLabelsEnabled,
-                      GLMULTIPLETLABELSENABLED: multipletLabelsEnabled,
+                      GLPRINTTYPE             : self.exportType.get(),
+                      GLPAGETYPE              : self.pageType.get(),
+                      GLPAGESIZE              : self.pageSize.get(),
+                      GLFOREGROUND            : hexToRgbRatio(self.foregroundColour),
+                      GLBACKGROUND            : hexToRgbRatio(self.backgroundColour),
+                      GLBASETHICKNESS         : self.baseThicknessBox.getValue(),
+                      # unique per spectrumDisplay - may differ from preferences
+                      GLSYMBOLTHICKNESS       : strip.symbolThickness,
+                      GLCONTOURTHICKNESS      : strip.contourThickness,
+                      GLALIASENABLED          : strip.aliasEnabled,
+                      GLALIASSHADE            : strip.aliasShade,
+                      GLALIASLABELSENABLED    : strip.aliasLabelsEnabled,
+                      GLPEAKLABELSENABLED     : strip.peakLabelsEnabled,
+                      GLMULTIPLETLABELSENABLED: strip.multipletLabelsEnabled,
                       GLSTRIPDIRECTION        : stripDirection,
-                      GLSTRIPPADDING          : stripPadding,
-                      GLEXPORTDPI             : exportDpi,
+                      GLSTRIPPADDING          : self.stripPaddingBox.getValue(),
+                      GLEXPORTDPI             : self.exportDpiBox.getValue(),
                       GLSELECTEDPIDS          : self.treeView.getSelectedObjectsPids(),
                       GLSTRIPREGIONS          : self._stripDict,
                       GLSCALINGMODE           : self.scaling.getIndex(),
@@ -1284,6 +1299,19 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         return unloadable, familyPath
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    # @queueStateChange(_verifyPopupApply)
+    # def _queueSetSymbol(self):
+    #     value = self.symbol.getIndex()
+    #     if value != self.preferences.general.symbolType:
+    #         return partial(self._setSymbol, value)
+    #
+    # def _setSymbol(self, value):
+    #     """Set the peak symbol type - current a cross or lineWidths
+    #     """
+    #     self.preferences.general.symbolType = value
+
     # def _getFont(self, value):
     #     # Simple font grabber from the system
     #     _fontAttr = self._fontButton
@@ -1319,7 +1347,7 @@ class ExportStripToFilePopup(ExportDialogABC):
     #     widget.setText(fontName)
 
 
-if __name__ == '__main__':
+def main():
     # from sandbox.Geerten.Refactored.framework import Framework
     # from sandbox.Geerten.Refactored.programArguments import Arguments
     #
@@ -1354,9 +1382,12 @@ if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import newTestApplication
     from ccpn.framework.Application import getApplication
 
-
     app = newTestApplication()
     application = getApplication()
 
     dialog = ExportStripToFilePopup(strips=[])
     result = dialog.exec_()
+
+
+if __name__ == '__main__':
+    main()

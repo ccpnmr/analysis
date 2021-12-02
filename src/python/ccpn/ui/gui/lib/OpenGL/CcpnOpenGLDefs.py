@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-11 18:57:51 +0000 (Thu, November 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-02 09:36:45 +0000 (Thu, December 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -110,6 +110,7 @@ GLSTRIP = 'strip'
 GLWIDGET = 'glWidget'
 GLPRINTTYPE = 'printType'
 GLPAGETYPE = 'pageType'
+GLPAGESIZE = 'pageSize'
 GLSELECTEDPIDS = 'selectedPids'
 
 # check box items

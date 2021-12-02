@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-14 12:10:57 +0100 (Thu, October 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-02 09:36:45 +0000 (Thu, December 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 import os
 import io
 import numpy as np
+import math
 from PyQt5 import QtGui
 from PyQt5.QtCore import QStandardPaths
 from PyQt5.QtGui import QFontDatabase
@@ -47,8 +48,8 @@ from reportlab.graphics.shapes import Drawing, Rect, String, PolyLine, Group, Pa
 # from reportlab.graphics.renderSVG import draw, renderScaledDrawing, SVGCanvas
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4, portrait, landscape
-from reportlab.platypus.tables import Table
+from reportlab.lib.pagesizes import portrait, landscape, letter, A0, A1, A2, A3, A4, A5, A6
+from reportlab.platypus.tables import Table, TableStyle
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLViewports import viewportDimensions
@@ -62,7 +63,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLGRIDLINES, GLAXISLABELS, GLA
     GLMULTIPLETSYMBOLS, GLOTHERLINES, GLPEAKLABELS, GLPEAKSYMBOLS, GLPRINTTYPE, GLSELECTEDPIDS, \
     GLSPECTRUMBORDERS, GLSPECTRUMCONTOURS, GLSPECTRUMLABELS, \
     GLSTRIP, GLSTRIPLABELLING, GLTRACES, GLACTIVETRACES, GLPLOTBORDER, \
-    GLPAGETYPE, GLSPECTRUMDISPLAY, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, \
+    GLPAGETYPE, GLPAGESIZE, GLSPECTRUMDISPLAY, GLBACKGROUND, GLBASETHICKNESS, GLSYMBOLTHICKNESS, \
     GLCONTOURTHICKNESS, GLFOREGROUND, GLSHOWSPECTRAONPHASE, \
     GLAXISTITLES, GLAXISUNITS, GLSTRIPDIRECTION, GLSTRIPPADDING, GLEXPORTDPI, \
     GLCURSORS, GLDIAGONALLINE, GLDIAGONALSIDEBANDS, \
@@ -75,7 +76,8 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLGRIDLINES, GLAXISLABELS, GLA
 # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLWIDGET, GLAXISLINES, GLAXISMARKSINSIDE, \
 #     GLFULLLIST, GLEXTENDEDLIST, GLALIASENABLED, GLALIASLABELSENABLED
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLGlobal import getAliasSetting
-from ccpn.ui.gui.popups.ExportStripToFile import PAGEPORTRAIT, DEFAULT_FONT
+from ccpn.ui.gui.popups.ExportStripToFile import PAGEPORTRAIT, DEFAULT_FONT, PAGESIZEA6, PAGESIZEA5, \
+    PAGESIZEA4, PAGESIZEA3, PAGESIZEA2, PAGESIZEA1, PAGESIZEA0, PAGESIZELETTER, PAGESIZES
 # from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPDF, EXPORTSVG, EXPORTTYPES, \
 #     PAGELANDSCAPE, PAGETYPES
 from ccpn.ui.gui.popups.ExportStripToFile import EXPORTPNG
@@ -100,7 +102,15 @@ PDFSTROKE = 'stroke'
 PDFSTROKEDASHARRAY = 'strokeDashArray'
 PDFCLOSEPATH = 'closePath'
 PDFLINES = 'lines'
-FRAMEPADDING = 12
+FRAMEPADDING = 13
+PAGEREFERENCE = {PAGESIZEA0    : A0,
+                 PAGESIZEA1    : A1,
+                 PAGESIZEA2    : A2,
+                 PAGESIZEA3    : A3,
+                 PAGESIZEA4    : A4,
+                 PAGESIZEA5    : A5,
+                 PAGESIZEA6    : A6,
+                 PAGESIZELETTER: letter}
 
 
 def alphaClip(value):
@@ -135,7 +145,10 @@ class GLExporter():
             pageType = portrait
         else:
             pageType = landscape
-        self._report = Report(self, self.project, filename, pagesize=pageType(A4))
+        _pageSize = PAGEREFERENCE.get(self.params[GLPAGESIZE]) or A4
+
+        self._report = Report(self, self.project, filename, pagesize=pageType(_pageSize),
+                              leftMargin=1, rightMargin=1, topMargin=1, bottomMargin=1)
 
         self._ordering = []
         self._importFonts()
@@ -177,6 +190,8 @@ class GLExporter():
             spectrumDisplay = self.params[GLSPECTRUMDISPLAY]
 
             self.numStrips = len(spectrumDisplay.strips)
+            self._buildPageDimensions(spectrumDisplay.strips)
+
             for strNum, strip in enumerate(spectrumDisplay.orderedStrips):
                 self.stripNumber = strNum
                 self._createStrip(strip, singleStrip=False, axesOnly=False)
@@ -193,9 +208,21 @@ class GLExporter():
                     self._createStrip(spectrumDisplay.orderedStrips[0], spectrumDisplay._bottomGLAxis, singleStrip=False, axesOnly=True)
 
         else:
+            strip = self.params[GLSTRIP]
+            spectrumDisplay = strip.spectrumDisplay
+
             self.numStrips = 1
+            self._buildPageDimensions([strip])
+
             self.stripNumber = 0
-            self._createStrip(self.params[GLSTRIP], singleStrip=True, axesOnly=False)
+            self._createStrip(strip, singleStrip=True, axesOnly=False)
+
+            if self.params[GLSTRIPDIRECTION] == 'Y':
+                if self._parent and not self._parent._drawRightAxis:
+                    self._createStrip(spectrumDisplay.orderedStrips[0], spectrumDisplay._rightGLAxis, singleStrip=True, axesOnly=True)
+            else:
+                if self._parent and not self._parent._drawBottomAxis:
+                    self._createStrip(spectrumDisplay.orderedStrips[0], spectrumDisplay._bottomGLAxis, singleStrip=True, axesOnly=True)
 
         self._addTableToStory()
 
@@ -279,13 +306,67 @@ class GLExporter():
         justFont = pdfmetrics.Font('Open Sans', faceName, 'WinAnsiEncoding')
         pdfmetrics.registerFont(justFont)
 
+    def _buildPageDimensions(self, strips):
+        """Calculate the scaling required for the whole page
+        """
+        st = strips[0]._CcpnGLWidget
+        if self.params[GLSTRIPDIRECTION] == 'Y':
+            fh = st.height()
+            _widths = [st._CcpnGLWidget.width() for st in strips]
+            if self.numStrips > 1:
+                _widths.append((self.numStrips - 1) * self.params[GLSTRIPPADDING])
+            if st and not st._drawRightAxis:
+                _widths.append(strips[0].spectrumDisplay._rightGLAxis.width())
+            fw = sum(_widths)
+        else:
+            fw = st.width()
+            _heights = [st._CcpnGLWidget.height() for st in strips]
+            if self.numStrips > 1:
+                _heights.append((self.numStrips - 1) * self.params[GLSTRIPPADDING])
+            if st and not st._drawBottomAxis:
+                _heights.append(self.strip.spectrumDisplay._bottomGLAxis.height())
+            fh = sum(_heights)
+
+        # dimensions of the strip list - should be ints
+        _parentH = self.fh = fh
+        _parentW = self.fw = fw
+
+        _doc = self._report.doc
+        self.docWidth = docWidth = _doc.width  # _doc.pagesize[0]  # - FRAMEPADDING
+        self.docHeight = docHeight = _doc.height  # pagesize[1]  # - (2 * FRAMEPADDING)
+
+        # print(f'  {_doc.leftMargin}  {_doc.width}  {_doc.rightMargin}  {_doc.pagesize}   {fw}:{fh}')
+
+        # translate to size of drawing Flowable
+        self.modRatio = 1.0
+
+        _pageRatio = docHeight / docWidth
+        _stripRatio = fh / fw
+
+        if _stripRatio > _pageRatio:
+            # strips are taller than relative page - fit to height
+            _scale = fh / docHeight
+            fh = docHeight
+            fw /= _scale
+        else:
+            _scale = fw / docWidth
+            fw = docWidth
+            fh /= _scale
+
+        self.modRatio = 1.0
+        self._displayScale = fh / _parentH
+        self._fontScale = self._pngScale / self._parent.viewports.devicePixelRatio
+
+        # print(f'   pagesize  {fw}   {fh}  {self._displayScale}')
+
+        # read the strip spacing from the params
+        self._stripSpacing = self.params[GLSTRIPPADDING] #* self._displayScale
+
     def _buildPage(self, singleStrip=True):
         """Build the main sections of the pdf file from a drawing object
         and add the drawing object to a reportlab document
         """
         dpi = 72  # drawing object and documents are hard-coded to this
-        pageWidth = A4[0]
-        pageHeight = A4[1]
 
         # keep aspect ratio of the original screen
         self.margin = 2.0 * cm
@@ -294,31 +375,13 @@ class GLExporter():
         self.rAxis = self._parent._drawRightAxis
         self.bAxis = self._parent._drawBottomAxis
 
-        if singleStrip:
-            frame = self.strip
-        else:
-            frame = self.strip.spectrumDisplay.stripFrame
-
         # get the method for retrieving the viewport sizes
         getView = self._parent.viewports.getViewportFromWH
 
-        if self.params[GLSTRIPDIRECTION] == 'Y':
-            docHeight = self._report.doc.height - (2 * FRAMEPADDING)
-            docWidth = self._report.doc.width - (2 * FRAMEPADDING)
-            fh = frame.height()
-            fw = frame.width()
-            _parentH = self._parent.h
-            _parentW = self._parent.w
-            fw += (self.numStrips - 1) * self.params[GLSTRIPPADDING]
+        _parentH = self._parent.h
+        _parentW = self._parent.w
 
-        else:
-            docHeight = self._report.doc.height - (2 * FRAMEPADDING)
-            docWidth = self._report.doc.width - (2 * FRAMEPADDING)
-            fh = frame.height()
-            fw = frame.width()
-            _parentH = self._parent.h
-            _parentW = self._parent.w
-            fh += (self.numStrips - 1) * self.params[GLSTRIPPADDING]
+        # print(f'      strip  {self._parent}   {_parentW}  {_parentH}')
 
         if not self.rAxis and not self.bAxis:
             # no axes visible
@@ -360,126 +423,92 @@ class GLExporter():
             self.bAxisMarkView = viewportDimensions(*getView(BOTTOMAXIS, _parentW, _parentH))
             self.bAxisBarView = viewportDimensions(*getView(BOTTOMAXISBAR, _parentW, _parentH))
 
-        # stripFrame ratio
-        frameRatio = fh / fw
+        # self.pixWidth = math.floor(_parentW * self.displayScale)
+        # self.pixHeight = math.floor(_parentH * self.displayScale)
+        # self.fontScale = self._pngScale * self.pixWidth * self.displayScale / _parentW
 
-        # self.pixHeight = docHeight
-        # self.pixWidth = self.pixHeight / frameRatio
-        # # self.fontScale = 1.025 * self.pixHeight / _parentH
-        # self.fontScale = self.pixHeight / _parentH
-
-        # translate to size of drawing Flowable
-        if self.params[GLSTRIPDIRECTION] == 'Y':
-            # strip axis ratio
-            ratio = _parentH / _parentW
-
-            self.pixWidth = docWidth / (fw / _parentW)
-            self.pixHeight = self.pixWidth * ratio
-
-            # scale fonts to appear the correct size
-            self.fontScale = self._pngScale * self.pixWidth / _parentW
-
-            # if too tall then reduce scaling
-            if self.pixHeight > docHeight:
-                modRatio = docHeight / self.pixHeight
-
-                self.pixWidth *= modRatio
-                self.pixHeight *= modRatio
-                self.fontScale *= modRatio
-
-        else:
-            # strip axis ratio
-            ratio = _parentH / _parentW
-
-            self.pixHeight = docHeight / (fh / _parentH)
-            self.pixWidth = self.pixHeight / ratio
-
-            # scale fonts to appear the correct size
-            self.fontScale = self._pngScale * self.pixWidth / _parentW
-
-            # if too wide then reduce scaling
-            if self.pixWidth > docWidth:
-                modRatio = docWidth / self.pixWidth
-
-                self.pixWidth *= modRatio
-                self.pixHeight *= modRatio
-                self.fontScale *= modRatio
+        self._pixWidth = _parentW
+        self._pixHeight = _parentH
 
         self.fontXOffset = 0.75
         self.fontYOffset = 3.0
 
-        # pixWidth/self.pixHeight are now the dimensions in points for the Flowable
-        self.displayScale = self.pixHeight / _parentH
-
-        # don't think these are needed
-        # pixBottom = pageHeight - self.pixHeight - self.margin
-        # pixLeft = self.margin
-
-        # read the strip spacing from the params
-        self.stripSpacing = self.params[GLSTRIPPADDING] * self.displayScale
+        # print(f'      size  {self._pixWidth}   {self._pixHeight}')
 
     def _modifyScaling(self):
+
         # modify by the print dialog scaling factor
         _scaleMode = self.params[GLSCALINGMODE]
         _scalePercent = self.params[GLSCALINGPERCENT]
         if _scaleMode == SCALING_MODES.index(SCALE_PERCENT):
-            if (0 <= _scalePercent <= 100):
-                self.pixWidth *= (_scalePercent / 100.0)
-                self.pixHeight *= (_scalePercent / 100.0)
-                self.fontScale *= (_scalePercent / 100.0)
-                self.displayScale *= (_scalePercent / 100.0)
-                self.stripSpacing *= (_scalePercent / 100.0)
+
+            # modify the displayScale
+            self.displayScale = (self._displayScale * (_scalePercent / 100.0)) if (0 <= _scalePercent <= 100) else self._displayScale
+            # self.pixWidth = math.floor(self._pixWidth * self.displayScale)
+            # self.pixHeight = math.floor(self._pixHeight * self.displayScale)
+            self.pixWidth = self._pixWidth * self.displayScale
+            self.pixHeight = self._pixHeight * self.displayScale
+            self.fontScale = self._fontScale * self.displayScale
+            self.stripSpacing = self._stripSpacing * self.displayScale
+
         else:
             _newScale = 1.0
             _scale = self.params[GLSCALINGBYUNITS]
             try:
                 # scales are ratios
-                # NOTE:ED - base on self.mainView dimensions and ranges
+                # based on self.mainView dimensions and ranges
                 if _scaleMode == SCALING_MODES.index(SCALE_CM_UNIT):
                     # this is scaled to 72dpi
                     if self.params[GLSCALINGAXIS] == 0:
-                        _cms = (self.displayScale * self.mainView.width * 2.54) / 72.0
+                        _cms = (self._displayScale * self.mainView.width * 2.54) / 72.0
                         _axisScale = abs(self._axisL - self._axisR)
                     else:
-                        _cms = (self.displayScale * self.mainView.height * 2.54) / 72.0
+                        _cms = (self._displayScale * self.mainView.height * 2.54) / 72.0
                         _axisScale = abs(self._axisT - self._axisB)
                     _newScale = _scale / (_cms / _axisScale)
 
                 elif _scaleMode == SCALING_MODES.index(SCALE_UNIT_CM):
                     if self.params[GLSCALINGAXIS] == 0:
-                        _cms = (self.displayScale * self.mainView.width * 2.54) / 72.0
+                        _cms = (self._displayScale * self.mainView.width * 2.54) / 72.0
                         _axisScale = abs(self._axisL - self._axisR)
                     else:
-                        _cms = (self.displayScale * self.mainView.height * 2.54) / 72.0
+                        _cms = (self._displayScale * self.mainView.height * 2.54) / 72.0
                         _axisScale = abs(self._axisT - self._axisB)
                     _newScale = (_axisScale / _cms) / _scale
 
                 elif _scaleMode == SCALING_MODES.index(SCALE_INCH_UNIT):
                     if self.params[GLSCALINGAXIS] == 0:
-                        _cms = (self.displayScale * self.mainView.width) / 72.0
+                        _cms = (self._displayScale * self.mainView.width) / 72.0
                         _axisScale = abs(self._axisL - self._axisR)
                     else:
-                        _cms = (self.displayScale * self.mainView.height) / 72.0
+                        _cms = (self._displayScale * self.mainView.height) / 72.0
                         _axisScale = abs(self._axisT - self._axisB)
                     _newScale = _scale / (_cms / _axisScale)
 
                 else:
                     if self.params[GLSCALINGAXIS] == 0:
-                        _cms = (self.displayScale * self.mainView.width) / 72.0
+                        _cms = (self._displayScale * self.mainView.width) / 72.0
                         _axisScale = abs(self._axisL - self._axisR)
                     else:
-                        _cms = (self.displayScale * self.mainView.height) / 72.0
+                        _cms = (self._displayScale * self.mainView.height) / 72.0
                         _axisScale = abs(self._axisT - self._axisB)
                     _newScale = (_axisScale / _cms) / _scale
 
             except:
-                pass
-            else:
-                self.pixWidth *= _newScale
-                self.pixHeight *= _newScale
-                self.fontScale *= _newScale
-                self.displayScale *= _newScale
-                self.stripSpacing *= _newScale
+                # default to full page
+                _newScale = 1.0
+
+            finally:
+                # clip to the percentage range
+                _newScale = max(0.01, min(_newScale, 1.0))
+
+                self.displayScale = self._displayScale * _newScale
+                # self.pixWidth = math.floor(self._pixWidth * self.displayScale)
+                # self.pixHeight = math.floor(self._pixHeight * self.displayScale)
+                self.pixWidth = self._pixWidth * self.displayScale
+                self.pixHeight = self._pixHeight * self.displayScale
+                self.fontScale = self._fontScale * self.displayScale
+                self.stripSpacing = self._stripSpacing * self.displayScale
 
     def _addBackgroundBox(self, thisPlot):
         """Make a background box to cover the plot area
@@ -1752,41 +1781,58 @@ class GLExporter():
         self._appendStripSize(report)
 
     def _appendStripSize(self, report):
-        # if self.stripNumber < (self.numStrips-1):
-        #     self.stripWidths.append(self.pixWidth + self.stripSpacing)
-        #     self.stripHeights.append(self.pixHeight + self.stripSpacing)
-        # else:
-        #     self.stripWidths.append(self.pixWidth)
-        #     self.stripHeights.append(self.pixHeight)
+
+        _val = 1.0
 
         if self.params[GLSTRIPDIRECTION] == 'Y':
             if self.stripNumber < (self.numStrips - 1):
-                self.stripWidths.append(report.width + self.stripSpacing)
-                self.stripHeights.append(report.height + self.stripSpacing)
+                self.stripWidths.append((report.width + self.stripSpacing) * _val)
+                self.stripHeights.append(report.height * _val)
             else:
-                self.stripWidths.append(report.width)
-                self.stripHeights.append(report.height)
+                self.stripWidths.append(report.width * _val)
+                self.stripHeights.append(report.height * _val)
+            self.stripHeights.append(report.height * _val)
 
         else:
-            if 0 < self.stripNumber < self.numStrips:
-                self.stripWidths.append(report.width + self.stripSpacing)
-                self.stripHeights.append(report.height + self.stripSpacing)
+            if self.stripNumber < (self.numStrips - 1):
+                self.stripWidths.append(report.width * _val)
+                self.stripHeights.append((report.height + self.stripSpacing) * _val)
             else:
-                self.stripWidths.append(report.width)
-                self.stripHeights.append(report.height)
+                self.stripWidths.append(report.width * _val)
+                self.stripHeights.append(report.height * _val)
+            self.stripWidths.append(report.width * _val)
 
     def _addTableToStory(self):
-        if self.params[GLSTRIPDIRECTION] == 'Y':
+        _style = TableStyle([('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                             ('TOPPADDING', (0, 0), (-1, -1), 0),
+                             ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+                             ('LEFTPADDING', (0, 0), (-1, -1), 0),
+                             ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+                             ('LEADING', (0, 0), (-1, -1), 0),
+                             ]
+                            )
 
+        _minSpace = 2.0 * cm  # self.docHeight / 2.0
+
+        if self.params[GLSTRIPDIRECTION] == 'Y':
             # arrange as a row
             table = (self.stripReports,)
-            self._report.story.append(Table(table, colWidths=self.stripWidths))
-        else:
+            _spacing = min(_minSpace, max(0.0, (self.docHeight - self.stripHeights[0]) / 2.0))
+            _table = Table(table, colWidths=self.stripWidths, rowHeights=self.stripHeights[0],
+                           )
 
+        else:
             # arrange as a column
             table = tuple((rep,) for rep in self.stripReports)
-            heights = self.stripHeights[:]
-            self._report.story.append(Table(table, rowHeights=heights))
+            _spacing = min(_minSpace, max(0.0, (self.docHeight - sum(self.stripHeights)) / 2.0))
+            _table = Table(table, rowHeights=self.stripHeights, colWidths=self.stripWidths[0],
+                           )
+        self._report.doc.topMargin = math.floor(_spacing)
+        # NOTE:ED - same for left/bottom margin?
+
+        _table.setStyle(_style)
+        self._report.addItemToStory(_table)
 
     def writePNGFile(self):
         """

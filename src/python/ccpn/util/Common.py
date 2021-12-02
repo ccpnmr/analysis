@@ -21,8 +21,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-08 17:43:51 +0000 (Mon, November 08, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-02 08:36:33 +0000 (Thu, December 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -488,22 +488,22 @@ def _traverse(obj, tree_types=(list, tuple)):
     else:
         yield obj
 
-
-def _getChildren(obj, path=None):
-    """
-    Walks in a tree like obj and put all children/parents in list of list eg: [[Parent,child...,],...]
-    """
-    children = []
-    if path is None:
-        path = []
-    path.append(obj)
-    if obj._childClasses:
-        for att in obj._childClasses:
-            for child in getattr(obj, att._pluralLinkName):
-                children.extend(_getChildren(child, path[:]))
-    else:
-        children.append(path)
-    return children
+# GWV 01/12/2021; commented, should not be here and not used?
+# def _getChildren(obj, path=None):
+#     """
+#     Walks in a tree like obj and put all children/parents in list of list eg: [[Parent,child...,],...]
+#     """
+#     children = []
+#     if path is None:
+#         path = []
+#     path.append(obj)
+#     if obj._childClasses:
+#         for att in obj._childClasses:
+#             for child in getattr(obj, att._pluralLinkName):
+#                 children.extend(_getChildren(child, path[:]))
+#     else:
+#         children.append(path)
+#     return children
 
 
 def percentage(percent, whole):

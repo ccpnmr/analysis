@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-29 15:35:08 +0000 (Mon, November 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-02 08:36:33 +0000 (Thu, December 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,11 +28,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from typing import List, Optional, Tuple
-
-# try:
-#   from cing import __version__
-# except ImportError:
-#   __version__ = '???'
 
 # set separators
 PREFIXSEP = ':'

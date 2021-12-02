@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-01 09:02:18 +0000 (Wed, December 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-02 08:36:33 +0000 (Thu, December 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1545,19 +1545,15 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         # temp buffer for unpacking aliased data along sliceDim
         sliceData2 = numpy.zeros(sizes[sliceAxis], dtype=self.dataType)
-        nPointCounts = self.pointCounts
-        nPoints = nPointCounts[sliceAxis]
-
-        # _slices = [(position, aliased) for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=[sliceDim])]
-        # print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-        # print(f'{sizes}    {sliceAxis}     {nPointCounts}')
-        # for _slice in _slices:
-        #     print(_slice)
+        nSlicePoints = self.pointCounts[sliceAxis]
 
         for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=[sliceDim]):
 
+            unFoldedPosition = [a*np+p for p, a, np in zip(position, aliased, self.pointCounts)]
+            # aliased[sliceAxis] = (starts[sliceAxis] < 0 or stops[sliceAxis] >= nPoints)
+
+            # read the slice using the unfolded position
             position[sliceAxis] = 1  # position is 1-based
-            aliased[sliceAxis] = (starts[sliceAxis] < 0 or stops[sliceAxis] >= nPoints)
             with notificationEchoBlocking():
                 sliceData = self.getSliceData(position=position, sliceDim=sliceDim)
 
@@ -1570,13 +1566,13 @@ class SpectrumDataSourceABC(CcpNmrJson):
             # # an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
             # dataSlices = tuple(dataSlices)
 
-            # dataSlices = [slice(((p-1)-start) % np, (((p-1)-start) % np) + 1) for start, p, np in zip(starts, position, nPointCounts)]
+            # dataSlices = [slice(((p-1)-start) % np, (((p-1)-start) % np) + 1) for start, p, np in zip(starts, position, self.pointCounts)]
             # define the set of dataSlices in a range bigger than the dataSet in any axis,
             # e.g., a long region across aliased spectrum
             #       if data is (100, 50) and region is (125, 5) then this will need 2 tiles ((0, 0), (1, 0))
-            _its = [range(((size - 1) // np) + 1) for size, np in zip(sizes, nPointCounts)]
+            _its = [range(((size - 1) // np) + 1) for size, np in zip(sizes, self.pointCounts)]
             allDataSlices = [
-                [slice(al * np + ((p - 1) - start) % np, al * np + (((p - 1) - start) % np) + 1) for start, p, np, al in zip(starts, position, nPointCounts, alias)]
+                [slice(al * np + ((p - 1) - start) % np, al * np + (((p - 1) - start) % np) + 1) for start, p, np, al in zip(starts, position, self.pointCounts, alias)]
                 for alias in [it for it in product(*_its)]
                 ]
             for _slice in allDataSlices:
@@ -1588,7 +1584,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 if axis != sliceAxis and aliase:
                     factor *= fac
 
-            if not aliased[sliceAxis]:
+            if (starts[sliceAxis] >= 1 and stops[sliceAxis] <= nSlicePoints):
                 # There are no aliased points along sliceDim
                 for dataSlices in allDataSlices:
                     # copy the relevant section of the sliceData into the (nD) data array
@@ -1596,11 +1592,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
             else:
                 # copy the relevant points from sliceData to sliceData2 array; aliasing where needed
                 for idx, p in zip(range(0, sizes[sliceAxis]), range(starts[sliceAxis], stops[sliceAxis])):
-                    pointFactor = aliasingFlags[sliceAxis] if (p < 0 or p >= nPoints) else 1.0
+                    pointFactor = aliasingFlags[sliceAxis] if (p < 0 or p >= nSlicePoints) else 1.0
                     while p < 0:
-                        p += nPoints
-                    while p >= nPoints:
-                        p -= nPoints
+                        p += nSlicePoints
+                    while p >= nSlicePoints:
+                        p -= nSlicePoints
                     sliceData2[idx] = factor * pointFactor * sliceData[p]
                 for dataSlices in allDataSlices:
                     # copy the sliceData2 into the (nD) data array
@@ -1715,18 +1711,6 @@ class SpectrumDataSourceABC(CcpNmrJson):
         loopPosition = [start for start, stop in sliceTuples]
         done = False
         while not done:
-            # get position list within the [1,pointCounts] range and an aliased True/False list
-            # position = []
-            # aliased = []
-            # for idx, p in enumerate(loopPosition):
-            #     aliased.append( (p<1) or p>self.pointCounts[idx] )
-            #     # Alias onto 1, pointCounts range
-            #     while p < 1:
-            #         p += self.pointCounts[idx]
-            #     while p > self.pointCounts[idx]:
-            #         p -= self.pointCounts[idx]
-            #     position.append(p)
-
             position = [((p - 1) % np) + 1 for p, np in zip(loopPosition, self.pointCounts)]
             aliased = [(p - 1) // np for p, np in zip(loopPosition, self.pointCounts)]
 

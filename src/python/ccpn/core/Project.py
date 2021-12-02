@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-29 12:01:53 +0000 (Mon, November 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-02 08:37:19 +0000 (Thu, December 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1461,17 +1461,18 @@ class Project(AbstractWrapperObject):
         raise NotImplementedError('Use Project.newEmptySpectrum')
 
     @logCommand('project.')
-    def newEmptySpectrum(self, isotopeCodes: Sequence[str], name='empty'):
+    def newEmptySpectrum(self, isotopeCodes: Sequence[str], name='emptySpectrum', **parameters):
         """
         Make new Empty spectrum from isotopeCodes list - without data and with default parameters.
 
         :param isotopeCodes:
         :param name:
+        :param **parameters: optional spectrum (parameter, value) pairs
         :return: a new Spectrum instance.
         """
         from ccpn.core.Spectrum import _newEmptySpectrum
 
-        return _newEmptySpectrum(self, isotopeCodes=isotopeCodes, name=name)
+        return _newEmptySpectrum(self, isotopeCodes=isotopeCodes, name=name, **parameters)
 
     @logCommand('project.')
     def newNmrChain(self, shortName: str = None, isConnected: bool = False, label: str = '?',

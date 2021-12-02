@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-01 09:02:18 +0000 (Wed, December 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-02 08:37:19 +0000 (Thu, December 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -3279,7 +3279,7 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
     return spectrum
 
 
-def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], name: str = 'emptySpectrum') -> Spectrum:
+def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], name: str = 'emptySpectrum', **parameters) -> Spectrum:
     """Creation of new Empty Spectrum;
     :return: Spectrum instance or None on error
     """
@@ -3302,11 +3302,19 @@ def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], name: str =
 
     spectrum = _newSpectrumFromDataSource(project, dataStore, dataSource, name)
 
+    # Optionally update Spectrum with optional parameters and copy back to dataSource instance;
+    # this allows for example to set the size
+    if len(parameters) > 0:
+        for param, value in parameters.items():
+            if hasattr(spectrum, param):
+                setattr(spectrum, param, value)
+        dataSource.importFromSpectrum(spectrum)
+
     return spectrum
 
 
 def _newSpectrum(project: Project, path: (str, Path), name: str = None) -> (Spectrum, None):
-    """Creation of new Spectrum;
+    """Creation of new Spectrum instance from path;
     :return: Spectrum instance or None on error
     """
 

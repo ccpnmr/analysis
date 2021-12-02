@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-02 08:37:19 +0000 (Thu, December 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-02 12:23:40 +0000 (Thu, December 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2011,6 +2011,28 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     # data access functions
     #-----------------------------------------------------------------------------------------
 
+    def isBuffered(self):
+        """Return True if dataSource of spectrum is buffered
+        """
+        if self._dataSource is None:
+            False
+        return self._dataSource.isBuffered
+
+    def setHdf5Buffering(self, flag):
+        """Set temporary Hdf5-buffering to True/False"""
+        if self._dataSource is None:
+            getLogger().warning('No proper (filePath, dataFormat) set for %s' % self)
+            return
+
+        if flag:
+            if self._dataSource.isBuffered:
+                # Already buffered
+                return
+            self._dataSource.initialiseHdf5Buffer(temporaryBuffer=True)
+        else:
+            if self._dataSource.isBuffered:
+                self.dataSource.closeHdf5Buffer()
+
     @logCommand(get='self')
     def getIntensity(self, ppmPositions) -> float:
         """Returns the interpolated height at the ppm position
@@ -2104,6 +2126,21 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         dimensions = self.getByAxisCodes('dimensions', [axisCode], exactMatch=True)
         return self.getSliceData(position=position, sliceDim=dimensions[0])
 
+    def setSliceData(self, data, position: Sequence = None, sliceDim: int = 1):
+        """Set data as slice defined by sliceDim and position (all 1-based)
+        """
+        if self._dataSource is None:
+            getLogger().warning('No proper (filePath, dataFormat) set for %s; cannot set plane data' % self)
+            return
+
+        try:
+            position = self._dataSource.checkForValidSlice(position, sliceDim=sliceDim)
+        except (RuntimeError, ValueError) as es:
+            getLogger().error('invalid arguments: %s' % es)
+            raise es
+
+        self._dataSource.setSliceData(data=data, position=position, sliceDim=sliceDim)
+
     @logCommand(get='self')
     def extractSliceToFile(self, axisCode, position, path=None, dataFormat='Hdf5'):
         """Extract 1D slice from self as new Spectrum instance;
@@ -2155,18 +2192,17 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         if self._dataSource is None:
             getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zeros only' % self)
-            data = numpy.zeros((self.pointCounts[yDim - 1], self.pointCounts[xDim - 1]), dtype=numpy.float32)
+            return numpy.zeros((self.pointCounts[yDim - 1], self.pointCounts[xDim - 1]), dtype=numpy.float32)
 
-        else:
-            try:
-                position = self._dataSource.checkForValidPlane(position, xDim=xDim, yDim=yDim)
-            except (RuntimeError, ValueError) as es:
-                getLogger().error('invalid arguments: %s' % es)
-                raise es
+        try:
+            position = self._dataSource.checkForValidPlane(position, xDim=xDim, yDim=yDim)
+        except (RuntimeError, ValueError) as es:
+            getLogger().error('invalid arguments: %s' % es)
+            raise es
 
-            data = self._dataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
-            # Make a copy in order to preserve the original data and apply scaling
-            data = data.copy(order='K') * self.scale
+        data = self._dataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+        # Make a copy in order to preserve the original data and apply scaling
+        data = data.copy(order='K') * self.scale
 
         return data
 
@@ -2187,6 +2223,25 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         xDim, yDim = self.getByAxisCodes('dimensions', axisCodes, exactMatch=True)
         return self.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+
+    def setPlaneData(self, data, position: Sequence = None, xDim: int = 1, yDim: int = 2):
+        """Set the plane data defined by xDim, yDim and position (all 1-based)
+        from NumPy data array
+        """
+        if self.dimensionCount < 2:
+            raise RuntimeError("Spectrum.gstPlaneData: dimensionality < 2")
+
+        if self._dataSource is None:
+            getLogger().warning('No proper (filePath, dataFormat) set for %s; cannot set plane data' % self)
+            return
+
+        try:
+            position = self._dataSource.checkForValidPlane(position, xDim=xDim, yDim=yDim)
+        except (RuntimeError, ValueError) as es:
+            getLogger().error('invalid arguments: %s' % es)
+            raise es
+
+        self._dataSource.setPlaneData(data=data, position=position, xDim=xDim, yDim=yDim)
 
     @logCommand(get='self')
     def extractPlaneToFile(self, axisCodes: (tuple, list), position=None, path=None, dataFormat='Hdf5'):
@@ -2595,6 +2650,14 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             raise RuntimeError('Not valid path for %s ' % self)
         return self._dataSource.allSlices(sliceDim=sliceDim)
 
+    def allPoints(self):
+        """An iterator over all yielding (positions, pointValue) tuples
+        positions are 1-based
+        """
+        if not self.hasValidPath():
+            raise RuntimeError('Not valid path for %s ' % self)
+        return self._dataSource.allPoints()
+
     #-----------------------------------------------------------------------------------------
     # Implementation properties and functions
     #-----------------------------------------------------------------------------------------
@@ -2689,95 +2752,98 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             if not self.sliceColour:
                 self.sliceColour = self.positiveContourColour
 
-    def _updateEdgeToAlpha1(self):
-        """Update the _ccpnInternal settings from version3.0.4 -> 3.1.0.alpha
-        """
-        if not isinstance(self._ccpnInternalData, dict):
-            return
-
-        # deprecated ccpnInternal settings
-        SPECTRUMAXES = 'spectrumAxesOrdering'
-        SPECTRUMPREFERREDAXISORDERING = 'spectrumPreferredAxisOrdering'
-        SPECTRUMALIASING = 'spectrumAliasing'
-        SPECTRUMSERIES = 'spectrumSeries'
-        SPECTRUMSERIESITEMS = 'spectrumSeriesItems'
-        NEGATIVENOISELEVEL = 'negativeNoiseLevel'
-
-        # include positive/negative contours
-        if self._INCLUDEPOSITIVECONTOURS in self._ccpnInternalData:
-            value = self._ccpnInternalData.get(self._INCLUDEPOSITIVECONTOURS)
-            self._setInternalParameter(self._INCLUDEPOSITIVECONTOURS, value)
-            del self._ccpnInternalData[self._INCLUDEPOSITIVECONTOURS]
-
-        if self._INCLUDENEGATIVECONTOURS in self._ccpnInternalData:
-            value = self._ccpnInternalData.get(self._INCLUDENEGATIVECONTOURS)
-            self._setInternalParameter(self._INCLUDENEGATIVECONTOURS, value)
-            del self._ccpnInternalData[self._INCLUDENEGATIVECONTOURS]
-
-        # spectrum preferred axis order
-        if self.hasParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING):
-            value = self.getParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING)
-            if value is not None:
-                self._setInternalParameter(self._PREFERREDAXISORDERING, value)
-
-        # spectrumGroup series items
-        if self.hasParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS):
-            value = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
-            if value is not None:
-                self._setInternalParameter(self._SERIESITEMS, value)
-
-        # display folded contours
-        if self.hasParameter(SPECTRUMALIASING, self._DISPLAYFOLDEDCONTOURS):
-            value = self.getParameter(SPECTRUMALIASING, self._DISPLAYFOLDEDCONTOURS)
-            if value is not None:
-                self._setInternalParameter(self._DISPLAYFOLDEDCONTOURS, value)
-        # visibleAliasingRange/aliasingRange should already have gone
-
-        # remove unnecessary dict items
-        if SPECTRUMAXES in self._ccpnInternalData:
-            del self._ccpnInternalData[SPECTRUMAXES]
-        if SPECTRUMSERIES in self._ccpnInternalData:
-            del self._ccpnInternalData[SPECTRUMSERIES]
-        if SPECTRUMALIASING in self._ccpnInternalData:
-            del self._ccpnInternalData[SPECTRUMALIASING]
-
-        # update the list of substances
-        if self._ReferenceSubstancesPids in self._ccpnInternalData:
-            value = self._ccpnInternalData.get(self._ReferenceSubstancesPids)
-            if value:
-                self._setInternalParameter(self._REFERENCESUBSTANCES, value)
-            del self._ccpnInternalData[self._ReferenceSubstancesPids]
-
-        if self.hasParameter(self._AdditionalAttribute, NEGATIVENOISELEVEL):
-            # move the internal parameter to the correct namespace
-            value = self.getParameter(self._AdditionalAttribute, NEGATIVENOISELEVEL)
-            self.deleteParameter(self._AdditionalAttribute, NEGATIVENOISELEVEL)
-            self._setInternalParameter(self._NEGATIVENOISELEVEL, value)
+    # def _updateEdgeToAlpha1(self):
+    #     """Update the _ccpnInternal settings from version3.0.4 -> 3.1.0.alpha
+    #     """
+    #     if not isinstance(self._ccpnInternalData, dict):
+    #         return
+    #
+    #     # deprecated ccpnInternal settings
+    #     SPECTRUMAXES = 'spectrumAxesOrdering'
+    #     SPECTRUMPREFERREDAXISORDERING = 'spectrumPreferredAxisOrdering'
+    #     SPECTRUMALIASING = 'spectrumAliasing'
+    #     SPECTRUMSERIES = 'spectrumSeries'
+    #     SPECTRUMSERIESITEMS = 'spectrumSeriesItems'
+    #     NEGATIVENOISELEVEL = 'negativeNoiseLevel'
+    #
+    #     # include positive/negative contours
+    #     if self._INCLUDEPOSITIVECONTOURS in self._ccpnInternalData:
+    #         value = self._ccpnInternalData.get(self._INCLUDEPOSITIVECONTOURS)
+    #         self._setInternalParameter(self._INCLUDEPOSITIVECONTOURS, value)
+    #         del self._ccpnInternalData[self._INCLUDEPOSITIVECONTOURS]
+    #
+    #     if self._INCLUDENEGATIVECONTOURS in self._ccpnInternalData:
+    #         value = self._ccpnInternalData.get(self._INCLUDENEGATIVECONTOURS)
+    #         self._setInternalParameter(self._INCLUDENEGATIVECONTOURS, value)
+    #         del self._ccpnInternalData[self._INCLUDENEGATIVECONTOURS]
+    #
+    #     # spectrum preferred axis order
+    #     if self.hasParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING):
+    #         value = self.getParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING)
+    #         if value is not None:
+    #             self._setInternalParameter(self._PREFERREDAXISORDERING, value)
+    #
+    #     # spectrumGroup series items
+    #     if self.hasParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS):
+    #         value = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
+    #         if value is not None:
+    #             self._setInternalParameter(self._SERIESITEMS, value)
+    #
+    #     # display folded contours
+    #     if self.hasParameter(SPECTRUMALIASING, self._DISPLAYFOLDEDCONTOURS):
+    #         value = self.getParameter(SPECTRUMALIASING, self._DISPLAYFOLDEDCONTOURS)
+    #         if value is not None:
+    #             self._setInternalParameter(self._DISPLAYFOLDEDCONTOURS, value)
+    #     # visibleAliasingRange/aliasingRange should already have gone
+    #
+    #     # remove unnecessary dict items
+    #     if SPECTRUMAXES in self._ccpnInternalData:
+    #         del self._ccpnInternalData[SPECTRUMAXES]
+    #     if SPECTRUMSERIES in self._ccpnInternalData:
+    #         del self._ccpnInternalData[SPECTRUMSERIES]
+    #     if SPECTRUMALIASING in self._ccpnInternalData:
+    #         del self._ccpnInternalData[SPECTRUMALIASING]
+    #
+    #     # update the list of substances
+    #     if self._ReferenceSubstancesPids in self._ccpnInternalData:
+    #         value = self._ccpnInternalData.get(self._ReferenceSubstancesPids)
+    #         if value:
+    #             self._setInternalParameter(self._REFERENCESUBSTANCES, value)
+    #         del self._ccpnInternalData[self._ReferenceSubstancesPids]
+    #
+    #     if self.hasParameter(self._AdditionalAttribute, NEGATIVENOISELEVEL):
+    #         # move the internal parameter to the correct namespace
+    #         value = self.getParameter(self._AdditionalAttribute, NEGATIVENOISELEVEL)
+    #         self.deleteParameter(self._AdditionalAttribute, NEGATIVENOISELEVEL)
+    #         self._setInternalParameter(self._NEGATIVENOISELEVEL, value)
 
     @classmethod
     def _restoreObject(cls, project, apiObj):
         """Subclassed to allow for initialisations on restore, not on creation via newSpectrum
         """
         spectrum = super()._restoreObject(project, apiObj)
-        dataStore = None
-
-        # NOTE - version 3.0.4 -> 3.1.0.alpha update
-        # move parameters from _ccpnInternal to the correct namespace, delete old parameters
-        spectrum._updateEdgeToAlpha1()
+        #
+        # # NOTE - version 3.0.4 -> 3.1.0.alpha update
+        # # move parameters from _ccpnInternal to the correct namespace, delete old parameters
+        # spectrum._updateEdgeToAlpha1()
 
         # Restore the dataStore info
+        dataStore = None
         try:
             dataStore = DataStore()._importFromSpectrum(spectrum)
-            spectrum.setTraitValue('_dataStore', dataStore, force=True)
         except (ValueError, RuntimeError) as es:
             getLogger().warning('Error restoring valid data store for %s (%s)' % (spectrum, es))
+        finally:
+            spectrum.setTraitValue('_dataStore', dataStore, force=True)
 
         # Get a dataSource object
+        dataSource = None
         try:
             dataSource = spectrum._getDataSource(dataStore)
-            spectrum.setTraitValue('_dataSource', dataSource, force=True)
         except (ValueError, RuntimeError) as es:
             getLogger().warning('Error restoring valid data source for %s (%s)' % (spectrum, es))
+        finally:
+            spectrum.setTraitValue('_dataSource', dataSource, force=True)
 
         # Get a peak picker
         try:

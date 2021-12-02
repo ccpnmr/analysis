@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 15:28:15 +0100 (Fri, June 25, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-02 12:23:40 +0000 (Thu, December 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -105,6 +105,9 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
         """Get plane defined by xDim, yDim and position (all 1-based)
         return NumPy data array with zero's
         """
+        if self.isBuffered:
+            return self.hdf5buffer.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+
         position = self.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
 
         # create the array with zeros
@@ -117,6 +120,9 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
         """Get slice defined by sliceDim and position (all 1-based)
         return NumPy data array of zero's
         """
+        if self.isBuffered:
+            return self.hdf5buffer.getSliceData(position=position, sliceDim=sliceDim)
+
         position = self.checkForValidSlice(position=position, sliceDim=sliceDim)
 
         # create the array with zeros
@@ -127,14 +133,10 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
         """Get value defined by points (1-based)
         returns 0.0
         """
-        position = self.checkForValidPosition(position=position)
-        return 0.0
+        if self.isBuffered:
+            return self.hdf5buffer.getPointData(position=position)
 
-    def getPointValue(self, position, aliasingFlags=None):
-        """Get interpolated value defined by position (1-based, float values)
-        Use getPointData() for a method using an integer-based position argument
-        returns 0.0
-        """
+        position = self.checkForValidPosition(position=position)
         return 0.0
 
     def getRegionData(self, sliceTuples, aliasingFlags=None):
@@ -150,6 +152,9 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
             1: aliasing with identical sign
            -1: aliasing with inverted sign
         """
+        if self.isBuffered:
+            return self.hdf5buffer.getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
+
         if aliasingFlags is None:
             aliasingFlags = [0] * self.dimensionCount
 

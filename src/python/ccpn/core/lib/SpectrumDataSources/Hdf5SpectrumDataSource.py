@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-29 16:23:50 +0000 (Mon, November 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-02 12:23:40 +0000 (Thu, December 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -315,6 +315,9 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         """Get plane defined by xDim, yDim and position (all 1-based)
         return NumPy data array
         """
+        if self.isBuffered:
+            return self.hdf5buffer.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+
         position = self.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
 
         if not self.hasOpenFile():
@@ -342,6 +345,10 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
     def setPlaneData(self, data, position: Sequence = None, xDim: int = 1, yDim: int = 2):
         """Set data as plane defined by xDim, yDim and position (all 1-based)
         """
+        if self.isBuffered:
+            self.hdf5buffer.setPlaneData(data=data, position=position, xDim=xDim, yDim=yDim)
+            return
+
         position = self.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
 
         if len(data.shape) != 2 or \
@@ -380,6 +387,9 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         """Get slice defined by sliceDim and position (all 1-based)
         return NumPy data array
         """
+        if self.isBuffered:
+            return self.hdf5buffer.getSliceData(position=position, sliceDim=sliceDim)
+
         position = self.checkForValidSlice(position=position, sliceDim=sliceDim)
 
         if not self.hasOpenFile():
@@ -396,6 +406,9 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
     def setSliceData(self, data, position: Sequence = None, sliceDim: int = 1):
         """Set data as slice defined by sliceDim and position (all 1-based)
         """
+        if self.isBuffered:
+            return self.hdf5buffer.setSliceData(data=data, position=position, sliceDim=sliceDim)
+
         position = self.checkForValidSlice(position=position, sliceDim=sliceDim)
 
         if not self.hasOpenFile():
@@ -408,6 +421,9 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
     def getPointData(self, position: Sequence = None) -> float:
         """Get value defined by position (1-based)
         """
+        if self.isBuffered:
+            return self.hdf5buffer.getPointData(position=position)
+
         position = self.checkForValidPosition(position=position)
 
         if not self.hasOpenFile():
@@ -419,6 +435,21 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         pointValue = float(data[0]) * self.dataScale
 
         return pointValue
+
+    def setPointData(self, value, position: Sequence = None) -> float:
+        """Set point value defined by position (1-based)
+        """
+        if self.isBuffered:
+            return self.hdf5buffer.setPointData(value=value, position=position)
+
+        position = self.checkForValidPosition(position=position)
+
+        if not self.hasOpenFile():
+            self.openFile(mode=self.defaultOpenWriteMode)
+
+        dataset = self.spectrumData
+        slices = self._getSlices(position=position, dims=[])
+        dataset[slices[::-1]] = value # data are z,y,x ordered
 
     def getRegionData(self, sliceTuples, aliasingFlags=None):
         """Return an numpy array containing the points defined by
@@ -432,6 +463,9 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             1: aliasing with identical sign
            -1: aliasing with inverted sign
         """
+        if self.isBuffered:
+            return self.hdf5buffer.getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
+
         if aliasingFlags is None:
             aliasingFlags = [0] * self.dimensionCount
 

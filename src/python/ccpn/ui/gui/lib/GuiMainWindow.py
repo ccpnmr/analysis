@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-01 13:51:43 +0000 (Wed, December 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-02 10:22:19 +0000 (Thu, December 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1166,24 +1166,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
         from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
         from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
-
-        # check-for and set any specific attributes of the dataLoader instance
-        # depending on the dataFormat
-        # if dataLoader.dataFormat == CcpNmrV2ProjectDataLoader.dataFormat:
-        #     choice = showYesNo('CCPN Version-2 project "%s"' % dataLoader.path,
-        #                        'will be converted to a Version-3 project and saved, do you want to load?')
-        #     if choice == False:
-        #         dataLoader = None
-        #         createNewProject = False
-        #         ignore = True
-
-        # elif dataLoader.dataFormat == CcpNmrV3ProjectDataLoader.dataFormat:
-        #     choice = showYesNo('CCPN Version-2 project "%s"' % dataLoader.path,
-        #                        'will be converted to a Version-3 project and saved, do you want to load?')
-        #     if choice == False:
-        #         dataLoader = None
-        #         createNewProject = False
-        #         ignore = True
+        from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
 
         if dataLoader.dataFormat == NefDataLoader.dataFormat or \
                 dataLoader.dataFormat == SparkyDataLoader.dataFormat:
@@ -1203,15 +1186,30 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 ignore = True
 
         elif dataLoader.dataFormat == SpectrumDataLoader.dataFormat and dataLoader.existsInProject():
-            choice = showYesNo('Spectrum "%s"' % dataLoader.path,
-                               'already exists in the project, do you want to load?')
-            if choice == False:
+            ok = MessageDialog.showYesNoWarning('Spectrum "%s"' % dataLoader.path,
+                                                f'already exists in the project\n'
+                                                '\n'
+                                                'do you want to load?'
+                               )
+            if not ok:
+                ignore = True
+
+        elif dataLoader.dataFormat == DirectoryDataLoader.dataFormat and len(dataLoader) > MAXITEMLOGGING:
+            ok = MessageDialog.showYesNoWarning('Directory "%s"\n' %dataLoader.path,
+                                                f'\n'
+                                                'CAUTION: You are trying to load %d items\n'
+                                                '\n'
+                                                'Do you want to continue?' % (len(dataLoader,))
+                                                )
+
+            if not ok:
                 ignore = True
 
         return (dataLoader, createNewProject, ignore)
 
-    def _processDroppedItems(self, data):
+    def _processDroppedItems(self, data) -> list:
         """Handle the dropped urls
+        :return list of loaded objects
         """
         # CCPNINTERNAL. Called also from module area and GuiStrip. They should have same behaviour
         # use an undoBlockWithoutSideBar, and ignore logging if MAXITEMLOGGING or more items

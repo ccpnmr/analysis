@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-02 12:23:40 +0000 (Thu, December 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-02 13:16:26 +0000 (Thu, December 02, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -711,16 +711,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             self.setTraitValue('_dataSource', None, force=True)
             return
 
-        # newDataStore = DataStore.newFromPath(path=value, dataFormat=self.dataFormat)
-        # if not newDataStore.exists():
-        #     raise ValueError('FilePath %r does not exist' % value)
-        #
-        # newDataStore.spectrum = self
-        #
-        # try:
-        #     newDataSource = self._getDataSource(newDataStore)
-        # except:
-        #     raise ValueError('Spectrum.filePath: incompatible file "%s"' % value)
         newDataStore, newDataSource = self._getDataSourceFromPath(path=value)
         if newDataStore is None or newDataSource is None:
             raise ValueError('Spectrum.filePath: incompatible file "%s"' % value)
@@ -920,18 +910,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                 valuePerPoint = None
 
             result.append(valuePerPoint)
-
-        # for dataDim in self._wrappedData.sortedDataDims():
-        #     if hasattr(dataDim, 'primaryDataDimRef'):
-        #         # FreqDataDim - get ppm valuePerPoint
-        #         ddr = dataDim.primaryDataDimRef
-        #         valuePerPoint = ddr and ddr.valuePerPoint
-        #     elif hasattr(dataDim, 'valuePerPoint'):
-        #         # FidDataDim - get time valuePerPoint
-        #         valuePerPoint = dataDim.valuePerPoint
-        #     else:
-        #         # Sampled DataDim - return None
-        #         valuePerPoint = None
 
         return result
 
@@ -1429,18 +1407,14 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def intensities(self) -> numpy.array:
         """ spectral intensities as NumPy array for 1D spectra
         """
-
         if self.dimensionCount != 1:
             getLogger().warning('Currently this method only works for 1D spectra')
-            return numpy.array([])
+            return numpy.zeros((self.pointCounts[0],), dtype=numpy.float32)
 
         if self._intensities is None:
-            self._intensities = self.getSliceData()  # Assignment is Redundant as getSliceData does that;
-
+            # Assignment is Redundant as getSliceData does that;
             # Nevertheless for clarity
-            if self._intensities is None:
-                getLogger().warning('Unable to get 1D slice data for %s' % self)
-                return numpy.array([])
+            self._intensities = self.getSliceData()
 
         return self._intensities
 
@@ -1651,7 +1625,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @property
     def preferredAxisOrdering(self):
-        """Return the preferred ordering for the axis codes when opening a new spectrumDisplay
+        """Return the preferred ordering for the axes (i.e zero-based); e.g. used when opening a
+        new spectrumDisplay
         """
         result = self._getInternalParameter(self._PREFERREDAXISORDERING)
         if result is None:
@@ -1660,21 +1635,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @preferredAxisOrdering.setter
     @checkSpectrumPropertyValue(iterable=True, unique=True, types=(int,))
-    def preferredAxisOrdering(self, order):
-        """Set the preferred ordering for the axis codes when opening a new spectrumDisplay
-        """
-        # if not order:
-        #     raise ValueError('order is not defined')
-        # if not isinstance(order, tuple):
-        #     raise TypeError('order is not a tuple')
-        # if len(order) != self.dimensionCount:
-        #     raise TypeError('order is not the correct length')
-        if not all(isinstance(ss, int) and ss >= 0 and ss < self.dimensionCount for ss in order):
-            raise TypeError('Spectrum.preferredAxisOrdering: elements must be in range (0 .. %d)' % (self.dimensionCount - 1))
-        # if len(set(order)) != len(order):
-        #     raise ValueError('order must contain unique elements')
-
-        self._setInternalParameter(self._PREFERREDAXISORDERING, order)
+    def preferredAxisOrdering(self, value):
+        self._setInternalParameter(self._PREFERREDAXISORDERING, value)
 
     def _setDefaultAxisOrdering(self):
         """Set the default axis ordering based on some hierarchy rules (defined in the

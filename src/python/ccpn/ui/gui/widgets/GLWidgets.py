@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-11 18:57:51 +0000 (Thu, November 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 16:17:10 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -565,6 +565,8 @@ class GuiNdWidget(CcpnGLWidget):
         for spectrumView in self._ordering:  #self._ordering:                             # strip.spectrumViews:       #.orderedSpectrumViews():
 
             if spectrumView.isDeleted or not spectrumView._showContours:
+                continue
+            if spectrumView.spectrum is None or (spectrumView.spectrum and spectrumView.spectrum.isDeleted):
                 continue
 
             if spectrumView.isVisible() and spectrumView in self._spectrumSettings.keys():
@@ -1385,6 +1387,8 @@ class Gui1dWidget(CcpnGLWidget):
         for spectrumView in self._ordering:  #self._ordering:                             # strip.spectrumViews:       #.orderedSpectrumViews():
 
             if spectrumView.isDeleted:
+                continue
+            if spectrumView.spectrum is None or (spectrumView.spectrum and spectrumView.spectrum.isDeleted):
                 continue
             if not spectrumView._showContours:
                 continue

@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-02 12:23:40 +0000 (Thu, December 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 11:45:34 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -525,7 +525,13 @@ class SpectrumDataSourceABC(CcpNmrJson):
         self.fp = None  # File pointer; None indicates closed
         self.mode = None  # Open mode
 
+        # hdf5Buffer related attributes
+        self._isBuffered = False  # Flag to indicate the spectrumDataSource object to have buffered read/writes;
         self.hdf5buffer = None  # Hdf5SpectrumBuffer instance; None indicates no Hdf5 buffer used
+        self._bufferFilled = False
+        self._bufferIsTemporary = True
+        self._bufferPath = None
+
         self.spectrum = None  # Spectrum instance
 
         self.setDefaultParameters()
@@ -1272,8 +1278,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
             self.mode = None
 
         # Close optional non-temporary hdf5 buffer
-        if self.isBuffered and not self.temporaryBuffer:
-            self.hdf5buffer.closeFile()
+        if self.isBuffered and not self._bufferIsTemporary:
+            self.closeHdf5Buffer()
 
         self.cache.clear()
 
@@ -1355,6 +1361,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """
 
         if self.isBuffered:
+            self._checkBuffer()
             return self.hdf5buffer.getPlaneData(position=position, xDim=xDim, yDim=yDim)
 
         position = self.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
@@ -1373,6 +1380,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         Can be subclassed
         """
         if self.isBuffered:
+            self._checkBuffer()
             self.hdf5buffer.setPlaneData(data=data, position=position, xDim=xDim, yDim=yDim)
             return
         else:
@@ -1399,6 +1407,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         :return NumPy data array
         """
         if self.isBuffered:
+            self._checkBuffer()
             return self.hdf5buffer.getSliceData(position=position, sliceDim=sliceDim)
 
         elif self.isBlocked:
@@ -1415,6 +1424,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         Can be subclassed
         """
         if self.isBuffered:
+            self._checkBuffer()
             self.hdf5buffer.setSliceData(data=data, position=position, sliceDim=sliceDim)
         else:
             raise RuntimeError('setSliceData, not buffered and no valid implementation')
@@ -1449,6 +1459,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         Use getPointValue() for an interpolated value
         """
         if self.isBuffered:
+            self._checkBuffer()
             return self.hdf5buffer.getPointData(position=position)
 
         elif self.isBlocked:
@@ -1467,6 +1478,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         Can be sub-classed
         """
         if self.isBuffered:
+            self._checkBuffer()
             return self.hdf5buffer.setPointData(value=value, position=position)
         else:
             raise RuntimeError('setPointData: not buffered or no valid implementation')
@@ -1632,6 +1644,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
            -1: aliasing with negative sign
         """
         if self.isBuffered:
+            self._checkBuffer()
             return self.hdf5buffer.getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
 
         if aliasingFlags is None:
@@ -1775,10 +1788,33 @@ class SpectrumDataSourceABC(CcpNmrJson):
     @property
     def isBuffered(self):
         "ReturnTrue if file is buffered"
-        return self.hdf5buffer is not None
+        return self._isBuffered
+
+    def setBuffering(self, isBuffered:bool, bufferIsTemporary:bool=True, bufferPath=None):
+        """Define the SpectrumDataSource buffering status
+        :param isBuffered (True, False): set the buffering status
+        :param bufferIsTemporary (True, False): define buffer as temporary (i.e. disgarded on close)
+        :param bufferPath: optional path to store the buffer file
+        """
+        if self.isBuffered:
+            self.closeHdf5Buffer()
+
+        self._isBuffered = isBuffered
+        self._bufferFilled = False
+        self._bufferIsTemporary = bufferIsTemporary
+        self._bufferPath = bufferPath
+
+    def _checkBuffer(self):
+        """Create (if needed) and fill Hdf5 buffer
+        """
+        if self.hdf5buffer is None:
+            # Buffer has not been created
+            self.initialiseHdf5Buffer(temporaryBuffer=self._bufferIsTemporary, path=self._bufferPath)
+        if not self._bufferFilled:
+            self.fillHdf5Buffer()
 
     def initialiseHdf5Buffer(self, temporaryBuffer=True, path=None):
-        """Initialise a Hdf5SpectrumBuffer instance and fill with data from self
+        """Initialise a Hdf5SpectrumBuffer instance.
 
         :param temporaryBuffer: flag indicating to create a temporary file, discarded upon closing
         :param path: explicit path or derived from self.path if None and temporary=False
@@ -1787,17 +1823,15 @@ class SpectrumDataSourceABC(CcpNmrJson):
         from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
 
         if self.isBuffered:
-            getLogger().debug('Closing %s' % self.hdf5buffer)
-            self.hdf5buffer.closeFile()
-            self.hdf5buffer = None
+            self.closeHdf5Buffer()
 
-        self.temporaryBuffer = temporaryBuffer
-        if self.temporaryBuffer:
+        self._bufferIsTemporary = temporaryBuffer
+        if self._bufferIsTemporary:
             name = 'CcpNmr_hdf5buffer_%s_' % self.path.basename
             tFile = tempfile.NamedTemporaryFile(prefix=name, suffix=Hdf5SpectrumDataSource.suffixes[0])
             path = tFile.name
 
-        if not self.temporaryBuffer:
+        if not self._bufferIsTemporary:
             if path is None:
                 path = self.path.withSuffix(Hdf5SpectrumDataSource.suffixes[0]).uniqueVersion()
 
@@ -1805,27 +1839,40 @@ class SpectrumDataSourceABC(CcpNmrJson):
         hdf5buffer = Hdf5SpectrumDataSource().copyParametersFrom(self)
         hdf5buffer._dataSource = self  # link back to self
         hdf5buffer.setPath(path=path, substituteSuffix=True)
-        self.hdf5buffer = hdf5buffer
         # do not use openNewFile as it has to remain open after filling the buffer
         hdf5buffer.openFile(mode=Hdf5SpectrumDataSource.defaultOpenWriteMode)
-        self.fillHdf5Buffer(hdf5buffer)
-        # buffer is filled now; future reads will use it to retrieve data
-        return hdf5buffer
+        self.hdf5buffer = hdf5buffer
+        self._isBuffered = True
+        self._bufferFilled = False
+        # buffer is ready now; future read/writes will use it to retrieve/store data
+        getLogger().debug('initialiseHdf5Buffer: opened %s' % self.hdf5buffer)
+        return self.hdf5buffer
 
-    def fillHdf5Buffer(self, hdf5buffer):
+    def fillHdf5Buffer(self):
         """Fill hdf5Buffer with data from self;
         this routine will be subclassed in the more problematic cases such as NmrPipe
         """
         if not self.isBuffered:
             raise RuntimeError('fillHdf5Buffer: no hdf5Buffer defined')
-        self.copyDataTo(hdf5buffer)
+
+        getLogger().debug('fillHdf5Buffer: filling buffer %s' % self.hdf5buffer)
+        # To use the non-buffered reading routines for filling the buffer,
+        # pretend it is (temporarily) not buffered
+        self._isBuffered = False
+        self.copyDataTo(self.hdf5buffer)
+        self._isBuffered = True
+        self._bufferFilled = True
 
     def closeHdf5Buffer(self):
         """Close the hdf5Buffer"""
         if not self.isBuffered:
             raise RuntimeError('closeHdf5Buffer: no hdf5Buffer defined')
-        self.hdf5buffer.closeFile()
+        if self.hdf5buffer is not None:
+            getLogger().debug('Closing buffer %s' % self.hdf5buffer)
+            self.hdf5buffer.closeFile()
+
         self.hdf5buffer = None
+        self._bufferFilled = False
 
     def duplicateDataToHdf5(self, path=None):
         """Make a duplicate from self to a Hdf5 file;

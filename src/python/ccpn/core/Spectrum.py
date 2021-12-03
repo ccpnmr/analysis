@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-02 13:16:26 +0000 (Thu, December 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 11:45:34 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1624,7 +1624,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             self._wrappedData.experiment.temperature = value
 
     @property
-    def preferredAxisOrdering(self):
+    def _preferredAxisOrdering(self):
         """Return the preferred ordering for the axes (i.e zero-based); e.g. used when opening a
         new spectrumDisplay
         """
@@ -1633,10 +1633,17 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             result = self.axes
         return result
 
-    @preferredAxisOrdering.setter
+    @_preferredAxisOrdering.setter
     @checkSpectrumPropertyValue(iterable=True, unique=True, types=(int,))
-    def preferredAxisOrdering(self, value):
+    def _preferredAxisOrdering(self, value):
         self._setInternalParameter(self._PREFERREDAXISORDERING, value)
+
+    @checkSpectrumPropertyValue(iterable=True, unique=True, types=(int,))
+    def setPreferredDimensionOrdering(self, dimensionOrder):
+        """Set the preferred dimension ordering
+        ;param dimensionOrder: tuple,list of dimensions (1-based; len dimensionCount)
+        """
+        self._preferredAxisOrdering = [d-1 for d in dimensionOrder]
 
     def _setDefaultAxisOrdering(self):
         """Set the default axis ordering based on some hierarchy rules (defined in the
@@ -3242,6 +3249,13 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
         name = dataSource.nameFromPath()
     # assure unique name
     name = Spectrum._uniqueName(project=project, name=name)
+
+    getLogger().debug('Creating Spectrum %r (%dD;%s); %s' % (
+        name, dataSource.dimensionCount,
+        'x'.join([str(p) for p in dataSource.pointCounts]),
+        dataStore
+        )
+    )
 
     apiProject = project._wrappedData
     apiExperiment = apiProject.newExperiment(name=name, numDim=dataSource.dimensionCount)

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-09 17:40:31 +0000 (Tue, November 09, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-03 11:45:34 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -201,7 +201,7 @@ def checkSpectrumPropertyValue(iterable: bool, unique: bool = False, allowNone: 
                              (attributeName, obj, value, type(value).__name__))
 
         if len(value) != obj.dimensionCount:
-            raise ValueError('Value for "%s" of %s needs to be of length %d; got %r' %
+            raise ValueError('Value for "%s" of %s needs to be an iterable of length %d; got %r' %
                              (attributeName, obj, obj.dimensionCount, value))
 
         if unique:

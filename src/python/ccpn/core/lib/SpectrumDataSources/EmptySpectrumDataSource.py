@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-02 12:23:40 +0000 (Thu, December 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 11:45:34 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -106,7 +106,7 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
         return NumPy data array with zero's
         """
         if self.isBuffered:
-            return self.hdf5buffer.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+            return super().getPlaneData(position=position, xDim=xDim, yDim=yDim)
 
         position = self.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
 
@@ -121,7 +121,7 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
         return NumPy data array of zero's
         """
         if self.isBuffered:
-            return self.hdf5buffer.getSliceData(position=position, sliceDim=sliceDim)
+            return super().getSliceData(position=position, sliceDim=sliceDim)
 
         position = self.checkForValidSlice(position=position, sliceDim=sliceDim)
 
@@ -134,7 +134,7 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
         returns 0.0
         """
         if self.isBuffered:
-            return self.hdf5buffer.getPointData(position=position)
+            return super().getPointData(position=position)
 
         position = self.checkForValidPosition(position=position)
         return 0.0
@@ -153,7 +153,7 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
            -1: aliasing with inverted sign
         """
         if self.isBuffered:
-            return self.hdf5buffer.getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
+            return super().getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
 
         if aliasingFlags is None:
             aliasingFlags = [0] * self.dimensionCount

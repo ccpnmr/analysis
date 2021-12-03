@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-03 16:20:10 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 20:07:35 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1492,33 +1492,6 @@ class Project(AbstractWrapperObject):
     #===========================================================================================
     # End data loaders
     #===========================================================================================
-
-    #TODO: use Substance._uniqueName
-    def _uniqueSubstanceName(self, name: str = None, defaultName: str = 'Molecule') -> str:
-        """add integer suffixed to name till it is unique"""
-
-        apiComponentStore = self._wrappedData.sampleStore.refSampleComponentStore
-        apiProject = apiComponentStore.root
-
-        # ensure substance name is unique
-        if name:
-            i = 0
-            result = name
-            formstring = name + '_%d'
-        else:
-            formstring = defaultName + '_%d'
-            i = 1
-            result = formstring % i
-        while (apiProject.findFirstMolecule(name=result) or
-               apiComponentStore.findFirstComponent(name=result)):
-            i += 1
-            result = formstring % i
-        if name and result != name and name != defaultName:
-            self._logger.warning(
-                    "CCPN molecule named %s already exists. New molecule has been named %s" %
-                    (name, result))
-        #
-        return result
 
     def getObjectsByPartialId(self, className: str,
                               idStartsWith: str) -> typing.List[AbstractWrapperObject]:

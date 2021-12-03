@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:19:59 +0100 (Fri, August 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 20:07:35 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -430,9 +430,11 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
 
     apiRefComponentStore = self._apiNmrProject.sampleStore.refSampleComponentStore
     if compoundName is None:
-        name = self._uniqueSubstanceName()
+        name = Substance._uniqueName(self.project)
+
     elif apiRefComponentStore.findFirstComponent(name=compoundName) is None:
         name = Chain._uniqueName(project=self, name=compoundName)
+
     else:
         raise ValueError(
                 "Substance '%s' already exists. Try choosing a new molecule name.\n"

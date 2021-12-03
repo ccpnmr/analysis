@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-16 19:06:53 +0100 (Thu, September 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 20:07:35 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -642,6 +642,24 @@ class Substance(AbstractWrapperObject):
     #=========================================================================================
     # CCPN functions
     #=========================================================================================
+
+    @classmethod
+    def _uniqueName(cls, project, name=None) -> str:
+        """Return a unique name based on name (set to defaultName if None)
+        """
+        apiComponentStore = project._wrappedData.sampleStore.refSampleComponentStore
+        apiProject = apiComponentStore.root
+
+        if name is None:
+            name = cls._defaultName()
+        cls._validateStringValue('name', name)
+        name = name.strip()
+        names = [sib.name for sib in getattr(project, cls._pluralLinkName)]
+        while name in names or (apiProject.findFirstMolecule(name=name) or
+               apiComponentStore.findFirstComponent(name=name)):
+            name = commonUtil.incrementName(name)
+
+        return name
 
     #===========================================================================================
     # new'Object' and other methods

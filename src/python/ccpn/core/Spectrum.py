@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-03 11:45:34 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 16:05:34 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1987,20 +1987,14 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             False
         return self._dataSource.isBuffered
 
-    def setHdf5Buffering(self, flag):
-        """Set temporary Hdf5-buffering to True/False"""
+    def setHdf5Buffering(self, isBuffered):
+        """Set temporary Hdf5-buffering.
+        :param isBuffered (True, False): set the buffering status
+        """
         if self._dataSource is None:
             getLogger().warning('No proper (filePath, dataFormat) set for %s' % self)
             return
-
-        if flag:
-            if self._dataSource.isBuffered:
-                # Already buffered
-                return
-            self._dataSource.initialiseHdf5Buffer(temporaryBuffer=True)
-        else:
-            if self._dataSource.isBuffered:
-                self.dataSource.closeHdf5Buffer()
+        self._dataSource.setBuffering(isBuffered)
 
     @logCommand(get='self')
     def getIntensity(self, ppmPositions) -> float:

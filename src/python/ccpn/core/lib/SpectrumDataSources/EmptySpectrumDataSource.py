@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-03 11:45:34 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 16:05:34 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -85,6 +85,16 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
         :return: None
         """
         return None
+
+    def setPath(self, path, substituteSuffix=False):
+        """define valid path: always set to None for EmptySpectrumDataSource"""
+        super().setPath(None)
+        return self
+
+    def nameFromPath(self):
+        """Return a name derived from path (to be subclassed for specific cases; e.g. Bruker)
+        """
+        return 'emptySpectrum'
 
     def hasValidPath(self):
         """Always True

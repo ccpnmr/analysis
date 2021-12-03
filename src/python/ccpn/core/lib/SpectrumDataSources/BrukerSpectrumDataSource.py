@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-30 09:00:43 +0000 (Tue, November 30, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 16:05:34 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -59,7 +59,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
     isFloatData = False
 
     suffixes = [None]
-    allowDirectory = True  # Can supply a Bruker top directory
+    allowDirectory = True  # Can supply a Bruker top directory or pdata directory
     openMethod = open
     defaultOpenReadMode = 'rb'
 

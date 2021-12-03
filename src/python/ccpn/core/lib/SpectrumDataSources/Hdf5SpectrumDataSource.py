@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-02 12:23:40 +0000 (Thu, December 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 16:05:34 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -110,14 +110,14 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
         if mode is None:
             raise ValueError('%s.openFile: Undefined open mode' % self.__class__.__name__)
+        newFile = not mode.startswith('r')
+
+        if self.hasOpenFile():
+            self.closeFile()
+
+        self._checkFilePath(newFile, mode)
 
         try:
-            if self.hasOpenFile():
-                self.closeFile()
-
-            if not self.checkPath(self.path, mode=mode):
-                raise FileNotFoundError('Invalid path %r (mode=%r)' % (self.path, mode))
-
             self.disableCache()  # Hdf has its own caching
             # Adjust hdf chunk caching parameters
             kwds.setdefault('rdcc_nbytes', self.maxCacheSize)
@@ -131,8 +131,9 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             self.closeFile()
             text = '%s.openFile(mode=%r): %s' % (self.__class__.__name__, mode, str(es))
             getLogger().warning(text)
+            raise es
 
-        if mode.startswith('r'):
+        if not newFile:
             # old file
             self.readParameters()
 
@@ -152,7 +153,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             self.blockSizes = tuple(self.spectrumData.chunks[::-1])
             self.writeParameters()
 
-        getLogger().debug('opened %s; %s blocks with size %s; chunks=%s' %
+        getLogger().debug('openFile: %s; %s blocks with size %s; chunks=%s' %
                           (self, self._totalBlocks, self._totalBlockSize, tuple(self.blockSizes)))
 
         return self.fp
@@ -316,7 +317,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         return NumPy data array
         """
         if self.isBuffered:
-            return self.hdf5buffer.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+            return super().getPlaneData(position=position, xDim=xDim, yDim=yDim)
 
         position = self.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
 
@@ -346,7 +347,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         """Set data as plane defined by xDim, yDim and position (all 1-based)
         """
         if self.isBuffered:
-            self.hdf5buffer.setPlaneData(data=data, position=position, xDim=xDim, yDim=yDim)
+            self.super().setPlaneData(data=data, position=position, xDim=xDim, yDim=yDim)
             return
 
         position = self.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
@@ -388,7 +389,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         return NumPy data array
         """
         if self.isBuffered:
-            return self.hdf5buffer.getSliceData(position=position, sliceDim=sliceDim)
+            return super().getSliceData(position=position, sliceDim=sliceDim)
 
         position = self.checkForValidSlice(position=position, sliceDim=sliceDim)
 
@@ -407,7 +408,8 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         """Set data as slice defined by sliceDim and position (all 1-based)
         """
         if self.isBuffered:
-            return self.hdf5buffer.setSliceData(data=data, position=position, sliceDim=sliceDim)
+            super().setSliceData(data=data, position=position, sliceDim=sliceDim)
+            return
 
         position = self.checkForValidSlice(position=position, sliceDim=sliceDim)
 
@@ -422,7 +424,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         """Get value defined by position (1-based)
         """
         if self.isBuffered:
-            return self.hdf5buffer.getPointData(position=position)
+            return super().getPointData(position=position)
 
         position = self.checkForValidPosition(position=position)
 
@@ -440,7 +442,8 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         """Set point value defined by position (1-based)
         """
         if self.isBuffered:
-            return self.hdf5buffer.setPointData(value=value, position=position)
+            super().setPointData(value=value, position=position)
+            return
 
         position = self.checkForValidPosition(position=position)
 
@@ -464,7 +467,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
            -1: aliasing with inverted sign
         """
         if self.isBuffered:
-            return self.hdf5buffer.getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
+            return super().getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
 
         if aliasingFlags is None:
             aliasingFlags = [0] * self.dimensionCount

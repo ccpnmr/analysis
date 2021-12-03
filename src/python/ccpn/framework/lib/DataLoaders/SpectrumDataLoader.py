@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-09 17:40:32 +0000 (Tue, November 09, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-03 16:05:35 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -71,12 +71,12 @@ class SpectrumDataLoader(DataLoaderABC):
         if not dataStore.exists():
             return (None, None)
 
-        dataSoure = checkPathForSpectrumFormats(dataStore.path)
-        if dataSoure is None:
+        dataSource = checkPathForSpectrumFormats(dataStore.aPath())
+        if dataSource is None:
             return (dataStore, None)
-        dataStore.dataFormat = dataSoure.dataFormat
+        dataStore.dataFormat = dataSource.dataFormat
 
-        return (dataStore, dataSoure)
+        return (dataStore, dataSource)
 
     def load(self):
         """The actual spectrum loading method;

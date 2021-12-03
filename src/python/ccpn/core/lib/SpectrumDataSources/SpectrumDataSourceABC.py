@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-03 11:45:34 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 16:05:35 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -603,25 +603,6 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """
         path = self.path
         return path is not None and path.exists()
-
-    def checkPath(self, path, mode='r') -> bool:
-        """Check if path exists (mode='r') or parent of path exists (not mode='r');
-        return True if ok; False otherwise
-        """
-        _p = aPath(path)
-
-        if _p is None:
-            return False
-
-        # read-mode: check if it exists
-        if mode.startswith('r') and _p.exists():
-            return True
-
-        # write-mode: check if parent exists
-        if not mode.startswith('r') and _p.parent.exists():
-            return True
-
-        return False
 
     def nameFromPath(self):
         """Return a name derived from path (to be subclassed for specific cases; e.g. Bruker)
@@ -1146,7 +1127,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
                          (path, instance.dataFormat))
             return None
 
-        if not instance.checkPath(instance.path, mode=instance.defaultOpenReadMode):
+        if (_p := instance.path) is None or not _p.exists():
             logger.debug2('path "%s" is not valid for reading SpectrumDataSource dataFormat "%s"' %
                          (path, instance.dataFormat))
             return None
@@ -1179,19 +1160,35 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         return None
 
+    def _checkFilePath(self, newFile, mode):
+        "Helper function to do checks on path"
+
+        _path = self.path
+        if _path is None:
+            raise RuntimeError('openFile: no path defined for %s' % self)
+
+        if not newFile and not _path.exists():
+            raise FileNotFoundError('openFile: path "%s" does not exist' % _path)
+
+        if newFile and not _path.parent.exists():
+            raise FileNotFoundError('openFile: parent of "%s" does not exist' % _path)
+        if newFile and _path.exists():
+            raise FileExistsError('openFile (mode=%s): path "%s" exists' %
+                                  (mode, _path))
+
     def openFile(self, mode, **kwds):
         """open self.path, set self.fp, return self.fp
         """
         if mode is None:
             raise ValueError('%s.openFile: Undefined open mode' % self.__class__.__name__)
+        newFile = not mode.startswith('r')
+
+        if self.hasOpenFile():
+            self.closeFile()
+
+        self._checkFilePath(newFile, mode)
 
         try:
-            if self.hasOpenFile():
-                self.closeFile()
-
-            if not self.checkPath(self.path, mode=mode):
-                raise FileNotFoundError('Invalid %s' % self)
-
             self.fp = self.openMethod(str(self.path), mode, **kwds)
             self.mode = mode
 
@@ -1201,11 +1198,13 @@ class SpectrumDataSourceABC(CcpNmrJson):
             getLogger().error(text)
             raise es
 
-        if mode.startswith('r'):
+        if not newFile:
             # cache will be defined after parameters are read
             pass
         else:
             self.disableCache()  # No caching on writing; that creates sync issues
+
+        # getLogger().debug('openFile: %s' % self)
 
         return self.fp
 
@@ -1809,15 +1808,12 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """
         if self.hdf5buffer is None:
             # Buffer has not been created
-            self.initialiseHdf5Buffer(temporaryBuffer=self._bufferIsTemporary, path=self._bufferPath)
+            self.initialiseHdf5Buffer()
         if not self._bufferFilled:
             self.fillHdf5Buffer()
 
-    def initialiseHdf5Buffer(self, temporaryBuffer=True, path=None):
+    def initialiseHdf5Buffer(self):
         """Initialise a Hdf5SpectrumBuffer instance.
-
-        :param temporaryBuffer: flag indicating to create a temporary file, discarded upon closing
-        :param path: explicit path or derived from self.path if None and temporary=False
         :return: Hdf5SpectrumBuffer instance
         """
         from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
@@ -1825,26 +1821,31 @@ class SpectrumDataSourceABC(CcpNmrJson):
         if self.isBuffered:
             self.closeHdf5Buffer()
 
-        self._bufferIsTemporary = temporaryBuffer
         if self._bufferIsTemporary:
+            # Constuct a path for temporary buffer using the tempfile methods
+            # However, tempfile.NamedTemporyFile already opens it, so grab the name, and close it (which will delete it)
             name = 'CcpNmr_hdf5buffer_%s_' % self.path.basename
             tFile = tempfile.NamedTemporaryFile(prefix=name, suffix=Hdf5SpectrumDataSource.suffixes[0])
             path = tFile.name
+            tFile.close()
 
-        if not self._bufferIsTemporary:
-            if path is None:
+        else:
+            # take path as defined in _bufferPath, or construct from self.path if None
+            path = self._bufferPath
+            if self._bufferPath is None:
                 path = self.path.withSuffix(Hdf5SpectrumDataSource.suffixes[0]).uniqueVersion()
 
         # create a hdf5 buffer file instance
-        hdf5buffer = Hdf5SpectrumDataSource().copyParametersFrom(self)
+        hdf5buffer = Hdf5SpectrumDataSource(path=path)
+        hdf5buffer.copyParametersFrom(self)
         hdf5buffer._dataSource = self  # link back to self
-        hdf5buffer.setPath(path=path, substituteSuffix=True)
+        # hdf5buffer.setPath(path=path, substituteSuffix=True)
         # do not use openNewFile as it has to remain open after filling the buffer
         hdf5buffer.openFile(mode=Hdf5SpectrumDataSource.defaultOpenWriteMode)
         self.hdf5buffer = hdf5buffer
         self._isBuffered = True
         self._bufferFilled = False
-        # buffer is ready now; future read/writes will use it to retrieve/store data
+        # hdf5buffer is ready now; future read/writes will use it to retrieve/store data
         getLogger().debug('initialiseHdf5Buffer: opened %s' % self.hdf5buffer)
         return self.hdf5buffer
 

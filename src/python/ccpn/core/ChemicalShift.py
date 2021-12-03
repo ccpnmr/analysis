@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-03 19:17:46 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 19:43:00 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -689,6 +689,11 @@ class ChemicalShift(NotifierBase):
             # replace the contents of the internal list with the original/recovered items
             addUndoItem(undo=partial(chemicalShiftList._undoRedoShifts, _oldShifts),
                         redo=partial(chemicalShiftList._undoRedoShifts, _newShifts))
+
+        # NOTE:ED - need to deassign nmrAtom first?
+        self.nmrAtom = None
+
+        with undoStackBlocking() as addUndoItem:
             addUndoItem(undo=partial(chemicalShiftList._undoRedoDeletedShifts, _oldDeletedShifts),
                         redo=partial(chemicalShiftList._undoRedoDeletedShifts, _newDeletedShifts))
 

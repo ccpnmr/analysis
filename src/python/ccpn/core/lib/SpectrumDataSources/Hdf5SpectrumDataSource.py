@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-03 17:06:08 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 18:23:04 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -246,6 +246,15 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             raise es
 
         return super().readParameters()
+
+    def updateParameters(self):
+        """Open existing file to write current parameters
+        :return self
+        """
+        if not self.hasOpenFile():
+            self.openFile(mode=self.defaultOpenReadMode)
+        self.writeParameters()
+        return self
 
     def writeParameters(self):
         """write the parameters into the hdf5 data structure

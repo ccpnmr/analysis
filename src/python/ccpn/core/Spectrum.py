@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-03 16:50:37 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 18:23:04 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2313,11 +2313,21 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                                           autoVersioning=True, withSuffix=suffix,
                                           dataFormat=dataFormat)
 
-        newSpectrum = _extractRegionToFile(spectrum=self,
-                                           dimensions=self.dimensions,
-                                           position=[1]*self.dimensionCount,
-                                           dataStore=dataStore,
-                                           name=name)
+        # Duplicate the data in an Hdf5 file
+        hdf5DataSource = self._dataSource.duplicateDataToHdf5(dataStore.aPath())
+        # Update the dataSource parameters from self
+        hdf5DataSource.importFromSpectrum(self, includePath=False)
+        hdf5DataSource.updateParameters()
+
+        # Create a new Spectrum instance
+        newSpectrum = _newSpectrumFromDataSource(project=self.project,
+                                                 dataStore=dataStore,
+                                                 dataSource=hdf5DataSource,
+                                                 name=name)
+
+        # Copy/set some more parameters (e.g. noiseLevel)
+        self._copyNonDimensionalParameters(newSpectrum)
+        newSpectrum._updateParameterValues()
 
         # Copy the peakList/peaks
         for idx, pl in enumerate(self.peakLists):

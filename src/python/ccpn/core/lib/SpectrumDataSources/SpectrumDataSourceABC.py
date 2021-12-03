@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-03 17:06:08 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 18:23:04 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1840,7 +1840,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         # create a hdf5 buffer file instance
         hdf5buffer = Hdf5SpectrumDataSource(path=path)
         hdf5buffer.copyParametersFrom(self)
-        # do not use openNewFile as it has to remain open after filling the buffer
+        # do not use openNewFile as it has to remain open to allow for filling the buffer
         hdf5buffer.openFile(mode=Hdf5SpectrumDataSource.defaultOpenWriteMode)
         # backward and forward linkages
         hdf5buffer.parent = self

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-24 17:59:36 +0000 (Wed, November 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 17:13:54 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1475,7 +1475,8 @@ def _getNmrResidue(self: NmrChain, sequenceCode: typing.Union[int, str] = None,
     """
     self = self._project.getByPid(self) if isinstance(self, str) else self
 
-    partialId = '%s.%s.' % (self.id, str(sequenceCode).translate(Pid.remapSeparators))
+    partialId = Pid.IDSEP.join([self.id, str(sequenceCode).translate(Pid.remapSeparators), ''])
+
     ll = self._project.getObjectsByPartialId(className='NmrResidue', idStartsWith=partialId)
     if ll:
         return ll[0]

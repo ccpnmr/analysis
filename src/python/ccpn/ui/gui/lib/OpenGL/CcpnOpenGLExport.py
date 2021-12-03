@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-03 14:13:48 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 19:19:23 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -173,11 +173,7 @@ class GLExporter():
             self._dpiScale = 1.0
 
         # set default colours
-        # self.backgroundColour = colors.Color(*self._parent.background[0:3],
-        #                                      alpha=alphaClip(self._parent.background[3]))
         self.backgroundColour = colors.Color(*self.params[GLBACKGROUND], alpha=alphaClip(1.0))
-        # self.foregroundColour = colors.Color(*self._parent.foreground[0:3],
-        #                                      alpha=alphaClip(self._parent.foreground[3]))
         self.foregroundColour = colors.Color(*self.params[GLFOREGROUND], alpha=alphaClip(1.0))
 
         # build all the sections of the pdf
@@ -289,11 +285,6 @@ class GLExporter():
                     pdfmetrics.registerFont(TTFont(_fontName, _path))
                 except Exception as es:
                     pass
-            #         # print(f' Font could not be loaded for printing: {_fontName} - {_path}')
-            #         self.params[GLUSEPRINTFONT] = False
-            # if not _paths:
-            #     # print(f' Font could not be loaded for printing: {_fontName}')
-            #     self.params[GLUSEPRINTFONT] = False
 
         # set a default fontName
         self.fontName = self._parent.getSmallFont().fontName
@@ -341,8 +332,6 @@ class GLExporter():
         self.docWidth = docWidth = _doc.width  # _doc.pagesize[0]  # - FRAMEPADDING
         self.docHeight = docHeight = _doc.height  # pagesize[1]  # - (2 * FRAMEPADDING)
 
-        # print(f'  {_doc.leftMargin}  {_doc.width}  {_doc.rightMargin}  {_doc.pagesize}   {fw}:{fh}')
-
         # translate to size of drawing Flowable
         self.modRatio = 1.0
 
@@ -362,8 +351,6 @@ class GLExporter():
         self.modRatio = 1.0
         self._displayScale = fh / _parentH
         self._fontScale = self._pngScale / self._parent.viewports.devicePixelRatio
-
-        # print(f'   pagesize  {fw}   {fh}  {self._displayScale}')
 
         # read the strip spacing from the params
         self._stripSpacing = self.params[GLSTRIPPADDING] #* self._displayScale
@@ -386,8 +373,6 @@ class GLExporter():
 
         _parentH = self._parent.h
         _parentW = self._parent.w
-
-        # print(f'      strip  {self._parent}   {_parentW}  {_parentH}')
 
         if not self.rAxis and not self.bAxis:
             # no axes visible
@@ -439,8 +424,6 @@ class GLExporter():
         self.fontXOffset = 0.75
         self.fontYOffset = 3.0
 
-        print(f'      size  {self._pixWidth}   {self._pixHeight}')
-
     def _modifyScaling(self):
 
         # modify by the print dialog scaling factor
@@ -450,8 +433,6 @@ class GLExporter():
 
             # modify the displayScale
             self.displayScale = (self._displayScale * (_scalePercent / 100.0)) if (0 <= _scalePercent <= 100) else self._displayScale
-            # self.pixWidth = math.floor(self._pixWidth * self.displayScale)
-            # self.pixHeight = math.floor(self._pixHeight * self.displayScale)
             self.pixWidth = self._pixWidth * self.displayScale
             self.pixHeight = self._pixHeight * self.displayScale
             self.fontScale = self._fontScale * self.displayScale
@@ -483,7 +464,6 @@ class GLExporter():
                     if self.params[GLSCALINGAXIS] == 0:
                         _cms = (self._displayScale * _width * 2.54) / 72.0
                         _axisScale = abs(_axisL - _axisR)
-                        print(f'   mainview   {_width}   {_height}    {_axisScale}')
                     else:
                         _cms = (self._displayScale * _height * 2.54) / 72.0
                         _axisScale = abs(_axisT - _axisB)
@@ -525,14 +505,10 @@ class GLExporter():
                 _newScale = max(0.01, min(_newScale, 1.0))
 
                 self.displayScale = self._displayScale * _newScale
-                # self.pixWidth = math.floor(self._pixWidth * self.displayScale)
-                # self.pixHeight = math.floor(self._pixHeight * self.displayScale)
                 self.pixWidth = self._pixWidth * self.displayScale
                 self.pixHeight = self._pixHeight * self.displayScale
                 self.fontScale = self._fontScale * self.displayScale
                 self.stripSpacing = self._stripSpacing * self.displayScale
-
-        print(f'      modifiedsize  {self.pixWidth}   {self.pixHeight}')
 
     def _addBackgroundBox(self, thisPlot):
         """Make a background box to cover the plot area

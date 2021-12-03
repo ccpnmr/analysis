@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-03 16:50:37 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 17:06:08 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1818,11 +1818,13 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """
         from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
 
-        if self.isBuffered:
-            self.closeHdf5Buffer()
+        if not self.isBuffered:
+            raise RuntimeError('initialiseHdf5Buffer: buffering not active, use setBuffering() method first')
+
+        self.closeHdf5Buffer()
 
         if self._bufferIsTemporary:
-            # Constuct a path for temporary buffer using the tempfile methods
+            # Construct a path for temporary buffer using the tempfile methods
             # However, tempfile.NamedTemporyFile already opens it, so grab the name, and close it (which will delete it)
             name = 'CcpNmr_hdf5buffer_%s_' % self.path.basename
             with tempfile.NamedTemporaryFile(prefix=name, suffix=Hdf5SpectrumDataSource.suffixes[0]) as tFile:
@@ -1840,7 +1842,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
         hdf5buffer.copyParametersFrom(self)
         # do not use openNewFile as it has to remain open after filling the buffer
         hdf5buffer.openFile(mode=Hdf5SpectrumDataSource.defaultOpenWriteMode)
-        hdf5buffer._dataSource = self  # link back to self
+        # backward and forward linkages
+        hdf5buffer.parent = self
         self.hdf5buffer = hdf5buffer
         self._isBuffered = True
         self._bufferFilled = False
@@ -1852,7 +1855,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """Fill hdf5Buffer with data from self;
         this routine will be subclassed in the more problematic cases such as NmrPipe
         """
-        if not self.isBuffered:
+        if not self.isBuffered or self.hdf5buffer is None:
             raise RuntimeError('fillHdf5Buffer: no hdf5Buffer defined')
 
         getLogger().debug('fillHdf5Buffer: filling buffer %s' % self.hdf5buffer)

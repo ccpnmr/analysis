@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-09 17:06:00 +0000 (Tue, November 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 14:13:48 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -937,6 +937,9 @@ class DoubleSpinBoxCompoundWidget(CompoundBaseWidget):
         """
         return self.setValue(value)
 
+    @property
+    def textFromValue(self):
+        return self.doubleSpinBox.textFromValue
 
 
 class ScientificSpinBoxCompoundWidget(CompoundBaseWidget):

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-02 09:36:45 +0000 (Thu, December 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 14:13:48 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -67,6 +67,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, \
     GLALIASENABLED, GLALIASSHADE, GLALIASLABELSENABLED, GLSTRIPREGIONS, \
     GLSCALINGMODE, GLSCALINGOPTIONS, GLSCALINGPERCENT, GLSCALINGBYUNITS, \
     GLPRINTFONT, GLUSEPRINTFONT, GLSCALINGAXIS, GLPEAKLABELSENABLED, GLMULTIPLETLABELSENABLED
+from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString, hexToRgbRatio, colourNameNoSpace
 from ccpn.util.Constants import SCALING_MODES, POSINFINITY
 
@@ -175,6 +176,9 @@ class ExportStripToFilePopup(ExportDialogABC):
 
     storeStateOnReject = True
 
+    # permanently enables the saveAndClose button
+    EDITMODE = False
+
     def __init__(self, parent=None, mainWindow=None, title='Export Strip to File',
                  fileMode='anyFile',
                  acceptMode='export',
@@ -194,6 +198,8 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.spectrumDisplay = None
         self.spectrumDisplays = set()
         self.specToExport = None
+        self._scalingModeIndex = 0
+        self._useFontSetting = None
 
         self._initialiseStripList()
 
@@ -205,6 +211,8 @@ class ExportStripToFilePopup(ExportDialogABC):
                          selectFile=selectFile,
                          fileFilter=fileFilter,
                          **kwds)
+
+        self.printSettings = self.application.preferences.printSettings
 
         if not strips:
             showWarning(str(self.windowTitle()), 'No strips selected')
@@ -220,7 +228,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                                                          grid=(row, 0), gridSpan=(1, 3), vAlign='top', hAlign='left',
                                                          orientation='left',
                                                          labelText='Strip/SpectrumDisplay',
-                                                         callback=self._changePulldown
+                                                         callback=self._changeObjectPulldownCallback
                                                          )
 
         # add a spacer to separate from the common save widgets
@@ -230,19 +238,22 @@ class ExportStripToFilePopup(ExportDialogABC):
         row += 1
         topRow = row
         Label(userFrame, text='Page Size', grid=(row, 0), hAlign='left', vAlign='centre')
-        self.pageSize = PulldownList(userFrame, vAlign='t', grid=(row, 1))
+        self.pageSize = PulldownList(userFrame, vAlign='t', grid=(row, 1),
+                                     callback=self._queuePageSizeCallback)
         self.pageSize.setData(texts=PAGESIZES)
 
         row += 1
         Label(userFrame, text='Page orientation', grid=(row, 0), hAlign='left', vAlign='centre')
-        self.pageType = RadioButtons(userFrame, PAGETYPES,
-                                     grid=(row, 1), direction='h', hAlign='left', spacing=(20, 0))
-
+        self.pageOrientation = RadioButtons(userFrame, PAGETYPES,
+                                            grid=(row, 1), direction='h', hAlign='left', spacing=(20, 0),
+                                            callback=self._queuePageOrientationCallback)
         row += 1
         Label(userFrame, text='Print Type', grid=(row, 0), hAlign='left', vAlign='centre')
-        self.exportType = RadioButtons(userFrame, list(EXPORTTYPES.keys()),
-                                       grid=(row, 1), direction='h', hAlign='left', spacing=(20, 0),
-                                       callback=self._changePrintType)
+        self.printType = RadioButtons(userFrame, list(EXPORTTYPES.keys()),
+                                      grid=(row, 1), direction='h', hAlign='left', spacing=(20, 0),
+                                      callback=self._queuePrintTypeCallback,
+                                      # callback=self._changePrintType,
+                                      )
 
         # create a pulldown for the foreground (axes) colour
         row += 1
@@ -250,9 +261,10 @@ class ExportStripToFilePopup(ExportDialogABC):
         Label(foregroundColourFrame, text="Foreground Colour", vAlign='c', hAlign='l', grid=(0, 0))
         self.foregroundColourBox = PulldownList(foregroundColourFrame, vAlign='t', grid=(0, 1))
         self.foregroundColourButton = Button(foregroundColourFrame, vAlign='t', hAlign='l', grid=(0, 2), hPolicy='fixed',
-                                             callback=self._changeForegroundButton, icon='icons/colours')
+                                             icon='icons/colours')
         fillColourPulldown(self.foregroundColourBox, allowAuto=False, includeGradients=False)
-        self.foregroundColourBox.activated.connect(self._changeForegroundPulldown)
+        self.foregroundColourBox.currentIndexChanged.connect(self._queueForegroundPulldownCallback)
+        self.foregroundColourButton.clicked.connect(self._queueForegroundButtonCallback)
 
         # create a pulldown for the background colour
         row += 1
@@ -260,25 +272,34 @@ class ExportStripToFilePopup(ExportDialogABC):
         Label(backgroundColourFrame, text="Background Colour", vAlign='c', hAlign='l', grid=(0, 0))
         self.backgroundColourBox = PulldownList(backgroundColourFrame, vAlign='t', grid=(0, 1))
         self.backgroundColourButton = Button(backgroundColourFrame, vAlign='t', hAlign='l', grid=(0, 2), hPolicy='fixed',
-                                             callback=self._changeBackgroundButton, icon='icons/colours')
+                                             icon='icons/colours')
         fillColourPulldown(self.backgroundColourBox, allowAuto=False, includeGradients=False)
-        self.backgroundColourBox.activated.connect(self._changeBackgroundPulldown)
+        self.backgroundColourBox.currentIndexChanged.connect(self._queueBackgroundPulldownCallback)
+        self.backgroundColourButton.clicked.connect(self._queueBackgroundButtonCallback)
 
         row += 1
         self.baseThicknessBox = DoubleSpinBoxCompoundWidget(userFrame, grid=(row, 0), gridSpan=(1, 3), hAlign='left',
                                                             labelText='Line Thickness',
                                                             # value=1.0,
-                                                            decimals=2, step=0.05, range=(0.01, 20))
+                                                            decimals=2, step=0.05, range=(0.01, 20),
+                                                            callback=self._queueBaseThicknessCallback,
+                                                            )
+
         row += 1
         self.stripPaddingBox = DoubleSpinBoxCompoundWidget(userFrame, grid=(row, 0), gridSpan=(1, 3), hAlign='left',
                                                            labelText='Strip Padding',
                                                            # value=5,
-                                                           decimals=0, step=1, range=(0, 50))
+                                                           decimals=0, step=1, range=(0, 50),
+                                                           callback=self._queueStripPaddingCallback,
+                                                           )
+
         row += 1
         self.exportDpiBox = DoubleSpinBoxCompoundWidget(userFrame, grid=(row, 0), gridSpan=(1, 3), hAlign='left',
                                                         labelText='Image dpi',
                                                         # value=300,
-                                                        decimals=0, step=5, range=(36, 2400))
+                                                        decimals=0, step=5, range=(36, 2400),
+                                                        callback=self._queueDpiCallback,
+                                                        )
 
         row += 1
         HLine(userFrame, grid=(row, 0), gridSpan=(1, 4), colour=getColours()[DIVIDER], height=20)
@@ -299,6 +320,8 @@ class ExportStripToFilePopup(ExportDialogABC):
         row += 1
 
         self.treeView = PrintTreeCheckBoxes(userFrame, project=None, grid=(row, 0), gridSpan=(1, 4))
+        self.treeView.itemClicked.connect(self._queueGetPrintOptionCallback)
+
         userFrame.layout().setRowStretch(row, 100)
         userFrame.addSpacer(5, 5, expandX=True, expandY=True, grid=(row, 3))
 
@@ -408,22 +431,29 @@ class ExportStripToFilePopup(ExportDialogABC):
         _frame = Frame(userFrame, setLayout=True, grid=(row, 0), gridSpan=(1, 8), hAlign='left')
 
         _row = 0
-        self.scaling = PulldownListCompoundWidget(_frame,
-                                                  grid=(_row, 0), hAlign='left',
-                                                  orientation='left',
-                                                  labelText='Scaling',
-                                                  texts=SCALING_MODES,
-                                                  tipText='Set the scaling option for printing',
-                                                  callback=self._scalingCallback
-                                                  )
-        self.scalingPercentage = DoubleSpinbox(_frame, grid=(_row, 1), min=1.0, max=100.0, decimals=0, step=1)
-        self.scalingByUnits = ScientificDoubleSpinBox(_frame, grid=(_row, 2), gridSpan=(1, 2), min=0.0, max=1e10, step=0.1)
+        self.scalingMode = PulldownListCompoundWidget(_frame,
+                                                      grid=(_row, 0), hAlign='left',
+                                                      orientation='left',
+                                                      labelText='Scaling',
+                                                      texts=SCALING_MODES,
+                                                      tipText='Set the scaling option for printing',
+                                                      # callback=self._scalingCallback
+                                                      callback=self._queueScalingModeCallback,
+                                                      )
+        self.scalingPercentage = DoubleSpinbox(_frame, grid=(_row, 1), min=1.0, max=100.0, decimals=0, step=1,
+                                               callback=self._queueScalingPercentageCallback
+                                               )
+        self.scalingUnits = ScientificDoubleSpinBox(_frame, grid=(_row, 2), gridSpan=(1, 2), min=0.0, max=1e10, step=0.1,
+                                                    callback=self._queueScalingUnitsCallback,
+                                                    )
         self.scalingAxis = PulldownListCompoundWidget(_frame, grid=(_row, 4),
                                                       labelText='Scale Axis', texts=STRIPAXES,
-                                                      tipText='Select the axis to apply the scaling to')
+                                                      tipText='Select the axis to apply the scaling to',
+                                                      callback=self._queueScalingAxisCallback,
+                                                      )
         self.scalingPercentage.setMinimumCharacters(10)
-        self.scalingByUnits.setMinimumCharacters(10)
-        self.scalingByUnits.setVisible(False)
+        self.scalingUnits.setMinimumCharacters(10)
+        self.scalingUnits.setVisible(False)
         self.scalingAxis.setVisible(False)
 
     def _setupFontWidget(self, row, userFrame):
@@ -440,7 +470,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                                                        orientation='right',
                                                        labelText='Use selected font for printing',
                                                        tipText=_tip,
-                                                       callback=self._fontCheckBoxCallback,
+                                                       callback=self._queueUseFontCallback,
                                                        )
 
         # self._fontButton = Button(_frame, text='<No Font Set>', grid=(_row, 1), hAlign='l', callback=self._getFont)
@@ -448,10 +478,12 @@ class ExportStripToFilePopup(ExportDialogABC):
         # self._fontButton.setVisible(False)  # hide for the minute - only .ttf fonts work so using a pulldown
 
         self._fontPulldown = PulldownList(_frame, grid=(_row, 2))
-        self._fontSpinbox = DoubleSpinbox(_frame, min=1, max=100, decimals=0, step=1, grid=(_row, 3))
+        self._fontSpinbox = DoubleSpinbox(_frame, min=1, max=100, decimals=0, step=1, grid=(_row, 3),
+                                          callback=self._queueFontSizeCallback)
         self._fontPulldown.setEnabled(False)
         self._fontSpinbox.setEnabled(False)
-        self._fontPulldown.setCallback(partial(self._setPulldownTextColour, self._fontPulldown))
+        self._fontPulldown.setCallback(self._queueFontNameCallback)
+        # self._fontPulldown.setCallback(partial(self._setPulldownTextColour, self._fontPulldown))
 
     def _initialiseStripList(self):
         """Setup the lists containing strips.spectrumDisplays before populating
@@ -661,13 +693,13 @@ class ExportStripToFilePopup(ExportDialogABC):
         else:
             self._setRangeState(self._currentStrip)
 
-    def _scalingCallback(self, value):
-        """Handle selecting item from scaling pulldown
-        """
-        _ind = self.scaling.getIndex()
-        self.scalingPercentage.setVisible(False if _ind else True)
-        self.scalingByUnits.setVisible(True if _ind else False)
-        self.scalingAxis.setVisible(True if _ind else False)
+    # def _scalingCallback(self, value):
+    #     """Handle selecting item from scaling pulldown
+    #     """
+    #     _ind = self.scalingMode.getIndex()
+    #     self.scalingPercentage.setVisible(False if _ind else True)
+    #     self.scalingUnits.setVisible(True if _ind else False)
+    #     self.scalingAxis.setVisible(True if _ind else False)
 
     def _fontCheckBoxCallback(self, value):
         """Handle checking/unchecking font checkbox
@@ -681,12 +713,18 @@ class ExportStripToFilePopup(ExportDialogABC):
     def populate(self, userframe):
         """Populate the widgets with project
         """
-        with self.blockWidgetSignals(userframe):
-            self._populate(userframe)
+        with self.blockWidgetSignals(self.mainWidget):
+            self._populate()
 
-    def _populate(self, userframe):
+        self._setScalingVisible()
+        self._setUseFontVisible()
+        self._setPulldownTextColour(self._fontPulldown)
+
+    def _populate(self):
         """Populate the widget
         """
+        self.printSettings = self.application.preferences.printSettings
+
         # define the contents for the object pulldown
         if len(self.strips) > 1:
             pulldownLabel = 'Select Strip:'
@@ -701,17 +739,17 @@ class ExportStripToFilePopup(ExportDialogABC):
             pulldownLabel = 'Current Strip:'
 
         self.objectPulldown.setLabelText(pulldownLabel)
-        self.objectPulldown.pulldownList.setData(sorted([ky for ky in self.objects.keys()]))
-
+        if self.objects:
+            self.objectPulldown.pulldownList.setData(sorted([ky for ky in self.objects.keys()]))
         # set the page types
-        self.pageSize.set(PAGESIZEA4)
-        self.pageType.set(PAGEPORTRAIT)
-        self.exportType.set(EXPORTPDF)
+        self.pageSize.set(self.printSettings.pageSize)
+        self.pageOrientation.set(self.printSettings.pageOrientation, silent=True)
+        self.printType.set(self.printSettings.printType, silent=True)
 
         # populate pulldown from foreground colour
         spectrumColourKeys = list(spectrumColours.keys())
-        self.foregroundColour = '#000000'
-        self.backgroundColour = '#FFFFFF'
+        self.foregroundColour = self.printSettings.foregroundColour
+        self.backgroundColour = self.printSettings.backgroundColour
 
         if self.foregroundColour in spectrumColourKeys:
             self.foregroundColourBox.setCurrentText(spectrumColours[self.foregroundColour])
@@ -731,9 +769,9 @@ class ExportStripToFilePopup(ExportDialogABC):
             fillColourPulldown(self.backgroundColourBox, allowAuto=False, includeGradients=False)
             self.backgroundColourBox.setCurrentText(spectrumColours[self.backgroundColour])
 
-        self.baseThicknessBox.setValue(1.0)
-        self.stripPaddingBox.setValue(5)
-        self.exportDpiBox.setValue(300)
+        self.baseThicknessBox.setValue(self.printSettings.baseThickness)
+        self.stripPaddingBox.setValue(self.printSettings.stripPadding)
+        self.exportDpiBox.setValue(self.printSettings.dpi)
 
         # set the pulldown to current strip of selected
         if self.current and self.current.strip:
@@ -756,7 +794,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self._populateTreeView()
 
         # set the default save name
-        exType = self.exportType.get()
+        exType = self.printType.get() or 'PDF'
         if exType in EXPORTTYPES:
             exportExtension = EXPORTTYPES[exType][EXPORTEXT]
         else:
@@ -829,9 +867,11 @@ class ExportStripToFilePopup(ExportDialogABC):
     def _populateScaling(self):
         """Populate the widgets in the scaling frame
         """
-        self.scalingPercentage.set(80)
-        self.scalingByUnits.set(0.01)
-        self.scalingAxis.setIndex(0)
+        self._scalingModeIndex = SCALING_MODES.index(self.printSettings.scalingMode)
+        self.scalingMode.select(self.printSettings.scalingMode)
+        self.scalingPercentage.set(self.printSettings.scalingPercentage)
+        self.scalingUnits.set(self.printSettings.scalingUnits)
+        self.scalingAxis.select(self.printSettings.scalingAxis)
 
     def _populateFont(self):
         """Populate the widgets in the font frame
@@ -851,10 +891,13 @@ class ExportStripToFilePopup(ExportDialogABC):
         color = QtGui.QColor('gray')
         model.item(0).setForeground(color)
 
-        fontName = self.application.preferences.printSettings.get('fontName')
-        fontSize = self.application.preferences.printSettings.get('fontSize')
+        fontName = self.printSettings.get('fontName')
+        fontSize = self.printSettings.get('fontSize')
         self._fontPulldown.set(fontName)
         self._fontSpinbox.set(fontSize)
+        value = self.printSettings.useFont
+        self._useFontSetting = value
+        self._useFontCheckbox.set(value)
 
         self._setPulldownTextColour(self._fontPulldown)
 
@@ -915,48 +958,35 @@ class ExportStripToFilePopup(ExportDialogABC):
         # self._currentAxis = ExportStripToFilePopup._storedState.get(self._SAVECURRENTAXIS, 0)
         pass
 
-    def _changeColourButton(self):
-        """Popup a dialog and set the colour in the pulldowns
-        """
-        dialog = ColourDialog(self)
+    # def _changeForegroundPulldown(self, value):
+    #     newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.foregroundColourBox.currentText()))]
+    #     if newColour:
+    #         self.foregroundColour = newColour
+    #
+    # def _changeForegroundButton(self, value):
+    #     """Change the colour from the foreground colour button
+    #     """
+    #     newColour = self._changeColourButton()
+    #     if newColour:
+    #         self.foregroundColourBox.setCurrentText(spectrumColours[newColour.name()])
+    #         self.foregroundColour = newColour.name()
+    #
+    # def _changeBackgroundPulldown(self, value):
+    #     newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.backgroundColourBox.currentText()))]
+    #     if newColour:
+    #         self.backgroundColour = newColour
+    #
+    # def _changeBackgroundButton(self, value):
+    #     """Change the colour from the background colour button
+    #     """
+    #     newColour = self._changeColourButton()
+    #     if newColour:
+    #         self.backgroundColourBox.setCurrentText(spectrumColours[newColour.name()])
+    #         self.backgroundColour = newColour.name()
 
-        newColour = dialog.getColor()
-        if newColour:
-            addNewColour(newColour)
-            fillColourPulldown(self.foregroundColourBox, allowAuto=False, includeGradients=False)
-            fillColourPulldown(self.backgroundColourBox, allowAuto=False, includeGradients=False)
-
-            return newColour
-
-    def _changeForegroundPulldown(self, value):
-        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.foregroundColourBox.currentText()))]
-        if newColour:
-            self.foregroundColour = newColour
-
-    def _changeForegroundButton(self, value):
-        """Change the colour from the foreground colour button
-        """
-        newColour = self._changeColourButton()
-        if newColour:
-            self.foregroundColourBox.setCurrentText(spectrumColours[newColour.name()])
-            self.foregroundColour = newColour.name()
-
-    def _changeBackgroundPulldown(self, value):
-        newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.backgroundColourBox.currentText()))]
-        if newColour:
-            self.backgroundColour = newColour
-
-    def _changeBackgroundButton(self, value):
-        """Change the colour from the background colour button
-        """
-        newColour = self._changeColourButton()
-        if newColour:
-            self.backgroundColourBox.setCurrentText(spectrumColours[newColour.name()])
-            self.backgroundColour = newColour.name()
-
-    def _changePulldown(self, value):
+    def _changeObjectPulldownCallback(self, value):
         selected = self.objectPulldown.getText()
-        exType = self.exportType.get()
+        exType = self.printType.get()
         if exType in EXPORTTYPES:
             exportExtension = EXPORTTYPES[exType][EXPORTEXT]
         else:
@@ -981,100 +1011,99 @@ class ExportStripToFilePopup(ExportDialogABC):
     def _populateTreeView(self, selectList=None):
         self.treeView.clear()
 
-        if not self.strip:
-            return
-
-        # add Spectra to the treeView
-        if self.strip.spectrumViews:
-            item = QtWidgets.QTreeWidgetItem(self.treeView)
-            item.setText(0, 'Spectra')
-            item.setFlags(int(item.flags()) | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
-
-            for specView in self.strip.spectrumViews:
-                child = QtWidgets.QTreeWidgetItem(item)
-                child.setFlags(int(child.flags()) | QtCore.Qt.ItemIsUserCheckable)
-                child.setData(1, 0, specView.spectrum)
-                child.setText(0, specView.spectrum.pid)
-                child.setCheckState(0, QtCore.Qt.Checked if specView.isVisible() else QtCore.Qt.Checked)
-
-        # find peak/integral/multiplets attached to the spectrumViews
-        peakLists = []
-        integralLists = []
-        multipletLists = []
-        for specView in self.strip.spectrumViews:
-            validPeakListViews = [pp for pp in specView.peakListViews]
-            validIntegralListViews = [pp for pp in specView.integralListViews]
-            validMultipletListViews = [pp for pp in specView.multipletListViews]
-            peakLists.extend(validPeakListViews)
-            integralLists.extend(validIntegralListViews)
-            multipletLists.extend(validMultipletListViews)
-
         printItems = []
-        if peakLists:
-            item = QtWidgets.QTreeWidgetItem(self.treeView)
-            item.setText(0, 'Peak Lists')
-            item.setFlags(int(item.flags()) | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+        if self.strip:
+            # add Spectra to the treeView
+            if self.strip.spectrumViews:
+                item = QtWidgets.QTreeWidgetItem(self.treeView)
+                item.setText(0, 'Spectra')
+                item.setFlags(int(item.flags()) | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
 
-            for pp in peakLists:
-                child = QtWidgets.QTreeWidgetItem(item)
-                child.setFlags(int(child.flags()) | QtCore.Qt.ItemIsUserCheckable)
-                child.setData(1, 0, pp.peakList)
-                child.setText(0, pp.peakList.pid)
-                child.setCheckState(0, QtCore.Qt.Checked if pp.isVisible() else QtCore.Qt.Checked)
+                for specView in self.strip.spectrumViews:
+                    child = QtWidgets.QTreeWidgetItem(item)
+                    child.setFlags(int(child.flags()) | QtCore.Qt.ItemIsUserCheckable)
+                    child.setData(1, 0, specView.spectrum)
+                    child.setText(0, specView.spectrum.pid)
+                    child.setCheckState(0, QtCore.Qt.Checked if specView.isVisible() else QtCore.Qt.Checked)
 
-            printItems.extend((GLPEAKSYMBOLS,
-                               GLPEAKLABELS))
+            # find peak/integral/multiplets attached to the spectrumViews
+            peakLists = []
+            integralLists = []
+            multipletLists = []
+            for specView in self.strip.spectrumViews:
+                validPeakListViews = [pp for pp in specView.peakListViews]
+                validIntegralListViews = [pp for pp in specView.integralListViews]
+                validMultipletListViews = [pp for pp in specView.multipletListViews]
+                peakLists.extend(validPeakListViews)
+                integralLists.extend(validIntegralListViews)
+                multipletLists.extend(validMultipletListViews)
 
-        if integralLists:
-            item = QtWidgets.QTreeWidgetItem(self.treeView)
-            item.setText(0, 'Integral Lists')
-            item.setFlags(int(item.flags()) | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+            printItems = []
+            if peakLists:
+                item = QtWidgets.QTreeWidgetItem(self.treeView)
+                item.setText(0, 'Peak Lists')
+                item.setFlags(int(item.flags()) | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
 
-            for pp in integralLists:
-                child = QtWidgets.QTreeWidgetItem(item)
-                child.setFlags(int(child.flags()) | QtCore.Qt.ItemIsUserCheckable)
-                child.setData(1, 0, pp.integralList)
-                child.setText(0, pp.integralList.pid)
-                child.setCheckState(0, QtCore.Qt.Checked if pp.isVisible() else QtCore.Qt.Checked)
+                for pp in peakLists:
+                    child = QtWidgets.QTreeWidgetItem(item)
+                    child.setFlags(int(child.flags()) | QtCore.Qt.ItemIsUserCheckable)
+                    child.setData(1, 0, pp.peakList)
+                    child.setText(0, pp.peakList.pid)
+                    child.setCheckState(0, QtCore.Qt.Checked if pp.isVisible() else QtCore.Qt.Checked)
 
-            printItems.extend((GLINTEGRALSYMBOLS,
-                               GLINTEGRALLABELS))
+                printItems.extend((GLPEAKSYMBOLS,
+                                   GLPEAKLABELS))
 
-        if multipletLists:
-            item = QtWidgets.QTreeWidgetItem(self.treeView)
-            item.setText(0, 'Multiplet Lists')
-            item.setFlags(int(item.flags()) | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+            if integralLists:
+                item = QtWidgets.QTreeWidgetItem(self.treeView)
+                item.setText(0, 'Integral Lists')
+                item.setFlags(int(item.flags()) | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
 
-            for pp in multipletLists:
-                child = QtWidgets.QTreeWidgetItem(item)
-                child.setFlags(int(child.flags()) | QtCore.Qt.ItemIsUserCheckable)
-                child.setData(1, 0, pp.multipletList)
-                child.setText(0, pp.multipletList.pid)
-                child.setCheckState(0, QtCore.Qt.Checked if pp.isVisible() else QtCore.Qt.Checked)
+                for pp in integralLists:
+                    child = QtWidgets.QTreeWidgetItem(item)
+                    child.setFlags(int(child.flags()) | QtCore.Qt.ItemIsUserCheckable)
+                    child.setData(1, 0, pp.integralList)
+                    child.setText(0, pp.integralList.pid)
+                    child.setCheckState(0, QtCore.Qt.Checked if pp.isVisible() else QtCore.Qt.Checked)
 
-            printItems.extend((GLMULTIPLETSYMBOLS,
-                               GLMULTIPLETLABELS))
+                printItems.extend((GLINTEGRALSYMBOLS,
+                                   GLINTEGRALLABELS))
 
-        # populate the treeview with the currently selected peak/integral/multiplet lists
-        self.treeView._uncheckAll()
-        pidList = []
-        for specView in self.strip.spectrumViews:
-            validPeakListViews = [pp.peakList.pid for pp in specView.peakListViews
-                                  if pp.isVisible()
-                                  and specView.isVisible()]
-            validIntegralListViews = [pp.integralList.pid for pp in specView.integralListViews
+            if multipletLists:
+                item = QtWidgets.QTreeWidgetItem(self.treeView)
+                item.setText(0, 'Multiplet Lists')
+                item.setFlags(int(item.flags()) | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+
+                for pp in multipletLists:
+                    child = QtWidgets.QTreeWidgetItem(item)
+                    child.setFlags(int(child.flags()) | QtCore.Qt.ItemIsUserCheckable)
+                    child.setData(1, 0, pp.multipletList)
+                    child.setText(0, pp.multipletList.pid)
+                    child.setCheckState(0, QtCore.Qt.Checked if pp.isVisible() else QtCore.Qt.Checked)
+
+                printItems.extend((GLMULTIPLETSYMBOLS,
+                                   GLMULTIPLETLABELS))
+
+            # populate the treeview with the currently selected peak/integral/multiplet lists
+            self.treeView._uncheckAll()
+            pidList = []
+            for specView in self.strip.spectrumViews:
+                validPeakListViews = [pp.peakList.pid for pp in specView.peakListViews
                                       if pp.isVisible()
                                       and specView.isVisible()]
-            validMultipletListViews = [pp.multipletList.pid for pp in specView.multipletListViews
-                                       if pp.isVisible()
-                                       and specView.isVisible()]
-            pidList.extend(validPeakListViews)
-            pidList.extend(validIntegralListViews)
-            pidList.extend(validMultipletListViews)
-            if specView.isVisible():
-                pidList.append(specView.spectrum.pid)
+                validIntegralListViews = [pp.integralList.pid for pp in specView.integralListViews
+                                          if pp.isVisible()
+                                          and specView.isVisible()]
+                validMultipletListViews = [pp.multipletList.pid for pp in specView.multipletListViews
+                                           if pp.isVisible()
+                                           and specView.isVisible()]
+                pidList.extend(validPeakListViews)
+                pidList.extend(validIntegralListViews)
+                pidList.extend(validMultipletListViews)
+                if specView.isVisible():
+                    pidList.append(specView.spectrum.pid)
 
-        self.treeView.selectObjects(pidList)
+            self.treeView.selectObjects(pidList)
 
         printItems.extend(GLEXTENDEDLIST)
 
@@ -1082,12 +1111,17 @@ class ExportStripToFilePopup(ExportDialogABC):
             selectList = {GLSPECTRUMBORDERS   : QtCore.Qt.Checked if self.application.preferences.general.showSpectrumBorder else QtCore.Qt.Unchecked,
                           GLSPECTRUMCONTOURS  : QtCore.Qt.Checked,
                           GLCURSORS           : QtCore.Qt.Unchecked,
-                          GLGRIDLINES         : QtCore.Qt.Checked if self.strip.gridVisible else QtCore.Qt.Unchecked,
-                          GLDIAGONALLINE      : QtCore.Qt.Checked if self.strip._CcpnGLWidget._matchingIsotopeCodes else QtCore.Qt.Unchecked,
-                          GLDIAGONALSIDEBANDS : (QtCore.Qt.Checked if (self.strip._CcpnGLWidget._sideBandsVisible and self.strip._CcpnGLWidget._matchingIsotopeCodes)
-                                                 else QtCore.Qt.Unchecked),
-                          GLSHOWSPECTRAONPHASE: QtCore.Qt.Checked if self.strip._CcpnGLWidget._showSpectraOnPhasing else QtCore.Qt.Unchecked
                           }
+            if self.strip:
+                _update = {
+                    GLGRIDLINES         : QtCore.Qt.Checked if self.strip.gridVisible else QtCore.Qt.Unchecked,
+                    GLDIAGONALLINE      : QtCore.Qt.Checked if self.strip._CcpnGLWidget._matchingIsotopeCodes else QtCore.Qt.Unchecked,
+                    GLDIAGONALSIDEBANDS : (QtCore.Qt.Checked if (self.strip._CcpnGLWidget._sideBandsVisible and self.strip._CcpnGLWidget._matchingIsotopeCodes)
+                                           else QtCore.Qt.Unchecked),
+                    GLSHOWSPECTRAONPHASE: QtCore.Qt.Checked if self.strip._CcpnGLWidget._showSpectraOnPhasing else QtCore.Qt.Unchecked
+                    }
+                selectList.update(_update)
+
         self.printList = []
 
         # add Print Options to the treeView
@@ -1100,12 +1134,19 @@ class ExportStripToFilePopup(ExportDialogABC):
             child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
             # child.setData(1, 0, obj)
             child.setText(0, itemName)
-            child.setCheckState(0, QtCore.Qt.Checked if itemName not in selectList else selectList[itemName])
+            # child.setCheckState(0, QtCore.Qt.Checked if itemName not in selectList else selectList[itemName])
+            _stored = self.printSettings.printOptions.get(itemName)
+            if _stored is None:
+                _state = QtCore.Qt.Checked if (itemName not in selectList) else selectList[itemName]
+                self.printSettings.printOptions[itemName] = True if (_state == QtCore.Qt.Checked) else False
+
+            child.setCheckState(0, QtCore.Qt.Checked if self.printSettings.printOptions.get(itemName) else QtCore.Qt.Unchecked)
+            # child.setCheckState(0, QtCore.Qt.Checked if itemName not in selectList else selectList[itemName])
 
         item.setExpanded(True)
 
     def _changePrintType(self):
-        selected = self.exportType.get()
+        selected = self.printType.get()
         lastPath = self.getSaveTextWidget()
 
         if selected in EXPORTTYPES:
@@ -1125,6 +1166,8 @@ class ExportStripToFilePopup(ExportDialogABC):
         """build parameters dict from the user widgets, to be passed to the export method.
         :return: dict - user parameters
         """
+        if not self.objects:
+            return {}
 
         selected = self.objectPulldown.getText()
         if 'SpectrumDisplay' in selected:
@@ -1134,10 +1177,10 @@ class ExportStripToFilePopup(ExportDialogABC):
         else:
             spectrumDisplay = None
             strip = self.objects[selected][0]
-            stripDirection = 'Y'
+            stripDirection = self.strip.spectrumDisplay.stripArrangement
 
-        # prType = self.exportType.get()
-        # pageType = self.pageType.get()
+        # prType = self.printType.get()
+        # pageType = self.pageOrientation.get()
         # foregroundColour = hexToRgbRatio(self.foregroundColour)
         # backgroundColour = hexToRgbRatio(self.backgroundColour)
         # baseThickness = self.baseThicknessBox.getValue()
@@ -1159,8 +1202,8 @@ class ExportStripToFilePopup(ExportDialogABC):
                       GLSPECTRUMDISPLAY       : spectrumDisplay,
                       GLSTRIP                 : strip,
                       GLWIDGET                : strip._CcpnGLWidget,
-                      GLPRINTTYPE             : self.exportType.get(),
-                      GLPAGETYPE              : self.pageType.get(),
+                      GLPRINTTYPE             : self.printType.get(),
+                      GLPAGETYPE              : self.pageOrientation.get(),
                       GLPAGESIZE              : self.pageSize.get(),
                       GLFOREGROUND            : hexToRgbRatio(self.foregroundColour),
                       GLBACKGROUND            : hexToRgbRatio(self.backgroundColour),
@@ -1178,9 +1221,9 @@ class ExportStripToFilePopup(ExportDialogABC):
                       GLEXPORTDPI             : self.exportDpiBox.getValue(),
                       GLSELECTEDPIDS          : self.treeView.getSelectedObjectsPids(),
                       GLSTRIPREGIONS          : self._stripDict,
-                      GLSCALINGMODE           : self.scaling.getIndex(),
+                      GLSCALINGMODE           : self.scalingMode.getIndex(),
                       GLSCALINGPERCENT        : self.scalingPercentage.get(),
-                      GLSCALINGBYUNITS        : self.scalingByUnits.get(),
+                      GLSCALINGBYUNITS        : self.scalingUnits.get(),
                       GLSCALINGAXIS           : self.scalingAxis.getIndex(),
                       GLUSEPRINTFONT          : self._useFontCheckbox.isChecked(),
                       GLPRINTFONT             : (self._fontPulldown.get(), self._fontSpinbox.get()),
@@ -1222,14 +1265,29 @@ class ExportStripToFilePopup(ExportDialogABC):
 
     def actionButtons(self):
         self.setOkButton(callback=self._saveAndCloseDialog, text='Save and Close', tipText='Export the strip and close the dialog')
-        self.setCancelButton(callback=self._rejectDialog, text='Close', tipText='Close the dialog')
+        self.setCancelButton(callback=self._closeDialog, text='Close', tipText='Close the dialog and save the settings')
         self.setCloseButton(callback=self._saveDialog, text='Save', tipText='Export the strip')
+        self.setHelpButton(callback=self._helpClicked, tipText='Help', enabled=False)
+        self.setRevertButton(callback=self._revertClicked, tipText='Revert to the initial state', enabled=False)
+        self.setUserButton(callback=self._rejectDialog, text='Cancel', tipText='Close the dialog and ignore any changes to settings', enabled=True)
         self.setDefaultButton(self.CANCELBUTTON)
+
+    def __postInit__(self):
+        """post initialise functions
+        """
+        super().__postInit__()
+
+        # self._populate()
+        self._revertButton = self.getButton(self.RESETBUTTON)
+
+    def _closeDialog(self):
+        self._applyChanges()
+        self._rejectDialog()
 
     def _saveDialog(self, exitSaveFileName=None):
         """save button has been clicked
         """
-        selected = self.exportType.get()
+        selected = self.printType.get()
         lastPath = self.getSaveTextWidget()
 
         if selected in EXPORTTYPES:
@@ -1254,10 +1312,35 @@ class ExportStripToFilePopup(ExportDialogABC):
                 else:
                     self._exportToFile()
 
+    def _applyChanges(self):
+        """
+        The apply button has been clicked
+        Define an undo block for setting the properties of the object
+        If there is an error setting any values then generate an error message
+          If anything has been added to the undo queue then remove it with application.undo()
+          repopulate the popup widgets
+
+        This is controlled by a series of dicts that contain change functions - operations that are scheduled
+        by changing items in the popup. These functions are executed when the Apply or OK buttons are clicked
+
+        Return True unless any errors occurred
+        """
+        allChanges = True if self._changes else False
+        if not allChanges:
+            return True
+
+        # apply all changes
+        self._applyAllChanges(self._changes)
+
+        # remove all changes
+        self._changes.clear()
+        self._revertButton.setEnabled(True)
+        return True
+
     def _saveAndCloseDialog(self, exitSaveFilename=None):
         """save and Close button has been clicked
         """
-        selected = self.exportType.get()
+        selected = self.printType.get()
         lastPath = self.getSaveTextWidget()
 
         if selected in EXPORTTYPES:
@@ -1266,7 +1349,16 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.setSaveTextWidget(lastPath)
         self.exitFilename = lastPath
 
+        self._applyChanges()
         self._acceptDialog()
+
+    def _revertClicked(self):
+        """Revert button signal comes here
+        Revert (roll-back) the state of the project to before the popup was opened
+        """
+        self.populate(self.mainWidget)
+        self._revertButton.setEnabled(False)
+        self.update()
 
     def keyPressEvent(self, a0: QtGui.QKeyEvent) -> None:
         """Subclass keypress to stop enter/return on default button
@@ -1300,17 +1392,242 @@ class ExportStripToFilePopup(ExportDialogABC):
         return unloadable, familyPath
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # page settings
 
-    # @queueStateChange(_verifyPopupApply)
-    # def _queueSetSymbol(self):
-    #     value = self.symbol.getIndex()
-    #     if value != self.preferences.general.symbolType:
-    #         return partial(self._setSymbol, value)
-    #
-    # def _setSymbol(self, value):
-    #     """Set the peak symbol type - current a cross or lineWidths
-    #     """
-    #     self.preferences.general.symbolType = value
+    def _getChangeState(self):
+        """Get the change state from the _changes dict
+        """
+        if not self._changes.enabled:
+            return None
+
+        applyState = True
+        revertState = False
+        allChanges = True if self._changes else False
+
+        return changeState(self, allChanges, applyState, revertState, None, None, self._revertButton, self._currentNumApplies)
+
+    @queueStateChange(_verifyPopupApply)
+    def _queuePageSizeCallback(self, _value):
+        value = self.pageSize.get()
+        if value != self.printSettings.pageSize:
+            return partial(self._setPageSize, value)
+
+    def _setPageSize(self, value):
+        """Set the page size
+        One of: A0, A1, A2, A3, A4, A5, A6, letter
+        """
+        self.printSettings.pageSize = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queuePageOrientationCallback(self):
+        value = self.pageOrientation.get()
+        if value != self.printSettings.pageOrientation:
+            return partial(self._setPageOrientation, value)
+
+    def _setPageOrientation(self, value):
+        """Set the page orientation - either portrait or landscape
+        """
+        self.printSettings.pageOrientation = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queuePrintTypeCallback(self):
+        value = self.printType.get()
+        if value != self.printSettings.printType:
+            return partial(self._setPrintType, value)
+
+    def _setPrintType(self, value):
+        """Set the print type: pdf, ps, svg, etc.
+        """
+        self.printSettings.printType = value
+
+    def _changeColourButton(self):
+        """Popup a dialog and set the colour in the pulldowns
+        """
+        dialog = ColourDialog(self)
+        newColour = dialog.getColor()
+        if newColour:
+            addNewColour(newColour)
+            fillColourPulldown(self.foregroundColourBox, allowAuto=False, includeGradients=False)
+            fillColourPulldown(self.backgroundColourBox, allowAuto=False, includeGradients=False)
+
+            return newColour
+
+    def _queueForegroundButtonCallback(self, _value):
+        if (newColour := self._changeColourButton()):
+            self.foregroundColourBox.setCurrentText(spectrumColours[newColour.name()])
+            self.foregroundColour = newColour.name()
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueForegroundPulldownCallback(self, _value):
+        if _value >= 0:
+            colName = colourNameNoSpace(self.foregroundColourBox.getText())
+            if colName in spectrumColours.values():
+                colName = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
+            if colName != self.printSettings.foregroundColour:
+                self.foregroundColour = colName
+                return partial(self._setForeGroundColour, colName)
+
+    def _setForeGroundColour(self, value):
+        self.printSettings.foregroundColour = value
+
+    def _queueBackgroundButtonCallback(self, _value):
+        if (newColour := self._changeColourButton()):
+            self.backgroundColourBox.setCurrentText(spectrumColours[newColour.name()])
+            self.backgroundColour = newColour.name()
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueBackgroundPulldownCallback(self, _value):
+        if _value >= 0:
+            colName = colourNameNoSpace(self.backgroundColourBox.getText())
+            if colName in spectrumColours.values():
+                colName = list(spectrumColours.keys())[list(spectrumColours.values()).index(colName)]
+            if colName != self.printSettings.backgroundColour:
+                self.backgroundColour = colName
+                return partial(self._setBackgroundColour, colName)
+
+    def _setBackgroundColour(self, value):
+        self.printSettings.backgroundColour = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueBaseThicknessCallback(self, _value):
+        textFromValue = self.baseThicknessBox.textFromValue
+        oldValue = textFromValue(self.printSettings.baseThickness or 0.0)
+        if _value >= 0 and textFromValue(_value) != oldValue:
+            return partial(self._setBaseThickness, _value)
+
+    def _setBaseThickness(self, value):
+        self.printSettings.baseThickness = float(value)
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueStripPaddingCallback(self, _value):
+        textFromValue = self.stripPaddingBox.textFromValue
+        oldValue = textFromValue(self.printSettings.stripPadding or 0.0)
+        if _value >= 0 and textFromValue(_value) != oldValue:
+            return partial(self._setStripPadding, _value)
+
+    def _setStripPadding(self, value):
+        self.printSettings.stripPadding = float(value)
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueDpiCallback(self, _value):
+        textFromValue = self.exportDpiBox.textFromValue
+        oldValue = textFromValue(self.printSettings.dpi or 0.0)
+        if _value >= 0 and textFromValue(_value) != oldValue:
+            return partial(self._setDpi, _value)
+
+    def _setDpi(self, value):
+        self.printSettings.dpi = float(value)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # scaling
+
+    def _setScalingVisible(self):
+        _ind = self._scalingModeIndex
+        self.scalingPercentage.setVisible(False if _ind else True)
+        self.scalingUnits.setVisible(True if _ind else False)
+        self.scalingAxis.setVisible(True if _ind else False)
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueScalingModeCallback(self, _value):
+        value = self.scalingMode.getText()
+        self._scalingModeIndex = SCALING_MODES.index(value)
+        self._setScalingVisible()
+        if value != self.printSettings.scalingMode:
+            return partial(self._setScalingMode, value)
+
+    def _setScalingMode(self, value):
+        self.printSettings.scalingMode = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueScalingPercentageCallback(self, _value):
+        textFromValue = self.scalingPercentage.textFromValue
+        oldValue = textFromValue(self.printSettings.scalingPercentage or 0.0)
+        if _value >= 0 and textFromValue(_value) != oldValue:
+            return partial(self._setScalingPercentage, _value)
+
+    def _setScalingPercentage(self, value):
+        self.printSettings.scalingPercentage = float(value)
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueScalingUnitsCallback(self, _value):
+        textFromValue = self.scalingUnits.textFromValue
+        oldValue = textFromValue(self.printSettings.scalingUnits or 0.0)
+        if _value >= 0 and textFromValue(_value) != oldValue:
+            return partial(self._setScalingUnits, _value)
+
+    def _setScalingUnits(self, value):
+        self.printSettings.scalingUnits = float(value)
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueScalingAxisCallback(self, _value):
+        value = self.scalingAxis.getText()
+        if value != self.printSettings.scalingAxis:
+            return partial(self._setScalingAxis, value)
+
+    def _setScalingAxis(self, value):
+        self.printSettings.scalingAxis = value
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # font selection
+
+    def _setUseFontVisible(self):
+        """Handle checking/unchecking font checkbox
+        """
+        self._fontPulldown.setEnabled(self._useFontSetting)
+        self._fontSpinbox.setEnabled(self._useFontSetting)
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueUseFontCallback(self, _value):
+        value = self._useFontCheckbox.isChecked()
+        self._useFontSetting = value
+        self._setUseFontVisible()
+        if value != self.printSettings.useFont:
+            return partial(self._setUseFont, value)
+
+    def _setUseFont(self, value):
+        self.printSettings.useFont = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueFontSizeCallback(self, _value):
+        textFromValue = self._fontSpinbox.textFromValue
+        oldValue = textFromValue(self.printSettings.fontSize or 0.0)
+        if _value >= 0 and textFromValue(_value) != oldValue:
+            return partial(self._setFontSize, _value)
+
+    def _setFontSize(self, value):
+        self.printSettings.fontSize = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueFontNameCallback(self, _value):
+        value = self._fontPulldown.get()
+        self._fontNameSetting = value
+        self._setPulldownTextColour(self._fontPulldown)
+        if value != self.printSettings.fontName:
+            return partial(self._setFontName, value)
+
+    def _setFontName(self, value):
+        self.printSettings.fontName = value
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # treeview print options
+
+    def _queueGetPrintOptionCallback(self, _value, _state):
+        # get the name of the option from the tree
+        option = _value.data(0, 0)
+        checked = True if (_value.checkState(0) == QtCore.Qt.Checked) else False
+        self._queuePrintOptionsCallback(option, checked)
+
+    @queueStateChange(_verifyPopupApply)
+    def _queuePrintOptionsCallback(self, option, checked):
+        """Toggle a general checkbox option in the preferences
+        Requires the parameter to be called 'option' so that the decorator gives it a unique name
+        in the internal updates dict
+        """
+        if checked != self.printSettings.printOptions.get(option):
+            return partial(self._togglePrintOptions, option, checked)
+
+    def _togglePrintOptions(self, option, checked):
+        self.printSettings.printOptions[option] = checked
 
     # def _getFont(self, value):
     #     # Simple font grabber from the system

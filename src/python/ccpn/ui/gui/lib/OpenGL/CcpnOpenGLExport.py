@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-02 09:36:45 +0000 (Thu, December 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 14:13:48 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -194,10 +194,13 @@ class GLExporter():
 
             for strNum, strip in enumerate(spectrumDisplay.orderedStrips):
                 self.stripNumber = strNum
+                self._linkedAxisStrip = None
                 self._createStrip(strip, singleStrip=False, axesOnly=False)
-
+                self._lastMainView = self.mainView
+            
             # build strip for the floating axis
             self.stripNumber = self.numStrips
+            self._linkedAxisStrip = spectrumDisplay.orderedStrips[-1]
 
             # self._parent still points to the last strip - check not to double up the last axis
             if self.params[GLSTRIPDIRECTION] == 'Y':
@@ -215,8 +218,11 @@ class GLExporter():
             self._buildPageDimensions([strip])
 
             self.stripNumber = 0
+            self._linkedAxisStrip = None
             self._createStrip(strip, singleStrip=True, axesOnly=False)
-
+            self._lastMainView = self.mainView
+            
+            self._linkedAxisStrip = strip
             if self.params[GLSTRIPDIRECTION] == 'Y':
                 if self._parent and not self._parent._drawRightAxis:
                     self._createStrip(spectrumDisplay.orderedStrips[0], spectrumDisplay._rightGLAxis, singleStrip=True, axesOnly=True)
@@ -433,7 +439,7 @@ class GLExporter():
         self.fontXOffset = 0.75
         self.fontYOffset = 3.0
 
-        # print(f'      size  {self._pixWidth}   {self._pixHeight}')
+        print(f'      size  {self._pixWidth}   {self._pixHeight}')
 
     def _modifyScaling(self):
 
@@ -457,44 +463,60 @@ class GLExporter():
             try:
                 # scales are ratios
                 # based on self.mainView dimensions and ranges
+                if self._linkedAxisStrip:
+                    _axisL = self._linkedAxisStrip._CcpnGLWidget.axisL
+                    _axisR = self._linkedAxisStrip._CcpnGLWidget.axisR
+                    _axisT = self._linkedAxisStrip._CcpnGLWidget.axisT
+                    _axisB = self._linkedAxisStrip._CcpnGLWidget.axisB
+                    _width = self._lastMainView.width
+                    _height = self._lastMainView.height
+                else:
+                    _axisL = self._axisL
+                    _axisR = self._axisR
+                    _axisT = self._axisT
+                    _axisB = self._axisB
+                    _width = self.mainView.width
+                    _height = self.mainView.height
+
                 if _scaleMode == SCALING_MODES.index(SCALE_CM_UNIT):
                     # this is scaled to 72dpi
                     if self.params[GLSCALINGAXIS] == 0:
-                        _cms = (self._displayScale * self.mainView.width * 2.54) / 72.0
-                        _axisScale = abs(self._axisL - self._axisR)
+                        _cms = (self._displayScale * _width * 2.54) / 72.0
+                        _axisScale = abs(_axisL - _axisR)
+                        print(f'   mainview   {_width}   {_height}    {_axisScale}')
                     else:
-                        _cms = (self._displayScale * self.mainView.height * 2.54) / 72.0
-                        _axisScale = abs(self._axisT - self._axisB)
+                        _cms = (self._displayScale * _height * 2.54) / 72.0
+                        _axisScale = abs(_axisT - _axisB)
                     _newScale = _scale / (_cms / _axisScale)
 
                 elif _scaleMode == SCALING_MODES.index(SCALE_UNIT_CM):
                     if self.params[GLSCALINGAXIS] == 0:
-                        _cms = (self._displayScale * self.mainView.width * 2.54) / 72.0
-                        _axisScale = abs(self._axisL - self._axisR)
+                        _cms = (self._displayScale * _width * 2.54) / 72.0
+                        _axisScale = abs(_axisL - _axisR)
                     else:
-                        _cms = (self._displayScale * self.mainView.height * 2.54) / 72.0
-                        _axisScale = abs(self._axisT - self._axisB)
+                        _cms = (self._displayScale * _height * 2.54) / 72.0
+                        _axisScale = abs(_axisT - _axisB)
                     _newScale = (_axisScale / _cms) / _scale
 
                 elif _scaleMode == SCALING_MODES.index(SCALE_INCH_UNIT):
                     if self.params[GLSCALINGAXIS] == 0:
-                        _cms = (self._displayScale * self.mainView.width) / 72.0
-                        _axisScale = abs(self._axisL - self._axisR)
+                        _cms = (self._displayScale * _width) / 72.0
+                        _axisScale = abs(_axisL - _axisR)
                     else:
-                        _cms = (self._displayScale * self.mainView.height) / 72.0
-                        _axisScale = abs(self._axisT - self._axisB)
+                        _cms = (self._displayScale * _height) / 72.0
+                        _axisScale = abs(_axisT - _axisB)
                     _newScale = _scale / (_cms / _axisScale)
 
                 else:
                     if self.params[GLSCALINGAXIS] == 0:
-                        _cms = (self._displayScale * self.mainView.width) / 72.0
-                        _axisScale = abs(self._axisL - self._axisR)
+                        _cms = (self._displayScale * _width) / 72.0
+                        _axisScale = abs(_axisL - _axisR)
                     else:
-                        _cms = (self._displayScale * self.mainView.height) / 72.0
-                        _axisScale = abs(self._axisT - self._axisB)
+                        _cms = (self._displayScale * _height) / 72.0
+                        _axisScale = abs(_axisT - _axisB)
                     _newScale = (_axisScale / _cms) / _scale
 
-            except:
+            except Exception as es:
                 # default to full page
                 _newScale = 1.0
 
@@ -509,6 +531,8 @@ class GLExporter():
                 self.pixHeight = self._pixHeight * self.displayScale
                 self.fontScale = self._fontScale * self.displayScale
                 self.stripSpacing = self._stripSpacing * self.displayScale
+
+        print(f'      modifiedsize  {self.pixWidth}   {self.pixHeight}')
 
     def _addBackgroundBox(self, thisPlot):
         """Make a background box to cover the plot area
@@ -1819,14 +1843,16 @@ class GLExporter():
             # arrange as a row
             table = (self.stripReports,)
             _spacing = min(_minSpace, max(0.0, (self.docHeight - self.stripHeights[0]) / 2.0))
-            _table = Table(table, colWidths=self.stripWidths, rowHeights=self.stripHeights[0],
+            _table = Table(table,
+                           colWidths=self.stripWidths, rowHeights=self.stripHeights[0],
                            )
 
         else:
             # arrange as a column
             table = tuple((rep,) for rep in self.stripReports)
             _spacing = min(_minSpace, max(0.0, (self.docHeight - sum(self.stripHeights)) / 2.0))
-            _table = Table(table, rowHeights=self.stripHeights, colWidths=self.stripWidths[0],
+            _table = Table(table,
+                           rowHeights=self.stripHeights, colWidths=self.stripWidths[0],
                            )
         self._report.doc.topMargin = math.floor(_spacing)
         # NOTE:ED - same for left/bottom margin?

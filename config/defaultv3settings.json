@@ -140,9 +140,23 @@
         "autoOpenPythonConsoleOnMacroEditor" : true
     },
     "printSettings"    : {
-        "font"     : "Helvetica,15,-1,5,50,0,0,0,0,0,Regular",
-        "fontName" : "Default Font",
-        "fontSize" : 12
+        "font"              : "Helvetica,15,-1,5,50,0,0,0,0,0,Regular",
+        "fontName"          : "Default Font",
+        "fontSize"          : 12,
+        "pageSize"          : "A4",
+        "pageOrientation"   : "portrait",
+        "printType"         : "PDF",
+        "foregroundColour"  : "#000000",
+        "backgroundColour"  : "#FFFFFF",
+        "baseThickness"     : 1.0,
+        "stripPadding"      : 5,
+        "dpi"               : 300,
+        "scalingMode"       : "Percentage",
+        "scalingPercentage" : 80,
+        "scalingUnits"      : 1.0,
+        "scalingAxis"       : "X",
+        "useFont"           : false,
+        "printOptions"      : {}
     },
     "recentMacros"     : [
     ],

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-24 17:59:36 +0000 (Wed, November 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 16:20:10 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1107,7 +1107,7 @@ class Project(AbstractWrapperObject):
         """New/Delete object to the general dict for v3 pids
         """
         # update pid:object mapping dictionary
-        self._pid2Obj[obj.shortClassName] = dd = self._pid2Obj.setdefault(obj.className, {})
+        dd = self._pid2Obj.setdefault(obj.className, self._pid2Obj.setdefault(obj.shortClassName, {}))
 
         # set/delete on action
         if action == 'create':

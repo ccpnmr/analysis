@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-03 19:17:47 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 19:22:18 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -562,11 +562,11 @@ class Peak(AbstractWrapperObject):
             for nmrAtom in (_post - _pre - _thisNmr):
                 self.spectrum.chemicalShiftList.newChemicalShift(nmrAtom=nmrAtom)
 
-            # NOTE:ED - do I need to do this? works here, need to check the number of local assignments before removing
-            for _sh in shifts:
-                if not _sh.assignedPeaks:
-                    # set the nmrAtom to None if there are no assignedPeaks for the chemicalShiftList
-                    _sh.nmrAtom = None
+            # # NOTE:ED - do I need to do this? works here, need to check the number of local assignments before removing
+            # for _sh in shifts:
+            #     if not _sh.assignedPeaks:
+            #         # set the nmrAtom to None if there are no assignedPeaks for the chemicalShiftList
+            #         _sh.nmrAtom = None
 
             self._recalculatePeakShifts(nmrResidues, shifts)
             with undoStackBlocking() as addUndoItem:

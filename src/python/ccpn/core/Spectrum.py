@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-03 16:05:34 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 16:50:37 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2932,6 +2932,15 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     #     """
     #     self._wrappedData.delete()
 
+    def _close(self):
+        """Close any open dataSource
+
+        CCPNINTERNAL: also called by Project.close() to do cleanup
+        """
+        self._clearCache()
+        if self._dataSource is not None:
+            self._dataSource.closeFile()
+
     @logCommand(get='self')
     def delete(self):
         """Delete Spectrum"""
@@ -2939,9 +2948,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
             # self._deleteSpectrumMetaData()
 
-            self._clearCache()
-            if self._dataSource is not None:
-                self._dataSource.closeFile()
+            self._close()
 
             # self.deleteAllNotifiers() TODO: no longer required?
 

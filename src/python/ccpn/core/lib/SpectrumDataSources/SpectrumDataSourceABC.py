@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-03 16:05:35 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 16:50:37 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1277,7 +1277,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             self.mode = None
 
         # Close optional non-temporary hdf5 buffer
-        if self.isBuffered and not self._bufferIsTemporary:
+        if self.isBuffered:
             self.closeHdf5Buffer()
 
         self.cache.clear()
@@ -1825,23 +1825,22 @@ class SpectrumDataSourceABC(CcpNmrJson):
             # Constuct a path for temporary buffer using the tempfile methods
             # However, tempfile.NamedTemporyFile already opens it, so grab the name, and close it (which will delete it)
             name = 'CcpNmr_hdf5buffer_%s_' % self.path.basename
-            tFile = tempfile.NamedTemporaryFile(prefix=name, suffix=Hdf5SpectrumDataSource.suffixes[0])
-            path = tFile.name
-            tFile.close()
+            with tempfile.NamedTemporaryFile(prefix=name, suffix=Hdf5SpectrumDataSource.suffixes[0]) as tFile:
+                path = tFile.name
 
         else:
             # take path as defined in _bufferPath, or construct from self.path if None
             path = self._bufferPath
             if self._bufferPath is None:
                 path = self.path.withSuffix(Hdf5SpectrumDataSource.suffixes[0]).uniqueVersion()
+            # tFile = None
 
         # create a hdf5 buffer file instance
         hdf5buffer = Hdf5SpectrumDataSource(path=path)
         hdf5buffer.copyParametersFrom(self)
-        hdf5buffer._dataSource = self  # link back to self
-        # hdf5buffer.setPath(path=path, substituteSuffix=True)
         # do not use openNewFile as it has to remain open after filling the buffer
         hdf5buffer.openFile(mode=Hdf5SpectrumDataSource.defaultOpenWriteMode)
+        hdf5buffer._dataSource = self  # link back to self
         self.hdf5buffer = hdf5buffer
         self._isBuffered = True
         self._bufferFilled = False
@@ -1871,6 +1870,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
         if self.hdf5buffer is not None:
             getLogger().debug('Closing buffer %s' % self.hdf5buffer)
             self.hdf5buffer.closeFile()
+            if self._bufferIsTemporary:
+                self.hdf5buffer.path.removeFile()
 
         self.hdf5buffer = None
         self._bufferFilled = False

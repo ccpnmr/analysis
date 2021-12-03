@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-03 16:05:34 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 16:50:37 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -104,8 +104,10 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         dataset = self.spectrumData
         return dataset.attrs
 
-    def openFile(self, mode, **kwds):
+    def openFile(self, mode, fileObj=None, **kwds):
         """open self.path, set self.fp, return self.fp
+        optionally pass in an open fileObject (e.g. as created by tempfile)
+        :return self.fp
         """
 
         if mode is None:
@@ -115,7 +117,11 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         if self.hasOpenFile():
             self.closeFile()
 
-        self._checkFilePath(newFile, mode)
+        if fileObj is None:
+            self._checkFilePath(newFile, mode)
+            fileObj = str(self.path)
+        else:
+            self.setPath(fileObj.name)
 
         try:
             self.disableCache()  # Hdf has its own caching
@@ -124,7 +130,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             kwds.setdefault('rdcc_nslots', 9973)  # large 'enough' prime number
             kwds.setdefault('rdcc_w0', 0.25)  # most-often will read
 
-            self.fp = self.openMethod(str(self.path), mode, **kwds)
+            self.fp = self.openMethod(fileObj, mode, **kwds)
             self.mode = mode
 
         except Exception as es:

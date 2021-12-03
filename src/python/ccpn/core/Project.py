@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-02 08:37:19 +0000 (Thu, December 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-03 16:50:37 +0000 (Fri, December 03, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -440,7 +440,11 @@ class Project(AbstractWrapperObject):
         """Clean up the wrapper project previous to deleting or replacing
         Cleanup includes wrapped data graphics objects (e.g. Window, Strip, ...)
         """
-        self._logger.info("Closing %s" % self.path)
+        getLogger().info("Closing %s" % self.path)
+
+        # close any spectra
+        for sp in self.spectra:
+            sp._close()
 
         # Remove undo stack:
         self._resetUndo(maxWaypoints=0)

@@ -34,7 +34,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-18 18:20:21 +0000 (Thu, November 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-06 17:05:44 +0000 (Mon, December 06, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -594,7 +594,7 @@ class GuiStripNd(GuiStrip):
                     getLogger().warning(f'Axis {zAxis.unit} not found')
                     return
 
-            if zAxis:
+            if zAxis and position is not None:
                 if minZPlaneSize is None:
                     minZPlaneSize = 1.0  # arbitrary to catch errors
 

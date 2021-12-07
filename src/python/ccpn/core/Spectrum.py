@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-04 15:40:10 +0000 (Sat, December 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-07 13:55:51 +0000 (Tue, December 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -789,15 +789,14 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def pointCounts(self, value: Sequence):
         self._setDimensionalAttributes('pointCount', value)
 
-    @property
-    @_includeInDimensionalCopy
-    def totalPointCounts(self) -> List[int]:
-        """Total number of points per dimension; i.e. twice pointCounts in case of complex data"""
-        result = self.pointCounts
-        for axis, isC in enumerate(self.isComplex):
-            if isC:
-                result[axis] *= 2
-        return result
+    # @property
+    # def totalPointCounts(self) -> List[int]:
+    #     """Total number of points per dimension; i.e. twice pointCounts in case of complex data"""
+    #     result = self.pointCounts
+    #     for axis, isC in enumerate(self.isComplex):
+    #         if isC:
+    #             result[axis] *= 2
+    #     return result
 
     @property
     @_includeInDimensionalCopy
@@ -2320,8 +2319,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         # Duplicate the data in an Hdf5 file
         hdf5DataSource = self._dataSource.duplicateDataToHdf5(dataStore.aPath())
         # Update the dataSource parameters from self
-        hdf5DataSource.importFromSpectrum(self, includePath=False)
-        hdf5DataSource.updateParameters()
+        # hdf5DataSource.importFromSpectrum(self, includePath=False)
+        # hdf5DataSource.writeParameters()
 
         # Create a new Spectrum instance
         newSpectrum = _newSpectrumFromDataSource(project=self.project,
@@ -2329,6 +2328,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                                                  dataSource=hdf5DataSource,
                                                  name=name)
 
+        # Copy the dimensional parameters
+        self._copyDimensionalParameters(self.axisCodes, newSpectrum)
         # Copy/set some more parameters (e.g. noiseLevel)
         self._copyNonDimensionalParameters(newSpectrum)
         newSpectrum._updateParameterValues()

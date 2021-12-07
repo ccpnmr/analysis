@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-03 18:23:04 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-07 13:55:51 +0000 (Tue, December 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -78,7 +78,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
     suffixes = ['.ndf5', '.hdf5']
     openMethod = h5py.File
-    defaultOpenReadMode = 'r+'
+    defaultOpenReadMode = 'r'
     defaultOpenWriteMode = 'w'
 
     HDF_VERSION = 1.0
@@ -247,15 +247,6 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
         return super().readParameters()
 
-    def updateParameters(self):
-        """Open existing file to write current parameters
-        :return self
-        """
-        if not self.hasOpenFile():
-            self.openFile(mode=self.defaultOpenReadMode)
-        self.writeParameters()
-        return self
-
     def writeParameters(self):
         """write the parameters into the hdf5 data structure
         Returns self
@@ -291,8 +282,11 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             return newValue
 
         try:
+            if self.hasOpenFile() and self.mode == 'r':
+                # File was opened read-only; close it so it can be re-opened 'r+'
+                self.closeFile()
             if not self.hasOpenFile():
-                self.openFile(mode=self.defaultOpenWriteMode)
+                self.openFile(mode='r+')  # File should exist as it was created before
 
             params = self.spectrumParameters
             params[VERSION] = self.HDF_VERSION

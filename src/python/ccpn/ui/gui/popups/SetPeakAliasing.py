@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-12 13:59:23 +0000 (Fri, November 12, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-07 12:27:47 +0000 (Tue, December 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -228,6 +228,7 @@ class SetPeakAliasingPopup(CcpnDialogMainWidget):
     def _setPulldownTextColour(self, combo):
         """Set the colour of the pulldown text
         """
+        # NOTE:ED - should move this the the pulldown widget
         ind = combo.currentIndex()
         model = combo.model()
         item = model.item(ind)

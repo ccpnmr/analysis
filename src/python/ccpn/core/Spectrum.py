@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-07 13:55:51 +0000 (Tue, December 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-07 14:18:28 +0000 (Tue, December 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2053,7 +2053,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         :param position: An optional list/tuple of point positions (1-based);
                          defaults to [1,1,1,1]
-        :param sliceDim: Dimension of the slice axis (1-based)
+        :param sliceDim: Dimension of the slice axis (1-based); defaults to 1
 
         :return: numpy 1D data array
 
@@ -2073,7 +2073,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                 getLogger().error('Spectrum.getSliceData: %s' % es)
                 raise es
 
-        # For 1D, save as intensities attribute; TODO: remove
+        # For 1D, save as intensities attribute;
         self._intensities = data
         return data
 
@@ -2677,7 +2677,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         if dataStore.dataFormat == EmptySpectrumDataSource.dataFormat:
             # Special case, empty spectrum
             dataSource = EmptySpectrumDataSource()
-            dataSource.importFromSpectrum(self)
+            dataSource.importFromSpectrum(self, includePath=False)
 
         else:
             if not dataStore.exists():
@@ -3366,7 +3366,7 @@ def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], name: str =
         for param, value in parameters.items():
             if hasattr(spectrum, param):
                 setattr(spectrum, param, value)
-        dataSource.importFromSpectrum(spectrum)
+        dataSource.importFromSpectrum(spectrum, includePath=False)
 
     return spectrum
 

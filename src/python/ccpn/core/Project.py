@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-03 16:50:37 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-07 14:18:28 +0000 (Tue, December 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -531,8 +531,10 @@ class Project(AbstractWrapperObject):
             if len(newPath.basename) > 32:
                 raise ValueError('Unfortunately, we currently have limited (32) length of the filename (%s)' % newPath.basename)
             path = str(newPath)
+            _saveAs = True
         else:
             path = str(self.path)
+            _saveAs = False
 
         try:
             apiStatus = self._getAPIObjectsStatus()
@@ -560,6 +562,8 @@ class Project(AbstractWrapperObject):
                 self.application.mainWindow.sideBar.setProjectName(self)
 
             # store the version history in state subfolder json file
+            if _saveAs:
+                self._saveHistory = newProjectSaveHistory(path)
             self._saveHistory.addSaveRecord().save()
 
         return savedOk

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-03 17:19:36 +0100 (Fri, September 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-07 12:27:22 +0000 (Tue, December 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -99,25 +99,27 @@ def _getNmrAtomName(popupinstance, nmrAtom, nmrResidue=None, isotopeCode=None):
         atomNameOptions += atomNameOptionsByResType
     else:
         atomNameOptions += getIsotopeListFromCode(None)  # all options
+    atomNameOptions = sorted(list(set(atomNameOptions)), key=greekKey)
 
     if isotopeCode in NEF_ATOM_NAMES:
         # if False:
         atomsNameOptionsByIC = getIsotopeListFromCode(isotopeCode or nmrAtom.isotopeCode)
+
         atomNotOfSameIsotopeCode = [x for x in atomNameOptions if x not in atomsNameOptionsByIC]
         atomOfSameIsotopeCode = [x for x in atomNameOptions if x in atomsNameOptionsByIC]
-        atomNameOptions = [nmrAtomName] + \
+        _atomNameOptions = [nmrAtomName] + \
                           [OtherByIC] + \
                           atomOfSameIsotopeCode + \
                           [OtherNames] + \
                           atomNotOfSameIsotopeCode
         nameSeparators = [OtherNames, OtherByIC]
     else:
-        atomNameOptions = [nmrAtomName] + \
+        _atomNameOptions = [nmrAtomName] + \
                           [OtherNames] + \
                           atomNameOptions
         nameSeparators = [OtherNames]
 
-    nameWidget.modifyTexts(atomNameOptions)
+    nameWidget.modifyTexts(_atomNameOptions)
 
     nameWidget.pulldownList.disableLabelsOnPullDown(nameSeparators)
 

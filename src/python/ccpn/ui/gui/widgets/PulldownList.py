@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-26 10:13:38 +0000 (Fri, November 26, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-07 12:28:34 +0000 (Tue, December 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -326,7 +326,7 @@ class PulldownList(QtWidgets.QComboBox, Base):
     def disableLabelsOnPullDown(self, texts, colour=None):
         """ Disable items from pulldown (not selectable, not clickable). And if given, changes the colour """
         for text in texts:
-            if text is not None:
+            if text is not None and self.getItemIndex(text) is not None:
                 item = self.model().item(self.getItemIndex(text))
                 if item:
                     item.setEnabled(False)

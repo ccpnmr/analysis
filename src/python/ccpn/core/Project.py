@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-07 14:18:28 +0000 (Tue, December 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-07 14:30:26 +0000 (Tue, December 07, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -563,6 +563,7 @@ class Project(AbstractWrapperObject):
 
             # store the version history in state subfolder json file
             if _saveAs:
+                self._checkProjectSubDirectories()
                 self._saveHistory = newProjectSaveHistory(path)
             self._saveHistory.addSaveRecord().save()
 

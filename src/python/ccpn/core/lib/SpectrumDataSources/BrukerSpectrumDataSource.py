@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-03 16:05:34 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-08 14:25:44 +0000 (Wed, December 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -398,7 +398,22 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 dimDict.update(self.acqus[i])
                 dimDict.update(self.procs[i])
 
+                # establish dimension type (time/frequency)
+                if int(float(dimDict.get('FT_mod', 1))) == 0:
+                    # point/time axis
+                    self.dimensionTypes[i] = specLib.DIMENSION_TIME
+                    self.measurementTypes[i] = specLib.MEASUREMENT_TYPE_TIME
+                else:
+                    # frequency axis
+                    self.dimensionTypes[i] = specLib.DIMENSION_FREQUENCY
+                    self.measurementTypes[i] = specLib.MEASUREMENT_TYPE_SHIFT
+
                 self.pointCounts[i] = int(dimDict['SI'])
+                if self.dimensionTypes[i] == specLib.DIMENSION_TIME:
+                    tdeff = int(dimDict['TDeff'])
+                    if tdeff > 0 and tdeff < self.pointCounts[i]:
+                        self.pointCounts[i] = tdeff
+
                 self.blockSizes[i] = int(dimDict['XDIM'])
                 if self.blockSizes[i] == 0:
                     self.blockSizes[i] = self.pointCounts[i]
@@ -410,22 +425,14 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 self.isotopeCodes[i] = dimDict.get('AXNUC')
                 self.axisLabels[i] = dimDict.get('AXNAME')
 
-                if int(float(dimDict.get('FT_mod', 1))) == 0:
-                    # point/time axis
-                    self.dimensionTypes[i] = specLib.DIMENSION_TIME
-                    self.measurementTypes[i] = specLib.MEASUREMENT_TYPE_TIME
-                else:
-                   # frequency axis
-                    self.dimensionTypes[i] = specLib.DIMENSION_FREQUENCY
-                    self.measurementTypes[i] = specLib.MEASUREMENT_TYPE_SHIFT
 
                 self.spectralWidthsHz[i] = float(dimDict.get('SW_p', 1.0))  # SW in Hz processed (from proc file)
                 self.spectrometerFrequencies[i] = float(dimDict.get('SFO1', dimDict.get('SF', 1.0)))
 
                 self.referenceValues[i] = float(dimDict.get('OFFSET', 0.0))
                 self.referencePoints[i] = float(dimDict.get('refPoint', 0.0))
-            # origNumPoints[i] = int(dimDict.get('$FTSIZE', 0))
-            # pointOffsets[i] = int(dimDict.get('$STSR', 0))
+                # origNumPoints[i] = int(dimDict.get('$FTSIZE', 0))
+                # pointOffsets[i] = int(dimDict.get('$STSR', 0))
                 self.phases0[i] = float(dimDict.get('PHC0', 0.0))
                 self.phases1[i] = float(dimDict.get('PHC1', 0.0))
 

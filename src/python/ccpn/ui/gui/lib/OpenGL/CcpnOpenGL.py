@@ -55,8 +55,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-11 18:57:51 +0000 (Thu, November 11, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-08 16:57:33 +0000 (Wed, December 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -4250,16 +4250,16 @@ class CcpnGLWidget(QOpenGLWidget):
                     if self._ordering:
 
                         if self.is1D:
-                            cursorX = thisSpec.spectrumReferences[0].valueToPoint(cursorCoordinate[0])
-                            startX = thisSpec.spectrumReferences[0].valueToPoint(cursorCoordinate[0])
+                            cursorX = thisSpec.spectrumDimensions[0].valueToPoint(cursorCoordinate[0])
+                            startX = thisSpec.spectrumDimensions[0].valueToPoint(cursorCoordinate[0])
 
                         else:
                             # get the axis ordering from the spectrumDisplay and map to the strip
                             indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
 
                             # map to a point
-                            cursorX = thisSpec.spectrumReferences[indices[0]].valueToPoint(cursorCoordinate[0])
-                            startX = thisSpec.spectrumReferences[indices[0]].valueToPoint(self._startCoordinate[0])
+                            cursorX = thisSpec.spectrumDimensions[indices[0]].valueToPoint(cursorCoordinate[0])
+                            startX = thisSpec.spectrumDimensions[indices[0]].valueToPoint(self._startCoordinate[0])
 
                     else:
                         # error trap all spectra deleted
@@ -4295,8 +4295,8 @@ class CcpnGLWidget(QOpenGLWidget):
                         indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
 
                         # map to a point
-                        cursorY = thisSpec.spectrumReferences[indices[1]].valueToPoint(cursorCoordinate[1])
-                        startY = thisSpec.spectrumReferences[indices[1]].valueToPoint(self._startCoordinate[1])
+                        cursorY = thisSpec.spectrumDimensions[indices[1]].valueToPoint(cursorCoordinate[1])
+                        startY = thisSpec.spectrumDimensions[indices[1]].valueToPoint(self._startCoordinate[1])
 
                     else:
                         # error trap all spectra deleted
@@ -5073,16 +5073,16 @@ class CcpnGLWidget(QOpenGLWidget):
                     if self._ordering:
 
                         if self.is1D:
-                            axisLimitL = thisSpec.spectrumReferences[0].valueToPoint(self.axisL)
-                            axisLimitR = thisSpec.spectrumReferences[0].valueToPoint(self.axisR)
+                            axisLimitL = thisSpec.spectrumDimensions[0].valueToPoint(self.axisL)
+                            axisLimitR = thisSpec.spectrumDimensions[0].valueToPoint(self.axisR)
 
                         else:
                             # get the axis ordering from the spectrumDisplay and map to the strip
                             indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
 
                             # map to a point
-                            axisLimitL = thisSpec.spectrumReferences[indices[0]].valueToPoint(self.axisL)
-                            axisLimitR = thisSpec.spectrumReferences[indices[0]].valueToPoint(self.axisR)
+                            axisLimitL = thisSpec.spectrumDimensions[indices[0]].valueToPoint(self.axisL)
+                            axisLimitR = thisSpec.spectrumDimensions[indices[0]].valueToPoint(self.axisR)
 
                     else:
                         # error trap all spectra deleted
@@ -5122,8 +5122,8 @@ class CcpnGLWidget(QOpenGLWidget):
                         indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
 
                         # map to a point
-                        axisLimitT = thisSpec.spectrumReferences[indices[1]].valueToPoint(self.axisT)
-                        axisLimitB = thisSpec.spectrumReferences[indices[1]].valueToPoint(self.axisB)
+                        axisLimitT = thisSpec.spectrumDimensions[indices[1]].valueToPoint(self.axisT)
+                        axisLimitB = thisSpec.spectrumDimensions[indices[1]].valueToPoint(self.axisB)
 
                     else:
                         # error trap all spectra deleted

@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-08 14:24:31 +0000 (Wed, December 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-08 16:57:33 +0000 (Wed, December 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1697,7 +1697,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         if dimension is None or dimension < 1 or dimension > self.dimensionCount:
             raise RuntimeError('Invalid dimension (%s)' % (dimension,))
 
-        return self.spectrumReferences[dimension - 1].valueToPoint(value)
+        return self.spectrumDimensions[dimension - 1].valueToPoint(value)
 
     def point2ppm(self, value, axisCode=None, dimension=None):
         """Convert point value to ppm for axis corresponding to to either axisCode or
@@ -1714,7 +1714,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         if dimension is None or dimension < 1 or dimension > self.dimensionCount:
             raise RuntimeError('Invalid dimension (%s)' % (dimension,))
 
-        return self.spectrumReferences[dimension - 1].pointToValue(value)
+        return self.spectrumDimensions[dimension - 1].pointToValue(value)
 
     def getPpmArray(self, axisCode=None, dimension=None) -> numpy.array:
         """Return a numpy array with ppm values of the grid points along axisCode or dimension
@@ -1740,9 +1740,9 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         Return the aliasing information for the given axis
         """
         if dimension is None and axisCode is None:
-            raise ValueError('Spectrum.getPpmAliasingLimits: either axisCode or dimension needs to be defined')
+            raise ValueError('Spectrum._verifyAxisCodeDimension: either axisCode or dimension needs to be defined')
         if dimension is not None and axisCode is not None:
-            raise ValueError('Spectrum.getPpmAliasingLimits: axisCode and dimension cannot be both defined')
+            raise ValueError('Spectrum._verifyAxisCodeDimension: axisCode and dimension cannot be both defined')
         if axisCode is not None:
             dimension = self.getByAxisCodes('dimensions', [axisCode], exactMatch=False)[0]
         if dimension is None or dimension < 1 or dimension > self.dimensionCount:

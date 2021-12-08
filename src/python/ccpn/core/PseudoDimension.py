@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-08 14:54:19 +0000 (Wed, December 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-08 16:57:33 +0000 (Wed, December 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -221,9 +221,9 @@ class PseudoDimension(AbstractWrapperObject, SpectrumDimensionAttributes):
     @property
     def referenceValue(self) -> float:
         """ppm-value used for axis (chemical shift) referencing.
-        emulated to always be 1.0
+        emulated to always be pointCount
         """
-        return 1.0
+        return float(self.pointCount)
 
     @referenceValue.setter
     def referenceValue(self, value: float):
@@ -253,7 +253,7 @@ class PseudoDimension(AbstractWrapperObject, SpectrumDimensionAttributes):
 
     @property
     def _valuePerPoint(self) -> float:
-        """Value per point"""
+        """Value per point in Hz for Frequency domain data, in secs for time/fid domain data"""
         return self.spectralWidthHz / self.pointCount
 
     @_valuePerPoint.setter
@@ -280,9 +280,9 @@ class PseudoDimension(AbstractWrapperObject, SpectrumDimensionAttributes):
 
     @property
     def assignmentTolerance(self) -> float:
-        """Assignment Tolerance; Always None
+        """Assignment Tolerance; Always 0.0
         """
-        return None
+        return 0.0
 
     @assignmentTolerance.setter
     def assignmentTolerance(self, value):
@@ -292,11 +292,18 @@ class PseudoDimension(AbstractWrapperObject, SpectrumDimensionAttributes):
     # CCPN functions
     #=========================================================================================
     def pointToValue(self, point: float) -> float:
-        """:return ppm-value corresponding to point (float)"""
-        return float(point)
+        """:return ppm-value corresponding to point (float)
+        """
+        pointOffset = point - self.referencePoint
+        ppmPerPoint = self._valuePerPoint / self.spectrometerFrequency
+        result = self.referenceValue - pointOffset *  ppmPerPoint # scale runs backwards
+        return result
 
     def valueToPoint(self, value: float) -> float:
         """:return point (float) corresponding to ppm-value"""
+        ppmPerPoint = self._valuePerPoint / self.spectrometerFrequency
+        valOffset = value - self.referenceValue
+        result =  self.referencePoint - value / ppmPerPoint  # scale runs backward
         return float(value)
 
     #=========================================================================================

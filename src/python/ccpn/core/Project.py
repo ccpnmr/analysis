@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-07 14:30:26 +0000 (Tue, December 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-08 09:56:50 +0000 (Wed, December 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -377,7 +377,7 @@ class Project(AbstractWrapperObject):
         return self._wrappedData.root.isProjectModified()
 
     @property
-    def isUpgradedFromV2(self):
+    def _isUpgradedFromV2(self):
         """Return True if project was upgraded from V2
         """
         return self._apiNmrProject.root._upgradedFromV2
@@ -1948,7 +1948,7 @@ def _loadProject(application, path: str) -> Project:
     # NB: linkages are set in Framework._intialiseProject()
 
     # If path pointed to a V2 project, save the result
-    if project.isUpgradedFromV2:
+    if project._isUpgradedFromV2:
         try:
             # call the update
             getLogger().info('==> Upgrading %s to version-3' % project)

@@ -6,7 +6,7 @@ def updateProject_fromV2(project):
     """Update actions for a V2 project
     """
 
-    if project.isUpgradedFromV2:
+    if project._isUpgradedFromV2:
         # Regrettably this V2 upgrade operation must be done at the wrapper level.
         # No good place except here
         for structureEnsemble in project.structureEnsembles:
@@ -16,4 +16,4 @@ def updateProject_fromV2(project):
             else:
                 data._containingObject = structureEnsemble
 
-    project._objectVersion = applicationVersion
+    project._objectVersion = '3.0.4'

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-08 09:56:50 +0000 (Wed, December 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ExpDimRef as ApiExpDimRef
 
 
 class PseudoDimension(AbstractWrapperObject):
-    """ADVANCED. A sampled Spectrum axis with non-gridded values. Used to describe
+    """A sampled Spectrum axis with non-gridded values. Can be used (V2 legacy) to describe
     sampled-value axes in pseudo-2D and nD experiments, such as the time delay axis for T1
     experiments."""
 
@@ -57,11 +57,48 @@ class PseudoDimension(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiSampledDataDim._metaclass.qualifiedName()
 
+    #-----------------------------------------------------------------------------------------
+
+    def __init__(self, project, wrappedData):
+        super().__init__(project, wrappedData)
+
+    #-----------------------------------------------------------------------------------------
+    # CCPN properties
+    #-----------------------------------------------------------------------------------------
+
     # CCPN properties
     @property
     def _apiSampledDataDim(self) -> ApiSampledDataDim:
         """ CCPN DataSource matching Spectrum"""
         return self._wrappedData
+
+    @property
+    def _dataDim(self):
+        """
+        :return: dataDim instance
+        """
+        return self._wrappedData
+
+    @property
+    def _dataDimRef(self):
+        """
+        :return: dataDim instance; not present for SampledDataDim
+        """
+        return None
+
+    @property
+    def _expDim(self):
+        """
+        :return: expDim instance
+        """
+        return self._dataDim.expDim
+
+    @property
+    def _expDimRef(self):
+        """
+        :return: expDimRef instance
+        """
+        return list(self._expDim.expDimRefs)[0]
 
     @property
     def _key(self) -> str:
@@ -80,6 +117,25 @@ class PseudoDimension(AbstractWrapperObject):
         return self._project._data2Obj[self._wrappedData.dataSource]
 
     spectrum = _parent
+
+    #-----------------------------------------------------------------------------------------
+    # Object properties
+    #-----------------------------------------------------------------------------------------
+
+    @property
+    def _isFrequencyDimension(self) -> bool:
+        """True if this is a frequency dimension; mainly used to implement code to upward compatible with v2"""
+        return self._dataDim.className == 'FreqDataDim'
+
+    @property
+    def _isSampledDimension(self) -> bool:
+        """True if this is a sampled dimension; mainly used to implement code to upward compatible with v2"""
+        return self._dataDim.className == 'SampledDataDim'
+
+    @property
+    def _isFidDimension(self) -> bool:
+        """True if this is a Fid dimension; mainly used to implement code to upward compatible with v2"""
+        return self._dataDim.className == 'FidDataDim'
 
     @property
     def dimension(self) -> int:

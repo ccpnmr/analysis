@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-18 18:20:21 +0000 (Thu, November 18, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-08 09:56:50 +0000 (Wed, December 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -78,23 +78,6 @@ class SpectrumReference(AbstractWrapperObject):
         return self._wrappedData
 
     @property
-    def _key(self) -> str:
-        """object identifier, used for id"""
-        dataDimRef = self._wrappedData
-        return Pid.createId(dataDimRef.dataDim.dim, dataDimRef.expDimRef.serial)
-
-    @property
-    def _localCcpnSortKey(self) -> Tuple:
-        """Local sorting key, in context of parent."""
-        dataDimRef = self._wrappedData
-        return (dataDimRef.dataDim.dim, dataDimRef.expDimRef.serial)
-
-    @property
-    def _parent(self) -> Spectrum:
-        """Spectrum containing spectrumReference."""
-        return self._project._data2Obj[self._wrappedData.dataDim.dataSource]
-
-    @property
     def _dataDim(self):
         """
         :return: dataDim instance
@@ -123,25 +106,40 @@ class SpectrumReference(AbstractWrapperObject):
         return self._wrappedData.expDimRef
 
     @property
-    def _isFrequencyDimension(self) -> bool:
-        """True if this is a frequency dimension; mainly used to implement code to upward compatible with v2"""
-        return self._dataDim.className == 'FreqDataDim'
+    def _key(self) -> str:
+        """object identifier, used for id"""
+        return Pid.createId(self._dataDim.dim, self._expDimRef.serial)
 
     @property
-    def _isSampledDimension(self) -> bool:
-        """True if this is a sampled dimension; mainly used to implement code to upward compatible with v2"""
-        return self._dataDim.className == 'SampledDataDim'
+    def _localCcpnSortKey(self) -> Tuple:
+        """Local sorting key, in context of parent."""
+        return (self._dataDim.dim, self._expDimRef.serial)
 
     @property
-    def _isFidDimension(self) -> bool:
-        """True if this is a Fid dimension; mainly used to implement code to upward compatible with v2"""
-        return self._dataDim.className == 'FidDataDim'
+    def _parent(self) -> Spectrum:
+        """Spectrum containing spectrumReference."""
+        return self._project._data2Obj[self._wrappedData.dataDim.dataSource]
 
     spectrum = _parent
 
     #-----------------------------------------------------------------------------------------
     # Object properties
     #-----------------------------------------------------------------------------------------
+
+    @property
+    def _isFrequencyDimension(self) -> bool:
+        """True if this is a frequency dimension; mainly used to implement code to upward compatible with v2"""
+        return self._dataDim.className == 'FreqDataDim'
+
+    @property
+    def _isFidDimension(self) -> bool:
+        """True if this is a Fid dimension; mainly used to implement code to upward compatible with v2"""
+        return self._dataDim.className == 'FidDataDim'
+
+    @property
+    def _isSampledDimension(self) -> bool:
+        """True if this is a sampled dimension; mainly used to implement code to upward compatible with v2"""
+        return self._dataDim.className == 'SampledDataDim'
 
     @property
     def dimension(self) -> int:
@@ -483,6 +481,17 @@ class SpectrumReference(AbstractWrapperObject):
         self._dataDimRef.assignmentTolerance = value
 
     #=========================================================================================
+    # CCPN functions
+    #=========================================================================================
+    def pointToValue(self, point: float) -> float:
+        """:return ppm-value corresponding to point (float)"""
+        return self._dataDimRef.pointToValue(point)
+
+    def valueToPoint(self, value: float) -> float:
+        """:return point (float) corresponding to ppm-value"""
+        return self._dataDimRef.valueToPoint(value)
+
+    #=========================================================================================
     # Implementation properties and functions
     #=========================================================================================
 
@@ -508,16 +517,6 @@ class SpectrumReference(AbstractWrapperObject):
             for peak in self.spectrum.peaks:
                 peak._finaliseAction('change')
 
-    #=========================================================================================
-    # CCPN functions
-    #=========================================================================================
-    def pointToValue(self, point: float) -> float:
-        """:return ppm-value corresponding to point (float)"""
-        return self._wrappedData.pointToValue(point)
-
-    def valueToPoint(self, value: float) -> float:
-        """:return point (float) corresponding to ppm-value"""
-        return self._wrappedData.valueToPoint(value)
 
 
 #=========================================================================================

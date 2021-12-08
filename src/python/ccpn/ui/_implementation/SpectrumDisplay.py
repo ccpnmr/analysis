@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-18 18:17:58 +0000 (Thu, November 18, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-08 14:24:31 +0000 (Wed, December 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -563,7 +563,7 @@ class SpectrumDisplay(AbstractWrapperObject):
                     # A display "plane-axis"
                     self.axes[ii].region = spectrum.spectrumLimits[axis]
                     self.axes[ii].width = spectrum.valuesPerPoint[axis]
-                    if spectrum.isTimeDomains[axis]:
+                    if spectrum.isTimeDomains[axis] or spectrum.isSampledDomains[axis]:
                         self.axes[ii].position = 1.0
 
         # Copy to strips
@@ -685,6 +685,9 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
             elif spectrum.dimensionTypes[axis] == specLib.DIMENSION_TIME:
                 # Cannot do; all falls apart
                 # apiSpectrumDisplay.newFidAxis(code=axisCode, stripSerial=1, unit=AXISUNIT_POINT)
+                apiSpectrumDisplay.newFrequencyAxis(code=displayAxisCode, stripSerial=1, unit=AXISUNIT_POINT)
+
+            elif spectrum.dimensionTypes[axis] == specLib.DIMENSION_SAMPLED:
                 apiSpectrumDisplay.newFrequencyAxis(code=displayAxisCode, stripSerial=1, unit=AXISUNIT_POINT)
 
             else:

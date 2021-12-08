@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-08 09:56:50 +0000 (Wed, December 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-08 14:24:31 +0000 (Wed, December 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -25,15 +25,17 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import typing
+from typing import Tuple, Sequence, Optional
+
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core._implementation.SpectrumDimensionAttributes import SpectrumDimensionAttributes
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import SampledDataDim as ApiSampledDataDim
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ExpDimRef as ApiExpDimRef
 
 
-class PseudoDimension(AbstractWrapperObject):
+class PseudoDimension(AbstractWrapperObject, SpectrumDimensionAttributes):
     """A sampled Spectrum axis with non-gridded values. Can be used (V2 legacy) to describe
     sampled-value axes in pseudo-2D and nD experiments, such as the time delay axis for T1
     experiments."""
@@ -107,7 +109,7 @@ class PseudoDimension(AbstractWrapperObject):
         return str(self._wrappedData.dim)
 
     @property
-    def _localCcpnSortKey(self) -> typing.Tuple:
+    def _localCcpnSortKey(self) -> Tuple:
         """Local sorting key, in context of parent."""
         return (self._wrappedData.dim,)
 
@@ -119,46 +121,8 @@ class PseudoDimension(AbstractWrapperObject):
     spectrum = _parent
 
     #-----------------------------------------------------------------------------------------
-    # Object properties
+    # Object properties; specific to PseudoDimension
     #-----------------------------------------------------------------------------------------
-
-    @property
-    def _isFrequencyDimension(self) -> bool:
-        """True if this is a frequency dimension; mainly used to implement code to upward compatible with v2"""
-        return self._dataDim.className == 'FreqDataDim'
-
-    @property
-    def _isSampledDimension(self) -> bool:
-        """True if this is a sampled dimension; mainly used to implement code to upward compatible with v2"""
-        return self._dataDim.className == 'SampledDataDim'
-
-    @property
-    def _isFidDimension(self) -> bool:
-        """True if this is a Fid dimension; mainly used to implement code to upward compatible with v2"""
-        return self._dataDim.className == 'FidDataDim'
-
-    @property
-    def dimension(self) -> int:
-        """dimension number"""
-        return self._wrappedData.dim
-
-    @property
-    def pointCount(self) -> int:
-        """dimension number"""
-        return self._wrappedData.numPoints
-
-    @property
-    def axisCode(self) -> str:
-        """PseudoDimension axisCode """
-
-        expDimRef = self._wrappedData.expDim.findFirstExpDimRef(serial=1)
-        return expDimRef and expDimRef.axisCode
-
-    @axisCode.setter
-    def axisCode(self, value: str):
-        expDimRef = self._wrappedData.expDim.findFirstExpDimRef(serial=1)
-        if expDimRef is not None:
-            expDimRef.axisCode = value
 
     @property
     def axisParameter(self) -> str:
@@ -171,35 +135,160 @@ class PseudoDimension(AbstractWrapperObject):
         self._wrappedData.conditionVaried = value
 
     @property
-    def axisUnit(self) -> str:
-        """unit for transformed data using the reference (most commonly 'ppm')"""
-        expDimRef = self._wrappedData.expDim.findFirstExpDimRef(serial=1)
-        if expDimRef is not None:
-            return expDimRef.unit
-
-    @axisUnit.setter
-    def axisUnit(self, value: str):
-        expDimRef = self._wrappedData.expDim.findFirstExpDimRef(serial=1)
-        if expDimRef is not None:
-            expDimRef.unit = value
-
-    @property
-    def pointValues(self) -> typing.Tuple[float, ...]:
+    def pointValues(self) -> Tuple[float, ...]:
         """point values for PseudoDimension)."""
         return tuple(self._wrappedData.pointValues)
 
     @pointValues.setter
-    def pointValues(self, value: typing.Sequence) -> tuple:
+    def pointValues(self, value: Sequence) -> tuple:
         self._wrappedData.pointValues = value
 
     @property
-    def pointErrors(self) -> typing.Tuple[float, ...]:
+    def pointErrors(self) -> Tuple[float, ...]:
         """point errors for PseudoDimension)."""
         return tuple(self._wrappedData.pointErrors)
 
     @pointErrors.setter
-    def pointErrors(self, value: typing.Sequence) -> tuple:
+    def pointErrors(self, value: Sequence) -> tuple:
         self._wrappedData.pointErrors = value
+
+    @property
+    def isAcquisition(self) -> bool:
+        """Always False"""
+        return False
+
+    @isAcquisition.setter
+    def isAcquisition(self, value):
+        pass
+
+    @property
+    def isReversed(self) -> bool:
+        """Always False
+        """
+        return False
+
+    @isReversed.setter
+    def isReversed(self, value):
+        """Set whether the axis is reversed - isReversed implies that ppm values decrease as point values increase
+        """
+        pass
+
+    @property
+    def maxAliasedFrequency(self) -> float:
+        """maximum possible peak frequency; emulated to be always pointCounts
+        """
+        return (float(self.pointCount))
+
+    @maxAliasedFrequency.setter
+    def maxAliasedFrequency(self, value):
+        pass
+
+    @property
+    def minAliasedFrequency(self) -> float:
+        """minimum possible frequency; emulated to be always 1.0
+        """
+        return 1.0
+
+    @minAliasedFrequency.setter
+    def minAliasedFrequency(self, value):
+        pass
+
+    @property
+    def limits(self) -> Tuple[float, float]:
+        """Return the limits of this dimension as a tuple of floats;
+        emulated to always be (1.0, pointCount)
+        """
+        return (1.0, float(self.pointCount))
+
+    @property
+    def foldingLimits(self) -> Tuple[float, float]:
+        """Return the foldingLimits of this dimension as a tuple of floats.
+        emulated to always be (0.5, pointCount+0.5)
+        """
+        return (0.5, float(self.pointCount)+0.5)
+
+    @property
+    def referencePoint(self) -> float:
+        """point used for axis (chemical shift) referencing.
+        emulated to always be 1.0
+        """
+        return 1.0
+
+    @referencePoint.setter
+    def referencePoint(self, value):
+        pass
+
+    @property
+    def referenceValue(self) -> float:
+        """ppm-value used for axis (chemical shift) referencing.
+        emulated to always be 1.0
+        """
+        return 1.0
+
+    @referenceValue.setter
+    def referenceValue(self, value: float):
+        pass
+
+    @property
+    def spectralWidthHz(self) -> float:
+        """spectral width in Hz
+        emulated to always be 1.0 * spectrometerFrequency
+        """
+        return 1.0*self.spectrometerFrequency
+
+    @spectralWidthHz.setter
+    def spectralWidthHz(self, value: float):
+        pass
+
+    @property
+    def spectralWidth(self) -> float:
+        """spectral width in ppm
+        emulated to always be self.pointCount
+        """
+        return float(self.pointCount)
+
+    @spectralWidth.setter
+    def spectralWidth(self, value: float):
+        pass
+
+    @property
+    def _valuePerPoint(self) -> float:
+        """Value per point:
+        emulated to always be 1.0
+        """
+        return 1.0
+
+    @_valuePerPoint.setter
+    def _valuePerPoint(self, value: float):
+        pass
+
+    @property
+    def phase0(self) -> Optional[float]:
+        """Zero-order phase; always None"""
+        return None
+
+    @phase0.setter
+    def phase0(self, value):
+        pass
+
+    @property
+    def phase1(self) -> Optional[float]:
+        """First-order phase; always None"""
+        return None
+
+    @phase1.setter
+    def phase1(self, value):
+        pass
+
+    @property
+    def assignmentTolerance(self) -> float:
+        """Assignment Tolerance; Always None
+        """
+        return None
+
+    @assignmentTolerance.setter
+    def assignmentTolerance(self, value):
+        pass
 
     #=========================================================================================
     # Implementation functions

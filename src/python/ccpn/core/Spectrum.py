@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-08 09:56:50 +0000 (Wed, December 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-08 14:24:31 +0000 (Wed, December 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -867,8 +867,16 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     def isTimeDomains(self) -> list:
         """Conveniance: A list of booleans per dimension indicating if dimension is
-          time domain """
+          time domain
+        """
         return [(dimType == specLib.DIMENSION_TIME) for dimType in self.dimensionTypes]
+
+    @property
+    def isSampledDomains(self) -> list:
+        """Conveniance: A list of booleans per dimension indicating if dimension is
+          sampled
+        """
+        return [(dimType == specLib.DIMENSION_SAMPLED) for dimType in self.dimensionTypes]
 
     @property
     @_includeInDimensionalCopy
@@ -897,7 +905,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """valuePerPoint for each dimension:
         in ppm for Frequency dimensions
         in time units (seconds) for Time (Fid) dimensions
-        None for sampled dimensions
+        1.0 for sampled dimensions
         """
         result = []
         _widths = self.spectralWidths
@@ -913,6 +921,9 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                 # valuePerPoint is dwell time
                 valuePerPoint = 1.0 / _widthsHz[axis] if _isComplex[axis] \
                     else 0.5 / _widthsHz[axis]
+
+            elif dimType == specLib.DIMENSION_SAMPLED:
+                valuePerPoint = 1.0
             else:
                 valuePerPoint = None
 
@@ -1300,12 +1311,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def foldingLimits(self) -> List[Tuple[float, float]]:
         """list of tuples of (ppmPoint(0.5), ppmPoint(n+0.5)) for each dimension
         """
-        result = []
-        for idx, limits in enumerate(self._getDimensionalAttributes('foldingLimits')):
-            if limits is None:  # happens for pseudoDimensions
-                limits = (self.point2ppm(0.5, dimension=idx+1), self.point2ppm(self.pointCounts[idx]+0.5, dimension=idx+1))
-            result.append(limits)
-        return result
+        return self._getDimensionalAttributes('foldingLimits')
 
     def get1Dlimits(self):
         """Get the 1D spectrum ppm-limits and the intensity limits
@@ -2851,23 +2857,23 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         except (ValueError, RuntimeError) as es:
             getLogger().warning('Error restoring valid peak picker for %s (%s)' % (spectrum, es))
 
-        try:
-            # check that the read values of aliasingLimits are with the allowed range (-3, +3) and centre
-            # and round to the nearest limit
-            inds = spectrum.aliasingIndexes
-            clippedInds = tuple((max(min(ind[0], 0), -MAXALIASINGRANGE),
-                                 max(min(ind[1], MAXALIASINGRANGE), 0)) for ind in inds)
-
-            if inds != clippedInds:
-                getLogger().warning(f'AliasingLimits are out-of-range for {spectrum}, clipping to ±{MAXALIASINGRANGE} spectrumLimits')
-            # foldingLimits extend 0.5points beyond spectrumLimits
-            lims = spectrum.foldingLimits
-            widths = spectrum.spectralWidths
-            newLims = tuple((min(lm) + min(cl) * wid, max(lm) + max(cl) * wid) for lm, cl, wid in zip(lims, clippedInds, widths))
-            # set the new aliasing limits
-            spectrum.aliasingLimits = newLims
-        except (IndexError, RuntimeError, ValueError) as es:
-            getLogger().error('Spectrum._restoreObject: %s' % es)
+        # try:
+        #     # check that the read values of aliasingLimits are with the allowed range (-3, +3) and centre
+        #     # and round to the nearest limit
+        #     inds = spectrum.aliasingIndexes
+        #     clippedInds = tuple((max(min(ind[0], 0), -MAXALIASINGRANGE),
+        #                          max(min(ind[1], MAXALIASINGRANGE), 0)) for ind in inds)
+        #
+        #     if inds != clippedInds:
+        #         getLogger().warning(f'AliasingLimits are out-of-range for {spectrum}, clipping to ±{MAXALIASINGRANGE} spectrumLimits')
+        #     # foldingLimits extend 0.5points beyond spectrumLimits
+        #     lims = spectrum.foldingLimits
+        #     widths = spectrum.spectralWidths
+        #     newLims = tuple((min(lm) + min(cl) * wid, max(lm) + max(cl) * wid) for lm, cl, wid in zip(lims, clippedInds, widths))
+        #     # set the new aliasing limits
+        #     spectrum.aliasingLimits = newLims
+        # except (IndexError, RuntimeError, ValueError) as es:
+        #     getLogger().error('Spectrum._restoreObject: %s' % es)
 
         # Assure a setting of crucial attributes
         spectrum._updateParameterValues()

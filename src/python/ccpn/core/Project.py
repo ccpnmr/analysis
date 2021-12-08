@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-03 20:07:35 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-08 13:27:03 +0000 (Wed, December 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -547,7 +547,7 @@ class Project(AbstractWrapperObject):
     #     return 'CcpNmr' if appBase is None else appBase.applicationName
 
     @logCommand('project.')
-    def deleteObjects(self, *objs: typing.Sequence[typing.Union[Pid.Pid, AbstractWrapperObject]]):
+    def deleteObjects(self, *objs: typing.Sequence[typing.Union[str, Pid.Pid, AbstractWrapperObject]]):
         """Delete one or more objects, given as either objects or Pids
         """
         getByPid = self.getByPid

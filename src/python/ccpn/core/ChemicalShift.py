@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-03 19:43:00 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-08 13:27:03 +0000 (Wed, December 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -324,7 +324,7 @@ class ChemicalShift(NotifierBase):
 
         if value is not None:
             # check the new value is valid - allow core object, str or Pid
-            _nmrAtom = self._project.getByPid(value) if isinstance(value, (str, type(Pid))) else value
+            _nmrAtom = self._project.getByPid(value) if isinstance(value, str) else value
             if not _nmrAtom:
                 raise ValueError(f'{self.className}.nmrAtom: {value} not found')
             if _nmrAtom == nat:

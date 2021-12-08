@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-03 16:21:02 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-08 13:27:03 +0000 (Wed, December 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -127,7 +127,10 @@ class ChemicalShiftList(AbstractWrapperObject):
 
         super().__init__(project, wrappedData)
 
-    # CCPN properties
+    #=========================================================================================
+    # CCPN Properties
+    #=========================================================================================
+
     @property
     def _apiShiftList(self) -> Nmr.ShiftList:
         """ CCPN ShiftList matching ChemicalShiftList"""
@@ -185,13 +188,6 @@ class ChemicalShiftList(AbstractWrapperObject):
     def isSimulated(self, value: bool):
         self._wrappedData.isSimulated = value
 
-    @property
-    def spectra(self) -> Tuple[Spectrum, ...]:
-        """ccpn.Spectra that use ChemicalShiftList to store chemical shifts"""
-        ff = self._project._data2Obj.get
-        return tuple(sorted(ff(y) for x in self._wrappedData.experiments
-                            for y in x.dataSources))
-
     def _recalculatePeakShifts(self, nmrResidues, shifts):
         # update the assigned nmrAtom chemical shift values - notify the nmrResidues and chemicalShifts
         for sh in shifts:
@@ -200,6 +196,13 @@ class ChemicalShiftList(AbstractWrapperObject):
             nmr._finaliseAction('change')
         for sh in shifts:
             sh._finaliseAction('change')
+
+    @property
+    def spectra(self) -> Tuple[Spectrum, ...]:
+        """ccpn.Spectra that use ChemicalShiftList to store chemical shifts"""
+        ff = self._project._data2Obj.get
+        return tuple(sorted(ff(y) for x in self._wrappedData.experiments
+                            for y in x.dataSources))
 
     @spectra.setter
     @logCommand(get='self', isProperty=True)
@@ -221,20 +224,18 @@ class ChemicalShiftList(AbstractWrapperObject):
         # add a spectrum/remove a spectrum
         _createSpectra = set(_spectra) - set(self.spectra)
         _deleteSpectra = set(self.spectra) - set(_spectra)
-        _createNmr = self._getNmrAtomsFromSpectra(_createSpectra)  # new nmrAtoms to add
-        _deleteNmr = self._getNmrAtomsFromSpectra(_deleteSpectra)  # old nmrAtoms to update
+        _createNmrAtoms = self._getNmrAtomsFromSpectra(_createSpectra)  # new nmrAtoms to add
+        _deleteNmrAtoms = self._getNmrAtomsFromSpectra(_deleteSpectra)  # old nmrAtoms to update
 
-        _thisNmr = self._getNmrAtoms()  # current nmrAtoms referenced in shiftLift
+        _thisNmrAtoms = self._getNmrAtoms()  # current nmrAtoms referenced in shiftLift
 
         # nmrAtoms with peakCount = 0 -> these are okay
-        _oldNmrPks = set(nmr for nmr in _thisNmr if self not in [pk.spectrum.chemicalShiftList for pk in nmr.assignedPeaks])
+        _oldNmrAtoms = set(nmr for nmr in _thisNmrAtoms if self not in [pk.chemicalShiftList for pk in nmr.assignedPeaks])
+        _newNmrAtoms = _createNmrAtoms - _oldNmrAtoms
 
-        _newNmr = _createNmr - _oldNmrPks
-        if (_newNmr & _thisNmr):
-            raise RuntimeError(f'ChemicalShiftList.spectra: nmrAtoms already in list')
-        _nmrs = _deleteNmr | _oldNmrPks
-        nmrResidues = set(nmr.nmrResidue for nmr in _nmrs)
-        shifts = set(cs for nmrAt in _nmrs for cs in nmrAt.chemicalShifts if cs and not cs.isDeleted)
+        _nmrAtoms = _createNmrAtoms | _deleteNmrAtoms | _oldNmrAtoms  # do I need to do all these?
+        nmrResidues = set(nmr.nmrResidue for nmr in _nmrAtoms)
+        shifts = set(cs for nmrAt in _nmrAtoms for cs in nmrAt.chemicalShifts if cs and not cs.isDeleted)
 
         with undoBlock():
             with undoStackBlocking() as addUndoItem:
@@ -242,7 +243,7 @@ class ChemicalShiftList(AbstractWrapperObject):
 
             self._wrappedData.experiments = set(x._wrappedData.experiment for x in _spectra)
 
-            for nmrAtom in _newNmr:
+            for nmrAtom in _newNmrAtoms:
                 self.newChemicalShift(nmrAtom=nmrAtom)
 
             self._recalculatePeakShifts(nmrResidues, shifts)
@@ -662,7 +663,7 @@ class ChemicalShiftList(AbstractWrapperObject):
 
         data = self._wrappedData.data
         if nmrAtom:
-            _nmrAtom = self.project.getByPid(nmrAtom) if isinstance(nmrAtom, (str, type(Pid))) else nmrAtom
+            _nmrAtom = self.project.getByPid(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom
             if not _nmrAtom:
                 raise ValueError(f'ChemicalShiftList.newChemicalShift: nmrAtom {_nmrAtom} not found')
             nmrAtom = _nmrAtom
@@ -785,9 +786,18 @@ def getter(self: Spectrum) -> ChemicalShiftList:
 
 
 def setter(self: Spectrum, value: ChemicalShiftList):
-    value = self.getByPid(value) if isinstance(value, str) else value
-    if isinstance(value, ChemicalShiftList):
-        self._apiDataSource.experiment.shiftList = value._apiShiftList
+    # value = self.getByPid(value) if isinstance(value, str) else value
+    # if isinstance(value, ChemicalShiftList):
+    #     self._apiDataSource.experiment.shiftList = value._apiShiftList
+
+    _shiftList = self.getByPid(value) if isinstance(value, str) else value
+    if not _shiftList:
+        raise ValueError(f'Spectrum.chemicalShiftList: {value} not found')
+    if not isinstance(_shiftList, ChemicalShiftList):
+        raise ValueError(f'Spectrum.chemicalShiftList: {value} not a chemicalShiftList')
+
+    # add the spectrum to the chemicalShiftList
+    _shiftList.spectra = set(_shiftList.spectra) | {self}
 
 
 Spectrum.chemicalShiftList = property(getter, setter, None,

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-08 14:24:31 +0000 (Wed, December 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-08 14:54:19 +0000 (Wed, December 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -234,7 +234,7 @@ class PseudoDimension(AbstractWrapperObject, SpectrumDimensionAttributes):
         """spectral width in Hz
         emulated to always be 1.0 * spectrometerFrequency
         """
-        return 1.0*self.spectrometerFrequency
+        return self.spectralWidth*self.spectrometerFrequency
 
     @spectralWidthHz.setter
     def spectralWidthHz(self, value: float):
@@ -253,10 +253,8 @@ class PseudoDimension(AbstractWrapperObject, SpectrumDimensionAttributes):
 
     @property
     def _valuePerPoint(self) -> float:
-        """Value per point:
-        emulated to always be 1.0
-        """
-        return 1.0
+        """Value per point"""
+        return self.spectralWidthHz / self.pointCount
 
     @_valuePerPoint.setter
     def _valuePerPoint(self, value: float):
@@ -289,6 +287,17 @@ class PseudoDimension(AbstractWrapperObject, SpectrumDimensionAttributes):
     @assignmentTolerance.setter
     def assignmentTolerance(self, value):
         pass
+
+    #=========================================================================================
+    # CCPN functions
+    #=========================================================================================
+    def pointToValue(self, point: float) -> float:
+        """:return ppm-value corresponding to point (float)"""
+        return float(point)
+
+    def valueToPoint(self, value: float) -> float:
+        """:return point (float) corresponding to ppm-value"""
+        return float(value)
 
     #=========================================================================================
     # Implementation functions

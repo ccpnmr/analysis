@@ -136,8 +136,8 @@ class SpectrumDimensionAttributes(object):
     def maxAliasedFrequency(self) -> float:
         """maximum possible frequency (in ppm) for this reference """
         if (result := self._expDimRef.maxAliasedFreq) is None:
-            point_1 = 1 - self._dataDim.pointOffset
-            point_n = float(point_1 + self.pointCount) + 0.5
+            point_1 = 1 - self._dataDim.pointOffset - 0.5
+            point_n = float(point_1 + self.pointCount)
             result = self.pointToValue((point_n))
         return result
 
@@ -158,15 +158,15 @@ class SpectrumDimensionAttributes(object):
         self._expDimRef.minAliasedFreq = value
 
     @property
-    def limits(self) -> Tuple[float, float]:
-        """Return the limits of this dimension as a tuple of floats"""
+    def spectrumLimits(self) -> Tuple[float, float]:
+        """Return the limits of this spectrum dimension as a tuple of floats"""
         if self.dimensionType == specLib.DIMENSION_FREQUENCY:
             return (self.pointToValue(1.0), self.pointToValue(float(self.pointCount)))
         elif self.dimensionType == specLib.DIMENSION_TIME:
             return (self.pointToValue(1.0), self.pointToValue(float(self.pointCount)))
             # return (0.0, self._valuePerPoint * self.pointCount)
         else:
-            raise RuntimeError('SpectrumReference.limits not implemented for sampled data')
+            raise RuntimeError('SpectrumReference.spectrumLimits: not implemented for sampled data')
 
     @property
     def foldingLimits(self) -> Tuple[float, float]:

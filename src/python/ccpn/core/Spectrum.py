@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-08 16:57:33 +0000 (Wed, December 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-08 17:48:41 +0000 (Wed, December 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1298,7 +1298,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def spectrumLimits(self) -> List[Tuple[float, float]]:
         """list of tuples of (ppmPoint(1), ppmPoint(n)) for each dimension
         """
-        return self._getDimensionalAttributes('limits')
+        return self._getDimensionalAttributes('spectrumLimits')
         # ll = []
         # for ii, ddr in enumerate(self._mainDataDimRefs()):
         #     if ddr is None:

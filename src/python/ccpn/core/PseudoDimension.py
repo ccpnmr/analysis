@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-08 16:57:33 +0000 (Wed, December 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-08 17:48:41 +0000 (Wed, December 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -175,9 +175,10 @@ class PseudoDimension(AbstractWrapperObject, SpectrumDimensionAttributes):
 
     @property
     def maxAliasedFrequency(self) -> float:
-        """maximum possible peak frequency; emulated to be always pointCounts
+        """maximum possible peak frequency; emulated to be always ppmValue of
+        pointCounts +0.5
         """
-        return (float(self.pointCount))
+        return self.pointToValue(float(self.pointCount)+0.5)
 
     @maxAliasedFrequency.setter
     def maxAliasedFrequency(self, value):
@@ -185,27 +186,26 @@ class PseudoDimension(AbstractWrapperObject, SpectrumDimensionAttributes):
 
     @property
     def minAliasedFrequency(self) -> float:
-        """minimum possible frequency; emulated to be always 1.0
+        """minimum possible frequency; emulated to be always ppmValue of
+        point 0.5
         """
-        return 1.0
+        result = self.pointToValue(0.5)
+        return result
 
     @minAliasedFrequency.setter
     def minAliasedFrequency(self, value):
         pass
 
     @property
-    def limits(self) -> Tuple[float, float]:
-        """Return the limits of this dimension as a tuple of floats;
-        emulated to always be (1.0, pointCount)
-        """
-        return (1.0, float(self.pointCount))
+    def spectrumLimits(self) -> Tuple[float, float]:
+        """Return the limits of this spectrum dimension as a tuple of floats"""
+        return (self.pointToValue(1.0), self.pointToValue(float(self.pointCount)))
 
     @property
     def foldingLimits(self) -> Tuple[float, float]:
         """Return the foldingLimits of this dimension as a tuple of floats.
-        emulated to always be (0.5, pointCount+0.5)
         """
-        return (0.5, float(self.pointCount)+0.5)
+        return (self.pointToValue(0.5), self.pointToValue(float(self.pointCount) + 0.5))
 
     @property
     def referencePoint(self) -> float:

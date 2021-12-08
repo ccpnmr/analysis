@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-04 20:14:38 +0000 (Thu, November 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-08 14:26:08 +0000 (Wed, December 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -440,8 +440,8 @@ class ChemicalShiftTable(GuiTable):
             currentNmrAtom = cShift.nmrAtom if cShift else None
 
             selection = [ch.nmrAtom for ch in selection or [] if ch.nmrAtom]
-            _check = (currentNmrAtom and (1 < len(selection) < 5) and currentNmrAtom in selection) or False
-            _option = ' into {}'.format(currentNmrAtom.id if currentNmrAtom else '') if _check else ''
+            _check = (currentNmrAtom and 1 < len(selection) and currentNmrAtom in selection) or False
+            _option = 'into {}'.format(currentNmrAtom.id if currentNmrAtom else '') if _check else ''
             self._mergeMenuAction.setText('Merge NmrAtoms {}'.format(_option))
             self._mergeMenuAction.setEnabled(_check)
 

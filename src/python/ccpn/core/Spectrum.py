@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-08 17:48:41 +0000 (Wed, December 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-08 18:27:40 +0000 (Wed, December 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1231,18 +1231,13 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @property
     @_includeInDimensionalCopy
-    def aliasingLimits(self) -> Tuple[tuple, ...]:
-        """Tuple of tuples of sorted(minAliasingLimit, maxAliasingLimit) per dimension
+    def aliasingLimits(self) -> List[Tuple[float, float]]:
+        """List of tuples of sorted(minAliasingLimit, maxAliasingLimit) per dimension
         """
-        # Pseudo dimensions do not have these attributes and hence yield None
         minVals = self._getDimensionalAttributes('minAliasedFrequency')
         maxVals = self._getDimensionalAttributes('maxAliasedFrequency')
-        result = []
-        for t in zip(minVals, maxVals):
-            if not None in t:
-                t = sorted(t)
-            result.append(t)
-        return tuple(result)
+        result = [sorted(t) for t in zip(minVals, maxVals)]
+        return result
 
         # result = [(x and x.minAliasedFreq, x and x.maxAliasedFreq) for x in self._mainExpDimRefs()]
         #
@@ -1282,30 +1277,11 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         self._setDimensionalAttributes('minAliasedFrequency', minVals)
         self._setDimensionalAttributes('maxAliasedFrequency', maxVals)
 
-    #     if len(value) != self.dimensionCount:
-    #         raise ValueError("length of aliasingLimits must match spectrum dimension, was %s" % value)
-    #
-    #     expDimRefs = self._mainExpDimRefs()
-    #     for ii, tt in enumerate(value):
-    #         expDimRef = expDimRefs[ii]
-    #         if expDimRef:
-    #             if len(tt) != 2:
-    #                 raise ValueError("Aliasing limits must have two value (min,max), was %s" % tt)
-    #             expDimRef.minAliasedFreq = tt[0]
-    #             expDimRef.maxAliasedFreq = tt[1]
-
     @property
     def spectrumLimits(self) -> List[Tuple[float, float]]:
         """list of tuples of (ppmPoint(1), ppmPoint(n)) for each dimension
         """
         return self._getDimensionalAttributes('spectrumLimits')
-        # ll = []
-        # for ii, ddr in enumerate(self._mainDataDimRefs()):
-        #     if ddr is None:
-        #         ll.append((None, None))
-        #     else:
-        #         ll.append((ddr.pointToValue(1), ddr.pointToValue(ddr.dataDim.numPoints + 1)))
-        # return tuple(ll)
 
     @property
     def foldingLimits(self) -> List[Tuple[float, float]]:

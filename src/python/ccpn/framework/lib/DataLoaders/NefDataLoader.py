@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-24 10:12:36 +0100 (Fri, September 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-08 15:36:30 +0000 (Wed, December 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -29,11 +29,16 @@ __date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
 # Start of code
 #=========================================================================================
 
-from typing import Union, Optional
+from typing import Union, Optional, Sequence
 from contextlib import contextmanager
+from time import time
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
 from ccpn.util import Path
+from ccpn.util.Logging import getLogger
+from ccpn.util.nef.GenericStarParser import DataBlock
 from ccpn.core.Project import Project
+from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking
+from ccpn.core.lib import CcpnNefIo
 
 
 class NefDataLoader(DataLoaderABC):
@@ -66,7 +71,7 @@ class NefDataLoader(DataLoaderABC):
         return [project]
 
     @staticmethod
-    def readNefFile(path: Union[str, Path.aPath], nefValidationPath: Union[str, Path.aPath, None]=None, errorLogging=None, hidePrefix=True):
+    def readNefFile(path: Union[str, Path.aPath], nefValidationPath: Union[str, Path.aPath, None] = None, errorLogging=None, hidePrefix=True):
         """Create a Nef loader object and load a nef file into it together with a Nef validation file.
         If no validation file is specified, the default is taken from PathsAndUrls
 
@@ -108,7 +113,7 @@ class NefDataLoader(DataLoaderABC):
         return _loader
 
     @staticmethod
-    def readNefText(text: str, nefValidationPath: Union[str, Path.aPath, None]=None, errorLogging=None, hidePrefix=True):
+    def readNefText(text: str, nefValidationPath: Union[str, Path.aPath, None] = None, errorLogging=None, hidePrefix=True):
         """Create a Nef loader object and populate from a text string containing the nef structure together with a Nef validation file.
 
         If no validation file is specified, the default is taken from PathsAndUrls
@@ -220,6 +225,53 @@ class NefDataLoader(DataLoaderABC):
         #
         #     getLogger().info('==> Loaded NEF file: "%s"' % (path,))
         #     return self.project
+
+    @staticmethod
+    def _convertToDataBlock(project, skipPrefixes: Sequence = (),
+                            expandSelection: bool = True,
+                            pidList: list = None):
+        """
+        Export selected contents of the project to a Nef file.
+
+          skipPrefixes: ( 'ccpn', ..., <str> )
+          expandSelection: <bool> }
+
+          Include 'ccpn' in the skipPrefixes list will exclude ccpn specific items from the file
+          expandSelection = True  will include all data from the project, this may not be data that
+                                  is not defined in the Nef standard.
+
+        PidList is a list of <str>, e.g. 'NC:@-', obtained from the objects to be included.
+        The Nef file may also contain further dependent items associated with the pidList.
+
+        :param skipPrefixes: items to skip
+        :param expandSelection: expand the selection
+        :param pidList: a list of pids
+        """
+        # from ccpn.core.lib import CcpnNefIo
+
+        with undoStackBlocking():
+            with notificationBlanking():
+                t0 = time()
+                dataBlock = CcpnNefIo.convertToDataBlock(project, skipPrefixes=skipPrefixes,
+                                                         expandSelection=expandSelection,
+                                                         pidList=pidList)
+                t2 = time()
+                getLogger().info('File to dataBlock, time = %.2fs' % (t2 - t0))
+
+        return dataBlock
+
+    @staticmethod
+    def _writeDataBlockToFile(dataBlock: DataBlock = None, path: str = None,
+                              overwriteExisting: bool = False):
+        # Export the modified dataBlock to file
+        # from ccpn.core.lib import CcpnNefIo
+
+        with undoStackBlocking():
+            with notificationBlanking():
+                t0 = time()
+                CcpnNefIo.writeDataBlock(dataBlock, path=path, overwriteExisting=overwriteExisting)
+                t2 = time()
+                getLogger().info('Exporting dataBlock to file, time = %.2fs' % (t2 - t0))
 
 
 NefDataLoader._registerFormat()

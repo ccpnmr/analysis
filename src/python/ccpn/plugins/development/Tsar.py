@@ -1,8 +1,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -10,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Chris Spronk $"
-__dateModified__ = "$dateModified: 2017-11-28 16:32:26 +0100 (Tue, Nov 28, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-12-08 15:36:30 +0000 (Wed, December 08, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -553,7 +554,9 @@ class TsarGuiPlugin(PluginModule):
 
     def _convertNefToDataBlock(self):
         # Convert the standard NEF data to a Data block
-        self.dataBlock = self.project._convertToDataBlock(skipPrefixes=(), expandSelection=False,pidList=self.exportPidList)
+        from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
+
+        self.dataBlock = NefDataLoader._convertToDataBlock(self.project, skipPrefixes=(), expandSelection=False,pidList=self.exportPidList)
 
     def _createConnectivities(self,spectrum):
 
@@ -642,7 +645,9 @@ class TsarGuiPlugin(PluginModule):
     def _exportNef(self):
         # self.outputPath = os.path.join(self.settings['General']['Run path'], '{0}.nef'.format(self.settings['General']['Run name']))
         # self.project._writeDataBlockToFile(dataBlock=self.dataBlock, path=self.outputPath, overwriteExisting=True)
-        self.project._writeDataBlockToFile(dataBlock=self.dataBlock, path=os.path.join(self.runPath, '{0}.nef'.format(self.settings['General']['Run name'])), overwriteExisting=True)
+        from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
+
+        NefDataLoader._writeDataBlockToFile(dataBlock=self.dataBlock, path=os.path.join(self.runPath, '{0}.nef'.format(self.settings['General']['Run name'])), overwriteExisting=True)
 
     def _setupProject(self):
         # Get values from the GUI widgets and save in the settings

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-24 18:52:43 +0000 (Wed, November 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-08 15:36:30 +0000 (Wed, December 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -987,83 +987,6 @@ class Framework(NotifierBase):
         """Convenience"""
         return self.getByPid(gid)
 
-    # def _startCommandBlock(self, command: str, quiet: bool = False, **objectParameters):
-    #     """Start block for command echoing, set undo waypoint, and echo command to ui and logger
-    #
-    #     MUST be paired with _endCommandBlock call - use try ... finally to ensure both are called
-    #
-    #     Set keyword:value objectParameters to point to the relevant objects in setup commands,
-    #     and pass setup commands and command proper to ui for echoing
-    #
-    #     Example calls:
-    #
-    #     _startCommandBlock("application.createSpectrumDisplay(spectrum)", spectrum=spectrumOrPid)
-    #
-    #     _startCommandBlock(
-    #        "newAssignment = peak.assignDimension(axisCode=%s, value=[newNmrAtom]" % axisCode,
-    #        peak=peakOrPid)"""
-    #
-    #     undo = self.project._undo
-    #     if undo is not None:  # ejb - changed from if undo:
-    #         # set undo step
-    #         undo.newWaypoint()  # DO NOT CHANGE
-    #
-    #         # _blockedSideBar is a project override
-    #         if not self.project._blockSideBar and not undo._blocked:
-    #             if undo._waypointBlockingLevel < 1 and self.ui and self.ui.mainWindow:
-    #                 self.ui.mainWindow.sideBar._saveExpandedState()
-    #
-    #         undo.increaseWaypointBlocking()
-    #
-    #     if not self._echoBlocking:
-    #         self.project.suspendNotification()
-    #
-    #         # Get list of command strings
-    #         commands = []
-    #         for parameter, value in sorted(objectParameters.items()):
-    #             if value is not None:
-    #                 if not isinstance(value, str):
-    #                     value = value.pid
-    #                 commands.append("%s = project.getByPid(%s)\n" % (parameter, repr(value)))
-    #         commands.append(command)  # ED: newLine NOT needed here
-    #
-    #         # echo command strings
-    #         # added 'quiet' mode to keep full functionality to 'startCommandEchoBLock'
-    #         # but without the screen output
-    #         if not quiet:
-    #             self.ui.echoCommands(commands)
-    #
-    #     self._increaseNotificationBlocking()
-    #     getLogger().debug2('command=%s, echoBlocking=%s, undo.blocking=%s'
-    #                        % (command, self._echoBlocking, undo.blocking))
-
-    # def _endCommandBlock(self):
-    #     """End block for command echoing,
-    #
-    #     MUST be paired with _startCommandBlock call - use try ... finally to ensure both are called"""
-    #
-    #     getLogger().debug2('echoBlocking=%s' % self._echoBlocking)
-    #     undo = self.project._undo
-    #
-    #     # if self._echoBlocking > 0:
-    #     #     self._echoBlocking -= 1
-    #     self._decreaseNotificationBlocking()
-    #
-    #     if not self._echoBlocking:
-    #         self.project.resumeNotification()
-    #
-    #     if undo is not None:  # ejb - changed from if undo:
-    #         undo.decreaseWaypointBlocking()
-    #
-    #         if not self.project._blockSideBar and not undo._blocked:
-    #             if undo._waypointBlockingLevel < 1 and self.ui and self.ui.mainWindow:
-    #                 self.ui.mainWindow.sideBar._restoreExpandedState()
-    #
-    #     # if self._echoBlocking > 0:
-    #     #   # If statement should always be True, but to avoid weird behaviour in error situations we check
-    #     #   self._echoBlocking -= 1
-    #     # # self.project.resumeNotification()
-
     def addApplicationMenuSpec(self, spec, position=5):
         """Add an entirely new menu at specified position"""
         self._menuSpec.insert(position, spec)
@@ -1724,36 +1647,6 @@ class Framework(NotifierBase):
         getLogger().info('==> Loaded Star file: "%s"' % (path,))
         return self.project
 
-    # """Load Project from NEF file at path, and do necessary setup"""
-    #
-    # from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
-    #
-    # dataBlock = self.nefReader.getNMRStarData(path)
-
-    # if makeNewProject:
-    #     if self.project is not None:
-    #         self._closeProject()
-    #     self.project = self.newProject(dataBlock.name)
-    #
-    # self.project._wrappedData.shiftAveraging = False
-    #
-    # # with suspendSideBarNotifications(project=self.project):
-    # with undoBlock():
-    #     with notificationEchoBlocking():
-    #         # with catchExceptions(application=self, errorStringTemplate='Error loading NMRStar file: %s'):
-    #             self.nefReader.importNewProject(self.project, dataBlock)
-
-    # with undoBlock():
-    #     try:
-    #         self.nefReader.importNewNMRStarProject(self.project, dataBlock)
-    #     except Exception as es:
-    #         getLogger().warning('Error loading NMRStar file: %s' % str(es))
-
-    # self.project._wrappedData.shiftAveraging = True
-
-    # getLogger().info('==> Loaded NmrStar file: "%s"' % (path,))
-    # return self.project
-
     def _loadSparkyFile(self, path: str, createNewProject=True) -> Project:
         """Load Project from Sparky file at path, and do necessary setup
         :return Project-instance (either existing or newly created)
@@ -2056,106 +1949,8 @@ class Framework(NotifierBase):
             # import from the loader into the current project
             self.importFromLoader(_loader, reader=_nefReader)
 
-            # self.project.shiftAveraging = False
-            # # with suspendSideBarNotifications(project=self.project):
-            #
-            # with undoBlockWithoutSideBar():
-            #     with notificationEchoBlocking():
-            #         with catchExceptions(application=self, errorStringTemplate='Error importing Nef file: %s', printTraceBack=True):
-            #             # need datablock selector here, with subset selection dependent on datablock type
-            #
-            #             _nefReader.importNewProject(self.project, _loader._nefDict, selection)
-            #
-            # self.project.shiftAveraging = True
-
             getLogger().info('==> Loaded NEF file: "%s"' % (path,))
             return self.project
-
-    # @logCommand('application.')
-    # def readNefFile(self, path: Union[str, Path.aPath], nefValidationPath: Union[str, Path.aPath, None]=None, errorLogging=None, hidePrefix=True):
-    #     """Create a Nef loader object and load a nef file into it together with a Nef validation file.
-    #     If no validation file is specified, the default is taken from PathsAndUrls
-    #
-    #     :param path: path to the nef file
-    #     :param nefValidationPath: path to the nef validation file - an mmcif.dic file
-    #     :param errorLogging: level of logging - 'standard', 'silent', 'strict'
-    #     :param hidePrefix: True/False, hide the 'nef_' prefixes in the saveframes
-    #     :return: instance of NefImporter
-    #     """
-    #
-    #     # NOTE:ED - this will need moving to the loaders in .alpha
-    #     from ccpn.util.nef import NefImporter as Nef
-    #     from ccpn.framework.PathsAndUrls import nefValidationPath as defaultNefValidationPath
-    #
-    #     # set the default values if not specified
-    #     _errorLogging = errorLogging or Nef.el.NEF_STRICT
-    #     _validation = nefValidationPath or defaultNefValidationPath
-    #
-    #     # check the parameters
-    #     if not isinstance(path, (str, Path.Path)):
-    #         raise ValueError(f'path {path} not defined correctly')
-    #     if not isinstance(_validation, (str, Path.Path, type(None))):
-    #         raise ValueError(f'nefValidationPath {_validation} not defined correctly')
-    #     if _errorLogging not in [Nef.el.NEF_STANDARD, Nef.el.NEF_STRICT, Nef.el.NEF_SILENT]:
-    #         raise ValueError(f'errorLogging must be one of: [{repr(Nef.el.NEF_STANDARD)}, {repr(Nef.el.NEF_STRICT)}, {repr(Nef.el.NEF_SILENT)}]')
-    #     if not isinstance(hidePrefix, bool):
-    #         raise ValueError(f'hidePrefix must be a bool')
-    #
-    #     # convert to aPath objects
-    #     path = Path.aPath(path) if isinstance(path, str) else path
-    #     _validation = Path.aPath(_validation) if isinstance(_validation, str) else _validation
-    #
-    #     # create the nef importer instance
-    #     _loader = Nef.NefImporter(errorLogging=_errorLogging, hidePrefix=hidePrefix)
-    #
-    #     # load the nef file and the validation file
-    #     _loader.loadFile(path)
-    #     _loader.loadValidateDictionary(_validation)
-    #
-    #     return _loader
-
-    # @logCommand('application.')
-    # def readNefText(self, text: str, nefValidationPath: Union[str, Path.aPath, None]=None, errorLogging=None, hidePrefix=True):
-    #     """Create a Nef loader object and populate from a text string containing the nef structure together with a Nef validation file.
-    #
-    #     If no validation file is specified, the default is taken from PathsAndUrls
-    #
-    #     :param text: text containging the nef structure
-    #     :param nefValidationPath: path to the nef validation file - an mmcif.dic file
-    #     :param errorLogging: level of logging - 'standard', 'silent', 'strict'
-    #     :param hidePrefix: True/False, hide the 'nef_' prefixes in the saveframes
-    #     :return: instance of NefImporter
-    #     """
-    #
-    #     # NOTE:ED - this will need moving to the loaders in .alpha
-    #     from ccpn.util.nef import NefImporter as Nef
-    #     from ccpn.framework.PathsAndUrls import nefValidationPath as defaultNefValidationPath
-    #
-    #     # set the default values if not specified
-    #     _errorLogging = errorLogging or Nef.el.NEF_STRICT
-    #     _validation = nefValidationPath or defaultNefValidationPath
-    #
-    #     # check the parameters
-    #     if not isinstance(text, str):
-    #         raise ValueError(f'text not defined correctly')
-    #     if not isinstance(_validation, (str, Path.Path, type(None))):
-    #         raise ValueError(f'nefValidationPath {_validation} not defined correctly')
-    #     if _errorLogging not in [Nef.el.NEF_STANDARD, Nef.el.NEF_STRICT, Nef.el.NEF_SILENT]:
-    #         raise ValueError(f'errorLogging must be one of: [{repr(Nef.el.NEF_STANDARD)}, {repr(Nef.el.NEF_STRICT)}, {repr(Nef.el.NEF_SILENT)}]')
-    #     if not isinstance(hidePrefix, bool):
-    #         raise ValueError(f'hidePrefix must be a bool')
-    #
-    #     # convert to aPath objects
-    #     _validation = Path.aPath(_validation) if isinstance(_validation, str) else _validation
-    #
-    #     # create the nef importer instance
-    #     _loader = Nef.NefImporter(errorLogging=_errorLogging, hidePrefix=hidePrefix)
-    #
-    #     # load the nef from text, and the validation file
-    #     _loader.loadText(text)
-    #     _loader.loadValidateDictionary(_validation)
-    #
-    #     return _loader
 
     @logCommand('application.')
     def importFromLoader(self, loader, reader=None):
@@ -2460,9 +2255,9 @@ class Framework(NotifierBase):
                 getLogger().debug('closing module: %s' % tempModule)
                 try:
                     tempModule.close()
-                except:
+                except Exception as es:
                     # wrapped C/C++ object of type StripDisplay1d has been deleted
-                    pass
+                    getLogger().debug(f'_closeMainWindows: {es}')
 
     def _closeExtraWindows(self):
         tempAreas = self.ui.mainWindow.moduleArea.tempAreas
@@ -2471,9 +2266,9 @@ class Framework(NotifierBase):
                 getLogger().debug('closing external module: %s' % tempArea.window())
                 try:
                     tempArea.window().close()
-                except:
+                except Exception as es:
                     # wrapped C/C++ object of type StripDisplay1d has been deleted
-                    pass
+                    getLogger().debug(f'_closeExtraWindows: {es}')
 
     def _setMainWindowsVisible(self, value):
         """Set visibility of the main windows
@@ -2483,9 +2278,9 @@ class Framework(NotifierBase):
             for tempModule in tempModules:
                 try:
                     tempModule.setVisible(value)
-                except:
+                except Exception as es:
                     # wrapped C/C++ object of type StripDisplay1d has been deleted
-                    pass
+                    getLogger().debug(f'_setMainWindowsVisible: {es}')
 
     def _setExtraWindowsVisible(self, value):
         """Set visibility of the extra windows
@@ -2495,9 +2290,9 @@ class Framework(NotifierBase):
             for tempArea in tempAreas:
                 try:
                     tempArea.window().setVisible(value)
-                except:
+                except Exception as es:
                     # wrapped C/C++ object of type StripDisplay1d has been deleted
-                    pass
+                    getLogger().debug(f'_setExtraWindowsVisible: {es}')
 
     def _closeProject(self):
         """Close project and clean up - when opening another or quitting application"""
@@ -3412,8 +3207,7 @@ def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):
     return preferences
 
 
-if __name__ == '__main__':
-
+def testMain():
     # from sandbox.Geerten.Refactored.framework import Framework
     # from sandbox.Geerten.Refactored.programArguments import Arguments
 
@@ -3448,3 +3242,7 @@ if __name__ == '__main__':
     container = ApplicationContainer()
     container.register(application)
     application.useFileLogger = True
+
+
+if __name__ == '__main__':
+    testMain()

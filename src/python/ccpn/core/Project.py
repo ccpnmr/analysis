@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-08 13:27:03 +0000 (Wed, December 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-08 15:36:30 +0000 (Wed, December 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -26,12 +26,12 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import functools
-import os
+# import os
 import typing
 import operator
 from typing import Sequence, Union, Optional
 from collections import OrderedDict
-from time import time
+# from time import time
 from datetime import datetime
 import json
 
@@ -41,12 +41,11 @@ from ccpn.core.lib import Pid
 from ccpn.core.lib import Undo
 from ccpn.util import Logging
 from ccpn.util.ExcelReader import ExcelReader
-from ccpn.util.nef.GenericStarParser import DataBlock
 from ccpn.util.Path import aPath, Path
-from ccpn.util.Common import isIterable
+# from ccpn.util.Common import isIterable
 from ccpn.framework.PathsAndUrls import CCPN_EXTENSION
 
-from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
+# from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpnmodel.ccpncore.memops import Notifiers
@@ -54,14 +53,14 @@ from ccpnmodel.ccpncore.memops.ApiError import ApiError
 from ccpnmodel.ccpncore.lib.molecule import MoleculeQuery
 from ccpnmodel.ccpncore.lib.spectrum import NmrExpPrototype
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrExpPrototype import RefExperiment
-from ccpnmodel.ccpncore.lib import Constants
+# from ccpnmodel.ccpncore.lib import Constants
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
-from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
+# from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 # from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
-    notificationEchoBlocking, inactivity, logCommandManager
+from ccpn.core.lib.ContextManagers import notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
+    inactivity, logCommandManager
 from ccpn.util.Logging import getLogger
 
 
@@ -1375,51 +1374,6 @@ class Project(AbstractWrapperObject):
                                     skipPrefixes=skipPrefixes,
                                     expandSelection=expandSelection,
                                     pidList=pidList)
-
-    def _convertToDataBlock(self, skipPrefixes: typing.Sequence = (),
-                            expandSelection: bool = True,
-                            pidList: list = None):
-        """
-        Export selected contents of the project to a Nef file.
-
-          skipPrefixes: ( 'ccpn', ..., <str> )
-          expandSelection: <bool> }
-
-          Include 'ccpn' in the skipPrefixes list will exclude ccpn specific items from the file
-          expandSelection = True  will include all data from the project, this may not be data that
-                                  is not defined in the Nef standard.
-
-        PidList is a list of <str>, e.g. 'NC:@-', obtained from the objects to be included.
-        The Nef file may also contain further dependent items associated with the pidList.
-
-        :param skipPrefixes: items to skip
-        :param expandSelection: expand the selection
-        :param pidList: a list of pids
-        """
-        from ccpn.core.lib import CcpnNefIo
-
-        with undoStackBlocking():
-            with notificationBlanking():
-                t0 = time()
-                dataBlock = CcpnNefIo.convertToDataBlock(self, skipPrefixes=skipPrefixes,
-                                                         expandSelection=expandSelection,
-                                                         pidList=pidList)
-                t2 = time()
-                getLogger().info('File to dataBlock, time = %.2fs' % (t2 - t0))
-
-        return dataBlock
-
-    def _writeDataBlockToFile(self, dataBlock: DataBlock = None, path: str = None,
-                              overwriteExisting: bool = False):
-        # Export the modified dataBlock to file
-        from ccpn.core.lib import CcpnNefIo
-
-        with undoStackBlocking():
-            with notificationBlanking():
-                t0 = time()
-                CcpnNefIo.writeDataBlock(dataBlock, path=path, overwriteExisting=overwriteExisting)
-                t2 = time()
-                getLogger().info('Exporting dataBlock to file, time = %.2fs' % (t2 - t0))
 
     #===========================================================================================
     # Data loaders

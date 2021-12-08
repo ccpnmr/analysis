@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-04 20:16:52 +0000 (Thu, November 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-08 15:36:30 +0000 (Wed, December 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -503,12 +503,16 @@ class StructureRefinementGuiPlugin(PluginModule):
 
     def _convertNefToDataBlock(self):
         # Convert the standard NEF data to a Data block
-        self.dataBlock = self.project._convertToDataBlock(skipPrefixes=(), expandSelection=False,pidList=self.exportPidList)
+        from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
+
+        self.dataBlock = NefDataLoader._convertToDataBlock(self.project, skipPrefixes=(), expandSelection=False,pidList=self.exportPidList)
 
     def _exportNef(self):
         # self.outputPath = os.path.join(self.settings['General']['Run path'], '{0}.nef'.format(self.settings['General']['Run name']))
         # self.project._writeDataBlockToFile(dataBlock=self.dataBlock, path=self.outputPath, overwriteExisting=True)
-        self.project._writeDataBlockToFile(dataBlock=self.dataBlock, path=os.path.join(self.runPath, '{0}.nef'.format(self.settings['General']['Run name'])), overwriteExisting=True)
+        from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
+
+        NefDataLoader._writeDataBlockToFile(dataBlock=self.dataBlock, path=os.path.join(self.runPath, '{0}.nef'.format(self.settings['General']['Run name'])), overwriteExisting=True)
 
     def _addCalculationBlocks(self):
         runName = self.settings['General']['Run name'].strip()

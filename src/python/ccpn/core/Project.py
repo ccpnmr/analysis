@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-15 12:08:45 +0000 (Mon, November 15, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-12-08 16:28:26 +0000 (Wed, December 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1484,6 +1484,11 @@ class Project(AbstractWrapperObject):
         else:
             spectrum = self._data2Obj[apiDataSource]
             spectrum.assignmentTolerances = spectrum.defaultAssignmentTolerances
+
+            from ccpn.core._implementation.patches.patch_3_0_4 import scaleBrukerSpectrum, NC_PROC
+
+            if subType == 'Bruker' and not spectrum._hasInternalParameter(NC_PROC):
+                scaleBrukerSpectrum(spectrum)
 
             # estimate new base contour levels
             # if self.application.preferences.general.automaticNoiseContoursOnLoadSpectrum:

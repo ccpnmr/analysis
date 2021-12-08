@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-15 12:08:45 +0000 (Mon, November 15, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-12-08 16:28:26 +0000 (Wed, December 08, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -33,8 +33,8 @@ from ccpn.util.Logging import getLogger
 NC_PROC = 'NC_proc'
 
 def getNCprocDataScale(spectrum):
-
-    "Read the procs file"
+    """Read the procs file
+    """
     procs = spectrum.path.parent  / 'procs'
     if not procs.exists():
         raise RuntimeError('Invalid acqus file "%s"' % procs)

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-03 11:44:53 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 15:39:25 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1198,7 +1198,7 @@ class DimensionsTab(Widget):
 
             self.aliasLim = self.spectrum.aliasingLimits
             self.aliasInds = self.spectrum.aliasingIndexes
-            self.axesReversed = self.spectrum.axesReversed
+            # self.axesReversed = self.spectrum.axesReversed
             self.foldLim = tuple(sorted(lim) for lim in self.spectrum.foldingLimits)
             self.deltaLim = self.spectrum.spectralWidths  # tuple(max(lim) - min(lim) for lim in self.foldLim)
 

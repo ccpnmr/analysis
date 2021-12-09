@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-25 18:29:04 +0100 (Mon, October 25, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-09 15:39:25 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -377,7 +377,7 @@ class SpectrumView(AbstractWrapperObject):
     @property
     def axes(self) -> tuple:
         """Spectrum axes in display order"""
-        return tuple([dim - 1 for dim in self._wrappedData.spectrumView.dimensionOrdering])
+        return tuple([dim - 1 for dim in self.dimensions])
 
     # deprecated
     dimensionOrdering = axes

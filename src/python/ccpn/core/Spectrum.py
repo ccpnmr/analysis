@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-09 12:01:18 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 15:39:25 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1282,10 +1282,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """Checking axes
         """
         self._setDimensionalAttributes('isReversed', value)
-        # # do I need to flip the aliasingLimits?
-        # _aliasingLimits = self.aliasingLimits
-        # _aliasingLimits = tuple(tuple(al for al in reversed(aLimits)) for aLimits in _aliasingLimits)
-        # self.aliasingLimits = _aliasingLimits
 
     @property
     def magnetisationTransfers(self) -> Tuple[MagnetisationTransferTuple, ...]:
@@ -2129,6 +2125,13 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         data = self._dataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
         # Make a copy in order to preserve the original data and apply scaling
         data = data.copy(order='K') * self.scale
+
+        #TODO: settle on the axisReversed issue
+
+        # if self.axesReversed[xDim-1]:
+        #     data = numpy.flip(data, axis=0)  # data are [y,x] ordered
+        # if self.axesReversed[yDim-1]:
+        #     data = numpy.flip(data, axis=1)  # data are [y,x] ordered
 
         return data
 

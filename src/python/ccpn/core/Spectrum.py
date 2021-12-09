@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-08 18:27:40 +0000 (Wed, December 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 12:01:18 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -382,15 +382,17 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @property
     def dimensions(self) -> tuple:
-        """Convenience: tuple of length dimensionCount with dimension integers (1-based); e.g. (1,2,3,..).
-        Useful for mapping axisCodes: eg: self.getByAxisCodes('dimensions', ['N','C','H'])
+        """Convenience: tuple (len dimensionCount) with the dimension integers (1-based);
+        e.g. (1,2,3,..).
+        Useful for mapping in axisCodes order: eg: self.getByAxisCodes('dimensions', ['N','C','H'])
         """
-        return tuple(range(1, self.dimensionCount + 1))
+        return tuple(range(1, self.dimensionCount+1))
 
     @property
     def axes(self) -> tuple:
-        """Convenience: tuple of length dimensionCount with axes integers (0-based); e.g. (0,1,2,3).
-        Useful for mapping axisCodes: eg: self.getByAxisCodes('axes', ['N','C','H'])
+        """Convenience: tuple (len dimensionCount) with the axes integers (0-based);
+        e.g. (0,1,2,3).
+        Useful for mapping in axisCodes order: eg: self.getByAxisCodes('axes', ['N','C','H'])
         """
         return tuple(range(0, self.dimensionCount))
 
@@ -1071,7 +1073,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         # if len(_vals) != len(set(_vals)):
         #     raise ValueError('referenceExperimentDimensions must be unique')
 
-        #TODO: use self.spectrumReferences and its attributes/methods (if needed add method)
+        #TODO: use self.spectrumDimensions and its attributes/methods (if needed add method)
         for ii, (dataDim, val) in enumerate(zip(apiDataSource.sortedDataDims(), values)):
             expDim = dataDim.expDim
             if expDim is None and val is not None:
@@ -1116,7 +1118,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     @_includeInDimensionalCopy
     def foldingModes(self) -> List[Optional[str]]:
-        """folding mode (values: 'circular', 'mirror', None); per dimension"""
+        """List of folding modes (values: 'circular', 'mirror', None); per dimension"""
         return self._getDimensionalAttributes('foldingMode')
         # dd = {True: 'mirror', False: 'circular', None: None}
         # return tuple(dd[x and x.isFolded] for x in self._mainExpDimRefs())
@@ -1139,7 +1141,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     @_includeInDimensionalCopy
     def axisUnits(self) -> List[Optional[str]]:
-        """Main axis unit (most commonly 'ppm') or None; per dimension"""
+        """List of axis units (most commonly 'ppm') or None; per dimension"""
         return self._getDimensionalAttributes('axisUnit')
 
     @axisUnits.setter
@@ -1150,7 +1152,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     @_includeInDimensionalCopy
     def referencePoints(self) -> List[Optional[float]]:
-        """point used for axis (chemical shift) referencing; per dimension."""
+        """List of points used for axis (chemical shift) referencing; per dimension.
+        """
         return self._getDimensionalAttributes('referencePoint')
 
     @referencePoints.setter
@@ -1161,7 +1164,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     @_includeInDimensionalCopy
     def referenceValues(self) -> List[Optional[float]]:
-        """ppm-value used for axis (chemical shift) referencing; per dimension."""
+        """List of ppm-values used for axis (chemical shift) referencing; per dimension.
+        """
         return self._getDimensionalAttributes('referenceValue')
 
     @referenceValues.setter
@@ -1234,48 +1238,13 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def aliasingLimits(self) -> List[Tuple[float, float]]:
         """List of tuples of sorted(minAliasingLimit, maxAliasingLimit) per dimension
         """
-        minVals = self._getDimensionalAttributes('minAliasedFrequency')
-        maxVals = self._getDimensionalAttributes('maxAliasedFrequency')
-        result = [sorted(t) for t in zip(minVals, maxVals)]
-        return result
-
-        # result = [(x and x.minAliasedFreq, x and x.maxAliasedFreq) for x in self._mainExpDimRefs()]
-        #
-        # if any(None in tt for tt in result):
-        #     # Some values not set, or missing. Try to get them as spectrum limits
-        #     for ii, dataDimRef in enumerate(self._mainDataDimRefs()):
-        #         if None in result[ii] and dataDimRef is not None:
-        #             dataDim = dataDimRef.dataDim
-        #             ff = dataDimRef.pointToValue
-        #             point1 = 1 - dataDim.pointOffset
-        #             result[ii] = tuple(sorted((ff(point1), ff(point1 + dataDim.numPointsOrig))))
-        # #
-        # return tuple(result)
+        return self._getDimensionalAttributes('aliasingLimits')
 
     @aliasingLimits.setter
     @logCommand(get='self', isProperty=True)
     @checkSpectrumPropertyValue(iterable=True, allowNone=False, types=(tuple, list))
     def aliasingLimits(self, value):
-        # check that we have iterables with two (min,max) values
-        for axis, t in enumerate(value):
-            if not isIterable(t) and len(t) != 2:
-                raise ValueError('invalid aliasingLimit[%s]; expected (minLimit, maxlimit) but got %r' % (axis, t))
-        minVals = [t[0] for t in value]
-        maxVals = [t[1] for t in value]
-
-        # crude check that the centre is always included
-        _specLimMeans = [(sl[0] + sl[1]) / 2 for sl in self.spectrumLimits]
-        if any(val >= specLim for val, specLim in zip(minVals, _specLimMeans)):
-            table = zip(minVals, self.spectrumLimits)
-            _msg = tabulate(table, floatfmt=".6f")
-            raise ValueError(f'invalid aliasingLimit; lower aliasingLimit exceeds minimum spectrumLimit\n{_msg}')
-        if any(val <= specLim for val, specLim in zip(maxVals, _specLimMeans)):
-            table = zip(maxVals, self.spectrumLimits)
-            _msg = tabulate(table, floatfmt=".6f")
-            raise ValueError(f'invalid aliasingLimit; upper aliasingLimit exceeds maximum spectrumLimit\n{_msg}')
-
-        self._setDimensionalAttributes('minAliasedFrequency', minVals)
-        self._setDimensionalAttributes('maxAliasedFrequency', maxVals)
+        self._setDimensionalAttributes('aliasingLimits', value)
 
     @property
     def spectrumLimits(self) -> List[Tuple[float, float]]:
@@ -1470,23 +1439,10 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @property
     def aliasingIndexes(self) -> Optional[Tuple[Tuple, ...]]:
-        """Return a tuple of the aliasing values in each dimension, as multiples of the spectral width.
+        """Return a tuple of the number of times the spectralWidth are folded in each dimension.
         This is a derived property from the aliasingLimits.
         """
-        _alias = self.aliasingLimits
-        _limits = self.foldingLimits
-        _widths = self.spectralWidths
-
-        values = []
-        for alias, lim, width in zip(_alias, _limits, _widths):
-            if alias is not None and lim is not None and width is not None:
-                minA, maxA = min(alias), max(alias)
-                minLim, maxLim = min(lim), max(lim)
-                values.append((int((minA - minLim + width / 2) // width), int((maxA - maxLim + width / 2) // width)))
-            else:
-                values.append( 0, 0 )
-
-        return tuple(values)
+        return tuple(self._getDimensionalAttributes('aliasingIndexes'))
 
     @property
     def _seriesItems(self):

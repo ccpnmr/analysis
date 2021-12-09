@@ -1,12 +1,9 @@
 
 from typing import Optional, Sequence, Tuple
 
-from ccpn.core.lib import Pid
-from ccpn.core.Project import Project
-from ccpn.core.Spectrum import Spectrum
 import ccpn.core.lib.SpectrumLib as specLib
+from ccpn.util.Common import isIterable
 
-from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.util.Logging import getLogger
 
 class SpectrumDimensionAttributes(object):
@@ -143,6 +140,12 @@ class SpectrumDimensionAttributes(object):
 
     @maxAliasedFrequency.setter
     def maxAliasedFrequency(self, value):
+        specLimits = self.spectrumLimits
+        if value < max(specLimits):
+            raise ValueError('%s: dimension %d, maxAliasedFrequency: value %s < max(spectrumLimits) %s' % (
+                             self.spectrum, self.dimension, value, max(specLimits)
+                            )
+            )
         self._expDimRef.maxAliasedFreq = value
 
     @property
@@ -155,7 +158,40 @@ class SpectrumDimensionAttributes(object):
 
     @minAliasedFrequency.setter
     def minAliasedFrequency(self, value):
+        specLimits = self.spectrumLimits
+        if value > min(specLimits):
+            raise ValueError('%s dimension %d, minAliasedFrequency: value %s > min(spectrumLimits) %s' %
+                            (self.spectrum, self.dimension, value, min(specLimits))
+                            )
+
         self._expDimRef.minAliasedFreq = value
+
+    @property
+    def aliasingLimits(self) -> Tuple[float, float]:
+        """tuple of sorted(minAliasingLimit, maxAliasingLimit) per dimension
+        """
+        return tuple(sorted((self.minAliasedFrequency, self.maxAliasedFrequency)))
+
+    @aliasingLimits.setter
+    def aliasingLimits(self, value):
+        if not isIterable(value) or len(value) != 2:
+            raise ValueError('%s dimension %d, aliasingLimits; expected (minLimit, maxLimit) but got %r' %
+                             (self.spectrum, self.dimension, value)
+                             )
+        self.minAliasedFrequency = min(value)
+        self.maxAliasedFrequency = max(value)
+
+    @property
+    def aliasingIndexes(self) -> Tuple[int, int]:
+        """A property derived from aliasingLimits.
+        Number of times the spectralWidth are folded.
+        :returns tuple(minFoldingIndex, maxFoldingIndex)
+        """
+        aLimits = self.aliasingLimits
+        sLimits = sorted(self.spectrumLimits)
+        minIndex = round( (aLimits[0]-sLimits[0]) / self.spectralWidth)
+        maxIndex = round( (aLimits[1]-sLimits[1]) / self.spectralWidth)
+        return (minIndex, maxIndex)
 
     @property
     def spectrumLimits(self) -> Tuple[float, float]:
@@ -166,7 +202,7 @@ class SpectrumDimensionAttributes(object):
             return (self.pointToValue(1.0), self.pointToValue(float(self.pointCount)))
             # return (0.0, self._valuePerPoint * self.pointCount)
         else:
-            raise RuntimeError('SpectrumReference.spectrumLimits: not implemented for sampled data')
+            raise RuntimeError('%s.spectrumLimits: not implemented' % self.__class__.__name__)
 
     @property
     def foldingLimits(self) -> Tuple[float, float]:
@@ -179,7 +215,7 @@ class SpectrumDimensionAttributes(object):
         elif self.dimensionType == specLib.DIMENSION_TIME:
             return (self.pointToValue(0.5), self.pointToValue(float(self.pointCount) + 0.5))
         else:
-            raise RuntimeError('%s.foldingLimits not implemented for sampled data' % self.__class__.__name__)
+            raise RuntimeError('%s.foldingLimits not implemented' % self.__class__.__name__)
 
     @property
     def isotopeCode(self) -> Optional[str]:

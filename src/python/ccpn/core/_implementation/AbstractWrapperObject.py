@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-22 12:39:43 +0000 (Mon, November 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 12:07:13 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -29,19 +29,15 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import functools
 import typing
 import re
-from contextlib import contextmanager
 from collections import OrderedDict
 from copy import deepcopy
 
 import ccpn.core._implementation.resetSerial
 from ccpn.core import _importOrder
-# from ccpn.core.lib import CcpnSorting
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
 from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking, \
-    apiNotificationBlanking, inactivity, ccpNmrV3CoreSetter
-# from ccpn.core.lib.Notifiers import NotifierBase, Notifier
-from ccpn.core.lib.ContextManagers import deleteObject
+    apiNotificationBlanking, ccpNmrV3CoreSetter
 from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.util import Common as commonUtil
 from ccpn.util.decorators import logCommand
@@ -871,7 +867,7 @@ class AbstractWrapperObject(NotifierBase):
 
                         _text = 'Error restoring child object %s of %s' % (apiObj, self)
                         getLogger().warning(_text)
-                        raise RuntimeError(_text)
+                        # raise RuntimeError(_text)
 
     #  For restore 3.2 branch
 

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-09 11:29:03 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 12:07:13 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1214,7 +1214,6 @@ class Framework(NotifierBase):
             ("Open...", self._openProjectMenuCallback, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Open Recent", ()),
 
-            #      ("Load Spectrum...", lambda: self.loadData(text='Load Spectrum'), [('shortcut', 'ls')]),
             ("Load Data...", lambda: self._loadDataFromMenu(text='Load Data'), [('shortcut', 'ld')]),
             (),
             ("Save", self.saveProject, [('shortcut', '⌃s')]),  # Unicode U+2303, NOT the carrot on your keyboard.
@@ -1260,7 +1259,6 @@ class Framework(NotifierBase):
         ms.append(('View', [
             ("Chemical Shift Table", partial(self.showChemicalShiftTable, selectFirstItem=True), [('shortcut', 'ct')]),
             ("NmrResidue Table", partial(self.showNmrResidueTable, selectFirstItem=True), [('shortcut', 'nt')]),
-            # ("Structure Table", partial(self.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
             ("Residue Table", partial(self.showResidueTable, selectFirstItem=True)),
             ("Peak Table", partial(self.showPeakTable, selectFirstItem=True), [('shortcut', 'pt')]),
             ("Integral Table", partial(self.showIntegralTable, selectFirstItem=True), [('shortcut', 'it')]),
@@ -1273,17 +1271,6 @@ class Framework(NotifierBase):
             ("Chemical Shift Mapping", self.showChemicalShiftMapping, [('shortcut', 'cm')]),
             ("Notes Editor", partial(self.showNotesEditor, selectFirstItem=True), [('shortcut', 'no'),
                                                                                    ('icon', 'icons/null')]),
-            (),
-            # (),
-            ###("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),
-            ###("Atom Selector", self.showAtomSelector, [('shortcut', 'as')]),
-            ###(),
-
-            # sequenceModule has been incorporated into sequence graph
-            # ("Show Sequence", self.toggleSequenceModule, [('shortcut', 'sq'),
-            #                                               ('checkable', True),
-            #                                               ('checked', False)
-            #                                               ]),
             (),
             ("In Active Spectrum Display", (("Show/Hide Toolbar", self.toggleToolbar, [('shortcut', 'tb')]),
                                             ("Show/Hide Spectrum Toolbar", self.toggleSpectrumToolbar, [('shortcut', 'sb')]),
@@ -1304,8 +1291,6 @@ class Framework(NotifierBase):
                                 ('checked', False)])
                 ])),
             ("Python Console", self._toggleConsoleCallback, [('shortcut', '  '),
-                                                             # ('checkable', True),  # don't really need a checkbox :)
-                                                             # ('checked', False)
                                                              ])
             ]
                    ))
@@ -1375,32 +1360,6 @@ class Framework(NotifierBase):
                 ("None", None, [('checkable', True),
                                 ('checked', False)])
                 ])),
-
-            # # Submenu
-            # ("Beginners Tutorial", self.showBeginnersTutorial),
-            # ("Backbone Tutorial", self.showBackboneTutorial),
-            # ("CSP Tutorial", self.showCSPtutorial),
-            # ("More...", self.showTutorials)
-            # ])),
-
-            # ("Show Shortcuts", self.showShortcuts),
-            # ("Show API Documentation", self.showVersion3Documentation),
-            # ("CcpNmr V3 Forum", self.showForum),
-            # (),
-            # ("About CcpNmr V3...", self.showAboutPopup),
-            # ("CcpNmr Homepage", self.showAboutCcpn),
-            # ("Show License", self.showCcpnLicense),
-            # (),
-            # # ("Inspect Code...", self.showCodeInspectionPopup, [('shortcut', 'gv'),
-            # #                                                    ('enabled', False)]),
-            # # ("Show Issues...", self.showIssuesList),
-            #
-            # ("Check for Updates...", self.showUpdatePopup),
-            # ("Register...", self.showRegisterPopup),
-            # (),
-            # ("Submit Feedback...", self.showFeedbackPopup),
-            # # ("Submit Macro...", self.showSubmitMacroPopup)
-
             ("Show Tip of the Day", partial(self._displayTipOfTheDay, standalone=True)),
             ("Key Concepts", self._displayKeyConcepts),
             ("Show Shortcuts", self.showShortcuts),
@@ -1413,12 +1372,8 @@ class Framework(NotifierBase):
             # ("Inspect Code...", self.showCodeInspectionPopup, [('shortcut', 'gv'),
             #                                                    ('enabled', False)]),
             # ("Show Issues...", self.showIssuesList),
-
             ("Check for Updates...", self.showUpdatePopup),
             ("Register...", self.showRegisterPopup),
-            (),
-            # ("Submit Feedback...", self.showFeedbackPopup),
-            # ("Submit Macro...", self.showSubmitMacroPopup)
             (),
             ("About CcpNmr V3...", self.showAboutPopup),
             ]
@@ -1427,6 +1382,7 @@ class Framework(NotifierBase):
     ###################################################################################################################
     ## These will eventually move to gui (probably via a set of lambda functions.
     ###################################################################################################################
+
     ###################################################################################################################
     ## MENU callbacks:  Project
     ###################################################################################################################

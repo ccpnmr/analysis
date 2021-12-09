@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-09 16:21:41 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 19:56:18 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -139,7 +139,7 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
             isTimeDomain                True if the axis is a time domain, otherwise False
         """
 
-        ii = self.axes[axisDim]
+        ii = self.axisIndices[axisDim]
         if ii is not None:
             _spectrum = self.spectrum
             # extent of the spectrum
@@ -169,7 +169,7 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
     def getTraceParameters(self, position, dim):
         # dim  = spectrumView index, i.e. 0 for X, 1 for Y
 
-        _indices = self.axes
+        _indices = self.axisIndices
         index = _indices[dim]
         if index is None:
             getLogger().warning('getTraceParameters: bad index')

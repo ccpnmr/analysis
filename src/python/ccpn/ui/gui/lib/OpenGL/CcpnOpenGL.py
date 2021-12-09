@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-09 16:21:41 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 19:56:18 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -4681,7 +4681,7 @@ class CcpnGLWidget(QOpenGLWidget):
             if self.showActivePhaseTrace and self._tracesNeedUpdating(spectrumView):
 
                 phasingFrame = self.spectrumDisplay.phasingFrame
-                dimension = spectrumView.axes
+                dimension = spectrumView.axisIndices
                 ppm2point = spectrumView.spectrum.ppm2point
                 point2ppm = spectrumView.spectrum.point2ppm
 
@@ -4738,7 +4738,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 ph1 = phasingFrame.slider1.value()
                 pivotPpm = phasingFrame.pivotEntry.get()
                 direction = phasingFrame.getDirection()
-                dimension = spectrumView.axes
+                dimension = spectrumView.axisIndices
                 ppm2point = spectrumView.spectrum.ppm2point
                 point2ppm = spectrumView.spectrum.point2ppm
 
@@ -4814,7 +4814,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 if hTrace.renderMode == GLRENDERMODE_RESCALE:
                     hTrace.renderMode = GLRENDERMODE_DRAW
 
-                    axisIndex = specView.axes[direction]
+                    axisIndex = specView.axisIndices[direction]
                     pivot = specView.spectrum.ppm2point(pivotPpm, dimension=axisIndex + 1)
                     positionPixel = hTrace.positionPixel
                     preData = Phasing.phaseRealData(hTrace.data, ph0, ph1, pivot)
@@ -4844,7 +4844,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 if vTrace.renderMode == GLRENDERMODE_RESCALE:
                     vTrace.renderMode = GLRENDERMODE_DRAW
 
-                    axisIndex = specView.axes[direction]
+                    axisIndex = specView.axisIndices[direction]
                     pivot = specView.spectrum.ppm2point(pivotPpm, dimension=axisIndex + 1)
                     positionPixel = vTrace.positionPixel
                     preData = Phasing.phaseRealData(vTrace.data, ph0, ph1, pivot)
@@ -6283,7 +6283,7 @@ class CcpnGLWidget(QOpenGLWidget):
                             peaks.add(peak)
 
                 else:
-                    spectrumIndices = spectrumView.axes
+                    spectrumIndices = spectrumView.axisIndices
                     xAxis = spectrumIndices[0]
                     yAxis = spectrumIndices[1]
 
@@ -6335,7 +6335,7 @@ class CcpnGLWidget(QOpenGLWidget):
                             multiplets.add(multiplet)
 
                 else:
-                    spectrumIndices = spectrumView.axes
+                    spectrumIndices = spectrumView.axisIndices
                     xAxis = spectrumIndices[0]
                     yAxis = spectrumIndices[1]
 

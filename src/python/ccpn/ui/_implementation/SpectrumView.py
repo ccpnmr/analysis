@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-09 18:43:12 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 19:56:18 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -369,44 +369,45 @@ class SpectrumView(AbstractWrapperObject):
     @property
     def spectrumDimensions(self) -> tuple:
         """spectrumDimension objects in display order"""
-        return tuple(self.spectrum.spectrumDimensions[idx] for idx in self.axes)
+        return tuple(self.spectrum.spectrumDimensions[idx] for idx in self.axisIndices)
 
     @property
-    def axes(self) -> tuple:
-        """Spectrum axes in display order"""
+    def axisIndices(self) -> tuple:
+        """Spectrum axis indices (0-based) in display order"""
         return tuple([dim - 1 for dim in self.dimensions])
 
     # deprecated
-    # dimensionOrdering = axes
+    # axes = axisIndices
+    # dimensionOrdering = axisIndices
 
     @property
     def axisCodes(self) -> list:
         """Spectrum axisCodes in display order"""
-        return [self.spectrum.axisCodes[idx] for idx in self.axes]
+        return [self.spectrum.axisCodes[idx] for idx in self.axisIndices]
 
     @property
     def spectrumLimits(self) -> list:
         """Spectrum limits in display order"""
         _tmp = self.spectrum.spectrumLimits
-        return [_tmp[idx] for idx in self.axes]
+        return [_tmp[idx] for idx in self.axisIndices]
 
     @property
     def aliasingLimits(self) -> list:
         """Spectrum aliasing limits in display order"""
         _tmp = self.spectrum.aliasingLimits
-        return [_tmp[idx] for idx in self.axes]
+        return [_tmp[idx] for idx in self.axisIndices]
 
     @property
     def foldingLimits(self) -> list:
         """Spectrum folding limits in display order"""
         _tmp = self.spectrum.foldingLimits
-        return [_tmp[idx] for idx in self.axes]
+        return [_tmp[idx] for idx in self.axisIndices]
 
     @property
     def valuesPerPoint(self) -> list:
         """Spectrum valuesPerPoint in display order"""
         _tmp = self.spectrum.valuesPerPoint
-        return [_tmp[idx] for idx in self.axes]
+        return [_tmp[idx] for idx in self.axisIndices]
 
     def _getByDisplayOrder(self, parameterName) -> list:
         """Return parameter in displayOrder"""

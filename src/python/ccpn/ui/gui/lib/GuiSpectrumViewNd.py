@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-09 16:21:41 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 19:56:18 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -255,39 +255,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                                                           np.array(_negColours, dtype=np.float32),
                                                           not self._application.preferences.general.generateSinglePlaneContours)
 
-            # else:
-            #     specIndices = self.axes
-            #     stripIndices = tuple(specIndices.index(ii) for ii in range(numDims))
-            #     regionLimits = tuple(axis.region for axis in self.strip.orderedAxes)
-            #
-            #     # get the spectrumLimits bounded by the first/last points
-            #     axisLimits = {}
-            #     for axisCode in self.spectrum.axisCodes:
-            #         lim = self.spectrum.getPpmArray(axisCode=axisCode)
-            #         axisLimits[axisCode] = (min(lim[0], lim[-1]),
-            #                                 max(lim[0], lim[-1]))
-            #
-            #     # fill the others in from the strip
-            #     axisLimits.update(dict([(self.spectrum.axisCodes[ii], regionLimits[stripIndices[ii]])
-            #                             for ii in range(numDims) if stripIndices[ii] is not None and stripIndices[ii] > 1]))
-            #
-            #     # use a single Nd dataArray and flatten to the visible axes - averages across the planes
-            #     data = self.spectrum.getRegion(**axisLimits)
-            #
-            #     if data is not None and data.size:
-            #         xyzDims = tuple((numDims - ind - 1) for ind in specIndices)
-            #         xyzDims = tuple(reversed(xyzDims))
-            #         tempDataArray = data.transpose(*xyzDims)
-            #
-            #         # flatten multidimensional arrays into single array
-            #         for maxCount in range(numDims - 2):
-            #             tempDataArray = np.max(tempDataArray.clip(0.0, 1e16), axis=0) + np.min(tempDataArray.clip(-1e16, 0.0), axis=0)
-            #
-            #         contourList = Contourer2d.contourerGLList((tempDataArray,),
-            #                                                   posLevelsArray,
-            #                                                   negLevelsArray,
-            #                                                   np.array(_posColours, dtype=np.float32),
-            #                                                   np.array(_negColours, dtype=np.float32))
 
         except Exception as es:
             getLogger().warning(f'Contouring error: {es}')
@@ -332,7 +299,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         spectrum = self.spectrum
         dimensionCount = spectrum.dimensionCount
-        dimIndices = self.axes
+        dimIndices = self.axisIndices
         xDim = dimIndices[0]
         yDim = dimIndices[1]
         #TODO: this needs rewriting without api calls
@@ -389,7 +356,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     def _getAxisInfo(self, orderedAxes, dim):
         """Get the information for the required axis
         """
-        index = self.axes[dim]
+        index = self.axisIndices[dim]
         if index is None:
             return
 
@@ -433,7 +400,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         spectrum = self.spectrum
         dimensionCount = spectrum.dimensionCount
-        dimIndices = self.axes
+        dimIndices = self.axisIndices
         orderedAxes = self._apiStripSpectrumView.strip.orderedAxes
 
         if dimensionCount <= 2:
@@ -444,8 +411,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         for dim in range(2, dimensionCount):
 
-            index = self.axes[dim]
-            if index is None:
+            indx = self.axisIndices[dim]
+            if indx is None:
                 return
 
             # make sure there is always a spectrumView to base visibility on
@@ -456,8 +423,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             # get the plane count from the widgets
             planeCount = self.strip.planeAxisBars[dim - 2].planeCount  #   .planeToolbar.planeCounts[dim - 2].value()
 
-            zPointCount = (self.spectrum.pointCounts)[index]
-            zValuePerPoint = (self.spectrum.valuesPerPoint)[index]
+            zPointCount = (self.spectrum.pointCounts)[indx]
+            zValuePerPoint = (self.spectrum.valuesPerPoint)[indx]
             # minSpectrumFrequency, maxSpectrumFrequency = (self.spectrum.spectrumLimits)[index]
 
             # pass in a smaller valuePerPoint - if there are differences in the z-resolution, otherwise just use local valuePerPoint

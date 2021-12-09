@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-09 10:03:12 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 11:29:03 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -119,7 +119,7 @@ def downloadFile(serverScript, serverDbRoot, fileName):
             if result.startswith(BAD_DOWNLOAD):
                 ll = len(result)
                 bd = len(BAD_DOWNLOAD)
-                getLogger().warning(Exception(result[min(ll, bd):min(ll, bd + 50)]))
+                getLogger().warning(result[min(ll, bd):min(ll, bd + 50)])
                 return
 
         return result

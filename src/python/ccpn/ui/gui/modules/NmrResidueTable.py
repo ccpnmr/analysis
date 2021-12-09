@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-11 19:40:43 +0100 (Mon, October 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 11:29:03 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -50,13 +50,12 @@ from ccpn.core._OldChemicalShift import _OldChemicalShift
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot
 from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
-from ccpnc.clibrary import Clibrary
+
 from PyQt5 import QtCore
 
 
 logger = getLogger()
 ALL = '<all>'
-_getNmrIndex = Clibrary.getNmrResidueIndex
 
 LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 
@@ -274,6 +273,8 @@ class NmrResidueTable(GuiTable):
         CCPN-INTERNAL: Insert an index into ObjectTable
         """
         try:
+            from ccpnc.clibrary import Clibrary
+            _getNmrIndex = Clibrary.getNmrResidueIndex
             return _getNmrIndex(nmrRes)
             # return nmrRes.nmrChain.nmrResidues.index(nmrRes)                # ED: THIS IS VERY SLOW
         except Exception as es:

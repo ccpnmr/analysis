@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-09 11:29:04 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 13:15:56 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -471,13 +471,15 @@ class UpdateAgent(object):
             from ccpn.util.Register import userAttributes, loadDict, _otherAttributes, _insertRegistration
 
             registrationDict = loadDict()
+            if not registrationDict:
+                self.showError('Update error', 'Could not read registration details')
+                return
+
             val2 = _insertRegistration(registrationDict)
             values = {}
             for attr in userAttributes + _otherAttributes:
-                value = []
-                for c in registrationDict[attr]:
-                    value.append(c if 32 <= ord(c) < 128 else '_')
-                values[attr] = ''.join(value)
+                if attr in registrationDict:
+                    values[attr] = ''.join([c if 32 <= ord(c) < 128 else '_' for c in registrationDict[attr]])
             values.update(val2)
             values['version'] = self.version
 
@@ -681,14 +683,17 @@ class UpdateAgent(object):
                 write('No local copy of file\n')
 
 
-if __name__ == '__main__':
+def testMain():
     from ccpn.framework.Version import applicationVersion
     import sys
     import os
-
 
     # applicationVersion = __version__.split()[1]  # ejb - read from the header
     installUpdates(applicationVersion, dryRun=False)
 
     if sys.platform[:3].lower() == 'win':
         os._exit(0)
+
+
+if __name__ == '__main__':
+    testMain()

@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-29 12:57:01 +0000 (Mon, November 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 10:20:34 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -38,7 +38,7 @@ from ccpn.util.decorators import singleton
 from ccpn.core.lib.ContextManagers import inactivity
 
 from ccpn.util.Logging import getLogger
-from ccpn.framework.Version import applicationVersion
+from ccpn.framework.Version import applicationVersion, VersionString
 
 
 UPDATE_PRE_OBJECT_INITIALISATION = 'update_pre_object_initialisation'
@@ -77,7 +77,7 @@ class Updater(object):
         with inactivity(application=obj.project.application):
 
             for fromVersion, toVersion, func in updateFunctions:
-                currentVersion = obj._objectVersion
+                currentVersion = VersionString(obj._objectVersion.withoutRelease())
 
                 if fromVersion is not None and currentVersion < fromVersion:
                     raise RuntimeError('Error trying to update %s from version %s to version %s; invalid current version %s' % \

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-08 14:24:31 +0000 (Wed, December 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 10:20:34 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -263,51 +263,12 @@ class SpectrumDisplay(AbstractWrapperObject):
 
     def _getUnitsIndices(self):
         """Conveniance function to get units as an index
-        CCPNINTERNAL: used CcppnOpenGl.initialiseAxes()
+        CCPNINTERNAL: used CcpnOpenGl.initialiseAxes()
         """
         from ccpn.util.Constants import AXISUNITS, AXISUNIT_NUMBER
 
         options = AXISUNITS + [AXISUNIT_NUMBER]  # To allow for 1D intensity axis unit
         return [options.index(unit) for unit in self.units]
-
-    # GWV WTF?? Why is this even here?????
-    # @property
-    # def parameters(self) -> dict:
-    #     """Keyword-value dictionary of parameters.
-    #     NB the value is a copy - modifying it will not modify the actual data.
-    #
-    #     Values can be anything that can be exported to JSON,
-    #     including OrderedDict, numpy.ndarray, ccpn.util.Tensor,
-    #     or pandas DataFrame, Series, or Panel"""
-    #     return dict((x.name, x.value) for x in self._wrappedData.parameters)
-    #
-    # def setParameter(self, name: str, value):
-    #     """Add name:value to parameters, overwriting existing entries"""
-    #     apiData = self._wrappedData
-    #     parameter = apiData.findFirstParameter(name=name)
-    #     if parameter is None:
-    #         apiData.newParameter(name=name, value=value)
-    #     else:
-    #         parameter.value = value
-    #
-    # def deleteParameter(self, name: str):
-    #     """Delete parameter named 'name'"""
-    #     apiData = self._wrappedData
-    #     parameter = apiData.findFirstParameter(name=name)
-    #     if parameter is None:
-    #         raise KeyError("No parameter named %s" % name)
-    #     else:
-    #         parameter.delete()
-    #
-    # def clearParameters(self):
-    #     """Delete all parameters"""
-    #     for parameter in self._wrappedData.parameters:
-    #         parameter.delete()
-    #
-    # def updateParameters(self, value: dict):
-    #     """update parameters"""
-    #     for key, val in value.items():
-    #         self.setParameter(key, val)
 
     def _getSpectra(self):
         if len(self.strips) > 0:  # strips

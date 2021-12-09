@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-29 17:41:00 +0000 (Mon, November 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 10:20:34 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -691,7 +691,7 @@ class Framework(NotifierBase):
                 )
         dataUrl.url = Implementation.Url(path=dataPath)
 
-    def correctColours(self):
+    def _correctColours(self):
         """Autocorrect all colours that are too close to the background colour
         """
         from ccpn.ui.gui.guiSettings import autoCorrectHexColour, getColours, CCPNGLWIDGET_HEXBACKGROUND
@@ -738,18 +738,19 @@ class Framework(NotifierBase):
                 mark.colour = autoCorrectHexColour(mark.colour,
                                                    getColours()[CCPNGLWIDGET_HEXBACKGROUND])
 
-    def initGraphics(self):
+    def _initGraphics(self):
         """Set up graphics system after loading
         """
         from ccpn.ui.gui.lib import GuiStrip
 
         project = self.project
+        mainWindow = self.ui.mainWindow
 
         # 20191113:ED Initial insertion of spectrumDisplays into the moduleArea
         try:
-            insertPoint = self.ui.mainWindow.moduleArea
+            insertPoint = mainWindow.moduleArea
             for spectrumDisplay in project.spectrumDisplays:
-                self.ui.mainWindow.moduleArea.addModule(spectrumDisplay,
+                mainWindow.moduleArea.addModule(spectrumDisplay,
                                                         position='right',
                                                         relativeTo=insertPoint)
                 insertPoint = spectrumDisplay
@@ -758,17 +759,19 @@ class Framework(NotifierBase):
 
         try:
             if self.preferences.general.restoreLayoutOnOpening and \
-                    self.ui.mainWindow.moduleLayouts:
-                Layout.restoreLayout(self._mainWindow, self.ui.mainWindow.moduleLayouts, restoreSpectrumDisplay=False)
+                    mainWindow.moduleLayouts:
+                Layout.restoreLayout(self._mainWindow, mainWindow.moduleLayouts, restoreSpectrumDisplay=False)
         except Exception as e:
             getLogger().warning('Impossible to restore Layout %s' % e)
 
         try:
             # Initialise displays
-            for spectrumDisplay in project.windows[0].spectrumDisplays:  # there is exactly one window
+            # for spectrumDisplay in project.windows[0].spectrumDisplays:  # there is exactly one window
+
+            for spectrumDisplay in mainWindow.spectrumDisplays:  # there is exactly one window
                 pass  # GWV: poor solution; removed the routine spectrumDisplay._resetRemoveStripAction()
             # initialise any colour changes before generating gui strips
-            self.correctColours()
+            self._correctColours()
         except Exception as e:
             getLogger().warning('Impossible to restore SpectrumDisplays')
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-29 15:35:08 +0000 (Mon, November 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 10:20:34 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -139,11 +139,7 @@ class Gui(Ui):
         with notificationEchoBlocking():
             # Set up mainWindow
             self.mainWindow = self._setupMainWindow(mainWindow)
-
-            self.application.initGraphics()
-
-            project = self.application.project
-            current = self.application.current
+            self.application._initGraphics()
 
     def start(self):
         self.mainWindow._fillRecentMacrosMenu()

@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-09 15:39:25 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 20:04:49 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -389,16 +389,16 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return tuple(range(1, self.dimensionCount+1))
 
     @property
-    def axes(self) -> tuple:
-        """Convenience: tuple (len dimensionCount) with the axes integers (0-based);
+    def axisIndices(self) -> tuple:
+        """Convenience: tuple (len dimensionCount) with the axes indices (0-based);
         e.g. (0,1,2,3).
-        Useful for mapping in axisCodes order: eg: self.getByAxisCodes('axes', ['N','C','H'])
+        Useful for mapping in axisCodes order: eg: self.getByAxisCodes('axisIndices', ['N','C','H'])
         """
         return tuple(range(0, self.dimensionCount))
 
     @property
     def axisTriples(self) -> tuple:
-        """Convenience: return a tuple of triples (axis, axisCode, dimension) for each dimension
+        """Convenience: return a tuple of triples (axisIndex, axisCode, dimension) for each dimension
 
         Useful for iterating over axis codes; eg in an H-N-CO ordered spectrum
             for axis, axisCode, dimension in self.getByAxisCodes('axisTriples', ('N','C','H'), exactMatch=False)
@@ -408,7 +408,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                 (2, 'CO', 3)
                 (0, 'H', 1)
         """
-        return tuple(z for z in zip(self.axes, self.axisCodes, self.dimensions))
+        return tuple(z for z in zip(self.axisIndices, self.axisCodes, self.dimensions))
 
     @property
     @_includeInCopy
@@ -1585,7 +1585,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """
         result = self._getInternalParameter(self._PREFERREDAXISORDERING)
         if result is None:
-            result = self.axes
+            result = self.axisIndices
         return result
 
     @_preferredAxisOrdering.setter
@@ -3432,7 +3432,7 @@ def _extractRegionToFile(spectrum, dimensions, position, dataStore, name=None) -
                 data = input.getSliceData(position, readSliceDim)
 
                 # map the input position to the output position and write the data
-                outPosition = [position[inverseIndexMap[p]] for p in output.axes]
+                outPosition = [position[inverseIndexMap[p]] for p in output.axisIndices]
                 # print('>>>', position, outPosition)
                 output.setSliceData(data, outPosition, writeSliceDim)
 

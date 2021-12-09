@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-03 11:45:34 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 20:04:49 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2052,7 +2052,7 @@ def _searchAxisCodePermutations(spectrum, checkCodes: Tuple[str, ...]) -> Option
 
     # add permutations for the axes
     axisPerms = tuple(permutations(spectrum.axisCodes))
-    axisOrder = tuple(permutations(spectrum.axes))
+    axisOrder = tuple(permutations(spectrum.axisIndices))
 
     for ii, perm in enumerate(axisPerms):
         n = min(len(checkCodes), len(perm))
@@ -2084,7 +2084,7 @@ def _setDefaultAxisOrdering(spectrum):
 
     if not pOrder:
         # didn't find anything; revert to default [0...dimensionCount-1]
-        pOrder = spectrum.axes
+        pOrder = spectrum.axisIndices
 
     return
 

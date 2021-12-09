@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-09 11:29:04 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 11:37:20 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -54,7 +54,7 @@ class SubmitMacroPopup(CcpnDialogMainWidget):
 
     def __init__(self, parent=None, title='Submit Macro Form', **kwds):
 
-        raise RuntimeError('This Popup is depreciated. To submit a macro, please visit the CcpnForum instead')
+        raise RuntimeError('This Popup is deprecated. To submit a macro, please visit the CcpnForum instead')
 
         super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
 

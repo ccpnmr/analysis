@@ -297,7 +297,7 @@ def saveProject(project, newPath = None, newProjectName = None, changeBackup = T
       # if os.path.exists(oldPath):  # only copy if this is a directory
       if os.path.isdir(oldPath):
         # just copy everything from oldPath to newPath
-        print(('Copying directory %s to %s (this might take some time if there are big files)' % (oldPath, newPath)))
+        # print(('Copying directory %s to %s (this might take some time if there are big files)' % (oldPath, newPath)))
         shutil.copytree(oldPath, newPath)
 
         # but need toz remove all implementation files

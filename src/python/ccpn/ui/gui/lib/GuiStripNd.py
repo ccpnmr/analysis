@@ -34,7 +34,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-08 16:57:33 +0000 (Wed, December 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 16:21:41 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -553,7 +553,7 @@ class GuiStripNd(GuiStrip):
                     continue
 
                 _params = spectrumView._getSpectrumViewParams(n + 2)
-                _index = spectrumView.dimensionOrdering[n+2]
+                _index = spectrumView.axes[n+2]
                 specDim = spectrumView.spectrum.spectrumDimensions[_index]
 
                 if zAxis.unit == AXISUNIT_PPM:
@@ -634,7 +634,7 @@ class GuiStripNd(GuiStrip):
         if not (_specView and not _specView.isDeleted):
             return
 
-        _index = _specView.dimensionOrdering[n]
+        _index = _specView.axes[n]
         specDim = _specView.spectrum.spectrumDimensions[_index]
 
         if zAxis.unit == AXISUNIT_PPM:

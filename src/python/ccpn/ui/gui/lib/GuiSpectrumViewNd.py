@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-09 15:39:25 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 16:21:41 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -256,7 +256,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                                                           not self._application.preferences.general.generateSinglePlaneContours)
 
             # else:
-            #     specIndices = self.dimensionOrdering
+            #     specIndices = self.axes
             #     stripIndices = tuple(specIndices.index(ii) for ii in range(numDims))
             #     regionLimits = tuple(axis.region for axis in self.strip.orderedAxes)
             #
@@ -332,7 +332,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         spectrum = self.spectrum
         dimensionCount = spectrum.dimensionCount
-        dimIndices = self.dimensionOrdering
+        dimIndices = self.axes
         xDim = dimIndices[0]
         yDim = dimIndices[1]
         #TODO: this needs rewriting without api calls
@@ -389,7 +389,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     def _getAxisInfo(self, orderedAxes, dim):
         """Get the information for the required axis
         """
-        index = self.dimensionOrdering[dim]
+        index = self.axes[dim]
         if index is None:
             return
 
@@ -433,7 +433,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         spectrum = self.spectrum
         dimensionCount = spectrum.dimensionCount
-        dimIndices = self.dimensionOrdering
+        dimIndices = self.axes
         orderedAxes = self._apiStripSpectrumView.strip.orderedAxes
 
         if dimensionCount <= 2:
@@ -444,7 +444,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         for dim in range(2, dimensionCount):
 
-            index = self.dimensionOrdering[dim]
+            index = self.axes[dim]
             if index is None:
                 return
 

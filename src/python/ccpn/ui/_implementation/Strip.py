@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-11 20:43:40 +0100 (Mon, October 11, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-09 16:21:40 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -333,81 +333,6 @@ class Strip(AbstractWrapperObject):
     def findAxis(self, axisCode):
         """Find axis"""
         return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
-
-    # @logCommand(get='self')
-    # def displaySpectrum(self, spectrum: Spectrum, axisOrder: Sequence = ()):
-    #     """Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
-    #     :return SpectrumView instance
-    #     """
-    #     return self._displaySpectrum(spectrum, axisOrder)
-
-    # def _displaySpectrum(self, spectrum: Spectrum, axisOrder: Sequence = (), useUndoBlock=True):
-    #     """Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
-    #     :return SpectrumView instance
-    #     CCPNINTERNAL: also used in GuiSpectrumDisplay.displaySpectrum
-    #     """
-    #     from ccpn.ui._implementation.SpectrumView import _newSpectrumView
-    #
-    #     getLogger().debug('Strip._displaySpectrum>>> %s' % spectrum)
-    #
-    #     spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
-    #     if not isinstance(spectrum, Spectrum):
-    #         raise ValueError('Expected Spectrum instance; got %s ' % str(spectrum))
-    #
-    #     dataSource = spectrum._wrappedData
-    #     # if self._apiStrip.findFirstSpectrumView(dataSource=dataSource) is not None:
-    #     #     getLogger().debug('Strip.displaySpectrum>>> spectrumView already displayed on %s' % self)
-    #     #     return
-    #
-    #
-    #
-    #     displayAxisCodes = self.axisCodes
-    #
-    #     # # make axis mapping indices
-    #     # if axisOrder and axisOrder != displayAxisCodes:
-    #     #     # Map axes to axisOrder, and remap to original setting
-    #     #     ll = _axisCodeMapIndices(spectrum.axisCodes, axisOrder)
-    #     #     mapIndices = [ll[axisOrder.index(x)] for x in displayAxisCodes]
-    #     # else:
-    #     #     # Map axes to original display setting
-    #     #     mapIndices = _axisCodeMapIndices(spectrum.axisCodes, displayAxisCodes)
-    #     #
-    #     # if mapIndices is None:
-    #     #     getLogger().debug('Strip.displaySpectrum>>> mapIndices is None')
-    #     #     return
-    #     #
-    #     # # if None in mapIndices[:2]: # make sure that x/y always mapped
-    #     # #   return
-    #     # if mapIndices[0] is None or mapIndices[1] is None and displayAxisCodes[1] != 'intensity':
-    #     #     getLogger().debug('Strip.displaySpectrum>>> mapIndices, x/y not mapped')
-    #     #     return
-    #     #
-    #     # if mapIndices.count(None) + spectrum.dimensionCount != len(mapIndices):
-    #     #     getLogger().debug('Strip.displaySpectrum>>> mapIndices, dimensionCount not matching')
-    #     #     return
-    #
-    #     # # Make dimensionOrdering
-    #     # sortedDataDims = dataSource.sortedDataDims()
-    #     # dimensionOrdering = []
-    #     # for index in mapIndices:
-    #     #     if index is None:
-    #     #         dimensionOrdering.append(0)
-    #     #     else:
-    #     #         dimensionOrdering.append(sortedDataDims[index].dim)
-    #
-    #     if self.spectrumDisplay.is1D:
-    #         dimensionOrdering = [1, 0]
-    #     else:
-    #         dimensionOrdering = spectrum.getByAxisCodes('dimensions', self.axisCodes, exactMatch=False)
-    #
-    #     # Make spectrumView
-    #     if useUndoBlock:
-    #         with undoBlockWithoutSideBar():
-    #             result = _newSpectrumView(self.spectrumDisplay, spectrum, dimensionOrdering=dimensionOrdering)
-    #     else:
-    #         result = _newSpectrumView(self.spectrumDisplay, spectrum, dimensionOrdering=dimensionOrdering)
-    #
-    #     return result
 
     @logCommand(get='self')
     def createPeak(self, ppmPositions: List[float]) -> Tuple[Tuple[Peak, ...], Tuple[PeakList, ...]]:

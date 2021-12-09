@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-18 18:20:21 +0000 (Thu, November 18, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-09 16:21:41 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -357,7 +357,8 @@ class PlaneSelectorWidget(Frame):
                 self.spinBox.setMaximum(maxAliasedFrequency)
             if minAliasedFrequency is not None:
                 self.spinBox.setMinimum(minAliasedFrequency)
-            self.spinBox.setValue(ppmPosition)
+            if ppmPosition is not None:
+                self.spinBox.setValue(ppmPosition)
 
             # override the spinBox to only allow integer points
             # self.spinBox.setDecimals(0 if unit == AXISUNIT_POINT else 3)

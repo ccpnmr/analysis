@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-18 18:17:58 +0000 (Thu, November 18, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-09 16:21:40 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2444,9 +2444,9 @@ class GuiSpectrumDisplay(CcpnModule):
 
         with undoStackBlocking() as _:  # Do not add to undo/redo stack
             # _getDimensionsMapping will check the match for axisCodes
-            dimensionOrder = (1, 0) if self.is1D else self._getDimensionsMapping(spectrum)
+            spectrumAxes = (1, 0) if self.is1D else self._getDimensionsMapping(spectrum)
             # check the isotopeCodes
-            dims = dimensionOrder[0:1] if self.is1D else dimensionOrder
+            dims = spectrumAxes[0:1] if self.is1D else spectrumAxes
             for ic1, ic2 in zip(self.isotopeCodes, spectrum.getByDimensions('isotopeCodes', dims)):
                 if ic1 != ic2:
                     raise RuntimeError('Cannot display %s on %s; incompatible isotopeCodes' % (spectrum, self))
@@ -2462,7 +2462,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     addUndoItem(undo=partial(self.setToolbarButtons, tuple(_oldOrdering)))
 
                     # Make spectrumView
-                    if (spectrumView := _newSpectrumView(self, spectrum=spectrum, dimensionOrdering=dimensionOrder)) \
+                    if (spectrumView := _newSpectrumView(self, spectrum=spectrum, spectrumAxes=spectrumAxes)) \
                             is None:
                         # notify the stack to revert to the pre-context manager stack
                         # revertStack(True)
@@ -2721,31 +2721,6 @@ class GuiSpectrumDisplay(CcpnModule):
         with undoBlockWithoutSideBar():
             for specView in self.spectrumViews:
                 specView.copyContourAttributesFromSpectrum()
-
-    #===========================================================================================
-    # new'Object' and other methods
-    # Call appropriate routines in their respective locations
-    #===========================================================================================
-
-    # @logCommand('project.')
-    # def newSpectrumView(self, spectrumName: str = None,
-    #                     stripSerial: int = None, dataSource=None,
-    #                     dimensionOrdering=None,
-    #                     **kwds):
-    #     """Create new SpectrumView
-    #
-    #     See the SpectrumView class for details.
-    #
-    #     Optional keyword arguments can be passed in; see SpectrumView._newSpectrumView for details.
-    #
-    #     :return: a new SpectrumView instance.
-    #     """
-    #     from ccpn.ui._implementation.SpectrumView import _newSpectrumView
-    #
-    #     return _newSpectrumView(self, spectrumName=spectrumName,
-    #                                  stripSerial=stripSerial, dataSource=dataSource,
-    #                                  dimensionOrdering=dimensionOrdering, **kwds)
-
 
 #=========================================================================================
 

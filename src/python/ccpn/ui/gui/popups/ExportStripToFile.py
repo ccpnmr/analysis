@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-09 16:42:45 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 19:23:31 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -72,6 +72,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLFILENAME, GLGRIDLINES, \
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, addNewColourString, hexToRgbRatio, colourNameNoSpace
 from ccpn.util.Constants import SCALING_MODES, POSINFINITY
+from ccpn.util.Logging import getLogger
 
 
 # from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLAXISLABELS, GLAXISMARKS, \
@@ -106,6 +107,7 @@ EXPORTFILTERS = EXPORTPDFFILTER
 PAGEPORTRAIT = 'portrait'
 PAGELANDSCAPE = 'landscape'
 PAGETYPES = [PAGEPORTRAIT, PAGELANDSCAPE]
+
 STRIPAXIS = 'Axis'
 STRIPMIN = 'Min'
 STRIPMAX = 'Max'
@@ -141,6 +143,11 @@ class _StripData:
     minMaxMode = 0
     axes = None
 
+    _USEREGION = 'useRegion'
+    _MINMAXMODE = 'minMaxMode'
+    _AXES = 'axes'
+    _DECIMALS = 5
+
     def _initialise(self):
         """Initialise the new dataclass from the strip
         """
@@ -170,6 +177,39 @@ class _StripData:
         """Output the string representation
         """
         return f'<{self.strip}: {self.useRegion}, {self.minMaxMode}, {self.axes}>'
+
+    def toDict(self, func=None):
+        """Output the contents as a dict
+        """
+
+        def _func(val):
+            return round(val, self._DECIMALS)
+
+        func = func or _func
+        dd = {self._USEREGION : self.useRegion,
+              self._MINMAXMODE: self.minMaxMode,
+              self._AXES      : [{STRIPMIN         : func(axis[STRIPMIN]),
+                                  STRIPMAX         : func(axis[STRIPMAX]),
+                                  STRIPCENTRE      : func(axis[STRIPCENTRE]),
+                                  STRIPWIDTH       : func(axis[STRIPWIDTH]),
+                                  STRIPAXISINVERTED: axis[STRIPAXISINVERTED],
+                                  } for axis in self.axes],
+              }
+        return dd
+
+    def fromDict(self, value):
+        """update contents from a dict
+        """
+        self.useRegion = value.get(self._USEREGION)
+        self.minMaxMode = value.get(self._MINMAXMODE)
+        self.axes = _axes = value.get(self._AXES)
+        if _axes:
+            self.axes = [{STRIPMIN         : float(axis[STRIPMIN]),
+                          STRIPMAX         : float(axis[STRIPMAX]),
+                          STRIPCENTRE      : float(axis[STRIPCENTRE]),
+                          STRIPWIDTH       : float(axis[STRIPWIDTH]),
+                          STRIPAXISINVERTED: axis[STRIPAXISINVERTED],
+                          } for axis in _axes]
 
 
 class ExportStripToFilePopup(ExportDialogABC):
@@ -515,11 +555,17 @@ class ExportStripToFilePopup(ExportDialogABC):
         self._currentStrips = []  # there may be multiple selected in the stripList
         self._currentAxis = 0
         self._stripDict = {}
+        self._localStripDict = {}
 
         if self.strips:
             self.objects = {strip.id: (strip, strip.pid) for strip in self.strips}
             for strip in self.strips:
+                # make two copies of the strip ranges
                 _data = self._stripDict[strip.id] = _StripData()
+                _data.strip = strip
+                _data._initialise()
+
+                _data = self._localStripDict[strip.id] = _StripData()
                 _data.strip = strip
                 _data._initialise()
 
@@ -548,7 +594,7 @@ class ExportStripToFilePopup(ExportDialogABC):
             ddAxis[STRIPCENTRE] = dd.strip.getAxisPosition(ii)
             ddAxis[STRIPWIDTH] = dd.strip.getAxisWidth(ii)
         except Exception as es:
-            pass
+            getLogger().debug2('Error updating _setStripRegion')
         else:
             self._setRangeState(self._currentStrip)
             self._focusButton(self._currentAxis, STRIPMIN if dd.minMaxMode == 0 else STRIPCENTRE)
@@ -574,7 +620,7 @@ class ExportStripToFilePopup(ExportDialogABC):
             okay = self._setStripMinValue(ddAxis, min(region))
 
         except Exception as es:
-            pass
+            getLogger().debug2('Error updating _setStripMin')
         else:
             self._setRangeState(self._currentStrip)
             self._focusButton(self._currentAxis, STRIPMIN)
@@ -603,7 +649,7 @@ class ExportStripToFilePopup(ExportDialogABC):
             okay = self._setStripMaxValue(ddAxis, max(region))
 
         except Exception as es:
-            pass
+            getLogger().debug2('Error updating _setStripMax')
         else:
             self._setRangeState(self._currentStrip)
             self._focusButton(self._currentAxis, STRIPMAX)
@@ -628,7 +674,7 @@ class ExportStripToFilePopup(ExportDialogABC):
             self._setStripCentreValue(ddAxis, centre)
 
         except Exception as es:
-            pass
+            getLogger().debug2('Error updating _setStripCentre')
         else:
             self._setRangeState(self._currentStrip)
             self._focusButton(self._currentAxis, STRIPCENTRE)
@@ -650,7 +696,7 @@ class ExportStripToFilePopup(ExportDialogABC):
             self._setStripWidthValue(ddAxis, width)
 
         except Exception as es:
-            pass
+            getLogger().debug2('Error updating _setStripWidth')
         else:
             self._setRangeState(self._currentStrip)
             self._focusButton(self._currentAxis, STRIPWIDTH)
@@ -672,7 +718,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                 self._setStripWidthValue(_dd.axes[row], value)
 
         except Exception as es:
-            pass
+            getLogger().debug2('Error updating _setSpinbox')
         else:
             self._setRangeState(self._currentStrip)
             self._focusButton(row, button)
@@ -700,7 +746,7 @@ class ExportStripToFilePopup(ExportDialogABC):
             _dd = self._stripDict.get(self._currentStrip)
             _dd.useRegion = value
         except Exception as es:
-            pass
+            getLogger().debug2('Error updating _useOverrideCallback')
         else:
             self._setRangeState(self._currentStrip)
 
@@ -711,14 +757,13 @@ class ExportStripToFilePopup(ExportDialogABC):
             _dd = self._stripDict.get(self._currentStrip)
             _dd.minMaxMode = self._rangeRadio.getIndex()
         except Exception as es:
-            pass
+            getLogger().debug2('Error updating _setModeCallback')
         else:
             self._setRangeState(self._currentStrip)
 
     def _fontCheckBoxCallback(self, value):
         """Handle checking/unchecking font checkbox
         """
-        # self._fontButton.setEnabled(self._useFontCheckbox.isChecked())
         self._fontPulldown.setEnabled(self._useFontCheckbox.isChecked())
         self._fontSpinbox.setEnabled(self._useFontCheckbox.isChecked())
 
@@ -738,6 +783,19 @@ class ExportStripToFilePopup(ExportDialogABC):
         """Populate the widget
         """
         self.printSettings = self.application.preferences.printSettings
+
+        # get the first spinBox, assume all are the same
+        textFromValue = self._axisSpinboxes[0][1].textFromValue
+        for strip in self.strips:
+            # copy from the local to the stripDict
+            _value = self._localStripDict[strip.id].toDict(textFromValue)
+            self._stripDict[strip.id].fromDict(_value)
+
+            # # NOTE:ED - ranges are currently not saved to preferences correctly
+            # _value = self.printSettings.printRanges.get(strip.id)
+            # if _value:
+            #     self._stripDict[strip.id].fromDict(_value)
+            #     self._localStripDict[strip.id].fromDict(_value)
 
         # define the contents for the object pulldown
         if len(self.strips) > 1:
@@ -797,6 +855,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                 self.strip = self.strips[0]
             else:
                 self.strip = None
+        self.spectrumDisplay = None
 
         # fill the range widgets from the strips
         self._populateRange()
@@ -821,13 +880,13 @@ class ExportStripToFilePopup(ExportDialogABC):
         """
         self._rangeLeft.setVisible(self.spectrumDisplay is not None)
         if self.strip:
-            self._setRangeState(self.strip.id)
+            self._setRangeState(self.strip.id, _updateQueue=False)
 
         self._stripLists.clear()
         self._stripLists.addItems(list(strip.id for strip in self.strips))
         self._stripLists.select(self._currentStrip)
 
-    def _setRangeState(self, strip, setButton=None, setRow=None):
+    def _setRangeState(self, strip, setButton=None, setRow=None, _updateQueue=True):
         try:
             stripId = strip.text()
         except Exception as es:
@@ -873,10 +932,14 @@ class ExportStripToFilePopup(ExportDialogABC):
                     # self._rangeRadio.setEnabled(_dd.useRegion)
                     self._setRangeButtons.setEnabled(_dd.useRegion)
 
+                # re-enable constraints
                 self._setSpinboxConstraints(stripId)
 
             self._rangeRight.setVisible(True)
             self._rangeRight.update()
+
+            if _updateQueue:
+                self._queuePrintRangesCallback(None)
 
     def _populateScaling(self):
         """Populate the widgets in the scaling frame
@@ -934,7 +997,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         try:
             self._axisSpinboxes[row][STRIPBUTTONS.index(button)].setFocus()
         except Exception as es:
-            pass
+            getLogger().debug2('Error updating _focusButton')
 
     def _setSpinboxConstraints(self, stripId, state=True):
         """Set the min/max/width constraints for the spinboxes associated with the stripId
@@ -951,26 +1014,31 @@ class ExportStripToFilePopup(ExportDialogABC):
                     self._axisSpinboxes[ii][STRIPBUTTONS.index(STRIPWIDTH)].setMinimum(0.0)
 
         except Exception as es:
-            pass
+            getLogger().debug2('Error updating _setSpinboxConstraints')
 
     def storeWidgetState(self):
-        """Store the state of the checkBoxes between popups
+        """Store the state of the widgets between popups
         """
-        # NOTE:ED - need to put the other settings in here - or use Revert method
-        # ExportStripToFilePopup._storedState[self._SAVESTRIPS] = self._stripDict.copy()
-        # ExportStripToFilePopup._storedState[self._SAVECURRENTSTRIP] = self._currentStrip
-        # ExportStripToFilePopup._storedState[self._SAVECURRENTAXIS] = self._currentAxis
-        pass
+        textFromValue = self._axisSpinboxes[0][1].textFromValue
+        _value = {k: v.toDict(textFromValue) for k, v in self._localStripDict.items()}
+        ExportStripToFilePopup._storedState[self._SAVESTRIPS] = _value
+
+        ExportStripToFilePopup._storedState[self._SAVECURRENTSTRIP] = self._currentStrip
+        ExportStripToFilePopup._storedState[self._SAVECURRENTAXIS] = self._currentAxis
 
     def restoreWidgetState(self):
-        """Restore the state of the checkBoxes
+        """Restore the state of the widgets
         """
-        # self._stripDict.update(ExportStripToFilePopup._storedState.get(self._SAVESTRIPS, {}))
-        # _val = ExportStripToFilePopup._storedState.get(self._SAVECURRENTSTRIP, None)
-        # if _val:
-        #     self._currentStrip = _val
-        # self._currentAxis = ExportStripToFilePopup._storedState.get(self._SAVECURRENTAXIS, 0)
-        pass
+        values = ExportStripToFilePopup._storedState.get(self._SAVESTRIPS, {})
+        for k, v in values.items():
+            _val = _StripData()
+            _val.fromDict(v)
+            self._localStripDict[k] = _val
+
+        _val = ExportStripToFilePopup._storedState.get(self._SAVECURRENTSTRIP, None)
+        if _val:
+            self._currentStrip = _val
+        self._currentAxis = ExportStripToFilePopup._storedState.get(self._SAVECURRENTAXIS, 0)
 
     def _changeObjectPulldownCallback(self, value):
         selected = self.objectPulldown.getText()
@@ -1594,7 +1662,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         option = _value.data(0, 0)
         itemName = _value.text(0)
         if itemName not in OPTIONLIST:
-            checked = int(_value.checkState(0))  # True if (_value.checkState(0) == QtCore.Qt.Checked) else False
+            checked = int(_value.checkState(0))
             self._queuePrintOptionsCallback(option, checked)
 
     @queueStateChange(_verifyPopupApply)
@@ -1609,39 +1677,28 @@ class ExportStripToFilePopup(ExportDialogABC):
     def _togglePrintOptions(self, option, checked):
         self.printSettings.printOptions[option] = checked
 
-    # def _getFont(self, value):
-    #     # Simple font grabber from the system
-    #     _fontAttr = self._fontButton
-    #     value = _fontAttr._fontString
-    #     _font = QtGui.QFont()
-    #     _font.fromString(value)
-    #     newFont, ok = QtWidgets.QFontDialog.getFont(_font, caption='Select Font')
-    #     if ok:
-    #         self.setFontText(self._fontButton, newFont.toString())
-    #         # add the font change to the apply queue
-    #         # self._queueSetFont(dim)
-    #         _paths = self.familyFonts.get(newFont.family(), [])
-    #         if not _paths:
-    #             showWarning('Font error', f'TrueType font could not be found for {newFont.family()}')
-    #
-    # def setFontText(self, widget, fontString):
-    #     """Set the contents of the widget the details of the font
-    #     """
-    #     try:
-    #         fontList = fontString.split(',')
-    #         if len(fontList) == 10:
-    #             name, size, _, _, _, _, _, _, _, _ = fontList
-    #             type = None
-    #         elif len(fontList) == 11:
-    #             name, size, _, _, _, _, _, _, _, _, type = fontList
-    #         else:
-    #             name, size, type = DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
-    #     except:
-    #         name, size, type = DEFAULTFONTNAME, DEFAULTFONTSIZE, DEFAULTFONTREGULAR
-    #
-    #     fontName = '{}, {}pt, {}'.format(name, size, type) if type else '{}, {}pt'.format(name, size, )
-    #     widget._fontString = fontString
-    #     widget.setText(fontName)
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # print ranges
+
+    @queueStateChange(_verifyPopupApply)
+    def _queuePrintRangesCallback(self, _value):
+        """Store the print ranges if they have changed
+        """
+        # get the first spinBox, assume all are the same
+        textFromValue = self._axisSpinboxes[0][1].textFromValue
+        _value = {}
+        _valueLocal = {}
+        for strip in self.strips:
+            _value[strip.id] = self._stripDict[strip.id].toDict(textFromValue)
+            _valueLocal[strip.id] = self._localStripDict[strip.id].toDict(textFromValue)
+        # any changes to the ranges dict
+        if _value != _valueLocal:
+            return partial(self._setPrintRange, _value)
+
+    def _setPrintRange(self, value):
+        # NOTE:ED - ranges are currently not saved to preferences correctly
+        for k, val in value.items():
+            self._localStripDict[k].fromDict(val)
 
 
 def main():

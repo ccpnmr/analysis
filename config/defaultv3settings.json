@@ -179,7 +179,8 @@
             "SpinningRate SideBands" : 0,
             "Strip Labelling"        : 2,
             "Static Traces"          : 2
-        }
+        },
+        "printRanges"       : {}
     },
     "recentMacros"     : [
     ],

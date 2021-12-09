@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-09 16:11:16 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 16:42:45 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1240,12 +1240,14 @@ class ExportStripToFilePopup(ExportDialogABC):
                         pngExport.writePSFile()
 
     def actionButtons(self):
-        self.setOkButton(callback=self._saveAndCloseDialog, text='Save and Close', tipText='Export the strip and close the dialog')
-        self.setCancelButton(callback=self._closeDialog, text='Close', tipText='Close the dialog and save the settings')
+        self.setOkButton(callback=self._saveAndCloseDialog, text='Save and Close',
+                         tipText='Export the strip and close the dialog\nAll changes to the print settings are saved')
+        self.setCancelButton(callback=self._closeDialog, text='Close', tipText='Close the dialog\nAll changes to the print settings are saved')
         self.setCloseButton(callback=self._saveDialog, text='Save', tipText='Export the strip')
         self.setHelpButton(callback=self._helpClicked, tipText='Help', enabled=False)
-        self.setRevertButton(callback=self._revertClicked, tipText='Revert to the initial state', enabled=False)
-        self.setUserButton(callback=self._rejectDialog, text='Cancel', tipText='Close the dialog and ignore any changes to settings', enabled=True)
+        self.setRevertButton(callback=self._revertClicked, tipText='Revert print settings to the state when the dialog was opened', enabled=False)
+        self.setUserButton(callback=self._rejectDialog, text='Cancel',
+                           tipText='Close the dialog\nAny changes to the print settings are ignored', enabled=True)
         self.setDefaultButton(self.CANCELBUTTON)
 
     def __postInit__(self):

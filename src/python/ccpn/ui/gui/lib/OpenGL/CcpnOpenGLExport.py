@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-09 16:11:16 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 16:18:55 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -789,7 +789,8 @@ class GLExporter():
         colour = colors.Color(*col[0:3], alpha=alphaClip(col[3]))
         colourPath = 'cursorText%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
 
-        newLine = self._scaleRatioToWindow(drawString.attribs[:2])
+        newLine = self._scaleRatioToWindow([drawString.attribs[0] + (self.fontXOffset * self._parent.deltaX),
+                                            drawString.attribs[1] + (self.fontYOffset * self._parent.deltaY)])
         if self.pointVisible(self._parent, newLine,
                              x=self.displayScale * self.mainView.left,
                              y=self.displayScale * self.mainView.bottom,

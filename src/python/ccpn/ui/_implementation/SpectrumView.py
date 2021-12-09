@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-09 16:21:40 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 18:43:12 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -346,19 +346,30 @@ class SpectrumView(AbstractWrapperObject):
         self._guiChanged = True
         self._wrappedData.spectrumView.sliceColour = value
 
-    @property
-    def spectrum(self) -> Spectrum:
-        """Spectrum that SpectrumView refers to"""
-        return self._project._data2Obj.get(self._wrappedData.spectrumView.dataSource)
-
     #=========================================================================================
     # Spectrum properties in displayOrder; convenience methods
     #=========================================================================================
 
     @property
+    def spectrum(self) -> Spectrum:
+        """Spectrum that SpectrumView refers to"""
+        return self._project._data2Obj.get(self._wrappedData.spectrumView.dataSource)
+
+    @property
+    def displayOrder(self) -> tuple:
+        """A tuple of dimensions (1-based) in display order; 0 indicates a 1D 'intensity' dimension
+        """
+        return tuple(self._wrappedData.spectrumView.dimensionOrdering)
+
+    @property
     def dimensions(self) -> tuple:
         """Spectrum dimensions in display order"""
-        return tuple(self._wrappedData.spectrumView.dimensionOrdering)
+        return tuple(dim for dim in self.displayOrder if dim > 0)
+
+    @property
+    def spectrumDimensions(self) -> tuple:
+        """spectrumDimension objects in display order"""
+        return tuple(self.spectrum.spectrumDimensions[idx] for idx in self.axes)
 
     @property
     def axes(self) -> tuple:
@@ -371,36 +382,36 @@ class SpectrumView(AbstractWrapperObject):
     @property
     def axisCodes(self) -> list:
         """Spectrum axisCodes in display order"""
-        return [self.spectrum.axisCodes[idx] for idx in self.axes if idx >= 0]
+        return [self.spectrum.axisCodes[idx] for idx in self.axes]
 
     @property
     def spectrumLimits(self) -> list:
         """Spectrum limits in display order"""
         _tmp = self.spectrum.spectrumLimits
-        return [_tmp[idx] for idx in self.axes if idx >= 0]
+        return [_tmp[idx] for idx in self.axes]
 
     @property
     def aliasingLimits(self) -> list:
         """Spectrum aliasing limits in display order"""
         _tmp = self.spectrum.aliasingLimits
-        return [_tmp[idx] for idx in self.axes if idx >= 0]
+        return [_tmp[idx] for idx in self.axes]
 
     @property
     def foldingLimits(self) -> list:
         """Spectrum folding limits in display order"""
         _tmp = self.spectrum.foldingLimits
-        return [_tmp[idx] for idx in self.axes if idx >= 0]
+        return [_tmp[idx] for idx in self.axes]
 
     @property
     def valuesPerPoint(self) -> list:
         """Spectrum valuesPerPoint in display order"""
         _tmp = self.spectrum.valuesPerPoint
-        return [_tmp[idx] for idx in self.axes if idx >= 0]
+        return [_tmp[idx] for idx in self.axes]
 
     def _getByDisplayOrder(self, parameterName) -> list:
         """Return parameter in displayOrder"""
-        dims = [d for d in self.dimensions if d > 0]  # Filter the '0' dimension of 1D
-        return list(self.spectrum.getByDimensions(parameterName=parameterName, dimensions=dims))
+        # dims = [d for d in self.dimensions if d > 0]  # Filter the '0' dimension of 1D
+        return list(self.spectrum.getByDimensions(parameterName=parameterName, dimensions=self.dimensions))
 
     def _getPointPosition(self, ppmPostions) -> tuple:
         """Convert the ppm-positions vector (in display order) to a position (1-based) vector

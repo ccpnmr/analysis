@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-09 20:04:49 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 21:13:22 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1942,7 +1942,7 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
             _ppmRegions.append(sorted(float(pos) for pos in region))
 
         # try and match the axis codes before creating new peakList (if required)
-        indices = spectrum.getByAxisCodes('axes', axisCodes)
+        indices = spectrum.getByAxisCodes('axisIndices', axisCodes)
 
         peakList = spectrum.project.getByPid(peakList) if isinstance(peakList, str) else peakList
         if not peakList:

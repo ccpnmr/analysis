@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-03 14:13:48 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 16:11:16 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -34,6 +34,8 @@ from PyQt5.QtCore import QStandardPaths
 from PyQt5.QtGui import QFontDatabase
 from dataclasses import dataclass
 from functools import partial
+from typing import Optional
+
 from ccpn.core.lib.ContextManagers import catchExceptions, queueStateChange
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER, BORDERFOCUS
 from ccpn.ui.gui.popups.ExportDialog import ExportDialogABC
@@ -124,6 +126,10 @@ PAGESIZEA6 = 'A6'
 PAGESIZELETTER = 'letter'
 PAGESIZES = [PAGESIZEA0, PAGESIZEA1, PAGESIZEA2, PAGESIZEA3, PAGESIZEA4, PAGESIZEA5, PAGESIZEA6, PAGESIZELETTER]
 PAGESIZE = 'pageSize'
+OPTIONSPECTRA = 'Spectra'
+OPTIONPEAKLISTS = 'Peak Lists'
+OPTIONPRINT = 'Print Options'
+OPTIONLIST = (OPTIONSPECTRA, OPTIONPEAKLISTS, OPTIONPRINT)
 
 
 @dataclass
@@ -185,6 +191,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                  selectFile=None,
                  fileFilter=EXPORTFILTERS,
                  strips=None,
+                 selectedStrip=None,
                  includeSpectrumDisplays=True,
                  **kwds):
         """
@@ -218,7 +225,22 @@ class ExportStripToFilePopup(ExportDialogABC):
             showWarning(str(self.windowTitle()), 'No strips selected')
             self.reject()
 
+        self._selectedStrip = selectedStrip or strips[0]
+
         self.fullList = GLFULLLIST
+
+    def exec_(self) -> Optional[dict]:
+        """Disable strip updating while the popup is visible
+        """
+        for strip in self.strips:
+            strip._CcpnGLWidget._disableCursorUpdate = True
+
+        result = super().exec_()
+
+        for strip in self.strips:
+            strip._CcpnGLWidget._disableCursorUpdate = False
+
+        return result
 
     def initialise(self, userFrame):
         """Create the widgets for the userFrame
@@ -693,14 +715,6 @@ class ExportStripToFilePopup(ExportDialogABC):
         else:
             self._setRangeState(self._currentStrip)
 
-    # def _scalingCallback(self, value):
-    #     """Handle selecting item from scaling pulldown
-    #     """
-    #     _ind = self.scalingMode.getIndex()
-    #     self.scalingPercentage.setVisible(False if _ind else True)
-    #     self.scalingUnits.setVisible(True if _ind else False)
-    #     self.scalingAxis.setVisible(True if _ind else False)
-
     def _fontCheckBoxCallback(self, value):
         """Handle checking/unchecking font checkbox
         """
@@ -773,7 +787,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.stripPaddingBox.setValue(self.printSettings.stripPadding)
         self.exportDpiBox.setValue(self.printSettings.dpi)
 
-        # set the pulldown to current strip of selected
+        # set the pulldown to current strip if selected
         if self.current and self.current.strip:
             self.objectPulldown.select(self.current.strip.id)
             self.strip = self.current.strip
@@ -958,32 +972,6 @@ class ExportStripToFilePopup(ExportDialogABC):
         # self._currentAxis = ExportStripToFilePopup._storedState.get(self._SAVECURRENTAXIS, 0)
         pass
 
-    # def _changeForegroundPulldown(self, value):
-    #     newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.foregroundColourBox.currentText()))]
-    #     if newColour:
-    #         self.foregroundColour = newColour
-    #
-    # def _changeForegroundButton(self, value):
-    #     """Change the colour from the foreground colour button
-    #     """
-    #     newColour = self._changeColourButton()
-    #     if newColour:
-    #         self.foregroundColourBox.setCurrentText(spectrumColours[newColour.name()])
-    #         self.foregroundColour = newColour.name()
-    #
-    # def _changeBackgroundPulldown(self, value):
-    #     newColour = list(spectrumColours.keys())[list(spectrumColours.values()).index(colourNameNoSpace(self.backgroundColourBox.currentText()))]
-    #     if newColour:
-    #         self.backgroundColour = newColour
-    #
-    # def _changeBackgroundButton(self, value):
-    #     """Change the colour from the background colour button
-    #     """
-    #     newColour = self._changeColourButton()
-    #     if newColour:
-    #         self.backgroundColourBox.setCurrentText(spectrumColours[newColour.name()])
-    #         self.backgroundColour = newColour.name()
-
     def _changeObjectPulldownCallback(self, value):
         selected = self.objectPulldown.getText()
         exType = self.printType.get()
@@ -994,8 +982,7 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         if 'SpectrumDisplay' in selected:
             self.spectrumDisplay = self.objects[selected][0]
-            self.strip = self.spectrumDisplay.strips[0]
-
+            self.strip = self._selectedStrip
             self.setSave(self.spectrumDisplay.id + exportExtension)
 
         else:
@@ -1016,7 +1003,7 @@ class ExportStripToFilePopup(ExportDialogABC):
             # add Spectra to the treeView
             if self.strip.spectrumViews:
                 item = QtWidgets.QTreeWidgetItem(self.treeView)
-                item.setText(0, 'Spectra')
+                item.setText(0, OPTIONSPECTRA)
                 item.setFlags(int(item.flags()) | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
 
                 for specView in self.strip.spectrumViews:
@@ -1041,7 +1028,7 @@ class ExportStripToFilePopup(ExportDialogABC):
             printItems = []
             if peakLists:
                 item = QtWidgets.QTreeWidgetItem(self.treeView)
-                item.setText(0, 'Peak Lists')
+                item.setText(0, OPTIONPEAKLISTS)
                 item.setFlags(int(item.flags()) | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
 
                 for pp in peakLists:
@@ -1107,43 +1094,32 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         printItems.extend(GLEXTENDEDLIST)
 
-        if selectList is None:
-            selectList = {GLSPECTRUMBORDERS   : QtCore.Qt.Checked if self.application.preferences.general.showSpectrumBorder else QtCore.Qt.Unchecked,
-                          GLSPECTRUMCONTOURS  : QtCore.Qt.Checked,
-                          GLCURSORS           : QtCore.Qt.Unchecked,
-                          }
-            if self.strip:
-                _update = {
-                    GLGRIDLINES         : QtCore.Qt.Checked if self.strip.gridVisible else QtCore.Qt.Unchecked,
-                    GLDIAGONALLINE      : QtCore.Qt.Checked if self.strip._CcpnGLWidget._matchingIsotopeCodes else QtCore.Qt.Unchecked,
-                    GLDIAGONALSIDEBANDS : (QtCore.Qt.Checked if (self.strip._CcpnGLWidget._sideBandsVisible and self.strip._CcpnGLWidget._matchingIsotopeCodes)
-                                           else QtCore.Qt.Unchecked),
-                    GLSHOWSPECTRAONPHASE: QtCore.Qt.Checked if self.strip._CcpnGLWidget._showSpectraOnPhasing else QtCore.Qt.Unchecked
-                    }
-                selectList.update(_update)
-
+        selectList = selectList or []
         self.printList = []
 
         # add Print Options to the treeView
         item = QtWidgets.QTreeWidgetItem(self.treeView)
-        item.setText(0, 'Print Options')
+        item.setText(0, OPTIONPRINT)
         item.setFlags(item.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
 
         for itemName in printItems:
             child = QtWidgets.QTreeWidgetItem(item)
             child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
-            # child.setData(1, 0, obj)
             child.setText(0, itemName)
-            # child.setCheckState(0, QtCore.Qt.Checked if itemName not in selectList else selectList[itemName])
-            _stored = self.printSettings.printOptions.get(itemName)
-            if _stored is None:
-                _state = QtCore.Qt.Checked if (itemName not in selectList) else selectList[itemName]
-                self.printSettings.printOptions[itemName] = True if (_state == QtCore.Qt.Checked) else False
-
-            child.setCheckState(0, QtCore.Qt.Checked if self.printSettings.printOptions.get(itemName) else QtCore.Qt.Unchecked)
-            # child.setCheckState(0, QtCore.Qt.Checked if itemName not in selectList else selectList[itemName])
 
         item.setExpanded(True)
+
+        for child in self.treeView.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
+            itemName = child.text(0)
+            if itemName in OPTIONLIST:
+                continue
+            if itemName in selectList:
+                _state = selectList[itemName]
+            else:
+                _prefState = self.printSettings.printOptions.get(itemName)
+                _state = _prefState if _prefState is not None else QtCore.Qt.Checked
+
+            child.setCheckState(0, _state)
 
     def _changePrintType(self):
         selected = self.printType.get()
@@ -1172,7 +1148,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         selected = self.objectPulldown.getText()
         if 'SpectrumDisplay' in selected:
             spectrumDisplay = self.objects[selected][0]
-            strip = spectrumDisplay.strips[0]
+            strip = self._selectedStrip
             stripDirection = self.spectrumDisplay.stripArrangement
         else:
             spectrumDisplay = None
@@ -1614,8 +1590,10 @@ class ExportStripToFilePopup(ExportDialogABC):
     def _queueGetPrintOptionCallback(self, _value, _state):
         # get the name of the option from the tree
         option = _value.data(0, 0)
-        checked = True if (_value.checkState(0) == QtCore.Qt.Checked) else False
-        self._queuePrintOptionsCallback(option, checked)
+        itemName = _value.text(0)
+        if itemName not in OPTIONLIST:
+            checked = int(_value.checkState(0))  # True if (_value.checkState(0) == QtCore.Qt.Checked) else False
+            self._queuePrintOptionsCallback(option, checked)
 
     @queueStateChange(_verifyPopupApply)
     def _queuePrintOptionsCallback(self, option, checked):

@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-25 17:59:14 +0000 (Thu, November 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 16:11:16 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -474,6 +474,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self._cursorFrameCounter = GLDefs.CursorFrameCounterModes.CURSOR_DEFAULT
         self._menuActive = False
+        self._disableCursorUpdate = False
 
     def close(self):
         self.GLSignals.glXAxisChanged.disconnect()
@@ -1845,16 +1846,20 @@ class CcpnGLWidget(QOpenGLWidget):
         self._resizeGL()
 
     def _clearGLCursorQueue(self):
-        for glBuf in self._glCursorQueue:
-            glBuf.clearArrays()
-        self._glCursorHead = 0
-        self._glCursorTail = (self._glCursorHead - 1) % self._numBuffers
+        """Clear the cursor glLists
+        """
+        if not self._disableCursorUpdate:
+            for glBuf in self._glCursorQueue:
+                glBuf.clearArrays()
+            self._glCursorHead = 0
+            self._glCursorTail = (self._glCursorHead - 1) % self._numBuffers
 
     def _advanceGLCursor(self):
         """Advance the pointers for the cursor glLists
         """
-        self._glCursorHead = (self._glCursorHead + 1) % self._numBuffers
-        self._glCursorTail = (self._glCursorHead - 1) % self._numBuffers
+        if not self._disableCursorUpdate:
+            self._glCursorHead = (self._glCursorHead + 1) % self._numBuffers
+            self._glCursorTail = (self._glCursorHead - 1) % self._numBuffers
 
     def _initialiseViewPorts(self):
         """Initialise all the viewports for the widget
@@ -2887,6 +2892,8 @@ class CcpnGLWidget(QOpenGLWidget):
         #     return
 
         self.buildCursors()
+        if self.underMouse():
+            self.buildMouseCoords()
 
         # build spectrumSettings, spectrumView visibility
         self.buildSpectra()
@@ -3158,9 +3165,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.enableTextClientState()
         self._setViewPortFontScale()
 
-        # if self._crosshairVisible:
-        if self.underMouse():
-            self.drawMouseCoords()
+        self.drawMouseCoords()
 
         # make the overlay/axis solid
         currentShader.setBlendEnabled(False)
@@ -3785,7 +3790,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def buildCursors(self):
         """Build and draw the cursors/doubleCursors
         """
-        if self._crosshairVisible:
+        if not self._disableCursorUpdate and self._crosshairVisible:
 
             # get the next cursor drawList
             self._advanceGLCursor()
@@ -4339,9 +4344,10 @@ class CcpnGLWidget(QOpenGLWidget):
             self.mouseString.updateTextArrayVBOAttribs()
 
     def drawMouseCoords(self):
-        if self.underMouse():  # and self.mouseString:
-            self.buildMouseCoords()
+        # if self.underMouse() or self._disableCursorUpdate:  # and self.mouseString:  # crosshairVisible
+        #     self.buildMouseCoords()
 
+        if self.underMouse():
             if self.mouseString is not None:
                 # draw the mouse coordinates to the screen
                 self.mouseString.drawTextArrayVBO()
@@ -5924,6 +5930,17 @@ class CcpnGLWidget(QOpenGLWidget):
             yield
         finally:
             self._menuActive = False
+
+    @contextmanager
+    def _disableCursorUpdating(self):
+        """Context manager to set the menu status to active
+        so that when the menu appears the live traces stay visible
+        """
+        self._disableCursorUpdate = True
+        try:
+            yield
+        finally:
+            self._disableCursorUpdate = False
 
     def getObjectsUnderMouse(self):
         """Return a list of objects under the mouse position as a dict

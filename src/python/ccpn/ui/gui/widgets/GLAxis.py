@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-11 18:57:51 +0000 (Thu, November 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 16:11:16 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1054,6 +1054,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._matchingIsotopeCodes = False
 
         self._menuActive = False
+        self._disableCursorUpdate = False
 
     def _setColourScheme(self):
         """Update colours from colourScheme

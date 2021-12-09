@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-03 19:19:23 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 16:11:16 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -183,8 +183,10 @@ class GLExporter():
         self.stripSpacing = 0
 
         if self.params[GLSPECTRUMDISPLAY]:
+            # print the whole spectrumDisplay
             spectrumDisplay = self.params[GLSPECTRUMDISPLAY]
 
+            self._selectedStrip = self.strip
             self.numStrips = len(spectrumDisplay.strips)
             self._buildPageDimensions(spectrumDisplay.strips)
 
@@ -207,9 +209,11 @@ class GLExporter():
                     self._createStrip(spectrumDisplay.orderedStrips[0], spectrumDisplay._bottomGLAxis, singleStrip=False, axesOnly=True)
 
         else:
+            # print a single strip
             strip = self.params[GLSTRIP]
             spectrumDisplay = strip.spectrumDisplay
 
+            self._selectedStrip = strip
             self.numStrips = 1
             self._buildPageDimensions([strip])
 
@@ -658,7 +662,8 @@ class GLExporter():
                 if self.params[GLSPECTRUMLABELS]: self._addSpectrumLabels()
 
             if self.params[GLTRACES]: self._addTraces()
-            if self.params[GLACTIVETRACES]: self._addLiveTraces()
+            if self._selectedStrip == self.strip:
+                if self.params[GLACTIVETRACES]: self._addLiveTraces()
 
             if not self._parent._stackingMode:
                 if self.params[GLOTHERLINES]: self._addInfiniteLines()
@@ -673,7 +678,10 @@ class GLExporter():
         self._addGridTickMarks()
 
         if not axesOnly:
-            if self.params[GLCURSORS]: self._addCursors()
+            if self.params[GLCURSORS]:
+                self._addCursors()
+                if self._selectedStrip == self.strip:
+                    self._addCursorText()
 
         if self.params[GLAXISLABELS] or self.params[GLAXISUNITS] or self.params[GLAXISTITLES]: self._addGridLabels()
 
@@ -743,9 +751,14 @@ class GLExporter():
         """
         Add cursors/double cursor to the main drawing area.
         """
-        if self._parent._cursorList:
+        if not (self._parent._glCursorQueue and self._parent._glCursorHead < len(self._parent._glCursorQueue)):
+            return
+
+        _drawList = self._parent._glCursorQueue[self._parent._glCursorHead]
+
+        if _drawList:
             colourGroups = OrderedDict()
-            self._appendIndexLineGroup(indArray=self._parent._cursorList,
+            self._appendIndexLineGroup(indArray=_drawList,
                                        colourGroups=colourGroups,
                                        plotDim={PLOTLEFT  : self.displayScale * self.mainView.left,
                                                 PLOTBOTTOM: self.displayScale * self.mainView.bottom,
@@ -755,6 +768,50 @@ class GLExporter():
                                        ratioLine=True,
                                        lineWidth=0.5 * self.baseThickness)
             self._appendGroup(drawing=self._mainPlot, colourGroups=colourGroups, name='cursors')
+
+    def _addCursorText(self):
+        """
+        Add the cursor text.
+        """
+        colourGroups = OrderedDict()
+
+        if not self._parent.mouseString:
+            return
+
+        drawString = self._parent.mouseString
+
+        if drawString.vertices is None or drawString.vertices.size == 0:
+            return
+
+        col = drawString.colors[0]
+        if not isinstance(col, Iterable):
+            col = drawString.colors[0:4]
+        colour = colors.Color(*col[0:3], alpha=alphaClip(col[3]))
+        colourPath = 'cursorText%s%s%s%s' % (colour.red, colour.green, colour.blue, colour.alpha)
+
+        newLine = self._scaleRatioToWindow(drawString.attribs[:2])
+        if self.pointVisible(self._parent, newLine,
+                             x=self.displayScale * self.mainView.left,
+                             y=self.displayScale * self.mainView.bottom,
+                             width=self.displayScale * self.mainView.width,
+                             height=self.displayScale * self.mainView.height):
+            if colourPath not in colourGroups:
+                colourGroups[colourPath] = Group()
+
+            textGroup = drawString.text.split('\n')
+            textLine = len(textGroup) - 1
+            for text in textGroup:
+                self._addString(colourGroups, colourPath,
+                                drawString,
+                                (newLine[0], newLine[1]),
+                                colour,
+                                text=text,
+                                offset=textLine
+                                )
+                textLine -= 1
+
+        for colourGroup in colourGroups.values():
+            self._mainPlot.add(colourGroup)
 
     def _addSpectrumViewManager(self, groupName):
         """

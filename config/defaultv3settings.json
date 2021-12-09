@@ -156,7 +156,30 @@
         "scalingUnits"      : 1.0,
         "scalingAxis"       : "X",
         "useFont"           : false,
-        "printOptions"      : {}
+        "printOptions"      : {
+            "Active Traces"          : 2,
+            "Axis Labels"            : 2,
+            "Axis Marks"             : 2,
+            "Axis Titles"            : 2,
+            "Axis Units"             : 2,
+            "Diagonal"               : 0,
+            "Grid Lines"             : 2,
+            "Mark Labels"            : 2,
+            "Mark Lines"             : 2,
+            "Other Lines"            : 2,
+            "Peak Labels"            : 2,
+            "Peak Symbols"           : 2,
+            "Plot Border"            : 2,
+            "Regions"                : 2,
+            "Show Cursors"           : 0,
+            "Spectra on Phasing"     : 0,
+            "Spectrum Borders"       : 2,
+            "Spectrum Contours"      : 2,
+            "Spectrum Labels"        : 2,
+            "SpinningRate SideBands" : 0,
+            "Strip Labelling"        : 2,
+            "Static Traces"          : 2
+        }
     },
     "recentMacros"     : [
     ],

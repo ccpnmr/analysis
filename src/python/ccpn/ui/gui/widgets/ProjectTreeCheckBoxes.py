@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-04 20:15:50 +0000 (Thu, November 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-09 16:11:17 +0000 (Thu, December 09, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -298,18 +298,19 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
     def getCheckStateItems(self, includeRoot=False):
         """Get checked state of objects
         """
-        selectedItems = {}
-        for item in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
-            obj = item.data(1, 0)
+        return {val.text(0): val.checkState(0) for val in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive)
+                }
 
-            # return checkstate of items in the tree that are group labels (bottom level should be objects with pids)
-            if not hasattr(obj, 'pid'):
-                if self.projectItem and item == self.projectItem and not includeRoot:
-                    continue
-
-                selectedItems[item.text(0)] = item.checkState(0)
-
-        return selectedItems
+        # selectedItems = {}
+        # for item in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
+        #     obj = item.data(1, 0)
+        #     # return checkstate of items in the tree that are group labels (bottom level should be objects with pids)
+        #     if not hasattr(obj, 'pid'):
+        #         if self.projectItem and item == self.projectItem and not includeRoot:
+        #             continue
+        #     selectedItems[item.text(0)] = item.checkState(0)
+        #
+        # return selectedItems
 
     def getSelectedObjectsPids(self, includeRoot=False):
         """Get the pids of the selected objects

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-09 10:20:34 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-10 08:56:59 +0000 (Fri, December 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -131,9 +131,9 @@ class SpectrumDisplay(AbstractWrapperObject):
 
     @property
     def title(self) -> str:
-        """SpectrumDisplay title
-
-        (corresponds to its name, but the name 'name' is taken by PyQt"""
+        """SpectrumDisplay.title
+        (corresponds to its name, but the name 'name' is taken by PyQt)
+        """
         return self._wrappedData.name
 
     @property
@@ -169,7 +169,7 @@ class SpectrumDisplay(AbstractWrapperObject):
 
     @property
     def stripCount(self) -> int:
-        """Number of strips"""
+        """Number of strips in the spectrumDisplay"""
         return self._wrappedData.stripCount
 
     @property
@@ -224,28 +224,28 @@ class SpectrumDisplay(AbstractWrapperObject):
         value = self.getByPid(value) if isinstance(value, str) else value
         self._wrappedData.resonanceGroup = value and value._wrappedData
 
-    @property
-    def positions(self) -> Tuple[float, ...]:
-        """Axis centre positions, in display order"""
-        return self._wrappedData.positions
-
-    @positions.setter
-    def positions(self, value):
-        self._wrappedData.positions = value
-
-    @property
-    def widths(self) -> Tuple[float, ...]:
-        """Axis display widths, in display order"""
-        return self._wrappedData.widths
-
-    @widths.setter
-    def widths(self, value):
-        self._wrappedData.widths = value
+    # @property
+    # def positions(self) -> Tuple[float, ...]:
+    #     """Axis centre positions, in display order"""
+    #     return self._wrappedData.positions
+    #
+    # @positions.setter
+    # def positions(self, value):
+    #     self._wrappedData.positions = value
+    #
+    # @property
+    # def widths(self) -> Tuple[float, ...]:
+    #     """Axis display widths, in display order"""
+    #     return self._wrappedData.widths
+    #
+    # @widths.setter
+    # def widths(self, value):
+    #     self._wrappedData.widths = value
 
     @property
     def units(self) -> Tuple[str, ...]:
         """Axis units, in display order"""
-        return tuple(a.unit for a in self.axes)
+        return tuple(a.unit for a in self.strips[0].axes)
 
     @units.setter
     def units(self, value):
@@ -464,19 +464,6 @@ class SpectrumDisplay(AbstractWrapperObject):
     # CCPN functions
     #=========================================================================================
 
-    def _setFromLimits(self, axis, value):
-        """Set width,position for axis from value tuple/list"""
-        width = value[1] - value[0] if value[1] > value[0] else value[0] - value[1]
-        pos = value[0] + width * 0.5 if value[1] > value[0] else value[0] - width * 0.5
-
-        positions = list(self.positions)
-        positions[axis] = pos
-        self.positions = positions
-
-        widths = list(self.widths)
-        widths[axis] = width
-        self.widths = widths
-
     def _getDimensionsMapping(self, spectrum: Spectrum) -> list:
         """Get the spectrum dimensions in display order
         """
@@ -505,32 +492,28 @@ class SpectrumDisplay(AbstractWrapperObject):
         # NB setting Axis.region translates into setting position (== halfway point)
         # and widths of the axis
 
-        # Get the mapping of the the axes of spectrum onto this SpectrumDisplay
+        # Get the mapping of the axes of spectrum onto this SpectrumDisplay
         spectrumAxes = self._getAxesMapping(spectrum)
 
-        if spectrum.dimensionCount == 1:
-            # 1D spectrum
-            ppmLimits, valueLimits = spectrum.get1Dlimits()
-            self.axes[0].region = ppmLimits
-            self.axes[1].region = valueLimits
+        for strip in self.strips:  # There should at least be one strip defined
+            if spectrum.dimensionCount == 1:
+                # 1D spectrum
+                ppmLimits, valueLimits = spectrum.get1Dlimits()
+                strip.axes[0].region = ppmLimits
+                strip.axes[1].region = valueLimits
 
-        else:
-            # nD
-            for ii, axis in enumerate(spectrumAxes):
-                if ii < 2:
-                    self.axes[ii].region = spectrum.spectrumLimits[axis]
+            else:
+                # nD
+                for ii, axis in enumerate(spectrumAxes):
+                    if ii < 2:
+                        strip.axes[ii].region = spectrum.spectrumLimits[axis]
 
-                else:
-                    # A display "plane-axis"
-                    self.axes[ii].region = spectrum.spectrumLimits[axis]
-                    self.axes[ii].width = spectrum.valuesPerPoint[axis]
-                    if spectrum.isTimeDomains[axis] or spectrum.isSampledDomains[axis]:
-                        self.axes[ii].position = 1.0
-
-        # Copy to strips
-        for strip in self.strips:
-            strip.positions = self.positions
-            strip.widths = self.widths
+                    else:
+                        # A display "plane-axis"
+                        strip.axes[ii].region = spectrum.spectrumLimits[axis]
+                        strip.axes[ii].width = spectrum.valuesPerPoint[axis]
+                        if spectrum.isTimeDomains[axis] or spectrum.isSampledDomains[axis]:
+                            strip.axes[ii].position = 1.0
 
     #===========================================================================================
     # new'Object' and other methods
@@ -621,10 +604,10 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
 
     else:
         # nD
-        spectrumAxes = display._getAxesMapping(spectrum)
-        display._isotopeCodes = tuple(spectrum.isotopeCodes[axis] for axis in spectrumAxes)
+        spectrumAxesInDisplayOrder = display._getAxesMapping(spectrum)
+        display._isotopeCodes = tuple(spectrum.isotopeCodes[axis] for axis in spectrumAxesInDisplayOrder)
 
-        for ii, axis in enumerate(spectrumAxes):
+        for ii, axis in enumerate(spectrumAxesInDisplayOrder):
             displayAxisCode = axisCodes[ii]
 
             # # if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y' or

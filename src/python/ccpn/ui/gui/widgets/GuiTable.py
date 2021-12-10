@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-29 18:30:40 +0100 (Fri, October 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-10 11:37:27 +0000 (Fri, December 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -25,6 +25,7 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 import random
 import time
 
@@ -695,7 +696,7 @@ class GuiTable(TableWidget, Base):
                     elif self._dataFrameObject and self._dataFrameObject.columnDefinitions.setEditValues[col]:  # ejb - editable fields don't actionCallback:
                         # item = self.item(row, col)
                         # item.setEditable(True)
-                            item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
+                        item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
                         # self.itemDelegate().closeEditor.connect(partial(self._changeMe, row, col))
                         # item.textChanged.connect(partial(self._changeMe, item))
                         # self.editItem(item)  # enter the editing mode
@@ -724,7 +725,7 @@ class GuiTable(TableWidget, Base):
             # item.setValue(val)  # Required--the text-change callback is invoked
             # when we call setItem.
             if isinstance(val, bool):  # this will create a check box if the value is a bool
-                item.setCheckable(True) # Very important: Set Flag so that user cannot check/uncheck directly the checkbox otherwise there are two parallel callbacks.
+                item.setCheckable(True)  # Very important: Set Flag so that user cannot check/uncheck directly the checkbox otherwise there are two parallel callbacks.
                 # TODO Make sure it works with more testing. The checkbox state is set automatically from the data.
                 state = 2 if val else 0
                 item.setCheckState(state)
@@ -768,7 +769,6 @@ class GuiTable(TableWidget, Base):
             else:
                 self.setItem(row, col, item)
                 item.setValue(val)
-
 
     def _expandCell(self, itemWidget, item):
         _itemRow = item.row()
@@ -1076,16 +1076,16 @@ class GuiTable(TableWidget, Base):
         data = self.parseEvent(event)
         source = data.get('source')
 
-        if isinstance(source, GuiTable): # do this to set the overlay border and allow proper clean-up on other events
-            if self != source: # this is the target table. Where we are dropping to.
+        if isinstance(source, GuiTable):  # do this to set the overlay border and allow proper clean-up on other events
+            if self != source:  # this is the target table. Where we are dropping to.
                 if self.allowRowDragAndDrop:
                     source._seenTables.add(self)
                     self._seenTables.add(self)
                     # self._setDraggingStyleSheet(GREEN1)
-                else: # DROP NOT ALLOWED
+                else:  # DROP NOT ALLOWED
                     event.ignore()
 
-        data.update(self._getDraggedDataDict(source)) #get the selectedObjects and update the datadict for emitting the callback
+        data.update(self._getDraggedDataDict(source))  #get the selectedObjects and update the datadict for emitting the callback
         if self._enterEventCallback:
             self._enterEventCallback(data)
 
@@ -1099,7 +1099,7 @@ class GuiTable(TableWidget, Base):
         """
         data = self.parseEvent(event)
         source = data.get('source')
-        if source == self: # DROPPING on same table. Ignore
+        if source == self:  # DROPPING on same table. Ignore
             self.setStyleSheet(self._defaultStyleSheet)
             event.ignore()
             return
@@ -1134,7 +1134,7 @@ class GuiTable(TableWidget, Base):
         dataDict[DropBase.DFS] = dfs
         return dataDict
 
-    def _setDraggingStyleSheet(self, focusColour = None):
+    def _setDraggingStyleSheet(self, focusColour=None):
         """Set the focus/noFocus colours for the widget
         """
         focusColour = focusColour or getColours()[BORDERFOCUS]
@@ -1142,7 +1142,7 @@ class GuiTable(TableWidget, Base):
                      "border: 2px solid;" \
                      "border-radius: 2px;" \
                      "border-color: %s;" \
-                     "} " %focusColour
+                     "} " % focusColour
         self.setStyleSheet(styleSheet)
 
     ####################################################################################################################
@@ -2697,7 +2697,7 @@ if __name__ == '__main__':
     class mockObj(object):
         """Mock object to test the table widget editing properties"""
 
-        def __init__(self, integer = 3, exampleFloat=63.3, exampleBool=True):
+        def __init__(self, integer=3, exampleFloat=63.3, exampleBool=True):
             pid = ''
             self.integer = integer
             self.exampleFloat = exampleFloat  # This will create a double spin box
@@ -2726,7 +2726,7 @@ if __name__ == '__main__':
             self.exampleList = value
 
         def editFlags(self, value):
-            print('EDIT VALUE',value)
+            print('EDIT VALUE', value)
 
 
     def _comboboxCallBack(value):

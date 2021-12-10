@@ -1,8 +1,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -10,9 +11,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: CCPN $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:24 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-12-10 11:37:27 +0000 (Fri, December 10, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,8 +40,9 @@ from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
 NEW = "Add New"
 PopupTitle = 'Multiplet Editor '
 
+
 class EditMultipletPopup(CcpnDialog):
-    def __init__(self, parent=None,  mainWindow=None, multiplet = None, spectrum = None, isNewMultipletList=False, title=PopupTitle, **kwds):
+    def __init__(self, parent=None, mainWindow=None, multiplet=None, spectrum=None, isNewMultipletList=False, title=PopupTitle, **kwds):
         CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, size=(700, 600), **kwds)
 
         self.project = None
@@ -67,8 +69,8 @@ class EditMultipletPopup(CcpnDialog):
 
         tipText = ''
 
-        self.getLayout().setContentsMargins(10,10,10,10)
-        row =  0
+        self.getLayout().setContentsMargins(10, 10, 10, 10)
+        row = 0
         self.mtLabel = Label(self, 'Select Multiplet List', grid=(row, 0), hAlign='l')
         self.label2 = Label(self, 'Select Peaks Source', grid=(row, 1), hAlign='l')
         row += 1
@@ -81,27 +83,25 @@ class EditMultipletPopup(CcpnDialog):
         row += 1
 
         self.mlPeaksLabel = Label(self, 'Peaks', grid=(row, 0), hAlign='l')
-        self.outputMultipletListsWidgetLabel = Label(self, 'Available Peaks',  grid=(row, 1),  hAlign='l')
+        self.outputMultipletListsWidgetLabel = Label(self, 'Available Peaks', grid=(row, 1), hAlign='l')
         row += 1
-        self.multipletPeaksListWidget = ListWidget(self, multiSelect= True, callback=self._activateOkButton,acceptDrops=True, copyDrop=False, tipText=tipText, grid=(row, 0))
-        self.peaksSourceListWidget = ListWidget(self, multiSelect= True, callback=self._activateOkButton, contextMenu=False, acceptDrops=True,copyDrop=False, tipText=tipText, grid=(row, 1))
+        self.multipletPeaksListWidget = ListWidget(self, multiSelect=True, callback=self._activateOkButton, acceptDrops=True, copyDrop=False, tipText=tipText, grid=(row, 0))
+        self.peaksSourceListWidget = ListWidget(self, multiSelect=True, callback=self._activateOkButton, contextMenu=False, acceptDrops=True, copyDrop=False, tipText=tipText, grid=(row, 1))
 
         row += 1
         self.typeLabel = Label(self, 'Type', grid=(row, 0), hAlign='l')
         self.typePullDown = FilteringPulldownList(self, texts=MULTIPLET_TYPES, headerText=' ', headerEnabled=True, callback=None,
-                                       grid=(row, 1))
+                                                  grid=(row, 1))
         row += 1
         self.commentLabel = Label(self, 'Comment', grid=(row, 0), hAlign='l')
         self.commentText = TextEditor(self, grid=(row, 1))
         self.commentText.setFixedHeight(40)
         row += 1
 
-
-        self.selectButtons = ButtonList(self, texts=['Select from Current Peaks','Close', 'Ok'],
+        self.selectButtons = ButtonList(self, texts=['Select from Current Peaks', 'Close', 'Ok'],
                                         callbacks=[self._selectCurrentPeaks, self._closePopup, self._okCallback],
                                         tipTexts=['Select on the list all the current peaks',
-                                                  '',''], grid=(row, 0), gridSpan=(row,2))
-
+                                                  '', ''], grid=(row, 0), gridSpan=(row, 2))
 
         self.multipletPeaksListWidget.setAcceptDrops(True)
         self.peaksSourceListWidget.setAcceptDrops(True)
@@ -113,7 +113,7 @@ class EditMultipletPopup(CcpnDialog):
         if self.project:
             if self.multiplet:
                 self._selectMultiplet()
-                print('comment',self.multiplet.comment)
+                print('comment', self.multiplet.comment)
                 self.commentText.setText(self.multiplet.comment)
             else:
                 if self._isNewMultipletList:
@@ -123,7 +123,7 @@ class EditMultipletPopup(CcpnDialog):
     def _setPullDownData(self):
         if self.project:
             for multipletList in self.project.multipletLists:
-                self.mtPullDown.addItem(text=multipletList.pid, object=multipletList)
+                self.mtPullDown.addItem(text=multipletList.pid, item=multipletList)
 
     def _selectMultiplet(self):
         if self.multiplet:
@@ -136,7 +136,7 @@ class EditMultipletPopup(CcpnDialog):
         if isinstance(obj, MultipletList):
             self.spectrum = obj.spectrum
             for multiplet in obj.multiplets:
-                self.mlPullDown.addItem(text=multiplet.pid, object=multiplet)
+                self.mlPullDown.addItem(text=multiplet.pid, item=multiplet)
         self._refreshAvailableSpectra()
 
     def _populatePeaksListsWidget(self, *args):
@@ -151,7 +151,6 @@ class EditMultipletPopup(CcpnDialog):
 
         self._refreshAvailableSpectra()
         self._activateOkButton()
-
 
     def _populateSourceMultipletListsWidget(self, *args):
 
@@ -170,7 +169,6 @@ class EditMultipletPopup(CcpnDialog):
                     else:
                         availablePeaks = [pp for peakList in self.spectrum.peakLists for pp in peakList.peaks]
                     self.peaksSourceListWidget.setObjects(availablePeaks, name='pid')
-
 
     def _refreshInputMultipletsWidget(self, *args):
         self._populateMultipletPulldown()
@@ -217,7 +215,6 @@ class EditMultipletPopup(CcpnDialog):
                     showWarning("No Multiplet Selected", "Select a multiplet option")
                     return
 
-
             sourceMultipletText = self.sourcePullDown.getText()
             sourceMultiplet = self.project.getByPid(sourceMultipletText)
             sourcePeaks = self.peaksSourceListWidget._getDroppedObjects(self.project)
@@ -239,7 +236,6 @@ class EditMultipletPopup(CcpnDialog):
             #   showWarning(str(self.windowTitle()), str(es))
             self._closePopup()
 
-
     def _selectPeaks(self, peaks):
         self.multipletPeaksListWidget.selectObjects(peaks)
 
@@ -255,7 +251,7 @@ class EditMultipletPopup(CcpnDialog):
             self._selectPeaks(peaks)
 
     def _enableButtons(self):
-        if len(self.current.peaks)>0:
+        if len(self.current.peaks) > 0:
             self.selectButtons.buttons[0].setDisabled(False)
         else:
             self.selectButtons.buttons[0].setDisabled(True)
@@ -285,6 +281,7 @@ class EditMultipletPopup(CcpnDialog):
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
+
 
     app = TestApplication()
     popup = EditMultipletPopup(None)

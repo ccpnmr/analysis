@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-22 17:05:10 +0100 (Wed, September 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-10 11:37:27 +0000 (Fri, December 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -42,6 +42,7 @@ from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.util.Logging import getLogger
 import operator as op
 
+
 VISIBLESEARCH = '<Visible Table>'
 
 GreaterThan = '>'
@@ -51,15 +52,15 @@ LessThanInclude = '<='
 Equal = 'Equal'
 Include = 'Include'
 
-
 SearchConditionsDict = {
-                        Equal: op.eq,
-                        Include: op.contains,
-                        GreaterThan: op.gt,
-                        GreaterThanInclude: op.ge,
-                        LessThan: op.lt,
-                        LessThanInclude: op.le,
-                        }
+    Equal             : op.eq,
+    Include           : op.contains,
+    GreaterThan       : op.gt,
+    GreaterThanInclude: op.ge,
+    LessThan          : op.lt,
+    LessThanInclude   : op.le,
+    }
+
 
 def _compareKeys(a, b, condition):
     """
@@ -69,15 +70,15 @@ def _compareKeys(a, b, condition):
     :return:
     """
     if not condition in list(SearchConditionsDict.keys()):
-        getLogger().debug('Condition %s  not available  for GuiTable filters.' %condition)
+        getLogger().debug('Condition %s  not available  for GuiTable filters.' % condition)
     try:
         if condition == Equal:
             return SearchConditionsDict.get(Equal)(a, b)
         if condition == Include:
             return SearchConditionsDict.get(Include)(a, b)
         else:
-            a,b, = float(a), float(b)
-            return SearchConditionsDict.get(condition)(a,b)
+            a, b, = float(a), float(b)
+            return SearchConditionsDict.get(condition)(a, b)
     except Exception as ex:
         getLogger().debug2('Error in comparing values for GuiTable filters.', ex)
 
@@ -146,7 +147,7 @@ class GuiTableFilter(ScrollArea):
         objectsRange = range(len(texts))
 
         self.columnOptions.clear()
-        self.columnOptions.addItem(VISIBLESEARCH, object=None)
+        self.columnOptions.addItem(VISIBLESEARCH, item=None)
         for i, text in enumerate(texts):
             self.columnOptions.addItem(text, objectsRange[i])
         self.columnOptions.setIndex(0)
@@ -235,7 +236,7 @@ class GuiTableFilter(ScrollArea):
             for column in range(self.table.columnCount()):
                 if self.table.horizontalHeaderItem(column).text() in visHeadings:
                     item = table.item(row, column)
-                    cellText =  item.data(QtCore.Qt.DisplayRole)
+                    cellText = item.data(QtCore.Qt.DisplayRole)
                     condition = self.conditionWidget.getText()
                     if (match := _compareKeys(cellText, text, condition)) is None:
                         _compareErrorCount += 1

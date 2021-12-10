@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-29 12:32:54 +0100 (Sun, August 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-10 11:37:27 +0000 (Fri, December 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -85,8 +85,8 @@ class CopyPeaks(CcpnDialog):
 
     def _setPullDownData(self):
         for spectrum in self.project.spectra:
-            self.selectFromPullDown.addItem(text=spectrum.pid, object=spectrum)
-            self.selectToPullDown.addItem(text=spectrum.pid, object=spectrum)
+            self.selectFromPullDown.addItem(text=spectrum.pid, item=spectrum)
+            self.selectToPullDown.addItem(text=spectrum.pid, item=spectrum)
 
     def _populatePeakWidget(self, *args):
         obj = self.selectFromPullDown.getObject()

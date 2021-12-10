@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-09 19:56:18 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-10 17:49:44 +0000 (Fri, December 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -407,6 +407,18 @@ class SpectrumView(AbstractWrapperObject):
     def valuesPerPoint(self) -> list:
         """Spectrum valuesPerPoint in display order"""
         _tmp = self.spectrum.valuesPerPoint
+        return [_tmp[idx] for idx in self.axisIndices]
+
+    @property
+    def spectralWidths(self):
+        """Spectrum widths in display order"""
+        _tmp = self.spectrum.spectralWidths
+        return [_tmp[idx] for idx in self.axisIndices]
+
+    @property
+    def pointCounts(self):
+        """Spectrum point counts in display order"""
+        _tmp = self.spectrum.pointCounts
         return [_tmp[idx] for idx in self.axisIndices]
 
     def _getByDisplayOrder(self, parameterName) -> list:

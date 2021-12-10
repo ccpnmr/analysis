@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-08 14:24:31 +0000 (Wed, December 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-10 17:49:44 +0000 (Fri, December 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -134,9 +134,13 @@ class SpectrumReference(AbstractWrapperObject, SpectrumDimensionAttributes):
         """:return ppm-value corresponding to point (float)"""
         return self._dataDimRef.pointToValue(point)
 
+    pointToPpm = pointToValue
+
     def valueToPoint(self, value: float) -> float:
         """:return point (float) corresponding to ppm-value"""
         return self._dataDimRef.valueToPoint(value)
+
+    ppmToPoint = valueToPoint
 
     #=========================================================================================
     # Implementation properties and functions

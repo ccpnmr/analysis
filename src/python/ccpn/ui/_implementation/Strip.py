@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-10 14:18:04 +0000 (Fri, December 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-10 17:49:44 +0000 (Fri, December 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -107,7 +107,7 @@ class Strip(AbstractWrapperObject):
     _parent = spectrumDisplay
 
     @property
-    def spectrumViews(self) -> tuple:
+    def spectrumViews(self) -> list:
         "SpectrumViews shown in Strip"
         pass
         # STUB for now; hot-fixed later
@@ -118,7 +118,9 @@ class Strip(AbstractWrapperObject):
     def _displayedSpectra(self) -> tuple:
         """Return a tuple of DisplayedSpectrum instances, in order, if currently visible
         """
-        result = [DisplayedSpectrum(strip=self, spectrumView=specView) for specView in self.spectrumViews if specView.isVisible()]
+        orderedSpecViews = self.spectrumDisplay.orderedSpectrumViews(None)
+        result = [DisplayedSpectrum(strip=self, spectrumView=specView) for specView in orderedSpecViews \
+                  if (specView in self.spectrumViews and specView.isDisplayed)]
         return tuple(result)
 
     # GWV 20/7/2021: not used
@@ -514,11 +516,52 @@ class DisplayedSpectrum(object):
     """GWV; a class to hold SpectrumView and strip objects
     Used to map any data/axis/parameter actions in a SpectrumView dependent fashion
     (post 3.1.0)
-    Placeholder for now
+    Limited functionality for now
     """
     def __init__(self, strip, spectrumView):
         self.strip = strip
         self.spectrumView = spectrumView
+
+    @property
+    def ppmIncrements(self) -> tuple:
+        """Return tuple of ppm increment values in axis display order
+        """
+        specWidth = self.spectrumView.spectralWidths
+        nPoints = self.spectrumView.pointCounts
+        result = [w / n for w, n in zip(specWidth, nPoints)]
+        return tuple(result)
+
+    @property
+    def positions(self) -> tuple:
+        """Return a tuple of positions (i.e. the centres) for axes in display order"""
+        axes = self.strip.axes
+        return tuple(ax.position for ax in axes)
+
+    @property
+    def widths(self) -> tuple:
+        """Return a tuple of widths for axes in display order"""
+        axes = self.strip.axes
+        return tuple(ax.width for ax in axes)
+
+    @property
+    def regions(self) -> tuple:
+        """Return a tuple of (leftPpm,rightPpm) regions for axes in display order"""
+        axes = self.strip.axes
+        regions = [a.region for a in axes]
+        return tuple(regions)
+
+    @property
+    def regionsInPoints(self) -> tuple:
+        """Return a tuple of (minPoint,maxPoint) regions for axes in display order"""
+        spectrumDimensions = self.spectrumView.spectrumDimensions
+        regions = self.regions
+        result = []
+        for indx, specDim in enumerate(spectrumDimensions):
+            minPpm, maxPpm = regions[indx]
+            minPoint = specDim.ppmToPoint(minPpm)
+            maxPoint = specDim.ppmToPoint(maxPpm)
+            result.append( sorted((minPoint,maxPoint)) )
+        return result
 
     def __str__(self):
         return "<DisplayedSpectrum: strip: %s; spectrumView: %s" % (

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-10 14:18:04 +0000 (Fri, December 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-10 17:49:44 +0000 (Fri, December 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -303,9 +303,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         xDim = dimIndices[0]
         yDim = dimIndices[1]
 
-        #TODO: this needs rewriting without api calls
-
-        # orderedAxes = self._apiStripSpectrumView.strip.orderedAxes
         orderedAxes = self.strip.axes
 
         if dimensionCount == 2:
@@ -356,17 +353,17 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 planeData = spectrum.getPlaneData(position, xDim=xDim + 1, yDim=yDim + 1)
                 yield position, planeData
 
-    def _getAxisInfo(self, orderedAxes, dim):
+    def _getAxisInfo(self, orderedAxes, axisIndex):
         """Get the information for the required axis
         """
-        indx = self.axisIndices[dim]
+        indx = self.axisIndices[axisIndex]
         if indx is None:
             return
 
         # get the axis region
-        zPosition = orderedAxes[dim].position
-        width = orderedAxes[dim].width
-        axisCode = self.strip.spectrumDisplay.axisCodes[dim]
+        zPosition = orderedAxes[axisIndex].position
+        width = orderedAxes[axisIndex].width
+        axisCode = self.strip.spectrumDisplay.axisCodes[axisIndex]
 
         # get the ppm range
         zPointCount = (self.spectrum.pointCounts)[indx]

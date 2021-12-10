@@ -52,8 +52,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-15 12:08:45 +0000 (Mon, November 15, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-12-10 14:55:13 +0000 (Fri, December 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2876,9 +2876,9 @@ assignmentTolerances
         from ccpn.core._implementation.patches.patch_3_0_4 import scaleBrukerSpectrum, NC_PROC
         spectrum = super()._restoreObject(project, apiObj)
 
-        # For Bruker spectra: Set a NC_proc derived correction to spectrum.scale
-        if spectrum.dataFormat == 'Bruker' and not spectrum._hasInternalParameter(NC_PROC):
-            scaleBrukerSpectrum(spectrum)
+        # # For Bruker spectra: Set a NC_proc derived correction to spectrum.scale
+        # if spectrum.dataFormat == 'Bruker' and not spectrum._hasInternalParameter(NC_PROC):
+        #     scaleBrukerSpectrum(spectrum)
 
         return spectrum
 

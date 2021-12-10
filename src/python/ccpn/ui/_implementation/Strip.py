@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-10 10:55:06 +0000 (Fri, December 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-10 14:18:04 +0000 (Fri, December 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -75,8 +75,10 @@ class Strip(AbstractWrapperObject):
     def __init__(self, project, wrappedData):
         super().__init__(project=project, wrappedData=wrappedData)
 
-        # GWV; a dict with DisplayedSpectrum objects; new to post 3.1.0
-        self._displaySpectraDict = None
+        # # GWV; _displaySpectraDict: a dict with (spectrumView,DisplayedSpectrum) (key,value) pairs;
+        # # new to post 3.1.0; reset and filled in GuiStrip.__init__, as at that time the
+        # # various linkages have been established
+        # self._displaySpectraDict = {}
 
     @classmethod
     def _restoreObject(cls, project, apiObj):
@@ -93,14 +95,14 @@ class Strip(AbstractWrapperObject):
 
         return result
 
-    #-----------------------------------------------------------------------------------------
-    # Attributes and methods related to the data structure
-    #-----------------------------------------------------------------------------------------
-
     @property
     def spectrumDisplay(self) -> SpectrumDisplay:
         """SpectrumDisplay containing strip."""
         return self._project._data2Obj.get(self._wrappedData.spectrumDisplay)
+
+    #-----------------------------------------------------------------------------------------
+    # Attributes and methods related to the data structure
+    #-----------------------------------------------------------------------------------------
 
     _parent = spectrumDisplay
 
@@ -111,6 +113,13 @@ class Strip(AbstractWrapperObject):
         # STUB for now; hot-fixed later
         # return tuple(self._project._data2Obj.get(x)
         #      for x in self._wrappedData.sortedStripSpectrumViews())
+
+    @property
+    def _displayedSpectra(self) -> tuple:
+        """Return a tuple of DisplayedSpectrum instances, in order, if currently visible
+        """
+        result = [DisplayedSpectrum(strip=self, spectrumView=specView) for specView in self.spectrumViews if specView.isVisible()]
+        return tuple(result)
 
     # GWV 20/7/2021: not used
     # def findSpectrumView(self, spectrum):
@@ -507,6 +516,13 @@ class DisplayedSpectrum(object):
     (post 3.1.0)
     Placeholder for now
     """
-    def __int__(self, strip, spectrumView):
+    def __init__(self, strip, spectrumView):
         self.strip = strip
         self.spectrumView = spectrumView
+
+    def __str__(self):
+        return "<DisplayedSpectrum: strip: %s; spectrumView: %s" % (
+            self.strip.pid, self.spectrumView.pid
+        )
+
+    __repr__ = __str__

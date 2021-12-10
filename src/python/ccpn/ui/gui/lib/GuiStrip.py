@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-10 10:55:06 +0000 (Fri, December 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-10 14:18:04 +0000 (Fri, December 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -82,6 +82,7 @@ class GuiStrip(Frame):
         This module inherits attributes from the Strip wrapper class:
         Use clone() method to make a copy
         """
+        from ccpn.ui._implementation.Strip import DisplayedSpectrum
 
         # For now, cannot set spectrumDisplay attribute as it is owned by the wrapper class
         # self.spectrumDisplay = spectrumDisplay

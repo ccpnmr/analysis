@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-11-30 15:54:58 +0000 (Tue, November 30, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-10 14:18:04 +0000 (Fri, December 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -944,7 +944,7 @@ class AbstractWrapperObject(NotifierBase):
                         obj = childClass._restoreObject(project, apiObj)
 
                     except RuntimeError as es:
-                        _text = 'Error restoring child object %s of %s' % (apiObj, self)
+                        _text = 'Error restoring api-child %r of %s (%s)' % (apiObj.qualifiedName, self, es)
                         getLogger().warning(_text)
                         raise RuntimeError(_text)
 

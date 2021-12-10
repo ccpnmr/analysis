@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-09 16:21:40 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-10 10:55:06 +0000 (Fri, December 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -69,6 +69,29 @@ class Strip(AbstractWrapperObject):
 
     # store the list of ordered spectrumViews
     _orderedSpectrumViews = None
+
+    #-----------------------------------------------------------------------------------------
+
+    def __init__(self, project, wrappedData):
+        super().__init__(project=project, wrappedData=wrappedData)
+
+        # GWV; a dict with DisplayedSpectrum objects; new to post 3.1.0
+        self._displaySpectraDict = None
+
+    @classmethod
+    def _restoreObject(cls, project, apiObj):
+        """Subclassed to allow for initialisations on restore
+        """
+        result = super()._restoreObject(project, apiObj)
+        result._isotopeCodes = tuple(result.spectrumViews[0]._getByDisplayOrder('isotopeCodes'))
+
+        # move everything from stripHeaderDict in one operation - same names
+        STRIPDICT = 'stripHeaderDict'
+        space = result._ccpnInternalData.pop(STRIPDICT, None)
+        if space is not None:
+            result._ccpnInternalData[result._CCPNMR_NAMESPACE].update(space)
+
+        return result
 
     #-----------------------------------------------------------------------------------------
     # Attributes and methods related to the data structure
@@ -270,21 +293,6 @@ class Strip(AbstractWrapperObject):
             raise ValueError('Tuple must be of type int')
 
         self._setInternalParameter(self._STRIPTILEPOSITION, value)
-
-    @classmethod
-    def _restoreObject(cls, project, apiObj):
-        """Subclassed to allow for initialisations on restore
-        """
-        result = super()._restoreObject(project, apiObj)
-        result._isotopeCodes = tuple(result.spectrumViews[0]._getByDisplayOrder('isotopeCodes'))
-
-        # move everything from stripHeaderDict in one operation - same names
-        STRIPDICT = 'stripHeaderDict'
-        space = result._ccpnInternalData.pop(STRIPDICT, None)
-        if space is not None:
-            result._ccpnInternalData[result._CCPNMR_NAMESPACE].update(space)
-
-        return result
 
     #=========================================================================================
     # CCPN functions
@@ -488,6 +496,17 @@ def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
 
     return newStrip
 
+# GWV 10/12/21: in SpectrumDisplay
+# SpectrumDisplay.copyStrip = _copyStrip
+# del _copyStrip
 
-SpectrumDisplay.copyStrip = _copyStrip
-del _copyStrip
+
+class DisplayedSpectrum(object):
+    """GWV; a class to hold SpectrumView and strip objects
+    Used to map any data/axis/parameter actions in a SpectrumView dependent fashion
+    (post 3.1.0)
+    Placeholder for now
+    """
+    def __int__(self, strip, spectrumView):
+        self.strip = strip
+        self.spectrumView = spectrumView

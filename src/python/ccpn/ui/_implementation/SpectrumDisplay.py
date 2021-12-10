@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-10 08:56:59 +0000 (Fri, December 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-10 10:55:06 +0000 (Fri, December 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -188,7 +188,9 @@ class SpectrumDisplay(AbstractWrapperObject):
 
     @property
     def isotopeCodes(self) -> Tuple[str, ...]:
-        """Fixed string isotope codes in display order (X, Y, Z1, Z2, ...)"""
+        """Fixed string isotope codes in display order (X, Y, Z1, Z2, ...)
+        Defined by first spectrum used for initialisation
+        """
         return self._isotopeCodes
 
     @property
@@ -480,7 +482,7 @@ class SpectrumDisplay(AbstractWrapperObject):
         return dimensionOrder
 
     def _getAxesMapping(self, spectrum: Spectrum) -> list:
-        """Get the spectrum axes in display order
+        """Get the spectrum axisIndices in display order
         CCPNMRINTERNAL: used in _newSpectrumDisplay
         """
         return [dim - 1 for dim in self._getDimensionsMapping(spectrum)]
@@ -520,6 +522,11 @@ class SpectrumDisplay(AbstractWrapperObject):
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
+    def copyStrip(self, strip: 'Strip', newIndex=None) -> 'Strip':
+        """Make copy of strip in self, at position newIndex - or rightmost.
+        """
+        from ccpn.ui._implementation.Strip import _copyStrip
+        return _copyStrip(self, strip=strip, newIndex=newIndex)
 
 #=========================================================================================
 # Connections to parents:

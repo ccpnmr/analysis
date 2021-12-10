@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-09 10:20:34 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-10 10:55:06 +0000 (Fri, December 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -237,17 +237,14 @@ class Gui(Ui):
 
 
 ## Window class
-coreClass = _coreClassMap['Window']
-#
+_coreClassWindow = _coreClassMap['Window']
 from ccpn.ui.gui.lib.GuiMainWindow import GuiMainWindow as _GuiMainWindow
 
-
-class MainWindow(coreClass, _GuiMainWindow):
+class MainWindow(_coreClassWindow, _GuiMainWindow):
     """GUI main window, corresponds to OS window"""
 
     def __init__(self, project: Project, wrappedData: 'ApiWindow'):
-        # AbstractWrapperObject.__init__(self, project, wrappedData)
-        super().__init__(project, wrappedData)
+        _coreClassWindow.__init__(self, project, wrappedData)
 
         logger = Logging.getLogger()
 
@@ -275,18 +272,15 @@ class MainWindow(coreClass, _GuiMainWindow):
 
 
 from ccpn.ui.gui.lib.GuiWindow import GuiWindow as _GuiWindow
-
-
-#TODO: copy from MainWindow
-class SideWindow(coreClass, _GuiWindow):
+class SideWindow(_coreClassWindow, _GuiWindow):
     """GUI side window, corresponds to OS window"""
 
     def __init__(self, project: Project, wrappedData: 'ApiWindow'):
-        AbstractWrapperObject.__init__(self, project, wrappedData)
+        _coreClassWindow.__init__(self, project, wrappedData)
         _GuiWindow.__init__(self, project.application)
 
 
-def _factoryFunction(project: Project, wrappedData) -> coreClass:
+def _factoryFunction(project: Project, wrappedData):
     """create Window, dispatching to subtype depending on wrappedData"""
     if wrappedData.title == 'Main':
         return MainWindow(project, wrappedData)
@@ -294,31 +288,25 @@ def _factoryFunction(project: Project, wrappedData) -> coreClass:
         return SideWindow(project, wrappedData)
 
 
-Gui._factoryFunctions[coreClass.className] = _factoryFunction
+Gui._factoryFunctions[_coreClassWindow.className] = _factoryFunction
 
 ## Task class
 # There is no special GuiTask, so nothing needs to be done
-
 
 ## Mark class - put in namespace for documentation
 Mark = _coreClassMap['Mark']
 
 ## SpectrumDisplay class
-coreClass = _coreClassMap['SpectrumDisplay']
+_coreClassSpectrumDisplay = _coreClassMap['SpectrumDisplay']
 from ccpn.ui.gui.modules.SpectrumDisplay1d import SpectrumDisplay1d as _SpectrumDisplay1d
 
-
-#also change for this class as done for the Nd variant below; this involves
-#chaning the init signature of the SpectrumDisplay1d and passing the parameters along to
-# GuiSpectrumDisplay
-
-class StripDisplay1d(coreClass, _SpectrumDisplay1d):
+class StripDisplay1d(_coreClassSpectrumDisplay, _SpectrumDisplay1d):
     """1D bound display"""
 
     def __init__(self, project: Project, wrappedData: 'ApiBoundDisplay'):
         """Local override init for Qt subclass"""
         Logging.getLogger().debug('StripDisplay1d>> project: %s, project._appBase: %s' % (project, project._appBase))
-        AbstractWrapperObject.__init__(self, project, wrappedData)
+        _coreClassSpectrumDisplay.__init__(self, project, wrappedData)
 
         # hack for now
         self.application = project._appBase
@@ -340,18 +328,19 @@ from ccpn.ui.gui.modules.SpectrumDisplayNd import SpectrumDisplayNd as _Spectrum
 
 
 #TODO: Need to check on the consequences of hiding name from the wrapper
+
 # NB: GWV had to comment out the name property to make it work
 # conflicts existed between the 'name' and 'window' attributes of the two classes
 # the pyqtgraph decendents need name(), GuiStripNd had 'window', but that could be replaced with
 # mainWindow throughout
 
-class SpectrumDisplayNd(coreClass, _SpectrumDisplayNd):
+class SpectrumDisplayNd(_coreClassSpectrumDisplay, _SpectrumDisplayNd):
     """ND bound display"""
 
     def __init__(self, project: Project, wrappedData: 'ApiBoundDisplay'):
         """Local override init for Qt subclass"""
         Logging.getLogger().debug('SpectrumDisplayNd>> project: %s, project._appBase: %s' % (project, project._appBase))
-        AbstractWrapperObject.__init__(self, project, wrappedData)
+        _coreClassSpectrumDisplay.__init__(self, project, wrappedData)
 
         # hack for now;
         self.application = project._appBase
@@ -372,29 +361,26 @@ class SpectrumDisplayNd(coreClass, _SpectrumDisplayNd):
 #old name
 StripDisplayNd = SpectrumDisplayNd
 
-
-def _factoryFunction(project: Project, wrappedData) -> coreClass:
+def _factoryFunction(project: Project, wrappedData):
     """create SpectrumDisplay, dispatching to subtype depending on wrappedData"""
     if wrappedData.is1d:
         return StripDisplay1d(project, wrappedData)
     else:
         return StripDisplayNd(project, wrappedData)
 
-
-Gui._factoryFunctions[coreClass.className] = _factoryFunction
+Gui._factoryFunctions[_coreClassSpectrumDisplay.className] = _factoryFunction
 
 ## Strip class
-coreClass = _coreClassMap['Strip']
+_coreClassStrip = _coreClassMap['Strip']
 from ccpn.ui.gui.lib.GuiStrip1d import GuiStrip1d as _GuiStrip1d
 
-
-class Strip1d(coreClass, _GuiStrip1d):
+class Strip1d(_coreClassStrip, _GuiStrip1d):
     """1D strip"""
 
     def __init__(self, project: Project, wrappedData: 'ApiBoundStrip'):
         """Local override init for Qt subclass"""
 
-        AbstractWrapperObject.__init__(self, project, wrappedData)
+        _coreClassStrip.__init__(self, project, wrappedData)
 
         Logging.getLogger().debug('Strip1d>> spectrumDisplay: %s' % self.spectrumDisplay)
         _GuiStrip1d.__init__(self, self.spectrumDisplay)
@@ -442,14 +428,13 @@ class Strip1d(coreClass, _GuiStrip1d):
 
 from ccpn.ui.gui.lib.GuiStripNd import GuiStripNd as _GuiStripNd
 
-
-class StripNd(coreClass, _GuiStripNd):
+class StripNd(_coreClassStrip, _GuiStripNd):
     """ND strip """
 
     def __init__(self, project: Project, wrappedData: 'ApiBoundStrip'):
         """Local override init for Qt subclass"""
 
-        AbstractWrapperObject.__init__(self, project, wrappedData)
+        _coreClassStrip.__init__(self, project, wrappedData)
 
         Logging.getLogger().debug('StripNd>> spectrumDisplay: %s' % self.spectrumDisplay)
         _GuiStripNd.__init__(self, self.spectrumDisplay)
@@ -495,7 +480,7 @@ class StripNd(coreClass, _GuiStripNd):
             Logging.getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(self.spectrumDisplay.pid))
 
 
-def _factoryFunction(project: Project, wrappedData) -> coreClass:
+def _factoryFunction(project: Project, wrappedData):
     """create SpectrumDisplay, dispatching to subtype depending on wrappedData"""
     apiSpectrumDisplay = wrappedData.spectrumDisplay
     if apiSpectrumDisplay.is1d:
@@ -503,8 +488,7 @@ def _factoryFunction(project: Project, wrappedData) -> coreClass:
     else:
         return StripNd(project, wrappedData)
 
-
-Gui._factoryFunctions[coreClass.className] = _factoryFunction
+Gui._factoryFunctions[_coreClassStrip.className] = _factoryFunction
 
 ## Axis class - put in namespace for documentation
 Axis = _coreClassMap['Axis']
@@ -512,16 +496,15 @@ Axis = _coreClassMap['Axis']
 # Any Factory function to _implementation or abstractWrapper
 #
 ## SpectrumView class
-coreClass = _coreClassMap['SpectrumView']
+_coreClassSpectrumView = _coreClassMap['SpectrumView']
 from ccpn.ui.gui.lib.GuiSpectrumView1d import GuiSpectrumView1d as _GuiSpectrumView1d
 
-
-class _SpectrumView1d(coreClass, _GuiSpectrumView1d):
+class _SpectrumView1d(_coreClassSpectrumView, _GuiSpectrumView1d):
     """1D Spectrum View"""
 
     def __init__(self, project: Project, wrappedData: 'ApiStripSpectrumView'):
         """Local override init for Qt subclass"""
-        AbstractWrapperObject.__init__(self, project, wrappedData)
+        _coreClassSpectrumView.__init__(self, project, wrappedData)
 
         # hack for now
         self._appBase = project._appBase
@@ -533,13 +516,12 @@ class _SpectrumView1d(coreClass, _GuiSpectrumView1d):
 
 from ccpn.ui.gui.lib.GuiSpectrumViewNd import GuiSpectrumViewNd as _GuiSpectrumViewNd
 
-
-class _SpectrumViewNd(coreClass, _GuiSpectrumViewNd):
+class _SpectrumViewNd(_coreClassSpectrumView, _GuiSpectrumViewNd):
     """ND Spectrum View"""
 
     def __init__(self, project: Project, wrappedData: 'ApiStripSpectrumView'):
         """Local override init for Qt subclass"""
-        AbstractWrapperObject.__init__(self, project, wrappedData)
+        _coreClassSpectrumView.__init__(self, project, wrappedData)
 
         # hack for now
         self._appBase = project._appBase
@@ -549,7 +531,7 @@ class _SpectrumViewNd(coreClass, _GuiSpectrumViewNd):
         _GuiSpectrumViewNd.__init__(self)
 
 
-def _factoryFunction(project: Project, wrappedData) -> coreClass:
+def _factoryFunction(project: Project, wrappedData):
     """create SpectrumView, dispatching to subtype depending on wrappedData"""
     if 'intensity' in wrappedData.strip.spectrumDisplay.axisCodes:
         # 1D display
@@ -558,72 +540,66 @@ def _factoryFunction(project: Project, wrappedData) -> coreClass:
         # ND display
         return _SpectrumViewNd(project, wrappedData)
 
-
-Gui._factoryFunctions[coreClass.className] = _factoryFunction
+Gui._factoryFunctions[_coreClassSpectrumView.className] = _factoryFunction
 
 # Any Factory function to _implementation or abstractWrapper
 #
 
 ## PeakListView class
-coreClass = _coreClassMap['PeakListView']
+_coreClassPeakListView = _coreClassMap['PeakListView']
 from ccpn.ui.gui.lib.GuiPeakListView import GuiPeakListView as _GuiPeakListView
 
-
-class _PeakListView(coreClass, _GuiPeakListView):
+class _PeakListView(_coreClassPeakListView, _GuiPeakListView):
     """Peak List View for 1D or nD PeakList"""
 
     def __init__(self, project: Project, wrappedData: 'ApiStripPeakListView'):
         """Local override init for Qt subclass"""
-        AbstractWrapperObject.__init__(self, project, wrappedData)
+        _coreClassPeakListView.__init__(self, project, wrappedData)
         # hack for now
         self._appBase = project._appBase
         self.application = project._appBase
         _GuiPeakListView.__init__(self)
         self._init()
 
+Gui._factoryFunctions[_coreClassPeakListView.className] = _PeakListView
 
-Gui._factoryFunctions[coreClass.className] = _PeakListView
 
 ## IntegralListView class
-coreClass = _coreClassMap['IntegralListView']
+_coreClassIntegralListView = _coreClassMap['IntegralListView']
 from ccpn.ui.gui.lib.GuiIntegralListView import GuiIntegralListView as _GuiIntegralListView
 
-
-class _IntegralListView(coreClass, _GuiIntegralListView):
+class _IntegralListView(_coreClassIntegralListView, _GuiIntegralListView):
     """Integral List View for 1D or nD IntegralList"""
 
     def __init__(self, project: Project, wrappedData: 'ApiStripIntegralListView'):
         """Local override init for Qt subclass"""
-        AbstractWrapperObject.__init__(self, project, wrappedData)
+        _coreClassIntegralListView.__init__(self, project, wrappedData)
         # hack for now
         self._appBase = project._appBase
         self.application = project._appBase
         _GuiIntegralListView.__init__(self)
         self._init()
 
-
-Gui._factoryFunctions[coreClass.className] = _IntegralListView
+Gui._factoryFunctions[_coreClassIntegralListView.className] = _IntegralListView
 
 ## MultipletListView class
-coreClass = _coreClassMap['MultipletListView']
+_coreClassMultipletListView = _coreClassMap['MultipletListView']
 from ccpn.ui.gui.lib.GuiMultipletListView import GuiMultipletListView as _GuiMultipletListView
 
-
-class _MultipletListView(coreClass, _GuiMultipletListView):
+class _MultipletListView(_coreClassMultipletListView, _GuiMultipletListView):
     """Multiplet List View for 1D or nD MultipletList"""
 
     def __init__(self, project: Project, wrappedData: 'ApiStripMultipletListView'):
         """Local override init for Qt subclass"""
-        AbstractWrapperObject.__init__(self, project, wrappedData)
+        _coreClassMultipletListView.__init__(self, project, wrappedData)
         # hack for now
         self._appBase = project._appBase
         self.application = project._appBase
         _GuiMultipletListView.__init__(self)
         self._init()
 
-
-Gui._factoryFunctions[coreClass.className] = _MultipletListView
+Gui._factoryFunctions[_coreClassMultipletListView.className] = _MultipletListView
 
 # Delete what we do not want in namespace
 del _factoryFunction
-del coreClass
+# del coreClass

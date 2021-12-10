@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-18 18:20:21 +0000 (Thu, November 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-10 13:43:37 +0000 (Fri, December 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -232,12 +232,12 @@ class SpectrumReference(AbstractWrapperObject):
         'Shift','ShiftAnisotropy','JCoupling','Rdc','TROESY','DipolarCoupling',
         'MQShift','T1','T2','T1rho','T1zz' --- defined SpectrumLib.MEASUREMENT_TYPES
         """
-        # TODO: Model-change to allow None
-        return self._expDimRef.measurementType
+        value = self._expDimRef.measurementType
+        return value if value != 'None' else None
 
     @measurementType.setter
     def measurementType(self, value):
-        self._expDimRef.measurementType = value
+        self._expDimRef.measurementType = value if value is not None else 'None'
 
     # GWV this was carried from the previous Spectrum implementation; no idea why, but it mattered
     # point1 = 1 - dataDim.pointOffset

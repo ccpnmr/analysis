@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-08 16:28:26 +0000 (Wed, December 08, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-10 11:03:06 +0000 (Fri, December 10, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,9 +37,10 @@ def getNCprocDataScale(spectrum):
     """
     procs = spectrum.path.parent  / 'procs'
     if not procs.exists():
-        raise RuntimeError('Invalid acqus file "%s"' % procs)
-    params = read_jcamp(procs)
+        getLogger().debug('Invalid acqus file "%s"' % procs)
+        return
 
+    params = read_jcamp(procs)
     if 'NC_proc' in params:
         dataScale = pow(2, float(params['NC_proc']))
     else:
@@ -52,6 +53,9 @@ def scaleBrukerSpectrum(spectrum):
     """Adjust the scaling in a Bruker spectrum; store it in the internal store for later
     """
     dataScale = getNCprocDataScale(spectrum)
+    if dataScale is None:
+        # skip if the folder doesn't exist
+        return
 
     spectrum.scale *= dataScale
     if spectrum.dimensionCount >= 2:

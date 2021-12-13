@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-29 12:32:55 +0100 (Sun, August 29, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-13 10:03:45 +0000 (Mon, December 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -338,12 +338,12 @@ class ListWidget(QtWidgets.QListWidget, Base):
 
     def raiseContextMenu(self, event):
         """
-        Raise the context menu
+        Raise the context menu and return the action clicked
         """
         menu = self.currentContextMenu()
         if menu:
             menu.move(event.globalPos().x(), event.globalPos().y() + 10)
-            menu.exec()
+            return menu.exec()
 
     def getContextMenu(self):
         # FIXME this context menu must be more generic and editable

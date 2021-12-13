@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-09 19:23:31 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-13 10:03:45 +0000 (Mon, December 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -43,6 +43,7 @@ from ccpn.ui.gui.popups.Dialog import handleDialogApply, _verifyPopupApply
 # from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.HLine import HLine
+from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import PrintTreeCheckBoxes
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -212,6 +213,55 @@ class _StripData:
                           } for axis in _axes]
 
 
+class _StripListWidget(ListWidget):
+    """ListWidget with a new right-mouse menu
+    """
+
+    def __init__(self, *args, parentPopup=None, parentCallbacks=None, **kwds):
+        if not (parentCallbacks and len(parentCallbacks) == 3):
+            raise RuntimeError('bad parentCallbacks')
+
+        super().__init__(*args, **kwds)
+
+        # copy has not been used on the first popup
+        self._firstCopy = False
+        self._parentPopup = parentPopup
+
+        # make a persistent menu
+        self._stripListMenu = contextMenu = Menu('', self, isFloatWidget=True)
+        self._copyOption = contextMenu.addItem("Copy Axis Range", callback=parentCallbacks[0])
+        self._pasteOption = contextMenu.addItem("Paste Axis Range", callback=parentCallbacks[1])
+        self._pasteAllOption = contextMenu.addItem("Paste Axis Range to All", callback=parentCallbacks[2])
+
+    def getContextMenu(self):
+        # return the axis menu
+        return self._stripListMenu
+
+    def mousePressEvent(self, event):
+        clicked = self.itemAt(event.pos())
+        self._clickedStripId = clicked.text() if clicked else None
+        if self.itemAt(event.pos()) is None:
+            self.clearSelection()
+
+        # want to call ListWidget handler not superclass
+        super(ListWidget, self).mousePressEvent(event)
+
+        # enable/disable options based on the selection
+        _selection = self.selectedItems()
+        self._copyOption.setEnabled(len(_selection) == 1)
+        self._pasteOption.setEnabled(self._firstCopy and len(_selection) == 1)
+        self._pasteAllOption.setEnabled(self._firstCopy and len(_selection) > 1)
+        self._selectedStripIds = [val.text() for val in _selection]
+
+        # raise the copy/paste menu
+        if event.button() == QtCore.Qt.RightButton:
+            if self.contextMenu:
+                option = self.raiseContextMenu(event)  # returns the menu action clicked
+                if option == self._copyOption:
+                    # enable the paste buttons if the copy has been used at least once
+                    self._firstCopy = True
+
+
 class ExportStripToFilePopup(ExportDialogABC):
     """
     Class to handle printing strips to file
@@ -265,9 +315,10 @@ class ExportStripToFilePopup(ExportDialogABC):
             showWarning(str(self.windowTitle()), 'No strips selected')
             self.reject()
 
-        self._selectedStrip = selectedStrip or strips[0]
+        self._selectedStrip = selectedStrip or (strips[0] if strips else None)
 
         self.fullList = GLFULLLIST
+        self._copyRangeValue = None
 
     def exec_(self) -> Optional[dict]:
         """Disable strip updating while the popup is visible
@@ -475,9 +526,13 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         # list to hold the current strips
         Label(self._rangeLeft, grid=(0, 0), text='Strips', hAlign='left')
-        self._stripLists = ListWidget(self._rangeLeft, grid=(1, 0), callback=self._setRangeState,
-                                      multiSelect=False, acceptDrops=False, copyDrop=False,
-                                      )
+        self._stripLists = _StripListWidget(self._rangeLeft, grid=(1, 0), callback=self._setRangeState,
+                                            multiSelect=True, acceptDrops=False, copyDrop=False,
+                                            parentPopup=self,
+                                            parentCallbacks=(self._copyRangeCallback,
+                                                           self._pasteRangeCallback,
+                                                           self._pasteRangeAllCallback)
+                                            )
         self._rangeLeft.setFixedSize(130, 180)
 
         _rangeFrame.getLayout().setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
@@ -1436,6 +1491,48 @@ class ExportStripToFilePopup(ExportDialogABC):
                         _paths.add(path)
 
         return unloadable, familyPath
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # list widget copy/paste callBack
+
+    def _copyRangeCallback(self):
+        """Copy the axis range values from the selected strip
+        """
+        clickedId = self._stripLists._clickedStripId
+        if clickedId in self._stripDict:
+            textFromValue = self._axisSpinboxes[0][1].textFromValue
+            self._copyRangeValue = self._stripDict[clickedId].toDict(textFromValue)
+
+    def _pasteRangeCallback(self):
+        """Paste the axis range values into the selected strip
+        """
+        if self._copyRangeValue is None:
+            getLogger().debug('Nothing to paste')
+            return
+
+        clickedId = self._stripLists._clickedStripId
+        if clickedId in self._stripDict:
+            self._stripDict[clickedId].fromDict(self._copyRangeValue)
+
+            # update the queued changes
+            self._setRangeState(clickedId)
+
+    def _pasteRangeAllCallback(self):
+        """Paste the axis range values into all the selected strips
+        """
+        if self._copyRangeValue is None:
+            getLogger().debug('Nothing to paste')
+            return
+
+        clickedId = self._stripLists._clickedStripId
+        selectedIds = self._stripLists._selectedStripIds
+        if clickedId and selectedIds:
+            for stripId in selectedIds:
+                if stripId in self._stripDict:
+                    self._stripDict[stripId].fromDict(self._copyRangeValue)
+
+            # update the queued changes
+            self._setRangeState(clickedId)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # page settings

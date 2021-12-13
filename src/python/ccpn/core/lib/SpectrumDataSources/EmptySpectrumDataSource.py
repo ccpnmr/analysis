@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-03 16:05:34 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-13 17:20:57 +0000 (Mon, December 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -58,19 +58,19 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
     suffixes = [None]
     openMethod = open
 
-    #=========================================================================================
-    # some default data
-    #=========================================================================================
-
-    isotopeDefaultDataDict = defaultdict(
-        lambda: {'spectralRange' : (12.0, -1.0),   'pointCount' : 128},
-        [
-        ('1H' , {'spectralRange' : (12.0, -1.0),   'pointCount' : 512}),
-        ('15N', {'spectralRange' : (130.0, 100.0), 'pointCount' : 128}),
-        ('13C', {'spectralRange' : (130.0, 5.0),   'pointCount' : 256}),
-        ('19F', {'spectralRange' : (250.0, 40.0),  'pointCount' : 512}),
-        ]
-    )
+    # #=========================================================================================
+    # # some default data
+    # #=========================================================================================
+    #
+    # isotopeDefaultDataDict = defaultdict(
+    #     lambda: {'spectralRange' : (12.0, -1.0),   'pointCount' : 128},
+    #     [
+    #     ('1H' , {'spectralRange' : (12.0, -1.0),   'pointCount' : 512}),
+    #     ('15N', {'spectralRange' : (130.0, 100.0), 'pointCount' : 128}),
+    #     ('13C', {'spectralRange' : (130.0, 5.0),   'pointCount' : 256}),
+    #     ('19F', {'spectralRange' : (250.0, 40.0),  'pointCount' : 512}),
+    #     ]
+    # )
     #=========================================================================================
 
 
@@ -175,37 +175,37 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
         regionData = numpy.zeros(sizes[::-1], dtype=self.dataType) # ...,z,y,x numpy ordering
         return regionData
 
-    def _setDefaultIsotopeValues(self, isotopeCode, dimension, field=18.8):
-        """ Set the default spectrometerFrequencies, spectralWidth, referencePoints, referenceValues
-        and axisCode values derived from isotopeCode and field for dimension (1-based)
-        """
-
-        if isotopeCode is not None:
-
-            idx = dimension-1
-            nuc = Nucleus(isotopeCode)
-            defaultValues = self.isotopeDefaultDataDict[isotopeCode]
-
-            if nuc is not None:
-                self.isotopeCodes[idx] = isotopeCode
-                self.spectrometerFrequencies[idx] = nuc.frequencyAtField(field)
-
-                high, low = defaultValues['spectralRange']
-                self.spectralWidthsHz[idx] = (high-low)*self.spectrometerFrequencies[idx]
-
-                self.referencePoints[idx] = 1.0
-                self.referenceValues[idx] = high
-
-                _count = self.axisCodes.count(nuc.axisCode)
-                self.axisCodes[idx] = nuc.axisCode + (str(_count) if _count else '')
-
-                self.pointCounts[idx] = defaultValues['pointCount']
-
-    def _setSpectralParametersFromIsotopeCodes(self, field=18.8):
-        """Set spectral parameters at field
-        """
-        for idx, isotopeCode in enumerate(self.isotopeCodes):
-            self._setDefaultIsotopeValues(isotopeCode, dimension=idx+1, field=field)
+    # def _setDefaultIsotopeValues(self, isotopeCode, dimension, field=18.8):
+    #     """ Set the default spectrometerFrequencies, spectralWidth, referencePoints, referenceValues
+    #     and axisCode values derived from isotopeCode and field for dimension (1-based)
+    #     """
+    #
+    #     if isotopeCode is not None:
+    #
+    #         idx = dimension-1
+    #         nuc = Nucleus(isotopeCode)
+    #         defaultValues = self.isotopeDefaultDataDict[isotopeCode]
+    #
+    #         if nuc is not None:
+    #             self.isotopeCodes[idx] = isotopeCode
+    #             self.spectrometerFrequencies[idx] = nuc.frequencyAtField(field)
+    #
+    #             high, low = defaultValues['spectralRange']
+    #             self.spectralWidthsHz[idx] = (high-low)*self.spectrometerFrequencies[idx]
+    #
+    #             self.referencePoints[idx] = 1.0
+    #             self.referenceValues[idx] = high
+    #
+    #             _count = self.axisCodes.count(nuc.axisCode)
+    #             self.axisCodes[idx] = nuc.axisCode + (str(_count) if _count else '')
+    #
+    #             self.pointCounts[idx] = defaultValues['pointCount']
+    #
+    # def _setSpectralParametersFromIsotopeCodes(self, field=18.8):
+    #     """Set spectral parameters at field
+    #     """
+    #     for idx, isotopeCode in enumerate(self.isotopeCodes):
+    #         self._setDefaultIsotopeValues(isotopeCode, dimension=idx+1, field=field)
 
 # Register this format
 EmptySpectrumDataSource._registerFormat()

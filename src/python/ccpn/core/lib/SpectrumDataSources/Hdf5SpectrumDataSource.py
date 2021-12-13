@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-07 13:55:51 +0000 (Tue, December 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-13 17:20:57 +0000 (Mon, December 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -78,8 +78,9 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
     suffixes = ['.ndf5', '.hdf5']
     openMethod = h5py.File
-    defaultOpenReadMode = 'r'
-    defaultOpenWriteMode = 'w'
+    defaultOpenReadMode = 'r+'   # read/write, file must exists
+    defaultOpenWriteMode = 'w'  # creates, truncates if exists
+    defaultOpenReadWriteMode = 'r+'
 
     HDF_VERSION = 1.0
 
@@ -111,7 +112,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
         if mode is None:
             raise ValueError('%s.openFile: Undefined open mode' % self.__class__.__name__)
-        newFile = not mode.startswith('r')
+        newFile = mode.startswith('w')
 
         if self.hasOpenFile():
             self.closeFile()
@@ -285,9 +286,16 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             if self.hasOpenFile() and self.mode == 'r':
                 # File was opened read-only; close it so it can be re-opened 'r+'
                 self.closeFile()
-            if not self.hasOpenFile():
-                self.openFile(mode='r+')  # File should exist as it was created before
+                self.openFile(mode=self.defaultOpenReadWriteMode)
 
+            if not self.hasOpenFile():
+                raise RuntimeError('File %s is not open' % self)
+
+        except Exception as es:
+            logger.error('%s.writeParameters: %s' % (self.__class__.__name__, es))
+            raise es
+
+        try:
             params = self.spectrumParameters
             params[VERSION] = self.HDF_VERSION
 
@@ -373,6 +381,11 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             firstAxis = yDim - 1
             secondAxis = xDim - 1
 
+        if self.hasOpenFile() and self.mode == 'r':
+            # File was opened read-only; close it so it can be re-opened 'r+'
+            self.closeFile()
+            self.openFile(mode=self.defaultOpenReadWriteMode)  # File should exist as it was created before
+
         if not self.hasOpenFile():
             self.openFile(mode=self.defaultOpenWriteMode)
 
@@ -417,6 +430,11 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
         position = self.checkForValidSlice(position=position, sliceDim=sliceDim)
 
+        if self.hasOpenFile() and self.mode == 'r':
+            # File was opened read-only; close it so it can be re-opened 'r+'
+            self.closeFile()
+            self.openFile(mode=self.defaultOpenReadWriteMode)  # File should exist as it was created before
+
         if not self.hasOpenFile():
             self.openFile(mode=self.defaultOpenWriteMode)
 
@@ -450,6 +468,11 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             return
 
         position = self.checkForValidPosition(position=position)
+
+        if self.hasOpenFile() and self.mode == 'r':
+            # File was opened read-only; close it so it can be re-opened 'r+'
+            self.closeFile()
+            self.openFile(mode=self.defaultOpenReadWriteMode)  # File should exist as it was created before
 
         if not self.hasOpenFile():
             self.openFile(mode=self.defaultOpenWriteMode)

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-11 18:57:51 +0000 (Thu, November 11, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-13 11:11:23 +0000 (Mon, December 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -69,8 +69,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
     INVERTYAXIS = True
     AXISLOCKEDBUTTON = False
     AXISLOCKEDBUTTONALLSTRIPS = False
-    SPECTRUMXZOOM = 1.0e1
-    SPECTRUMYZOOM = 1.0e1
+    SPECTRUMXZOOM = 5.0e1
+    SPECTRUMYZOOM = 5.0e1
     SHOWSPECTRUMONPHASING = False
     XAXES = GLDefs.XAXISUNITS
     YAXES = YAXISUNITS1D
@@ -2778,8 +2778,8 @@ class GuiNdWidgetAxis(Gui1dWidgetAxis):
     INVERTYAXIS = True
     AXISLOCKEDBUTTON = True
     AXISLOCKEDBUTTONALLSTRIPS = True
-    SPECTRUMXZOOM = 1.0e1
-    SPECTRUMYZOOM = 1.0e1
+    SPECTRUMXZOOM = 5.0e1
+    SPECTRUMYZOOM = 5.0e1
     SHOWSPECTRUMONPHASING = True
     XAXES = GLDefs.XAXISUNITS
     YAXES = GLDefs.YAXISUNITS

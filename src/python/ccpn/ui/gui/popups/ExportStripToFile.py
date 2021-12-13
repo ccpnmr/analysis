@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-13 10:03:45 +0000 (Mon, December 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-13 10:21:20 +0000 (Mon, December 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -229,9 +229,9 @@ class _StripListWidget(ListWidget):
 
         # make a persistent menu
         self._stripListMenu = contextMenu = Menu('', self, isFloatWidget=True)
-        self._copyOption = contextMenu.addItem("Copy Axis Range", callback=parentCallbacks[0])
-        self._pasteOption = contextMenu.addItem("Paste Axis Range", callback=parentCallbacks[1])
-        self._pasteAllOption = contextMenu.addItem("Paste Axis Range to All", callback=parentCallbacks[2])
+        self._copyOption = contextMenu.addItem("Copy", callback=parentCallbacks[0])
+        self._pasteOption = contextMenu.addItem("Paste to", callback=parentCallbacks[1])
+        self._pasteAllOption = contextMenu.addItem("Paste to Selection", callback=parentCallbacks[2])
 
     def getContextMenu(self):
         # return the axis menu
@@ -248,8 +248,13 @@ class _StripListWidget(ListWidget):
 
         # enable/disable options based on the selection
         _selection = self.selectedItems()
-        self._copyOption.setEnabled(len(_selection) == 1)
-        self._pasteOption.setEnabled(self._firstCopy and len(_selection) == 1)
+        self._copyOption.setEnabled(True if self._clickedStripId else False)
+        self._copyOption.setText(f'Copy {self._clickedStripId or "-"}')
+
+        _opt = self._firstCopy and self._clickedStripId
+        self._pasteOption.setEnabled(True if _opt else False)
+        self._pasteOption.setText(f'Paste to {self._clickedStripId if _opt else "-"}')
+
         self._pasteAllOption.setEnabled(self._firstCopy and len(_selection) > 1)
         self._selectedStripIds = [val.text() for val in _selection]
 
@@ -1499,7 +1504,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         """Copy the axis range values from the selected strip
         """
         clickedId = self._stripLists._clickedStripId
-        if clickedId in self._stripDict:
+        if clickedId and clickedId in self._stripDict:
             textFromValue = self._axisSpinboxes[0][1].textFromValue
             self._copyRangeValue = self._stripDict[clickedId].toDict(textFromValue)
 
@@ -1511,7 +1516,7 @@ class ExportStripToFilePopup(ExportDialogABC):
             return
 
         clickedId = self._stripLists._clickedStripId
-        if clickedId in self._stripDict:
+        if clickedId and clickedId in self._stripDict:
             self._stripDict[clickedId].fromDict(self._copyRangeValue)
 
             # update the queued changes
@@ -1526,7 +1531,7 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         clickedId = self._stripLists._clickedStripId
         selectedIds = self._stripLists._selectedStripIds
-        if clickedId and selectedIds:
+        if clickedId and clickedId and selectedIds:
             for stripId in selectedIds:
                 if stripId in self._stripDict:
                     self._stripDict[stripId].fromDict(self._copyRangeValue)

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-13 11:10:55 +0000 (Mon, December 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-13 15:26:45 +0000 (Mon, December 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -518,7 +518,7 @@ class DisplayedSpectrum(object):
         self.spectrumView = spectrumView
 
     @property
-    def ppmIncrements(self) -> tuple:
+    def incrementsInPpm(self) -> tuple:
         """Return tuple of ppm increment values in axis display order.
         Assure that the len always is dimensionCOunt of the spectrumDisplay
         by adding None's if necessary. This compensates for lower dimensional
@@ -532,7 +532,7 @@ class DisplayedSpectrum(object):
         return tuple(result)
 
     @property
-    def positions(self) -> tuple:
+    def positionsInPpm(self) -> tuple:
         """Return a tuple of positions (i.e. the centres) for axes in display order
         Assure that the len always is dimensionCOunt of the spectrumDisplay
         by adding None's if necessary. This compensates for lower dimensional
@@ -545,7 +545,7 @@ class DisplayedSpectrum(object):
         return tuple(result)
 
     @property
-    def widths(self) -> tuple:
+    def widthsInPpm(self) -> tuple:
         """Return a tuple of widths for axes in display order.
         Assure that the len always is dimensionCOunt of the spectrumDisplay
         by adding None's if necessary. This compensates for lower dimensional
@@ -558,7 +558,7 @@ class DisplayedSpectrum(object):
         return tuple(result)
 
     @property
-    def regions(self) -> tuple:
+    def regionsInPpm(self) -> tuple:
         """Return a tuple of (leftPpm,rightPpm) regions for axes in display order.
         Assure that the len always is dimensionCOunt of the spectrumDisplay
         by adding None's if necessary. This compensates for lower dimensional
@@ -578,13 +578,13 @@ class DisplayedSpectrum(object):
         spectra (e.g. a 2D mapped onto a 3D)
         """
         spectrumDimensions = self.spectrumView.spectrumDimensions
-        regions = self.regions
+        regions = self.regionsInPpm
         result = []
         for indx, specDim in enumerate(spectrumDimensions):
             minPpm, maxPpm = regions[indx]
             minPoint = specDim.ppmToPoint(minPpm)
             maxPoint = specDim.ppmToPoint(maxPpm)
-            result.append( sorted((minPoint,maxPoint)) )
+            result.append( tuple(sorted((minPoint,maxPoint))) )
         for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
             result.append( (None, None) )
         return tuple(result)

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-23 14:26:09 +0000 (Tue, November 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-13 11:49:40 +0000 (Mon, December 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -912,6 +912,7 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
                  includeSpectrumTable=True,
                  defaultSpectrum=None,
                  activePulldownClass=None,
+                 activePulldownInitialState=True,
                  labelText='Display(s): ',
                  **kwds):
         super().__init__(parent, setLayout=True, **kwds)
@@ -1008,7 +1009,7 @@ class StripPlot(Widget, _commonSettings, SignalBlocking):
                     orientation='left',
                     labelText=optionTexts[3],
                     tipText='Set/update current %s when selecting from pulldown' % self.activePulldownClass.className,
-                    checked=LINKTOACTIVESTATE
+                    checked=activePulldownInitialState,  # LINKTOACTIVESTATE
                     ))
 
         row += 1

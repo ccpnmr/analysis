@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-09 11:37:20 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-13 11:49:40 +0000 (Mon, December 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -102,6 +102,7 @@ class NmrResidueTableModule(CcpnModule):
                                                  includeNmrChains=self.includeNmrChains,
                                                  includeSpectrumTable=self.includeSpectrumTable,
                                                  activePulldownClass=self.activePulldownClass,
+                                                 activePulldownInitialState=False,
                                                  grid=(0, 0))
 
         # initialise the table

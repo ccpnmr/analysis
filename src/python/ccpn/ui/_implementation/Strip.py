@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-10 17:49:44 +0000 (Fri, December 10, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-13 11:10:55 +0000 (Mon, December 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -75,11 +75,6 @@ class Strip(AbstractWrapperObject):
     def __init__(self, project, wrappedData):
         super().__init__(project=project, wrappedData=wrappedData)
 
-        # # GWV; _displaySpectraDict: a dict with (spectrumView,DisplayedSpectrum) (key,value) pairs;
-        # # new to post 3.1.0; reset and filled in GuiStrip.__init__, as at that time the
-        # # various linkages have been established
-        # self._displaySpectraDict = {}
-
     @classmethod
     def _restoreObject(cls, project, apiObj):
         """Subclassed to allow for initialisations on restore
@@ -118,9 +113,9 @@ class Strip(AbstractWrapperObject):
     def _displayedSpectra(self) -> tuple:
         """Return a tuple of DisplayedSpectrum instances, in order, if currently visible
         """
-        orderedSpecViews = self.spectrumDisplay.orderedSpectrumViews(None)
-        result = [DisplayedSpectrum(strip=self, spectrumView=specView) for specView in orderedSpecViews \
-                  if (specView in self.spectrumViews and specView.isDisplayed)]
+        # orderedSpecViews = self.spectrumDisplay.orderedSpectrumViews(None)
+        result = [DisplayedSpectrum(strip=self, spectrumView=specView) \
+                  for specView in self.spectrumViews if specView.isDisplayed]
         return tuple(result)
 
     # GWV 20/7/2021: not used
@@ -516,7 +511,7 @@ class DisplayedSpectrum(object):
     """GWV; a class to hold SpectrumView and strip objects
     Used to map any data/axis/parameter actions in a SpectrumView dependent fashion
     (post 3.1.0)
-    Limited functionality for now
+    Limited functionality for testing
     """
     def __init__(self, strip, spectrumView):
         self.strip = strip
@@ -524,35 +519,64 @@ class DisplayedSpectrum(object):
 
     @property
     def ppmIncrements(self) -> tuple:
-        """Return tuple of ppm increment values in axis display order
+        """Return tuple of ppm increment values in axis display order.
+        Assure that the len always is dimensionCOunt of the spectrumDisplay
+        by adding None's if necessary. This compensates for lower dimensional
+        spectra (e.g. a 2D mapped onto a 3D)
         """
         specWidth = self.spectrumView.spectralWidths
         nPoints = self.spectrumView.pointCounts
         result = [w / n for w, n in zip(specWidth, nPoints)]
+        for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
+            result.append(None)
         return tuple(result)
 
     @property
     def positions(self) -> tuple:
-        """Return a tuple of positions (i.e. the centres) for axes in display order"""
+        """Return a tuple of positions (i.e. the centres) for axes in display order
+        Assure that the len always is dimensionCOunt of the spectrumDisplay
+        by adding None's if necessary. This compensates for lower dimensional
+        spectra (e.g. a 2D mapped onto a 3D)
+        """
         axes = self.strip.axes
-        return tuple(ax.position for ax in axes)
+        result = [ax.position for ax in axes]
+        for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
+            result.append(None)
+        return tuple(result)
 
     @property
     def widths(self) -> tuple:
-        """Return a tuple of widths for axes in display order"""
+        """Return a tuple of widths for axes in display order.
+        Assure that the len always is dimensionCOunt of the spectrumDisplay
+        by adding None's if necessary. This compensates for lower dimensional
+        spectra (e.g. a 2D mapped onto a 3D)
+        """
         axes = self.strip.axes
-        return tuple(ax.width for ax in axes)
+        result = [ax.width for ax in axes]
+        for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
+            result.append(None)
+        return tuple(result)
 
     @property
     def regions(self) -> tuple:
-        """Return a tuple of (leftPpm,rightPpm) regions for axes in display order"""
+        """Return a tuple of (leftPpm,rightPpm) regions for axes in display order.
+        Assure that the len always is dimensionCOunt of the spectrumDisplay
+        by adding None's if necessary. This compensates for lower dimensional
+        spectra (e.g. a 2D mapped onto a 3D)
+        """
         axes = self.strip.axes
-        regions = [a.region for a in axes]
-        return tuple(regions)
+        result = [ax.region for ax in axes]
+        for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
+            result.append( (None, None) )
+        return tuple(result)
 
     @property
     def regionsInPoints(self) -> tuple:
-        """Return a tuple of (minPoint,maxPoint) regions for axes in display order"""
+        """Return a tuple of (minPoint,maxPoint) regions for axes in display order.
+        Assure that the len always is dimensionCOunt of the spectrumDisplay
+        by adding None's if necessary. This compensates for lower dimensional
+        spectra (e.g. a 2D mapped onto a 3D)
+        """
         spectrumDimensions = self.spectrumView.spectrumDimensions
         regions = self.regions
         result = []
@@ -561,7 +585,9 @@ class DisplayedSpectrum(object):
             minPoint = specDim.ppmToPoint(minPpm)
             maxPoint = specDim.ppmToPoint(maxPpm)
             result.append( sorted((minPoint,maxPoint)) )
-        return result
+        for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
+            result.append( (None, None) )
+        return tuple(result)
 
     def __str__(self):
         return "<DisplayedSpectrum: strip: %s; spectrumView: %s" % (

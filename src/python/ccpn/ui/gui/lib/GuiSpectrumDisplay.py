@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-25 17:59:14 +0000 (Thu, November 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-13 10:58:08 +0000 (Mon, December 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -470,7 +470,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
     def _registerNotifiers(self):
         self._spectrumChangeNotifier = self.setNotifier(self.project,
-                                                        [Notifier.CHANGE, Notifier.RENAME],
+                                                        [Notifier.CHANGE, Notifier.RENAME, Notifier.DELETE],
                                                         Spectrum.className,
                                                         self._spectrumChanged)
 
@@ -600,6 +600,9 @@ class GuiSpectrumDisplay(CcpnModule):
 
         elif trigger == Notifier.RENAME:
             self.spectrumToolBar._spectrumRename(data)
+
+        elif trigger == Notifier.DELETE:
+            self.removeSpectrum(spectrum)
 
     def _spectrumViewChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame

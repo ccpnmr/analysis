@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-13 10:21:20 +0000 (Mon, December 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-13 10:34:06 +0000 (Mon, December 13, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -238,25 +238,29 @@ class _StripListWidget(ListWidget):
         return self._stripListMenu
 
     def mousePressEvent(self, event):
-        clicked = self.itemAt(event.pos())
-        self._clickedStripId = clicked.text() if clicked else None
         if self.itemAt(event.pos()) is None:
             self.clearSelection()
 
         # want to call ListWidget handler not superclass
         super(ListWidget, self).mousePressEvent(event)
 
+        # get item under mouse
+        clicked = self.itemAt(event.pos())
+        self._clickedStripId = clicked.text() if clicked else None
+
         # enable/disable options based on the selection
         _selection = self.selectedItems()
-        self._copyOption.setEnabled(True if self._clickedStripId else False)
-        self._copyOption.setText(f'Copy {self._clickedStripId or "-"}')
+        self._selectedStripIds = [val.text() for val in _selection]
 
-        _opt = self._firstCopy and self._clickedStripId
+        _opt = self._clickedStripId and self._clickedStripId in self._selectedStripIds
+        self._copyOption.setEnabled(True if _opt else False)
+        self._copyOption.setText(f'Copy {self._clickedStripId if _opt else "-"}')
+
+        _opt = self._firstCopy and self._clickedStripId and self._clickedStripId in self._selectedStripIds
         self._pasteOption.setEnabled(True if _opt else False)
         self._pasteOption.setText(f'Paste to {self._clickedStripId if _opt else "-"}')
 
         self._pasteAllOption.setEnabled(self._firstCopy and len(_selection) > 1)
-        self._selectedStripIds = [val.text() for val in _selection]
 
         # raise the copy/paste menu
         if event.button() == QtCore.Qt.RightButton:

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 11:40:51 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-14 22:03:54 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -188,7 +188,7 @@ def isPositionWithinfBounds(strip: GuiStrip, shift: _OldChemicalShift, axis: obj
     axisIndex = strip.axisOrder.index(axis.code)
 
     for spectrumView in strip.spectrumViews:
-        spectrumIndices = spectrumView.axisIndices
+        spectrumIndices = spectrumView.dimensionIndices
         index = spectrumIndices[axisIndex]
         if index:
             minima.append(spectrumView.spectrum.aliasingLimits[index][0])

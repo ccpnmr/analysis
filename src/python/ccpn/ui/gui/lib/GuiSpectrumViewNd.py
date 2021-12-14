@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 11:40:51 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-14 22:03:54 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -299,7 +299,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         spectrum = self.spectrum
         dimensionCount = spectrum.dimensionCount
-        dimIndices = self.axisIndices
+        dimIndices = self.dimensionIndices
         xDim = dimIndices[0]
         yDim = dimIndices[1]
 
@@ -356,7 +356,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     def _getAxisInfo(self, orderedAxes, axisIndex):
         """Get the information for the required axis
         """
-        indx = self.axisIndices[axisIndex]
+        indx = self.dimensionIndices[axisIndex]
         if indx is None:
             return
 
@@ -400,7 +400,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         spectrum = self.spectrum
         dimensionCount = spectrum.dimensionCount
-        dimIndices = self.axisIndices
+        dimIndices = self.dimensionIndices
         orderedAxes = self._apiStripSpectrumView.strip.orderedAxes
 
         if dimensionCount <= 2:
@@ -411,7 +411,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         for dim in range(2, dimensionCount):
 
-            indx = self.axisIndices[dim]
+            indx = self.dimensionIndices[dim]
             if indx is None:
                 return
 

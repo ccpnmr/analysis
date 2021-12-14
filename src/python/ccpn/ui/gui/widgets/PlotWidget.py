@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 11:40:52 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-14 22:03:55 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -232,7 +232,7 @@ class PlotWidget(pg.PlotWidget):
             if spectrum.showDoubleCrosshair:
                 #if strip.spectrumDisplay.mainWindow.application.preferences.general.doubleCrossHair:
                 offsets = spectrum.doubleCrosshairOffsets
-                displayIndices = spectrumView.axisIndices
+                displayIndices = spectrumView.dimensionIndices
                 xOffset = offsets[displayIndices[0]]
                 yOffset = offsets[displayIndices[1]]
                 if xPos is None or xOffset == 0:

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 20:21:23 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-14 21:34:19 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -302,7 +302,8 @@ class PseudoDimension(AbstractWrapperObject, SpectrumDimensionAttributes):
         """
         pointOffset = point - self.referencePoint
         ppmPerPoint = self._valuePerPoint / self.spectrometerFrequency
-        value = self.referenceValue - pointOffset *  ppmPerPoint # scale runs backwards
+        factor = -1.0 # (axis runs backward) if self.isReversed else 1.0
+        value = self.referenceValue + factor * pointOffset *  ppmPerPoint
         return value
 
     pointToPpm = pointToValue
@@ -311,7 +312,8 @@ class PseudoDimension(AbstractWrapperObject, SpectrumDimensionAttributes):
         """:return point (float) corresponding to ppm-value"""
         ppmPerPoint = self._valuePerPoint / self.spectrometerFrequency
         valOffset = value - self.referenceValue
-        point =  self.referencePoint - valOffset / ppmPerPoint  # scale runs backward
+        factor = -1.0 # (axis runs backward) if self.isReversed else 1.0
+        point =  self.referencePoint + factor * valOffset / ppmPerPoint
         return point
 
     ppmToPoint = valueToPoint

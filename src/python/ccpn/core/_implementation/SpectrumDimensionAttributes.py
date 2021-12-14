@@ -168,7 +168,8 @@ class SpectrumDimensionAttributes(object):
 
     @property
     def aliasingLimits(self) -> Tuple[float, float]:
-        """tuple of sorted(minAliasingLimit, maxAliasingLimit) per dimension
+        """tuple of sorted(minAliasingLimit, maxAliasingLimit) per dimension.
+        i.e. The actual ppm limits of the full (including the aliased regions) limits.
         """
         return tuple(sorted((self.minAliasedFrequency, self.maxAliasedFrequency)))
 
@@ -195,7 +196,9 @@ class SpectrumDimensionAttributes(object):
 
     @property
     def spectrumLimits(self) -> Tuple[float, float]:
-        """Return the limits of this spectrum dimension as a tuple of floats"""
+        """Return the limits of this spectrum dimension as a tuple of floats
+        i.e. the ppm values of the first and last point.
+        """
         if self.dimensionType == specLib.DIMENSION_FREQUENCY:
             return (self.pointToValue(1.0), self.pointToValue(float(self.pointCount)))
         elif self.dimensionType == specLib.DIMENSION_TIME:
@@ -207,7 +210,7 @@ class SpectrumDimensionAttributes(object):
     @property
     def foldingLimits(self) -> Tuple[float, float]:
         """Return the foldingLimits of this dimension as a tuple of floats.
-        This is the spectrumLimits ±0.5 extra points to the left and right
+        This is the spectrumLimits ±0.5 extra points to the left and right.
         """
         # it is easier to define a new function here than mess about with limits
         if self.dimensionType == specLib.DIMENSION_FREQUENCY:

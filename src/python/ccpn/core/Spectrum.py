@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-13 17:20:57 +0000 (Mon, December 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-14 11:06:06 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -397,6 +397,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         Useful for mapping in axisCodes order: eg: self.getByAxisCodes('axisIndices', ['N','C','H'])
         """
         return tuple(range(0, self.dimensionCount))
+
+    dimensionIndices = axisIndices
 
     @property
     def axisTriples(self) -> tuple:

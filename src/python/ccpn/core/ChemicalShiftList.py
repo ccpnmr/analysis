@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 11:40:48 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-14 19:57:21 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -537,41 +537,6 @@ class ChemicalShiftList(AbstractWrapperObject):
     #=========================================================================================
     # CCPN functions
     #=========================================================================================
-
-    # def _updateEdgeToAlpha1(self):
-    #     """Move chemicalShifts from model shifts to pandas dataFrame
-    #
-    #     version 3.0.4 -> 3.1.0.alpha update
-    #     dataframe now stored in _wrappedData.data
-    #     CCPN Internal
-    #     """
-    #     # skip for no shifts
-    #     if not self._oldChemicalShifts:
-    #         return
-    #
-    #     with undoBlockWithoutSideBar():
-    #         # create a new dataframe
-    #         shifts = []
-    #         for row, oldShift in enumerate(self._oldChemicalShifts):
-    #             newRow = oldShift._getShiftAsTuple()
-    #             if not newRow.isDeleted:
-    #                 # ignore deleted as not needed - this SHOULDN'T happen here, but just to be safe
-    #                 shifts.append(newRow)
-    #
-    #                 # get the id from the shift and update the _uniqueId dict
-    #                 _uniqueId = newRow.uniqueId
-    #                 _nextId = self.project._queryNextUniqueIdValue(CS_CLASSNAME)
-    #                 self.project._setNextUniqueIdValue(CS_CLASSNAME, 1 + max(_nextId, _uniqueId))
-    #
-    #             # delete the old shift object
-    #             oldShift.delete()
-    #
-    #         # instantiate the dataframe
-    #         df = pd.DataFrame(shifts, columns=CS_COLUMNS)
-    #         df.set_index(df[CS_UNIQUEID], inplace=True, )  # drop=False)
-    #
-    #         # set as the new subclassed DataFrameABC - not using yet, may have undo/redo issues
-    #         self._wrappedData.data = df  #_ChemicalShiftListFrame(df)
 
     @classmethod
     def _restoreObject(cls, project, apiObj):

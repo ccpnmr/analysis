@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 11:40:49 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-14 19:57:21 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,7 @@ __date__ = "$Date: 2021-11-10 10:28:41 +0000 (Wed, November 10, 2021) $"
 #=========================================================================================
 
 import pandas as pd
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 
 
 def _updateSpectrum_3_0_4_to_3_1_0(spectrum):
@@ -130,30 +131,36 @@ def _updateSpectrum_settings(spectrum):
 def _updateChemicalShiftList_3_0_4_to_3_1_0(chemicalShiftList):
     """Move chemicalShifts from model shifts to pandas dataFrame
 
-    version 3.0.4 -> 3.1.0. update
+    version 3.0.4 -> 3.1.0.alpha update
     dataframe now stored in _wrappedData.data
     CCPN Internal
     """
-    from ccpn.core.ChemicalShiftList import CS_COLUMNS, CS_UNIQUEID
+    from ccpn.core.ChemicalShiftList import CS_COLUMNS, CS_UNIQUEID, CS_CLASSNAME
 
     # skip for no shifts
     if not chemicalShiftList._oldChemicalShifts:
         return
 
-    # create a new dataframe
-    shifts = []
-    for row, oldShift in enumerate(chemicalShiftList._oldChemicalShifts):
-        newRow = oldShift._getShiftAsTuple()
-        if not newRow.isDeleted:
-            # ignore deleted as not needed - this SHOULDN'T happen here, but just to be safe
-            shifts.append(newRow)
+    with undoBlockWithoutSideBar():
+        # create a new dataframe
+        shifts = []
+        for row, oldShift in enumerate(chemicalShiftList._oldChemicalShifts):
+            newRow = oldShift._getShiftAsTuple()
+            if not newRow.isDeleted:
+                # ignore deleted as not needed - this SHOULDN'T happen here, but just to be safe
+                shifts.append(newRow)
 
-        # delete the old shift
-        oldShift.delete()
+                # get the id from the shift and update the _uniqueId dict
+                _uniqueId = newRow.uniqueId
+                _nextId = chemicalShiftList.project._queryNextUniqueIdValue(CS_CLASSNAME)
+                chemicalShiftList.project._setNextUniqueIdValue(CS_CLASSNAME, 1 + max(_nextId, _uniqueId))
 
-    # instantiate the dataframe
-    df = pd.DataFrame(shifts, columns=CS_COLUMNS)
-    df.set_index(df[CS_UNIQUEID], inplace=True, )  # drop=False)
+            # delete the old shift object
+            oldShift.delete()
 
-    # set as the new subclassed DataFrameABC - not using yet, may have undo/redo issues
-    chemicalShiftList._wrappedData.data = df  #_ChemicalShiftListFrame(df)
+        # instantiate the dataframe
+        df = pd.DataFrame(shifts, columns=CS_COLUMNS)
+        df.set_index(df[CS_UNIQUEID], inplace=True, )  # drop=False)
+
+        # set as the new subclassed DataFrameABC - not using yet, may have undo/redo issues
+        chemicalShiftList._wrappedData.data = df  #_ChemicalShiftListFrame(df)

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-09 12:07:13 +0000 (Thu, December 09, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-14 11:40:49 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -29,16 +29,24 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import functools
 import typing
 import re
-from collections import OrderedDict
+from contextlib import contextmanager
+from collections import OrderedDict, defaultdict
 from copy import deepcopy
+
+from decorator import decorator
 
 import ccpn.core._implementation.resetSerial
 from ccpn.core import _importOrder
 from ccpn.core.lib import Pid
+from ccpn.core._implementation.Updater import Updater, \
+    UPDATE_POST_OBJECT_INITIALISATION, UPDATE_POST_PROJECT_INITIALISATION, \
+    UPDATE_PRE_OBJECT_INITIALISATION
+
 from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
 from ccpn.core.lib.ContextManagers import deleteObject, notificationBlanking, \
     apiNotificationBlanking, ccpNmrV3CoreSetter
 from ccpn.core.lib.Notifiers import NotifierBase
+from ccpn.framework.Version import VersionString, applicationVersion
 from ccpn.util import Common as commonUtil
 from ccpn.util.decorators import logCommand
 from ccpn.util.Logging import getLogger
@@ -48,9 +56,6 @@ from ccpn.util.Logging import getLogger
 class AbstractWrapperObject(NotifierBase):
     """Abstract class containing common functionality for subclasses.
 
-    ADVANCED. Core programmers only.
-
-
     **Rules for subclasses:**
 
     All collection attributes are tuples. For objects these are sorted by pid;
@@ -59,7 +64,7 @@ class AbstractWrapperObject(NotifierBase):
     Non-child collection attributes must have addElement() and removeElement
     functions as appropriate.
 
-    For each child class there will be a newChild factory function, to crate
+    For each child class there will be a newChild factory function, to create
     the child object. There will be a collection attribute for each child,
     grandchild, and generally descendant.
 
@@ -95,10 +100,14 @@ class AbstractWrapperObject(NotifierBase):
     must have teh standard class-level attributes, such as  shortClassName, _childClasses,
     and _pluralLinkName.
     Each class must implement the properties id and _parent, and the methods
-    _getAllWrappedData,  and rename. Note that the
-    properties and the _getAllWrappedData function
+    _getAllWrappedData, and rename.
+    Note that the properties and the _getAllWrappedData function
     must work from the underlying data, as they will be called before the pid
     and object dictionary data are set up.
+
+    The core classes (except for Project) must define newClass method(s) to
+    create any children, AND ALL UNDERLYING DATA, taking in all parameters
+    necessary to do so.
     """
 
     #: Short class name, for PID. Must be overridden for each subclass
@@ -128,6 +137,9 @@ class AbstractWrapperObject(NotifierBase):
 
     # Function to generate custom subclass instances -= overridden in some subclasses
     _factoryFunction = None
+
+    # The updater instance
+    _updater = Updater()
 
     # Default values for parameters to 'new' function. Overridden in subclasses
     _defaultInitValues = None
@@ -288,7 +300,7 @@ class AbstractWrapperObject(NotifierBase):
     __hash__ = object.__hash__
 
     #=========================================================================================
-    # CCPN Properties
+    # CcpNmr Properties
     #=========================================================================================
 
     @property
@@ -479,8 +491,17 @@ class AbstractWrapperObject(NotifierBase):
     def comment(self, value: str):
         self._wrappedData.details = self._str2none(value)
 
+    def appendComment(self, value):
+        """Conveniance function to append to comment
+        """
+        comment = self.comment
+        if len(comment) > 0:
+            comment += '; '
+        comment += value
+        self.comment = comment
+
     #=========================================================================================
-    # CCPN functionalities
+    # CcpNmr functionalities
     #=========================================================================================
 
     @classmethod
@@ -604,7 +625,7 @@ class AbstractWrapperObject(NotifierBase):
         return result
 
     #=========================================================================================
-    # CCPN abstract properties
+    # CcpNmr abstract properties
     #=========================================================================================
 
     @property
@@ -653,6 +674,14 @@ class AbstractWrapperObject(NotifierBase):
         for child in node._childClasses:
             self._printClassTree(child, tabs=tabs + 1)
 
+    def _getAllDecendants(self) -> list:
+        """Get all objects descending from self; i.e. children, grandchildren, etc
+        """
+        result = []
+        for children in self._getChildren(recursion=True).values():
+            result.extend(children)
+        return result
+
     def _getChildrenByClass(self, klass) -> list:
         """GWV: Convenience: get the children of type klass of self.
         klass is string (e.g. 'Peak') or V3 core class
@@ -664,24 +693,41 @@ class AbstractWrapperObject(NotifierBase):
             return []
         return result
 
-    def _getChildren(self, classes=['all']) -> OrderedDict:
-        """GWV; Return a dict of (className, ChildrenList) pairs
-        classes is either 'gui' or 'nonGui' or 'all' or explicit enumeration of classNames
+    def _getChildren(self, classes=('all',), recursion:bool=False) -> OrderedDict:
+        """GWV; Construct a dict of (className, ChildrenList) pairs
+
+        :param classes is either 'gui' or 'nonGui' or 'all' or explicit enumeration of classNames
+        :param recursion: Optionally recurse (breath-first)
+        :return: a OrderedDict of (className, ChildrenList) pairs
+
         CCPNINTERNAL: used throughout
         """
         _get = self._project._data2Obj.get
         data = OrderedDict()
         for className, apiChildren in self._getApiChildren(classes=classes).items():
-            children = data.setdefault(className, [])
+            data.setdefault(className, [])
             for apiChild in apiChildren:
                 child = _get(apiChild)
                 if child is not None:
-                    children.append(child)
+                    data[className].append(child)
+        # check for recursion
+        if recursion:
+            children = [child for childList in data.values() for child in childList]
+            # for children in data.values():
+            for child in children:
+                childData = child._getChildren(classes=classes, recursion=recursion)
+                for childClassName, childList in childData.items():
+                    data.setdefault(childClassName, [])
+                    data[childClassName].extend(childList)
+            # print('>>>', data)
         return data
 
-    def _getApiChildren(self, classes=['all']) -> OrderedDict:
-        """GWV; Return a dict of (className, apiChildrenList) pairs
-         classes is either 'gui' or 'nonGui' or 'all' or explicit enumeration of classNames
+    def _getApiChildren(self, classes=('all',)) -> OrderedDict:
+        """GWV; Construct a dict of (className, apiChildrenList) pairs
+
+         :param classes is either 'gui' or 'nonGui' or 'all' or explicit enumeration of classNames
+         :return: a OrderedDict of (className, apiChildrenList) pairs
+
          CCPNINTERNAL: used throughout
          """
         data = OrderedDict()
@@ -823,39 +869,70 @@ class AbstractWrapperObject(NotifierBase):
     # Restore methods
     #=========================================================================================
 
+    _OBJECT_VERSION = '_objectVersion'
+    @property
+    def _objectVersion(self) -> VersionString:
+        """Return the versionString of the object; used in _updateObject
+        to implement the update mechanism
+        """
+        if not self._hasInternalParameter(self._OBJECT_VERSION):
+            version = str(self.project._saveHistory.lastSavedVersion)
+            self._setInternalParameter(self._OBJECT_VERSION, version)
+        return VersionString(self._getInternalParameter(self._OBJECT_VERSION))
+
+    @_objectVersion.setter
+    def _objectVersion(self, version):
+        # call the VersionString class, as it checks for compliance
+        # Value is stored as an actual str object, not VersionString object
+        version = str(VersionString(version))
+        self._setInternalParameter(self._OBJECT_VERSION, version)
+
+    def _updateObject(self, updateMethod):
+        """Use post-object or post-project updateMethod (as defined in Updater)
+        to update the project
+        """
+        if updateMethod not in (UPDATE_POST_OBJECT_INITIALISATION, UPDATE_POST_PROJECT_INITIALISATION):
+            raise ValueError('Invalid updateMethod "%s"' % updateMethod)
+        self._updater.update(updateMethod, obj=self)
+
     @classmethod
     def _restoreObject(cls, project, apiObj):
         """Restores object from apiObj; checks for _factoryFunction.
         Restores the children
-        :return Restored obj
 
-        CCPNINTERNAL: subclassed in special cases
+        :return Restored object
+
+        CCPNINTERNAL: can be subclassed in special cases
         """
         if apiObj is None:
             raise ValueError('_restoreObject: undefined apiObj')
 
-        factoryFunction = cls._factoryFunction
-        if factoryFunction is None:
+        # # call any pre-initialisation updates
+        # cls._updater.update(UPDATE_PRE_OBJECT_INITIALISATION, apipObj, cls)
+
+        if (factoryFunction := cls._factoryFunction) is None:
             obj = cls(project, apiObj)
         else:
             obj = factoryFunction(project, apiObj)
-
         if obj is None:
             raise RuntimeError('Error restoring object encoded by %s' % apiObj)
 
         # restore the children
         obj._restoreChildren()
 
+        # call any post-initialisation updates
+        cls._updater.update(UPDATE_POST_OBJECT_INITIALISATION, obj)
+
         return obj
 
     def _restoreChildren(self):
-        """Initialize children, using existing objects in data model"""
+        """Recursively restore children, using existing objects in data model
+        """
 
         project = self._project
         data2Obj = project._data2Obj
 
         for childClass in self._childClasses:
-            # print('>>> childClass', childClass)
             # recursively create children
             for apiObj in childClass._getAllWrappedData(self):
                 obj = data2Obj.get(apiObj)
@@ -863,9 +940,9 @@ class AbstractWrapperObject(NotifierBase):
                 if obj is None:
                     try:
                         obj = childClass._restoreObject(project, apiObj)
-                    except RuntimeError as es:
 
-                        _text = 'Error restoring child object %s of %s' % (apiObj, self)
+                    except RuntimeError as es:
+                        _text = 'Error restoring api-child %r of %s (%s)' % (apiObj.qualifiedName, self, es)
                         getLogger().warning(_text)
                         # raise RuntimeError(_text)
 
@@ -1312,8 +1389,10 @@ class AbstractWrapperObject(NotifierBase):
                 oldPid = self.pid
             # Wrapper-level processing
             self._resetIds()
+
         elif action == 'create':
             self._flaggedForDelete = False
+
         elif action == 'delete':
             self._flaggedForDelete = True
 
@@ -1398,56 +1477,25 @@ class AbstractWrapperObject(NotifierBase):
                 getLogger().warning('Potential error for the property %s in creating dictionary from object: %s . Error: %s' % (i, self, e))
         return od
 
-    # def _startCommandEchoBlock(self, funcName, *params, values=None, defaults=None, parName=None, propertySetter=False,
-    #                            quiet=False):
-    #     """Start block for command echoing, set undo waypoint, and echo command to ui and logger
-    #
-    #     *params, values, and defaults are used by coreUtil.commandParameterString to set the function
-    #     parameter string - see the documentation of commandParameterString for details
-    #     """
-    #
-    #     # if not hasattr(self, 'blockindent'):
-    #     #   self.blockindent = 1
-    #     # getLogger().info('.'*self.blockindent+'>>>start_'+str(funcName))
-    #     # self.blockindent+=4
-    #
-    #     #CCPNINTERNAL
-    #
-    #     project = self._project
-    #
-    #     parameterString = coreUtil.commandParameterString(*params, values=values, defaults=defaults)
-    #
-    #     if self is project:
-    #         if propertySetter:
-    #             if parameterString:
-    #                 command = "project.%s = %s" % (funcName, parameterString)
-    #             else:
-    #                 command = "project.%s" % funcName
-    #         else:
-    #             command = "project.%s(%s)" % (funcName, parameterString)
-    #     else:
-    #         if propertySetter:
-    #             if parameterString:
-    #                 command = "project.getByPid('%s').%s = %s" % (self.pid, funcName, parameterString)
-    #             else:
-    #                 command = "project.getByPid('%s').%s" % (self.pid, funcName)
-    #         else:
-    #             command = "project.getByPid('%s').%s(%s)" % (self.pid, funcName, parameterString)
-    #
-    #     if parName:
-    #         command = ''.join((parName, ' = ', command))
-    #
-    #     project._appBase._startCommandBlock(command, quiet=quiet)
-
-    # def _endCommandEchoBlock(self):
-    #     """End block for command echoing"""
-    #     # self.blockindent-=4
-    #     # if self.blockindent<0:
-    #     #   print ('****')
-    #     #   self.blockindent=0
-    #     # getLogger().info('..'+'.'*self.blockindent+'>>>end_')
-    #
-    #     self._project._appBase._endCommandBlock()
-
-
 AbstractWrapperObject.getByPid.__annotations__['return'] = AbstractWrapperObject
+
+
+def updateObject(fromVersion, toVersion, updateFunction):
+    """Class decorator to register updateFunction for a core-class in the _updateFunctions list.
+    updateFunction updates fromVersion to the next higher version toVersion
+    fromVersion can be None, in which case no initial check on objectVersion is done
+
+    def updateFunction(obj)
+        obj: object that is being updated
+    """
+
+    def theDecorator(cls):
+        """This function will decorate cls with _update, _updateHandler list and registers the updateHandler
+        """
+        if not hasattr(cls, '_updateFunctions'):
+            raise RuntimeError('class %s does not have the attribute _updateFunctions')
+
+        cls._updateFunctions[cls.className].append( (fromVersion, toVersion, updateFunction) )
+        return cls
+
+    return theDecorator

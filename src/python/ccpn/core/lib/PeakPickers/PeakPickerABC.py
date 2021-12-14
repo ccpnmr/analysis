@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-28 11:41:02 +0100 (Mon, June 28, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-14 11:40:49 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -143,7 +143,7 @@ class PeakPickerABC(CcpNmrJson):
     keysInOrder = True  # maintain the definition order
 
     saveAllTraitsToJson = True
-    version = 1.0  # for json saving
+    classVersion = 1.0  # for json saving
 
     # list of core peakPicker attributes that need to be restored when the spectrum is loaded
     dimensionCount = CInt(default_value=0)

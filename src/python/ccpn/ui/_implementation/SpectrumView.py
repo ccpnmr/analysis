@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-25 18:29:04 +0100 (Mon, October 25, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-14 11:40:50 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -346,75 +346,85 @@ class SpectrumView(AbstractWrapperObject):
         self._guiChanged = True
         self._wrappedData.spectrumView.sliceColour = value
 
-    @property
-    def spectrum(self) -> Spectrum:
-        """Spectrum that SpectrumView refers to"""
-        return self._project._data2Obj.get(self._wrappedData.spectrumView.dataSource)
-
-    # @property
-    # def dimensionOrdering(self) -> Tuple[int, ...]:
-    #     """Axes Indices (zero-based) of spectrum dimensions in display order (x, y, Z1, ...)"""
-    #     apiStripSpectrumView = self._wrappedData
-    #     axisCodes = self.strip.axisCodes
-    #     axisOrder = self.strip.axisOrder
-    #
-    #     # DimensionOrdering is one-origin (first dim is dim 1)
-    #     dimensionOrdering = apiStripSpectrumView.spectrumView.dimensionOrdering
-    #
-    #     # Convert to zero-origin (for indices) and return
-    #     ll = tuple(dimensionOrdering[axisCodes.index(x)] for x in axisOrder)
-    #     return tuple((x or None) and x - 1 for x in ll)
-
     #=========================================================================================
     # Spectrum properties in displayOrder; convenience methods
     #=========================================================================================
 
     @property
-    def dimensions(self) -> tuple:
-        """Spectrum dimensions in display order"""
+    def spectrum(self) -> Spectrum:
+        """Spectrum that SpectrumView refers to"""
+        return self._project._data2Obj.get(self._wrappedData.spectrumView.dataSource)
+
+    @property
+    def displayOrder(self) -> tuple:
+        """A tuple of dimensions (1-based) in display order; 0 indicates a 1D 'intensity' dimension
+        """
         return tuple(self._wrappedData.spectrumView.dimensionOrdering)
 
     @property
-    def axes(self) -> tuple:
-        """Spectrum axes in display order"""
-        return tuple([dim - 1 for dim in self._wrappedData.spectrumView.dimensionOrdering])
+    def dimensions(self) -> tuple:
+        """Spectrum dimensions in display order"""
+        return tuple(dim for dim in self.displayOrder if dim > 0)
+
+    @property
+    def spectrumDimensions(self) -> tuple:
+        """spectrumDimension objects in display order"""
+        return tuple(self.spectrum.spectrumDimensions[idx] for idx in self.axisIndices)
+
+    @property
+    def axisIndices(self) -> tuple:
+        """Spectrum axis indices (0-based) in display order"""
+        return tuple([dim - 1 for dim in self.dimensions])
 
     # deprecated
-    dimensionOrdering = axes
+    # axes = axisIndices
+    # dimensionOrdering = axisIndices
 
     @property
     def axisCodes(self) -> list:
         """Spectrum axisCodes in display order"""
-        return [self.spectrum.axisCodes[idx] for idx in self.axes if idx >= 0]
+        return [self.spectrum.axisCodes[idx] for idx in self.axisIndices]
 
     @property
     def spectrumLimits(self) -> list:
         """Spectrum limits in display order"""
         _tmp = self.spectrum.spectrumLimits
-        return [_tmp[idx] for idx in self.axes if idx >= 0]
+        return [_tmp[idx] for idx in self.axisIndices]
 
     @property
     def aliasingLimits(self) -> list:
         """Spectrum aliasing limits in display order"""
         _tmp = self.spectrum.aliasingLimits
-        return [_tmp[idx] for idx in self.axes if idx >= 0]
+        return [_tmp[idx] for idx in self.axisIndices]
 
     @property
     def foldingLimits(self) -> list:
         """Spectrum folding limits in display order"""
         _tmp = self.spectrum.foldingLimits
-        return [_tmp[idx] for idx in self.axes if idx >= 0]
+        return [_tmp[idx] for idx in self.axisIndices]
 
     @property
     def valuesPerPoint(self) -> list:
         """Spectrum valuesPerPoint in display order"""
         _tmp = self.spectrum.valuesPerPoint
-        return [_tmp[idx] for idx in self.axes if idx >= 0]
+        return [_tmp[idx] for idx in self.axisIndices]
+
+    @property
+    def spectralWidths(self):
+        """Spectrum widths in display order"""
+        _tmp = self.spectrum.spectralWidths
+        return [_tmp[idx] for idx in self.axisIndices]
+
+    @property
+    def pointCounts(self):
+        """Spectrum point counts in display order"""
+        _tmp = self.spectrum.pointCounts
+        return [_tmp[idx] for idx in self.axisIndices]
 
     def _getByDisplayOrder(self, parameterName) -> list:
         """Return parameter in displayOrder"""
-        dims = [d for d in self.dimensions if d > 0]  # Filter the '0' dimension of 1D
-        return list(self.spectrum.getByDimensions(parameterName=parameterName, dimensions=dims))
+        # dims = [d for d in self.dimensions if d > 0]  # Filter the '0' dimension of 1D
+        return list(self.spectrum.getByDimensions(parameterName=parameterName, dimensions=self.dimensions))
 
     def _getPointPosition(self, ppmPostions) -> tuple:
         """Convert the ppm-positions vector (in display order) to a position (1-based) vector
@@ -487,8 +497,10 @@ class SpectrumView(AbstractWrapperObject):
 # ccpnmodel.ccpncore.memops.ApiError.ApiError: StripSpectrumView <ccpnmr.gui.Task.StripSpectrumView ['user', 'View', '1D_H', 1, <ccpnmr.gui.Task.SpectrumView ['user', 'View', '1D_H', 'AcetatePE', 0]>]>: StripSpectrumViews can only be deleted when the SpectrumView or Strip is deleted.
 # """
 
-def _newSpectrumView(display, spectrum, dimensionOrdering):
+def _newSpectrumView(display, spectrum, spectrumAxes):
     """Create new SpectrumView
+    :param spectrum: A Spectrum instance
+
     """
 
     # # Set stripSerial
@@ -499,16 +511,18 @@ def _newSpectrumView(display, spectrum, dimensionOrdering):
     #     stripSerial = 0
 
     if not isinstance(spectrum, Spectrum):
-        raise ValueError('invlaid spectrum; got %r' % spectrum)
+        raise ValueError('invalid spectrum; got %r' % spectrum)
 
-    if not isinstance(dimensionOrdering, (list, tuple)) or len(dimensionOrdering) < 2:
-        raise ValueError('invalid dimensionOrdering; got %r' % dimensionOrdering)
+    if not isinstance(spectrumAxes, (list, tuple)) or len(spectrumAxes) < 2:
+        raise ValueError('invalid spectrumAxes; got %r' % spectrumAxes)
 
-    obj = display._wrappedData.newSpectrumView(spectrumName=spectrum.name, stripSerial=0, dataSource=spectrum._wrappedData,
-                                               dimensionOrdering=dimensionOrdering)
+    obj = display._wrappedData.newSpectrumView(spectrumName=spectrum.name,
+                                               stripSerial=0,
+                                               dataSource=spectrum._wrappedData,
+                                               dimensionOrdering=spectrumAxes)
 
     # 20191113:ED testing - doesn't work yet, _data2Obj not created in correct place
-    # GWV: don't know why, but only querying via the FindFirstStripSpectrumView seems to allows to yield the V2 object
+    # GWV: don't know why, but only querying via the FindFirstStripSpectrumView seems to allow to yield the V2 object
     apiSpectrumView = display.strips[0]._wrappedData.findFirstStripSpectrumView(spectrumView=obj)
     newSpecView = display.project._data2Obj.get(apiSpectrumView)
 
@@ -518,16 +532,6 @@ def _newSpectrumView(display, spectrum, dimensionOrdering):
     # NOTE:ED - 2021oct25 - @GWV not sure why this is here as overrides the .getter logic
     #   replaced with method
     # newSpecView.copyContourAttributesFromSpectrum()
-    #
-    # for param in '''negativeContourBase negativeContourCount negativeContourFactor
-    #                 displayNegativeContours negativeContourColour
-    #                 positiveContourBase positiveContourCount positiveContourFactor
-    #                 displayPositiveContours positiveContourColour
-    #                 sliceColour
-    #              '''.split():
-    #     if hasattr(spectrum, param):
-    #         value = getattr(spectrum, param)
-    #         setattr(newSpecView, param, value)
 
     return newSpecView
 

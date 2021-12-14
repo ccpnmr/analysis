@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-09 17:40:30 +0000 (Tue, November 09, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-14 11:40:49 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -33,13 +33,13 @@ __date__ = "$Date: 2020-11-20 10:28:48 +0000 (Fri, November 20, 2020) $"
 import os
 from typing import Sequence
 
-from ccpn.util.Path import Path
+from ccpn.util.Path import Path, aPath
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import flatten
 import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
 
-from nmrglue.fileio.bruker import read_acqus_file, read_jcamp
+from nmrglue.fileio.bruker import read_jcamp
 
 
 class BrukerSpectrumDataSource(SpectrumDataSourceABC):
@@ -59,7 +59,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
     isFloatData = False
 
     suffixes = [None]
-    allowDirectory = True  # Can supply a Bruker top directory
+    allowDirectory = True  # Can supply a Bruker top directory or pdata directory
     openMethod = open
     defaultOpenReadMode = 'rb'
 
@@ -279,9 +279,17 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         return None
 
     def nameFromPath(self):
-        """Return a name derived from pdataDir
+        """Return a name derived from _brukerRoot and pdataDir
         """
-        return '%s_pdata%s' % (self._brukerRoot.stem, self._pdataDir.stem)
+        return '%s-%s' % (self._brukerRoot.stem, self._pdataDir.stem)
+
+    @property
+    def parentPath(self) -> aPath:
+        """Return an absolute path of parent directory, i.e. _BrukerRoot, as a Path instance
+        or None when dataFile is not defined.
+        Subclassed to accommodate the special Bruker directory structure
+        """
+        return (None if self.dataFile is None else self._brukerRoot.parent)
 
     def setPath(self, path, substituteSuffix=False):
         """Parse and set path, assure there is the directory with acqus and pdata dirs
@@ -390,7 +398,22 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 dimDict.update(self.acqus[i])
                 dimDict.update(self.procs[i])
 
+                # establish dimension type (time/frequency)
+                if int(float(dimDict.get('FT_mod', 1))) == 0:
+                    # point/time axis
+                    self.dimensionTypes[i] = specLib.DIMENSION_TIME
+                    self.measurementTypes[i] = specLib.MEASUREMENT_TYPE_TIME
+                else:
+                    # frequency axis
+                    self.dimensionTypes[i] = specLib.DIMENSION_FREQUENCY
+                    self.measurementTypes[i] = specLib.MEASUREMENT_TYPE_SHIFT
+
                 self.pointCounts[i] = int(dimDict['SI'])
+                if self.dimensionTypes[i] == specLib.DIMENSION_TIME:
+                    tdeff = int(dimDict['TDeff'])
+                    if tdeff > 0 and tdeff < self.pointCounts[i]:
+                        self.pointCounts[i] = tdeff
+
                 self.blockSizes[i] = int(dimDict['XDIM'])
                 if self.blockSizes[i] == 0:
                     self.blockSizes[i] = self.pointCounts[i]
@@ -402,22 +425,14 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 self.isotopeCodes[i] = dimDict.get('AXNUC')
                 self.axisLabels[i] = dimDict.get('AXNAME')
 
-                if int(float(dimDict.get('FT_mod', 1))) == 0:
-                    # point/time axis
-                    self.dimensionTypes[i] = specLib.DIMENSION_TIME
-                    self.measurementTypes[i] = specLib.MEASUREMENT_TYPE_TIME
-                else:
-                   # frequency axis
-                    self.dimensionTypes[i] = specLib.DIMENSION_FREQUENCY
-                    self.measurementTypes[i] = specLib.MEASUREMENT_TYPE_SHIFT
 
                 self.spectralWidthsHz[i] = float(dimDict.get('SW_p', 1.0))  # SW in Hz processed (from proc file)
                 self.spectrometerFrequencies[i] = float(dimDict.get('SFO1', dimDict.get('SF', 1.0)))
 
                 self.referenceValues[i] = float(dimDict.get('OFFSET', 0.0))
                 self.referencePoints[i] = float(dimDict.get('refPoint', 0.0))
-            # origNumPoints[i] = int(dimDict.get('$FTSIZE', 0))
-            # pointOffsets[i] = int(dimDict.get('$STSR', 0))
+                # origNumPoints[i] = int(dimDict.get('$FTSIZE', 0))
+                # pointOffsets[i] = int(dimDict.get('$STSR', 0))
                 self.phases0[i] = float(dimDict.get('PHC0', 0.0))
                 self.phases1[i] = float(dimDict.get('PHC1', 0.0))
 
@@ -449,54 +464,3 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
 # Register this format
 BrukerSpectrumDataSource._registerFormat()
 
-#=========================================================================
-# Bug fix from NMRglue
-#=========================================================================
-
-def read_procs_file(dir='.', procs_files=None):
-    """
-    Read Bruker processing files from a directory.
-
-    Parameters
-    ----------
-    dir : str
-        Directory to read from.
-    procs_files : list, optional
-        List of filename(s) of procs parameter files in directory. None uses
-        standard files.
-
-    Returns
-    -------
-    dic : dict
-        Dictionary of Bruker parameters.
-    """
-    if procs_files is None:
-        procs_files = []
-        for f in ["procs", "proc2s", "proc3s", "proc4s"]:
-            if os.path.isfile(os.path.join(dir, f)):
-                procs_files.append(f)
-        pdata_path = dir
-
-    elif procs_files == []:
-        if os.path.isdir(os.path.join(dir, 'pdata')):
-            pdata_folders = [folder for folder in
-                             os.walk(os.path.join(dir, 'pdata'))][0][1]
-            if '1' in pdata_folders:
-                pdata_path = os.path.join(dir, 'pdata', '1')
-            else:
-                pdata_path = os.path.join(dir, 'pdata', pdata_folders[0])
-
-        for f in ["procs", "proc2s", "proc3s", "proc4s"]:
-            if os.path.isfile(os.path.join(pdata_path, f)):
-                procs_files.append(f)
-
-    else:
-        pdata_path = dir
-
-    # create an empty dictionary
-    dic = dict()
-
-    # read the acqus_files and add to the dictionary
-    for f in procs_files:
-        dic[f] = read_jcamp(os.path.join(pdata_path, f))
-    return dic

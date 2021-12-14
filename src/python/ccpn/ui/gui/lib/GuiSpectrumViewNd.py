@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-13 10:03:45 +0000 (Mon, December 13, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-14 11:40:51 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -255,39 +255,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                                                           np.array(_negColours, dtype=np.float32),
                                                           not self._application.preferences.general.generateSinglePlaneContours)
 
-            # else:
-            #     specIndices = self.dimensionOrdering
-            #     stripIndices = tuple(specIndices.index(ii) for ii in range(numDims))
-            #     regionLimits = tuple(axis.region for axis in self.strip.orderedAxes)
-            #
-            #     # get the spectrumLimits bounded by the first/last points
-            #     axisLimits = {}
-            #     for axisCode in self.spectrum.axisCodes:
-            #         lim = self.spectrum.getPpmArray(axisCode=axisCode)
-            #         axisLimits[axisCode] = (min(lim[0], lim[-1]),
-            #                                 max(lim[0], lim[-1]))
-            #
-            #     # fill the others in from the strip
-            #     axisLimits.update(dict([(self.spectrum.axisCodes[ii], regionLimits[stripIndices[ii]])
-            #                             for ii in range(numDims) if stripIndices[ii] is not None and stripIndices[ii] > 1]))
-            #
-            #     # use a single Nd dataArray and flatten to the visible axes - averages across the planes
-            #     data = self.spectrum.getRegion(**axisLimits)
-            #
-            #     if data is not None and data.size:
-            #         xyzDims = tuple((numDims - ind - 1) for ind in specIndices)
-            #         xyzDims = tuple(reversed(xyzDims))
-            #         tempDataArray = data.transpose(*xyzDims)
-            #
-            #         # flatten multidimensional arrays into single array
-            #         for maxCount in range(numDims - 2):
-            #             tempDataArray = np.max(tempDataArray.clip(0.0, 1e16), axis=0) + np.min(tempDataArray.clip(-1e16, 0.0), axis=0)
-            #
-            #         contourList = Contourer2d.contourerGLList((tempDataArray,),
-            #                                                   posLevelsArray,
-            #                                                   negLevelsArray,
-            #                                                   np.array(_posColours, dtype=np.float32),
-            #                                                   np.array(_negColours, dtype=np.float32))
 
         except Exception as es:
             getLogger().warning(f'Contouring error: {es}')
@@ -332,11 +299,11 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         spectrum = self.spectrum
         dimensionCount = spectrum.dimensionCount
-        dimIndices = self.dimensionOrdering
+        dimIndices = self.axisIndices
         xDim = dimIndices[0]
         yDim = dimIndices[1]
-        #TODO: this needs rewriting without api calls
-        orderedAxes = self._apiStripSpectrumView.strip.orderedAxes
+
+        orderedAxes = self.strip.axes
 
         if dimensionCount == 2:
             planeData = spectrum.getPlaneData(xDim=xDim + 1, yDim=yDim + 1)
@@ -386,31 +353,31 @@ class GuiSpectrumViewNd(GuiSpectrumView):
                 planeData = spectrum.getPlaneData(position, xDim=xDim + 1, yDim=yDim + 1)
                 yield position, planeData
 
-    def _getAxisInfo(self, orderedAxes, dim):
+    def _getAxisInfo(self, orderedAxes, axisIndex):
         """Get the information for the required axis
         """
-        index = self.dimensionOrdering[dim]
-        if index is None:
+        indx = self.axisIndices[axisIndex]
+        if indx is None:
             return
 
         # get the axis region
-        zPosition = orderedAxes[dim].position
-        width = orderedAxes[dim].width
-        axisCode = orderedAxes[dim].code
+        zPosition = orderedAxes[axisIndex].position
+        width = orderedAxes[axisIndex].width
+        axisCode = self.strip.spectrumDisplay.axisCodes[axisIndex]
 
         # get the ppm range
-        zPointCount = (self.spectrum.pointCounts)[index]
+        zPointCount = (self.spectrum.pointCounts)[indx]
         zRegionValue = (zPosition + 0.5 * width, zPosition - 0.5 * width)  # Note + and - (axis backwards)
 
         # clip to the aliasingLimits of the spectrum - ignore if both greater/less than limits
-        aliasing = (self.spectrum.aliasingLimits)[index]
+        aliasing = (self.spectrum.aliasingLimits)[indx]
         if all(val <= aliasing[0] for val in zRegionValue) or all(val >= aliasing[1] for val in zRegionValue):
             return
         zRegionValue = tuple(float(np.clip(val, *aliasing)) for val in zRegionValue)
 
         # convert ppm- to point-range
-        zPointFloat0 = self.spectrum.ppm2point(zRegionValue[0], axisCode=axisCode) - 1
-        zPointFloat1 = self.spectrum.ppm2point(zRegionValue[1], axisCode=axisCode) - 1
+        zPointFloat0 = self.spectrum.ppm2point(zRegionValue[0], axisCode=axisCode) - 1.0
+        zPointFloat1 = self.spectrum.ppm2point(zRegionValue[1], axisCode=axisCode) - 1.0
 
         # convert to integers
         zPointInt0, zPointInt1 = (int(zPointFloat0 + (1 if zPointFloat0 >= 0 else 0)),  # this gives first and 1+last integer in range
@@ -433,8 +400,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         spectrum = self.spectrum
         dimensionCount = spectrum.dimensionCount
-        dimIndices = self.dimensionOrdering
-        #TODO: no Api calls!
+        dimIndices = self.axisIndices
         orderedAxes = self._apiStripSpectrumView.strip.orderedAxes
 
         if dimensionCount <= 2:
@@ -445,8 +411,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
         for dim in range(2, dimensionCount):
 
-            index = self.dimensionOrdering[dim]
-            if index is None:
+            indx = self.axisIndices[dim]
+            if indx is None:
                 return
 
             # make sure there is always a spectrumView to base visibility on
@@ -457,8 +423,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             # get the plane count from the widgets
             planeCount = self.strip.planeAxisBars[dim - 2].planeCount  #   .planeToolbar.planeCounts[dim - 2].value()
 
-            zPointCount = (self.spectrum.pointCounts)[index]
-            zValuePerPoint = (self.spectrum.valuesPerPoint)[index]
+            zPointCount = (self.spectrum.pointCounts)[indx]
+            zValuePerPoint = (self.spectrum.valuesPerPoint)[indx]
             # minSpectrumFrequency, maxSpectrumFrequency = (self.spectrum.spectrumLimits)[index]
 
             # pass in a smaller valuePerPoint - if there are differences in the z-resolution, otherwise just use local valuePerPoint

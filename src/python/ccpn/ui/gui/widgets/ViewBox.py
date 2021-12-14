@@ -55,8 +55,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-28 16:26:14 +0100 (Fri, May 28, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-14 11:40:52 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -544,7 +544,7 @@ class ViewBox(pg.ViewBox):
                             # print('***', stripAxisCodes, spectrumView.spectrum.axisCodes)
                             # Fixed 13/3/2016 Rasmus Fogh
                             # Avoid comparing spectrum AxisCodes to display axisCodes - they are not identical
-                            spectrumIndices = spectrumView.dimensionOrdering
+                            spectrumIndices = spectrumView.axisIndices
                             xAxis = spectrumIndices[0]
                             yAxis = spectrumIndices[1]
                             # axisMapping = axisCodeMapping(stripAxisCodes, spectrumView.spectrum.axisCodes)
@@ -715,7 +715,7 @@ def _peaksVisibleInStrip(peaks, strip):
     for spectrumView in strip.spectrumViews:
         if spectrumView.spectrum.dimensionCount == 1:  # skip 1D peakLists
             continue
-        indices = spectrumView.dimensionOrdering[:2]
+        indices = spectrumView.axisIndices[:2]
         peakLists = [peakListView.peakList for peakListView in spectrumView.peakListViews if peakListView.isVisible()]
         for peakList in peakLists:
             peakListToIndicesDict[peakList] = indices

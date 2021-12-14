@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-25 15:28:15 +0100 (Fri, June 25, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-14 11:40:49 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -59,20 +59,6 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
     openMethod = open
 
     #=========================================================================================
-    # some default data
-    #=========================================================================================
-
-    isotopeDefaultDataDict = defaultdict(
-        lambda: {'spectralRange' : (12.0, -1.0),   'pointCount' : 128},
-        [
-        ('1H' , {'spectralRange' : (12.0, -1.0),   'pointCount' : 512}),
-        ('15N', {'spectralRange' : (130.0, 100.0), 'pointCount' : 128}),
-        ('13C', {'spectralRange' : (130.0, 5.0),   'pointCount' : 256}),
-        ('19F', {'spectralRange' : (250.0, 40.0),  'pointCount' : 512}),
-        ]
-    )
-    #=========================================================================================
-
 
     def openFile(self, mode=None, **kwds):
         """Return None, as there is no actual file
@@ -85,6 +71,16 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
         :return: None
         """
         return None
+
+    def setPath(self, path, substituteSuffix=False):
+        """define valid path: always set to None for EmptySpectrumDataSource"""
+        super().setPath(None)
+        return self
+
+    def nameFromPath(self):
+        """Return a name derived from path (to be subclassed for specific cases; e.g. Bruker)
+        """
+        return 'emptySpectrum'
 
     def hasValidPath(self):
         """Always True
@@ -105,6 +101,9 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
         """Get plane defined by xDim, yDim and position (all 1-based)
         return NumPy data array with zero's
         """
+        if self.isBuffered:
+            return super().getPlaneData(position=position, xDim=xDim, yDim=yDim)
+
         position = self.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
 
         # create the array with zeros
@@ -117,6 +116,9 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
         """Get slice defined by sliceDim and position (all 1-based)
         return NumPy data array of zero's
         """
+        if self.isBuffered:
+            return super().getSliceData(position=position, sliceDim=sliceDim)
+
         position = self.checkForValidSlice(position=position, sliceDim=sliceDim)
 
         # create the array with zeros
@@ -127,14 +129,10 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
         """Get value defined by points (1-based)
         returns 0.0
         """
-        position = self.checkForValidPosition(position=position)
-        return 0.0
+        if self.isBuffered:
+            return super().getPointData(position=position)
 
-    def getPointValue(self, position, aliasingFlags=None):
-        """Get interpolated value defined by position (1-based, float values)
-        Use getPointData() for a method using an integer-based position argument
-        returns 0.0
-        """
+        position = self.checkForValidPosition(position=position)
         return 0.0
 
     def getRegionData(self, sliceTuples, aliasingFlags=None):
@@ -150,6 +148,9 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
             1: aliasing with identical sign
            -1: aliasing with inverted sign
         """
+        if self.isBuffered:
+            return super().getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
+
         if aliasingFlags is None:
             aliasingFlags = [0] * self.dimensionCount
 
@@ -159,38 +160,6 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
         # The result being assembled
         regionData = numpy.zeros(sizes[::-1], dtype=self.dataType) # ...,z,y,x numpy ordering
         return regionData
-
-    def _setDefaultIsotopeValues(self, isotopeCode, dimension, field=18.8):
-        """ Set the default spectrometerFrequencies, spectralWidth, referencePoints, referenceValues
-        and axisCode values derived from isotopeCode and field for dimension (1-based)
-        """
-
-        if isotopeCode is not None:
-
-            idx = dimension-1
-            nuc = Nucleus(isotopeCode)
-            defaultValues = self.isotopeDefaultDataDict[isotopeCode]
-
-            if nuc is not None:
-                self.isotopeCodes[idx] = isotopeCode
-                self.spectrometerFrequencies[idx] = nuc.frequencyAtField(field)
-
-                high, low = defaultValues['spectralRange']
-                self.spectralWidthsHz[idx] = (high-low)*self.spectrometerFrequencies[idx]
-
-                self.referencePoints[idx] = 1.0
-                self.referenceValues[idx] = high
-
-                _count = self.axisCodes.count(nuc.axisCode)
-                self.axisCodes[idx] = nuc.axisCode + (str(_count) if _count else '')
-
-                self.pointCounts[idx] = defaultValues['pointCount']
-
-    def _setSpectralParametersFromIsotopeCodes(self, field=18.8):
-        """Set spectral parameters at field
-        """
-        for idx, isotopeCode in enumerate(self.isotopeCodes):
-            self._setDefaultIsotopeValues(isotopeCode, dimension=idx+1, field=field)
 
 # Register this format
 EmptySpectrumDataSource._registerFormat()

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-14 09:23:47 +0000 (Tue, December 14, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-14 11:40:50 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2744,31 +2744,6 @@ class GuiSpectrumDisplay(CcpnModule):
         with undoBlockWithoutSideBar():
             for specView in self.spectrumViews:
                 specView.copyContourAttributesFromSpectrum()
-
-    #===========================================================================================
-    # new'Object' and other methods
-    # Call appropriate routines in their respective locations
-    #===========================================================================================
-
-    # @logCommand('project.')
-    # def newSpectrumView(self, spectrumName: str = None,
-    #                     stripSerial: int = None, dataSource=None,
-    #                     dimensionOrdering=None,
-    #                     **kwds):
-    #     """Create new SpectrumView
-    #
-    #     See the SpectrumView class for details.
-    #
-    #     Optional keyword arguments can be passed in; see SpectrumView._newSpectrumView for details.
-    #
-    #     :return: a new SpectrumView instance.
-    #     """
-    #     from ccpn.ui._implementation.SpectrumView import _newSpectrumView
-    #
-    #     return _newSpectrumView(self, spectrumName=spectrumName,
-    #                                  stripSerial=stripSerial, dataSource=dataSource,
-    #                                  dimensionOrdering=dimensionOrdering, **kwds)
-
 
 #=========================================================================================
 

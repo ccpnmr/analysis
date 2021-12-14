@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-22 17:49:17 +0000 (Mon, November 22, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-14 11:40:49 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -587,7 +587,6 @@ def getSpinSystemsLocation(project: Project, nmrResidues: typing.List[NmrResidue
     # TODO NBNB rename variables so api level objects have .api...' names
     # Also consider moving to ccpnmodel, or refactoring. NBNB
     # Also check sorting order for residues
-    # NBNB TODO
 
     nmrProject = project._wrappedData
     spinSystems = [nmrResidue._wrappedData for nmrResidue in nmrResidues]

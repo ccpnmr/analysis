@@ -33,8 +33,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-09 16:11:16 +0000 (Thu, December 09, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-14 11:40:51 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -554,8 +554,8 @@ class GuiStripNd(GuiStrip):
                     continue
 
                 _params = spectrumView._getSpectrumViewParams(n + 2)
-                _index = spectrumView.dimensionOrdering[n+2]
-                specRef = spectrumView.spectrum.spectrumReferences[_index]
+                _index = spectrumView.axisIndices[n+2]
+                specDim = spectrumView.spectrum.spectrumDimensions[_index]
 
                 if zAxis.unit == AXISUNIT_PPM:
                     _valuePerPoint = _params.valuePerPoint
@@ -574,7 +574,7 @@ class GuiStripNd(GuiStrip):
                     minAliasedFrequency = min(pointL, pointR)
                     maxAliasedFrequency = max(pointL, pointR)
                     minZPlaneSize = 1.0
-                    position = spectrumView.spectrum.spectrumReferences[_index].valueToPoint(zAxis.position)
+                    position = spectrumView.spectrum.spectrumDimensions[_index].valueToPoint(zAxis.position)
 
                 elif zAxis.unit == AXISUNIT_HZ:
                     # change to Hz to display in the widget
@@ -584,12 +584,12 @@ class GuiStripNd(GuiStrip):
                     minAliasedFrequency = min(minAliasedFrequency, _minFreq) if minAliasedFrequency is not None else _minFreq
                     maxAliasedFrequency = max(maxAliasedFrequency, _maxFreq) if maxAliasedFrequency is not None else _maxFreq
 
-                    minAliasedFrequency *= specRef.spectrometerFrequency
-                    maxAliasedFrequency *= specRef.spectrometerFrequency
+                    minAliasedFrequency *= specDim.spectrometerFrequency
+                    maxAliasedFrequency *= specDim.spectrometerFrequency
 
                     if minZPlaneSize is None or _valuePerPoint < minZPlaneSize:
-                        minZPlaneSize = _valuePerPoint * specRef.spectrometerFrequency
-                    position = zAxis.position * specRef.spectrometerFrequency
+                        minZPlaneSize = _valuePerPoint * specDim.spectrometerFrequency
+                    position = zAxis.position * specDim.spectrometerFrequency
 
                 else:
                     getLogger().warning(f'Axis {zAxis.unit} not found')
@@ -635,20 +635,20 @@ class GuiStripNd(GuiStrip):
         if not (_specView and not _specView.isDeleted):
             return
 
-        _index = _specView.dimensionOrdering[n]
-        specRef = _specView.spectrum.spectrumReferences[_index]
+        _index = _specView.axisIndices[n]
+        specDim = _specView.spectrum.spectrumDimensions[_index]
 
         if zAxis.unit == AXISUNIT_PPM:
-            planeSize = specRef._valuePerPoint/ specRef.spectrometerFrequency  # specRef is in Hz
+            planeSize = specDim._valuePerPoint/ specDim.spectrometerFrequency  # specDim is in Hz
 
         elif zAxis.unit == AXISUNIT_POINT:
-            position = specRef.pointToValue(position)
-            planeSize = specRef._valuePerPoint/ specRef.spectrometerFrequency  # specRef is in Hz
+            position = specDim.pointToValue(position)
+            planeSize = specDim._valuePerPoint/ specDim.spectrometerFrequency  # specDim is in Hz
 
         elif zAxis.unit == AXISUNIT_HZ:
             # first change to ppm and scale by spectrometerFrequencies
-            position = position / specRef.spectrometerFrequency
-            planeSize = specRef._valuePerPoint/ specRef.spectrometerFrequency  # specRef is in Hz
+            position = position / specDim.spectrometerFrequency
+            planeSize = specDim._valuePerPoint/ specDim.spectrometerFrequency  # specDim is in Hz
 
         else:
             getLogger().warning(f'Axis {zAxis.unit} not found')

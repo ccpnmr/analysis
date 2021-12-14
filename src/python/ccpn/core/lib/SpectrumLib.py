@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-10 13:43:37 +0000 (Fri, December 10, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-14 11:40:50 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -202,7 +202,7 @@ def checkSpectrumPropertyValue(iterable: bool, unique: bool = False, allowNone: 
                              (attributeName, obj, value, type(value).__name__))
 
         if len(value) != obj.dimensionCount:
-            raise ValueError('Value for "%s" of %s needs to be of length %d; got %r' %
+            raise ValueError('Value for "%s" of %s needs to be an iterable of length %d; got %r' %
                              (attributeName, obj, obj.dimensionCount, value))
 
         if unique:
@@ -1943,7 +1943,7 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
             _ppmRegions.append(sorted(float(pos) for pos in region))
 
         # try and match the axis codes before creating new peakList (if required)
-        indices = spectrum.getByAxisCodes('axes', axisCodes)
+        indices = spectrum.getByAxisCodes('axisIndices', axisCodes)
 
         peakList = spectrum.project.getByPid(peakList) if isinstance(peakList, str) else peakList
         if not peakList:
@@ -2053,7 +2053,7 @@ def _searchAxisCodePermutations(spectrum, checkCodes: Tuple[str, ...]) -> Option
 
     # add permutations for the axes
     axisPerms = tuple(permutations(spectrum.axisCodes))
-    axisOrder = tuple(permutations(spectrum.axes))
+    axisOrder = tuple(permutations(spectrum.axisIndices))
 
     for ii, perm in enumerate(axisPerms):
         n = min(len(checkCodes), len(perm))
@@ -2085,7 +2085,7 @@ def _setDefaultAxisOrdering(spectrum):
 
     if not pOrder:
         # didn't find anything; revert to default [0...dimensionCount-1]
-        pOrder = spectrum.axes
+        pOrder = spectrum.axisIndices
 
     return
 

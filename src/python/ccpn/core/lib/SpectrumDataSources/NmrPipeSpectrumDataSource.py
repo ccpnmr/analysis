@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 15:57:57 +0100 (Tue, April 20, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-14 11:40:49 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -131,7 +131,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
 
     def __init__(self, path=None, spectrum=None, temporaryBuffer=True, bufferPath=None):
-        """Intialise; optionally set path or extract from spectrum
+        """Initialise; optionally set path or extract from spectrum
 
         :param path: optional input path
         :param spectrum: associate instance with spectrum and import spectrum's parameters
@@ -143,9 +143,9 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
         self.header = None  # NmrPipeHeader instance
         self.pipeDimension = None
         self.nusDimension = None
-        # we hold off from opening the hdf5 buffer until we actually needs the data
-        self.temporaryBuffer=temporaryBuffer
-        self.bufferPath = bufferPath
+
+        # NmrPipe files are always buffered
+        self.setBuffering(True, temporaryBuffer, bufferPath)
 
     def _readHeader(self):
         "Create NmrPipeHeader instance and read the data"
@@ -324,9 +324,33 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
         return path, offset
 
-    def fillHdf5Buffer(self, hdf5buffer):
+    def setPath(self, path, substituteSuffix=False):
+        """define valid path to a (binary) data file, if needed appends or substitutes
+        the suffix (if defined).
+
+
+        return self or None on error
+        """
+        if path is None:
+            self.dataFile = None  # A reset essentially
+            return self
+
+        _path = aPath(path)
+        if _path.is_dir():
+            files = [f for f in _path.glob('*001.dat')]
+            if len(files) > 0:
+                _path = files[0]
+
+        return super().setPath(path=_path, substituteSuffix=substituteSuffix)
+
+    def fillHdf5Buffer(self):
         """Fill hdf5buffer with data from self
         """
+        if not self.isBuffered:
+            raise RuntimeError('fillHdf5Buffer: no hdf5Buffer defined')
+
+        getLogger().debug('fillHdf5Buffer: filling buffer %s' % self.hdf5buffer)
+
         xAxis = self.X_AXIS
         xDim = self.X_DIM
         yAxis = self.Y_AXIS
@@ -339,7 +363,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
             with open(path, 'r') as fp:
                 fp.seek(offset, 0)
                 data = numpy.fromfile(file=fp, dtype=self.dtype, count=self.pointCounts[xAxis])
-            hdf5buffer.setSliceData(data, position=position, sliceDim=xDim)
+            self.hdf5buffer.setSliceData(data, position=position, sliceDim=xDim)
 
         else:
             # nD's: fill the buffer, reading x,y planes from the nmrPipe files into the hdf5 buffer
@@ -351,49 +375,8 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                     fp.seek(offset, 0)
                     data = numpy.fromfile(file=fp, dtype=self.dtype, count=planeSize)
                     data.resize( (self.pointCounts[yAxis], self.pointCounts[xAxis]))
-                hdf5buffer.setPlaneData(data, position=position, xDim=xDim, yDim=yDim)
-
-    def _fillBuffer(self):
-        """Create (if needed) and fill HDF5 buffer
-        """
-        if self.hdf5buffer is None:
-            # Buffer has not been created and filled
-            self.initialiseHdf5Buffer(temporaryBuffer=self.temporaryBuffer, path=self.bufferPath)
-
-    def getPlaneData(self, position:Sequence=None, xDim:int=1, yDim:int=2):
-        """Get plane defined by xDim, yDim and position (all 1-based)
-        return NumPy data array
-        """
-        self._fillBuffer()
-        return self.hdf5buffer.getPlaneData(position=position, xDim=xDim, yDim=yDim)
-
-    def getSliceData(self, position:Sequence=None, sliceDim:int=1):
-        """Get slice defined by sliceDim and position (all 1-based)
-        return NumPy data array
-        """
-        self._fillBuffer()
-        return self.hdf5buffer.getSliceData(position=position, sliceDim=sliceDim)
-
-    def getPointData(self, position:Sequence=None) -> float:
-        """Get value defined by points (1-based)
-        """
-        self._fillBuffer()
-        return self.hdf5buffer.getPointData(position=position)
-
-    def getRegionData(self, sliceTuples, aliasingFlags=None):
-        """Return an numpy array containing the points defined by
-                sliceTuples=[(start_1,stop_1), (start_2,stop_2), ...],
-
-        sliceTuples are 1-based; sliceTuple stop values are inclusive (i.e. different
-        from the python slice object)
-
-        Optionally allow for aliasing per dimension:
-            0: No aliasing
-            1: aliasing with identical sign
-           -1: aliasing with inverted sign
-        """
-        self._fillBuffer()
-        return self.hdf5buffer.getRegionData(sliceTuples, aliasingFlags)
+                self.hdf5buffer.setPlaneData(data, position=position, xDim=xDim, yDim=yDim)
+        self._bufferFilled = True
 
 # Register this format
 NmrPipeSpectrumDataSource._registerFormat()
@@ -415,7 +398,9 @@ class NmrPipeInputStreamDataSource(NmrPipeSpectrumDataSource):
         # sys.stdin.reconfigure(encoding='ISO-8859-1')
         self.fp = sys.stdin.buffer
         self.readParameters()
-        self.initialiseHdf5Buffer(temporaryBuffer=temporaryBuffer, path=bufferPath)
+        self.setBuffering(True, bufferIsTemporary=temporaryBuffer, bufferPath=bufferPath)
+        self.initialiseHdf5Buffer()
+        self.fillHdf5Buffer()
 
     def _readHeader(self):
         "Create NmrPipeHeader instance and read the data"
@@ -438,6 +423,7 @@ class NmrPipeInputStreamDataSource(NmrPipeSpectrumDataSource):
         for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=(sliceDim,)):
             data = numpy.fromfile(file=self.fp, dtype=self.dtype, count=self.pointCounts[sliceDim-1])
             hdf5buffer.setSliceData(data, position=position, sliceDim=sliceDim)
+        self._bufferFilled = True
 
     def closeFile(self):
         """close the file

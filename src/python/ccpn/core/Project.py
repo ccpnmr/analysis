@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-13 10:03:44 +0000 (Mon, December 13, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-14 11:40:48 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,15 +37,19 @@ import json
 
 # from ccpn.util.Common import isValidPath, isValidFileNameLength
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core._implementation.Updater import UPDATE_POST_PROJECT_INITIALISATION
+
 from ccpn.core.lib import Pid
 from ccpn.core.lib import Undo
+from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory, newProjectSaveHistory
 from ccpn.util import Logging
 from ccpn.util.ExcelReader import ExcelReader
 from ccpn.util.Path import aPath, Path
-# from ccpn.util.Common import isIterable
-from ccpn.framework.PathsAndUrls import CCPN_EXTENSION
+from ccpn.util.Common import isIterable
 
-# from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
+from ccpn.framework.Version import VersionString
+from ccpn.framework.PathsAndUrls import CCPN_EXTENSION
+from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpnmodel.ccpncore.memops import Notifiers
@@ -56,8 +60,10 @@ from ccpnmodel.ccpncore.api.ccp.nmr.NmrExpPrototype import RefExperiment
 # from ccpnmodel.ccpncore.lib import Constants
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 # from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
+from ccpnmodel.ccpncore.lib import ApiPath
+from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
-# from ccpn.ui.gui.lib.guiDecorators import suspendSideBarNotifications
+
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
     inactivity, logCommandManager
@@ -84,12 +90,13 @@ PEAKCLUSTERS = 'peakClusters'
 COLLECTIONS = 'collections'
 
 
+
 class Project(AbstractWrapperObject):
     """ The Project is the object that contains all data objects and serves as the hub for
     navigating between them.
 
-    There are eleven top-level data objects directly within a project, of which seven have child
-    objects of their own, namely Spectrum, Sample, Chain, NmrChain, ChemicalShiftList, StructureData
+    There are 15 top-level data objects directly within a project, of which 8 have child
+    objects of their own, e.g. Spectrum, Sample, Chain, NmrChain, ChemicalShiftList, DataSet
     and StructureEnsemble. The child data objects are organised in a logical hierarchy; for example,
     a Spectrum has PeakLists, which in turn, are made up of Peaks, whereas a Chain is made up of Residues,
     which are made up of Atoms.
@@ -266,18 +273,17 @@ class Project(AbstractWrapperObject):
             raise ValueError("Project initialised with %s, should be ccp.nmr.Nmr.NmrProject."
                              % wrappedData)
 
-        # set up attributes
+        # Define linkage attributes
         self._project = self
         self._wrappedData = wrappedData
-        # self._id = _id = ''
+
+        # self._appBase = None (delt with below)
+        # Reference to application; defined by Framework
+        self._application = None
 
         # setup object handling dictionaries
         self._data2Obj = {wrappedData: self}
         self._pid2Obj = {}
-
-        # self._pid2Obj[self.className] =  dd = {}
-        # self._pid2Obj[self.shortClassName] = dd
-        # dd[_id] = self
 
         self._id = wrappedData.name
         self._resetIds()
@@ -311,13 +317,20 @@ class Project(AbstractWrapperObject):
         # Special attributes:
         self._implExperimentTypeMap = None
 
-        # Set for Pre-May-2016 version. NBNB TODO remove when no longer needed
-        self._appBase = None
+        # reference to a ProjectSaveHistory instance; defined _newProject() or _loadProject()
+        self._saveHistory = None
 
-    # GWV: 20181102: insert to retain consistency with future changes
+        # reference to the logger; defined in call to _initialiseProject())
+        self._logger = None
+
+        self._checkProjectSubDirectories()
+
     @property
     def application(self):
-        return self._appBase
+        return self._application
+
+    # GWV: 20181102: insert _appBase to retain consistency with current data loading models
+    _appBase = application
 
     @property
     def isNew(self):
@@ -340,14 +353,43 @@ class Project(AbstractWrapperObject):
         return self._wrappedData.root.isProjectModified()
 
     @property
-    def isUpgradedFromV2(self):
+    def _isUpgradedFromV2(self):
         """Return True if project was upgraded from V2
         """
         return self._apiNmrProject.root._upgradedFromV2
 
+    @staticmethod
+    def _needsUpgrading(path) -> bool:
+        """
+        Check if project defined by path needs upgrading
+        :param path: a ccpn project-path
+        :return: True/False
+        """
+        from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
+        from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
+
+        # Check for V2 project; always needs upgrading
+        if (dataloader := CcpNmrV2ProjectDataLoader.checkForValidFormat(path)) is not None:
+            return True
+
+        if (dataloader := CcpNmrV3ProjectDataLoader.checkForValidFormat(path)) is None:
+            raise ValueError('Path "%s" doe not define a valid ccpn project' % path)
+
+        projectHistory = getProjectSaveHistory(dataloader.path)
+        return projectHistory.lastSavedVersion <= '3.0.4'
+
+    def _checkProjectSubDirectories(self):
+        """if need be, create all project subdirectories"""
+        from ccpn.framework.PathsAndUrls import CCPN_SUB_DIRECTORIES
+        _path = aPath(self.path)
+        for dir in CCPN_SUB_DIRECTORIES:
+            _path.fetchDir((dir))
+
     def _initialiseProject(self):
         """Complete initialisation of project,
         set up logger and notifiers, and wrap underlying data
+        This routine is called from Framework, as some other machinery first needs to set up
+        (linkages, Current, notifiers and such)
         """
 
         # The logger has already been set up when creating/loading the API project
@@ -357,17 +399,15 @@ class Project(AbstractWrapperObject):
         # Set up notifiers
         self._registerPresetApiNotifiers()
 
-        # GWV 20181123: deactivated
-        # for tt in self._coreNotifiers:
-        #     self.registerNotifier(*tt)
-
         # initialise, creating the children
-        self._resetUndo()
         with inactivity():
             self._restoreChildren()
             # we always have the default chemicalShift list
             if len(self.chemicalShiftLists) == 0:
                 self.newChemicalShiftList(name='default')
+
+        # Call any updates
+        self._update()
 
     def _close(self):
         self.close()
@@ -376,7 +416,11 @@ class Project(AbstractWrapperObject):
         """Clean up the wrapper project previous to deleting or replacing
         Cleanup includes wrapped data graphics objects (e.g. Window, Strip, ...)
         """
-        self._logger.info("Closing %s" % self.path)
+        getLogger().info("Closing %s" % self.path)
+
+        # close any spectra
+        for sp in self.spectra:
+            sp._close()
 
         # Remove undo stack:
         self._resetUndo(maxWaypoints=0)
@@ -440,15 +484,6 @@ class Project(AbstractWrapperObject):
         self._wrappedData._nextUniqueIdValues[className] = int(value)
 
     @property
-    def versionHistory(self) -> tuple:
-        """Return the tuple of versions that the project has been saved under
-        The last element is the most recent
-        Defaults to ('3.0.4',) if project saved before version 3.1.0.alpha
-        """
-        _history = getattr(self._wrappedData, 'versionHistory', []) or ['3.0.4']
-        return tuple(_history)
-
-    @property
     def _parent(self) -> AbstractWrapperObject:
         """Parent (containing) object."""
         return None
@@ -458,10 +493,9 @@ class Project(AbstractWrapperObject):
              checkValid: bool = False, changeDataLocations: bool = False) -> bool:
         """Save project with all data, optionally to new location or with new name.
         Unlike lower-level functions, this function ensures that data in high level caches are saved.
-        Return True if save succeeded otherwise return False (or throw error)"""
+        Return True if save succeeded otherwise return False (or throw error)
+        """
         # self._flushCachedData()
-
-        from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY, ccpnVersionHistory
 
         # path is empty for save under the same name
         if newPath:
@@ -473,8 +507,10 @@ class Project(AbstractWrapperObject):
             if len(newPath.basename) > 32:
                 raise ValueError('Unfortunately, we currently have limited (32) length of the filename (%s)' % newPath.basename)
             path = str(newPath)
+            _saveAs = True
         else:
             path = str(self.path)
+            _saveAs = False
 
         try:
             apiStatus = self._getAPIObjectsStatus()
@@ -489,12 +525,6 @@ class Project(AbstractWrapperObject):
         except Exception as es:
             getLogger().warning('Error checking project status: %s' % str(es))
 
-        # keep a list of the versions that the project has been saved under
-        if not hasattr(self._wrappedData, 'versionHistory') or self._wrappedData.versionHistory is None:
-            setattr(self._wrappedData, 'versionHistory', [])
-        if self.application.applicationVersion not in self._wrappedData.versionHistory:
-            self._wrappedData.versionHistory.append(self.application.applicationVersion)
-
         # don't check valid inside this routine as it is not optimised and only results in a crash. Use apiStatus object.
         savedOk = apiIo.saveProject(self._wrappedData.root, newPath=path,
                                     changeBackup=changeBackup, createFallback=createFallback,
@@ -502,16 +532,16 @@ class Project(AbstractWrapperObject):
                                     changeDataLocations=changeDataLocations)
         if savedOk:
             self._resetIds()
-            if self.application.hasGui:
+            # check for application and Gui; might not yet be there (e.g. on save of converted V2
+            # project)
+            if self.application and self.application.hasGui:
                 self.application.mainWindow.sideBar.setProjectName(self)
-            # application = self._appBase
-            # if application is not None:
-            #     application._refreshAfterSave()
 
-            # store the version history in state subfolder json file - not the best as a duplication which could cause issues later
-            _tmpPath = aPath(path).fetchDir(CCPN_STATE_DIRECTORY)
-            with open(_tmpPath / ccpnVersionHistory, 'w') as fp:
-                json.dump(self._wrappedData.versionHistory, fp)
+            # store the version history in state subfolder json file
+            if _saveAs:
+                self._checkProjectSubDirectories()
+                self._saveHistory = newProjectSaveHistory(path)
+            self._saveHistory.addSaveRecord().save()
 
         return savedOk
 
@@ -539,12 +569,6 @@ class Project(AbstractWrapperObject):
         backupPath = backupUrl.path
         return backupPath
 
-    # @property
-    # def programName(self) -> str:
-    #     """Name of running program - defaults to 'CcpNmr'"""
-    #     appBase = self._appBase if hasattr(self, '_appBase') else None
-    #     return 'CcpNmr' if appBase is None else appBase.applicationName
-
     @logCommand('project.')
     def deleteObjects(self, *objs: typing.Sequence[typing.Union[str, Pid.Pid, AbstractWrapperObject]]):
         """Delete one or more objects, given as either objects or Pids
@@ -556,30 +580,6 @@ class Project(AbstractWrapperObject):
             for obj in objs:
                 if obj and not obj.isDeleted:
                     obj.delete()
-
-    # def renameObject(self, objectOrPid:typing.Union[str,AbstractWrapperObject], newName:str):
-    #   """Rename object indicated by objectOrPid to name newName
-    #   NB at last one class (Substance) has a two-part name - these are passed as one,
-    #   dot-separated string (e.g. 'Lysozyme.U13C'"""
-    #   obj = self._data2Obj.get(objectOrPid) if isinstance(objectOrPid, str) else objectOrPid
-    #   names = newName.split('.')
-    #   obj.rename(*names)
-
-    def execute(self, pid, funcName, *params, **kwparams):
-        """Get the object identified by pid, execute object.funcName(\*params, \*\*kwparams)
-        and return the result"""
-
-        # NBNB TODO - probably not useful - remove?
-
-        obj = self.getByPid(pid)
-        if obj is None:
-            raise ValueError("No objet found with pid %s" % pid)
-        else:
-            func = getattr(obj, funcName)
-            if func is None:
-                raise ValueError("Object *s has no method named %s" % funcName)
-            else:
-                return func(*params, **kwparams)
 
     @property
     def _apiNmrProject(self) -> ApiNmrProject:
@@ -1171,176 +1171,13 @@ class Project(AbstractWrapperObject):
         apiStatus = APIStatus(apiObj=root, completeScan=completeScan, includeDefaultChildren=includeDefaultChildren)
         return apiStatus
 
-    # def _checkUpgradedFromV2(self):
-    #     """Check whether the project has been upgraded from V2
-    #     """
-    #     if self._apiNmrProject.root._upgradedFromV2:
-    #         # reset the noise levels
-    #         self._setNoiseLevels(alwaysSetNoise=True)
-
-    # def _validateDataUrlAndFilePaths(self, newDataUrlPath=None):
-    #     """Perform validate operation for setting dataUrl from preferences - to be called after loading
-    #     """
-    #
-    #     # read the dataPath from the preferences of defined
-    #     project = self
-    #     general = self.application.preferences.general if self.application.preferences and self.application.preferences.general else None
-    #     autoSet = general.autoSetDataPath if general.autoSetDataPath else False
-    #
-    #     getLogger().info('Validating dataUrls and filePaths')
-    #
-    #     newDataUrlPath = newDataUrlPath if newDataUrlPath else general.dataPath \
-    #         if general and general.dataPath else general.userWorkingPath \
-    #         if general.userWorkingPath else os.path.expanduser('~')
-    #     newDataUrlPath = os.path.expanduser(newDataUrlPath)
-    #
-    #     def _findDataUrl(project, storeType):
-    #         """find the dataStores of the given type
-    #         """
-    #         dataUrl = project._apiNmrProject.root.findFirstDataLocationStore(
-    #                 name='standard').findFirstDataUrl(name=storeType)
-    #         if dataUrl:
-    #             return (dataUrl,)
-    #         else:
-    #             return ()
-    #
-    #     # get the dataPaths from the project
-    #     dataUrlData = {}
-    #     # dataUrlData['remoteData'] = _findDataUrl(project, 'remoteData')
-    #
-    #     # # skip setting the path if autoSetDataPath is false
-    #     # if autoSet:
-    #     #
-    #     #     # update dataUrl here to the value in preferences
-    #     #     if dataUrlData['remoteData'] and len(dataUrlData['remoteData']) == 1:
-    #     #         # must only be one dataUrl
-    #     #         primaryDataUrl = dataUrlData['remoteData'][0]
-    #     #         primaryDataUrl.url = primaryDataUrl.url.clone(path=newDataUrlPath)
-    #
-    #     # reset the dataStores
-    #     dataUrlData['remoteData'] = _findDataUrl(project, 'remoteData')
-    #     dataUrlData['insideData'] = _findDataUrl(project, 'insideData')
-    #     dataUrlData['alongsideData'] = _findDataUrl(project, 'alongsideData')
-    #     dataUrlData['otherData'] = [dataUrl for store in project._wrappedData.memopsRoot.sortedDataLocationStores()
-    #                                 for dataUrl in store.sortedDataUrls() if dataUrl.name not in ('insideData', 'alongsideData', 'remoteData')]
-    #
-    #     # standardStore = self.project._wrappedData.memopsRoot.findFirstDataLocationStore(name='standard')
-    #     # stores = [(store.name, store.url.dataLocation, url.path,) for store in standardStore.sortedDataUrls() for url in store.sortedDataStores()]
-    #     # urls = [(store.dataUrl.name, store.dataUrl.url.dataLocation, store.path,) for store in standardStore.sortedDataStores()]
-    #
-    #     self._validateCleanUrls()
-    #
-    #     delList = set()
-    #     if autoSet:
-    #         from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import forceChangeDataStoreUrl, repointToDataUrl
-    #
-    #         # NOTE:ED - must remove all other dataUrls first, otherwise the dataUrl rename won't work
-    #
-    #         # force the change of the other dataUrls
-    #         for spec in self.project.spectra:
-    #             apiDataStore = spec._wrappedData.dataStore
-    #             if apiDataStore is None:
-    #                 getLogger().warning("Spectrum is not stored, cannot change file path")
-    #
-    #             else:
-    #                 # dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
-    #                 dataUrlName = apiDataStore.dataUrl.name
-    #                 # print('>>>    dataUrlName', dataUrlName)
-    #                 if dataUrlName not in ('insideData', 'alongsideData', 'remoteData'):
-    #                     # move all other objects that are not in the correct remoteData
-    #                     # to the correct remoteData created above
-    #
-    #                     primaryDataUrl = dataUrlData['remoteData'][0]
-    #                     delList.add(apiDataStore.dataUrl)
-    #                     repointToDataUrl(apiDataStore, primaryDataUrl)
-    #
-    #         # force the change of the dataUrl
-    #         for spec in self.project.spectra:
-    #             apiDataStore = spec._wrappedData.dataStore
-    #             if apiDataStore is None:
-    #                 getLogger().warning("Spectrum is not stored, cannot change file path")
-    #
-    #             else:
-    #                 # dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
-    #                 dataUrlName = apiDataStore.dataUrl.name
-    #                 # print('>>>    dataUrlName', dataUrlName, newDataUrlPath)
-    #                 if dataUrlName == 'remoteData':
-    #                     # if dataUrlName not in ('insideData', 'alongsideData'):
-    #
-    #                     # force existing remoteData to the new location
-    #                     # a new remoteData in the correct place
-    #
-    #                     getLogger().info('>>>  validate autoset: %s' % str(apiDataStore))
-    #                     # delList.add(apiDataStore.dataUrl.url)
-    #                     apiDataStore.dataUrl.url = apiDataStore.dataUrl.url.clone(path=newDataUrlPath)
-    #                     # forceChangeDataStoreUrl(apiDataStore, newDataUrlPath)
-    #
-    #     for delObj in delList:
-    #         # print('>>>    delete', delObj)
-    #         delObj.delete()
-    #
-    #     self._validateCleanUrls()
-    #
-    #     # # skip setting the path if autoSetDataPath is false
-    #     # if autoSet:
-    #     #
-    #     #     # update dataUrl here to the value in preferences
-    #     #     if dataUrlData['remoteData'] and len(dataUrlData['remoteData']) == 1:
-    #     #         # must only be one dataUrl
-    #     #         getLogger().info('>>>repointing dataUrl to %s...' % newDataUrlPath)
-    #     #
-    #     #         primaryDataUrl = dataUrlData['remoteData'][0]
-    #     #         primaryDataUrl.url = primaryDataUrl.url.clone(path=newDataUrlPath)
-    #
-    # def _validateCleanUrls(self):
-    #
-    #     # update the pointers to the urls and delete the spares
-    #     standardStore = self.project._wrappedData.memopsRoot.findFirstDataLocationStore(name='standard')
-    #
-    #     spectraStores = [spec._wrappedData.dataStore for spec in self.project.spectra]
-    #     badUrls = [url for store in standardStore.sortedDataUrls() for url in store.sortedDataStores() if url not in spectraStores]
-    #     otherUrls = [dataUrl for store in self.project._wrappedData.memopsRoot.sortedDataLocationStores()
-    #                  for dataUrl in store.sortedDataUrls() if dataUrl.name not in ('insideData', 'alongsideData', 'remoteData')]
-    #
-    #     allRemoteUrls = [url for url in standardStore.sortedDataUrls() if url.name == 'remoteData' if url.dataStores]
-    #     remoteUrls = [url for url in standardStore.sortedDataUrls() if url.name == 'remoteData' if not url.dataStores]
-    #
-    #     for bb in badUrls:
-    #         getLogger().debug2('>>>validate cleanup urls: %s' % str(bb))
-    #         bb.delete()
-    #
-    #     for url in otherUrls:
-    #         if not url.dataStores:
-    #             getLogger().debug2('>>>validate cleanup stores: %s' % str(url))
-    #             url.delete()
-    #
-    #     for bb in (allRemoteUrls + remoteUrls)[1:]:
-    #         getLogger().debug2('>>>validate cleanup remoteUrls: %s' % str(bb))
-    #         bb.delete()
-    #
-    #     # from ccpnmodel.ccpncore.lib._ccp.general.DataLocation.AbstractDataStore import forceChangeDataStoreUrl
-    #     #
-    #     # for spec in self.project.spectra:
-    #     #     apiDataStore = spec._wrappedData.dataStore
-    #     #     if apiDataStore is None:
-    #     #         raise ValueError("Spectrum is not stored, cannot change file path")
-    #     #
-    #     #     else:
-    #     #         # dataUrl = self._project._wrappedData.root.fetchDataUrl(value)
-    #     #         dataUrlName = apiDataStore.dataUrl.name
-    #     #         if dataUrlName == 'remoteData':
-    #     #
-    #     #             forceChangeDataStoreUrl(apiDataStore, '/Users/ejb66/Desktop/')
-    #
-    #     # # skip setting the path if autoSetDataPath is false
-    #     # if not autoSet:
-    #     #     return
-    #     #
-    #     # # update dataUrl here to the value in preferences
-    #     # if dataUrlData['remoteData'] and len(dataUrlData['remoteData']) == 1:
-    #     #     # must only be one dataUrl
-    #     #     primaryDataUrl = dataUrlData['remoteData'][0]
-    #     #     primaryDataUrl.url = primaryDataUrl.url.clone(path=newDataUrlPath)
+    def _update(self):
+        """Call the _updateObject method on all objects, including self
+        """
+        self._updateObject(UPDATE_POST_PROJECT_INITIALISATION)
+        objs = self._getAllDecendants()
+        for obj in objs:
+            obj._updateObject(UPDATE_POST_PROJECT_INITIALISATION)
 
     @logCommand('project.')
     def exportNef(self, path: str = None,
@@ -1537,30 +1374,46 @@ class Project(AbstractWrapperObject):
 
         return _newSpectrum(self, path=path, name=name)
 
-    @logCommand('project.')
-    def createDummySpectrum(self, axisCodes: Sequence[str], name=None, chemicalShiftList=None):
-        """
-        Make dummy spectrum from isotopeCodes list - without data and with default parameters.
+    # @logCommand('project.')
+    # def createDummySpectrum(self, axisCodes: Sequence[str], name=None, chemicalShiftList=None):
+    #     """
+    #     Make dummy spectrum from isotopeCodes list - without data and with default parameters.
+    #
+    #     :param axisCodes:
+    #     :param name:
+    #     :param chemicalShiftList:
+    #     :return: a new Spectrum instance.
+    #     """
+    #     raise NotImplementedError('Use Project.newEmptySpectrum')
 
-        :param axisCodes:
-        :param name:
-        :param chemicalShiftList:
-        :return: a new Spectrum instance.
-        """
-        raise NotImplementedError('Use Project.newEmptySpectrum')
-
     @logCommand('project.')
-    def newEmptySpectrum(self, isotopeCodes: Sequence[str], name='empty'):
+    def newEmptySpectrum(self, isotopeCodes: Sequence[str], name='emptySpectrum', **parameters):
         """
         Make new Empty spectrum from isotopeCodes list - without data and with default parameters.
 
         :param isotopeCodes:
         :param name:
+        :param **parameters: optional spectrum (parameter, value) pairs
         :return: a new Spectrum instance.
         """
         from ccpn.core.Spectrum import _newEmptySpectrum
 
-        return _newEmptySpectrum(self, isotopeCodes=isotopeCodes, name=name)
+        return _newEmptySpectrum(self, isotopeCodes=isotopeCodes, name=name, **parameters)
+
+    @logCommand('project.')
+    def newHdf5Spectrum(self, isotopeCodes: Sequence[str], name='hdf5Spectrum', path=None, **parameters):
+        """
+        Make new hdf5 spectrum from isotopeCodes list - without data and with default parameters.
+
+        :param isotopeCodes:
+        :param name: name of the spectrum
+        :param path: optional path (autogenerated when None)
+        :param **parameters: optional spectrum (parameter, value) pairs
+        :return: a new Spectrum instance.
+        """
+        from ccpn.core.Spectrum import _newHdf5Spectrum
+        return _newHdf5Spectrum(self, isotopeCodes=isotopeCodes, name=name, path=path, **parameters)
+
 
     @logCommand('project.')
     def newNmrChain(self, shortName: str = None, isConnected: bool = False, label: str = '?',
@@ -2001,3 +1854,93 @@ class Project(AbstractWrapperObject):
         from ccpn.core.ChemicalShiftList import _getChemicalShiftList
 
         return _getChemicalShiftList(self, name=name, **kwds)
+
+#=========================================================================================
+# Code adapted from prior _implementation/Io.py
+#=========================================================================================
+
+def _loadProject(application, path: str) -> Project:
+    """Load the project defined by path
+    :return Project instance
+    """
+    from ccpn.core._implementation.updates.update_v2 import updateProject_fromV2
+
+    _path = aPath(path)
+    if not _path.exists():
+        raise ValueError('Path {_path} does not exist')
+
+    if (apiProject := apiIo.loadProject(str(path), useFileLogger=True)) is None:
+        raise RuntimeError("No valid project loaded from %s" % path)
+
+    apiNmrProject = apiProject.fetchNmrProject()
+    apiNmrProject.initialiseData()
+    apiNmrProject.initialiseGraphicsData()
+    project = Project(apiNmrProject)
+    project._isNew = False
+    # NB: linkages are set in Framework._intialiseProject()
+
+    # If path pointed to a V2 project, save the result
+    if project._isUpgradedFromV2:
+        try:
+            # call the update
+            getLogger().info('==> Upgrading %s to version-3' % project)
+            updateProject_fromV2(project)
+            # Using api calls as V3-Project has not yet been fully instantiated
+            apiProject.touch()
+            apiProject.save()
+            getLogger().info('==> Writing model data')
+        except Exception as es:
+            getLogger().warning('Failed upgrading %s (%s)' % (project, str(es)))
+
+    else:
+        # check if it has been moved
+        projectPath = project.path
+        oldName = project.name
+        newName = aPath(projectPath).basename
+        if oldName != newName:
+            # Directory name has changed. Change project name and move Project xml file.
+            oldProjectFilePath = aPath(ApiPath.getProjectFile(projectPath, oldName))
+            if oldProjectFilePath.exists():
+                oldProjectFilePath.removeFile()
+            apiProject.__dict__['name'] = newName
+            # Using api calls as V3-Project has not yet been fully instantiated
+            apiProject.touch()
+            apiProject.save()
+
+    project._resetUndo(debug=application.level <= Logging.DEBUG2, application=application)
+
+    # Do some admin
+    # need project.path, as it may have have changed; e.g. for a V2 project
+    project._saveHistory = getProjectSaveHistory(project.path)
+
+    # the initialisation is completed by Framework when it has done its things
+    # project._initialiseProject()
+
+    return project
+
+
+def _newProject(application, name: str = 'default', path: str = None, overwrite=False) -> Project:
+    """Make new project, putting underlying data storage (API project) at path
+    :return Project instance
+    """
+    # apiIo.newProject will create a temp path if path is None
+    if (apiProject := apiIo.newProject(name, path, overwriteExisting=overwrite, useFileLogger=True)) is None:
+        raise RuntimeError("New project could not be created (overlaps exiting project?) name:%s, path:%s, overwrite:"
+                         % (name, path, overwrite))
+
+    apiNmrProject = apiProject.fetchNmrProject()
+    apiNmrProject.initialiseData()
+    apiNmrProject.initialiseGraphicsData()
+    project = Project(apiNmrProject)
+    project._isNew = True
+    # NB: linkages are set in Framework._intialiseProject()
+
+    project._resetUndo(debug=application.level <= Logging.DEBUG2, application=application)
+    project._saveHistory = newProjectSaveHistory(project.path)
+
+    project._objectVersion = application.applicationVersion
+
+    # the initialisation is completed by Framework when it has done its things
+    # project._initialiseProject()
+
+    return project

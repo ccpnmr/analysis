@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 11:40:50 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-14 21:34:43 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -61,12 +61,12 @@ class SpectrumView(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiStripSpectrumView._metaclass.qualifiedName()
 
-    _CONTOURATTRIBUTELIST = '''negativeContourBase negativeContourCount negativeContourFactor
-                            displayNegativeContours negativeContourColour
-                            positiveContourBase positiveContourCount positiveContourFactor
-                            displayPositiveContours positiveContourColour
-                            sliceColour
-                            '''
+    _CONTOURATTRIBUTELIST = """negativeContourBase negativeContourCount negativeContourFactor
+                               displayNegativeContours negativeContourColour
+                               positiveContourBase positiveContourCount positiveContourFactor
+                               displayPositiveContours positiveContourColour
+                               sliceColour
+                            """
 
     #=========================================================================================
     # CCPN properties
@@ -497,10 +497,11 @@ class SpectrumView(AbstractWrapperObject):
 # ccpnmodel.ccpncore.memops.ApiError.ApiError: StripSpectrumView <ccpnmr.gui.Task.StripSpectrumView ['user', 'View', '1D_H', 1, <ccpnmr.gui.Task.SpectrumView ['user', 'View', '1D_H', 'AcetatePE', 0]>]>: StripSpectrumViews can only be deleted when the SpectrumView or Strip is deleted.
 # """
 
-def _newSpectrumView(display, spectrum, spectrumAxes):
+def _newSpectrumView(display, spectrum, displayOrder) -> SpectrumView:
     """Create new SpectrumView
     :param spectrum: A Spectrum instance
-
+    :displayOrder: A tuple/list of spectrum dimensions (1-based) or 0 (For intensity) in display order
+    :returns: SpectrumView instance
     """
 
     # # Set stripSerial
@@ -513,13 +514,13 @@ def _newSpectrumView(display, spectrum, spectrumAxes):
     if not isinstance(spectrum, Spectrum):
         raise ValueError('invalid spectrum; got %r' % spectrum)
 
-    if not isinstance(spectrumAxes, (list, tuple)) or len(spectrumAxes) < 2:
-        raise ValueError('invalid spectrumAxes; got %r' % spectrumAxes)
+    if not isinstance(displayOrder, (list, tuple)) or len(displayOrder) < 2:
+        raise ValueError('invalid displayOrder; got %r' % displayOrder)
 
     obj = display._wrappedData.newSpectrumView(spectrumName=spectrum.name,
                                                stripSerial=0,
                                                dataSource=spectrum._wrappedData,
-                                               dimensionOrdering=spectrumAxes)
+                                               dimensionOrdering=displayOrder)
 
     # 20191113:ED testing - doesn't work yet, _data2Obj not created in correct place
     # GWV: don't know why, but only querying via the FindFirstStripSpectrumView seems to allow to yield the V2 object

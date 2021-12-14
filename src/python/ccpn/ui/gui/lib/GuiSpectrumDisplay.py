@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 11:40:50 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-14 21:34:43 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2448,9 +2448,9 @@ class GuiSpectrumDisplay(CcpnModule):
         # keep this as may be needed for undo/redo gui operations
         # with undoStackBlocking() as _:  # Do not add to undo/redo stack
         #     # _getDimensionsMapping will check the match for axisCodes
-        #     dimensionOrder = (1, 0) if self.is1D else self._getDimensionsMapping(spectrum)
+        #     displayOrder = (1, 0) if self.is1D else self._getDimensionsMapping(spectrum)
         #     # check the isotopeCodes
-        #     dims = dimensionOrder[0:1] if self.is1D else dimensionOrder
+        #     dims = displayOrder[0:1] if self.is1D else displayOrder
         #     # check the isotopeCodes exist and check compatibility
         #     for ic1, ic2 in zip(self.isotopeCodes or [], spectrum.getByDimensions('isotopeCodes', dims)):
         #         if ic1 != ic2:
@@ -2462,10 +2462,9 @@ class GuiSpectrumDisplay(CcpnModule):
             with undoStackBlocking(self.application) as addUndoItem:
 
                 # _getDimensionsMapping will check the match for axisCodes
-                dimensionOrder = (1, 0) if self.is1D else self._getDimensionsMapping(spectrum)
+                displayOrder = (1, 0) if self.is1D else self._getDimensionsMapping(spectrum)
                 # check the isotopeCodes
-                dims = dimensionOrder[0:1] if self.is1D else dimensionOrder
-
+                dims = displayOrder[0:1] if self.is1D else displayOrder
                 # check the isotopeCodes exist and check compatibility
                 for ic1, ic2 in zip(self.isotopeCodes or [], spectrum.getByDimensions('isotopeCodes', dims)):
                     if ic1 != ic2:
@@ -2477,7 +2476,7 @@ class GuiSpectrumDisplay(CcpnModule):
                 # addUndoItem(undo=partial(self.setToolbarButtons, tuple(_oldOrdering)))  # keep for undo/redo
 
                 # Make spectrumView
-                if (spectrumView := _newSpectrumView(self, spectrum=spectrum, dimensionOrdering=dimensionOrder)) \
+                if (spectrumView := _newSpectrumView(self, spectrum=spectrum, displayOrder=displayOrder)) \
                         is None:
                     # notify the stack to revert to the pre-context manager stack
                     # revertStack(True)

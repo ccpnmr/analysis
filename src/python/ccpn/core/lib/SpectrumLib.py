@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 11:40:50 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-14 20:21:23 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -110,7 +110,8 @@ SPECTRUM_INTENSITIES = 'intensities'
 
 
 def getAssignmentTolerances(isotopeCode) -> float:
-    """:return assignmentTolerance for isotopeCode"""
+    """:return assignmentTolerance for isotopeCode or defaultAssignment tolerance if not defined
+    """
     return isotope2Tolerance.get(isotopeCode, defaultAssignmentTolerance)
 
 

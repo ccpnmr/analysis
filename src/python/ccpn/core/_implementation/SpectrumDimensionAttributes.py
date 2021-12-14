@@ -403,8 +403,11 @@ class SpectrumDimensionAttributes(object):
 
     @property
     def assignmentTolerance(self) -> float:
-        """Assignment Tolerance"""
-        return self._dataDimRef.assignmentTolerance
+        """Assignment Tolerance (in ppm)"""
+        tolerance = self._dataDimRef.assignmentTolerance
+        if tolerance is None:
+            tolerance = self.defaultAssignmentTolerance
+        return tolerance
 
     @assignmentTolerance.setter
     def assignmentTolerance(self, value):
@@ -412,3 +415,13 @@ class SpectrumDimensionAttributes(object):
         if value is not None:
             value = max(value, 0.0)
         self._dataDimRef.assignmentTolerance = value
+
+    @property
+    def defaultAssignmentTolerance(self) -> float:
+        """Default assignment tolerance (in ppm); isotopeCode dependent or
+        overall defaultAssignmentTolerance (defined in specLib).
+        The value is always >= than digitalResolution in ppm.
+        """
+        tolerance = specLib.getAssignmentTolerances(self.isotopeCode)
+        tolerance = max(tolerance, self.spectralWidth / float(self.pointCount))
+        return tolerance

@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 11:40:48 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-14 20:21:23 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1214,8 +1214,10 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @property
     @_includeInDimensionalCopy
-    def assignmentTolerances(self) -> List[Optional[float]]:
-        """Assignment tolerance in axis unit (ppm); per dimension"""
+    def assignmentTolerances(self) -> List[float]:
+        """Assignment tolerance in axis unit (ppm); per dimension;
+        set to default value on basis of isotopeCode
+        """
         return self._getDimensionalAttributes('assignmentTolerance')
 
     @assignmentTolerances.setter
@@ -1223,19 +1225,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def assignmentTolerances(self, value):
         self._setDimensionalAttributes('assignmentTolerance', value)
 
-    @property
-    def defaultAssignmentTolerances(self) -> List[Optional[float]]:
-        """Default assignment tolerances per dimension (in ppm), upward adjusted (if needed) for
-        digital resolution
-        NB for Time or Sampled dimensions value will be None
-        """
-        tolerances = [None] * self.dimensionCount
-        for ii, dimensionType in enumerate(self.dimensionTypes):
-            if dimensionType == specLib.DIMENSION_FREQUENCY:
-                tolerance = specLib.getAssignmentTolerances(self.isotopeCodes[ii])
-                tolerances[ii] = max(tolerance, self.spectralWidths[ii] / self.pointCounts[ii])
-        #
-        return tolerances
+    # @property
+    # def defaultAssignmentTolerances(self) -> List[Optional[float]]:
+    #     """Default assignment tolerances per dimension (in ppm), upward adjusted (if needed) for
+    #     digital resolution.
+    #     """
+    #     return self._getDimensionalAttributes('defaultAssignmentTolerance')
 
     @property
     @_includeInDimensionalCopy
@@ -3296,9 +3291,6 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
         # Hack to trigger initialisation of contours
         spectrum.positiveContourCount = 0
         spectrum.negativeContourCount = 0
-
-        # set default assignment tolerances
-        spectrum.assignmentTolerances = spectrum.defaultAssignmentTolerances
 
         spectrum._updateParameterValues()
         spectrum._saveSpectrumMetaData()

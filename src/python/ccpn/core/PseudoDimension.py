@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 11:40:48 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-14 20:21:23 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -287,6 +287,12 @@ class PseudoDimension(AbstractWrapperObject, SpectrumDimensionAttributes):
     @assignmentTolerance.setter
     def assignmentTolerance(self, value):
         pass
+
+    @property
+    def defaultAssignmentTolerance(self) -> float:
+        """Default assignment tolerance (in ppm);
+        """
+        return 0.0
 
     #=========================================================================================
     # CCPN functions

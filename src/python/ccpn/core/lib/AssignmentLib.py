@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 11:40:49 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-14 20:21:23 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -339,10 +339,11 @@ def propagateAssignments(peaks: typing.List[Peak] = None, referencePeak: Peak = 
 
                     dimNmrAtoms[key].append(nmrAtom)
 
-    for spectrum in spectra:
-        if not (all(spectrum.assignmentTolerances)):
-            # NB Tolerances *should* be non for Fid or sampled dimensions. Even so, for safety:
-            spectrum.assignmentTolerances = spectrum.defaultAssignmentTolerances
+    # GWV 14/12/21: no longer required as there is always a default value
+    # for spectrum in spectra:
+    #     if not (all(spectrum.assignmentTolerances)):
+    #         # NB Tolerances *should* be non for Fid or sampled dimensions. Even so, for safety:
+    #         spectrum.assignmentTolerances = spectrum.defaultAssignmentTolerances
 
     # spectrum = peak.peakList.spectrum
     # assignmentTolerances = list(spectrum.assignmentTolerances)
@@ -889,10 +890,8 @@ def matchingNmrAtomsForPeakDimension(peak: Peak, dim: int, nmrAtoms: typing.List
         return matchingNmrAtoms
 
     tolerance = spectrum.assignmentTolerances[dim]
-    if not tolerance:
-        tolerance = spectrum.defaultAssignmentTolerances[dim]
     if doubleTolerance:
-        tolerance *= 2
+        tolerance *= 2.0
 
     for nmrAtom in nmrAtoms:
         if nmrAtom.isotopeCode == isotopeCode and \
@@ -911,7 +910,9 @@ def withinTolerance(nmrAtom: NmrAtom, position: float, shiftList: ChemicalShiftL
     shift = shiftList.getChemicalShift(nmrAtom)
     if shift:
         _value = shift.value
-        if _value is not None and abs(position - _value) < tolerance:
+        # if _value is None or position is None or tolerance is None:
+        #     print('>>>', _value, position, tolerance)
+        if _value is not None and abs(position - _value) <= tolerance:
             return True
     return False
 

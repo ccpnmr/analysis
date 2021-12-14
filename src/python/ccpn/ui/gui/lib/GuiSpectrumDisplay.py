@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-13 10:58:08 +0000 (Mon, December 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-14 09:23:47 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2445,41 +2445,61 @@ class GuiSpectrumDisplay(CcpnModule):
 
         # _oldOrdering = self.getOrderedSpectrumViewsIndex()
 
-        with undoStackBlocking() as _:  # Do not add to undo/redo stack
-            # _getDimensionsMapping will check the match for axisCodes
-            dimensionOrder = (1, 0) if self.is1D else self._getDimensionsMapping(spectrum)
-            # check the isotopeCodes
-            dims = dimensionOrder[0:1] if self.is1D else dimensionOrder
-            for ic1, ic2 in zip(self.isotopeCodes, spectrum.getByDimensions('isotopeCodes', dims)):
-                if ic1 != ic2:
-                    raise RuntimeError('Cannot display %s on %s; incompatible isotopeCodes' % (spectrum, self))
+        # keep this as may be needed for undo/redo gui operations
+        # with undoStackBlocking() as _:  # Do not add to undo/redo stack
+        #     # _getDimensionsMapping will check the match for axisCodes
+        #     dimensionOrder = (1, 0) if self.is1D else self._getDimensionsMapping(spectrum)
+        #     # check the isotopeCodes
+        #     dims = dimensionOrder[0:1] if self.is1D else dimensionOrder
+        #     # check the isotopeCodes exist and check compatibility
+        #     for ic1, ic2 in zip(self.isotopeCodes or [], spectrum.getByDimensions('isotopeCodes', dims)):
+        #         if ic1 != ic2:
+        #             raise RuntimeError('Cannot display %s on %s; incompatible isotopeCodes' % (spectrum, self))
 
-            # with undoStackRevert(self.application) as revertStack:
-            with undoBlockWithoutSideBar(self.application):
-                # push/pop ordering
-                with undoStackBlocking(self.application) as addUndoItem:
+        # with undoStackRevert(self.application) as revertStack:
+        with undoBlockWithoutSideBar(self.application):
+            # push/pop ordering
+            with undoStackBlocking(self.application) as addUndoItem:
 
-                    _oldOrdering = self.getOrderedSpectrumViewsIndex()
+                # _getDimensionsMapping will check the match for axisCodes
+                dimensionOrder = (1, 0) if self.is1D else self._getDimensionsMapping(spectrum)
+                # check the isotopeCodes
+                dims = dimensionOrder[0:1] if self.is1D else dimensionOrder
 
-                    # add toolbar ordering to the undo stack
-                    addUndoItem(undo=partial(self.setToolbarButtons, tuple(_oldOrdering)))
+                # check the isotopeCodes exist and check compatibility
+                for ic1, ic2 in zip(self.isotopeCodes or [], spectrum.getByDimensions('isotopeCodes', dims)):
+                    if ic1 != ic2:
+                        raise RuntimeError('Cannot display %s on %s; incompatible isotopeCodes' % (spectrum, self))
 
-                    # Make spectrumView
-                    if (spectrumView := _newSpectrumView(self, spectrum=spectrum, dimensionOrdering=dimensionOrder)) \
-                            is None:
-                        # notify the stack to revert to the pre-context manager stack
-                        # revertStack(True)
-                        getLogger().warning(f'Could not create new spectrumView for {spectrum}')
+                _oldOrdering = self.getOrderedSpectrumViewsIndex()
 
-                    else:
-                        # add the spectrum to the end of the spectrum ordering in the toolbar
-                        idx = self.getOrderedSpectrumViewsIndex()
-                        newInd = self.spectrumViews.index(spectrumView)
+                # # add toolbar ordering to the undo stack
+                # addUndoItem(undo=partial(self.setToolbarButtons, tuple(_oldOrdering)))  # keep for undo/redo
+
+                # Make spectrumView
+                if (spectrumView := _newSpectrumView(self, spectrum=spectrum, dimensionOrdering=dimensionOrder)) \
+                        is None:
+                    # notify the stack to revert to the pre-context manager stack
+                    # revertStack(True)
+                    getLogger().warning(f'Could not create new spectrumView for {spectrum}')
+
+                else:
+
+                    if not (_isotopeCodes := self.isotopeCodes) and self.spectrumViews and len(self.spectrumViews) == 1:
+                        # set the isotopeCodes from the first spectrumView
+                        _isotopeCodes = tuple(self.spectrumViews[0]._getByDisplayOrder('isotopeCodes'))
+                        self._isotopeCodes = _isotopeCodes
+
+                    # add the spectrum to the end of the spectrum ordering in the toolbar
+                    idx = self.getOrderedSpectrumViewsIndex()
+                    newInd = self.spectrumViews.index(spectrumView)
+                    if len(self.spectrumViews) == len(_oldOrdering) + 1:
                         idx = tuple((ii + 1) if (ii >= newInd) else ii for ii in idx)
                         idx += (newInd,)
 
-                        self.setToolbarButtons(tuple(idx))
-                        addUndoItem(redo=partial(self.setToolbarButtons, tuple(idx)))
+                    self.setToolbarButtons(tuple(idx))
+                    # addUndoItem(redo=partial(self.setToolbarButtons, tuple(idx)))  # keep for undo/redo
+
         return spectrumView
 
     @logCommand(get='self')

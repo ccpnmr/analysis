@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-25 13:38:51 +0000 (Thu, November 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-14 09:23:47 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -71,6 +71,9 @@ class SpectrumDisplay(AbstractWrapperObject):
     # store the list of ordered spectrumViews
     _orderedSpectrumViews = None
 
+    # Internal namespace
+    _ISOTOPECODES = '_isotopeCodes'
+
     #-----------------------------------------------------------------------------------------
     # Attributes of the data structure (incomplete?)
     #-----------------------------------------------------------------------------------------
@@ -93,7 +96,8 @@ class SpectrumDisplay(AbstractWrapperObject):
         """Subclassed to allow for initialisations on restore
         """
         result = super()._restoreObject(project, apiObj)
-        result._isotopeCodes = tuple(result.spectrumViews[0]._getByDisplayOrder('isotopeCodes'))
+        # moved to property
+        # result._isotopeCodes = tuple(result.spectrumViews[0]._getByDisplayOrder('isotopeCodes'))
 
         SPECTRUMGROUPS = 'spectrumGroups'
         SPECTRUMISGROUPED = 'spectrumIsGrouped'
@@ -190,6 +194,20 @@ class SpectrumDisplay(AbstractWrapperObject):
     def isotopeCodes(self) -> Tuple[str, ...]:
         """Fixed string isotope codes in display order (X, Y, Z1, Z2, ...)"""
         return self._isotopeCodes
+
+    @property
+    def _isotopeCodes(self) -> Tuple[str, ...]:
+        """Fixed string isotope codes in display order (X, Y, Z1, Z2, ...)
+        CCPN Internal"""
+        # NOTE:ED - moved from _restoreObject (for the minute) as spectrumDisplay may be empty
+        if (isoCodes := self._getInternalParameter(self._ISOTOPECODES)) is None and self.spectrumViews:
+            isoCodes = tuple(self.spectrumViews[0]._getByDisplayOrder('isotopeCodes'))
+            self._isotopeCodes = isoCodes
+        return isoCodes
+
+    @_isotopeCodes.setter
+    def _isotopeCodes(self, value):
+        self._setInternalParameter(self._ISOTOPECODES, value)
 
     @property
     def dimensionCount(self) -> int:

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-13 11:19:26 +0000 (Mon, December 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-14 09:23:47 +0000 (Tue, December 14, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -83,7 +83,7 @@ class Strip(AbstractWrapperObject):
 
     @property
     def spectrumViews(self) -> tuple:
-        "SpectrumViews shown in Strip"
+        """SpectrumViews shown in Strip"""
         pass
         # STUB for now; hot-fixed later
         # return tuple(self._project._data2Obj.get(x)
@@ -276,6 +276,7 @@ class Strip(AbstractWrapperObject):
         """Subclassed to allow for initialisations on restore
         """
         result = super()._restoreObject(project, apiObj)
+        # NOTE:ED - in some cases spectrumViews has not been instantiated
         # result._isotopeCodes = tuple(result.spectrumViews[0]._getByDisplayOrder('isotopeCodes'))
 
         # move everything from stripHeaderDict in one operation - same names

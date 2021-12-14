@@ -791,13 +791,19 @@ def setter(self: Spectrum, value: ChemicalShiftList):
     #     self._apiDataSource.experiment.shiftList = value._apiShiftList
 
     _shiftList = self.getByPid(value) if isinstance(value, str) else value
-    if not _shiftList:
-        raise ValueError(f'Spectrum.chemicalShiftList: {value} not found')
-    if not isinstance(_shiftList, ChemicalShiftList):
-        raise ValueError(f'Spectrum.chemicalShiftList: {value} not a chemicalShiftList')
-
     # add the spectrum to the chemicalShiftList
-    _shiftList.spectra = set(_shiftList.spectra) | {self}
+    if isinstance(_shiftList, ChemicalShiftList):
+        _shiftList.spectra = set(_shiftList.spectra) | {self}
+    else:
+        ## Don't raise errors here or you crash-out a perfectly valid project/Nef from loading
+        from ccpn.util.Logging import getLogger
+        getLogger().warning(f'Could not set chemicalShiftList for Spectrum {self}. Invcalid ChemicalShiftList.')
+    # if not _shiftList:
+    #     raise ValueError(f'Spectrum.chemicalShiftList: {value} not found')
+    # if not isinstance(_shiftList, ChemicalShiftList):
+    #     raise ValueError(f'Spectrum.chemicalShiftList: {value} not a chemicalShiftList')
+
+
 
 
 Spectrum.chemicalShiftList = property(getter, setter, None,

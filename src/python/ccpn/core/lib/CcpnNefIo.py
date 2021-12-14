@@ -7305,7 +7305,8 @@ def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict
 
             # make new spectrum with default parameters
             spectrum = project.newEmptySpectrum(isotopeCodes=dimensionData['isotopeCodes'], name=spectrumName)
-            spectrum.chemicalShiftList = spectrumParameters.get('chemicalShiftList')
+            if spectrumParameters.get('chemicalShiftList') is not None:
+                spectrum.chemicalShiftList = spectrumParameters.get('chemicalShiftList')
 
             if acquisitionAxisIndex is not None:
                 spectrum.isAquisition[acquisitionAxisIndex] = True

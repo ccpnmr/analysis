@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 21:34:19 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-15 11:06:23 +0000 (Wed, December 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1582,7 +1582,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """
         result = self._getInternalParameter(self._PREFERREDAXISORDERING)
         if result is None:
-            result = self.axisIndices
+            result = self.dimensionIndices
         return result
 
     @_preferredAxisOrdering.setter
@@ -3465,11 +3465,11 @@ def _extractRegionToFile(spectrum, dimensions, position, dataStore, name=None) -
                 data = input.getSliceData(position, readSliceDim)
 
                 # map the input position to the output position and write the data
-                outPosition = [position[inverseIndexMap[p]] for p in output.axisIndices]
+                outPosition = [position[inverseIndexMap[p]] for p in output.dimensionIndices]
                 # print('>>>', position, outPosition)
                 output.setSliceData(data, outPosition, writeSliceDim)
 
-    # create the new spectrum from the dataSource
+    # create the new Spectrum instance from the dataSource
     newSpectrum = _newSpectrumFromDataSource(project=spectrum.project,
                                              dataStore=dataStore,
                                              dataSource=dataSource,

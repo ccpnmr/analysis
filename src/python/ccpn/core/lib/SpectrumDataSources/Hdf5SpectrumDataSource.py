@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 11:40:49 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-15 11:06:23 +0000 (Wed, December 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -79,8 +79,9 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
     suffixes = ['.ndf5', '.hdf5']
     openMethod = h5py.File
     defaultOpenReadMode = 'r+'   # read/write, file must exists
-    defaultOpenWriteMode = 'w'  # creates, truncates if exists
     defaultOpenReadWriteMode = 'r+'
+    defaultOpenWriteMode = 'w'  # creates, truncates if exists
+    defaultAppendMode = 'a'
 
     HDF_VERSION = 1.0
 
@@ -107,6 +108,14 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
     def openFile(self, mode, **kwds):
         """open self.path, set self.fp, return self.fp
+
+        :param mode: open file mode;
+                    from hdf5 documentation:
+                        r	Readonly, file must exist (default)
+                        r+	Read/write, file must exist
+                        w	Create file, truncate if exists
+                        w- or x	Create file, fail if exists
+                        a	Read/write if exists, create otherwise
         :return self.fp
         """
 
@@ -387,7 +396,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             self.openFile(mode=self.defaultOpenReadWriteMode)  # File should exist as it was created before
 
         if not self.hasOpenFile():
-            self.openFile(mode=self.defaultOpenWriteMode)
+            self.openFile(mode=self.defaultAppendMode)
 
         dataset = self.spectrumData
         slices = self._getSlices(position=position, dims=(firstAxis + 1, secondAxis + 1))  # slices are x,y,z ordered
@@ -436,7 +445,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             self.openFile(mode=self.defaultOpenReadWriteMode)  # File should exist as it was created before
 
         if not self.hasOpenFile():
-            self.openFile(mode=self.defaultOpenWriteMode)
+            self.openFile(mode=self.defaultAppendMode)
 
         dataset = self.spectrumData
         slices = self._getSlices(position=position, dims=(sliceDim,))
@@ -475,7 +484,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             self.openFile(mode=self.defaultOpenReadWriteMode)  # File should exist as it was created before
 
         if not self.hasOpenFile():
-            self.openFile(mode=self.defaultOpenWriteMode)
+            self.openFile(mode=self.defaultAppendMode)
 
         dataset = self.spectrumData
         slices = self._getSlices(position=position, dims=[])

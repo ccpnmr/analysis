@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 11:40:50 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-15 11:06:23 +0000 (Wed, December 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -230,7 +230,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
     allowDirectory = False  # Can/Can't open a directory
     openMethod = None  # method to open the file as openMethod(path, mode)
     defaultOpenReadMode = 'r+'
+    defaultOpenReadWriteMode = 'r+'
     defaultOpenWriteMode = 'w'
+    defaultAppendMode = 'a'
 
     #=========================================================================================
     # data formats
@@ -486,8 +488,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
         return range(1, self.dimensionCount + 1)
 
     @property
-    def axes(self):
-        """A zero-based list of axes [0,dimensionCount-1]
+    def dimensionIndices(self):
+        """A zero-based list of dimension indices [0,dimensionCount-1]
         """
         return [i for i in range(0, self.dimensionCount)]
 
@@ -495,7 +497,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     def totalNumberOfPoints(self):
         """Total number of points of the data"""
         result = self.pointCounts[0]
-        for axis in self.axes[1:]:
+        for axis in self.dimensionIndices[1:]:
             result *= self.pointCounts[axis]
         return result
 
@@ -1214,13 +1216,12 @@ class SpectrumDataSourceABC(CcpNmrJson):
             raise RuntimeError('openFile: no path defined for %s' % self)
 
         if not newFile and not _path.exists():
-            raise FileNotFoundError('openFile: path "%s" does not exist' % _path)
+            raise FileNotFoundError('path "%s" does not exist' % _path)
 
         if newFile and not _path.parent.exists():
-            raise FileNotFoundError('openFile: parent of "%s" does not exist' % _path)
-        if newFile and _path.exists():
-            raise FileExistsError('openFile (mode=%s): path "%s" exists' %
-                                  (mode, _path))
+            raise FileNotFoundError('parent of "%s" does not exist' % _path)
+        if newFile and _path.exists() and mode != self.defaultAppendMode:
+            raise FileExistsError('path "%s" exists (mode=%s)' % (_path, mode))
 
     def openFile(self, mode, **kwds):
         """open self.path, set self.fp, return self.fp
@@ -1232,15 +1233,15 @@ class SpectrumDataSourceABC(CcpNmrJson):
         if self.hasOpenFile():
             self.closeFile()
 
-        self._checkFilePath(newFile, mode)
 
         try:
+            self._checkFilePath(newFile, mode)
             self.fp = self.openMethod(str(self.path), mode, **kwds)
             self.mode = mode
 
         except Exception as es:
             self.closeFile()
-            text = '%s.openFile(mode=%r): %s' % (self.__class__.__name__, mode, str(es))
+            text = '%s.openFile: %s' % (self.__class__.__name__, str(es))
             getLogger().error(text)
             raise es
 
@@ -1305,7 +1306,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         except Exception as es:
             self.closeFile()
-            getLogger().error('%s.openNewFile: "%s"' % (self.__class__.__name__, str(es)))
+            getLogger().error('%s.openNewFile: %s' % (self.__class__.__name__, str(es)))
             raise es
 
         finally:
@@ -1652,7 +1653,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
             # get aliasing factor determined by dimensions other than sliceDim
             factor = 1.0
-            for axis, fac, aliase in zip(self.axes, aliasingFlags, aliased):
+            for axis, fac, aliase in zip(self.dimensionIndices, aliasingFlags, aliased):
                 if axis != sliceAxis and aliase:
                     factor *= fac
 

@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-15 11:57:09 +0000 (Wed, December 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-15 14:25:01 +0000 (Wed, December 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -149,30 +149,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     _apiClassQualifiedName = Nmr.DataSource._metaclass.qualifiedName()
 
     #-----------------------------------------------------------------------------------------
-
-    # 'local' definitions of constants; defining defs in SpectrumLib to prevent circular imports
-    # elsewhere
+    # 'local' definition of MAXDIM; defining defs in SpectrumLib to prevent circular imports
     MAXDIM = specLib.MAXDIM  # 8  # Maximum dimensionality
-
-    X_AXIS = specLib.X_AXIS  # 0
-    Y_AXIS = specLib.Y_AXIS  # 1
-    Z_AXIS = specLib.Z_AXIS  # 2
-    A_AXIS = specLib.A_AXIS  # 3
-    B_AXIS = specLib.B_AXIS  # 4
-    C_AXIS = specLib.C_AXIS  # 5
-    D_AXIS = specLib.D_AXIS  # 6
-    E_AXIS = specLib.E_AXIS  # 7
-    UNDEFINED_AXIS = specLib.Y_AXIS  # 8
-    axisNames = specLib.axisNames
-
-    X_DIM = specLib.X_DIM  # 1
-    Y_DIM = specLib.Y_DIM  # 2
-    Z_DIM = specLib.Z_DIM  # 3
-    A_DIM = specLib.A_DIM  # 4
-    B_DIM = specLib.B_DIM  # 5
-    C_DIM = specLib.C_DIM  # 6
-    D_DIM = specLib.D_DIM  # 7
-    E_DIM = specLib.E_DIM  # 8
 
     #-----------------------------------------------------------------------------------------
     # Internal NameSpace  and other definitions

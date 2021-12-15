@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 11:40:49 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-15 14:25:02 +0000 (Wed, December 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -40,6 +40,8 @@ from ccpn.util.traits.CcpNmrTraits import CInt, CString
 
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
 from ccpn.core.lib.SpectrumDataSources.lib.NmrPipeHeader import NmrPipeHeader
+
+import ccpn.core.lib.SpectrumLib as specLib
 
 #============================================================================================================
 
@@ -183,7 +185,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                     self.temperature = None
 
                 # Pipe and NUS dimensions??
-                map1 = {1:self.X_DIM, 2:self.Y_DIM, 3:self.Z_DIM, 4:self.A_DIM, 0:None}
+                map1 = {1:specLib.X_DIM, 2:specLib.Y_DIM, 3:specLib.Z_DIM, 4:specLib.A_DIM, 0:None}
                 if parName == "pipeDimension":
                     self.pipeDimension = map1[self.pipeDimension]
                 if parName == "nusDimension":
@@ -194,7 +196,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                 self.template = self._guessTemplate()
 
             self._setBaseDimensionality()
-            self.blockSizes = [1]*self.MAXDIM
+            self.blockSizes = [1]*specLib.MAXDIM
             self.blockSizes[0:self.baseDimensionality] = self.pointCounts[0:self.baseDimensionality]
 
         except Exception as es:
@@ -206,7 +208,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
         # fix possible acquisition axis code
         if self.transposed:
-            self.acquisitionAxisCode = self.axisCodes[self.Y_AXIS]
+            self.acquisitionAxisCode = self.axisCodes[specLib.Y_DIM_INDEX]
 
         return self
 
@@ -246,7 +248,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                 # check if we made a subsititution
                 if template != fileName:
                     # check if we can find the last 3D file of the series
-                    path = Path(directory) / (template % self.pointCounts[self.Z_AXIS]) + suffix
+                    path = Path(directory) / (template % self.pointCounts[specLib.Z_DIM_INDEX]) + suffix
                     if path.exists():
                         return str(Path(directory) / (template) + suffix)
 
@@ -261,7 +263,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                 # check if we made a subsititution
                 if template != fileName:
                     # check if we can find the last 4D file of the series
-                    path = Path(directory) / (template % (self.pointCounts[self.Z_AXIS], self.pointCounts[self.A_AXIS])) + suffix
+                    path = Path(directory) / (template % (self.pointCounts[specLib.Z_DIM_INDEX], self.pointCounts[specLib.A_DIM_INDEX])) + suffix
                     if path.exists():
                         return str(Path(directory) / (template) + suffix)
 
@@ -274,7 +276,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                 # check if we made a subsititution
                 if template != fileName:
                     # check if we can find the last 4D file of the series
-                    path = Path(directory) / (template % self.pointCounts[self.A_AXIS]) + suffix
+                    path = Path(directory) / (template % self.pointCounts[specLib.A_DIM_INDEX]) + suffix
                     if path.exists():
                         return str(Path(directory) / (template) + suffix)
 
@@ -293,27 +295,27 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
         elif self.dimensionCount == 3 and self.nFiles == 1:
             path = self.path
             offset = ( self.headerSize + \
-                      (position[self.Z_AXIS]-1) *self.pointCounts[self.X_AXIS] * self.pointCounts[self.Y_AXIS]
+                      (position[specLib.Z_DIM_INDEX]-1) *self.pointCounts[specLib.X_DIM_INDEX] * self.pointCounts[specLib.Y_DIM_INDEX]
                      ) * self.wordSize
 
         elif self.dimensionCount == 3 and self.baseDimensionality == 2:
             if self.template is None:
                 raise RuntimeError('%s: Undefined template' % self)
-            path = self.template % (position[self.Z_AXIS],)
+            path = self.template % (position[specLib.Z_DIM_INDEX],)
             offset = self.headerSize * self.wordSize
 
         elif self.dimensionCount == 4 and self.baseDimensionality == 2:
             if self.template is None:
                 raise RuntimeError('%s: Undefined template' % self)
-            path =  self.template % (position[self.Z_AXIS], position[self.A_AXIS])
+            path =  self.template % (position[specLib.Z_DIM_INDEX], position[specLib.A_DIM_INDEX])
             offset = self.headerSize * self.wordSize
 
         elif self.dimensionCount == 4 and self.baseDimensionality == 3:
             if self.template is None:
                 raise RuntimeError('%s: Undefined template' % self)
-            path =  self.template % (position[self.A_AXIS],)
+            path =  self.template % (position[specLib.A_DIM_INDEX],)
             offset = ( self.headerSize + \
-                      (position[self.A_AXIS]-1) *self.pointCounts[self.X_AXIS] * self.pointCounts[self.Y_AXIS]
+                      (position[specLib.X_DIM_INDEX]-1) * self.pointCounts[specLib.X_DIM_INDEX] * self.pointCounts[specLib.Y_DIM_INDEX]
                      ) * self.wordSize
         else:
             raise RuntimeError('%s: Unable to construct path for position %s' % (self, position))
@@ -351,10 +353,10 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
 
         getLogger().debug('fillHdf5Buffer: filling buffer %s' % self.hdf5buffer)
 
-        xAxis = self.X_AXIS
-        xDim = self.X_DIM
-        yAxis = self.Y_AXIS
-        yDim = self.Y_DIM
+        xAxis = specLib.X_DIM_INDEX
+        xDim = specLib.X_DIM
+        yAxis = specLib.Y_DIM_INDEX
+        yDim = specLib.Y_DIM
 
         if self.dimensionCount == 1:
             # 1D

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-15 11:57:09 +0000 (Wed, December 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-15 14:25:02 +0000 (Wed, December 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -64,7 +64,7 @@ E_AXIS = 7
 UNDEFINED_AXIS = 8
 axisNames = {X_AXIS        : "x-axis", Y_AXIS: "y-axis", Z_AXIS: "z-axis", A_AXIS: "a-axis",
              B_AXIS        : "b-axis", C_AXIS: "c-axis", D_AXIS: "d-axis", E_AXIS: "e-axis",
-             UNDEFINED_AXIS: "undefined"
+             UNDEFINED_AXIS: "undefined-axis"
              }
 
 X_DIM = 1
@@ -75,6 +75,20 @@ B_DIM = 5
 C_DIM = 6
 D_DIM = 7
 E_DIM = 8
+
+X_DIM_INDEX = 0
+Y_DIM_INDEX = 1
+Z_DIM_INDEX = 2
+A_DIM_INDEX = 3
+B_DIM_INDEX = 4
+C_DIM_INDEX = 5
+D_DIM_INDEX = 6
+E_DIM_INDEX = 7
+UNDEFINED_DIM_INDEX = 8
+dimensionNames = {X_DIM_INDEX        : "x-dimension", Y_DIM_INDEX: "y-dimension", Z_DIM_INDEX: "z-dimension", A_DIM_INDEX: "a-dimension",
+                  B_DIM_INDEX        : "b-dimension", C_DIM_INDEX: "c-dimension", D_DIM_INDEX: "d-dimension", E_DIM_INDEX: "e-dimension",
+                  UNDEFINED_AXIS: "undefined-dimension"
+                 }
 
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple', 'dimension1 dimension2 transferType isIndirect')
 NoiseEstimateTuple = collections.namedtuple('NoiseEstimateTuple', 'mean std min max noiseLevel')
@@ -2080,7 +2094,7 @@ def _setDefaultAxisOrdering(spectrum):
     # See if we can map one of the preferred orderings
     for dCode in dCodes:
         pOrder = _searchAxisCodePermutations(spectrum, dCode)
-        if pOrder and pOrder[0] == spectrum.X_AXIS:
+        if len(pOrder) > 0 and pOrder[0] == X_DIM_INDEX:
             spectrum.preferredAxisOrdering = pOrder
             break
 

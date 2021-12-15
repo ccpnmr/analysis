@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 22:03:54 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-15 14:03:04 +0000 (Wed, December 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -6379,20 +6379,20 @@ class CcpnGLWidget(QOpenGLWidget):
             event.accept()
 
             self._resetBoxes()
-            selectedRegion = [[round(self._startCoordinate[0], 3), round(self._endCoordinate[0], 3)],
-                              [round(self._startCoordinate[1], 3), round(self._endCoordinate[1], 3)]]
+            selectedRegion = [tuple([round(self._startCoordinate[0], 3), round(self._endCoordinate[0], 3)]),
+                              tuple([round(self._startCoordinate[1], 3), round(self._endCoordinate[1], 3)])
+                             ]
 
             if self._validRegionPick:
 
                 # only pick if the region is inside the bounds
                 for n in self._orderedAxes[2:]:
-                    selectedRegion.append((n.region[0], n.region[1]))
+                    selectedRegion.append(tuple([round(n.region[0], 3), round(n.region[1],3)]))
 
                 # selectedRegion is tuple((xL, xR), (yB, yT), ...) - from display
                 # ... is other Nd axes
 
-                peaks = self.strip.pickPeaks(selectedRegion)
-                self.current.peaks = peaks
+                self.strip.pickPeaks(selectedRegion)
 
         elif controlLeftMouse(event):
             # Control(Cmd)+left drag: selects peaks - purple box

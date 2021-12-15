@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 11:40:50 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-15 14:03:04 +0000 (Wed, December 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -357,7 +357,7 @@ class Strip(AbstractWrapperObject):
 
         with undoBlockWithoutSideBar():
             # create the axisDict for this spectrum
-            axisDict = {axis: ppm for axis, ppm in zip(self.axisCodes, ppmPositions)}
+            axisDict = {axis: tuple(ppm) for axis, ppm in zip(self.axisCodes, ppmPositions)}
 
             # loop through the visible spectra
             for spectrumView in (v for v in self.spectrumViews if v.isVisible()):
@@ -383,8 +383,8 @@ class Strip(AbstractWrapperObject):
         return tuple(result), tuple(peakLists)
 
     @logCommand(get='self')
-    def pickPeaks(self, ppmRegions: List[List[float]]) -> Tuple[Peak, ...]:
-        """Peak pick all spectra currently displayed in strip in selectedRegion.
+    def pickPeaks(self, ppmRegions: List[Tuple[float,float]]) -> Tuple[Peak, ...]:
+        """Peak pick in ppmRegions for all spectra currently displayed in strip .
         """
         # selectedRegion is rounded before-hand to 3 dp.
         result = []
@@ -394,8 +394,8 @@ class Strip(AbstractWrapperObject):
         fitMethod = self.application.preferences.general.peakFittingMethod
 
         with undoBlockWithoutSideBar():
-            # create the axisDict for this spectrum
-            axisDict = {axis: ppms for axis, ppms in zip(self.axisCodes, ppmRegions)}
+            # create the axisDict for peak picking the spectra
+            axisDict = {axis: tuple(ppms) for axis, ppms in zip(self.axisCodes, ppmRegions)}
 
             # loop through the visible spectra
             for spectrumView in (v for v in self.spectrumViews if v.isVisible()):
@@ -430,7 +430,9 @@ class Strip(AbstractWrapperObject):
                     if newPeaks:
                         result.extend(newPeaks)
 
-            return tuple(result)
+            result = tuple(result)
+            self.current.peaks = result
+            return result
 
 
 # @newObject(Strip)

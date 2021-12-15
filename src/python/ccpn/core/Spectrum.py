@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-15 11:06:23 +0000 (Wed, December 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-15 11:57:09 +0000 (Wed, December 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -391,28 +391,29 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return tuple(range(1, self.dimensionCount+1))
 
     @property
-    def axisIndices(self) -> tuple:
-        """Convenience: tuple (len dimensionCount) with the axes indices (0-based);
+    def dimensionIndices(self) -> tuple:
+        """Convenience: tuple (len dimensionCount) with the dimension indices (0-based);
         e.g. (0,1,2,3).
-        Useful for mapping in axisCodes order: eg: self.getByAxisCodes('axisIndices', ['N','C','H'])
+        Useful for mapping in axisCodes order: eg: self.getByAxisCodes('dimensionIndices', ['N','C','H'])
         """
         return tuple(range(0, self.dimensionCount))
 
-    dimensionIndices = axisIndices
+    # legacy
+    axisIndices = dimensionIndices
 
     @property
-    def axisTriples(self) -> tuple:
-        """Convenience: return a tuple of triples (axisIndex, axisCode, dimension) for each dimension
+    def dimensionTriples(self) -> tuple:
+        """Convenience: return a tuple of triples (dimensionIndex, axisCode, dimension) for each dimension
 
         Useful for iterating over axis codes; eg in an H-N-CO ordered spectrum
-            for axis, axisCode, dimension in self.getByAxisCodes('axisTriples', ('N','C','H'), exactMatch=False)
+            for axis, axisCode, dimension in self.getByAxisCodes('dimensionTriples', ('N','C','H'), exactMatch=False)
 
             would yield:
                 (1, 'N', 2)
                 (2, 'CO', 3)
                 (0, 'H', 1)
         """
-        return tuple(z for z in zip(self.axisIndices, self.axisCodes, self.dimensions))
+        return tuple(z for z in zip(self.dimensionIndices, self.axisCodes, self.dimensions))
 
     @property
     @_includeInCopy
@@ -2343,15 +2344,15 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         axisCodes = [ac for ac in axisDict.keys()]
 
         # augment axisDict with any missing axisCodes or replace any None values with spectrumLimits
-        inds = self.getByAxisCodes('axes', axisCodes)
+        inds = self.getByAxisCodes('dimIndices', axisCodes)
         for idx, ac in enumerate(self.axisCodes):
-            if idx not in inds:
+            if idx not in inds or axisDict[ac] is None:
                 axisDict[ac] = self.spectrumLimits[idx]
 
         axisPpms = [ppm for ppm in axisDict.values()]
         sliceTuples = [None] * self.dimensionCount
-        for axis, ac, dim in self.axisTriples:
-            idx = inds.index(axis)
+        for dimIndex, ac, dim in self.dimensionTriples:
+            idx = inds.index(dimIndex)
             stopPpm, startPpm = axisPpms[idx]  # to be converted to points; ppm scale runs backwards
 
             if startPpm is None:
@@ -2360,14 +2361,14 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                 startPoint = int(self.ppm2point(startPpm, dimension=idx + 1) + 0.5)
 
             if stopPpm is None:
-                stopPoint = self.pointCounts[axis]
+                stopPoint = self.pointCounts[dimIndex]
             else:
                 stopPoint = int(self.ppm2point(stopPpm, dimension=idx + 1) + 0.5)
 
             # check that the point values are not outside the maximum aliasing limits
-            startPoint = max(startPoint, -MAXALIASINGRANGE * self.pointCounts[axis])
-            stopPoint = min(stopPoint, (MAXALIASINGRANGE + 1) * self.pointCounts[axis])
-            sliceTuples[axis] = (startPoint, stopPoint)
+            startPoint = max(startPoint, -MAXALIASINGRANGE * self.pointCounts[dimIndex])
+            stopPoint = min(stopPoint, (MAXALIASINGRANGE + 1) * self.pointCounts[dimIndex])
+            sliceTuples[dimIndex] = (startPoint, stopPoint)
 
         getLogger().debug('Spectrum._axisDictToSliceTuples: axisDict = %s; sliceTuples = %s' %
                           (axisDict, sliceTuples))

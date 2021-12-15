@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-15 11:06:23 +0000 (Wed, December 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-15 11:57:09 +0000 (Wed, December 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1858,7 +1858,7 @@ def _createPeak(spectrum, peakList=None, **ppmPositions) -> Optional['Peak']:
 
         try:
             # try and match the axis codes before creating new peakList (if required)
-            indices = spectrum.getByAxisCodes('axes', axisCodes)
+            indices = spectrum.getByAxisCodes('dimIndices', axisCodes)
         except Exception as es:
             getLogger().warning(f'Non-matching axis codes found {axisCodes}')
             return
@@ -1944,7 +1944,7 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
             _ppmRegions.append(sorted(float(pos) for pos in region))
 
         # try and match the axis codes before creating new peakList (if required)
-        indices = spectrum.getByAxisCodes('axisIndices', axisCodes)
+        indices = spectrum.getByAxisCodes('dimensionIndices', axisCodes)
 
         peakList = spectrum.project.getByPid(peakList) if isinstance(peakList, str) else peakList
         if not peakList:

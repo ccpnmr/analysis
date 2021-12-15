@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 11:40:50 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-15 11:57:09 +0000 (Wed, December 15, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -494,7 +494,7 @@ class SpectrumDisplay(AbstractWrapperObject):
         return dimensionOrder
 
     def _getAxesMapping(self, spectrum: Spectrum) -> list:
-        """Get the spectrum axisIndices in display order
+        """Get the spectrum dimensionIndices in display order
         CCPNMRINTERNAL: used in _newSpectrumDisplay
         """
         return [dim - 1 for dim in self._getDimensionsMapping(spectrum)]

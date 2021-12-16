@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 11:40:49 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-16 16:21:09 +0000 (Thu, December 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -38,8 +38,6 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.Common import flatten
 import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
-
-from nmrglue.fileio.bruker import read_jcamp
 
 
 class BrukerSpectrumDataSource(SpectrumDataSourceABC):
@@ -369,14 +367,18 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         logger = getLogger()
 
         self.setDefaultParameters()
+        self.dimensionCount = self._getDimensionality()
 
         try:
-            self.dimensionCount = self._getDimensionality()
-
             # read acqus and procs
             self._readAcqus()
             self._readProcs()
+        except Exception as es:
+            errTxt = 'Reading acqu/proc parameters of %s; %s' % (self._brukerRoot, es)
+            logger.error(errTxt)
+            raise es
 
+        try:
             _comment = self.acqus[0].get('_comments')
             if _comment is not None and isinstance(_comment, list):
                 self.comment = '\n'.join(_comment)
@@ -437,8 +439,9 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 self.phases1[i] = float(dimDict.get('PHC1', 0.0))
 
         except Exception as es:
-            logger.error('Reading parameters; %s' % es)
-            raise es
+            errTxt = 'Parsing parameters for %s; %s' % (self._brukerRoot, es)
+            logger.error(errTxt)
+            raise RuntimeError(errTxt)
 
         return super().readParameters()
 
@@ -464,3 +467,67 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
 # Register this format
 BrukerSpectrumDataSource._registerFormat()
 
+import locale
+import io
+from nmrglue.fileio.bruker import parse_jcamp_line
+
+def read_jcamp(filename:str, encoding:str = locale.getpreferredencoding()) -> dict:
+    """
+    Read a Bruker JCAMP-DX file into a dictionary.
+
+    Creates two special dictionary keys _coreheader and _comments Bruker
+    parameter "$FOO" are extracted into strings, floats or lists and assigned
+    to dic["FOO"]
+
+    Parameters
+    ----------
+    filename : str
+        Filename of Bruker JCAMP-DX file.
+    encoding : str
+        Encoding of Bruker JCAMP-DX file. Defaults to the system default locale
+
+    Returns
+    -------
+    dic : dict
+        Dictionary of parameters in file.
+
+    See Also
+    --------
+    write_jcamp : Write a Bruker JCAMP-DX file.
+
+    Notes
+    -----
+    This is not a fully functional JCAMP-DX reader, it is only intended
+    to read Bruker acqus (and similar) files.
+
+    """
+    dic = {"_coreheader": [], "_comments": []}  # create empty dictionary
+
+    with io.open(filename, 'r', encoding=encoding, errors='replace') as f:
+        endOfFile = False
+        while not endOfFile:     # loop until end of file is found
+
+            line = f.readline().rstrip()    # read a line
+            if line == '':      # end of file found
+                endOfFile = True
+                continue
+
+            if line[:6] == "##END=":
+                # print("End of file")
+                endOfFile = True
+                continue
+
+            elif line[:2] == "$$":
+                dic["_comments"].append(line)
+            elif line[:2] == "##" and line[2] != "$":
+                dic["_coreheader"].append(line)
+            elif line[:3] == "##$":
+                try:
+                    key, value = parse_jcamp_line(line, f)
+                    dic[key] = value
+                except:
+                    getLogger().warning("%s: Unable to correctly parse line %r" % (filename, line))
+            else:
+                getLogger().warning("%s: Extraneous line %r" % (filename, line))
+
+    return dic

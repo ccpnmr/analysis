@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-15 12:20:59 +0000 (Wed, December 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-16 16:21:09 +0000 (Thu, December 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -325,10 +325,13 @@ class Framework(NotifierBase):
         self._disableUndoException = getattr(self.args, 'disableUndoException', False)
         self._ccpnLogging = getattr(self.args, 'ccpnLogging', False)
 
-        # register dataLoader for the first and only time
+        # register dataLoaders for the first and only time
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders
-
         self._dataLoaders = getDataLoaders()
+
+        # register SpectrumDataSource formats for the first and only time
+        from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
+        self._spectrumDataSourceFormats = getDataFormats()
 
     @property
     def _isInDebugMode(self) -> bool:

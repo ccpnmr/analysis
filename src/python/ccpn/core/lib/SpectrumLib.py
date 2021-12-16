@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-15 14:25:02 +0000 (Wed, December 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-16 16:20:22 +0000 (Thu, December 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -33,6 +33,7 @@ import decorator
 
 from typing import Tuple, Optional
 
+from ccpn.framework.Application import getApplication
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking, undoBlockWithoutSideBar
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.core.lib._DistanceRestraintsLib import _getBoundResonances, longRangeTransfers
@@ -1987,9 +1988,9 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
                 elif pos[ii] > regionBounds[1]:
                     pos[ii] = regionBounds[1]
 
-        # get the peaks from the peakPicker
         axisDict = {axisCodes[indices.index(ii)]: _ppmRegions[ii] for ii in range(len(indices))}
 
+        # get the peaks from the peakPicker
         if spectrum._peakPicker:
             try:
                 pks = spectrum._peakPicker.pickPeaks(peakList=peakList,
@@ -1999,7 +2000,11 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
                 return tuple(pks)
             except Exception as err:
                 # need to trap error that Nd spectra may not be defined in all dimensions of axisDict
-                getLogger().warning(f'could not pick peaks for {spectrum} in region {axisDict}')
+                logger = getLogger()
+                logger.debug('_pickPeaks, trapped error: %s' % str(err))
+                logger.warning(f'could not pick peaks for {spectrum} in region {axisDict}')
+                if getApplication()._isInDebugMode:
+                    raise  err
 
 
 def fetchPeakPicker(spectrum):
@@ -2094,7 +2099,7 @@ def _setDefaultAxisOrdering(spectrum):
     # See if we can map one of the preferred orderings
     for dCode in dCodes:
         pOrder = _searchAxisCodePermutations(spectrum, dCode)
-        if len(pOrder) > 0 and pOrder[0] == X_DIM_INDEX:
+        if pOrder and pOrder[0] == X_DIM_INDEX:
             spectrum.preferredAxisOrdering = pOrder
             break
 

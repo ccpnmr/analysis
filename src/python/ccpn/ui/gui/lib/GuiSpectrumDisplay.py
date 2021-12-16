@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 21:34:43 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-16 16:20:22 +0000 (Thu, December 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2465,10 +2465,15 @@ class GuiSpectrumDisplay(CcpnModule):
                 displayOrder = (1, 0) if self.is1D else self._getDimensionsMapping(spectrum)
                 # check the isotopeCodes
                 dims = displayOrder[0:1] if self.is1D else displayOrder
-                # check the isotopeCodes exist and check compatibility
-                for ic1, ic2 in zip(self.isotopeCodes or [], spectrum.getByDimensions('isotopeCodes', dims)):
-                    if ic1 != ic2:
-                        raise RuntimeError('Cannot display %s on %s; incompatible isotopeCodes' % (spectrum, self))
+
+                if not self._isNew:
+                    # check the isotopeCodes exist and check compatibility
+                    for ic1, ic2 in zip(self.isotopeCodes or [], spectrum.getByDimensions('isotopeCodes', dims)):
+                        if ic1 != ic2:
+                            raise RuntimeError('Cannot display %s on %s; incompatible isotopeCodes' % (spectrum, self))
+                    for dt1, dt2 in zip(self.dimensionTypes or [], spectrum.getByDimensions('dimensionTypes', dims)):
+                        if dt1 != dt2:
+                            raise RuntimeError('Cannot display %s on %s; incompatible dimensionTypes' % (spectrum, self))
 
                 _oldOrdering = self.getOrderedSpectrumViewsIndex()
 
@@ -2484,10 +2489,10 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 else:
 
-                    if not (_isotopeCodes := self.isotopeCodes) and self.spectrumViews and len(self.spectrumViews) == 1:
-                        # set the isotopeCodes from the first spectrumView
-                        _isotopeCodes = tuple(self.spectrumViews[0]._getByDisplayOrder('isotopeCodes'))
-                        self._isotopeCodes = _isotopeCodes
+                    # if not (_isotopeCodes := self.isotopeCodes) and self.spectrumViews is not None and len(self.spectrumViews) == 1:
+                    #     # set the isotopeCodes from the first spectrumView
+                    #     _isotopeCodes = tuple(self.spectrumViews[0]._getByDisplayOrder('isotopeCodes'))
+                    #     self._isotopeCodes = _isotopeCodes
 
                     # add the spectrum to the end of the spectrum ordering in the toolbar
                     idx = self.getOrderedSpectrumViewsIndex()

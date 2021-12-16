@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-15 14:25:01 +0000 (Wed, December 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-16 16:20:22 +0000 (Thu, December 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2322,7 +2322,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         axisCodes = [ac for ac in axisDict.keys()]
 
         # augment axisDict with any missing axisCodes or replace any None values with spectrumLimits
-        inds = self.getByAxisCodes('dimIndices', axisCodes)
+        inds = self.getByAxisCodes('dimensionIndices', axisCodes)
         for idx, ac in enumerate(self.axisCodes):
             if idx not in inds or axisDict[ac] is None:
                 axisDict[ac] = self.spectrumLimits[idx]

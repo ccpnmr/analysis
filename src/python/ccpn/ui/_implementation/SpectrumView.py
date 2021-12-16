@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 22:03:54 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-16 16:20:22 +0000 (Thu, December 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -367,6 +367,11 @@ class SpectrumView(AbstractWrapperObject):
         return tuple(dim for dim in self.displayOrder if dim > 0)
 
     @property
+    def dimensionCount(self) -> int:
+        """The number of displayed dimensions of spectrum"""
+        return len(self.dimensions)
+
+    @property
     def spectrumDimensions(self) -> tuple:
         """spectrumDimension objects in display order"""
         return tuple(self.spectrum.spectrumDimensions[idx] for idx in self.dimensionIndices)
@@ -376,16 +381,25 @@ class SpectrumView(AbstractWrapperObject):
         """Spectrum dimension indices (0-based) in display order"""
         return tuple([dim - 1 for dim in self.dimensions])
 
-    # axisIndices = dimensionIndices
-
     # deprecated
+    # axisIndices = dimensionIndices
     # axes = axisIndices
     # dimensionOrdering = axisIndices
+
+    @property
+    def dimensionTypes(self) -> list:
+        """Spectrum dimensionTypes in display order"""
+        return [self.spectrum.dimensionTypes[idx] for idx in self.dimensionIndices]
 
     @property
     def axisCodes(self) -> list:
         """Spectrum axisCodes in display order"""
         return [self.spectrum.axisCodes[idx] for idx in self.dimensionIndices]
+
+    @property
+    def isotopeCodes(self) -> list:
+        """Spectrum isotopeCodes in display order"""
+        return [self.spectrum.isotopeCodes[idx] for idx in self.dimensionIndices]
 
     @property
     def spectrumLimits(self) -> list:

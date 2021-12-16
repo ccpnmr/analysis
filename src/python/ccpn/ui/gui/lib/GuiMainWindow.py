@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 11:40:50 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-16 16:20:22 +0000 (Thu, December 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1232,7 +1232,9 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 dataLoader, createsNewProject, ignore = self._getDataLoader(url)
                 dataLoaders.append((url, dataLoader, createsNewProject, ignore))
             except (RuntimeError, ValueError) as es:
-                MessageDialog.showError('Load Data', '%s' % str(es), parent=self)
+                MessageDialog.showError('Load Data',
+                                        'While examining %s:\n%s' % (url, str(es)),
+                                        parent=self)
 
         # analyse for potential errors
         errorUrls = [url for url, dl, createNew, ignore in dataLoaders if (dl is None and not ignore)]

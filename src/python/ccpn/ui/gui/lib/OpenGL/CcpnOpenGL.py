@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-15 14:03:04 +0000 (Wed, December 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-16 16:20:22 +0000 (Thu, December 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -6386,8 +6386,14 @@ class CcpnGLWidget(QOpenGLWidget):
             if self._validRegionPick:
 
                 # only pick if the region is inside the bounds
-                for n in self._orderedAxes[2:]:
-                    selectedRegion.append(tuple([round(n.region[0], 3), round(n.region[1],3)]))
+                for axis in self._orderedAxes[2:]:
+                    if axis.width > 0.05:
+                        # round the value for prettier reporting, but only for large enough values
+                        # as otherwise it might go wrong with time axes
+                        region = tuple([round(val, 3) for val in axis.region])
+                    else:
+                        region = tuple(axis.region)
+                    selectedRegion.append(region)
 
                 # selectedRegion is tuple((xL, xR), (yB, yT), ...) - from display
                 # ... is other Nd axes

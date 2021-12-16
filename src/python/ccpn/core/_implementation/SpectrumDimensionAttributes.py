@@ -74,7 +74,7 @@ class SpectrumDimensionAttributes(object):
         self._dataDim.isComplex = bool(value)
 
     @property
-    def dimensionType(self) -> Optional[str]:
+    def dimensionType(self) -> str:
         """Dimension type ('Time' / 'Frequency' / 'Sampled')"""
         if not self._hasInternalParameter('dimensionType'):
             result = specLib.DIMENSION_FREQUENCY

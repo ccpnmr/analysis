@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-16 16:21:09 +0000 (Thu, December 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-16 16:34:14 +0000 (Thu, December 16, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -446,18 +446,17 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         return super().readParameters()
 
     def _readAcqus(self):
-        "Read the acqus files"
+        """Read the acqus files; fill the self.acqus list with a dict for every dimension
+        """
         acquFiles = self._acqusFiles[0:self.dimensionCount]
-        # acqus = read_acqus_file(str(self._brukerRoot), acuFiles)
-        # # acqus is a dict with acqFiles[i] as keys; convert to a list in dimension order
-        # self.acqus = [acqus[key] for key in acuFiles]
         self.acqus = []
         for f in acquFiles:
             _params = read_jcamp(self._brukerRoot / f)
             self.acqus.append(_params)
 
     def _readProcs(self):
-        "Read the procs files"
+        """Read the procs files; fill the self.procs list with a dict for every dimension
+        """
         procFiles = self._procFiles[0:self.dimensionCount]
         self.procs = []
         for f in procFiles:
@@ -505,8 +504,10 @@ def read_jcamp(filename:str, encoding:str = locale.getpreferredencoding()) -> di
 
     with io.open(filename, 'r', encoding=encoding, errors='replace') as f:
         endOfFile = False
+        lineIndex = 0
         while not endOfFile:     # loop until end of file is found
 
+            lineIndex += 1
             line = f.readline().rstrip()    # read a line
             if line == '':      # end of file found
                 endOfFile = True
@@ -526,8 +527,9 @@ def read_jcamp(filename:str, encoding:str = locale.getpreferredencoding()) -> di
                     key, value = parse_jcamp_line(line, f)
                     dic[key] = value
                 except:
-                    getLogger().warning("%s: Unable to correctly parse line %r" % (filename, line))
+                    getLogger().warning("%s (line:%d): Unable to correctly parse %r" %
+                                        (filename, lineIndex, line))
             else:
-                getLogger().warning("%s: Extraneous line %r" % (filename, line))
+                getLogger().warning("%s (line:%d): Extraneous %r" % (filename, lineIndex, line))
 
     return dic

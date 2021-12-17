@@ -5,7 +5,8 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-01 11:22:53 +0000 (Mon, March 01, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2021-12-17 13:13:36 +0000 (Fri, December 17, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -77,24 +78,24 @@ class SpectrumToolBar(ToolBar):
         painter.end()
         return pixmap
 
-    def _updateSpectrumViews(self, newIndex):
-        newSpectrumViewsOrder = []
-
-        for action in self.actions():
-            spectrumView = self.widget.project.getByPid(action.spectrumViewPid)
-            newSpectrumViewsOrder.append(spectrumView)
-
-        # self.widget.project.blankNotification()
-        # newIndex = [newIndex.index(ii) for ii in self.widget.getOrderedSpectrumViewsIndex()]
-        newIndex = tuple(self.widget.getOrderedSpectrumViewsIndex()[ii] for ii in newIndex)
-        self.widget.setOrderedSpectrumViewsIndex(newIndex)
-
-        from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-
-        GLSignals = GLNotifier(parent=None)
-
-        # GLSignals.emitPaintEvent()
-        GLSignals._emitAxisUnitsChanged(source=None, strip=self.widget.strips[0], dataDict={})
+    # def _updateSpectrumViews(self, newIndex):
+    #     newSpectrumViewsOrder = []
+    #
+    #     for action in self.actions():
+    #         spectrumView = self.widget.project.getByPid(action.spectrumViewPid)
+    #         newSpectrumViewsOrder.append(spectrumView)
+    #
+    #     # self.widget.project.blankNotification()
+    #     # newIndex = [newIndex.index(ii) for ii in self.widget._getOrderedSpectrumViewsIndex()]
+    #     newIndex = tuple(self.widget._getOrderedSpectrumViewsIndex()[ii] for ii in newIndex)
+    #     self.widget._setOrderedSpectrumViewsIndex(newIndex)
+    #
+    #     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
+    #
+    #     GLSignals = GLNotifier(parent=None)
+    #
+    #     # GLSignals.emitPaintEvent()
+    #     GLSignals._emitAxisUnitsChanged(source=None, strip=self.widget.strips[0], dataDict={})
 
     def _addSubMenusToContext(self, contextMenu, button):
 
@@ -340,7 +341,7 @@ class SpectrumToolBar(ToolBar):
                     if nextButton == toolButton:
                         return
 
-                    # get the new index and call setOrderedSpectrumViewsIndex
+                    # get the new index and call _setOrderedSpectrumViewsIndex
                     startInd = allActionsTexts.index(toolButton.text())
                     endInd = allActionsTexts.index(nextButton.text())
                     self.widget.moveSpectrumByIndex(startInd, endInd)
@@ -462,7 +463,8 @@ class SpectrumToolBar(ToolBar):
             sv.setVisible(visible)
 
     def _addSpectrumViewToolButtons(self, spectrumView):
-        spectrumDisplay = spectrumView.strip.spectrumDisplay
+        _strip = spectrumView.strip
+        spectrumDisplay = _strip.spectrumDisplay
         if spectrumDisplay.isGrouped:
             return
 
@@ -480,8 +482,9 @@ class SpectrumToolBar(ToolBar):
                 actionList = self.actions()
                 try:
                     # try and find the spectrumView in the orderedlist - for undo function
-                    oldList = spectrumDisplay.spectrumViews
-                    oldList = spectrumDisplay.orderedSpectrumViews(oldList)
+                    # oldList = spectrumDisplay.orderedSpectrumViews(spectrumDisplay.spectrumViews)
+                    # NOTE:ED - not tested as gui undo disabled
+                    oldList = _strip.orderedSpectrumViews
                     if spectrumView in oldList:
                         oldIndex = oldList.index(spectrumView)
                     else:

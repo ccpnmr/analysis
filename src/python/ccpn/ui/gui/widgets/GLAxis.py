@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-09 16:11:16 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-17 13:13:36 +0000 (Fri, December 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2459,7 +2459,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         if self.spectrumDisplay and self.spectrumDisplay.strips and len(self.spectrumDisplay.strips) > 0:
             strip = self.spectrumDisplay.strips[0]
             if not (strip.isDeleted or strip._flaggedForDelete):
-                self._ordering = self.spectrumDisplay.orderedSpectrumViews(strip.spectrumViews)
+                self._ordering = strip.orderedSpectrumViews
 
         self._ordering = [specView for specView in self._ordering]
 

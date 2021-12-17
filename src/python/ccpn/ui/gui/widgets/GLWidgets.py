@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-03 16:17:10 +0000 (Fri, December 03, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-17 13:13:36 +0000 (Fri, December 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -164,7 +164,7 @@ class GuiNdWidget(CcpnGLWidget):
         """
 
         # make the list of ordered spectrumViews
-        self._ordering = self.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
+        self._ordering = self.strip.orderedSpectrumViews
 
         # GWV: removed as new data reader returns zeros; blank spectra can be displayed
         # self._ordering = [specView for specView in self._ordering if specView.spectrum.hasValidPath()]
@@ -1127,7 +1127,7 @@ class Gui1dWidget(CcpnGLWidget):
         """
 
         # make the list of ordered spectrumViews
-        self._ordering = self.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
+        self._ordering = self.strip.orderedSpectrumViews
 
         self._ordering = [specView for specView in self._ordering]
 

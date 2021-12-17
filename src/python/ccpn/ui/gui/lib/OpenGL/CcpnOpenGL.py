@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-09 16:11:16 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-17 13:13:36 +0000 (Fri, December 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -591,20 +591,15 @@ class CcpnGLWidget(QOpenGLWidget):
         if self.strip.isDeleted:
             return
         self.updateVisibleSpectrumViews()
-        # rescale the matrices for each spectrumView
-        # stackCount = 0
+
         self.resetRangeLimits(allLimits=False)
 
-        for stackCount, spectrumView in enumerate(self._ordering):  # _ordering:                             # strip.spectrumViews:  #.orderedSpectrumViews():
-            # self._spectrumSettings[spectrumView] = {}
-
+        for stackCount, spectrumView in enumerate(self._ordering):
             if spectrumView.isDeleted:
                 self._spectrumSettings[spectrumView] = {}
                 continue
 
             self._buildSpectrumSetting(spectrumView=spectrumView, stackCount=stackCount)
-            # if self._stackingMode:
-            #     stackCount += 1
 
     def setXRegion(self, axisL=None, axisR=None):
         if axisL is not None:
@@ -632,7 +627,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def autoRange(self):
         self._updateVisibleSpectrumViews()
-        for spectrumView in self._ordering:  # strip.spectrumViews:  #.orderedSpectrumViews():
+        for spectrumView in self._ordering:
             if spectrumView.isDeleted:
                 self._spectrumSettings[spectrumView] = {}
                 continue

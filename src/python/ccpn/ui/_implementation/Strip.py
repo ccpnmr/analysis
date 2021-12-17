@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-14 09:23:47 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-17 13:13:35 +0000 (Fri, December 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -66,9 +66,6 @@ class Strip(AbstractWrapperObject):
 
     # internal namespace
     _STRIPTILEPOSITION = '_stripTilePosition'
-
-    # store the list of ordered spectrumViews
-    _orderedSpectrumViews = None
 
     #-----------------------------------------------------------------------------------------
     # Attributes and methods related to the data structure
@@ -160,6 +157,16 @@ class Strip(AbstractWrapperObject):
         return tuple(x.spectrum for x in self.spectrumViews)
 
     @property
+    def orderedSpectra(self) -> Tuple[Spectrum, ...]:
+        """The spectra attached to the strip (whether display is currently turned on or not) in display order"""
+        return self._parent._orderedSpectrumViews(self.spectra)
+
+    @property
+    def orderedSpectrumViews(self) -> Tuple['SpectrumView', ...]:
+        """The spectrumViews attached to the strip (whether display is currently turned on or not) in display order"""
+        return self._parent._orderedSpectrumViews(self.spectrumViews)
+
+    @property
     def spectrumGroups(self) -> Tuple[Spectrum, ...]:
         """The spectra attached to the strip (whether display is currently turned on  or not)"""
         pids = self.spectrumDisplay._getSpectrumGroups()
@@ -246,8 +253,8 @@ class Strip(AbstractWrapperObject):
         """
         raise RuntimeError('Please use spectrumDisplay.deleteStrip()')
 
-    def _removeOrderedSpectrumViewIndex(self, index):
-        self.spectrumDisplay.removeOrderedSpectrumView(index)
+    # def _removeOrderedSpectrumViewIndex(self, index):
+    #     self.spectrumDisplay.removeOrderedSpectrumView(index)
 
     @property
     def tilePosition(self) -> Tuple[int, int]:

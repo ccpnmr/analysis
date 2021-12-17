@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-09 16:18:55 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-17 13:13:36 +0000 (Fri, December 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -625,7 +625,7 @@ class GLExporter():
         self._addBackgroundBox(self._mainPlot)
 
         # get the list of required spectra
-        self._ordering = self.strip.spectrumDisplay.orderedSpectrumViews(self.strip.spectrumViews)
+        self._ordering = self.strip.orderedSpectrumViews
 
         # print the grid objects
         if self.params[GLGRIDLINES]: self._addGridLines()

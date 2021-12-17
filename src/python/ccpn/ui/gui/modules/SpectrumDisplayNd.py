@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-22 16:51:57 +0000 (Mon, November 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-17 13:13:36 +0000 (Fri, December 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -66,7 +66,7 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
         self.spectrumActionDict = {}  # apiDataSource --> toolbar action (i.e. button); used in SpectrumToolBar
 
         # store the list of ordered spectrumViews
-        self._orderedSpectrumViews = None
+        self._orderedSpectrumViewsHandler = None
 
         self._fillToolBar()
         #self.setAcceptDrops(True)
@@ -273,5 +273,5 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
     def adjustContours(self):
         # insert popup to modify contours
         popup = SpectrumDisplayPropertiesPopupNd(parent=self.mainWindow, mainWindow=self.mainWindow,
-                                                 orderedSpectrumViews=self.orderedSpectrumViews(self.strips[0].spectrumViews))
+                                                 orderedSpectrumViews=self._orderedSpectrumViews(self.strips[0].spectrumViews))
         popup.exec_()

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-14 09:23:47 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-17 13:13:35 +0000 (Fri, December 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -816,7 +816,7 @@ class GuiSpectrumDisplay(CcpnModule):
     def visibleSpectra(self):
         """List of spectra currently visible in the spectrumDisplay
         """
-        return [sv.spectrum for sv in self.orderedSpectrumViews(self.spectrumViews) if sv.isVisible()]
+        return [sv.spectrum for sv in self._orderedSpectrumViews(self.spectrumViews) if sv.isVisible()]
 
     @property
     def isGrouped(self):
@@ -2443,7 +2443,7 @@ class GuiSpectrumDisplay(CcpnModule):
             getLogger().debug('displaySpectrum: Spectrum %s already in display %s' % (spectrum, self))
             return _specViews[0]
 
-        # _oldOrdering = self.getOrderedSpectrumViewsIndex()
+        # _oldOrdering = self._getOrderedSpectrumViewsIndex()
 
         # keep this as may be needed for undo/redo gui operations
         # with undoStackBlocking() as _:  # Do not add to undo/redo stack
@@ -2471,7 +2471,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     if ic1 != ic2:
                         raise RuntimeError('Cannot display %s on %s; incompatible isotopeCodes' % (spectrum, self))
 
-                _oldOrdering = self.getOrderedSpectrumViewsIndex()
+                _oldOrdering = self._getOrderedSpectrumViewsIndex()
 
                 # # add toolbar ordering to the undo stack
                 # addUndoItem(undo=partial(self.setToolbarButtons, tuple(_oldOrdering)))  # keep for undo/redo
@@ -2491,7 +2491,7 @@ class GuiSpectrumDisplay(CcpnModule):
                         self._isotopeCodes = _isotopeCodes
 
                     # add the spectrum to the end of the spectrum ordering in the toolbar
-                    idx = self.getOrderedSpectrumViewsIndex()
+                    idx = self._getOrderedSpectrumViewsIndex()
                     newInd = self.spectrumViews.index(spectrumView)
                     if len(self.spectrumViews) == len(_oldOrdering) + 1:
                         idx = tuple((ii + 1) if (ii >= newInd) else ii for ii in idx)
@@ -2521,7 +2521,7 @@ class GuiSpectrumDisplay(CcpnModule):
             with undoStackBlocking() as _:  # Do not add to undo/redo stack
 
                 # explicitly change the ordering
-                _oldOrdering = self.getOrderedSpectrumViewsIndex()
+                _oldOrdering = self._getOrderedSpectrumViewsIndex()
                 _index = self.spectrumViews.index(specView)
                 _newOrdering = [od if od < _index else od - 1 for ii, od in enumerate(_oldOrdering) if od != _index]
 
@@ -2568,8 +2568,8 @@ class GuiSpectrumDisplay(CcpnModule):
 
         if not self.isGrouped:
             if order:
-                self.setOrderedSpectrumViewsIndex(order)
-            self.spectrumToolBar.setButtonsFromSpectrumViews(self.orderedSpectrumViews(self.strips[0].spectrumViews))
+                self._setOrderedSpectrumViewsIndex(order)
+            self.spectrumToolBar.setButtonsFromSpectrumViews(self._orderedSpectrumViews(self.strips[0].spectrumViews))
 
     @logCommand(get='self')
     def makeStripPlot(self, peaks=None, nmrResidues=None,

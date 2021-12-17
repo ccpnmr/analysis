@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-01 18:50:59 +0100 (Fri, October 01, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-17 13:13:36 +0000 (Fri, December 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1204,7 +1204,7 @@ class CcpnModuleLabel(DockLabel):
         icon = Icon('icons/%s' % iconName)
 
         button.setIcon(icon)
-        retinaIconSize = self.getMaxIconSize(icon) // 2
+        # retinaIconSize = self.getMaxIconSize(icon) // 2
         retinaIconSize = self.labelSize - 4
 
         button.setIconSize(QtCore.QSize(retinaIconSize, retinaIconSize))
@@ -1214,7 +1214,7 @@ class CcpnModuleLabel(DockLabel):
         elif position == CcpnModuleLabel.TOP_LEFT:
             styleInfo = (self.buttonBorderWidth, self.buttonCornerRadius, 0)
         else:
-            raise Exception('button position must be one of %s' % ', '.join(CcpnModule.TOP_LEFT, CcpnModule.TOP_RIGHT))
+            raise Exception('button position must be one of %s' % ', '.join([CcpnModule.TOP_LEFT, CcpnModule.TOP_RIGHT]))
 
         # GST colours are hard coded... help please I need  a central source for
         # these presumably a color palette or scheme

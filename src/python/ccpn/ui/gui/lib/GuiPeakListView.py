@@ -4,8 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-23 12:56:14 +0100 (Fri, October 23, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__dateModified__ = "$dateModified: 2021-12-17 13:13:35 +0000 (Fri, December 17, 2021) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,6 +30,7 @@ from PyQt5 import QtCore, QtGui
 from ccpn.ui.gui.lib.GuiListView import GuiListViewABC
 from ccpn.util.OrderedSet import OrderedSet
 from collections import OrderedDict
+
 
 NULL_RECT = QtCore.QRectF()
 IDENTITY = QtGui.QTransform()
@@ -57,7 +59,7 @@ def _getPeakLabelling(peak):
 
         pdNADim = [atom for atom in pdNA[dimension] if not (atom.isDeleted or atom._flaggedForDelete)]
 
-        if not pdNADim:                 # len(pdNA[dimension]) == 0:
+        if not pdNADim:  # len(pdNA[dimension]) == 0:
             if len(pdNA) == 1:
                 peakLabel.append(peak.id)
             else:
@@ -66,7 +68,7 @@ def _getPeakLabelling(peak):
             peakNmrResidues = [atom[0].nmrResidue.id for atom in pdNA if len(atom) != 0 and not (atom[0].isDeleted or atom[0]._flaggedForDelete)]
             if all(x == peakNmrResidues[0] for x in peakNmrResidues):
 
-                for item in pdNADim:                        # pdNA[dimension]:
+                for item in pdNADim:  # pdNA[dimension]:
                     if len(peakLabel) > 0:
                         peakLabel.append(item.name)
                     else:
@@ -74,7 +76,7 @@ def _getPeakLabelling(peak):
 
             else:
                 pdNADim = [atom for atom in pdNA[dimension] if not (atom.isDeleted or atom._flaggedForDelete)]
-                for item in pdNADim:            # pdNA[dimension]:
+                for item in pdNADim:  # pdNA[dimension]:
                     label = '.'.join((item.nmrResidue.id, item.name))
                     # label = item.nmrResidue.id + '.' + item.name
                     peakLabel.append(label)
@@ -86,6 +88,7 @@ def _getPeakLabelling(peak):
 def _getScreenPeakAnnotation(peak, useShortCode=False, useMinimalCode=False, usePid=False):
     """Create labelling for short, long, minimal
     """
+
     def chainLabel(item):
         try:
             chainLabel = item.nmrResidue.nmrChain.id

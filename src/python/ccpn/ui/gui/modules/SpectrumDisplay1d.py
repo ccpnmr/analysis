@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-22 13:09:38 +0100 (Thu, July 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-17 13:13:36 +0000 (Fri, December 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -55,8 +55,8 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
         ###self.inactivePeakItems = set() # contains unused peakItems
         self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to set of peaks which are not being displayed
 
-        # store the list of ordered spectrumViews
-        self._orderedSpectrumViews = None
+        # store the list of ordered spectrumViews/spectra
+        self._orderedSpectrumViewsHandler = None
 
     def _fillToolBar(self):
         """
@@ -100,7 +100,7 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
     def adjustContours(self):
         # insert popup to modify contours
         popup = SpectrumDisplayPropertiesPopup1d(parent=self.mainWindow, mainWindow=self.mainWindow,
-                                                 orderedSpectrumViews=self.orderedSpectrumViews(self.strips[0].spectrumViews))
+                                                 orderedSpectrumViews=self._orderedSpectrumViews(self.strips[0].spectrumViews))
         popup.exec_()
         popup.raise_()
 

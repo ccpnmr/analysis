@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-13 10:03:44 +0000 (Mon, December 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-17 13:13:35 +0000 (Fri, December 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2899,8 +2899,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             #     # notify spectrumViews of delete
             #     addUndoItem(redo=self._finaliseSpectrumViews, '')
 
-            for sd in specViews:
-                sd[0]._removeOrderedSpectrumViewIndex(sd[1])
+            # for sd in specViews:
+            #     sd[0]._removeOrderedSpectrumViewIndex(sd[1])
 
     def _deleteChild(self, child):
         """Delete child object

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-18 18:20:21 +0000 (Thu, November 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-17 13:15:26 +0000 (Fri, December 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -87,7 +87,10 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
 
     # override of Qt setVisible
     def setVisible(self, visible):
+        """Change visible state of the spectrumView
+        """
         QtWidgets.QGraphicsItem.setVisible(self, visible)
+        self.isDisplayed = visible
         try:
             if self:  # ejb - ?? crashes on table update otherwise
                 action = self.strip.spectrumDisplay.spectrumActionDict.get(self.spectrum)
@@ -95,8 +98,8 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
                     action.setChecked(visible)
                 # for peakListView in self.peakListViews:
                 #   peakListView.setVisible(visible)
-        except:
-            getLogger().debug('No visible peaklists')  # gwv changed to debug to reduce output
+        except Exception as es:
+            getLogger().debug(f'Error changing visibility {es}')  # gwv changed to debug to reduce output
 
         # repaint all displays - this is called for each spectrumView in the spectrumDisplay
         # all are attached to the same click

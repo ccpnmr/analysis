@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-16 16:34:14 +0000 (Thu, December 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-17 15:14:32 +0000 (Fri, December 17, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -451,7 +451,11 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         acquFiles = self._acqusFiles[0:self.dimensionCount]
         self.acqus = []
         for f in acquFiles:
-            _params = read_jcamp(self._brukerRoot / f)
+            try:
+                _params = read_jcamp(self._brukerRoot / f, encoding='Windows-1252')
+            except UnicodeDecodeError:
+                # Try again with utf-8
+                _params = read_jcamp(self._brukerRoot / f, encoding='utf-8')
             self.acqus.append(_params)
 
     def _readProcs(self):
@@ -460,7 +464,12 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         procFiles = self._procFiles[0:self.dimensionCount]
         self.procs = []
         for f in procFiles:
-            _params = read_jcamp(self._pdataDir / f)
+            try:
+                _params = read_jcamp(self._pdataDir / f, encoding='Windows-1252')
+            except UnicodeDecodeError:
+                # Try again with utf-8
+                _params = read_jcamp(self._pdataDir / f, encoding='utf-8')
+
             self.procs.append(_params)
 
 # Register this format

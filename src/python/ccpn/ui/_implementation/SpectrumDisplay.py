@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-16 16:20:22 +0000 (Thu, December 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-18 14:57:09 +0000 (Sat, December 18, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -74,6 +74,8 @@ class SpectrumDisplay(AbstractWrapperObject):
     # Internal namespace
     _ISOTOPECODES_KEY = '_isotopeCodes'
     _DIMENSIONTYPES_KEY = '_dimensionTypes'
+
+    INTENSITY = 'intensity'  # used for 1D intensity (Y) axis
 
     #-----------------------------------------------------------------------------------------
     # Attributes of the data structure (incomplete?)
@@ -229,7 +231,7 @@ class SpectrumDisplay(AbstractWrapperObject):
     def is1D(self) -> bool:
         """True if this is a 1D display."""
         tt = self.axisCodes
-        return bool(tt and tt[1] == 'intensity')
+        return bool(tt and tt[1] == self.INTENSITY)
 
     @property
     def dimensionTypes(self):
@@ -259,7 +261,10 @@ class SpectrumDisplay(AbstractWrapperObject):
         if not commonUtil.isIterable(value):
             raise ValueError('Expected list/tuple for _dimensionTypes; got %r' % value)
         value = list(value)
-        if len(value) != self.dimensionCount:
+        if self.is1D and len(value) != 1:
+            raise ValueError('Expected list/tuple with length %d for _dimensionTypes; got %r' %
+                             (1, value))
+        elif not self.is1D and len(value) != self.dimensionCount:
             raise ValueError('Expected list/tuple with length %d for _dimensionTypes; got %r' %
                              (self.dimensionCount, value))
         for idx, val in enumerate(value):
@@ -627,14 +632,14 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
             )
 
     if is1D:
-        axisCodes = spectrum.axisCodes + ['intensity']
+        axisCodes = spectrum.axisCodes + [SpectrumDisplay.INTENSITY]
     if len(axisCodes) < 2:
         raise ValueError("New SpectrumDisplay must have at least two axisCodes")
     displayPars['axisCodes'] = displayPars['axisOrder'] = axisCodes
 
     # Add name, setting and insuring uniqueness if necessary
     if name is None:
-        excludedNames = ['intensity']
+        excludedNames = [SpectrumDisplay.INTENSITY]
         name = ''.join(['%dD_' % spectrum.dimensionCount] + [str(x)[0:1] for x in axisCodes if x not in excludedNames])
     name = SpectrumDisplay._uniqueApiName(project, name)
     displayPars['name'] = name
@@ -665,7 +670,7 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
         elif spectrum.dimensionTypes[0] == specLib.DIMENSION_TIME:
             apiSpectrumDisplay.newFidAxis('time', stripSerial=1, unit=AXISUNIT_POINT)
 
-        apiSpectrumDisplay.newIntensityAxis(code='intensity', stripSerial=1, unit=AXISUNIT_NUMBER)
+        apiSpectrumDisplay.newIntensityAxis(code=SpectrumDisplay.INTENSITY, stripSerial=1, unit=AXISUNIT_NUMBER)
 
         display._isotopeCodes = tuple(spectrum.isotopeCodes)
 

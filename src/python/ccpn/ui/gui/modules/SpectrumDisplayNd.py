@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-17 13:13:36 +0000 (Fri, December 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 18:47:15 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -125,7 +125,7 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
         modifiedSpectra = set()
         with undoBlockWithoutSideBar():
             for spectrumView in self.spectrumViews:
-                if spectrumView.isVisible():
+                if spectrumView.isDisplayed:
                     spectrum = spectrumView.spectrum
 
                     # only increase once - duh
@@ -163,7 +163,7 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
         modifiedSpectra = set()
         with undoBlockWithoutSideBar():
             for spectrumView in self.spectrumViews:
-                if spectrumView.isVisible():
+                if spectrumView.isDisplayed:
                     spectrum = spectrumView.spectrum
 
                     # only increase once - duh
@@ -200,7 +200,7 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
         modifiedSpectra = set()
         with undoBlockWithoutSideBar():
             for spectrumView in self.spectrumViews:
-                if spectrumView.isVisible():
+                if spectrumView.isDisplayed:
                     spectrum = spectrumView.spectrum
 
                     # only increase once - duh
@@ -235,7 +235,7 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
         modifiedSpectra = set()
         with undoBlockWithoutSideBar():
             for spectrumView in self.spectrumViews:
-                if spectrumView.isVisible():
+                if spectrumView.isDisplayed:
                     spectrum = spectrumView.spectrum
 
                     # only increase once - duh

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-17 13:13:35 +0000 (Fri, December 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 18:47:15 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2139,7 +2139,7 @@ class GuiStrip(Frame):
             spectrumViews = self.orderedSpectrumViews
             countSpvs = len(spectrumViews)
             if countSpvs > 0:
-                visibleSpectrumViews = [i for i in spectrumViews if i.isVisible()]
+                visibleSpectrumViews = [sv for sv in spectrumViews if sv.isDisplayed]
                 if len(visibleSpectrumViews) > 0:
                     currentIndex = spectrumViews.index(visibleSpectrumViews[-1])
                     if countSpvs > currentIndex + 1:
@@ -2200,7 +2200,7 @@ class GuiStrip(Frame):
             spectrumViews = self.orderedSpectrumViews
             countSpvs = len(spectrumViews)
             if countSpvs > 0:
-                visibleSpectrumViews = [i for i in spectrumViews if i.isVisible()]
+                visibleSpectrumViews = [sv for sv in spectrumViews if sv.isDisplayed]
                 if len(visibleSpectrumViews) > 0:
                     currentIndex = spectrumViews.index(visibleSpectrumViews[0])
                     # if countSpvs > currentIndex + 1:
@@ -2277,9 +2277,9 @@ class GuiStrip(Frame):
             countSpvs = len(spectrumViews)
             if countSpvs > 0:
 
-                visibleSpectrumViews = [i.isVisible() for i in spectrumViews]
+                visibleSpectrumViews = [sv.isDisplayed for sv in spectrumViews]
                 if any(visibleSpectrumViews):
-                    changeState = [i.setVisible(not i.isVisible()) for i in spectrumViews]
+                    for sv in spectrumViews: sv.setVisible(not sv.isDisplayed)
                 else:
                     self._showAllSpectrumViews(True)
 
@@ -2551,7 +2551,6 @@ def _updateSelectedMultiplets(data):
 
     GLSignals = GLNotifier(parent=None)
     GLSignals.emitEvent(triggers=[GLNotifier.GLHIGHLIGHTMULTIPLETS], targets=data[Notifier.OBJECT].multiplets)
-
 
 # def _axisRegionChanged(cDict):
 #     """Notifier function: Update strips etc. for when axis position or width changes.

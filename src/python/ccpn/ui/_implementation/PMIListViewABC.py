@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-11 20:43:40 +0100 (Mon, October 11, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 18:47:14 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -29,8 +29,10 @@ __date__ = "$Date: 2020-05-26 14:50:42 +0000 (Tue, May 26, 2020) $"
 import re
 import typing
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpn.core._implementation.PMIListABC import COLOURCHECK, INHERITCOLOUR
+from ccpn.core.lib.ContextManagers import ccpNmrV3CoreUndoBlock
+from ccpn.ui._implementation.SpectrumView import SpectrumView
+from ccpn.util.decorators import logCommand
 
 
 class PMIListViewABC(AbstractWrapperObject):
@@ -118,6 +120,8 @@ class PMIListViewABC(AbstractWrapperObject):
         return result
 
     @symbolStyle.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreUndoBlock()
     def symbolStyle(self, value: str):
         if self.symbolStyle != value:
             self._apiListView.symbolStyle = value
@@ -140,6 +144,8 @@ class PMIListViewABC(AbstractWrapperObject):
         return result
 
     @symbolColour.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreUndoBlock()
     def symbolColour(self, value: typing.Optional[str]):
         # ccpnInternal - changes this to '#' for non-valid colour check to validate in model
         if not isinstance(value, (str, type(None))):
@@ -170,6 +176,8 @@ class PMIListViewABC(AbstractWrapperObject):
         return result
 
     @textColour.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreUndoBlock()
     def textColour(self, value: typing.Optional[str]):
         # ccpnInternal - changes this to '#' for non-valid colour check to validate in model
         if not isinstance(value, (str, type(None))):
@@ -184,20 +192,36 @@ class PMIListViewABC(AbstractWrapperObject):
 
     @property
     def isSymbolDisplayed(self) -> bool:
-        """True if the marker symbol is displayed."""
+        """True if the marker symbol is displayed"""
         return self._apiListView.isSymbolDisplayed
 
     @isSymbolDisplayed.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreUndoBlock()
     def isSymbolDisplayed(self, value: bool):
         self._apiListView.isSymbolDisplayed = value
 
     @property
     def isTextDisplayed(self) -> bool:
-        """True if the annotation is displayed?"""
+        """True if the annotation is displayed"""
         return self._apiListView.isTextDisplayed
 
     @isTextDisplayed.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreUndoBlock()
     def isTextDisplayed(self, value: bool):
+        self._apiListView.isTextDisplayed = value
+
+    @property
+    def isDisplayed(self) -> bool:
+        """True if symbols and text displayed"""
+        return self._apiListView.isSymbolDisplayed and self._apiListView.isTextDisplayed
+
+    @isDisplayed.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreUndoBlock()
+    def isDisplayed(self, value: bool):
+        self._apiListView.isSymbolDisplayed = value
         self._apiListView.isTextDisplayed = value
 
     @property
@@ -217,6 +241,8 @@ class PMIListViewABC(AbstractWrapperObject):
         return result
 
     @meritColour.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreUndoBlock()
     def meritColour(self, value: typing.Optional[str]):
         if not isinstance(value, (str, type(None))):
             raise TypeError("meritColour must be a hex colour string (e.g. '#ABCDEF' or '%s') or None" % INHERITCOLOUR)
@@ -242,6 +268,8 @@ class PMIListViewABC(AbstractWrapperObject):
         return result
 
     @meritEnabled.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreUndoBlock()
     def meritEnabled(self, value: bool):
         if not isinstance(value, bool):
             raise TypeError("meritEnabled must be True/False.")
@@ -262,6 +290,8 @@ class PMIListViewABC(AbstractWrapperObject):
         return result
 
     @meritThreshold.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreUndoBlock()
     def meritThreshold(self, value: typing.Union[float, int]):
         if not isinstance(value, (float, int)):
             raise TypeError("meritThreshold must be a float or integer")
@@ -288,6 +318,8 @@ class PMIListViewABC(AbstractWrapperObject):
         return result
 
     @lineColour.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreUndoBlock()
     def lineColour(self, value: typing.Optional[str]):
         if not isinstance(value, (str, type(None))):
             raise TypeError("lineColour must be a hex colour string (e.g. '#ABCDEF' or '%s') or None" % INHERITCOLOUR)

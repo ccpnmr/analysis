@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-17 13:13:36 +0000 (Fri, December 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 18:47:16 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -352,7 +352,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         if gridGLList.renderMode == GLRENDERMODE_REBUILD:
 
             # get the list of visible spectrumViews, or the first in the list
-            visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+            visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isDisplayed]
             thisSpecView = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[
                 0].isDeleted else None
 
@@ -2459,7 +2459,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         if self.spectrumDisplay and self.spectrumDisplay.strips and len(self.spectrumDisplay.strips) > 0:
             strip = self.spectrumDisplay.strips[0]
             if not (strip.isDeleted or strip._flaggedForDelete):
-                self._ordering = strip.orderedSpectrumViews
+                self._ordering = strip.getSpectrumViews()
 
         self._ordering = [specView for specView in self._ordering]
 
@@ -2470,8 +2470,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
                 del self._spectrumSettings[specView]
 
         # make a list of the visible and not-deleted spectrumViews
-        # visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
-        visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+        # visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isDisplayed]
+        visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isDisplayed]
 
         self._visibleOrdering = visibleSpectrumViews
 
@@ -2736,7 +2736,7 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         """Build the visible axis codes from the visible spectra appending wildcard as required
         """
         _visibleSpec = [(specView, self._spectrumSettings[specView]) for specView in self._ordering
-                        if not specView.isDeleted and specView.isVisible() and
+                        if not specView.isDeleted and specView.isDisplayed and
                         specView in self._spectrumSettings]
         _firstVisible = ((self._ordering[0], self._spectrumSettings[self._ordering[0]]),) if self._ordering and not self._ordering[0].isDeleted and self._ordering[0] in self._spectrumSettings else ()
         self._visibleOrderingDict = _visibleSpec or _firstVisible

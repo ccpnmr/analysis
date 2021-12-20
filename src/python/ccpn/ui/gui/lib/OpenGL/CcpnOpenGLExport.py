@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-17 13:13:36 +0000 (Fri, December 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 18:47:15 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -625,7 +625,7 @@ class GLExporter():
         self._addBackgroundBox(self._mainPlot)
 
         # get the list of required spectra
-        self._ordering = self.strip.orderedSpectrumViews
+        self._ordering = self.strip.getSpectrumViews()
 
         # print the grid objects
         if self.params[GLGRIDLINES]: self._addGridLines()
@@ -1031,8 +1031,8 @@ class GLExporter():
             attribList = data.spectrumView.peakListViews
             validListViews = [_symbols[pp] for pp in attribList
                               if pp in _symbols.keys()
-                              and pp.isVisible()
-                              and data.spectrumView.isVisible()
+                              and pp.isDisplayed
+                              and data.spectrumView.isDisplayed
                               and pp.peakList.pid in self.params[GLSELECTEDPIDS]
                               ]
 
@@ -1061,8 +1061,8 @@ class GLExporter():
             attribList = data.spectrumView.multipletListViews
             validListViews = [_symbols[pp] for pp in attribList
                               if pp in _symbols.keys()
-                              and pp.isVisible()
-                              and data.spectrumView.isVisible()
+                              and pp.isDisplayed
+                              and data.spectrumView.isDisplayed
                               and pp.multipletList.pid in self.params[GLSELECTEDPIDS]]
 
             for GLObject in validListViews:
@@ -1122,8 +1122,8 @@ class GLExporter():
                 continue
 
             validIntegralListViews = [pp for pp in spectrumView.integralListViews
-                                      if pp.isVisible()
-                                      and spectrumView.isVisible()
+                                      if pp.isDisplayed
+                                      and spectrumView.isDisplayed
                                       and pp in self._parent._GLIntegrals._GLSymbols.keys()
                                       and pp.integralList.pid in self.params[GLSELECTEDPIDS]]
 
@@ -1206,8 +1206,8 @@ class GLExporter():
         for data in self._addSpectrumViewManager('peakLabels'):
 
             validPeakListViews = [pp for pp in data.spectrumView.peakListViews
-                                  if pp.isVisible()
-                                  and data.spectrumView.isVisible()
+                                  if pp.isDisplayed
+                                  and data.spectrumView.isDisplayed
                                   and pp in self._parent._GLPeaks._GLLabels.keys()
                                   and pp.peakList.pid in self.params[GLSELECTEDPIDS]]
 
@@ -1267,8 +1267,8 @@ class GLExporter():
                 continue
 
             validIntegralListViews = [pp for pp in spectrumView.integralListViews
-                                      if pp.isVisible()
-                                      and spectrumView.isVisible()
+                                      if pp.isDisplayed
+                                      and spectrumView.isDisplayed
                                       and pp in self._parent._GLIntegrals._GLLabels.keys()
                                       and pp.integralList.pid in self.params[GLSELECTEDPIDS]]
 
@@ -1318,8 +1318,8 @@ class GLExporter():
         for data in self._addSpectrumViewManager('multipletLabels'):
 
             validMultipletListViews = [pp for pp in data.spectrumView.multipletListViews
-                                       if pp.isVisible()
-                                       and data.spectrumView.isVisible()
+                                       if pp.isDisplayed
+                                       and data.spectrumView.isDisplayed
                                        and pp in self._parent._GLMultiplets._GLLabels.keys()
                                        and pp.multipletList.pid in self.params[GLSELECTEDPIDS]]
 
@@ -1432,7 +1432,7 @@ class GLExporter():
             self._mainPlot.add(colourGroup)
 
     def _addSingleTrace(self, traceName, trace, spectrumView, colourGroups):
-        if spectrumView and not spectrumView.isDeleted and spectrumView.isVisible():
+        if spectrumView and not spectrumView.isDeleted and spectrumView.isDisplayed:
             # drawVertexColor
 
             if self._parent._stackingMode:
@@ -2058,8 +2058,8 @@ class GLExporter():
 
             attribList = getattr(spectrumView, listView + 'Views')
             validListViews = [pp for pp in attribList
-                              if pp.isVisible()
-                              and spectrumView.isVisible()
+                              if pp.isDisplayed
+                              and spectrumView.isDisplayed
                               and getattr(pp, listView).pid in self.params[GLSELECTEDPIDS]]
 
             for thisListView in validListViews:

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-28 19:12:27 +0100 (Mon, June 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 18:47:15 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -309,7 +309,7 @@ class CalibrateSpectraFromPeaksPopup1d(CalibrateSpectraFromPeaksPopupNd):
                             self._spectraCheckBoxes[str(self.spectrumCount[specView.spectrum].id) + str(0)].isChecked(),
                             self._spectraCheckBoxes[str(self.spectrumCount[specView.spectrum].id) + str(1)].isChecked())
                            for specView in self.strip.spectrumViews
-                           if specView.isVisible()
+                           if specView.isDisplayed
                            and specView.spectrum in self.spectrumCount
                            and self.spectrumCount[specView.spectrum] is not self.primaryPeak]
 

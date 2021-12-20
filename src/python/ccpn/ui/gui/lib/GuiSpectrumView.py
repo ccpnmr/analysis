@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-17 13:15:26 +0000 (Fri, December 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 18:47:15 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -92,15 +92,29 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
         QtWidgets.QGraphicsItem.setVisible(self, visible)
         self.isDisplayed = visible
         try:
-            if self:  # ejb - ?? crashes on table update otherwise
-                action = self.strip.spectrumDisplay.spectrumActionDict.get(self.spectrum)
-                if action:
-                    action.setChecked(visible)
-                # for peakListView in self.peakListViews:
-                #   peakListView.setVisible(visible)
+            action = self.strip.spectrumDisplay.spectrumActionDict.get(self.spectrum)
+            if action:
+                action.setChecked(visible)
         except Exception as es:
-            getLogger().debug(f'Error changing visibility {es}')  # gwv changed to debug to reduce output
+            getLogger().debug(f'Error in setVisible {es}')  # gwv changed to debug to reduce output
 
+        self._notifyChange()
+
+    def setDisplayed(self, visible):
+        """Change visible state of the spectrumView
+        """
+        QtWidgets.QGraphicsItem.setVisible(self, visible)
+        self.isDisplayed = visible
+        try:
+            action = self.strip.spectrumDisplay.spectrumActionDict.get(self.spectrum)
+            if action:
+                action.setChecked(visible)
+        except Exception as es:
+            getLogger().debug(f'Error in setDisplayed {es}')  # gwv changed to debug to reduce output
+
+        self._notifyChange()
+
+    def _notifyChange(self):
         # repaint all displays - this is called for each spectrumView in the spectrumDisplay
         # all are attached to the same click
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
@@ -116,27 +130,27 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
 
         Returns None or namedTuple of the form:
 
-            valuePerPoint:              ppm width spanning a point value
-            pointCount,                 number of points in the dimension
-            minAliasingFrequency,       minimum aliasing frequency
-            maxAliasingFrequency,       maximum aliasing frequency
+            valuePerPoint               ppm width spanning a point value
+            pointCount                  number of points in the dimension
+            minAliasingFrequency        minimum aliasing frequency
+            maxAliasingFrequency        maximum aliasing frequency
                                         aliasing frequencies define the span of the spectrum, beyond the range of the defined points
                                         for aliasingIndex (0, 0) this will correspond to points [0.5], [pointCount + 0.5]
-            minSpectrumFrequency,       minimum spectrum frequency
-            maxSpectrumFrequency,       maximum spectrum frequency
-                                        spectrum frequencies defined the ppm positions of points [1] and [pointCount]
-            axisReversed,               True of the pointn corresponds to the maximum spectrum frequency
-            spectralWidth,              maxSpectrumFrequency - minSpectrumFrequency
+            minSpectrumFrequency        minimum spectrum frequency
+            maxSpectrumFrequency        maximum spectrum frequency
+                                        spectrum frequencies defined by the ppm positions of points [1] and [pointCount]
+            axisReversed                True if the point [pointCount] corresponds to the maximum spectrum frequency
+            spectralWidth               maxSpectrumFrequency - minSpectrumFrequency
             aliasingIndex               a tuple (min, max) defining how many integer multiples the aliasing frequencies span the spectrum
                                         (0, 0) implies the aliasing range matches the spectral range
                                         (s, t) implies:
                                             the minimum limit = minSpectrumFrequency - 's' spectral widths - should always be negative or zero
                                             the maximum limit = maxSpectrumFrequency + 't' spectral widths - should always be positive or zero
             foldingMode                 the type of folding: 'circular', 'mirror' or None
-            regionBounds                a tuple of ppm values (min, ..., max) in mulitples of the spectral width from the lower aliasingLimit
+            regionBounds                a tuple of ppm values (min, ..., max) in multiples of the spectral width from the lower aliasingLimit
                                         to the upper aliasingLimit
-            minFoldingFrequency,        minimum folding frequency
-            maxFoldingFrequency,        maximum folding frequency
+            minFoldingFrequency         minimum folding frequency
+            maxFoldingFrequency         maximum folding frequency
                                         folding frequencies define the ppm positions of points [0.5] and [pointCount + 0.5]
                                         currently the exact ppm at which the spectrum is folded
             isTimeDomain                True if the axis is a time domain, otherwise False

@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-28 16:26:14 +0100 (Fri, May 28, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 18:47:16 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -382,7 +382,7 @@ class ViewBox(pg.ViewBox):
             if spectrumView.spectrum.dimensionCount == 1:
                 continue
             for peakListView in spectrumView.peakListViews:
-                if peakListView.isVisible():
+                if peakListView.isDisplayed:
 
                     # ejb - strange error AttributeError: 'IntegralList' object has no attribute 'peaks'
                     if peakListView.peakList and hasattr(peakListView.peakList, 'peaks'):
@@ -521,7 +521,7 @@ class ViewBox(pg.ViewBox):
                 peaks = list(self.current.peaks)
                 for spectrumView in self.current.strip.spectrumViews:
                     for peakListView in spectrumView.peakListViews:
-                        if not peakListView.isVisible():
+                        if not peakListView.isDisplayed:
                             continue
                         peakList = peakListView.peakList
                         if not isinstance(peakList, PeakList):  # it could be an IntegralList
@@ -716,7 +716,7 @@ def _peaksVisibleInStrip(peaks, strip):
         if spectrumView.spectrum.dimensionCount == 1:  # skip 1D peakLists
             continue
         indices = spectrumView.dimensionOrdering[:2]
-        peakLists = [peakListView.peakList for peakListView in spectrumView.peakListViews if peakListView.isVisible()]
+        peakLists = [peakListView.peakList for peakListView in spectrumView.peakListViews if peakListView.isDisplayed]
         for peakList in peakLists:
             peakListToIndicesDict[peakList] = indices
 

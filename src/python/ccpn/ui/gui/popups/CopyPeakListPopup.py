@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-17 13:13:36 +0000 (Fri, December 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 18:47:15 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -104,7 +104,7 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
         first visible spectrum
         """
         if self.spectrumDisplay and self.spectrumDisplay.strips:
-            orderedSpectra = self.spectrumDisplay.strips[0].orderedSpectra
+            orderedSpectra = self.spectrumDisplay.strips[0].getSpectra()
             visibleSpectra = self.spectrumDisplay.strips[0].visibleSpectra
         else:
             visibleSpectra = orderedSpectra = self.project.spectra

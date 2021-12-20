@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-13 10:34:06 +0000 (Mon, December 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 18:47:15 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1143,7 +1143,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                     child.setFlags(int(child.flags()) | QtCore.Qt.ItemIsUserCheckable)
                     child.setData(1, 0, specView.spectrum)
                     child.setText(0, specView.spectrum.pid)
-                    child.setCheckState(0, QtCore.Qt.Checked if specView.isVisible() else QtCore.Qt.Checked)
+                    child.setCheckState(0, QtCore.Qt.Checked if specView.isDisplayed else QtCore.Qt.Checked)
 
             # find peak/integral/multiplets attached to the spectrumViews
             peakLists = []
@@ -1168,7 +1168,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                     child.setFlags(int(child.flags()) | QtCore.Qt.ItemIsUserCheckable)
                     child.setData(1, 0, pp.peakList)
                     child.setText(0, pp.peakList.pid)
-                    child.setCheckState(0, QtCore.Qt.Checked if pp.isVisible() else QtCore.Qt.Checked)
+                    child.setCheckState(0, QtCore.Qt.Checked if pp.isDisplayed else QtCore.Qt.Checked)
 
                 printItems.extend((GLPEAKSYMBOLS,
                                    GLPEAKLABELS))
@@ -1183,7 +1183,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                     child.setFlags(int(child.flags()) | QtCore.Qt.ItemIsUserCheckable)
                     child.setData(1, 0, pp.integralList)
                     child.setText(0, pp.integralList.pid)
-                    child.setCheckState(0, QtCore.Qt.Checked if pp.isVisible() else QtCore.Qt.Checked)
+                    child.setCheckState(0, QtCore.Qt.Checked if pp.isDisplayed else QtCore.Qt.Checked)
 
                 printItems.extend((GLINTEGRALSYMBOLS,
                                    GLINTEGRALLABELS))
@@ -1198,7 +1198,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                     child.setFlags(int(child.flags()) | QtCore.Qt.ItemIsUserCheckable)
                     child.setData(1, 0, pp.multipletList)
                     child.setText(0, pp.multipletList.pid)
-                    child.setCheckState(0, QtCore.Qt.Checked if pp.isVisible() else QtCore.Qt.Checked)
+                    child.setCheckState(0, QtCore.Qt.Checked if pp.isDisplayed else QtCore.Qt.Checked)
 
                 printItems.extend((GLMULTIPLETSYMBOLS,
                                    GLMULTIPLETLABELS))
@@ -1208,18 +1208,18 @@ class ExportStripToFilePopup(ExportDialogABC):
             pidList = []
             for specView in self.strip.spectrumViews:
                 validPeakListViews = [pp.peakList.pid for pp in specView.peakListViews
-                                      if pp.isVisible()
-                                      and specView.isVisible()]
+                                      if pp.isDisplayed
+                                      and specView.isDisplayed]
                 validIntegralListViews = [pp.integralList.pid for pp in specView.integralListViews
-                                          if pp.isVisible()
-                                          and specView.isVisible()]
+                                          if pp.isDisplayed
+                                          and specView.isDisplayed]
                 validMultipletListViews = [pp.multipletList.pid for pp in specView.multipletListViews
-                                           if pp.isVisible()
-                                           and specView.isVisible()]
+                                           if pp.isDisplayed
+                                           and specView.isDisplayed]
                 pidList.extend(validPeakListViews)
                 pidList.extend(validIntegralListViews)
                 pidList.extend(validMultipletListViews)
-                if specView.isVisible():
+                if specView.isDisplayed:
                     pidList.append(specView.spectrum.pid)
 
             self.treeView.selectObjects(pidList)

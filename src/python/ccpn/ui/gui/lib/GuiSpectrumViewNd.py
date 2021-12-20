@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-13 10:03:45 +0000 (Mon, December 13, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 18:47:15 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -130,7 +130,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         """
         # CCPN INTERNAL - called in _updatePhasing method of GuiStrip
         """
-        if not self.isVisible():
+        if not self.isDisplayed:
             return
 
     @property

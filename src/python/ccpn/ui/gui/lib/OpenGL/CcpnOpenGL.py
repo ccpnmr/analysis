@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-17 13:13:36 +0000 (Fri, December 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 18:47:15 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2142,7 +2142,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def mousePressIn1DArea(self, regions):
         cursorCoordinate = self.getCurrentCursorCoordinate()
         for region in regions:
-            if region._objectView and not region._objectView.isVisible():
+            if region._objectView and not region._objectView.isDisplayed:
                 continue
 
             if isinstance(region._object, Integral):
@@ -2169,7 +2169,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def mousePressInRegion(self, regions):
         cursorCoordinate = self.getCurrentCursorCoordinate()
         for region in regions:
-            if region._objectView and not region._objectView.isVisible():
+            if region._objectView and not region._objectView.isDisplayed:
                 continue
 
             if region.visible and region.movable:
@@ -2220,7 +2220,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def mousePressInfiniteLine(self, regions):
         cursorCoordinate = self.getCurrentCursorCoordinate()
         for region in regions:
-            if region._objectView and not region._objectView.isVisible():
+            if region._objectView and not region._objectView.isDisplayed:
                 continue
 
             if region.visible and region.movable and region.values == region.values:  # nan/inf check
@@ -2247,8 +2247,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # for reg in self._GLIntegralLists.values():
         for reg in self._GLIntegrals._GLSymbols.values():
-            if not reg.integralListView.isVisible() or \
-                    not reg.spectrumView.isVisible():
+            if not reg.integralListView.isDisplayed or \
+                    not reg.spectrumView.isDisplayed:
                 continue
 
             integralPressed = self.mousePressInRegion(reg._regions)
@@ -2350,7 +2350,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     self._maxBounds = [None, None]
 
                 # get the list of visible spectrumViews, or the first in the list
-                visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+                visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isDisplayed]
 
                 for specView in visibleSpectrumViews:
                     specSettings = self._spectrumSettings[specView]
@@ -3380,7 +3380,7 @@ class CcpnGLWidget(QOpenGLWidget):
         """Build the visible axis codes from the visible spectra appending wildcard as required
         """
         _visibleSpec = [(specView, self._spectrumSettings[specView]) for specView in self._ordering
-                        if not specView.isDeleted and specView.isVisible() and
+                        if not specView.isDeleted and specView.isDisplayed and
                         specView in self._spectrumSettings]
         _firstVisible = ((self._ordering[0], self._spectrumSettings[self._ordering[0]]),) if self._ordering and not self._ordering[0].isDeleted and self._ordering[0] in self._spectrumSettings else ()
         self._visibleOrderingDict = _visibleSpec or _firstVisible
@@ -4211,7 +4211,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 self._startCoordinate = cursorCoordinate
 
             # get the list of visible spectrumViews, or the first in the list
-            visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+            visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isDisplayed]
             thisSpecView = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[
                 0].isDeleted else None
 
@@ -4727,7 +4727,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 continue
 
             # only add phasing trace for the visible spectra
-            if spectrumView.isVisible():
+            if spectrumView.isDisplayed:
 
                 phasingFrame = self.spectrumDisplay.phasingFrame
 
@@ -4864,7 +4864,7 @@ class CcpnGLWidget(QOpenGLWidget):
         if phasingFrame.isVisible():
 
             for hTrace in self._staticHTraces:
-                if hTrace.spectrumView and not hTrace.spectrumView.isDeleted and hTrace.spectrumView.isVisible():
+                if hTrace.spectrumView and not hTrace.spectrumView.isDeleted and hTrace.spectrumView.isDisplayed:
 
                     if self._stackingMode:
                         # use the stacking matrix to offset the 1D spectra
@@ -4873,7 +4873,7 @@ class CcpnGLWidget(QOpenGLWidget):
                     hTrace.drawVertexColorVBO()
 
             for vTrace in self._staticVTraces:
-                if vTrace.spectrumView and not vTrace.spectrumView.isDeleted and vTrace.spectrumView.isVisible():
+                if vTrace.spectrumView and not vTrace.spectrumView.isDeleted and vTrace.spectrumView.isDisplayed:
                     # vTrace.drawVertexColor()
 
                     if self._stackingMode:
@@ -5034,7 +5034,7 @@ class CcpnGLWidget(QOpenGLWidget):
         if gridGLList.renderMode == GLRENDERMODE_REBUILD:
 
             # get the list of visible spectrumViews, or the first in the list
-            visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+            visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isDisplayed]
             thisSpecView = visibleSpectrumViews[0] if visibleSpectrumViews else self._ordering[0] if self._ordering and not self._ordering[
                 0].isDeleted else None
 
@@ -6271,7 +6271,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 continue
 
             for peakListView in spectrumView.peakListViews:
-                if not peakListView.isVisible() or not spectrumView.isVisible():
+                if not peakListView.isDisplayed() or not spectrumView.isDisplayed():
                     continue
 
                 peakList = peakListView.peakList
@@ -6322,7 +6322,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 continue
 
             for multipletListView in spectrumView.multipletListViews:
-                if not multipletListView.isVisible() or not spectrumView.isVisible():
+                if not multipletListView.isDisplayed() or not spectrumView.isDisplayed():
                     continue
 
                 multipletList = multipletListView.multipletList

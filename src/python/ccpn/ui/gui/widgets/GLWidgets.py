@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-17 13:13:36 +0000 (Fri, December 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 18:47:16 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -66,7 +66,7 @@ class GuiNdWidget(CcpnGLWidget):
 
         for spectrumView in self.strip.spectrumViews:
             for peakListView in spectrumView.peakListViews:
-                if spectrumView.isVisible() and peakListView.isVisible():
+                if spectrumView.isDisplayed and peakListView.isDisplayed:
 
                     peakList = peakListView.peakList
 
@@ -116,7 +116,7 @@ class GuiNdWidget(CcpnGLWidget):
         for spectrumView in self.strip.spectrumViews:
 
             for multipletListView in spectrumView.multipletListViews:
-                if spectrumView.isVisible() and multipletListView.isVisible():
+                if spectrumView.isDisplayed and multipletListView.isDisplayed:
 
                     multipletList = multipletListView.multipletList
 
@@ -164,7 +164,7 @@ class GuiNdWidget(CcpnGLWidget):
         """
 
         # make the list of ordered spectrumViews
-        self._ordering = self.strip.orderedSpectrumViews
+        self._ordering = self.strip.getSpectrumViews()
 
         # GWV: removed as new data reader returns zeros; blank spectra can be displayed
         # self._ordering = [specView for specView in self._ordering if specView.spectrum.hasValidPath()]
@@ -177,8 +177,8 @@ class GuiNdWidget(CcpnGLWidget):
                 self._spectrumLabelling.removeString(specView)
 
         # make a list of the visible and not-deleted spectrumViews
-        # visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
-        visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+        # visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isDisplayed]
+        visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isDisplayed]
 
         self._visibleOrdering = visibleSpectrumViews
 
@@ -331,7 +331,7 @@ class GuiNdWidget(CcpnGLWidget):
             if specView.isDeleted:
                 continue
 
-            if specView.isVisible() and specView in self._spectrumSettings.keys():
+            if specView.isDisplayed and specView in self._spectrumSettings.keys():
                 # set correct transform when drawing this contour
 
                 specSettings = self._spectrumSettings[specView]
@@ -417,7 +417,7 @@ class GuiNdWidget(CcpnGLWidget):
             if specView.isDeleted:
                 continue
 
-            if specView.isVisible() and specView in self._spectrumSettings.keys():
+            if specView.isDisplayed and specView in self._spectrumSettings.keys():
                 specSettings = self._spectrumSettings[specView]
                 # pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
                 # if None in pIndex:
@@ -503,7 +503,7 @@ class GuiNdWidget(CcpnGLWidget):
                 if spectrumView.isDeleted:
                     continue
 
-                if spectrumView.isVisible() and spectrumView.spectrum.dimensionCount > 1 and spectrumView in self._spectrumSettings.keys():
+                if spectrumView.isDisplayed and spectrumView.spectrum.dimensionCount > 1 and spectrumView in self._spectrumSettings.keys():
                     specSettings = self._spectrumSettings[spectrumView]
 
                     fxMin, _ = specSettings[GLDefs.SPECTRUM_XFOLDLIMITS]
@@ -569,7 +569,7 @@ class GuiNdWidget(CcpnGLWidget):
             if spectrumView.spectrum is None or (spectrumView.spectrum and spectrumView.spectrum.isDeleted):
                 continue
 
-            if spectrumView.isVisible() and spectrumView in self._spectrumSettings.keys():
+            if spectrumView.isDisplayed and spectrumView in self._spectrumSettings.keys():
 
                 # set correct transform when drawing this contour
                 if spectrumView.spectrum.displayFoldedContours:
@@ -674,7 +674,7 @@ class GuiNdWidget(CcpnGLWidget):
             if spectrumView.isDeleted:
                 continue
 
-            if spectrumView.isVisible() and spectrumView in self._spectrumSettings.keys():
+            if spectrumView.isDisplayed and spectrumView in self._spectrumSettings.keys():
                 specSettings = self._spectrumSettings[spectrumView]
                 pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
 
@@ -926,7 +926,7 @@ class Gui1dWidget(CcpnGLWidget):
         peaks = []
         for spectrumView in self.strip.spectrumViews:
             for peakListView in spectrumView.peakListViews:
-                if spectrumView.isVisible() and peakListView.isVisible():
+                if spectrumView.isDisplayed and peakListView.isDisplayed:
 
                     peakList = peakListView.peakList
 
@@ -948,7 +948,7 @@ class Gui1dWidget(CcpnGLWidget):
 
         if not self._stackingMode and not (self.is1D and self.strip._isPhasingOn):
             for reg in self._GLIntegrals._GLSymbols.values():
-                if not reg.integralListView.isVisible() or not reg.spectrumView.isVisible():
+                if not reg.integralListView.isDisplayed or not reg.spectrumView.isDisplayed:
                     continue
                 integralPressed = self.mousePressIn1DArea(reg._regions)
                 if integralPressed:
@@ -970,7 +970,7 @@ class Gui1dWidget(CcpnGLWidget):
         multiplets = []
         for spectrumView in self.strip.spectrumViews:
             for multipletListView in spectrumView.multipletListViews:
-                if spectrumView.isVisible() and multipletListView.isVisible():
+                if spectrumView.isDisplayed and multipletListView.isDisplayed:
 
                     multipletList = multipletListView.multipletList
 
@@ -1127,7 +1127,7 @@ class Gui1dWidget(CcpnGLWidget):
         """
 
         # make the list of ordered spectrumViews
-        self._ordering = self.strip.orderedSpectrumViews
+        self._ordering = self.strip.getSpectrumViews()
 
         self._ordering = [specView for specView in self._ordering]
 
@@ -1141,8 +1141,8 @@ class Gui1dWidget(CcpnGLWidget):
                 self._spectrumLabelling.removeString(specView)
 
         # make a list of the visible and not-deleted spectrumViews
-        # visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
-        visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isVisible()]
+        # visibleSpectra = [specView.spectrum for specView in self._ordering if not specView.isDeleted and specView.isDisplayed]
+        visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isDisplayed]
 
         self._visibleOrdering = visibleSpectrumViews
 
@@ -1208,7 +1208,7 @@ class Gui1dWidget(CcpnGLWidget):
             if specView.isDeleted:
                 continue
 
-            if specView.isVisible() and specView in self._spectrumSettings.keys():
+            if specView.isDisplayed and specView in self._spectrumSettings.keys():
                 specSettings = self._spectrumSettings[specView]
 
                 # should move this to buildSpectrumSettings
@@ -1273,7 +1273,7 @@ class Gui1dWidget(CcpnGLWidget):
             if specView.isDeleted:
                 continue
 
-            if specView.isVisible() and specView in self._spectrumSettings.keys():
+            if specView.isDisplayed and specView in self._spectrumSettings.keys():
                 specSettings = self._spectrumSettings[specView]
 
                 # should move this to buildSpectrumSettings
@@ -1321,7 +1321,7 @@ class Gui1dWidget(CcpnGLWidget):
             if specView.isDeleted:
                 continue
 
-            if specView.isVisible():
+            if specView.isDisplayed:
                 self._GLIntegrals.drawLabels(specView)
 
     def drawBoundingBoxes(self):
@@ -1345,7 +1345,7 @@ class Gui1dWidget(CcpnGLWidget):
 
         _visibleSpecs = [specView for specView in self._ordering
                          if not specView.isDeleted and
-                         specView.isVisible() and
+                         specView.isDisplayed and
                          specView._showContours and
                          specView in self._spectrumSettings.keys() and
                          specView in self._contourList.keys() and
@@ -1358,7 +1358,7 @@ class Gui1dWidget(CcpnGLWidget):
         #     if not spectrumView._showContours:
         #         continue
         #
-        #     if spectrumView.isVisible() and spectrumView in self._spectrumSettings.keys():
+        #     if spectrumView.isDisplayed and spectrumView in self._spectrumSettings.keys():
         #         # set correct transform when drawing this contour
         #
         #         if spectrumView in self._contourList.keys() and \
@@ -1396,7 +1396,7 @@ class Gui1dWidget(CcpnGLWidget):
             # only draw the traces for the spectra that are visible
             specTraces = [trace.spectrumView for trace in self._staticHTraces]
 
-            if spectrumView.isVisible() and spectrumView in self._spectrumSettings.keys():
+            if spectrumView.isDisplayed and spectrumView in self._spectrumSettings.keys():
 
                 # set correct transform when drawing this contour
                 if spectrumView.spectrum.displayFoldedContours:

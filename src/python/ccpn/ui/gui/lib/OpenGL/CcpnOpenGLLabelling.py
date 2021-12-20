@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-14 12:10:14 +0100 (Thu, October 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 18:47:15 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -128,8 +128,8 @@ class GLLabelling():
                            for lv in self.listViews(specView)
                            if not lv.isDeleted]
         self._visibleListViews = [(lv, specView) for lv, specView in self._listViews
-                                  if lv.isVisible()
-                                  and specView.isVisible()]
+                                  if lv.isDisplayed
+                                  and specView.isDisplayed]
         # and lv in self._GLSymbols.keys()]
         self._ordering = spectrumViews
 

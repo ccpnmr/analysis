@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-07 20:05:58 +0100 (Thu, October 07, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 18:47:15 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -237,7 +237,7 @@ class GuiStrip1d(GuiStrip):
         ph1 = values.get('ph1')
         pivot = values.get('pivot')
         spectrumViews = self.spectrumViews
-        for spectrum in [view.spectrum for view in spectrumViews if view.isVisible()]:
+        for spectrum in [sv.spectrum for sv in spectrumViews if sv.isDisplayed]:
             intensities = Phasing.phaseRealData(spectrum.intensities, ph0, ph1, pivot)
             spectrum.intensities = intensities
         self.spectrumDisplay.togglePhaseConsole()

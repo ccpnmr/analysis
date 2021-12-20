@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-17 13:13:36 +0000 (Fri, December 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 18:47:16 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -106,14 +106,16 @@ class SpectrumToolBar(ToolBar):
                 for coreObj, viewObj in dd.items():
                     smenu = contextMenu.addMenu(coreObj.className)
                     allViews = []
+                    # list to check for duplicate objectLists
+                    _found = []
                     vv = getattr(self.widget, viewObj._pluralLinkName)
                     if vv:
                         for view in vv:
                             s = coreObj.className
                             o = getattr(view, s[0].lower() + s[1:])
-                            if o:
-                                if o._parent == spectrum:
-                                    allViews.append(view)
+                            if o and o._parent == spectrum and o not in _found:
+                                allViews.append(view)
+                                _found.append(o)
                     views = list(set(allViews))
                     smenu.setEnabled(len(views) > 0)
 
@@ -132,6 +134,7 @@ class SpectrumToolBar(ToolBar):
 
                     smenu.addSeparator()
                     for view in sorted(views, reverse=False):
+                        print(f'     menu views {coreObj}   {viewObj}   {view}')
                         ccpnObj = view._childClass
                         strip = view._parent._parent
                         toolTip = 'Toggle {0} {1} on strip {2}'.format(coreObj.className, ccpnObj._key, strip.id)
@@ -145,9 +148,9 @@ class SpectrumToolBar(ToolBar):
                                 action = smenu.addItem(ccpnObj.id, toolTip=toolTip)
 
                             action.setCheckable(True)
-                            if view.isVisible():
+                            if view.isDisplayed:
                                 action.setChecked(True)
-                            action.toggled.connect(view.setVisible)
+                            action.toggled.connect(view.setDisplayed)
                             action.toggled.connect(self._updateGl)
 
     def _spectrumToolBarItem(self, button):
@@ -423,6 +426,8 @@ class SpectrumToolBar(ToolBar):
         spectrum = spectrumView.spectrum
         spectrumName = spectrum.name
 
+        print(f'   _setupAction   {spectrumView}   {spectrumView.isDisplayed}')
+
         # create new action
         _actions = [action for action in self.actions() if action and action.objectName() == spectrum.pid]
         if len(_actions) > 1:
@@ -435,7 +440,7 @@ class SpectrumToolBar(ToolBar):
         action.setObjectName(spectrum.pid)
 
         action.setCheckable(True)
-        action.setChecked(True)
+        action.setChecked(spectrumView.isDisplayed)
         action.setToolTip(spectrum.name)
 
         # get the attached widget
@@ -452,15 +457,15 @@ class SpectrumToolBar(ToolBar):
         # NOTE:ED - UPDATE, the following call sets the icon colours:
         _spectrumViewHasChanged({Notifier.OBJECT: spectrumView})
 
-        action.toggled.connect(partial(self._toggleSpectrumViews, spectrum))
+        action.toggled.connect(partial(self._toggleSpectrumViews, spectrum, action))
         setWidgetFont(action, size='SMALL')
 
-    def _toggleSpectrumViews(self, spectrum, visible):
+    def _toggleSpectrumViews(self, spectrum, action, state):
         """Toggle visibility of spectrumViews attached to this spectrum in the same spectrumDisplay
         """
         specViews = [sv for sv in self.widget.spectrumViews if sv.spectrum == spectrum]
         for sv in specViews:
-            sv.setVisible(visible)
+            sv.setVisible(state)
 
     def _addSpectrumViewToolButtons(self, spectrumView):
         _strip = spectrumView.strip
@@ -484,7 +489,7 @@ class SpectrumToolBar(ToolBar):
                     # try and find the spectrumView in the orderedlist - for undo function
                     # oldList = spectrumDisplay.orderedSpectrumViews(spectrumDisplay.spectrumViews)
                     # NOTE:ED - not tested as gui undo disabled
-                    oldList = _strip.orderedSpectrumViews
+                    oldList = _strip.getSpectrumViews()
                     if spectrumView in oldList:
                         oldIndex = oldList.index(spectrumView)
                     else:
@@ -506,7 +511,7 @@ class SpectrumToolBar(ToolBar):
                     action.setObjectName(spectrum.pid)
 
                 action.setCheckable(True)
-                action.setChecked(True)
+                action.setChecked(spectrumView.isDisplayed)
                 action.setToolTip(spectrum.name)
                 widget = self.widgetForAction(action)
 

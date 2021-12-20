@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-22 16:51:30 +0000 (Mon, November 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 18:47:15 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -334,7 +334,7 @@ class GuiWindow():
                         if cursorPosition is not None:
                             limits = [cursorPosition[0], cursorPosition[0] + 0.01]
 
-                            validViews = [sv for sv in strip.spectrumViews if sv.isVisible()]
+                            validViews = [sv for sv in strip.spectrumViews if sv.isDisplayed]
                             currentIntegrals = list(self.current.integrals)
                             for spectrumView in validViews:
 
@@ -342,7 +342,7 @@ class GuiWindow():
                                     spectrumView.spectrum.newIntegralList()
 
                                 # stupid bug! mixing views and lists
-                                validIntegralLists = [ilv.integralList for ilv in spectrumView.integralListViews if ilv.isVisible()]
+                                validIntegralLists = [ilv.integralList for ilv in spectrumView.integralListViews if ilv.isDisplayed]
 
                                 for integralList in validIntegralLists:
 
@@ -443,7 +443,7 @@ class GuiWindow():
                 strip = self.application.current.strip
         if strip and not strip.isDeleted:
             spectra = [spectrumView.spectrum for spectrumView in strip.spectrumViews
-                       if spectrumView.isVisible()]
+                       if spectrumView.isDisplayed]
             listOfPeaks = [peakList.peaks for spectrum in spectra for peakList in spectrum.peakLists]
 
             self.application.current.peaks = [peak for peaks in listOfPeaks for peak in peaks]
@@ -455,7 +455,7 @@ class GuiWindow():
         with undoBlockWithoutSideBar():
             if strip and strip.spectrumDisplay:
                 spectra = [spectrumView.spectrum for spectrumView in
-                           strip.spectrumViews if spectrumView.isVisible()]
+                           strip.spectrumViews if spectrumView.isDisplayed]
                 for spectrum in spectra:
                     if len(spectrum.multipletLists) < 1:
                         multipletList = spectrum.newMultipletList()

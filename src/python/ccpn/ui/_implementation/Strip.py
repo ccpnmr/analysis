@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-17 13:13:35 +0000 (Fri, December 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 18:47:14 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -156,13 +156,11 @@ class Strip(AbstractWrapperObject):
         """The spectra attached to the strip (whether display is currently turned on  or not)"""
         return tuple(x.spectrum for x in self.spectrumViews)
 
-    @property
-    def orderedSpectra(self) -> Tuple[Spectrum, ...]:
+    def getSpectra(self) -> Tuple[Spectrum, ...]:
         """The spectra attached to the strip (whether display is currently turned on or not) in display order"""
         return self._parent._orderedSpectrumViews(self.spectra)
 
-    @property
-    def orderedSpectrumViews(self) -> Tuple['SpectrumView', ...]:
+    def getSpectrumViews(self) -> Tuple['SpectrumView', ...]:
         """The spectrumViews attached to the strip (whether display is currently turned on or not) in display order"""
         return self._parent._orderedSpectrumViews(self.spectrumViews)
 
@@ -429,11 +427,11 @@ class Strip(AbstractWrapperObject):
             axisDict = {axis: ppm for axis, ppm in zip(self.axisCodes, ppmPositions)}
 
             # loop through the visible spectra
-            for spectrumView in (v for v in self.spectrumViews if v.isVisible()):
+            for spectrumView in (v for v in self.spectrumViews if v.isDisplayed):
 
                 spectrum = spectrumView.spectrum
                 # get the list of visible peakLists
-                validPeakListViews = [pp for pp in spectrumView.peakListViews if pp.isVisible()]
+                validPeakListViews = [pp for pp in spectrumView.peakListViews if pp.isDisplayed]
                 if not validPeakListViews:
                     continue
 
@@ -467,12 +465,12 @@ class Strip(AbstractWrapperObject):
             axisDict = {axis: ppms for axis, ppms in zip(self.axisCodes, ppmRegions)}
 
             # loop through the visible spectra
-            for spectrumView in (v for v in self.spectrumViews if v.isVisible()):
+            for spectrumView in (v for v in self.spectrumViews if v.isDisplayed):
 
                 spectrum = spectrumView.spectrum
 
                 # get the list of visible peakLists
-                validPeakListViews = [pp for pp in spectrumView.peakListViews if pp.isVisible()]
+                validPeakListViews = [pp for pp in spectrumView.peakListViews if pp.isDisplayed]
                 if not validPeakListViews:
                     continue
 

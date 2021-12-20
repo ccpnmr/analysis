@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-20 18:52:57 +0000 (Mon, December 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 18:57:14 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -134,7 +134,6 @@ class SpectrumToolBar(ToolBar):
 
                     smenu.addSeparator()
                     for view in sorted(views, reverse=False):
-                        print(f'     menu views {coreObj}   {viewObj}   {view}')
                         ccpnObj = view._childClass
                         strip = view._parent._parent
                         toolTip = 'Toggle {0} {1} on strip {2}'.format(coreObj.className, ccpnObj._key, strip.id)

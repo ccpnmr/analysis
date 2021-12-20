@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-20 09:30:08 +0000 (Mon, December 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 09:49:51 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -81,19 +81,12 @@ class Strip(AbstractWrapperObject):
     def __init__(self, project, wrappedData):
         super().__init__(project=project, wrappedData=wrappedData)
 
-    @classmethod
-    def _restoreObject(cls, project, apiObj):
-        """Subclassed to allow for initialisations on restore
-        """
-        result = super()._restoreObject(project, apiObj)
-
-        # # move everything from stripHeaderDict in one operation - same names
-        # STRIPDICT = 'stripHeaderDict'
-        # space = result._ccpnInternalData.pop(STRIPDICT, None)
-        # if space is not None:
-        #     result._ccpnInternalData[result._CCPNMR_NAMESPACE].update(space)
-        #
-        return result
+    # @classmethod
+    # def _restoreObject(cls, project, apiObj):
+    #     """Subclassed to allow for initialisations on restore
+    #     """
+    #     result = super()._restoreObject(project, apiObj)
+    #     return result
 
     @property
     def spectrumDisplay(self) -> SpectrumDisplay:

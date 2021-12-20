@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-20 09:30:08 +0000 (Mon, December 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 09:49:51 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -175,3 +175,25 @@ def _updateStrip_3_0_4_to_3_1_0(strip):
         strip._ccpnInternalData[strip._CCPNMR_NAMESPACE].update(space)
 
     return strip
+
+def _updateSpectumDisplay_3_0_4_to_3_1_0(spectrumDisplay):
+    """Update the spectrumDisplay object from 3.0.4 to 3.1.0
+    move the internal parameter to the internal namespace
+    """
+    SPECTRUMGROUPS = 'spectrumGroups'
+    SPECTRUMISGROUPED = 'spectrumIsGrouped'
+    SPECTRUMGROUPLIST = 'spectrumGroupList'
+    SPECTRUMDISPLAY = 'spectrumDisplay'
+    STRIPARRANGEMENT = 'stripArrangement'
+    ZPLANENAVIGATIONMODE = 'zPlaneNavigationMode'
+
+    for namespace, param, newVar in [(SPECTRUMGROUPS, SPECTRUMISGROUPED, spectrumDisplay._ISGROUPED),
+                                     (SPECTRUMGROUPS, SPECTRUMGROUPLIST, spectrumDisplay._SPECTRUMGROUPS),
+                                     (SPECTRUMDISPLAY, STRIPARRANGEMENT, spectrumDisplay._STRIPARRANGEMENT),
+                                     (SPECTRUMDISPLAY, ZPLANENAVIGATIONMODE, spectrumDisplay._ZPLANENAVIGATIONMODE),
+                                     ]:
+        if spectrumDisplay.hasParameter(namespace, param):
+            # move the internal parameter to the internal namespace
+            value = spectrumDisplay.getParameter(namespace, param)
+            spectrumDisplay.deleteParameter(namespace, param)
+            spectrumDisplay._setInternalParameter(newVar, value)

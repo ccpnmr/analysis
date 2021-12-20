@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-18 14:57:09 +0000 (Sat, December 18, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 09:49:51 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -48,6 +48,13 @@ from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, undoBloc
 from ccpn.util.Logging import getLogger
 
 
+from ccpn.core._implementation.updates.update_3_0_4 import _updateSpectumDisplay_3_0_4_to_3_1_0
+from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_OBJECT_INITIALISATION
+
+@updateObject(fromVersion='3.0.4',
+              toVersion='3.1.0',
+              updateFunction=_updateSpectumDisplay_3_0_4_to_3_1_0,
+              updateMethod=UPDATE_POST_OBJECT_INITIALISATION)
 class SpectrumDisplay(AbstractWrapperObject):
     """Spectrum display for 1D or nD spectrum"""
 
@@ -98,24 +105,6 @@ class SpectrumDisplay(AbstractWrapperObject):
         """Subclassed to allow for initialisations on restore
         """
         result = super()._restoreObject(project, apiObj)
-
-        SPECTRUMGROUPS = 'spectrumGroups'
-        SPECTRUMISGROUPED = 'spectrumIsGrouped'
-        SPECTRUMGROUPLIST = 'spectrumGroupList'
-        SPECTRUMDISPLAY = 'spectrumDisplay'
-        STRIPARRANGEMENT = 'stripArrangement'
-        ZPLANENAVIGATIONMODE = 'zPlaneNavigationMode'
-
-        for namespace, param, newVar in [(SPECTRUMGROUPS, SPECTRUMISGROUPED, result._ISGROUPED),
-                                         (SPECTRUMGROUPS, SPECTRUMGROUPLIST, result._SPECTRUMGROUPS),
-                                         (SPECTRUMDISPLAY, STRIPARRANGEMENT, result._STRIPARRANGEMENT),
-                                         (SPECTRUMDISPLAY, ZPLANENAVIGATIONMODE, result._ZPLANENAVIGATIONMODE),
-                                         ]:
-            if result.hasParameter(namespace, param):
-                # move the internal parameter to the correct namespace
-                value = result.getParameter(namespace, param)
-                result.deleteParameter(namespace, param)
-                result._setInternalParameter(newVar, value)
 
         result._spectrumViewVisibleChanged()
 

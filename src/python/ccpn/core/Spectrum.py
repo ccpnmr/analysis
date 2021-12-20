@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-16 16:20:22 +0000 (Thu, December 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 12:31:11 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -705,8 +705,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             return
 
         newDataStore, newDataSource = self._getDataSourceFromPath(path=value)
-        if newDataStore is None or newDataSource is None:
-            raise ValueError('Spectrum.filePath: incompatible file "%s"' % value)
+        if newDataStore is None:
+            raise ValueError('Spectrum.filePath: %s invalid filePath "%s"' %
+                             (self, value))
+        if newDataSource is None:
+            raise ValueError('Spectrum.filePath: %s incompatible dataSource "%s"' %
+                             (self, value))
 
         # we found a valid new file
         self.setTraitValue('_dataSource', newDataSource, force=True)
@@ -2637,6 +2641,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                 if dataSource.pointCounts[idx] != np:
                     raise RuntimeError('Spectrum._getDataSource: incompatible pointsCount[%s] = %s of "%s"' %
                                        (idx, dataSource.pointCounts[idx], dataStore.aPath()))
+
+            for isC_spectrum, isC_dataSource in zip(self.isComplex, dataSource.isComplex):
+                if isC_spectrum != isC_dataSource:
+                    raise RuntimeError('Spectrum._getDataSource: incompatible isComplex definitions; %s has %r ; %s has %r' %
+                                       (self, self.isComplex, dataSource, dataSource.isComplex))
+
 
             dataSource.spectrum = self
 

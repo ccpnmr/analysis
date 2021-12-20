@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-09 12:07:13 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 18:41:36 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -564,7 +564,7 @@ class AbstractWrapperObject(NotifierBase):
 
     @staticmethod
     def _str2none(value):
-        """Covenience to convert an empty string to None; V2 requirement for some attributes
+        """Convenience to convert an empty string to None; V2 requirement for some attributes
         """
         if value is None:
             return None
@@ -574,7 +574,7 @@ class AbstractWrapperObject(NotifierBase):
 
     @staticmethod
     def _none2str(value):
-        """Covenience to None return to an empty string; V2 requirement for some attributes
+        """Convenience to None return to an empty string; V2 requirement for some attributes
         """
         return '' if value is None else value
 

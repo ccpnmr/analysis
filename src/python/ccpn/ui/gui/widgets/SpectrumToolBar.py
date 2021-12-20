@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-20 18:47:16 +0000 (Mon, December 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 18:52:57 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -425,8 +425,6 @@ class SpectrumToolBar(ToolBar):
         """
         spectrum = spectrumView.spectrum
         spectrumName = spectrum.name
-
-        print(f'   _setupAction   {spectrumView}   {spectrumView.isDisplayed}')
 
         # create new action
         _actions = [action for action in self.actions() if action and action.objectName() == spectrum.pid]

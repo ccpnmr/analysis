@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-15 14:03:04 +0000 (Wed, December 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-20 09:30:08 +0000 (Mon, December 20, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,13 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, newObject
 
+from ccpn.core._implementation.updates.update_3_0_4 import _updateStrip_3_0_4_to_3_1_0
+from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_OBJECT_INITIALISATION
 
+@updateObject(fromVersion='3.0.4',
+              toVersion='3.1.0',
+              updateFunction=_updateStrip_3_0_4_to_3_1_0,
+              updateMethod=UPDATE_POST_OBJECT_INITIALISATION)
 class Strip(AbstractWrapperObject):
     """Display Strip for 1D or nD spectrum"""
 
@@ -80,14 +86,13 @@ class Strip(AbstractWrapperObject):
         """Subclassed to allow for initialisations on restore
         """
         result = super()._restoreObject(project, apiObj)
-        # result._isotopeCodes = tuple(result.spectrumViews[0]._getByDisplayOrder('isotopeCodes'))
 
-        # move everything from stripHeaderDict in one operation - same names
-        STRIPDICT = 'stripHeaderDict'
-        space = result._ccpnInternalData.pop(STRIPDICT, None)
-        if space is not None:
-            result._ccpnInternalData[result._CCPNMR_NAMESPACE].update(space)
-
+        # # move everything from stripHeaderDict in one operation - same names
+        # STRIPDICT = 'stripHeaderDict'
+        # space = result._ccpnInternalData.pop(STRIPDICT, None)
+        # if space is not None:
+        #     result._ccpnInternalData[result._CCPNMR_NAMESPACE].update(space)
+        #
         return result
 
     @property

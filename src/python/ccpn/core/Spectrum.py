@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-20 12:31:11 +0000 (Mon, December 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-21 10:52:53 +0000 (Tue, December 21, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -384,7 +384,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """Convenience: return a tuple of triples (dimensionIndex, axisCode, dimension) for each dimension
 
         Useful for iterating over axis codes; eg in an H-N-CO ordered spectrum
-            for axis, axisCode, dimension in self.getByAxisCodes('dimensionTriples', ('N','C','H'), exactMatch=False)
+            for dimIndex, axisCode, dimension in self.getByAxisCodes('dimensionTriples', ('N','C','H'), exactMatch=False)
 
             would yield:
                 (1, 'N', 2)
@@ -1712,128 +1712,170 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             raise ValueError('axisCodes %s contains an invalid element' % str(axisCodes))
         return [axisCodeMap[a] for a in axisCodes]
 
-    def _reorderValues(self, values: Sequence, newAxisCodeOrder: Sequence[str]):
-        """Reorder values in spectrum dimension order to newAxisCodeOrder
-        """
-        mapping = dict((axisCode, i) for i, axisCode in enumerate(self.axisCodes))
-        # assemble the newValues in order
-        newValues = []
-        for axisCode in newAxisCodeOrder:
-            if axisCode in mapping:
-                newValues.append(values[mapping[axisCode]])
-            else:
-                raise ValueError('Invalid axisCode "%s" in %s; should be one of %s' %
-                                 (axisCode, newAxisCodeOrder, self.axisCodes))
-        return newValues
-
-    def getByAxisCodes(self, parameterName: str, axisCodes: Sequence[str] = None, exactMatch: bool = False, matchLength: bool = True):
-        """Return values defined by attributeName in order defined by axisCodes:
-        (default order if None).
-
+    def orderByAxisCodes(self, iterable, axisCodes: Sequence[str] = None, exactMatch: bool = False, matchLength: bool = True) -> list:
+        """Return a list with values of an iterable in order defined by axisCodes (default order if None).
         Perform a mapping if exactMatch=False (eg. 'H' to 'Hn')
 
-        NB: Use getByDimensions for dimensions (1..dimensionCount) based access
+        :param iterable: an iterable (tuple, list)
+        :param axisCodes: a tuple or list of axisCodes
+        :param exactMatch: a boolean optional testing for an exact match with the instance axisCodes
+        :return: the values defined by iterable in axisCode order
+
+        Related:
+        Use getByDimensions() for dimensions (1..dimensionCount) based access of dimensional parameters of the
+            Spectrum class.
+        Use getByAxisCodes() for axisCode based access of dimensional parameters of the Spectrum class.
         """
-        if not hasattr(self, parameterName):
-            raise ValueError('%s does not have parameter "%s"' % (self, parameterName))
+        from ccpn.core.lib.SpectrumLib import _orderByDimensions
 
-        if not isIterable(axisCodes):
-            raise ValueError('axisCodes is not iterable "%s"; expected list or tuple' % axisCodes)
+        if axisCodes is None:
+            axisCodes = self.axisCodes
 
-        if axisCodes is not None and not exactMatch:
-            if (_axisCodes := self._mapAxisCodes(axisCodes)) is None:
-                raise ValueError('Failed mapping axisCodes "%s"' % axisCodes)
-            axisCodes = _axisCodes
+        else:
+            # do some optional axis code matching
+            if not isIterable(axisCodes):
+                raise ValueError('%s.orderByAxisCodes: axisCodes is not iterable "%s"; expected list or tuple' %
+                                 (self.className, axisCodes))
+            if not exactMatch:
+                if (_axisCodes := self._mapAxisCodes(axisCodes)) is None:
+                    raise ValueError('%s.orderByAxisCodes: Failed mapping axisCodes "%s"' %
+                                     (self.className, axisCodes))
+                axisCodes = _axisCodes
 
-        try:
-            values = getattr(self, parameterName)
-        except AttributeError:
-            raise ValueError('Error getting parameter "%s" from %s' % (parameterName, self))
-        if not isIterable(values):
-            raise ValueError('Parameter "%s" of %s is not iterable; "%s"' % (parameterName, self, values))
+        # we now should have valid axisCodes
+        for ac in axisCodes:
+            if not ac in self.axisCodes:
+                raise ValueError('%s.orderByAxisCodes: invalid axisCode "%s" in %r' %
+                                 (self.className, ac, axisCodes))
 
-        if axisCodes is not None:
-            # change to order defined by axisCodes
-            values = self._reorderValues(values, axisCodes[:self.dimensionCount] if matchLength else axisCodes)
+        # create an (axisCode, dimension) mapping
+        mapping = dict([(ac, dim) for dimIndx, ac, dim in self.dimensionTriples])
+        # get the dimensions in axisCode order
+        dimensions = [mapping[ac] for ac in axisCodes]
+        # get the values of iterable in axisCode order
+        values = _orderByDimensions(iterable, dimensions=dimensions, dimensionCount=self.dimensionCount)
         return values
 
-    def setByAxisCodes(self, parameterName: str, values: Sequence, axisCodes: Sequence[str] = None, exactMatch: bool = False, matchLength: bool = True):
-        """Set attributeName to values in order defined by axisCodes:
-        (default order if None)
-
+    def getByAxisCodes(self, parameterName: str, axisCodes: Sequence[str] = None,
+                       exactMatch: bool = False, matchLength: bool = True) -> list:
+        """Return a list of values defined by parameterName in order defined by axisCodes (default order if None).
         Perform a mapping if exactMatch=False (eg. 'H' to 'Hn')
 
-        NB: Use setByDimensions for dimensions (1..dimensionCount) based access
+        :param parameterName: a str denoting a Spectrum dimensional attribute
+        :param axisCodes: a tuple or list of axisCodes
+        :param exactMatch: a boolean optional testing for an exact match with the instance axisCodes
+        :return: the values defined by parameterName in axisCode order
+
+        Related:
+        Use getByDimensions() for dimensions (1..dimensionCount) based access of dimensional parameters of the
+            Spectrum class.
         """
-        if not hasattr(self, parameterName):
-            raise ValueError('%s does not have parameter "%s"' % (self, parameterName))
+        from ccpn.core.lib.SpectrumLib import _getParameterValues
 
-        if not isIterable(values):
-            raise ValueError('Parameter "%s" of %s requires iterable; "%s"' % (parameterName, self, values))
+        if axisCodes is None:
+            dimIndices = self.dimensionIndices
+        else:
+            dimIndices = self.orderByAxisCodes(self.dimensionIndices, axisCodes=axisCodes, exactMatch=exactMatch, matchLength=matchLength)
 
-        if not isIterable(axisCodes):
-            raise ValueError('axisCodes is not iterable "%s"; expected list or tuple' % axisCodes)
-
-        if axisCodes is not None and not exactMatch:
-            axisCodes = self._mapAxisCodes(axisCodes)
-
-        if axisCodes is not None:
-            # change values to the order appropriate for spectrum
-            values = self._reorderValues(values, axisCodes[:self.dimensionCount] if matchLength else axisCodes)
         try:
-            setattr(self, parameterName, values)
-        except AttributeError:
-            raise ValueError('Unable to set parameter "%s" of %s to "%s"' % (parameterName, self, values))
+            newValues = _getParameterValues(self, parameterName, dimIndices=dimIndices, dimensionCount=self.dimensionCount)
+        except ValueError as es:
+            raise ValueError('Spectrum.getByAxisCodes: %s' % str(es))
 
-    def getByDimensions(self, parameterName: str, dimensions: Sequence[int] = None):
-        """Return values of parameterName in order defined by dimensions (1..dimensionCount).
-           (default order if None)
-           NB: Use getByAxisCodes for axisCode based access
-        """
-        if not hasattr(self, parameterName):
-            raise ValueError('Spectrum object does not have parameter "%s"' % parameterName)
-
-        values = getattr(self, parameterName)
-        if not isIterable(values):
-            raise ValueError('Parameter "%s" of %s is not iterable; "%s"' % (parameterName, self, values))
-
-        if dimensions is None:
-            return values
-
-        newValues = []
-        for dim in dimensions:
-            if not (1 <= dim <= self.dimensionCount):
-                raise ValueError('Invalid dimension "%d"; should be one of %s' % (dim, self.dimensions))
-            else:
-                newValues.append(values[dim - 1])
         return newValues
 
-    def setByDimensions(self, parameterName: str, values: Sequence, dimensions: Sequence[int] = None):
-        """Set parameterName to values as defined by dimensions (1..dimensionCount).
-           (default order if None)
-           NB: Use setByAxisCodes for axisCode based access
-        """
-        if not hasattr(self, parameterName):
-            raise ValueError('Spectrum object does not have parameter "%s"' % parameterName)
+    def setByAxisCodes(self, parameterName: str, values: Sequence, axisCodes: Sequence[str] = None,
+                       exactMatch: bool = False, matchLength: bool = True) -> list:
+        """Set attributeName to values in order defined by axisCodes (default order if None)
+        Perform a mapping if exactMatch=False (eg. 'H' to 'Hn')
 
-        if not isIterable(values):
-            raise ValueError('Parameter "%s" of %s requires iterable; "%s"' % (parameterName, self, values))
+        :param parameterName: a str denoting a Spectrum dimensional attribute
+        :param values: an iterable with values
+        :param axisCodes: a tuple or list of axisCodes
+        :param exactMatch: a boolean optional testing for an exact match with the instance axisCodes
+        :return: a list of newly set values of parameterName (in default order)
+
+        Related:
+        Use setByDimensions() for dimensions (1..dimensionCount) based setting of dimensional parameters of the
+            Spectrum class.
+        """
+        from ccpn.core.lib.SpectrumLib import _setParameterValues
+
+        if axisCodes is None:
+            dimIndices = self.dimensionIndices
+        else:
+            dimIndices = self.orderByAxisCodes(self.dimensionIndices, axisCodes=axisCodes, exactMatch=exactMatch, matchLength=matchLength)
+
+        try:
+            newValues = _setParameterValues(self, parameterName, values, dimIndices=dimIndices, dimensionCount=self.dimensionCount)
+        except ValueError as es:
+            raise ValueError('Spectrum.setByAxisCodes: %s' % str(es))
+
+        return newValues
+
+    def orderByDimensions(self, iterable, dimensions) -> list:
+        """Return a list of values of iterable in order defined by dimensions (default order if None).
+
+        :param iterable: an iterable (tuple, list)
+        :param dimensions: a tuple or list of dimensions (1..dimensionCount)
+        :return: a list with values defined by iterable in dimensions order
+        """
+        from ccpn.core.lib.SpectrumLib import _orderByDimensions
+        return _orderByDimensions(iterable, dimensions=dimensions, dimensionCount=self.dimensionCount)
+
+    def getByDimensions(self, parameterName: str, dimensions: Sequence[int] = None) -> list:
+        """Return a list of values of Spectrum dimensional attribute parameterName in order defined
+        by dimensions (default order if None).
+
+        :param parameterName: a str denoting a Spectrum dimensional attribute
+        :param dimensions: a tuple or list of dimensions (1..dimensionCount)
+        :return: the values defined by parameterName in dimensions order
+
+        Related:
+        Use getByAxisCodes() for axisCode based access of dimensional parameters of the Spectrum class.
+        """
+        from ccpn.core.lib.SpectrumLib import _getParameterValues
 
         if dimensions is None:
-            dimensions = self.dimensions
-        if not isIterable(dimensions):
-            raise ValueError('dimensions "%s" is not iterable' % (dimensions))
+            dimIndices = self.dimensionIndices
+        else:
+            if not isIterable(dimensions):
+                raise ValueError('Spectrum.getByDimensions: expected "dimensions" tuple or list; got %r' % dimensions)
+            dimIndices = [dim-1 for dim in dimensions]
 
-        newValues = getattr(self, parameterName)
-        for idx, dim in enumerate(dimensions):
-            if not (1 <= dim <= self.dimensionCount):
-                raise ValueError('Invalid dimension "%d"; should be one of %s' % (dim, self.dimensions))
-            else:
-                newValues[dim - 1] = values[idx]
         try:
-            setattr(self, parameterName, newValues)
-        except AttributeError:
-            raise ValueError('Unable to set parameter "%s" of %s to "%s"' % (parameterName, self, values))
+            newValues = _getParameterValues(self, parameterName, dimIndices=dimIndices, dimensionCount=self.dimensionCount)
+        except ValueError as es:
+            raise ValueError('Spectrum.getByAxisCodes: %s' % str(es))
+
+        return newValues
+
+    def setByDimensions(self, parameterName: str, values: Sequence, dimensions: Sequence[int] = None) -> list:
+        """Set Spectrum dimensional attribute parameterName to values in the order as defined by
+        dimensions (1..dimensionCount)(default order if None)
+
+        :param parameterName: a str denoting a Spectrum dimensional attribute
+        :param dimensions: a tuple or list of dimensions (1..dimensionCount)
+        :return: a list of newly set values of parameterName (in default order)
+
+        Related:
+        Use setByAxisCodes() for axisCode based setting of dimensional parameters of the Spectrum class.
+        """
+        from ccpn.core.lib.SpectrumLib import _setParameterValues
+
+        if dimensions is None:
+            dimIndices = self.dimensionIndices
+        else:
+            if not isIterable(dimensions):
+                raise ValueError('Spectrum.setByDimensions: expected "dimensions" tuple or list; got %r' % dimensions)
+            dimIndices = [dim-1 for dim in dimensions]
+
+        try:
+            newValues = _setParameterValues(self, parameterName, values, dimIndices=dimIndices, dimensionCount=self.dimensionCount)
+        except ValueError as es:
+            raise ValueError('Spectrum.setByDimensions: %s' % str(es))
+
+        return newValues
 
     def _setDefaultContourValues(self, base=None, multiplier=1.41, count=10):
         """Set default contour values

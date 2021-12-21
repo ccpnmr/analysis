@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-16 16:20:22 +0000 (Thu, December 16, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-21 10:52:54 +0000 (Tue, December 21, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ import random
 import numpy as np
 import decorator
 
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Sequence
 
 from ccpn.framework.Application import getApplication
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking, undoBlockWithoutSideBar
@@ -1949,8 +1949,51 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
     :param ppmRegions: dict of (axisCode, tupleValue) key, value pairs
     :return: tuple of new peaks or None
     """
+    # local import as cycles otherwise
+    from ccpn.core.Spectrum import Spectrum
+    from ccpn.core.PeakList import PeakList
+
+    application = getApplication()
+    preferences = application.preferences
+    logger = getLogger()
+
+    if spectrum is None or not isinstance(spectrum, Spectrum):
+        raise ValueError('_pickPeaks: required Spectrum instance, got:%r' % spectrum)
+
+    if peakList is None:
+        if len(spectrum.peakLists) > 0:
+            peakList = spectrum.peakLists[-1]
+        else:
+            # log warning that no peakList exists - this SHOULD never happen
+            getLogger().warning(f'Spectrum {spectrum} has no peakLists (this should not happen!) - creating new')
+            peakList = spectrum.newPeakList()
+    if not isinstance(peakList, PeakList):
+        raise ValueError('_pickPeaks: required peakList instance, got:%r' % peakList)
+
+    # get the peakPicker
+    if (peakPicker := spectrum._peakPicker) is None:
+        logger.warning(f'No valid peakPicker for {spectrum}')
+
+    # set any additional parameters from preferences
+    minDropFactor = preferences.general.peakDropFactor
+    fitMethod = preferences.general.peakFittingMethod
+    peakPicker.setParameters(dropFactor=minDropFactor,
+                             fitMethod=fitMethod,
+                             setLineWidths=True
+                             )
 
     with undoBlockWithoutSideBar():
+
+        # # get the dimensions by mapping the keys of the ppmLimits dict
+        # dimensions = spectrum.getByAxisCodes('dimensions', [a for a in ppmRegions.keys()])
+        # # now get all other parameters in dimension order
+        # axisCodes = spectrum.getByDimensions('axisCodes', dimensions)
+        # dimIndices = spectrum.getByDimensions('dimensionIndices', dimensions)
+        # foldingLimits = spectrum.getByDimensions('foldingLimits', dimensions)
+        # specLimits = spectrum.getByDimensions('spectrumLimits', dimensions)
+        # aliasInds = spectrum.getByDimensions('aliasingIndexes', dimensions)
+        # ppmRegions = [sorted(float(pos) for pos in region) for region in ppmRegions.values()]
+        # _ppmRegions = [ppmRegions[dimIdx] for dimIdx in dimIndices]  # sorted in order of the axisCode keys
 
         axisCodes = []
         _ppmRegions = []
@@ -1958,17 +2001,8 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
             axisCodes.append(axis)
             _ppmRegions.append(sorted(float(pos) for pos in region))
 
-        # try and match the axis codes before creating new peakList (if required)
+        # try and match the axis codes
         indices = spectrum.getByAxisCodes('dimensionIndices', axisCodes)
-
-        peakList = spectrum.project.getByPid(peakList) if isinstance(peakList, str) else peakList
-        if not peakList:
-            if spectrum.peakLists:
-                peakList = spectrum.peakLists[-1]
-            else:
-                # log warning that no peakList exists - this SHOULD never happen
-                getLogger().warning(f'Spectrum {spectrum} has no peakLists - creating new')
-                peakList = spectrum.newPeakList()
 
         _ppmRegions = [_ppmRegions[indices.index(ii)] for ii in range(len(indices))]
         specLimits = spectrum.spectrumLimits
@@ -1989,22 +2023,22 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
                     pos[ii] = regionBounds[1]
 
         axisDict = {axisCodes[indices.index(ii)]: _ppmRegions[ii] for ii in range(len(indices))}
+        # axisDict = dict((axisCode, region) for axisCode, region in zip(axisCodes, _ppmRegions))
 
-        # get the peaks from the peakPicker
-        if spectrum._peakPicker:
-            try:
-                pks = spectrum._peakPicker.pickPeaks(peakList=peakList,
-                                                     positiveThreshold=positiveThreshold,
-                                                     negativeThreshold=negativeThreshold,
-                                                     axisDict=axisDict)
-                return tuple(pks)
-            except Exception as err:
-                # need to trap error that Nd spectra may not be defined in all dimensions of axisDict
-                logger = getLogger()
-                logger.debug('_pickPeaks, trapped error: %s' % str(err))
-                logger.warning(f'could not pick peaks for {spectrum} in region {axisDict}')
-                if getApplication()._isInDebugMode:
-                    raise  err
+        try:
+            pks = peakPicker.pickPeaks(peakList=peakList,
+                                       positiveThreshold=positiveThreshold,
+                                       negativeThreshold=negativeThreshold,
+                                       axisDict=axisDict)
+
+        except Exception as err:
+            # need to trap error that Nd spectra may not be defined in all dimensions of axisDict
+            logger.debug('_pickPeaks, trapped error: %s' % str(err))
+            logger.warning(f'could not pick peaks for {spectrum} in region {axisDict}')
+            if application._isInDebugMode:
+                raise  err
+
+        return tuple(pks)
 
 
 def fetchPeakPicker(spectrum):
@@ -2108,6 +2142,102 @@ def _setDefaultAxisOrdering(spectrum):
         pOrder = spectrum.dimensionIndices
 
     return
+
+#===========================================================================================================
+# parameter management
+#===========================================================================================================
+
+def _setParameterValues(obj, parameterName: str, values: Sequence, dimIndices:Sequence, dimensionCount:int) -> list:
+    """A helper function to reduce code overhead in setting parameters of Spectrum and Peak
+    :return The list with values
+
+    CCPNINTERNAL: used in setByAxisCode and setByDimension methods of Spectrum and Peak classes
+    """
+    if not hasattr(obj, parameterName):
+        raise ValueError('object "%s" does not have parameter "%s"' %
+                         (obj.className, parameterName))
+
+    if not isIterable(values):
+        raise ValueError('setting parameter "%s.%s" requires "values" tuple or list; got %r' %
+                         (obj.className, parameterName, values))
+
+    if not isIterable(dimIndices):
+        raise ValueError('setting parameter "%s.%s" requires "dimensionIndices" tuple or list; got %r' %
+                         (obj.className, parameterName, dimIndices))
+
+    if len(values) != len(dimIndices):
+        raise ValueError('setting parameter "%s.%s": unequal length of "values" and "dimensionIndices"; got %r and %r' %
+                         (obj.className, parameterName, values, dimIndices))
+
+    newValues = list(getattr(obj, parameterName))
+    for dimIndx, val in zip(dimIndices, values):
+        if dimIndx < 0 or dimIndx >= dimensionCount:
+            # report error in 1-based, as the error is caughed  by the calling routines
+            raise ValueError('%s: invalid dimension "%s"; should be in range (1,%d)' %
+                             (obj, dimIndx+1, dimensionCount))
+        newValues[dimIndx] = val
+
+    try:
+        setattr(obj, parameterName, newValues)
+    except AttributeError:
+        raise ValueError('object "%s": unable to set parameter "%s" to %r' %
+                         (obj.className, parameterName, newValues))
+    return newValues
+
+def _getParameterValues(obj, parameterName: str, dimIndices:Sequence, dimensionCount:int) -> list:
+    """A helper function to reduce code overhead in setting parameters of Spectrum and Peak
+    :return The list with values
+
+    CCPNINTERNAL: used in getByAxisCode and getByDimension methods of Spectrum and Peak classes
+    """
+    if not hasattr(obj, parameterName):
+        raise ValueError('object "%s" does not have parameter "%s"' %
+                         (obj.className, parameterName))
+
+    if not isIterable(dimIndices):
+        raise ValueError('getting "%s.%s" requires "dimensionIndices" tuple or list; got %r' %
+                         (obj.className, parameterName, dimIndices))
+
+    try:
+        values = getattr(obj, parameterName)
+    except AttributeError:
+        raise ValueError('%s: unable to get parameter "%s"' % (obj, parameterName))
+
+    newValues = []
+    for dimIndx in dimIndices:
+        if dimIndx < 0 or dimIndx >= dimensionCount:
+            # report error in 1-based, as the error is caughed  by the calling routines
+            raise ValueError('%s: invalid dimension "%s"; should be in range (1,%d)' %
+                             (obj, dimIndx+1, dimensionCount))
+        newValues.append(values[dimIndx])
+
+    return newValues
+
+def _orderByDimensions(iterable, dimensions, dimensionCount) -> list:
+    """Return a list of values of iterable in order defined by dimensions (default order if None).
+
+    :param iterable: an iterable (tuple, list)
+    :param dimensions: a tuple or list of dimensions (1..dimensionCount)
+    :return: a list with values defined by iterable in dimensions order
+    """
+    if not isIterable(iterable):
+        raise ValueError('not an iterable; got %r' % (iterable))
+    values = list(iterable)
+
+    if not isIterable(dimensions):
+        raise ValueError('dimensions is not iterable; got %r' % (dimensions))
+
+    result = []
+    for dim in dimensions:
+        if dim <1 or dim > dimensionCount:
+            raise ValueError('invalid dimension "%s"; should be in range (1,%d)' %
+                             (dim, dimensionCount))
+        if dim-1 >= len(values):
+            raise ValueError('invalid dimension "%s"; to large for iterable (%r)' %
+                             (dim, values))
+
+        result.append( values[dim-1] )
+    return result
 
 #===========================================================================================================
 # GWV testing only

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-20 09:49:51 +0000 (Mon, December 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-21 10:49:54 +0000 (Tue, December 21, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -106,6 +106,17 @@ class Strip(AbstractWrapperObject):
         # STUB for now; hot-fixed later
         # return tuple(self._project._data2Obj.get(x)
         #      for x in self._wrappedData.sortedStripSpectrumViews())
+
+    # def getSpectrumViews(self):
+    #     """
+    #     :return:
+    #     """
+    #     pass
+    #
+    # @property
+    # def spectra(self) -> tuple:
+    #     """ Spectra in spectrumView displayed order"""
+    #     return tuple([specView.spectrum for specView in self.getSpectrumViews()])
 
     @property
     def _displayedSpectra(self) -> tuple:
@@ -388,8 +399,8 @@ class Strip(AbstractWrapperObject):
         result = []
 
         # get settings from preferences
-        minDropFactor = self.application.preferences.general.peakDropFactor
-        fitMethod = self.application.preferences.general.peakFittingMethod
+        # minDropFactor = self.application.preferences.general.peakDropFactor
+        # fitMethod = self.application.preferences.general.peakFittingMethod
 
         with undoBlockWithoutSideBar():
             # create the axisDict for peak picking the spectra
@@ -414,11 +425,11 @@ class Strip(AbstractWrapperObject):
                 positiveThreshold = spectrum.positiveContourBase if spectrumView.displayPositiveContours else None
                 negativeThreshold = spectrum.negativeContourBase if spectrumView.displayNegativeContours else None
 
-                # set any additional parameters
-                myPeakPicker.setParameters(dropFactor=minDropFactor,
-                                           fitMethod=fitMethod,
-                                           setLineWidths=True
-                                           )
+                # # set any additional parameters
+                # myPeakPicker.setParameters(dropFactor=minDropFactor,
+                #                            fitMethod=fitMethod,
+                #                            setLineWidths=True
+                #                            )
 
                 for thisPeakListView in validPeakListViews:
                     peakList = thisPeakListView.peakList

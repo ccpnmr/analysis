@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-21 14:48:23 +0000 (Tue, December 21, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-21 17:03:28 +0000 (Tue, December 21, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1919,7 +1919,7 @@ def _createPeak(spectrum, peakList=None, **ppmPositions) -> Optional['Peak']:
                 return pk
 
 
-def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshold=None, **ppmRegions) -> Optional[Tuple['Peak', ...]]:
+def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshold=None, **ppmRegions) -> Tuple['Peak', ...]:
     """Pick peaks in the region defined by the ppmRegions dict.
 
     Ppm regions are passed in as a dict containing the axis codes and the required limits.
@@ -1948,11 +1948,10 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
     :param negativeThreshold: float or None specifying the negative threshold below which to find peaks.
                               if None, negative peak picking is disabled.
     :param ppmRegions: dict of (axisCode, tupleValue) key, value pairs
-    :return: tuple of new peaks or None
+    :return: tuple of new peaks
     """
     # local import as cycles otherwise
     from ccpn.core.Spectrum import Spectrum
-    from ccpn.core.PeakList import PeakList
 
     application = getApplication()
     preferences = application.preferences
@@ -1962,35 +1961,35 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
         raise ValueError('_pickPeaks: required Spectrum instance, got:%r' % spectrum)
 
     if peakList is None:
-        if len(spectrum.peakLists) > 0:
-            peakList = spectrum.peakLists[-1]
-        else:
-            # log warning that no peakList exists - this SHOULD never happen
-            getLogger().warning(f'Spectrum {spectrum} has no peakLists (this should not happen!) - creating new')
-            peakList = spectrum.newPeakList()
-    if not isinstance(peakList, PeakList):
-        raise ValueError('_pickPeaks: required peakList instance, got:%r' % peakList)
+        peakList = spectrum.peakLists[-1]
+
 
     # get the dimensions by mapping the keys of the ppmRegions dict
     dimensions = spectrum.getByAxisCodes('dimensions', [a for a in ppmRegions.keys()])
     # now get all other parameters in dimensions order
     axisCodes = spectrum.getByDimensions('axisCodes', dimensions)
-    dimIndices = spectrum.getByDimensions('dimensionIndices', dimensions)
-    foldingLimits = spectrum.getByDimensions('foldingLimits', dimensions)
-    specLimits = spectrum.getByDimensions('spectrumLimits', dimensions)
-    aliasInds = spectrum.getByDimensions('aliasingIndexes', dimensions)
     ppmValues = [sorted(float(pos) for pos in region) for region in ppmRegions.values()]
     ppmValues = spectrum.orderByDimensions(ppmValues, dimensions) # sorted in order of dimensions
 
     axisDict = dict((axisCode, region) for axisCode, region in zip(axisCodes, ppmValues))
     sliceTuples = spectrum._axisDictToSliceTuples(axisDict)
 
-    return _pickPeaksByRegion(spectrum, peakList, positiveThreshold, negativeThreshold, sliceTuples)
+    return _pickPeaksByRegion(spectrum, sliceTuples= sliceTuples, peakList=peakList,
+                              positiveThreshold=positiveThreshold, negativeThreshold=negativeThreshold)
 
 
-def _pickPeaksByRegion(spectrum, peakList, positiveThreshold, negativeThreshold, sliceTuples) -> Optional[Tuple['Peak', ...]]:
-    """
-    Helper function
+def _pickPeaksByRegion(spectrum, sliceTuples, peakList, positiveThreshold, negativeThreshold) -> Tuple['Peak', ...]:
+    """Helper function to pick peaks of spectrum in region defined by sliceTuples
+
+    :param spectrum: a Spectrum instance
+    :param sliceTuples: a list of (startPoint,stopPoint) tuples (1-based, inclusive) per dimension
+    :param peakList: peakList to hold newly created peak.
+    :param positiveThreshold: float or None specifying the positive threshold above which to find peaks.
+                              if None, positive peak picking is disabled.
+    :param negativeThreshold: float or None specifying the negative threshold below which to find peaks.
+                              if None, negative peak picking is disabled.
+
+    :return: tuple of new peaks
     """
 
     # local import as cycles otherwise
@@ -2012,6 +2011,23 @@ def _pickPeaksByRegion(spectrum, peakList, positiveThreshold, negativeThreshold,
         txt = f'_pickPeakByRegion: No valid peakPicker for {spectrum}'
         logger.warning(txt)
         raise RuntimeError(txt)
+
+    # check the sliceTuples; make a list of lists first
+    sliceTuples = [list(sl) for sl in sliceTuples]
+    cropped = False
+    for dimIdx, slice, points in zip(spectrum.dimensionIndices, sliceTuples, spectrum.aliasingPointLimits):
+        if slice[0] < points[0]:
+            slice[0] = points[0]
+            sliceTuples[dimIdx] = slice
+            cropped = True
+        if slice[1] > points[1]:
+            slice[1] = points[1]
+            sliceTuples[dimIdx] = slice
+            cropped = True
+    # revert to a list of tuples
+    sliceTuples = [tuple(sl) for sl in sliceTuples]
+    if cropped:
+        logger.warning('_pickPeaksByRegion: cropped sliceTuples to %r' % sliceTuples)
 
     # set any additional parameters from preferences
     minDropFactor = preferences.general.peakDropFactor
@@ -2037,7 +2053,7 @@ def _pickPeaksByRegion(spectrum, peakList, positiveThreshold, negativeThreshold,
             if application._isInDebugMode:
                 raise  err
 
-        return tuple(pks)
+    return tuple(pks)
 
 def fetchPeakPicker(spectrum):
     """Get a peakPicker; either by restore from spectrum or the default relevant for spectrum
@@ -2052,7 +2068,7 @@ def fetchPeakPicker(spectrum):
     if spectrum is None:
         raise ValueError('fetchPeakPicker: spectrum is None')
     if not isinstance(spectrum, Spectrum):
-        raise ValueError('fetchPeakPicker: : spectrum is not of Spectrum class')
+        raise ValueError('fetchPeakPicker: spectrum is not of Spectrum class')
 
     project = spectrum.project
     application = project.application

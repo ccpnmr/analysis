@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-20 09:49:51 +0000 (Mon, December 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-21 17:03:28 +0000 (Tue, December 21, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -126,6 +126,10 @@ def _updateSpectrum_settings(spectrum):
         value = spectrum.getParameter(spectrum._AdditionalAttribute, NEGATIVENOISELEVEL)
         spectrum.deleteParameter(spectrum._AdditionalAttribute, NEGATIVENOISELEVEL)
         spectrum._setInternalParameter(spectrum._NEGATIVENOISELEVEL, value)
+
+    # This will fix any spurious settings on the aliasing
+    _aIndices = spectrum.aliasingIndices
+    spectrum.aliasingIndices = _aIndices
 
 
 def _updateChemicalShiftList_3_0_4_to_3_1_0(chemicalShiftList):

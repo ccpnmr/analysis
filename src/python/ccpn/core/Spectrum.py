@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-21 14:48:23 +0000 (Tue, December 21, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-21 17:03:28 +0000 (Tue, December 21, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1230,7 +1230,14 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         self._setDimensionalAttributes('aliasingLimits', value)
 
     @property
-    def aliasingIndexes(self) -> Optional[Tuple[Tuple, ...]]:
+    def aliasingPointLimits(self) -> Tuple[Tuple[int,int], ...]:
+        """Return a tuple of sorted(minAliasingPointLimit, maxAliasingPointLimit) per dimension.
+        i.e. The actual point limits of the full (including the aliased regions) limits.
+        """
+        return self._getDimensionalAttributes('aliasingPointLimits')
+
+    @property
+    def aliasingIndexes(self) -> Tuple[Tuple[int,int], ...]:
         """Return a tuple of the number of times the spectralWidth are folded in each dimension.
         This is a derived property from the aliasingLimits; setting aliasingIndexes value will alter
         the aliasingLimits parameter accordingly.
@@ -2481,7 +2488,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return _createPeak(self, peakList, **ppmPositions)
 
     @logCommand(get='self')
-    def pickPeaks(self, peakList=None, positiveThreshold=None, negativeThreshold=None, **ppmRegions) -> Optional[Tuple['Peak', ...]]:
+    def pickPeaks(self, peakList=None, positiveThreshold=None, negativeThreshold=None, **ppmRegions) -> Tuple['Peak', ...]:
         """Pick peaks in the region defined by the ppmRegions dict.
 
         Ppm regions are passed in as a dict containing the axis codes and the required limits.
@@ -2512,11 +2519,26 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         :param negativeThreshold: float or None specifying the negative threshold below which to find peaks.
                                   if None, negative peak picking is disabled.
         :param ppmRegions: dict of (axisCode, tupleValue) key, value pairs
-        :return: tuple of new peaks or None
+        :return: tuple of new peaks
         """
-        from ccpn.core.lib.SpectrumLib import _pickPeaks
+        from ccpn.core.lib.SpectrumLib import _pickPeaksByRegion
 
-        return _pickPeaks(self, peakList, positiveThreshold, negativeThreshold, **ppmRegions)
+        if peakList is None:
+            peakList = self.peakLists[-1]
+
+        # get the dimensions by mapping the keys of the ppmRegions dict
+        dimensions = self.getByAxisCodes('dimensions', [a for a in ppmRegions.keys()])
+        # now get all other parameters in dimensions order
+        axisCodes = self.getByDimensions('axisCodes', dimensions)
+        ppmValues = [sorted(float(pos) for pos in region) for region in ppmRegions.values()]
+        ppmValues = self.orderByDimensions(ppmValues, dimensions) # now sorted in order of dimensions
+
+        axisDict = dict((axisCode, region) for axisCode, region in zip(axisCodes, ppmValues))
+        sliceTuples = self._axisDictToSliceTuples(axisDict)
+
+        return _pickPeaksByRegion(self,
+                                  sliceTuples= sliceTuples, peakList=peakList,
+                                  positiveThreshold=positiveThreshold, negativeThreshold=negativeThreshold)
 
     def _extractToFile(self, axisCodes, position, path, dataFormat, tag):
         """Local helper routine to prevent code duplication across extractSliceToFile, extractPlaneToFile,
@@ -2803,7 +2825,15 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         #
         # # NOTE - version 3.0.4 -> 3.1.0 update was executed by the wrapper
         # # move parameters from _ccpnInternal to the correct namespace, delete old parameters
-        # spectrum._updateEdgeToAlpha1()
+
+        # Assure at least one peakList
+        if len(spectrum.peakLists) == 0:
+            spectrum.newPeakList()
+            getLogger().warning('%s had no peakList; created one' % spectrum)
+
+        # This will fix any spurious settings on the aliasing (also in update_3_0_4 code)
+        _aIndices = spectrum.aliasingIndices
+        spectrum.aliasingIndices = _aIndices
 
         # Restore the dataStore info
         dataStore = None

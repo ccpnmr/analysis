@@ -179,7 +179,7 @@ class SpectrumDimensionAttributes(object):
 
     @property
     def aliasingLimits(self) -> Tuple[float, float]:
-        """tuple of sorted(minAliasingLimit, maxAliasingLimit) per dimension.
+        """tuple of sorted(minAliasingLimit, maxAliasingLimit).
         i.e. The actual ppm limits of the full (including the aliased regions) limits.
         """
         return tuple(sorted((self.minAliasedFrequency, self.maxAliasedFrequency)))
@@ -197,6 +197,15 @@ class SpectrumDimensionAttributes(object):
         # and setting them again
         aliasingIndices = self.aliasingIndexes
         self.aliasingIndexes = aliasingIndices
+
+    @property
+    def aliasingPointLimits(self) -> Tuple[int, int]:
+        """Return a tuple of sorted(minAliasingPointLimit, maxAliasingPointLimit).
+        i.e. The actual point limits of the full (including the aliased regions) limits.
+        """
+        minPoint = int(self.ppmToPoint(self.minAliasedFrequency)+0.5)
+        maxPoint = int(self.ppmToPoint(self.maxAliasedFrequency)+0.5)
+        return tuple(sorted((minPoint, maxPoint)))
 
     @property
     def aliasingIndexes(self) -> Tuple[int, int]:

@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 11:40:49 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-21 12:24:21 +0000 (Tue, December 21, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -285,11 +285,12 @@ class PeakPickerABC(CcpNmrJson):
         """
         raise NotImplementedError('%s.findPeaks should be implemented' % self.__class__.__name__)
 
-    def pickPeaks(self, axisDict, peakList, positiveThreshold=None, negativeThreshold=None) -> list:
-        """
-        :param axisDict: Axis limits  are passed in as a dict of (axisCode, tupleLimit) key, value
-                         pairs with the tupleLimit supplied as (start,stop) axis limits in ppm
-                         (lower ppm value first).
+    def pickPeaks(self, sliceTuples, peakList, positiveThreshold=None, negativeThreshold=None) -> list:
+        """Pick peaks in spectral region defined by sliceTuples=[(start_1,stop_1), (start_2,stop_2), ...],
+        sliceTuples are 1-based; sliceTuple stop values are inclusive (i.e. different from the python
+        slice object)
+
+        :param sliceTuples: list of (start,stop) point values per dimension (1-based)
         :param peakList: peakList instance to add newly pickedPeaks
         :return: list of core.Peak instances
         """
@@ -304,7 +305,7 @@ class PeakPickerABC(CcpNmrJson):
         self.positiveThreshold = positiveThreshold
         self.negativeThreshold = negativeThreshold
 
-        self.sliceTuples = self.spectrum._axisDictToSliceTuples(axisDict)
+        self.sliceTuples = sliceTuples
 
         if self.defaultPointExtension:
             # add default points to extend pick region
@@ -317,7 +318,7 @@ class PeakPickerABC(CcpNmrJson):
 
         peaks = self.findPeaks(data)
         getLogger().debug('%s.pickPeaks: found %d peaks in spectrum %s; %r' %
-                          (self.__class__.__name__, len(peaks), self.spectrum, axisDict))
+                          (self.__class__.__name__, len(peaks), self.spectrum, self.sliceTuples))
 
         corePeaks = []
         if len(peaks) > 0:

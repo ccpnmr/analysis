@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-15 14:25:02 +0000 (Wed, December 15, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-21 12:24:21 +0000 (Tue, December 21, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1656,7 +1656,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     def getRegionData(self, sliceTuples, aliasingFlags=None):
         """Return an numpy array containing the points defined by
-                sliceTuples=[(start_1,stop_1), (start_2,stop_2), ...],
+        sliceTuples=[(start_1,stop_1), (start_2,stop_2), ...],
 
         sliceTuples are 1-based; sliceTuple stop values are inclusive (i.e. different
         from the python slice object)

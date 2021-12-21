@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-21 10:49:54 +0000 (Tue, December 21, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-21 12:24:21 +0000 (Tue, December 21, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -392,19 +392,20 @@ class Strip(AbstractWrapperObject):
         return tuple(result), tuple(peakLists)
 
     @logCommand(get='self')
-    def pickPeaks(self, ppmRegions: List[Tuple[float,float]]) -> Tuple[Peak, ...]:
-        """Peak pick in ppmRegions for all spectra currently displayed in strip .
+    def pickPeaks(self, regions: List[Tuple[float,float]]) -> Tuple[Peak, ...]:
+        """Peak pick in regions for all spectra currently displayed in strip .
         """
         # selectedRegion is rounded before-hand to 3 dp.
+
+        spectrumDisplay = self.spectrumDisplay
+
         result = []
-
-        # get settings from preferences
-        # minDropFactor = self.application.preferences.general.peakDropFactor
-        # fitMethod = self.application.preferences.general.peakFittingMethod
-
         with undoBlockWithoutSideBar():
             # create the axisDict for peak picking the spectra
-            axisDict = {axis: tuple(ppms) for axis, ppms in zip(self.axisCodes, ppmRegions)}
+            if spectrumDisplay.is1D:
+                axisDict = {self.axisCodes[0] : tuple(regions[0])}
+            else:
+                axisDict = {axis: tuple(ppms) for axis, ppms in zip(self.axisCodes, regions)}
 
             # loop through the visible spectra
             for spectrumView in (v for v in self.spectrumViews if v.isVisible()):
@@ -425,12 +426,6 @@ class Strip(AbstractWrapperObject):
                 positiveThreshold = spectrum.positiveContourBase if spectrumView.displayPositiveContours else None
                 negativeThreshold = spectrum.negativeContourBase if spectrumView.displayNegativeContours else None
 
-                # # set any additional parameters
-                # myPeakPicker.setParameters(dropFactor=minDropFactor,
-                #                            fitMethod=fitMethod,
-                #                            setLineWidths=True
-                #                            )
-
                 for thisPeakListView in validPeakListViews:
                     peakList = thisPeakListView.peakList
 
@@ -442,7 +437,11 @@ class Strip(AbstractWrapperObject):
             result = tuple(result)
             self.current.peaks = result
             return result
+#end class
 
+
+# newStrip functions
+# Rasmus: We should NOT have any newStrip function, except possibly for FreeStrips
 
 # @newObject(Strip)
 # def _newStrip(self):
@@ -457,8 +456,6 @@ class Strip(AbstractWrapperObject):
 #     return result
 
 
-# newStrip functions
-# We should NOT have any newStrip function, except possibly for FreeStrips
 def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
     """Make copy of strip in self, at position newIndex - or rightmost.
     """

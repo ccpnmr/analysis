@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-21 10:52:54 +0000 (Tue, December 21, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-21 12:24:21 +0000 (Tue, December 21, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1970,9 +1970,77 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
     if not isinstance(peakList, PeakList):
         raise ValueError('_pickPeaks: required peakList instance, got:%r' % peakList)
 
+    # get the dimensions by mapping the keys of the ppmRegions dict
+    dimensions = spectrum.getByAxisCodes('dimensions', [a for a in ppmRegions.keys()])
+    # now get all other parameters in dimension order
+    axisCodes = spectrum.getByDimensions('axisCodes', dimensions)
+    dimIndices = spectrum.getByDimensions('dimensionIndices', dimensions)
+    foldingLimits = spectrum.getByDimensions('foldingLimits', dimensions)
+    specLimits = spectrum.getByDimensions('spectrumLimits', dimensions)
+    aliasInds = spectrum.getByDimensions('aliasingIndexes', dimensions)
+    ppmValues = [sorted(float(pos) for pos in region) for region in ppmRegions.values()]
+    ppmValues = spectrum.orderByDimensions(ppmValues, dimensions) # sorted in order of dimensions
+    axisDict = dict((axisCode, region) for axisCode, region in zip(axisCodes, ppmValues))
+
+    sliceTuples = spectrum._axisDictToSliceTuples(axisDict)
+
+
+    # axisCodes = []
+    # _ppmRegions = []
+    # for axis, region in ppmRegions.items():
+    #     axisCodes.append(axis)
+    #     _ppmRegions.append(sorted(float(pos) for pos in region))
+    #
+    # # try and match the axis codes
+    # indices = spectrum.getByAxisCodes('dimensionIndices', axisCodes)
+    #
+    # _ppmRegions = [_ppmRegions[indices.index(ii)] for ii in range(len(indices))]
+    # specLimits = spectrum.spectrumLimits
+    # aliasInds = spectrum.aliasingIndexes
+    #
+    # # check that the picked peak lies in the bounded region of the spectrum
+    # # for dim, pos in enumerate(_ppmRegions):
+    # #     minSpectrumFrequency, maxSpectrumFrequency = sorted(specLimits[dim])
+    # #     visibleAlias = aliasInds[dim]
+    # #     regionBounds = (round(minSpectrumFrequency + visibleAlias[0] * (maxSpectrumFrequency - minSpectrumFrequency), 3),
+    # #                     round(minSpectrumFrequency + (visibleAlias[1] + 1) * (maxSpectrumFrequency - minSpectrumFrequency), 3))
+    # #
+    # #     # clip to the current region bounds
+    # #     for ii in range(2):
+    # #         if pos[ii] < regionBounds[0]:
+    # #             pos[ii] = regionBounds[0]
+    # #         elif pos[ii] > regionBounds[1]:
+    # #             pos[ii] = regionBounds[1]
+    #
+    # axisDict = {axisCodes[indices.index(ii)]: _ppmRegions[ii] for ii in range(len(indices))}
+
+    return _pickPeaksByRegion(spectrum, peakList, positiveThreshold, negativeThreshold, sliceTuples)
+
+
+def _pickPeaksByRegion(spectrum, peakList, positiveThreshold, negativeThreshold, sliceTuples) -> Optional[Tuple['Peak', ...]]:
+    """
+    Helper function
+    """
+
+    # local import as cycles otherwise
+    from ccpn.core.Spectrum import Spectrum
+    from ccpn.core.PeakList import PeakList
+
+    application = getApplication()
+    preferences = application.preferences
+    logger = getLogger()
+
+    if spectrum is None or not isinstance(spectrum, Spectrum):
+        raise ValueError('_pickPeaksByRegion: required Spectrum instance, got:%r' % spectrum)
+
+    if peakList is None or not isinstance(peakList, PeakList):
+        raise ValueError('_pickPeaksByRegion: required peakList instance, got:%r' % peakList)
+
     # get the peakPicker
     if (peakPicker := spectrum._peakPicker) is None:
-        logger.warning(f'No valid peakPicker for {spectrum}')
+        txt = f'_pickPeakByRegion: No valid peakPicker for {spectrum}'
+        logger.warning(txt)
+        raise RuntimeError(txt)
 
     # set any additional parameters from preferences
     minDropFactor = preferences.general.peakDropFactor
@@ -1984,62 +2052,21 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
 
     with undoBlockWithoutSideBar():
 
-        # # get the dimensions by mapping the keys of the ppmLimits dict
-        # dimensions = spectrum.getByAxisCodes('dimensions', [a for a in ppmRegions.keys()])
-        # # now get all other parameters in dimension order
-        # axisCodes = spectrum.getByDimensions('axisCodes', dimensions)
-        # dimIndices = spectrum.getByDimensions('dimensionIndices', dimensions)
-        # foldingLimits = spectrum.getByDimensions('foldingLimits', dimensions)
-        # specLimits = spectrum.getByDimensions('spectrumLimits', dimensions)
-        # aliasInds = spectrum.getByDimensions('aliasingIndexes', dimensions)
-        # ppmRegions = [sorted(float(pos) for pos in region) for region in ppmRegions.values()]
-        # _ppmRegions = [ppmRegions[dimIdx] for dimIdx in dimIndices]  # sorted in order of the axisCode keys
-
-        axisCodes = []
-        _ppmRegions = []
-        for axis, region in ppmRegions.items():
-            axisCodes.append(axis)
-            _ppmRegions.append(sorted(float(pos) for pos in region))
-
-        # try and match the axis codes
-        indices = spectrum.getByAxisCodes('dimensionIndices', axisCodes)
-
-        _ppmRegions = [_ppmRegions[indices.index(ii)] for ii in range(len(indices))]
-        specLimits = spectrum.spectrumLimits
-        aliasInds = spectrum.aliasingIndexes
-
-        # check that the picked peak lies in the bounded region of the spectrum
-        for dim, pos in enumerate(_ppmRegions):
-            minSpectrumFrequency, maxSpectrumFrequency = sorted(specLimits[dim])
-            visibleAlias = aliasInds[dim]
-            regionBounds = (round(minSpectrumFrequency + visibleAlias[0] * (maxSpectrumFrequency - minSpectrumFrequency), 3),
-                            round(minSpectrumFrequency + (visibleAlias[1] + 1) * (maxSpectrumFrequency - minSpectrumFrequency), 3))
-
-            # clip to the current region bounds
-            for ii in range(2):
-                if pos[ii] < regionBounds[0]:
-                    pos[ii] = regionBounds[0]
-                elif pos[ii] > regionBounds[1]:
-                    pos[ii] = regionBounds[1]
-
-        axisDict = {axisCodes[indices.index(ii)]: _ppmRegions[ii] for ii in range(len(indices))}
-        # axisDict = dict((axisCode, region) for axisCode, region in zip(axisCodes, _ppmRegions))
-
         try:
-            pks = peakPicker.pickPeaks(peakList=peakList,
+            pks = peakPicker.pickPeaks(sliceTuples=sliceTuples,
+                                       peakList=peakList,
                                        positiveThreshold=positiveThreshold,
-                                       negativeThreshold=negativeThreshold,
-                                       axisDict=axisDict)
+                                       negativeThreshold=negativeThreshold
+                                       )
 
         except Exception as err:
             # need to trap error that Nd spectra may not be defined in all dimensions of axisDict
             logger.debug('_pickPeaks, trapped error: %s' % str(err))
-            logger.warning(f'could not pick peaks for {spectrum} in region {axisDict}')
+            logger.warning(f'could not pick peaks for {spectrum} in region {sliceTuples}')
             if application._isInDebugMode:
                 raise  err
 
         return tuple(pks)
-
 
 def fetchPeakPicker(spectrum):
     """Get a peakPicker; either by restore from spectrum or the default relevant for spectrum

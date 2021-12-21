@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-21 10:52:53 +0000 (Tue, December 21, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-21 12:24:21 +0000 (Tue, December 21, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2363,7 +2363,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         :param axisDict: dict of (axisCode, (startPpm,stopPpm)) (key,value) pairs
         :return list of sliceTuples
 
-        CCPNINTERNAL: also used by PeakPickerABC
+        CCPNINTERNAL: also used by SpectrumLib._pickPeaks
         """
         axisCodes = [ac for ac in axisDict.keys()]
 

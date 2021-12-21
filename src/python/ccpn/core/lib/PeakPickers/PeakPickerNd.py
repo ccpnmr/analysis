@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-28 11:41:02 +0100 (Mon, June 28, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-21 12:24:21 +0000 (Tue, December 21, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -208,22 +208,24 @@ class PeakPickerNd(PeakPickerABC):
 
         return allPeaksArray, allRegionArrays, regionArray, validPointPeaks
 
-    def pickPeaks(self, axisDict, peakList, positiveThreshold=None, negativeThreshold=None) -> list:
+    def pickPeaks(self, sliceTuples, peakList, positiveThreshold=None, negativeThreshold=None) -> list:
         """Set the default functionality for picking simplePeaks from the region defined by axisDict
         """
         # set the correct parameters for the standard findPeaks
         self._hbsWidth = self.halfBoxFindPeaksWidth
         self.findFunc = self._returnSimplePeaks
 
-        return super().pickPeaks(axisDict, peakList, positiveThreshold, negativeThreshold)
+        return super().pickPeaks(sliceTuples=sliceTuples, peakList=peakList,
+                                 positiveThreshold=positiveThreshold, negativeThreshold=negativeThreshold)
 
     def _returnSimplePeaks(self, foundPeaks):
-        """Return a list of simple peaks from the height/point/lineWidth list
+        """Return a list of SimplePeak objects from the height/point/lineWidth foundPeaks list
         """
-        return [SimplePeak(points=point[::-1],
-                           height=height,
-                           lineWidths=pointLineWidths if self.setLineWidths else None)
+        peaks = [SimplePeak(points=point[::-1],
+                            height=height,
+                            lineWidths=pointLineWidths if self.setLineWidths else None)
                 for height, point, pointLineWidths in foundPeaks]
+        return peaks
 
     def snapToExtremum(self, peak) -> list:
         """

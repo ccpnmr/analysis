@@ -140,17 +140,24 @@ class SpectrumDimensionAttributes(object):
 
     @maxAliasedFrequency.setter
     def maxAliasedFrequency(self, value):
-        specLimits = self.spectrumLimits
-        if value < max(specLimits):
+        from ccpn.core.lib.SpectrumLib import MAXALIASINGRANGE
+        maxSpecLimits = max(self.spectrumLimits)
+        if value < maxSpecLimits:
             raise ValueError('%s: dimension %d, maxAliasedFrequency: value %s < max(spectrumLimits) %s' % (
-                             self.spectrum, self.dimension, value, max(specLimits)
+                             self.spectrum, self.dimension, value, maxSpecLimits
                             )
             )
+        if value > maxSpecLimits + self.spectralWidth*MAXALIASINGRANGE:
+            value = maxSpecLimits +  self.spectralWidth*MAXALIASINGRANGE
+            getLogger().warning('Setting %s, dimension %d maxAliasedFrequency: value clipped to %s' %
+                                (self.spectrum, self.dimension, value)
+                                )
+
         self._expDimRef.maxAliasedFreq = value
 
     @property
     def minAliasedFrequency(self) -> float:
-        """minimum possible frequency (in ppm) for this reference """
+        """minimum possible frequency (in ppm) for this dimension """
         if (result := self._expDimRef.minAliasedFreq) is None:
             point_1 = float(1 - self._dataDim.pointOffset) - 0.5
             result = self.pointToValue((point_1))
@@ -158,11 +165,17 @@ class SpectrumDimensionAttributes(object):
 
     @minAliasedFrequency.setter
     def minAliasedFrequency(self, value):
-        specLimits = self.spectrumLimits
-        if value > min(specLimits):
+        from ccpn.core.lib.SpectrumLib import MAXALIASINGRANGE
+        minSpecLimits = min(self.spectrumLimits)
+        if value > minSpecLimits:
             raise ValueError('%s dimension %d, minAliasedFrequency: value %s > min(spectrumLimits) %s' %
-                            (self.spectrum, self.dimension, value, min(specLimits))
+                            (self.spectrum, self.dimension, value, minSpecLimits)
                             )
+        if value < minSpecLimits - self.spectralWidth*MAXALIASINGRANGE:
+            value = minSpecLimits - self.spectralWidth*MAXALIASINGRANGE
+            getLogger().warning('Setting %s, dimension %d minAliasedFrequency: value clipped to %s' %
+                                (self.spectrum, self.dimension, value)
+                                )
 
         self._expDimRef.minAliasedFreq = value
 

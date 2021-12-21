@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 11:40:51 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-21 13:41:31 +0000 (Tue, December 21, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -31,11 +31,11 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from itertools import permutations
 from collections.abc import Iterable
 
-from ccpn.core.Spectrum import MAXALIASINGRANGE, Spectrum
+from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock
 from ccpn.core.lib.ContextManagers import undoStackBlocking
-from ccpn.core.lib.SpectrumLib import getContourLevelsFromNoise
+from ccpn.core.lib.SpectrumLib import getContourLevelsFromNoise, MAXALIASINGRANGE
 from ccpn.core.lib.ContextManagers import queueStateChange
 
 from ccpn.ui.gui.widgets.Button import Button

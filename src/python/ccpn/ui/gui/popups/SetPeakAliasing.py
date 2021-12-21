@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-07 12:27:47 +0000 (Tue, December 07, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-21 13:41:31 +0000 (Tue, December 21, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,7 @@ from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, handleDialogApply
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
 from ccpn.ui.gui.lib.SpectrumDisplay import navigateToCurrentPeakPosition
-from ccpn.core.Spectrum import MAXALIASINGRANGE
+from ccpn.core.lib.SpectrumLib import MAXALIASINGRANGE
 
 
 DEFAULTALIASING = MAXALIASINGRANGE

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-21 12:24:21 +0000 (Tue, December 21, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-21 13:41:31 +0000 (Tue, December 21, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -119,9 +119,10 @@ isotope2Tolerance = {
     '19F': 0.03,
     }
 
-
 SPECTRUM_POSITIONS = 'positions'
 SPECTRUM_INTENSITIES = 'intensities'
+
+MAXALIASINGRANGE = 3
 
 
 def getAssignmentTolerances(isotopeCode) -> float:
@@ -1980,8 +1981,8 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
     aliasInds = spectrum.getByDimensions('aliasingIndexes', dimensions)
     ppmValues = [sorted(float(pos) for pos in region) for region in ppmRegions.values()]
     ppmValues = spectrum.orderByDimensions(ppmValues, dimensions) # sorted in order of dimensions
-    axisDict = dict((axisCode, region) for axisCode, region in zip(axisCodes, ppmValues))
 
+    axisDict = dict((axisCode, region) for axisCode, region in zip(axisCodes, ppmValues))
     sliceTuples = spectrum._axisDictToSliceTuples(axisDict)
 
 
@@ -2209,7 +2210,9 @@ def _setParameterValues(obj, parameterName: str, values: Sequence, dimIndices:Se
     except AttributeError:
         raise ValueError('object "%s": unable to set parameter "%s" to %r' %
                          (obj.className, parameterName, newValues))
-    return newValues
+
+    # we get the values from the obj, just in case some haven been modified
+    return getattr(obj, parameterName)
 
 def _getParameterValues(obj, parameterName: str, dimIndices:Sequence, dimensionCount:int) -> list:
     """A helper function to reduce code overhead in setting parameters of Spectrum and Peak

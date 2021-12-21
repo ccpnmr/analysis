@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-21 12:24:21 +0000 (Tue, December 21, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-21 13:41:31 +0000 (Tue, December 21, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -110,12 +110,8 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand, singleton
 from ccpn.util.Path import Path, aPath
 
-
-MAXALIASINGRANGE = 3
-
-# def _testUpdate(spectrum):
-#     getLogger().debug('TEST-UPDATE: objectVersion: %s' % spectrum._objectVersion)
-#     spectrum._objectVersion = getApplication().applicationVersion
+# defined here too as imported from Spectrum throughout the code base
+MAXALIASINGRANGE = specLib.MAXALIASINGRANGE
 
 #=========================================================================================
 # Spectrum class
@@ -124,7 +120,11 @@ MAXALIASINGRANGE = 3
 from ccpn.core._implementation.updates.update_3_0_4 import _updateSpectrum_3_0_4_to_3_1_0
 from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_PROJECT_INITIALISATION
 
-@updateObject('3.0.4', '3.1.0', _updateSpectrum_3_0_4_to_3_1_0, UPDATE_POST_PROJECT_INITIALISATION)
+@updateObject(fromVersion = '3.0.4',
+              toVersion = '3.1.0',
+              updateFunction =_updateSpectrum_3_0_4_to_3_1_0,
+              updateMethod = UPDATE_POST_PROJECT_INITIALISATION
+              )
 class Spectrum(AbstractWrapperObject, CcpNmrJson):
     """A Spectrum object contains all the stored properties of an NMR spectrum, as well as the
     path to the NMR (binary) data file. The Spectrum object has methods to get the binary data
@@ -1682,19 +1682,19 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """Return a tuple of ppm values of the (first, last) grid points along axisCode or dimension
         for the points contained by the aliasing limits, end points are inclusive
         """
-        ppmL, ppmR, _, _ = self._verifyAxisCodeDimension(axisCode, dimension)
+        ppmL, ppmR, _tmp1, _tmp2 = self._verifyAxisCodeDimension(axisCode, dimension)
         return (ppmL, ppmR)
 
     def getPointAliasingLimitsArray(self, axisCode=None, dimension=None) -> numpy.array:
         """Return a numpy array with point values of the grid points along axisCode or dimension
         """
-        _, _, pL, pR = self._verifyAxisCodeDimension(axisCode, dimension)
+        _tmp1, _tmp2, pL, pR = self._verifyAxisCodeDimension(axisCode, dimension)
         return numpy.linspace(pL, pR, pR - pL + 1)
 
     def getPointAliasingLimits(self, axisCode=None, dimension=None):
         """Return a tuple of point values of the (first, last) grid points along axisCode or dimension
         """
-        _, _, pL, pR = self._verifyAxisCodeDimension(axisCode, dimension)
+        _tmp1, _tmp2, pL, pR = self._verifyAxisCodeDimension(axisCode, dimension)
         return (pL, pR)
 
     # def automaticIntegration(self, spectralData):
@@ -2390,8 +2390,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                 stopPoint = int(self.ppm2point(stopPpm, dimension=idx + 1) + 0.5)
 
             # check that the point values are not outside the maximum aliasing limits
-            startPoint = max(startPoint, -MAXALIASINGRANGE * self.pointCounts[dimIndex])
-            stopPoint = min(stopPoint, (MAXALIASINGRANGE + 1) * self.pointCounts[dimIndex])
+            # startPoint = max(startPoint, -MAXALIASINGRANGE * self.pointCounts[dimIndex])
+            # stopPoint = min(stopPoint, (MAXALIASINGRANGE + 1) * self.pointCounts[dimIndex])
             sliceTuples[dimIndex] = (startPoint, stopPoint)
 
         getLogger().debug('Spectrum._axisDictToSliceTuples: axisDict = %s; sliceTuples = %s' %
@@ -2547,7 +2547,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         Peaks is an iterable of type str of Peak - bad strings are ignored
         Core objects that are not of type Peak will raise error
-
 
         :param peaks:
         :param aliasingIndexes: tuple(int, int)

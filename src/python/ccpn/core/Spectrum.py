@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-21 13:41:31 +0000 (Tue, December 21, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-21 14:48:23 +0000 (Tue, December 21, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1218,7 +1218,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @property
     @_includeInDimensionalCopy
     def aliasingLimits(self) -> List[Tuple[float, float]]:
-        """List of tuples of sorted(minAliasingLimit, maxAliasingLimit) per dimension
+        """List of tuples of sorted(minAliasingLimit, maxAliasingLimit) per dimension.
+        Setting these values will round them to the nearest multiple of the spectralWidth.
         """
         return self._getDimensionalAttributes('aliasingLimits')
 
@@ -1227,6 +1228,22 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @checkSpectrumPropertyValue(iterable=True, allowNone=False, types=(tuple, list))
     def aliasingLimits(self, value):
         self._setDimensionalAttributes('aliasingLimits', value)
+
+    @property
+    def aliasingIndexes(self) -> Optional[Tuple[Tuple, ...]]:
+        """Return a tuple of the number of times the spectralWidth are folded in each dimension.
+        This is a derived property from the aliasingLimits; setting aliasingIndexes value will alter
+        the aliasingLimits parameter accordingly.
+        """
+        return tuple(self._getDimensionalAttributes('aliasingIndexes'))
+
+    @aliasingIndexes.setter
+    @checkSpectrumPropertyValue(iterable=True, allowNone=False, types=(tuple, list))
+    def aliasingIndexes(self, value):
+        self._setDimensionalAttributes('aliasingIndexes', value)
+
+    # GWV, plural of index is indices
+    aliasingIndices = aliasingIndexes
 
     @property
     def spectrumLimits(self) -> List[Tuple[float, float]]:
@@ -1412,13 +1429,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             raise ValueError("Spectrum.displayFoldedContours: must be True/False.")
 
         self._setInternalParameter(self._DISPLAYFOLDEDCONTOURS, value)
-
-    @property
-    def aliasingIndexes(self) -> Optional[Tuple[Tuple, ...]]:
-        """Return a tuple of the number of times the spectralWidth are folded in each dimension.
-        This is a derived property from the aliasingLimits.
-        """
-        return tuple(self._getDimensionalAttributes('aliasingIndexes'))
 
     @property
     def _seriesItems(self):

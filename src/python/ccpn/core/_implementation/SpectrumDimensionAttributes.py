@@ -140,15 +140,14 @@ class SpectrumDimensionAttributes(object):
 
     @maxAliasedFrequency.setter
     def maxAliasedFrequency(self, value):
-        from ccpn.core.lib.SpectrumLib import MAXALIASINGRANGE
         maxSpecLimits = max(self.spectrumLimits)
         if value < maxSpecLimits:
             raise ValueError('%s: dimension %d, maxAliasedFrequency: value %s < max(spectrumLimits) %s' % (
                              self.spectrum, self.dimension, value, maxSpecLimits
                             )
             )
-        if value > maxSpecLimits + self.spectralWidth*MAXALIASINGRANGE:
-            value = maxSpecLimits +  self.spectralWidth*MAXALIASINGRANGE
+        if value > maxSpecLimits + self.spectralWidth*specLib.MAXALIASINGRANGE:
+            value = maxSpecLimits +  self.spectralWidth*specLib.MAXALIASINGRANGE
             getLogger().warning('Setting %s, dimension %d maxAliasedFrequency: value clipped to %s' %
                                 (self.spectrum, self.dimension, value)
                                 )
@@ -165,14 +164,13 @@ class SpectrumDimensionAttributes(object):
 
     @minAliasedFrequency.setter
     def minAliasedFrequency(self, value):
-        from ccpn.core.lib.SpectrumLib import MAXALIASINGRANGE
         minSpecLimits = min(self.spectrumLimits)
         if value > minSpecLimits:
             raise ValueError('%s dimension %d, minAliasedFrequency: value %s > min(spectrumLimits) %s' %
                             (self.spectrum, self.dimension, value, minSpecLimits)
                             )
-        if value < minSpecLimits - self.spectralWidth*MAXALIASINGRANGE:
-            value = minSpecLimits - self.spectralWidth*MAXALIASINGRANGE
+        if value < minSpecLimits - self.spectralWidth*specLib.MAXALIASINGRANGE:
+            value = minSpecLimits - self.spectralWidth*specLib.MAXALIASINGRANGE
             getLogger().warning('Setting %s, dimension %d minAliasedFrequency: value clipped to %s' %
                                 (self.spectrum, self.dimension, value)
                                 )
@@ -192,8 +190,13 @@ class SpectrumDimensionAttributes(object):
             raise ValueError('%s dimension %d, aliasingLimits; expected (minLimit, maxLimit) but got %r' %
                              (self.spectrum, self.dimension, value)
                              )
+        # first set the values
         self.minAliasedFrequency = min(value)
         self.maxAliasedFrequency = max(value)
+        # now round them to integer times the spectral width, by getting the aliasingIndexes
+        # and setting them again
+        aliasingIndices = self.aliasingIndexes
+        self.aliasingIndexes = aliasingIndices
 
     @property
     def aliasingIndexes(self) -> Tuple[int, int]:
@@ -206,6 +209,31 @@ class SpectrumDimensionAttributes(object):
         minIndex = round( (aLimits[0]-sLimits[0]) / self.spectralWidth)
         maxIndex = round( (aLimits[1]-sLimits[1]) / self.spectralWidth)
         return (minIndex, maxIndex)
+
+    @aliasingIndexes.setter
+    def aliasingIndexes(self, value):
+        if not isIterable(value) or len(value) != 2:
+            raise ValueError('%s dimension %d, aliasingIndexes; expected (minIndex, maxIndex) but got %r' %
+                             (self.spectrum, self.dimension, value)
+                             )
+        value = list(value)
+        if value[0] > 0 or value[1] < 0:
+            raise ValueError('%s dimension %d, aliasingIndexes; expected (minIndex<=0, maxIndex>=0) but got %r' %
+                             (self.spectrum, self.dimension, value))
+
+        clipped = False
+        if value[0] < -1*specLib.MAXALIASINGRANGE:
+            value[0] = -1*specLib.MAXALIASINGRANGE
+            clipped = True
+        if value[1] > specLib.MAXALIASINGRANGE:
+            value[1] = specLib.MAXALIASINGRANGE
+            clipped = True
+        if clipped:
+            getLogger().warning('%s dimension %d, aliasingIndexes; clipped values to %r' %
+                               (self.spectrum, self.dimension, value))
+
+        self.minAliasedFrequency = min(self.spectrumLimits) + value[0]*self.spectralWidth
+        self.maxAliasedFrequency = max(self.spectrumLimits) + value[1]*self.spectralWidth
 
     @property
     def spectrumLimits(self) -> Tuple[float, float]:

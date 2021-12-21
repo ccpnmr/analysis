@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-21 13:41:31 +0000 (Tue, December 21, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-21 14:48:23 +0000 (Tue, December 21, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1973,7 +1973,7 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
 
     # get the dimensions by mapping the keys of the ppmRegions dict
     dimensions = spectrum.getByAxisCodes('dimensions', [a for a in ppmRegions.keys()])
-    # now get all other parameters in dimension order
+    # now get all other parameters in dimensions order
     axisCodes = spectrum.getByDimensions('axisCodes', dimensions)
     dimIndices = spectrum.getByDimensions('dimensionIndices', dimensions)
     foldingLimits = spectrum.getByDimensions('foldingLimits', dimensions)
@@ -1984,36 +1984,6 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
 
     axisDict = dict((axisCode, region) for axisCode, region in zip(axisCodes, ppmValues))
     sliceTuples = spectrum._axisDictToSliceTuples(axisDict)
-
-
-    # axisCodes = []
-    # _ppmRegions = []
-    # for axis, region in ppmRegions.items():
-    #     axisCodes.append(axis)
-    #     _ppmRegions.append(sorted(float(pos) for pos in region))
-    #
-    # # try and match the axis codes
-    # indices = spectrum.getByAxisCodes('dimensionIndices', axisCodes)
-    #
-    # _ppmRegions = [_ppmRegions[indices.index(ii)] for ii in range(len(indices))]
-    # specLimits = spectrum.spectrumLimits
-    # aliasInds = spectrum.aliasingIndexes
-    #
-    # # check that the picked peak lies in the bounded region of the spectrum
-    # # for dim, pos in enumerate(_ppmRegions):
-    # #     minSpectrumFrequency, maxSpectrumFrequency = sorted(specLimits[dim])
-    # #     visibleAlias = aliasInds[dim]
-    # #     regionBounds = (round(minSpectrumFrequency + visibleAlias[0] * (maxSpectrumFrequency - minSpectrumFrequency), 3),
-    # #                     round(minSpectrumFrequency + (visibleAlias[1] + 1) * (maxSpectrumFrequency - minSpectrumFrequency), 3))
-    # #
-    # #     # clip to the current region bounds
-    # #     for ii in range(2):
-    # #         if pos[ii] < regionBounds[0]:
-    # #             pos[ii] = regionBounds[0]
-    # #         elif pos[ii] > regionBounds[1]:
-    # #             pos[ii] = regionBounds[1]
-    #
-    # axisDict = {axisCodes[indices.index(ii)]: _ppmRegions[ii] for ii in range(len(indices))}
 
     return _pickPeaksByRegion(spectrum, peakList, positiveThreshold, negativeThreshold, sliceTuples)
 
@@ -2172,7 +2142,7 @@ def _setDefaultAxisOrdering(spectrum):
     return
 
 #===========================================================================================================
-# parameter management
+# Spectrum/Peak parameter management
 #===========================================================================================================
 
 def _setParameterValues(obj, parameterName: str, values: Sequence, dimIndices:Sequence, dimensionCount:int) -> list:
@@ -2186,15 +2156,15 @@ def _setParameterValues(obj, parameterName: str, values: Sequence, dimIndices:Se
                          (obj.className, parameterName))
 
     if not isIterable(values):
-        raise ValueError('setting parameter "%s.%s" requires "values" tuple or list; got %r' %
+        raise ValueError('setting "%s.%s" requires "values" tuple or list; got %r' %
                          (obj.className, parameterName, values))
 
     if not isIterable(dimIndices):
-        raise ValueError('setting parameter "%s.%s" requires "dimensionIndices" tuple or list; got %r' %
+        raise ValueError('setting "%s.%s" requires "dimensionIndices" tuple or list; got %r' %
                          (obj.className, parameterName, dimIndices))
 
     if len(values) != len(dimIndices):
-        raise ValueError('setting parameter "%s.%s": unequal length of "values" and "dimensionIndices"; got %r and %r' %
+        raise ValueError('setting "%s.%s": unequal length of "values" and "dimensionIndices"; got %r and %r' %
                          (obj.className, parameterName, values, dimIndices))
 
     newValues = list(getattr(obj, parameterName))
@@ -2208,7 +2178,7 @@ def _setParameterValues(obj, parameterName: str, values: Sequence, dimIndices:Se
     try:
         setattr(obj, parameterName, newValues)
     except AttributeError:
-        raise ValueError('object "%s": unable to set parameter "%s" to %r' %
+        raise ValueError('setting "%s.%s": unable to set to %r' %
                          (obj.className, parameterName, newValues))
 
     # we get the values from the obj, just in case some haven been modified

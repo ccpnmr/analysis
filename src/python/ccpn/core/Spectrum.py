@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-21 17:03:28 +0000 (Tue, December 21, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-22 10:28:35 +0000 (Wed, December 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2423,18 +2423,13 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         Axis limits  are passed in as a dict of (axisCode, tupleLimit) key, value pairs
         with the tupleLimit supplied as (startPpm,stopPpm) axis limits in ppm (lower ppm value first).
-
         For axisCodes that are not included in the axisDict, the limits will by taken from the
         spectrum limits along the relevant axis
         For axisCodes that are None, the limits will by taken from the spectrum limits along the
-        relevant axis
+        relevant axis. Illegal axisCodes will raise an error.
 
-        Illegal axisCodes will raise an error.
-
-        Example dict:
-            {'Hn': (7.0, 9.0),
-             'Nh': (110, 130)
-             }
+        Example axisDict:
+            {'Hn': (7.0, 9.0), 'Nh': (110, 130)}
 
         Example calling function:
             regionData = spectrum.getRegion(**limitsDict)
@@ -2456,25 +2451,16 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @logCommand(get='self')
     def createPeak(self, peakList=None, **ppmPositions) -> Optional['Peak']:
-        """Create peak at position specified by the ppmPositions dict.
-
-        Return the peak created at this ppm position or None.
+        """Create and return peak at position specified by the ppmPositions dict.
 
         Ppm positions are passed in as a dict of (axisCode, ppmValue) key, value pairs
         with the ppmValue supplied mapping to the closest matching axis.
-
         Illegal or non-matching axisCodes will return None.
 
         Example ppmPosition dict:
-
-        ::
-
             {'Hn': 7.0, 'Nh': 110}
 
         Example calling function:
-
-        ::
-
         >>> peak = spectrum.createPeak(**ppmPositions)
         >>> peak = spectrum.createPeak(peakList, **ppmPositions)
         >>> peak = spectrum.createPeak(peakList=peakList, Hn=7.0, Nh=110)
@@ -2484,7 +2470,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         :return: new peak or None
         """
         from ccpn.core.lib.SpectrumLib import _createPeak
-
         return _createPeak(self, peakList, **ppmPositions)
 
     @logCommand(get='self')
@@ -2494,21 +2479,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         Ppm regions are passed in as a dict containing the axis codes and the required limits.
         Each limit is defined as a key, value pair: (str, tuple), with the tuple supplied as (min, max) axis limits in ppm.
         Axis codes supplied are mapped to the closest matching axis.
-
         Illegal or non-matching axisCodes will return None.
 
         Example ppmRegions dict:
-
-        ::
-
-            {'Hn': (7.0, 9.0),
-             'Nh': (110, 130)
-             }
+            {'Hn': (7.0, 9.0), 'Nh': (110, 130)}
 
         Example calling function:
-
-        ::
-
         >>> peaks = spectrum.pickPeaks(**ppmRegions)
         >>> peaks = spectrum.pickPeaks(peakList, **ppmRegions)
         >>> peaks = spectrum.pickPeaks(peakList=peakList, Hn=(7.0, 9.0), Nh=(110, 130))
@@ -2619,10 +2595,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     # Iterators
     #-----------------------------------------------------------------------------------------
 
-    def allPlanes(self, axisCodes: tuple, exactMatch=True):
-        """An iterator over all planes defined by axisCodes, yielding (positions, data-array) tuples
-        Expand axisCodes if exactMatch=False
-        positions are 1-based
+    def allPlanes(self, axisCodes: tuple, exactMatch:bool = True):
+        """An iterator over all planes defined by axisCodes, yielding (positions, data-array) tuples.
+
+        :param axisCodes: a tuple/list of two axisCodes defining the plane
+        :param exactMatch: match the axisCodes if True
+        :return: iterator (position, data-array); position is a (1-based) tuple of length dimensionCount
         """
         if len(axisCodes) != 2:
             raise ValueError('Invalid axisCodes %s, len should be 2' % axisCodes)
@@ -2635,9 +2613,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             raise RuntimeError('Not valid path for %s ' % self)
         return self._dataSource.allPlanes(xDim=axisDims[0], yDim=axisDims[1])
 
-    def allSlices(self, axisCode, exactMatch=True):
-        """An iterator over all slices defined by axisCode, yielding (positions, data-array) tuples
-        positions are 1-based
+    def allSlices(self, axisCode:str, exactMatch:bool = True):
+        """An iterator over all slices defined by axisCode, yielding (positions, data-array) tuples.
+
+        :param axisCode: an axisCodes defining the slice
+        :param exactMatch: match the axisCodes if True
+        :return: iterator (position, data-array); position is a (1-based) tuple of length dimensionCount
         """
         sliceDim = self.getByAxisCodes('dimensions', [axisCode], exactMatch=exactMatch)[0]
         if not self.hasValidPath():
@@ -2645,8 +2626,9 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._dataSource.allSlices(sliceDim=sliceDim)
 
     def allPoints(self):
-        """An iterator over all yielding (positions, pointValue) tuples
-        positions are 1-based
+        """An iterator over all points yielding (positions, pointValue) tuples.
+
+        :return: iterator (position, data-array); position is a (1-based) tuple of length dimensionCount
         """
         if not self.hasValidPath():
             raise RuntimeError('Not valid path for %s ' % self)
@@ -2752,71 +2734,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             if not self.sliceColour:
                 self.sliceColour = self.positiveContourColour
 
-    # def _updateEdgeToAlpha1(self):
-    #     """Update the _ccpnInternal settings from version3.0.4 -> 3.1.0.alpha
-    #     """
-    #     if not isinstance(self._ccpnInternalData, dict):
-    #         return
-    #
-    #     # deprecated ccpnInternal settings
-    #     SPECTRUMAXES = 'spectrumAxesOrdering'
-    #     SPECTRUMPREFERREDAXISORDERING = 'spectrumPreferredAxisOrdering'
-    #     SPECTRUMALIASING = 'spectrumAliasing'
-    #     SPECTRUMSERIES = 'spectrumSeries'
-    #     SPECTRUMSERIESITEMS = 'spectrumSeriesItems'
-    #     NEGATIVENOISELEVEL = 'negativeNoiseLevel'
-    #
-    #     # include positive/negative contours
-    #     if self._INCLUDEPOSITIVECONTOURS in self._ccpnInternalData:
-    #         value = self._ccpnInternalData.get(self._INCLUDEPOSITIVECONTOURS)
-    #         self._setInternalParameter(self._INCLUDEPOSITIVECONTOURS, value)
-    #         del self._ccpnInternalData[self._INCLUDEPOSITIVECONTOURS]
-    #
-    #     if self._INCLUDENEGATIVECONTOURS in self._ccpnInternalData:
-    #         value = self._ccpnInternalData.get(self._INCLUDENEGATIVECONTOURS)
-    #         self._setInternalParameter(self._INCLUDENEGATIVECONTOURS, value)
-    #         del self._ccpnInternalData[self._INCLUDENEGATIVECONTOURS]
-    #
-    #     # spectrum preferred axis order
-    #     if self.hasParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING):
-    #         value = self.getParameter(SPECTRUMAXES, SPECTRUMPREFERREDAXISORDERING)
-    #         if value is not None:
-    #             self._setInternalParameter(self._PREFERREDAXISORDERING, value)
-    #
-    #     # spectrumGroup series items
-    #     if self.hasParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS):
-    #         value = self.getParameter(SPECTRUMSERIES, SPECTRUMSERIESITEMS)
-    #         if value is not None:
-    #             self._setInternalParameter(self._SERIESITEMS, value)
-    #
-    #     # display folded contours
-    #     if self.hasParameter(SPECTRUMALIASING, self._DISPLAYFOLDEDCONTOURS):
-    #         value = self.getParameter(SPECTRUMALIASING, self._DISPLAYFOLDEDCONTOURS)
-    #         if value is not None:
-    #             self._setInternalParameter(self._DISPLAYFOLDEDCONTOURS, value)
-    #     # visibleAliasingRange/aliasingRange should already have gone
-    #
-    #     # remove unnecessary dict items
-    #     if SPECTRUMAXES in self._ccpnInternalData:
-    #         del self._ccpnInternalData[SPECTRUMAXES]
-    #     if SPECTRUMSERIES in self._ccpnInternalData:
-    #         del self._ccpnInternalData[SPECTRUMSERIES]
-    #     if SPECTRUMALIASING in self._ccpnInternalData:
-    #         del self._ccpnInternalData[SPECTRUMALIASING]
-    #
-    #     # update the list of substances
-    #     if self._ReferenceSubstancesPids in self._ccpnInternalData:
-    #         value = self._ccpnInternalData.get(self._ReferenceSubstancesPids)
-    #         if value:
-    #             self._setInternalParameter(self._REFERENCESUBSTANCES, value)
-    #         del self._ccpnInternalData[self._ReferenceSubstancesPids]
-    #
-    #     if self.hasParameter(self._AdditionalAttribute, NEGATIVENOISELEVEL):
-    #         # move the internal parameter to the correct namespace
-    #         value = self.getParameter(self._AdditionalAttribute, NEGATIVENOISELEVEL)
-    #         self.deleteParameter(self._AdditionalAttribute, NEGATIVENOISELEVEL)
-    #         self._setInternalParameter(self._NEGATIVENOISELEVEL, value)
-
     @classmethod
     def _restoreObject(cls, project, apiObj):
         """Subclassed to allow for initialisations on restore, not on creation via newSpectrum
@@ -2830,10 +2747,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         if len(spectrum.peakLists) == 0:
             spectrum.newPeakList()
             getLogger().warning('%s had no peakList; created one' % spectrum)
-
-        # This will fix any spurious settings on the aliasing (also in update_3_0_4 code)
-        _aIndices = spectrum.aliasingIndices
-        spectrum.aliasingIndices = _aIndices
 
         # Restore the dataStore info
         dataStore = None
@@ -2859,23 +2772,9 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         except (ValueError, RuntimeError) as es:
             getLogger().warning('Error restoring valid peak picker for %s (%s)' % (spectrum, es))
 
-        # try:
-        #     # check that the read values of aliasingLimits are with the allowed range (-3, +3) and centre
-        #     # and round to the nearest limit
-        #     inds = spectrum.aliasingIndexes
-        #     clippedInds = tuple((max(min(ind[0], 0), -MAXALIASINGRANGE),
-        #                          max(min(ind[1], MAXALIASINGRANGE), 0)) for ind in inds)
-        #
-        #     if inds != clippedInds:
-        #         getLogger().warning(f'AliasingLimits are out-of-range for {spectrum}, clipping to ±{MAXALIASINGRANGE} spectrumLimits')
-        #     # foldingLimits extend 0.5points beyond spectrumLimits
-        #     lims = spectrum.foldingLimits
-        #     widths = spectrum.spectralWidths
-        #     newLims = tuple((min(lm) + min(cl) * wid, max(lm) + max(cl) * wid) for lm, cl, wid in zip(lims, clippedInds, widths))
-        #     # set the new aliasing limits
-        #     spectrum.aliasingLimits = newLims
-        # except (IndexError, RuntimeError, ValueError) as es:
-        #     getLogger().error('Spectrum._restoreObject: %s' % es)
+        # This will fix any spurious settings on the aliasing (also in update_3_0_4 code)
+        _aIndices = spectrum.aliasingIndices
+        spectrum.aliasingIndices = _aIndices
 
         # Assure a setting of crucial attributes
         spectrum._updateParameterValues()
@@ -2972,13 +2871,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """
         if self._dataSource is not None:
             self._dataSource.clearCache()
-
-    # # in baseclass
-    # @deleteObject()
-    # def _delete(self):
-    #     """Delete the spectrum wrapped data.
-    #     """
-    #     self._wrappedData.delete()
 
     def _close(self):
         """Close any open dataSource

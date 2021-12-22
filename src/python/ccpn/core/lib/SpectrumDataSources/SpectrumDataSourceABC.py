@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-21 12:24:21 +0000 (Tue, December 21, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-22 12:55:52 +0000 (Wed, December 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -461,19 +461,19 @@ class SpectrumDataSourceABC(CcpNmrJson):
         return OrderedDict(items)
 
     @property
-    def dimensions(self):
-        """A one-based list of dimensions [1,dimensionCount]
+    def dimensions(self) -> tuple:
+        """A one-based tuple of dimensions [1,dimensionCount]
         """
-        return range(1, self.dimensionCount + 1)
+        return tuple(range(1, self.dimensionCount + 1))
 
     @property
-    def dimensionIndices(self):
-        """A zero-based list of dimension indices [0,dimensionCount-1]
+    def dimensionIndices(self) -> tuple:
+        """A zero-based tuple of dimension indices [0,dimensionCount-1]
         """
-        return [i for i in range(0, self.dimensionCount)]
+        return tuple([i for i in range(0, self.dimensionCount)])
 
     @property
-    def totalNumberOfPoints(self):
+    def totalNumberOfPoints(self) -> int:
         """Total number of points of the data"""
         result = self.pointCounts[0]
         for axis in self.dimensionIndices[1:]:
@@ -481,7 +481,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         return result
 
     @property
-    def expectedFileSizeInBytes(self):
+    def expectedFileSizeInBytes(self) -> int:
         """The expected file size in Bytes"""
         if self.dimensionCount == 0:
             raise RuntimeError('%s: Undefined parameters' % self)
@@ -593,13 +593,13 @@ class SpectrumDataSourceABC(CcpNmrJson):
             self.dataFile = str(_p)
         return self
 
-    def hasValidPath(self):
+    def hasValidPath(self) -> bool:
         """Return true if the path is valid
         """
         path = self.path
         return path is not None and path.exists()
 
-    def nameFromPath(self):
+    def nameFromPath(self) -> str:
         """Return a name derived from path (to be subclassed for specific cases; e.g. Bruker)
         """
         return self.path.stem
@@ -627,9 +627,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
         for dim in dimensions:
             if dim < 1 or dim > self.dimensionCount:
                 raise ValueError('invalid dimension "%s" in %r' % (dim, dimensions))
-        newValues = values[:]
-        for idx, dim in enumerate(dimensions):
-            newValues[dim - 1] = values[idx]
+        newValues = self.getTraitValue(parameterName)
+        for dim, val in zip(dimensions, values):
+            newValues[dim - 1] = val
         self.setTraitValue(parameterName, newValues)
 
     def _copyParametersFromSpectrum(self, spectrum):

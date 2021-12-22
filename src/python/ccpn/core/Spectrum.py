@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-22 11:57:14 +0000 (Wed, December 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-22 12:55:52 +0000 (Wed, December 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -684,7 +684,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @property
     def filePath(self) -> Optional[str]:
-        """Path to NMR data file; can contain redirections (e.g. $DATA)
+        """Definition of the NMR (binary) dataSource file; can contain redirections (e.g. $DATA)
+        Use Spectrum.path attribute for an absolute, decoded path
         """
         if self._dataStore is None:
             raise RuntimeError('dataStore not defined')
@@ -699,9 +700,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             raise RuntimeError('dataStore not defined')
 
         if value is None:
-            self._clearCache()
+            self._close()
             self._dataStore.path = None
-            self.setTraitValue('_dataSource', None, force=True)
             return
 
         newDataStore, newDataSource = self._getDataSourceFromPath(path=value)
@@ -728,8 +728,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         self._dataSource.exportToSpectrum(self, includePath=False)
 
     @property
-    def path(self):
-        """return a Path instance defining the absolute path of filePath
+    def path(self) -> Path:
+        """return a Path instance defining the absolute, decoded path of filePath
         """
         if self._dataStore is None:
             raise RuntimeError('dataStore not defined')
@@ -741,7 +741,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """
         return self._dataSource is not None and self._dataSource.hasValidPath()
 
-    def isEmptySpectrum(self):
+    def isEmptySpectrum(self) -> bool:
         """Return True if instance refers to an empty spectrum; i.e. as in without actual spectral data"
         """
         if self._dataStore is None:
@@ -749,7 +749,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self._dataStore.dataFormat == EmptySpectrumDataSource.dataFormat
 
     @property
-    def dataFormat(self):
+    def dataFormat(self) -> str:
         """Return the spectrum data-format identifier (e.g. Hdf5, NMRPipe)
         """
         if self._dataStore is None:
@@ -2878,6 +2878,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         self._clearCache()
         if self._dataSource is not None:
             self._dataSource.closeFile()
+            self.setTraitValue('_dataSource', None, force=True)
 
     @logCommand(get='self')
     def delete(self):

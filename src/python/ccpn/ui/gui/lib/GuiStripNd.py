@@ -34,7 +34,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-22 19:32:23 +0000 (Wed, December 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-22 19:39:18 +0000 (Wed, December 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -634,7 +634,7 @@ class GuiStripNd(GuiStrip):
         planeAxisBar = self.planeAxisBars[axisIndex - 2]
 
         # get current plane minValue, maxValue, stepSize, value, planeDepth
-        planeMin, planeMax, planeSize, position, planeDepth = planeAxisBar.getPlaneValues()
+        planeMin, planeMax, _tmp, position, planeDepth = planeAxisBar.getPlaneValues()
 
         # below is hack to prevent initial setting of value to 99.99 when dragging spectrum onto blank display
         if planeMin == 0 and position == 99.99 and planeMax == 99.99:
@@ -643,7 +643,6 @@ class GuiStripNd(GuiStrip):
         _specView = self.firstVisibleSpectrum()
         if not (_specView and not _specView.isDeleted):
             return
-
         specDim = _specView.spectrumDimensions[axisIndex]
 
         if stripAxis.unit == AXISUNIT_PPM:
@@ -665,16 +664,26 @@ class GuiStripNd(GuiStrip):
             getLogger().warning(f'Axis {stripAxis.unit} not found')
             return
 
+        def _wrapPosition(_position):
+            # wrap around the aliasing limits
+            _aliasMin, _aliasMax = _specView.aliasingLimits[axisIndex]
+            if _position > _aliasMax:
+                _position = _aliasMin
+            if _position < _aliasMin:
+                _position = _aliasMax
+            return _position
+
         if planeCount:
             delta = planeSize * planeCount
             position = position + delta
 
             # wrap around the aliasing limits
-            _aliasMin, _aliasMax = _specView.aliasingLimits[axisIndex]
-            if position > _aliasMax:
-                position = _aliasMin
-            if position < _aliasMin:
-                position = _aliasMax
+            position = _wrapPosition(position)
+            # _aliasMin, _aliasMax = _specView.aliasingLimits[axisIndex]
+            # if position > _aliasMax:
+            #     position = _aliasMin
+            # if position < _aliasMin:
+            #     position = _aliasMax
 
             stripAxis.position = position
             stripAxis.width = planeSize * planeDepth
@@ -684,8 +693,10 @@ class GuiStripNd(GuiStrip):
 
         else:
             if position is not None:
-                _aliasMin, _aliasMax = _specView.spectrum.aliasingLimits[_index]
-                position = _aliasMin + (position - _aliasMin) % (_aliasMax - _aliasMin)
+                # _aliasMin, _aliasMax = _specView.spectrum.aliasingLimits[_index]
+                # position = _aliasMin + (position - _aliasMin) % (_aliasMax - _aliasMin)
+                position = _wrapPosition(position)
+
                 stripAxis.position = position
                 stripAxis.width = planeSize * planeDepth
 

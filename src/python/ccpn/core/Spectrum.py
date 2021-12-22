@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-22 10:29:24 +0000 (Wed, December 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-22 11:57:14 +0000 (Wed, December 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1790,14 +1790,15 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         from ccpn.core.lib.SpectrumLib import _getParameterValues
 
         if axisCodes is None:
-            dimIndices = self.dimensionIndices
+            dimensions = self.dimensions
         else:
-            dimIndices = self.orderByAxisCodes(self.dimensionIndices, axisCodes=axisCodes, exactMatch=exactMatch, matchLength=matchLength)
+            dimensions = self.orderByAxisCodes(self.dimensions, axisCodes=axisCodes, exactMatch=exactMatch, matchLength=matchLength)
 
         try:
-            newValues = _getParameterValues(self, parameterName, dimIndices=dimIndices, dimensionCount=self.dimensionCount)
+            newValues = _getParameterValues(self, parameterName,
+                                            dimensions=dimensions, dimensionCount=self.dimensionCount)
         except ValueError as es:
-            raise ValueError('Spectrum.getByAxisCodes: %s' % str(es))
+            raise ValueError('%s.getByAxisCodes: %s' % (self.__class__.__name__, str(es)))
 
         return newValues
 
@@ -1819,18 +1820,19 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         from ccpn.core.lib.SpectrumLib import _setParameterValues
 
         if axisCodes is None:
-            dimIndices = self.dimensionIndices
+            dimensions = self.dimensions
         else:
-            dimIndices = self.orderByAxisCodes(self.dimensionIndices, axisCodes=axisCodes, exactMatch=exactMatch, matchLength=matchLength)
+            dimensions = self.orderByAxisCodes(self.dimensions, axisCodes=axisCodes, exactMatch=exactMatch, matchLength=matchLength)
 
         try:
-            newValues = _setParameterValues(self, parameterName, values, dimIndices=dimIndices, dimensionCount=self.dimensionCount)
+            newValues = _setParameterValues(self, parameterName, values,
+                                            dimensions=dimensions, dimensionCount=self.dimensionCount)
         except ValueError as es:
-            raise ValueError('Spectrum.setByAxisCodes: %s' % str(es))
+            raise ValueError('%s.setByAxisCodes: %s' % (self.__class__.__name__, str(es)))
 
         return newValues
 
-    def orderByDimensions(self, iterable, dimensions) -> list:
+    def orderByDimensions(self, iterable, dimensions=None) -> list:
         """Return a list of values of iterable in order defined by dimensions (default order if None).
 
         :param iterable: an iterable (tuple, list)
@@ -1838,6 +1840,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         :return: a list with values defined by iterable in dimensions order
         """
         from ccpn.core.lib.SpectrumLib import _orderByDimensions
+        if dimensions is None:
+            dimensions = self.dimensions
         return _orderByDimensions(iterable, dimensions=dimensions, dimensionCount=self.dimensionCount)
 
     def getByDimensions(self, parameterName: str, dimensions: Sequence[int] = None) -> list:
@@ -1854,16 +1858,13 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         from ccpn.core.lib.SpectrumLib import _getParameterValues
 
         if dimensions is None:
-            dimIndices = self.dimensionIndices
-        else:
-            if not isIterable(dimensions):
-                raise ValueError('Spectrum.getByDimensions: expected "dimensions" tuple or list; got %r' % dimensions)
-            dimIndices = [dim-1 for dim in dimensions]
+            dimensions = self.dimensions
 
         try:
-            newValues = _getParameterValues(self, parameterName, dimIndices=dimIndices, dimensionCount=self.dimensionCount)
+            newValues = _getParameterValues(self, parameterName,
+                                            dimensions=dimensions, dimensionCount=self.dimensionCount)
         except ValueError as es:
-            raise ValueError('Spectrum.getByAxisCodes: %s' % str(es))
+            raise ValueError('%s.getByDimensions: %s' % (self.__class__.__name__, str(es)))
 
         return newValues
 
@@ -1881,16 +1882,13 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         from ccpn.core.lib.SpectrumLib import _setParameterValues
 
         if dimensions is None:
-            dimIndices = self.dimensionIndices
-        else:
-            if not isIterable(dimensions):
-                raise ValueError('Spectrum.setByDimensions: expected "dimensions" tuple or list; got %r' % dimensions)
-            dimIndices = [dim-1 for dim in dimensions]
+            dimensions = self.dimensions
 
         try:
-            newValues = _setParameterValues(self, parameterName, values, dimIndices=dimIndices, dimensionCount=self.dimensionCount)
+            newValues = _setParameterValues(self, parameterName, values,
+                                            dimensions=dimensions, dimensionCount=self.dimensionCount)
         except ValueError as es:
-            raise ValueError('Spectrum.setByDimensions: %s' % str(es))
+            raise ValueError('%s.setByDimensions: %s' % (self.__class__.__name__, str(es)))
 
         return newValues
 

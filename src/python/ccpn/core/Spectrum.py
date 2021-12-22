@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-22 10:28:35 +0000 (Wed, December 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-22 10:29:24 +0000 (Wed, December 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -3443,30 +3443,30 @@ def _extractRegionToFile(spectrum, dimensions, position, dataStore, name=None) -
 
     return newSpectrum
 
-
-# Additional Notifiers:
-Project._apiNotifiers.extend(
-        (
-            # GWV: not needed?
-            # ('_finaliseApiRename', {}, Nmr.DataSource._metaclass.qualifiedName(), 'setName'),
-            #
-            ('_notifyRelatedApiObject', {'pathToObject': 'dataSources', 'action': 'change'},
-             Nmr.Experiment._metaclass.qualifiedName(), ''),
-
-            ('_notifyRelatedApiObject', {'pathToObject': 'dataSource', 'action': 'change'},
-             Nmr.AbstractDataDim._metaclass.qualifiedName(), ''),
-
-            ('_notifyRelatedApiObject', {'pathToObject': 'dataDim.dataSource', 'action': 'change'},
-             Nmr.DataDimRef._metaclass.qualifiedName(), ''),
-
-            ('_notifyRelatedApiObject', {'pathToObject': 'experiment.dataSources', 'action': 'change'},
-             Nmr.ExpDim._metaclass.qualifiedName(), ''),
-
-            ('_notifyRelatedApiObject', {'pathToObject': 'expDim.experiment.dataSources', 'action': 'change'},
-             Nmr.ExpDimRef._metaclass.qualifiedName(), ''),
-
-            ('_notifyRelatedApiObject', {'pathToObject': 'nmrDataSources', 'action': 'change'},
-             DataLocation.AbstractDataStore._metaclass.qualifiedName(), ''),
-
-            )
-        )
+#
+# # Additional Notifiers:
+# Project._apiNotifiers.extend(
+#         (
+#             # GWV: not needed?
+#             # ('_finaliseApiRename', {}, Nmr.DataSource._metaclass.qualifiedName(), 'setName'),
+#             #
+#             ('_notifyRelatedApiObject', {'pathToObject': 'dataSources', 'action': 'change'},
+#              Nmr.Experiment._metaclass.qualifiedName(), ''),
+#
+#             ('_notifyRelatedApiObject', {'pathToObject': 'dataSource', 'action': 'change'},
+#              Nmr.AbstractDataDim._metaclass.qualifiedName(), ''),
+#
+#             ('_notifyRelatedApiObject', {'pathToObject': 'dataDim.dataSource', 'action': 'change'},
+#              Nmr.DataDimRef._metaclass.qualifiedName(), ''),
+#
+#             ('_notifyRelatedApiObject', {'pathToObject': 'experiment.dataSources', 'action': 'change'},
+#              Nmr.ExpDim._metaclass.qualifiedName(), ''),
+#
+#             ('_notifyRelatedApiObject', {'pathToObject': 'expDim.experiment.dataSources', 'action': 'change'},
+#              Nmr.ExpDimRef._metaclass.qualifiedName(), ''),
+#
+#             ('_notifyRelatedApiObject', {'pathToObject': 'nmrDataSources', 'action': 'change'},
+#              DataLocation.AbstractDataStore._metaclass.qualifiedName(), ''),
+#
+#             )
+#         )

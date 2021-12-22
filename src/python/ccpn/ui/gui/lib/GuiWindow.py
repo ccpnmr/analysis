@@ -946,9 +946,11 @@ class GuiWindow():
 
         if self.pythonConsoleModule is None:  # No pythonConsole module detected, so create one.
             self.moduleArea.addModule(PythonConsoleModule(self), 'bottom')
-
-        else:  # just close it!
-            self.pythonConsoleModule._closeModule()
+        if self.pythonConsoleModule:
+            if self.pythonConsoleModule.isHidden():
+                self.pythonConsoleModule.show()
+            else:
+                self.pythonConsoleModule.hide()
 
     def _lowerContourBaseCallback(self):
         """Callback to lower the contour level for the currently

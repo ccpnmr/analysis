@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-06 15:55:53 +0100 (Wed, October 06, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-22 19:32:23 +0000 (Wed, December 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -164,7 +164,8 @@ class DoubleSpinbox(QtWidgets.QDoubleSpinBox, Base):
         # emit the value when wheel event has occurred, only when hasFocus
         if self.hasFocus() or not self._internalWheelEvent:
             super().wheelEvent(event)
-            self.wheelChanged.emit(self.value())
+            value = self.value()
+            self.wheelChanged.emit(value)
         else:
             event.ignore()
 

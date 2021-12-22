@@ -371,6 +371,11 @@ class SpectrumDimensionAttributes(object):
         # self._dataDimRef.spectralWidth = value  # This is not allowed; it needs to go via valuePerPoint
         self._valuePerPoint *= (value / swOld)
 
+    @property
+    def ppmPerPoint(self):
+        """Convenience; ppm per point"""
+        return self.spectralWidth / float(self.pointCount)
+
     # This is a crucial property that effectively governs the spectral width (both in Hz and ppm)
     #     # We assume that the number of points is constant, so setting SW changes valuePerPoint
     #     dataDimRef = self._wrappedData

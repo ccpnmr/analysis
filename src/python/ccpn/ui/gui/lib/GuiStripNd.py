@@ -34,7 +34,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-22 14:09:56 +0000 (Wed, December 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-22 19:32:23 +0000 (Wed, December 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -532,79 +532,89 @@ class GuiStripNd(GuiStrip):
         self._updateTraces()
 
     def _setZWidgets(self, ignoreSpectrumView=None, axis=None):
-        """
+        """Sets values for the planeAxis widgets in the plane toolbar.
         # CCPN INTERNAL - called in _changedBoundDisplayAxisOrdering function of SpectrumDisplayNd.py
-        Sets values for the widgets in the plane toolbar.
         """
-        for n, zAxis in enumerate(self.orderedAxes[2:]):
+        for n, stripAxis in enumerate(self.orderedAxes[2:]):
 
-            if axis and axis != zAxis:
+            if axis and axis != stripAxis:
                 continue
 
+            displayAxisIndex = n+2
+            planeAxisBar = self.planeAxisBars[n]
+
+            # initialise the values to be determined
             position = None
-            minZPlaneSize = None
-            minAliasedFrequency = maxAliasedFrequency = None
-            for spectrumView in self.spectrumViews:
+            planeSize = None
+            minPlaneValue = None
+            maxPlaneValue = None
 
-                if ignoreSpectrumView is spectrumView:
-                    continue
+            specViews = [specView for specView in self.spectrumViews
+                                  if (specView is not ignoreSpectrumView and
+                                      specView.spectrum.dimensionCount > 2
+                                     )
+                         ]
+            for spectrumView in specViews:
 
-                spectrum = spectrumView.spectrum
-                if spectrum.dimensionCount <= 2:
-                    continue
+                _params = spectrumView._getSpectrumViewParams(displayAxisIndex)
+                _index = spectrumView.dimensionIndices[displayAxisIndex]
+                specDim = spectrumView.spectrumDimensions[displayAxisIndex]
 
-                _params = spectrumView._getSpectrumViewParams(n + 2)
-                _index = spectrumView.dimensionIndices[n+2]
-                specDim = spectrumView.spectrum.spectrumDimensions[_index]
+                if stripAxis.unit == AXISUNIT_PPM:
+                    # _valuePerPoint = _params.valuePerPoint
+                    # _minFreq = _params.minAliasedFrequency + (0.5 * _valuePerPoint) or _params.minSpectrumFrequency
+                    # _maxFreq = _params.maxAliasedFrequency - (0.5 * _valuePerPoint) or _params.maxSpectrumFrequency
 
-                if zAxis.unit == AXISUNIT_PPM:
-                    _valuePerPoint = _params.valuePerPoint
-                    _minFreq = _params.minAliasedFrequency + (0.5 * _valuePerPoint) or _params.minSpectrumFrequency
-                    _maxFreq = _params.maxAliasedFrequency - (0.5 * _valuePerPoint) or _params.maxSpectrumFrequency
-                    minAliasedFrequency = min(minAliasedFrequency, _minFreq) if minAliasedFrequency is not None else _minFreq
-                    maxAliasedFrequency = max(maxAliasedFrequency, _maxFreq) if maxAliasedFrequency is not None else _maxFreq
+                    _ppmPerPoint = specDim.ppmPerPoint
+                    _minFreq, _maxFreq = spectrumView.aliasingLimits[displayAxisIndex]
+                    _minFreq -= 0.5*_ppmPerPoint  # hack
+                    _maxFreq += 0.5*_ppmPerPoint  # hack
 
-                    if minZPlaneSize is None or _valuePerPoint < minZPlaneSize:
-                        minZPlaneSize = _valuePerPoint
-                    position = zAxis.position
+                    minPlaneValue = min(minPlaneValue, _minFreq) if minPlaneValue is not None else _minFreq
+                    maxPlaneValue = max(maxPlaneValue, _maxFreq) if maxPlaneValue is not None else _maxFreq
+                    planeSize = min(planeSize, _ppmPerPoint) if planeSize is not None else _ppmPerPoint
 
-                elif zAxis.unit == AXISUNIT_POINT:
+                    # if minZPlaneSize is None or _valuePerPoint < minZPlaneSize:
+                    #     minZPlaneSize = _valuePerPoint
+                    position = stripAxis.position
+
+                elif stripAxis.unit == AXISUNIT_POINT:
                     # change to points to display in the widget
                     # pointL, pointR = spectrumView.spectrum.getPointAliasingLimits(dimension=_index + 1)
-                    minAliasedFrequency = 1
-                    maxAliasedFrequency = specDim.pointCount
-                    minZPlaneSize = 1.0
-                    position = specDim.ppmToPoint(zAxis.position)
+                    minPlaneValue = 0.5
+                    maxPlaneValue = float(specDim.pointCount)+0.5
+                    planeSize = 1.0
+                    position = specDim.ppmToPoint(stripAxis.position)
 
-                elif zAxis.unit == AXISUNIT_HZ:
+                elif stripAxis.unit == AXISUNIT_HZ:
                     # change to Hz to display in the widget
                     _valuePerPoint = _params.valuePerPoint
                     _minFreq = _params.minAliasedFrequency + (0.5 * _valuePerPoint) or _params.minSpectrumFrequency
                     _maxFreq = _params.maxAliasedFrequency - (0.5 * _valuePerPoint) or _params.maxSpectrumFrequency
-                    minAliasedFrequency = min(minAliasedFrequency, _minFreq) if minAliasedFrequency is not None else _minFreq
-                    maxAliasedFrequency = max(maxAliasedFrequency, _maxFreq) if maxAliasedFrequency is not None else _maxFreq
+                    minPlaneValue = min(minPlaneValue, _minFreq) if minPlaneValue is not None else _minFreq
+                    maxPlaneValue = max(maxPlaneValue, _maxFreq) if maxPlaneValue is not None else _maxFreq
 
-                    minAliasedFrequency *= specDim.spectrometerFrequency
-                    maxAliasedFrequency *= specDim.spectrometerFrequency
+                    minPlaneValue *= specDim.spectrometerFrequency
+                    maxPlaneValue *= specDim.spectrometerFrequency
 
-                    if minZPlaneSize is None or _valuePerPoint < minZPlaneSize:
-                        minZPlaneSize = _valuePerPoint * specDim.spectrometerFrequency
-                    position = zAxis.position * specDim.spectrometerFrequency
+                    if planeSize is None or _valuePerPoint < planeSize:
+                        planeSize = _valuePerPoint * specDim.spectrometerFrequency
+                    position = stripAxis.position * specDim.spectrometerFrequency
 
                 else:
-                    getLogger().warning(f'Axis {zAxis.unit} not found')
+                    getLogger().warning(f'Axis {stripAxis.unit} not found')
                     return
 
-            if zAxis and position is not None:
-                if minZPlaneSize is None:
-                    minZPlaneSize = 1.0  # arbitrary to catch errors
-
-                self.planeAxisBars[n].setPlaneValues(minZPlaneSize, minAliasedFrequency, maxAliasedFrequency, position, zAxis.unit)
+            if stripAxis and position is not None:
+                if planeSize is None:
+                    planeSize = 1.0  # arbitrary to catch errors
+                # set PlaneSelectorWidget values; BUT "unit" argument is ignored (GWV)
+                planeAxisBar.setPlaneValues(planeSize, minPlaneValue, maxPlaneValue, position, unit=stripAxis.unit)
 
         self.haveSetupZWidgets = True
 
     # @logCommand(get='self')
-    def changeZPlane(self, n: int = None, planeCount: int = None, position: float = None):
+    def changeZPlane(self, axisIndex:int = None, planeCount:int = None, position:float = None):
         """
         Changes the position of the z,a,b axis of the strip by number of planes or a ppm position, depending
         on which is specified.
@@ -615,17 +625,16 @@ class GuiStripNd(GuiStrip):
         if not (self.planeAxisBars and self.activePlaneAxis is not None):
             return
 
-        # GWV: don't get this; Z is always 2; why pass it in?? I now know; the routine is used for z-plane, a-plane
-        # etc; i.e. n == planeIndex
-        n = (n if isinstance(n, int) else self.activePlaneAxis)
-        if not (0 <= (n - 2) < len(self.planeAxisBars)):
-            getLogger().warning('planeIndex out of range %s' % str(n))
+        axisIndex = (axisIndex if isinstance(axisIndex, int) else self.activePlaneAxis)
+        if not (0 <= (axisIndex - 2) < len(self.planeAxisBars)):
+            getLogger().warning('axisIndex out of range %s' % axisIndex)
             return
 
-        zAxis = self.orderedAxes[n]  # was + 2
+        stripAxis = self.orderedAxes[axisIndex]  # was + 2
+        planeAxisBar = self.planeAxisBars[axisIndex - 2]
 
-        planeAxisBar = self.planeAxisBars[n - 2]
-        planeMin, planeMax, planeSize, position, _tmp = planeAxisBar.getPlaneValues()
+        # get current plane minValue, maxValue, stepSize, value, planeDepth
+        planeMin, planeMax, planeSize, position, planeDepth = planeAxisBar.getPlaneValues()
 
         # below is hack to prevent initial setting of value to 99.99 when dragging spectrum onto blank display
         if planeMin == 0 and position == 99.99 and planeMax == 99.99:
@@ -635,45 +644,52 @@ class GuiStripNd(GuiStrip):
         if not (_specView and not _specView.isDeleted):
             return
 
-        _index = _specView.dimensionIndices[n]
-        specDim = _specView.spectrum.spectrumDimensions[_index]
+        specDim = _specView.spectrumDimensions[axisIndex]
 
-        if zAxis.unit == AXISUNIT_PPM:
-            planeSize = specDim._valuePerPoint/ specDim.spectrometerFrequency  # specDim is in Hz
+        if stripAxis.unit == AXISUNIT_PPM:
+            # planeSize = specDim._valuePerPoint/ specDim.spectrometerFrequency  # specDim is in Hz
+            planeSize = specDim.ppmPerPoint
 
-        elif zAxis.unit == AXISUNIT_POINT:
-            position = specDim.pointToValue(position)
-            planeSize = specDim._valuePerPoint/ specDim.spectrometerFrequency  # specDim is in Hz
+        elif stripAxis.unit == AXISUNIT_POINT:
+            position = specDim.pointToPpm(position)
+            # planeSize = specDim._valuePerPoint/ specDim.spectrometerFrequency  # specDim is in Hz
+            planeSize = specDim.ppmPerPoint
 
-        elif zAxis.unit == AXISUNIT_HZ:
+        elif stripAxis.unit == AXISUNIT_HZ:
             # first change to ppm and scale by spectrometerFrequencies
             position = position / specDim.spectrometerFrequency
-            planeSize = specDim._valuePerPoint/ specDim.spectrometerFrequency  # specDim is in Hz
+            # planeSize = specDim._valuePerPoint/ specDim.spectrometerFrequency  # specDim is in Hz
+            planeSize = specDim.ppmPerPoint
 
         else:
-            getLogger().warning(f'Axis {zAxis.unit} not found')
+            getLogger().warning(f'Axis {stripAxis.unit} not found')
             return
 
         if planeCount:
             delta = planeSize * planeCount
             position = position + delta
 
-            _aliasMin, _aliasMax = _specView.spectrum.aliasingLimits[_index]
-            position = _aliasMin + (position - _aliasMin) % (_aliasMax - _aliasMin)
-            zAxis.position = position
-            zAxis.width = _tmp * planeSize
+            # wrap around the aliasing limits
+            _aliasMin, _aliasMax = _specView.aliasingLimits[axisIndex]
+            if position > _aliasMax:
+                position = _aliasMin
+            if position < _aliasMin:
+                position = _aliasMax
 
-            self.axisRegionChanged(zAxis)
+            stripAxis.position = position
+            stripAxis.width = planeSize * planeDepth
+
+            self.axisRegionChanged(stripAxis)
             self.refresh()
 
         else:
             if position is not None:
                 _aliasMin, _aliasMax = _specView.spectrum.aliasingLimits[_index]
                 position = _aliasMin + (position - _aliasMin) % (_aliasMax - _aliasMin)
-                zAxis.position = position
-                zAxis.width = _tmp * planeSize
+                stripAxis.position = position
+                stripAxis.width = planeSize * planeDepth
 
-                self.axisRegionChanged(zAxis)
+                self.axisRegionChanged(stripAxis)
                 self.refresh()
 
     def _setZPlanePosition(self, n: int, value: float):

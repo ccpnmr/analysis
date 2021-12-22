@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-20 18:47:15 +0000 (Mon, December 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-22 18:06:58 +0000 (Wed, December 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -6271,7 +6271,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 continue
 
             for peakListView in spectrumView.peakListViews:
-                if not peakListView.isDisplayed() or not spectrumView.isDisplayed():
+                if not peakListView.isDisplayed or not spectrumView.isDisplayed:
                     continue
 
                 peakList = peakListView.peakList
@@ -6322,7 +6322,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 continue
 
             for multipletListView in spectrumView.multipletListViews:
-                if not multipletListView.isDisplayed() or not spectrumView.isDisplayed():
+                if not multipletListView.isDisplayed or not spectrumView.isDisplayed:
                     continue
 
                 multipletList = multipletListView.multipletList

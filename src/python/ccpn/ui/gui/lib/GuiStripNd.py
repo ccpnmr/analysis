@@ -34,7 +34,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-14 22:03:54 +0000 (Tue, December 14, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-22 14:09:56 +0000 (Wed, December 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -570,11 +570,11 @@ class GuiStripNd(GuiStrip):
 
                 elif zAxis.unit == AXISUNIT_POINT:
                     # change to points to display in the widget
-                    pointL, pointR = spectrumView.spectrum.getPointAliasingLimits(dimension=_index + 1)
-                    minAliasedFrequency = min(pointL, pointR)
-                    maxAliasedFrequency = max(pointL, pointR)
+                    # pointL, pointR = spectrumView.spectrum.getPointAliasingLimits(dimension=_index + 1)
+                    minAliasedFrequency = 1
+                    maxAliasedFrequency = specDim.pointCount
                     minZPlaneSize = 1.0
-                    position = spectrumView.spectrum.spectrumDimensions[_index].valueToPoint(zAxis.position)
+                    position = specDim.ppmToPoint(zAxis.position)
 
                 elif zAxis.unit == AXISUNIT_HZ:
                     # change to Hz to display in the widget

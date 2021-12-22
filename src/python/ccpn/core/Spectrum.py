@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-22 12:55:52 +0000 (Wed, December 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-22 14:09:56 +0000 (Wed, December 22, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1660,59 +1660,59 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         return result
 
-    def _verifyAxisCodeDimension(self, axisCode, dimension):
-        """Verify the axisCode and dimension
-        Return the aliasing information for the given axis
-        """
-        if dimension is None and axisCode is None:
-            raise ValueError('Spectrum._verifyAxisCodeDimension: either axisCode or dimension needs to be defined')
-        if dimension is not None and axisCode is not None:
-            raise ValueError('Spectrum._verifyAxisCodeDimension: axisCode and dimension cannot be both defined')
-        if axisCode is not None:
-            dimension = self.getByAxisCodes('dimensions', [axisCode], exactMatch=False)[0]
-        if dimension is None or dimension < 1 or dimension > self.dimensionCount:
-            raise RuntimeError('Invalid dimension (%s)' % (dimension,))
+    # def _verifyAxisCodeDimension(self, axisCode, dimension):
+    #     """Verify the axisCode and dimension
+    #     Return the aliasing information for the given axis
+    #     """
+    #     if dimension is None and axisCode is None:
+    #         raise ValueError('Spectrum._verifyAxisCodeDimension: either axisCode or dimension needs to be defined')
+    #     if dimension is not None and axisCode is not None:
+    #         raise ValueError('Spectrum._verifyAxisCodeDimension: axisCode and dimension cannot be both defined')
+    #     if axisCode is not None:
+    #         dimension = self.getByAxisCodes('dimensions', [axisCode], exactMatch=False)[0]
+    #     if dimension is None or dimension < 1 or dimension > self.dimensionCount:
+    #         raise RuntimeError('Invalid dimension (%s)' % (dimension,))
+    #
+    #     aliasLims = self.aliasingLimits[dimension - 1]
+    #     axisRevd = self.axesReversed[dimension - 1]
+    #     pCount = self.pointCounts[dimension - 1]
+    #     vpp = self.valuesPerPoint[dimension - 1] * 0.5  # offset for aliasingLimits
+    #     if axisRevd:
+    #         aliasLims = list(reversed(aliasLims))
+    #         vpp = -vpp
+    #     ppmL, ppmR = aliasLims[0] + vpp, aliasLims[1] - vpp
+    #     pL, pR = round(self.ppm2point(ppmL, dimension=dimension)), round(self.ppm2point(ppmR, dimension=dimension))
+    #
+    #     # clip to the maximum allowed aliasing limits
+    #     pL = min((MAXALIASINGRANGE + 1) * pCount, max(-MAXALIASINGRANGE * pCount, pL))
+    #     pR = min((MAXALIASINGRANGE + 1) * pCount, max(-MAXALIASINGRANGE * pCount, pR))
+    #     return ppmL, ppmR, pL, pR
 
-        aliasLims = self.aliasingLimits[dimension - 1]
-        axisRevd = self.axesReversed[dimension - 1]
-        pCount = self.pointCounts[dimension - 1]
-        vpp = self.valuesPerPoint[dimension - 1] * 0.5  # offset for aliasingLimits
-        if axisRevd:
-            aliasLims = list(reversed(aliasLims))
-            vpp = -vpp
-        ppmL, ppmR = aliasLims[0] + vpp, aliasLims[1] - vpp
-        pL, pR = round(self.ppm2point(ppmL, dimension=dimension)), round(self.ppm2point(ppmR, dimension=dimension))
+    # def getPpmAliasingLimitsArray(self, axisCode=None, dimension=None) -> numpy.array:
+    #     """Return a numpy array of ppm values of the grid points along axisCode or dimension
+    #     for the points contained by the aliasing limits, end points are inclusive
+    #     """
+    #     ppmL, ppmR, pL, pR = self._verifyAxisCodeDimension(axisCode, dimension)
+    #     return numpy.linspace(ppmL, ppmR, pR - pL + 1)
+    #
+    # def getPpmAliasingLimits(self, axisCode=None, dimension=None):
+    #     """Return a tuple of ppm values of the (first, last) grid points along axisCode or dimension
+    #     for the points contained by the aliasing limits, end points are inclusive
+    #     """
+    #     ppmL, ppmR, _tmp1, _tmp2 = self._verifyAxisCodeDimension(axisCode, dimension)
+    #     return (ppmL, ppmR)
 
-        # clip to the maximum allowed aliasing limits
-        pL = min((MAXALIASINGRANGE + 1) * pCount, max(-MAXALIASINGRANGE * pCount, pL))
-        pR = min((MAXALIASINGRANGE + 1) * pCount, max(-MAXALIASINGRANGE * pCount, pR))
-        return ppmL, ppmR, pL, pR
+    # def getPointAliasingLimitsArray(self, axisCode=None, dimension=None) -> numpy.array:
+    #     """Return a numpy array with point values of the grid points along axisCode or dimension
+    #     """
+    #     _tmp1, _tmp2, pL, pR = self._verifyAxisCodeDimension(axisCode, dimension)
+    #     return numpy.linspace(pL, pR, pR - pL + 1)
 
-    def getPpmAliasingLimitsArray(self, axisCode=None, dimension=None) -> numpy.array:
-        """Return a numpy array of ppm values of the grid points along axisCode or dimension
-        for the points contained by the aliasing limits, end points are inclusive
-        """
-        ppmL, ppmR, pL, pR = self._verifyAxisCodeDimension(axisCode, dimension)
-        return numpy.linspace(ppmL, ppmR, pR - pL + 1)
-
-    def getPpmAliasingLimits(self, axisCode=None, dimension=None):
-        """Return a tuple of ppm values of the (first, last) grid points along axisCode or dimension
-        for the points contained by the aliasing limits, end points are inclusive
-        """
-        ppmL, ppmR, _tmp1, _tmp2 = self._verifyAxisCodeDimension(axisCode, dimension)
-        return (ppmL, ppmR)
-
-    def getPointAliasingLimitsArray(self, axisCode=None, dimension=None) -> numpy.array:
-        """Return a numpy array with point values of the grid points along axisCode or dimension
-        """
-        _tmp1, _tmp2, pL, pR = self._verifyAxisCodeDimension(axisCode, dimension)
-        return numpy.linspace(pL, pR, pR - pL + 1)
-
-    def getPointAliasingLimits(self, axisCode=None, dimension=None):
-        """Return a tuple of point values of the (first, last) grid points along axisCode or dimension
-        """
-        _tmp1, _tmp2, pL, pR = self._verifyAxisCodeDimension(axisCode, dimension)
-        return (pL, pR)
+    # def getPointAliasingLimits(self, axisCode=None, dimension=None):
+    #     """Return a tuple of point values of the (first, last) grid points along axisCode or dimension
+    #     """
+    #     _tmp1, _tmp2, pL, pR = self._verifyAxisCodeDimension(axisCode, dimension)
+    #     return (pL, pR)
 
     # def automaticIntegration(self, spectralData):
     #     return self._apiDataSource.automaticIntegration(spectralData)
@@ -1726,7 +1726,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         # find the map of newAxisCodeOrder to self.axisCodes; eg. 'H' to 'Hn'
         axisCodeMap = getAxisCodeMatch(axisCodes, self.axisCodes)
         if len(axisCodeMap) == 0:
-            raise ValueError('axisCodes %s contains an invalid element' % str(axisCodes))
+            raise ValueError('axisCodes %r contains an invalid element' % axisCodes)
         return [axisCodeMap[a] for a in axisCodes]
 
     def orderByAxisCodes(self, iterable, axisCodes: Sequence[str] = None, exactMatch: bool = False, matchLength: bool = True) -> list:

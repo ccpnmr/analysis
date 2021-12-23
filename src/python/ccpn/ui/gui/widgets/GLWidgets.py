@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-23 10:00:05 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 11:27:19 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -70,7 +70,7 @@ class GuiNdWidget(CcpnGLWidget):
 
                     peakList = peakListView.peakList
 
-                    spectrumIndices = spectrumView.dimensionOrdering
+                    spectrumIndices = spectrumView.dimensionIndices
                     xAxis = spectrumIndices[0]
                     yAxis = spectrumIndices[1]
 
@@ -120,7 +120,7 @@ class GuiNdWidget(CcpnGLWidget):
 
                     multipletList = multipletListView.multipletList
 
-                    spectrumIndices = spectrumView.dimensionOrdering
+                    spectrumIndices = spectrumView.dimensionIndices
                     xAxis = spectrumIndices[0]
                     yAxis = spectrumIndices[1]
 

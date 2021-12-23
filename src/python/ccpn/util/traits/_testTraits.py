@@ -11,7 +11,7 @@ from ccpn.util.traits.CcpNmrTraits import RecursiveDict, RecursiveList, Recursiv
 class TestObj(CcpNmrJson):
 
     saveAllTraitsToJson = True
-    version = 0.1
+    classVersion = 0.1
 
     odict = RecursiveOdict()
     adict = Adict()

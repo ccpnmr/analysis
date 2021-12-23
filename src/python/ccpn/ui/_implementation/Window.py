@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-17 15:13:05 +0100 (Fri, September 17, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 11:27:17 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -335,7 +335,7 @@ class Window(AbstractWrapperObject):
             raise ValueError('%s has no spectra' % spectra)
 
         if not axisCodes:
-            axisCodes = tuple(spectrum.axisCodes[ac] for ac in spectrum.preferredAxisOrdering)
+            axisCodes = tuple(spectrum.axisCodes[ac] for ac in spectrum._preferredAxisOrdering)
 
         # change string names to objects
         if isinstance(relativeTo, str):

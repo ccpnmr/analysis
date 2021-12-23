@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-20 18:47:15 +0000 (Mon, December 20, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 11:27:18 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -43,11 +43,6 @@ from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.util.Colour import colorSchemeTable
 
-
-#TODO:WAYNE: incorporate most functionality in GuiMainWindow. See also MainMenu
-# For readability there should be a class
-# _MainWindowShortCuts which (Only!) has the shortcut definitions and the callbacks to initiate them.
-# The latter should all be private methods!
 
 
 class GuiWindow():

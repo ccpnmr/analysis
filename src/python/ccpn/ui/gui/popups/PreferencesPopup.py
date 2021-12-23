@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-18 18:17:58 +0000 (Thu, November 18, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 11:27:18 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -280,7 +280,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         if updateColourScheme:
             # change the colour theme
             setColourScheme(self.application.preferences.general.colourScheme)
-            self.application.correctColours()
+            self.application._correctColours()
 
         if updateSpectrumDisplays:
             self._updateSpectrumDisplays()

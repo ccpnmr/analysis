@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-23 10:00:05 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 11:27:17 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,13 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, newObject
 
+from ccpn.core._implementation.updates.update_3_0_4 import _updateStrip_3_0_4_to_3_1_0
+from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_OBJECT_INITIALISATION
 
+@updateObject(fromVersion='3.0.4',
+              toVersion='3.1.0',
+              updateFunction=_updateStrip_3_0_4_to_3_1_0,
+              updateMethod=UPDATE_POST_OBJECT_INITIALISATION)
 class Strip(AbstractWrapperObject):
     """Display Strip for 1D or nD spectrum"""
 
@@ -68,23 +74,55 @@ class Strip(AbstractWrapperObject):
     _STRIPTILEPOSITION = '_stripTilePosition'
 
     #-----------------------------------------------------------------------------------------
-    # Attributes and methods related to the data structure
-    #-----------------------------------------------------------------------------------------
+
+    def __init__(self, project, wrappedData):
+        super().__init__(project=project, wrappedData=wrappedData)
+
+    # @classmethod
+    # def _restoreObject(cls, project, apiObj):
+    #     """Subclassed to allow for initialisations on restore
+    #     """
+    #     result = super()._restoreObject(project, apiObj)
+    #     return result
 
     @property
     def spectrumDisplay(self) -> SpectrumDisplay:
         """SpectrumDisplay containing strip."""
         return self._project._data2Obj.get(self._wrappedData.spectrumDisplay)
 
+    #-----------------------------------------------------------------------------------------
+    # Attributes and methods related to the data structure
+    #-----------------------------------------------------------------------------------------
+
     _parent = spectrumDisplay
 
     @property
-    def spectrumViews(self) -> tuple:
+    def spectrumViews(self) -> list:
         """SpectrumViews shown in Strip"""
         pass
         # STUB for now; hot-fixed later
         # return tuple(self._project._data2Obj.get(x)
         #      for x in self._wrappedData.sortedStripSpectrumViews())
+
+    # def getSpectrumViews(self):
+    #     """
+    #     :return:
+    #     """
+    #     pass
+    #
+    # @property
+    # def spectra(self) -> tuple:
+    #     """ Spectra in spectrumView displayed order"""
+    #     return tuple([specView.spectrum for specView in self.getSpectrumViews()])
+
+    @property
+    def _displayedSpectra(self) -> tuple:
+        """Return a tuple of DisplayedSpectrum instances, in order, if currently visible
+        """
+        # orderedSpecViews = self.spectrumDisplay.orderedSpectrumViews(None)
+        result = [DisplayedSpectrum(strip=self, spectrumView=specView) \
+                  for specView in self.spectrumViews if specView.isDisplayed]
+        return tuple(result)
 
     # GWV 20/7/2021: not used
     # def findSpectrumView(self, spectrum):
@@ -287,22 +325,6 @@ class Strip(AbstractWrapperObject):
 
         self._setInternalParameter(self._STRIPTILEPOSITION, value)
 
-    @classmethod
-    def _restoreObject(cls, project, apiObj):
-        """Subclassed to allow for initialisations on restore
-        """
-        result = super()._restoreObject(project, apiObj)
-        # NOTE:ED - in some cases spectrumViews has not been instantiated
-        # result._isotopeCodes = tuple(result.spectrumViews[0]._getByDisplayOrder('isotopeCodes'))
-
-        # move everything from stripHeaderDict in one operation - same names
-        STRIPDICT = 'stripHeaderDict'
-        space = result._ccpnInternalData.pop(STRIPDICT, None)
-        if space is not None:
-            result._ccpnInternalData[result._CCPNMR_NAMESPACE].update(space)
-
-        return result
-
     #=========================================================================================
     # CCPN functions
     #=========================================================================================
@@ -351,81 +373,6 @@ class Strip(AbstractWrapperObject):
         """Find axis"""
         return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
 
-    # @logCommand(get='self')
-    # def displaySpectrum(self, spectrum: Spectrum, axisOrder: Sequence = ()):
-    #     """Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
-    #     :return SpectrumView instance
-    #     """
-    #     return self._displaySpectrum(spectrum, axisOrder)
-
-    # def _displaySpectrum(self, spectrum: Spectrum, axisOrder: Sequence = (), useUndoBlock=True):
-    #     """Display additional spectrum on strip, with spectrum axes ordered according to axisOrder
-    #     :return SpectrumView instance
-    #     CCPNINTERNAL: also used in GuiSpectrumDisplay.displaySpectrum
-    #     """
-    #     from ccpn.ui._implementation.SpectrumView import _newSpectrumView
-    #
-    #     getLogger().debug('Strip._displaySpectrum>>> %s' % spectrum)
-    #
-    #     spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
-    #     if not isinstance(spectrum, Spectrum):
-    #         raise ValueError('Expected Spectrum instance; got %s ' % str(spectrum))
-    #
-    #     dataSource = spectrum._wrappedData
-    #     # if self._apiStrip.findFirstSpectrumView(dataSource=dataSource) is not None:
-    #     #     getLogger().debug('Strip.displaySpectrum>>> spectrumView already displayed on %s' % self)
-    #     #     return
-    #
-    #
-    #
-    #     displayAxisCodes = self.axisCodes
-    #
-    #     # # make axis mapping indices
-    #     # if axisOrder and axisOrder != displayAxisCodes:
-    #     #     # Map axes to axisOrder, and remap to original setting
-    #     #     ll = _axisCodeMapIndices(spectrum.axisCodes, axisOrder)
-    #     #     mapIndices = [ll[axisOrder.index(x)] for x in displayAxisCodes]
-    #     # else:
-    #     #     # Map axes to original display setting
-    #     #     mapIndices = _axisCodeMapIndices(spectrum.axisCodes, displayAxisCodes)
-    #     #
-    #     # if mapIndices is None:
-    #     #     getLogger().debug('Strip.displaySpectrum>>> mapIndices is None')
-    #     #     return
-    #     #
-    #     # # if None in mapIndices[:2]: # make sure that x/y always mapped
-    #     # #   return
-    #     # if mapIndices[0] is None or mapIndices[1] is None and displayAxisCodes[1] != 'intensity':
-    #     #     getLogger().debug('Strip.displaySpectrum>>> mapIndices, x/y not mapped')
-    #     #     return
-    #     #
-    #     # if mapIndices.count(None) + spectrum.dimensionCount != len(mapIndices):
-    #     #     getLogger().debug('Strip.displaySpectrum>>> mapIndices, dimensionCount not matching')
-    #     #     return
-    #
-    #     # # Make dimensionOrdering
-    #     # sortedDataDims = dataSource.sortedDataDims()
-    #     # dimensionOrdering = []
-    #     # for index in mapIndices:
-    #     #     if index is None:
-    #     #         dimensionOrdering.append(0)
-    #     #     else:
-    #     #         dimensionOrdering.append(sortedDataDims[index].dim)
-    #
-    #     if self.spectrumDisplay.is1D:
-    #         dimensionOrdering = [1, 0]
-    #     else:
-    #         dimensionOrdering = spectrum.getByAxisCodes('dimensions', self.axisCodes, exactMatch=False)
-    #
-    #     # Make spectrumView
-    #     if useUndoBlock:
-    #         with undoBlockWithoutSideBar():
-    #             result = _newSpectrumView(self.spectrumDisplay, spectrum, dimensionOrdering=dimensionOrdering)
-    #     else:
-    #         result = _newSpectrumView(self.spectrumDisplay, spectrum, dimensionOrdering=dimensionOrdering)
-    #
-    #     return result
-
     @logCommand(get='self')
     def createPeak(self, ppmPositions: List[float]) -> Tuple[Tuple[Peak, ...], Tuple[PeakList, ...]]:
         """Create peak at position for all spectra currently displayed in strip.
@@ -435,7 +382,7 @@ class Strip(AbstractWrapperObject):
 
         with undoBlockWithoutSideBar():
             # create the axisDict for this spectrum
-            axisDict = {axis: ppm for axis, ppm in zip(self.axisCodes, ppmPositions)}
+            axisDict = {axis: tuple(ppm) for axis, ppm in zip(self.axisCodes, ppmPositions)}
 
             # loop through the visible spectra
             for spectrumView in (v for v in self.spectrumViews if v.isDisplayed):
@@ -461,19 +408,20 @@ class Strip(AbstractWrapperObject):
         return tuple(result), tuple(peakLists)
 
     @logCommand(get='self')
-    def pickPeaks(self, ppmRegions: List[List[float]]) -> Tuple[Peak, ...]:
-        """Peak pick all spectra currently displayed in strip in selectedRegion.
+    def pickPeaks(self, regions: List[Tuple[float,float]]) -> Tuple[Peak, ...]:
+        """Peak pick in regions for all spectra currently displayed in strip .
         """
         # selectedRegion is rounded before-hand to 3 dp.
+
+        spectrumDisplay = self.spectrumDisplay
+
         result = []
-
-        # get settings from preferences
-        minDropFactor = self.application.preferences.general.peakDropFactor
-        fitMethod = self.application.preferences.general.peakFittingMethod
-
         with undoBlockWithoutSideBar():
-            # create the axisDict for this spectrum
-            axisDict = {axis: ppms for axis, ppms in zip(self.axisCodes, ppmRegions)}
+            # create the axisDict for peak picking the spectra
+            if spectrumDisplay.is1D:
+                axisDict = {self.axisCodes[0] : tuple(regions[0])}
+            else:
+                axisDict = {axis: tuple(ppms) for axis, ppms in zip(self.axisCodes, regions)}
 
             # loop through the visible spectra
             for spectrumView in (v for v in self.spectrumViews if v.isDisplayed):
@@ -494,12 +442,6 @@ class Strip(AbstractWrapperObject):
                 positiveThreshold = spectrum.positiveContourBase if spectrumView.displayPositiveContours else None
                 negativeThreshold = spectrum.negativeContourBase if spectrumView.displayNegativeContours else None
 
-                # set any additional parameters
-                myPeakPicker.setParameters(dropFactor=minDropFactor,
-                                           fitMethod=fitMethod,
-                                           setLineWidths=True
-                                           )
-
                 for thisPeakListView in validPeakListViews:
                     peakList = thisPeakListView.peakList
 
@@ -508,8 +450,14 @@ class Strip(AbstractWrapperObject):
                     if newPeaks:
                         result.extend(newPeaks)
 
-            return tuple(result)
+            result = tuple(result)
+            self.current.peaks = result
+            return result
+#end class
 
+
+# newStrip functions
+# Rasmus: We should NOT have any newStrip function, except possibly for FreeStrips
 
 # @newObject(Strip)
 # def _newStrip(self):
@@ -524,8 +472,6 @@ class Strip(AbstractWrapperObject):
 #     return result
 
 
-# newStrip functions
-# We should NOT have any newStrip function, except possibly for FreeStrips
 def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
     """Make copy of strip in self, at position newIndex - or rightmost.
     """
@@ -580,6 +526,96 @@ def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
 
     return newStrip
 
+# GWV 10/12/21: in SpectrumDisplay
+# SpectrumDisplay.copyStrip = _copyStrip
+# del _copyStrip
 
-SpectrumDisplay.copyStrip = _copyStrip
-del _copyStrip
+
+class DisplayedSpectrum(object):
+    """GWV; a class to hold SpectrumView and strip objects
+    Used to map any data/axis/parameter actions in a SpectrumView dependent fashion
+    (post 3.1.0)
+    Limited functionality for testing
+    """
+    def __init__(self, strip, spectrumView):
+        self.strip = strip
+        self.spectrumView = spectrumView
+
+    @property
+    def incrementsInPpm(self) -> tuple:
+        """Return tuple of ppm increment values in axis display order.
+        Assure that the len always is dimensionCOunt of the spectrumDisplay
+        by adding None's if necessary. This compensates for lower dimensional
+        spectra (e.g. a 2D mapped onto a 3D)
+        """
+        specWidth = self.spectrumView.spectralWidths
+        nPoints = self.spectrumView.pointCounts
+        result = [w / n for w, n in zip(specWidth, nPoints)]
+        for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
+            result.append(None)
+        return tuple(result)
+
+    @property
+    def positionsInPpm(self) -> tuple:
+        """Return a tuple of positions (i.e. the centres) for axes in display order
+        Assure that the len always is dimensionCOunt of the spectrumDisplay
+        by adding None's if necessary. This compensates for lower dimensional
+        spectra (e.g. a 2D mapped onto a 3D)
+        """
+        axes = self.strip.axes
+        result = [ax.position for ax in axes]
+        for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
+            result.append(None)
+        return tuple(result)
+
+    @property
+    def widthsInPpm(self) -> tuple:
+        """Return a tuple of widths for axes in display order.
+        Assure that the len always is dimensionCOunt of the spectrumDisplay
+        by adding None's if necessary. This compensates for lower dimensional
+        spectra (e.g. a 2D mapped onto a 3D)
+        """
+        axes = self.strip.axes
+        result = [ax.width for ax in axes]
+        for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
+            result.append(None)
+        return tuple(result)
+
+    @property
+    def regionsInPpm(self) -> tuple:
+        """Return a tuple of (leftPpm,rightPpm) regions for axes in display order.
+        Assure that the len always is dimensionCOunt of the spectrumDisplay
+        by adding None's if necessary. This compensates for lower dimensional
+        spectra (e.g. a 2D mapped onto a 3D)
+        """
+        axes = self.strip.axes
+        result = [ax.region for ax in axes]
+        for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
+            result.append( (None, None) )
+        return tuple(result)
+
+    @property
+    def regionsInPoints(self) -> tuple:
+        """Return a tuple of (minPoint,maxPoint) regions for axes in display order.
+        Assure that the len always is dimensionCOunt of the spectrumDisplay
+        by adding None's if necessary. This compensates for lower dimensional
+        spectra (e.g. a 2D mapped onto a 3D)
+        """
+        spectrumDimensions = self.spectrumView.spectrumDimensions
+        regions = self.regionsInPpm
+        result = []
+        for indx, specDim in enumerate(spectrumDimensions):
+            minPpm, maxPpm = regions[indx]
+            minPoint = specDim.ppmToPoint(minPpm)
+            maxPoint = specDim.ppmToPoint(maxPpm)
+            result.append( tuple(sorted((minPoint,maxPoint))) )
+        for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
+            result.append( (None, None) )
+        return tuple(result)
+
+    def __str__(self):
+        return "<DisplayedSpectrum: strip: %s; spectrumView: %s" % (
+            self.strip.pid, self.spectrumView.pid
+        )
+
+    __repr__ = __str__

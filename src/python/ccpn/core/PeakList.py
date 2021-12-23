@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-29 18:30:39 +0100 (Fri, October 29, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 11:27:15 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -281,7 +281,7 @@ class PeakList(PMIListABC):
             if not targetPeakList in targetSpectrum.peakLists:
                 raise TypeError('targetPeakList is not a PeakList of: %s'%targetSpectrum.pid)
 
-        # TODO enable copying across different dimensionility
+        # TODO enable copying across different dimensionalities
         dimensionCount = self.spectrum.dimensionCount
         if dimensionCount != targetSpectrum.dimensionCount:
             raise ValueError("Cannot copy %sD %s to %sD %s"

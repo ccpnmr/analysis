@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-16 13:45:30 +0000 (Thu, December 16, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 11:27:15 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,7 @@ import pandas as pd
 from typing import Tuple, Sequence, List, Union, Optional
 from functools import partial
 from collections.abc import Iterable
+
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.DataFrameABC import DataFrameABC
@@ -76,7 +77,6 @@ CS_TABLECOLUMNS = (CS_UNIQUEID, CS_ISDELETED, CS_PID,
 CS_CLASSNAME = 'ChemicalShift'
 CS_PLURALNAME = 'chemicalShifts'
 
-
 class _ChemicalShiftListFrame(DataFrameABC):
     """
     ChemicalShiftList data - as a Pandas DataFrame.
@@ -89,6 +89,10 @@ class _ChemicalShiftListFrame(DataFrameABC):
     pass
 
 
+from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_OBJECT_INITIALISATION
+from ccpn.core._implementation.updates.update_3_0_4 import _updateChemicalShiftList_3_0_4_to_3_1_0
+
+@updateObject('3.0.4', '3.1.0', _updateChemicalShiftList_3_0_4_to_3_1_0, UPDATE_POST_OBJECT_INITIALISATION)
 class ChemicalShiftList(AbstractWrapperObject):
     """An object containing Chemical Shifts. Note: the object is not a (subtype of a) Python list.
     To access all ChemicalShift objects, use chemicalShiftList.chemicalShifts.
@@ -534,41 +538,6 @@ class ChemicalShiftList(AbstractWrapperObject):
     # CCPN functions
     #=========================================================================================
 
-    def _updateEdgeToAlpha1(self):
-        """Move chemicalShifts from model shifts to pandas dataFrame
-
-        version 3.0.4 -> 3.1.0.alpha update
-        dataframe now stored in _wrappedData.data
-        CCPN Internal
-        """
-        # skip for no shifts
-        if not self._oldChemicalShifts:
-            return
-
-        with undoBlockWithoutSideBar():
-            # create a new dataframe
-            shifts = []
-            for row, oldShift in enumerate(self._oldChemicalShifts):
-                newRow = oldShift._getShiftAsTuple()
-                if not newRow.isDeleted:
-                    # ignore deleted as not needed - this SHOULDN'T happen here, but just to be safe
-                    shifts.append(newRow)
-
-                    # get the id from the shift and update the _uniqueId dict
-                    _uniqueId = newRow.uniqueId
-                    _nextId = self.project._queryNextUniqueIdValue(CS_CLASSNAME)
-                    self.project._setNextUniqueIdValue(CS_CLASSNAME, 1 + max(_nextId, _uniqueId))
-
-                # delete the old shift object
-                oldShift.delete()
-
-            # instantiate the dataframe
-            df = pd.DataFrame(shifts, columns=CS_COLUMNS)
-            df.set_index(df[CS_UNIQUEID], inplace=True, )  # drop=False)
-
-            # set as the new subclassed DataFrameABC - not using yet, may have undo/redo issues
-            self._wrappedData.data = df  #_ChemicalShiftListFrame(df)
-
     @classmethod
     def _restoreObject(cls, project, apiObj):
         """Subclassed to allow for initialisations on restore, not on creation via newChemicalShiftList
@@ -577,28 +546,6 @@ class ChemicalShiftList(AbstractWrapperObject):
         from ccpn.core.ChemicalShift import _newChemicalShift as _newShift
 
         chemicalShiftList = super()._restoreObject(project, apiObj)
-
-        # keep a list of the update methods
-        # this needs to be traversed on order from the latest version that the project has been saved under
-        versionUpdates = (('3.0.4', cls._updateEdgeToAlpha1),
-                          ('3.1.0', None),  # current version - just used for debug logging
-                          )
-
-        # check version history (defaults to 3.0.4)
-        history = project.versionHistory[-1]
-
-        try:
-            # get the index of the saved version, this SHOULD always work
-            startIndex = [_ver for _ver, _ in versionUpdates].index(history)
-        except:
-            raise RuntimeError(f'ChemicalShiftList._restoreObject: current version is not defined {history}')
-
-        lastIndex = len(versionUpdates)
-
-        # iterate through the updates
-        for (ver, func), (nextVer, _) in zip(versionUpdates[startIndex:lastIndex - 1], versionUpdates[startIndex + 1:lastIndex]):
-            getLogger().debug(f'updating version {ver} -> {nextVer}')
-            func(chemicalShiftList)
 
         # create a set of new shift objects linked to the pandas rows - discard deleted
         _data = chemicalShiftList._wrappedData.data

@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 15:57:57 +0100 (Tue, April 20, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 11:27:17 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -90,7 +90,7 @@ class JcampSpectrumDataSource(SpectrumDataSourceABC):
             if len(data) == 2:
                 self._realData = np.array(data[0])
                 self._imaginaryData = np.array(data[1])
-                self.isComplex[self.X_AXIS] = True
+                self.isComplex[specLib.X_DIM_INDEX] = True
 
             elif len(data) == 1:
                 self._realData = np.array(data[0])
@@ -103,7 +103,7 @@ class JcampSpectrumDataSource(SpectrumDataSourceABC):
             if (dimCount:= len(self._realData.shape)) != 1:
                 raise RuntimeError('JcampDataSource.readParameters: data reading only implemented for 1D; got dimensionCount "%s"' % dimCount)
             self.setDimensionCount(1)
-            self.pointCounts[self.X_AXIS] = self._realData.shape[0]
+            self.pointCounts[specLib.X_DIM_INDEX] = self._realData.shape[0]
 
         # Extract the non-dimensional parameters
         _comment = params.get('_comments')

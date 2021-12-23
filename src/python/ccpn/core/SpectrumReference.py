@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-10 13:43:37 +0000 (Fri, December 10, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 11:27:16 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,7 @@ from typing import Optional, Sequence, Tuple
 
 from ccpn.core.lib import Pid
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core._implementation.SpectrumDimensionAttributes import SpectrumDimensionAttributes
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 import ccpn.core.lib.SpectrumLib as specLib
@@ -38,11 +39,11 @@ from ccpn.core.lib.ContextManagers import newObject
 from ccpn.util.Logging import getLogger
 
 
-class SpectrumReference(AbstractWrapperObject):
+class SpectrumReference(AbstractWrapperObject, SpectrumDimensionAttributes):
     """A SpectrumReference holds detailed information about axes and referencing
     needed for e.g. multple-quantum, projection, and reduced-dimensionality experiments.
 
-    SpectrumRefefences can only exist for frequency dimensions.
+    SpectrumReferences can only exist for frequency dimensions.
     Required for describing experiments with assignable splittings (e.g. J-coupling, RDC),
     reduced dimensionality, more than one nucleus per axis,
     or multi-atom parameters (J-dimensions, MQ dimensions)."""
@@ -78,23 +79,6 @@ class SpectrumReference(AbstractWrapperObject):
         return self._wrappedData
 
     @property
-    def _key(self) -> str:
-        """object identifier, used for id"""
-        dataDimRef = self._wrappedData
-        return Pid.createId(dataDimRef.dataDim.dim, dataDimRef.expDimRef.serial)
-
-    @property
-    def _localCcpnSortKey(self) -> Tuple:
-        """Local sorting key, in context of parent."""
-        dataDimRef = self._wrappedData
-        return (dataDimRef.dataDim.dim, dataDimRef.expDimRef.serial)
-
-    @property
-    def _parent(self) -> Spectrum:
-        """Spectrum containing spectrumReference."""
-        return self._project._data2Obj[self._wrappedData.dataDim.dataSource]
-
-    @property
     def _dataDim(self):
         """
         :return: dataDim instance
@@ -123,364 +107,40 @@ class SpectrumReference(AbstractWrapperObject):
         return self._wrappedData.expDimRef
 
     @property
-    def _isFrequencyDimension(self) -> bool:
-        """True if this is a frequency dimension; mainly used to implement code to upward compatible with v2"""
-        return self._dataDim.className == 'FreqDataDim'
+    def _key(self) -> str:
+        """object identifier, used for id"""
+        return Pid.createId(self._dataDim.dim, self._expDimRef.serial)
 
     @property
-    def _isSampledDimension(self) -> bool:
-        """True if this is a sampled dimension; mainly used to implement code to upward compatible with v2"""
-        return self._dataDim.className == 'SampledDataDim'
+    def _localCcpnSortKey(self) -> Tuple:
+        """Local sorting key, in context of parent."""
+        return (self._dataDim.dim, self._expDimRef.serial)
 
     @property
-    def _isFidDimension(self) -> bool:
-        """True if this is a Fid dimension; mainly used to implement code to upward compatible with v2"""
-        return self._dataDim.className == 'FidDataDim'
+    def _parent(self) -> Spectrum:
+        """Spectrum containing spectrumReference."""
+        return self._project._data2Obj[self._wrappedData.dataDim.dataSource]
 
     spectrum = _parent
 
     #-----------------------------------------------------------------------------------------
-    # Object properties
+    # Object properties are inherited from SpectrumDimensionAttributes
     #-----------------------------------------------------------------------------------------
 
-    @property
-    def dimension(self) -> int:
-        """dimension number"""
-        return self._dataDim.dim
+    #=========================================================================================
+    # CCPN functions
+    #=========================================================================================
+    def pointToValue(self, point: float) -> float:
+        """:return ppm-value corresponding to point (float)"""
+        return self._dataDimRef.pointToValue(point)
 
-    @property
-    def isAcquisition(self) -> bool:
-        """True if dimension is acquisition"""
-        return self._expDim.isAcquisition
+    pointToPpm = pointToValue
 
-    @isAcquisition.setter
-    def isAcquisition(self, value):
-        self._expDim.isAcquisition = value
+    def valueToPoint(self, value: float) -> float:
+        """:return point (float) corresponding to ppm-value"""
+        return self._dataDimRef.valueToPoint(value)
 
-    @property
-    def pointCount(self):
-        """Number of points in this dimension"""
-        if self._isFidDimension and hasattr(self._dataDim, 'numPointsValid'):
-            # GWV: compatibility with v2?
-            result = self._dataDim.numPointsValid
-        else:
-            result = self._dataDim.numPoints
-        return result
-
-    @pointCount.setter
-    def pointCount(self, value):
-        # To decouple pointCount from spectralWidth
-        oldSw = self.spectralWidthHz
-        if self._isFidDimension:
-            # GWV: compatibility with v2?
-            self._dataDim.numPointsValid = value
-        else:
-            self._dataDim.numPoints = value
-        self.spectralWidthHz = oldSw
-
-    @property
-    def isComplex(self):
-        """Boolean indicating complex data for this dimension"""
-        return self._dataDim.isComplex
-
-    @isComplex.setter
-    def isComplex(self, value):
-        self._dataDim.isComplex = bool(value)
-
-    @property
-    def dimensionType(self) -> Optional[str]:
-        """Dimension type ('Time' / 'Frequency' / 'Sampled')"""
-        if not self._hasInternalParameter('dimensionType'):
-            result = specLib.DIMENSION_FREQUENCY
-            # self._setInternalParameter('dimensionType', result)
-        else:
-            result = self._getInternalParameter('dimensionType')
-        return result
-
-    @dimensionType.setter
-    def dimensionType(self, value):
-        if value not in specLib.DIMENSIONTYPES:
-            raise ValueError('dimensionType should be one of %r' % specLib.DIMENSIONTYPES)
-        self._setInternalParameter('dimensionType', value)
-
-    @property
-    def isReversed(self) -> bool:
-        """Set whether the axis is reversed - isReversed implies that ppm values decrease as point values increase
-        deprecated!
-        :return True if dimension is reversed
-        """
-        return self._expDimRef.isAxisReversed
-
-    @isReversed.setter
-    def isReversed(self, value):
-        """Set whether the axis is reversed - isReversed implies that ppm values decrease as point values increase
-        """
-        self._expDimRef.__dict__['isAxisReversed'] = value
-
-    @property
-    def spectrometerFrequency(self) -> float:
-        """Absolute frequency at carrier (or at splitting 0.0). In MHz or dimensionless."""
-        return self._expDimRef.sf
-
-    @spectrometerFrequency.setter
-    def spectrometerFrequency(self, value):
-        self._expDimRef.sf = value
-
-    @property
-    def measurementType(self) -> Optional[str]:
-        """Type of NMR measurement referred to by this reference. Legal values are:
-        'Shift','ShiftAnisotropy','JCoupling','Rdc','TROESY','DipolarCoupling',
-        'MQShift','T1','T2','T1rho','T1zz' --- defined SpectrumLib.MEASUREMENT_TYPES
-        """
-        value = self._expDimRef.measurementType
-        return value if value != 'None' else None
-
-    @measurementType.setter
-    def measurementType(self, value):
-        self._expDimRef.measurementType = value if value is not None else 'None'
-
-    # GWV this was carried from the previous Spectrum implementation; no idea why, but it mattered
-    # point1 = 1 - dataDim.pointOffset
-    # result[ii] = tuple(sorted((ff(point1), ff(point1 + dataDim.numPointsOrig))
-
-    @property
-    def maxAliasedFrequency(self) -> float:
-        """maximum possible peak frequency (in ppm) for this reference """
-        if (result := self._expDimRef.maxAliasedFreq) is None:
-            point_1 = 1 - self._dataDim.pointOffset
-            point_n = float(point_1 + self.pointCount) + 0.5
-            result = self.pointToValue((point_n))
-        return result
-
-    @maxAliasedFrequency.setter
-    def maxAliasedFrequency(self, value):
-        self._expDimRef.maxAliasedFreq = value
-
-    @property
-    def minAliasedFrequency(self) -> float:
-        """minimum possible peak frequency (in ppm) for this reference """
-        if (result := self._expDimRef.minAliasedFreq) is None:
-            point_1 = float(1 - self._dataDim.pointOffset) - 0.5
-            result = self.pointToValue((point_1))
-        return result
-
-    @minAliasedFrequency.setter
-    def minAliasedFrequency(self, value):
-        self._expDimRef.minAliasedFreq = value
-
-    @property
-    def limits(self) -> Tuple[float, float]:
-        """Return the limits of this dimension as a tuple of floats"""
-        if self.dimensionType == specLib.DIMENSION_FREQUENCY:
-            return (self.pointToValue(1.0), self.pointToValue(float(self.pointCount)))
-        elif self.dimensionType == specLib.DIMENSION_TIME:
-            return (self.pointToValue(1.0), self.pointToValue(float(self.pointCount)))
-            # return (0.0, self._valuePerPoint * self.pointCount)
-        else:
-            raise RuntimeError('SpectrumReference.limits not implemented for sampled data')
-
-    @property
-    def foldingLimits(self) -> Tuple[float, float]:
-        """Return the foldingLimits of this dimension as a tuple of floats.
-        This is the spectrumLimits ±0.5 extra points to the left and right
-        """
-        # it is easier to define a new function here than mess about with limits
-        if self.dimensionType == specLib.DIMENSION_FREQUENCY:
-            return (self.pointToValue(0.5), self.pointToValue(float(self.pointCount) + 0.5))
-        elif self.dimensionType == specLib.DIMENSION_TIME:
-            return (self.pointToValue(0.5), self.pointToValue(float(self.pointCount) + 0.5))
-        else:
-            raise RuntimeError('SpectrumReference.foldingLimits not implemented for sampled data')
-
-    @property
-    def isotopeCode(self) -> Optional[str]:
-        """Isotope identification strings for isotopes.
-        """
-        if len(self._isotopeCodes) > 0:
-            return self._isotopeCodes[0]
-        return None
-
-    @isotopeCode.setter
-    def isotopeCode(self, value: str):
-        self._isotopeCodes = [value]
-
-    # GWV: moved this to a private attributes, as currently we only support one isotopeCode per dimension
-    @property
-    def _isotopeCodes(self) -> Tuple[str, ...]:
-        """Isotope identification strings for isotopes.
-        NB there can be several isotopes for e.g. J-coupling or multiple quantum coherence.
-        """
-        return self._expDimRef.isotopeCodes
-
-    @_isotopeCodes.setter
-    def _isotopeCodes(self, value: Sequence):
-        self._expDimRef.isotopeCodes = value
-
-    @property
-    def foldingMode(self) -> Optional[str]:
-        """folding mode matching reference (values: 'circular', 'mirror', None)"""
-        if not self._hasInternalParameter('foldingMode'):
-            result = None
-            self.foldingMode = result
-        else:
-            result = self._getInternalParameter('foldingMode')
-        return result
-
-    @foldingMode.setter
-    def foldingMode(self, value):
-        if value not in list(specLib.FOLDING_MODES) + [None]:
-            raise ValueError('foldingMode should be one of %r or None; got %r' %
-                             (specLib.FOLDING_MODES, value))
-        self._setInternalParameter('foldingMode', value)
-
-    @property
-    def axisCode(self) -> str:
-        """Reference axisCode """
-        return self._expDimRef.axisCode
-
-    @axisCode.setter
-    def axisCode(self, value: str):
-        self._expDimRef.axisCode = value
-
-    @property
-    def axisUnit(self) -> str:
-        """unit for transformed data using their reference (most commonly 'ppm')"""
-        return self._expDimRef.unit
-
-    @axisUnit.setter
-    def axisUnit(self, value: str):
-        self._expDimRef.unit = value
-
-    # Attributes belonging to DataDimRef
-
-    @property
-    def referencePoint(self) -> float:
-        """point used for axis (chemical shift) referencing."""
-        return self._dataDimRef.refPoint
-
-    @referencePoint.setter
-    def referencePoint(self, value):
-        self._dataDimRef.refPoint = value
-
-    @property
-    def referenceValue(self) -> float:
-        """ppm-value used for axis (chemical shift) referencing."""
-        return self._dataDimRef.refValue
-
-    @referenceValue.setter
-    def referenceValue(self, value: float):
-        self._dataDimRef.refValue = value
-
-    @property
-    def spectralWidthHz(self) -> float:
-        """spectral width in Hz"""
-        return self._dataDim.spectralWidth
-
-    @spectralWidthHz.setter
-    def spectralWidthHz(self, value: float):
-        swOld = self.spectralWidthHz
-        # self._dataDim.spectralWidth = value # This is not allowed; it needs to go via valuePerPoint
-        self._valuePerPoint *= (value / swOld)
-
-    @property
-    def spectralWidth(self) -> float:
-        """spectral width in ppm"""
-        return self._dataDimRef.spectralWidth
-
-    @spectralWidth.setter
-    def spectralWidth(self, value: float):
-        swOld = self.spectralWidth
-        # self._dataDimRef.spectralWidth = value  # This is not allowed; it needs to go via valuePerPoint
-        self._valuePerPoint *= (value / swOld)
-
-    # This is a crucial property that effectively governs the spectral width (both in Hz and ppm)
-    #     # We assume that the number of points is constant, so setting SW changes valuePerPoint
-    #     dataDimRef = self._wrappedData
-    #     swOld = dataDimRef.spectralWidth
-    #     if dataDimRef.localValuePerPoint:
-    #         dataDimRef.localValuePerPoint *= (value / swOld)
-    #     else:
-    #         dataDimRef.dataDim.valuePerPoint *= (value / swOld)
-    @property
-    def _valuePerPoint(self) -> float:
-        """Value per point: in Hz for Frequency domain data, in secs for time/fid domain data"""
-        return self._dataDim.valuePerPoint
-
-    @_valuePerPoint.setter
-    def _valuePerPoint(self, value: float):
-        self._dataDim.valuePerPoint = value
-
-    # @property
-    # def numPointsOrig(self) -> bool:
-    #     """numPointsOrig"""
-    #     return self._wrappedData.dataDim.numPointsOrig
-
-    @property
-    def phase0(self) -> Optional[float]:
-        """Zero-order phase"""
-        return (self._dataDim.phase0 if not self._isSampledDimension else None)
-
-    @phase0.setter
-    def phase0(self, value):
-        self._dataDim.phase0 = value
-
-    @property
-    def phase1(self) -> Optional[float]:
-        """First-order phase"""
-        return (self._dataDim.phase1 if not self._isSampledDimension else None)
-
-    @phase1.setter
-    def phase1(self, value):
-        self._dataDim.phase1 = value
-
-    @property
-    def windowFunction(self) -> Optional[str]:
-        """Window function
-        e.g. 'EM', 'GM', 'SINE', 'QSINE', .... (defined in SpectrumLib.WINDOW_FUNCTIONS)
-        """
-        return (self._dataDim.windowFunction if not self._isSampledDimension else None)
-
-    @windowFunction.setter
-    def windowFunction(self, value):
-        if not value in list(specLib.WINDOW_FUNCTIONS) + [None]:
-            raise ValueError('windowFunction should be one of %r or None; got %r' % (specLib.WINDOW_FUNCTIONS, value))
-        self._dataDim.windowFunction = value
-
-    @property
-    def lorentzianBroadening(self) -> Optional[float]:
-        """Lorenzian broadening (in Hz)"""
-        return (self._dataDim.lorentzianBroadening if not self._isSampledDimension else None)
-
-    @lorentzianBroadening.setter
-    def lorentzianBroadening(self, value):
-        self._dataDim.lorentzianBroadening = value
-
-    @property
-    def gaussianBroadening(self) -> Optional[float]:
-        """Gaussian broadening"""
-        return (self._dataDim.gaussianBroadening if not self._isSampledDimension else None)
-
-    @gaussianBroadening.setter
-    def gaussianBroadening(self, value):
-        self._dataDim.gaussianBroadening = value
-
-    @property
-    def sineWindowShift(self) -> Optional[float]:
-        """Shift of sine/sine-square window function (in degrees)"""
-        return (self._dataDim.sineWindowShift if not self._isSampledDimension else None)
-
-    @sineWindowShift.setter
-    def sineWindowShift(self, value):
-        self._dataDim.sineWindowShift = value
-
-    @property
-    def assignmentTolerance(self) -> float:
-        """Assignment Tolerance"""
-        return self._dataDimRef.assignmentTolerance
-
-    @assignmentTolerance.setter
-    def assignmentTolerance(self, value):
-        self._dataDimRef.assignmentTolerance = value
+    ppmToPoint = valueToPoint
 
     #=========================================================================================
     # Implementation properties and functions
@@ -508,16 +168,6 @@ class SpectrumReference(AbstractWrapperObject):
             for peak in self.spectrum.peaks:
                 peak._finaliseAction('change')
 
-    #=========================================================================================
-    # CCPN functions
-    #=========================================================================================
-    def pointToValue(self, point: float) -> float:
-        """:return ppm-value corresponding to point (float)"""
-        return self._wrappedData.pointToValue(point)
-
-    def valueToPoint(self, value: float) -> float:
-        """:return point (float) corresponding to ppm-value"""
-        return self._wrappedData.valueToPoint(value)
 
 
 #=========================================================================================

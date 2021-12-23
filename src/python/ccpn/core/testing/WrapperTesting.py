@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:25:09 +0100 (Mon, September 13, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 11:27:17 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -139,7 +139,7 @@ class WrapperTesting(unittest.TestCase):
         """load data relative to TEST_PROJECTS_PATH (unless dataPath is absolute"""
         if not os.path.isabs(dataPath):
             dataPath = os.path.join(TEST_PROJECTS_PATH, dataPath)
-        dataList = self.project.loadData(dataPath)
+        dataList = self.framework.loadData(dataPath)
         #
         return dataList
 

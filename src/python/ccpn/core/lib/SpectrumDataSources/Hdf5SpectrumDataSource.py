@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-09 17:40:30 +0000 (Tue, November 09, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 11:27:17 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -76,10 +76,12 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
     isFloatData = True
     hasWritingAbility = True  # flag that defines if dataFormat implements writing methods
 
-    suffixes = ['.hdf5']
+    suffixes = ['.ndf5', '.hdf5']
     openMethod = h5py.File
-    defaultOpenReadMode = 'r+'
-    defaultOpenWriteMode = 'w'
+    defaultOpenReadMode = 'r+'   # read/write, file must exists
+    defaultOpenReadWriteMode = 'r+'
+    defaultOpenWriteMode = 'w'  # creates, truncates if exists
+    defaultAppendMode = 'a'
 
     HDF_VERSION = 1.0
 
@@ -106,18 +108,27 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
     def openFile(self, mode, **kwds):
         """open self.path, set self.fp, return self.fp
+
+        :param mode: open file mode;
+                    from hdf5 documentation:
+                        r	Readonly, file must exist (default)
+                        r+	Read/write, file must exist
+                        w	Create file, truncate if exists
+                        w- or x	Create file, fail if exists
+                        a	Read/write if exists, create otherwise
+        :return self.fp
         """
 
         if mode is None:
             raise ValueError('%s.openFile: Undefined open mode' % self.__class__.__name__)
+        newFile = mode.startswith('w')
+
+        if self.hasOpenFile():
+            self.closeFile()
+
+        self._checkFilePath(newFile, mode)
 
         try:
-            if self.hasOpenFile():
-                self.closeFile()
-
-            if not self.checkPath(self.path, mode=mode):
-                raise FileNotFoundError('Invalid path %r (mode=%r)' % (self.path, mode))
-
             self.disableCache()  # Hdf has its own caching
             # Adjust hdf chunk caching parameters
             kwds.setdefault('rdcc_nbytes', self.maxCacheSize)
@@ -131,8 +142,9 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             self.closeFile()
             text = '%s.openFile(mode=%r): %s' % (self.__class__.__name__, mode, str(es))
             getLogger().warning(text)
+            raise es
 
-        if mode.startswith('r'):
+        if not newFile:
             # old file
             self.readParameters()
 
@@ -152,7 +164,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             self.blockSizes = tuple(self.spectrumData.chunks[::-1])
             self.writeParameters()
 
-        getLogger().debug('opened %s; %s blocks with size %s; chunks=%s' %
+        getLogger().debug('openFile: %s; %s blocks with size %s; chunks=%s' %
                           (self, self._totalBlocks, self._totalBlockSize, tuple(self.blockSizes)))
 
         return self.fp
@@ -280,9 +292,19 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             return newValue
 
         try:
-            if not self.hasOpenFile():
-                self.openFile(mode=self.defaultOpenWriteMode)
+            if self.hasOpenFile() and self.mode == 'r':
+                # File was opened read-only; close it so it can be re-opened 'r+'
+                self.closeFile()
+                self.openFile(mode=self.defaultOpenReadWriteMode)
 
+            if not self.hasOpenFile():
+                raise RuntimeError('File %s is not open' % self)
+
+        except Exception as es:
+            logger.error('%s.writeParameters: %s' % (self.__class__.__name__, es))
+            raise es
+
+        try:
             params = self.spectrumParameters
             params[VERSION] = self.HDF_VERSION
 
@@ -315,6 +337,9 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         """Get plane defined by xDim, yDim and position (all 1-based)
         return NumPy data array
         """
+        if self.isBuffered:
+            return super().getPlaneData(position=position, xDim=xDim, yDim=yDim)
+
         position = self.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
 
         if not self.hasOpenFile():
@@ -342,6 +367,10 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
     def setPlaneData(self, data, position: Sequence = None, xDim: int = 1, yDim: int = 2):
         """Set data as plane defined by xDim, yDim and position (all 1-based)
         """
+        if self.isBuffered:
+            self.super().setPlaneData(data=data, position=position, xDim=xDim, yDim=yDim)
+            return
+
         position = self.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
 
         if len(data.shape) != 2 or \
@@ -361,8 +390,13 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             firstAxis = yDim - 1
             secondAxis = xDim - 1
 
+        if self.hasOpenFile() and self.mode == 'r':
+            # File was opened read-only; close it so it can be re-opened 'r+'
+            self.closeFile()
+            self.openFile(mode=self.defaultOpenReadWriteMode)  # File should exist as it was created before
+
         if not self.hasOpenFile():
-            self.openFile(mode=self.defaultOpenWriteMode)
+            self.openFile(mode=self.defaultAppendMode)
 
         dataset = self.spectrumData
         slices = self._getSlices(position=position, dims=(firstAxis + 1, secondAxis + 1))  # slices are x,y,z ordered
@@ -380,6 +414,9 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         """Get slice defined by sliceDim and position (all 1-based)
         return NumPy data array
         """
+        if self.isBuffered:
+            return super().getSliceData(position=position, sliceDim=sliceDim)
+
         position = self.checkForValidSlice(position=position, sliceDim=sliceDim)
 
         if not self.hasOpenFile():
@@ -396,10 +433,19 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
     def setSliceData(self, data, position: Sequence = None, sliceDim: int = 1):
         """Set data as slice defined by sliceDim and position (all 1-based)
         """
+        if self.isBuffered:
+            super().setSliceData(data=data, position=position, sliceDim=sliceDim)
+            return
+
         position = self.checkForValidSlice(position=position, sliceDim=sliceDim)
 
+        if self.hasOpenFile() and self.mode == 'r':
+            # File was opened read-only; close it so it can be re-opened 'r+'
+            self.closeFile()
+            self.openFile(mode=self.defaultOpenReadWriteMode)  # File should exist as it was created before
+
         if not self.hasOpenFile():
-            self.openFile(mode=self.defaultOpenWriteMode)
+            self.openFile(mode=self.defaultAppendMode)
 
         dataset = self.spectrumData
         slices = self._getSlices(position=position, dims=(sliceDim,))
@@ -408,6 +454,9 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
     def getPointData(self, position: Sequence = None) -> float:
         """Get value defined by position (1-based)
         """
+        if self.isBuffered:
+            return super().getPointData(position=position)
+
         position = self.checkForValidPosition(position=position)
 
         if not self.hasOpenFile():
@@ -419,6 +468,27 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         pointValue = float(data[0]) * self.dataScale
 
         return pointValue
+
+    def setPointData(self, value, position: Sequence = None) -> float:
+        """Set point value defined by position (1-based)
+        """
+        if self.isBuffered:
+            super().setPointData(value=value, position=position)
+            return
+
+        position = self.checkForValidPosition(position=position)
+
+        if self.hasOpenFile() and self.mode == 'r':
+            # File was opened read-only; close it so it can be re-opened 'r+'
+            self.closeFile()
+            self.openFile(mode=self.defaultOpenReadWriteMode)  # File should exist as it was created before
+
+        if not self.hasOpenFile():
+            self.openFile(mode=self.defaultAppendMode)
+
+        dataset = self.spectrumData
+        slices = self._getSlices(position=position, dims=[])
+        dataset[slices[::-1]] = value # data are z,y,x ordered
 
     def getRegionData(self, sliceTuples, aliasingFlags=None):
         """Return an numpy array containing the points defined by
@@ -432,6 +502,9 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             1: aliasing with identical sign
            -1: aliasing with inverted sign
         """
+        if self.isBuffered:
+            return super().getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
+
         if aliasingFlags is None:
             aliasingFlags = [0] * self.dimensionCount
 

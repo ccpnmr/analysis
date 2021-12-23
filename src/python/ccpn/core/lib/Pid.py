@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-22 13:40:13 +0100 (Thu, July 22, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 11:27:16 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,11 +28,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from typing import List, Optional, Tuple
-
-# try:
-#   from cing import __version__
-# except ImportError:
-#   __version__ = '???'
 
 # set separators
 PREFIXSEP = ':'
@@ -249,12 +244,11 @@ class Pid(str):
     def isValid(text: str) -> bool:
         return PREFIXSEP in text and text[0] != PREFIXSEP
 
-    # NBNB TODO function name 'str' confuses Sphinx documentation and is bad for, Change it?
     @property
-    def str(self):
+    def asString(self):
         """
         Convenience: return as string rather than object;
-        allows to do things as obj.asPid.str rather then str(obj.asPid)
+        allows to do things as obj.pid.asString() rather then str(obj.pid)
         """
         return str(self)
 

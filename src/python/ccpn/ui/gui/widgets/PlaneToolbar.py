@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-18 18:20:21 +0000 (Thu, November 18, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 11:27:19 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -304,32 +304,33 @@ class PlaneSelectorWidget(Frame):
         self.spinBox.setToolTip(str(self.strip.axisCodes[self.axis]))
 
     def setCallbacks(self, callbacks):
+        "callbacks a dict with (key, callbackFunction) items"
         self._callbacks = callbacks
 
     def _planeCountChanged(self, value: int = 1):
         """Changes the number of planes displayed simultaneously.
         """
         if self.strip:
-            self._callbacks[3](value)
+            self._callbacks['_planeCountChanged'](value)
 
     def _nextPlane(self, *args):
         """Increases axis ppm position by one plane
         """
         self.project._buildWithProfile = False
         if self.strip:
-            self._callbacks[2](*args)
+            self._callbacks['_nextPlane'](*args)
 
     def _previousPlane(self, *args):
         """Decreases axis ppm position by one plane
         """
         if self.strip:
-            self._callbacks[0](*args)
+            self._callbacks['_previousPlane'](*args)
 
     def _spinBoxChanged(self, value: float):
         """Sets the value of the axis plane position box if the specified value is within the displayable limits.
         """
         if self.strip:
-            self._callbacks[1](value)
+            self._callbacks['_spinBoxChanged'](value)
 
     def _wheelEvent(self, event):
         if event.angleDelta().y() > 0:
@@ -347,24 +348,25 @@ class PlaneSelectorWidget(Frame):
         with self.blockWidgetSignals():
             self.spinBox.setValue(ppmPosition)
 
-    def setPlaneValues(self, minZPlaneSize=None, minAliasedFrequency=None, maxAliasedFrequency=None, ppmPosition=None, unit=None):
+    def setPlaneValues(self, planeSize=None, minValue=None, maxValue=None, value=None, unit=None):
         """Set new values for the plane selector
         """
         with self.blockWidgetSignals(root=self._mainWidget):
             # block signals while setting contents
-            self.spinBox.setSingleStep(minZPlaneSize)
-            if maxAliasedFrequency is not None:
-                self.spinBox.setMaximum(maxAliasedFrequency)
-            if minAliasedFrequency is not None:
-                self.spinBox.setMinimum(minAliasedFrequency)
-            self.spinBox.setValue(ppmPosition)
+            self.spinBox.setSingleStep(planeSize)
+            if maxValue is not None:
+                self.spinBox.setMaximum(maxValue)
+            if minValue is not None:
+                self.spinBox.setMinimum(minValue)
+            if value is not None:
+                self.spinBox.setValue(value)
 
             # override the spinBox to only allow integer points
             # self.spinBox.setDecimals(0 if unit == AXISUNIT_POINT else 3)
 
     def getPlaneValues(self):
         """Return the current settings for this axis
-        :returns: ppmValue, maximum ppmValue, ppmStepSize, ppmPosition, planeCount
+        :returns: minValue, maxValue, stepSize, value, planeCount
         """
         return self.spinBox.minimum(), self.spinBox.maximum(), self.spinBox.singleStep(), self.spinBox.value(), self.planeCount
 
@@ -552,12 +554,20 @@ class PlaneAxisWidget(_OpenGLFrameABC):
         self._axisSelector._initialise(strip, axis)
         self._axisLabel.setText(strip.axisCodes[axis] + ':')
         self._axisLabel.setToolTip(strip.axisCodes[axis])
-        self._axisSelector.setCallbacks((self._previousPlane,
-                                         self._spinBoxChanged,
-                                         self._nextPlane,
-                                         self._planeCountChanged,
-                                         self._wheelEvent
-                                         ))
+        callbacks = {
+            '_previousPlane' : self._previousPlane,
+            '_spinBoxChanged' : self._spinBoxChanged,
+            '_nextPlane' : self._nextPlane,
+            '_planeCountChanged' : self._planeCountChanged,
+            '_wheelEvent' : self._wheelEvent
+        }
+        self._axisSelector.setCallbacks(callbacks)
+        # self._axisSelector.setCallbacks((self._previousPlane,
+        #                                  self._spinBoxChanged,
+        #                                  self._nextPlane,
+        #                                  self._planeCountChanged,
+        #                                  self._wheelEvent
+        #                                  ))
         self._resize()
 
     def scrollPpmPosition(self, event):
@@ -642,16 +652,18 @@ class PlaneAxisWidget(_OpenGLFrameABC):
         """Return the current settings for this axis
         :returns: ppmValue, maximum ppmValue, ppmStepSize, ppmPosition, planeCount
         """
+        # self._axisSelector is a PlaneSelectorWidget
         return self._axisSelector.getPlaneValues()
 
-    def setPlaneValues(self, minZPlaneSize=None, minAliasedFrequency=None, maxAliasedFrequency=None, ppmPosition=None, unit=None):
+    def setPlaneValues(self, planeSize=None, minValue=None, maxValue=None, value=None, unit=None):
         """Set new values for the plane selector
         """
-        planeBox = self._axisSelector
-        planeBox.setPlaneValues(minZPlaneSize, minAliasedFrequency, maxAliasedFrequency, ppmPosition, unit)
+        # self._axisSelector is a PlaneSelectorWidget
+        planeSelectorWidget = self._axisSelector
+        planeSelectorWidget.setPlaneValues(planeSize, minValue, maxValue, value, unit)
 
-        self._axisPpmPosition.setText('%.3f' % ppmPosition)
-        self._axisPlaneCount.setText('[' + str(planeBox.planeCount) + ']')
+        self._axisPpmPosition.setText('%.3f' % value)
+        self._axisPlaneCount.setText('[' + str(planeSelectorWidget.planeCount) + ']')
 
     @property
     def planeCount(self) -> int:

@@ -55,8 +55,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-22 18:06:58 +0000 (Wed, December 22, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 11:27:18 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -4246,16 +4246,16 @@ class CcpnGLWidget(QOpenGLWidget):
                     if self._ordering:
 
                         if self.is1D:
-                            cursorX = thisSpec.spectrumReferences[0].valueToPoint(cursorCoordinate[0])
-                            startX = thisSpec.spectrumReferences[0].valueToPoint(cursorCoordinate[0])
+                            cursorX = thisSpec.spectrumDimensions[0].valueToPoint(cursorCoordinate[0])
+                            startX = thisSpec.spectrumDimensions[0].valueToPoint(cursorCoordinate[0])
 
                         else:
                             # get the axis ordering from the spectrumDisplay and map to the strip
                             indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
 
                             # map to a point
-                            cursorX = thisSpec.spectrumReferences[indices[0]].valueToPoint(cursorCoordinate[0])
-                            startX = thisSpec.spectrumReferences[indices[0]].valueToPoint(self._startCoordinate[0])
+                            cursorX = thisSpec.spectrumDimensions[indices[0]].valueToPoint(cursorCoordinate[0])
+                            startX = thisSpec.spectrumDimensions[indices[0]].valueToPoint(self._startCoordinate[0])
 
                     else:
                         # error trap all spectra deleted
@@ -4291,8 +4291,8 @@ class CcpnGLWidget(QOpenGLWidget):
                         indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
 
                         # map to a point
-                        cursorY = thisSpec.spectrumReferences[indices[1]].valueToPoint(cursorCoordinate[1])
-                        startY = thisSpec.spectrumReferences[indices[1]].valueToPoint(self._startCoordinate[1])
+                        cursorY = thisSpec.spectrumDimensions[indices[1]].valueToPoint(cursorCoordinate[1])
+                        startY = thisSpec.spectrumDimensions[indices[1]].valueToPoint(self._startCoordinate[1])
 
                     else:
                         # error trap all spectra deleted
@@ -4678,7 +4678,7 @@ class CcpnGLWidget(QOpenGLWidget):
             if self.showActivePhaseTrace and self._tracesNeedUpdating(spectrumView):
 
                 phasingFrame = self.spectrumDisplay.phasingFrame
-                dimension = spectrumView.dimensionOrdering
+                dimension = spectrumView.dimensionIndices
                 ppm2point = spectrumView.spectrum.ppm2point
                 point2ppm = spectrumView.spectrum.point2ppm
 
@@ -4735,7 +4735,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 ph1 = phasingFrame.slider1.value()
                 pivotPpm = phasingFrame.pivotEntry.get()
                 direction = phasingFrame.getDirection()
-                dimension = spectrumView.dimensionOrdering
+                dimension = spectrumView.dimensionIndices
                 ppm2point = spectrumView.spectrum.ppm2point
                 point2ppm = spectrumView.spectrum.point2ppm
 
@@ -4811,7 +4811,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 if hTrace.renderMode == GLRENDERMODE_RESCALE:
                     hTrace.renderMode = GLRENDERMODE_DRAW
 
-                    axisIndex = specView.dimensionOrdering[direction]
+                    axisIndex = specView.dimensionIndices[direction]
                     pivot = specView.spectrum.ppm2point(pivotPpm, dimension=axisIndex + 1)
                     positionPixel = hTrace.positionPixel
                     preData = Phasing.phaseRealData(hTrace.data, ph0, ph1, pivot)
@@ -4841,7 +4841,7 @@ class CcpnGLWidget(QOpenGLWidget):
                 if vTrace.renderMode == GLRENDERMODE_RESCALE:
                     vTrace.renderMode = GLRENDERMODE_DRAW
 
-                    axisIndex = specView.dimensionOrdering[direction]
+                    axisIndex = specView.dimensionIndices[direction]
                     pivot = specView.spectrum.ppm2point(pivotPpm, dimension=axisIndex + 1)
                     positionPixel = vTrace.positionPixel
                     preData = Phasing.phaseRealData(vTrace.data, ph0, ph1, pivot)
@@ -5070,16 +5070,16 @@ class CcpnGLWidget(QOpenGLWidget):
                     if self._ordering:
 
                         if self.is1D:
-                            axisLimitL = thisSpec.spectrumReferences[0].valueToPoint(self.axisL)
-                            axisLimitR = thisSpec.spectrumReferences[0].valueToPoint(self.axisR)
+                            axisLimitL = thisSpec.spectrumDimensions[0].valueToPoint(self.axisL)
+                            axisLimitR = thisSpec.spectrumDimensions[0].valueToPoint(self.axisR)
 
                         else:
                             # get the axis ordering from the spectrumDisplay and map to the strip
                             indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
 
                             # map to a point
-                            axisLimitL = thisSpec.spectrumReferences[indices[0]].valueToPoint(self.axisL)
-                            axisLimitR = thisSpec.spectrumReferences[indices[0]].valueToPoint(self.axisR)
+                            axisLimitL = thisSpec.spectrumDimensions[indices[0]].valueToPoint(self.axisL)
+                            axisLimitR = thisSpec.spectrumDimensions[indices[0]].valueToPoint(self.axisR)
 
                     else:
                         # error trap all spectra deleted
@@ -5119,8 +5119,8 @@ class CcpnGLWidget(QOpenGLWidget):
                         indices = self._spectrumSettings[thisSpecView][GLDefs.SPECTRUM_POINTINDEX]
 
                         # map to a point
-                        axisLimitT = thisSpec.spectrumReferences[indices[1]].valueToPoint(self.axisT)
-                        axisLimitB = thisSpec.spectrumReferences[indices[1]].valueToPoint(self.axisB)
+                        axisLimitT = thisSpec.spectrumDimensions[indices[1]].valueToPoint(self.axisT)
+                        axisLimitB = thisSpec.spectrumDimensions[indices[1]].valueToPoint(self.axisB)
 
                     else:
                         # error trap all spectra deleted
@@ -6291,7 +6291,7 @@ class CcpnGLWidget(QOpenGLWidget):
                             peaks.add(peak)
 
                 else:
-                    spectrumIndices = spectrumView.dimensionOrdering
+                    spectrumIndices = spectrumView.dimensionIndices
                     xAxis = spectrumIndices[0]
                     yAxis = spectrumIndices[1]
 
@@ -6343,7 +6343,7 @@ class CcpnGLWidget(QOpenGLWidget):
                             multiplets.add(multiplet)
 
                 else:
-                    spectrumIndices = spectrumView.dimensionOrdering
+                    spectrumIndices = spectrumView.dimensionIndices
                     xAxis = spectrumIndices[0]
                     yAxis = spectrumIndices[1]
 
@@ -6374,20 +6374,26 @@ class CcpnGLWidget(QOpenGLWidget):
             event.accept()
 
             self._resetBoxes()
-            selectedRegion = [[round(self._startCoordinate[0], 3), round(self._endCoordinate[0], 3)],
-                              [round(self._startCoordinate[1], 3), round(self._endCoordinate[1], 3)]]
+            selectedRegion = [tuple([round(self._startCoordinate[0], 3), round(self._endCoordinate[0], 3)]),
+                              tuple([round(self._startCoordinate[1], 3), round(self._endCoordinate[1], 3)])
+                             ]
 
             if self._validRegionPick:
 
                 # only pick if the region is inside the bounds
-                for n in self._orderedAxes[2:]:
-                    selectedRegion.append((n.region[0], n.region[1]))
+                for axis in self._orderedAxes[2:]:
+                    if axis.width > 0.05:
+                        # round the value for prettier reporting, but only for large enough values
+                        # as otherwise it might go wrong with time axes
+                        region = tuple([round(val, 3) for val in axis.region])
+                    else:
+                        region = tuple(axis.region)
+                    selectedRegion.append(region)
 
                 # selectedRegion is tuple((xL, xR), (yB, yT), ...) - from display
                 # ... is other Nd axes
 
-                peaks = self.strip.pickPeaks(selectedRegion)
-                self.current.peaks = peaks
+                self.strip.pickPeaks(selectedRegion)
 
         elif controlLeftMouse(event):
             # Control(Cmd)+left drag: selects peaks - purple box

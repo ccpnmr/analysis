@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:26:48 +0100 (Fri, August 20, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 11:27:18 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -191,7 +191,8 @@ class PathRowABC(object):
 
     def _getDialog(self):
 
-        dialog = SpectrumFileDialog(parent=self.buttonWidget, acceptMode='select')
+        dialogPath = self.getDialogPath()
+        dialog = SpectrumFileDialog(parent=self.buttonWidget, acceptMode='select', directory=dialogPath)
         dialog._show()
 
         choices = dialog.selectedFiles()
@@ -344,8 +345,17 @@ class SpectrumPathRow(PathRowABC):
                 pass
 
     def getDialogPath(self) -> str:
-        """Get the directory path to start the selection"""
-        return str(self.obj.path.parent)
+        """Get the directory path to start the selection;
+        traverse up the tree to find a valid directory
+        """
+        _path = self.obj.path.parent
+        atRoot = False
+        while not _path.exists() and not atRoot:
+            atRoot = (_path.parent == _path.root)
+            _path = _path.parent
+        if atRoot:
+            _path = aPath('~')
+        return str(_path)
 
 
 # end class
@@ -524,7 +534,7 @@ class ValidateSpectraPopup(CcpnDialog):
         for sp in self.project.spectra:
             enabled = (not sp.isEmptySpectrum())
             _row = SpectrumPathRow(parentWidget=self.spectrumScrollAreaWidgetContents, row=scrollRow,
-                                   labelText='%s  (%s)' % (sp.pid, sp.dataFormat),
+                                   labelText='%s  (%dD, %s)' % (sp.pid, sp.dimensionCount, sp.dataFormat),
                                    obj=sp, enabled=enabled,
                                    callback=self._spectrumRowCallback)
             scrollRow += 1

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-23 10:00:05 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 11:27:18 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -82,6 +82,7 @@ class GuiStrip(Frame):
         This module inherits attributes from the Strip wrapper class:
         Use clone() method to make a copy
         """
+        from ccpn.ui._implementation.Strip import DisplayedSpectrum
 
         # For now, cannot set spectrumDisplay attribute as it is owned by the wrapper class
         # self.spectrumDisplay = spectrumDisplay
@@ -2596,8 +2597,6 @@ def _updateSelectedMultiplets(data):
 
 # NB The following two notifiers could be replaced by wrapper notifiers on
 # Mark, 'change'. But it would be rather more clumsy, so leave it as it is.
-
-# NBNB TODO code uses API object. REFACTOR
 
 # def _rulerCreated(project: Project, apiRuler: ApiRuler):
 #     """Notifier function for creating rulers"""

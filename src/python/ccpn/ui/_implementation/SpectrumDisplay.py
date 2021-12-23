@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-23 10:00:05 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 11:27:17 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -48,6 +48,13 @@ from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, undoBloc
 from ccpn.util.Logging import getLogger
 
 
+from ccpn.core._implementation.updates.update_3_0_4 import _updateSpectumDisplay_3_0_4_to_3_1_0
+from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_OBJECT_INITIALISATION
+
+@updateObject(fromVersion='3.0.4',
+              toVersion='3.1.0',
+              updateFunction=_updateSpectumDisplay_3_0_4_to_3_1_0,
+              updateMethod=UPDATE_POST_OBJECT_INITIALISATION)
 class SpectrumDisplay(AbstractWrapperObject):
     """Spectrum display for 1D or nD spectrum"""
 
@@ -72,7 +79,10 @@ class SpectrumDisplay(AbstractWrapperObject):
     _orderedSpectrumViewsHandler = None
 
     # Internal namespace
-    _ISOTOPECODES = '_isotopeCodes'
+    _ISOTOPECODES_KEY = '_isotopeCodes'
+    _DIMENSIONTYPES_KEY = '_dimensionTypes'
+
+    INTENSITY = 'intensity'  # used for 1D intensity (Y) axis
 
     #-----------------------------------------------------------------------------------------
     # Attributes of the data structure (incomplete?)
@@ -88,8 +98,7 @@ class SpectrumDisplay(AbstractWrapperObject):
     def __init__(self, project: Project, wrappedData):
 
         AbstractWrapperObject.__init__(self, project, wrappedData)
-        # isotopeCodes in display order; set on initialisation with the first spectrum
-        self._isotopeCodes = None
+        self._isNew = False  # Only set by newSpectrumDisplay
 
     @classmethod
     def _restoreObject(cls, project, apiObj):
@@ -97,23 +106,11 @@ class SpectrumDisplay(AbstractWrapperObject):
         """
         result = super()._restoreObject(project, apiObj)
 
-        SPECTRUMGROUPS = 'spectrumGroups'
-        SPECTRUMISGROUPED = 'spectrumIsGrouped'
-        SPECTRUMGROUPLIST = 'spectrumGroupList'
-        SPECTRUMDISPLAY = 'spectrumDisplay'
-        STRIPARRANGEMENT = 'stripArrangement'
-        ZPLANENAVIGATIONMODE = 'zPlaneNavigationMode'
+        result._spectrumViewVisibleChanged()
 
-        for namespace, param, newVar in [(SPECTRUMGROUPS, SPECTRUMISGROUPED, result._ISGROUPED),
-                                         (SPECTRUMGROUPS, SPECTRUMGROUPLIST, result._SPECTRUMGROUPS),
-                                         (SPECTRUMDISPLAY, STRIPARRANGEMENT, result._STRIPARRANGEMENT),
-                                         (SPECTRUMDISPLAY, ZPLANENAVIGATIONMODE, result._ZPLANENAVIGATIONMODE),
-                                         ]:
-            if result.hasParameter(namespace, param):
-                # move the internal parameter to the correct namespace
-                value = result.getParameter(namespace, param)
-                result.deleteParameter(namespace, param)
-                result._setInternalParameter(newVar, value)
+        # getting value will induce an update in the internal parameters
+        _tmp = result.isotopeCodes
+        _tmp2 = result.dimensionTypes
 
         # check that the indexing has been set, or is populated correctly
         if result.strips and (specViews := result.strips[0].getSpectrumViews()):
@@ -141,9 +138,9 @@ class SpectrumDisplay(AbstractWrapperObject):
 
     @property
     def title(self) -> str:
-        """SpectrumDisplay title
-
-        (corresponds to its name, but the name 'name' is taken by PyQt"""
+        """SpectrumDisplay.title
+        (corresponds to its name, but the name 'name' is taken by PyQt)
+        """
         return self._wrappedData.name
 
     @property
@@ -179,7 +176,7 @@ class SpectrumDisplay(AbstractWrapperObject):
 
     @property
     def stripCount(self) -> int:
-        """Number of strips"""
+        """Number of strips in the spectrumDisplay"""
         return self._wrappedData.stripCount
 
     @property
@@ -198,22 +195,29 @@ class SpectrumDisplay(AbstractWrapperObject):
 
     @property
     def isotopeCodes(self) -> Tuple[str, ...]:
-        """Fixed string isotope codes in display order (X, Y, Z1, Z2, ...)"""
+        """Fixed string isotope codes in display order (X, Y, Z1, Z2, ...)
+        Defined by first spectrum used for initialisation
+        """
         return self._isotopeCodes
 
     @property
     def _isotopeCodes(self) -> Tuple[str, ...]:
         """Fixed string isotope codes in display order (X, Y, Z1, Z2, ...)
-        CCPN Internal"""
-        # NOTE:ED - moved from _restoreObject (for the minute) as spectrumDisplay may be empty
-        if (isoCodes := self._getInternalParameter(self._ISOTOPECODES)) is None and self.spectrumViews:
-            isoCodes = tuple(self.spectrumViews[0]._getByDisplayOrder('isotopeCodes'))
-            self._isotopeCodes = isoCodes
-        return isoCodes
+        CCPN Internal
+        """
+        if (result := self._getInternalParameter(self._ISOTOPECODES_KEY)) is None:
+            # Try to reconstruct from any possible spectrum
+            result = [None]*self.dimensionCount
+            for sv in self.spectrumViews:
+                if sv.dimensionCount == self.dimensionCount:
+                    result = sv.isotopeCodes
+                    self._isotopeCodes = result
+                    break
+        return tuple(result)
 
     @_isotopeCodes.setter
     def _isotopeCodes(self, value):
-        self._setInternalParameter(self._ISOTOPECODES, value)
+        self._setInternalParameter(self._ISOTOPECODES_KEY, value)
 
     @property
     def dimensionCount(self) -> int:
@@ -224,7 +228,48 @@ class SpectrumDisplay(AbstractWrapperObject):
     def is1D(self) -> bool:
         """True if this is a 1D display."""
         tt = self.axisCodes
-        return bool(tt and tt[1] == 'intensity')
+        return bool(tt and tt[1] == self.INTENSITY)
+
+    @property
+    def dimensionTypes(self):
+        """dimension types ('Time' / 'Frequency' / 'Sampled') in display order;
+        Values defined by the first spectrum used to initialise the SpectrumDisplay
+        """
+        return self._dimensionTypes
+
+    @property
+    def _dimensionTypes(self) -> Tuple[Optional[str], ...]:
+        """local variable to hold dimension types ('Time' / 'Frequency' / 'Sampled')
+        in display order;
+        Values defined by the first spectrum used to initialise the SpectrumDisplay
+        """
+        if (result := self._getInternalParameter(self._DIMENSIONTYPES_KEY)) is None:
+            # Try to reconstruct from any possible spectrum
+            result = [None]*self.dimensionCount
+            for sv in self.spectrumViews:
+                if sv.dimensionCount == self.dimensionCount:
+                    result = sv.dimensionTypes
+                    self._dimensionTypes = result
+                    break
+        return tuple(result)
+
+    @_dimensionTypes.setter
+    def _dimensionTypes(self, value):
+        if not commonUtil.isIterable(value):
+            raise ValueError('Expected list/tuple for _dimensionTypes; got %r' % value)
+        value = list(value)
+        if self.is1D and len(value) != 1:
+            raise ValueError('Expected list/tuple with length %d for _dimensionTypes; got %r' %
+                             (1, value))
+        elif not self.is1D and len(value) != self.dimensionCount:
+            raise ValueError('Expected list/tuple with length %d for _dimensionTypes; got %r' %
+                             (self.dimensionCount, value))
+        for idx, val in enumerate(value):
+            allowedTypes = specLib.DIMENSIONTYPES + [None]
+            if val not in allowedTypes:
+                raise ValueError('dimensionType[%d] should be one of %r' %
+                                 (idx, allowedTypes))
+        self._setInternalParameter(self._DIMENSIONTYPES_KEY, value)
 
     # @property
     # def window(self) -> Window:
@@ -248,28 +293,28 @@ class SpectrumDisplay(AbstractWrapperObject):
         value = self.getByPid(value) if isinstance(value, str) else value
         self._wrappedData.resonanceGroup = value and value._wrappedData
 
-    @property
-    def positions(self) -> Tuple[float, ...]:
-        """Axis centre positions, in display order"""
-        return self._wrappedData.positions
-
-    @positions.setter
-    def positions(self, value):
-        self._wrappedData.positions = value
-
-    @property
-    def widths(self) -> Tuple[float, ...]:
-        """Axis display widths, in display order"""
-        return self._wrappedData.widths
-
-    @widths.setter
-    def widths(self, value):
-        self._wrappedData.widths = value
+    # @property
+    # def positions(self) -> Tuple[float, ...]:
+    #     """Axis centre positions, in display order"""
+    #     return self._wrappedData.positions
+    #
+    # @positions.setter
+    # def positions(self, value):
+    #     self._wrappedData.positions = value
+    #
+    # @property
+    # def widths(self) -> Tuple[float, ...]:
+    #     """Axis display widths, in display order"""
+    #     return self._wrappedData.widths
+    #
+    # @widths.setter
+    # def widths(self, value):
+    #     self._wrappedData.widths = value
 
     @property
     def units(self) -> Tuple[str, ...]:
         """Axis units, in display order"""
-        return tuple(a.unit for a in self.axes)
+        return tuple(a.unit for a in self.strips[0].axes)
 
     @units.setter
     def units(self, value):
@@ -287,51 +332,12 @@ class SpectrumDisplay(AbstractWrapperObject):
 
     def _getUnitsIndices(self):
         """Conveniance function to get units as an index
-        CCPNINTERNAL: used CcppnOpenGl.initialiseAxes()
+        CCPNINTERNAL: used CcpnOpenGl.initialiseAxes()
         """
         from ccpn.util.Constants import AXISUNITS, AXISUNIT_NUMBER
 
         options = AXISUNITS + [AXISUNIT_NUMBER]  # To allow for 1D intensity axis unit
         return [options.index(unit) for unit in self.units]
-
-    # GWV WTF?? Why is this even here?????
-    # @property
-    # def parameters(self) -> dict:
-    #     """Keyword-value dictionary of parameters.
-    #     NB the value is a copy - modifying it will not modify the actual data.
-    #
-    #     Values can be anything that can be exported to JSON,
-    #     including OrderedDict, numpy.ndarray, ccpn.util.Tensor,
-    #     or pandas DataFrame, Series, or Panel"""
-    #     return dict((x.name, x.value) for x in self._wrappedData.parameters)
-    #
-    # def setParameter(self, name: str, value):
-    #     """Add name:value to parameters, overwriting existing entries"""
-    #     apiData = self._wrappedData
-    #     parameter = apiData.findFirstParameter(name=name)
-    #     if parameter is None:
-    #         apiData.newParameter(name=name, value=value)
-    #     else:
-    #         parameter.value = value
-    #
-    # def deleteParameter(self, name: str):
-    #     """Delete parameter named 'name'"""
-    #     apiData = self._wrappedData
-    #     parameter = apiData.findFirstParameter(name=name)
-    #     if parameter is None:
-    #         raise KeyError("No parameter named %s" % name)
-    #     else:
-    #         parameter.delete()
-    #
-    # def clearParameters(self):
-    #     """Delete all parameters"""
-    #     for parameter in self._wrappedData.parameters:
-    #         parameter.delete()
-    #
-    # def updateParameters(self, value: dict):
-    #     """update parameters"""
-    #     for key, val in value.items():
-    #         self.setParameter(key, val)
 
     def _getSpectra(self):
         if len(self.strips) > 0:  # strips
@@ -494,12 +500,13 @@ class SpectrumDisplay(AbstractWrapperObject):
     #             addUndoItem(redo=self._rescaleSpectra)
 
     # CCPN functions
-    @logCommand(get='self')
-    def resetAxisOrder(self):
-        """Reset display to original axis order"""
 
-        with undoBlockWithoutSideBar():
-            self._wrappedData.resetAxisOrder()
+    # @logCommand(get='self')
+    # def resetAxisOrder(self):
+    #     """Reset display to original axis order"""
+    #
+    #     with undoBlockWithoutSideBar():
+    #         self._wrappedData.resetAxisOrder()
 
     def findAxis(self, axisCode):
         """Find axis """
@@ -545,19 +552,6 @@ class SpectrumDisplay(AbstractWrapperObject):
     # CCPN functions
     #=========================================================================================
 
-    def _setFromLimits(self, axis, value):
-        """Set width,position for axis from value tuple/list"""
-        width = value[1] - value[0] if value[1] > value[0] else value[0] - value[1]
-        pos = value[0] + width * 0.5 if value[1] > value[0] else value[0] - width * 0.5
-
-        positions = list(self.positions)
-        positions[axis] = pos
-        self.positions = positions
-
-        widths = list(self.widths)
-        widths[axis] = width
-        self.widths = widths
-
     def _getDimensionsMapping(self, spectrum: Spectrum) -> list:
         """Get the spectrum dimensions in display order
         """
@@ -574,7 +568,7 @@ class SpectrumDisplay(AbstractWrapperObject):
         return dimensionOrder
 
     def _getAxesMapping(self, spectrum: Spectrum) -> list:
-        """Get the spectrum axes in display order
+        """Get the spectrum dimensionIndices in display order
         CCPNMRINTERNAL: used in _newSpectrumDisplay
         """
         return [dim - 1 for dim in self._getDimensionsMapping(spectrum)]
@@ -586,38 +580,39 @@ class SpectrumDisplay(AbstractWrapperObject):
         # NB setting Axis.region translates into setting position (== halfway point)
         # and widths of the axis
 
-        # Get the mapping of the the axes of spectrum onto this SpectrumDisplay
+        # Get the mapping of the axes of spectrum onto this SpectrumDisplay
         spectrumAxes = self._getAxesMapping(spectrum)
 
-        if spectrum.dimensionCount == 1:
-            # 1D spectrum
-            ppmLimits, valueLimits = spectrum.get1Dlimits()
-            self.axes[0].region = ppmLimits
-            self.axes[1].region = valueLimits
+        for strip in self.strips:  # There should at least be one strip defined
+            if spectrum.dimensionCount == 1:
+                # 1D spectrum
+                ppmLimits, valueLimits = spectrum.get1Dlimits()
+                strip.axes[0].region = ppmLimits
+                strip.axes[1].region = valueLimits
 
-        else:
-            # nD
-            for ii, axis in enumerate(spectrumAxes):
-                if ii < 2:
-                    self.axes[ii].region = spectrum.spectrumLimits[axis]
+            else:
+                # nD
+                for ii, axis in enumerate(spectrumAxes):
+                    if ii < 2:
+                        strip.axes[ii].region = spectrum.spectrumLimits[axis]
 
-                else:
-                    # A display "plane-axis"
-                    self.axes[ii].region = spectrum.spectrumLimits[axis]
-                    self.axes[ii].width = spectrum.valuesPerPoint[axis]
-                    if spectrum.isTimeDomains[axis]:
-                        self.axes[ii].position = 1.0
-
-        # Copy to strips
-        for strip in self.strips:
-            strip.positions = self.positions
-            strip.widths = self.widths
+                    else:
+                        # A display "plane-axis"
+                        strip.axes[ii].region = spectrum.spectrumLimits[axis]
+                        strip.axes[ii].width = spectrum.valuesPerPoint[axis]
+                        if spectrum.isTimeDomains[axis] or spectrum.isSampledDomains[axis]:
+                            strip.axes[ii].position = 1.0
 
     #===========================================================================================
     # new'Object' and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
+    def copyStrip(self, strip: 'Strip', newIndex=None) -> 'Strip':
+        """Make copy of strip in self, at position newIndex - or rightmost.
+        """
+        from ccpn.ui._implementation.Strip import _copyStrip
+        return _copyStrip(self, strip=strip, newIndex=newIndex)
 
 #=========================================================================================
 # Connections to parents:
@@ -658,14 +653,14 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
             )
 
     if is1D:
-        axisCodes = spectrum.axisCodes + ['intensity']
+        axisCodes = spectrum.axisCodes + [SpectrumDisplay.INTENSITY]
     if len(axisCodes) < 2:
         raise ValueError("New SpectrumDisplay must have at least two axisCodes")
     displayPars['axisCodes'] = displayPars['axisOrder'] = axisCodes
 
     # Add name, setting and insuring uniqueness if necessary
     if name is None:
-        excludedNames = ['intensity']
+        excludedNames = [SpectrumDisplay.INTENSITY]
         name = ''.join(['%dD_' % spectrum.dimensionCount] + [str(x)[0:1] for x in axisCodes if x not in excludedNames])
     name = SpectrumDisplay._uniqueApiName(project, name)
     displayPars['name'] = name
@@ -696,16 +691,16 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
         elif spectrum.dimensionTypes[0] == specLib.DIMENSION_TIME:
             apiSpectrumDisplay.newFidAxis('time', stripSerial=1, unit=AXISUNIT_POINT)
 
-        apiSpectrumDisplay.newIntensityAxis(code='intensity', stripSerial=1, unit=AXISUNIT_NUMBER)
+        apiSpectrumDisplay.newIntensityAxis(code=SpectrumDisplay.INTENSITY, stripSerial=1, unit=AXISUNIT_NUMBER)
 
         display._isotopeCodes = tuple(spectrum.isotopeCodes)
 
     else:
         # nD
-        spectrumAxes = display._getAxesMapping(spectrum)
-        display._isotopeCodes = tuple(spectrum.isotopeCodes[axis] for axis in spectrumAxes)
+        spectrumAxesInDisplayOrder = display._getAxesMapping(spectrum)
+        display._isotopeCodes = tuple(spectrum.isotopeCodes[axis] for axis in spectrumAxesInDisplayOrder)
 
-        for ii, axis in enumerate(spectrumAxes):
+        for ii, axis in enumerate(spectrumAxesInDisplayOrder):
             displayAxisCode = axisCodes[ii]
 
             # # if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y' or
@@ -729,13 +724,24 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
                 # apiSpectrumDisplay.newFidAxis(code=axisCode, stripSerial=1, unit=AXISUNIT_POINT)
                 apiSpectrumDisplay.newFrequencyAxis(code=displayAxisCode, stripSerial=1, unit=AXISUNIT_POINT)
 
+            elif spectrum.dimensionTypes[axis] == specLib.DIMENSION_SAMPLED:
+                apiSpectrumDisplay.newFrequencyAxis(code=displayAxisCode, stripSerial=1, unit=AXISUNIT_POINT)
+
             else:
                 raise NotImplementedError('No sampled axes (yet)')
 
     display._setLimits(spectrum)
 
     # display the spectrum, this will also create a new spectrumView
+    # Define the display as new, to avoid the isotopeCode and dimensionTypes checks
+    display._isNew = True
     spectrumView = display.displaySpectrum(spectrum=spectrum)
+    display._isNew = False
+    # We now can set the isotopeCode and dimensionTypes parameters to define the spectrum
+    # display
+    display._dimensionTypes = spectrumView.dimensionTypes
+    display._isotopeCodes = spectrumView.isotopeCodes
+
     # We only can set the z-widgets when there is a spectrumView; which we just created
     strip._setZWidgets()
 

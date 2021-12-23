@@ -5,4 +5,4 @@ export CCPNMR_TOP_DIR
 PIPE2HDF5="${CCPNMR_TOP_DIR}"/src/python/pipe2hdf5
 
 source "${CCPNMR_TOP_DIR}"/bin/paths.sh
-"${ANACONDA3}"/bin/python -W ignore "${PIPE2HDF5}" $*
+"${CONDA}"/bin/python -W ignore "${PIPE2HDF5}" $*

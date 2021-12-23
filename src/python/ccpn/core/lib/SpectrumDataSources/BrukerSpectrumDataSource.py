@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-09 17:40:30 +0000 (Tue, November 09, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 11:27:16 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -33,13 +33,11 @@ __date__ = "$Date: 2020-11-20 10:28:48 +0000 (Fri, November 20, 2020) $"
 import os
 from typing import Sequence
 
-from ccpn.util.Path import Path
+from ccpn.util.Path import Path, aPath
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import flatten
 import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
-
-from nmrglue.fileio.bruker import read_acqus_file, read_jcamp
 
 
 class BrukerSpectrumDataSource(SpectrumDataSourceABC):
@@ -59,7 +57,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
     isFloatData = False
 
     suffixes = [None]
-    allowDirectory = True  # Can supply a Bruker top directory
+    allowDirectory = True  # Can supply a Bruker top directory or pdata directory
     openMethod = open
     defaultOpenReadMode = 'rb'
 
@@ -279,9 +277,17 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         return None
 
     def nameFromPath(self):
-        """Return a name derived from pdataDir
+        """Return a name derived from _brukerRoot and pdataDir
         """
-        return '%s_pdata%s' % (self._brukerRoot.stem, self._pdataDir.stem)
+        return '%s-%s' % (self._brukerRoot.stem, self._pdataDir.stem)
+
+    @property
+    def parentPath(self) -> aPath:
+        """Return an absolute path of parent directory, i.e. _BrukerRoot, as a Path instance
+        or None when dataFile is not defined.
+        Subclassed to accommodate the special Bruker directory structure
+        """
+        return (None if self.dataFile is None else self._brukerRoot.parent)
 
     def setPath(self, path, substituteSuffix=False):
         """Parse and set path, assure there is the directory with acqus and pdata dirs
@@ -361,14 +367,18 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
         logger = getLogger()
 
         self.setDefaultParameters()
+        self.dimensionCount = self._getDimensionality()
 
         try:
-            self.dimensionCount = self._getDimensionality()
-
             # read acqus and procs
             self._readAcqus()
             self._readProcs()
+        except Exception as es:
+            errTxt = 'Reading acqu/proc parameters of %s; %s' % (self._brukerRoot, es)
+            logger.error(errTxt)
+            raise es
 
+        try:
             _comment = self.acqus[0].get('_comments')
             if _comment is not None and isinstance(_comment, list):
                 self.comment = '\n'.join(_comment)
@@ -390,7 +400,22 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 dimDict.update(self.acqus[i])
                 dimDict.update(self.procs[i])
 
+                # establish dimension type (time/frequency)
+                if int(float(dimDict.get('FT_mod', 1))) == 0:
+                    # point/time axis
+                    self.dimensionTypes[i] = specLib.DIMENSION_TIME
+                    self.measurementTypes[i] = specLib.MEASUREMENT_TYPE_TIME
+                else:
+                    # frequency axis
+                    self.dimensionTypes[i] = specLib.DIMENSION_FREQUENCY
+                    self.measurementTypes[i] = specLib.MEASUREMENT_TYPE_SHIFT
+
                 self.pointCounts[i] = int(dimDict['SI'])
+                if self.dimensionTypes[i] == specLib.DIMENSION_TIME:
+                    tdeff = int(dimDict['TDeff'])
+                    if tdeff > 0 and tdeff < self.pointCounts[i]:
+                        self.pointCounts[i] = tdeff
+
                 self.blockSizes[i] = int(dimDict['XDIM'])
                 if self.blockSizes[i] == 0:
                     self.blockSizes[i] = self.pointCounts[i]
@@ -402,101 +427,118 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 self.isotopeCodes[i] = dimDict.get('AXNUC')
                 self.axisLabels[i] = dimDict.get('AXNAME')
 
-                if int(float(dimDict.get('FT_mod', 1))) == 0:
-                    # point/time axis
-                    self.dimensionTypes[i] = specLib.DIMENSION_TIME
-                    self.measurementTypes[i] = specLib.MEASUREMENT_TYPE_TIME
-                else:
-                   # frequency axis
-                    self.dimensionTypes[i] = specLib.DIMENSION_FREQUENCY
-                    self.measurementTypes[i] = specLib.MEASUREMENT_TYPE_SHIFT
 
                 self.spectralWidthsHz[i] = float(dimDict.get('SW_p', 1.0))  # SW in Hz processed (from proc file)
                 self.spectrometerFrequencies[i] = float(dimDict.get('SFO1', dimDict.get('SF', 1.0)))
 
                 self.referenceValues[i] = float(dimDict.get('OFFSET', 0.0))
                 self.referencePoints[i] = float(dimDict.get('refPoint', 0.0))
-            # origNumPoints[i] = int(dimDict.get('$FTSIZE', 0))
-            # pointOffsets[i] = int(dimDict.get('$STSR', 0))
+                # origNumPoints[i] = int(dimDict.get('$FTSIZE', 0))
+                # pointOffsets[i] = int(dimDict.get('$STSR', 0))
                 self.phases0[i] = float(dimDict.get('PHC0', 0.0))
                 self.phases1[i] = float(dimDict.get('PHC1', 0.0))
 
         except Exception as es:
-            logger.error('Reading parameters; %s' % es)
-            raise es
+            errTxt = 'Parsing parameters for %s; %s' % (self._brukerRoot, es)
+            logger.error(errTxt)
+            raise RuntimeError(errTxt)
 
         return super().readParameters()
 
     def _readAcqus(self):
-        "Read the acqus files"
+        """Read the acqus files; fill the self.acqus list with a dict for every dimension
+        """
         acquFiles = self._acqusFiles[0:self.dimensionCount]
-        # acqus = read_acqus_file(str(self._brukerRoot), acuFiles)
-        # # acqus is a dict with acqFiles[i] as keys; convert to a list in dimension order
-        # self.acqus = [acqus[key] for key in acuFiles]
         self.acqus = []
         for f in acquFiles:
-            _params = read_jcamp(self._brukerRoot / f)
+            try:
+                _params = read_jcamp(self._brukerRoot / f, encoding='Windows-1252')
+            except UnicodeDecodeError:
+                # Try again with utf-8
+                _params = read_jcamp(self._brukerRoot / f, encoding='utf-8')
             self.acqus.append(_params)
 
     def _readProcs(self):
-        "Read the procs files"
+        """Read the procs files; fill the self.procs list with a dict for every dimension
+        """
         procFiles = self._procFiles[0:self.dimensionCount]
         self.procs = []
         for f in procFiles:
-            _params = read_jcamp(self._pdataDir / f)
+            try:
+                _params = read_jcamp(self._pdataDir / f, encoding='Windows-1252')
+            except UnicodeDecodeError:
+                # Try again with utf-8
+                _params = read_jcamp(self._pdataDir / f, encoding='utf-8')
+
             self.procs.append(_params)
 
 # Register this format
 BrukerSpectrumDataSource._registerFormat()
 
-#=========================================================================
-# Bug fix from NMRglue
-#=========================================================================
+import locale
+import io
+from nmrglue.fileio.bruker import parse_jcamp_line
 
-def read_procs_file(dir='.', procs_files=None):
+def read_jcamp(filename:str, encoding:str = locale.getpreferredencoding()) -> dict:
     """
-    Read Bruker processing files from a directory.
+    Read a Bruker JCAMP-DX file into a dictionary.
+
+    Creates two special dictionary keys _coreheader and _comments Bruker
+    parameter "$FOO" are extracted into strings, floats or lists and assigned
+    to dic["FOO"]
 
     Parameters
     ----------
-    dir : str
-        Directory to read from.
-    procs_files : list, optional
-        List of filename(s) of procs parameter files in directory. None uses
-        standard files.
+    filename : str
+        Filename of Bruker JCAMP-DX file.
+    encoding : str
+        Encoding of Bruker JCAMP-DX file. Defaults to the system default locale
 
     Returns
     -------
     dic : dict
-        Dictionary of Bruker parameters.
+        Dictionary of parameters in file.
+
+    See Also
+    --------
+    write_jcamp : Write a Bruker JCAMP-DX file.
+
+    Notes
+    -----
+    This is not a fully functional JCAMP-DX reader, it is only intended
+    to read Bruker acqus (and similar) files.
+
     """
-    if procs_files is None:
-        procs_files = []
-        for f in ["procs", "proc2s", "proc3s", "proc4s"]:
-            if os.path.isfile(os.path.join(dir, f)):
-                procs_files.append(f)
-        pdata_path = dir
+    dic = {"_coreheader": [], "_comments": []}  # create empty dictionary
 
-    elif procs_files == []:
-        if os.path.isdir(os.path.join(dir, 'pdata')):
-            pdata_folders = [folder for folder in
-                             os.walk(os.path.join(dir, 'pdata'))][0][1]
-            if '1' in pdata_folders:
-                pdata_path = os.path.join(dir, 'pdata', '1')
+    with io.open(filename, 'r', encoding=encoding, errors='replace') as f:
+        endOfFile = False
+        lineIndex = 0
+        while not endOfFile:     # loop until end of file is found
+
+            lineIndex += 1
+            line = f.readline().rstrip()    # read a line
+            if line == '':      # end of file found
+                endOfFile = True
+                continue
+
+            if line[:6] == "##END=":
+                # print("End of file")
+                endOfFile = True
+                continue
+
+            elif line[:2] == "$$":
+                dic["_comments"].append(line)
+            elif line[:2] == "##" and line[2] != "$":
+                dic["_coreheader"].append(line)
+            elif line[:3] == "##$":
+                try:
+                    key, value = parse_jcamp_line(line, f)
+                    dic[key] = value
+                except:
+                    getLogger().warning("%s (line:%d): Unable to correctly parse %r" %
+                                        (filename, lineIndex, line))
             else:
-                pdata_path = os.path.join(dir, 'pdata', pdata_folders[0])
+                getLogger().warning("%s (line:%d): Extraneous %r" % (filename, lineIndex, line))
 
-        for f in ["procs", "proc2s", "proc3s", "proc4s"]:
-            if os.path.isfile(os.path.join(pdata_path, f)):
-                procs_files.append(f)
-
-    else:
-        pdata_path = dir
-
-    # create an empty dictionary
-    dic = dict()
-
-    # read the acqus_files and add to the dictionary
-    for f in procs_files:
-        dic[f] = read_jcamp(os.path.join(pdata_path, f))
     return dic

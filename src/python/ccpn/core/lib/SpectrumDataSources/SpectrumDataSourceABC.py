@@ -92,8 +92,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-09 17:40:31 +0000 (Tue, November 09, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 11:27:17 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -107,7 +107,7 @@ __date__ = "$Date: 2020-11-20 10:28:48 +0000 (Fri, November 20, 2020) $"
 import sys
 from typing import Sequence
 from contextlib import contextmanager
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from itertools import product
 
 import tempfile
@@ -187,29 +187,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     classVersion = 1.0  # For json saving
 
-    # 'local' definitions of constants; defining defs in SpectrumLib to prevent circular imports
-    # elsewhere
+    # 'local' definition of MAXDIM; defining defs in SpectrumLib to prevent circular imports
     MAXDIM = specLib.MAXDIM  # 8  # Maximum dimensionality
-
-    X_AXIS = specLib.X_AXIS  # 0
-    Y_AXIS = specLib.Y_AXIS  # 1
-    Z_AXIS = specLib.Z_AXIS  # 2
-    A_AXIS = specLib.A_AXIS  # 3
-    B_AXIS = specLib.B_AXIS  # 4
-    C_AXIS = specLib.C_AXIS  # 5
-    D_AXIS = specLib.D_AXIS  # 6
-    E_AXIS = specLib.E_AXIS  # 7
-    UNDEFINED_AXIS = specLib.Y_AXIS  # 8
-    axisNames = specLib.axisNames
-
-    X_DIM = specLib.X_DIM  # 1
-    Y_DIM = specLib.Y_DIM  # 2
-    Z_DIM = specLib.Z_DIM  # 3
-    A_DIM = specLib.A_DIM  # 4
-    B_DIM = specLib.B_DIM  # 5
-    C_DIM = specLib.C_DIM  # 6
-    D_DIM = specLib.D_DIM  # 7
-    E_DIM = specLib.E_DIM  # 8
 
     #=========================================================================================
     # to be subclassed
@@ -230,7 +209,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
     allowDirectory = False  # Can/Can't open a directory
     openMethod = None  # method to open the file as openMethod(path, mode)
     defaultOpenReadMode = 'r+'
+    defaultOpenReadWriteMode = 'r+'
     defaultOpenWriteMode = 'w'
+    defaultAppendMode = 'a'
 
     #=========================================================================================
     # data formats
@@ -258,7 +239,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     _bigEndian = (sys.byteorder == 'big')
 
     saveAllTraitsToJson = True
-    version = 1.0  # for json saving
+    classVersion = 1.0  # for json saving
 
     date = CString(allow_none=True, default_value=None).tag(isDimensional=False,
                                                             doCopy=True,
@@ -448,6 +429,20 @@ class SpectrumDataSourceABC(CcpNmrJson):
             )
 
     #=========================================================================================
+    # some default data
+    #=========================================================================================
+
+    isotopeDefaultDataDict = defaultdict(
+        lambda: {'spectralRange' : (12.0, -1.0),   'pointCount' : 128},
+        [
+        ('1H' , {'spectralRange' : (12.0, -1.0),   'pointCount' : 512}),
+        ('15N', {'spectralRange' : (130.0, 100.0), 'pointCount' : 128}),
+        ('13C', {'spectralRange' : (130.0, 5.0),   'pointCount' : 256}),
+        ('19F', {'spectralRange' : (250.0, 40.0),  'pointCount' : 512}),
+        ]
+    )
+
+    #=========================================================================================
     # Convenience properties and methods
     #=========================================================================================
 
@@ -466,27 +461,27 @@ class SpectrumDataSourceABC(CcpNmrJson):
         return OrderedDict(items)
 
     @property
-    def dimensions(self):
-        """A one-based list of dimensions [1,dimensionCount]
+    def dimensions(self) -> tuple:
+        """A one-based tuple of dimensions [1,dimensionCount]
         """
-        return range(1, self.dimensionCount + 1)
+        return tuple(range(1, self.dimensionCount + 1))
 
     @property
-    def axes(self):
-        """A zero-based list of axes [0,dimensionCount-1]
+    def dimensionIndices(self) -> tuple:
+        """A zero-based tuple of dimension indices [0,dimensionCount-1]
         """
-        return [i for i in range(0, self.dimensionCount)]
+        return tuple([i for i in range(0, self.dimensionCount)])
 
     @property
-    def totalNumberOfPoints(self):
+    def totalNumberOfPoints(self) -> int:
         """Total number of points of the data"""
         result = self.pointCounts[0]
-        for axis in self.axes[1:]:
+        for axis in self.dimensionIndices[1:]:
             result *= self.pointCounts[axis]
         return result
 
     @property
-    def expectedFileSizeInBytes(self):
+    def expectedFileSizeInBytes(self) -> int:
         """The expected file size in Bytes"""
         if self.dimensionCount == 0:
             raise RuntimeError('%s: Undefined parameters' % self)
@@ -525,7 +520,13 @@ class SpectrumDataSourceABC(CcpNmrJson):
         self.fp = None  # File pointer; None indicates closed
         self.mode = None  # Open mode
 
+        # hdf5Buffer related attributes
+        self._isBuffered = False  # Flag to indicate the spectrumDataSource object to have buffered read/writes;
         self.hdf5buffer = None  # Hdf5SpectrumBuffer instance; None indicates no Hdf5 buffer used
+        self._bufferFilled = False
+        self._bufferIsTemporary = True
+        self._bufferPath = None
+
         self.spectrum = None  # Spectrum instance
 
         self.setDefaultParameters()
@@ -560,9 +561,18 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     @property
     def path(self) -> aPath:
-        """Return an absolute path of datapath as a Path instance or None when not defined
+        """Return an absolute path of datapath as a Path instance or None when dataFile is
+        not defined.
         """
         return (None if self.dataFile is None else aPath(self.dataFile))
+
+    @property
+    def parentPath(self) -> aPath:
+        """Return an absolute path of parent of self.dataFile as a Path instance or None
+        when dataFile is not defined.
+        For subclassing; e.g. in case of Bruker
+        """
+        return (None if self.dataFile is None else self.path.parent)
 
     def setPath(self, path, substituteSuffix=False):
         """define valid path to a (binary) data file, if needed appends or substitutes
@@ -583,32 +593,13 @@ class SpectrumDataSourceABC(CcpNmrJson):
             self.dataFile = str(_p)
         return self
 
-    def hasValidPath(self):
+    def hasValidPath(self) -> bool:
         """Return true if the path is valid
         """
         path = self.path
         return path is not None and path.exists()
 
-    def checkPath(self, path, mode='r') -> bool:
-        """Check if path exists (mode='r') or parent of path exists (not mode='r');
-        return True if ok; False otherwise
-        """
-        _p = aPath(path)
-
-        if _p is None:
-            return False
-
-        # read-mode: check if it exists
-        if mode.startswith('r') and _p.exists():
-            return True
-
-        # write-mode: check if parent exists
-        if not mode.startswith('r') and _p.parent.exists():
-            return True
-
-        return False
-
-    def nameFromPath(self):
+    def nameFromPath(self) -> str:
         """Return a name derived from path (to be subclassed for specific cases; e.g. Bruker)
         """
         return self.path.stem
@@ -636,9 +627,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
         for dim in dimensions:
             if dim < 1 or dim > self.dimensionCount:
                 raise ValueError('invalid dimension "%s" in %r' % (dim, dimensions))
-        newValues = values[:]
-        for idx, dim in enumerate(dimensions):
-            newValues[dim - 1] = values[idx]
+        newValues = self.getTraitValue(parameterName)
+        for dim, val in zip(dimensions, values):
+            newValues[dim - 1] = val
         self.setTraitValue(parameterName, newValues)
 
     def _copyParametersFromSpectrum(self, spectrum):
@@ -853,8 +844,6 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 acode = '%s_%d' % (acode, idx + 1)
                 self.axisCodes[idx] = acode
 
-        # self.acquisitionAxisCode = self.axisCodes[self.X_AXIS]
-
     def setDimensionCount(self, dimensionCount):
         """Change the dimensionality, assuring proper values of the dimensional parameters"""
         if dimensionCount < 1 or dimensionCount > self.MAXDIM:
@@ -862,6 +851,38 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         self.dimensionCount = dimensionCount
         self._assureProperDimensionality()
+
+    def _setDefaultIsotopeValues(self, isotopeCode, dimension, field=18.8):
+        """ Set the default spectrometerFrequencies, spectralWidth, referencePoints, referenceValues
+        and axisCode values derived from isotopeCode and field for dimension (1-based)
+        """
+
+        if isotopeCode is not None:
+
+            idx = dimension-1
+            nuc = Nucleus(isotopeCode)
+            defaultValues = self.isotopeDefaultDataDict[isotopeCode]
+
+            if nuc is not None:
+                self.isotopeCodes[idx] = isotopeCode
+                self.spectrometerFrequencies[idx] = nuc.frequencyAtField(field)
+
+                high, low = defaultValues['spectralRange']
+                self.spectralWidthsHz[idx] = (high-low)*self.spectrometerFrequencies[idx]
+
+                self.referencePoints[idx] = 1.0
+                self.referenceValues[idx] = high
+
+                _count = self.axisCodes.count(nuc.axisCode)
+                self.axisCodes[idx] = nuc.axisCode + (str(_count) if _count else '')
+
+                self.pointCounts[idx] = defaultValues['pointCount']
+
+    def _setSpectralParametersFromIsotopeCodes(self, field=18.8):
+        """Set spectral parameters at field
+        """
+        for idx, isotopeCode in enumerate(self.isotopeCodes):
+            self._setDefaultIsotopeValues(isotopeCode, dimension=idx+1, field=field)
 
     #=========================================================================================
     # access to cache
@@ -1131,7 +1152,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
                          (path, instance.dataFormat))
             return None
 
-        if not instance.checkPath(instance.path, mode=instance.defaultOpenReadMode):
+        if (_p := instance.path) is None or not _p.exists():
             logger.debug2('path "%s" is not valid for reading SpectrumDataSource dataFormat "%s"' %
                          (path, instance.dataFormat))
             return None
@@ -1164,33 +1185,50 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         return None
 
+    def _checkFilePath(self, newFile, mode):
+        "Helper function to do checks on path"
+
+        _path = self.path
+        if _path is None:
+            raise RuntimeError('openFile: no path defined for %s' % self)
+
+        if not newFile and not _path.exists():
+            raise FileNotFoundError('path "%s" does not exist' % _path)
+
+        if newFile and not _path.parent.exists():
+            raise FileNotFoundError('parent of "%s" does not exist' % _path)
+        if newFile and _path.exists() and mode != self.defaultAppendMode:
+            raise FileExistsError('path "%s" exists (mode=%s)' % (_path, mode))
+
     def openFile(self, mode, **kwds):
         """open self.path, set self.fp, return self.fp
         """
         if mode is None:
             raise ValueError('%s.openFile: Undefined open mode' % self.__class__.__name__)
+        newFile = not mode.startswith('r')
+
+        if self.hasOpenFile():
+            self.closeFile()
+
 
         try:
-            if self.hasOpenFile():
-                self.closeFile()
-
-            if not self.checkPath(self.path, mode=mode):
-                raise FileNotFoundError('Invalid %s' % self)
-
+            self._checkFilePath(newFile, mode)
             self.fp = self.openMethod(str(self.path), mode, **kwds)
             self.mode = mode
 
         except Exception as es:
             self.closeFile()
-            text = '%s.openFile(mode=%r): %s' % (self.__class__.__name__, mode, str(es))
+            text = '%s.openFile: %s' % (self.__class__.__name__, str(es))
             getLogger().error(text)
             raise es
 
-        if mode.startswith('r'):
+        if not newFile:
             # cache will be defined after parameters are read
             pass
         else:
             self.disableCache()  # No caching on writing; that creates sync issues
+
+        # getLogger().debug('openFile: %s' % self)
 
         return self.fp
 
@@ -1245,7 +1283,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         except Exception as es:
             self.closeFile()
-            getLogger().error('%s.openNewFile: "%s"' % (self.__class__.__name__, str(es)))
+            getLogger().error('%s.openNewFile: %s' % (self.__class__.__name__, str(es)))
             raise es
 
         finally:
@@ -1263,8 +1301,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
             self.mode = None
 
         # Close optional non-temporary hdf5 buffer
-        if self.hdf5buffer is not None and not self.temporaryBuffer:
-            self.hdf5buffer.closeFile()
+        if self.isBuffered:
+            self.closeHdf5Buffer()
 
         self.cache.clear()
 
@@ -1345,7 +1383,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
         :return NumPy data array
         """
 
-        if self.hdf5buffer is not None:
+        if self.isBuffered:
+            self._checkBuffer()
             return self.hdf5buffer.getPlaneData(position=position, xDim=xDim, yDim=yDim)
 
         position = self.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
@@ -1358,12 +1397,17 @@ class SpectrumDataSourceABC(CcpNmrJson):
             raise NotImplementedError('Not implemented')
 
     def setPlaneData(self, data, position: Sequence = None, xDim: int = 1, yDim: int = 2):
-        """Set the plane defined by xDim, yDim and position (all 1-based)
+        """Set the plane data defined by xDim, yDim and position (all 1-based)
         from NumPy data array
 
-        to be subclassed
+        Can be subclassed
         """
-        raise NotImplementedError('Not implemented')
+        if self.isBuffered:
+            self._checkBuffer()
+            self.hdf5buffer.setPlaneData(data=data, position=position, xDim=xDim, yDim=yDim)
+            return
+        else:
+            raise RuntimeError('setPlaneData: not buffered and no valid implementation')
 
     def checkForValidSlice(self, position, sliceDim):
         """Checks that sliceDim is valid, returns valid (expanded) position if None
@@ -1385,7 +1429,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         :return NumPy data array
         """
-        if self.hdf5buffer is not None:
+        if self.isBuffered:
+            self._checkBuffer()
             return self.hdf5buffer.getSliceData(position=position, sliceDim=sliceDim)
 
         elif self.isBlocked:
@@ -1399,10 +1444,13 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     def setSliceData(self, data, position: Sequence = None, sliceDim: int = 1):
         """Set data as slice defined by sliceDim and position (all 1-based)
-
-        to be subclassed
+        Can be subclassed
         """
-        raise NotImplementedError('Not implemented')
+        if self.isBuffered:
+            self._checkBuffer()
+            self.hdf5buffer.setSliceData(data=data, position=position, sliceDim=sliceDim)
+        else:
+            raise RuntimeError('setSliceData, not buffered and no valid implementation')
 
     def getSliceDataFromPlane(self, position, xDim: int, yDim: int, sliceDim: int):
         """Routine to get sliceData using getPlaneData
@@ -1433,7 +1481,8 @@ class SpectrumDataSourceABC(CcpNmrJson):
         """Get value defined by position (1-based, integer values)
         Use getPointValue() for an interpolated value
         """
-        if self.hdf5buffer is not None:
+        if self.isBuffered:
+            self._checkBuffer()
             return self.hdf5buffer.getPointData(position=position)
 
         elif self.isBlocked:
@@ -1446,6 +1495,16 @@ class SpectrumDataSourceABC(CcpNmrJson):
             # piggyback on getSliceData
             data = self.getSliceData(position=position, sliceDim=1)
             return float(data[position[0] - 1])
+
+    def setPointData(self, value, position: Sequence = None) -> float:
+        """Set point value defined by position (1-based)
+        Can be sub-classed
+        """
+        if self.isBuffered:
+            self._checkBuffer()
+            return self.hdf5buffer.setPointData(value=value, position=position)
+        else:
+            raise RuntimeError('setPointData: not buffered or no valid implementation')
 
     def getPointValue(self, position, aliasingFlags=None):
         """Get interpolated value defined by position (1-based, float values), optionally aliased
@@ -1536,19 +1595,15 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         # temp buffer for unpacking aliased data along sliceDim
         sliceData2 = numpy.zeros(sizes[sliceAxis], dtype=self.dataType)
-        nPointCounts = self.pointCounts
-        nPoints = nPointCounts[sliceAxis]
-
-        # _slices = [(position, aliased) for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=[sliceDim])]
-        # print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-        # print(f'{sizes}    {sliceAxis}     {nPointCounts}')
-        # for _slice in _slices:
-        #     print(_slice)
+        nSlicePoints = self.pointCounts[sliceAxis]
 
         for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=[sliceDim]):
 
+            unFoldedPosition = [a*np+p for p, a, np in zip(position, aliased, self.pointCounts)]
+            # aliased[sliceAxis] = (starts[sliceAxis] < 0 or stops[sliceAxis] >= nPoints)
+
+            # read the slice using the unfolded position
             position[sliceAxis] = 1  # position is 1-based
-            aliased[sliceAxis] = (starts[sliceAxis] < 0 or stops[sliceAxis] >= nPoints)
             with notificationEchoBlocking():
                 sliceData = self.getSliceData(position=position, sliceDim=sliceDim)
 
@@ -1561,13 +1616,13 @@ class SpectrumDataSourceABC(CcpNmrJson):
             # # an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
             # dataSlices = tuple(dataSlices)
 
-            # dataSlices = [slice(((p-1)-start) % np, (((p-1)-start) % np) + 1) for start, p, np in zip(starts, position, nPointCounts)]
+            # dataSlices = [slice(((p-1)-start) % np, (((p-1)-start) % np) + 1) for start, p, np in zip(starts, position, self.pointCounts)]
             # define the set of dataSlices in a range bigger than the dataSet in any axis,
             # e.g., a long region across aliased spectrum
             #       if data is (100, 50) and region is (125, 5) then this will need 2 tiles ((0, 0), (1, 0))
-            _its = [range(((size - 1) // np) + 1) for size, np in zip(sizes, nPointCounts)]
+            _its = [range(((size - 1) // np) + 1) for size, np in zip(sizes, self.pointCounts)]
             allDataSlices = [
-                [slice(al * np + ((p - 1) - start) % np, al * np + (((p - 1) - start) % np) + 1) for start, p, np, al in zip(starts, position, nPointCounts, alias)]
+                [slice(al * np + ((p - 1) - start) % np, al * np + (((p - 1) - start) % np) + 1) for start, p, np, al in zip(starts, position, self.pointCounts, alias)]
                 for alias in [it for it in product(*_its)]
                 ]
             for _slice in allDataSlices:
@@ -1575,11 +1630,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
             # get aliasing factor determined by dimensions other than sliceDim
             factor = 1.0
-            for axis, fac, aliase in zip(self.axes, aliasingFlags, aliased):
+            for axis, fac, aliase in zip(self.dimensionIndices, aliasingFlags, aliased):
                 if axis != sliceAxis and aliase:
                     factor *= fac
 
-            if not aliased[sliceAxis]:
+            if (starts[sliceAxis] >= 1 and stops[sliceAxis] <= nSlicePoints):
                 # There are no aliased points along sliceDim
                 for dataSlices in allDataSlices:
                     # copy the relevant section of the sliceData into the (nD) data array
@@ -1587,11 +1642,11 @@ class SpectrumDataSourceABC(CcpNmrJson):
             else:
                 # copy the relevant points from sliceData to sliceData2 array; aliasing where needed
                 for idx, p in zip(range(0, sizes[sliceAxis]), range(starts[sliceAxis], stops[sliceAxis])):
-                    pointFactor = aliasingFlags[sliceAxis] if (p < 0 or p >= nPoints) else 1.0
+                    pointFactor = aliasingFlags[sliceAxis] if (p < 0 or p >= nSlicePoints) else 1.0
                     while p < 0:
-                        p += nPoints
-                    while p >= nPoints:
-                        p -= nPoints
+                        p += nSlicePoints
+                    while p >= nSlicePoints:
+                        p -= nSlicePoints
                     sliceData2[idx] = factor * pointFactor * sliceData[p]
                 for dataSlices in allDataSlices:
                     # copy the sliceData2 into the (nD) data array
@@ -1601,7 +1656,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     def getRegionData(self, sliceTuples, aliasingFlags=None):
         """Return an numpy array containing the points defined by
-                sliceTuples=[(start_1,stop_1), (start_2,stop_2), ...],
+        sliceTuples=[(start_1,stop_1), (start_2,stop_2), ...],
 
         sliceTuples are 1-based; sliceTuple stop values are inclusive (i.e. different
         from the python slice object)
@@ -1611,16 +1666,16 @@ class SpectrumDataSourceABC(CcpNmrJson):
             1: aliasing with positive sign
            -1: aliasing with negative sign
         """
+        if self.isBuffered:
+            self._checkBuffer()
+            return self.hdf5buffer.getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
+
         if aliasingFlags is None:
             aliasingFlags = [0] * self.dimensionCount
 
-        if self.hdf5buffer is not None:
-            regionData = self.hdf5buffer.getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
-
-        else:
-            self.checkForValidRegion(sliceTuples, aliasingFlags)
-            # No need to scale, as _getRegionData relies on getSliceData, which is already scaled
-            regionData = self._getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
+        self.checkForValidRegion(sliceTuples, aliasingFlags)
+        # No need to scale, as _getRegionData relies on getSliceData, which is already scaled
+        regionData = self._getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
 
         return regionData
 
@@ -1642,7 +1697,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         else:
             # 3D and up: use a yz-plane, about 10 points in; this plane is likely mostly empty
             position = [min(10, self.pointCounts[0])] + [1] * (self.dimensionCount-1)
-            data = self.getPlaneData(xDim=self.Y_DIM, yDim=self.Z_DIM, position=position)
+            data = self.getPlaneData(xDim=specLib.Y_DIM, yDim=specLib.Z_DIM, position=position)
             data = data.flatten()
             stdFactor = 2.0
 
@@ -1706,18 +1761,6 @@ class SpectrumDataSourceABC(CcpNmrJson):
         loopPosition = [start for start, stop in sliceTuples]
         done = False
         while not done:
-            # get position list within the [1,pointCounts] range and an aliased True/False list
-            # position = []
-            # aliased = []
-            # for idx, p in enumerate(loopPosition):
-            #     aliased.append( (p<1) or p>self.pointCounts[idx] )
-            #     # Alias onto 1, pointCounts range
-            #     while p < 1:
-            #         p += self.pointCounts[idx]
-            #     while p > self.pointCounts[idx]:
-            #         p -= self.pointCounts[idx]
-            #     position.append(p)
-
             position = [((p - 1) % np) + 1 for p, np in zip(loopPosition, self.pointCounts)]
             aliased = [(p - 1) // np for p, np in zip(loopPosition, self.pointCounts)]
 
@@ -1752,7 +1795,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 yield (position, sliceData)
 
     def allPoints(self):
-        """An iterator over all points, yielding (position, data-array) tuples
+        """An iterator over all points, yielding (position, pointValue) tuples
         positions are one-based
         """
         sliceTuples = [(1, p) for p in self.pointCounts]
@@ -1765,46 +1808,112 @@ class SpectrumDataSourceABC(CcpNmrJson):
     # Hdf5 buffer
     #=========================================================================================
 
-    def initialiseHdf5Buffer(self, temporaryBuffer=True, path=None):
-        """Initialise a Hdf5SpectrumBuffer instance and fill with data from self
+    @property
+    def isBuffered(self):
+        "ReturnTrue if file is buffered"
+        return self._isBuffered
 
-        :param temporaryBuffer: flag indicating to create a temporary file, discarded upon closing
-        :param path: explicit path or derived from self.path if None and temporary=False
+    def setBuffering(self, isBuffered:bool, bufferIsTemporary:bool=True, bufferPath=None):
+        """Define the SpectrumDataSource buffering status
+        :param isBuffered (True, False): set the buffering status
+        :param bufferIsTemporary (True, False): define buffer as temporary (i.e. disgarded on close)
+        :param bufferPath: optional path to store the buffer file
+        """
+        if self.isBuffered:
+            self.closeHdf5Buffer()
+
+        self._isBuffered = isBuffered
+        self._bufferFilled = False
+        self._bufferIsTemporary = bufferIsTemporary
+        self._bufferPath = bufferPath
+
+    def _checkBuffer(self):
+        """Create (if needed) and fill Hdf5 buffer
+        """
+        if self.hdf5buffer is None:
+            # Buffer has not been created
+            self.initialiseHdf5Buffer()
+        if not self._bufferFilled:
+            self.fillHdf5Buffer()
+
+    def _getTemporaryPath(self, prefix, suffix=None):
+        """Return a temporary path with prefix and suffix (autogenerated from self.suffixes)
+        generated tempfile, but closing and deleting the file
+        instantly, while returning the generated path name.
+        """
+        if suffix is None and len(self.suffixes) > 0:
+            suffix = self.suffixes[0]
+        with tempfile.NamedTemporaryFile(prefix=prefix, suffix=suffix) as tFile:
+            path = tFile.name
+        return path
+
+    def initialiseHdf5Buffer(self):
+        """Initialise a Hdf5SpectrumBuffer instance.
         :return: Hdf5SpectrumBuffer instance
         """
         from ccpn.core.lib.SpectrumDataSources.Hdf5SpectrumDataSource import Hdf5SpectrumDataSource
 
-        if self.hdf5buffer is not None:
-            getLogger().debug('Closing %s' % self.hdf5buffer)
-            self.hdf5buffer.closeFile()
-            self.hdf5buffer = None
+        if not self.isBuffered:
+            raise RuntimeError('initialiseHdf5Buffer: buffering not active, use setBuffering() method first')
 
-        self.temporaryBuffer = temporaryBuffer
-        if self.temporaryBuffer:
-            name = 'CcpNmr_hdf5buffer_%s_' % self.path.basename
-            tFile = tempfile.NamedTemporaryFile(prefix=name, suffix=Hdf5SpectrumDataSource.suffixes[0])
-            path = tFile.name
+        self.closeHdf5Buffer()
 
-        if not self.temporaryBuffer:
-            if path is None:
+        if self._bufferIsTemporary:
+            # Construct a path for temporary buffer using the tempfile methods
+            # However, tempfile.NamedTemporyFile already opens it, so grab the name, and close it (which will delete it)
+            prefix = 'CcpNmr_hdf5buffer_%s_' % self.path.basename
+            path = self._getTemporaryPath(prefix=prefix, suffix=Hdf5SpectrumDataSource.suffixes[0])
+            # with tempfile.NamedTemporaryFile(prefix=prefix, suffix=Hdf5SpectrumDataSource.suffixes[0]) as tFile:
+            #     path = tFile.name
+
+        else:
+            # take path as defined in _bufferPath, or construct from self.path if None
+            path = self._bufferPath
+            if self._bufferPath is None:
                 path = self.path.withSuffix(Hdf5SpectrumDataSource.suffixes[0]).uniqueVersion()
+            # tFile = None
 
         # create a hdf5 buffer file instance
-        hdf5buffer = Hdf5SpectrumDataSource().copyParametersFrom(self)
-        hdf5buffer._dataSource = self  # link back to self
-        hdf5buffer.setPath(path=path, substituteSuffix=True)
-        # do not use openNewFile as it has to remain open after filling the buffer
+        hdf5buffer = Hdf5SpectrumDataSource(path=path)
+        hdf5buffer.copyParametersFrom(self)
+        # do not use openNewFile as it has to remain open to allow for filling the buffer
         hdf5buffer.openFile(mode=Hdf5SpectrumDataSource.defaultOpenWriteMode)
-        self.fillHdf5Buffer(hdf5buffer)
-        # buffer is filled now; associate with self so that future reads will use it to retrieve data
+        # backward and forward linkages
+        hdf5buffer.parent = self
         self.hdf5buffer = hdf5buffer
-        return hdf5buffer
+        self._isBuffered = True
+        self._bufferFilled = False
+        # hdf5buffer is ready now; future read/writes will use it to retrieve/store data
+        getLogger().debug('initialiseHdf5Buffer: opened %s' % self.hdf5buffer)
+        return self.hdf5buffer
 
-    def fillHdf5Buffer(self, hdf5buffer):
+    def fillHdf5Buffer(self):
         """Fill hdf5Buffer with data from self;
         this routine will be subclassed in the more problematic cases such as NmrPipe
         """
-        self.copyDataTo(hdf5buffer)
+        if not self.isBuffered or self.hdf5buffer is None:
+            raise RuntimeError('fillHdf5Buffer: no hdf5Buffer defined')
+
+        getLogger().debug('fillHdf5Buffer: filling buffer %s' % self.hdf5buffer)
+        # To use the non-buffered reading routines for filling the buffer,
+        # pretend it is (temporarily) not buffered
+        self._isBuffered = False
+        self.copyDataTo(self.hdf5buffer)
+        self._isBuffered = True
+        self._bufferFilled = True
+
+    def closeHdf5Buffer(self):
+        """Close the hdf5Buffer"""
+        if not self.isBuffered:
+            raise RuntimeError('closeHdf5Buffer: no hdf5Buffer defined')
+        if self.hdf5buffer is not None:
+            getLogger().debug('Closing buffer %s' % self.hdf5buffer)
+            self.hdf5buffer.closeFile()
+            if self._bufferIsTemporary:
+                self.hdf5buffer.path.removeFile()
+
+        self.hdf5buffer = None
+        self._bufferFilled = False
 
     def duplicateDataToHdf5(self, path=None):
         """Make a duplicate from self to a Hdf5 file;
@@ -1843,7 +1952,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         if self.dimensionCount == 0:
             return '<%s: _D (), %s>' % (self.__class__.__name__, self.path.name)
         else:
-            if self.hdf5buffer is not None:
+            if self.isBuffered:
                 fpStatus = '%r' % 'buffered'
                 path = self.hdf5buffer.path
             elif self.hasOpenFile():
@@ -1853,7 +1962,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 fpStatus = '%r' % 'closed'
                 path = self.path
 
-            return '<%s: %dD (%s), (%s,%s)>' % (self.__class__.__name__,
+            return '<%s: %dD (%s), (%s,%r)>' % (self.__class__.__name__,
                                                     self.dimensionCount,
                                                     'x'.join([str(p) for p in self.pointCounts]),
                                                     fpStatus,

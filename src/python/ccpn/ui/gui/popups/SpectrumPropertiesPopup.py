@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-09 15:26:01 +0000 (Tue, November 09, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 11:27:18 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -31,11 +31,11 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from itertools import permutations
 from collections.abc import Iterable
 
-from ccpn.core.Spectrum import MAXALIASINGRANGE, Spectrum
+from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock
 from ccpn.core.lib.ContextManagers import undoStackBlocking
-from ccpn.core.lib.SpectrumLib import getContourLevelsFromNoise
+from ccpn.core.lib.SpectrumLib import getContourLevelsFromNoise, MAXALIASINGRANGE
 from ccpn.core.lib.ContextManagers import queueStateChange
 
 from ccpn.ui.gui.widgets.Button import Button
@@ -1064,8 +1064,8 @@ class DimensionsTab(Widget):
             hLine.setContentsMargins(5, 0, 0, 0)
 
             row += 1
-            self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self, labelText="Preferred Axis Order",
-                                                                         grid=(row, 0), gridSpan=(1, dimensions + 1), vAlign='t', tipText=getAttributeTipText(Spectrum, 'preferredAxisOrdering'))
+            self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self, labelText="Preferred Dimension Order",
+                                                                         grid=(row, 0), gridSpan=(1, dimensions + 1), vAlign='t', tipText=getAttributeTipText(Spectrum, 'setDimensionOrdering'))
             self.preferredAxisOrderPulldown.pulldownList.setCallback(partial(self._queueSetSpectrumOrderingComboIndex, spectrum))
 
         row += 1
@@ -1081,7 +1081,7 @@ class DimensionsTab(Widget):
     def _populatePreferredOrder(self):
         """Fill the pullDown with the currently available permutations of the axis codes
         """
-        specOrder = tuple(self.spectrum.preferredAxisOrdering) if self.spectrum.preferredAxisOrdering is not None else None
+        specOrder = tuple(self.spectrum._preferredAxisOrdering) if self.spectrum._preferredAxisOrdering is not None else None
 
         axisCodeTexts = tuple([ss.text() for ss in self.axisCodeEdits])
         ll = ['<None>']
@@ -1106,13 +1106,13 @@ class DimensionsTab(Widget):
 
             axisOrder = tuple(permutations(list(range(len(spectrum.axisCodes)))))
             value = tuple(axisOrder[index - 1])
-            if value != spectrum.preferredAxisOrdering:
+            if value != spectrum._preferredAxisOrdering:
                 return partial(self._setSpectrumOrdering, spectrum, value)
 
     def _setSpectrumOrdering(self, spectrum, value):
         """Set the preferred axis ordering from the pullDown selection
         """
-        spectrum.preferredAxisOrdering = value
+        spectrum._preferredAxisOrdering = value
 
     def _fillPullDowns(self):
         pass
@@ -1198,7 +1198,7 @@ class DimensionsTab(Widget):
 
             self.aliasLim = self.spectrum.aliasingLimits
             self.aliasInds = self.spectrum.aliasingIndexes
-            self.axesReversed = self.spectrum.axesReversed
+            # self.axesReversed = self.spectrum.axesReversed
             self.foldLim = tuple(sorted(lim) for lim in self.spectrum.foldingLimits)
             self.deltaLim = self.spectrum.spectralWidths  # tuple(max(lim) - min(lim) for lim in self.foldLim)
 

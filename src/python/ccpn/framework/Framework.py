@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-09 16:11:16 +0000 (Thu, December 09, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 11:27:17 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -57,7 +57,6 @@ from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
 from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Project import Project
-from ccpn.core._implementation import Io as coreIo
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.lib.Pid import Pid, PREFIXSEP
 
@@ -102,16 +101,12 @@ from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_KEY_CONCEPTS
 
 from PyQt5.QtCore import QTimer
 
+
 import faulthandler
-
-
 faulthandler.enable()
 
-# from functools import partial
 
 _DEBUG = False
-
-# componentNames = ('Assignment', 'Screening', 'Structure')
 
 AnalysisAssign = 'AnalysisAssign'
 AnalysisScreen = 'AnalysisScreen'
@@ -261,9 +256,9 @@ class Framework(NotifierBase):
         self.args = args
         self.applicationName = applicationName
         self.applicationVersion = applicationVersion
-
         # NOTE:ED - what is revision for? there are no uses and causes a new error for sphinx documentation unless a string
-        self.revision = Version.revision
+        # self.revision = Version.revision
+
         self.plugins = []  # Hack for now, how should we store these?
         self.ccpnModules = []
 
@@ -292,7 +287,7 @@ class Framework(NotifierBase):
         self._mainWindow = None
 
         # This is needed to make project available in NoUi (if nothing else)
-        self.project = None
+        self._project = None
 
         # Blocking level for command echo and logging
         self._echoBlocking = 0
@@ -301,7 +296,6 @@ class Framework(NotifierBase):
         self._backupTimerQ = None
         self.autoBackupThread = None
 
-        # NBNB TODO The following block should maybe be moved into _getUi
         # Assure that .ccpn exists
         ccpnDir = Path.aPath(userPreferencesDirectory)
         if not ccpnDir.exists():
@@ -331,10 +325,13 @@ class Framework(NotifierBase):
         self._disableUndoException = getattr(self.args, 'disableUndoException', False)
         self._ccpnLogging = getattr(self.args, 'ccpnLogging', False)
 
-        # register dataLoader for the first and only time
+        # register dataLoaders for the first and only time
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders
-
         self._dataLoaders = getDataLoaders()
+
+        # register SpectrumDataSource formats for the first and only time
+        from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
+        self._spectrumDataSourceFormats = getDataFormats()
 
     @property
     def _isInDebugMode(self) -> bool:
@@ -357,6 +354,11 @@ class Framework(NotifierBase):
         if self.hasGui:
             return self.ui.mainWindow
         return None
+
+    @property
+    def project(self):
+        """Return project"""
+        return self._project
 
     def _testShortcuts0(self):
         print('>>> Testing shortcuts0')
@@ -460,17 +462,21 @@ class Framework(NotifierBase):
     def _initialiseProject(self, project: Project):
         """Initialise project and set up links and objects that involve it"""
 
-        self.project = project
+        # Linkages
+        self._project = project
+        project._application = self
+        # project._appBase = self  # _appBase is defined in project so the UI instantiation can happen
 
-        # Pass an instance of framework to project so the UI instantiation can happen
-        project._appBase = self
+        # Logging
+        logger = getLogger()
+        Logging.setLevel(logger, self.level)
+        logger.debug('Framework._initialiseProject>>>')
 
-        # Set up current
+        # Set up current; we need it when restoring
         self.current = Current(project=project)
 
         # This wraps the underlying data, including the wrapped graphics data
         #  - the project is now ready to use
-
         project._initialiseProject()
 
         # Adapt project to preferences
@@ -485,17 +491,12 @@ class Framework(NotifierBase):
         self.spectraPath = self.spectraPath
         self.pluginDataPath = self.pluginDataPath
 
+
         # restore current
         self.current._restoreStateFromFile(self.statePath)
 
-        self.project = project
-        if hasattr(self, '_mainWindow'):
-            Logging.getLogger().debug('Framework._initialiseProject>>>')
-
-            project._blockSideBar = True
+        if self.hasGui:
             self.ui.initialize(self._mainWindow)
-            project._blockSideBar = False
-
             # Get the mainWindow out of the application top level once it's been transferred to ui
             del self._mainWindow
         else:
@@ -693,7 +694,7 @@ class Framework(NotifierBase):
                 )
         dataUrl.url = Implementation.Url(path=dataPath)
 
-    def correctColours(self):
+    def _correctColours(self):
         """Autocorrect all colours that are too close to the background colour
         """
         from ccpn.ui.gui.guiSettings import autoCorrectHexColour, getColours, CCPNGLWIDGET_HEXBACKGROUND
@@ -740,18 +741,19 @@ class Framework(NotifierBase):
                 mark.colour = autoCorrectHexColour(mark.colour,
                                                    getColours()[CCPNGLWIDGET_HEXBACKGROUND])
 
-    def initGraphics(self):
+    def _initGraphics(self):
         """Set up graphics system after loading
         """
         from ccpn.ui.gui.lib import GuiStrip
 
         project = self.project
+        mainWindow = self.ui.mainWindow
 
         # 20191113:ED Initial insertion of spectrumDisplays into the moduleArea
         try:
-            insertPoint = self.ui.mainWindow.moduleArea
+            insertPoint = mainWindow.moduleArea
             for spectrumDisplay in project.spectrumDisplays:
-                self.ui.mainWindow.moduleArea.addModule(spectrumDisplay,
+                mainWindow.moduleArea.addModule(spectrumDisplay,
                                                         position='right',
                                                         relativeTo=insertPoint)
                 insertPoint = spectrumDisplay
@@ -760,17 +762,19 @@ class Framework(NotifierBase):
 
         try:
             if self.preferences.general.restoreLayoutOnOpening and \
-                    self.ui.mainWindow.moduleLayouts:
-                Layout.restoreLayout(self._mainWindow, self.ui.mainWindow.moduleLayouts, restoreSpectrumDisplay=False)
+                    mainWindow.moduleLayouts:
+                Layout.restoreLayout(self._mainWindow, mainWindow.moduleLayouts, restoreSpectrumDisplay=False)
         except Exception as e:
             getLogger().warning('Impossible to restore Layout %s' % e)
 
         try:
             # Initialise displays
-            for spectrumDisplay in project.windows[0].spectrumDisplays:  # there is exactly one window
+            # for spectrumDisplay in project.windows[0].spectrumDisplays:  # there is exactly one window
+
+            for spectrumDisplay in mainWindow.spectrumDisplays:  # there is exactly one window
                 pass  # GWV: poor solution; removed the routine spectrumDisplay._resetRemoveStripAction()
             # initialise any colour changes before generating gui strips
-            self.correctColours()
+            self._correctColours()
         except Exception as e:
             getLogger().warning('Impossible to restore SpectrumDisplays')
 
@@ -969,23 +973,24 @@ class Framework(NotifierBase):
         if len(identifier) >= 2 and identifier[0] == '<' and identifier[-1] == '>':
             identifier = identifier[1:-1]
 
-        return self.getByPid(identifier)
+        return self.project.getByPid(identifier)
 
     def getByPid(self, pid):
         """Convenience"""
-        obj = self.project.getByPid(pid)
-        if obj:
-            return obj
-        else:
-            if isinstance(self.ui, Gui):
-                if PREFIXSEP in pid:
-                    pid = Pid(pid)
-                    if pid:
-                        return self.ui.mainWindow.moduleArea.modules.get(pid.id)
+        return self.project.getByPid(pid)
+        # obj = self.project.getByPid(pid)
+        # if obj:
+        #     return obj
+        # else:
+        #     if isinstance(self.ui, Gui):
+        #         if PREFIXSEP in pid:
+        #             pid = Pid(pid)
+        #             if pid:
+        #                 return self.ui.mainWindow.moduleArea.modules.get(pid.id)
 
     def getByGid(self, gid):
         """Convenience"""
-        return self.getByPid(gid)
+        return self.project.getByPid(gid)
 
     def addApplicationMenuSpec(self, spec, position=5):
         """Add an entirely new menu at specified position"""
@@ -1425,47 +1430,43 @@ class Framework(NotifierBase):
     def newProject(self, name='default'):
         """Create new, empty project; return Project instance
         """
+        # local import to avoid cycles
+        from ccpn.core.Project import _newProject
 
-        # NB _closeProject includes a gui cleanup call
-        if self.project is not None:
-            self._closeProject()
-
-        project = None
-        sys.stderr.write('==> Creating new, empty project\n')
         newName = re.sub('[^0-9a-zA-Z]+', '', name)
         if newName != name:
             getLogger().info('Removing whitespace from name: %s' % name)
 
-        project = coreIo.newProject(name=newName, useFileLogger=self.useFileLogger, level=self.level)
-        project._isNew = True
-        # Needs to know this for restoring the GuiSpectrum Module. Could be removed after decoupling Gui and Data!
-        # GST note change of order required for undo dirty system not consistent
-        # order in other place elsewhise
-        project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
-        self._initialiseProject(project)
-
-        # 20190424:ED reset the flag so that spectrumDisplays open correctly again
-        project._isNew = None
-        self.project = project
+        sys.stderr.write('==> Creating new, empty project\n')
+        # NB _closeProject includes a gui cleanup call
+        self._closeProject()
+        project = _newProject(self, name=newName)
+        self._initialiseProject(project)    # This also set the linkages
 
         return project
 
     def _openProjectMenuCallback(self):
         """Just a stub for the menu setup to pass on to mainWindow, to be moved later
         """
-        return self.ui.mainWindow._openProject()
+        return self.ui.mainWindow._openProjectCallback()
 
-    def _loadV2Project(self, path):
+    def _loadV2Project(self, path) -> List[Project]:
         """Actual V2 project loader
         CCPNINTERNAL: called from CcpNmrV2ProjectDataLoader
         """
+        from ccpn.core._implementation.updates.update_v2 import updateProject_fromV2
+        from ccpn.core.Project import _loadProject
+
         with logCommandManager('application.', 'loadProject', path):
             logger = getLogger()
-            project = self._loadV3Project(path)
-            # returns a list or None
-            if project and isinstance(project, list):
-                project = project[0]
-            logger.info('==> Upgraded %s to version-3' % project)
+
+            # always close first
+            self._closeProject()
+            project = _loadProject(application=self, path=str(path))
+            self._initialiseProject(project)    # This also sets the linkages
+            getLogger().info('==> Loaded ccpn project "%s"' % path)
+
+            # Save the result
             try:
                 project.save()
                 logger.info('==> Saved %s as "%s"' % (project, project.path))
@@ -1474,59 +1475,26 @@ class Framework(NotifierBase):
 
         return [project]
 
-    def _loadV3Project(self, path):
+    def _loadV3Project(self, path) -> List[Project]:
         """Actual V3 project loader
         CCPNINTERNAL: called from CcpNmrV3ProjectDataLoader
         """
-        from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY, ccpnVersionHistory
-        from ccpn.util.Path import aPath
+        from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory
+        from ccpn.core.Project import _loadProject
+
+        if not isinstance(path, (Path.Path, str)):
+            raise ValueError('invalid path "%s"' % path)
 
         with logCommandManager('application.', 'loadProject', path):
-            if not isinstance(path, (Path.Path, str)):
-                raise ValueError('invalid path "%s"' % path)
 
             _path = Path.aPath(path)
             if not _path.exists():
                 raise ValueError('path "%s" does not exist' % path)
 
-            # warning for projects that predate 3.1.0.alpha - these will no longer be backwards compatible with
-            #   3.0.4.edge and earlier
-            _lastVersion = None
-            try:
-                with open(_path / CCPN_STATE_DIRECTORY / ccpnVersionHistory, 'r') as fp:
-                    # load the current version history from the state folder - this should be a list of version strings
-                    _history = json.load(fp)
-
-                _lastVersion = _history[-1]
-            except:
-                # TODO:ED - this should really be separated into NoUi and Gui class
-                if self.ui and self.ui.mainWindow:
-                    # file does not exists, or contains the wrong information/json structure
-                    ok = MessageDialog.showYesNoWarning('Load Project',
-                                                        f'Project {_path} was created with an earlier version of AnalysisV3.\n'
-                                                        '\n'
-                                                        'CAUTION: After saving in version 3.1 the project cannot currently be loaded '
-                                                        'back into versions 3.0.4 or earlier. If you are in any doubt, please make a copy of '
-                                                        'the project folder before loading/saving this project.\n'
-                                                        '\n'
-                                                        'Do you want to continue loading?')
-                else:
-                    ok = True
-
-                if not ok:
-                    # skip loading so that user can backup/copy project
-                    return []
-
-            else:
-                # project contains a versionHistory
-                # this is okay as there is no file for projects pre-dating 3.1.0.alpha
-                pass
-
-            if self.project is not None:  # always close for Ccpn
-                self._closeProject()
-            project = coreIo.loadProject(str(_path), useFileLogger=self.useFileLogger, level=self.level)
-            # project._resetUndo(debug=self.level <= Logging.DEBUG2, application=self)
-            self._initialiseProject(project)
+            # always close first
+            self._closeProject()
+            project = _loadProject(application=self, path=path)
+            self._initialiseProject(project)    # This also set the linkages
             getLogger().info('==> Loaded ccpn project "%s"' % path)
 
         return [project]
@@ -1548,8 +1516,7 @@ class Framework(NotifierBase):
         dataBlock = _nefReader.getNefData(path)
 
         if makeNewProject:
-            if self.project is not None:
-                self._closeProject()
+            self._closeProject()
             self.project = self.newProject(dataBlock.name)
 
         self.project.shiftAveraging = False
@@ -1612,12 +1579,12 @@ class Framework(NotifierBase):
         sparkyName = dataBlock.getDataValues(SPARKY_NAME, firstOnly=True)
 
         # Just a helper function for cleaner code below"
-        def _import():
+        def _importData(project):
             with undoBlockWithoutSideBar():
                 with notificationEchoBlocking():
                     with catchExceptions(application=self, errorStringTemplate='Error loading Sparky file: %s',
                                          printTraceBack=True):
-                        sparkyReader.importSparkyProject(self.project, dataBlock)
+                        sparkyReader.importSparkyProject(project, dataBlock)
 
         #end def
 
@@ -1625,14 +1592,14 @@ class Framework(NotifierBase):
             with logCommandManager('application.', 'loadProject', path):
                 self._closeProject()
                 project = self.newProject(sparkyName)
-                _import()
+                _importData(project)
                 self.project.shiftAveraging = True
             getLogger().info('==> Created project from Sparky file: "%s"' % (path,))
 
         else:
             project = self.project
             with logCommandManager('application.', 'loadData', path):
-                _import()
+                _importData(project)
             getLogger().info('==> Imported Sparky file: "%s"' % (path,))
 
         return project
@@ -1654,7 +1621,6 @@ class Framework(NotifierBase):
         mainWindow = self.mainWindow
         with logCommandManager('application.', 'loadData', path):
             path = Path.aPath(path)
-            # title = path.basename
             mainWindow.newHtmlModule(urlPath=str(path), position='top', relativeTo=mainWindow.moduleArea)
         return []
 
@@ -1678,10 +1644,6 @@ class Framework(NotifierBase):
         from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
 
         if paths is None:
-            # if self.preferences.general.useNative:
-            #     m = 'Native dialog not available on multiple selections. ' \
-            #         'For loading a single file (not Dir) through a native dialog please use: Project > Load Data...'
-            #     getLogger().info(m)
             dialog = SpectrumFileDialog(parent=self.ui.mainWindow, acceptMode='load', fileFilter=filter, useNative=False)
 
             dialog._show()
@@ -1696,7 +1658,7 @@ class Framework(NotifierBase):
         for path in paths:
             _path = Path.aPath(path)
             if _path.is_dir():
-                dirLoader = DirectoryDataLoader(path, recursive=True,
+                dirLoader = DirectoryDataLoader(path, recursive=False,
                                                 filterForDataFormats=(SpectrumDataLoader.dataFormat,))
                 spectrumLoaders.append(dirLoader)
                 count += len(dirLoader)
@@ -1893,8 +1855,7 @@ class Framework(NotifierBase):
             _nefReader = dialog.getActiveNefReader()
 
             if makeNewProject:
-                if self.project is not None:
-                    self._closeProject()
+                self._closeProject()
                 self.project = self.newProject(_loader._nefDict.name)
 
             # import from the loader into the current project
@@ -2246,7 +2207,8 @@ class Framework(NotifierBase):
                     getLogger().debug(f'_setExtraWindowsVisible: {es}')
 
     def _closeProject(self):
-        """Close project and clean up - when opening another or quitting application"""
+        """Close project and clean up - when opening another or quitting application
+        """
 
         # NB: this function must clean up both wrapper and ui/gui
 
@@ -2268,10 +2230,7 @@ class Framework(NotifierBase):
         if self.project is not None:
             # Cleans up wrapper project, including graphics data objects (Window, Strip, etc.)
             self.project._close()
-            self.project = None
-
-        # self.ui.mainWindow = None
-        # self.project = None
+            self._project = None
 
     ###################################################################################################################
     ## MENU callbacks:  Spectrum

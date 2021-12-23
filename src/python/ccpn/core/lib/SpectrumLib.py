@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-10 13:43:37 +0000 (Fri, December 10, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 11:27:17 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -31,8 +31,9 @@ import random
 import numpy as np
 import decorator
 
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Sequence
 
+from ccpn.framework.Application import getApplication
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking, undoBlockWithoutSideBar
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.core.lib._DistanceRestraintsLib import _getBoundResonances, longRangeTransfers
@@ -64,7 +65,7 @@ E_AXIS = 7
 UNDEFINED_AXIS = 8
 axisNames = {X_AXIS        : "x-axis", Y_AXIS: "y-axis", Z_AXIS: "z-axis", A_AXIS: "a-axis",
              B_AXIS        : "b-axis", C_AXIS: "c-axis", D_AXIS: "d-axis", E_AXIS: "e-axis",
-             UNDEFINED_AXIS: "undefined"
+             UNDEFINED_AXIS: "undefined-axis"
              }
 
 X_DIM = 1
@@ -75,6 +76,20 @@ B_DIM = 5
 C_DIM = 6
 D_DIM = 7
 E_DIM = 8
+
+X_DIM_INDEX = 0
+Y_DIM_INDEX = 1
+Z_DIM_INDEX = 2
+A_DIM_INDEX = 3
+B_DIM_INDEX = 4
+C_DIM_INDEX = 5
+D_DIM_INDEX = 6
+E_DIM_INDEX = 7
+UNDEFINED_DIM_INDEX = 8
+dimensionNames = {X_DIM_INDEX        : "x-dimension", Y_DIM_INDEX: "y-dimension", Z_DIM_INDEX: "z-dimension", A_DIM_INDEX: "a-dimension",
+                  B_DIM_INDEX        : "b-dimension", C_DIM_INDEX: "c-dimension", D_DIM_INDEX: "d-dimension", E_DIM_INDEX: "e-dimension",
+                  UNDEFINED_AXIS: "undefined-dimension"
+                 }
 
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple', 'dimension1 dimension2 transferType isIndirect')
 NoiseEstimateTuple = collections.namedtuple('NoiseEstimateTuple', 'mean std min max noiseLevel')
@@ -92,7 +107,7 @@ WINDOW_FUNCTIONS = (WINDOW_FUNCTION_EM, WINDOW_FUNCTION_GM, WINDOW_FUNCTION_SINE
 # These MUST match the model - ('Shift','ShiftAnisotropy','JCoupling','Rdc','TROESY','DipolarCoupling','MQShift','T1','T2','T1rho','T1zz','Time','None')
 MEASUREMENT_TYPE_TIME = 'Time'
 MEASUREMENT_TYPE_SHIFT = 'Shift'
-MEASUREMENT_TYPES = (MEASUREMENT_TYPE_TIME, MEASUREMENT_TYPE_SHIFT, 'ShiftAnisotropy', 'JCoupling', 'Rdc', 'TROESY', 'DipolarCoupling', \
+MEASUREMENT_TYPES = (MEASUREMENT_TYPE_TIME, MEASUREMENT_TYPE_SHIFT, 'ShiftAnisotropy', 'JCoupling', 'Rdc', 'TROESY', 'DipolarCoupling',
                      'MQShift', 'T1', 'T2', 'T1rho', 'T1zz')
 
 # Isotope-dependent assignment tolerances (in ppm)
@@ -104,13 +119,15 @@ isotope2Tolerance = {
     '19F': 0.03,
     }
 
-
 SPECTRUM_POSITIONS = 'positions'
 SPECTRUM_INTENSITIES = 'intensities'
 
+MAXALIASINGRANGE = 3
+
 
 def getAssignmentTolerances(isotopeCode) -> float:
-    """:return assignmentTolerance for isotopeCode"""
+    """:return assignmentTolerance for isotopeCode or defaultAssignment tolerance if not defined
+    """
     return isotope2Tolerance.get(isotopeCode, defaultAssignmentTolerance)
 
 
@@ -157,7 +174,7 @@ def _includeInDimensionalCopy(func):
 
 
 def checkSpectrumPropertyValue(iterable: bool, unique: bool = False, allowNone: bool = False, types: tuple = (),
-                               enumerated: tuple = (), mapping={}):
+                               enumerated: tuple = (), mapping=None):
     """Decorator to check values of the Spectrum class property setters
 
     :param iterable: True, False: indicates that value should be an iterable
@@ -174,8 +191,13 @@ def checkSpectrumPropertyValue(iterable: bool, unique: bool = False, allowNone: 
         if len(enumerated) > 0:
             enumerated = list(enumerated) + [None]
 
+    if mapping is None:
+        mapping = {}
+
     def checkType(obj, attributeName, value):
         """Check and optional casts value
+        :param obj: the object checked
+        :param attributeName: the attribute of object
         :param value:
         :return: value cast into types[0]
         """
@@ -202,7 +224,7 @@ def checkSpectrumPropertyValue(iterable: bool, unique: bool = False, allowNone: 
                              (attributeName, obj, value, type(value).__name__))
 
         if len(value) != obj.dimensionCount:
-            raise ValueError('Value for "%s" of %s needs to be of length %d; got %r' %
+            raise ValueError('Value for "%s" of %s needs to be an iterable of length %d; got %r' %
                              (attributeName, obj, obj.dimensionCount, value))
 
         if unique:
@@ -346,10 +368,7 @@ def align2HSQCs(refSpectrum, querySpectrum, refPeakListIdx=-1, queryPeakListIdx=
     # Create numpy arrays containing the peak positions of
     # each peakList
 
-    import numpy as np
-
-    refPeakPositions = np.array([peak.position for peak in
-                                 refPeakList.peaks])
+    refPeakPositions = np.array([peak.position for peak in refPeakList.peaks])
     queryPeakPositions = np.array([peak.position for peak in queryPeakList.peaks])
 
     # Align the two numpy arrays by centre of mass
@@ -422,8 +441,7 @@ PROJECTION_METHODS = ('max', 'max above threshold', 'min', 'min below threshold'
                       'sum', 'sum above threshold', 'sum below threshold')
 
 
-def _getProjection(spectrum: 'Spectrum', axisCodes: tuple,
-                   method: str = 'max', threshold=None):
+def _getProjection(spectrum, axisCodes: tuple, method: str = 'max', threshold=None):
     """Get projected plane defined by axisCodes using method and optional threshold
     return projected data array
 
@@ -496,7 +514,7 @@ def als(y, lam=10 ** 2, p=0.001, nIter=10):
     niter = Number of iteration, default 10.
 
     """
-
+    nIter = max(1, nIter)
     L = len(y)
     D = sparse.csc_matrix(np.diff(np.eye(L), 2))
     w = np.ones(L)
@@ -549,6 +567,7 @@ def airPLS(y, lambda_=100, porder=1, itermax=15):
     output
         the fitted background vector
     """
+    itermax = max(1, itermax)
     m = y.shape[0]
     w = np.ones(m)
     for i in range(1, itermax + 1):
@@ -556,7 +575,8 @@ def airPLS(y, lambda_=100, porder=1, itermax=15):
         d = y - z
         dssn = np.abs(d[d < 0].sum())
         if (dssn < 0.001 * (abs(y)).sum() or i == itermax):
-            if (i == itermax): print('WARING max iteration reached!')
+            if (i == itermax):
+                getLogger().warning('max iteration reached!')
             break
         w[d >= 0] = 0  # d>0 means that this point is part of a peak, so its weight is set to 0 in order to ignore it
         w[d < 0] = np.exp(i * np.abs(d[d < 0]) / dssn)
@@ -591,9 +611,9 @@ def arPLS(y, lambda_=5.e5, ratio=1.e-6, itermax=50):
     :param ratio: (Optional) Iteration will stop when the weights stop changing.
                     (weights_(i) - weights_(i+1)) / (weights_(i)) < ratio.
                     Default is 1.e-6.
-    :param log: (Optional) True to debug log. Default False.
     :returns: The smoothed baseline of y.
     """
+    itermax = max(1, itermax)
     y = np.array(y)
 
     N = y.shape[0]
@@ -736,7 +756,7 @@ def nmrGlueBaselineCorrector(data, wd=20):
     return data
 
 
-def _getDefaultApiSpectrumColours(spectrum: 'Spectrum') -> Tuple[str, str]:
+def _getDefaultApiSpectrumColours(spectrum) -> Tuple[str, str]:
     """Get the default colours from the core spectrum class
     """
     # from ccpn.util.Colour import spectrumHexColours
@@ -1136,10 +1156,10 @@ def getSpectrumNoise(spectrum):
 
     Float
     """
-    if not spectrum.noiseLevel:
+    noise = spectrum.noiseLevel
+    if noise is None:
         noise = getNoiseEstimate(spectrum)
         spectrum.noiseLevel = noise.noiseLevel
-
     return noise
 
 
@@ -1397,14 +1417,13 @@ def estimateSNR(noiseLevels, signalPoints, factor=2.5):
     return [None] * len(signalPoints)
 
 
-def estimateNoiseLevel1D(y, f=10, stdFactor=0.5):
+def estimateNoiseLevel1D(y, f=10, stdFactor=0.5) -> Tuple[float, float]:
     """
 
     :param y: the y region of the spectrum.
     :param f: percentage of the spectrum to use. If given a portion known to be just noise, set it to 100.
-    :param increaseBySTD: increase the estimated by the STD for the y region
     :param stdFactor: 0 to don't adjust the initial guess.
-    :return:   (float, float) of estimated noise threshold  as max and min
+    :return: tuple (float, float) of estimated noise threshold  as max and min
     """
 
     eMax, eMin = 0, 0
@@ -1857,7 +1876,7 @@ def _createPeak(spectrum, peakList=None, **ppmPositions) -> Optional['Peak']:
 
         try:
             # try and match the axis codes before creating new peakList (if required)
-            indices = spectrum.getByAxisCodes('axes', axisCodes)
+            indices = spectrum.getByAxisCodes('dimIndices', axisCodes)
         except Exception as es:
             getLogger().warning(f'Non-matching axis codes found {axisCodes}')
             return
@@ -1902,7 +1921,7 @@ def _createPeak(spectrum, peakList=None, **ppmPositions) -> Optional['Peak']:
                 return pk
 
 
-def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshold=None, **ppmRegions) -> Optional[Tuple['Peak', ...]]:
+def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshold=None, **ppmRegions) -> Tuple['Peak', ...]:
     """Pick peaks in the region defined by the ppmRegions dict.
 
     Ppm regions are passed in as a dict containing the axis codes and the required limits.
@@ -1931,61 +1950,112 @@ def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshol
     :param negativeThreshold: float or None specifying the negative threshold below which to find peaks.
                               if None, negative peak picking is disabled.
     :param ppmRegions: dict of (axisCode, tupleValue) key, value pairs
-    :return: tuple of new peaks or None
+    :return: tuple of new peaks
     """
+    # local import as cycles otherwise
+    from ccpn.core.Spectrum import Spectrum
+
+    application = getApplication()
+    preferences = application.preferences
+    logger = getLogger()
+
+    if spectrum is None or not isinstance(spectrum, Spectrum):
+        raise ValueError('_pickPeaks: required Spectrum instance, got:%r' % spectrum)
+
+    if peakList is None:
+        peakList = spectrum.peakLists[-1]
+
+
+    # get the dimensions by mapping the keys of the ppmRegions dict
+    dimensions = spectrum.getByAxisCodes('dimensions', [a for a in ppmRegions.keys()])
+    # now get all other parameters in dimensions order
+    axisCodes = spectrum.getByDimensions('axisCodes', dimensions)
+    ppmValues = [sorted(float(pos) for pos in region) for region in ppmRegions.values()]
+    ppmValues = spectrum.orderByDimensions(ppmValues, dimensions) # sorted in order of dimensions
+
+    axisDict = dict((axisCode, region) for axisCode, region in zip(axisCodes, ppmValues))
+    sliceTuples = spectrum._axisDictToSliceTuples(axisDict)
+
+    return _pickPeaksByRegion(spectrum, sliceTuples= sliceTuples, peakList=peakList,
+                              positiveThreshold=positiveThreshold, negativeThreshold=negativeThreshold)
+
+
+def _pickPeaksByRegion(spectrum, sliceTuples, peakList, positiveThreshold, negativeThreshold) -> Tuple['Peak', ...]:
+    """Helper function to pick peaks of spectrum in region defined by sliceTuples
+
+    :param spectrum: a Spectrum instance
+    :param sliceTuples: a list of (startPoint,stopPoint) tuples (1-based, inclusive) per dimension
+    :param peakList: peakList to hold newly created peak.
+    :param positiveThreshold: float or None specifying the positive threshold above which to find peaks.
+                              if None, positive peak picking is disabled.
+    :param negativeThreshold: float or None specifying the negative threshold below which to find peaks.
+                              if None, negative peak picking is disabled.
+
+    :return: tuple of new peaks
+    """
+
+    # local import as cycles otherwise
+    from ccpn.core.Spectrum import Spectrum
+    from ccpn.core.PeakList import PeakList
+
+    application = getApplication()
+    preferences = application.preferences
+    logger = getLogger()
+
+    if spectrum is None or not isinstance(spectrum, Spectrum):
+        raise ValueError('_pickPeaksByRegion: required Spectrum instance, got:%r' % spectrum)
+
+    if peakList is None or not isinstance(peakList, PeakList):
+        raise ValueError('_pickPeaksByRegion: required peakList instance, got:%r' % peakList)
+
+    # get the peakPicker
+    if (peakPicker := spectrum._peakPicker) is None:
+        txt = f'_pickPeakByRegion: No valid peakPicker for {spectrum}'
+        logger.warning(txt)
+        raise RuntimeError(txt)
+
+    # check the sliceTuples; make a list of lists first
+    sliceTuples = [list(sl) for sl in sliceTuples]
+    cropped = False
+    for dimIdx, slice, points in zip(spectrum.dimensionIndices, sliceTuples, spectrum.aliasingPointLimits):
+        if slice[0] < points[0]:
+            slice[0] = points[0]
+            sliceTuples[dimIdx] = slice
+            cropped = True
+        if slice[1] > points[1]:
+            slice[1] = points[1]
+            sliceTuples[dimIdx] = slice
+            cropped = True
+    # revert to a list of tuples
+    sliceTuples = [tuple(sl) for sl in sliceTuples]
+    if cropped:
+        logger.warning('_pickPeaksByRegion: cropped sliceTuples to %r' % sliceTuples)
+
+    # set any additional parameters from preferences
+    minDropFactor = preferences.general.peakDropFactor
+    fitMethod = preferences.general.peakFittingMethod
+    peakPicker.setParameters(dropFactor=minDropFactor,
+                             fitMethod=fitMethod,
+                             setLineWidths=True
+                             )
 
     with undoBlockWithoutSideBar():
 
-        axisCodes = []
-        _ppmRegions = []
-        for axis, region in ppmRegions.items():
-            axisCodes.append(axis)
-            _ppmRegions.append(sorted(float(pos) for pos in region))
+        try:
+            pks = peakPicker.pickPeaks(sliceTuples=sliceTuples,
+                                       peakList=peakList,
+                                       positiveThreshold=positiveThreshold,
+                                       negativeThreshold=negativeThreshold
+                                       )
 
-        # try and match the axis codes before creating new peakList (if required)
-        indices = spectrum.getByAxisCodes('axes', axisCodes)
+        except Exception as err:
+            # need to trap error that Nd spectra may not be defined in all dimensions of axisDict
+            logger.debug('_pickPeaks, trapped error: %s' % str(err))
+            logger.warning(f'could not pick peaks for {spectrum} in region {sliceTuples}')
+            if application._isInDebugMode:
+                raise  err
 
-        peakList = spectrum.project.getByPid(peakList) if isinstance(peakList, str) else peakList
-        if not peakList:
-            if spectrum.peakLists:
-                peakList = spectrum.peakLists[-1]
-            else:
-                # log warning that no peakList exists - this SHOULD never happen
-                getLogger().warning(f'Spectrum {spectrum} has no peakLists - creating new')
-                peakList = spectrum.newPeakList()
-
-        _ppmRegions = [_ppmRegions[indices.index(ii)] for ii in range(len(indices))]
-        specLimits = spectrum.spectrumLimits
-        aliasInds = spectrum.aliasingIndexes
-
-        # check that the picked peak lies in the bounded region of the spectrum
-        for dim, pos in enumerate(_ppmRegions):
-            minSpectrumFrequency, maxSpectrumFrequency = sorted(specLimits[dim])
-            visibleAlias = aliasInds[dim]
-            regionBounds = (round(minSpectrumFrequency + visibleAlias[0] * (maxSpectrumFrequency - minSpectrumFrequency), 3),
-                            round(minSpectrumFrequency + (visibleAlias[1] + 1) * (maxSpectrumFrequency - minSpectrumFrequency), 3))
-
-            # clip to the current region bounds
-            for ii in range(2):
-                if pos[ii] < regionBounds[0]:
-                    pos[ii] = regionBounds[0]
-                elif pos[ii] > regionBounds[1]:
-                    pos[ii] = regionBounds[1]
-
-        # get the peaks from the peakPicker
-        axisDict = {axisCodes[indices.index(ii)]: _ppmRegions[ii] for ii in range(len(indices))}
-
-        if spectrum._peakPicker:
-            try:
-                pks = spectrum._peakPicker.pickPeaks(peakList=peakList,
-                                                     positiveThreshold=positiveThreshold,
-                                                     negativeThreshold=negativeThreshold,
-                                                     axisDict=axisDict)
-                return tuple(pks)
-            except Exception as err:
-                # need to trap error that Nd spectra may not be defined in all dimensions of axisDict
-                getLogger().warning(f'could not pick peaks for {spectrum} in region {axisDict}')
-
+    return tuple(pks)
 
 def fetchPeakPicker(spectrum):
     """Get a peakPicker; either by restore from spectrum or the default relevant for spectrum
@@ -2000,7 +2070,7 @@ def fetchPeakPicker(spectrum):
     if spectrum is None:
         raise ValueError('fetchPeakPicker: spectrum is None')
     if not isinstance(spectrum, Spectrum):
-        raise ValueError('fetchPeakPicker: : spectrum is not of Spectrum class')
+        raise ValueError('fetchPeakPicker: spectrum is not of Spectrum class')
 
     project = spectrum.project
     application = project.application
@@ -2053,7 +2123,7 @@ def _searchAxisCodePermutations(spectrum, checkCodes: Tuple[str, ...]) -> Option
 
     # add permutations for the axes
     axisPerms = tuple(permutations(spectrum.axisCodes))
-    axisOrder = tuple(permutations(spectrum.axes))
+    axisOrder = tuple(permutations(spectrum.dimensionIndices))
 
     for ii, perm in enumerate(axisPerms):
         n = min(len(checkCodes), len(perm))
@@ -2079,15 +2149,118 @@ def _setDefaultAxisOrdering(spectrum):
     # See if we can map one of the preferred orderings
     for dCode in dCodes:
         pOrder = _searchAxisCodePermutations(spectrum, dCode)
-        if pOrder and pOrder[0] == spectrum.X_AXIS:
+        if pOrder and pOrder[0] == X_DIM_INDEX:
             spectrum.preferredAxisOrdering = pOrder
             break
 
     if not pOrder:
         # didn't find anything; revert to default [0...dimensionCount-1]
-        pOrder = spectrum.axes
+        pOrder = spectrum.dimensionIndices
 
     return
+
+#===========================================================================================================
+# Spectrum/Peak parameter management
+#===========================================================================================================
+
+def _setParameterValues(obj, parameterName:str, values:Sequence, dimensions:Sequence, dimensionCount:int) -> list:
+    """A helper function to reduce code overhead in setting parameters of Spectrum and Peak
+    :return The list with values
+
+    CCPNINTERNAL: used in setByAxisCode and setByDimension methods of
+                  Spectrum and Peak classes
+    """
+    if not hasattr(obj, parameterName):
+        raise ValueError('object "%s" does not have parameter "%s"' %
+                         (obj.__class__.__name__, parameterName))
+
+    if not isIterable(values):
+        raise ValueError('setting "%s.%s" requires "values" tuple or list; got %r' %
+                         (obj.__class__.__name__, parameterName, values))
+
+    if not isIterable(dimensions):
+        raise ValueError('setting "%s.%s" requires "dimensionIndices" tuple or list; got %r' %
+                         (obj.__class__.__name__, parameterName, dimensions))
+
+    if len(values) != len(dimensions):
+        raise ValueError('setting "%s.%s": unequal length of "values" and "dimensionIndices"; got %r and %r' %
+                         (obj.__class__.__name__, parameterName, values, dimensions))
+
+    newValues = list(getattr(obj, parameterName))
+    for dim, val in zip(dimensions, values):
+        if dim < 1 or dim > dimensionCount:
+            # report error in 1-based, as the error is caught by the calling routines
+            raise ValueError('%s: invalid dimension "%s"; should be in range (1,%d)' %
+                             (obj, dim, dimensionCount))
+        newValues[dim-1] = val
+
+    try:
+        setattr(obj, parameterName, newValues)
+    except AttributeError:
+        raise ValueError('setting "%s.%s": unable to set to %r' %
+                         (obj.__class__.__name__, parameterName, newValues))
+
+    # we get the values from the obj, just in case some haven been modified
+    return getattr(obj, parameterName)
+
+
+def _getParameterValues(obj, parameterName:str, dimensions:Sequence, dimensionCount:int) -> list:
+    """A helper function to reduce code overhead in setting parameters of Spectrum and Peak
+    :return The list with values
+
+    CCPNINTERNAL: used in getByAxisCode and getByDimension methods of
+                  Spectrum and Peak classes
+    """
+    if not hasattr(obj, parameterName):
+        raise ValueError('object "%s" does not have parameter "%s"' %
+                         (obj.__class__.__name__, parameterName))
+
+    if not isIterable(dimensions):
+        raise ValueError('getting "%s.%s" requires "dimensions" tuple or list; got %r' %
+                         (obj.__class__.__name__, parameterName, dimensions))
+
+    try:
+        values = getattr(obj, parameterName)
+    except AttributeError:
+        raise ValueError('%s: unable to get parameter "%s"' % (obj, parameterName))
+
+    newValues = []
+    for dim in dimensions:
+        if dim < 1 or dim > dimensionCount:
+            # report error in 1-based, as the error is caught by the calling routines
+            raise ValueError('%s: invalid dimension "%s"; should be in range (1,%d)' %
+                             (obj, dim, dimensionCount))
+        newValues.append(values[dim-1])
+
+    return newValues
+
+
+def _orderByDimensions(iterable, dimensions, dimensionCount) -> list:
+    """Return a list of values of iterable in order defined by dimensions (default order if None).
+
+    :param iterable: an iterable (tuple, list)
+    :param dimensions: a tuple or list of dimensions (1..dimensionCount)
+    :return: a list with values defined by iterable in dimensions order
+    """
+    if not isIterable(iterable):
+        raise ValueError('not an iterable; got %r' % (iterable))
+    values = list(iterable)
+
+    if not isIterable(dimensions):
+        raise ValueError('"dimensions" is not iterable; got %r' % (dimensions))
+
+    result = []
+    for dim in dimensions:
+        if dim <1 or dim > dimensionCount:
+            raise ValueError('invalid dimension "%s"; should be in range (1,%d)' %
+                             (dim, dimensionCount))
+        if dim-1 >= len(values):
+            raise ValueError('invalid dimension "%s"; to large for iterable (%r)' %
+                             (dim, values))
+
+        result.append( values[dim-1] )
+    return result
+
 
 #===========================================================================================================
 # GWV testing only
@@ -2117,7 +2290,7 @@ class SpectrumDimensionTrait(List):
         return value
 
     def _getValue(self, obj):
-        """Get the value of trait, obtained from the obj's (i.e.spectrum) dimensions
+        """Get the value of trait, obtained from the obj (i.e.spectrum) dimensions
         """
         if (dimensionAttributeName := self.get_metadata('attributeName', None)) is None:
             raise RuntimeError('Undefined dimensional attributeName for trait %r' % self.name)
@@ -2143,11 +2316,11 @@ class SpectrumDimensionTrait(List):
             raise TraitError('Unexpected error in DimensionTrait')
 
         else:
-            self._obj = obj  # last obje used for get
+            self._obj = obj  # last obj used for get
             return value
 
     def _setValue(self, obj, value):
-        """Set the value of trait, stored in the obj's (i.e.spectrum) dimensions
+        """Set the value of trait, stored in the obj (i.e.spectrum) dimensions
         """
         if (dimensionAttributeName := self.get_metadata('attributeName', None)) is None:
             raise RuntimeError('Undefined dimensional attributeName for trait %r' % self.name)

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-04-20 15:57:59 +0100 (Tue, April 20, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 11:27:18 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -40,7 +40,7 @@ class SpectrumProjectionPopup(ExportDialogABC):
 
     FIXEDHEIGHT = True
 
-    def __init__(self, parent=None, mainWindow=None, title='Make Spectrum Projection', **kwds):
+    def __init__(self, parent=None, mainWindow=None, title='Spectrum Projection', **kwds):
 
         super().__init__(parent=parent, mainWindow=mainWindow, title=title,
                          fileMode='anyFile',
@@ -130,12 +130,12 @@ class SpectrumProjectionPopup(ExportDialogABC):
         self.projectionAxisPulldown.setData(spectrum.axisCodes)
         self.thresholdData.set(spectrum.positiveContourBase)
 
-    def _setProjectionAxis(self, projectionAxis):
-        """Callback when setting projection axis
-        """
-        spectrum = self.project.getByPid(self.spectrumPulldown.currentText())
-        path = aPath(spectrum._getDefaultProjectionPath(self.axisCodes))
-        self.updateFilename(path)
+    # def _setProjectionAxis(self, projectionAxis):
+    #     """Callback when setting projection axis
+    #     """
+    #     spectrum = self.project.getByPid(self.spectrumPulldown.currentText())
+    #     path = aPath(spectrum._getDefaultProjectionPath(self.axisCodes))
+    #     self.updateFilename(path)
 
     def _setMethod(self, method):
         """Callback when setting method"""

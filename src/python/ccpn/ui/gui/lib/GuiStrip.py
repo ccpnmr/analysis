@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-20 18:47:15 +0000 (Mon, December 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 10:00:05 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -521,7 +521,7 @@ class GuiStrip(Frame):
         from ccpn.ui.gui.popups.EstimateNoisePopup import EstimateNoisePopup
 
         popup = EstimateNoisePopup(parent=self.mainWindow, mainWindow=self.mainWindow, strip=self,
-                                   orderedSpectrumViews=self.orderedSpectrumViews)
+                                   orderedSpectrumViews=self.getSpectrumViews())
         popup.exec_()
         popup._cleanupWidget()
 
@@ -2136,7 +2136,7 @@ class GuiStrip(Frame):
         if not self.spectrumDisplay.isGrouped:
 
             # cycle through the spectrumViews
-            spectrumViews = self.orderedSpectrumViews
+            spectrumViews = self.getSpectrumViews()
             countSpvs = len(spectrumViews)
             if countSpvs > 0:
                 visibleSpectrumViews = [sv for sv in spectrumViews if sv.isDisplayed]
@@ -2157,7 +2157,7 @@ class GuiStrip(Frame):
 
         else:
             # cycle through the spectrumGroups
-            spectrumViews = self.orderedSpectrumViews
+            spectrumViews = self.getSpectrumViews()
 
             actions = self.spectrumDisplay.spectrumGroupToolBar.actions()
             if not actions:
@@ -2197,7 +2197,7 @@ class GuiStrip(Frame):
 
         if not self.spectrumDisplay.isGrouped:
 
-            spectrumViews = self.orderedSpectrumViews
+            spectrumViews = self.getSpectrumViews()
             countSpvs = len(spectrumViews)
             if countSpvs > 0:
                 visibleSpectrumViews = [sv for sv in spectrumViews if sv.isDisplayed]
@@ -2215,7 +2215,7 @@ class GuiStrip(Frame):
 
         else:
             # cycle through the spectrumGroups
-            spectrumViews = self.orderedSpectrumViews
+            spectrumViews = self.getSpectrumViews()
 
             actions = self.spectrumDisplay.spectrumGroupToolBar.actions()
             if not actions:
@@ -2254,7 +2254,7 @@ class GuiStrip(Frame):
     def _showAllSpectrumViews(self, value: bool = True):
 
         # turn on/off all spectrumViews
-        spectrumViews = self.orderedSpectrumViews
+        spectrumViews = self.getSpectrumViews()
         for sp in spectrumViews:
             sp.setVisible(value)
 
@@ -2273,7 +2273,7 @@ class GuiStrip(Frame):
     def _invertSelectedSpectra(self):
 
         if not self.spectrumDisplay.isGrouped:
-            spectrumViews = self.orderedSpectrumViews
+            spectrumViews = self.getSpectrumViews()
             countSpvs = len(spectrumViews)
             if countSpvs > 0:
 
@@ -2299,7 +2299,7 @@ class GuiStrip(Frame):
                         spectra.add(spec)
 
             # set the visibility of the spectrumViews
-            spectrumViews = self.orderedSpectrumViews
+            spectrumViews = self.getSpectrumViews()
             for specView in spectrumViews:
                 specView.setVisible(specView.spectrum in spectra)
 

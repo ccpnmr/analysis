@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-20 18:47:14 +0000 (Mon, December 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 10:00:05 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -96,8 +96,6 @@ class SpectrumDisplay(AbstractWrapperObject):
         """Subclassed to allow for initialisations on restore
         """
         result = super()._restoreObject(project, apiObj)
-        # moved to property
-        # result._isotopeCodes = tuple(result.spectrumViews[0]._getByDisplayOrder('isotopeCodes'))
 
         SPECTRUMGROUPS = 'spectrumGroups'
         SPECTRUMISGROUPED = 'spectrumIsGrouped'
@@ -116,6 +114,14 @@ class SpectrumDisplay(AbstractWrapperObject):
                 value = result.getParameter(namespace, param)
                 result.deleteParameter(namespace, param)
                 result._setInternalParameter(newVar, value)
+
+        # check that the indexing has been set, or is populated correctly
+        if result.strips and (specViews := result.strips[0].getSpectrumViews()):
+            indexing = [v._index for v in specViews]
+            if None in indexing or len(indexing) != len(set(indexing)):
+                # set new indexing
+                for ind, sv in enumerate(specViews):
+                    sv._index = ind
 
         return result
 
@@ -329,7 +335,8 @@ class SpectrumDisplay(AbstractWrapperObject):
 
     def _getSpectra(self):
         if len(self.strips) > 0:  # strips
-            return [x.spectrum for x in self._orderedSpectrumViews(self.strips[0].spectrumViews)]
+            # return [x.spectrum for x in self._orderedSpectrumViews(self.strips[0].spectrumViews)]
+            return self.strips[0].getSpectra()
 
     @renameObject()
     def rename(self, name):
@@ -385,7 +392,7 @@ class SpectrumDisplay(AbstractWrapperObject):
     def _rescaleSpectra(self):
         """Reorder the buttons and spawn a redraw event
         """
-        self.spectrumToolBar.reorderButtons(self._orderedSpectrumViews(self.strips[0].spectrumViews))
+        self.spectrumToolBar.reorderButtons(self.strips[0].getSpectrumViews())
 
         # spawn the required event to reordered the spectrumViews in openGL
         from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
@@ -397,14 +404,37 @@ class SpectrumDisplay(AbstractWrapperObject):
         """Move spectrum in spectrumDisplay list from index startInd to endInd
         startInd/endInd are the order as seen in the spectrumToolbar
         """
-        _order = self._getOrderedSpectrumViewsIndex()
-        _newOrder = list(_order)
+        # _order = self._getOrderedSpectrumViewsIndex()
+        # _newOrder = list(_order)
+        #
+        # _last = _newOrder.pop(startInd)
+        # _newOrder.insert(endInd, _last)
+        #
+        # self._setOrderedSpectrumViewsIndex(tuple(_newOrder))
 
-        _last = _newOrder.pop(startInd)
-        _newOrder.insert(endInd, _last)
+        # orderedSV = list(self.strips[0].getSpectrumViews())
+        # last = orderedSV.pop(startInd)
+        # orderedSV.insert(endInd, last)
+        # self.strips[0]._setSpectrumViews(orderedSV)
+        #
+        # self._rescaleSpectra()
 
-        self._setOrderedSpectrumViewsIndex(tuple(_newOrder))
-        self._rescaleSpectra()
+        with undoStackBlocking() as _:  # Do not add to undo/redo stack
+
+            # rebuild the display when the ordering has changed
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(undo=self._rescaleSpectra)
+
+            orderedSV = list(self.strips[0].getSpectrumViews())
+            last = orderedSV.pop(startInd)
+            orderedSV.insert(endInd, last)
+            self.strips[0]._setSpectrumViews(orderedSV)
+
+            self._rescaleSpectra()
+
+            # rebuild the display when the ordering has changed
+            with undoStackBlocking() as addUndoItem:
+                addUndoItem(redo=self._rescaleSpectra)
 
     def _setOrderedSpectrumViewsIndex(self, spectrumIndex: Tuple[int]):
         """

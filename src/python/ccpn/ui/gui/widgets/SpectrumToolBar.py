@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-20 18:57:14 +0000 (Mon, December 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 10:00:05 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -134,6 +134,7 @@ class SpectrumToolBar(ToolBar):
 
                     smenu.addSeparator()
                     for view in sorted(views, reverse=False):
+                        # print(f'     menu views {coreObj}   {viewObj}   {view}')
                         ccpnObj = view._childClass
                         strip = view._parent._parent
                         toolTip = 'Toggle {0} {1} on strip {2}'.format(coreObj.className, ccpnObj._key, strip.id)
@@ -388,6 +389,7 @@ class SpectrumToolBar(ToolBar):
         """
         _actions = {act.objectName(): act for act in self.actions()}
 
+        # print(f'   reorderButtons   {spectrumViews}')
         # create new action for any spectrumViews without an action (create spectrumView)
         for specView in spectrumViews:
             if specView.spectrum.pid not in _actions:
@@ -422,8 +424,13 @@ class SpectrumToolBar(ToolBar):
     def _setupAction(self, spectrumView):
         """Create and setup a new action attached to the spectrum
         """
+        import traceback
+
         spectrum = spectrumView.spectrum
         spectrumName = spectrum.name
+
+        # print(f'   _setupAction {spectrumView}   {spectrumName}')
+        # print(traceback.print_stack())
 
         # create new action
         _actions = [action for action in self.actions() if action and action.objectName() == spectrum.pid]
@@ -470,6 +477,7 @@ class SpectrumToolBar(ToolBar):
         if spectrumDisplay.isGrouped:
             return
 
+        # print(f'   _addSpectrumViewToolButtons   {spectrumView}   {spectrumView.isDisplayed}')
         with self.blockWidgetSignals(recursive=False):
             spectrumDisplay = spectrumView.strip.spectrumDisplay
             spectrum = spectrumView.spectrum
@@ -554,6 +562,7 @@ class SpectrumToolBar(ToolBar):
         _iconY = int(10 / self.spectrumDisplay.devicePixelRatio())
         pix = QtGui.QPixmap(QtCore.QSize(_iconX, _iconY))
 
+        # print(f'   _addActionIcon  {action}   {obj}')
         if getattr(obj, '_showContours', True) or self.spectrumDisplay.isGrouped:
             if self.spectrumDisplay.is1D:
                 _col = obj.sliceColour

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-25 18:29:04 +0100 (Mon, October 25, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 10:00:05 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -67,6 +67,22 @@ class SpectrumView(AbstractWrapperObject):
                             displayPositiveContours positiveContourColour
                             sliceColour
                             '''
+
+    #=========================================================================================
+
+    # __init__ not required
+
+    @classmethod
+    def _restoreObject(cls, project, apiObj):
+        """Subclassed to allow for initialisations on restore
+        """
+        result = super()._restoreObject(project, apiObj)
+
+        # check that the index is not None
+        if result._index is None:
+            result._index = 0
+
+        return result
 
     #=========================================================================================
     # CCPN properties
@@ -469,6 +485,18 @@ class SpectrumView(AbstractWrapperObject):
             if hasattr(_spectrum, param):
                 value = getattr(_spectrum, param)
                 setattr(self, param, value)
+
+    @property
+    def _index(self):
+        """Return the index of the spectrumView in display order
+        """
+        return self._wrappedData.spectrumView.index
+
+    @_index.setter
+    def _index(self, value):
+        if not (isinstance(value, int) and value >= 0):
+            raise ValueError('_index must be a non-negative int')
+        self._wrappedData.spectrumView.index = value
 
 
 #=========================================================================================

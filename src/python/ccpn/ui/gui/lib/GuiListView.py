@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-20 18:47:14 +0000 (Mon, December 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 10:00:05 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -56,6 +56,25 @@ class GuiListViewABC(QtWidgets.QGraphicsItem):
     def setVisible(self, visible):
         super().setVisible(visible)
 
+        self.isDisplayed = visible
+
+        # print(f'    setVisible {self}')
+        #
+        self.isDisplayed = visible
+
+        # change visibility list for the strip
+        self.spectrumView.strip._updateVisibility()
+
+        self._notifyChange()
+
+    # # just use the same behaviour for the minute
+    # setDisplayed = setVisible
+
+    def setDisplayed(self, visible):
+        # super().setVisible(visible)
+
+        # print(f'    setDisplayed {self}')
+        #
         self.isDisplayed = visible
 
         # change visibility list for the strip

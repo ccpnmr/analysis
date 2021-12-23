@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-20 18:47:14 +0000 (Mon, December 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 10:00:05 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -153,20 +153,31 @@ class Strip(AbstractWrapperObject):
 
     @property
     def spectra(self) -> Tuple[Spectrum, ...]:
-        """The spectra attached to the strip (whether display is currently turned on  or not)"""
+        """The spectra attached to the strip (whether display is currently turned on or not)"""
         return tuple(x.spectrum for x in self.spectrumViews)
 
     def getSpectra(self) -> Tuple[Spectrum, ...]:
         """The spectra attached to the strip (whether display is currently turned on or not) in display order"""
-        return self._parent._orderedSpectrumViews(self.spectra)
+        return tuple(sv.spectrum for sv in self.getSpectrumViews())
 
     def getSpectrumViews(self) -> Tuple['SpectrumView', ...]:
         """The spectrumViews attached to the strip (whether display is currently turned on or not) in display order"""
-        return self._parent._orderedSpectrumViews(self.spectrumViews)
+        dd = [(sv._index, sv) for sv in self.spectrumViews]
+        return tuple(val[1] for val in sorted(dd))
+
+    def _setSpectrumViews(self, spectrumViews):
+        """Set the new ordering for the spectrumViews.
+        Must be the original spectrumViews"""
+        if set(self.getSpectrumViews()) != set(spectrumViews):
+            raise ValueError('bad spectrumViews')
+        with undoBlockWithoutSideBar():
+            for ind, sv in enumerate(spectrumViews):
+                # update the spectrumView indexing
+                sv._index = ind
 
     @property
     def spectrumGroups(self) -> Tuple[Spectrum, ...]:
-        """The spectra attached to the strip (whether display is currently turned on  or not)"""
+        """The spectra attached to the strip (whether display is currently turned on or not)"""
         pids = self.spectrumDisplay._getSpectrumGroups()
         return tuple(self.project.getByPid(x) for x in pids)
 

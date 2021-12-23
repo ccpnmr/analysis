@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-20 18:47:15 +0000 (Mon, December 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 10:00:05 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 
 import collections
+import traceback
 from ccpn.util import Colour
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.util.Logging import getLogger
@@ -123,7 +124,7 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
         GLSignals.emitPaintEvent()
 
         # notify that the spectrumView has changed
-        self._finaliseAction('change')
+        # self._finaliseAction('change')
 
     def _getSpectrumViewParams(self, axisDim: int) -> Optional[Tuple]:
         """Get parameters for axisDim'th axis (zero-origin) of spectrum.

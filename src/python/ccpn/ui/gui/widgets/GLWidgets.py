@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-20 18:47:16 +0000 (Mon, December 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 10:00:05 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -326,7 +326,7 @@ class GuiNdWidget(CcpnGLWidget):
         # change to correct value for shader
         _shader.setAliasShade(self._aliasShade / 100.0)
 
-        for specView in self._ordering:  #self._ordering:                             # strip.spectrumViews:       #.orderedSpectrumViews():
+        for specView in self._ordering:
 
             if specView.isDeleted:
                 continue
@@ -412,7 +412,7 @@ class GuiNdWidget(CcpnGLWidget):
         # change to correct value for shader
         _shader.setAliasShade(self._aliasShade / 100.0)
 
-        for specView in self._ordering:  #self._ordering:                             # strip.spectrumViews:       #.orderedSpectrumViews():
+        for specView in self._ordering:
 
             if specView.isDeleted:
                 continue
@@ -562,7 +562,7 @@ class GuiNdWidget(CcpnGLWidget):
         GL.glLineWidth(self._contourThickness * self.viewports.devicePixelRatio)
         GL.glDisable(GL.GL_BLEND)
 
-        for spectrumView in self._ordering:  #self._ordering:                             # strip.spectrumViews:       #.orderedSpectrumViews():
+        for spectrumView in self._ordering:
 
             if spectrumView.isDeleted or not spectrumView._showContours:
                 continue
@@ -1268,7 +1268,7 @@ class Gui1dWidget(CcpnGLWidget):
         # change to correct value for shader
         _shader.setAliasShade(self._aliasShade / 100.0)
 
-        for specView in self._ordering:  #self._ordering:                             # strip.spectrumViews:       #.orderedSpectrumViews():
+        for specView in self._ordering:
 
             if specView.isDeleted:
                 continue
@@ -1316,7 +1316,7 @@ class Gui1dWidget(CcpnGLWidget):
     def drawIntegralLabels(self):
         """Draw all the integral labels
         """
-        for specView in self._ordering:  #self._ordering:                             # strip.spectrumViews:       #.orderedSpectrumViews():
+        for specView in self._ordering:
 
             if specView.isDeleted:
                 continue
@@ -1351,7 +1351,7 @@ class Gui1dWidget(CcpnGLWidget):
                          specView in self._contourList.keys() and
                          (specView not in specTraces or self.showSpectraOnPhasing)]
 
-        # for spectrumView in self._ordering:  #self._ordering:                             # strip.spectrumViews:       #.orderedSpectrumViews():
+        # for spectrumView in self._ordering:
         #
         #     if spectrumView.isDeleted:
         #         continue
@@ -1384,7 +1384,7 @@ class Gui1dWidget(CcpnGLWidget):
         GL.glLineWidth(self._contourThickness * self.viewports.devicePixelRatio)
         GL.glDisable(GL.GL_BLEND)
 
-        for spectrumView in self._ordering:  #self._ordering:                             # strip.spectrumViews:       #.orderedSpectrumViews():
+        for spectrumView in self._ordering:
 
             if spectrumView.isDeleted:
                 continue

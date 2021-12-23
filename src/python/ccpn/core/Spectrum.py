@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-17 13:13:35 +0000 (Fri, December 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 10:00:04 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1592,33 +1592,33 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             seriesItems[spectrumGroup.pid] = oldItems
             self._setInternalParameter(self._SERIESITEMS, seriesItems)
 
-    def _getSeriesItemsById(self, id):
-        """Return the series item for the current spectrum by 'id'
+    def _getSeriesItemsById(self, pid):
+        """Return the series item for the current spectrum by 'pid'
         CCPNINTERNAL: used in creating new spectrumGroups - not for external use
         """
         seriesItems = self._getInternalParameter(self._SERIESITEMS)
-        if seriesItems and id in seriesItems:
-            return seriesItems[id]
+        if seriesItems and pid in seriesItems:
+            return seriesItems[pid]
 
-    def _setSeriesItemsById(self, id, item):
-        """Set the series item for the current spectrum by 'id'
+    def _setSeriesItemsById(self, pid, item):
+        """Set the series item for the current spectrum by 'pid'
         CCPNINTERNAL: used in creating new spectrumGroups - not for external use
         """
         seriesItems = self._getInternalParameter(self._SERIESITEMS)
         if seriesItems:
-            seriesItems[id] = item
+            seriesItems[pid] = item
         else:
-            seriesItems = {id: item}
+            seriesItems = {pid: item}
         self._setInternalParameter(self._SERIESITEMS, seriesItems)
 
-    def _removeSeriesItemsById(self, spectrumGroup, id):
-        """Remove the keys in the seriesItems allocated to 'id'
+    def _removeSeriesItemsById(self, pid):
+        """Remove the keys in the seriesItems allocated to 'pid'
         CCPNINTERNAL: used in creating new spectrumGroups - not for external use
         """
         # useful for storing an item
         seriesItems = self._getInternalParameter(self._SERIESITEMS)
-        if id in seriesItems:
-            del seriesItems[id]
+        if pid in seriesItems:
+            del seriesItems[pid]
             self._setInternalParameter(self._SERIESITEMS, seriesItems)
 
     @property

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-20 18:47:14 +0000 (Mon, December 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 10:00:05 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -168,7 +168,7 @@ class GuiSpectrumDisplay(CcpnModule):
     resetAxisOrder    Reset display to original axis order
     findAxis          Find axis
                         findAxis(axisCode)
-                          :param axisCode:
+                          :param axisCode
                           :return axis
     """
 
@@ -2571,7 +2571,8 @@ class GuiSpectrumDisplay(CcpnModule):
         if not self.isGrouped:
             if order:
                 self._setOrderedSpectrumViewsIndex(order)
-            self.spectrumToolBar.setButtonsFromSpectrumViews(self._orderedSpectrumViews(self.strips[0].spectrumViews))
+            # self.spectrumToolBar.setButtonsFromSpectrumViews(self._orderedSpectrumViews(self.strips[0].spectrumViews))
+            self.spectrumToolBar.setButtonsFromSpectrumViews(self.strips[0].getSpectrumViews())
 
     @logCommand(get='self')
     def makeStripPlot(self, peaks=None, nmrResidues=None,

@@ -3,9 +3,9 @@
   store the current orderedSpectrumViews in the internal data store _ccpnInternalData
   so it is hidden from external users
 
-  accessed with the properties:
-      strip.orderedSpectra          returns tuple(spectra) or None
-      strip.orderedSpectrumViews    returns tuple(spectrumViews) or None
+  accessed with the methods:
+      strip.getSpectra()          returns tuple(spectra) or None
+      strip.getSpectrumViews()    returns tuple(spectrumViews) or None
 
   use order = <tuple> to set the list
 """
@@ -23,7 +23,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-17 13:13:35 +0000 (Fri, December 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 10:00:05 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-20 18:41:36 +0000 (Mon, December 20, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 10:00:05 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1144,19 +1144,19 @@ class AbstractWrapperObject(NotifierBase):
 
         if descendantClasses is None or len(descendantClasses) == 0:
             # we should never be here
-            raise RuntimeError('Error getting all decendants from %s; decendants tree is empty' % self)
+            raise RuntimeError('Error getting all descendants from %s; decendants tree is empty' % self)
 
         if len(descendantClasses) == 1:
-            # we are at the end of the recursion tree; return the children of type decendantClass[0] of self
+            # we are at the end of the recursion tree; return the children of type descendantClass[0] of self
             if descendantClasses[0] not in self._childClasses:
-                raise RuntimeError('Invalid decentdantClass %s for %s' % (descendantClasses[0], self))
+                raise RuntimeError('Invalid descendantClass %s for %s' % (descendantClasses[0], self))
             className = descendantClasses[0].className
             # Passing the 'classes' argument limits the dict to className only (for speed)
             objs = self._getChildren(classes=[className])[className]
             # NB: the returned list of NmrResidues is sorted; if not: breaks the programme
             if descendantClasses[0].className == NmrResidue.className:
                 objs.sort()
-            # print('_allDecendants for %-30s of class %-20r: %s' % \
+            # print('_allDescendants for %-30s of class %-20r: %s' % \
             #       (self, descendantClasses[0].__name__, objs))
             return objs
 

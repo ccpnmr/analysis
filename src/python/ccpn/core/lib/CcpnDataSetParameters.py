@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-04 20:12:04 +0000 (Thu, November 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 17:37:46 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -59,7 +59,7 @@ def getCcpnNefParameter(project: 'Project', structureData, serial, name, paramet
             getLogger().debug(f'dataSet serials do not match: {dSet.serial} != {serial}')
         
         dd = dSet.getData(name)
-        params = dd.parameters
+        params = dd.dataParameters
 
         # return a copy of the ccpnHistory parameter
         return params.get(parameterName)
@@ -103,11 +103,11 @@ def setCcpnNefParameter(project: 'Project', structureData, serial, name, paramet
         # check whether the data already exists in the dataSet
         # try and write the information to the parameters
         dd = dSet.getData(name) or dSet.newData(name=name)
-        if parameterName in dd.parameters and not overwrite:
+        if parameterName in dd.dataParameters and not overwrite:
             getLogger().warning(f'structureData.data parameter {repr(parameterName)} exists')
             return
 
-        dd.setParameter(parameterName, value)
+        dd.setDataParameter(parameterName, value)
     except Exception as es:
         raise RuntimeError(f'Error creating structureData parameter {repr(parameterName)}')
 

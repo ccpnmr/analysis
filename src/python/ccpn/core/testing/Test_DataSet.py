@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 17:37:46 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -164,22 +164,22 @@ class DataTest(WrapperTesting):
         data1 = dataSet.newData(name='try1', attachedObjectPid=dataSet.pid)
         undo = self.project._undo
         self.project.newUndoPoint()
-        self.assertEqual(data1.parameters, {})
-        data1.setParameter('aaa', 1)
-        self.assertEqual(data1.parameters, {'aaa': 1})
-        data1.updateParameters(testpars)
-        self.assertEqual(data1.parameters, testpars)
-        data1.deleteParameter('ccc')
+        self.assertEqual(data1.dataParameters, {})
+        data1.setDataParameter('aaa', 1)
+        self.assertEqual(data1.dataParameters, {'aaa': 1})
+        data1.updateDataParameters(testpars)
+        self.assertEqual(data1.dataParameters, testpars)
+        data1.deleteDataParameter('ccc')
         del testpars['ccc']
-        self.assertEqual(data1.parameters, testpars)
-        data1.setParameter('ddd', 11)
+        self.assertEqual(data1.dataParameters, testpars)
+        data1.setDataParameter('ddd', 11)
         testpars['ddd'] = 11
-        self.assertEqual(data1.parameters, testpars)
+        self.assertEqual(data1.dataParameters, testpars)
         undo.undo()
         undo.redo()
-        self.assertEqual(data1.parameters, testpars)
-        data1.clearParameters()
-        self.assertEqual(data1.parameters, {})
+        self.assertEqual(data1.dataParameters, testpars)
+        data1.clearDataParameters()
+        self.assertEqual(data1.dataParameters, {})
 
         self.assertEqual(data1.pid, 'DA:myStructureData.try1')
         data1.rename('different')
@@ -192,21 +192,21 @@ class DataTest(WrapperTesting):
         data1 = dataSet.newData(name='try1', attachedObjectPid=dataSet.pid)
         undo = self.project._undo
         self.project.newUndoPoint()
-        data1.setParameter('ndarray', numpy.ndarray((5, 3, 1)))
+        data1.setDataParameter('ndarray', numpy.ndarray((5, 3, 1)))
         undo.undo()
         undo.redo()
-        self.assertTrue(isinstance(data1.parameters['ndarray'], numpy.ndarray))
+        self.assertTrue(isinstance(data1.dataParameters['ndarray'], numpy.ndarray))
 
     def test_tensor_parameter(self):
         dataSet = self.project.newStructureData()
         data1 = dataSet.newData(name='try1', attachedObjectPid=dataSet.pid)
         undo = self.project._undo
         self.project.newUndoPoint()
-        data1.setParameter('tensor', Tensor._fromDict({'orientationMatrix': numpy.identity(3),
-                                                       'isotropic'        : 2.1, 'axial': -3.0, 'rhombic': 0.9}))
+        data1.setDataParameter('tensor', Tensor._fromDict({'orientationMatrix': numpy.identity(3),
+                                                       'isotropic'            : 2.1, 'axial': -3.0, 'rhombic': 0.9}))
         undo.undo()
         undo.redo()
-        tensor = data1.parameters['tensor']
+        tensor = data1.dataParameters['tensor']
         self.assertTrue(isinstance(tensor, Tensor))
         self.assertAlmostEquals(tensor.isotropic, 2.1)
         self.assertAlmostEquals(tensor.axial, -3.0)
@@ -225,10 +225,10 @@ class DataTest(WrapperTesting):
         # generate Pandas Dataframe
         self.Panda = pd.DataFrame(numpy.random.randint(0, 100, size=(100, 4)), columns=list('ABCD'))
 
-        data1.setParameter('pandasDataframe', self.Panda)
+        data1.setDataParameter('pandasDataframe', self.Panda)
         undo.undo()
         undo.redo()
-        self.assertTrue(isinstance(data1.parameters['pandasDataframe'], self.Panda.__class__))
+        self.assertTrue(isinstance(data1.dataParameters['pandasDataframe'], self.Panda.__class__))
 
     def test_EnsembleData_parameter(self):
         """
@@ -249,7 +249,7 @@ class DataTest(WrapperTesting):
         undo.undo()
         undo.redo()
 
-        data1.setParameter('EnsembleData', self.data)
+        data1.setDataParameter('EnsembleData', self.data)
         undo.undo()  # needs to undo the setParameter
         undo.redo()
-        self.assertTrue(isinstance(data1.parameters['EnsembleData'], self.data.__class__))
+        self.assertTrue(isinstance(data1.dataParameters['EnsembleData'], self.data.__class__))

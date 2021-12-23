@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:16 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-12-23 17:37:46 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1063,7 +1063,7 @@ class CcpnNefWriter:
             calculationData = dataSet.data
             if calculationData:
                 for obj in calculationData:
-                    for k, val in obj.parameters.items():
+                    for k, val in obj.dataParameters.items():
 
                         # Set up frame - this is too hard-coded here
                         result = self._newNefSaveFrame(None, category, str(paramNum))
@@ -4729,7 +4729,7 @@ class CcpnNefReader(CcpnNefContent):
                     # if loop and hasattr(loop, 'data'):
                     importer(self, result, loop, saveFrame)
         #
-        # result.setParameter(run_id, _df)
+        # result.setDataParameter(run_id, _df)
 
         return result
 
@@ -4754,7 +4754,7 @@ class CcpnNefReader(CcpnNefContent):
         if name is None:
             name = 'default'
         name = name.strip()
-        names = [dd.name for dd in data.parameters]
+        names = [dd.name for dd in data.dataParameters]
         while name in names:
             name = commonUtil.incrementName(name)
         return name
@@ -4792,7 +4792,7 @@ class CcpnNefReader(CcpnNefContent):
             # vset3 = [v for k, v in p1.groupby(['model_id'])]
             # pd.concat([v.reset_index()['violation'] for v in vset3], axis=1).agg(['sum', 'mean', 'min', 'max', lambda x : sum(x > 0.3), lambda x : sum(x > 0.3)], axis=1)
 
-            data.setParameter(run_id, _df)
+            data.setDataParameter(run_id, _df)
 
     importers['ccpn_distance_restraint_violation'] = load_ccpn_restraint_violation
 

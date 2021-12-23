@@ -23,7 +23,7 @@ print(f'Available data containing violationLists:')
 for (restraintTable, violationDataItem) in violationDataItems:
     
     print(f'  {violationDataItem}')
-    for k, violationRun in violationDataItem.parameters.items():
+    for k, violationRun in violationDataItem.dataParameters.items():
         
         if k == 'results':
             # skip results
@@ -78,7 +78,7 @@ for (restraintTable, violationDataItem) in violationDataItems:
                 print(f'\n{val}')
                 
             # insert results into the parameters as 'results'
-            violationDataItem.setParameter('results', result)
+            violationDataItem.setDataParameter('results', result)
 
     #         # build the result dataFrame
     #         result = pd.concat([ids, subIds, atoms, average], ignore_index=True, axis=1)
@@ -92,7 +92,7 @@ for (restraintTable, violationDataItem) in violationDataItems:
     #             print(f'\n{val}')
     #             
     #         # insert results into the parameters as 'results'
-    #         violationDataItem.setParameter('results', result)
+    #         violationDataItem.setDataParameter('results', result)
 
             if restraintTable in _results:
                 print('   Already found')

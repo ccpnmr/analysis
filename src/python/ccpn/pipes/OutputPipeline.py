@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-02 18:40:28 +0000 (Tue, November 02, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 17:37:47 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -176,7 +176,7 @@ class OutputSpectraPipe(SpectraPipe):
             if mode == DataSet:
                 newDataSet = self.project.newStructureData(name=self.pipeline.pipelineName)
                 data = newDataSet.newData(name=self.pipeline.pipelineName)
-                data.setParameter(self.pipeline.pipelineName, df)
+                data.setDataParameter(self.pipeline.pipelineName, df)
 
         if sucess:
             self.project._logger.info("Pipeline Output saved in %s" % path)

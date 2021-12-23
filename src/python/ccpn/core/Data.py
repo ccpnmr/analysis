@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-04 20:12:04 +0000 (Thu, November 04, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 17:37:46 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -123,10 +123,10 @@ class Data(AbstractWrapperObject):
             self._wrappedData.attachedObjectPid = None
 
     @property
-    def parameters(self) -> dict:
+    def dataParameters(self) -> dict:
         """Keyword-value dictionary of parameters.
         NB the value is a copy - modifying it will not modify the actual data.
-        Use the setParameter, deleteParameter, clearParameters, and updateParameters
+        Use the setDataParameter, deleteDataParameter, clearDataParameters, and updateDataParameters
         methods to modify the parameters.
 
         Dictionary values can be anything that can be exported to JSON,
@@ -134,7 +134,7 @@ class Data(AbstractWrapperObject):
         or pandas DataFrame, Series, or Panel"""
         return dict((x.name, x.value) for x in self._wrappedData.parameters)
 
-    def setParameter(self, name: str, value):
+    def setDataParameter(self, name: str, value):
         """Add name:value to parameters, overwriting existing entries"""
         apiData = self._wrappedData
         parameter = apiData.findFirstParameter(name=name)
@@ -143,7 +143,7 @@ class Data(AbstractWrapperObject):
         else:
             parameter.value = value
 
-    def deleteParameter(self, name: str):
+    def deleteDataParameter(self, name: str):
         """Delete parameter named 'name'"""
         apiData = self._wrappedData
         parameter = apiData.findFirstParameter(name=name)
@@ -152,16 +152,16 @@ class Data(AbstractWrapperObject):
         else:
             parameter.delete()
 
-    def clearParameters(self):
+    def clearDataParameters(self):
         """Delete all parameters"""
         for parameter in self._wrappedData.parameters:
             parameter.delete()
 
-    def updateParameters(self, value: dict):
+    def updateDataParameters(self, value: dict):
         """Convenience routine, similar to dict.update().
-        Calls self.setParameter(key, value) for each key,value pair in the input."""
+        Calls self.setDataParameter(key, value) for each key,value pair in the input."""
         for key, val in value.items():
-            self.setParameter(key, val)
+            self.setDataParameter(key, val)
 
     #=========================================================================================
     # Implementation functions

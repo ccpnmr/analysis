@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 15:18:25 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-12-23 17:37:47 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -754,7 +754,7 @@ class RestraintAnalysisTableWidget(GuiTable):
         #             _resLists = OrderedDict([(res, []) for res in self._restraintTables])
         #
         #             # get the result from the dataSet.data
-        #             # rl = self._restraintTables[0]; rl.structureData.data[0].parameters.get('results')
+        #             # rl = self._restraintTables[0]; rl.structureData.data[0].dataParameters.get('results')
         #             #
         #             # rename the columns to match
         #             # viols.columns = [col+'_{ii+1}' for col in viols.columns]
@@ -853,7 +853,7 @@ class RestraintAnalysisTableWidget(GuiTable):
             violationResults = {resList: viols.copy() if viols is not None else None
                                 for resList in resLists
                                 for data in resList.structureData.data if resList.name == data.name
-                                for k, viols in data.parameters.items() if k == 'results'}
+                                for k, viols in data.dataParameters.items() if k == 'results'}
 
             # rename the columns to match the order in visible list - number must match the position in the selected restraintTables
             for ii, (k, resViol) in enumerate(violationResults.items()):

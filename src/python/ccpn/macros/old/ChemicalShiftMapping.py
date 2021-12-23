@@ -91,7 +91,7 @@ ds.newData(ds.title)
 
 for n, i in sorted(shifts.items()):
   max_index = shifts[n].index.max()
-  ds.data[0].setParameter(i.name,(str(n), str(shifts[n].loc[max_index])) )
+  ds.data[0].setDataParameter(i.name, (str(n), str(shifts[n].loc[max_index])))
   print(
     {i.name : (str(n), str(shifts[n].loc[max_index]))}
     )

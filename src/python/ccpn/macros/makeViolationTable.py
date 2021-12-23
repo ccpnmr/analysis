@@ -82,7 +82,7 @@ for lCount, rl in enumerate(resLists):
 violationResults = {resList: viols.copy() if viols is not None else None
                     for resList in project.restraintTables
                     for data in resList.structureData.data if resList.name == data.name
-                    for k, viols in data.parameters.items() if k == 'results'}
+                    for k, viols in data.dataParameters.items() if k == 'results'}
 
 # rename the columns to match the order in visible list
 for ii, (k, resViol) in enumerate(violationResults.items()):

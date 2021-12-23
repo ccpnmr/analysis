@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-22 14:09:56 +0000 (Wed, December 22, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 08:22:09 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -704,7 +704,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             self._dataStore.path = None
             return
 
-        newDataStore, newDataSource = self._getDataSourceFromPath(path=value)
+        newDataStore, newDataSource = self._getDataSourceFromPath(path=value, checkParameters=True)
         if newDataStore is None:
             raise ValueError('Spectrum.filePath: %s invalid filePath "%s"' %
                              (self, value))
@@ -713,19 +713,34 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                              (self, value))
 
         # we found a valid new file
+        self._close()
         self.setTraitValue('_dataSource', newDataSource, force=True)
         self.setTraitValue('_dataStore', newDataStore, force=True)
         self._dataStore._saveInternal()
-        self._clearCache()
         self._saveSpectrumMetaData()
 
-    def reload(self):
-        """Reload the spectrum defined by filePath
+    @logCommand(get='self')
+    def reload(self, path:str):
+        """Reload the spectrum as defined by path;
+        DataFormat and dimensionality need to match with the current Spectrum instance.
+        All other parameters will be pulled from the (binary) spectrum data.
+
+        :param path: a path to the spectrum; may contain redirections (e.g. $DATA)
         """
-        # setting filePath will re-initialise a dataSource instance
-        _filePath = self.filePath
-        self.filePath = _filePath
+        newDataStore, newDataSource = self._getDataSourceFromPath(path, checkParameters=False)
+        if newDataStore is None or newDataSource is None:
+            raise ValueError('Spectrum.reload: unable to load "%s"' % path)
+        if newDataSource.dimensionCount != self.dimensionCount:
+            raise ValueError('Spectrum.reload: dimensionCount "%s" (%d) incompatble with %s' %
+                             (path, newDataSource.dimensionCount, self))
+
+        # we found a valid new file
+        self._close()
+        self.setTraitValue('_dataSource', newDataSource, force=True)
+        self.setTraitValue('_dataStore', newDataStore, force=True)
         self._dataSource.exportToSpectrum(self, includePath=False)
+        self._dataStore._saveInternal()
+        self._saveSpectrumMetaData()
 
     @property
     def path(self) -> Path:
@@ -2643,7 +2658,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """
         return self._wrappedData.serial
 
-    def _getDataSourceFromPath(self, path):
+    def _getDataSourceFromPath(self, path, checkParameters=True):
         """Return a (dataStore, dataSource) tuple if path points  a file compatible
         with self.dataFormat, or (None, None) otherwise
         """
@@ -2653,13 +2668,14 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         dataStore.spectrum = self
 
         try:
-            dataSource = self._getDataSource(dataStore)
-        except RuntimeError:
+            dataSource = self._getDataSource(dataStore, checkParameters=checkParameters)
+        except RuntimeError as es:
+            getLogger().debug('_getDataSource: caught error: %s' % str(es))
             return (None, None)
 
         return (dataStore, dataSource)
 
-    def _getDataSource(self, dataStore):
+    def _getDataSource(self, dataStore, checkParameters=True):
         """Check the validity and access the file defined by dataStore;
         returns: SpectrumDataSource instance when filePath and/or dataFormat of the
         dataStore instance are incorrect
@@ -2674,6 +2690,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             # Special case, empty spectrum
             dataSource = EmptySpectrumDataSource()
             dataSource.importFromSpectrum(self, includePath=False)
+            checkParameters = False
 
         else:
             if not dataStore.exists():
@@ -2685,6 +2702,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                 raise RuntimeError('Spectrum._getDataSource: dataStore path "%s" is incompatible with dataFormat "%s"' %
                                    (dataStore.aPath(), dataStore.dataFormat))
 
+        if checkParameters:
             # check some fundamental parameters
             if dataSource.dimensionCount != self.dimensionCount:
                 raise RuntimeError('Spectrum._getDataSource: incompatible dimensionCount (%s) of "%s"' %
@@ -2701,8 +2719,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                                        (self, self.isComplex, dataSource, dataSource.isComplex))
 
 
-            dataSource.spectrum = self
-
+        dataSource.spectrum = self
         return dataSource
 
     def _getPeakPicker(self):

@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 15:19:21 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 18:40:50 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1778,7 +1778,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                                      (self.className, axisCodes))
                 axisCodes = _axisCodes
 
-
         # we now should have valid axisCodes
         for ac in axisCodes:
             if not ac in self.axisCodes:
@@ -2519,7 +2518,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             peakList = self.peakLists[-1]
 
         # get the dimensions by mapping the keys of the ppmRegions dict
-        dimensions = self.getByAxisCodes('dimensions', [a for a in ppmRegions.keys()])
+        _axisCodes = tuple([a for a in ppmRegions.keys()])
+        dimensions = self.getByAxisCodes('dimensions', _axisCodes)
         # now get all other parameters in dimensions order
         axisCodes = self.getByDimensions('axisCodes', dimensions)
         ppmValues = [sorted(float(pos) for pos in region) for region in ppmRegions.values()]

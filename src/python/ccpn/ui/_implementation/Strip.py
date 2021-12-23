@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 12:51:27 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 18:40:50 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -393,33 +393,39 @@ class Strip(AbstractWrapperObject):
 
     @logCommand(get='self')
     def pickPeaks(self, regions: List[Tuple[float,float]]) -> Tuple[Peak, ...]:
-        """Peak pick in regions for all spectra currently displayed in strip .
+        """Peak-pick in regions for all spectra currently displayed in the strip.
         """
-        # selectedRegion is rounded before-hand to 3 dp.
-
         spectrumDisplay = self.spectrumDisplay
 
         result = []
         with undoBlockWithoutSideBar():
-            # create the axisDict for peak picking the spectra
-            if spectrumDisplay.is1D:
-                axisDict = {self.axisCodes[0] : tuple(regions[0])}
-            else:
-                axisDict = {axis: tuple(ppms) for axis, ppms in zip(self.axisCodes, regions)}
 
             # loop through the visible spectra
             for spectrumView in (v for v in self.spectrumViews if v.isDisplayed):
 
                 spectrum = spectrumView.spectrum
 
+                _displayedSpectrum = DisplayedSpectrum(self, spectrumView)
+                _sliceTuples = _displayedSpectrum.getSliceTuples(regions)
+                _checks = _displayedSpectrum.checkForRegionsOutsideLimits(regions)
+                _skip = any(_checks)
+
+                # create the axisDict for peak picking the spectra
+                if spectrumDisplay.is1D:
+                    axisDict = {self.axisCodes[0] : tuple(regions[0])}
+
+                else:
+                    if (_axisCodes := spectrum._mapAxisCodes(self.axisCodes)) is None:
+                        raise ValueError('%s.pickPeaks: Failed mapping axisCodes "%s"' %
+                                         (self.__class__.__name__, self.axisCodes))
+                    # There may be None's in the _axisCodes, as "spectrum" might have a lower dimensionality
+                    # than the display
+                    axisDict = dict([(ac, tuple(region)) for ac, region in zip(_axisCodes, regions)
+                                                         if ac is not None])
+
                 # get the list of visible peakLists
                 validPeakListViews = [pp for pp in spectrumView.peakListViews if pp.isDisplayed]
                 if not validPeakListViews:
-                    continue
-
-                myPeakPicker = spectrum.peakPicker
-                if not myPeakPicker:
-                    getLogger().warning(f'peakPicker not defined for {spectrum}')
                     continue
 
                 # get parameters to apply to peak picker
@@ -431,7 +437,7 @@ class Strip(AbstractWrapperObject):
 
                     # pick the peak in this peakList
                     newPeaks = spectrum.pickPeaks(peakList, positiveThreshold, negativeThreshold, **axisDict)
-                    if newPeaks:
+                    if newPeaks is not None and len(newPeaks) > 0:
                         result.extend(newPeaks)
 
             result = tuple(result)
@@ -528,7 +534,7 @@ class DisplayedSpectrum(object):
     @property
     def incrementsInPpm(self) -> tuple:
         """Return tuple of ppm increment values in axis display order.
-        Assure that the len always is dimensionCOunt of the spectrumDisplay
+        Assure that the len always is dimensionCount of the spectrumDisplay
         by adding None's if necessary. This compensates for lower dimensional
         spectra (e.g. a 2D mapped onto a 3D)
         """
@@ -542,7 +548,7 @@ class DisplayedSpectrum(object):
     @property
     def positionsInPpm(self) -> tuple:
         """Return a tuple of positions (i.e. the centres) for axes in display order
-        Assure that the len always is dimensionCOunt of the spectrumDisplay
+        Assure that the len always is dimensionCount of the spectrumDisplay
         by adding None's if necessary. This compensates for lower dimensional
         spectra (e.g. a 2D mapped onto a 3D)
         """
@@ -568,7 +574,7 @@ class DisplayedSpectrum(object):
     @property
     def regionsInPpm(self) -> tuple:
         """Return a tuple of (leftPpm,rightPpm) regions for axes in display order.
-        Assure that the len always is dimensionCOunt of the spectrumDisplay
+        Assure that the len always is dimensionCount of the spectrumDisplay
         by adding None's if necessary. This compensates for lower dimensional
         spectra (e.g. a 2D mapped onto a 3D)
         """
@@ -578,15 +584,9 @@ class DisplayedSpectrum(object):
             result.append( (None, None) )
         return tuple(result)
 
-    @property
-    def regionsInPoints(self) -> tuple:
-        """Return a tuple of (minPoint,maxPoint) regions for axes in display order.
-        Assure that the len always is dimensionCOunt of the spectrumDisplay
-        by adding None's if necessary. This compensates for lower dimensional
-        spectra (e.g. a 2D mapped onto a 3D)
-        """
+    def _getRegionsInPoints(self, regions):
+        """Helper function"""
         spectrumDimensions = self.spectrumView.spectrumDimensions
-        regions = self.regionsInPpm
         result = []
         for indx, specDim in enumerate(spectrumDimensions):
             minPpm, maxPpm = regions[indx]
@@ -597,8 +597,60 @@ class DisplayedSpectrum(object):
             result.append( (None, None) )
         return tuple(result)
 
+    @property
+    def regionsInPoints(self) -> tuple:
+        """Return a tuple of (minPoint,maxPoint) tuples corresponding to regions for axes
+        in display order.
+        Assure that the len always is dimensionCount of the spectrumDisplay
+        by adding None's if necessary. This compensates for lower dimensional
+        spectra (e.g. a 2D mapped onto a 3D)
+        """
+        return self._getRegionsInPoints(self.regionsInPpm)
+
+    @property
+    def aliasingLimits(self) -> tuple:
+        """Return a tuple of aliasingLimits in display order.
+        Assure that the len always is dimensionCount of the spectrumDisplay
+        by adding None's if necessary. This compensates for lower dimensional
+        spectra (e.g. a 2D mapped onto a 3D).
+        """
+        result = self.spectrumView.aliasingLimits
+        for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
+            result.append( (None, None) )
+
+    def getSliceTuples(self, regions) -> list:
+        """Return a list of (startPoint,endPoint) slice tuples for regions display order.
+        """
+        regionInPoints = [list(rp) for rp in self._getRegionsInPoints(regions)]
+        result = []
+        for points in regionInPoints:
+            if points[0] is not None and points[1] is not None:
+                for i in (0,1):
+                    points[i] = int(points[i] + 0.5)
+                result.append(tuple(points))
+        return result
+
+    def checkForRegionsOutsideLimits(self, regions) -> tuple:
+        """check if regions are fully outside the aliasing limits of spectrum.
+        :return a tuple of booleans in display order
+        """
+        result = []
+        for region, limits in zip(regions, self.spectrumView.aliasingLimits):
+            # to not be dependent on order of low,high values in region or limits:
+            minVal = min(region)
+            maxVal = max(region)
+            minLimit = min(limits)
+            maxLimit = max(limits)
+            if maxVal < minLimit or minVal > maxLimit:
+                result.append(True)
+            else:
+                result.append(False)
+
+        return tuple(result)
+
+
     def __str__(self):
-        return "<DisplayedSpectrum: strip: %s; spectrumView: %s" % (
+        return "<DisplayedSpectrum: strip: %s; spectrumView: %s>" % (
             self.strip.pid, self.spectrumView.pid
         )
 

@@ -34,7 +34,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 15:18:24 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 18:40:50 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -356,29 +356,11 @@ class GuiStripNd(GuiStrip):
         :param openInSpectrumDisplay: optionally open in a new SpectrumDisplay
         :returns: a list of Spectrum instances
         """
-
         display = self.spectrumDisplay
 
         result = []
-
         for specView in [spv for spv in display.spectrumViews if spv.isVisible]:
             ppmPositions = self.positions
-
-            # spectrum = specView.spectrum
-            #
-            # print('Display:', display)
-            # print('Strip:', strip)
-            # print('ppmPositions:', ppmPositions)
-            # print('')
-            # print('Spectrum:', spectrum)
-            # print('point position:', specView._getPointPosition(ppmPositions))
-            # print('')
-            # print('SpectrumView:', specView)
-            # print('Spectrumview dimensions:', specView.dimensions)
-            # print('Spectrumview axisCodes:', specView.axisCodes)
-            # print('Spectrumview SW:', specView._getByDisplayOrder('spectralWidths'))
-            # print('Spectrumview limits:', specView._getByDisplayOrder('spectrumLimits'))
-
             plane = specView._extractXYplaneToFile(ppmPositions)
             result.append(plane)
 

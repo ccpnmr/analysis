@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:17 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 12:51:27 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -104,31 +104,14 @@ class Strip(AbstractWrapperObject):
         # return tuple(self._project._data2Obj.get(x)
         #      for x in self._wrappedData.sortedStripSpectrumViews())
 
-    # def getSpectrumViews(self):
-    #     """
-    #     :return:
-    #     """
-    #     pass
-    #
-    # @property
-    # def spectra(self) -> tuple:
-    #     """ Spectra in spectrumView displayed order"""
-    #     return tuple([specView.spectrum for specView in self.getSpectrumViews()])
-
     @property
     def _displayedSpectra(self) -> tuple:
         """Return a tuple of DisplayedSpectrum instances, in order, if currently visible
         """
         # orderedSpecViews = self.spectrumDisplay.orderedSpectrumViews(None)
         result = [DisplayedSpectrum(strip=self, spectrumView=specView) \
-                  for specView in self.spectrumViews if specView.isDisplayed]
+                  for specView in self.getSpectrumViews() if specView.isDisplayed]
         return tuple(result)
-
-    # GWV 20/7/2021: not used
-    # def findSpectrumView(self, spectrum):
-    #     """find Strip.spectrumView that matches spectrum, or None if not present"""
-    #     sViews = [sv for sv in self.spectrumViews if sv.spectrum == spectrum]
-    #     return sViews[0] if len(sViews) == 1 else None
 
     #-----------------------------------------------------------------------------------------
 
@@ -160,11 +143,12 @@ class Strip(AbstractWrapperObject):
         # apiSpectrumDisplay = apiStrip.spectrumDisplay
         # return tuple(ff(apiSpectrumDisplay.findFirstAxis(code=x, stripSerial=stripSerial)) for x in apiSpectrumDisplay.axisOrder)
 
-    @orderedAxes.setter
-    def orderedAxes(self, value: Sequence):
-        value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
-        #self._wrappedData.orderedAxes = tuple(x._wrappedData.axis for x in value)
-        self._wrappedData.axisOrder = tuple(x.code for x in value)
+    # GWV 23/12: There should not be a setter! Created by SpectrumDisplay/Strip
+    # @orderedAxes.setter
+    # def orderedAxes(self, value: Sequence):
+    #     value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
+    #     #self._wrappedData.orderedAxes = tuple(x._wrappedData.axis for x in value)
+    #     self._wrappedData.axisOrder = tuple(x.code for x in value)
 
     @property
     def positions(self) -> Tuple[float, ...]:

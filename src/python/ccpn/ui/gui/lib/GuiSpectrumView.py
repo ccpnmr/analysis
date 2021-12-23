@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:17 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 13:15:21 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -167,7 +167,7 @@ class GuiSpectrumView(QtWidgets.QGraphicsObject):
             # spectrumLimits extended by 0.5point on either end
             minFoldingFrequency, maxFoldingFrequency = sorted(_spectrum.foldingLimits[ii])
             pointCount = (_spectrum.pointCounts)[ii]
-            valuePerPoint = (_spectrum.valuesPerPoint)[ii]
+            valuePerPoint = (_spectrum.ppmPerPoints)[ii]
             axisReversed = (_spectrum.axesReversed)[ii]
             spectralWidth = (_spectrum.spectralWidths)[ii]
             aliasingIndex = (_spectrum.aliasingIndexes)[ii]

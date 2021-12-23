@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:17 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 13:15:21 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -599,7 +599,7 @@ class SpectrumDisplay(AbstractWrapperObject):
                     else:
                         # A display "plane-axis"
                         strip.axes[ii].region = spectrum.spectrumLimits[axis]
-                        strip.axes[ii].width = spectrum.valuesPerPoint[axis]
+                        # strip.axes[ii].width = spectrum.valuesPerPoint[axis]
                         if spectrum.isTimeDomains[axis] or spectrum.isSampledDomains[axis]:
                             strip.axes[ii].position = 1.0
 

@@ -102,8 +102,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-22 14:50:48 +0000 (Mon, November 22, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 13:15:21 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -320,7 +320,7 @@ class NotificationTest(WrapperTesting):
         # refpt = tuple([Constants.DEFAULT_SPECTRUM_PARAMETERS[ic]['refpt'] for ic in ('19F', '15N')])
         # self.assertEqual(spectrum.referencePoints, refpt)
 
-        vpp = peak1.spectrum.valuesPerPoint
+        vpp = peak1.spectrum.ppmPerPoints
         _oldRefPoints = spectrum.referencePoints
         spectrum.referencePoints = (11., 11.)
 

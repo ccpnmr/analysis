@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:18 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 13:15:21 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -4438,7 +4438,7 @@ class CcpnGLWidget(QOpenGLWidget):
         # need to block logging
         with notificationEchoBlocking(self.application):
             code = spectrumView.spectrum.axisCodes[0]
-            vpps = spectrumView.spectrum.valuesPerPoint
+            vpps = spectrumView.spectrum.ppmPerPoints
             axisCodes = spectrumView.spectrum.axisCodes
 
             _region = {axis: (ppmPosition + 0.5 * vpp, ppmPosition + 0.5 * vpp)

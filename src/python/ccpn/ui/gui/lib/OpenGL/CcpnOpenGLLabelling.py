@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-20 18:47:15 +0000 (Mon, December 20, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 13:15:21 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -264,7 +264,7 @@ class GLLabelling():
         symbolWidth = self.strip.symbolSize / 2.0
 
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
-        vPP = spectrumView.spectrum.valuesPerPoint
+        vPP = spectrumView.spectrum.ppmPerPoints
 
         try:
             r = self._GLParent.symbolX * np.sign(self._GLParent.pixelX)

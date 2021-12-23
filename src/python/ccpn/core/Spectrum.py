@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:16 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 13:15:21 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -905,35 +905,40 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         self._setDimensionalAttributes('spectralWidth', value)
 
     @property
-    def valuesPerPoint(self) -> List[Optional[float]]:
-        """valuePerPoint for each dimension:
-        in ppm for Frequency dimensions
-        in time units (seconds) for Time (Fid) dimensions
-        1.0 for sampled dimensions
-        """
-        result = []
-        _widths = self.spectralWidths
-        _widthsHz = self.spectralWidthsHz
-        _pCounts = self.pointCounts
-        _isComplex = self.isComplex
-        for axis, dimType in enumerate(self.dimensionTypes):
+    def ppmPerPoints(self) -> List[float]:
+        """Convenience; ppm-per-point for each dimension"""
+        return self._getDimensionalAttributes('ppmPerPoint')
 
-            if dimType == specLib.DIMENSION_FREQUENCY:
-                valuePerPoint = _widths[axis] / _pCounts[axis]
-
-            elif dimType == specLib.DIMENSION_TIME:
-                # valuePerPoint is dwell time
-                valuePerPoint = 1.0 / _widthsHz[axis] if _isComplex[axis] \
-                    else 0.5 / _widthsHz[axis]
-
-            elif dimType == specLib.DIMENSION_SAMPLED:
-                valuePerPoint = 1.0
-            else:
-                valuePerPoint = None
-
-            result.append(valuePerPoint)
-
-        return result
+    # @property
+    # def valuesPerPoint(self) -> List[Optional[float]]:
+    #     """valuePerPoint for each dimension:
+    #     in ppm for Frequency dimensions
+    #     in time units (seconds) for Time (Fid) dimensions
+    #     1.0 for sampled dimensions
+    #     """
+    #     result = []
+    #     _widths = self.spectralWidths
+    #     _widthsHz = self.spectralWidthsHz
+    #     _pCounts = self.pointCounts
+    #     _isComplex = self.isComplex
+    #     for axis, dimType in enumerate(self.dimensionTypes):
+    #
+    #         if dimType == specLib.DIMENSION_FREQUENCY:
+    #             valuePerPoint = _widths[axis] / _pCounts[axis]
+    #
+    #         elif dimType == specLib.DIMENSION_TIME:
+    #             # valuePerPoint is dwell time
+    #             valuePerPoint = 1.0 / _widthsHz[axis] if _isComplex[axis] \
+    #                 else 0.5 / _widthsHz[axis]
+    #
+    #         elif dimType == specLib.DIMENSION_SAMPLED:
+    #             valuePerPoint = 1.0
+    #         else:
+    #             valuePerPoint = None
+    #
+    #         result.append(valuePerPoint)
+    #
+    #     return result
 
     @property
     @_includeInDimensionalCopy

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:18 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 13:15:21 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -424,7 +424,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
             planeCount = self.strip.planeAxisBars[dim - 2].planeCount  #   .planeToolbar.planeCounts[dim - 2].value()
 
             zPointCount = (self.spectrum.pointCounts)[indx]
-            zValuePerPoint = (self.spectrum.valuesPerPoint)[indx]
+            zValuePerPoint = (self.spectrum.ppmPerPoints)[indx]
             # minSpectrumFrequency, maxSpectrumFrequency = (self.spectrum.spectrumLimits)[index]
 
             # pass in a smaller valuePerPoint - if there are differences in the z-resolution, otherwise just use local valuePerPoint

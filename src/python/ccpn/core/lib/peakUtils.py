@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-29 18:30:39 +0100 (Fri, October 29, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 13:15:21 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -715,7 +715,7 @@ def peakParabolicInterpolation(peak: 'Peak', update=False):
     # # get the data +/-1 point along each axis
     # sliceTuples = [(p - 1, p + 1) for p in position]  # nb: sliceTuples run [1,n] with n inclusive
 
-    _valuesPerPoint = spectrum.valuesPerPoint
+    _valuesPerPoint = spectrum.ppmPerPoints
     _axisCodes = spectrum.axisCodes
     _regionData = {axisCode: (ppm - valPerPoint / 2, ppm + valPerPoint / 2,) for axisCode, ppm, valPerPoint in zip(_axisCodes, peak.ppmPositions, _valuesPerPoint)}
     data = spectrum.getRegion(**_regionData)

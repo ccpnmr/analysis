@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 18:40:50 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 20:07:34 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -395,7 +395,7 @@ class Strip(AbstractWrapperObject):
     def pickPeaks(self, regions: List[Tuple[float,float]]) -> Tuple[Peak, ...]:
         """Peak-pick in regions for all spectra currently displayed in the strip.
         """
-        spectrumDisplay = self.spectrumDisplay
+        from ccpn.core.lib.SpectrumLib import _pickPeaksByRegion
 
         result = []
         with undoBlockWithoutSideBar():
@@ -403,25 +403,13 @@ class Strip(AbstractWrapperObject):
             # loop through the visible spectra
             for spectrumView in (v for v in self.spectrumViews if v.isDisplayed):
 
-                spectrum = spectrumView.spectrum
-
                 _displayedSpectrum = DisplayedSpectrum(self, spectrumView)
+                spectrum = _displayedSpectrum.spectrum
                 _sliceTuples = _displayedSpectrum.getSliceTuples(regions)
                 _checks = _displayedSpectrum.checkForRegionsOutsideLimits(regions)
                 _skip = any(_checks)
-
-                # create the axisDict for peak picking the spectra
-                if spectrumDisplay.is1D:
-                    axisDict = {self.axisCodes[0] : tuple(regions[0])}
-
-                else:
-                    if (_axisCodes := spectrum._mapAxisCodes(self.axisCodes)) is None:
-                        raise ValueError('%s.pickPeaks: Failed mapping axisCodes "%s"' %
-                                         (self.__class__.__name__, self.axisCodes))
-                    # There may be None's in the _axisCodes, as "spectrum" might have a lower dimensionality
-                    # than the display
-                    axisDict = dict([(ac, tuple(region)) for ac, region in zip(_axisCodes, regions)
-                                                         if ac is not None])
+                if _skip:
+                    continue
 
                 # get the list of visible peakLists
                 validPeakListViews = [pp for pp in spectrumView.peakListViews if pp.isDisplayed]
@@ -435,8 +423,14 @@ class Strip(AbstractWrapperObject):
                 for thisPeakListView in validPeakListViews:
                     peakList = thisPeakListView.peakList
 
-                    # pick the peak in this peakList
-                    newPeaks = spectrum.pickPeaks(peakList, positiveThreshold, negativeThreshold, **axisDict)
+                    # # pick the peak in this peakList
+                    # newPeaks = spectrum.pickPeaks(peakList, positiveThreshold, negativeThreshold, **axisDict)
+                    newPeaks = _pickPeaksByRegion(spectrum = spectrum,
+                                                  sliceTuples=_sliceTuples,
+                                                  peakList=peakList,
+                                                  positiveThreshold=positiveThreshold,
+                                                  negativeThreshold=negativeThreshold,
+                                                  )
                     if newPeaks is not None and len(newPeaks) > 0:
                         result.extend(newPeaks)
 
@@ -532,6 +526,10 @@ class DisplayedSpectrum(object):
         self.spectrumView = spectrumView
 
     @property
+    def spectrum(self):
+        return self.spectrumView.spectrum
+
+    @property
     def incrementsInPpm(self) -> tuple:
         """Return tuple of ppm increment values in axis display order.
         Assure that the len always is dimensionCount of the spectrumDisplay
@@ -619,16 +617,21 @@ class DisplayedSpectrum(object):
             result.append( (None, None) )
 
     def getSliceTuples(self, regions) -> list:
-        """Return a list of (startPoint,endPoint) slice tuples for regions display order.
+        """Return a list of (startPoint,endPoint) slice tuples for regions in spectrum order.
         """
         regionInPoints = [list(rp) for rp in self._getRegionsInPoints(regions)]
+        # first assemble the result in display order
         result = []
-        for points in regionInPoints:
-            if points[0] is not None and points[1] is not None:
-                for i in (0,1):
-                    points[i] = int(points[i] + 0.5)
-                result.append(tuple(points))
-        return result
+        for points in regionInPoints[:self.spectrumView.dimensionCount]:
+            for i in (0,1):
+                points[i] = int(points[i] + 0.5)
+            result.append(tuple(points))
+
+        # create a mapping dict to reorder in spectrum order
+        mapping = dict([(dimIdx, idx) for idx, dimIdx in enumerate(self.spectrumView.dimensionIndices)])
+        sliceTuples = [result[mapping[idx]] for idx in self.spectrumView.spectrum.dimensionIndices]
+
+        return sliceTuples
 
     def checkForRegionsOutsideLimits(self, regions) -> tuple:
         """check if regions are fully outside the aliasing limits of spectrum.

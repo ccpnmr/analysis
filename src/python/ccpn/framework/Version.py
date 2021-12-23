@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 13:58:20 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-12-23 17:29:59 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ class VersionString(str):
 
         majorVersion.minorVersion.microVersion[.release]
 
-     Examples: 3.0.4; 3.1.0.alfa
+     Examples: 3.0.4; 3.1.0.alpha
 
     The isValid function checks for validity
 
@@ -45,8 +45,8 @@ class VersionString(str):
     A VersionString instance supports comparisons with either another VersionString instance or a suitable
     formatted string; e.g.
 
-     VersionString('3.1.0.alfa') > VersionString('3.0.4')    yields True
-     VersionString('3.1.0.alfa') < '3.0.2'    yields False
+     VersionString('3.1.0.alpha') > VersionString('3.0.4')    yields True
+     VersionString('3.1.0.alpha') < '3.0.2'    yields False
 
     """
 
@@ -203,9 +203,5 @@ class VersionString(str):
         return self.__gt__(other) or self.__eq__(other)
 
 
-
-applicationVersion = VersionString('3.1.0.alfa3')
+applicationVersion = VersionString('3.1.0.alpha3')
 revision = '3'
-
-
-

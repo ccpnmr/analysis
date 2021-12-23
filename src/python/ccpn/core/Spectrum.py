@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 13:58:20 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 15:19:21 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2390,16 +2390,14 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     def _axisDictToSliceTuples(self, axisDict) -> list:
         """Convert dict of (key,value) = (axisCode, (startPpm, stopPpm)) pairs
-        to a list of sliceTuples (1-based)
+        to a list of (startPoint,stopPoint) sliceTuples (1-based) for each dimension
 
         if (axisDict[axisCode] is None) ==> use spectrumLimits
         if (startPpm is None) ==> point=1
         if (stopPpm is None) ==> point=pointCounts[axis]
 
         :param axisDict: dict of (axisCode, (startPpm,stopPpm)) (key,value) pairs
-        :return list of sliceTuples
-
-        CCPNINTERNAL: also used by SpectrumLib._pickPeaks
+        :return list of (startPoint,stopPoint) sliceTuples (1-based) for each dimension
         """
         axisCodes = [ac for ac in axisDict.keys()]
 
@@ -2413,19 +2411,21 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         sliceTuples = [None] * self.dimensionCount
         for dimIndex, ac, dim in self.dimensionTriples:
             idx = inds.index(dimIndex)
-            stopPpm, startPpm = axisPpms[idx]  # to be converted to points; ppm scale runs backwards
+            minPpm = min(axisPpms[idx])
+            maxPpm = max(axisPpms[idx])
 
-            if startPpm is None:
+            # ppm axis runs backward
+            if maxPpm is None:
                 startPoint = 1
             else:
-                startPoint = int(self.ppm2point(startPpm, dimension=idx + 1) + 0.5)
+                startPoint = int(self.ppm2point(maxPpm, dimension=idx + 1) + 0.5)
 
-            if stopPpm is None:
+            if minPpm is None:
                 stopPoint = self.pointCounts[dimIndex]
             else:
-                stopPoint = int(self.ppm2point(stopPpm, dimension=idx + 1) + 0.5)
+                stopPoint = int(self.ppm2point(minPpm, dimension=idx + 1) + 0.5)
 
-            sliceTuples[dimIndex] = (startPoint, stopPoint)
+            sliceTuples[dimIndex] = tuple(sorted((startPoint, stopPoint)))
 
         getLogger().debug('Spectrum._axisDictToSliceTuples: axisDict = %s; sliceTuples = %s' %
                           (axisDict, sliceTuples))

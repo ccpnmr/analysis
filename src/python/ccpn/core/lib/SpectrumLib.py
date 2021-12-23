@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:38:41 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 15:19:21 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ import random
 import numpy as np
 import decorator
 
-from typing import Tuple, Optional, Sequence
+from typing import Tuple, Optional, Sequence, List
 
 from ccpn.framework.Application import getApplication
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking, undoBlockWithoutSideBar
@@ -1980,7 +1980,7 @@ def _createPeak(spectrum, peakList=None, **ppmPositions) -> Optional['Peak']:
 #                               positiveThreshold=positiveThreshold, negativeThreshold=negativeThreshold)
 
 
-def _pickPeaksByRegion(spectrum, sliceTuples, peakList, positiveThreshold, negativeThreshold) -> Tuple['Peak', ...]:
+def _pickPeaksByRegion(spectrum, sliceTuples, peakList, positiveThreshold, negativeThreshold) -> list:
     """Helper function to pick peaks of spectrum in region defined by sliceTuples
 
     :param spectrum: a Spectrum instance
@@ -1991,7 +1991,7 @@ def _pickPeaksByRegion(spectrum, sliceTuples, peakList, positiveThreshold, negat
     :param negativeThreshold: float or None specifying the negative threshold below which to find peaks.
                               if None, negative peak picking is disabled.
 
-    :return: tuple of new peaks
+    :return: list of new peaks
     """
 
     # local import as cycles otherwise
@@ -2014,22 +2014,35 @@ def _pickPeaksByRegion(spectrum, sliceTuples, peakList, positiveThreshold, negat
         logger.warning(txt)
         raise RuntimeError(txt)
 
-    # check the sliceTuples; make a list of lists first
-    sliceTuples = [list(sl) for sl in sliceTuples]
+    # check the sliceTuples; make a copy as list of lists first
+    _sliceTuples = [list(sl) for sl in sliceTuples]
     cropped = False
-    for dimIdx, slice, points in zip(spectrum.dimensionIndices, sliceTuples, spectrum.aliasingPointLimits):
-        if slice[0] < points[0]:
-            slice[0] = points[0]
-            sliceTuples[dimIdx] = slice
+    for dimIdx, _slice, points in zip(spectrum.dimensionIndices, _sliceTuples, spectrum.aliasingPointLimits):
+        # check if the region is not completely outside the spectrum;
+        # if so, issue a warning
+        if (_slice[0] < points[0] and _slice[1] < points[0]) or \
+           (_slice[0] > points[1] and _slice[1] > points[1]):
+            # region is fully outside the spectral range
+            logger.debug('_pickPeaksByRegion: %s: sliceTuples[%d]=%r out of range %r' %
+                       (spectrum, dimIdx, tuple(_slice), points))
+            logger.warning(f'could not pick peaks for {spectrum} in region {sliceTuples}; '\
+                           f'dimension {dimIdx+1},"{spectrum.axisCodes[dimIdx]}" = {tuple(_slice)} out of range {points}')
+            return []
+
+        if _slice[0] < points[0]:
+            _slice[0] = points[0]
+            _sliceTuples[dimIdx] = _slice
             cropped = True
-        if slice[1] > points[1]:
-            slice[1] = points[1]
-            sliceTuples[dimIdx] = slice
+        if _slice[1] > points[1]:
+            _slice[1] = points[1]
+            _sliceTuples[dimIdx] = _slice
             cropped = True
+
     # revert to a list of tuples
-    sliceTuples = [tuple(sl) for sl in sliceTuples]
+    _sliceTuples = [tuple(sl) for sl in _sliceTuples]
     if cropped:
-        logger.warning('_pickPeaksByRegion: cropped sliceTuples to %r' % sliceTuples)
+        logger.warning('_pickPeaksByRegion: %s: cropped sliceTuples from %r to %r' %
+                       (spectrum, sliceTuples, _sliceTuples))
 
     # set any additional parameters from preferences
     minDropFactor = preferences.general.peakDropFactor
@@ -2039,23 +2052,24 @@ def _pickPeaksByRegion(spectrum, sliceTuples, peakList, positiveThreshold, negat
                              setLineWidths=True
                              )
 
+    peaks = []
     with undoBlockWithoutSideBar():
 
         try:
-            pks = peakPicker.pickPeaks(sliceTuples=sliceTuples,
-                                       peakList=peakList,
-                                       positiveThreshold=positiveThreshold,
-                                       negativeThreshold=negativeThreshold
-                                       )
+            peaks = peakPicker.pickPeaks(sliceTuples=_sliceTuples,
+                                         peakList=peakList,
+                                         positiveThreshold=positiveThreshold,
+                                         negativeThreshold=negativeThreshold
+                                         )
 
         except Exception as err:
             # need to trap error that Nd spectra may not be defined in all dimensions of axisDict
-            logger.debug('_pickPeaks, trapped error: %s' % str(err))
+            logger.debug('_pickPeaks %s, trapped error: %s' % (spectrum, str(err)))
             logger.warning(f'could not pick peaks for {spectrum} in region {sliceTuples}')
-            if application._isInDebugMode:
-                raise  err
+            # if application._isInDebugMode:
+            #     raise  err
 
-    return tuple(pks)
+    return peaks
 
 def fetchPeakPicker(spectrum):
     """Get a peakPicker; either by restore from spectrum or the default relevant for spectrum

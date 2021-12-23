@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-09 17:40:32 +0000 (Tue, November 09, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 17:30:59 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -69,6 +69,7 @@ class _Ordered(object):
     """A class that maintains and sets trait-order
     """
     _globalTraitOrder = 0
+
     def __init__(self):
         self._traitOrder = _Ordered._globalTraitOrder
         _Ordered._globalTraitOrder += 1
@@ -139,7 +140,8 @@ class CBool(_CBool, _Ordered):
 
 
 class List(_List, _Ordered):
-    "Fixing default_value problem"
+    """Fixing default_value problem"""
+
     def __init__(self, trait=None, default_value=[], minlen=0, maxlen=sys.maxsize, **kwargs):
         _List.__init__(self, trait=trait, default_value=default_value, minlen=minlen, maxlen=maxlen, **kwargs)
         _Ordered.__init__(self)
@@ -148,10 +150,11 @@ class List(_List, _Ordered):
 
 
 class CList(List, _Ordered):
-    "Casting list, any iterable"
+    """Casting list, any iterable"""
 
     def validate(self, obj, values):
         from ccpn.util.Common import isIterable  # local import, because isotopeRecords in Common cause circular imports £%%$$GRr
+
         if isinstance(values, list):
             pass
         elif isIterable(values):
@@ -163,6 +166,8 @@ class CList(List, _Ordered):
 class RecursiveList(List):
     """A list trait that implements recursion of any of the values that are a CcpNmrJson (sub)type
     """
+
+
     # trait-specific json handler
     class jsonHandler(RecursiveListHandlerABC):
         klass = list
@@ -170,7 +175,8 @@ class RecursiveList(List):
 
 
 class Set(_Set, _Ordered):
-    "Fixing default_value problem"
+    """Fixing default_value problem"""
+
     def __init__(self, trait=None, default_value=None, minlen=0, maxlen=sys.maxsize, **kwargs):
         _Set.__init__(self, trait=trait, default_value=default_value, minlen=minlen, maxlen=maxlen, **kwargs)
         _Ordered.__init__(self)
@@ -181,6 +187,8 @@ class Set(_Set, _Ordered):
 class RecursiveSet(Set):
     """A Set trait that implements recursion of any of the values that are a CcpNmrJson (sub)type
     """
+
+
     # trait-specific json handler
     class jsonHandler(RecursiveListHandlerABC):
         klass = set
@@ -188,7 +196,8 @@ class RecursiveSet(Set):
 
 
 class Tuple(_Tuple, _Ordered):
-    "Fixing default_value problem"
+    """Fixing default_value problem"""
+
     def __init__(self, *traits, **kwargs):
         default_value = kwargs.setdefault('default_value', None)
         _Tuple.__init__(self, *traits, **kwargs)
@@ -200,6 +209,8 @@ class Tuple(_Tuple, _Ordered):
 class RecursiveTuple(Tuple):
     """A tuple trait that implements recursion of any of the values that are a CcpNmrJson (sub)type
     """
+
+
     # trait-specific json handler
     class jsonHandler(RecursiveListHandlerABC):
         klass = tuple
@@ -207,7 +218,8 @@ class RecursiveTuple(Tuple):
 
 
 class Dict(_Dict, _Ordered):
-    "Fixing default_value problem"
+    """Fixing default_value problem"""
+
     def __init__(self, trait=None, traits=None, default_value={}, **kwargs):
         _Dict.__init__(self, trait=trait, traits=traits, default_value=default_value, **kwargs)
         _Ordered.__init__(self)
@@ -219,6 +231,8 @@ class RecursiveDict(Dict):
     """A dict trait that implements recursion of any of the values that are a CcpNmrJson (sub)type
     Recursion is active by default, unless tagged with .tag(recursion=False)
     """
+
+
     # trait-specific json handler
     class jsonHandler(RecursiveDictHandlerABC):
         klass = dict
@@ -250,10 +264,13 @@ class Adict(TraitType, _Ordered):
         else:
             self.error(obj, value)
 
+
     # trait-specific json handler
     class jsonHandler(RecursiveDictHandlerABC):
         klass = AttributeDict
         recursion = False
+
+
 # end class
 
 
@@ -263,10 +280,13 @@ class RecursiveAdict(Adict):
     Recursion is active
     """
 
+
     # trait-specific json handler
     class jsonHandler(RecursiveDictHandlerABC):
         klass = AttributeDict
         recursion = True
+
+
 # end class
 
 
@@ -294,10 +314,13 @@ class Odict(TraitType, _Ordered):
         else:
             self.error(obj, value)
 
+
     # trait-specific json handler
     class jsonHandler(RecursiveDictHandlerABC):
         klass = OrderedDict
         recursion = False
+
+
 # end class
 
 
@@ -306,10 +329,14 @@ class RecursiveOdict(Odict):
     dicts are automatically cast into OrderedDict
     Recursion is active
     """
+
+
     # trait-specific json handler
     class jsonHandler(RecursiveDictHandlerABC):
         klass = OrderedDict
         recursion = True
+
+
 # end class
 
 
@@ -320,10 +347,12 @@ class Immutable(Any, _Ordered):
         TraitType.__init__(self, default_value=value, read_only=True)
         _Ordered.__init__(self)
 
+
     # trait-specific json handler
     class jsonHandler(TraitJsonHandlerBase):
         """Serialise Immutable to be json compatible.
         """
+
         # def encode(self, obj, trait): # inherits from base class
         #     return getattr(obj, trait)
 
@@ -331,6 +360,8 @@ class Immutable(Any, _Ordered):
             # force set value
             obj.setTraitValue(trait, value, force=True)
     # end class
+
+
 #end class
 
 
@@ -353,17 +384,19 @@ class CPath(TraitType, _Ordered):
             pass
 
         elif isinstance(value, pathlib.Path) or isinstance(value, str):
-            value =  Path(value)
+            value = Path(value)
 
         else:
             self.error(obj, value)
 
         return value
 
+
     # trait-specific json handler
     class jsonHandler(TraitJsonHandlerBase):
         """Serialise Path to be json compatible.
         """
+
         def encode(self, obj, trait):
             # stores as a str for json if not None
             value = getattr(obj, trait)
@@ -377,6 +410,8 @@ class CPath(TraitType, _Ordered):
                 value = Path(value)
             setattr(obj, trait, value)
     # end class
+
+
 # end class
 
 
@@ -396,14 +431,14 @@ class CString(TraitType, _Ordered):
             self.default_value = default_value
 
     def asBytes(self, value):
-        "Return value encoded as a bytes object; encode None"
+        """Return value encoded as a bytes object; encode None"""
         if value is None:
             value = self.NONE_VALUE
         return bytes(value, self.encoding)
 
     def fromBytes(self, value):
-        "Return value decoded from bytes object; decode NONE_VALUE to None"
-        # 3.1.0.alfa2: encoutered error that value was of type str
+        """Return value decoded from bytes object; decode NONE_VALUE to None"""
+        # 3.1.0.alpha2: encountered error that value was of type str
         if isinstance(value, bytes):
             value = value.decode(self.encoding)
         if value == self.NONE_VALUE:
@@ -417,7 +452,7 @@ class CString(TraitType, _Ordered):
             pass
 
         elif isinstance(value, bytes):
-            value =  self.fromBytes(value)
+            value = self.fromBytes(value)
             # Test again if None is allowed, as this was missed if it was encoded as NONE_VALUE
             if value is None and not self.allow_none:
                 self.error(obj, value)
@@ -426,6 +461,7 @@ class CString(TraitType, _Ordered):
             self.error(obj, value)
 
         return value
+
 
     # trait-specific json handler
     class jsonHandler(TraitJsonHandlerBase):

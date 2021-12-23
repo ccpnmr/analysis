@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:15 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 13:58:20 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -755,7 +755,7 @@ class Peak(AbstractWrapperObject):
         self.dimensionNmrAtoms = dimensionNmrAtoms
 
     def getByAxisCodes(self, parameterName: str, axisCodes: Sequence[str] = None,
-                       exactMatch: bool = False, matchLength: bool = True) -> list:
+                       exactMatch: bool = False) -> list:
         """Return a list of values defined by parameterName in order defined by axisCodes (default order if None).
         Perform a mapping if exactMatch=False (eg. 'H' to 'Hn')
 
@@ -773,7 +773,7 @@ class Peak(AbstractWrapperObject):
         if axisCodes is None:
             dimensions = self.spectrum.dimensions
         else:
-            dimensions = self.spectrum.orderByAxisCodes(self.spectrum.dimensions, axisCodes=axisCodes, exactMatch=exactMatch, matchLength=matchLength)
+            dimensions = self.spectrum.orderByAxisCodes(self.spectrum.dimensions, axisCodes=axisCodes, exactMatch=exactMatch)
 
         try:
             newValues = _getParameterValues(self, parameterName,
@@ -783,7 +783,7 @@ class Peak(AbstractWrapperObject):
 
         return newValues
 
-    def setByAxisCodes(self, parameterName: str, values: Sequence, axisCodes: Sequence[str] = None, exactMatch: bool = False, matchLength=True) -> list:
+    def setByAxisCodes(self, parameterName:str, values:Sequence, axisCodes:Sequence[str] = None, exactMatch: bool = False) -> list:
         """Set attributeName to values in order defined by axisCodes (default order if None)
         Perform a mapping if exactMatch=False (eg. 'H' to 'Hn')
 
@@ -802,7 +802,7 @@ class Peak(AbstractWrapperObject):
         if axisCodes is None:
             dimensions = self.spectrum.dimensions
         else:
-            dimensions = self.spectrum.orderByAxisCodes(self.spectrum.dimensions, axisCodes=axisCodes, exactMatch=exactMatch, matchLength=matchLength)
+            dimensions = self.spectrum.orderByAxisCodes(self.spectrum.dimensions, axisCodes=axisCodes, exactMatch=exactMatch)
 
         try:
             newValues = _setParameterValues(self, parameterName, values,
@@ -812,7 +812,7 @@ class Peak(AbstractWrapperObject):
 
         return newValues
 
-    def getByDimensions(self, parameterName: str, dimensions: Sequence[int] = None) -> list:
+    def getByDimensions(self, parameterName:str, dimensions:Sequence[int] = None) -> list:
         """Return a list of values of Peak dimensional attribute parameterName in order defined
         by dimensions (default order if None).
 
@@ -836,7 +836,7 @@ class Peak(AbstractWrapperObject):
 
         return newValues
 
-    def setByDimensions(self, parameterName: str, values: Sequence, dimensions: Sequence[int] = None) -> list:
+    def setByDimensions(self, parameterName:str, values:Sequence, dimensions:Sequence[int] = None) -> list:
         """Set Spectrum dimensional attribute parameterName to values in the order as defined by
         dimensions (1..dimensionCount)(default order if None)
 

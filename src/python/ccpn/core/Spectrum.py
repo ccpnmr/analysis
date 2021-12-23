@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 13:15:21 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 13:58:20 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -65,11 +65,9 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from typing import Sequence, Tuple, Optional, Union, List
 from functools import partial
 from itertools import permutations
-from tabulate import tabulate
 import numpy
 
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-from ccpnmodel.ccpncore.api.ccp.general import DataLocation
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -178,19 +176,19 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     #-----------------------------------------------------------------------------------------
 
     @property
-    def peakLists(self):
+    def peakLists(self) -> list:
         """STUB: hot-fixed later"""
-        return ()
+        return []
 
     @property
-    def multipletLists(self):
+    def multipletLists(self) -> list:
         """STUB: hot-fixed later"""
-        return ()
+        return []
 
     @property
-    def integralLists(self):
+    def integralLists(self) -> list:
         """STUB: hot-fixed later"""
-        return ()
+        return []
 
     @property
     def spectrumViews(self) -> tuple:
@@ -214,7 +212,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @property
     def spectrumDimensions(self) -> tuple:
-        """:return A list with the spectrum dimension (== SpectrumReference or PseudoDimension) instances
+        """:return A tuple with the spectrum dimensions (== SpectrumReference or PseudoDimension) instances
         """
         if self._spectrumDimensions is None:
             data2obj = self.project._data2Obj
@@ -228,12 +226,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
             sDims = [data2obj.get(dim) for dim in dataDims]
             self._spectrumDimensions = tuple(sDims)
-        return self._spectrumDimensions
+        return tuple(self._spectrumDimensions)
 
     @property
     def spectrumHits(self) -> list:
         """STUB: hot-fixed later"""
-        return None
+        return []
 
     @property
     def sample(self):
@@ -1254,7 +1252,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """Return a tuple of sorted(minAliasingPointLimit, maxAliasingPointLimit) per dimension.
         i.e. The actual point limits of the full (including the aliased regions) limits.
         """
-        return self._getDimensionalAttributes('aliasingPointLimits')
+        return tuple(self._getDimensionalAttributes('aliasingPointLimits'))
 
     @property
     def aliasingIndexes(self) -> Tuple[Tuple[int,int], ...]:
@@ -1749,7 +1747,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             raise ValueError('axisCodes %r contains an invalid element' % axisCodes)
         return [axisCodeMap[a] for a in axisCodes]
 
-    def orderByAxisCodes(self, iterable, axisCodes: Sequence[str] = None, exactMatch: bool = False, matchLength: bool = True) -> list:
+    def orderByAxisCodes(self, iterable, axisCodes: Sequence[str] = None, exactMatch: bool = False) -> list:
         """Return a list with values of an iterable in order defined by axisCodes (default order if None).
         Perform a mapping if exactMatch=False (eg. 'H' to 'Hn')
 
@@ -1769,15 +1767,17 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             axisCodes = self.axisCodes
 
         else:
-            # do some optional axis code matching
             if not isIterable(axisCodes):
                 raise ValueError('%s.orderByAxisCodes: axisCodes is not iterable "%s"; expected list or tuple' %
                                  (self.className, axisCodes))
+
+            # do some optional axis code matching
             if not exactMatch:
                 if (_axisCodes := self._mapAxisCodes(axisCodes)) is None:
                     raise ValueError('%s.orderByAxisCodes: Failed mapping axisCodes "%s"' %
                                      (self.className, axisCodes))
                 axisCodes = _axisCodes
+
 
         # we now should have valid axisCodes
         for ac in axisCodes:
@@ -1789,12 +1789,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         mapping = dict([(ac, dim) for dimIndx, ac, dim in self.dimensionTriples])
         # get the dimensions in axisCode order
         dimensions = [mapping[ac] for ac in axisCodes]
-        # get the values of iterable in axisCode order
+        # get the values of iterable in axisCode==dimensions order
         values = _orderByDimensions(iterable, dimensions=dimensions, dimensionCount=self.dimensionCount)
         return values
 
     def getByAxisCodes(self, parameterName: str, axisCodes: Sequence[str] = None,
-                       exactMatch: bool = False, matchLength: bool = True) -> list:
+                       exactMatch: bool = False) -> list:
         """Return a list of values defined by parameterName in order defined by axisCodes (default order if None).
         Perform a mapping if exactMatch=False (eg. 'H' to 'Hn')
 
@@ -1812,7 +1812,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         if axisCodes is None:
             dimensions = self.dimensions
         else:
-            dimensions = self.orderByAxisCodes(self.dimensions, axisCodes=axisCodes, exactMatch=exactMatch, matchLength=matchLength)
+            dimensions = self.orderByAxisCodes(self.dimensions, axisCodes=axisCodes, exactMatch=exactMatch)
 
         try:
             newValues = _getParameterValues(self, parameterName,
@@ -1822,8 +1822,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         return newValues
 
-    def setByAxisCodes(self, parameterName: str, values: Sequence, axisCodes: Sequence[str] = None,
-                       exactMatch: bool = False, matchLength: bool = True) -> list:
+    def setByAxisCodes(self, parameterName:str, values:Sequence, axisCodes:Sequence[str] = None,
+                       exactMatch:bool = False, matchLength:bool = True) -> list:
         """Set attributeName to values in order defined by axisCodes (default order if None)
         Perform a mapping if exactMatch=False (eg. 'H' to 'Hn')
 
@@ -1842,7 +1842,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         if axisCodes is None:
             dimensions = self.dimensions
         else:
-            dimensions = self.orderByAxisCodes(self.dimensions, axisCodes=axisCodes, exactMatch=exactMatch, matchLength=matchLength)
+            dimensions = self.orderByAxisCodes(self.dimensions, axisCodes=axisCodes, exactMatch=exactMatch)
 
         try:
             newValues = _setParameterValues(self, parameterName, values,
@@ -1864,13 +1864,13 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             dimensions = self.dimensions
         return _orderByDimensions(iterable, dimensions=dimensions, dimensionCount=self.dimensionCount)
 
-    def getByDimensions(self, parameterName: str, dimensions: Sequence[int] = None) -> list:
+    def getByDimensions(self, parameterName:str, dimensions:Sequence[int] = None) -> list:
         """Return a list of values of Spectrum dimensional attribute parameterName in order defined
         by dimensions (default order if None).
 
         :param parameterName: a str denoting a Spectrum dimensional attribute
         :param dimensions: a tuple or list of dimensions (1..dimensionCount)
-        :return: the values defined by parameterName in dimensions order
+        :return: a list of values defined by parameterName in dimensions order
 
         Related:
         Use getByAxisCodes() for axisCode based access of dimensional parameters of the Spectrum class.
@@ -1888,11 +1888,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         return newValues
 
-    def setByDimensions(self, parameterName: str, values: Sequence, dimensions: Sequence[int] = None) -> list:
+    def setByDimensions(self, parameterName: str, values:Sequence, dimensions:Sequence[int] = None) -> list:
         """Set Spectrum dimensional attribute parameterName to values in the order as defined by
         dimensions (1..dimensionCount)(default order if None)
 
         :param parameterName: a str denoting a Spectrum dimensional attribute
+        :param values: a list of values to set for each dimension
         :param dimensions: a tuple or list of dimensions (1..dimensionCount)
         :return: a list of newly set values of parameterName (in default order)
 
@@ -1996,12 +1997,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """Return True if dataSource of spectrum is buffered
         """
         if self._dataSource is None:
-            False
+            return False
         return self._dataSource.isBuffered
 
-    def setBuffering(self, isBuffered, path=None):
+    def setBuffering(self, isBuffered:bool, path:str = None):
         """Set temporary Hdf5-buffering.
-        :param isBuffered (True, False): set the buffering status
+        :param isBuffered: set the buffering status
         :param path: store hdf5buffer file at path; implies non-temporary buffer
         """
         if self._dataSource is None:
@@ -2424,9 +2425,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             else:
                 stopPoint = int(self.ppm2point(stopPpm, dimension=idx + 1) + 0.5)
 
-            # check that the point values are not outside the maximum aliasing limits
-            # startPoint = max(startPoint, -MAXALIASINGRANGE * self.pointCounts[dimIndex])
-            # stopPoint = min(stopPoint, (MAXALIASINGRANGE + 1) * self.pointCounts[dimIndex])
             sliceTuples[dimIndex] = (startPoint, stopPoint)
 
         getLogger().debug('Spectrum._axisDictToSliceTuples: axisDict = %s; sliceTuples = %s' %

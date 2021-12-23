@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:17 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 11:38:41 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1921,63 +1921,63 @@ def _createPeak(spectrum, peakList=None, **ppmPositions) -> Optional['Peak']:
                 return pk
 
 
-def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshold=None, **ppmRegions) -> Tuple['Peak', ...]:
-    """Pick peaks in the region defined by the ppmRegions dict.
-
-    Ppm regions are passed in as a dict containing the axis codes and the required limits.
-    Each limit is defined as a key, value pair: (str, tuple), with the tuple supplied as (min, max) axis limits in ppm.
-    Axis codes supplied are mapped to the closest matching axis.
-
-    Illegal or non-matching axisCodes will return None.
-
-    Example ppmRegions dict:
-
-    ::
-
-        {'Hn': (7.0, 9.0),
-         'Nh': (110, 130)
-         }
-
-    Example calling function:
-
-    >>> peaks = spectrum.pickPeaks(**regionsDict)
-    >>> peaks = spectrum.pickPeaks(peakList, **regionsDict)
-    >>> peaks = spectrum.pickPeaks(peakList=peakList, Hn=(7.0, 9.0), Nh=(110, 130))
-
-    :param peakList: peakList to create new peak in, or None for the last peakList belonging to spectrum
-    :param positiveThreshold: float or None specifying the positive threshold above which to find peaks.
-                              if None, positive peak picking is disabled.
-    :param negativeThreshold: float or None specifying the negative threshold below which to find peaks.
-                              if None, negative peak picking is disabled.
-    :param ppmRegions: dict of (axisCode, tupleValue) key, value pairs
-    :return: tuple of new peaks
-    """
-    # local import as cycles otherwise
-    from ccpn.core.Spectrum import Spectrum
-
-    application = getApplication()
-    preferences = application.preferences
-    logger = getLogger()
-
-    if spectrum is None or not isinstance(spectrum, Spectrum):
-        raise ValueError('_pickPeaks: required Spectrum instance, got:%r' % spectrum)
-
-    if peakList is None:
-        peakList = spectrum.peakLists[-1]
-
-
-    # get the dimensions by mapping the keys of the ppmRegions dict
-    dimensions = spectrum.getByAxisCodes('dimensions', [a for a in ppmRegions.keys()])
-    # now get all other parameters in dimensions order
-    axisCodes = spectrum.getByDimensions('axisCodes', dimensions)
-    ppmValues = [sorted(float(pos) for pos in region) for region in ppmRegions.values()]
-    ppmValues = spectrum.orderByDimensions(ppmValues, dimensions) # sorted in order of dimensions
-
-    axisDict = dict((axisCode, region) for axisCode, region in zip(axisCodes, ppmValues))
-    sliceTuples = spectrum._axisDictToSliceTuples(axisDict)
-
-    return _pickPeaksByRegion(spectrum, sliceTuples= sliceTuples, peakList=peakList,
-                              positiveThreshold=positiveThreshold, negativeThreshold=negativeThreshold)
+# def _pickPeaks(spectrum, peakList=None, positiveThreshold=None, negativeThreshold=None, **ppmRegions) -> Tuple['Peak', ...]:
+#     """Pick peaks in the region defined by the ppmRegions dict.
+#
+#     Ppm regions are passed in as a dict containing the axis codes and the required limits.
+#     Each limit is defined as a key, value pair: (str, tuple), with the tuple supplied as (min, max) axis limits in ppm.
+#     Axis codes supplied are mapped to the closest matching axis.
+#
+#     Illegal or non-matching axisCodes will return None.
+#
+#     Example ppmRegions dict:
+#
+#     ::
+#
+#         {'Hn': (7.0, 9.0),
+#          'Nh': (110, 130)
+#          }
+#
+#     Example calling function:
+#
+#     >>> peaks = spectrum.pickPeaks(**regionsDict)
+#     >>> peaks = spectrum.pickPeaks(peakList, **regionsDict)
+#     >>> peaks = spectrum.pickPeaks(peakList=peakList, Hn=(7.0, 9.0), Nh=(110, 130))
+#
+#     :param peakList: peakList to create new peak in, or None for the last peakList belonging to spectrum
+#     :param positiveThreshold: float or None specifying the positive threshold above which to find peaks.
+#                               if None, positive peak picking is disabled.
+#     :param negativeThreshold: float or None specifying the negative threshold below which to find peaks.
+#                               if None, negative peak picking is disabled.
+#     :param ppmRegions: dict of (axisCode, tupleValue) key, value pairs
+#     :return: tuple of new peaks
+#     """
+#     # local import as cycles otherwise
+#     from ccpn.core.Spectrum import Spectrum
+#
+#     application = getApplication()
+#     preferences = application.preferences
+#     logger = getLogger()
+#
+#     if spectrum is None or not isinstance(spectrum, Spectrum):
+#         raise ValueError('_pickPeaks: required Spectrum instance, got:%r' % spectrum)
+#
+#     if peakList is None:
+#         peakList = spectrum.peakLists[-1]
+#
+#
+#     # get the dimensions by mapping the keys of the ppmRegions dict
+#     dimensions = spectrum.getByAxisCodes('dimensions', [a for a in ppmRegions.keys()])
+#     # now get all other parameters in dimensions order
+#     axisCodes = spectrum.getByDimensions('axisCodes', dimensions)
+#     ppmValues = [sorted(float(pos) for pos in region) for region in ppmRegions.values()]
+#     ppmValues = spectrum.orderByDimensions(ppmValues, dimensions) # sorted in order of dimensions
+#
+#     axisDict = dict((axisCode, region) for axisCode, region in zip(axisCodes, ppmValues))
+#     sliceTuples = spectrum._axisDictToSliceTuples(axisDict)
+#
+#     return _pickPeaksByRegion(spectrum, sliceTuples= sliceTuples, peakList=peakList,
+#                               positiveThreshold=positiveThreshold, negativeThreshold=negativeThreshold)
 
 
 def _pickPeaksByRegion(spectrum, sliceTuples, peakList, positiveThreshold, negativeThreshold) -> Tuple['Peak', ...]:

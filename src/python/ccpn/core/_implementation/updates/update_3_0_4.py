@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:16 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-12-23 17:32:49 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ __date__ = "$Date: 2021-11-10 10:28:41 +0000 (Wed, November 10, 2021) $"
 
 import pandas as pd
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
+from ccpn.util.Logging import getLogger
 
 
 def _updateSpectrum_3_0_4_to_3_1_0(spectrum):
@@ -53,8 +54,12 @@ def _updateSpectrum_NC_proc(spectrum):
             spectrum.scale /= scale
 
         else:
+            if not spectrum._dataSource:
+                getLogger().warning('Spectrum has no dataSource')
+                return
+
             scale = spectrum._dataSource.dataScale
-            if spectrum.dimensionCount >=2:
+            if spectrum.dimensionCount >= 2:
                 spectrum.positiveContourBase *= scale
                 spectrum.negativeContourBase *= scale
 
@@ -169,6 +174,7 @@ def _updateChemicalShiftList_3_0_4_to_3_1_0(chemicalShiftList):
         # set as the new subclassed DataFrameABC - not using yet, may have undo/redo issues
         chemicalShiftList._wrappedData.data = df  #_ChemicalShiftListFrame(df)
 
+
 def _updateStrip_3_0_4_to_3_1_0(strip):
     """Update the strip object from 3.0.4 to 3.1.0
     """
@@ -179,6 +185,7 @@ def _updateStrip_3_0_4_to_3_1_0(strip):
         strip._ccpnInternalData[strip._CCPNMR_NAMESPACE].update(space)
 
     return strip
+
 
 def _updateSpectumDisplay_3_0_4_to_3_1_0(spectrumDisplay):
     """Update the spectrumDisplay object from 3.0.4 to 3.1.0

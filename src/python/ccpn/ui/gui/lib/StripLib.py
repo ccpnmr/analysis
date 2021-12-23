@@ -1,5 +1,5 @@
 """
-Module Documentation.
+Strip Library functionalities
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:18 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 15:18:25 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import typing
+from typing import List, Tuple
 
 from ccpn.core._OldChemicalShift import _OldChemicalShift
 from ccpn.core.NmrAtom import NmrAtom
@@ -47,8 +48,10 @@ def _getCurrentZoomRatio(viewRange):
     return xRatio, yRatio
 
 
-def navigateToPositionInStrip(strip, positions: typing.List[float], axisCodes: typing.List[str] = None,
-                              widths: typing.List[float] = None):
+def navigateToPositionInStrip(strip,
+                              positions:List[float],
+                              axisCodes:List[str] = None,
+                              widths:List[float] = None):
     """
     Takes a strip, a list of positions and optionally, a parallel list of axisCodes.
     Navigates to specified positions in strip using axisCodes, if specified, otherwise it navigates

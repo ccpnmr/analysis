@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-10 12:56:37 +0000 (Wed, November 10, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2021-12-23 15:18:25 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -365,7 +365,7 @@ class GuiRestraintTable(GuiTable):
 
         from ccpn.ui.gui.widgets.MessageDialog import showWarning
         from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
-        from ccpn.ui.gui.lib.Strip import _getCurrentZoomRatio, navigateToPositionInStrip
+        from ccpn.ui.gui.lib.StripLib import _getCurrentZoomRatio, navigateToPositionInStrip
 
         if restraint and restraint.peaks:
             self.current.peaks = restraint.peaks

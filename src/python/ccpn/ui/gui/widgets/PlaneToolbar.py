@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:19 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 15:18:25 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -288,7 +288,7 @@ class PlaneSelectorWidget(Frame):
     def _initialise(self, strip=None, axis=None):
         """Set the initial values for the plane selector
         """
-        from ccpn.ui.gui.lib.Strip import GuiStrip
+        from ccpn.ui.gui.lib.GuiStrip import GuiStrip
 
         strip = self.project.getByPid(strip) if isinstance(strip, str) else strip
         if not isinstance(strip, GuiStrip):

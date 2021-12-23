@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:18 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 15:18:24 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -689,7 +689,7 @@ class GuiStrip(Frame):
         pass
 
     def _createMenuItemForNavigate(self, currentStrip, navigateAxes, navigatePos, showPos, strip, menuFunc, label, includeAxisCodes=True):
-        from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
+        from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip
 
         if includeAxisCodes:
             item = ', '.join([cc + ":" + str(x if isinstance(x, str) else round(x, 3)) for x, cc in zip(showPos, strip.axisCodes)])
@@ -848,7 +848,7 @@ class GuiStrip(Frame):
         """Mark the X/Y/XY axisCodes by index
         """
         from functools import partial
-        from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
+        from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip
 
         position = [self.current.mouseMovedDict[AXIS_FULLATOMNAME][ax] for ax in self.axisCodes]
         if indices is None:
@@ -2435,7 +2435,7 @@ class GuiStrip(Frame):
     def navigateToPosition(self, positions: typing.List[float],
                            axisCodes: typing.List[str] = None,
                            widths: typing.List[float] = None):
-        from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
+        from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip
 
         navigateToPositionInStrip(self, positions, axisCodes, widths)
 

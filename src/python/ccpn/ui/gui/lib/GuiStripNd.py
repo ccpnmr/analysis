@@ -34,7 +34,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:18 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 15:18:24 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -53,7 +53,7 @@ from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, undoStackBloc
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, IntegralMenu, MultipletMenu, PhasingMenu, AxisMenu
 from ccpn.ui.gui.lib.GuiStripContextMenus import _getNdPhasingMenu, _getNdDefaultMenu, _getNdPeakMenu, \
     _getNdIntegralMenu, _getNdMultipletMenu, _getNdAxisMenu
-from ccpn.ui.gui.lib.Strip import copyStripPosition
+from ccpn.ui.gui.lib.StripLib import copyStripPosition
 from ccpn.ui.gui.guiSettings import ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Frame import OpenGLOverlayFrame
@@ -127,7 +127,7 @@ class GuiStripNd(GuiStrip):
 
     def __init__(self, spectrumDisplay):
         """
-        Initialise Nd spectra object
+        Initialise Nd Strip object
     
         :param spectrumDisplay: spectrumDisplay instance
         """
@@ -169,21 +169,6 @@ class GuiStripNd(GuiStrip):
         # TEST: ED new plane widgets
 
         self.planeToolbar = None
-
-        # # TODO: this should be refactored; together with the 'Z-plane' mess: should general, to be used for other dimensions
-        # # Adds the plane toolbar to the strip.
-        # callbacks = [self.prevZPlane, self.nextZPlane, self._setZPlanePosition, self._changePlaneCount]
-        # self.planeToolbar = PlaneToolbar(self._stripToolBarWidget, strip=self, callbacks=callbacks,
-        #                                  grid=(0, 0), hPolicy='minimum', hAlign='center', vAlign='center',
-        #                                  stripArrangement=getattr(self.spectrumDisplay, 'stripArrangement', None),
-        #                                  containers=self._stripAxisCodes)
-        #
-        # self._resize()
-
-        #self._stripToolBarWidget.addWidget(self.planeToolbar)
-        #self.planeToolBar.hide()
-        # test
-        #PlaneSelectorWidget(qtParent=self._stripToolBarWidget, strip=self, axis=2, grid=(0,1))
 
         # tuple of "plane-selection" widgets; i.e. for 3D, 4D, etc
         self.planeAxisBars = ()

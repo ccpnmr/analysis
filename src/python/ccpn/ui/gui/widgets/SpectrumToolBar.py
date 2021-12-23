@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-23 10:00:05 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 17:50:23 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -77,25 +77,6 @@ class SpectrumToolBar(ToolBar):
         painter.fillRect(pixmap.rect(), QtGui.QColor(0, 0, 0, 127))
         painter.end()
         return pixmap
-
-    # def _updateSpectrumViews(self, newIndex):
-    #     newSpectrumViewsOrder = []
-    #
-    #     for action in self.actions():
-    #         spectrumView = self.widget.project.getByPid(action.spectrumViewPid)
-    #         newSpectrumViewsOrder.append(spectrumView)
-    #
-    #     # self.widget.project.blankNotification()
-    #     # newIndex = [newIndex.index(ii) for ii in self.widget._getOrderedSpectrumViewsIndex()]
-    #     newIndex = tuple(self.widget._getOrderedSpectrumViewsIndex()[ii] for ii in newIndex)
-    #     self.widget._setOrderedSpectrumViewsIndex(newIndex)
-    #
-    #     from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import GLNotifier
-    #
-    #     GLSignals = GLNotifier(parent=None)
-    #
-    #     # GLSignals.emitPaintEvent()
-    #     GLSignals._emitAxisUnitsChanged(source=None, strip=self.widget.strips[0], dataDict={})
 
     def _addSubMenusToContext(self, contextMenu, button):
 
@@ -182,16 +163,16 @@ class SpectrumToolBar(ToolBar):
         contextMenu = Menu('', self.widget, isFloatWidget=True)
         dd = OrderedDict([(PeakList, PeakListView), (IntegralList, IntegralListView), (MultipletList, MultipletListView)])
         for coreObj, viewObj in dd.items():
-                smenuItems = []
-                smenu = contextMenu.addMenu(coreObj.className)
-                labelsBools = OrderedDict([('Show All',True),
-                                           ('Hide All',False)])
-                for label, abool in labelsBools.items():
-                    item = _SCMitem(name=label,
-                                    typeItem=ItemTypes.get(ITEM), icon='icons/null',
-                                    callback=partial(self._toggleAllViews,viewObj._pluralLinkName,abool))
-                    smenuItems.append(item)
-                _addMenuItems(self.widget, smenu, smenuItems)
+            smenuItems = []
+            smenu = contextMenu.addMenu(coreObj.className)
+            labelsBools = OrderedDict([('Show All', True),
+                                       ('Hide All', False)])
+            for label, abool in labelsBools.items():
+                item = _SCMitem(name=label,
+                                typeItem=ItemTypes.get(ITEM), icon='icons/null',
+                                callback=partial(self._toggleAllViews, viewObj._pluralLinkName, abool))
+                smenuItems.append(item)
+            _addMenuItems(self.widget, smenu, smenuItems)
 
         return contextMenu
 
@@ -201,9 +182,8 @@ class SpectrumToolBar(ToolBar):
         :param abool: True or False
         :return: Toggles all Views on display
         """
-        for view in getattr(self.widget,viewPluralLinkName):
+        for view in getattr(self.widget, viewPluralLinkName):
             view.setVisible(abool)
-
 
     def _createContextMenu(self, button: QtWidgets.QToolButton):
         """
@@ -344,7 +324,7 @@ class SpectrumToolBar(ToolBar):
                     if nextButton == toolButton:
                         return
 
-                    # get the new index and call _setOrderedSpectrumViewsIndex
+                    # get the new index and move the spectrum
                     startInd = allActionsTexts.index(toolButton.text())
                     endInd = allActionsTexts.index(nextButton.text())
                     self.widget.moveSpectrumByIndex(startInd, endInd)

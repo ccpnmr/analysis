@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-17 13:13:36 +0000 (Fri, December 17, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-23 17:50:23 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -35,7 +35,6 @@ from ccpn.util.Logging import getLogger
 
 
 class SpectrumDisplay1d(GuiSpectrumDisplay):
-
     MAXPEAKLABELTYPES = 6
     MAXPEAKSYMBOLTYPES = 4
 
@@ -54,9 +53,6 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
         # TBD: this might change so that we can use wrapper peak (which would make nicer code in showPeaks and deletedPeak below)
         ###self.inactivePeakItems = set() # contains unused peakItems
         self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to set of peaks which are not being displayed
-
-        # store the list of ordered spectrumViews/spectra
-        self._orderedSpectrumViewsHandler = None
 
     def _fillToolBar(self):
         """
@@ -99,10 +95,11 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
 
     def adjustContours(self):
         # insert popup to modify contours
-        popup = SpectrumDisplayPropertiesPopup1d(parent=self.mainWindow, mainWindow=self.mainWindow,
-                                                 orderedSpectrumViews=self._orderedSpectrumViews(self.strips[0].spectrumViews))
-        popup.exec_()
-        popup.raise_()
+        if self.strips:
+            popup = SpectrumDisplayPropertiesPopup1d(parent=self.mainWindow, mainWindow=self.mainWindow,
+                                                     orderedSpectrumViews=self.strips[0].getSpectrumViews())
+            popup.exec_()
+            popup.raise_()
 
     def raiseContourBase(self):
         """

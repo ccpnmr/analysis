@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 13:15:21 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-12-23 17:50:23 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -47,9 +47,9 @@ from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, undoBlockWithoutSideBar, deleteObject, renameObject
 from ccpn.util.Logging import getLogger
 
-
 from ccpn.core._implementation.updates.update_3_0_4 import _updateSpectumDisplay_3_0_4_to_3_1_0
 from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_OBJECT_INITIALISATION
+
 
 @updateObject(fromVersion='3.0.4',
               toVersion='3.1.0',
@@ -74,9 +74,6 @@ class SpectrumDisplay(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiBoundDisplay._metaclass.qualifiedName()
-
-    # store the list of ordered spectrumViews
-    _orderedSpectrumViewsHandler = None
 
     # Internal namespace
     _ISOTOPECODES_KEY = '_isotopeCodes'
@@ -207,7 +204,7 @@ class SpectrumDisplay(AbstractWrapperObject):
         """
         if (result := self._getInternalParameter(self._ISOTOPECODES_KEY)) is None:
             # Try to reconstruct from any possible spectrum
-            result = [None]*self.dimensionCount
+            result = [None] * self.dimensionCount
             for sv in self.spectrumViews:
                 if sv.dimensionCount == self.dimensionCount:
                     result = sv.isotopeCodes
@@ -245,7 +242,7 @@ class SpectrumDisplay(AbstractWrapperObject):
         """
         if (result := self._getInternalParameter(self._DIMENSIONTYPES_KEY)) is None:
             # Try to reconstruct from any possible spectrum
-            result = [None]*self.dimensionCount
+            result = [None] * self.dimensionCount
             for sv in self.spectrumViews:
                 if sv.dimensionCount == self.dimensionCount:
                     result = sv.dimensionTypes
@@ -341,7 +338,6 @@ class SpectrumDisplay(AbstractWrapperObject):
 
     def _getSpectra(self):
         if len(self.strips) > 0:  # strips
-            # return [x.spectrum for x in self._orderedSpectrumViews(self.strips[0].spectrumViews)]
             return self.strips[0].getSpectra()
 
     @renameObject()
@@ -372,29 +368,6 @@ class SpectrumDisplay(AbstractWrapperObject):
 
         return (oldName,)
 
-    # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # # ejb - orderedSpectrumViews, orderedSpectra
-    # # store the current orderedSpectrumViews in the internal data store
-    # # so it is hidden from external users
-
-    def _orderedSpectrumViews(self, spectrumList) -> Optional[Tuple]:
-        """
-        The spectrumViews attached to the strip (ordered)
-        :return tuple of SpectrumViews:
-        """
-        if not self._orderedSpectrumViewsHandler:
-            self._orderedSpectrumViewsHandler = OrderedSpectrumViews(parent=self)
-        return self._orderedSpectrumViewsHandler.orderedItems((spectrumList or self.strips[0].spectrumViews))
-
-    def _getOrderedSpectrumViewsIndex(self) -> Optional[Tuple]:
-        """
-        The indexing of the current spectrumViews
-        :return tuple of ints:
-        """
-        if not self._orderedSpectrumViewsHandler:
-            self._orderedSpectrumViewsHandler = OrderedSpectrumViews(parent=self)
-        return self._orderedSpectrumViewsHandler.order or ()
-
     def _rescaleSpectra(self):
         """Reorder the buttons and spawn a redraw event
         """
@@ -410,23 +383,18 @@ class SpectrumDisplay(AbstractWrapperObject):
         """Move spectrum in spectrumDisplay list from index startInd to endInd
         startInd/endInd are the order as seen in the spectrumToolbar
         """
-        # _order = self._getOrderedSpectrumViewsIndex()
-        # _newOrder = list(_order)
-        #
-        # _last = _newOrder.pop(startInd)
-        # _newOrder.insert(endInd, _last)
-        #
-        # self._setOrderedSpectrumViewsIndex(tuple(_newOrder))
+        if not self.strips:
+            getLogger().warning(f'SpectrumDisplay {self} does not contain strips')
+            return
 
-        # orderedSV = list(self.strips[0].getSpectrumViews())
-        # last = orderedSV.pop(startInd)
-        # orderedSV.insert(endInd, last)
-        # self.strips[0]._setSpectrumViews(orderedSV)
-        #
-        # self._rescaleSpectra()
+        specViews = self.strips[0].getSpectrumViews()
+        if not (0 <= startInd < len(specViews) and 0 <= endInd < len(specViews)):
+            raise ValueError('startInd/endInd out of range')
+        if startInd == endInd:
+            getLogger().warning('SpectrumDisplay.moveSpectrumByIndex: startInd = endInd')
+            return
 
-        with undoStackBlocking() as _:  # Do not add to undo/redo stack
-
+        with undoStackBlocking():  # Do not add to undo/redo stack
             # rebuild the display when the ordering has changed
             with undoStackBlocking() as addUndoItem:
                 addUndoItem(undo=self._rescaleSpectra)
@@ -436,6 +404,7 @@ class SpectrumDisplay(AbstractWrapperObject):
             orderedSV.insert(endInd, last)
             self.strips[0]._setSpectrumViews(orderedSV)
 
+            # rebuild the displays
             self._rescaleSpectra()
 
             # rebuild the display when the ordering has changed
@@ -447,88 +416,32 @@ class SpectrumDisplay(AbstractWrapperObject):
         Set the new indexing of the spectrumViews attached to the strip/spectrumDisplay
         :param spectrumIndex - tuple of integers
         """
-        # TODO:ED this should really be in GuiSpectrumDisplay
-        if not all(isinstance(val, int) for val in spectrumIndex):
-            raise ValueError("spectrum indexing values must be Int")
+        if not all(isinstance(val, int) and val >= 0 for val in spectrumIndex):
+            raise ValueError("spectrum indexing values must be non-negative Int")
+        if len(spectrumIndex) != len(set(spectrumIndex)) or max(spectrumIndex) != len(spectrumIndex) - 1:
+            raise ValueError("spectrum indexing values badly defined")
+        if not self.strips:
+            getLogger().warning(f'SpectrumDisplay {self} does not contain strips')
+            return
 
-        # with undoBlockWithoutSideBar():
-        with undoStackBlocking() as _:  # Do not add to undo/redo stack
-
+        with undoStackBlocking():  # Do not add to undo/redo stack
             # rebuild the display when the ordering has changed
             with undoStackBlocking() as addUndoItem:
-                addUndoItem(undo=self._rescaleSpectra)
+                addUndoItem(undo=self._rescaleSpectra)  # keep for the minute, may need for gui undo/redo
 
-            if not self._orderedSpectrumViewsHandler:
-                self._orderedSpectrumViewsHandler = OrderedSpectrumViews(parent=self)
-            self._orderedSpectrumViewsHandler.order = spectrumIndex
+            specViews = self.strips[0].getSpectrumViews()
+            specViews = [specViews[ii] for ii in spectrumIndex]
+            self.strips[0]._setSpectrumViews(specViews)
+
             self._rescaleSpectra()
 
             # rebuild the display when the ordering has changed
             with undoStackBlocking() as addUndoItem:
                 addUndoItem(redo=self._rescaleSpectra)
 
-    # def _removeOrderedSpectrumViewIndex(self, index):
-    #     # self.removeOrderedSpectrumView(index)
-    #     pass
-
-    # @logCommand(get='self')
-    # def removeOrderedSpectrumView(self, ind):
-    #     if not isinstance(ind, int):
-    #         raise TypeError('ind %s is not of type Int' % str(ind))
-    #
-    #     index = ind  #.spectrumViews.index(spectrumView)
-    #     with undoBlockWithoutSideBar():
-    #
-    #         if not self._orderedSpectrumViewsHandler:
-    #             self._orderedSpectrumViewsHandler = OrderedSpectrumViews(parent=self)
-    #         oldIndex = list(self._getOrderedSpectrumViewsIndex())
-    #
-    #         # rebuild the display when the ordering has changed
-    #         with undoStackBlocking() as addUndoItem:
-    #             addUndoItem(undo=self._rescaleSpectra)
-    #
-    #         # index = oldIndex.index(ind)
-    #         oldIndex.remove(index)
-    #         for ii in range(len(oldIndex)):
-    #             if oldIndex[ii] > index:
-    #                 oldIndex[ii] -= 1
-    #         # self._orderedSpectrumViews.setOrder(spectrumIndex=oldIndex)
-    #         self._orderedSpectrumViewsHandler.order = oldIndex
-    #
-    #         # rebuild the display when the ordering has changed
-    #         with undoStackBlocking() as addUndoItem:
-    #             addUndoItem(redo=self._rescaleSpectra)
-
-    # CCPN functions
-
-    # @logCommand(get='self')
-    # def resetAxisOrder(self):
-    #     """Reset display to original axis order"""
-    #
-    #     with undoBlockWithoutSideBar():
-    #         self._wrappedData.resetAxisOrder()
-
     def findAxis(self, axisCode):
         """Find axis """
         return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
-
-    # def appendSpectrumView(self, spectrumView):
-    #   """
-    #   Append a SpectrumView to the end of the ordered spectrumviews
-    #   :param spectrumView - new SpectrumView:
-    #   """
-    #   if not self._orderedSpectrumViews:
-    #     self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
-    #   self._orderedSpectrumViews.appendSpectrumView(spectrumView)
-    #
-    # def removeSpectrumView(self, spectrumView):
-    #   """
-    #   Remove a SpectrumView from the ordered spectrumviews
-    #   :param spectrumView - SpectrumView to be removed:
-    #   """
-    #   if not self._orderedSpectrumViews:
-    #     self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
-    #   self._orderedSpectrumViews.removeSpectrumView(spectrumView)
 
     @property
     def orderedStrips(self):
@@ -612,7 +525,9 @@ class SpectrumDisplay(AbstractWrapperObject):
         """Make copy of strip in self, at position newIndex - or rightmost.
         """
         from ccpn.ui._implementation.Strip import _copyStrip
+
         return _copyStrip(self, strip=strip, newIndex=newIndex)
+
 
 #=========================================================================================
 # Connections to parents:

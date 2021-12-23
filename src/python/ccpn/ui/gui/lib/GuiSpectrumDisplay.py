@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:17 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2021-12-23 17:50:23 +0000 (Thu, December 23, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -816,7 +816,8 @@ class GuiSpectrumDisplay(CcpnModule):
     def visibleSpectra(self):
         """List of spectra currently visible in the spectrumDisplay
         """
-        return [sv.spectrum for sv in self._orderedSpectrumViews(self.spectrumViews) if sv.isDisplayed]
+        if self.strips:
+            return [spectrum for spectrum in self.strips[0].getSpectra() if spectrum.isDisplayed]
 
     displayedSpectra = visibleSpectra
 
@@ -1725,15 +1726,6 @@ class GuiSpectrumDisplay(CcpnModule):
                     self._removeStripFromLayout(strip)
                     strip.setBlankingAllNotifiers(True)
 
-                    #EJB 20181213: old style delete notifiers
-                    # # add object delete/undelete to the undo stack
-                    # addUndoItem(undo=partial(strip._wrappedData.root._unDelete,
-                    #                          apiObjectsCreated, (strip._wrappedData.topObject,)),
-                    #             redo=partial(strip._delete)
-                    #             )
-                    # # delete the strip
-                    # strip._delete()
-
                     # add object delete/undelete to the undo stack
                     addUndoItem(undo=BlankedPartial(strip._wrappedData.root._unDelete,
                                                     topObjectsToCheck=(strip._wrappedData.topObject,),
@@ -1775,14 +1767,6 @@ class GuiSpectrumDisplay(CcpnModule):
 
         self.deleteStrip(self.current.strip)
 
-    # def duplicateStrip(self):
-    #   """
-    #   Creates a new strip identical to the last one created and adds it to right of the display.
-    #   """
-    #   newStrip = self.strips[-1].clone()
-
-    # def addStrip(self, stripIndex=-1) -> 'GuiStripNd':
-
     def setLastAxisOnly(self, lastAxisOnly: bool = True):
         self.lastAxisOnly = lastAxisOnly
 
@@ -1796,11 +1780,6 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 # strips are arranged in a row
                 if self.lastAxisOnly and len(currentStrips) > 1:
-                    # for ss in currentStrips[:-1]:
-                    #     ss.setAxesVisible(rightAxisVisible=False, bottomAxisVisible=True)
-                    #
-                    # currentStrips[-1].setAxesVisible(rightAxisVisible=True, bottomAxisVisible=True)
-
                     for ss in self.strips:
                         ss.setAxesVisible(rightAxisVisible=False, bottomAxisVisible=True)
 
@@ -1813,11 +1792,6 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 # strips are arranged in a column
                 if self.lastAxisOnly and len(currentStrips) > 1:
-                    # for ss in currentStrips[:-1]:
-                    #     ss.setAxesVisible(rightAxisVisible=True, bottomAxisVisible=False)
-                    #
-                    # currentStrips[-1].setAxesVisible(rightAxisVisible=True, bottomAxisVisible=True)
-
                     for ss in self.strips:
                         ss.setAxesVisible(rightAxisVisible=True, bottomAxisVisible=False)
 
@@ -1929,10 +1903,8 @@ class GuiSpectrumDisplay(CcpnModule):
         self.stripFrame.hide()
 
         strips = self.orderedStrips
-        newWidth = max(strips[0].width() * factor, STRIP_MINIMUMWIDTH)  # + (0 if self.lastAxisOnly else strips[0].getRightAxisWidth()))
-        axisWidth = 0  #strips[0].getRightAxisWidth() if self.lastAxisOnly else 0
-
-        # NOTE:ED - always uniform width with new axis
+        newWidth = max(strips[0].width() * factor, STRIP_MINIMUMWIDTH)
+        axisWidth = 0
 
         if len(strips) > 1:
             for strip in strips[:-1]:
@@ -1963,10 +1935,8 @@ class GuiSpectrumDisplay(CcpnModule):
         self.stripFrame.hide()
 
         strips = self.orderedStrips
-        newHeight = max(strips[0].height() * factor, STRIP_MINIMUMHEIGHT)  # + (0 if self.lastAxisOnly else strips[0].getRightAxisWidth()))
-        axisHeight = 0  #strips[0].getBottomAxisHeight() if self.lastAxisOnly else 0
-
-        # NOTE:ED - always uniform height with new axis
+        newHeight = max(strips[0].height() * factor, STRIP_MINIMUMHEIGHT)
+        axisHeight = 0
 
         if len(strips) > 1:
             for strip in strips[:-1]:
@@ -2002,8 +1972,7 @@ class GuiSpectrumDisplay(CcpnModule):
             showWarning(str(self.windowTitle()), 'Please disable Phasing Console before adding strips')
             return
 
-        # with undoBlockWithoutSideBar():
-        with undoStackBlocking() as _:  # Do not add to undo/redo stack
+        with undoStackBlocking():  # Do not add to undo/redo stack
             with undoStackBlocking() as addUndoItem:
                 with self._hideWidget(self.stripFrame):
                     addUndoItem(undo=self._redrawAxes,
@@ -2142,38 +2111,6 @@ class GuiSpectrumDisplay(CcpnModule):
                 except:
                     pass
 
-            # else:
-            #
-            #     # set the correct widths for the strips
-            #     maxCol = thisLayout.count() - 1
-            #     firstWidth = scaleFactor * (thisLayoutWidth - AXIS_WIDTH - (maxCol * AXIS_PADDING)) / (maxCol + 1)
-            #
-            #     if minimumWidth:
-            #         firstWidth = max(firstWidth, minimumWidth)
-            #
-            #     endWidth = firstWidth + AXIS_WIDTH
-            #
-            #     # set the minimum widths and stretch values for the strips
-            #     for column in range(thisLayout.count()):
-            #         thisLayout.setColumnStretch(column, firstWidth if stretchValue else 1)
-            #         if widths:
-            #             wid = thisLayout.itemAt(column).widget()
-            #             wid.setMinimumWidth(firstWidth)
-            #
-            #     thisLayout.setColumnStretch(maxCol, endWidth if stretchValue else 1)
-            #     if widths:
-            #         wid = thisLayout.itemAt(maxCol).widget()
-            #         wid.setMinimumWidth(endWidth)
-            #
-            #     # fix the width of the stripFrame
-            #     if minimumWidth:
-            #
-            #         # this depends on the spacing in stripFrame
-            #         self.stripFrame.setMinimumWidth((firstWidth + STRIP_SPACING) * len(self.orderedStrips) + AXIS_WIDTH)
-            #     else:
-            #         self.stripFrame.setMinimumWidth(self.stripFrame.minimumSizeHint().width())
-            #     self.stripFrame.setMinimumHeight(50)
-
             self.stripFrame.show()
 
     def _setRowStretches(self, stretchValue=False, scaleFactor=1.0, heights=True, minimumHeight=STRIP_MINIMUMHEIGHT, deletingStrip=False):
@@ -2238,37 +2175,6 @@ class GuiSpectrumDisplay(CcpnModule):
                     self._bottomGLAxis.setMinimumWidth(STRIP_MINIMUMWIDTH)
                     self._bottomGLAxis._updateAxes = True
                     self._bottomGLAxis.update()
-
-            # else:
-            #
-            #     # set the correct heights for the strips
-            #     maxRow = thisLayout.count() - 1
-            #     firstHeight = scaleFactor * (thisLayoutHeight - AXIS_HEIGHT - (maxRow * AXIS_PADDING)) / (maxRow + 1)
-            #
-            #     if minimumHeight:
-            #         firstHeight = max(firstHeight, minimumHeight)
-            #
-            #     endHeight = firstHeight + AXIS_HEIGHT
-            #
-            #     # set the minimum heights and stretch values for the strips
-            #     for rr in range(thisLayout.count()):
-            #         thisLayout.setRowStretch(rr, firstHeight if stretchValue else 1)
-            #         if heights:
-            #             wid = thisLayout.itemAt(rr).widget()
-            #             wid.setMinimumHeight(firstHeight)
-            #
-            #     thisLayout.setRowStretch(maxRow, endHeight if stretchValue else 1)
-            #     if heights:
-            #         wid = thisLayout.itemAt(maxRow).widget()
-            #         wid.setMinimumHeight(endHeight)
-            #
-            #     # fix the height of the stripFrame
-            #     if minimumHeight:
-            #         # this depends on the spacing in stripFrame
-            #         self.stripFrame.setMinimumHeight((firstHeight + STRIP_SPACING) * len(self.orderedStrips) + AXIS_HEIGHT)
-            #     else:
-            #         self.stripFrame.setMinimumHeight(self.stripFrame.minimumSizeHint().height())
-            #     self.stripFrame.setMinimumWidth(50)
 
             self.stripFrame.show()
 
@@ -2408,20 +2314,6 @@ class GuiSpectrumDisplay(CcpnModule):
         except:
             getLogger().warning('Error cycling peak symbols')
 
-    # def _deletedPeak(self, peak):
-    #     apiPeak = peak._wrappedData
-    #     # NBNB TBD
-    #     # ALSO move this machinery from subclasses to this class.
-    #     for peakListView in self.activePeakItemDict:
-    #         peakItemDict = self.activePeakItemDict[peakListView]
-    #         peakItem = peakItemDict.get(apiPeak)
-    #         if peakItem:
-    #             # peakListView.spectrumView.strip.plotWidget.scene().removeItem(peakItem)
-    #             del peakItemDict[apiPeak]
-    #             inactivePeakItems = self.inactivePeakItemDict.get(peakListView)
-    #             if inactivePeakItems:
-    #                 inactivePeakItems.add(peakItem)
-
     @logCommand(get='self')
     def displaySpectrum(self, spectrum):
         """Display spectrum, with spectrum axes ordered according to display axisCodes
@@ -2444,8 +2336,6 @@ class GuiSpectrumDisplay(CcpnModule):
         if len(_specViews) > 0:
             getLogger().debug('displaySpectrum: Spectrum %s already in display %s' % (spectrum, self))
             return _specViews[0]
-
-        # _oldOrdering = self._getOrderedSpectrumViewsIndex()
 
         # keep this as may be needed for undo/redo gui operations
         # with undoStackBlocking() as _:  # Do not add to undo/redo stack
@@ -2477,10 +2367,8 @@ class GuiSpectrumDisplay(CcpnModule):
                         if dt1 != dt2:
                             raise RuntimeError('Cannot display %s on %s; incompatible dimensionTypes' % (spectrum, self))
 
-                _oldOrdering = self._getOrderedSpectrumViewsIndex()
-
                 # # add toolbar ordering to the undo stack
-                # addUndoItem(undo=partial(self.setToolbarButtons, tuple(_oldOrdering)))  # keep for undo/redo
+                # addUndoItem(undo=self.setToolbarButtons)  # keep for undo/redo
 
                 # Make spectrumView
                 if (spectrumView := _newSpectrumView(self, spectrum=spectrum, displayOrder=displayOrder)) \
@@ -2490,21 +2378,8 @@ class GuiSpectrumDisplay(CcpnModule):
                     getLogger().warning(f'Could not create new spectrumView for {spectrum}')
 
                 else:
-
-                    # if not (_isotopeCodes := self.isotopeCodes) and self.spectrumViews is not None and len(self.spectrumViews) == 1:
-                    #     # set the isotopeCodes from the first spectrumView
-                    #     _isotopeCodes = tuple(self.spectrumViews[0]._getByDisplayOrder('isotopeCodes'))
-                    #     self._isotopeCodes = _isotopeCodes
-
-                    # add the spectrum to the end of the spectrum ordering in the toolbar
-                    idx = self._getOrderedSpectrumViewsIndex()
-                    newInd = self.spectrumViews.index(spectrumView)
-                    if len(self.spectrumViews) == len(_oldOrdering) + 1:
-                        idx = tuple((ii + 1) if (ii >= newInd) else ii for ii in idx)
-                        idx += (newInd,)
-
-                    self.setToolbarButtons(tuple(idx))
-                    # addUndoItem(redo=partial(self.setToolbarButtons, tuple(idx)))  # keep for undo/redo
+                    self.setToolbarButtons()
+                    # addUndoItem(redo=self.setToolbarButtons)  # keep for undo/redo
 
         return spectrumView
 
@@ -2522,26 +2397,18 @@ class GuiSpectrumDisplay(CcpnModule):
 
             _, specView = sv[0]
 
-            # need undo block stuff here
-            # with undoBlockWithoutSideBar(self.application):
-            with undoStackBlocking() as _:  # Do not add to undo/redo stack
-
-                # explicitly change the ordering
-                _oldOrdering = self._getOrderedSpectrumViewsIndex()
-                _index = self.spectrumViews.index(specView)
-                _newOrdering = [od if od < _index else od - 1 for ii, od in enumerate(_oldOrdering) if od != _index]
-
+            with undoStackBlocking():  # Do not add to undo/redo stack
                 # push/pop ordering
                 with undoStackBlocking(self.application) as addUndoItem:
-                    addUndoItem(undo=partial(self.setToolbarButtons, tuple(_oldOrdering)))
+                    addUndoItem(undo=self.setToolbarButtons)
 
                 # delete the spectrumView - for multiple strips will delete all spectrumViews attached to spectrum
                 specView._delete()
 
                 # push/pop ordering
                 with undoStackBlocking(self.application) as addUndoItem:
-                    self.setToolbarButtons(tuple(_newOrdering))
-                    addUndoItem(redo=partial(self.setToolbarButtons, tuple(_newOrdering)))
+                    self.setToolbarButtons()
+                    addUndoItem(redo=self.setToolbarButtons)
         else:
             getLogger().warning('No spectrumView found')
 
@@ -2565,17 +2432,10 @@ class GuiSpectrumDisplay(CcpnModule):
                     undo=partial(self._setVisibleSpectrum, spectrum, not visible),
                     redo=partial(self._setVisibleSpectrum, spectrum, visible))
 
-    def setToolbarButtons(self, order=None):
+    def setToolbarButtons(self):
         """Setup the buttons in the toolbar for each spectrum
-        If order is a tuple of integers, then the ordering is based on the new order
-
-        :param order: None or tuple
         """
-
-        if not self.isGrouped:
-            if order:
-                self._setOrderedSpectrumViewsIndex(order)
-            # self.spectrumToolBar.setButtonsFromSpectrumViews(self._orderedSpectrumViews(self.strips[0].spectrumViews))
+        if not self.isGrouped and self.strips:
             self.spectrumToolBar.setButtonsFromSpectrumViews(self.strips[0].getSpectrumViews())
 
     @logCommand(get='self')
@@ -2751,6 +2611,7 @@ class GuiSpectrumDisplay(CcpnModule):
         with undoBlockWithoutSideBar():
             for specView in self.spectrumViews:
                 specView.copyContourAttributesFromSpectrum()
+
 
 #=========================================================================================
 

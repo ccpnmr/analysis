@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-24 14:23:11 +0000 (Fri, December 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-24 15:23:20 +0000 (Fri, December 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -947,8 +947,9 @@ class GuiSpectrumDisplay(CcpnModule):
         # can't think of a better way yet - will be fixable of single window used for all viewports in fucture
         QtCore.QTimer.singleShot(50, self._stripFrameScrollArea.refreshViewPort)
 
-    def setZWidgets(self):
+    def _setPlaneAxisWidgets(self):
         """Update the widgets in the planeToolbar
+        CCPNINTERNAL: used in a few spots
         """
         for strip in self.strips:
             strip._setPlaneAxisWidgets()

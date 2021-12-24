@@ -34,7 +34,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-24 14:23:11 +0000 (Fri, December 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-24 15:23:20 +0000 (Fri, December 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -511,7 +511,7 @@ class GuiStripNd(GuiStrip):
                             ]
 
         if len(_displayedSpectra) == 0:
-            getLogger().debug('_setZWidgets: no spectra displayed')
+            getLogger().debug('_setPlaneAxisWidgets: no spectra displayed')
             return
 
         def _getVals(attrName, idx) -> list:

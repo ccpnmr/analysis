@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-24 14:23:11 +0000 (Fri, December 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-24 15:23:20 +0000 (Fri, December 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -573,8 +573,8 @@ class SpectrumDisplay(AbstractWrapperObject):
         """
         return [dim - 1 for dim in self._getDimensionsMapping(spectrum)]
 
-    def _setLimits(self, spectrum: Spectrum):
-        """Define the relevant display limits from the dimensions of spectrum
+    def _setAxesLimits(self, spectrum: Spectrum):
+        """Define the relevant display-axis limits from the dimensions of spectrum
         CCPNMRINTERNAL: used in _newSpectrumDisplay
         """
         # NB setting Axis.region translates into setting position (== halfway point)
@@ -598,10 +598,13 @@ class SpectrumDisplay(AbstractWrapperObject):
 
                     else:
                         # A display "plane-axis"
-                        strip.axes[ii].region = spectrum.spectrumLimits[axis]
-                        # strip.axes[ii].width = spectrum.valuesPerPoint[axis]
                         if spectrum.isTimeDomains[axis] or spectrum.isSampledDomains[axis]:
                             strip.axes[ii].position = 1.0
+                            strip.axes[ii].width = 1.0
+                        else:
+                            limits = spectrum.spectrumLimits[axis]
+                            strip.axes[ii].position = 0.5*max(limits) + 0.5*min(limits)  # The centre
+                            strip.axes[ii].width = spectrum.ppmPerPoints[axis]
 
     #===========================================================================================
     # new'Object' and other methods
@@ -730,7 +733,7 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
             else:
                 raise NotImplementedError('No sampled axes (yet)')
 
-    display._setLimits(spectrum)
+    display._setAxesLimits(spectrum)
 
     # display the spectrum, this will also create a new spectrumView
     # Define the display as new, to avoid the isotopeCode and dimensionTypes checks
@@ -742,8 +745,8 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
     display._dimensionTypes = spectrumView.dimensionTypes
     display._isotopeCodes = spectrumView.isotopeCodes
 
-    # We only can set the z-widgets when there is a spectrumView; which we just created
-    strip._setPlaneAxisWidgets()
+    # We only can set the plane-axis-widgets when there is a spectrumView; which we just created
+    display._setPlaneAxisWidgets()
 
     # call any post initialise routines for the spectrumDisplay here
     display._postInit()

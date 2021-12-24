@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-24 10:21:25 +0000 (Fri, December 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-24 14:23:11 +0000 (Fri, December 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -34,10 +34,13 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib.AxisCodeLib import _axisCodeMapIndices
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
+
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, newObject
+
+from ccpn.util.Constants import AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT
 
 from ccpn.core._implementation.updates.update_3_0_4 import _updateStrip_3_0_4_to_3_1_0
 from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_OBJECT_INITIALISATION
@@ -546,22 +549,21 @@ class DisplayedSpectrum(object):
         return self.spectrumView.spectrum
 
     @property
-    def incrementsInPpm(self) -> tuple:
-        """Return tuple of ppm increment values in axis display order.
+    def ppmPerPoints(self) -> tuple:
+        """Return tuple of ppm-per-point values in axis display order.
         Assure that the len always is dimensionCount of the spectrumDisplay
         by adding None's if necessary. This compensates for lower dimensional
         spectra (e.g. a 2D mapped onto a 3D)
         """
-        specWidth = self.spectrumView.spectralWidths
-        nPoints = self.spectrumView.pointCounts
-        result = [w / n for w, n in zip(specWidth, nPoints)]
+        result = self.spectrumView.ppmPerPoints
         for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
             result.append(None)
         return tuple(result)
 
     @property
     def positionsInPpm(self) -> tuple:
-        """Return a tuple of positions (i.e. the centres) for axes in display order
+        """Return a tuple of current positions (i.e. the centres) for axes
+        in display order.
         Assure that the len always is dimensionCount of the spectrumDisplay
         by adding None's if necessary. This compensates for lower dimensional
         spectra (e.g. a 2D mapped onto a 3D)
@@ -573,8 +575,8 @@ class DisplayedSpectrum(object):
         return tuple(result)
 
     @property
-    def widthsInPpm(self) -> tuple:
-        """Return a tuple of widths for axes in display order.
+    def currentWidthsInPpm(self) -> tuple:
+        """Return a tuple of the current widths for axes in display order.
         Assure that the len always is dimensionCOunt of the spectrumDisplay
         by adding None's if necessary. This compensates for lower dimensional
         spectra (e.g. a 2D mapped onto a 3D)
@@ -586,8 +588,9 @@ class DisplayedSpectrum(object):
         return tuple(result)
 
     @property
-    def regionsInPpm(self) -> tuple:
-        """Return a tuple of (leftPpm,rightPpm) regions for axes in display order.
+    def currentRegionsInPpm(self) -> tuple:
+        """Return a tuple of (leftPpm,rightPpm) for current regions for axes
+        in display order.
         Assure that the len always is dimensionCount of the spectrumDisplay
         by adding None's if necessary. This compensates for lower dimensional
         spectra (e.g. a 2D mapped onto a 3D)
@@ -612,14 +615,101 @@ class DisplayedSpectrum(object):
         return tuple(result)
 
     @property
-    def regionsInPoints(self) -> tuple:
-        """Return a tuple of (minPoint,maxPoint) tuples corresponding to regions for axes
-        in display order.
+    def currentRegionsInPoints(self) -> tuple:
+        """Return a tuple of (minPoint,maxPoint) tuples corresponding to
+        current regions for axes in display order.
         Assure that the len always is dimensionCount of the spectrumDisplay
         by adding None's if necessary. This compensates for lower dimensional
         spectra (e.g. a 2D mapped onto a 3D)
         """
-        return self._getRegionsInPoints(self.regionsInPpm)
+        return self._getRegionsInPoints(self.currentRegionsInPpm)
+
+    @property
+    def axisIncrementsByType(self) -> tuple:
+        """Return axis increments by type for axes in display order.
+        Assure that the len always is dimensionCount of the spectrumDisplay
+        by adding None's if necessary. This compensates for lower dimensional
+        spectra (e.g. a 2D mapped onto a 3D)
+        """
+        result = []
+        for axis, ppmPerPoint, specFreq, points in \
+                zip(self.strip.axes,
+                    self.spectrumView.ppmPerPoints,
+                    self.spectrumView.spectrometerFrequencies,
+                    self.spectrumView.pointCounts
+                   ):
+
+            if axis.unit == AXISUNIT_PPM:
+                result.append(ppmPerPoint)
+
+            elif axis.unit == AXISUNIT_POINT:
+                result.append(1.0)
+
+            elif axis.unit == AXISUNIT_HZ:
+                result.append(ppmPerPoint*specFreq)
+
+            else:
+                raise RuntimeError('axisIncrementsByType: undefined axis unit "%s"' % axis.unit)
+
+        for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
+            result.append( None )
+        return tuple(result)
+
+    @property
+    def axisLimitsByType(self) -> tuple:
+        """Return a tuple of (minVal,maxVal) tuples corresponding to the
+        limits by type for axes in display order.
+        Assure that the len always is dimensionCount of the spectrumDisplay
+        by adding None's if necessary. This compensates for lower dimensional
+        spectra (e.g. a 2D mapped onto a 3D)
+        """
+        result = []
+        for axis, specDim, limits, specFreq, points in \
+                zip(self.strip.axes,
+                    self.spectrumView.spectrumDimensions,
+                    self.spectrumView.aliasingLimits,
+                    self.spectrumView.spectrometerFrequencies,
+                    self.spectrumView.pointCounts
+                   ):
+
+            if axis.unit == AXISUNIT_PPM:
+                result.append((min(limits), max(limits)))
+
+            elif axis.unit == AXISUNIT_POINT:
+                result.append((1.0, float(points)))
+
+            elif axis.unit == AXISUNIT_HZ:
+                limits = [val*specFreq for val in limits]
+                result.append((min(limits), max(limits)))
+
+            else:
+                raise RuntimeError('axisLimitsByType: undefined axis unit "%s"' % axis.unit)
+
+        for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
+            result.append( (None, None) )
+        return tuple(result)
+
+    @property
+    def minAxisLimitsByType(self) -> tuple:
+        """Return a tuple corresponding to the minimum limits by type for axes in
+        display order.
+        Assure that the len always is dimensionCount of the spectrumDisplay
+        by adding None's if necessary. This compensates for lower dimensional
+        spectra (e.g. a 2D mapped onto a 3D)
+        """
+        result = [val[0] for val in self.axisLimitsByType]
+        return tuple(result)
+
+    @property
+    def maxAxisLimitsByType(self) -> tuple:
+        """Return a tuple corresponding to the maximum limits by type for axes in
+        display order.
+        Assure that the len always is dimensionCount of the spectrumDisplay
+        by adding None's if necessary. This compensates for lower dimensional
+        spectra (e.g. a 2D mapped onto a 3D)
+        """
+        result = [val[1] for val in self.axisLimitsByType]
+        return tuple(result)
 
     @property
     def aliasingLimits(self) -> tuple:

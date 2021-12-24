@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:17 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-24 14:23:11 +0000 (Fri, December 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -594,7 +594,7 @@ class GuiSpectrumDisplay(CcpnModule):
             if not self.is1D:
                 for strip in self.strips:
                     # NOTE:ED - may need to fire update here if this forces a change to the z-plane
-                    strip._setZWidgets()
+                    strip._setPlaneAxisWidgets()
 
             self._refreshSpectrumView(spectrum)
 
@@ -619,7 +619,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
             if not self.is1D:
                 for strip in self.strips:
-                    strip._setZWidgets()
+                    strip._setPlaneAxisWidgets()
 
             spectrum = spectrumView.spectrum
             if spectrumView in self.spectrumViews:
@@ -630,7 +630,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
             if not self.is1D:
                 for strip in self.strips:
-                    strip._setZWidgets(ignoreSpectrumView=spectrumView)
+                    strip._setPlaneAxisWidgets(ignoreSpectrumView=spectrumView)
 
         elif trigger == Notifier.CHANGE:
             if spectrumView in self.spectrumViews:
@@ -951,7 +951,7 @@ class GuiSpectrumDisplay(CcpnModule):
         """Update the widgets in the planeToolbar
         """
         for strip in self.strips:
-            strip._setZWidgets()
+            strip._setPlaneAxisWidgets()
 
     def _stripRange(self):
         """Return the bounds for the tilePositions of the strips

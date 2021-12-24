@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 15:18:25 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-24 14:23:11 +0000 (Fri, December 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.ui.gui.lib.StripLib import copyStripPosition
+from ccpn.ui.gui.lib.StripLib import copyStripAxisPositionsAndWidths
 
 
 class CopyStripFlippedSpectraPopup(CcpnDialogMainWidget):
@@ -130,4 +130,4 @@ class CopyStripFlippedSpectraPopup(CcpnDialogMainWidget):
                     newDisplay.displaySpectrum(spectrum)
 
                 # newDisplay.autoRange()
-                copyStripPosition(self.strip, newDisplay.strips[0])
+                copyStripAxisPositionsAndWidths(self.strip, newDisplay.strips[0])

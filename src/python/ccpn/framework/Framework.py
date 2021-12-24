@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:17 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-24 14:23:11 +0000 (Fri, December 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -752,7 +752,7 @@ class Framework(NotifierBase):
         # 20191113:ED Initial insertion of spectrumDisplays into the moduleArea
         try:
             insertPoint = mainWindow.moduleArea
-            for spectrumDisplay in project.spectrumDisplays:
+            for spectrumDisplay in mainWindow.spectrumDisplays:
                 mainWindow.moduleArea.addModule(spectrumDisplay,
                                                         position='right',
                                                         relativeTo=insertPoint)
@@ -768,22 +768,21 @@ class Framework(NotifierBase):
             getLogger().warning('Impossible to restore Layout %s' % e)
 
         try:
-            # Initialise displays
-            # for spectrumDisplay in project.windows[0].spectrumDisplays:  # there is exactly one window
+            # Initialise colours
+            # # for spectrumDisplay in project.windows[0].spectrumDisplays:  # there is exactly one window
+            #
+            # for spectrumDisplay in mainWindow.spectrumDisplays:  # there is exactly one window
+            #     pass  # GWV: poor solution; removed the routine spectrumDisplay._resetRemoveStripAction()
 
-            for spectrumDisplay in mainWindow.spectrumDisplays:  # there is exactly one window
-                pass  # GWV: poor solution; removed the routine spectrumDisplay._resetRemoveStripAction()
             # initialise any colour changes before generating gui strips
             self._correctColours()
         except Exception as e:
-            getLogger().warning('Impossible to restore SpectrumDisplays')
+            getLogger().warning('Impossible to restore colours')
 
-        # Initialise SpectrumViews
-        try:
-            for spectrumDisplay in project.spectrumDisplays:
-
-                strips = spectrumDisplay.orderedStrips
-                for si, strip in enumerate(strips):
+        # Initialise Strips
+        for spectrumDisplay in mainWindow.spectrumDisplays:
+            try:
+                for si, strip in enumerate(spectrumDisplay.strips):
 
                     # temporary to catch bad strips from ordering bug
                     if not strip:
@@ -797,32 +796,27 @@ class Framework(NotifierBase):
 
                     # move to the correct place in the widget - check stripDirection to display as row or column
                     if spectrumDisplay.stripArrangement == 'Y':
-
-                        #TODO: remove unreachable code
                         if True:  # tilePosition is None:
                             spectrumDisplay.stripFrame.layout().addWidget(strip, 0, si)  #stripIndex)
                             strip.tilePosition = (0, si)
-                        else:
-                            spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[0], tilePosition[1])
+                        # else:
+                        #     spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[0], tilePosition[1])
 
                     elif spectrumDisplay.stripArrangement == 'X':
-
                         if True:  #tilePosition is None:
                             spectrumDisplay.stripFrame.layout().addWidget(strip, si, 0)  #stripIndex)
                             strip.tilePosition = (0, si)
-                        else:
-                            spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[1], tilePosition[0])
+                        # else:
+                        #     spectrumDisplay.stripFrame.layout().addWidget(strip, tilePosition[1], tilePosition[0])
 
                     elif spectrumDisplay.stripArrangement == 'T':
-
                         # NOTE:ED - Tiled plots not fully implemented yet
                         getLogger().warning('Tiled plots not implemented for spectrumDisplay: %s' % str(spectrumDisplay))
-
                     else:
                         getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(spectrumDisplay))
 
                     if not spectrumDisplay.is1D:
-                        strip._setZWidgets()
+                        strip._setPlaneAxisWidgets()
 
                 if spectrumDisplay.isGrouped:
                     # setup the spectrumGroup toolbar
@@ -848,19 +842,15 @@ class Framework(NotifierBase):
                 spectrumDisplay.showAxes(stretchValue=True, widths=True,
                                          minimumWidth=GuiStrip.STRIP_MINIMUMWIDTH)
 
-        except Exception as e:
-            getLogger().warning('Impossible to restore spectrumDisplay(s) %s' % e)
+            except Exception as e:
+                getLogger().warning('Impossible to restore spectrumDisplay(s) %s' % e)
 
         try:
-            if self.current.strip is None:
-                if len(self.project.strips) > 0:
-                    self.current.strip = self.project.strips[0]
+            if self.current.strip is None and len(mainWindow.strips) > 0:
+                self.current.strip = mainWindow.strips[0]
         except Exception as e:
-            getLogger().warning('Impossible to restore spectrumDisplay(s) %s' % e)
+            getLogger().warning('Error restoring current.strip: %s' % e)
 
-        if self.current.strip is None:
-            if len(self.project.strips) > 0:
-                self.current.strip = self.project.strips[0]
 
         # GST slightly complicated as we have to wait for anay license or other
         # startup dialogs to close before we display tip of the day

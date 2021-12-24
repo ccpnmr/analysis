@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 15:18:24 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-24 09:33:03 +0000 (Fri, December 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -479,9 +479,10 @@ class GuiStrip(Frame):
         """
         self.doubleCrosshairVisible = not self._CcpnGLWidget._doubleCrosshairVisible
 
-    @property
-    def pythonConsole(self):
-        return self.mainWindow.pythonConsole
+    # GWV; commented 24/12/21
+    # @property
+    # def pythonConsole(self):
+    #     return self.mainWindow.pythonConsole
 
     def _showPeakOnPLTable(self):
         current = self.application.current
@@ -2265,11 +2266,12 @@ class GuiStrip(Frame):
             for action in actions:
                 action.setChecked(value)
 
-    @property
-    def visibleSpectra(self):
-        """List of spectra currently visible in the strip. Ordered as in the spectrumDisplay
-        """
-        return self.spectrumDisplay.visibleSpectra
+    # GWV 24/12/21: moved to Strip.py, as it relates to the data structure
+    # @property
+    # def visibleSpectra(self):
+    #     """List of spectra currently visible in the strip. Ordered as in the spectrumDisplay
+    #     """
+    #     return self.spectrumDisplay.visibleSpectra
 
     def _invertSelectedSpectra(self):
 

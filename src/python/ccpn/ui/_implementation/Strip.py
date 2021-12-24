@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 20:07:34 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-24 09:33:03 +0000 (Fri, December 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -106,13 +106,21 @@ class Strip(AbstractWrapperObject):
 
     @property
     def _displayedSpectra(self) -> tuple:
-        """Return a tuple of DisplayedSpectrum instances, in order, if currently visible
+        """Return a tuple of DisplayedSpectrum instances, in order of the spectrumDisplay
+        toolbar, if currently visible
         """
-        # orderedSpecViews = self.spectrumDisplay.orderedSpectrumViews(None)
         result = [DisplayedSpectrum(strip=self, spectrumView=specView) \
                   for specView in self.getSpectrumViews() if specView.isDisplayed]
         return tuple(result)
 
+    @property
+    def visibleSpectra(self):
+        """List of spectra currently visible in the strip. Ordered as in the spectrumDisplay
+        """
+        return self.spectrumDisplay.visibleSpectra
+
+    #-----------------------------------------------------------------------------------------
+    # Functional attributes of the class
     #-----------------------------------------------------------------------------------------
 
     @property
@@ -268,10 +276,10 @@ class Strip(AbstractWrapperObject):
         """
         # original api indexing
         ccpnStrip = self._wrappedData
-        index = ccpnStrip.index
+        indx = ccpnStrip.index
         # spectrumDisplay = self.spectrumDisplay
         # index = spectrumDisplay.strips.index(self)
-        return index
+        return indx
 
     # from ccpn.util.decorators import profile
     # @profile
@@ -347,15 +355,17 @@ class Strip(AbstractWrapperObject):
         # move the strip
         self._wrappedData.moveTo(newIndex)
 
-    @logCommand(get='self')
-    def resetAxisOrder(self):
-        """Reset display to original axis order"""
-        with undoBlockWithoutSideBar():
-            self._wrappedData.resetAxisOrder()
+    # GWV 24/12/21: commented as not used
+    # @logCommand(get='self')
+    # def resetAxisOrder(self):
+    #     """Reset display to original axis order"""
+    #     with undoBlockWithoutSideBar():
+    #         self._wrappedData.resetAxisOrder()
 
-    def findAxis(self, axisCode):
-        """Find axis"""
-        return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
+    # GWV 24/12/21: commented as not used
+    # def findAxis(self, axisCode):
+    #     """Find axis"""
+    #     return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
 
     @logCommand(get='self')
     def createPeak(self, ppmPositions: List[float]) -> Tuple[Tuple[Peak, ...], Tuple[PeakList, ...]]:
@@ -397,18 +407,23 @@ class Strip(AbstractWrapperObject):
         """
         from ccpn.core.lib.SpectrumLib import _pickPeaksByRegion
 
+        _displayedSpectra = self._displayedSpectra
+        if len(_displayedSpectra) == 0:
+            getLogger().warning('%s pickPeaks: no visible spectra' % self)
+            return
+
         result = []
         with undoBlockWithoutSideBar():
 
             # loop through the visible spectra
-            for spectrumView in (v for v in self.spectrumViews if v.isDisplayed):
-
-                _displayedSpectrum = DisplayedSpectrum(self, spectrumView)
+            for _displayedSpectrum in _displayedSpectra:
                 spectrum = _displayedSpectrum.spectrum
-                _sliceTuples = _displayedSpectrum.getSliceTuples(regions)
-                _checks = _displayedSpectrum.checkForRegionsOutsideLimits(regions)
-                _skip = any(_checks)
+                spectrumView = _displayedSpectrum.spectrumView
+
+                _checkOutside = _displayedSpectrum.checkForRegionsOutsideLimits(regions)
+                _skip = any(_checkOutside)
                 if _skip:
+                    getLogger().debug('Strip.pickPeaks: skipping %s; outside region %r' % (spectrum, regions))
                     continue
 
                 # get the list of visible peakLists
@@ -417,14 +432,13 @@ class Strip(AbstractWrapperObject):
                     continue
 
                 # get parameters to apply to peak picker
+                _sliceTuples = _displayedSpectrum.getSliceTuples(regions)
                 positiveThreshold = spectrum.positiveContourBase if spectrumView.displayPositiveContours else None
                 negativeThreshold = spectrum.negativeContourBase if spectrumView.displayNegativeContours else None
 
                 for thisPeakListView in validPeakListViews:
                     peakList = thisPeakListView.peakList
-
-                    # # pick the peak in this peakList
-                    # newPeaks = spectrum.pickPeaks(peakList, positiveThreshold, negativeThreshold, **axisDict)
+                    # pick the peaks in this peakList
                     newPeaks = _pickPeaksByRegion(spectrum = spectrum,
                                                   sliceTuples=_sliceTuples,
                                                   peakList=peakList,
@@ -434,9 +448,9 @@ class Strip(AbstractWrapperObject):
                     if newPeaks is not None and len(newPeaks) > 0:
                         result.extend(newPeaks)
 
-            result = tuple(result)
-            self.current.peaks = result
-            return result
+        result = tuple(result)
+        self.current.peaks = result
+        return result
 #end class
 
 
@@ -518,8 +532,7 @@ def _copyStrip(self: SpectrumDisplay, strip: Strip, newIndex=None) -> Strip:
 class DisplayedSpectrum(object):
     """GWV; a class to hold SpectrumView and strip objects
     Used to map any data/axis/parameter actions in a SpectrumView dependent fashion
-    (post 3.1.0)
-    Limited functionality for testing
+    Only to be used internally
     """
     def __init__(self, strip, spectrumView):
         self.strip = strip

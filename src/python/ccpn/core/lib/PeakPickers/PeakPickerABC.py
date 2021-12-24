@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:16 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-24 09:33:03 +0000 (Fri, December 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -317,7 +317,7 @@ class PeakPickerABC(CcpNmrJson):
         data = self.spectrum._dataSource.getRegionData(self.sliceTuples, aliasingFlags=[1] * self.spectrum.dimensionCount)
 
         peaks = self.findPeaks(data)
-        getLogger().debug('%s.pickPeaks: found %d peaks in spectrum %s; %r' %
+        getLogger().debug('%s.pickPeaks: found %d peaks in spectrum %s; sliceTuples = %r' %
                           (self.__class__.__name__, len(peaks), self.spectrum, self.sliceTuples))
 
         corePeaks = []

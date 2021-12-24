@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-24 09:33:03 +0000 (Fri, December 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-24 10:21:25 +0000 (Fri, December 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -26,30 +26,37 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import typing
+from typing import List, Tuple, Sequence
 from copy import deepcopy
+from functools import partial
+
 from PyQt5 import QtWidgets, QtCore, QtGui
+
 from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
+from ccpn.core.PeakList import PeakList
+
 from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, \
+    notificationBlanking, undoBlockWithoutSideBar
+from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXHIGHLIGHT, CCPNGLWIDGET_HEXFOREGROUND
+
+from ccpn.util.Logging import getLogger
+from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME, DOUBLEAXIS_FULLATOMNAME
+from ccpn.util.decorators import logCommand
+from ccpn.util.Colour import colorSchemeTable
+
 from ccpn.ui.gui.guiSettings import GUISTRIP_PIVOT, ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.util.Logging import getLogger
-from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME, DOUBLEAXIS_FULLATOMNAME
-from functools import partial
+
+from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
     SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISASPECTRATIOS, AXISASPECTRATIOMODE, \
     BOTTOMAXIS, RIGHTAXIS, ALIASENABLED, ALIASSHADE, ALIASLABELSENABLED, CONTOURTHICKNESS, \
     PEAKLABELSENABLED, MULTIPLETLABELSENABLED
-from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, \
-    notificationBlanking, undoBlockWithoutSideBar
-from ccpn.util.decorators import logCommand
-from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXHIGHLIGHT, CCPNGLWIDGET_HEXFOREGROUND
-from ccpn.util.Colour import colorSchemeTable
 
 
 STRIPLABEL_ISPLUS = 'stripLabel_isPlus'
@@ -75,14 +82,13 @@ class GuiStrip(Frame):
 
     def __init__(self, spectrumDisplay):
         """
-        Basic strip class; used in StripNd and Strip1d
+        Basic graphics strip class; used in StripNd and Strip1d
 
         :param spectrumDisplay: spectrumDisplay instance
 
         This module inherits attributes from the Strip wrapper class:
         Use clone() method to make a copy
         """
-        from ccpn.ui._implementation.Strip import DisplayedSpectrum
 
         # For now, cannot set spectrumDisplay attribute as it is owned by the wrapper class
         # self.spectrumDisplay = spectrumDisplay
@@ -134,7 +140,7 @@ class GuiStrip(Frame):
         self._CcpnGLWidget.setStripID('.'.join(self.pid.split('.')))
         # self._CcpnGLWidget.setStripID('')
 
-        # Widgets for toolbar; items will be added by GuiStripNd (eg. the Z/A-plane boxes)
+        # Widgets for toolbar; items will be added by GuiStripNd (e.g. the Z/A-plane boxes)
         # and GuiStrip1d; will be hidden for 2D's by GuiSpectrumView
         self._stripToolBarWidget = Widget(parent=self, setLayout=True,
                                           grid=stripToolBarGrid, gridSpan=stripToolBarSpan)
@@ -249,6 +255,11 @@ class GuiStrip(Frame):
         self.showActivePhaseTrace = True
         self.pivotLine = None
         self._lastClickedObjects = None
+        self._newPosition = None
+
+        self._hTraceActive = False
+        self._vTraceActive = False
+        self._newConsoleDirection = None
 
         # initialise the notifiers
         self.setStripNotifiers()
@@ -540,7 +551,7 @@ class GuiStrip(Frame):
     def calibrateFromPeaks(self):
         if self.current.peaks and len(self.current.peaks) > 1:
 
-            if not (self._lastClickedObjects and isinstance(self._lastClickedObjects, typing.Sequence)):
+            if not (self._lastClickedObjects and isinstance(self._lastClickedObjects, Sequence)):
                 MessageDialog.showMessage('Calibrate error', 'Select a single peak as the peak to calibrate to.')
                 return
             else:
@@ -848,9 +859,6 @@ class GuiStrip(Frame):
     def markAxisIndices(self, indices=None):
         """Mark the X/Y/XY axisCodes by index
         """
-        from functools import partial
-        from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip
-
         position = [self.current.mouseMovedDict[AXIS_FULLATOMNAME][ax] for ax in self.axisCodes]
         if indices is None:
             indices = tuple(range(len(self.axisCodes)))
@@ -1161,6 +1169,7 @@ class GuiStrip(Frame):
         # position = self.current.cursorPosition[0] if direction == 0 else self.current.cursorPosition[1]
         # position = self.current.positions[0] if direction == 0 else self.current.positions[1]
 
+        position = None  #GWV; not sure what it should be
         mouseMovedDict = self.current.mouseMovedDict
         if direction == 0:
             for mm in mouseMovedDict[AXIS_MATCHATOMTYPE].keys():
@@ -1897,26 +1906,27 @@ class GuiStrip(Frame):
         """
         return self._CcpnGLWidget.getObjectsUnderMouse()
 
-    def _showMousePosition(self, pos: QtCore.QPointF):
-        """Displays mouse position for both axes by axis code.
-        """
-        if self.isDeleted:
-            return
-
-        # position = self.viewBox.mapSceneToView(pos)
-        try:
-            # this only calls a single _wrapper function
-            if self.orderedAxes[1] and self.orderedAxes[1].code == 'intensity':
-                format = "%s: %.3f\n%s: %.4g"
-            else:
-                format = "%s: %.2f\n%s: %.2f"
-        except:
-            format = "%s: %.3f  %s: %.4g"
+    # GWV 24/12/21: not used and method does not return anything
+    # def _showMousePosition(self, pos: QtCore.QPointF):
+    #     """Displays mouse position for both axes by axis code.
+    #     """
+    #     if self.isDeleted:
+    #         return
+    #
+    #     # position = self.viewBox.mapSceneToView(pos)
+    #     try:
+    #         # this only calls a single _wrapper function
+    #         if self.spectrumDisplay.is1D:
+    #             fmt = "%s: %.3f\n%s: %.4g"
+    #         else:
+    #             fmt = "%s: %.2f\n%s: %.2f"
+    #     except:
+    #         fmt = "%s: %.3f  %s: %.4g"
 
     def autoRange(self):
         self._CcpnGLWidget.autoRange()
 
-    def zoom(self, xRegion: typing.Tuple[float, float], yRegion: typing.Tuple[float, float]):
+    def zoom(self, xRegion: Tuple[float, float], yRegion: Tuple[float, float]):
         """Zooms strip to the specified region.
         """
         self._CcpnGLWidget.zoom(xRegion, yRegion)
@@ -2404,8 +2414,8 @@ class GuiStrip(Frame):
                 if True:  # tilePosition is None:
                     layout.addWidget(widgStrip, 0, m)
                     widgStrip.tilePosition = (0, m)
-                else:
-                    layout.addWidget(widgStrip, tilePosition[0], tilePosition[1])
+                # else:
+                #     layout.addWidget(widgStrip, tilePosition[0], tilePosition[1])
 
                 widgStrip.setMinimumWidth(minSizes[m].width())
 
@@ -2418,8 +2428,8 @@ class GuiStrip(Frame):
                 if True:  # tilePosition is None:
                     layout.addWidget(widgStrip, m, 0)
                     widgStrip.tilePosition = (0, m)
-                else:
-                    layout.addWidget(widgStrip, tilePosition[1], tilePosition[0])
+                # else:
+                #     layout.addWidget(widgStrip, tilePosition[1], tilePosition[0])
 
                 widgStrip.setMinimumHeight(minSizes[m].height())
 
@@ -2434,14 +2444,14 @@ class GuiStrip(Frame):
         # rebuild the axes for strips
         spectrumDisplay.showAxes(stretchValue=True, widths=False)
 
-    def navigateToPosition(self, positions: typing.List[float],
-                           axisCodes: typing.List[str] = None,
-                           widths: typing.List[float] = None):
+    def navigateToPosition(self, positions:List[float],
+                           axisCodes:List[str] = None,
+                           widths:List[float] = None):
         from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip
 
         navigateToPositionInStrip(self, positions, axisCodes, widths)
 
-    def navigateToPeak(self, peak, widths: typing.List[float] = None):
+    def navigateToPeak(self, peak, widths:List[float] = None):
 
         if peak:
             self.navigateToPosition(peak.position, peak.axisCodes)
@@ -2508,7 +2518,7 @@ class GuiStrip(Frame):
         """
         self._CcpnGLWidget.setAxisRegion(axisIndex, width, rescale=rescale, update=update)
 
-    def getAxisRegions(self) -> typing.Tuple[typing.Tuple, ...]:
+    def getAxisRegions(self) -> Tuple[Tuple, ...]:
         """Return a tuple if tuples for the regions ((min, max), ...)
         Visible direction of axes is not preserved
         """
@@ -2518,8 +2528,97 @@ class GuiStrip(Frame):
 
         return tuple(regions)
 
+    @logCommand(get='self')
+    def createPeak(self, ppmPositions: List[float]) -> Tuple[Tuple[Peak, ...], Tuple[PeakList, ...]]:
+        """Create peak at position for all spectra currently displayed in strip.
+        """
+        result = []
+        peakLists = []
 
+        with undoBlockWithoutSideBar():
+            # create the axisDict for this spectrum
+            axisDict = {axis: tuple(ppm) for axis, ppm in zip(self.axisCodes, ppmPositions)}
+
+            # loop through the visible spectra
+            for spectrumView in (v for v in self.spectrumViews if v.isDisplayed):
+
+                spectrum = spectrumView.spectrum
+                # get the list of visible peakLists
+                validPeakListViews = [pp for pp in spectrumView.peakListViews if pp.isDisplayed]
+                if not validPeakListViews:
+                    continue
+
+                for thisPeakListView in validPeakListViews:
+                    peakList = thisPeakListView.peakList
+
+                    # pick the peak in this peakList
+                    pk = spectrum.createPeak(peakList, **axisDict)
+                    if pk:
+                        result.append(pk)
+                        peakLists.append(peakList)
+
+            # set the current peaks
+            self.current.peaks = result
+
+        return tuple(result), tuple(peakLists)
+
+    @logCommand(get='self')
+    def pickPeaks(self, regions: List[Tuple[float,float]]) -> list:
+        """Peak-pick in regions for all spectra currently displayed in the strip.
+        :param regions: a list of (minVal,maxVal) tuples in display order
+        :return a list of Peak instances
+        """
+        from ccpn.core.lib.SpectrumLib import _pickPeaksByRegion
+
+        _displayedSpectra = self._displayedSpectra
+        if len(_displayedSpectra) == 0:
+            getLogger().warning('%s pickPeaks: no visible spectra' % self)
+            return []
+
+        result = []
+        with undoBlockWithoutSideBar():
+
+            # loop through the visible spectra
+            for _displayedSpectrum in _displayedSpectra:
+                spectrum = _displayedSpectrum.spectrum
+                spectrumView = _displayedSpectrum.spectrumView
+
+                _checkOutside = _displayedSpectrum.checkForRegionsOutsideLimits(regions)
+                _skip = any(_checkOutside)
+                if _skip:
+                    getLogger().debug('Strip.pickPeaks: skipping %s; outside region %r' % (spectrum, regions))
+                    continue
+
+                # get the list of visible peakLists
+                validPeakListViews = [pp for pp in spectrumView.peakListViews if pp.isDisplayed]
+                if not validPeakListViews:
+                    continue
+
+                # get parameters to apply to peak picker
+                _sliceTuples = _displayedSpectrum.getSliceTuples(regions)
+                positiveThreshold = spectrum.positiveContourBase if spectrumView.displayPositiveContours else None
+                negativeThreshold = spectrum.negativeContourBase if spectrumView.displayNegativeContours else None
+
+                for thisPeakListView in validPeakListViews:
+                    peakList = thisPeakListView.peakList
+                    # pick the peaks in this peakList
+                    newPeaks = _pickPeaksByRegion(spectrum = spectrum,
+                                                  sliceTuples=_sliceTuples,
+                                                  peakList=peakList,
+                                                  positiveThreshold=positiveThreshold,
+                                                  negativeThreshold=negativeThreshold,
+                                                  )
+                    if newPeaks is not None and len(newPeaks) > 0:
+                        result.extend(newPeaks)
+
+        self.current.peaks = result
+        return result
+
+
+#=========================================================================================
 # Notifiers:
+#=========================================================================================
+
 def _updateDisplayedMarks(data):
     """Callback when marks have changed - Create, Change, Delete; defined above.
     """

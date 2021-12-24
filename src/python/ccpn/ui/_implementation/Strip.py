@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-24 09:33:03 +0000 (Fri, December 24, 2021) $"
+__dateModified__ = "$dateModified: 2021-12-24 10:21:25 +0000 (Fri, December 24, 2021) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -78,6 +78,10 @@ class Strip(AbstractWrapperObject):
     def __init__(self, project, wrappedData):
         super().__init__(project=project, wrappedData=wrappedData)
 
+    #-----------------------------------------------------------------------------------------
+    # Attributes and methods related to the data structure
+    #-----------------------------------------------------------------------------------------
+
     # @classmethod
     # def _restoreObject(cls, project, apiObj):
     #     """Subclassed to allow for initialisations on restore
@@ -89,10 +93,6 @@ class Strip(AbstractWrapperObject):
     def spectrumDisplay(self) -> SpectrumDisplay:
         """SpectrumDisplay containing strip."""
         return self._project._data2Obj.get(self._wrappedData.spectrumDisplay)
-
-    #-----------------------------------------------------------------------------------------
-    # Attributes and methods related to the data structure
-    #-----------------------------------------------------------------------------------------
 
     _parent = spectrumDisplay
 
@@ -113,6 +113,7 @@ class Strip(AbstractWrapperObject):
                   for specView in self.getSpectrumViews() if specView.isDisplayed]
         return tuple(result)
 
+    # GWV 24/12/21: moved here from GuiStrip
     @property
     def visibleSpectra(self):
         """List of spectra currently visible in the strip. Ordered as in the spectrumDisplay
@@ -367,90 +368,92 @@ class Strip(AbstractWrapperObject):
     #     """Find axis"""
     #     return self._project._data2Obj.get(self._wrappedData.findAxis(axisCode))
 
-    @logCommand(get='self')
-    def createPeak(self, ppmPositions: List[float]) -> Tuple[Tuple[Peak, ...], Tuple[PeakList, ...]]:
-        """Create peak at position for all spectra currently displayed in strip.
-        """
-        result = []
-        peakLists = []
-
-        with undoBlockWithoutSideBar():
-            # create the axisDict for this spectrum
-            axisDict = {axis: tuple(ppm) for axis, ppm in zip(self.axisCodes, ppmPositions)}
-
-            # loop through the visible spectra
-            for spectrumView in (v for v in self.spectrumViews if v.isDisplayed):
-
-                spectrum = spectrumView.spectrum
-                # get the list of visible peakLists
-                validPeakListViews = [pp for pp in spectrumView.peakListViews if pp.isDisplayed]
-                if not validPeakListViews:
-                    continue
-
-                for thisPeakListView in validPeakListViews:
-                    peakList = thisPeakListView.peakList
-
-                    # pick the peak in this peakList
-                    pk = spectrum.createPeak(peakList, **axisDict)
-                    if pk:
-                        result.append(pk)
-                        peakLists.append(peakList)
-
-            # set the current peaks
-            self.current.peaks = result
-
-        return tuple(result), tuple(peakLists)
-
-    @logCommand(get='self')
-    def pickPeaks(self, regions: List[Tuple[float,float]]) -> Tuple[Peak, ...]:
-        """Peak-pick in regions for all spectra currently displayed in the strip.
-        """
-        from ccpn.core.lib.SpectrumLib import _pickPeaksByRegion
-
-        _displayedSpectra = self._displayedSpectra
-        if len(_displayedSpectra) == 0:
-            getLogger().warning('%s pickPeaks: no visible spectra' % self)
-            return
-
-        result = []
-        with undoBlockWithoutSideBar():
-
-            # loop through the visible spectra
-            for _displayedSpectrum in _displayedSpectra:
-                spectrum = _displayedSpectrum.spectrum
-                spectrumView = _displayedSpectrum.spectrumView
-
-                _checkOutside = _displayedSpectrum.checkForRegionsOutsideLimits(regions)
-                _skip = any(_checkOutside)
-                if _skip:
-                    getLogger().debug('Strip.pickPeaks: skipping %s; outside region %r' % (spectrum, regions))
-                    continue
-
-                # get the list of visible peakLists
-                validPeakListViews = [pp for pp in spectrumView.peakListViews if pp.isDisplayed]
-                if not validPeakListViews:
-                    continue
-
-                # get parameters to apply to peak picker
-                _sliceTuples = _displayedSpectrum.getSliceTuples(regions)
-                positiveThreshold = spectrum.positiveContourBase if spectrumView.displayPositiveContours else None
-                negativeThreshold = spectrum.negativeContourBase if spectrumView.displayNegativeContours else None
-
-                for thisPeakListView in validPeakListViews:
-                    peakList = thisPeakListView.peakList
-                    # pick the peaks in this peakList
-                    newPeaks = _pickPeaksByRegion(spectrum = spectrum,
-                                                  sliceTuples=_sliceTuples,
-                                                  peakList=peakList,
-                                                  positiveThreshold=positiveThreshold,
-                                                  negativeThreshold=negativeThreshold,
-                                                  )
-                    if newPeaks is not None and len(newPeaks) > 0:
-                        result.extend(newPeaks)
-
-        result = tuple(result)
-        self.current.peaks = result
-        return result
+    # GWV 24/12/21: moved to GuiStrip
+    # @logCommand(get='self')
+    # def createPeak(self, ppmPositions: List[float]) -> Tuple[Tuple[Peak, ...], Tuple[PeakList, ...]]:
+    #     """Create peak at position for all spectra currently displayed in strip.
+    #     """
+    #     result = []
+    #     peakLists = []
+    #
+    #     with undoBlockWithoutSideBar():
+    #         # create the axisDict for this spectrum
+    #         axisDict = {axis: tuple(ppm) for axis, ppm in zip(self.axisCodes, ppmPositions)}
+    #
+    #         # loop through the visible spectra
+    #         for spectrumView in (v for v in self.spectrumViews if v.isDisplayed):
+    #
+    #             spectrum = spectrumView.spectrum
+    #             # get the list of visible peakLists
+    #             validPeakListViews = [pp for pp in spectrumView.peakListViews if pp.isDisplayed]
+    #             if not validPeakListViews:
+    #                 continue
+    #
+    #             for thisPeakListView in validPeakListViews:
+    #                 peakList = thisPeakListView.peakList
+    #
+    #                 # pick the peak in this peakList
+    #                 pk = spectrum.createPeak(peakList, **axisDict)
+    #                 if pk:
+    #                     result.append(pk)
+    #                     peakLists.append(peakList)
+    #
+    #         # set the current peaks
+    #         self.current.peaks = result
+    #
+    #     return tuple(result), tuple(peakLists)
+    #
+    # GWV 24/12/21: moved to GuiStrip
+    # @logCommand(get='self')
+    # def pickPeaks(self, regions: List[Tuple[float,float]]) -> Tuple[Peak, ...]:
+    #     """Peak-pick in regions for all spectra currently displayed in the strip.
+    #     """
+    #     from ccpn.core.lib.SpectrumLib import _pickPeaksByRegion
+    #
+    #     _displayedSpectra = self._displayedSpectra
+    #     if len(_displayedSpectra) == 0:
+    #         getLogger().warning('%s pickPeaks: no visible spectra' % self)
+    #         return
+    #
+    #     result = []
+    #     with undoBlockWithoutSideBar():
+    #
+    #         # loop through the visible spectra
+    #         for _displayedSpectrum in _displayedSpectra:
+    #             spectrum = _displayedSpectrum.spectrum
+    #             spectrumView = _displayedSpectrum.spectrumView
+    #
+    #             _checkOutside = _displayedSpectrum.checkForRegionsOutsideLimits(regions)
+    #             _skip = any(_checkOutside)
+    #             if _skip:
+    #                 getLogger().debug('Strip.pickPeaks: skipping %s; outside region %r' % (spectrum, regions))
+    #                 continue
+    #
+    #             # get the list of visible peakLists
+    #             validPeakListViews = [pp for pp in spectrumView.peakListViews if pp.isDisplayed]
+    #             if not validPeakListViews:
+    #                 continue
+    #
+    #             # get parameters to apply to peak picker
+    #             _sliceTuples = _displayedSpectrum.getSliceTuples(regions)
+    #             positiveThreshold = spectrum.positiveContourBase if spectrumView.displayPositiveContours else None
+    #             negativeThreshold = spectrum.negativeContourBase if spectrumView.displayNegativeContours else None
+    #
+    #             for thisPeakListView in validPeakListViews:
+    #                 peakList = thisPeakListView.peakList
+    #                 # pick the peaks in this peakList
+    #                 newPeaks = _pickPeaksByRegion(spectrum = spectrum,
+    #                                               sliceTuples=_sliceTuples,
+    #                                               peakList=peakList,
+    #                                               positiveThreshold=positiveThreshold,
+    #                                               negativeThreshold=negativeThreshold,
+    #                                               )
+    #                 if newPeaks is not None and len(newPeaks) > 0:
+    #                     result.extend(newPeaks)
+    #
+    #     result = tuple(result)
+    #     self.current.peaks = result
+    #     return result
 #end class
 
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-04 11:38:41 +0000 (Tue, January 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-04 17:18:54 +0000 (Tue, January 04, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2537,7 +2537,7 @@ class GuiStrip(Frame):
 
         with undoBlockWithoutSideBar():
             # create the axisDict for this spectrum
-            axisDict = {axis: tuple(ppm) for axis, ppm in zip(self.axisCodes, ppmPositions)}
+            axisDict = {axis: ppm for axis, ppm in zip(self.axisCodes, ppmPositions)}
 
             # loop through the visible spectra
             for spectrumView in (v for v in self.spectrumViews if v.isDisplayed):

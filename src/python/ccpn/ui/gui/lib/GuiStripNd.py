@@ -23,7 +23,7 @@ showStripLabel(doShow:bool):  show/hide the stripLabel
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -33,8 +33,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 15:18:24 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-01-04 11:38:41 +0000 (Tue, January 04, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -53,7 +53,7 @@ from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, undoStackBloc
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, DefaultMenu, PeakMenu, IntegralMenu, MultipletMenu, PhasingMenu, AxisMenu
 from ccpn.ui.gui.lib.GuiStripContextMenus import _getNdPhasingMenu, _getNdDefaultMenu, _getNdPeakMenu, \
     _getNdIntegralMenu, _getNdMultipletMenu, _getNdAxisMenu
-from ccpn.ui.gui.lib.StripLib import copyStripPosition
+from ccpn.ui.gui.lib.StripLib import copyStripAxisPositionsAndWidths
 from ccpn.ui.gui.guiSettings import ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Frame import OpenGLOverlayFrame
@@ -139,7 +139,8 @@ class GuiStripNd(GuiStrip):
         ###self.peakListViewDict = {}  # peakList --> peakListView
         # self.spectrumActionDict = {}  # apiDataSource --> toolbar action (i.e. button); used in SpectrumToolBar
 
-        self.haveSetupZWidgets = False
+        # self.haveSetupZWidgets = False
+
         self.viewStripMenu = _getNdDefaultMenu(self)
         self._defaultMenu = self.viewStripMenu
         self._phasingMenu = _getNdPhasingMenu(self)
@@ -275,7 +276,7 @@ class GuiStripNd(GuiStrip):
                 newDisplay.displaySpectrum(spectrum)
 
             # newDisplay.autoRange()
-            copyStripPosition(self, newDisplay.strips[0])
+            copyStripAxisPositionsAndWidths(self, newDisplay.strips[0])
 
     @logCommand(get='self')
     def flipXYAxis(self):
@@ -291,14 +292,14 @@ class GuiStripNd(GuiStrip):
                 axisOrder.extend(self.axisOrder[2:])
 
             # with undoBlockWithoutSideBar():
-            with undoStackBlocking() as _:  # Do not add to undo/redo stack
+            with undoStackBlocking() as _tmp:  # Do not add to undo/redo stack
                 # create a new spectrum display with the new axis order
                 newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisCodes=axisOrder)
                 for spectrum in self.spectra:
                     newDisplay.displaySpectrum(spectrum)
 
                 # newDisplay.autoRange()
-                copyStripPosition(self, newDisplay.strips[0])
+                copyStripAxisPositionsAndWidths(self, newDisplay.strips[0])
 
     @logCommand(get='self')
     def flipXZAxis(self):
@@ -323,7 +324,7 @@ class GuiStripNd(GuiStrip):
                     newDisplay.displaySpectrum(spectrum)
 
                 # newDisplay.autoRange()
-                copyStripPosition(self, newDisplay.strips[0])
+                copyStripAxisPositionsAndWidths(self, newDisplay.strips[0])
 
     @logCommand(get='self')
     def flipYZAxis(self):
@@ -348,7 +349,7 @@ class GuiStripNd(GuiStrip):
                     newDisplay.displaySpectrum(spectrum)
 
                 # newDisplay.autoRange()
-                copyStripPosition(self, newDisplay.strips[0])
+                copyStripAxisPositionsAndWidths(self, newDisplay.strips[0])
 
     @logCommand(get='self')
     def extractVisiblePlanes(self, openInSpectrumDisplay=True) -> list:
@@ -356,29 +357,11 @@ class GuiStripNd(GuiStrip):
         :param openInSpectrumDisplay: optionally open in a new SpectrumDisplay
         :returns: a list of Spectrum instances
         """
-
         display = self.spectrumDisplay
 
         result = []
-
         for specView in [spv for spv in display.spectrumViews if spv.isVisible]:
             ppmPositions = self.positions
-
-            # spectrum = specView.spectrum
-            #
-            # print('Display:', display)
-            # print('Strip:', strip)
-            # print('ppmPositions:', ppmPositions)
-            # print('')
-            # print('Spectrum:', spectrum)
-            # print('point position:', specView._getPointPosition(ppmPositions))
-            # print('')
-            # print('SpectrumView:', specView)
-            # print('Spectrumview dimensions:', specView.dimensions)
-            # print('Spectrumview axisCodes:', specView.axisCodes)
-            # print('Spectrumview SW:', specView._getByDisplayOrder('spectralWidths'))
-            # print('Spectrumview limits:', specView._getByDisplayOrder('spectrumLimits'))
-
             plane = specView._extractXYplaneToFile(ppmPositions)
             result.append(plane)
 
@@ -516,87 +499,48 @@ class GuiStripNd(GuiStrip):
         #GuiStrip._mouseMoved(self, positionPixel)
         self._updateTraces()
 
-    def _setZWidgets(self, ignoreSpectrumView=None, axis=None):
+    def _setPlaneAxisWidgets(self, ignoreSpectrumView=None, axis=None):
         """Sets values for the planeAxis widgets in the plane toolbar.
-        # CCPN INTERNAL - called in _changedBoundDisplayAxisOrdering function of SpectrumDisplayNd.py
+        # CCPNINTERNAL - called from several places
         """
-        for n, stripAxis in enumerate(self.orderedAxes[2:]):
 
-            if axis and axis != stripAxis:
-                continue
+        _displayedSpectra = [ds for ds in self._displayedSpectra
+                                if (ds.spectrumView is not ignoreSpectrumView and
+                                    ds.spectrum.dimensionCount > 2
+                                   )
+                            ]
 
-            displayAxisIndex = n+2
-            planeAxisBar = self.planeAxisBars[n]
+        if len(_displayedSpectra) == 0:
+            getLogger().debug('_setPlaneAxisWidgets: no spectra displayed')
+            return
 
-            # initialise the values to be determined
-            position = None
-            planeSize = None
-            minPlaneValue = None
-            maxPlaneValue = None
+        def _getVals(attrName, idx) -> list:
+            """A simple helper function to get values by attrName
+            Remove any None's
+            """
+            result = [getattr(ds, attrName)[idx] for ds in _displayedSpectra]
+            return [val for val in result if val is not None]
 
-            specViews = [specView for specView in self.spectrumViews
-                                  if (specView is not ignoreSpectrumView and
-                                      specView.spectrum.dimensionCount > 2
-                                     )
-                         ]
-            for spectrumView in specViews:
+        for idx, stripAxis in enumerate(self.axes[2:]):
+            axisIndex = idx+2
 
-                _params = spectrumView._getSpectrumViewParams(displayAxisIndex)
-                _index = spectrumView.dimensionIndices[displayAxisIndex]
-                specDim = spectrumView.spectrumDimensions[displayAxisIndex]
+            _vals = _getVals('axisIncrementsByType', axisIndex)
+            _planeSize = min(_vals)
 
-                if stripAxis.unit == AXISUNIT_PPM:
-                    # _valuePerPoint = _params.valuePerPoint
-                    # _minFreq = _params.minAliasedFrequency + (0.5 * _valuePerPoint) or _params.minSpectrumFrequency
-                    # _maxFreq = _params.maxAliasedFrequency - (0.5 * _valuePerPoint) or _params.maxSpectrumFrequency
+            _position = stripAxis.position
 
-                    _ppmPerPoint = specDim.ppmPerPoint
-                    _minFreq, _maxFreq = spectrumView.aliasingLimits[displayAxisIndex]
-                    _minFreq -= 0.5*_ppmPerPoint  # hack
-                    _maxFreq += 0.5*_ppmPerPoint  # hack
+            _vals = _getVals('minAxisLimitsByType', axisIndex)
+            _minPlaneValue = min(_vals)
 
-                    minPlaneValue = min(minPlaneValue, _minFreq) if minPlaneValue is not None else _minFreq
-                    maxPlaneValue = max(maxPlaneValue, _maxFreq) if maxPlaneValue is not None else _maxFreq
-                    planeSize = min(planeSize, _ppmPerPoint) if planeSize is not None else _ppmPerPoint
+            _vals = _getVals('maxAxisLimitsByType', axisIndex)
+            _maxPlaneValue = min(_vals)
 
-                    # if minZPlaneSize is None or _valuePerPoint < minZPlaneSize:
-                    #     minZPlaneSize = _valuePerPoint
-                    position = stripAxis.position
+            # set PlaneSelectorWidget values; BUT "unit" argument is ignored (GWV)
+            planeAxisBar = self.planeAxisBars[idx]
+            planeAxisBar.setPlaneValues(_planeSize, _minPlaneValue, _maxPlaneValue, _position, unit=stripAxis.unit)
 
-                elif stripAxis.unit == AXISUNIT_POINT:
-                    # change to points to display in the widget
-                    # pointL, pointR = spectrumView.spectrum.getPointAliasingLimits(dimension=_index + 1)
-                    minPlaneValue = 0.5
-                    maxPlaneValue = float(specDim.pointCount)+0.5
-                    planeSize = 1.0
-                    position = specDim.ppmToPoint(stripAxis.position)
-
-                elif stripAxis.unit == AXISUNIT_HZ:
-                    # change to Hz to display in the widget
-                    _valuePerPoint = _params.valuePerPoint
-                    _minFreq = _params.minAliasedFrequency + (0.5 * _valuePerPoint) or _params.minSpectrumFrequency
-                    _maxFreq = _params.maxAliasedFrequency - (0.5 * _valuePerPoint) or _params.maxSpectrumFrequency
-                    minPlaneValue = min(minPlaneValue, _minFreq) if minPlaneValue is not None else _minFreq
-                    maxPlaneValue = max(maxPlaneValue, _maxFreq) if maxPlaneValue is not None else _maxFreq
-
-                    minPlaneValue *= specDim.spectrometerFrequency
-                    maxPlaneValue *= specDim.spectrometerFrequency
-
-                    if planeSize is None or _valuePerPoint < planeSize:
-                        planeSize = _valuePerPoint * specDim.spectrometerFrequency
-                    position = stripAxis.position * specDim.spectrometerFrequency
-
-                else:
-                    getLogger().warning(f'Axis {stripAxis.unit} not found')
-                    return
-
-            if stripAxis and position is not None:
-                if planeSize is None:
-                    planeSize = 1.0  # arbitrary to catch errors
-                # set PlaneSelectorWidget values; BUT "unit" argument is ignored (GWV)
-                planeAxisBar.setPlaneValues(planeSize, minPlaneValue, maxPlaneValue, position, unit=stripAxis.unit)
-
-        self.haveSetupZWidgets = True
+        # GWV:not sure about this
+        # self.haveSetupZWidgets = True
 
     # @logCommand(get='self')
     def changeZPlane(self, axisIndex:int = None, planeCount:int = None, position:float = None):

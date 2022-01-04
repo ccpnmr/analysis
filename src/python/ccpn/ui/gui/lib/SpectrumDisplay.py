@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 15:18:24 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-01-04 11:38:41 +0000 (Tue, January 04, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -25,8 +25,6 @@ __date__ = "$Date: 2021-09-17 15:02:29 +0100 (Fri, September 17, 2021) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-
-#TODO:GEERTEN: Move to other places, like SpectrumDisplay or Strip
 
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.Peak import Peak
@@ -40,7 +38,6 @@ from ccpn.util.Logging import getLogger
 
 def navigateToCurrentPeakPosition(application, selectFirstPeak=False):
     """
-
     Takes the current peak position and navigates (centres) to that position all strips and spectrum displays of the project.
     Called by shortcut. For a more generic usage refer to:  "navigateToPositionInStrip"
     instead
@@ -67,7 +64,7 @@ def navigateToCurrentPeakPosition(application, selectFirstPeak=False):
             if strip:
                 navigateToPositionInStrip(strip, peak.position, peak.axisCodes)
 
-        display.setZWidgets()
+        display._setPlaneAxisWidgets()
 
 
 def navigateToCurrentNmrResiduePosition(application):

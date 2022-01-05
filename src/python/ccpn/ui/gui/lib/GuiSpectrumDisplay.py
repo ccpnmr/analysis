@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-24 15:23:20 +0000 (Fri, December 24, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-05 09:56:04 +0000 (Wed, January 05, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -32,14 +32,24 @@ from functools import partial
 from copy import deepcopy
 # from collections import namedtuple
 from contextlib import contextmanager
+from typing import Tuple
+
 # from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.Sample import Sample
+from ccpn.core.Substance import Substance
+from ccpn.core.NmrAtom import NmrAtom
+from ccpn.core.NmrResidue import NmrResidue
+from ccpn.core.NmrChain import NmrChain
+from ccpn.core.lib.SpectrumLib import DIMENSION_TIME, DIMENSION_SAMPLED
+
+from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks, _assignNmrResiduesToPeaks
+
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
-from typing import Tuple
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.PhasingFrame import PhasingFrame
@@ -53,8 +63,7 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, STRIP_MINIMUMWIDTH, STRIP_MINIMUMHEIGHT
-from ccpn.core.lib.Notifiers import Notifier
-from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks, _assignNmrResiduesToPeaks
+
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import PEAKSELECT, MULTIPLETSELECT, CcpnGLWidget
 from ccpn.ui.gui.widgets.GLAxis import GuiNdWidgetAxis
 from ccpn.ui.gui.lib.GuiSpectrumView import _spectrumViewHasChanged
@@ -62,10 +71,7 @@ from ccpn.ui.gui.widgets.SpectrumGroupToolBar import _spectrumGroupViewHasChange
 from ccpn.util.Constants import AXISUNITS
 from ccpn.util.Logging import getLogger
 from ccpn.util import Colour
-from ccpn.core.Substance import Substance
-from ccpn.core.NmrAtom import NmrAtom
-from ccpn.core.NmrResidue import NmrResidue
-from ccpn.core.NmrChain import NmrChain
+
 
 from ccpn.ui._implementation.PeakListView import PeakListView
 from ccpn.ui._implementation.IntegralListView import IntegralListView
@@ -2477,6 +2483,10 @@ class GuiSpectrumDisplay(CcpnModule):
                     for dt1, dt2 in zip(self.dimensionTypes or [], spectrum.getByDimensions('dimensionTypes', dims)):
                         if dt1 != dt2:
                             raise RuntimeError('Cannot display %s on %s; incompatible dimensionTypes' % (spectrum, self))
+                        # For now: no multiple spectra with time/sampled axes (current implementation limit)
+                        if dt2 == DIMENSION_SAMPLED or dt2 == DIMENSION_TIME:
+                            raise RuntimeError('Currently cannot display %s with "%s" axis on %s; SpectrumDisplay already contains other spectra with time/sampled axes' %
+                                               (spectrum, dt2, self))
 
                 _oldOrdering = self._getOrderedSpectrumViewsIndex()
 
@@ -2756,4 +2766,4 @@ class GuiSpectrumDisplay(CcpnModule):
 #=========================================================================================
 
 
-GuiSpectrumDisplay.processSpectrum = GuiSpectrumDisplay.displaySpectrum  # ejb - from SpectrumDisplay
+#GuiSpectrumDisplay.processSpectrum = GuiSpectrumDisplay.displaySpectrum  # ejb - from SpectrumDisplay

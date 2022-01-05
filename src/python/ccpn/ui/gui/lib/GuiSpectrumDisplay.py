@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-05 09:56:04 +0000 (Wed, January 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-05 10:14:07 +0000 (Wed, January 05, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2476,10 +2476,10 @@ class GuiSpectrumDisplay(CcpnModule):
                 dims = displayOrder[0:1] if self.is1D else displayOrder
 
                 if not self._isNew:
-                    # check the isotopeCodes exist and check compatibility
-                    for ic1, ic2 in zip(self.isotopeCodes or [], spectrum.getByDimensions('isotopeCodes', dims)):
-                        if ic1 != ic2:
-                            raise RuntimeError('Cannot display %s on %s; incompatible isotopeCodes' % (spectrum, self))
+                    # There is already a spectrum displayed; ie. the spectrumDisplay has definitions for
+                    # its x,z,plane(s) display axes
+
+                    # check for matching dimension types
                     for dt1, dt2 in zip(self.dimensionTypes or [], spectrum.getByDimensions('dimensionTypes', dims)):
                         if dt1 != dt2:
                             raise RuntimeError('Cannot display %s on %s; incompatible dimensionTypes' % (spectrum, self))
@@ -2487,6 +2487,11 @@ class GuiSpectrumDisplay(CcpnModule):
                         if dt2 == DIMENSION_SAMPLED or dt2 == DIMENSION_TIME:
                             raise RuntimeError('Currently cannot display %s with "%s" axis on %s; SpectrumDisplay already contains other spectra with time/sampled axes' %
                                                (spectrum, dt2, self))
+
+                    # check the isotopeCodes exist and check compatibility
+                    for ic1, ic2 in zip(self.isotopeCodes or [], spectrum.getByDimensions('isotopeCodes', dims)):
+                        if ic1 != ic2:
+                            raise RuntimeError('Cannot display %s on %s; incompatible isotopeCodes' % (spectrum, self))
 
                 _oldOrdering = self._getOrderedSpectrumViewsIndex()
 

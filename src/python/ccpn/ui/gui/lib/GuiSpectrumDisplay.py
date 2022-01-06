@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-04 11:38:40 +0000 (Tue, January 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-06 12:54:51 +0000 (Thu, January 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -32,14 +32,24 @@ from functools import partial
 from copy import deepcopy
 # from collections import namedtuple
 from contextlib import contextmanager
+from typing import Tuple
+
 # from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.Sample import Sample
+from ccpn.core.Substance import Substance
+from ccpn.core.NmrAtom import NmrAtom
+from ccpn.core.NmrResidue import NmrResidue
+from ccpn.core.NmrChain import NmrChain
+from ccpn.core.lib.SpectrumLib import DIMENSION_TIME, DIMENSION_SAMPLED
+
+from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks, _assignNmrResiduesToPeaks
+
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
-from typing import Tuple
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.PhasingFrame import PhasingFrame
@@ -53,8 +63,7 @@ from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.lib.GuiStrip import GuiStrip, STRIP_MINIMUMWIDTH, STRIP_MINIMUMHEIGHT
-from ccpn.core.lib.Notifiers import Notifier
-from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks, _assignNmrResiduesToPeaks
+
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import PEAKSELECT, MULTIPLETSELECT, CcpnGLWidget
 from ccpn.ui.gui.widgets.GLAxis import GuiNdWidgetAxis
 from ccpn.ui.gui.lib.GuiSpectrumView import _spectrumViewHasChanged
@@ -62,10 +71,7 @@ from ccpn.ui.gui.widgets.SpectrumGroupToolBar import _spectrumGroupViewHasChange
 from ccpn.util.Constants import AXISUNITS
 from ccpn.util.Logging import getLogger
 from ccpn.util import Colour
-from ccpn.core.Substance import Substance
-from ccpn.core.NmrAtom import NmrAtom
-from ccpn.core.NmrResidue import NmrResidue
-from ccpn.core.NmrChain import NmrChain
+
 
 from ccpn.ui._implementation.PeakListView import PeakListView
 from ccpn.ui._implementation.IntegralListView import IntegralListView
@@ -2360,13 +2366,22 @@ class GuiSpectrumDisplay(CcpnModule):
                 dims = displayOrder[0:1] if self.is1D else displayOrder
 
                 if not self._isNew:
+                    # There is already a spectrum displayed; ie. the spectrumDisplay has definitions for
+                    # its x,z,plane(s) display axes
+
+                    # check for matching dimension types
+                    for dt1, dt2 in zip(self.dimensionTypes or [], spectrum.getByDimensions('dimensionTypes', dims)):
+                        if dt1 != dt2:
+                            raise RuntimeError('Cannot display %s on %s; incompatible dimensionTypes' % (spectrum, self))
+                        # For now: no multiple spectra with time/sampled axes (current implementation limit)
+                        if dt2 == DIMENSION_SAMPLED or dt2 == DIMENSION_TIME:
+                            raise RuntimeError('Currently cannot display %s with "%s" axis on %s; SpectrumDisplay already contains other spectra with time/sampled axes' %
+                                               (spectrum, dt2, self))
+
                     # check the isotopeCodes exist and check compatibility
                     for ic1, ic2 in zip(self.isotopeCodes or [], spectrum.getByDimensions('isotopeCodes', dims)):
                         if ic1 != ic2:
                             raise RuntimeError('Cannot display %s on %s; incompatible isotopeCodes' % (spectrum, self))
-                    for dt1, dt2 in zip(self.dimensionTypes or [], spectrum.getByDimensions('dimensionTypes', dims)):
-                        if dt1 != dt2:
-                            raise RuntimeError('Cannot display %s on %s; incompatible dimensionTypes' % (spectrum, self))
 
                 # # add toolbar ordering to the undo stack
                 # addUndoItem(undo=self.setToolbarButtons)  # keep for undo/redo
@@ -2617,4 +2632,4 @@ class GuiSpectrumDisplay(CcpnModule):
 #=========================================================================================
 
 
-GuiSpectrumDisplay.processSpectrum = GuiSpectrumDisplay.displaySpectrum  # ejb - from SpectrumDisplay
+#GuiSpectrumDisplay.processSpectrum = GuiSpectrumDisplay.displaySpectrum  # ejb - from SpectrumDisplay

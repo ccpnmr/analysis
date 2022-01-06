@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-06 16:27:57 +0000 (Thu, January 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-06 22:08:37 +0000 (Thu, January 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2547,6 +2547,58 @@ class GuiStrip(Frame):
         self.current.peaks = result
         return result
 
+    def _initAxesValues(self,   spectrumView):
+        """Initialiase the strip.axes using a spectrumView instance
+        CCPNINTERNAL: used from _newSpectrumDisplay
+        """
+        from ccpn.util.Constants import AXISUNIT_NUMBER, AXISUNIT_POINT, AXISUNIT_PPM
+
+        spectrum = spectrumView.spectrum
+        axes = self.orderedAxes
+
+        if spectrum.dimensionCount == 1:
+            # 1D spectrum
+            ppmLimits, valueLimits = spectrum.get1Dlimits()
+
+            axes[0].region = ppmLimits
+            axes[0]._positionByType = axes[0].position
+            axes[0]._widthByType = axes[0].width
+
+            axes[1].region = valueLimits
+            axes[1].unit = AXISUNIT_NUMBER
+
+        else:
+            # nD
+            for _axis, _specDim, dimIndex in zip(axes,
+                                                 spectrumView.spectrumDimensions,
+                                                 spectrumView.dimensionIndices
+                                                 ):
+                if _axis._displayAxisIndex < 2:
+                    limits = _specDim.aliasingLimits
+                    _axis.unit = AXISUNIT_PPM
+                    self._setAxisPositionAndWidth(_axis._displayAxisIndex,
+                                                  position = 0.5*(limits[0] + limits[1]),  # The centre
+                                                  width = max(limits) - min(limits),
+                                                  refresh = False
+                    )
+
+                else:
+                    # A display "plane-axis"
+                    if spectrum.isTimeDomains[dimIndex] or spectrum.isSampledDomains[dimIndex]:
+                        _axis.unit = AXISUNIT_POINT
+                        self._setAxisPositionAndWidth(_axis._displayAxisIndex,
+                                                      position = 1.0,
+                                                      width = 1.0,
+                                                      refresh = False
+                        )
+                    else:
+                        _axis.unit = AXISUNIT_PPM
+                        limits = _specDim.spectrumLimits
+                        self._setAxisPositionAndWidth(_axis._displayAxisIndex,
+                                                      position = 0.5*(limits[0] + limits[1]),  # The centre
+                                                      width = _specDim.ppmPerPoint,
+                                                      refresh = False
+                        )
 
 #=========================================================================================
 # Notifiers:

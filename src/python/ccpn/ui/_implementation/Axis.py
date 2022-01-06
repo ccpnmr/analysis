@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-06 16:27:57 +0000 (Thu, January 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-06 22:08:36 +0000 (Thu, January 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -108,7 +108,7 @@ class Axis(AbstractWrapperObject):
     def _displayAxisIndex(self):
         """Index of self in the parent strip.axes; i.e. defined by display order
         """
-        return list(self.strip.axes).index(self)
+        return list(self.strip.orderedAxes).index(self)
 
     #=========================================================================================
     # properties

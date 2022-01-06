@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-06 16:27:57 +0000 (Thu, January 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-06 22:08:36 +0000 (Thu, January 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -573,38 +573,6 @@ class SpectrumDisplay(AbstractWrapperObject):
         """
         return [dim - 1 for dim in self._getDimensionsMapping(spectrum)]
 
-    def _setAxesLimits(self, spectrum: Spectrum):
-        """Define the relevant display-axis limits from the dimensions of spectrum
-        CCPNMRINTERNAL: used in _newSpectrumDisplay
-        """
-        # NB setting Axis.region translates into setting position (== halfway point)
-        # and widths of the axis
-
-        # Get the mapping of the axes of spectrum onto this SpectrumDisplay
-        spectrumAxes = self._getAxesMapping(spectrum)
-
-        for strip in self.strips:  # There should at least be one strip defined
-            if spectrum.dimensionCount == 1:
-                # 1D spectrum
-                ppmLimits, valueLimits = spectrum.get1Dlimits()
-                strip.axes[0].region = ppmLimits
-                strip.axes[1].region = valueLimits
-
-            else:
-                # nD
-                for ii, axis in enumerate(spectrumAxes):
-                    if ii < 2:
-                        strip.axes[ii].region = spectrum.spectrumLimits[axis]
-
-                    else:
-                        # A display "plane-axis"
-                        if spectrum.isTimeDomains[axis] or spectrum.isSampledDomains[axis]:
-                            strip.axes[ii].position = 1.0
-                            strip.axes[ii].width = 1.0
-                        else:
-                            limits = spectrum.spectrumLimits[axis]
-                            strip.axes[ii].position = 0.5*max(limits) + 0.5*min(limits)  # The centre
-                            strip.axes[ii].width = spectrum.ppmPerPoints[axis]
 
     #===========================================================================================
     # new'Object' and other methods
@@ -689,22 +657,23 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
 
     # Create axes
     if is1D:
+        # SpectrumDisplay X
         if spectrum.dimensionTypes[0] == specLib.DIMENSION_FREQUENCY:
             apiSpectrumDisplay.newFrequencyAxis(code=axisCodes[0], stripSerial=1, unit=AXISUNIT_PPM)
         elif spectrum.dimensionTypes[0] == specLib.DIMENSION_TIME:
             apiSpectrumDisplay.newFidAxis('time', stripSerial=1, unit=AXISUNIT_POINT)
-
+        # SpectrumDisplay Y; i.e. Intensity
         apiSpectrumDisplay.newIntensityAxis(code=SpectrumDisplay.INTENSITY, stripSerial=1, unit=AXISUNIT_NUMBER)
 
-        display._isotopeCodes = tuple(spectrum.isotopeCodes)
+        # display._isotopeCodes = tuple(spectrum.isotopeCodes)
 
     else:
         # nD
         spectrumAxesInDisplayOrder = display._getAxesMapping(spectrum)
-        display._isotopeCodes = tuple(spectrum.isotopeCodes[axis] for axis in spectrumAxesInDisplayOrder)
+        # display._isotopeCodes = tuple(spectrum.isotopeCodes[axis] for axis in spectrumAxesInDisplayOrder)
 
-        for ii, axis in enumerate(spectrumAxesInDisplayOrder):
-            displayAxisCode = axisCodes[ii]
+        for ii, dimIndex in enumerate(spectrumAxesInDisplayOrder):
+            displayAxisCode = axisCodes[dimIndex]
 
             # # if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y' or
             # #    not stripDirection):
@@ -719,34 +688,39 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
             # #       stripDirection is no longer used in the api
             # stripSerial = 1
 
-            if spectrum.dimensionTypes[axis] == specLib.DIMENSION_FREQUENCY:
-                apiSpectrumDisplay.newFrequencyAxis(code=displayAxisCode, stripSerial=1, unit=AXISUNIT_PPM)
+            dimType = spectrum.dimensionTypes[dimIndex]
+            if dimType == specLib.DIMENSION_FREQUENCY:
+                apiAxis = apiSpectrumDisplay.newFrequencyAxis(code=displayAxisCode, stripSerial=1, unit=AXISUNIT_PPM)
+                _unit = apiAxis.unit
 
-            elif spectrum.dimensionTypes[axis] == specLib.DIMENSION_TIME:
-                # Cannot do; all falls apart
+            elif dimType == specLib.DIMENSION_TIME:
+                # Cannot do newFidAxis; all falls apart
                 # apiSpectrumDisplay.newFidAxis(code=axisCode, stripSerial=1, unit=AXISUNIT_POINT)
-                apiSpectrumDisplay.newFrequencyAxis(code=displayAxisCode, stripSerial=1, unit=AXISUNIT_POINT)
+                apiAxis = apiSpectrumDisplay.newFrequencyAxis(code=displayAxisCode, stripSerial=1, unit=AXISUNIT_POINT)
+                _unit = apiAxis.unit
 
-            elif spectrum.dimensionTypes[axis] == specLib.DIMENSION_SAMPLED:
-                apiSpectrumDisplay.newFrequencyAxis(code=displayAxisCode, stripSerial=1, unit=AXISUNIT_POINT)
+            elif dimType == specLib.DIMENSION_SAMPLED:
+                apiAxis = apiSpectrumDisplay.newFrequencyAxis(code=displayAxisCode, stripSerial=1, unit=AXISUNIT_POINT)
+                _unit = apiAxis.unit
 
             else:
-                raise RuntimeError('Invalid dimensionType "%s"' % spectrum.dimensionTypes[axis])
-
-    display._setAxesLimits(spectrum)
+                raise RuntimeError('Invalid dimensionType "%s"' % dimType)
 
     # display the spectrum, this will also create a new spectrumView
     # Define the display as new, to avoid the isotopeCode and dimensionTypes checks
     display._isNew = True
     spectrumView = display.displaySpectrum(spectrum=spectrum)
     display._isNew = False
-    # We now can set the isotopeCode and dimensionTypes parameters to define the spectrum
-    # display
+    # We now can set the isotopeCode and dimensionTypes parameters to define the
+    # spectrumDisplay
     display._dimensionTypes = spectrumView.dimensionTypes
     display._isotopeCodes = spectrumView.isotopeCodes
 
-    # We only can set the plane-axis-widgets when there is a spectrumView; which we just created
-    display._setPlaneAxisWidgets()
+    # initialise the axes, using the values from spectrumView
+    # this will also update any planeToolbar widgets
+    strip._initAxesValues(spectrumView)
+    # # We only can set the plane-axis-widgets when there is a spectrumView; which we just created
+    # display._setPlaneAxisWidgets()
 
     # call any post initialise routines for the spectrumDisplay here
     display._postInit()

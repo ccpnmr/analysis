@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-06 16:28:18 +0000 (Thu, January 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-06 22:08:37 +0000 (Thu, January 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -251,7 +251,7 @@ class MainWindow(_coreClassWindow, _GuiMainWindow):
         logger.debug('MainWindow>> project: %s' % project)
         logger.debug('MainWindow>> project.application: %s' % project.application)
 
-        application = project._appBase
+        application = project.application
         _GuiMainWindow.__init__(self, application=application)
 
         # hide the window here and make visible later

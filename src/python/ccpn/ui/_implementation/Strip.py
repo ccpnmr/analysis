@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-06 16:27:57 +0000 (Thu, January 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-06 22:08:37 +0000 (Thu, January 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -143,12 +143,6 @@ class Strip(AbstractWrapperObject):
         apiStrip = self._wrappedData
         ff = self._project._data2Obj.get
         return tuple(ff(apiStrip.findFirstStripAxis(axis=x)) for x in apiStrip.orderedAxes)
-
-        # # NOTE: ED new code to read axes ignoring stripDirection
-        # # All strips will return their own axes
-        # stripSerial = apiStrip.stripSerial
-        # apiSpectrumDisplay = apiStrip.spectrumDisplay
-        # return tuple(ff(apiSpectrumDisplay.findFirstAxis(code=x, stripSerial=stripSerial)) for x in apiSpectrumDisplay.axisOrder)
 
     # GWV 23/12: There should not be a setter! Created by SpectrumDisplay/Strip
     # @orderedAxes.setter
@@ -658,7 +652,7 @@ class DisplayedSpectrum(object):
         in display order.
         The length is always dimensionCount of the spectrumDisplay
         """
-        axes = self.strip.axes
+        axes = self.strip.orderedAxes
         result = [ax.position for ax in axes]
         for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
             result.append(None)
@@ -669,7 +663,7 @@ class DisplayedSpectrum(object):
         """Return a tuple of the current widths for axes in display order.
         The length is always dimensionCount of the spectrumDisplay
         """
-        axes = self.strip.axes
+        axes = self.strip.orderedAxes
         result = [ax.width for ax in axes]
         for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
             result.append(None)
@@ -680,7 +674,7 @@ class DisplayedSpectrum(object):
         """Return a tuple of (leftPpm,rightPpm) for current regions for axes
         in display order.
         """
-        axes = self.strip.axes
+        axes = self.strip.orderedAxes
         result = [ax.region for ax in axes]
         for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
             result.append( (None, None) )
@@ -718,7 +712,7 @@ class DisplayedSpectrum(object):
         """
         result = []
         for axis, ppmPerPoint, specFreq, points in \
-                zip(self.strip.axes,
+                zip(self.strip.orderedAxes,
                     self.spectrumView.ppmPerPoints,
                     self.spectrumView.spectrometerFrequencies,
                     self.spectrumView.pointCounts
@@ -750,7 +744,7 @@ class DisplayedSpectrum(object):
         """
         result = []
         for axis, specDim, limits, specFreq, points in \
-                zip(self.strip.axes,
+                zip(self.strip.orderedAxes,
                     self.spectrumView.spectrumDimensions,
                     self.spectrumView.aliasingLimits,
                     self.spectrumView.spectrometerFrequencies,

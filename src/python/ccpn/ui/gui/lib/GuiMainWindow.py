@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-04 11:38:40 +0000 (Tue, January 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-06 11:21:33 +0000 (Thu, January 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1364,6 +1364,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             return None
 
         from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
+        from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
 
         path = dataLoader.path
         if dataLoader.dataFormat == CcpNmrV2ProjectDataLoader.dataFormat:
@@ -1381,7 +1382,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 getLogger().info('==> Cancelled loading ccpn project "%s"' % path)
                 return None
 
-        elif Project._needsUpgrading(path):
+        elif dataLoader.dataFormat == CcpNmrV3ProjectDataLoader.dataFormat and Project._needsUpgrading(path):
             ok = MessageDialog.showYesNoWarning('Load Project',
                                                 f'Project "%s" was saved with an earlier version of AnalysisV3, '
                                                 'and will be converted to version %s.\n'

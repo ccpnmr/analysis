@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-04 11:38:40 +0000 (Tue, January 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-06 11:21:33 +0000 (Thu, January 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1507,7 +1507,7 @@ class Framework(NotifierBase):
 
         if makeNewProject:
             self._closeProject()
-            self.project = self.newProject(dataBlock.name)
+            self._project = self.newProject(dataBlock.name)
 
         self.project.shiftAveraging = False
 

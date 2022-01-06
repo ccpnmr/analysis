@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-05 10:14:07 +0000 (Wed, January 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-06 16:27:57 +0000 (Thu, January 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2472,8 +2472,8 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 # _getDimensionsMapping will check the match for axisCodes
                 displayOrder = (1, 0) if self.is1D else self._getDimensionsMapping(spectrum)
-                # check the isotopeCodes
-                dims = displayOrder[0:1] if self.is1D else displayOrder
+                # dimensions are 1-based and not defined for (1D) Intensity axis
+                dims = [1] if self.is1D else displayOrder
 
                 if not self._isNew:
                     # There is already a spectrum displayed; ie. the spectrumDisplay has definitions for
@@ -2506,11 +2506,6 @@ class GuiSpectrumDisplay(CcpnModule):
                     getLogger().warning(f'Could not create new spectrumView for {spectrum}')
 
                 else:
-
-                    # if not (_isotopeCodes := self.isotopeCodes) and self.spectrumViews is not None and len(self.spectrumViews) == 1:
-                    #     # set the isotopeCodes from the first spectrumView
-                    #     _isotopeCodes = tuple(self.spectrumViews[0]._getByDisplayOrder('isotopeCodes'))
-                    #     self._isotopeCodes = _isotopeCodes
 
                     # add the spectrum to the end of the spectrum ordering in the toolbar
                     idx = self._getOrderedSpectrumViewsIndex()

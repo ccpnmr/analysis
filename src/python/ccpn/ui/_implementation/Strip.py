@@ -4,7 +4,7 @@ GUI Display Strip class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-24 14:23:11 +0000 (Fri, December 24, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-06 16:27:57 +0000 (Thu, January 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -81,16 +81,16 @@ class Strip(AbstractWrapperObject):
     def __init__(self, project, wrappedData):
         super().__init__(project=project, wrappedData=wrappedData)
 
-    #-----------------------------------------------------------------------------------------
-    # Attributes and methods related to the data structure
-    #-----------------------------------------------------------------------------------------
-
     # @classmethod
     # def _restoreObject(cls, project, apiObj):
     #     """Subclassed to allow for initialisations on restore
     #     """
     #     result = super()._restoreObject(project, apiObj)
     #     return result
+
+    #-----------------------------------------------------------------------------------------
+    # Attributes and methods related to the data structure
+    #-----------------------------------------------------------------------------------------
 
     @property
     def spectrumDisplay(self) -> SpectrumDisplay:
@@ -102,19 +102,14 @@ class Strip(AbstractWrapperObject):
     @property
     def spectrumViews(self) -> list:
         """SpectrumViews shown in Strip"""
-        pass
         # STUB for now; hot-fixed later
-        # return tuple(self._project._data2Obj.get(x)
-        #      for x in self._wrappedData.sortedStripSpectrumViews())
+        pass
 
     @property
-    def _displayedSpectra(self) -> tuple:
-        """Return a tuple of DisplayedSpectrum instances, in order of the spectrumDisplay
-        toolbar, if currently visible
-        """
-        result = [DisplayedSpectrum(strip=self, spectrumView=specView) \
-                  for specView in self.getSpectrumViews() if specView.isDisplayed]
-        return tuple(result)
+    def axes(self) -> list:
+        """The axes of Strip"""
+        # STUB for now; hot-fixed later
+        pass
 
     # GWV 24/12/21: moved here from GuiStrip
     @property
@@ -217,6 +212,91 @@ class Strip(AbstractWrapperObject):
 
     #=========================================================================================
     # CCPN properties
+    #=========================================================================================
+
+    @property
+    def _displayedSpectra(self) -> tuple:
+        """Return a tuple of DisplayedSpectrum instances, in order of the spectrumDisplay
+        toolbar, if currently visible
+        """
+        result = [DisplayedSpectrum(strip=self, spectrumView=specView) \
+                  for specView in self.getSpectrumViews() if specView.isDisplayed]
+        return tuple(result)
+
+    def _getValuesFromDisplayedSpectra(self, displayedSpectra, attributeName, displayAxisIndex, filterNone = True) -> list:
+        """Helper routine: Return a list of values defined by attributeName, from the displayedSpectra objects,
+        for displayAxisIndex, optionally filtered for None's
+        """
+        result = [getattr(ds, attributeName)[displayAxisIndex] for ds in displayedSpectra]
+        if filterNone:
+            result = [val for val in result if val is not None]
+        return result
+
+    @property
+    def _minAxisLimitsByType(self) -> list:
+        """:return a list of the min(axis-limits-by-type) (ie. depending on axis.unit) in display-axis order
+        """
+        _allSpecs = [DisplayedSpectrum(strip=self, spectrumView=sv)
+                     for sv in self.spectrumViews
+                    ]
+        _valsPerSpecView = [ds.minAxisLimitsByType
+                            for ds in _allSpecs]
+
+        # now get the values per axis
+        result = []
+        for axisIndex, axis in enumerate(self.axes):
+            _tmp = [val[axisIndex] for val in _valsPerSpecView
+                        if val[axisIndex] is not None
+                   ]
+            _minVal = None if len(_tmp) == 0 else min(_tmp)
+            result.append(_minVal)
+
+        return result    \
+
+    @property
+    def _maxAxisLimitsByType(self) -> list:
+        """:return a list of the max(axis-limits-by-type) (ie. depending on axis.unit) in display-axis order
+        """
+        _allSpecs = [DisplayedSpectrum(strip=self, spectrumView=sv)
+                     for sv in self.spectrumViews
+                    ]
+        _valsPerSpecView = [ds.maxAxisLimitsByType
+                            for ds in _allSpecs]
+
+        # now get the values per axis
+        result = []
+        for axisIndex, axis in enumerate(self.axes):
+            _tmp = [val[axisIndex] for val in _valsPerSpecView
+                        if val[axisIndex] is not None
+                   ]
+            _maxVal = None if len(_tmp) == 0 else max(_tmp)
+            result.append(_maxVal)
+
+        return result
+
+    @property
+    def _minAxisIncrementByType(self) -> list:
+        """:return a list of the min(axis-increment-by-type) (ie. depending on axis.unit) in display-axis order
+        """
+        _allSpecs = [DisplayedSpectrum(strip=self, spectrumView=sv)
+                     for sv in self.spectrumViews
+                    ]
+        _valsPerSpecView = [ds.axisIncrementsByType
+                            for ds in _allSpecs]
+
+        # now get the values per axis
+        result = []
+        for axisIndex, axis in enumerate(self.axes):
+            _tmp = [val[axisIndex] for val in _valsPerSpecView
+                        if val[axisIndex] is not None
+                   ]
+            _minVal = None if len(_tmp) == 0 else min(_tmp)
+            result.append(_minVal)
+
+        return result
+
+    #=========================================================================================
+    # API-related properties
     #=========================================================================================
 
     @property
@@ -549,6 +629,18 @@ class DisplayedSpectrum(object):
         return self.spectrumView.spectrum
 
     @property
+    def spectrumDimensions(self):
+        """Return a tuple of spectrumDimensions in axis display order
+        Assure that the len always is dimensionCount of the spectrumDisplay
+        by adding None's if necessary. This compensates for lower dimensional
+        spectra (e.g. a 2D mapped onto a 3D)
+        """
+        result = self.spectrumView.spectrumDimensions
+        for idx in range(len(result), self.strip.spectrumDisplay.dimensionCount):
+            result.append(None)
+        return tuple(result)
+
+    @property
     def ppmPerPoints(self) -> tuple:
         """Return tuple of ppm-per-point values in axis display order.
         Assure that the len always is dimensionCount of the spectrumDisplay
@@ -561,12 +653,10 @@ class DisplayedSpectrum(object):
         return tuple(result)
 
     @property
-    def positionsInPpm(self) -> tuple:
+    def currentPositionsInPpm(self) -> tuple:
         """Return a tuple of current positions (i.e. the centres) for axes
         in display order.
-        Assure that the len always is dimensionCount of the spectrumDisplay
-        by adding None's if necessary. This compensates for lower dimensional
-        spectra (e.g. a 2D mapped onto a 3D)
+        The length is always dimensionCount of the spectrumDisplay
         """
         axes = self.strip.axes
         result = [ax.position for ax in axes]
@@ -577,9 +667,7 @@ class DisplayedSpectrum(object):
     @property
     def currentWidthsInPpm(self) -> tuple:
         """Return a tuple of the current widths for axes in display order.
-        Assure that the len always is dimensionCOunt of the spectrumDisplay
-        by adding None's if necessary. This compensates for lower dimensional
-        spectra (e.g. a 2D mapped onto a 3D)
+        The length is always dimensionCount of the spectrumDisplay
         """
         axes = self.strip.axes
         result = [ax.width for ax in axes]
@@ -591,9 +679,6 @@ class DisplayedSpectrum(object):
     def currentRegionsInPpm(self) -> tuple:
         """Return a tuple of (leftPpm,rightPpm) for current regions for axes
         in display order.
-        Assure that the len always is dimensionCount of the spectrumDisplay
-        by adding None's if necessary. This compensates for lower dimensional
-        spectra (e.g. a 2D mapped onto a 3D)
         """
         axes = self.strip.axes
         result = [ax.region for ax in axes]
@@ -713,7 +798,7 @@ class DisplayedSpectrum(object):
 
     @property
     def aliasingLimits(self) -> tuple:
-        """Return a tuple of aliasingLimits in display order.
+        """Return a tuple of aliasingLimits (in ppm) in display order.
         Assure that the len always is dimensionCount of the spectrumDisplay
         by adding None's if necessary. This compensates for lower dimensional
         spectra (e.g. a 2D mapped onto a 3D).

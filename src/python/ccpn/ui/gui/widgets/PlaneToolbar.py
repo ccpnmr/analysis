@@ -7,7 +7,7 @@ The NmrResidueLabel allows drag and drop of the ids displayed in them
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 15:18:25 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-06 16:27:57 +0000 (Thu, January 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -670,36 +670,32 @@ class PlaneAxisWidget(_OpenGLFrameABC):
         return self._axisSelector.planeCount
 
     def _planeCountChanged(self, value: int = 1):
-        """
-        Changes the number of planes displayed simultaneously.
+        """Changes the number of planes displayed simultaneously.
         """
         if self.strip:
-            self.strip.changeZPlane(self.axis)
+            self.strip._changePlane(self.axis, planeIncrement=0, planeCount=self.planeCount)
 
     def _nextPlane(self, *args):
-        """
-        Increases axis ppm position by one plane
+        """Increases axis position by one plane
         """
         if self.strip:
-            self.strip.changeZPlane(self.axis, planeCount=-1)  # -1 because ppm units are backwards
+            self.strip._changePlane(self.axis, planeIncrement=1, planeCount=self.planeCount)
 
     def _previousPlane(self, *args):
-        """
-        Decreases axis ppm position by one plane
+        """Decreases axis position by one plane
         """
         if self.strip:
-            self.strip.changeZPlane(self.axis, planeCount=1)
+            self.strip._changePlane(self.axis, planeIncrement=-1, planeCount=self.planeCount)
 
     def _spinBoxChanged(self, *args):
-        """
-        Sets the value of the axis plane position box if the specified value is within the displayable limits.
+        """Sets the value of the axis plane position box if the specified value is within the displayable limits.
         """
         if self.strip:
             planeLabel = self._axisSelector.spinBox
             value = planeLabel.value()
 
             if planeLabel.minimum() <= value <= planeLabel.maximum():
-                self.strip.changeZPlane(self.axis, position=value)
+                self.strip._setAxisPositionAndWidth(self.axis, position=value)
 
     def _wheelEvent(self, event):
         if event.angleDelta().y() > 0:

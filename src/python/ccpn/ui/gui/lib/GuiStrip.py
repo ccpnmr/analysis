@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-24 15:23:20 +0000 (Fri, December 24, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-06 16:27:57 +0000 (Thu, January 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -96,7 +96,6 @@ class GuiStrip(Frame):
         self.application = self.mainWindow.application
         self.current = self.application.current
 
-        getLogger().debug('GuiStrip>>> spectrumDisplay: %s' % self.spectrumDisplay)
         super().__init__(parent=spectrumDisplay.stripFrame, setLayout=True, showBorder=False,
                          spacing=(0, 0), acceptDrops=True  #, hPolicy='expanding', vPolicy='expanding' ##'minimal'
                          )
@@ -588,81 +587,15 @@ class GuiStrip(Frame):
         self.deleteAllNotifiers()
         super().close()
 
-    # GWV 20181127: changed implementation to use deleteAllNotifiers in close() method
-    # def _unregisterStrip(self):
-    #     """Unregister all notifiers
-    #     """
-    #     self._stripNotifier.unRegister()
-    #     self._peakNotifier.unRegister()
-    #     self._integralNotifier.unRegister()
-    #     self._multipletNotifier.unRegister()
-    #     self._stripLabelNotifier.unRegister()
-    #     self._droppedNotifier.unRegister()
-    #     self._moveEventNotifier.unRegister()
-
     def _updateSpectrumLabels(self, data):
         """Callback when spectra have changed
         """
         self._CcpnGLWidget._processSpectrumNotifier(data)
 
-    # def _checkAliasingRange(self, spectrum):
-    #     """check whether the local aliasingRange has changed and entend the visible range if needed
-    #     """
-    #     newAliasingRange = spectrum.aliasingRange
-    #     if not self._currentAliasingRange:
-    #         self._currentAliasingRange[spectrum] = newAliasingRange
-    #
-    #         # update
-    #         with notificationBlanking():
-    #             vARange = spectrum.visibleAliasingRange
-    #             newRange = tuple((min(minL, minR), max(maxL, maxR))
-    #                              for (minL, maxL), (minR, maxR) in zip(vARange, newAliasingRange))
-    #             spectrum.visibleAliasingRange = newRange
-    #
-    #     if spectrum in self._currentAliasingRange and self._currentAliasingRange[spectrum] != newAliasingRange:
-    #         self._currentAliasingRange[spectrum] = newAliasingRange
-    #
-    #         # update
-    #         with notificationBlanking():
-    #             vARange = spectrum.visibleAliasingRange
-    #             newRange = tuple((min(minL, minR), max(maxL, maxR))
-    #                              for (minL, maxL), (minR, maxR) in zip(vARange, newAliasingRange))
-    #             spectrum.visibleAliasingRange = newRange
-    #
-    # def _checkVisibleAliasingRange(self, spectrum):
-    #     """check whether the local visibleAliasingRange has changed and update the limits of the plane toolbar
-    #     """
-    #     newVisibleAliasingRange = spectrum.visibleAliasingRange
-    #     if not self._currentVisibleAliasingRange:
-    #         self._currentVisibleAliasingRange[spectrum] = newVisibleAliasingRange
-    #         # update
-    #         if not self.spectrumDisplay.is1D:
-    #             self._setZWidgets()
-    #
-    #     if spectrum in self._currentVisibleAliasingRange and self._currentVisibleAliasingRange[spectrum] != newVisibleAliasingRange:
-    #         # update
-    #         self._currentVisibleAliasingRange[spectrum] = newVisibleAliasingRange
-    #         if not self.spectrumDisplay.is1D:
-    #             self._setZWidgets()
-
     def _updateDisplayedPeaks(self, data):
         """Callback when peaks have changed
         """
         self._CcpnGLWidget._processPeakNotifier(data)
-
-        # # check whether the aliasing range has changed
-        # triggers = data[Notifier.TRIGGER]
-        # obj = data[Notifier.OBJECT]
-        #
-        # if isinstance(obj, Peak):
-        #
-        #     # update the peak labelling
-        #     if Notifier.DELETE in triggers or Notifier.CREATE in triggers:
-        #         # need to update the aliasing limits
-        #         pass
-        #
-        #     spectrum = obj.peakList.spectrum
-        #     self._checkVisibleAliasingRange(spectrum)
 
     def _updateDisplayedNmrAtoms(self, data):
         """Callback when nmrAtoms have changed

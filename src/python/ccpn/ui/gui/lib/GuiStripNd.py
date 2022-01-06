@@ -23,7 +23,7 @@ showStripLabel(doShow:bool):  show/hide the stripLabel
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -34,7 +34,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-24 15:23:20 +0000 (Fri, December 24, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-06 16:27:57 +0000 (Thu, January 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -514,26 +514,14 @@ class GuiStripNd(GuiStrip):
             getLogger().debug('_setPlaneAxisWidgets: no spectra displayed')
             return
 
-        def _getVals(attrName, idx) -> list:
-            """A simple helper function to get values by attrName
-            Remove any None's
-            """
-            result = [getattr(ds, attrName)[idx] for ds in _displayedSpectra]
-            return [val for val in result if val is not None]
-
         for idx, stripAxis in enumerate(self.axes[2:]):
             axisIndex = idx+2
 
-            _vals = _getVals('axisIncrementsByType', axisIndex)
-            _planeSize = min(_vals)
-
-            _position = stripAxis.position
-
-            _vals = _getVals('minAxisLimitsByType', axisIndex)
-            _minPlaneValue = min(_vals)
-
-            _vals = _getVals('maxAxisLimitsByType', axisIndex)
-            _maxPlaneValue = min(_vals)
+            _planeSize = self._minAxisIncrementByType[axisIndex]
+            _position = stripAxis._positionByType if stripAxis._positionByType is not None \
+                        else stripAxis.position
+            _minPlaneValue = self._minAxisLimitsByType[axisIndex]
+            _maxPlaneValue = self._maxAxisLimitsByType[axisIndex]
 
             # set PlaneSelectorWidget values; BUT "unit" argument is ignored (GWV)
             planeAxisBar = self.planeAxisBars[idx]
@@ -542,108 +530,255 @@ class GuiStripNd(GuiStrip):
         # GWV:not sure about this
         # self.haveSetupZWidgets = True
 
-    # @logCommand(get='self')
-    def changeZPlane(self, axisIndex:int = None, planeCount:int = None, position:float = None):
+    def _updatePlaneToolBarWidgets(self, displayAxisIndex: int):
+        """Update the planeToolBar widgets
         """
-        Changes the position of the z,a,b axis of the strip by number of planes or a ppm position, depending
-        on which is specified.
+        if displayAxisIndex < 0 or displayAxisIndex >= self.spectrumDisplay.dimensionCount:
+            raise ValueError('%s._updatePlaneToolBarWidgets: invalid displayAxisIndex "%s"' %
+                             (self.__class__.__name__, displayAxisIndex))
+        _axis = self.axes[displayAxisIndex]
+
+        # for Z,A,.. axis: update the PlaneSelectorWidget values; BUT "unit" argument is ignored (GWV)
+        if displayAxisIndex >= 2:
+            planeAxisBar = self.planeAxisBars[displayAxisIndex-2]
+            planeAxisBar.setPlaneValues(_axis._incrementByType,
+                                        _axis._minLimitByType,
+                                        _axis._maxLimitByType,
+                                        _axis._positionByType,
+                                        unit = _axis.unit)
+
+    def _setAxisPositionAndWidth(self, displayAxisIndex: int, position:float, width:float = None,
+                                       refresh=True):
+        """Change the position of axis defined by displayAxisIndex
+        :param displayAxisIndex: an index, defining an Z, A, ... plane; i.e. >= 2
+        :param position: de new position (in axis units; i.e. ppm, Hz, points)
+        :param width: (optional) the width of the plane
+        :param refresh: call openGL refresh
         """
-        if self.isDeleted:
+
+        if displayAxisIndex < 0 or displayAxisIndex >= self.spectrumDisplay.dimensionCount:
+            raise ValueError('%s._setAxisPositionAndWidth: invalid displayAxisIndex "%s"' %
+                             (self.__class__.__name__, displayAxisIndex))
+        _axis = self.axes[displayAxisIndex]
+
+        if len(self._displayedSpectra) == 0:
             return
 
-        if not (self.planeAxisBars and self.activePlaneAxis is not None):
-            return
+        # unfortunately, we need a spectrum with right dimensionality to do axis unit conversions
+        # (for now). Take the first eligible one
+        found = False
+        for sv in self.spectrumViews:
+            if sv.spectrum.dimensionCount == self.spectrumDisplay.dimensionCount:
+                found = True
+                break
+        if not found:
+            raise RuntimeError('_setPositionAndWidth: no appropriate spectrum found for this display to do conversions')
+        _specDim = sv.spectrumDimensions[displayAxisIndex]
 
-        axisIndex = (axisIndex if isinstance(axisIndex, int) else self.activePlaneAxis)
-        if not (0 <= (axisIndex - 2) < len(self.planeAxisBars)):
-            getLogger().warning('axisIndex out of range %s' % axisIndex)
-            return
+        _axis._incrementByType = self._minAxisIncrementByType[displayAxisIndex]
+        _axis._minLimitByType = self._minAxisLimitsByType[displayAxisIndex]
+        _axis._maxLimitByType = self._maxAxisLimitsByType[displayAxisIndex]
+        position = max(_axis._minLimitByType, position)
+        position = min(_axis._maxLimitByType, position)
 
-        stripAxis = self.orderedAxes[axisIndex]  # was + 2
-        planeAxisBar = self.planeAxisBars[axisIndex - 2]
+        # for now: Axis.position and Axis.width are maintained in ppm; so conversion
+        # depending on Axis.unit is required.
+        if _axis.unit == AXISUNIT_PPM:
+            _axis.position = position
+            _axis._positionByType = position
+            if width is not None:
+                _axis.width = width
+                _axis._widthByType = width
 
-        # get current plane minValue, maxValue, stepSize, value, planeDepth
-        planeMin, planeMax, _tmp, position, planeDepth = planeAxisBar.getPlaneValues()
+        elif _axis.unit == AXISUNIT_POINT:
+            # change to ppm
+            _axis.position = _specDim.pointToPpm(position)
+            _axis._positionByType = position
+            if width is not None:
+                _axis.width = width * _specDim.ppmPerPoint
+                _axis._widthByType = width
 
-        # below is hack to prevent initial setting of value to 99.99 when dragging spectrum onto blank display
-        if planeMin == 0 and position == 99.99 and planeMax == 99.99:
-            return
-
-        _specView = self.firstVisibleSpectrum()
-        if not (_specView and not _specView.isDeleted):
-            return
-        specDim = _specView.spectrumDimensions[axisIndex]
-
-        if stripAxis.unit == AXISUNIT_PPM:
-            # planeSize = specDim._valuePerPoint/ specDim.spectrometerFrequency  # specDim is in Hz
-            planeSize = specDim.ppmPerPoint
-
-        elif stripAxis.unit == AXISUNIT_POINT:
-            position = specDim.pointToPpm(position)
-            # planeSize = specDim._valuePerPoint/ specDim.spectrometerFrequency  # specDim is in Hz
-            planeSize = specDim.ppmPerPoint
-
-        elif stripAxis.unit == AXISUNIT_HZ:
-            # first change to ppm and scale by spectrometerFrequencies
-            position = position / specDim.spectrometerFrequency
-            # planeSize = specDim._valuePerPoint/ specDim.spectrometerFrequency  # specDim is in Hz
-            planeSize = specDim.ppmPerPoint
+        elif _axis.unit == AXISUNIT_HZ:
+            # change to ppm by scaling by spectrometerFrequencies
+            _axis.position = position / _specDim.spectrometerFrequency
+            _axis._positionByType = position
+            if width is not None:
+                _axis.width = width / _specDim.spectrometerFrequency
+                _axis._widthByType = width
 
         else:
-            getLogger().warning(f'Axis {stripAxis.unit} not found')
+            getLogger().warning(f'Axis {_axis.unit} not found')
             return
 
-        def _wrapPosition(_position):
-            # wrap around the aliasing limits
-            _aliasMin, _aliasMax = _specView.aliasingLimits[axisIndex]
-            if _position > _aliasMax:
-                _position = _aliasMin
-            if _position < _aliasMin:
-                _position = _aliasMax
-            return _position
-
-        if planeCount:
-            delta = planeSize * planeCount
-            position = position + delta
-
-            # wrap around the aliasing limits
-            position = _wrapPosition(position)
-            # _aliasMin, _aliasMax = _specView.aliasingLimits[axisIndex]
-            # if position > _aliasMax:
-            #     position = _aliasMin
-            # if position < _aliasMin:
-            #     position = _aliasMax
-
-            stripAxis.position = position
-            stripAxis.width = planeSize * planeDepth
-
-            self.axisRegionChanged(stripAxis)
+        self._updatePlaneToolBarWidgets(displayAxisIndex)
+        if refresh:
             self.refresh()
 
+    def _changePlane(self, displayAxisIndex: int, planeIncrement:int, planeCount = None):
+        """Change the position of plane-axis defined by displayAxisIndex by increment (in points)
+        :param displayAxisIndex: an index, defining an Z, A, ... plane; i.e. >= 2
+        :param planeIncrement: an integer defining number of planes to increment.
+                               The actual ppm increment (for axis in ppm units) will be
+                               the minimum ppm increment along displayAxisIndex.
+        :param planeCount: the number of planes to display
+        """
+        if displayAxisIndex < 0 or displayAxisIndex >= self.spectrumDisplay.dimensionCount:
+            raise ValueError('%s._changePlane: invalid displayAxisIndex "%s"' %
+                             (self.__class__.__name__, displayAxisIndex))
+
+        if displayAxisIndex < 2:
+            # X or Y; do nothing
+            return
+        _axis = self.axes[displayAxisIndex]
+
+        _displayedNdSpectra = [ds for ds in self._displayedSpectra
+                                  if ds.spectrum.dimensionCount > 2]
+        if len(_displayedNdSpectra) == 0:
+            return
+
+        if planeCount is not None:
+            _axis._planeCount = planeCount
+        # Assure a valid _axis._planeCount value
+        if _axis._planeCount is None or _axis._planeCount < 1:
+            _axis._planeCount = 1
+
+        _incrementByType = self._minAxisIncrementByType[displayAxisIndex]
+
+        # for now: axis.position is maintained in ppm; so conversion depending on the unit is required.
+        if _axis.unit == AXISUNIT_PPM:
+            newPosition = _axis.position + _incrementByType * planeIncrement
+            width = _incrementByType * _axis._planeCount
+
+        elif _axis.unit == AXISUNIT_POINT:
+            # change to ppm; there should only be one SpectrumView with this axis (for now)
+            ds = _displayedNdSpectra[0]
+            specDim = ds.spectrumView.spectrumDimensions[displayAxisIndex]
+            pointPosition = specDim.ppmToPoint(_axis.position)
+            newPosition = pointPosition + _incrementByType * planeIncrement
+            width = _incrementByType * _axis._planeCount
+
+        elif _axis.unit == AXISUNIT_HZ:
+            raise RuntimeError('Units "Hz" option not yet implemented for axis %s' % _axis)
+
         else:
-            if position is not None:
-                # _aliasMin, _aliasMax = _specView.spectrum.aliasingLimits[_index]
-                # position = _aliasMin + (position - _aliasMin) % (_aliasMax - _aliasMin)
-                position = _wrapPosition(position)
+            getLogger().warning(f'Axis {_axis.unit} not found')
+            return
 
-                stripAxis.position = position
-                stripAxis.width = planeSize * planeDepth
+        # find the limits across all spectra for this axis
+        minLimit = self._minAxisLimitsByType[displayAxisIndex]
+        maxLimit = self._maxAxisLimitsByType[displayAxisIndex]
+        # wrap around the limits if we found proper limits
+        if maxLimit is not None and minLimit is not None:
+            if newPosition > maxLimit: newPosition = minLimit
+            if newPosition < minLimit: newPosition = maxLimit
 
-                self.axisRegionChanged(stripAxis)
-                self.refresh()
+        self._setAxisPositionAndWidth(displayAxisIndex=displayAxisIndex,
+                                      position=newPosition, width=width)
 
-    def _setZPlanePosition(self, n: int, value: float):
-        """
-        Sets the value of the z plane position box if the specified value is within the displayable limits.
-        """
-        planeLabel = self.planeToolbar.planeLabels[n]
-        if 1:  # planeLabel.valueChanged: (<-- isn't that always true??)
-            value = planeLabel.value()
-        # 8/3/2016 Rasmus Fogh. Fixed untested (obvious bug)
-        # if planeLabel.minimum() <= planeLabel.value() <= planeLabel.maximum():
+    # GWV 6/1/2022: replaced by _setAxisPositionAndWidth() and _changePlane()
+    # # @logCommand(get='self')
+    # def changeZPlane(self, axisIndex:int = None, planeCount:int = None, position:float = None):
+    #     """
+    #     Changes the position of the z,a,b axis of the strip by number of planes or a ppm position, depending
+    #     on which is specified.
+    #     """
+    #     if self.isDeleted:
+    #         return
+    #
+    #     if not (self.planeAxisBars and self.activePlaneAxis is not None):
+    #         return
+    #
+    #     axisIndex = (axisIndex if isinstance(axisIndex, int) else self.activePlaneAxis)
+    #     if not (0 <= (axisIndex - 2) < len(self.planeAxisBars)):
+    #         getLogger().warning('axisIndex out of range %s' % axisIndex)
+    #         return
+    #
+    #     stripAxis = self.orderedAxes[axisIndex]  # was + 2
+    #     planeAxisBar = self.planeAxisBars[axisIndex - 2]
+    #
+    #     # get current plane minValue, maxValue, stepSize, value, planeDepth
+    #     planeMin, planeMax, _tmp, position, planeDepth = planeAxisBar.getPlaneValues()
+    #
+    #     # below is hack to prevent initial setting of value to 99.99 when dragging spectrum onto blank display
+    #     if planeMin == 0 and position == 99.99 and planeMax == 99.99:
+    #         return
+    #
+    #     _specView = self.firstVisibleSpectrum()
+    #     if not (_specView and not _specView.isDeleted):
+    #         return
+    #     specDim = _specView.spectrumDimensions[axisIndex]
+    #
+    #     if stripAxis.unit == AXISUNIT_PPM:
+    #         # planeSize = specDim._valuePerPoint/ specDim.spectrometerFrequency  # specDim is in Hz
+    #         planeSize = specDim.ppmPerPoint
+    #
+    #     elif stripAxis.unit == AXISUNIT_POINT:
+    #         position = specDim.pointToPpm(position)
+    #         # planeSize = specDim._valuePerPoint/ specDim.spectrometerFrequency  # specDim is in Hz
+    #         planeSize = specDim.ppmPerPoint
+    #
+    #     elif stripAxis.unit == AXISUNIT_HZ:
+    #         # first change to ppm and scale by spectrometerFrequencies
+    #         position = position / specDim.spectrometerFrequency
+    #         # planeSize = specDim._valuePerPoint/ specDim.spectrometerFrequency  # specDim is in Hz
+    #         planeSize = specDim.ppmPerPoint
+    #
+    #     else:
+    #         getLogger().warning(f'Axis {stripAxis.unit} not found')
+    #         return
+    #
+    #     def _wrapPosition(_position):
+    #         # wrap around the aliasing limits
+    #         _aliasMin, _aliasMax = _specView.aliasingLimits[axisIndex]
+    #         if _position > _aliasMax:
+    #             _position = _aliasMin
+    #         if _position < _aliasMin:
+    #             _position = _aliasMax
+    #         return _position
+    #
+    #     if planeCount:
+    #         delta = planeSize * planeCount
+    #         position = position + delta
+    #
+    #         # wrap around the aliasing limits
+    #         position = _wrapPosition(position)
+    #         # _aliasMin, _aliasMax = _specView.aliasingLimits[axisIndex]
+    #         # if position > _aliasMax:
+    #         #     position = _aliasMin
+    #         # if position < _aliasMin:
+    #         #     position = _aliasMax
+    #
+    #         stripAxis.position = position
+    #         stripAxis.width = planeSize * planeDepth
+    #
+    #         self.axisRegionChanged(stripAxis)
+    #         self.refresh()
+    #
+    #     else:
+    #         if position is not None:
+    #             # _aliasMin, _aliasMax = _specView.spectrum.aliasingLimits[_index]
+    #             # position = _aliasMin + (position - _aliasMin) % (_aliasMax - _aliasMin)
+    #             position = _wrapPosition(position)
+    #
+    #             stripAxis.position = position
+    #             stripAxis.width = planeSize * planeDepth
+    #
+    #             self.axisRegionChanged(stripAxis)
+    #             self.refresh()
 
-        if planeLabel.minimum() <= value <= planeLabel.maximum():
-            self.changeZPlane(n, position=value)
+    # GWV 6/1/2022: not used
+    # def _setZPlanePosition(self, n: int, value: float):
+    #     """
+    #     Sets the value of the z plane position box if the specified value is within the displayable limits.
+    #     """
+    #     planeLabel = self.planeToolbar.planeLabels[n]
+    #     if 1:  # planeLabel.valueChanged: (<-- isn't that always true??)
+    #         value = planeLabel.value()
+    #     # 8/3/2016 Rasmus Fogh. Fixed untested (obvious bug)
+    #     # if planeLabel.minimum() <= planeLabel.value() <= planeLabel.maximum():
+    #
+    #     if planeLabel.minimum() <= value <= planeLabel.maximum():
+    #         self.changeZPlane(n, position=value)
 
     def _findPeakListView(self, peakList: PeakList):
         if hasattr(self, 'spectrumViews'):

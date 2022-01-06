@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:18 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-06 16:27:57 +0000 (Thu, January 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -973,7 +973,7 @@ class GuiWindow():
         navigate to the previous Z plane for the currently selected strip
         """
         if self.current.strip:
-            self.current.strip.changeZPlane(None, planeCount=+1)
+            self.current.strip._changePlane(displayAxisIndex=2, planeIncrement=-1)
         else:
             getLogger().warning('No current strip. Select a strip first.')
 
@@ -982,7 +982,7 @@ class GuiWindow():
         navigate to the next Z plane for the currently selected strip
         """
         if self.current.strip:
-            self.current.strip.changeZPlane(None, planeCount=-1)
+            self.current.strip._changePlane(displayAxisIndex=2, planeIncrement=1)
         else:
             getLogger().warning('No current strip. Select a strip first.')
 

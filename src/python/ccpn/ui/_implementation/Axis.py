@@ -4,7 +4,7 @@ GUI Axis class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-01-06 16:27:57 +0000 (Thu, January 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -61,7 +61,30 @@ class Axis(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiStripAxis._metaclass.qualifiedName()
 
-    # CCPN properties
+   #-----------------------------------------------------------------------------------------
+
+    def __init__(self, project, wrappedData):
+        super().__init__(project, wrappedData)
+
+        # additional attributes set by strip._setAxisPositionAndWidth method
+        self._minLimitByType = None
+        self._maxLimitByType = None
+        self._incrementByType = None
+        self._positionByType = None
+        self._widthByType = None
+        self._planeCount = None
+
+    # @classmethod
+    # def _restoreObject(cls, project, apiObj):
+    #     """Subclassed to allow for initialisations on restore
+    #     """
+    #     result = super()._restoreObject(project, apiObj)
+    #     return result
+
+    #-----------------------------------------------------------------------------------------
+    # Attributes and methods related to the data structure
+    #-----------------------------------------------------------------------------------------
+
     @property
     def _apiStripAxis(self) -> ApiStripAxis:
         """ CCPN Axis matching Axis"""
@@ -82,8 +105,18 @@ class Axis(AbstractWrapperObject):
     strip = _parent
 
     @property
+    def _displayAxisIndex(self):
+        """Index of self in the parent strip.axes; i.e. defined by display order
+        """
+        return list(self.strip.axes).index(self)
+
+    #=========================================================================================
+    # properties
+    #=========================================================================================
+
+    @property
     def position(self) -> float:
-        """Centre point position for displayed region, in current unit."""
+        """Centre point position for displayed region (in ppm)."""
         return self._wrappedData.axis.position
 
     @position.setter
@@ -92,7 +125,7 @@ class Axis(AbstractWrapperObject):
 
     @property
     def width(self) -> float:
-        """Width for displayed region, in current unit."""
+        """Width for displayed region (in ppm)."""
         return self._wrappedData.axis.width
 
     @width.setter
@@ -131,16 +164,8 @@ class Axis(AbstractWrapperObject):
         value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
         self._wrappedData.axis.resonances = tuple(x._wrappedData for x in value)
 
-    # @property
-    # def strip(self) -> Optional[Strip]:
-    #     """Strip that Axis belongs to"""
-    #     if self._wrappedData:
-    #         return self._project._data2Obj.get(self._wrappedData.strip)
-    #     else:
-    #         return None
-
     #=========================================================================================
-    # Implementation functions
+    # CCPN Implementation functions
     #=========================================================================================
 
     @classmethod

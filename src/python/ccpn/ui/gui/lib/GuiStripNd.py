@@ -34,7 +34,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-07 17:00:55 +0000 (Fri, January 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 18:10:19 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -275,87 +275,74 @@ class GuiStripNd(GuiStrip):
             # newDisplay.autoRange()
             copyStripAxisPositionsAndWidths(self, newDisplay.strips[0])
 
+    def _flipAxes(self, axisOrderIndices):
+        """Create a new SpectrumDisplay with the axes flipped to the new axisOrder
+        :param axisOrderIndices: a list/tuple of the indices of the new axis-order;
+                                 e.g. (1,0) for YXZ order, or (2,0,1) for ZXY, etc.
+        :return a Spectrum display instance
+        """
+        axisCodes = [self.axisCodes[idx] for idx in axisOrderIndices]
+        _la = len(axisCodes)
+        if _la < self.spectrumDisplay.dimensionCount:
+            axisCodes.extend(self.axisCodes[_la:])
+
+        with undoStackBlocking() as _tmp:  # Do not add to undo/redo stack
+            # create a new spectrum display with the new axis order
+            newDisplay = self.mainWindow.newSpectrumDisplay(self.spectra[0],
+                                                            axisCodes=axisCodes)
+            for spectrum in self.spectra[1:]:
+                newDisplay.displaySpectrum(spectrum)
+            copyStripAxisPositionsAndWidths(self, newDisplay.strips[0])
+
+        return newDisplay
+
     @logCommand(get='self')
     def flipXYAxis(self):
+        """Flip the X and Y axes
+        :return A new SpectrumDisplay instance
         """
-        Flip the X and Y axes
-        """
-        nDim = self.spectrumDisplay.dimensionCount
-        if nDim < 2:
-            getLogger().warning('Too few dimensions for XY flip')
-        else:
-            axisOrder = [self.axisOrder[1], self.axisOrder[0]]
-            if nDim > len(axisOrder):
-                axisOrder.extend(self.axisOrder[2:])
+        if self.spectrumDisplay.dimensionCount < 2:
+            getLogger().warning('flipXYaxis: Too few dimensions for XY flip')
+            return
 
-            # with undoBlockWithoutSideBar():
-            with undoStackBlocking() as _tmp:  # Do not add to undo/redo stack
-                # create a new spectrum display with the new axis order
-                try:
-                    newDisplay = self.mainWindow.newSpectrumDisplay(self.spectra[0], axisCodes=axisOrder)
-                    for spectrum in self.spectra:
-                        newDisplay.displaySpectrum(spectrum)
+        try:
+            display = self._flipAxes(axisOrderIndices=(1,0))
+        except (RuntimeError, ValueError) as es:
+            getLogger().warning('flipXYaxis: %s' % es)
 
-                    # newDisplay.autoRange()
-                    copyStripAxisPositionsAndWidths(self, newDisplay.strips[0])
-                except (RuntimeError, ValueError) as es:
-                    getLogger().warning('flipXYaxis: %s' % es)
+        return display
 
     @logCommand(get='self')
     def flipXZAxis(self):
+        """Flip the X and Z axes
+        :return A new SpectrumDisplay instance
         """
-        Flip the X and Z axes
-        """
-        nDim = self.spectrumDisplay.dimensionCount
-        if nDim < 3:
-            getLogger().warning('Too few dimensions for XZ flip')
-        else:
-            axisOrder = [self.axisOrder[2], self.axisOrder[1], self.axisOrder[0]]
+        if self.spectrumDisplay.dimensionCount < 3:
+            getLogger().warning('flipXZaxis: Too few dimensions for XZ flip')
+            return
 
-            # add any remaining axes of the strip to the list
-            if nDim > len(axisOrder):
-                axisOrder.extend(self.axisOrder[3:])
+        try:
+            display = self._flipAxes(axisOrderIndices=(2,1,0))
+        except (RuntimeError, ValueError) as es:
+            getLogger().warning('flipXZaxis: %s' % es)
 
-            # with undoBlockWithoutSideBar():
-            with undoStackBlocking() as _tmp:  # Do not add to undo/redo stack
-                # create a new spectrum display with the new axis order
-                try:
-                    newDisplay = self.mainWindow.newSpectrumDisplay(self.spectra[0], axisCodes=axisOrder)
-                    for spectrum in self.spectra:  #[1:]:
-                        newDisplay.displaySpectrum(spectrum)
-
-                    # newDisplay.autoRange()
-                    copyStripAxisPositionsAndWidths(self, newDisplay.strips[0])
-                except (RuntimeError, ValueError) as es:
-                    getLogger().warning('flipXZaxis: %s' % es)
+        return display
 
     @logCommand(get='self')
     def flipYZAxis(self):
+        """Flip the Y and Z axes
+        :return A new SpectrumDisplay instance
         """
-        Flip the Y and Z axes
-        """
-        nDim = self.spectrumDisplay.dimensionCount
-        if nDim < 3:
-            getLogger().warning('Too few dimensions for YZ flip')
-        else:
-            axisOrder = [self.axisOrder[0], self.axisOrder[2], self.axisOrder[1]]
+        if self.spectrumDisplay.dimensionCount < 3:
+            getLogger().warning('flipYZaxis: Too few dimensions for YZ flip')
+            return
 
-            # add any remaining axes of the strip to the list
-            if nDim > len(axisOrder):
-                axisOrder.extend(self.axisOrder[3:])
+        try:
+            display = self._flipAxes(axisOrderIndices=(0,2,1))
+        except (RuntimeError, ValueError) as es:
+            getLogger().warning('flipYZaxis: %s' % es)
 
-            # with undoBlockWithoutSideBar():
-            with undoStackBlocking() as _tmp:  # Do not add to undo/redo stack
-                # create a new spectrum display with the new axis order
-                try:
-                    newDisplay = self.mainWindow.newSpectrumDisplay(self.spectra[0], axisCodes=axisOrder)
-                    for spectrum in self.spectra:
-                        newDisplay.displaySpectrum(spectrum)
-
-                    # newDisplay.autoRange()
-                    copyStripAxisPositionsAndWidths(self, newDisplay.strips[0])
-                except (RuntimeError, ValueError) as es:
-                    getLogger().warning('flipYZaxis: %s' % es)
+        return display
 
     @logCommand(get='self')
     def extractVisiblePlanes(self, openInSpectrumDisplay=True) -> list:

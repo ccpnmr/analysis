@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-07 17:00:55 +0000 (Fri, January 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 18:10:20 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,8 @@ __date__ = "$Date: 2019-11-27 12:20:27 +0000 (Wed, November 27, 2019) $"
 
 from PyQt5 import QtWidgets
 from itertools import permutations
+
+from ccpn.util.Logging import getLogger
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, undoStackBlocking
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
@@ -56,14 +58,16 @@ class CopyStripFlippedSpectraPopup(CcpnDialogMainWidget):
         self.current = self.application.current
         self.strip = strip
         self.axisCodes = strip.axisCodes
-        self._axisOrdering = strip.axisCodes
+        self._axisOrderingOptions = tuple(permutations(list(range(len(self.axisCodes)))))
+        self._axisOrdering = None
 
         if strip.axisCodes:
             row = 0
             Label(self.mainWidget, text=label + ' - ' + str(self._axisOrdering), bold=True, grid=(row, 0), gridSpan=(1, 3))
 
             row += 1
-            self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self.mainWidget, labelText="Select Axis Ordering:",
+            self.preferredAxisOrderPulldown = PulldownListCompoundWidget(self.mainWidget,
+                                                                         labelText="Select Axis Ordering:",
                                                                          grid=(row, 0), gridSpan=(1, 3), vAlign='t',
                                                                          callback=self._setAxisCodeOrdering)
             self.preferredAxisOrderPulldown.setPreSelect(self._fillPreferredWidget)
@@ -92,42 +96,29 @@ class CopyStripFlippedSpectraPopup(CcpnDialogMainWidget):
 
         ll = ['<None>']
         axisPerms = []
-        axisOrder = []
         if self.mainWindow:
             # add permutations for the axes
             axisPerms = permutations([axisCode for axisCode in self.axisCodes])
-            axisOrder = tuple(permutations(list(range(len(self.axisCodes)))))
             ll += [" ".join(ax for ax in perm) for perm in axisPerms]
 
         self.preferredAxisOrderPulldown.pulldownList.setData(ll)
-
-        # if specOrder is not None and self.mainWindow:
-        #     specIndex = axisOrder.index(specOrder) + 1
         self.preferredAxisOrderPulldown.setIndex(1)
 
     def _setAxisCodeOrdering(self, value):
         """Set the preferred axis ordering from the pullDown selection
         """
-        index = self.preferredAxisOrderPulldown.getIndex()
+        indx = self.preferredAxisOrderPulldown.getIndex()
 
-        axisOrder = tuple(permutations(list(range(len(self.axisCodes)))))
-        if index > 0:
-            self._axisOrdering = tuple(axisOrder[index - 1])
+        if indx > 0:
+            self._axisOrdering = self._axisOrderingOptions[indx - 1]
         else:
             self._axisOrdering = None
 
     def _accept(self):
         self.accept()
 
-        # open new spectrumDisplay here
-        # with undoBlockWithoutSideBar():
-        with undoStackBlocking() as _:  # Do not add to undo/redo stack
-            spectra = self.strip.spectra
-            if spectra:
-                # create a new spectrum display with the new axis order
-                newDisplay = self.mainWindow.newSpectrumDisplay(spectra[0], axisCodes=tuple(self.axisCodes[ii] for ii in self._axisOrdering))
-                for spectrum in spectra:
-                    newDisplay.displaySpectrum(spectrum)
+        try:
+            display = self.strip._flipAxes(axisOrderIndices=self._axisOrdering)
+        except (RuntimeError, ValueError) as es:
+            getLogger().warning('flipAxes %s' % es)
 
-                # newDisplay.autoRange()
-                copyStripAxisPositionsAndWidths(self.strip, newDisplay.strips[0])

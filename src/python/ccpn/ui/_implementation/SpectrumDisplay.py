@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-06 22:08:36 +0000 (Thu, January 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 10:59:38 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -314,30 +314,35 @@ class SpectrumDisplay(AbstractWrapperObject):
     @property
     def units(self) -> Tuple[str, ...]:
         """Axis units, in display order"""
-        return tuple(a.unit for a in self.strips[0].axes)
+        return self.strips[0].units
 
-    @units.setter
-    def units(self, value):
-        # local import to avoid cycles
-        from ccpn.util.Constants import AXISUNITS, AXISUNIT_NUMBER
+    # @units.setter
+    # def units(self, value):
+    #     # local import to avoid cycles
+    #     from ccpn.util.Constants import AXISUNITS, AXISUNIT_NUMBER
+    #
+    #     options = list(AXISUNITS) + [AXISUNIT_NUMBER]  # To allow for 1D intensity axis unit
+    #     for idx, val in enumerate(value):
+    #         if val not in options:
+    #             raise ValueError('Invalid units[%d] %r; should be one of %r' % (idx, val, options))
+    #         self.orderedAxes[idx].unit = val
+    #     # assure the update of the widgets is done
+    #     self._updateAxesUnits()
+    #     # self._wrappedData.units = value
 
-        options = AXISUNITS + [AXISUNIT_NUMBER]  # To allow for 1D intensity axis unit
-        for idx, val in enumerate(value):
-            if val not in options:
-                raise ValueError('Invalid units[%d] %r; should be one of %r' % (idx, val, options))
-            self.axes[idx].unit = val
-        # assure the update of the widgets is done
-        self._updateAxesUnits()
-        # self._wrappedData.units = value
+    @property
+    def _unitIndices(self) -> Tuple[str, ...]:
+        """Axis unit indicess, in display order"""
+        return self.strips[0]._unitIndices
 
-    def _getUnitsIndices(self):
-        """Conveniance function to get units as an index
-        CCPNINTERNAL: used CcpnOpenGl.initialiseAxes()
-        """
-        from ccpn.util.Constants import AXISUNITS, AXISUNIT_NUMBER
-
-        options = AXISUNITS + [AXISUNIT_NUMBER]  # To allow for 1D intensity axis unit
-        return [options.index(unit) for unit in self.units]
+    # def _getUnitsIndices(self):
+    #     """Conveniance function to get units as an index
+    #     CCPNINTERNAL: used CcpnOpenGl.initialiseAxes()
+    #     """
+    #     from ccpn.util.Constants import AXISUNITS, AXISUNIT_NUMBER
+    #
+    #     options = list(AXISUNITS) + [AXISUNIT_NUMBER]  # To allow for 1D intensity axis unit
+    #     return [options.index(unit) for unit in self.units]
 
     def _getSpectra(self):
         if len(self.strips) > 0:  # strips
@@ -665,6 +670,7 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
         # SpectrumDisplay Y; i.e. Intensity
         apiSpectrumDisplay.newIntensityAxis(code=SpectrumDisplay.INTENSITY, stripSerial=1, unit=AXISUNIT_NUMBER)
 
+        # we need these to do the checks
         # display._isotopeCodes = tuple(spectrum.isotopeCodes)
 
     else:
@@ -673,7 +679,7 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
         # display._isotopeCodes = tuple(spectrum.isotopeCodes[axis] for axis in spectrumAxesInDisplayOrder)
 
         for ii, dimIndex in enumerate(spectrumAxesInDisplayOrder):
-            displayAxisCode = axisCodes[dimIndex]
+            displayAxisCode = axisCodes[ii]  # axisCodes are passed in and thus in displayOrder
 
             # # if (ii == 0 and stripDirection == 'X' or ii == 1 and stripDirection == 'Y' or
             # #    not stripDirection):
@@ -716,14 +722,15 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
     display._dimensionTypes = spectrumView.dimensionTypes
     display._isotopeCodes = spectrumView.isotopeCodes
 
-    # initialise the axes, using the values from spectrumView
-    # this will also update any planeToolbar widgets
-    strip._initAxesValues(spectrumView)
-    # # We only can set the plane-axis-widgets when there is a spectrumView; which we just created
-    # display._setPlaneAxisWidgets()
+    # call any post initialise routines
+    display.setToolbarButtons()
 
-    # call any post initialise routines for the spectrumDisplay here
-    display._postInit()
+    # initialise the strip axes, using the values from spectrumView
+    # this will also update any Strip.planeToolbar widgets and the GL
+    strip._initAxesValues(spectrumView)
+
+    # having initialised the strip axes, we can update the display settings widget
+    display._updateAxesUnits()
 
     return display
 

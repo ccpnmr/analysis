@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-06 22:08:37 +0000 (Thu, January 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 10:59:38 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1443,26 +1443,26 @@ class CcpnGLWidget(QOpenGLWidget):
         self._axisCodes = strip.axisCodes
         self._axisOrder = strip.axisOrder
 
-        unitIndices = self.spectrumDisplay._getUnitsIndices()
-
         axis = self.orderedAxes[0]
+        region = axis.region
         if self.INVERTXAXIS:
-            self.axisL = max(axis.region[0], axis.region[1])
-            self.axisR = min(axis.region[0], axis.region[1])
+            self.axisL = max(region[0], region[1])
+            self.axisR = min(region[0], region[1])
         else:
-            self.axisL = min(axis.region[0], axis.region[1])
-            self.axisR = max(axis.region[0], axis.region[1])
-        self._xUnits = unitIndices[0]
+            self.axisL = min(region[0], region[1])
+            self.axisR = max(region[0], region[1])
+        self._xUnits = axis._unitIndex
 
         axis = self.orderedAxes[1]
+        region = axis.region
         if self.INVERTYAXIS:
-            self.axisB = max(axis.region[0], axis.region[1])
-            self.axisT = min(axis.region[0], axis.region[1])
+            self.axisB = max(region[0], region[1])
+            self.axisT = min(region[0], region[1])
         else:
-            self.axisB = min(axis.region[0], axis.region[1])
-            self.axisT = max(axis.region[0], axis.region[1])
+            self.axisB = min(region[0], region[1])
+            self.axisT = max(region[0], region[1])
         if not self.spectrumDisplay.is1D:
-            self._yUnits = unitIndices[1]
+            self._yUnits = axis._unitIndex
 
         self.update()
 

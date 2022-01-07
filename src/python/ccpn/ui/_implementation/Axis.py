@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-06 22:08:36 +0000 (Thu, January 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 10:59:37 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -33,11 +33,11 @@ from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.ui._implementation.Strip import Strip
 from ccpn.core.lib import Pid
+
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripAxis as ApiStripAxis
 
-
-# from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
+from ccpn.util.Constants import AXISUNITS, AXISUNIT_NUMBER
 
 
 class Axis(AbstractWrapperObject):
@@ -105,8 +105,9 @@ class Axis(AbstractWrapperObject):
     strip = _parent
 
     @property
-    def _displayAxisIndex(self):
+    def _index(self):
         """Index of self in the parent strip.axes; i.e. defined by display order
+        CCPNINTERNAL: used in GuiStrip
         """
         return list(self.strip.orderedAxes).index(self)
 
@@ -151,7 +152,18 @@ class Axis(AbstractWrapperObject):
 
     @unit.setter
     def unit(self, value: str):
+        options = tuple(list(AXISUNITS) + [AXISUNIT_NUMBER]) # To allow for 1D intensity axis unit
+        if value not in options:
+            raise ValueError('Axis.unit: invalid value "%s", should be one of %r' %
+                             (value, options)
+                             )
         self._wrappedData.axis.unit = value
+
+    @property
+    def _unitIndex(self) -> int:
+        """Return the index of the unit reltive to the definitions"""
+        options = list(AXISUNITS) + [AXISUNIT_NUMBER]  # To allow for 1D intensity axis unit
+        return options.index(self.unit)
 
     @property
     def nmrAtoms(self) -> Tuple[NmrAtom]:

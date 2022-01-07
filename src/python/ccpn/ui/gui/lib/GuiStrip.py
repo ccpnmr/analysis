@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-06 22:08:37 +0000 (Thu, January 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 10:59:38 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -170,7 +170,7 @@ class GuiStrip(Frame):
         self._preferences = self.application.preferences.general
 
         # set symbolLabelling to the default from preferences or strip to the left
-        settings = spectrumDisplay.getSettings()
+        settings = spectrumDisplay._getSettingsDict()
         if len(spectrumDisplay.strips) > 1:
 
             _firstStrip = spectrumDisplay.strips[0]
@@ -2573,20 +2573,29 @@ class GuiStrip(Frame):
                                                  spectrumView.spectrumDimensions,
                                                  spectrumView.dimensionIndices
                                                  ):
-                if _axis._displayAxisIndex < 2:
-                    limits = _specDim.aliasingLimits
-                    _axis.unit = AXISUNIT_PPM
-                    self._setAxisPositionAndWidth(_axis._displayAxisIndex,
-                                                  position = 0.5*(limits[0] + limits[1]),  # The centre
-                                                  width = max(limits) - min(limits),
-                                                  refresh = False
-                    )
-
-                else:
-                    # A display "plane-axis"
+                if _axis._index < 2:
+                    # The X,Y axis of the strip
                     if spectrum.isTimeDomains[dimIndex] or spectrum.isSampledDomains[dimIndex]:
                         _axis.unit = AXISUNIT_POINT
-                        self._setAxisPositionAndWidth(_axis._displayAxisIndex,
+                        self._setAxisPositionAndWidth(_axis._index,
+                                                      position = float(_specDim.pointCount/2)+0.5,
+                                                      width = float(_specDim.pointCount),
+                                                      refresh = False
+                        )
+                    else:
+                        _axis.unit = AXISUNIT_PPM
+                        limits = _specDim.aliasingLimits
+                        self._setAxisPositionAndWidth(_axis._index,
+                                                      position = 0.5*(limits[0] + limits[1]),  # The centre
+                                                      width = max(limits) - min(limits),
+                                                      refresh = False
+                        )
+
+                else:
+                    # A strip Z,A,... "plane-axis"
+                    if spectrum.isTimeDomains[dimIndex] or spectrum.isSampledDomains[dimIndex]:
+                        _axis.unit = AXISUNIT_POINT
+                        self._setAxisPositionAndWidth(_axis._index,
                                                       position = 1.0,
                                                       width = 1.0,
                                                       refresh = False
@@ -2594,11 +2603,13 @@ class GuiStrip(Frame):
                     else:
                         _axis.unit = AXISUNIT_PPM
                         limits = _specDim.spectrumLimits
-                        self._setAxisPositionAndWidth(_axis._displayAxisIndex,
+                        self._setAxisPositionAndWidth(_axis._index,
                                                       position = 0.5*(limits[0] + limits[1]),  # The centre
                                                       width = _specDim.ppmPerPoint,
                                                       refresh = False
                         )
+        # init the GL
+        self._CcpnGLWidget.initialiseAxes(strip=self)
 
 #=========================================================================================
 # Notifiers:

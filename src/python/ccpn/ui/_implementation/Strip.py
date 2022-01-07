@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-06 22:08:37 +0000 (Thu, January 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 10:59:38 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -172,7 +172,13 @@ class Strip(AbstractWrapperObject):
     @property
     def units(self) -> Tuple[str, ...]:
         """Axis units, in display order"""
-        return self._wrappedData.units
+        # return self._wrappedData.units
+        return tuple([ax.unit for ax in self.orderedAxes])
+
+    @property
+    def _unitIndices(self) -> Tuple[str, ...]:
+        """Axis units indices, in display order"""
+        return tuple([ax._unitIndex for ax in self.orderedAxes])
 
     @property
     def spectra(self) -> Tuple[Spectrum, ...]:

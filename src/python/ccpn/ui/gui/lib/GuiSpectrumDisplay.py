@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-06 16:27:57 +0000 (Thu, January 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 10:59:38 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -436,9 +436,12 @@ class GuiSpectrumDisplay(CcpnModule):
 
     def _updateAxesUnits(self):
         """Update the x- and y-axis units of the display"""
-        units = self.units
-        xUnit = AXISUNITS.index(units[0])
-        yUnit = AXISUNITS.index(units[1]) if not self.is1D else None
+        # units = self.units
+        # xUnit = AXISUNITS.index(units[0])
+        # yUnit = AXISUNITS.index(units[1]) if not self.is1D else None
+
+        xUnit = self._unitIndices[0]
+        yUnit = self._unitIndices[1] if not self.is1D else None
 
         self._spectrumDisplaySettings._setAxesUnits(xUnit, yUnit)
         self._spectrumDisplaySettings._settingsChanged()
@@ -509,18 +512,6 @@ class GuiSpectrumDisplay(CcpnModule):
                                                        SpectrumGroup.className,
                                                        self._spectrumGroupChanged,
                                                        onceOnly=True)
-
-    def _postInit(self):
-        """Method to be called as last item during spectrumDisplay creation
-        CCPNMRINTERNAL: Called from _newSpectrumDisplay
-        """
-        self.setToolbarButtons()
-        try:
-            # # force an update for units
-            # self._updateAxesUnits() This proved not to work; adjusted the code in initialiseAxes() instead
-            self.strips[0]._CcpnGLWidget.initialiseAxes(strip=self.strips[0])
-        except:
-            getLogger().debugGL('OpenGL widget not instantiated')
 
     def _setFloatingAxes(self, xUnits, yUnits, aspectRatioMode, aspectRatios):
         """Set the aspectRatio and units for the floating axes
@@ -1057,7 +1048,7 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         AbstractWrapperObject._setInternalParameter(self, self._SPECTRUMGROUPS, groups)
 
-    def getSettings(self):
+    def _getSettingsDict(self):
         """get the settings dict from the settingsWidget
         """
         return self._spectrumDisplaySettings.getValues()

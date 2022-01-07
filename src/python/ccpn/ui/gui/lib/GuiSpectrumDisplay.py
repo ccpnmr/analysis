@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-07 10:59:38 +0000 (Fri, January 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 12:25:18 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -809,13 +809,18 @@ class GuiSpectrumDisplay(CcpnModule):
         GLSignals = GLNotifier(parent=None)
         GLSignals.emitPaintEvent()
 
-    @property
-    def visibleSpectra(self):
-        """List of spectra currently visible in the spectrumDisplay
+    def getVisibleSpectra(self) -> list:
+        """Return a list of spectra currently visible in the spectrumDisplay
         """
         return [sv.spectrum for sv in self._orderedSpectrumViews(self.spectrumViews) if sv.isDisplayed]
 
-    displayedSpectra = visibleSpectra
+    # GWV 07/01/2022: replace by getVisibleSpectra() fro naming consistency
+    # @property
+    # def visibleSpectra(self) -> list:
+    #     """List of spectra currently visible in the spectrumDisplay
+    #     """
+    #     return self.getVisibleSpectra()
+    # displayedSpectra = visibleSpectra
 
     @property
     def isGrouped(self):
@@ -1293,11 +1298,12 @@ class GuiSpectrumDisplay(CcpnModule):
         for mult in self.current.multiplets:
             peaks = peaks | set(mult.peaks)
         if peaks:
+            visibleSpectra = self.getVisibleSpectra()
             with undoBlockWithoutSideBar():
                 for substance in substances:
                     annotation = substance.name
                     for peak in peaks:
-                        if peak.peakList.spectrum in self.visibleSpectra:
+                        if peak.peakList.spectrum in visibleSpectra:
                             if not replaceAnnotation:  # if want appending instead of replacing
                                 annotation = ', '.join(filter(None, set([peak.annotation, substance.name])))  # Filter to make sure is not duplicating any existing annotation
                             peak.annotation = annotation

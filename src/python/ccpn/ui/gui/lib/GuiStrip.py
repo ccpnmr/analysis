@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-07 10:59:38 +0000 (Fri, January 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 12:25:18 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -207,8 +207,8 @@ class GuiStrip(Frame):
                     self.setAxesVisible(True, True)
 
             # set the axis units from the current settings
-            self.xUnits = _firstStrip.xUnits
-            self.yUnits = _firstStrip.yUnits
+            # self.xUnits = _firstStrip.xUnits
+            # self.yUnits = _firstStrip.yUnits
             # self._CcpnGLWidget._useLockedAspect = spectrumDisplay.strips[0]._CcpnGLWidget._useLockedAspect
 
         else:
@@ -242,8 +242,8 @@ class GuiStrip(Frame):
             self.setAxesVisible(True, True)
 
             # set the axis units from the current settings
-            self.xUnits = settings[AXISXUNITS]
-            self.yUnits = settings[AXISYUNITS]
+            # self.xUnits = settings[AXISXUNITS]
+            # self.yUnits = settings[AXISYUNITS]
 
         self._CcpnGLWidget._aspectRatioMode = settings[AXISASPECTRATIOMODE]
         self._CcpnGLWidget._aspectRatios = deepcopy(settings[AXISASPECTRATIOS])

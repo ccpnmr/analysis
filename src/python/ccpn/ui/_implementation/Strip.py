@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-07 10:59:38 +0000 (Fri, January 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 12:25:18 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -111,12 +111,20 @@ class Strip(AbstractWrapperObject):
         # STUB for now; hot-fixed later
         pass
 
-    # GWV 24/12/21: moved here from GuiStrip
+    #GWV: moved here from _implementation/Axis.py
     @property
-    def visibleSpectra(self):
-        """List of spectra currently visible in the strip. Ordered as in the spectrumDisplay
-        """
-        return self.spectrumDisplay.visibleSpectra
+    def orderedAxes(self) -> Tuple:
+        """Axes in display order (X, Y, Z1, Z2, ...) """
+        apiStrip = self._wrappedData
+        ff = self._project._data2Obj.get
+        return tuple(ff(apiStrip.findFirstStripAxis(axis=x)) for x in apiStrip.orderedAxes)
+
+    # GWV 23/12: There should not be a setter! Created by SpectrumDisplay/Strip
+    # @orderedAxes.setter
+    # def orderedAxes(self, value: Sequence):
+    #     value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
+    #     #self._wrappedData.orderedAxes = tuple(x._wrappedData.axis for x in value)
+    #     self._wrappedData.axisOrder = tuple(x.code for x in value)
 
     #-----------------------------------------------------------------------------------------
     # Functional attributes of the class
@@ -135,21 +143,6 @@ class Strip(AbstractWrapperObject):
     @axisOrder.setter
     def axisOrder(self, value: Sequence):
         self._wrappedData.axisOrder = value
-
-    #GWV: moved here from _implementation/Axis.py
-    @property
-    def orderedAxes(self) -> Tuple:
-        """Axes in display order (X, Y, Z1, Z2, ...) """
-        apiStrip = self._wrappedData
-        ff = self._project._data2Obj.get
-        return tuple(ff(apiStrip.findFirstStripAxis(axis=x)) for x in apiStrip.orderedAxes)
-
-    # GWV 23/12: There should not be a setter! Created by SpectrumDisplay/Strip
-    # @orderedAxes.setter
-    # def orderedAxes(self, value: Sequence):
-    #     value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
-    #     #self._wrappedData.orderedAxes = tuple(x._wrappedData.axis for x in value)
-    #     self._wrappedData.axisOrder = tuple(x.code for x in value)
 
     @property
     def positions(self) -> Tuple[float, ...]:
@@ -176,7 +169,7 @@ class Strip(AbstractWrapperObject):
         return tuple([ax.unit for ax in self.orderedAxes])
 
     @property
-    def _unitIndices(self) -> Tuple[str, ...]:
+    def _unitIndices(self) -> Tuple[int, ...]:
         """Axis units indices, in display order"""
         return tuple([ax._unitIndex for ax in self.orderedAxes])
 
@@ -186,8 +179,13 @@ class Strip(AbstractWrapperObject):
         return tuple(x.spectrum for x in self.spectrumViews)
 
     def getSpectra(self) -> Tuple[Spectrum, ...]:
-        """The spectra attached to the strip (whether display is currently turned on or not) in display order"""
+        """The spectra attached to the strip (whether display is currently turned on or not) in displayed order"""
         return tuple(sv.spectrum for sv in self.getSpectrumViews())
+
+    def getVisibleSpectra(self) -> Tuple[Spectrum, ...]:
+        """Return a tuple of spectra currently visible in the strip in displayed order
+        """
+        return tuple(sv.spectrum for sv in self.getSpectrumViews() if sv.isDisplayed)
 
     def getSpectrumViews(self) -> Tuple['SpectrumView', ...]:
         """The spectrumViews attached to the strip (whether display is currently turned on or not) in display order"""
@@ -222,15 +220,6 @@ class Strip(AbstractWrapperObject):
         result = [DisplayedSpectrum(strip=self, spectrumView=specView) \
                   for specView in self.getSpectrumViews() if specView.isDisplayed]
         return tuple(result)
-
-    def _getValuesFromDisplayedSpectra(self, displayedSpectra, attributeName, displayAxisIndex, filterNone = True) -> list:
-        """Helper routine: Return a list of values defined by attributeName, from the displayedSpectra objects,
-        for displayAxisIndex, optionally filtered for None's
-        """
-        result = [getattr(ds, attributeName)[displayAxisIndex] for ds in displayedSpectra]
-        if filterNone:
-            result = [val for val in result if val is not None]
-        return result
 
     @property
     def _minAxisLimitsByType(self) -> list:

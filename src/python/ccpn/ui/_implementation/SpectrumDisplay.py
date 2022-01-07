@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-07 10:59:38 +0000 (Fri, January 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 12:25:18 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -90,6 +90,17 @@ class SpectrumDisplay(AbstractWrapperObject):
 
     @property
     def strips(self) -> list:
+        """STUB: hot-fixed later"""
+        return []
+
+    @property
+    def orderedStrips(self):
+        """Return the ccpn.Strips in displayed order"""
+        ff = self._project._data2Obj.get
+        return tuple(ff(x) for x in self._wrappedData.orderedStrips)
+
+    @property
+    def spectrumViews(self) -> list:
         """STUB: hot-fixed later"""
         return []
 
@@ -535,11 +546,12 @@ class SpectrumDisplay(AbstractWrapperObject):
     #     self._orderedSpectrumViews = OrderedSpectrumViews(parent=self)
     #   self._orderedSpectrumViews.removeSpectrumView(spectrumView)
 
-    @property
-    def orderedStrips(self):
-        """Return the ccpn.Strips in displayed order"""
-        ff = self._project._data2Obj.get
-        return tuple(ff(x) for x in self._wrappedData.orderedStrips)
+    # GWV 07/01/2022: moved up
+    # @property
+    # def orderedStrips(self):
+    #     """Return the ccpn.Strips in displayed order"""
+    #     ff = self._project._data2Obj.get
+    #     return tuple(ff(x) for x in self._wrappedData.orderedStrips)
 
     #=========================================================================================
     # Implementation functions

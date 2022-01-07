@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-07 10:59:37 +0000 (Fri, January 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 12:25:18 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -161,7 +161,9 @@ class Axis(AbstractWrapperObject):
 
     @property
     def _unitIndex(self) -> int:
-        """Return the index of the unit reltive to the definitions"""
+        """Return the index of the self.unit relative to the definitions
+        CCPNINTERNAL: used in Strp, GL and elsewhere
+        """
         options = list(AXISUNITS) + [AXISUNIT_NUMBER]  # To allow for 1D intensity axis unit
         return options.index(self.unit)
 

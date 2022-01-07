@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-06 16:27:57 +0000 (Thu, January 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 15:07:03 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -359,6 +359,10 @@ class PlaneSelectorWidget(Frame):
             if minValue is not None:
                 self.spinBox.setMinimum(minValue)
             if value is not None:
+                if unit == AXISUNIT_POINT:
+                    value = round(value)
+                else:
+                    value = round(float(value), 3)
                 self.spinBox.setValue(value)
 
             # override the spinBox to only allow integer points

@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-24 15:23:20 +0000 (Fri, December 24, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-07 15:07:03 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -42,13 +42,10 @@ from ccpn.util.Colour import colorSchemeTable
 
 
 class GuiStrip1d(GuiStrip):
-    """
-    Main Strip for 1d spectra object
+    """Strip class for display of 1D spectra
 
     This module inherits the following attributes from the Strip wrapper class:
 
-    serial          serial number of Strip, used in Pid and to identify the Strip
-                      :return <str>
     axisCodes         Fixed string Axis codes in original display order
                         :return <tuple>:(X, Y, Z1, Z2, ...)
     axisOrder         String Axis codes in display order, determine axis display order
@@ -71,7 +68,6 @@ class GuiStrip1d(GuiStrip):
     moveTo            Move strip to index newIndex in orderedStrips
                         moveTo(newIndex:int)
                           :param newIndex:<int> new index position
-    resetAxisOrder    Reset display to original axis order
     findAxis          Find axis
                         findAxis(axisCode)
                           :param axisCode:
@@ -459,17 +455,17 @@ class GuiStrip1d(GuiStrip):
             getLogger().warning('Error setting mark at position')
             raise (es)
 
-    def changeZPlane(self, n: int = 0, planeCount: int = None, position: float = None):
-        """
-        Changes the position of the z axis of the strip by number of planes or a ppm position, depending
-        on which is specified.
-        """
-        # Not implemented for 1d strips
-        pass
+    # def changeZPlane(self, n: int = 0, planeCount: int = None, position: float = None):
+    #     """
+    #     Changes the position of the z axis of the strip by number of planes or a ppm position, depending
+    #     on which is specified.
+    #     """
+    #     # Not implemented for 1d strips
+    #     pass
 
-    def _setPlaneAxisWidgets(self, ignoreSpectrumView=None):
-        """
-        # CCPN INTERNAL - Sets values for the widgets in the plane toolbar.
-        """
-        # Not implemented for 1d strips
-        pass
+    # def _setPlaneAxisWidgets(self, ignoreSpectrumView=None):
+    #     """
+    #     # CCPN INTERNAL - Sets values for the widgets in the plane toolbar.
+    #     """
+    #     # Not implemented for 1d strips
+    #     pass

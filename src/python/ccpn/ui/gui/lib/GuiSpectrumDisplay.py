@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-07 12:25:18 +0000 (Fri, January 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 15:07:03 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -587,12 +587,9 @@ class GuiSpectrumDisplay(CcpnModule):
                 action.setText(spectrum.name)
                 setWidgetFont(action, size='SMALL')
 
-            # update planeToolbars
-            if not self.is1D:
-                for strip in self.strips:
-                    # NOTE:ED - may need to fire update here if this forces a change to the z-plane
-                    strip._setPlaneAxisWidgets()
-
+            # update's
+            for strip in self.strips:
+                strip._updatePlaneAxes()
             self._refreshSpectrumView(spectrum)
 
         elif trigger == Notifier.RENAME:
@@ -614,9 +611,8 @@ class GuiSpectrumDisplay(CcpnModule):
         # respond to the create/delete notifiers
         if trigger == Notifier.CREATE:
 
-            if not self.is1D:
-                for strip in self.strips:
-                    strip._setPlaneAxisWidgets()
+            for strip in self.strips:
+                strip._updatePlaneAxes()
 
             spectrum = spectrumView.spectrum
             if spectrumView in self.spectrumViews:
@@ -625,9 +621,8 @@ class GuiSpectrumDisplay(CcpnModule):
 
         elif trigger == Notifier.DELETE:
 
-            if not self.is1D:
-                for strip in self.strips:
-                    strip._setPlaneAxisWidgets(ignoreSpectrumView=spectrumView)
+            for strip in self.strips:
+                strip._updatePlaneAxes()
 
         elif trigger == Notifier.CHANGE:
             if spectrumView in self.spectrumViews:
@@ -949,12 +944,13 @@ class GuiSpectrumDisplay(CcpnModule):
         # can't think of a better way yet - will be fixable of single window used for all viewports in fucture
         QtCore.QTimer.singleShot(50, self._stripFrameScrollArea.refreshViewPort)
 
-    def _setPlaneAxisWidgets(self):
-        """Update the widgets in the planeToolbar
-        CCPNINTERNAL: used in a few spots
-        """
-        for strip in self.strips:
-            strip._setPlaneAxisWidgets()
+    # def _setPlaneAxisWidgets(self):
+    #     """Update the widgets in the planeToolbar
+    #     CCPNINTERNAL: used in a few spots
+    #     """
+    #     if not self.is1D:
+    #         for strip in self.strips:
+    #             strip._setPlaneAxisWidgets()
 
     def _stripRange(self):
         """Return the bounds for the tilePositions of the strips

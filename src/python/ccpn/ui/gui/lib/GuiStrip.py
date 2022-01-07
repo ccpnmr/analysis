@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-07 12:25:18 +0000 (Fri, January 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 15:07:03 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -57,6 +57,8 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
     SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISASPECTRATIOS, AXISASPECTRATIOMODE, \
     BOTTOMAXIS, RIGHTAXIS, ALIASENABLED, ALIASSHADE, ALIASLABELSENABLED, CONTOURTHICKNESS, \
     PEAKLABELSENABLED, MULTIPLETLABELSENABLED
+
+from ccpn.util.Constants import AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT
 
 
 STRIPLABEL_ISPLUS = 'stripLabel_isPlus'
@@ -355,35 +357,36 @@ class GuiStrip(Frame):
         # spawn a redraw of the GL windows
         self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
-    @property
-    def xUnits(self):
-        """Current xUnits
-        """
-        return self._CcpnGLWidget._xUnits
-
-    @xUnits.setter
-    def xUnits(self, units):
-        """set the xUnits
-        """
-        self._CcpnGLWidget._xUnits = units
-
-        # spawn a redraw of the GL windows
-        self._CcpnGLWidget.GLSignals.emitPaintEvent()
-
-    @property
-    def yUnits(self):
-        """Current yUnits
-        """
-        return self._CcpnGLWidget._yUnits
-
-    @yUnits.setter
-    def yUnits(self, units):
-        """set the yUnits
-        """
-        self._CcpnGLWidget._yUnits = units
-
-        # spawn a redraw of the GL windows
-        self._CcpnGLWidget.GLSignals.emitPaintEvent()
+    # GWV 07/01/2022: removed
+    # @property
+    # def xUnits(self):
+    #     """Current xUnits
+    #     """
+    #     return self._CcpnGLWidget._xUnits
+    #
+    # @xUnits.setter
+    # def xUnits(self, units):
+    #     """set the xUnits
+    #     """
+    #     self._CcpnGLWidget._xUnits = units
+    #
+    #     # spawn a redraw of the GL windows
+    #     self._CcpnGLWidget.GLSignals.emitPaintEvent()
+    #
+    # @property
+    # def yUnits(self):
+    #     """Current yUnits
+    #     """
+    #     return self._CcpnGLWidget._yUnits
+    #
+    # @yUnits.setter
+    # def yUnits(self, units):
+    #     """set the yUnits
+    #     """
+    #     self._CcpnGLWidget._yUnits = units
+    #
+    #     # spawn a redraw of the GL windows
+    #     self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
     @property
     def sideBandsVisible(self):
@@ -1731,8 +1734,9 @@ class GuiStrip(Frame):
         # update the aspect ratio mode
         self._CcpnGLWidget._aspectRatioMode = mode
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #-----------------------------------------------------------------------------------------
     # marks
+    #-----------------------------------------------------------------------------------------
 
     def _createMarkAtPosition(self, positions, axisCodes):
         try:
@@ -2209,7 +2213,7 @@ class GuiStrip(Frame):
             for action in actions:
                 action.setChecked(value)
 
-    # GWV 24/12/21: moved to Strip.py, as it relates to the data structure
+    # GWV 07/01/2022: removed
     # @property
     # def visibleSpectra(self):
     #     """List of spectra currently visible in the strip. Ordered as in the spectrumDisplay
@@ -2260,16 +2264,16 @@ class GuiStrip(Frame):
             if glReport:
                 return glReport.report()
 
-    def axisRegionChanged(self, axis):
-        """Notifier function: Update strips etc. for when axis position or width changes.
-        """
-        if self.isDeleted:
-            return
-
-        self._setPlaneAxisWidgets(axis=axis)
-
-        # # can't remember why this is here
-        # self.beingUpdated = False
+    # def axisRegionChanged(self, axis):
+    #     """Notifier function: Update strips etc. for when axis position or width changes.
+    #     """
+    #     if self.isDeleted:
+    #         return
+    #
+    #     self._setPlaneAxisWidgets(axis=axis)
+    #
+    #     # # can't remember why this is here
+    #     # self.beingUpdated = False
 
     @logCommand(get='self')
     def moveTo(self, newIndex: int):
@@ -2380,14 +2384,17 @@ class GuiStrip(Frame):
     def navigateToPosition(self, positions:List[float],
                            axisCodes:List[str] = None,
                            widths:List[float] = None):
+        """Navigate to positions, optionally setting widths of this Strip
+        """
         from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip
 
         navigateToPositionInStrip(self, positions, axisCodes, widths)
 
     def navigateToPeak(self, peak, widths:List[float] = None):
-
+        """Navigate to peak.position, optionally setting widths of this Strip
+        """
         if peak:
-            self.navigateToPosition(peak.position, peak.axisCodes)
+            self.navigateToPosition(peak.position, peak.axisCodes, widths=widths)
         else:
             MessageDialog.showMessage('No Peak', 'Select a peak first')
 
@@ -2421,46 +2428,9 @@ class GuiStrip(Frame):
         """
         return self._CcpnGLWidget.mainViewSize()
 
-    def getAxisPosition(self, axisIndex):
-        return self._CcpnGLWidget.getAxisPosition(axisIndex)
-
-    def setAxisPosition(self, axisIndex, position, rescale=True, update=True):
-        """Set the axis position of the strip
-        if rescale is False, the symbols, etc., must explicitly be refreshed
-        """
-        self._CcpnGLWidget.setAxisPosition(axisIndex, position, rescale=rescale, update=update)
-
-    def getAxisWidth(self, axisIndex):
-        return self._CcpnGLWidget.getAxisWidth(axisIndex)
-
-    def setAxisWidth(self, axisIndex, width, rescale=True, update=True):
-        """Set the axis width of the strip, centred on the axis position
-        if rescale is False, the symbols, etc., must explicitly be refreshed
-        """
-        self._CcpnGLWidget.setAxisWidth(axisIndex, width, rescale=rescale, update=update)
-
-    def getAxisRegion(self, axisIndex):
-        """Return the region currently displayed in the strip as tuple(min, max) for given axis.
-        axisIndex is the screen axis; X is 0, Y is 1
-        """
-        return self._CcpnGLWidget.getAxisRegion(axisIndex)
-
-    def setAxisRegion(self, axisIndex, width, rescale=True, update=True):
-        """Set the axis region for the strip.
-        if rescale is False, the symbols, etc., must explicitly be refreshed
-        """
-        self._CcpnGLWidget.setAxisRegion(axisIndex, width, rescale=rescale, update=update)
-
-    def getAxisRegions(self) -> Tuple[Tuple, ...]:
-        """Return a tuple if tuples for the regions ((min, max), ...)
-        Visible direction of axes is not preserved
-        """
-        regions = []
-        for axis, position, width in zip(self.orderedAxes, self.positions, self.widths):
-            regions.append((position - width / 2.0, position + width / 2.0))
-
-        return tuple(regions)
-
+    #-----------------------------------------------------------------------------------------
+    # Peak-related stuff
+    #-----------------------------------------------------------------------------------------
     @logCommand(get='self')
     def createPeak(self, ppmPositions: List[float]) -> Tuple[Tuple[Peak, ...], Tuple[PeakList, ...]]:
         """Create peak at position for all spectra currently displayed in strip.
@@ -2547,6 +2517,119 @@ class GuiStrip(Frame):
         self.current.peaks = result
         return result
 
+    #-----------------------------------------------------------------------------------------
+    # strip Axis-related stuff
+    #-----------------------------------------------------------------------------------------
+    def getAxisPosition(self, axisIndex):
+        return self._CcpnGLWidget.getAxisPosition(axisIndex)
+
+    def setAxisPosition(self, axisIndex, position, rescale=True, update=True):
+        """Set the axis position of the strip
+        if rescale is False, the symbols, etc., must explicitly be refreshed
+        """
+        self._CcpnGLWidget.setAxisPosition(axisIndex, position, rescale=rescale, update=update)
+
+    def getAxisWidth(self, axisIndex):
+        return self._CcpnGLWidget.getAxisWidth(axisIndex)
+
+    def setAxisWidth(self, axisIndex, width, rescale=True, update=True):
+        """Set the axis width of the strip, centred on the axis position
+        if rescale is False, the symbols, etc., must explicitly be refreshed
+        """
+        self._CcpnGLWidget.setAxisWidth(axisIndex, width, rescale=rescale, update=update)
+
+    def getAxisRegion(self, axisIndex):
+        """Return the region currently displayed in the strip as tuple(min, max) for given axis.
+        axisIndex is the screen axis; X is 0, Y is 1
+        """
+        return self._CcpnGLWidget.getAxisRegion(axisIndex)
+
+    def setAxisRegion(self, axisIndex, width, rescale=True, update=True):
+        """Set the axis region for the strip.
+        if rescale is False, the symbols, etc., must explicitly be refreshed
+        """
+        self._CcpnGLWidget.setAxisRegion(axisIndex, width, rescale=rescale, update=update)
+
+    def getAxisRegions(self) -> Tuple[Tuple, ...]:
+        """Return a tuple if tuples for the regions ((min, max), ...)
+        Visible direction of axes is not preserved
+        """
+        regions = []
+        for axis, position, width in zip(self.orderedAxes, self.positions, self.widths):
+            regions.append((position - width / 2.0, position + width / 2.0))
+
+        return tuple(regions)
+
+    def _setAxisPositionAndWidth(self, stripAxisIndex: int, position:float, width:float = None,
+                                       refresh=True):
+        """Change the position of axis defined by stripAxisIndex
+        :param stripAxisIndex: an index, defining an Z, A, ... plane; i.e. >= 2
+        :param position: the new position (in axis units; i.e. ppm, Hz, points)
+        :param width: (optional) the width of the plane
+        :param refresh: call openGL refresh
+        """
+
+        if stripAxisIndex < 0 or stripAxisIndex >= self.spectrumDisplay.dimensionCount:
+            raise ValueError('%s._setAxisPositionAndWidth: invalid stripAxisIndex "%s"' %
+                             (self.__class__.__name__, stripAxisIndex))
+        _axis = self.orderedAxes[stripAxisIndex]
+
+        if len(self._displayedSpectra) == 0:
+            return
+
+        # unfortunately, we need a spectrum with right dimensionality to do axis unit conversions
+        # (for now). Take the first eligible one
+        found = False
+        sv = None
+        for sv in self.spectrumViews:
+            if sv.spectrum.dimensionCount == self.spectrumDisplay.dimensionCount:
+                found = True
+                break
+        if not found or sv is None:
+            raise RuntimeError('%s._setPositionAndWidth: no appropriate spectrum found for this display to do conversions' %
+                               self.__class__.__name__
+                               )
+        _specDim = sv.spectrumDimensions[stripAxisIndex]
+
+        _axis._incrementByType = self._minAxisIncrementByType[stripAxisIndex]
+        _axis._minLimitByType = self._minAxisLimitsByType[stripAxisIndex]
+        _axis._maxLimitByType = self._maxAxisLimitsByType[stripAxisIndex]
+        position = max(_axis._minLimitByType, position)
+        position = min(_axis._maxLimitByType, position)
+
+        # for now: Axis.position and Axis.width are maintained in ppm; so conversion
+        # depending on Axis.unit is required.
+        if _axis.unit == AXISUNIT_PPM:
+            _axis.position = position
+            _axis._positionByType = position
+            if width is not None:
+                _axis.width = width
+                _axis._widthByType = width
+
+        elif _axis.unit == AXISUNIT_POINT:
+            # change to ppm
+            _axis.position = _specDim.pointToPpm(position)
+            _axis._positionByType = position
+            if width is not None:
+                _axis.width = width * _specDim.ppmPerPoint
+                _axis._widthByType = width
+
+        elif _axis.unit == AXISUNIT_HZ:
+            # change to ppm by scaling by spectrometerFrequencies
+            _axis.position = position / _specDim.spectrometerFrequency
+            _axis._positionByType = position
+            if width is not None:
+                _axis.width = width / _specDim.spectrometerFrequency
+                _axis._widthByType = width
+
+        else:
+            getLogger().debug(f'Axis {_axis.unit} not found')
+            return
+
+        self._updatePlaneToolBarWidgets(stripAxisIndex)
+        if refresh:
+            self.refresh()
+
     def _initAxesValues(self,   spectrumView):
         """Initialiase the strip.axes using a spectrumView instance
         CCPNINTERNAL: used from _newSpectrumDisplay
@@ -2610,6 +2693,32 @@ class GuiStrip(Frame):
                         )
         # init the GL
         self._CcpnGLWidget.initialiseAxes(strip=self)
+
+    #-----------------------------------------------------------------------------------------
+    # Subclassed in nD
+    #-----------------------------------------------------------------------------------------
+
+    def _updatePlaneAxes(self):
+        """A Convenience method to update plane-axis values.
+        It uses the _changePlane() method; also updates the plane widgets
+        """
+        # Only implemented for nD
+        pass
+
+    def _changePlane(self, stripAxisIndex: int, planeIncrement:int, planeCount = None,
+                           refresh:bool = True
+                     ):
+        """Change the position of plane-axis defined by stripAxisIndex by increment (in points)
+        :param stripAxisIndex: an index, defining an Z, A, ... plane; i.e. >= 2
+        :param planeIncrement: an integer defining number of planes to increment.
+                               The actual ppm increment (for axis in ppm units) will be
+                               the minimum ppm increment along stripAxisIndex.
+        :param planeCount: the number of planes to display
+        :param refresh: optionally refresh strip after setting values
+        """
+        # Only implemented for nD
+        pass
+
 
 #=========================================================================================
 # Notifiers:

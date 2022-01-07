@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-06 16:28:18 +0000 (Thu, January 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 15:07:03 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -819,7 +819,8 @@ class Framework(NotifierBase):
                         getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(spectrumDisplay))
 
                     if not spectrumDisplay.is1D:
-                        strip._setPlaneAxisWidgets()
+                        for strip in spectrumDisplay.strips:
+                            strip._updatePlaneAxes()
 
                 if spectrumDisplay.isGrouped:
                     # setup the spectrumGroup toolbar

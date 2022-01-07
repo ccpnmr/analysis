@@ -34,7 +34,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-06 22:08:37 +0000 (Thu, January 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 15:07:03 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -47,6 +47,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from PyQt5 import QtWidgets
 import numpy
+
 from ccpn.core.PeakList import PeakList
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, undoStackBlocking
@@ -67,13 +68,10 @@ from ccpn.util.Constants import AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT
 
 
 class GuiStripNd(GuiStrip):
-    """
-    Main Strip for Nd spectra object
+    """Strip class for display of nD spectra
   
     This module inherits the following attributes from the Strip wrapper class:
-  
-    serial          serial number of Strip, used in Pid and to identify the Strip
-                      :return <str>
+
     axisCodes         Fixed string Axis codes in original display order
                         :return <tuple>:(X, Y, Z1, Z2, ...)
     axisOrder         String Axis codes in display order, determine axis display order
@@ -96,7 +94,6 @@ class GuiStripNd(GuiStrip):
     moveTo            Move strip to index newIndex in orderedStrips
                         moveTo(newIndex:int)
                           :param newIndex:<int> new index position
-    resetAxisOrder    Reset display to original axis order
     findAxis          Find axis
                         findAxis(axisCode)
                           :param axisCode:
@@ -126,8 +123,7 @@ class GuiStripNd(GuiStrip):
     # TODO:ED: complete the above; also port to GuiStrip1d
 
     def __init__(self, spectrumDisplay):
-        """
-        Initialise Nd Strip object
+        """Initialise nD Strip object
     
         :param spectrumDisplay: spectrumDisplay instance
         """
@@ -513,15 +509,15 @@ class GuiStripNd(GuiStrip):
         # CCPNINTERNAL - called from several places
         """
 
-        _displayedSpectra = [ds for ds in self._displayedSpectra
-                                if (ds.spectrumView is not ignoreSpectrumView and
-                                    ds.spectrum.dimensionCount > 2
-                                   )
-                            ]
-
-        if len(_displayedSpectra) == 0:
-            getLogger().debug('_setPlaneAxisWidgets: no spectra displayed')
-            return
+        # _displayedSpectra = [ds for ds in self._displayedSpectra
+        #                         if (ds.spectrumView is not ignoreSpectrumView and
+        #                             ds.spectrum.dimensionCount > 2
+        #                            )
+        #                     ]
+        #
+        # if len(_displayedSpectra) == 0:
+        #     getLogger().debug('_setPlaneAxisWidgets: no spectra displayed')
+        #     return
 
         for idx, stripAxis in enumerate(self.axes[2:]):
             axisIndex = idx+2
@@ -539,106 +535,51 @@ class GuiStripNd(GuiStrip):
         # GWV:not sure about this
         # self.haveSetupZWidgets = True
 
-    def _updatePlaneToolBarWidgets(self, displayAxisIndex: int):
-        """Update the planeToolBar widgets
+    def _updatePlaneAxes(self):
+        """A Convenience method to update plane-axis settings.
+        It uses the _changePlane() method; also updates the plane widgets
         """
-        if displayAxisIndex < 0 or displayAxisIndex >= self.spectrumDisplay.dimensionCount:
-            raise ValueError('%s._updatePlaneToolBarWidgets: invalid displayAxisIndex "%s"' %
-                             (self.__class__.__name__, displayAxisIndex))
-        _axis = self.axes[displayAxisIndex]
+        if self.spectrumDisplay.dimensionCount > 2:
+            for axis in self.orderedAxes[2:]:
+                self._changePlane(axis._index, planeIncrement=0, refresh=False)
+
+    def _updatePlaneToolBarWidgets(self, stripAxisIndex: int):
+        """Update the planeToolBar widgets
+        :param stripAxisIndex: an index, defining an Z, A, ... plane; i.e. >= 2
+        """
+        if stripAxisIndex < 0 or stripAxisIndex >= self.spectrumDisplay.dimensionCount:
+            raise ValueError('%s._updatePlaneToolBarWidgets: invalid stripAxisIndex "%s"' %
+                             (self.__class__.__name__, stripAxisIndex))
+        _axis = self.axes[stripAxisIndex]
 
         # for Z,A,.. axis: update the PlaneSelectorWidget values; BUT "unit" argument is ignored (GWV)
-        if displayAxisIndex >= 2:
-            planeAxisBar = self.planeAxisBars[displayAxisIndex-2]
+        if stripAxisIndex >= 2:
+            planeAxisBar = self.planeAxisBars[stripAxisIndex-2]
             planeAxisBar.setPlaneValues(_axis._incrementByType,
                                         _axis._minLimitByType,
                                         _axis._maxLimitByType,
                                         _axis._positionByType,
                                         unit = _axis.unit)
 
-    def _setAxisPositionAndWidth(self, displayAxisIndex: int, position:float, width:float = None,
-                                       refresh=True):
-        """Change the position of axis defined by displayAxisIndex
-        :param displayAxisIndex: an index, defining an Z, A, ... plane; i.e. >= 2
-        :param position: de new position (in axis units; i.e. ppm, Hz, points)
-        :param width: (optional) the width of the plane
-        :param refresh: call openGL refresh
-        """
-
-        if displayAxisIndex < 0 or displayAxisIndex >= self.spectrumDisplay.dimensionCount:
-            raise ValueError('%s._setAxisPositionAndWidth: invalid displayAxisIndex "%s"' %
-                             (self.__class__.__name__, displayAxisIndex))
-        _axis = self.axes[displayAxisIndex]
-
-        if len(self._displayedSpectra) == 0:
-            return
-
-        # unfortunately, we need a spectrum with right dimensionality to do axis unit conversions
-        # (for now). Take the first eligible one
-        found = False
-        for sv in self.spectrumViews:
-            if sv.spectrum.dimensionCount == self.spectrumDisplay.dimensionCount:
-                found = True
-                break
-        if not found:
-            raise RuntimeError('_setPositionAndWidth: no appropriate spectrum found for this display to do conversions')
-        _specDim = sv.spectrumDimensions[displayAxisIndex]
-
-        _axis._incrementByType = self._minAxisIncrementByType[displayAxisIndex]
-        _axis._minLimitByType = self._minAxisLimitsByType[displayAxisIndex]
-        _axis._maxLimitByType = self._maxAxisLimitsByType[displayAxisIndex]
-        position = max(_axis._minLimitByType, position)
-        position = min(_axis._maxLimitByType, position)
-
-        # for now: Axis.position and Axis.width are maintained in ppm; so conversion
-        # depending on Axis.unit is required.
-        if _axis.unit == AXISUNIT_PPM:
-            _axis.position = position
-            _axis._positionByType = position
-            if width is not None:
-                _axis.width = width
-                _axis._widthByType = width
-
-        elif _axis.unit == AXISUNIT_POINT:
-            # change to ppm
-            _axis.position = _specDim.pointToPpm(position)
-            _axis._positionByType = position
-            if width is not None:
-                _axis.width = width * _specDim.ppmPerPoint
-                _axis._widthByType = width
-
-        elif _axis.unit == AXISUNIT_HZ:
-            # change to ppm by scaling by spectrometerFrequencies
-            _axis.position = position / _specDim.spectrometerFrequency
-            _axis._positionByType = position
-            if width is not None:
-                _axis.width = width / _specDim.spectrometerFrequency
-                _axis._widthByType = width
-
-        else:
-            getLogger().warning(f'Axis {_axis.unit} not found')
-            return
-
-        self._updatePlaneToolBarWidgets(displayAxisIndex)
-        if refresh:
-            self.refresh()
-
-    def _changePlane(self, displayAxisIndex: int, planeIncrement:int, planeCount = None):
-        """Change the position of plane-axis defined by displayAxisIndex by increment (in points)
-        :param displayAxisIndex: an index, defining an Z, A, ... plane; i.e. >= 2
+    def _changePlane(self, stripAxisIndex: int, planeIncrement:int, planeCount = None,
+                           refresh:bool = True
+                     ):
+        """Change the position of plane-axis defined by stripAxisIndex by increment (in points)
+        :param stripAxisIndex: an index, defining an Z, A, ... plane; i.e. >= 2
         :param planeIncrement: an integer defining number of planes to increment.
                                The actual ppm increment (for axis in ppm units) will be
-                               the minimum ppm increment along displayAxisIndex.
+                               the minimum ppm increment along stripAxisIndex.
         :param planeCount: the number of planes to display
+        :param refresh: optionally refresh strip after setting values
         """
-        if displayAxisIndex < 0 or displayAxisIndex >= self.spectrumDisplay.dimensionCount:
-            raise ValueError('%s._changePlane: invalid displayAxisIndex "%s"' %
-                             (self.__class__.__name__, displayAxisIndex))
+        if stripAxisIndex < 0 or stripAxisIndex >= self.spectrumDisplay.dimensionCount:
+            raise ValueError('%s._changePlane: invalid stripAxisIndex "%s"' %
+                             (self.__class__.__name__, stripAxisIndex))
 
-        if displayAxisIndex < 2:
+        if stripAxisIndex < 2:
             # X or Y; do nothing
             return
-        _axis = self.axes[displayAxisIndex]
+        _axis = self.axes[stripAxisIndex]
 
         _displayedNdSpectra = [ds for ds in self._displayedSpectra
                                   if ds.spectrum.dimensionCount > 2]
@@ -651,7 +592,7 @@ class GuiStripNd(GuiStrip):
         if _axis._planeCount is None or _axis._planeCount < 1:
             _axis._planeCount = 1
 
-        _incrementByType = self._minAxisIncrementByType[displayAxisIndex]
+        _incrementByType = self._minAxisIncrementByType[stripAxisIndex]
 
         # for now: axis.position is maintained in ppm; so conversion depending on the unit is required.
         if _axis.unit == AXISUNIT_PPM:
@@ -661,7 +602,7 @@ class GuiStripNd(GuiStrip):
         elif _axis.unit == AXISUNIT_POINT:
             # change to ppm; there should only be one SpectrumView with this axis (for now)
             ds = _displayedNdSpectra[0]
-            specDim = ds.spectrumView.spectrumDimensions[displayAxisIndex]
+            specDim = ds.spectrumView.spectrumDimensions[stripAxisIndex]
             pointPosition = specDim.ppmToPoint(_axis.position)
             newPosition = pointPosition + _incrementByType * planeIncrement
             width = _incrementByType * _axis._planeCount
@@ -674,15 +615,17 @@ class GuiStripNd(GuiStrip):
             return
 
         # find the limits across all spectra for this axis
-        minLimit = self._minAxisLimitsByType[displayAxisIndex]
-        maxLimit = self._maxAxisLimitsByType[displayAxisIndex]
+        minLimit = self._minAxisLimitsByType[stripAxisIndex]
+        maxLimit = self._maxAxisLimitsByType[stripAxisIndex]
         # wrap around the limits if we found proper limits
         if maxLimit is not None and minLimit is not None:
             if newPosition > maxLimit: newPosition = minLimit
             if newPosition < minLimit: newPosition = maxLimit
 
-        self._setAxisPositionAndWidth(displayAxisIndex=displayAxisIndex,
-                                      position=newPosition, width=width)
+        self._setAxisPositionAndWidth(stripAxisIndex=stripAxisIndex,
+                                      position=newPosition, width=width,
+                                      refresh = refresh
+                                      )
 
     # GWV 6/1/2022: replaced by _setAxisPositionAndWidth() and _changePlane()
     # # @logCommand(get='self')

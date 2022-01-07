@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-06 16:27:57 +0000 (Thu, January 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 15:07:03 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -973,7 +973,7 @@ class GuiWindow():
         navigate to the previous Z plane for the currently selected strip
         """
         if self.current.strip:
-            self.current.strip._changePlane(displayAxisIndex=2, planeIncrement=-1)
+            self.current.strip._changePlane(stripAxisIndex=2, planeIncrement=-1)
         else:
             getLogger().warning('No current strip. Select a strip first.')
 
@@ -982,7 +982,7 @@ class GuiWindow():
         navigate to the next Z plane for the currently selected strip
         """
         if self.current.strip:
-            self.current.strip._changePlane(displayAxisIndex=2, planeIncrement=1)
+            self.current.strip._changePlane(stripAxisIndex=2, planeIncrement=1)
         else:
             getLogger().warning('No current strip. Select a strip first.')
 

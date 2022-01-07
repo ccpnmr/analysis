@@ -6,7 +6,7 @@ It works in concert with a wrapper object for storing/retrieving attibute values
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-24 15:23:20 +0000 (Fri, December 24, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-07 15:07:03 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1095,7 +1095,9 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         if trigger == Notifier.CHANGE:
             getLogger().debug(f'>>> SPECTRUMDISPLAY CHANGED  -  {spectrumDisplay}')
-            spectrumDisplay._setPlaneAxisWidgets()
+            for strip in self.strips:
+                strip._updatePlaneAxes()
+            # spectrumDisplay._setPlaneAxisWidgets()
 
     def printToFile(self):
         self.application.showPrintSpectrumDisplayPopup()

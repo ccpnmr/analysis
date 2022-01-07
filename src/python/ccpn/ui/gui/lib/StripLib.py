@@ -4,7 +4,7 @@ Strip Library functionalities
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-24 14:23:11 +0000 (Fri, December 24, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-07 15:07:03 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -71,7 +71,7 @@ def navigateToPositionInStrip(strip,
     # if _undo is not None:
     #   _undo.increaseBlocking()
 
-    indices = getAxisCodeMatchIndices(axisCodes, strip.axisCodes)
+    indices = getAxisCodeMatchIndices(axisCodes=axisCodes, refAxisCodes=strip.axisCodes)
 
     for ii, axisCode in enumerate(axisCodes):
         if indices[ii] is None or ii >= len(positions):
@@ -98,16 +98,19 @@ def navigateToPositionInStrip(strip,
                             # if the list item is a str with value, default, set width to 5ppm for heteronuclei and 0.5ppm for 1H
                             if (name2IsotopeCode(axisCode) == '13C' or
                                     name2IsotopeCode(axisCode) == '15N'):
-                                _setStripAxisWidth(strip, axisIndex=stripAxisIndex, width=5, update=True)
+                                _setStripAxisWidth(strip, axisIndex=stripAxisIndex, width=5.0, update=True)
                             else:
                                 _setStripAxisWidth(strip, axisIndex=stripAxisIndex, width=0.5, update=True)
-            except:
+            except Exception as es:
+                getLogger().debug('navigateToPositionInStrip: caught error %s' % es)
                 continue
+
+    strip._updatePlaneAxes()
 
     # redraw the contours
     strip._updateVisibility()
-    if len(strip.orderedAxes) > 2:
-        strip.axisRegionChanged(strip.orderedAxes[2])
+    # if len(strip.orderedAxes) > 2:
+    #     strip.axisRegionChanged(strip.orderedAxes[2])
 
     # build here so it doesn't conflict with OpenGl update
     strip._CcpnGLWidget.buildAllContours()
@@ -258,8 +261,8 @@ def navigateToNmrAtomsInStrip(strip: GuiStrip, nmrAtoms: typing.List[NmrAtom], w
 
     # redraw the contours
     strip._updateVisibility()
-    if len(strip.orderedAxes) > 2:
-        strip.axisRegionChanged(strip.orderedAxes[2])
+    # if len(strip.orderedAxes) > 2:
+    #     strip.axisRegionChanged(strip.orderedAxes[2])
 
     for specNum, thisSpecView in enumerate(strip.spectrumDisplay.spectrumViews):
         thisSpecView.buildContours = True

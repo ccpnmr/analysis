@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-07 15:07:03 +0000 (Fri, January 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 17:00:55 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -358,19 +358,15 @@ class PlaneSelectorWidget(Frame):
                 self.spinBox.setMaximum(maxValue)
             if minValue is not None:
                 self.spinBox.setMinimum(minValue)
-            if value is not None:
-                if unit == AXISUNIT_POINT:
-                    value = round(value)
-                else:
-                    value = round(float(value), 3)
-                self.spinBox.setValue(value)
 
             # override the spinBox to only allow integer points
-            # self.spinBox.setDecimals(0 if unit == AXISUNIT_POINT else 3)
+            self.spinBox.setDecimals(0 if unit == AXISUNIT_POINT else 3)
+            if value is not None:
+                self.spinBox.setValue(value)
 
     def getPlaneValues(self):
         """Return the current settings for this axis
-        :returns: minValue, maxValue, stepSize, value, planeCount
+        :returns: (minValue, maxValue, stepSize, value, planeCount) tuple
         """
         return self.spinBox.minimum(), self.spinBox.maximum(), self.spinBox.singleStep(), self.spinBox.value(), self.planeCount
 

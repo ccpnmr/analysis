@@ -34,7 +34,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-07 15:27:00 +0000 (Fri, January 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 17:00:55 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -268,7 +268,7 @@ class GuiStripNd(GuiStrip):
         # with undoBlockWithoutSideBar():
         with undoStackBlocking() as _:  # Do not add to undo/redo stack
             # create a new spectrum display
-            newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisCodes=self.axisOrder)
+            newDisplay = self.mainWindow.newSpectrumDisplay(self.spectra[0], axisCodes=self.axisOrder)
             for spectrum in self.spectra:
                 newDisplay.displaySpectrum(spectrum)
 
@@ -292,7 +292,7 @@ class GuiStripNd(GuiStrip):
             with undoStackBlocking() as _tmp:  # Do not add to undo/redo stack
                 # create a new spectrum display with the new axis order
                 try:
-                    newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisCodes=axisOrder)
+                    newDisplay = self.mainWindow.newSpectrumDisplay(self.spectra[0], axisCodes=axisOrder)
                     for spectrum in self.spectra:
                         newDisplay.displaySpectrum(spectrum)
 
@@ -320,7 +320,7 @@ class GuiStripNd(GuiStrip):
             with undoStackBlocking() as _tmp:  # Do not add to undo/redo stack
                 # create a new spectrum display with the new axis order
                 try:
-                    newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisCodes=axisOrder)
+                    newDisplay = self.mainWindow.newSpectrumDisplay(self.spectra[0], axisCodes=axisOrder)
                     for spectrum in self.spectra:  #[1:]:
                         newDisplay.displaySpectrum(spectrum)
 
@@ -348,7 +348,7 @@ class GuiStripNd(GuiStrip):
             with undoStackBlocking() as _tmp:  # Do not add to undo/redo stack
                 # create a new spectrum display with the new axis order
                 try:
-                    newDisplay = self.mainWindow.createSpectrumDisplay(self.spectra[0], axisCodes=axisOrder)
+                    newDisplay = self.mainWindow.newSpectrumDisplay(self.spectra[0], axisCodes=axisOrder)
                     for spectrum in self.spectra:
                         newDisplay.displaySpectrum(spectrum)
 

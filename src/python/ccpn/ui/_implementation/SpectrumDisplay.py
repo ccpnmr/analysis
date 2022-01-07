@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-07 12:25:18 +0000 (Fri, January 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 17:00:55 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -117,19 +117,23 @@ class SpectrumDisplay(AbstractWrapperObject):
         """
         result = super()._restoreObject(project, apiObj)
 
-        result._spectrumViewVisibleChanged()
-
         # getting value will induce an update in the internal parameters
         _tmp = result.isotopeCodes
         _tmp2 = result.dimensionTypes
 
-        # check that the indexing has been set, or is populated correctly
-        if result.strips and (specViews := result.strips[0].getSpectrumViews()):
+        # update the plane axes settings
+        for strip in result.strips:
+            strip._updatePlaneAxes()
+
+        # check that the spectrumView indexing has been set, or is populated correctly
+        if len(result.strips) > 0 and \
+           (specViews := result.strips[0].getSpectrumViews()):
             indexing = [v._index for v in specViews]
             if None in indexing or len(indexing) != len(set(indexing)):
                 # set new indexing
                 for ind, sv in enumerate(specViews):
                     sv._index = ind
+        result._spectrumViewVisibleChanged()
 
         return result
 
@@ -338,7 +342,7 @@ class SpectrumDisplay(AbstractWrapperObject):
     #             raise ValueError('Invalid units[%d] %r; should be one of %r' % (idx, val, options))
     #         self.orderedAxes[idx].unit = val
     #     # assure the update of the widgets is done
-    #     self._updateAxesUnits()
+    #     self._updateSettingsAxesUnits()
     #     # self._wrappedData.units = value
 
     @property
@@ -742,7 +746,7 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
     strip._initAxesValues(spectrumView)
 
     # having initialised the strip axes, we can update the display settings widget
-    display._updateAxesUnits()
+    display._updateSettingsAxesUnits()
 
     return display
 

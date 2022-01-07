@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-07 15:07:03 +0000 (Fri, January 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 17:00:55 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -434,12 +434,10 @@ class GuiSpectrumDisplay(CcpnModule):
                                                        prefsGen.contourThickness,
                                                        prefsGen.zPlaneNavigationMode)
 
-    def _updateAxesUnits(self):
-        """Update the x- and y-axis units of the display"""
-        # units = self.units
-        # xUnit = AXISUNITS.index(units[0])
-        # yUnit = AXISUNITS.index(units[1]) if not self.is1D else None
-
+    def _updateSettingsAxesUnits(self):
+        """Update the settings of x- and y-axis units of the display
+        CCPNINTERNAL: used in _newS[ectrumDisplay and when setting Axis.unit attribute
+        """
         xUnit = self._unitIndices[0]
         yUnit = self._unitIndices[1] if not self.is1D else None
 
@@ -2470,7 +2468,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 if not self._isNew:
                     # There is already a spectrum displayed; ie. the spectrumDisplay has definitions for
-                    # its x,z,plane(s) display axes
+                    # its x,y, and z,a,.. plane(s) display axes
 
                     # check for matching dimension types
                     for dt1, dt2 in zip(self.dimensionTypes or [], spectrum.getByDimensions('dimensionTypes', dims)):
@@ -2509,6 +2507,12 @@ class GuiSpectrumDisplay(CcpnModule):
 
                     self.setToolbarButtons(tuple(idx))
                     # addUndoItem(redo=partial(self.setToolbarButtons, tuple(idx)))  # keep for undo/redo
+
+        if not self._isNew:
+            # Now that the spectrum is added, we need to update the plane-related
+            # axis values
+            for strip in self.strips:
+                strip._updatePlaneAxes()
 
         return spectrumView
 

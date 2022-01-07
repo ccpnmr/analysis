@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-07 15:07:03 +0000 (Fri, January 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 17:00:55 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -109,9 +109,6 @@ def navigateToPositionInStrip(strip,
 
     # redraw the contours
     strip._updateVisibility()
-    # if len(strip.orderedAxes) > 2:
-    #     strip.axisRegionChanged(strip.orderedAxes[2])
-
     # build here so it doesn't conflict with OpenGl update
     strip._CcpnGLWidget.buildAllContours()
     # strip._CcpnGLWidget.update()

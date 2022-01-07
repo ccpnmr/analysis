@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-24 14:23:11 +0000 (Fri, December 24, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-07 17:00:55 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -125,7 +125,7 @@ class CopyStripFlippedSpectraPopup(CcpnDialogMainWidget):
             spectra = self.strip.spectra
             if spectra:
                 # create a new spectrum display with the new axis order
-                newDisplay = self.mainWindow.createSpectrumDisplay(spectra[0], axisCodes=tuple(self.axisCodes[ii] for ii in self._axisOrdering))
+                newDisplay = self.mainWindow.newSpectrumDisplay(spectra[0], axisCodes=tuple(self.axisCodes[ii] for ii in self._axisOrdering))
                 for spectrum in spectra:
                     newDisplay.displaySpectrum(spectrum)
 

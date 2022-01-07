@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-07 17:00:55 +0000 (Fri, January 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 17:19:20 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -750,10 +750,6 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
 
     return display
 
-
-#EJB 20181206: moved to _implementation.Window
-# Window.createSpectrumDisplay = _createSpectrumDisplay
-# del _createSpectrumDisplay
 
 # GWV 20210807: moved to _implementation.Window
 # # Window.spectrumDisplays property

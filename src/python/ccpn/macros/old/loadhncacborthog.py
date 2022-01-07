@@ -12,12 +12,12 @@ project.loadData(spectrumPath)
 # hold of the spectrum object
 hncacbSpectrum = project.getByPid('SP:hncacb')
 
-# use the createSpectrumDisplay() method of ui.MainWindow
+# use the newSpectrumDisplay() method of ui.MainWindow
 # with the axisOrder argument to display the spectrum with
 # x = H, y = C and z = N
-mainWindow.createSpectrumDisplay(hncacbSpectrum, axisOrder=['H', 'C', 'N'])
+mainWindow.newSpectrumDisplay(hncacbSpectrum, axisOrder=['H', 'C', 'N'])
 
-# use the createSpectrumDisplay() method of ui.MainWindow
+# use the newSpectrumDisplay() method of ui.MainWindow
 # with the axisOrder argument to display the spectrum with
 # x = H, y = N and z = C
-mainWindow.createSpectrumDisplay(hncacbSpectrum, axisOrder=['H', 'N', 'C'])
+mainWindow.newSpectrumDisplay(hncacbSpectrum, axisOrder=['H', 'N', 'C'])

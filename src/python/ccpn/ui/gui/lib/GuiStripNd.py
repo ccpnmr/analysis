@@ -34,7 +34,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-07 15:07:03 +0000 (Fri, January 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 15:27:00 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -119,8 +119,9 @@ class GuiStripNd(GuiStrip):
                           :param selectedRegion:<List>  of <List> of coordinates to test
                           :return <Tuple>:(<Peak>, ...)
     """
-
     # TODO:ED: complete the above; also port to GuiStrip1d
+
+    #-----------------------------------------------------------------------------------------
 
     def __init__(self, spectrumDisplay):
         """Initialise nD Strip object
@@ -504,36 +505,36 @@ class GuiStripNd(GuiStrip):
         #GuiStrip._mouseMoved(self, positionPixel)
         self._updateTraces()
 
-    def _setPlaneAxisWidgets(self, ignoreSpectrumView=None, axis=None):
-        """Sets values for the planeAxis widgets in the plane toolbar.
-        # CCPNINTERNAL - called from several places
-        """
-
-        # _displayedSpectra = [ds for ds in self._displayedSpectra
-        #                         if (ds.spectrumView is not ignoreSpectrumView and
-        #                             ds.spectrum.dimensionCount > 2
-        #                            )
-        #                     ]
-        #
-        # if len(_displayedSpectra) == 0:
-        #     getLogger().debug('_setPlaneAxisWidgets: no spectra displayed')
-        #     return
-
-        for idx, stripAxis in enumerate(self.axes[2:]):
-            axisIndex = idx+2
-
-            _planeSize = self._minAxisIncrementByType[axisIndex]
-            _position = stripAxis._positionByType if stripAxis._positionByType is not None \
-                        else stripAxis.position
-            _minPlaneValue = self._minAxisLimitsByType[axisIndex]
-            _maxPlaneValue = self._maxAxisLimitsByType[axisIndex]
-
-            # set PlaneSelectorWidget values; BUT "unit" argument is ignored (GWV)
-            planeAxisBar = self.planeAxisBars[idx]
-            planeAxisBar.setPlaneValues(_planeSize, _minPlaneValue, _maxPlaneValue, _position, unit=stripAxis.unit)
-
-        # GWV:not sure about this
-        # self.haveSetupZWidgets = True
+    # def _setPlaneAxisWidgets(self, ignoreSpectrumView=None, axis=None):
+    #     """Sets values for the planeAxis widgets in the plane toolbar.
+    #     # CCPNINTERNAL - called from several places
+    #     """
+    #
+    #     # _displayedSpectra = [ds for ds in self._displayedSpectra
+    #     #                         if (ds.spectrumView is not ignoreSpectrumView and
+    #     #                             ds.spectrum.dimensionCount > 2
+    #     #                            )
+    #     #                     ]
+    #     #
+    #     # if len(_displayedSpectra) == 0:
+    #     #     getLogger().debug('_setPlaneAxisWidgets: no spectra displayed')
+    #     #     return
+    #
+    #     for idx, stripAxis in enumerate(self.axes[2:]):
+    #         axisIndex = idx+2
+    #
+    #         _planeSize = self._minAxisIncrementByUnit[axisIndex]
+    #         _position = stripAxis._positionByUnit if stripAxis._positionByUnit is not None \
+    #                     else stripAxis.position
+    #         _minPlaneValue = self._minAxisLimitsByUnit[axisIndex]
+    #         _maxPlaneValue = self._maxAxisLimitsByUnit[axisIndex]
+    #
+    #         # set PlaneSelectorWidget values; BUT "unit" argument is ignored (GWV)
+    #         planeAxisBar = self.planeAxisBars[idx]
+    #         planeAxisBar.setPlaneValues(_planeSize, _minPlaneValue, _maxPlaneValue, _position, unit=stripAxis.unit)
+    #
+    #     # GWV:not sure about this
+    #     # self.haveSetupZWidgets = True
 
     def _updatePlaneAxes(self):
         """A Convenience method to update plane-axis settings.
@@ -555,10 +556,10 @@ class GuiStripNd(GuiStrip):
         # for Z,A,.. axis: update the PlaneSelectorWidget values; BUT "unit" argument is ignored (GWV)
         if stripAxisIndex >= 2:
             planeAxisBar = self.planeAxisBars[stripAxisIndex-2]
-            planeAxisBar.setPlaneValues(_axis._incrementByType,
-                                        _axis._minLimitByType,
-                                        _axis._maxLimitByType,
-                                        _axis._positionByType,
+            planeAxisBar.setPlaneValues(_axis._incrementByUnit,
+                                        _axis._minLimitByUnit,
+                                        _axis._maxLimitByUnit,
+                                        _axis._positionByUnit,
                                         unit = _axis.unit)
 
     def _changePlane(self, stripAxisIndex: int, planeIncrement:int, planeCount = None,
@@ -592,31 +593,31 @@ class GuiStripNd(GuiStrip):
         if _axis._planeCount is None or _axis._planeCount < 1:
             _axis._planeCount = 1
 
-        _incrementByType = self._minAxisIncrementByType[stripAxisIndex]
+        _incrementByUnit = self._minAxisIncrementByUnit[stripAxisIndex]
 
         # for now: axis.position is maintained in ppm; so conversion depending on the unit is required.
         if _axis.unit == AXISUNIT_PPM:
-            newPosition = _axis.position + _incrementByType * planeIncrement
-            width = _incrementByType * _axis._planeCount
+            newPosition = _axis.position + _incrementByUnit * planeIncrement
+            width = _incrementByUnit * _axis._planeCount
 
         elif _axis.unit == AXISUNIT_POINT:
             # change to ppm; there should only be one SpectrumView with this axis (for now)
             ds = _displayedNdSpectra[0]
             specDim = ds.spectrumView.spectrumDimensions[stripAxisIndex]
             pointPosition = specDim.ppmToPoint(_axis.position)
-            newPosition = pointPosition + _incrementByType * planeIncrement
-            width = _incrementByType * _axis._planeCount
+            newPosition = pointPosition + _incrementByUnit * planeIncrement
+            width = _incrementByUnit * _axis._planeCount
 
         elif _axis.unit == AXISUNIT_HZ:
             raise RuntimeError('Units "Hz" option not yet implemented for axis %s' % _axis)
 
         else:
-            getLogger().warning(f'Axis {_axis.unit} not found')
+            getLogger().debug(f'Axis {_axis.unit} not found')
             return
 
         # find the limits across all spectra for this axis
-        minLimit = self._minAxisLimitsByType[stripAxisIndex]
-        maxLimit = self._maxAxisLimitsByType[stripAxisIndex]
+        minLimit = self._minAxisLimitsByUnit[stripAxisIndex]
+        maxLimit = self._maxAxisLimitsByUnit[stripAxisIndex]
         # wrap around the limits if we found proper limits
         if maxLimit is not None and minLimit is not None:
             if newPosition > maxLimit: newPosition = minLimit

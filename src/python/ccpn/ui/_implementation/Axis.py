@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-07 12:25:18 +0000 (Fri, January 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 15:27:00 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -66,12 +66,12 @@ class Axis(AbstractWrapperObject):
     def __init__(self, project, wrappedData):
         super().__init__(project, wrappedData)
 
-        # additional attributes set by strip._setAxisPositionAndWidth method
-        self._minLimitByType = None
-        self._maxLimitByType = None
-        self._incrementByType = None
-        self._positionByType = None
-        self._widthByType = None
+        # additional attributes set by GuiStrip._setAxisPositionAndWidth method
+        self._minLimitByUnit = None
+        self._maxLimitByUnit = None
+        self._incrementByUnit = None
+        self._positionByUnit = None
+        self._widthByUnit = None
         self._planeCount = None
 
     # @classmethod

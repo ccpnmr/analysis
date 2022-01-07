@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-07 15:07:03 +0000 (Fri, January 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-07 15:27:00 +0000 (Fri, January 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2591,36 +2591,36 @@ class GuiStrip(Frame):
                                )
         _specDim = sv.spectrumDimensions[stripAxisIndex]
 
-        _axis._incrementByType = self._minAxisIncrementByType[stripAxisIndex]
-        _axis._minLimitByType = self._minAxisLimitsByType[stripAxisIndex]
-        _axis._maxLimitByType = self._maxAxisLimitsByType[stripAxisIndex]
-        position = max(_axis._minLimitByType, position)
-        position = min(_axis._maxLimitByType, position)
+        _axis._incrementByUnit = self._minAxisIncrementByUnit[stripAxisIndex]
+        _axis._minLimitByUnit = self._minAxisLimitsByUnit[stripAxisIndex]
+        _axis._maxLimitByUnit = self._maxAxisLimitsByUnit[stripAxisIndex]
+        position = max(_axis._minLimitByUnit, position)
+        position = min(_axis._maxLimitByUnit, position)
 
         # for now: Axis.position and Axis.width are maintained in ppm; so conversion
         # depending on Axis.unit is required.
         if _axis.unit == AXISUNIT_PPM:
             _axis.position = position
-            _axis._positionByType = position
+            _axis._positionByUnit = position
             if width is not None:
                 _axis.width = width
-                _axis._widthByType = width
+                _axis._widthByUnit = width
 
         elif _axis.unit == AXISUNIT_POINT:
             # change to ppm
             _axis.position = _specDim.pointToPpm(position)
-            _axis._positionByType = position
+            _axis._positionByUnit = position
             if width is not None:
                 _axis.width = width * _specDim.ppmPerPoint
-                _axis._widthByType = width
+                _axis._widthByUnit = width
 
         elif _axis.unit == AXISUNIT_HZ:
             # change to ppm by scaling by spectrometerFrequencies
             _axis.position = position / _specDim.spectrometerFrequency
-            _axis._positionByType = position
+            _axis._positionByUnit = position
             if width is not None:
                 _axis.width = width / _specDim.spectrometerFrequency
-                _axis._widthByType = width
+                _axis._widthByUnit = width
 
         else:
             getLogger().debug(f'Axis {_axis.unit} not found')
@@ -2644,8 +2644,8 @@ class GuiStrip(Frame):
             ppmLimits, valueLimits = spectrum.get1Dlimits()
 
             axes[0].region = ppmLimits
-            axes[0]._positionByType = axes[0].position
-            axes[0]._widthByType = axes[0].width
+            axes[0]._positionByUnit = axes[0].position
+            axes[0]._widthByUnit = axes[0].width
 
             axes[1].region = valueLimits
             axes[1].unit = AXISUNIT_NUMBER

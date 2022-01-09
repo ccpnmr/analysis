@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-07 17:19:20 +0000 (Fri, January 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-09 15:51:26 +0000 (Sun, January 09, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -683,6 +683,7 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
             apiSpectrumDisplay.newFrequencyAxis(code=axisCodes[0], stripSerial=1, unit=AXISUNIT_PPM)
         elif spectrum.dimensionTypes[0] == specLib.DIMENSION_TIME:
             apiSpectrumDisplay.newFidAxis('time', stripSerial=1, unit=AXISUNIT_POINT)
+
         # SpectrumDisplay Y; i.e. Intensity
         apiSpectrumDisplay.newIntensityAxis(code=SpectrumDisplay.INTENSITY, stripSerial=1, unit=AXISUNIT_NUMBER)
 
@@ -745,7 +746,8 @@ def _newSpectrumDisplay(window: Window, spectrum: Spectrum, axisCodes: (str,),
     # this will also update any Strip.planeToolbar widgets and the GL
     strip._initAxesValues(spectrumView)
 
-    # having initialised the strip axes, we can update the display settings widget
+    # having initialised the strip axes, we can update the display
+    # settings widget
     display._updateSettingsAxesUnits()
 
     return display

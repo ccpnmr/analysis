@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-07 17:00:55 +0000 (Fri, January 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-09 15:51:26 +0000 (Sun, January 09, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -79,7 +79,8 @@ from ccpn.ui._implementation.MultipletListView import MultipletListView
 from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySettings
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, \
-    BlankedPartial, ccpNmrV3CoreSetter, notificationEchoBlocking, undoBlockWithoutSideBar
+    BlankedPartial, ccpNmrV3CoreSetter, notificationEchoBlocking, undoBlockWithoutSideBar, \
+    waypointBlocking
 from ccpn.util.decorators import logCommand
 from ccpn.util.Common import makeIterableList
 from ccpn.core.lib import Undo
@@ -2526,32 +2527,55 @@ class GuiSpectrumDisplay(CcpnModule):
 
         # get the spectrumViews from the first strip
         sv = [(spectrum, specView) for specView in self.strips[0].spectrumViews if specView.spectrum == spectrum]
-        if len(sv) == 1:
+        if len(sv) != 1:
+            getLogger().warning('%.removeSpectrum: No spectrum found' % self.__class__.__name__)
+            return
 
-            _, specView = sv[0]
+        _spectrum, specView = sv[0]
 
-            # need undo block stuff here
-            # with undoBlockWithoutSideBar(self.application):
-            with undoStackBlocking() as _:  # Do not add to undo/redo stack
+        # for debugger
+        _undo = self.application._getUndo()
 
-                # explicitly change the ordering
-                _oldOrdering = self._getOrderedSpectrumViewsIndex()
-                _index = self.spectrumViews.index(specView)
-                _newOrdering = [od if od < _index else od - 1 for ii, od in enumerate(_oldOrdering) if od != _index]
+        # explicitly change the ordering
+        _index = self.spectrumViews.index(specView)
+        _oldOrdering = tuple(self._getOrderedSpectrumViewsIndex())
+        _newOrdering = tuple([od if od < _index else od - 1 for ii, od in enumerate(_oldOrdering)
+                              if od != _index])
+
+        # GWV thinks it should be like this
+        # need undo block stuff here
+        with waypointBlocking():
+            with undoStackBlocking() as addUndoItem:
+                # refresh on undo
+                _data = {Notifier.OBJECT:specView,
+                         Notifier.TRIGGER:Notifier.CREATE
+                         }
+                addUndoItem(undo=partial(self._spectrumViewChanged, _data)
+                            )
+                # addUndoItem(undo=partial(self._refreshSpectrumView, _spectrum)
+                #             )
 
                 # push/pop ordering
-                with undoStackBlocking(self.application) as addUndoItem:
-                    addUndoItem(undo=partial(self.setToolbarButtons, tuple(_oldOrdering)))
+                # addUndoItem(undo=self.project.unblankNotification,
+                #             redo=self.project.blankNotification)
+                addUndoItem(undo=partial(self.setToolbarButtons, _oldOrdering)
+                            )
 
-                # delete the spectrumView - for multiple strips will delete all spectrumViews attached to spectrum
-                specView._delete()
+            # delete the spectrumView -
+            # for multiple strips will delete all spectrumViews attached to spectrum
+            specView._delete()
 
-                # push/pop ordering
-                with undoStackBlocking(self.application) as addUndoItem:
-                    self.setToolbarButtons(tuple(_newOrdering))
-                    addUndoItem(redo=partial(self.setToolbarButtons, tuple(_newOrdering)))
-        else:
-            getLogger().warning('No spectrumView found')
+            with undoStackBlocking() as addUndoItem:
+                # push ordering
+                self.setToolbarButtons(_newOrdering)
+                addUndoItem(redo=partial(self.setToolbarButtons, _newOrdering)
+                            )
+                # addUndoItem(undo=self.project.blankNotification,
+                #             redo=self.project.unblankNotification
+                #             )
+        #end with
+
+        return
 
     def _setVisibleSpectrum(self, spectrum, visible: bool):
         """ Set visible the spectrumView of the spectrum in the spectrumDisplay.

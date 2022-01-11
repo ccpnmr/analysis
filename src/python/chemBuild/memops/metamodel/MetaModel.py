@@ -2688,7 +2688,7 @@ class MetaPackage(MetaModelElement):
         
       # check shortName
       if self.shortName is not None:
-        raise MemopsError("%s: branch package has shortName" (self,))
+        raise MemopsError("%s: branch package has shortName" % (self,))
       
       # name style check:
       if (self.name[0] not in ImpConstants.lowercase and 

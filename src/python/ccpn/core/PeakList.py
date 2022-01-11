@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:15 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-11 18:58:31 +0000 (Tue, January 11, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,9 +28,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import numpy as np
 from typing import Sequence, List, Optional
 
-from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
+from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices, _axisCodeMapIndices
+
 from ccpn.util.Common import percentage
-from scipy.ndimage import maximum_filter, minimum_filter
+
 from ccpn.util import Common as commonUtil
 from ccpn.core.Spectrum import Spectrum
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
@@ -259,10 +260,9 @@ class PeakList(PMIListABC):
         If targetPeakList is given, peaks will be added to it, otherwise a new PeakList is created (default behaviour).
         return the target PeakList with the newly copied peaks.
 
-
         :param targetSpectrum:  object: Core.Spectrum or Str: Pid
         :param targetPeakList:  object: Core.PeakList or Str: Pid
-        :param kwargs:          any extra Peaklist attributes for newly created peakLists.
+        :param kwargs:          any extra PeakList attributes for newly created peakLists.
                                 Not used if it is given a targetPeakList
         """
 
@@ -274,13 +274,8 @@ class PeakList(PMIListABC):
             raise TypeError('targetSpectrum not defined')
         if not isinstance(targetSpectrum, Spectrum):
             raise TypeError('targetSpectrum is not of type Spectrum')
-        if targetPeakList:
-            targetPeakList = self.project.getByPid(targetPeakList) if isinstance(targetPeakList,str) else targetPeakList
-            if not isinstance(targetPeakList, PeakList):
-                raise TypeError('targetPeakList is not of type PeakList')
-            if not targetPeakList in targetSpectrum.peakLists:
-                raise TypeError('targetPeakList is not a PeakList of: %s'%targetSpectrum.pid)
 
+        # checking targetSpectrum for compatibility
         # TODO enable copying across different dimensionalities
         dimensionCount = self.spectrum.dimensionCount
         if dimensionCount != targetSpectrum.dimensionCount:
@@ -288,17 +283,31 @@ class PeakList(PMIListABC):
                              % (dimensionCount, self.longPid,
                                 targetSpectrum.dimensionCount, targetSpectrum.longPid))
 
-        params = dict(((tag, getattr(self, tag)) for tag in singleValueTags))
-        params['comment'] = "Copy of %s\n" % self.longPid + (params['comment'] or '')
-        for key, val in kwargs.items():
-            if key in singleValueTags:
-                params[key] = val
-            else:
-                raise ValueError("PeakList has no attribute %s" % key)
+        dimensionMapping = _axisCodeMapIndices(self.spectrum.axisCodes,targetSpectrum.axisCodes)
+        if None in dimensionMapping:
+            raise ValueError("%s axisCodes %r not compatible with targetSpectrum axisCodes %r"
+                             % (self, self.spectrum.axisCodes, targetSpectrum.axisCodes))
+
+        if targetPeakList:
+            targetPeakList = self.project.getByPid(targetPeakList) if isinstance(targetPeakList,str) else targetPeakList
+            if not isinstance(targetPeakList, PeakList):
+                raise TypeError('targetPeakList is not of type PeakList')
+            if not targetPeakList in targetSpectrum.peakLists:
+                raise TypeError('targetPeakList is not a PeakList of: %s'%targetSpectrum.pid)
+
+        else:
+            # make a dictionary with parameters of self to be copied to new targetPeakList (if created)
+            params = dict(((tag, getattr(self, tag)) for tag in singleValueTags))
+            params['comment'] = "Copy of %s\n" % self.longPid + (params['comment'] or '')
+            for key, val in kwargs.items():
+                if key in singleValueTags:
+                    params[key] = val
+                else:
+                    raise ValueError("PeakList has no attribute %s" % key)
 
         with undoBlockWithoutSideBar():
             if not targetPeakList:
-                targetPeakList = targetSpectrum.newPeakList(**params)
+               targetPeakList = targetSpectrum.newPeakList(**params)
 
             for peak in self.peaks:
                 peak.copyTo(targetPeakList)
@@ -389,7 +398,8 @@ class PeakList(PMIListABC):
             if _peakPicker:
                 _peakPicker.dropFactor = minDropFactor
                 _peakPicker.setLineWidths = True
-                peaks = _spectrum.pickPeaks(self, _spectrum.positiveContourBase if doPos else None,
+                peaks = _spectrum.pickPeaks(self,
+                                            _spectrum.positiveContourBase if doPos else None,
                                             _spectrum.negativeContourBase if doNeg else None,
                                             **axisCodeDict)
                 return peaks

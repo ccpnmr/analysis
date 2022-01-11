@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-11 12:34:42 +0000 (Tue, January 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-11 18:58:31 +0000 (Tue, January 11, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1205,15 +1205,16 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         spectrum = peakList.spectrum
 
-        if spectrum.dimensionCount != self.strips[0].spectra[0].dimensionCount or \
-                not True:  # peakList.spectrum.axisCodes match
-            showWarning('Dropped PeakList "%s"' % peakList.pid, 'Cannot copy: Axes do not match')
+        if spectrum.dimensionCount != self.dimensionCount:
+            showWarning('Dropped PeakList "%s"' % peakList.pid,
+                        'Cannot copy: dimensionCount\'s PeakList and SpectrumDisplay do not match')
             return
         else:
             from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
 
-            popup = CopyPeakListPopup(parent=self.mainWindow, mainWindow=self.mainWindow, spectrumDisplay=self)
-            popup.sourcePeakListPullDown.select(peakList.pid)
+            popup = CopyPeakListPopup(parent=self.mainWindow, mainWindow=self.mainWindow,
+                                      spectrumDisplay=self, selectItem=peakList.pid)
+            # popup.sourcePeakListPullDown.select(peakList.pid)
             popup.exec_()
         # showInfo(title='Copy PeakList "%s"' % peakList.pid, message='Copy to selected spectra')
 

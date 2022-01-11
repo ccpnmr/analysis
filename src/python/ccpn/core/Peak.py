@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 13:58:20 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-11 18:58:31 +0000 (Tue, January 11, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -924,7 +924,7 @@ class Peak(AbstractWrapperObject):
                            'annotation', 'comment', ]
         dimensionValueTags = ['ppmPositions', 'positionError', 'boxWidths', 'lineWidths', ]
 
-        peakList = self._parent
+        peakList = self.peakList
         dimensionCount = peakList.spectrum.dimensionCount
 
         if dimensionCount != targetPeakList.spectrum.dimensionCount:
@@ -932,10 +932,9 @@ class Peak(AbstractWrapperObject):
                              % (dimensionCount, self.longPid,
                                 targetPeakList.spectrum.dimensionCount, targetPeakList.longPid))
 
-        dimensionMapping = _axisCodeMapIndices(peakList.spectrum.axisCodes,
-                                               targetPeakList.spectrum.axisCodes)
-        if dimensionMapping is None:
-            raise ValueError("%s axisCodes %s not compatible with target axisCodes %s"
+        dimensionMapping = _axisCodeMapIndices(peakList.spectrum.axisCodes, targetPeakList.spectrum.axisCodes)
+        if None in dimensionMapping:
+            raise ValueError("%s axisCodes %s not compatible with targetSpectrum axisCodes %s"
                              % (self, peakList.spectrum.axisCodes, targetPeakList.spectrum.axisCodes))
 
         with undoBlockWithoutSideBar():

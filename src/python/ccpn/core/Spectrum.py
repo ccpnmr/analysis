@@ -50,8 +50,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-04 11:38:40 +0000 (Tue, January 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-01-11 12:56:51 +0000 (Tue, January 11, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1822,7 +1822,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return newValues
 
     def setByAxisCodes(self, parameterName:str, values:Sequence, axisCodes:Sequence[str] = None,
-                       exactMatch:bool = False, matchLength:bool = True) -> list:
+                       exactMatch:bool = False) -> list:
         """Set attributeName to values in order defined by axisCodes (default order if None)
         Perform a mapping if exactMatch=False (eg. 'H' to 'Hn')
 
@@ -2129,6 +2129,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         :param axisCode: axiscode of slice to extract
         :param position: position vector (1-based)
         :param path: optional path; if None, constructed from current filePath
+        :param dataFormat: string identifier for dataFormat of resulting file;
+                           dataFormat need to have writing abilty (currently only for Hdf5)
 
         :return: Spectrum instance
         """
@@ -2148,7 +2150,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         except (ValueError, RuntimeError) as es:
             text = 'Spectrum.extractSliceToFile: %s' % es
-            raise ValueError(es)
+            raise ValueError(text)
 
         return newSpectrum
 
@@ -3427,7 +3429,7 @@ def _extractRegionToFile(spectrum, dimensions, position, dataStore, name=None) -
     dataSource.setDimensionCount(len(dimensions))
 
     # copy the data
-    indexMap = dict((k - 1, v - 1) for k, v in dimensionsMap.items())  # source -> destination
+    # indexMap = dict((k - 1, v - 1) for k, v in dimensionsMap.items())  # source -> destination
     inverseIndexMap = dict((v - 1, k - 1) for k, v, in dimensionsMap.items())  # destination -> source
 
     readSliceDim = dimensions[0]  # first retained dimension from the original data
@@ -3438,12 +3440,12 @@ def _extractRegionToFile(spectrum, dimensions, position, dataStore, name=None) -
     for dim in dimensions[1:]:
         sliceTuples[dim - 1] = (1, spectrum.pointCounts[dim - 1])
 
-    with spectrum._dataSource.openExistingFile() as input:
+    with spectrum._dataSource.openExistingFile() as inputFile:
         with dataSource.openNewFile(path=dataStore.aPath()) as output:
             # loop over all requested slices
-            for position, aliased in input._selectedPointsIterator(sliceTuples=sliceTuples,
+            for position, aliased in inputFile._selectedPointsIterator(sliceTuples=sliceTuples,
                                                                    excludeDimensions=[readSliceDim]):
-                data = input.getSliceData(position, readSliceDim)
+                data = inputFile.getSliceData(position, readSliceDim)
 
                 # map the input position to the output position and write the data
                 outPosition = [position[inverseIndexMap[p]] for p in output.dimensionIndices]

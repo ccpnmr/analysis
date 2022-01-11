@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-09 15:51:26 +0000 (Sun, January 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-11 11:14:48 +0000 (Tue, January 11, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2556,8 +2556,6 @@ class GuiSpectrumDisplay(CcpnModule):
                 #             )
 
                 # push/pop ordering
-                # addUndoItem(undo=self.project.unblankNotification,
-                #             redo=self.project.blankNotification)
                 addUndoItem(undo=partial(self.setToolbarButtons, _oldOrdering)
                             )
 
@@ -2570,10 +2568,8 @@ class GuiSpectrumDisplay(CcpnModule):
                 self.setToolbarButtons(_newOrdering)
                 addUndoItem(redo=partial(self.setToolbarButtons, _newOrdering)
                             )
-                # addUndoItem(undo=self.project.blankNotification,
-                #             redo=self.project.unblankNotification
-                #             )
-        #end with
+
+        #end waypoint
 
         return
 

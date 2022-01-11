@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-04 17:18:54 +0000 (Tue, January 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-11 18:50:22 +0000 (Tue, January 11, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -840,8 +840,8 @@ class GuiStrip(Frame):
     def _addItemsToNavigateToPeakMenu(self, peaks):
         """Adds item to navigate to peak position from context menu.
         """
-        if peaks and self.navigateToPeakMenuSelected:
-            self._addItemsToNavigateMenu(peaks[0].position, peaks[0].axisCodes, 'Peak', self.navigateToPeakMenuSelected, includeAxisCodes=True)
+        if peaks and self._navigateToPeakMenuSelected:
+            self._addItemsToNavigateMenu(peaks[0].position, peaks[0].axisCodes, 'Peak', self._navigateToPeakMenuSelected, includeAxisCodes=True)
 
     def _addItemsToNavigateToCursorPosMenu(self):
         """Copied from old viewbox. This function apparently take the current cursorPosition

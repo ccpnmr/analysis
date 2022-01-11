@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:16 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-11 12:34:41 +0000 (Tue, January 11, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -847,8 +847,9 @@ def deleteWrapperWithoutSideBar():
                 # must be done like this as the undo functions are not known
                 with undoStackBlocking(application=application) as addUndoItem:
                     # incorporate the change notifier to simulate the decorator
-                    addUndoItem(redo=partial(self._finaliseAction, 'delete'),
-                                undo=partial(self._finaliseAction, 'create'))
+                    addUndoItem(undo=partial(self._finaliseAction, 'create'),
+                                redo=partial(self._finaliseAction, 'delete')
+                                )
                     addUndoItem(undo=application.project.unblankNotification,
                                 redo=application.project.blankNotification)
 

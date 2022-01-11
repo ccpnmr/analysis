@@ -45,7 +45,7 @@ By Mouse button:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 13:15:21 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-11 12:34:42 +0000 (Tue, January 11, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1439,30 +1439,30 @@ class CcpnGLWidget(QOpenGLWidget):
     def initialiseAxes(self, strip=None):
         """setup the correct axis range and padding
         """
-        self.orderedAxes = strip.axes
+        self.orderedAxes = strip.orderedAxes
         self._axisCodes = strip.axisCodes
         self._axisOrder = strip.axisOrder
 
-        unitIndices = self.spectrumDisplay._getUnitsIndices()
-
         axis = self.orderedAxes[0]
+        region = axis.region
         if self.INVERTXAXIS:
-            self.axisL = max(axis.region[0], axis.region[1])
-            self.axisR = min(axis.region[0], axis.region[1])
+            self.axisL = max(region[0], region[1])
+            self.axisR = min(region[0], region[1])
         else:
-            self.axisL = min(axis.region[0], axis.region[1])
-            self.axisR = max(axis.region[0], axis.region[1])
-        self._xUnits = unitIndices[0]
+            self.axisL = min(region[0], region[1])
+            self.axisR = max(region[0], region[1])
+        self._xUnits = axis._unitIndex
 
         axis = self.orderedAxes[1]
+        region = axis.region
         if self.INVERTYAXIS:
-            self.axisB = max(axis.region[0], axis.region[1])
-            self.axisT = min(axis.region[0], axis.region[1])
+            self.axisB = max(region[0], region[1])
+            self.axisT = min(region[0], region[1])
         else:
-            self.axisB = min(axis.region[0], axis.region[1])
-            self.axisT = max(axis.region[0], axis.region[1])
+            self.axisB = min(region[0], region[1])
+            self.axisT = max(region[0], region[1])
         if not self.spectrumDisplay.is1D:
-            self._yUnits = unitIndices[1]
+            self._yUnits = axis._unitIndex
 
         self.update()
 

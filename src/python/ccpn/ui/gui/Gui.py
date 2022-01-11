@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:17 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-11 12:34:42 +0000 (Tue, January 11, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -249,9 +249,9 @@ class MainWindow(_coreClassWindow, _GuiMainWindow):
         logger = Logging.getLogger()
 
         logger.debug('MainWindow>> project: %s' % project)
-        logger.debug('MainWindow>> project._appBase: %s' % project._appBase)
+        logger.debug('MainWindow>> project.application: %s' % project.application)
 
-        application = project._appBase
+        application = project.application
         _GuiMainWindow.__init__(self, application=application)
 
         # hide the window here and make visible later
@@ -259,14 +259,14 @@ class MainWindow(_coreClassWindow, _GuiMainWindow):
 
         # patches for now:
         project._mainWindow = self
-        logger.debug('MainWindow>> project._mainWindow: %s' % project._mainWindow)
+        # logger.debug('MainWindow>> project._mainWindow: %s' % project._mainWindow)
 
         application._mainWindow = self
         application.ui.mainWindow = self
-        logger.debug('MainWindow>> application: %s' % application)
-        logger.debug('MainWindow>> application.project: %s' % application.project)
-        logger.debug('MainWindow>> application._mainWindow: %s' % application._mainWindow)
-        logger.debug('MainWindow>> application.ui.mainWindow: %s' % application.ui.mainWindow)
+        # logger.debug('MainWindow>> application: %s' % application)
+        # logger.debug('MainWindow>> application.project: %s' % application.project)
+        # logger.debug('MainWindow>> application._mainWindow: %s' % application._mainWindow)
+        # logger.debug('MainWindow>> application.ui.mainWindow: %s' % application.ui.mainWindow)
 
         setWidgetFont(self, )
 
@@ -436,7 +436,7 @@ class StripNd(_coreClassStrip, _GuiStripNd):
 
         _coreClassStrip.__init__(self, project, wrappedData)
 
-        Logging.getLogger().debug('StripNd>> spectrumDisplay: %s' % self.spectrumDisplay)
+        Logging.getLogger().debug('StripNd>> spectrumDisplay=%s' % self.spectrumDisplay)
         _GuiStripNd.__init__(self, self.spectrumDisplay)
 
         # cannot add the Frame until fully done
@@ -527,7 +527,7 @@ class _SpectrumViewNd(_coreClassSpectrumView, _GuiSpectrumViewNd):
         self._appBase = project._appBase
         self.application = project._appBase
 
-        Logging.getLogger().debug('SpectrumViewNd>> %s %s' % (self, self.strip))
+        Logging.getLogger().debug('SpectrumViewNd>> self=%s strip=%s' % (self, self.strip))
         _GuiSpectrumViewNd.__init__(self)
 
 

@@ -8,7 +8,7 @@ from ccpn.core.lib.Undo import _deleteAllApiObjects, restoreOriginalLinks, no_op
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:21:21 +0100 (Mon, September 13, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-01-11 12:34:42 +0000 (Tue, January 11, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -30,9 +30,11 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import sys
 from enum import Enum
 from functools import partial, update_wrapper
 from collections import deque
+
 from ccpn.util.Logging import getLogger
 from ccpn.util.OrderedSet import OrderedSet
 
@@ -484,7 +486,7 @@ class Undo(deque):
                 if self.application and self.application._ccpnLogging:
                     self._logObjects()
                 if self._debug:
-                    print("UNDO DEBUG: error in undo. Last undo function was:", undoCall)
+                    sys.stderr.write("UNDO DEBUG: error in undo. Last undo function was: %s\n" % undoCall)
                     raise
                 self.clear()
 
@@ -553,7 +555,7 @@ class Undo(deque):
                 if self.application and self.application._ccpnLogging:
                     self._logObjects()
                 if self._debug:
-                    print("REDO DEBUG: error in redo. Last redo call was:", redoCall)
+                    sys.stderr.write("REDO DEBUG: error in redo. Last redo call was: %s\n" % redoCall)
                     raise
                 self.clear()
             finally:

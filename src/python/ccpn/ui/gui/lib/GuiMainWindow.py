@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-06 11:21:33 +0000 (Thu, January 06, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-01-11 12:34:42 +0000 (Tue, January 11, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1095,7 +1095,9 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         if trigger == Notifier.CHANGE:
             getLogger().debug(f'>>> SPECTRUMDISPLAY CHANGED  -  {spectrumDisplay}')
-            spectrumDisplay._setPlaneAxisWidgets()
+            for strip in self.strips:
+                strip._updatePlaneAxes()
+            # spectrumDisplay._setPlaneAxisWidgets()
 
     def printToFile(self):
         self.application.showPrintSpectrumDisplayPopup()

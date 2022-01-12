@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-11 18:58:31 +0000 (Tue, January 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-12 09:54:06 +0000 (Wed, January 12, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2414,17 +2414,10 @@ class GuiSpectrumDisplay(CcpnModule):
 
         _spectrum, specView = sv[0]
 
-        # for debugger
-        _undo = self.application._getUndo()
+        # # for debugger
+        # _undo = self.application._getUndo()
 
-        # # explicitly change the ordering
-        # _index = self.spectrumViews.index(specView)
-        # _oldOrdering = tuple(self._getOrderedSpectrumViewsIndex())
-        # _newOrdering = tuple([od if od < _index else od - 1 for ii, od in enumerate(_oldOrdering)
-        #                       if od != _index])
-
-        # GWV thinks it should be like this
-        # need undo block stuff here
+        # need undo waypoint here
         with waypointBlocking():
             with undoStackBlocking() as addUndoItem:
                 # refresh on undo

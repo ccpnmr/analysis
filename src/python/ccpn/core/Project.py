@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-10 15:43:10 +0000 (Fri, December 10, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-12 10:41:58 +0000 (Wed, January 12, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1485,10 +1485,10 @@ class Project(AbstractWrapperObject):
             spectrum = self._data2Obj[apiDataSource]
             spectrum.assignmentTolerances = spectrum.defaultAssignmentTolerances
 
-            from ccpn.core._implementation.patches.patch_3_0_4 import scaleBrukerSpectrum, NC_PROC
+            # from ccpn.core._implementation.patches.patch_3_0_4 import scaleBrukerSpectrum, NC_PROC
 
-            if subType == 'Bruker' and not spectrum._hasInternalParameter(NC_PROC):
-                scaleBrukerSpectrum(spectrum)
+            # if subType == 'Bruker' and not spectrum._hasInternalParameter(NC_PROC):
+            #     scaleBrukerSpectrum(spectrum)
 
             # estimate new base contour levels
             # if self.application.preferences.general.automaticNoiseContoursOnLoadSpectrum:

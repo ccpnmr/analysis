@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:17 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-01-13 16:11:39 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -204,6 +204,16 @@ class Gui(Ui):
                 console._write(command + '\n')
 
     def getByGid(self, gid):
+
+        from ccpn.ui.gui.modules.CcpnModule import PidShortClassName, PidLongClassName
+        from ccpn.core.lib.Pid import Pid
+
+        pid = Pid(gid)
+        if pid is not None:
+            if pid.type in [PidLongClassName, PidShortClassName]:
+                # get the GuiModule object By its Gid
+                return self.application.mainWindow.moduleArea.modules.get(pid.id)
+
         return self.application.getByGid(gid)
 
     def _execUpdates(self):

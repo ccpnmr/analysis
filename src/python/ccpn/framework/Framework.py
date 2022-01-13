@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-06 11:21:33 +0000 (Thu, January 06, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-01-13 16:11:39 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -968,15 +968,6 @@ class Framework(NotifierBase):
     def getByPid(self, pid):
         """Convenience"""
         return self.project.getByPid(pid)
-        # obj = self.project.getByPid(pid)
-        # if obj:
-        #     return obj
-        # else:
-        #     if isinstance(self.ui, Gui):
-        #         if PREFIXSEP in pid:
-        #             pid = Pid(pid)
-        #             if pid:
-        #                 return self.ui.mainWindow.moduleArea.modules.get(pid.id)
 
     def getByGid(self, gid):
         """Convenience"""

@@ -5,7 +5,7 @@ modified by Geerten 1-12/12/2016
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-17 13:13:36 +0000 (Fri, December 17, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-01-13 16:11:39 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -367,6 +367,10 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         Identifier for the object, unique within the project - added to give label to ccpnModules
         """
         return createPid(self.shortClassName, self.id)
+
+    @property
+    def gid(self) -> Pid:
+        return self.pid
 
     @property
     def longPid(self) -> Pid:
@@ -1271,6 +1275,7 @@ class CcpnModuleLabel(DockLabel):
     def _createContextMenu(self):
 
         contextMenu = Menu('', self, isFloatWidget=True)
+        contextMenu.setToolTipsVisible(True)
         renameAction = contextMenu.addAction('Rename', self._showNameEditor)
         contextMenu.addSeparator()
         contextMenu.addAction('Close', self.module._closeModule)
@@ -1278,7 +1283,9 @@ class CcpnModuleLabel(DockLabel):
             contextMenu.addAction('Close Others', partial(self.module.area._closeOthers, self.module))
             contextMenu.addAction('Close All', self.module.area._closeAll)
         contextMenu.addSeparator()
-        contextMenu.addAction('Copy Pid to clipboard', self._copyPidToClipboard)
+
+        gidAction = contextMenu.addAction('Copy Gid to clipboard', self._copyPidToClipboard)
+        gidAction.setToolTip('Usage, On Python Console type: ui.getByGid(Pasted_Gid) to get this module as an object')
 
         renameAction.setEnabled(self.module._allowRename)
         # numDocks = len(self.module.getDocksInParentArea())

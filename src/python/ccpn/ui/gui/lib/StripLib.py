@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-04 11:38:41 +0000 (Tue, January 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-13 17:30:50 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -71,7 +71,7 @@ def navigateToPositionInStrip(strip,
     # if _undo is not None:
     #   _undo.increaseBlocking()
 
-    indices = getAxisCodeMatchIndices(axisCodes, strip.axisCodes)
+    indices = getAxisCodeMatchIndices(axisCodes=axisCodes, refAxisCodes=strip.axisCodes)
 
     for ii, axisCode in enumerate(axisCodes):
         if indices[ii] is None or ii >= len(positions):
@@ -98,17 +98,17 @@ def navigateToPositionInStrip(strip,
                             # if the list item is a str with value, default, set width to 5ppm for heteronuclei and 0.5ppm for 1H
                             if (name2IsotopeCode(axisCode) == '13C' or
                                     name2IsotopeCode(axisCode) == '15N'):
-                                _setStripAxisWidth(strip, axisIndex=stripAxisIndex, width=5, update=True)
+                                _setStripAxisWidth(strip, axisIndex=stripAxisIndex, width=5.0, update=True)
                             else:
                                 _setStripAxisWidth(strip, axisIndex=stripAxisIndex, width=0.5, update=True)
-            except:
+            except Exception as es:
+                getLogger().debug('navigateToPositionInStrip: caught error %s' % es)
                 continue
+
+    strip._updatePlaneAxes()
 
     # redraw the contours
     strip._updateVisibility()
-    if len(strip.orderedAxes) > 2:
-        strip.axisRegionChanged(strip.orderedAxes[2])
-
     # build here so it doesn't conflict with OpenGl update
     strip._CcpnGLWidget.buildAllContours()
     # strip._CcpnGLWidget.update()
@@ -258,8 +258,8 @@ def navigateToNmrAtomsInStrip(strip: GuiStrip, nmrAtoms: typing.List[NmrAtom], w
 
     # redraw the contours
     strip._updateVisibility()
-    if len(strip.orderedAxes) > 2:
-        strip.axisRegionChanged(strip.orderedAxes[2])
+    # if len(strip.orderedAxes) > 2:
+    #     strip.axisRegionChanged(strip.orderedAxes[2])
 
     for specNum, thisSpecView in enumerate(strip.spectrumDisplay.spectrumViews):
         thisSpecView.buildContours = True

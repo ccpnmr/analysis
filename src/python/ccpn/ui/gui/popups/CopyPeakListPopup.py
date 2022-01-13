@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-20 18:47:15 +0000 (Mon, December 20, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-13 17:30:50 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -35,7 +35,8 @@ from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 
 
 class CopyPeakListPopup(CcpnDialogMainWidget):
-    def __init__(self, parent=None, mainWindow=None, title='Copy PeakList', spectrumDisplay=None, **kwds):
+    def __init__(self, parent=None, mainWindow=None, title='Copy PeakList', spectrumDisplay=None,
+                       selectItem=None, **kwds):
         super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
 
         if mainWindow:
@@ -48,6 +49,11 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
             self.project = None
 
         self.spectrumDisplay = spectrumDisplay
+        self.sourcePeakList = None
+        self.targetSpectrum = None
+        self.defaultPeakList = self._getDefaultPeakList() if selectItem is None else \
+                               self.application.get(selectItem)
+
         self.setWidgets()
         self._populate()
 
@@ -59,7 +65,8 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
 
     def setWidgets(self):
         self.sourcePeakListLabel = Label(self.mainWidget, 'Source PeakList', grid=(0, 0))
-        self.sourcePeakListPullDown = PulldownList(self.mainWidget, grid=(0, 1))
+        self.sourcePeakListPullDown = PulldownList(self.mainWidget, grid=(0, 1),
+                                                   callback=self._populateTargetSpectraPullDown)
         self.targetSpectraLabel = Label(self.mainWidget, 'Target Spectrum', grid=(1, 0))
         self.targetSpectraPullDown = PulldownList(self.mainWidget, grid=(1, 1))
 
@@ -77,66 +84,92 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
     def _copyPeakListToSpectrum(self):
         if self.sourcePeakList is not None:
             try:
-                # self.project.blankNotification()
                 if self.targetSpectrum is not None:
                     self.sourcePeakList.copyTo(self.targetSpectrum)
 
             except Exception as es:
                 getLogger().warning('Error copying peakList: %s' % str(es))
                 showWarning(str(self.windowTitle()), str(es))
-                if self.application._isInDebugMode:
-                    raise es
-            # finally:
-            #     self.project.unblankNotification()
 
     def _populateSourcePeakListPullDown(self):
         """Populate the pulldown with the list of spectra in the project
         """
-        sourcePullDownData = []
-        if len(self.project.peakLists) > 0:
-            for pl in self.project.peakLists:
-                sourcePullDownData.append(str(pl.pid))
-        self.sourcePeakListPullDown.setData(sourcePullDownData)
-        self._selectDefaultPeakList()
+        if len(self.project.peakLists) == 0:
+            raise RuntimeError('Project has no PeakList\'s')
 
-    def _populateTargetSpectraPullDown(self):
+        sourcePullDownData = [str(pl.pid) for pl in self.project.peakLists]
+        self.sourcePeakListPullDown.setData(sourcePullDownData)
+        if self.defaultPeakList is not None:
+           self.sourcePeakListPullDown.select(self.defaultPeakList.pid)
+           self.sourcePeakList = self.defaultPeakList
+        # self._selectDefaultPeakList()
+
+    def _populateTargetSpectraPullDown(self, *args):
         """Populate the pulldown with the list of spectra on the selected spectrumDisplay and select the
         first visible spectrum
         """
-        if self.spectrumDisplay and self.spectrumDisplay.strips:
-            orderedSpectra = self.spectrumDisplay.strips[0].getSpectra()
-            visibleSpectra = self.spectrumDisplay.strips[0].visibleSpectra
+        sourcePeakList = self.application.get(args[0]) if len(args)>0 else self.sourcePeakList
+        if sourcePeakList is None:
+            visibleSpectra = spectra = self.project.spectra
         else:
-            visibleSpectra = orderedSpectra = self.project.spectra
+            _dimCount = sourcePeakList.spectrum.dimensionCount
+            visibleSpectra = spectra = [spec for spec in self.project.spectra if spec.dimensionCount == _dimCount]
 
-        if orderedSpectra:
-            targetPullDownData = [str(sp.pid) for sp in orderedSpectra]
+            if self.spectrumDisplay is not None:
+                _tmp = self.spectrumDisplay.strips[0].getVisibleSpectra()
+                visibleSpectra = [spec for spec in _tmp if spec.dimensionCount == _dimCount]
+
+        #
+        # if self.spectrumDisplay and self.spectrumDisplay.strips:
+        #     orderedSpectra = self.spectrumDisplay.strips[0].getSpectra()
+        #     visibleSpectra = self.spectrumDisplay.strips[0].getVisibleSpectra()
+
+        if spectra:
+            targetPullDownData = [str(sp.pid) for sp in spectra]
             self.targetSpectraPullDown.setData(targetPullDownData)
 
             if visibleSpectra:
                 self.targetSpectraPullDown.select(visibleSpectra[0].pid)
 
-    def _selectDefaultPeakList(self):
+    def _getDefaultPeakList(self):
+        """:return the default PeakList based on current settings, or None
+        """
+        result = None
+
         if self.application.current.peak is not None:
-            defaultPeakList = self.application.current.peak.peakList
-            self.sourcePeakListPullDown.select(defaultPeakList.pid)
-            # print('Selected defaultPeakList: "current.peak.peakList" ',defaultPeakList) #Testing statement to be deleted
-            return
-        if self.application.current.strip is not None and not self.application.current.strip.isDeleted:
-            if len(self.application.current.strip.spectra[0].peakLists)>0:
-                defaultPeakList = self.application.current.strip.spectra[0].peakLists[-1]
-            else:
-                defaultPeakList = self.application.current.strip.spectra[0].newPeakList()
-            self.sourcePeakListPullDown.select(defaultPeakList.pid)
-            # print('Selected defaultPeakList: "current.strip.spectra[0].peakLists[-1]" ', defaultPeakList)  #Testing statement to be deleted
-            return
-        else:
-            # why this else!
-            if len(self.project.peakLists)>0:
-                defaultPeakList = self.project.peakLists[0]
-                self.sourcePeakListPullDown.select(defaultPeakList.pid)
-            # print('Selected defaultPeakList: "self.project.spectra[0].peakLists[-1]" ', defaultPeakList) #Testing statement to be deleted
-            return
+            result = self.application.current.peak.peakList
+
+        elif self.application.current.strip is not None and not self.application.current.strip.isDeleted:
+            _spec = self.application.current.strip.spectra[0]
+            result = _spec.peakLists[-1]
+
+        elif len(self.project.peakLists)>0:
+            result = self.project.peakLists[0]
+
+        return result
+
+    #GWV 11/12/2022: implementation change
+    # def _selectDefaultPeakList(self):
+    #     if self.application.current.peak is not None:
+    #         defaultPeakList = self.application.current.peak.peakList
+    #         self.sourcePeakListPullDown.select(defaultPeakList.pid)
+    #         # print('Selected defaultPeakList: "current.peak.peakList" ',defaultPeakList) #Testing statement to be deleted
+    #         return
+    #     if self.application.current.strip is not None and not self.application.current.strip.isDeleted:
+    #         if len(self.application.current.strip.spectra[0].peakLists)>0:
+    #             defaultPeakList = self.application.current.strip.spectra[0].peakLists[-1]
+    #         else:
+    #             defaultPeakList = self.application.current.strip.spectra[0].newPeakList()
+    #         self.sourcePeakListPullDown.select(defaultPeakList.pid)
+    #         # print('Selected defaultPeakList: "current.strip.spectra[0].peakLists[-1]" ', defaultPeakList)  #Testing statement to be deleted
+    #         return
+    #     else:
+    #         # why this else!
+    #         if len(self.project.peakLists)>0:
+    #             defaultPeakList = self.project.peakLists[0]
+    #             self.sourcePeakListPullDown.select(defaultPeakList.pid)
+    #         # print('Selected defaultPeakList: "self.project.spectra[0].peakLists[-1]" ', defaultPeakList) #Testing statement to be deleted
+    #         return
 
 
 if __name__ == '__main__':

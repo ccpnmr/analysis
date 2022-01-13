@@ -4,7 +4,7 @@ GUI Axis class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:02 +0100 (Tue, July 20, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-13 17:30:49 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -33,11 +33,11 @@ from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.ui._implementation.Strip import Strip
 from ccpn.core.lib import Pid
+
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripAxis as ApiStripAxis
 
-
-# from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
+from ccpn.util.Constants import AXISUNITS, AXISUNIT_NUMBER
 
 
 class Axis(AbstractWrapperObject):
@@ -61,7 +61,30 @@ class Axis(AbstractWrapperObject):
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiStripAxis._metaclass.qualifiedName()
 
-    # CCPN properties
+   #-----------------------------------------------------------------------------------------
+
+    def __init__(self, project, wrappedData):
+        super().__init__(project, wrappedData)
+
+        # additional attributes set by GuiStrip._setAxisPositionAndWidth method
+        self._minLimitByUnit = None
+        self._maxLimitByUnit = None
+        self._incrementByUnit = None
+        self._positionByUnit = None
+        self._widthByUnit = None
+        self._planeCount = None
+
+    # @classmethod
+    # def _restoreObject(cls, project, apiObj):
+    #     """Subclassed to allow for initialisations on restore
+    #     """
+    #     result = super()._restoreObject(project, apiObj)
+    #     return result
+
+    #-----------------------------------------------------------------------------------------
+    # Attributes and methods related to the data structure
+    #-----------------------------------------------------------------------------------------
+
     @property
     def _apiStripAxis(self) -> ApiStripAxis:
         """ CCPN Axis matching Axis"""
@@ -82,8 +105,19 @@ class Axis(AbstractWrapperObject):
     strip = _parent
 
     @property
+    def _index(self):
+        """Index of self in the parent strip.axes; i.e. defined by display order
+        CCPNINTERNAL: used in GuiStrip
+        """
+        return list(self.strip.orderedAxes).index(self)
+
+    #=========================================================================================
+    # properties
+    #=========================================================================================
+
+    @property
     def position(self) -> float:
-        """Centre point position for displayed region, in current unit."""
+        """Centre point position for displayed region (in ppm)."""
         return self._wrappedData.axis.position
 
     @position.setter
@@ -92,7 +126,7 @@ class Axis(AbstractWrapperObject):
 
     @property
     def width(self) -> float:
-        """Width for displayed region, in current unit."""
+        """Width for displayed region (in ppm)."""
         return self._wrappedData.axis.width
 
     @width.setter
@@ -118,7 +152,20 @@ class Axis(AbstractWrapperObject):
 
     @unit.setter
     def unit(self, value: str):
+        options = tuple(list(AXISUNITS) + [AXISUNIT_NUMBER]) # To allow for 1D intensity axis unit
+        if value not in options:
+            raise ValueError('Axis.unit: invalid value "%s", should be one of %r' %
+                             (value, options)
+                             )
         self._wrappedData.axis.unit = value
+
+    @property
+    def _unitIndex(self) -> int:
+        """Return the index of the self.unit relative to the definitions
+        CCPNINTERNAL: used in Strp, GL and elsewhere
+        """
+        options = list(AXISUNITS) + [AXISUNIT_NUMBER]  # To allow for 1D intensity axis unit
+        return options.index(self.unit)
 
     @property
     def nmrAtoms(self) -> Tuple[NmrAtom]:
@@ -131,16 +178,8 @@ class Axis(AbstractWrapperObject):
         value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
         self._wrappedData.axis.resonances = tuple(x._wrappedData for x in value)
 
-    # @property
-    # def strip(self) -> Optional[Strip]:
-    #     """Strip that Axis belongs to"""
-    #     if self._wrappedData:
-    #         return self._project._data2Obj.get(self._wrappedData.strip)
-    #     else:
-    #         return None
-
     #=========================================================================================
-    # Implementation functions
+    # CCPN Implementation functions
     #=========================================================================================
 
     @classmethod

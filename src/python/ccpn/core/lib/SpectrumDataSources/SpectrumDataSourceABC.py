@@ -82,7 +82,7 @@ Example 3 (using Spectrum instance to make a hdf5 duplicate):
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -92,8 +92,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:17 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-01-13 17:30:48 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1567,92 +1567,155 @@ class SpectrumDataSourceABC(CcpNmrJson):
         for idx, sTuple in enumerate(sliceTuples):  # do not call this slice! as it override the python slice object
             if sTuple is None:
                 sTuple = (1, self.pointCounts[idx])
+            else:
+                # assure a to be a tuple
+                sTuple = tuple(sTuple)
             start, stop = sTuple
 
             if aliasingFlags[idx] == 0:
                 if start < 1:
-                    raise ValueError('invalid sliceTuple for dimension %s; start < 1 (%s)' % (idx + 1, start))
+                    raise ValueError('invalid sliceTuple (start,stop)=%r for dimension %s; start < 1 (%s)' %
+                                     (sTuple, idx + 1, start))
 
                 if stop > self.pointCounts[idx]:
-                    raise ValueError('invalid sliceTuple for dimension %s; stop > %s (%s)'
-                                     % (idx + 1, self.pointCounts[idx], stop))
+                    raise ValueError('invalid sliceTuple (start,stop)=%r for dimension %s; stop > %s (%s)' %
+                                     (sTuple, idx + 1, self.pointCounts[idx], stop))
 
             if start > stop:
-                raise ValueError('invalid sliceTuple for dimension %s; start (%s) > stop (%s)' % (idx + 1, start, stop))
+                raise ValueError('invalid sliceTuple (start,stop)=%r for dimension %s; start (%s) > stop (%s)' %
+                                 (sTuple, idx + 1, start, stop))
+
+    # def _getRegionData(self, sliceTuples, aliasingFlags=None):
+    #     """Return an numpy array containing the region data; see getRegionData description
+    #     implementation based upon getSliceData method
+    #     """
+    #     sizes = [(stop - start + 1) for start, stop in sliceTuples]
+    #     starts = [start - 1 for start, stop in sliceTuples]  # 0-based
+    #     stops = [stop for start, stop in sliceTuples]  # 0-based, non-inclusive
+    #     sliceDim = 1
+    #     sliceAxis = sliceDim - 1  # 0-based axis of sliceDim
+    #
+    #     # The result being assembled
+    #     regionData = numpy.zeros(sizes[::-1], dtype=self.dataType)  # ...,z,y,x numpy ordering
+    #
+    #     # temp buffer for unpacking aliased data along sliceDim
+    #     sliceData2 = numpy.zeros(sizes[sliceAxis], dtype=self.dataType)
+    #     nSlicePoints = self.pointCounts[sliceAxis]
+    #
+    #     for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=[sliceDim]):
+    #
+    #         unFoldedPosition = [a*np+p for p, a, np in zip(position, aliased, self.pointCounts)]
+    #         # aliased[sliceAxis] = (starts[sliceAxis] < 0 or stops[sliceAxis] >= nPoints)
+    #
+    #         # read the slice using the unfolded position
+    #         position[sliceAxis] = 1  # position is 1-based
+    #         with notificationEchoBlocking():
+    #             sliceData = self.getSliceData(position=position, sliceDim=sliceDim)
+    #
+    #         # # define the data slicing objects
+    #         # # offset to the origin of regionData - mod to the pointCounts of the data
+    #         # dataSlices = [slice((p - 1) - starts[idx], (p - 1) - starts[idx] + 1) for idx, p in enumerate(position)]
+    #         # dataSlices[sliceAxis] = slice(0,sizes[sliceAxis])
+    #         # # FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated;
+    #         # # use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as
+    #         # # an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
+    #         # dataSlices = tuple(dataSlices)
+    #
+    #         # dataSlices = [slice(((p-1)-start) % np, (((p-1)-start) % np) + 1) for start, p, np in zip(starts, position, self.pointCounts)]
+    #         # define the set of dataSlices in a range bigger than the dataSet in any axis,
+    #         # e.g., a long region across aliased spectrum
+    #         #       if data is (100, 50) and region is (125, 5) then this will need 2 tiles ((0, 0), (1, 0))
+    #         _its = [range(((size - 1) // np) + 1) for size, np in zip(sizes, self.pointCounts)]
+    #         allDataSlices = [
+    #             [slice(al * np + ((p - 1) - start) % np, al * np + (((p - 1) - start) % np) + 1) for start, p, np, al in zip(starts, position, self.pointCounts, alias)]
+    #             for alias in [it for it in product(*_its)]
+    #             ]
+    #         for _slice in allDataSlices:
+    #             _slice[sliceAxis] = slice(0, sizes[sliceAxis])
+    #
+    #         # get aliasing factor determined by dimensions other than sliceDim
+    #         factor = 1.0
+    #         for axis, fac, aliase in zip(self.dimensionIndices, aliasingFlags, aliased):
+    #             if axis != sliceAxis and aliase:
+    #                 factor *= fac
+    #
+    #         if (starts[sliceAxis] >= 1 and stops[sliceAxis] <= nSlicePoints):
+    #             # There are no aliased points along sliceDim
+    #             for dataSlices in allDataSlices:
+    #                 # copy the relevant section of the sliceData into the (nD) data array
+    #                 regionData[tuple(dataSlices[::-1])] = factor * sliceData[starts[sliceAxis]:stops[sliceAxis]]  # dimensions run in ..,z,y,x order
+    #         else:
+    #             # copy the relevant points from sliceData to sliceData2 array; aliasing where needed
+    #
+    #             for idx, p in zip(range(0, sizes[sliceAxis]), range(starts[sliceAxis], stops[sliceAxis])):
+    #                 pointFactor = aliasingFlags[sliceAxis] if (p < 0 or p >= nSlicePoints) else 1.0
+    #                 while p < 0:
+    #                     p += nSlicePoints
+    #                 while p >= nSlicePoints:
+    #                     p -= nSlicePoints
+    #                 sliceData2[idx] = factor * pointFactor * sliceData[p]
+    #             for dataSlices in allDataSlices:
+    #                 # copy the sliceData2 into the (nD) data array
+    #                 regionData[tuple(dataSlices[::-1])] = sliceData2[:]  # dimensions run in ..,z,y,x order
+    #
+    #     return regionData
 
     def _getRegionData(self, sliceTuples, aliasingFlags=None):
         """Return an numpy array containing the region data; see getRegionData description
         implementation based upon getSliceData method
+        GWV 13/01/2022: new implementation
         """
-        sizes = [(stop - start + 1) for start, stop in sliceTuples]
-        starts = [start - 1 for start, stop in sliceTuples]  # 0-based
-        stops = [stop for start, stop in sliceTuples]  # 0-based, non-inclusive
-        sliceDim = 1
-        sliceAxis = sliceDim - 1  # 0-based axis of sliceDim
+        sliceDim = 1 # only works for 1, as there is otherwise a np shape mismatch
+        sliceIdx = sliceDim-1
 
-        # The result being assembled
-        regionData = numpy.zeros(sizes[::-1], dtype=self.dataType)  # ...,z,y,x numpy ordering
+        newPoints = [s[1]-s[0]+1 for s in sliceTuples]
+        slicePoints = newPoints[sliceIdx]
 
-        # temp buffer for unpacking aliased data along sliceDim
-        sliceData2 = numpy.zeros(sizes[sliceAxis], dtype=self.dataType)
-        nSlicePoints = self.pointCounts[sliceAxis]
+        # first collect all the folded/unfolded/indexed points
+        pointDict = {}
+        for foldedPosition, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=[sliceDim]):
 
-        for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=[sliceDim]):
-
-            unFoldedPosition = [a*np+p for p, a, np in zip(position, aliased, self.pointCounts)]
-            # aliased[sliceAxis] = (starts[sliceAxis] < 0 or stops[sliceAxis] >= nPoints)
-
-            # read the slice using the unfolded position
-            position[sliceAxis] = 1  # position is 1-based
-            with notificationEchoBlocking():
-                sliceData = self.getSliceData(position=position, sliceDim=sliceDim)
-
-            # # define the data slicing objects
-            # # offset to the origin of regionData - mod to the pointCounts of the data
-            # dataSlices = [slice((p - 1) - starts[idx], (p - 1) - starts[idx] + 1) for idx, p in enumerate(position)]
-            # dataSlices[sliceAxis] = slice(0,sizes[sliceAxis])
-            # # FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated;
-            # # use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as
-            # # an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-            # dataSlices = tuple(dataSlices)
-
-            # dataSlices = [slice(((p-1)-start) % np, (((p-1)-start) % np) + 1) for start, p, np in zip(starts, position, self.pointCounts)]
-            # define the set of dataSlices in a range bigger than the dataSet in any axis,
-            # e.g., a long region across aliased spectrum
-            #       if data is (100, 50) and region is (125, 5) then this will need 2 tiles ((0, 0), (1, 0))
-            _its = [range(((size - 1) // np) + 1) for size, np in zip(sizes, self.pointCounts)]
-            allDataSlices = [
-                [slice(al * np + ((p - 1) - start) % np, al * np + (((p - 1) - start) % np) + 1) for start, p, np, al in zip(starts, position, self.pointCounts, alias)]
-                for alias in [it for it in product(*_its)]
-                ]
-            for _slice in allDataSlices:
-                _slice[sliceAxis] = slice(0, sizes[sliceAxis])
-
+            foldedPosition = tuple(foldedPosition)
+            unFoldedPosition = tuple([a*np+p
+                                      for p, a, np in zip(foldedPosition, aliased, self.pointCounts)])
+            indxPosition = tuple([(p-sliceTuples[idx][0])
+                                  for idx, p in zip(self.dimensionIndices, unFoldedPosition)])
             # get aliasing factor determined by dimensions other than sliceDim
             factor = 1.0
-            for axis, fac, aliase in zip(self.dimensionIndices, aliasingFlags, aliased):
-                if axis != sliceAxis and aliase:
+            for idx, fac, aliase in zip(self.dimensionIndices, aliasingFlags, aliased):
+                if idx != sliceIdx and aliase:
                     factor *= fac
 
-            if (starts[sliceAxis] >= 1 and stops[sliceAxis] <= nSlicePoints):
-                # There are no aliased points along sliceDim
-                for dataSlices in allDataSlices:
-                    # copy the relevant section of the sliceData into the (nD) data array
-                    regionData[tuple(dataSlices[::-1])] = factor * sliceData[starts[sliceAxis]:stops[sliceAxis]]  # dimensions run in ..,z,y,x order
-            else:
-                # copy the relevant points from sliceData to sliceData2 array; aliasing where needed
-                for idx, p in zip(range(0, sizes[sliceAxis]), range(starts[sliceAxis], stops[sliceAxis])):
-                    pointFactor = aliasingFlags[sliceAxis] if (p < 0 or p >= nSlicePoints) else 1.0
-                    while p < 0:
-                        p += nSlicePoints
-                    while p >= nSlicePoints:
-                        p -= nSlicePoints
-                    sliceData2[idx] = factor * pointFactor * sliceData[p]
-                for dataSlices in allDataSlices:
-                    # copy the sliceData2 into the (nD) data array
-                    regionData[tuple(dataSlices[::-1])] = sliceData2[:]  # dimensions run in ..,z,y,x order
+            theList = pointDict.setdefault(foldedPosition, [])
+            theList.append((unFoldedPosition, indxPosition, factor))
 
-        return regionData
+        # print('pointDict:')
+        # for key, val in pointDict.items():
+        #     print(key, ':', val)
+
+        # Assemble the data
+        data = numpy.zeros(newPoints[::-1], dtype='float32')  # the final result
+        newSliceData = numpy.zeros(newPoints[sliceIdx], dtype='float32')  # the unaliased slice
+
+        for foldedPosition, _vals in pointDict.items():
+            # get the slice for foldedPosition (only once)
+            sliceData = self.getSliceData(position=foldedPosition, sliceDim=sliceDim)
+            # unaliase the slice
+            sliceStart = sliceTuples[sliceIdx][0]
+            sliceStop = sliceTuples[sliceIdx][1]
+            _fillSlice(sliceData,
+                       start=sliceStart, stop=sliceStop, aliasing=aliasingFlags[sliceIdx],
+                       resultSlice=newSliceData)
+            # print('>>', foldedPosition, newSliceData)
+
+            # put the unaliased slice at all required positions in the data
+            for unFoldedPosition, indxPosition, factor in _vals:
+                slices = [slice(idx, idx+1, 1) for idx in indxPosition]
+                slices[sliceIdx] = slice(0, slicePoints, 1)
+                slices = tuple(slices[::-1])  # x,y,z order is reversed
+                data[slices] = factor*newSliceData[:]
+
+        return data
 
     def getRegionData(self, sliceTuples, aliasingFlags=None):
         """Return an numpy array containing the points defined by
@@ -1969,6 +2032,78 @@ class SpectrumDataSourceABC(CcpNmrJson):
                                                     path.name
                                                     )
 #end class
+
+
+def _fillSlice(sliceData, start, stop, aliasing, resultSlice=None):
+    """Helper function for _getRegionData.
+    Fill a slice from sliceData, trimming or extend on either side dependng on start, stop
+        :param start,stop: start, stop indices (1-based)
+        :param aliasing: the aliasing flag (-1,0,1) to calculate the sliceFactor
+        :return the new numpy slice array
+    """
+    aliasing = float(aliasing)
+    sliceFactor = pow(aliasing, 0)
+
+    nPoints = sliceData.shape[0]
+    start = start-1
+
+    if resultSlice is None:
+        resultSlice = numpy.zeros((stop-start,), dtype=sliceData.dtype)
+
+    # Simple cases:
+    if start >= 0 and stop <= nPoints:
+        #  within the limits of sliceData
+        resultSlice[:] = sliceData[start:stop]
+        return resultSlice
+
+    elif -nPoints < start < 0 and stop <= nPoints:
+        # at most one extension on left
+        sliceFactor = pow(aliasing, 1)
+        numpy.concatenate((sliceData[start:]*sliceFactor, sliceData[0:stop]), out=resultSlice)
+        return  resultSlice
+
+    elif start > 0 and  stop <= nPoints*2:
+        # at most one extension on the right
+        sliceFactor = pow(aliasing, 1)
+        numpy.concatenate((sliceData[start:], sliceData[0:stop-nPoints]*sliceFactor), out=resultSlice)
+        return  resultSlice
+
+    elif -nPoints < start < 0 and stop <= nPoints <= nPoints*2:
+        # at most one extension on the left and right;
+        # might occur regularly for peak picking of a plane with one-point extension
+        sliceFactor = pow(aliasing, 1)
+        numpy.concatenate((sliceData[start:]*sliceFactor, sliceData, sliceData[0:stop-nPoints]*sliceFactor), out=resultSlice)
+        return resultSlice
+
+    foldedStop = stop // nPoints
+    foldedStopIdx = stop % nPoints
+
+    idx = start
+    result_idx = 0
+    while idx < stop:
+
+        folded = idx // nPoints  # integer division
+        sliceFactor = pow(aliasing, abs(folded))
+
+        idx_1 = idx % nPoints
+        if folded == foldedStop:
+            # This accommodates the stop point
+            idx_2 = foldedStopIdx
+        else:
+            # This accomodates any start value, also < 0; i.e. the initial left part will be
+            # trucated to the first multiple of nPoints
+            idx_2 = min(idx_1 + nPoints, nPoints)
+        increment = idx_2 - idx_1
+        # print('>', start, stop, '>>', idx_1, idx_2)
+
+        # copy the data
+        resultSlice[result_idx:result_idx+increment] = sliceData[idx_1:idx_2] * sliceFactor
+        idx += increment
+        result_idx += increment
+
+    return resultSlice
+
+
 
 from ccpn.util.traits.CcpNmrTraits import Instance
 from ccpn.util.traits.TraitJsonHandlerBase import CcpNmrJsonClassHandlerABC

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:23:25 +0000 (Thu, January 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-13 17:30:49 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -334,6 +334,9 @@ class Framework(NotifierBase):
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
 
         self._spectrumDataSourceFormats = getDataFormats()
+
+    def __str__(self):
+        return '<%s version:%s>' % (self.applicationName, self.applicationVersion)
 
     @property
     def _isInDebugMode(self) -> bool:
@@ -817,7 +820,8 @@ class Framework(NotifierBase):
                         getLogger().warning('Strip direction is not defined for spectrumDisplay: %s' % str(spectrumDisplay))
 
                     if not spectrumDisplay.is1D:
-                        strip._setPlaneAxisWidgets()
+                        for strip in spectrumDisplay.strips:
+                            strip._updatePlaneAxes()
 
                 if spectrumDisplay.isGrouped:
                     # setup the spectrumGroup toolbar
@@ -2308,8 +2312,9 @@ class Framework(NotifierBase):
 
     def showCopyPeakListPopup(self):
         if not self.project.peakLists:
-            getLogger().warning('Project has no Peak Lists. Peak Lists cannot be copied')
-            MessageDialog.showWarning('Project has no Peak Lists.', 'Peak Lists cannot be copied')
+            txt = 'Project has no PeakList\'s. Peak Lists cannot be copied'
+            getLogger().warning(txt)
+            MessageDialog.showWarning(txt)
             return
         else:
             from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup

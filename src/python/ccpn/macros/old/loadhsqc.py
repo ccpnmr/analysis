@@ -8,5 +8,5 @@ project.loadData(spectrumPath)
 # Use the getByPid() method of the project class to get hold of the spectrum object
 hsqcSpectrum = get('SP:hsqc')
 
-# use the createSpectrumDisplay() method of ui.mainWindow to display the spectrum
-mainWindow.createSpectrumDisplay(hsqcSpectrum)
+# use the newSpectrumDisplay() method of ui.mainWindow to display the spectrum
+mainWindow.newSpectrumDisplay(hsqcSpectrum)

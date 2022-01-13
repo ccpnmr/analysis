@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-06 12:54:51 +0000 (Thu, January 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-13 17:30:50 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -79,7 +79,8 @@ from ccpn.ui._implementation.MultipletListView import MultipletListView
 from ccpn.ui.gui.widgets.SettingsWidgets import SpectrumDisplaySettings
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking, \
-    BlankedPartial, ccpNmrV3CoreSetter, notificationEchoBlocking, undoBlockWithoutSideBar
+    BlankedPartial, ccpNmrV3CoreSetter, notificationEchoBlocking, undoBlockWithoutSideBar, \
+    waypointBlocking
 from ccpn.util.decorators import logCommand
 from ccpn.util.Common import makeIterableList
 from ccpn.core.lib import Undo
@@ -434,11 +435,12 @@ class GuiSpectrumDisplay(CcpnModule):
                                                        prefsGen.contourThickness,
                                                        prefsGen.zPlaneNavigationMode)
 
-    def _updateAxesUnits(self):
-        """Update the x- and y-axis units of the display"""
-        units = self.units
-        xUnit = AXISUNITS.index(units[0])
-        yUnit = AXISUNITS.index(units[1]) if not self.is1D else None
+    def _updateSettingsAxesUnits(self):
+        """Update the settings of x- and y-axis units of the display
+        CCPNINTERNAL: used in _newS[ectrumDisplay and when setting Axis.unit attribute
+        """
+        xUnit = self._unitIndices[0]
+        yUnit = self._unitIndices[1] if not self.is1D else None
 
         self._spectrumDisplaySettings._setAxesUnits(xUnit, yUnit)
         self._spectrumDisplaySettings._settingsChanged()
@@ -509,18 +511,6 @@ class GuiSpectrumDisplay(CcpnModule):
                                                        SpectrumGroup.className,
                                                        self._spectrumGroupChanged,
                                                        onceOnly=True)
-
-    def _postInit(self):
-        """Method to be called as last item during spectrumDisplay creation
-        CCPNMRINTERNAL: Called from _newSpectrumDisplay
-        """
-        self.setToolbarButtons()
-        try:
-            # # force an update for units
-            # self._updateAxesUnits() This proved not to work; adjusted the code in initialiseAxes() instead
-            self.strips[0]._CcpnGLWidget.initialiseAxes(strip=self.strips[0])
-        except:
-            getLogger().debugGL('OpenGL widget not instantiated')
 
     def _setFloatingAxes(self, xUnits, yUnits, aspectRatioMode, aspectRatios):
         """Set the aspectRatio and units for the floating axes
@@ -596,12 +586,9 @@ class GuiSpectrumDisplay(CcpnModule):
                 action.setText(spectrum.name)
                 setWidgetFont(action, size='SMALL')
 
-            # update planeToolbars
-            if not self.is1D:
-                for strip in self.strips:
-                    # NOTE:ED - may need to fire update here if this forces a change to the z-plane
-                    strip._setPlaneAxisWidgets()
-
+            # update's
+            for strip in self.strips:
+                strip._updatePlaneAxes()
             self._refreshSpectrumView(spectrum)
 
         elif trigger == Notifier.RENAME:
@@ -623,9 +610,8 @@ class GuiSpectrumDisplay(CcpnModule):
         # respond to the create/delete notifiers
         if trigger == Notifier.CREATE:
 
-            if not self.is1D:
-                for strip in self.strips:
-                    strip._setPlaneAxisWidgets()
+            for strip in self.strips:
+                strip._updatePlaneAxes()
 
             spectrum = spectrumView.spectrum
             if spectrumView in self.spectrumViews:
@@ -634,9 +620,8 @@ class GuiSpectrumDisplay(CcpnModule):
 
         elif trigger == Notifier.DELETE:
 
-            if not self.is1D:
-                for strip in self.strips:
-                    strip._setPlaneAxisWidgets(ignoreSpectrumView=spectrumView)
+            for strip in self.strips:
+                strip._updatePlaneAxes()
 
         elif trigger == Notifier.CHANGE:
             if spectrumView in self.spectrumViews:
@@ -818,14 +803,19 @@ class GuiSpectrumDisplay(CcpnModule):
         GLSignals = GLNotifier(parent=None)
         GLSignals.emitPaintEvent()
 
-    @property
-    def visibleSpectra(self):
-        """List of spectra currently visible in the spectrumDisplay
+    def getVisibleSpectra(self) -> list:
+        """Return a list of spectra currently visible in the spectrumDisplay
         """
         if self.strips:
             return [spectrum for spectrum in self.strips[0].getSpectra() if spectrum.isDisplayed]
 
-    displayedSpectra = visibleSpectra
+    # GWV 07/01/2022: replace by getVisibleSpectra() fro naming consistency
+    # @property
+    # def visibleSpectra(self) -> list:
+    #     """List of spectra currently visible in the spectrumDisplay
+    #     """
+    #     return self.getVisibleSpectra()
+    # displayedSpectra = visibleSpectra
 
     @property
     def isGrouped(self):
@@ -954,12 +944,13 @@ class GuiSpectrumDisplay(CcpnModule):
         # can't think of a better way yet - will be fixable of single window used for all viewports in fucture
         QtCore.QTimer.singleShot(50, self._stripFrameScrollArea.refreshViewPort)
 
-    def _setPlaneAxisWidgets(self):
-        """Update the widgets in the planeToolbar
-        CCPNINTERNAL: used in a few spots
-        """
-        for strip in self.strips:
-            strip._setPlaneAxisWidgets()
+    # def _setPlaneAxisWidgets(self):
+    #     """Update the widgets in the planeToolbar
+    #     CCPNINTERNAL: used in a few spots
+    #     """
+    #     if not self.is1D:
+    #         for strip in self.strips:
+    #             strip._setPlaneAxisWidgets()
 
     def _stripRange(self):
         """Return the bounds for the tilePositions of the strips
@@ -1058,7 +1049,7 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         AbstractWrapperObject._setInternalParameter(self, self._SPECTRUMGROUPS, groups)
 
-    def getSettings(self):
+    def _getSettingsDict(self):
         """get the settings dict from the settingsWidget
         """
         return self._spectrumDisplaySettings.getValues()
@@ -1214,15 +1205,16 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         spectrum = peakList.spectrum
 
-        if spectrum.dimensionCount != self.strips[0].spectra[0].dimensionCount or \
-                not True:  # peakList.spectrum.axisCodes match
-            showWarning('Dropped PeakList "%s"' % peakList.pid, 'Cannot copy: Axes do not match')
+        if spectrum.dimensionCount != self.dimensionCount:
+            showWarning('Dropped PeakList "%s"' % peakList.pid,
+                        'Cannot copy: dimensionCount\'s PeakList and SpectrumDisplay do not match')
             return
         else:
             from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
 
-            popup = CopyPeakListPopup(parent=self.mainWindow, mainWindow=self.mainWindow, spectrumDisplay=self)
-            popup.sourcePeakListPullDown.select(peakList.pid)
+            popup = CopyPeakListPopup(parent=self.mainWindow, mainWindow=self.mainWindow,
+                                      spectrumDisplay=self, selectItem=peakList.pid)
+            # popup.sourcePeakListPullDown.select(peakList.pid)
             popup.exec_()
         # showInfo(title='Copy PeakList "%s"' % peakList.pid, message='Copy to selected spectra')
 
@@ -1303,11 +1295,12 @@ class GuiSpectrumDisplay(CcpnModule):
         for mult in self.current.multiplets:
             peaks = peaks | set(mult.peaks)
         if peaks:
+            visibleSpectra = self.getVisibleSpectra()
             with undoBlockWithoutSideBar():
                 for substance in substances:
                     annotation = substance.name
                     for peak in peaks:
-                        if peak.peakList.spectrum in self.visibleSpectra:
+                        if peak.peakList.spectrum in visibleSpectra:
                             if not replaceAnnotation:  # if want appending instead of replacing
                                 annotation = ', '.join(filter(None, set([peak.annotation, substance.name])))  # Filter to make sure is not duplicating any existing annotation
                             peak.annotation = annotation
@@ -2362,12 +2355,12 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 # _getDimensionsMapping will check the match for axisCodes
                 displayOrder = (1, 0) if self.is1D else self._getDimensionsMapping(spectrum)
-                # check the isotopeCodes
-                dims = displayOrder[0:1] if self.is1D else displayOrder
+                # dimensions are 1-based and not defined for (1D) Intensity axis
+                dims = [1] if self.is1D else displayOrder
 
                 if not self._isNew:
                     # There is already a spectrum displayed; ie. the spectrumDisplay has definitions for
-                    # its x,z,plane(s) display axes
+                    # its x,y, and z,a,.. plane(s) display axes
 
                     # check for matching dimension types
                     for dt1, dt2 in zip(self.dimensionTypes or [], spectrum.getByDimensions('dimensionTypes', dims)):
@@ -2397,6 +2390,12 @@ class GuiSpectrumDisplay(CcpnModule):
                     self.setToolbarButtons()
                     # addUndoItem(redo=self.setToolbarButtons)  # keep for undo/redo
 
+        if not self._isNew:
+            # Now that the spectrum is added, we need to update the plane-related
+            # axis values
+            for strip in self.strips:
+                strip._updatePlaneAxes()
+
         return spectrumView
 
     @logCommand(get='self')
@@ -2409,24 +2408,39 @@ class GuiSpectrumDisplay(CcpnModule):
 
         # get the spectrumViews from the first strip
         sv = [(spectrum, specView) for specView in self.strips[0].spectrumViews if specView.spectrum == spectrum]
-        if len(sv) == 1:
+        if len(sv) != 1:
+            getLogger().warning('%.removeSpectrum: No spectrum found' % self.__class__.__name__)
+            return
 
-            _, specView = sv[0]
+        _spectrum, specView = sv[0]
 
-            with undoStackBlocking():  # Do not add to undo/redo stack
+        # # for debugger
+        # _undo = self.application._getUndo()
+
+        # need undo waypoint here
+        with waypointBlocking():
+            with undoStackBlocking() as addUndoItem:
+                # refresh on undo
+                _data = {Notifier.OBJECT:specView,
+                         Notifier.TRIGGER:Notifier.CREATE
+                         }
+                addUndoItem(undo=partial(self._spectrumViewChanged, _data)
+                            )
+
                 # push/pop ordering
-                with undoStackBlocking(self.application) as addUndoItem:
-                    addUndoItem(undo=self.setToolbarButtons)
+                addUndoItem(undo=self.setToolbarButtons)
 
-                # delete the spectrumView - for multiple strips will delete all spectrumViews attached to spectrum
-                specView._delete()
+            # delete the spectrumView -
+            # for multiple strips will delete all spectrumViews attached to spectrum
+            specView._delete()
 
-                # push/pop ordering
-                with undoStackBlocking(self.application) as addUndoItem:
-                    self.setToolbarButtons()
-                    addUndoItem(redo=self.setToolbarButtons)
-        else:
-            getLogger().warning('No spectrumView found')
+            with undoStackBlocking() as addUndoItem:
+                # push ordering
+                self.setToolbarButtons()
+                addUndoItem(redo=self.setToolbarButtons)
+
+        #end waypoint
+        return
 
     def _setVisibleSpectrum(self, spectrum, visible: bool):
         """ Set visible the spectrumView of the spectrum in the spectrumDisplay.

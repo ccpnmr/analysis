@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-04 11:38:41 +0000 (Tue, January 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-13 17:30:50 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -64,12 +64,9 @@ def navigateToCurrentPeakPosition(application, selectFirstPeak=False):
             if strip:
                 navigateToPositionInStrip(strip, peak.position, peak.axisCodes)
 
-        display._setPlaneAxisWidgets()
-
 
 def navigateToCurrentNmrResiduePosition(application):
     """
-
     Takes the current nmrResidue and navigates (centres) to that position all strips and spectrum displays of the project.
     Called by shortcut. For a more generic usage refer to:  "navigateToPositionInStrip"
     instead

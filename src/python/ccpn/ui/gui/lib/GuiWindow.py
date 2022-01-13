@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-01-13 16:19:04 +0000 (Thu, January 13, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-01-13 17:30:50 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -935,9 +935,8 @@ class GuiWindow():
         - Opens a new pythonConsole module if none available.
         - Show/hide the pythonConsole module if already one available.
         """
-
-
         from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
+
         _justCreated = False
         if self.pythonConsoleModule is None:  # No pythonConsole module detected, so create one.
             self.moduleArea.addModule(PythonConsoleModule(self), 'bottom')
@@ -973,7 +972,7 @@ class GuiWindow():
         navigate to the previous Z plane for the currently selected strip
         """
         if self.current.strip:
-            self.current.strip.changeZPlane(None, planeCount=+1)
+            self.current.strip._changePlane(stripAxisIndex=2, planeIncrement=-1)
         else:
             getLogger().warning('No current strip. Select a strip first.')
 
@@ -982,7 +981,7 @@ class GuiWindow():
         navigate to the next Z plane for the currently selected strip
         """
         if self.current.strip:
-            self.current.strip.changeZPlane(None, planeCount=-1)
+            self.current.strip._changePlane(stripAxisIndex=2, planeIncrement=1)
         else:
             getLogger().warning('No current strip. Select a strip first.')
 

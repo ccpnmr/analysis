@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-11 13:49:12 +0000 (Thu, November 11, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-01-13 16:54:12 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -97,8 +97,16 @@ class TempAreaWindow(GuiWindow, MainWindow):
                 spectrumDisplay._bottomGLAxis.refreshDevicePixelRatio()
 
     def closeEvent(self, *args, **kwargs):
+        from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
+
         for module in self.tempModuleArea.ccpnModules:
-            module._closeModule()
+            if isinstance(module, PythonConsoleModule):
+                # move the PythonConsole back to the main ModuleArea or get a C++ error
+                mainArea = self.mainWindow.moduleArea
+                mainArea.addModule(module)
+                module.hide()
+            else:
+                module._closeModule()
         if self.tempModuleArea in self.mainModuleArea.tempAreas:
             self.mainModuleArea.tempAreas.remove(self.tempModuleArea)
 
@@ -275,6 +283,13 @@ class CcpnModuleArea(ModuleArea, DropBase):
         elif len(self.ccpnModules) == len(self._tempModules()):
             # means all modules are pop-out, so paint the label in the main module area
             self._paint(ev)
+
+        elif all([m.isHidden() for m in self.ccpnModules]):
+            # means all modules are hidden
+            self._paint(ev)
+
+
+
 
     def _isNameAvailable(self, name):
         """

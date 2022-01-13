@@ -11,7 +11,7 @@ from __future__ import unicode_literals
 # Licence, Reference and Credits
 #=========================================================================================
 
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -21,8 +21,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:19 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-01-13 17:23:26 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -46,6 +46,8 @@ from ccpn.core.lib.AxisCodeLib import _axisCodeMapIndices
 from ccpn.util.OrderedSet import OrderedSet
 
 from ccpn.util import Constants
+
+
 # from ccpn.util.isotopes import isotopeRecords
 
 
@@ -88,7 +90,7 @@ WHITESPACE_AND_NULL = {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
 #                                    defaultFileNameChar)
 
 
-def incrementName(name, split:str='_'):
+def incrementName(name, split: str = '_'):
     """Add '_1' to name or change suffix '_n' to '_(n+1)
     """
     ll = name.rsplit(split, 1)
@@ -488,6 +490,7 @@ def _traverse(obj, tree_types=(list, tuple)):
     else:
         yield obj
 
+
 # GWV 01/12/2021; commented, should not be here and not used?
 # def _getChildren(obj, path=None):
 #     """
@@ -842,16 +845,18 @@ def copyToClipboard(items):
     texts = []
     for i in items:
         if isinstance(i, AbstractWrapperObject):
-            txt = f"""'{i.pid}'""" # wrap a Pid with quotes if the format is of instance AbstractWrapperObject
+            txt = f"""'{i.pid}'"""  # wrap a Pid with quotes if the format is of instance AbstractWrapperObject
+        if hasattr(i, 'pid'):
+            txt = f"""'{i.pid}'"""  # wrap a Pid with quotes if the format is of instance <object> with attribute pid
         elif isinstance(i, str):
-            txt = f"""'{i}'"""     # wrap with quotes if the format is a string
+            txt = f"""'{i}'"""  # wrap with quotes if the format is a string
         else:
-            txt = f"""{i}"""       # otherwise preserve the format (e.g. floats, int...)
+            txt = f"""{i}"""  # otherwise preserve the format (e.g. floats, int...)
         texts.append(txt)
     values = '{}'.format(', '.join(sorted(set(texts), key=texts.index)))
     df = pd.DataFrame([values])
     df.to_clipboard(index=False, header=False)
-    getLogger().info("Copied to clipboard: %s" %values)
+    getLogger().info("Copied to clipboard: %s" % values)
 
 
 def loadModules(paths):

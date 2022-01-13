@@ -4,7 +4,7 @@
 # Licence, Reference and Credits
 #=========================================================================================
 
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:16 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-01-13 17:23:25 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -693,7 +693,7 @@ class AbstractWrapperObject(NotifierBase):
             return []
         return result
 
-    def _getChildren(self, classes=('all',), recursion:bool=False) -> OrderedDict:
+    def _getChildren(self, classes=('all',), recursion: bool = False) -> OrderedDict:
         """GWV; Construct a dict of (className, ChildrenList) pairs
 
         :param classes is either 'gui' or 'nonGui' or 'all' or explicit enumeration of classNames
@@ -849,10 +849,8 @@ class AbstractWrapperObject(NotifierBase):
     def collections(self) -> tuple:
         """Return the list of collections containing this core object
         """
-        try:
-            return tuple([self._project._data2Obj[itm] for itm in self._wrappedData.collections])
-        except:
-            return ()
+        # dynamic lookup from the project collectionList
+        return self.project._collectionList.searchCollections(self)
 
     @logCommand(get='self')
     def addToCollection(self, collection):
@@ -870,6 +868,7 @@ class AbstractWrapperObject(NotifierBase):
     #=========================================================================================
 
     _OBJECT_VERSION = '_objectVersion'
+
     @property
     def _objectVersion(self) -> VersionString:
         """Return the versionString of the object; used in _updateObject
@@ -1389,6 +1388,7 @@ class AbstractWrapperObject(NotifierBase):
                 oldPid = self.pid
             # Wrapper-level processing
             self._resetIds()
+            self._project._collectionList._resetItemPids(oldPid, self.pid)
 
         elif action == 'create':
             self._flaggedForDelete = False
@@ -1477,6 +1477,7 @@ class AbstractWrapperObject(NotifierBase):
                 getLogger().warning('Potential error for the property %s in creating dictionary from object: %s . Error: %s' % (i, self, e))
         return od
 
+
 AbstractWrapperObject.getByPid.__annotations__['return'] = AbstractWrapperObject
 
 
@@ -1495,7 +1496,7 @@ def updateObject(fromVersion, toVersion, updateFunction):
         if not hasattr(cls, '_updateFunctions'):
             raise RuntimeError('class %s does not have the attribute _updateFunctions')
 
-        cls._updateFunctions[cls.className].append( (fromVersion, toVersion, updateFunction) )
+        cls._updateFunctions[cls.className].append((fromVersion, toVersion, updateFunction))
         return cls
 
     return theDecorator

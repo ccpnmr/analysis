@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-13 10:56:11 +0000 (Sat, November 13, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-13 17:23:24 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -26,19 +26,20 @@ __date__ = "$Date: 2021-10-26 15:52:47 +0100 (Tue, October 26, 2021) $"
 # Start of code
 #=========================================================================================
 
-from typing import Optional, Tuple, Any, Sequence
-from collections import Counter
+from typing import Optional, List, Tuple, Any, Sequence, Union
+from collections import namedtuple
 import fnmatch
 
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Collection as apiCollection
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
-from ccpn.core.lib import Pid
-from ccpn.core.lib.ContextManagers import newObject, undoBlock, \
-    renameObject, ccpNmrV3CoreSetter
-from ccpn.util.Common import makeIterableList
+from ccpn.core.lib.ContextManagers import undoBlock, ccpNmrV3CoreSetter
+from ccpn.core._implementation.CollectionList import CO_COMMENT, CO_ISDELETED, \
+    CO_ITEMS, CO_UNIQUEID, CO_NAME, _checkItems, _checkDuplicates
+from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
 from ccpn.util.decorators import logCommand
 from ccpn.util.OrderedSet import OrderedSet
+
+
+CollectionParameters = namedtuple('CollectionParameters', f'{CO_UNIQUEID} {CO_ISDELETED} {CO_NAME} {CO_ITEMS} {CO_COMMENT} ')
 
 
 class _searchCollections():
@@ -208,7 +209,7 @@ class _searchCycles():
         return len(self._cycles)
 
 
-class Collection(AbstractWrapperObject):
+class Collection(V3CoreObjectABC):
     """Collection object, holding a list of core objects.
     """
 
@@ -224,122 +225,98 @@ class Collection(AbstractWrapperObject):
 
     #: List of child classes.
     _childClasses = []
+    _isGuiClass = False
 
-    # Qualified name of matching API class
-    _apiClassQualifiedName = apiCollection._metaclass.qualifiedName()
+    # the attribute name used by current
+    _currentAttributeName = 'collections'
+
+    def __init__(self, project, collectionList, _uniqueId):
+        """Create a new instance of v3 collection
+
+        _unique Id links the collection to the dataFrame storage and MUST be specified
+        before the collection can be used
+        """
+        super().__init__(project, collectionList, _uniqueId)
 
     #=========================================================================================
-    # CCPN properties
+    # CCPN Properties
+    #=========================================================================================
+
+    #=========================================================================================
+    # Class Properties and methods
     #=========================================================================================
 
     @property
-    def _apiCollection(self) -> apiCollection:
-        """API collections matching Collection"""
-        return self._wrappedData
-
-    @property
-    def _key(self) -> str:
-        """id string"""
-        _name = self._wrappedData.name or ''
-        return _name.translate(Pid.remapSeparators)
-
-    @property
-    def serial(self) -> int:
-        """serial number of Collection, used in Pid and to identify the Collection. """
-        return self._wrappedData.serial
-
-    @property
-    def _parent(self) -> Optional['Project']:
-        """parent containing collection."""
-        try:
-            return self._project._data2Obj[self._wrappedData.collectionParent]
-        except:
-            return None
-
-    collectionParent = _parent
-
-    @property
-    def name(self) -> str:
-        """Name of collection, part of identifier"""
-        return self._wrappedData.name
-
-    @name.setter
-    @logCommand(get='self', isProperty=True)
-    def name(self, value: str):
-        """set Name of collection, part of identifier"""
-        self.rename(value)
-
-    @property
-    def items(self) -> Optional[Tuple[Any]]:
+    def items(self) -> Tuple[Any, ...]:
         """List of items attached to the collection"""
         try:
-            _data2Obj = self._project._data2Obj
-            return tuple([_data2Obj[pk] for pk in self._wrappedData.collectionItems])
+            _getByPid = self._project.getByPid
+            _itms = self._wrapperList._getAttribute(self._uniqueId, CO_ITEMS, list)
+
+            # hiding the Nones handles the undo/redo behaviour for items
+            return tuple(filter(None, map(_getByPid, _itms or ())))
         except:
-            return None
+            return ()
 
     @items.setter
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def items(self, values):
         """Set the items in the collection"""
-        values = Collection._checkItems(self.project, values)
+        values = _checkItems(self.project, values)
         if self in values:
             raise ValueError(f'Cannot add {self} to itself')
-        self._checkDuplicates(values)
+        _checkDuplicates(values)
 
-        if values:
-            self._wrappedData.collectionItems = [itm._wrappedData for itm in values]
+        _oldItems = set(self.items)
+        self._wrapperList._setAttribute(self._uniqueId, CO_ITEMS, [itm.pid for itm in values])
+
+        # notify the items have been added to/removed from collection
+        _notify = set(values) ^ _oldItems - {self}
+        self._finaliseChildren.extend((itm, 'change') for itm in _notify)
 
     def __len__(self):
         """Return the number of items in the collection
         """
-        return len(self._wrappedData.collectionItems)
+        return len(self.items)
 
     #=========================================================================================
     # Implementation functions
     #=========================================================================================
 
-    @classmethod
-    def _getAllWrappedData(cls, parent: 'Project') -> Tuple[apiCollection]:
-        """get _wrappedData (Collections) for all Collection children of parent"""
-        return parent._wrappedData.sortedPrimaryCollections()
-
-    @renameObject()
-    @logCommand(get='self')
-    def rename(self, value: str):
-        """Rename Collection, changing its name and Pid.
+    def _rename(self, value):
+        """Rename the collection
         """
-        return self._rename(value)
+        # validate the name
+        name = self._uniqueName(project=self.project, name=value)
+
+        # rename functions from here
+        oldName = self.name
+        self._oldPid = self.pid
+
+        self._wrapperList.renameCollection(self, name=name)
+
+        return (oldName,)
+
+    #=========================================================================================
+    # Implementation functions - necessary as there is no abstractWrapper object
+    #=========================================================================================
+
+    def delete(self):
+        """Delete the collection
+        """
+        self._wrapperList.deleteCollection(uniqueId=self._uniqueId)
+        # raise RuntimeError(f'{self.className}.delete: Please use CollectionList.deleteCollection()')  # optional error-trap
+
+    def _updateItems(self):
+        """Restore the links to the nmrAtoms
+        CCPN Internal - called from first creation from _restoreObject
+        """
+        pass
 
     #=========================================================================================
     # CCPN functions
     #=========================================================================================
-
-    @staticmethod
-    def _checkItems(project, items: Sequence[Any]) -> Optional[list]:
-        """Check the list of items, as core object or pid strings
-        Raise an error if there are any non-core objects
-        """
-        items = makeIterableList(items)
-        _itms = [project.getByPid(itm) if isinstance(itm, str) else itm for itm in items]
-        itms = list(filter(lambda obj: isinstance(obj, AbstractWrapperObject), _itms))
-
-        if items and (len(itms) != len(items)):
-            _itms = list(filter(lambda obj: not isinstance(obj, AbstractWrapperObject), _itms))
-            raise ValueError(f'items contains non-core objects: {_itms}')
-
-        return itms
-
-    @staticmethod
-    def _checkDuplicates(items: Sequence[Any]):
-        """Check the list of items, as core objects
-        Raise an error if there are any duplicates
-        CCPNInternal - to be used after _checkItem on flat list
-        """
-        duplicateCheck = Counter(items)
-        if any(v > 1 for k, v in duplicateCheck.items()):
-            raise ValueError(f'items contains duplicates {tuple(k for k, v in duplicateCheck.items() if v > 1)}')
 
     def _checkNestedCollections(self, items: Sequence[Any]):
         """Check the list of items, as core objects
@@ -358,28 +335,27 @@ class Collection(AbstractWrapperObject):
 
         :param items: single object or list of core objects, as objects or pid strings.
         """
-        items = Collection._checkItems(self.project, items)
+        items = _checkItems(self.project, items)
         if self in items:
             raise ValueError(f'Cannot add {self} to itself')
-        self._checkDuplicates(items)
+        _checkDuplicates(items)
 
         if items:
-            _items = self._wrappedData.collectionItems
-            _exists = tuple(itm for itm in items if itm._wrappedData in _items)
+            _currentItms = self.items
+            _exists = tuple(filter(lambda itm: itm in _currentItms, items))
             if _exists:
+                # check already exists
                 if len(_exists) > 1:
-                    raise ValueError(f'items {_exists} already in collection {self.pid}')
+                    raise ValueError(f'items {_exists} already in collection {self}')
                 else:
-                    raise ValueError(f'item {_exists[0]} already in collection {self.pid}')
+                    raise ValueError(f'item {_exists[0]} already in collection {self}')
 
             with undoBlock():
                 # NOTE:ED - any item could cause a nested loop - can't check until each object has been added
                 #   then need to reset if there is an error
                 for itm in items:
-                    self._wrappedData.addCollectionItem(itm._wrappedData)
-
-            # possibly check cycles here
-            # and return to previous state if there are any
+                    _currentItms += (itm,)
+                self.items = _currentItms
 
     @logCommand(get='self')
     def removeItems(self, items: Sequence[Any]):
@@ -392,20 +368,21 @@ class Collection(AbstractWrapperObject):
 
         :param items: single object or list of core objects, as objects or pid strings.
         """
-        items = Collection._checkItems(self.project, items)
+        items = _checkItems(self.project, items)
 
         if items:
-            _items = self._wrappedData.collectionItems
-            _exists = tuple(itm for itm in items if itm._wrappedData not in _items)
+            _currentItms = list(self.items)
+            _exists = tuple(filter(lambda itm: itm not in _currentItms, items))
             if _exists:
                 if len(_exists) > 1:
-                    raise ValueError(f'items {_exists} not in collection {self.pid}')
+                    raise ValueError(f'items {_exists} not in collection {self}')
                 else:
-                    raise ValueError(f'item {_exists[0]} not in collection {self.pid}')
+                    raise ValueError(f'item {_exists[0]} not in collection {self}')
 
             with undoBlock():
                 for itm in items:
-                    self._wrappedData.removeCollectionItem(itm._wrappedData)
+                    _currentItms.remove(itm)
+                self.items = _currentItms
 
     @logCommand(get='self')
     def getByObjectType(self, objectTypes=None,
@@ -480,9 +457,10 @@ class Collection(AbstractWrapperObject):
         if disableLeadingTrailingSearch is not None and not search:
             raise ValueError('disableLeadingTrailingSearch only valid when search is specified')
 
-        if isinstance(objectTypes, (str, type(AbstractWrapperObject))):
-            # change a single item to a list, if is a str or a core object, strings are checked later
+        if isinstance(objectTypes, str) or (objectTypes is not None and hasattr(objectTypes, 'pid')):
+            # change a single item to a list, if is a str or a core object (object with .pid), strings are checked later
             objectTypes = [objectTypes, ]
+
         if not isinstance(objectTypes, (list, tuple, type(None))):
             raise ValueError('objectTypes must be list/tuple of core objects or classnames, or single core object or None')
 
@@ -494,13 +472,11 @@ class Collection(AbstractWrapperObject):
         if objectTypes:
 
             # check the list of object types against the project classNames
-
             if caseSensitive:
                 _allObjectTypes = self.project._className2Class
                 _allList = self.project._className2ClassList
 
                 # case sensitive search - check against all defined core objects in project
-                # _all = list(_allObjectTypes.keys()) + list(_allObjectTypes.values())
                 _objectTypes = list(filter(lambda itm: (itm in _allList), objectTypes))
 
                 if len(_objectTypes) != len(objectTypes):
@@ -515,8 +491,6 @@ class Collection(AbstractWrapperObject):
                 _allList = self.project._classNameLower2ClassList
 
                 # case insensitive search - change all to lowercase
-                # _allLowerObjectTypes = {k.lower(): v for k, v in _allObjectTypes.items()}
-                # _all = list(_allLowerObjectTypes.keys()) + list(_allLowerObjectTypes.values())
                 _objectTypes = list(filter(lambda itm: (itm.lower() if isinstance(itm, str) else itm) in _allList, objectTypes))
 
                 if len(_objectTypes) != len(objectTypes):
@@ -524,9 +498,9 @@ class Collection(AbstractWrapperObject):
                     raise ValueError(f'objectTypes contains bad items: {_badObjectTypes}')
 
                 # change all valid strings to core object types
-                _objectTypes = tuple(_allObjectTypes[itm] if isinstance(itm, str) else itm for itm in _objectTypes)
+                _objectTypes = tuple(_allObjectTypes[itm.lower()] if isinstance(itm, str) else itm for itm in _objectTypes)
 
-        # create an iterator
+        # create a search iterator
         recurse = _searchCollections(self.items,
                                      objectTypes=_objectTypes,
                                      search=search,
@@ -543,7 +517,7 @@ class Collection(AbstractWrapperObject):
     def searchCycles(self, depth=0):
         """Check whether there are any cycles in the collections
         """
-        # create an iterator
+        # create a search iterator
         recurse = _searchCycles(self, depth=depth)
         for _ in recurse:
             pass
@@ -552,7 +526,7 @@ class Collection(AbstractWrapperObject):
         return recurse._cycles if recurse else ()
 
     #===========================================================================================
-    # new'Object' and other methods
+    # new<Object> and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
@@ -561,50 +535,39 @@ class Collection(AbstractWrapperObject):
 # Connections to parents:
 #=========================================================================================
 
-@newObject(Collection)
-def _newCollection(self: Project, name: str = None, items: Sequence[Any] = None, comment: str = None) -> Collection:
-    """Create new Collection.
+def _newCollection(project: Project, collectionList, _uniqueId: Optional[int] = None):
+    """Create a new collection attached to the collectionList.
 
-    See the Collection class for details.
-
-    Name is a non-empty string.
-    If name is not supplied, the next available name will be generated.
-
-    Items is a list of CCPN core-objects, e.g. Note, Peak, PeakList, etc.
-    The list of items may also contain other collections.
-    Comment is any user supplide string, if required.
-
-    An error is raised if there are any non-core objects.
-
-    Examples:
-
-    ::
-
-        project.newCollection()
-        project.newCollection(name='smallCollection', items=(Note0, Peak1, Collection2), comment='A small collection')
-
-    :param name: unique name for the Collection
-    :param items: optional single object or list of core objects, as objects or pid strings.
-    :param comment: optional user comment
+    :param project: core project
+    :param collectionList: parent collectionList
+    :param _uniqueId: _unique int identifier
     :return: a new Collection instance.
     """
 
-    # generate a unique name is not supplied
-    name = Collection._uniqueName(project=self, name=name)
-
-    apiParent = self._wrappedData
-    if items:
-        # create a new Collection with supplied core objects
-        items = Collection._checkItems(self.project, items)
-
-        apiCollection = apiParent.newCollection(name=name, collectionItems=[itm._wrappedData for itm in items],
-                                                details=comment)
-    else:
-        # create a new Collection
-        apiCollection = apiParent.newCollection(name=name, details=comment)
-
-    result = self._project._data2Obj.get(apiCollection)
+    result = Collection(project, collectionList, _uniqueId=_uniqueId)
     if result is None:
-        raise RuntimeError('Unable to generate new Collection')
+        raise RuntimeError(f'{collectionList.__class__.__name__}._newCollection: unable to generate new Collection item')
 
     return result
+
+
+def _getByTuple(collectionList,
+                name: str,
+                items: Union[List[Union[Any, str, None]], Tuple[Union[Any, str, None]]] = None,
+                comment: str = None):
+    """Create a new tuple object from the supplied parameters
+    Check whether a valid tuple can be created, otherwise raise the appropriate errors
+    CCPN Internal
+    """
+    if items:
+        items = _checkItems(collectionList._project, items)
+        _checkDuplicates(items)
+
+    newRow = (None,
+              None,
+              str(name),
+              str([itm.pid for itm in items]) if items else None,
+              comment,)
+    newRow = CollectionParameters(*newRow)
+
+    return newRow

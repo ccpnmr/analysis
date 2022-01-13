@@ -45,7 +45,7 @@ By Mouse button:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -55,8 +55,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 13:15:21 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-01-13 17:23:25 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -6104,6 +6104,8 @@ class CcpnGLWidget(QOpenGLWidget):
             mouseInAxis = self._mouseInAxis(event.pos())
 
             if mouseInAxis == GLDefs.MAINVIEW:
+
+                # strip should handle the selection of correct menu
                 selectedDict = self.getObjectsUnderMouse()
                 if PEAKSELECT in selectedDict:
 
@@ -6135,7 +6137,8 @@ class CcpnGLWidget(QOpenGLWidget):
                     menu = strip._contextMenus.get(strip.contextMenuMode)
                     strip._lastClickedObjects = selectedDict[MULTIPLETSELECT]
 
-                strip.navigateToPeakMenuMain.setEnabled(False)
+                strip._navigateToPeakMenuMain.menuAction().setVisible(False)  # created from stripMethodName
+                strip._makeStripPlotItemMain.setVisible(False)
                 if PEAKSELECT not in selectedDict:
                     _setEnabledAllItems(strip._selectedPeaksMenu, True if self.current.peaks else False)
 

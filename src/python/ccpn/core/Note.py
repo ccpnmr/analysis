@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-24 17:59:36 +0000 (Wed, November 24, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-13 17:23:25 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -156,24 +156,8 @@ class Note(AbstractWrapperObject):
             ll = text.splitlines()
             if ll:
                 return ll[0]
-        #
+
         return None
-
-    @property
-    def comment(self) -> str:
-        """Free-form text comment"""
-        comment = self._getInternalParameter(self._COMMENT)
-        return comment
-
-    @comment.setter
-    @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter()
-    def comment(self, value: str):
-        """set optional comment of note."""
-        if not isinstance(value, (str, type(None))):
-            raise ValueError("comment must be a string/None.")
-
-        self._setInternalParameter(self._COMMENT, value)
 
     #=========================================================================================
     # Implementation functions
@@ -196,7 +180,7 @@ class Note(AbstractWrapperObject):
     #=========================================================================================
 
     #===========================================================================================
-    # new'Object' and other methods
+    # new<Object> and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
 

@@ -8,7 +8,7 @@ To create a menu:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-25 15:56:55 +0100 (Mon, October 25, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-13 17:23:25 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -464,12 +464,13 @@ def _reorderPeakListAxesItem():
                     callback=_app.mainWindow.reorderPeakListAxes)
 
 
-def _makeStripPlotItem():
+def _makeStripPlotItem(menuId):
     from ccpn.framework.Framework import getApplication
 
     _app = getApplication()
     return _SCMitem(name='Make Strip Plot...',
                     typeItem=ItemTypes.get(ITEM), toolTip='Make Strip Plot from Selected Peaks', shortcut='SP',
+                    stripMethodName=f'_makeStripPlotItem{menuId}',
                     callback=partial(_app.mainWindow.makeStripPlot, includePeakLists=True, includeNmrChains=False))
 
 
@@ -491,17 +492,17 @@ def _integrate1DItem():
                     callback=_app.mainWindow.add1DIntegral)
 
 
-def _navigateToCursorPosItem(strip):
+def _navigateToCursorPosMenuItem(strip):
     return _SCMitem(name='Navigate to:',
                     typeItem=ItemTypes.get(MENU), toolTip='Show this position in the selected strip ',
                     stripMethodName='navigateCursorMenu',
                     callback=None)
 
 
-def _navigateToPeakPosItem(menuId):
+def _navigateToPeakPosMenuItem(menuId):
     return _SCMitem(name='Navigate to:',
                     typeItem=ItemTypes.get(MENU), toolTip='Show current.peak.position in the selected strip ',
-                    stripMethodName=f'navigateToPeakMenu{menuId}',
+                    stripMethodName=f'_navigateToPeakMenu{menuId}',
                     callback=None)
 
 
@@ -534,14 +535,14 @@ def _flipAxesMenuItem(strip):
 
 
 # mark positions
-def _markCursorPosItem(strip):
+def _markCursorPosMenuItem(strip):
     return _SCMitem(name='Mark in:',
                     typeItem=ItemTypes.get(MENU), toolTip='Mark this position in the selected strip ',
                     stripMethodName='markInCursorMenu',
                     callback=None)
 
 
-def _markPeakPosItem(strip):
+def _markPeakPosMenuItem(strip):
     return _SCMitem(name='Mark in:',
                     typeItem=ItemTypes.get(MENU), toolTip='Mark positions of selected peaks',
                     stripMethodName='markInPeakMenu',
@@ -566,14 +567,14 @@ def _markMultipletsItem():
                     callback=_app.mainWindow.markSelectedMultiplets, shortcut='UM')
 
 
-def _markAxesItem(strip):
+def _markAxesMenuItem(strip):
     return _SCMitem(name='Mark Axes:',
                     typeItem=ItemTypes.get(MENU), toolTip='Mark axisCodes ',
                     stripMethodName='markAxesMenu',
                     callback=None)
 
 
-def _markAxesItem2(strip):
+def _markAxesMenuItem2(strip):
     return _SCMitem(name='Mark Axes:',
                     typeItem=ItemTypes.get(MENU), toolTip='Mark axisCodes ',
                     stripMethodName='markAxesMenu2',
@@ -592,7 +593,7 @@ def _markCursorYPosItem(strip):
                     callback=partial(strip.markAxisIndices, indices=(1,)))
 
 
-def _markPeakXYPosItem(strip):
+def _markPeakXYPosMenuItem(strip):
     return _SCMitem(name='Mark Selected Peaks:',
                     typeItem=ItemTypes.get(MENU), toolTip='Mark selected peaks ',
                     stripMethodName='markXYInPeakMenu',
@@ -600,35 +601,35 @@ def _markPeakXYPosItem(strip):
 
 
 # axis items for the main view
-def _copyXAxisRangeFromStripItem(strip):
+def _copyXAxisRangeFromStripMenuItem(strip):
     return _SCMitem(name='Copy X Axis Range From:',
                     typeItem=ItemTypes.get(MENU), toolTip='Copy X axis range from selected strip',
                     stripMethodName='copyXAxisFromMenu',
                     callback=None)
 
 
-def _copyYAxisRangeFromStripItem(strip):
+def _copyYAxisRangeFromStripMenuItem(strip):
     return _SCMitem(name='Copy Y Axis Range From:',
                     typeItem=ItemTypes.get(MENU), toolTip='Copy Y axis range from selected strip',
                     stripMethodName='copyYAxisFromMenu',
                     callback=None)
 
 
-def _copyAllAxisRangeFromStripItem(strip):
+def _copyAllAxisRangeFromStripMenuItem(strip):
     return _SCMitem(name='Copy X/Y Axis Ranges From:',
                     typeItem=ItemTypes.get(MENU), toolTip='Copy X and Y axis range from selected strip',
                     stripMethodName='copyAllAxisFromMenu',
                     callback=None)
 
 
-def _copyXAxisCodeRangeFromStripItem(strip):
+def _copyXAxisCodeRangeFromStripMenuItem(strip):
     return _SCMitem(name='Copy Axis Range to %s from:' % strip.axisCodes[0],
                     typeItem=ItemTypes.get(MENU), toolTip='Copy axis range to %s from selected strip' % strip.axisCodes[0],
                     stripMethodName='matchXAxisCodeToMenu',
                     callback=None)
 
 
-def _copyYAxisCodeRangeFromStripItem(strip):
+def _copyYAxisCodeRangeFromStripMenuItem(strip):
     return _SCMitem(name='Copy Axis Range to %s from:' % strip.axisCodes[1],
                     typeItem=ItemTypes.get(MENU), toolTip='Copy axis range to %s from selected strip' % strip.axisCodes[1],
                     stripMethodName='matchYAxisCodeToMenu',
@@ -636,7 +637,7 @@ def _copyYAxisCodeRangeFromStripItem(strip):
 
 
 # axis items for the axis and corner menus
-def _copyXAxisRangeFromStripItem2(strip):
+def _copyXAxisRangeFromStripMenuItem2(strip):
     """Separate item needed for the new axis menu
     """
     return _SCMitem(name='Copy X Axis Range From:',
@@ -645,7 +646,7 @@ def _copyXAxisRangeFromStripItem2(strip):
                     callback=None)
 
 
-def _copyYAxisRangeFromStripItem2(strip):
+def _copyYAxisRangeFromStripMenuItem2(strip):
     """Separate item needed for the new axis menu
     """
     return _SCMitem(name='Copy Y Axis Range From:',
@@ -654,21 +655,21 @@ def _copyYAxisRangeFromStripItem2(strip):
                     callback=None)
 
 
-def _copyAllAxisRangeFromStripItem2(strip):
+def _copyAllAxisRangeFromStripMenuItem2(strip):
     return _SCMitem(name='Copy X/Y Axis Ranges From:',
                     typeItem=ItemTypes.get(MENU), toolTip='Copy X and Y axis range from selected strip',
                     stripMethodName='copyAllAxisFromMenu2',
                     callback=None)
 
 
-def _copyXAxisCodeRangeFromStripItem2(strip):
+def _copyXAxisCodeRangeFromStripMenuItem2(strip):
     return _SCMitem(name='Copy Axis Range to %s from:' % strip.axisCodes[0],
                     typeItem=ItemTypes.get(MENU), toolTip='Copy axis range to %s from selected strip' % strip.axisCodes[0],
                     stripMethodName='matchXAxisCodeToMenu2',
                     callback=None)
 
 
-def _copyYAxisCodeRangeFromStripItem2(strip):
+def _copyYAxisCodeRangeFromStripMenuItem2(strip):
     return _SCMitem(name='Copy Axis Range to %s from:' % strip.axisCodes[1],
                     typeItem=ItemTypes.get(MENU), toolTip='Copy axis range to %s from selected strip' % strip.axisCodes[1],
                     stripMethodName='matchYAxisCodeToMenu2',
@@ -787,11 +788,11 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
         _separator(),
 
         _marksItem(guiStrip1d),
-        _markAxesItem(guiStrip1d),
+        _markAxesMenuItem(guiStrip1d),
         _clearMarksItem(guiStrip1d),
         _separator(),
 
-        _navigateToCursorPosItem(guiStrip1d),
+        _navigateToCursorPosMenuItem(guiStrip1d),
         _copyAxesMenuItem(guiStrip1d),
         _separator(),
 
@@ -817,9 +818,9 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
 
     # copy axes submenu - add to Strip._copyAxesMenu
     items = [
-        _copyAllAxisRangeFromStripItem(guiStrip1d),
-        _copyXAxisRangeFromStripItem(guiStrip1d),
-        _copyYAxisRangeFromStripItem(guiStrip1d),
+        _copyAllAxisRangeFromStripMenuItem(guiStrip1d),
+        _copyXAxisRangeFromStripMenuItem(guiStrip1d),
+        _copyYAxisRangeFromStripMenuItem(guiStrip1d),
         ]
     items = [itm for itm in items if itm is not None]
     # attach to the _copyAxesMenu submenu
@@ -873,7 +874,7 @@ def _get1dPeakMenuItems(menuId) -> list:
         _integrate1DItem(),
         _separator(),
 
-        _navigateToPeakPosItem(menuId),
+        _navigateToPeakPosMenuItem(menuId),
         _markPeaksItem()
         ]
     return [itm for itm in items if itm is not None]
@@ -945,11 +946,11 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         _separator(),
 
         _marksItem(guiStripNd),
-        _markAxesItem(guiStripNd),
+        _markAxesMenuItem(guiStripNd),
         _clearMarksItem(guiStripNd),
         _separator(),
 
-        _navigateToCursorPosItem(guiStripNd),
+        _navigateToCursorPosMenuItem(guiStripNd),
         _copyAxesMenuItem(guiStripNd),
         _flipAxesMenuItem(guiStripNd),
         _separator(),
@@ -982,11 +983,11 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
 
     # copy axes submenu - add to Strip._copyAxesMenu
     items = [
-        _copyAllAxisRangeFromStripItem(guiStripNd),
-        _copyXAxisRangeFromStripItem(guiStripNd),
-        _copyYAxisRangeFromStripItem(guiStripNd),
-        _copyXAxisCodeRangeFromStripItem(guiStripNd),
-        _copyYAxisCodeRangeFromStripItem(guiStripNd),
+        _copyAllAxisRangeFromStripMenuItem(guiStripNd),
+        _copyXAxisRangeFromStripMenuItem(guiStripNd),
+        _copyYAxisRangeFromStripMenuItem(guiStripNd),
+        _copyXAxisCodeRangeFromStripMenuItem(guiStripNd),
+        _copyYAxisCodeRangeFromStripMenuItem(guiStripNd),
         ]
     items = [itm for itm in items if itm is not None]
     # attach to the _copyAxesMenu submenu
@@ -1049,14 +1050,14 @@ def _getNdPeakMenuItems(menuId) -> list:
         _reorderPeakListAxesItem(),
         _separator(),
 
-        _makeStripPlotItem(),
+        _makeStripPlotItem(menuId),
         _calibrateFromPeaks(),
         _separator(),
 
         _newMultipletItem(),
         _separator(),
 
-        _navigateToPeakPosItem(menuId),
+        _navigateToPeakPosMenuItem(menuId),
         _markPeaksItem(),
         ]
     return [itm for itm in items if itm is not None]
@@ -1130,27 +1131,27 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import MAINVIEW, BOTTOMAXIS, RIGHTAXI
 def _addCopyMenuItems(guiStrip, viewPort, thisMenu, is1D):
     items = copyAttribs = matchAttribs = ()
     if viewPort in (MAINVIEW, AXISCORNER):
-        items = (_copyAllAxisRangeFromStripItem2(guiStrip),
-                 _copyXAxisRangeFromStripItem2(guiStrip),
-                 _copyYAxisRangeFromStripItem2(guiStrip),)
+        items = (_copyAllAxisRangeFromStripMenuItem2(guiStrip),
+                 _copyXAxisRangeFromStripMenuItem2(guiStrip),
+                 _copyYAxisRangeFromStripMenuItem2(guiStrip),)
         if not is1D:
-            items = items + (_copyXAxisCodeRangeFromStripItem2(guiStrip),
-                             _copyYAxisCodeRangeFromStripItem2(guiStrip),
+            items = items + (_copyXAxisCodeRangeFromStripMenuItem2(guiStrip),
+                             _copyYAxisCodeRangeFromStripMenuItem2(guiStrip),
                              )
         items = items + (_separator(),)
 
     elif viewPort == BOTTOMAXIS:
-        items = (_copyAllAxisRangeFromStripItem2(guiStrip),
-                 _copyXAxisRangeFromStripItem2(guiStrip),)
+        items = (_copyAllAxisRangeFromStripMenuItem2(guiStrip),
+                 _copyXAxisRangeFromStripMenuItem2(guiStrip),)
         if not is1D:
-            items = items + (_copyXAxisCodeRangeFromStripItem2(guiStrip),
+            items = items + (_copyXAxisCodeRangeFromStripMenuItem2(guiStrip),
                              )
         items = items + (_separator(),)
     elif viewPort == RIGHTAXIS:
-        items = (_copyAllAxisRangeFromStripItem2(guiStrip),
-                 _copyYAxisRangeFromStripItem2(guiStrip),)
+        items = (_copyAllAxisRangeFromStripMenuItem2(guiStrip),
+                 _copyYAxisRangeFromStripMenuItem2(guiStrip),)
         if not is1D:
-            items = items + (_copyYAxisCodeRangeFromStripItem2(guiStrip),
+            items = items + (_copyYAxisCodeRangeFromStripMenuItem2(guiStrip),
                              )
         items = items + (_separator(),)
 

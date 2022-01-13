@@ -97,7 +97,7 @@ peaks are assigned to NmrAtoms.
 A **ChemicalShiftList** object is a container for **ChemicalShift** objects, which represent
 observed chemical shifts.
 
-**StructureData** objects serve to group RestraintTables and other input and output from a
+**StructureData** objects serve to group RestraintTables/ViolationTables and other input and output from a
 calculation.
 
 A **RestraintTable** contains **Restraint** Objects of a specific type (distance, dihedral, etc.).
@@ -388,6 +388,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #     Project.structureData
 #     Project.structureEnsembles
 #     Project.substances
+#     Project.violationTables
 #     Project.windows
 #     Residue.atoms
 #     Residue.getAtom
@@ -452,9 +453,11 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #     StructureData.getRestraint
 #     StructureData.getRestraintContribution
 #     StructureData.getRestraintTable
+#     StructureData.getViolationTable
 #     StructureData.restraintContributions
 #     StructureData.restraintTables
 #     StructureData.restraints
+#     StructureData.violationTables
 #     StructureEnsemble.getModel
 #     StructureEnsemble.models
 #=========================================================================================
@@ -477,7 +480,7 @@ _coreImportOrder = (
     'ChemicalShiftList', '_OldChemicalShift',
     'StructureData', 'RestraintTable', 'Restraint',
     'RestraintContribution', 'CalculationStep', 'Data', 'StructureEnsemble', 'Model', 'Note',
-    'PeakCluster', 'MultipletList', 'Multiplet', 'DataTable', 'Collection'
+    'PeakCluster', 'MultipletList', 'Multiplet', 'DataTable', 'ViolationTable'
     )
 
 # This list includes ui classes (added below)

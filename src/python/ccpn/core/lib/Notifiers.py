@@ -19,7 +19,7 @@ April 2017: First design by Geerten Vuister
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:21:21 +0100 (Mon, September 13, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-13 17:23:25 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -485,12 +485,12 @@ class NotifierBase(object):
         objNotifiers = self._getObjectNotifiersDict()
         notifier = Notifier(theObject=theObject, triggers=triggers, targetName=targetName,
                             callback=callback, **kwargs)
-        id = notifier.id
+        _id = notifier.id
         # this should never happen; hence just a check
-        if id in objNotifiers:
-            raise RuntimeError('%s: a notifier with id "%s" already exists (%s)' % (self, id, objNotifiers[id]))
+        if _id in objNotifiers:
+            raise RuntimeError('%s: a notifier with id "%s" already exists (%s)' % (self, _id, objNotifiers[_id]))
         # add the notifier
-        objNotifiers[id] = notifier
+        objNotifiers[_id] = notifier
         return notifier
 
     def setGuiNotifier(self, theObject: 'AbstractWrapperObject', triggers: list, targetName: str, callback: Callable[..., Optional[str]], **kwargs) -> Notifier:
@@ -511,12 +511,12 @@ class NotifierBase(object):
         objNotifiers = self._getObjectNotifiersDict()
         notifier = GuiNotifier(theObject=theObject, triggers=triggers, targetName=targetName,
                                callback=callback, **kwargs)
-        id = notifier.id
+        _id = notifier.id
         # this should never happen; hence just a check
-        if id in objNotifiers:
-            raise RuntimeError('%s: a notifier with id "%s" already exists (%s)' % (self, id, objNotifiers[id]))
+        if _id in objNotifiers:
+            raise RuntimeError('%s: a notifier with id "%s" already exists (%s)' % (self, _id, objNotifiers[_id]))
         # add the notifier
-        objNotifiers[id] = notifier
+        objNotifiers[_id] = notifier
         return notifier
 
     def deleteNotifier(self, notifier: Notifier):

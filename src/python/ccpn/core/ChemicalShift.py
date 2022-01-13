@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-08 13:27:03 +0000 (Wed, December 08, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-13 17:23:24 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -26,22 +26,21 @@ __date__ = "$Date: 2021-08-02 10:55:54 +0100 (Mon, August 02, 2021) $"
 # Start of code
 #=========================================================================================
 
-import pandas as pd
-from collections import OrderedDict
 from functools import partial
 from typing import Optional, Union
 from collections import namedtuple
+import pandas as pd
+
 from ccpn.core import _importOrder
 from ccpn.core.Project import Project
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.lib.ContextManagers import ccpNmrV3CoreSetter, undoStackBlocking, deleteV3Object, ccpNmrV3CoreUndoBlock
-# from ccpn.core.lib.ContextManagers import checkDeleted
 from ccpn.core.lib import Pid
-from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.core.ChemicalShiftList import CS_UNIQUEID, CS_ISDELETED, CS_VALUE, CS_VALUEERROR, \
     CS_FIGUREOFMERIT, CS_NMRATOM, CS_CHAINCODE, CS_SEQUENCECODE, CS_RESIDUETYPE, CS_ATOMNAME, \
-    CS_COMMENT, CS_COLUMNS, CS_CLASSNAME
+    CS_COMMENT, CS_COLUMNS
+from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
 from ccpn.util.Common import makeIterableList
 from ccpn.util.decorators import logCommand
 
@@ -54,7 +53,7 @@ ShiftParameters = namedtuple('ShiftParameters', f'{CS_UNIQUEID} {CS_ISDELETED} {
                                                 f'{CS_COMMENT} ')
 
 
-class ChemicalShift(NotifierBase):
+class ChemicalShift(V3CoreObjectABC):
     """Chemical Shift, containing a ChemicalShift value for the NmrAtom they belong to.
 
     Chemical shift values are continuously averaged over peaks assigned to the NmrAtom,
@@ -80,71 +79,21 @@ class ChemicalShift(NotifierBase):
     # the attribute name used by current
     _currentAttributeName = 'chemicalShifts'
 
-    def __init__(self, chemicalShiftList, _uniqueId):
+    def __init__(self, project, chemicalShiftList, _uniqueId):
         """Create a new instance of v3 Shift
 
         _unique Id links the shift to the dataFrame storage and MUST be specified
         before the shift can be used
         """
-        self._chemicalShiftList = chemicalShiftList
-        self._project = chemicalShiftList.project
-        if not isinstance(_uniqueId, (int, type(None))):
-            raise ValueError(f'{self.className}.__init__: uniqueId {_uniqueId} must be int or None')
-        self._uniqueId = _uniqueId
-        self._deletedId = None
-        self._isDeleted = False
-        # this should never change as cannot rename
-        self._ccpnSortKey = (id(self.project), _importOrder.index(self._oldClassName), self._uniqueId)
+        super().__init__(project, chemicalShiftList, _uniqueId)
+
         self._oldValue = self._oldValueError = None
-        self._oldNmrAtom = []
 
         # All other properties are derived from the chemicalShiftList pandas dataframe
-
-    def __str__(self):
-        """Readable string representation; potentially subclassed
-        """
-        return ("<%s-Deleted>" % self.pid) if self._isDeleted else ("<%s>" % self.pid)
-
-    def __repr__(self):
-        """Object string representation; compatible with application.get()
-        """
-        return f"'{self.__str__()}'"
-
-    def __bool__(self):
-        """Truth value: true - wrapper classes are never empty
-        """
-        return True
-
-    def __lt__(self, other):
-        """Ordering implementation function, necessary for making lists sortable.
-        """
-        if hasattr(other, '_ccpnSortKey'):
-            return self._ccpnSortKey < other._ccpnSortKey
-        else:
-            return id(self) < id(other)
-
-    def __eq__(self, other):
-        """Python 2 behaviour - objects equal only to themselves.
-        """
-        return self is other
-
-    def __ne__(self, other):
-        """Python 2 behaviour - objects equal only to themselves.
-        """
-        return self is not other
-
-    def __hash__(self):
-        return id(self)
 
     #=========================================================================================
     # CCPN Properties
     #=========================================================================================
-
-    @property
-    def project(self) -> 'Project':
-        """The Project (root)containing the object.
-        """
-        return self._project
 
     @property
     def id(self) -> str:
@@ -153,61 +102,30 @@ class ChemicalShift(NotifierBase):
         with the value of one or more key attributes that uniquely identify the object in context
         E.g. 'default.1'
         """
-        return self._deletedId if self._isDeleted else Pid.IDSEP.join((self._chemicalShiftList.name, str(self._uniqueId)))
+        return self._deletedId if self._isDeleted else Pid.IDSEP.join((self._wrapperList.name, str(self._uniqueId)))
 
     @property
-    def pid(self) -> Pid.Pid:
-        """Identifier for the object, unique within the project.
-        Set automatically from the short class name, the parent chemicalShiftList and object.uniqueId
-        E.g. 'SH:default.1'
-        """
-        return Pid.Pid(Pid.PREFIXSEP.join((self.shortClassName, self.id)))
-
-    @property
-    def longPid(self) -> Pid.Pid:
-        """Identifier for the object, unique within the project.
-        Set automatically from the full class name, the parent chemicalShiftList and object.uniqueId
-        E.g. 'ChemicalShift:default.1'
-        """
-        return Pid.Pid(Pid.PREFIXSEP.join((self.className, self.id)))
-
-    @property
-    def _parent(self):
+    def chemicalShiftList(self):
         """ChemicalShiftList containing ChemicalShift.
         """
-        return self._chemicalShiftList
-
-    chemicalShiftList = _parent
+        return self._wrapperList
 
     #=========================================================================================
     # Class Properties and methods
     #=========================================================================================
 
     @property
-    def uniqueId(self) -> int:
-        """unique identifier of ChemicalShift.
+    def name(self) -> str:
+        """Not allowed for ChemicalShift
         """
-        return self._uniqueId
+        raise RuntimeError('ChemicalShift does not have attribute name')
 
-    @property
-    def isDeleted(self) -> bool:
-        """True if this object is deleted.
+    @name.setter
+    @logCommand(get='self', isProperty=True)
+    def name(self, value: str):
+        """Not allowed for ChemicalShift
         """
-        return self._isDeleted
-
-    @property
-    def _deleted(self) -> bool:
-        """True if this object is deleted.
-        CCPN Internal - allows internal deletion of the ChemicalShift
-        sets/clears the value in the chemicalShiftLists dataframe
-        """
-        return self._chemicalShiftList._getShiftAttribute(self._uniqueId, CS_ISDELETED, bool)
-
-    @_deleted.setter
-    def _deleted(self, value: bool):
-        if not isinstance(value, bool):
-            raise ValueError(f'{self.className}.isDeleted must be True/False')
-        self._chemicalShiftList._setShiftAttribute(self._uniqueId, CS_ISDELETED, value)
+        raise RuntimeError('ChemicalShift name cannot be set')
 
     #~~~~~~~~~~~~~~~~
 
@@ -217,7 +135,7 @@ class ChemicalShift(NotifierBase):
     def value(self) -> Optional[float]:
         """shift value of ChemicalShift, in unit as defined in the ChemicalShiftList.
         """
-        return self._chemicalShiftList._getShiftAttribute(self._uniqueId, CS_VALUE, float)
+        return self._wrapperList._getAttribute(self._uniqueId, CS_VALUE, float)
 
     @value.setter
     @logCommand(get='self', isProperty=True)
@@ -228,10 +146,10 @@ class ChemicalShift(NotifierBase):
         """
         if not isinstance(val, (float, int, type(None))):
             raise ValueError(f'{self.className}.value must be of type float, int or None')
-        _nmrAtomPid = self._chemicalShiftList._getShiftAttribute(self._uniqueId, CS_NMRATOM, str)
+        _nmrAtomPid = self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str)
         if _nmrAtomPid:
             raise ValueError(f'{self.className}.value cannot be changed with attached nmrAtom')
-        self._chemicalShiftList._setShiftAttribute(self._uniqueId, CS_VALUE, val)
+        self._wrapperList._setAttribute(self._uniqueId, CS_VALUE, val)
 
     #~~~~~~~~~~~~~~~~
 
@@ -239,7 +157,7 @@ class ChemicalShift(NotifierBase):
     def valueError(self) -> Optional[float]:
         """shift valueError of ChemicalShift, in unit as defined in the ChemicalShiftList.
         """
-        return self._chemicalShiftList._getShiftAttribute(self._uniqueId, CS_VALUEERROR, float)
+        return self._wrapperList._getAttribute(self._uniqueId, CS_VALUEERROR, float)
 
     @valueError.setter
     @logCommand(get='self', isProperty=True)
@@ -250,10 +168,10 @@ class ChemicalShift(NotifierBase):
         """
         if not isinstance(value, (float, int, type(None))):
             raise ValueError(f'{self.className}.valueError must be of type float, int or None')
-        _nmrAtomPid = self._chemicalShiftList._getShiftAttribute(self._uniqueId, CS_NMRATOM, str)
+        _nmrAtomPid = self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str)
         if _nmrAtomPid:
             raise ValueError(f'{self.className}.value cannot be changed with attached nmrAtom')
-        self._chemicalShiftList._setShiftAttribute(self._uniqueId, CS_VALUEERROR, value)
+        self._wrapperList._setAttribute(self._uniqueId, CS_VALUEERROR, value)
 
     #~~~~~~~~~~~~~~~~
 
@@ -261,7 +179,7 @@ class ChemicalShift(NotifierBase):
     def figureOfMerit(self) -> Optional[float]:
         """Figure of Merit for ChemicalShift, between 0.0 and 1.0 inclusive.
         """
-        return self._chemicalShiftList._getShiftAttribute(self._uniqueId, CS_FIGUREOFMERIT, float)
+        return self._wrapperList._getAttribute(self._uniqueId, CS_FIGUREOFMERIT, float)
 
     @figureOfMerit.setter
     @logCommand(get='self', isProperty=True)
@@ -274,7 +192,7 @@ class ChemicalShift(NotifierBase):
             raise ValueError(f'{self.className}.figureOfMerit must be of type float, int or None')
         if value is not None and not (MINFOM <= value <= MAXFOM):
             raise ValueError(f'{self.className}.figureOfMerit must be in range [{MINFOM} - {MAXFOM}]')
-        self._chemicalShiftList._setShiftAttribute(self._uniqueId, CS_FIGUREOFMERIT, value)
+        self._wrapperList._setAttribute(self._uniqueId, CS_FIGUREOFMERIT, value)
 
     #~~~~~~~~~~~~~~~~
 
@@ -282,7 +200,7 @@ class ChemicalShift(NotifierBase):
     def nmrAtom(self) -> Optional[NmrAtom]:
         """Attached NmrAtom.
         """
-        _nmrAtomPid = self._chemicalShiftList._getShiftAttribute(self._uniqueId, CS_NMRATOM, str)
+        _nmrAtomPid = self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str)
         return self.project.getByPid(_nmrAtomPid)
 
     def _nmrAtom(self, value: NmrAtom):
@@ -292,14 +210,14 @@ class ChemicalShift(NotifierBase):
         if value is None:
             if nat is None:
                 return
-            self._chemicalShiftList._setShiftAttribute(self._uniqueId, CS_NMRATOM, None)
+            self._wrapperList._setAttribute(self._uniqueId, CS_NMRATOM, None)
             nat.chemicalShifts.remove(self)
 
         else:
             # nmrAtom and derived properties
-            self._chemicalShiftList._setShiftAttribute(self._uniqueId, CS_NMRATOM, str(value.pid))
-            self._chemicalShiftList._setShiftAttributes(self._uniqueId, CS_CHAINCODE, CS_ATOMNAME,
-                                                        tuple(val or None for val in value.pid.fields))
+            self._wrapperList._setAttribute(self._uniqueId, CS_NMRATOM, str(value.pid))
+            self._wrapperList._setAttributes(self._uniqueId, CS_CHAINCODE, CS_ATOMNAME,
+                                             tuple(val or None for val in value.pid.fields))
             if nat:
                 nat.chemicalShifts.remove(self)
             value.chemicalShifts.append(self)
@@ -333,15 +251,15 @@ class ChemicalShift(NotifierBase):
 
             if not isinstance(_nmrAtom, NmrAtom):
                 raise ValueError(f'{self.className}.nmrAtom: {value} must be of type NmrAtom')
-            if self._chemicalShiftList._searchChemicalShifts(nmrAtom=_nmrAtom):
+            if self._wrapperList._searchChemicalShifts(nmrAtom=_nmrAtom):
                 raise ValueError(f'{self.className}.nmrAtom: {_nmrAtom.pid} already exists')
             value = _nmrAtom
 
         with undoStackBlocking() as addUndoItem:
             if _oldNmrAt is None:
                 # previously empty - remember the OLD settings - is only required by undo/redo to give previous state
-                _oldSettings = self._chemicalShiftList._getShiftAttributes(self._uniqueId, CS_CHAINCODE, CS_ATOMNAME, (str, str, str, str))
-                addUndoItem(undo=partial(self._chemicalShiftList._setShiftAttributes, self._uniqueId, CS_CHAINCODE, CS_ATOMNAME, _oldSettings), )
+                _oldSettings = self._wrapperList._getAttributes(self._uniqueId, CS_CHAINCODE, CS_ATOMNAME, (str, str, str, str))
+                addUndoItem(undo=partial(self._wrapperList._setAttributes, self._uniqueId, CS_CHAINCODE, CS_ATOMNAME, _oldSettings), )
 
             # update the nmrAtom
             self._nmrAtom(value)
@@ -350,8 +268,8 @@ class ChemicalShift(NotifierBase):
 
             if value is None:
                 # now empty - remember the NEW settings - is only required by undo/redo to give new state
-                _newSettings = self._chemicalShiftList._getShiftAttributes(self._uniqueId, CS_CHAINCODE, CS_ATOMNAME, (str, str, str, str))
-                addUndoItem(redo=partial(self._chemicalShiftList._setShiftAttributes, self._uniqueId, CS_CHAINCODE, CS_ATOMNAME, _newSettings), )
+                _newSettings = self._wrapperList._getAttributes(self._uniqueId, CS_CHAINCODE, CS_ATOMNAME, (str, str, str, str))
+                addUndoItem(redo=partial(self._wrapperList._setAttributes, self._uniqueId, CS_CHAINCODE, CS_ATOMNAME, _newSettings), )
 
     #~~~~~~~~~~~~~~~~
 
@@ -360,7 +278,7 @@ class ChemicalShift(NotifierBase):
         """chainCode for attached nmrAtom.
         Optional user value if nmrAtom is None
         """
-        return self._chemicalShiftList._getShiftAttribute(self._uniqueId, CS_CHAINCODE, str)
+        return self._wrapperList._getAttribute(self._uniqueId, CS_CHAINCODE, str)
 
     @chainCode.setter
     @logCommand(get='self', isProperty=True)
@@ -374,11 +292,11 @@ class ChemicalShift(NotifierBase):
         """
         if not isinstance(value, (str, type(None))):
             raise ValueError(f'{self.className}.chainCode must be of type str or None')
-        _nmrAtomPid = self._chemicalShiftList._getShiftAttribute(self._uniqueId, CS_NMRATOM, str)
+        _nmrAtomPid = self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str)
         if _nmrAtomPid:
             raise RuntimeError(f'{self.className}.chainCode: derived value, cannot modify when nmrAtom is set')
         # only set if the nmrAtom has not been set
-        self._chemicalShiftList._setShiftAttribute(self._uniqueId, CS_CHAINCODE, value)
+        self._wrapperList._setAttribute(self._uniqueId, CS_CHAINCODE, value)
 
     #~~~~~~~~~~~~~~~~
 
@@ -387,7 +305,7 @@ class ChemicalShift(NotifierBase):
         """sequenceCode for attached nmrAtom.
         Optional user value if nmrAtom is None
         """
-        return self._chemicalShiftList._getShiftAttribute(self._uniqueId, CS_SEQUENCECODE, str)
+        return self._wrapperList._getAttribute(self._uniqueId, CS_SEQUENCECODE, str)
 
     @sequenceCode.setter
     @logCommand(get='self', isProperty=True)
@@ -401,11 +319,11 @@ class ChemicalShift(NotifierBase):
         """
         if not isinstance(value, (str, type(None))):
             raise ValueError(f'{self.className}.sequenceCode must be of type str or None')
-        _nmrAtomPid = self._chemicalShiftList._getShiftAttribute(self._uniqueId, CS_NMRATOM, str)
+        _nmrAtomPid = self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str)
         if _nmrAtomPid:
             raise RuntimeError(f'{self.className}.sequenceCode: derived value, cannot modify when nmrAtom is set')
         # only set if the nmrAtom has not been set
-        self._chemicalShiftList._setShiftAttribute(self._uniqueId, CS_SEQUENCECODE, value)
+        self._wrapperList._setAttribute(self._uniqueId, CS_SEQUENCECODE, value)
 
     #~~~~~~~~~~~~~~~~
 
@@ -414,7 +332,7 @@ class ChemicalShift(NotifierBase):
         """residueType for attached nmrAtom.
         Optional user value if nmrAtom is None
         """
-        return self._chemicalShiftList._getShiftAttribute(self._uniqueId, CS_RESIDUETYPE, str)
+        return self._wrapperList._getAttribute(self._uniqueId, CS_RESIDUETYPE, str)
 
     @residueType.setter
     @logCommand(get='self', isProperty=True)
@@ -428,11 +346,11 @@ class ChemicalShift(NotifierBase):
         """
         if not isinstance(value, (str, type(None))):
             raise ValueError(f'{self.className}.residueType must be of type str or None')
-        _nmrAtomPid = self._chemicalShiftList._getShiftAttribute(self._uniqueId, CS_NMRATOM, str)
+        _nmrAtomPid = self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str)
         if _nmrAtomPid:
             raise RuntimeError(f'{self.className}.residueType: derived value, cannot modify when nmrAtom is set')
         # only set if the nmrAtom has not been set
-        self._chemicalShiftList._setShiftAttribute(self._uniqueId, CS_RESIDUETYPE, value)
+        self._wrapperList._setAttribute(self._uniqueId, CS_RESIDUETYPE, value)
 
     #~~~~~~~~~~~~~~~~
 
@@ -441,7 +359,7 @@ class ChemicalShift(NotifierBase):
         """atomName for attached nmrAtom
         Optional user value if nmrAtom is None
         """
-        return self._chemicalShiftList._getShiftAttribute(self._uniqueId, CS_ATOMNAME, str)
+        return self._wrapperList._getAttribute(self._uniqueId, CS_ATOMNAME, str)
 
     @atomName.setter
     @logCommand(get='self', isProperty=True)
@@ -455,32 +373,11 @@ class ChemicalShift(NotifierBase):
         """
         if not isinstance(value, (str, type(None))):
             raise ValueError(f'{self.className}.atomName must be of type str or None')
-        _nmrAtomPid = self._chemicalShiftList._getShiftAttribute(self._uniqueId, CS_NMRATOM, str)
+        _nmrAtomPid = self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str)
         if _nmrAtomPid:
             raise RuntimeError(f'{self.className}.atomName: derived value, cannot modify when nmrAtom is set')
         # only set if the nmrAtom has not been set
-        self._chemicalShiftList._setShiftAttribute(self._uniqueId, CS_ATOMNAME, value)
-
-    #~~~~~~~~~~~~~~~~
-
-    @property
-    def comment(self) -> Optional[str]:
-        """comment for attached nmrAtom.
-        """
-        return self._chemicalShiftList._getShiftAttribute(self._uniqueId, CS_COMMENT, str)
-
-    @comment.setter
-    @logCommand(get='self', isProperty=True)
-    @ccpNmrV3CoreSetter()
-    def comment(self, value: Optional[str]):
-        """Set optional comment
-        Must be of type string or None
-
-        :param value:
-        """
-        if not isinstance(value, (str, type(None))):
-            raise ValueError(f'{self.className}.comment must be of type str or None')
-        self._chemicalShiftList._setShiftAttribute(self._uniqueId, CS_COMMENT, value)
+        self._wrapperList._setAttribute(self._uniqueId, CS_ATOMNAME, value)
 
     #~~~~~~~~~~~~~~~~
 
@@ -496,7 +393,7 @@ class ChemicalShift(NotifierBase):
     def allAssignedPeaks(self) -> Optional[tuple]:
         """All assigned peaks for attached nmrAtom.
         """
-        _nmrAtomPid = self._chemicalShiftList._getShiftAttribute(self._uniqueId, CS_NMRATOM, str)
+        _nmrAtomPid = self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str)
         _nmrAtom = self.project.getByPid(_nmrAtomPid)
         if _nmrAtom:
             return tuple(set(makeIterableList(_nmrAtom.assignedPeaks)))
@@ -505,70 +402,24 @@ class ChemicalShift(NotifierBase):
     # Implementation functions - necessary as there is no abstractWrapper object
     #=========================================================================================
 
+    def rename(self, value: str):
+        """Not allowed for ChemicalShift
+        """
+        raise RuntimeError('ChemicalShift cannot be renamed')
+
     def _resetUniqueId(self, value):
         """Reset the uniqueId
         CCPN Internal - although not sure whether actually required here
         """
-        # if self._chemicalShiftList._searchChemicalShifts(uniqueId=value):
+        # if self._wrapperList._searchChemicalShifts(uniqueId=value):
         #     raise ValueError(f'{self.className}._resetUniqueId: uniqueId {value} already exists')
         self._uniqueId = int(value)
         self._ccpnSortKey = (id(self.project), _importOrder.index(self._oldClassName), self._uniqueId)
 
-    def _finaliseAction(self, action: str):
-        """Do wrapper level finalisation, and execute all notifiers
-        action is one of: 'create', 'delete', 'change', 'rename'
-        """
-        project = self.project
-        if action == 'create':
-            # housekeeping -
-            #   handle the modifying of __str__/__repr__ here so that it does not require
-            #   extra calls to _isDeleted which may crash on loose objects in the undo deque (or elsewhere)
-            #   update the pid2Obj list
-            self._flaggedForDelete = False
-            self._deleted = False
-            self._isDeleted = False
-            project._finalisePid2Obj(self, 'create')
-        elif action == 'delete':
-            self._flaggedForDelete = True
-            self._deletedId = str(self.id)
-            self._deleted = True
-            self._isDeleted = True
-            project._finalisePid2Obj(self, 'delete')
-
-        if project._notificationBlanking:
-            # do not call external notifiers
-            # structures should be in a valid state at this point
-            return
-
-        # notify any external objects - these should NOT modify any objects/structures
-        className = self.className
-        # NB 'AbstractWrapperObject' not currently in use (Sep 2016), but kept for future needs
-        iterator = (project._context2Notifiers.setdefault((name, action), OrderedDict())
-                    for name in (className, 'AbstractWrapperObject'))
-        pendingNotifications = project._pendingNotifications
-
-        if action == 'rename':
-            # Special case - cannot rename chemicalShift
-            pass
-
-        else:
-            # Normal case - just call notifiers - as per AbstractWrapperObject
-            if project._notificationSuspension and action != 'delete':
-                # NB Deletion notifiers must currently be executed immediately
-                for dd in iterator:
-                    for notifier, onceOnly in dd.items():
-                        pendingNotifications.append((notifier, onceOnly, self))
-            else:
-                for dd in iterator:
-                    for notifier in tuple(dd):
-                        notifier(self)
-
-        return True
-
     def delete(self):
         """Delete the shift
         """
-        self.chemicalShiftList.deleteChemicalShift(uniqueId=self._uniqueId)
+        self._wrapperList.deleteChemicalShift(uniqueId=self._uniqueId)
         # raise RuntimeError(f'{self.className}.delete: Please use ChemicalShiftList.deleteChemicalShift()')  # optional error-trap
 
     def _updateNmrAtomShifts(self):
@@ -579,29 +430,6 @@ class ChemicalShift(NotifierBase):
         # must assume that the shift value is correct at this point
         if _nmrAtom:
             _nmrAtom.chemicalShifts.append(self)
-
-    def getByPid(self, pid: str):
-        """Get an arbitrary data object from either its pid (e.g. 'SP:HSQC2') or its longPid
-        (e.g. 'Spectrum:HSQC2')
-
-        Returns None for invalid or unrecognised input strings.
-        """
-        if pid is None or len(pid) is None:
-            return None
-
-        obj = None
-
-        # return if the pid does not conform to a pid definition
-        if not Pid.Pid.isValid(pid):
-            return None
-
-        pid = Pid.Pid(pid)
-        dd = self._project._pid2Obj.get(pid.type)
-        if dd is not None:
-            obj = dd.get(pid.id)
-        if obj is not None and obj._isDeleted:
-            raise RuntimeError(f'{self.className}.getByPid "%s" defined a deleted object' % pid)
-        return obj
 
     #=========================================================================================
     # CCPN functions
@@ -638,7 +466,7 @@ class ChemicalShift(NotifierBase):
         """Calculate the shift value
         """
         nmrAtom = nmrAtom or self.nmrAtom
-        if self._chemicalShiftList.autoUpdate:
+        if self._wrapperList.autoUpdate:
             if nmrAtom:
                 if nmrAtom.assignedPeaks:
                     # remember the oldest setting
@@ -646,37 +474,32 @@ class ChemicalShift(NotifierBase):
                 else:
                     self._oldValue = self._oldValueError = None
 
-                value, valueError = nmrAtom._recalculateShiftValue(self._chemicalShiftList.spectra)
+                value, valueError = nmrAtom._recalculateShiftValue(self._wrapperList.spectra)
             else:
                 value, valueError = None, None
 
             if not (value is None and valueError is None):
                 # update the dataframe
-                self._chemicalShiftList._setShiftAttribute(self._uniqueId, CS_VALUE, value)
-                self._chemicalShiftList._setShiftAttribute(self._uniqueId, CS_VALUEERROR, valueError)
+                self._wrapperList._setAttribute(self._uniqueId, CS_VALUE, value)
+                self._wrapperList._setAttribute(self._uniqueId, CS_VALUEERROR, valueError)
 
             elif not (self._oldValue is None and self._oldValueError is None):
                 # make sure that the empty value does not change
-                self._chemicalShiftList._setShiftAttribute(self._uniqueId, CS_VALUE, self._oldValue)
-                self._chemicalShiftList._setShiftAttribute(self._uniqueId, CS_VALUEERROR, self._oldValueError)
+                self._wrapperList._setAttribute(self._uniqueId, CS_VALUE, self._oldValue)
+                self._wrapperList._setAttribute(self._uniqueId, CS_VALUEERROR, self._oldValueError)
 
     def _renameNmrAtom(self, nmrAtom):
         """Update the values in the table for the renamed nmrAtom
         """
-        if nmrAtom and self._chemicalShiftList._getShiftAttribute(self._uniqueId, CS_NMRATOM, str) != nmrAtom.pid:
+        if nmrAtom and self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str) != nmrAtom.pid:
             # nmrAtom and derived properties
-            self._chemicalShiftList._setShiftAttributes(self._uniqueId, CS_NMRATOM, CS_ATOMNAME,
-                                                        (str(nmrAtom.pid),) + tuple(val or None for val in nmrAtom.pid.fields))
+            self._wrapperList._setAttributes(self._uniqueId, CS_NMRATOM, CS_ATOMNAME,
+                                             (str(nmrAtom.pid),) + tuple(val or None for val in nmrAtom.pid.fields))
 
     #===========================================================================================
-    # new'Object' and other methods
+    # new<Object> and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
-
-    def _tryToRecover(self):
-        """Routine to try to recover an object that has not loaded correctly to repair integrity
-        """
-        pass
 
     @deleteV3Object()
     def _deleteWrapper(self, chemicalShiftList, _newDeletedShifts, _newShifts, _oldDeletedShifts, _oldShifts):
@@ -690,7 +513,6 @@ class ChemicalShift(NotifierBase):
             addUndoItem(undo=partial(chemicalShiftList._undoRedoShifts, _oldShifts),
                         redo=partial(chemicalShiftList._undoRedoShifts, _newShifts))
 
-        # NOTE:ED - need to deassign nmrAtom first?
         self.nmrAtom = None
 
         with undoStackBlocking() as addUndoItem:
@@ -698,7 +520,7 @@ class ChemicalShift(NotifierBase):
                         redo=partial(chemicalShiftList._undoRedoDeletedShifts, _newDeletedShifts))
 
 
-def _newChemicalShift(chemicalShiftList, _uniqueId: Optional[int] = None
+def _newChemicalShift(project: Project, chemicalShiftList, _uniqueId: Optional[int] = None
                       ):
     """Create a new chemicalShift attached to the chemicalShiftList.
 
@@ -707,7 +529,7 @@ def _newChemicalShift(chemicalShiftList, _uniqueId: Optional[int] = None
     :return: a new ChemicalShift instance.
     """
 
-    result = ChemicalShift(chemicalShiftList, _uniqueId=_uniqueId)
+    result = ChemicalShift(project, chemicalShiftList, _uniqueId=_uniqueId)
     if result is None:
         raise RuntimeError('ChemicalShiftList._newChemicalShift: unable to generate new ChemicalShift item')
 

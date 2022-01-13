@@ -6,7 +6,7 @@ tertiary version by Ejb 9/5/17
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 15:18:25 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-01-13 17:00:01 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -714,7 +714,7 @@ class ChemicalShiftTable(GuiTable):
         _peaks = obj.allAssignedPeaks or []
         allPeaks = str([pp.pid for pp in _peaks])
         try:
-            shiftPeakCount = len([pp for pp in _peaks if pp.spectrum.chemicalShiftList == obj._chemicalShiftList])
+            shiftPeakCount = len([pp for pp in _peaks if pp.spectrum.chemicalShiftList == obj.chemicalShiftList])
         except Exception as es:
             shiftPeakCount = 0
         peakCount = len(_peaks) if _peaks else 0

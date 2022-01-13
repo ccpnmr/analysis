@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-06 11:21:32 +0000 (Thu, January 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-13 17:00:00 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -88,7 +88,6 @@ SPECTRUMGROUPS = 'spectrumGroups'
 NOTES = 'notes'
 PEAKCLUSTERS = 'peakClusters'
 COLLECTIONS = 'collections'
-
 
 
 class Project(AbstractWrapperObject):
@@ -196,6 +195,11 @@ class Project(AbstractWrapperObject):
         return None
 
     @property
+    def violationTables(self):
+        """STUB: hot-fixed later"""
+        return None
+
+    @property
     def samples(self):
         """STUB: hot-fixed later"""
         return None
@@ -260,6 +264,32 @@ class Project(AbstractWrapperObject):
         else:
             return None
 
+    @property
+    def collections(self):
+        """Return the list of collections in the project
+        """
+        return self._collectionList.collections
+
+    def getCollection(self, relativeId: str) -> Optional['Collection']:
+        """Return the collection from the supplied relativeId
+        """
+        from ccpn.core.Collection import Collection
+
+        dd = self._project._pid2Obj.get(Collection.className)
+        if dd:
+            key = '{}'.format(relativeId)
+            return dd.get(key)
+        else:
+            return None
+
+    @property
+    def _collectionStore(self):
+        return self._wrappedData.collectionData
+
+    @_collectionStore.setter
+    def _collectionStore(self, value):
+        self._wrappedData.collectionData = value
+
     #-----------------------------------------------------------------------------------------
 
     # Implementation methods
@@ -323,6 +353,9 @@ class Project(AbstractWrapperObject):
         # reference to the logger; defined in call to _initialiseProject())
         self._logger = None
 
+        # reference to special v3 core lists without abstractWrapperObject
+        self._collectionList = None
+
         self._checkProjectSubDirectories()
 
     @property
@@ -381,6 +414,7 @@ class Project(AbstractWrapperObject):
     def _checkProjectSubDirectories(self):
         """if need be, create all project subdirectories"""
         from ccpn.framework.PathsAndUrls import CCPN_SUB_DIRECTORIES
+
         _path = aPath(self.path)
         for dir in CCPN_SUB_DIRECTORIES:
             _path.fetchDir((dir))
@@ -406,8 +440,43 @@ class Project(AbstractWrapperObject):
             if len(self.chemicalShiftLists) == 0:
                 self.newChemicalShiftList(name='default')
 
+            # perform any required restoration of project not covered by children
+            self._restoreObject(self, self._wrappedData)
+
         # Call any updates
         self._update()
+
+    @classmethod
+    def _restoreObject(cls, project, apiObj):
+        """Process data that must always be performed after updating all children
+        """
+        from ccpn.core._implementation.CollectionList import CollectionList
+        from ccpn.core.Collection import Collection
+        from ccpn.core.ChemicalShift import ChemicalShift
+
+        # update new collectionTable and collection items
+
+        # NOTE:ED - should this go elsewhere? near _linkWrapperClasses? ... or core/__init__
+
+        # add the non-abstractWrapperObjects to the collections search list
+        for klass in [ChemicalShift, Collection]:
+            # Fill in Project._className2Class map
+            dd = Project._className2Class
+            dd[klass.className] = dd[klass.shortClassName] = klass
+            Project._className2ClassList.extend([klass.className, klass.shortClassName, klass])
+
+            dd = Project._classNameLower2Class
+            dd[klass.className.lower()] = dd[klass.shortClassName.lower()] = klass
+            Project._classNameLower2ClassList.extend([klass.className.lower(), klass.shortClassName.lower(), klass])
+
+        # new collection table if required
+        project._collectionList = CollectionList(project=project)
+
+        # create new collections
+        project._collectionList._restoreObject(project, None)
+
+        # don't need to call super here
+        return project
 
     def _close(self):
         self.close()
@@ -1352,7 +1421,7 @@ class Project(AbstractWrapperObject):
         return getExpClassificationDict(self._wrappedData)
 
     #===========================================================================================
-    # new'Object' and other methods
+    # new<Object> and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
@@ -1412,8 +1481,8 @@ class Project(AbstractWrapperObject):
         :return: a new Spectrum instance.
         """
         from ccpn.core.Spectrum import _newHdf5Spectrum
-        return _newHdf5Spectrum(self, isotopeCodes=isotopeCodes, name=name, path=path, **parameters)
 
+        return _newHdf5Spectrum(self, isotopeCodes=isotopeCodes, name=name, path=path, **parameters)
 
     @logCommand('project.')
     def newNmrChain(self, shortName: str = None, isConnected: bool = False, label: str = '?',
@@ -1557,9 +1626,7 @@ class Project(AbstractWrapperObject):
         :param items: optional list of core objects as objects or pids.
         :return: a new Collection instance.
         """
-        from ccpn.core.Collection import _newCollection
-
-        return _newCollection(self, items=items, **kwds)
+        return self._collectionList.newCollection(items=items, **kwds)
 
     @logCommand('project.')
     def newSample(self, name: str = None, pH: float = None, ionicStrength: float = None,
@@ -1855,6 +1922,7 @@ class Project(AbstractWrapperObject):
 
         return _getChemicalShiftList(self, name=name, **kwds)
 
+
 #=========================================================================================
 # Code adapted from prior _implementation/Io.py
 #=========================================================================================
@@ -1926,7 +1994,7 @@ def _newProject(application, name: str = 'default', path: str = None, overwrite=
     # apiIo.newProject will create a temp path if path is None
     if (apiProject := apiIo.newProject(name, path, overwriteExisting=overwrite, useFileLogger=True)) is None:
         raise RuntimeError("New project could not be created (overlaps exiting project?) name:%s, path:%s, overwrite:"
-                         % (name, path, overwrite))
+                           % (name, path, overwrite))
 
     apiNmrProject = apiProject.fetchNmrProject()
     apiNmrProject.initialiseData()

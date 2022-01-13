@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-15 16:30:39 +0000 (Mon, November 15, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-13 17:00:01 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -41,6 +41,7 @@ from ccpn.core.Chain import Chain
 from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.RestraintTable import RestraintTable
 from ccpn.core.DataTable import DataTable
+from ccpn.core.ViolationTable import ViolationTable
 from ccpn.core.Collection import Collection
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn.ui.gui.widgets.Menu import Menu
@@ -66,8 +67,9 @@ from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpn.ui.gui.popups.StructureEnsemblePopup import StructureEnsemblePopup
 from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
 from ccpn.ui.gui.popups.DataTablePopup import DataTablePopup
+from ccpn.ui.gui.popups.ViolationTablePopup import ViolationTablePopup
 from ccpn.ui.gui.popups.CollectionPopup import CollectionPopup
-from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, \
+from ccpn.core.lib.ContextManagers import notificationEchoBlocking, \
     undoBlockWithoutSideBar, undoStackBlocking
 
 
@@ -169,6 +171,10 @@ class _createNewDataTable(CreateNewObjectABC):
     parentMethodName = 'newDataTable'
 
 
+class _createNewViolationTable(CreateNewObjectABC):
+    parentMethodName = 'newViolationTable'
+
+
 class _createNewCollection(CreateNewObjectABC):
     parentMethodName = 'newCollection'
 
@@ -197,7 +203,7 @@ class RaisePopupABC():
         useNone: set obj to None
         """
         self.useParent = useParent  # Use parent of object
-        if useParent and self.parentObjectArgumentName == None:
+        if useParent and self.parentObjectArgumentName is None:
             raise RuntimeError('useParent==True requires definition of parentObjectArgumentName (%s)' % self)
         self.useNone = useNone
         self.kwds = kwds
@@ -360,6 +366,12 @@ class _raiseDataTablePopup(RaisePopupABC):
     # objectArgumentName = 'obj'
 
 
+class _raiseViolationTablePopup(RaisePopupABC):
+    popupClass = ViolationTablePopup
+    # objectArgumentName = 'obj'
+    parentObjectArgumentName = 'structureData'
+
+
 class _raiseCollectionPopup(RaisePopupABC):
     popupClass = CollectionPopup
     # objectArgumentName = 'obj'
@@ -381,7 +393,7 @@ class OpenItemABC():
 
     validActionTargets = (Spectrum, PeakList, MultipletList, IntegralList,
                           NmrChain, Chain, SpectrumGroup, Sample, ChemicalShiftList,
-                          RestraintTable, Note, StructureEnsemble, DataTable, Collection
+                          RestraintTable, Note, StructureEnsemble, DataTable, ViolationTable, Collection
                           )
 
     # This can be subclassed
@@ -494,11 +506,7 @@ class OpenItemABC():
                 with undoBlockWithoutSideBar():
                     with notificationEchoBlocking():
                         project.deleteObjects(*objs)
-            # with undoBlock():
-            #     for obj in objs:
-            #         if obj:
-            #             # just delete the object
-            #             obj.delete()
+
         except Exception as es:
             showWarning('Delete', str(es))
 
@@ -517,26 +525,32 @@ class OpenItemABC():
         # create subMenu for adding selected items to a single collection
         subMenu = menu.addMenu('Add to Collection')
         collections = self.mainWindow.application.project.collections
+        _count = 0
         for col in collections:
             # only select items that are in the collection
-            _objs = [obj for obj in objs if obj not in col.items]
-            if _objs:
-                # add action to add to the collection
-                subMenu.addAction(col.pid, partial(col.addItems, _objs))
-        if not len(subMenu.actions()):
+            _objs = [obj for obj in objs if obj not in col.items and obj != col]
+            # add action to add to the collection
+            _action = subMenu.addAction(col.pid, partial(col.addItems, _objs))
+            if not _objs:
+                _action.setEnabled(False)
+                _count += 1
+        if not len(subMenu.actions()) or _count == len(collections):
             # disable menu if empty
             subMenu.setEnabled(False)
 
         # create subMenu for removing selected items from a single collection - items are not deleted
         subMenu = menu.addMenu('Remove from Collection')
         collections = self.mainWindow.application.project.collections
+        _count = 0
         for col in collections:
             # only select items that are in the collection
-            _objs = [obj for obj in objs if obj in col.items]
-            if _objs:
-                # add action to remove from the collection
-                subMenu.addAction(col.pid, partial(col.removeItems, _objs))
-        if not len(subMenu.actions()):
+            _objs = [obj for obj in objs if obj in col.items and obj != col]
+            # add action to remove from the collection
+            _action = subMenu.addAction(col.pid, partial(col.removeItems, _objs))
+            if not _objs:
+                _action.setEnabled(False)
+                _count += 1
+        if not len(subMenu.actions()) or _count == len(collections):
             # disable menu if empty
             subMenu.setEnabled(False)
 
@@ -558,8 +572,8 @@ class OpenItemABC():
                 mouse_screen = screen
                 break
         collectionPopup.showAt(pos, preferred_side=Side.RIGHT,
-                              side_priority=(Side.TOP, Side.BOTTOM, Side.RIGHT, Side.LEFT),
-                              target_screen=mouse_screen)
+                               side_priority=(Side.TOP, Side.BOTTOM, Side.RIGHT, Side.LEFT),
+                               target_screen=mouse_screen)
 
 
 from ccpn.ui.gui.widgets.SpeechBalloon import SpeechBalloon, Side
@@ -900,6 +914,11 @@ class _openItemDataTable(OpenItemABC):
     objectArgumentName = 'dataTable'
 
 
+class _openItemViolationTable(OpenItemABC):
+    openItemMethod = 'showViolationTable'
+    objectArgumentName = 'violationTable'
+
+
 class _openItemCollectionModule(OpenItemABC):
     openItemMethod = 'showCollectionModule'
     objectArgumentName = 'collection'
@@ -919,6 +938,7 @@ OpenObjAction = {
     IntegralList     : _openItemIntegralListTable,
     StructureEnsemble: _openItemStructureEnsembleTable,
     DataTable        : _openItemDataTable,
+    ViolationTable   : _openItemViolationTable,
     Collection       : _openItemCollectionModule,
     }
 

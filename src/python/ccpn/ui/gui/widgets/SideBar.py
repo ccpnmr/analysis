@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-11 17:52:27 +0000 (Tue, January 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-13 17:00:01 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -67,6 +67,8 @@ from ccpn.core.StructureData import StructureData
 from ccpn.core.Restraint import RestraintTable
 from ccpn.core.Note import Note
 from ccpn.core.DataTable import DataTable
+from ccpn.core.ViolationTable import ViolationTable
+from ccpn.core._implementation.CollectionList import CollectionList
 from ccpn.core.Collection import Collection
 
 from ccpn.core.lib.Pid import Pid
@@ -96,7 +98,7 @@ from ccpn.ui.gui.lib.MenuActions import _createNewStructureData, _createNewPeakL
     _raiseNmrResiduePopup, _raiseNmrResidueNewPopup, _raiseNmrAtomPopup, _raiseNmrAtomNewPopup, _raiseNotePopup, _raiseIntegralListPopup, \
     _raiseRestraintTableEditPopup, _raiseRestraintTableNewPopup, _raiseSamplePopup, _raiseAtomNewPopup, _raiseAtomPopup, \
     _raiseSampleComponentPopup, _raiseSpectrumPopup, _raiseSpectrumGroupEditorPopup, _raiseStructureEnsemblePopup, \
-    _raiseSubstancePopup, _raiseDataTablePopup, _raiseCollectionPopup
+    _raiseSubstancePopup, _raiseDataTablePopup, _raiseViolationTablePopup, _raiseCollectionPopup
 
 from ccpn.ui.gui.lib.MenuActions import _openItemNoteTable, _openItemChemicalShiftListTable, \
     _openItemIntegralListTable, _openItemMultipletListTable, _openItemNmrChainTable, \
@@ -104,7 +106,7 @@ from ccpn.ui.gui.lib.MenuActions import _openItemNoteTable, _openItemChemicalShi
     _openItemSpectrumGroupDisplay, _openItemStructureEnsembleTable, _openItemStructureDataTable, \
     _openItemSpectrumDisplay, _openItemSampleDisplay, _openItemComplexTable, _openItemResidueTable, \
     _openItemSubstanceTable, _openItemSampleComponentTable, _openItemNmrResidueItem, _openItemNmrAtomItem, \
-    _openItemSpectrumInGroupDisplay, _openItemAtomItem, _openItemDataTable, _openItemCollectionModule
+    _openItemSpectrumInGroupDisplay, _openItemAtomItem, _openItemDataTable, _openItemViolationTable, _openItemCollectionModule
 
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, \
@@ -632,9 +634,9 @@ class SidebarClassABC(SidebarABC):
         self.children = []
         for classObj in classObjs:
 
-            # skip the objects if they are due to be deleted
-            if classObj._flaggedForDelete:
-                continue
+            # # skip the objects if they are due to be deleted
+            # if classObj._flaggedForDelete:
+            #     continue
 
             if 'ClassTreeItems' in self.itemType:
                 # if isinstance(self, SidebarClassTreeItems):
@@ -771,6 +773,20 @@ class SidebarClassNmrResidueTreeItems(SidebarClassABC):
         if classObjs:
             nmrChain = classObjs[0].nmrChain
             return nmrChain.nmrResidues
+
+        return classObjs
+
+
+class SidebarClassCollectionItems(SidebarClassItems):
+    """A Tree with a number of dynamically added items of type V3 core 'klass'
+    """
+    itemType = 'CollectionClassItems'
+
+    def _getKlassChildren(self, obj, klass):
+        """Get the children of <obj> by class type <klass>.
+        Reorder the children according to the order in the nmrChain.
+        """
+        classObjs = obj.collections
 
         return classObjs
 
@@ -932,11 +948,29 @@ class SideBarStructure(object):
                 SidebarClassTreeItems(klass=StructureData, rebuildOnRename='StructureData-ClassTreeItems',
                                       callback=_raiseStructureDataPopup(),
                                       menuAction=_openItemStructureDataTable(position='left', relativeTo=None), isDraggable=True, children=[
-                        SidebarItem('<New RestraintTable>', callback=_raiseRestraintTableNewPopup(editMode=False, useNone=False, useParent=True)),
+                        # SidebarItem('<New RestraintTable>', callback=_raiseRestraintTableNewPopup(editMode=False, useNone=False, useParent=True)),
+                        # SidebarItem('<New ViolationTable>', callback=_raiseViolationTablePopup(editMode=False, useNone=False, useParent=True)),
+                        #
+                        # SidebarClassTreeItems(klass=RestraintTable, rebuildOnRename='StructureData-ClassTreeItems',
+                        #                           callback=_raiseRestraintTableEditPopup(),
+                        #                           menuAction=_openItemRestraintTable(position='left', relativeTo=None), isDraggable=True),
+                        #
+                        # SidebarClassItems(klass=ViolationTable, callback=_raiseViolationTablePopup(),
+                        #                       menuAction=_openItemViolationTable(position='bottom', relativeTo=None), isDraggable=True),
 
-                        SidebarClassTreeItems(klass=RestraintTable, rebuildOnRename='StructureData-ClassTreeItems',
-                                              callback=_raiseRestraintTableEditPopup(),
-                                              menuAction=_openItemRestraintTable(position='left', relativeTo=None), isDraggable=True),
+                        SidebarTree('RestraintTables', closed=False, children=[
+                            SidebarItem('<New RestraintTable>', callback=_raiseRestraintTableNewPopup(editMode=False, useNone=False, useParent=True)),
+
+                            SidebarClassTreeItems(klass=RestraintTable, rebuildOnRename='StructureData-ClassTreeItems',
+                                                  callback=_raiseRestraintTableEditPopup(),
+                                                  menuAction=_openItemRestraintTable(position='left', relativeTo=None), isDraggable=True),
+                            ]),
+                        SidebarTree('ViolationTables', closed=False, children=[
+                            SidebarItem('<New ViolationTable>', callback=_raiseViolationTablePopup(editMode=False, useNone=False, useParent=True)),
+
+                            SidebarClassItems(klass=ViolationTable, callback=_raiseViolationTablePopup(),
+                                              menuAction=_openItemViolationTable(position='bottom', relativeTo=None), isDraggable=True),
+                            ]),
                         ]),
                 ]),
 
@@ -952,8 +986,8 @@ class SideBarStructure(object):
             SidebarTree('Collections', closed=True, children=[
                 SidebarItem('<New Collection>', callback=_raiseCollectionPopup(editMode=False, useNone=True)),
 
-                SidebarClassItems(klass=Collection, callback=_raiseCollectionPopup(),
-                                  menuAction=_openItemCollectionModule(position='bottom', relativeTo=None), isDraggable=True),
+                SidebarClassCollectionItems(klass=Collection, callback=_raiseCollectionPopup(),
+                                            menuAction=_openItemCollectionModule(position='bottom', relativeTo=None), isDraggable=True),
                 ]),
 
             #------ Notes ------
@@ -1550,12 +1584,13 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
                 for elem in self.project._project._pid2Obj[pid_key]:
                     elem_key = "%s:%s" % (key, str(elem))
 
-                    wrapper = self.project._project._pid2Obj[pid_key][elem]
-                    wrapper_has_flagged_for_delete = hasattr(wrapper, '_flaggedForDelete')
-                    flagged_for_delete = False
-                    if wrapper_has_flagged_for_delete:
-                        flagged_for_delete = self.project._project._pid2Obj[pid_key][elem]._flaggedForDelete
-                    if not flagged_for_delete:
+                    # wrapper = self.project._project._pid2Obj[pid_key][elem]
+                    # wrapper_has_flagged_for_delete = hasattr(wrapper, '_flaggedForDelete')
+                    # flagged_for_delete = False
+                    # if wrapper_has_flagged_for_delete:
+                    #     flagged_for_delete = self.project._project._pid2Obj[pid_key][elem]._flaggedForDelete
+                    # if not flagged_for_delete:
+                    if not elem.isDeleted:
                         if fnmatch.fnmatch(elem_key.lower(), lower_text):
                             if elem not in seen:
                                 self._results_list.append('%s:%s' % (pid_key, str(elem)))

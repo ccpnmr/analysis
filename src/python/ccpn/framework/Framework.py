@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-06 11:21:33 +0000 (Thu, January 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-13 17:00:00 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -101,10 +101,10 @@ from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_KEY_CONCEPTS
 
 from PyQt5.QtCore import QTimer
 
-
 import faulthandler
-faulthandler.enable()
 
+
+faulthandler.enable()
 
 _DEBUG = False
 
@@ -327,10 +327,12 @@ class Framework(NotifierBase):
 
         # register dataLoaders for the first and only time
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders
+
         self._dataLoaders = getDataLoaders()
 
         # register SpectrumDataSource formats for the first and only time
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
+
         self._spectrumDataSourceFormats = getDataFormats()
 
     @property
@@ -490,7 +492,6 @@ class Framework(NotifierBase):
         self.pipelinePath = self.pipelinePath
         self.spectraPath = self.spectraPath
         self.pluginDataPath = self.pluginDataPath
-
 
         # restore current
         self.current._restoreStateFromFile(self.statePath)
@@ -754,8 +755,8 @@ class Framework(NotifierBase):
             insertPoint = mainWindow.moduleArea
             for spectrumDisplay in mainWindow.spectrumDisplays:
                 mainWindow.moduleArea.addModule(spectrumDisplay,
-                                                        position='right',
-                                                        relativeTo=insertPoint)
+                                                position='right',
+                                                relativeTo=insertPoint)
                 insertPoint = spectrumDisplay
         except Exception as e:
             getLogger().warning('Impossible to restore SpectrumDisplays')
@@ -850,7 +851,6 @@ class Framework(NotifierBase):
                 self.current.strip = mainWindow.strips[0]
         except Exception as e:
             getLogger().warning('Error restoring current.strip: %s' % e)
-
 
         # GST slightly complicated as we have to wait for anay license or other
         # startup dialogs to close before we display tip of the day
@@ -1261,6 +1261,7 @@ class Framework(NotifierBase):
             ("Restraint Table", partial(self.showRestraintTable, selectFirstItem=True), [('shortcut', 'rt')]),
             ("Structure Table", partial(self.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
             ("Data Table", partial(self.showDataTable, selectFirstItem=True), [('shortcut', 'dt')]),
+            ("Violation Table", partial(self.showViolationTable, selectFirstItem=True), [('shortcut', 'vt')]),
             (),
             ("Restraint Analysis Table", partial(self.showRestraintAnalysisTable, selectFirstItem=True), [('shortcut', 'at')]),
             ("Chemical Shift Mapping", self.showChemicalShiftMapping, [('shortcut', 'cm')]),
@@ -1431,7 +1432,7 @@ class Framework(NotifierBase):
         # NB _closeProject includes a gui cleanup call
         self._closeProject()
         project = _newProject(self, name=newName)
-        self._initialiseProject(project)    # This also set the linkages
+        self._initialiseProject(project)  # This also set the linkages
 
         return project
 
@@ -1453,7 +1454,7 @@ class Framework(NotifierBase):
             # always close first
             self._closeProject()
             project = _loadProject(application=self, path=str(path))
-            self._initialiseProject(project)    # This also sets the linkages
+            self._initialiseProject(project)  # This also sets the linkages
             getLogger().info('==> Loaded ccpn project "%s"' % path)
 
             # Save the result
@@ -1484,7 +1485,7 @@ class Framework(NotifierBase):
             # always close first
             self._closeProject()
             project = _loadProject(application=self, path=path)
-            self._initialiseProject(project)    # This also set the linkages
+            self._initialiseProject(project)  # This also set the linkages
             getLogger().info('==> Loaded ccpn project "%s"' % path)
 
         return [project]
@@ -2598,7 +2599,7 @@ class Framework(NotifierBase):
 
     @logCommand('application.')
     def showDataTable(self, position='bottom', relativeTo=None,
-                           dataTable=None, selectFirstItem=False):
+                      dataTable=None, selectFirstItem=False):
         """Displays DataTable Table
         """
         from ccpn.ui.gui.modules.DataTableModuleABC import DataTableModuleBC
@@ -2607,13 +2608,30 @@ class Framework(NotifierBase):
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
         if dataTable:
-            _dataTableModule = DataTableModuleBC(dataTable,name=dataTable.name, mainWindow=mainWindow)
+            _dataTableModule = DataTableModuleBC(dataTable, name=dataTable.name, mainWindow=mainWindow)
             mainWindow.moduleArea.addModule(_dataTableModule, position=position, relativeTo=relativeTo)
             return _dataTableModule
 
     @logCommand('application.')
+    def showViolationTable(self, position: str = 'bottom', relativeTo: CcpnModule = None,
+                           violationTable: PeakList = None, selectFirstItem=False):
+        """Displays Peak table on left of main window with specified list selected.
+        """
+        getLogger().debug('No ViolationTable module')
+        # from ccpn.ui.gui.modules.ViolationTableModule import ViolationTableModule
+        #
+        # mainWindow = self.ui.mainWindow
+        # if not relativeTo:
+        #     relativeTo = mainWindow.moduleArea
+        # violationTableModule = ViolationTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
+        # mainWindow.moduleArea.addModule(violationTableModule, position=position, relativeTo=relativeTo)
+        # if violationTable:
+        #     violationTableModule.selectViolationTable(violationTable)
+        # return violationTableModule
+
+    @logCommand('application.')
     def showCollectionModule(self, position='bottom', relativeTo=None,
-                            collection=None, selectFirstItem=False):
+                             collection=None, selectFirstItem=False):
         """Displays Collection Module
         """
         pass
@@ -3138,7 +3156,6 @@ def testMain():
 
     # register the programme
     from ccpn.framework.Application import ApplicationContainer
-
 
     container = ApplicationContainer()
     container.register(application)

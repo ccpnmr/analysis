@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:18 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-01-13 16:19:04 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -933,24 +933,22 @@ class GuiWindow():
         """
 
         - Opens a new pythonConsole module if none available.
-        - Closes the  pythonConsole module if already one available.
-
+        - Show/hide the pythonConsole module if already one available.
         """
-        # NB. The  pythonConsole module is only a container for the IpythonConsole Widget,
-        #     which is always present in the application and never gets destroyed until the project is closed.
-        #     The pythonConsole module instead is created and closed all the time this function is called.
-        #     Destroying the module has been the most stable way of handle this toggling feature. Hiding,moving or any other
-        #     kind, has created many bugs in the past, including misbehaviour on tempAreas, containers QT errors etc.
+
 
         from ccpn.ui.gui.modules.PythonConsoleModule import PythonConsoleModule
-
+        _justCreated = False
         if self.pythonConsoleModule is None:  # No pythonConsole module detected, so create one.
             self.moduleArea.addModule(PythonConsoleModule(self), 'bottom')
+            _justCreated = True
         if self.pythonConsoleModule:
             if self.pythonConsoleModule.isHidden():
                 self.pythonConsoleModule.show()
             else:
-                self.pythonConsoleModule.hide()
+                if not _justCreated:
+                    self.pythonConsoleModule.hide()
+
 
     def _lowerContourBaseCallback(self):
         """Callback to lower the contour level for the currently

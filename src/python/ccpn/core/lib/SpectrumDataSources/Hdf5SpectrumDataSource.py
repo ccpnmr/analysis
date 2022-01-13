@@ -8,7 +8,7 @@ See SpectrumDataSourceABC for a description of the methods
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:17 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-13 16:27:02 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ __date__ = "$Date: 2020-11-20 10:28:48 +0000 (Fri, November 20, 2020) $"
 # Start of code
 #=========================================================================================
 
-from typing import Sequence
+from typing import Sequence, Tuple
 import h5py
 
 from ccpn.util.Logging import getLogger
@@ -319,9 +319,10 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
         return self
 
-    def _getSlices(self, position: Sequence, dims: Sequence):
-        """Return a slices tuple defined by position (one-based) and dims (one-based)
-        slices are (0,pointCounts[dim]) for dims and
+    def _getSlices(self, position: Sequence, dims: Sequence) -> Tuple[slice]:
+        """Return a tuple of slice objects (numpy-style) defined by position (one-based)
+        and dims (one-based)
+        slice objects are (0,pointCounts[dim]) for dims and
                    (p-1,p) for all other dims
         i.e. they can define a single slice, single plane, single cube etc depending on dims
         """
@@ -401,7 +402,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         dataset = self.spectrumData
         slices = self._getSlices(position=position, dims=(firstAxis + 1, secondAxis + 1))  # slices are x,y,z ordered
 
-        # change data to correct nD shape
+        # change 2D data to correct nD shape
         pointCounts = [1] * self.dimensionCount
         pointCounts[firstAxis] = self.pointCounts[firstAxis]
         pointCounts[secondAxis] = self.pointCounts[secondAxis]
@@ -513,14 +514,17 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         if not self.hasOpenFile():
             self.openFile(mode=self.defaultOpenReadMode)
 
-        if 1 in aliasingFlags or -1 in aliasingFlags:
-            # fall back on the slice-based extraction
-            data = super()._getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
-        else:
+        withinLimits = [(sliceTuple[0] >= 1 and sliceTuple[1] <= np)
+                        for sliceTuple, np in zip(sliceTuples, self.pointCounts)]
+        if all(withinLimits):
+            # we can use the hdf extraction
             dataset = self.spectrumData
             slices = tuple(slice(start - 1, stop) for start, stop in sliceTuples)
             data = dataset[slices[::-1]]  # data are ..,z,y,x ordered
             data *= self.dataScale
+        else:
+            # fall back on the slice-based extraction
+            data = super()._getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
 
         return data
 

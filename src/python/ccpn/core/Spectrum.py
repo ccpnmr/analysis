@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-11 12:56:51 +0000 (Tue, January 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-13 16:27:02 +0000 (Thu, January 13, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2201,8 +2201,9 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         :param axisCodes: tuple/list of two axisCodes; expand if exactMatch=False
         :param position: A list/tuple of point-positions (1-based)
+        :param axisCodes: A list/tuple of axisCodes that define the plane dimensions
 
-        :return: 2D float32 NumPy array in order (yDim, xDim)
+        :return: A 2-dimensional float32 numpy array in order (yDim, xDim)
 
         NB: use getPlaneData method for dimension based access
         """
@@ -2213,8 +2214,12 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         return self.getPlaneData(position=position, xDim=xDim, yDim=yDim)
 
     def setPlaneData(self, data, position: Sequence = None, xDim: int = 1, yDim: int = 2):
-        """Set the plane data defined by xDim, yDim and position (all 1-based)
-        from NumPy data array
+        """Set the plane data as defined by xDim, yDim and position (all 1-based).
+
+        :param data: A 2-dimensional float32 numpy array in order (yDim, xDim)
+        :param position: position: A list/tuple of point-positions (1-based)
+        :param xDim: Dimension of the first axis (1-based)
+        :param yDim: Dimension of the second axis (1-based)
         """
         if self.dimensionCount < 2:
             raise RuntimeError("Spectrum.gstPlaneData: dimensionality < 2")

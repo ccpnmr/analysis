@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-14 18:51:45 +0000 (Fri, January 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-14 18:56:11 +0000 (Fri, January 14, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -258,9 +258,12 @@ class SpectrumDataABC(np.ndarray):
             increments[self.dimensionCount-1] = item.start
 
         elif isinstance(item, (tuple, list)):
-            isSlices = [isinstance(obj,slice) and obj.start is not None for obj in item]
+            isSlices = [isinstance(obj,slice) for obj in item]
             if all(isSlices):
-                increments = [sl.start for sl in item]
+                increments = []
+                for sl in item:
+                    val = sl.start if sl.start is not None else 0
+                    increments.append(val)
                 # reverse the list, as the slices came in reversed order; append with zero
                 increments = list(reversed(increments)) + \
                              [0] * (self.dataSource.dimensionCount - len(item))

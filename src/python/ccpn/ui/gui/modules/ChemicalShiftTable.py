@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-14 18:00:05 +0000 (Fri, January 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-14 18:53:06 +0000 (Fri, January 14, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -109,12 +109,13 @@ class ChemicalShiftTableModule(CcpnModule):
                     )
 
         # main window
+        _hidden = ['isDeleted', 'figureOfMerit', 'allPeaks', 'chainCode', 'sequenceCode', 'residueType', 'state']
         self.chemicalShiftTable = ChemicalShiftTable(parent=self.mainWidget,
                                                      mainWindow=self.mainWindow,
                                                      moduleParent=self,
                                                      setLayout=True,
                                                      grid=(0, 0),
-                                                     hiddenColumns=['isDeleted', 'figureOfMerit', 'allPeaks', 'chainCode', 'sequenceCode', 'residueType'])
+                                                     hiddenColumns=_hidden)
 
         if chemicalShiftList is not None:
             self.selectChemicalShiftList(chemicalShiftList)

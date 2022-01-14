@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:15 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-01-14 18:35:28 +0000 (Fri, January 14, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -83,7 +83,7 @@ class NmrAtom(AbstractWrapperObject):
     def __init__(self, project: Project, wrappedData):
 
         # internal lists to hold the current chemicalShifts
-        self.chemicalShifts = []
+        self._chemicalShifts = []
 
         super().__init__(project, wrappedData)
 
@@ -397,6 +397,12 @@ class NmrAtom(AbstractWrapperObject):
 
         raise TypeError('nmrAtom does not have attribute {}'.format(attrName))
 
+    @property
+    def chemicalShifts(self) -> tuple:
+        """Return the chemicalShifts containing the nmrAtom
+        """
+        return tuple(self._chemicalShifts)
+
     #=========================================================================================
     # Implementation functions
     #=========================================================================================
@@ -508,10 +514,10 @@ class NmrAtom(AbstractWrapperObject):
     def delete(self):
         """Delete self and update the chemicalShift values
         """
-        shifts = list(self.chemicalShifts)
+        _shifts = self.chemicalShifts  # tuple from property
 
         with undoBlock():
-            for sh in shifts:
+            for sh in _shifts:
                 sh.nmrAtom = None
             # delete the nmrAtom - notifiers handled by decorator
             self._delete()

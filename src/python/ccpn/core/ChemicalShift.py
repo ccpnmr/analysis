@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-14 18:00:05 +0000 (Fri, January 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-14 18:35:28 +0000 (Fri, January 14, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -271,7 +271,7 @@ class ChemicalShift(V3CoreObjectABC):
             if nat is None:
                 return
             self._wrapperList._setAttribute(self._uniqueId, CS_NMRATOM, None)
-            nat.chemicalShifts.remove(self)
+            nat._chemicalShifts.remove(self)
 
         else:
             # nmrAtom and derived properties
@@ -279,8 +279,8 @@ class ChemicalShift(V3CoreObjectABC):
             self._wrapperList._setAttributes(self._uniqueId, CS_CHAINCODE, CS_ATOMNAME,
                                              tuple(val or None for val in value.pid.fields))
             if nat:
-                nat.chemicalShifts.remove(self)
-            value.chemicalShifts.append(self)
+                nat._chemicalShifts.remove(self)
+            value._chemicalShifts.append(self)
 
             self._recalculateShiftValue(value)
 
@@ -499,7 +499,7 @@ class ChemicalShift(V3CoreObjectABC):
         _nmrAtom = self.nmrAtom
         # must assume that the shift value is correct at this point
         if _nmrAtom:
-            _nmrAtom.chemicalShifts.append(self)
+            _nmrAtom._chemicalShifts.append(self)
 
     #=========================================================================================
     # CCPN functions

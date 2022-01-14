@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:23:24 +0000 (Thu, January 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-14 15:05:26 +0000 (Fri, January 14, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,7 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.lib.ContextManagers import ccpNmrV3CoreSetter, undoStackBlocking, deleteV3Object, ccpNmrV3CoreUndoBlock
 from ccpn.core.lib import Pid
-from ccpn.core.ChemicalShiftList import CS_UNIQUEID, CS_ISDELETED, CS_VALUE, CS_VALUEERROR, \
+from ccpn.core.ChemicalShiftList import CS_UNIQUEID, CS_ISDELETED, CS_STATIC, CS_VALUE, CS_VALUEERROR, \
     CS_FIGUREOFMERIT, CS_NMRATOM, CS_CHAINCODE, CS_SEQUENCECODE, CS_RESIDUETYPE, CS_ATOMNAME, \
     CS_COMMENT, CS_COLUMNS
 from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
@@ -48,7 +48,8 @@ from ccpn.util.decorators import logCommand
 MINFOM = 0.0
 MAXFOM = 1.0
 
-ShiftParameters = namedtuple('ShiftParameters', f'{CS_UNIQUEID} {CS_ISDELETED} {CS_VALUE} {CS_VALUEERROR} {CS_FIGUREOFMERIT} '
+ShiftParameters = namedtuple('ShiftParameters', f'{CS_UNIQUEID} {CS_ISDELETED} {CS_STATIC} '
+                                                f'{CS_VALUE} {CS_VALUEERROR} {CS_FIGUREOFMERIT} '
                                                 f'{CS_NMRATOM} {CS_CHAINCODE} {CS_SEQUENCECODE} {CS_RESIDUETYPE} {CS_ATOMNAME} '
                                                 f'{CS_COMMENT} ')
 
@@ -126,6 +127,53 @@ class ChemicalShift(V3CoreObjectABC):
         """Not allowed for ChemicalShift
         """
         raise RuntimeError('ChemicalShift name cannot be set')
+
+    #~~~~~~~~~~~~~~~~
+
+    @property
+    def _static(self):
+        # Getter/setter for undo/redo
+        return self._wrapperList._getAttribute(self._uniqueId, CS_STATIC, bool)
+
+    @_static.setter
+    @ccpNmrV3CoreSetter()
+    def _static(self, value):
+        self._wrapperList._setAttribute(self._uniqueId, CS_STATIC, value)
+
+    @property
+    def static(self) -> bool:
+        """Static state of ChemicalShift.
+        :return: True if chemicalShift or parent chemicalShiftTable is static
+        """
+        return self._static or self.chemicalShiftList.static
+
+    @property
+    def dynamic(self) -> bool:
+        """Dynamic state of ChemicalShift.
+        :return: not chemicalShift.static
+        """
+        return not self.static
+
+    @property
+    def orphan(self):
+        """Orphan state of the chemicalShift
+        :return: True if not static (i.e. dynamic), and has no associated peaks
+        """
+        return not self.static and not self.assignedPeaks
+
+    def getStatic(self) -> bool:
+        """Return the local static state of the chemicalShift
+        """
+        return self._static
+
+    @logCommand(get='self')
+    def setStatic(self, value: bool):
+        """Set the local static state for the chemicalShift.
+        """
+        if not isinstance(value, bool):
+            raise ValueError(f'{self.className}.setStatic must be True/False')
+        # use setter above to handle undo/redo
+        self._static = value
 
     #~~~~~~~~~~~~~~~~
 
@@ -382,21 +430,31 @@ class ChemicalShift(V3CoreObjectABC):
     #~~~~~~~~~~~~~~~~
 
     @property
-    def assignedPeaks(self) -> Optional[tuple]:
+    def assignedPeaks(self) -> tuple:
         """Assigned peaks for attached nmrAtom belonging to this chemicalShiftList.
         """
         assigned = self.allAssignedPeaks
         if assigned is not None:
             return tuple(pp for pp in assigned if pp.chemicalShiftList == self.chemicalShiftList)
 
+        return ()
+
     @property
-    def allAssignedPeaks(self) -> Optional[tuple]:
+    def allAssignedPeaks(self) -> tuple:
         """All assigned peaks for attached nmrAtom.
         """
         _nmrAtomPid = self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str)
         _nmrAtom = self.project.getByPid(_nmrAtomPid)
         if _nmrAtom:
             return tuple(set(makeIterableList(_nmrAtom.assignedPeaks)))
+
+        return ()
+
+    @property
+    def peakPpmPositions(self) -> tuple:
+        """Return a tuple of the assigned peak positions (in ppm)
+        """
+        return tuple(pos for pk in self.assignedPeaks for (pos, nmrAtom) in zip(pk.ppmPositions, pk.dimensionNmrAtoms))
 
     #=========================================================================================
     # Implementation functions - necessary as there is no abstractWrapper object
@@ -443,6 +501,7 @@ class ChemicalShift(V3CoreObjectABC):
 
         newRow = (self._uniqueId,
                   self._isDeleted,
+                  self.static,
                   self.value,
                   self.valueError,
                   self.figureOfMerit,
@@ -537,6 +596,7 @@ def _newChemicalShift(project: Project, chemicalShiftList, _uniqueId: Optional[i
 
 
 def _getByTuple(chemicalShiftList,
+                static: bool = False,
                 value: float = None, valueError: float = None, figureOfMerit: float = 1.0,
                 nmrAtom: Union[NmrAtom, str, None] = None,
                 chainCode: str = None, sequenceCode: str = None, residueType: str = None, atomName: str = None,
@@ -555,6 +615,8 @@ def _getByTuple(chemicalShiftList,
 
     if not isinstance(nmrAtom, (NmrAtom, type(None))):
         raise ValueError('nmrAtom must be of type nmrAtom or None')
+    if not isinstance(static, bool):
+        raise ValueError('static must be True/False')
     if not all(isinstance(val, (str, type(None))) for val in (chainCode, sequenceCode, residueType, atomName)):
         raise ValueError('chainCode, sequenceCode, residueType, atomName must be of type str or None')
     if not all(isinstance(val, (float, int, type(None))) for val in (value, valueError, figureOfMerit)):
@@ -564,6 +626,7 @@ def _getByTuple(chemicalShiftList,
 
     newRow = (None,
               None,
+              static,
               value,
               valueError,
               figureOfMerit,

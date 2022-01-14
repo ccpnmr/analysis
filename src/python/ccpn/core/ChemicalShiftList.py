@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:23:24 +0000 (Thu, January 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-14 15:05:27 +0000 (Fri, January 14, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,7 @@ from ccpn.core.Spectrum import Spectrum
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.lib import Pid
 from ccpn.core.lib.ContextManagers import newObject, newV3Object, renameObject, \
-    undoBlockWithoutSideBar, undoStackBlocking, undoBlock
+    undoBlockWithoutSideBar, undoStackBlocking, undoBlock, ccpNmrV3CoreSetter
 from ccpn.util.decorators import logCommand
 from ccpn.util.OrderedSet import OrderedSet
 
@@ -54,6 +54,7 @@ CS_CHAINCODE = 'chainCode'
 CS_SEQUENCECODE = 'sequenceCode'
 CS_RESIDUETYPE = 'residueType'
 CS_ATOMNAME = 'atomName'
+CS_STATIC = 'static'
 CS_SHIFTLISTPEAKS = 'shiftListPeaks'
 CS_ALLPEAKS = 'allPeaks'
 CS_SHIFTLISTPEAKSCOUNT = 'shiftListPeaksCount'
@@ -63,10 +64,12 @@ CS_ISDELETED = 'isDeleted'
 CS_OBJECT = '_object'  # this must match the object search for guiTable
 
 CS_COLUMNS = (CS_UNIQUEID, CS_ISDELETED,
+              CS_STATIC,
               CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT,
               CS_NMRATOM, CS_CHAINCODE, CS_SEQUENCECODE, CS_RESIDUETYPE, CS_ATOMNAME,
               CS_COMMENT)
 CS_TABLECOLUMNS = (CS_UNIQUEID, CS_ISDELETED, CS_PID,
+                   CS_STATIC,
                    CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT,
                    CS_NMRATOM, CS_CHAINCODE, CS_SEQUENCECODE, CS_RESIDUETYPE, CS_ATOMNAME,
                    CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT,
@@ -182,6 +185,8 @@ class ChemicalShiftList(AbstractWrapperObject):
         return self._wrappedData.autoUpdate
 
     @autoUpdate.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def autoUpdate(self, value: bool):
         self._wrappedData.autoUpdate = value
 
@@ -191,8 +196,33 @@ class ChemicalShiftList(AbstractWrapperObject):
         return self._wrappedData.isSimulated
 
     @isSimulated.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def isSimulated(self, value: bool):
         self._wrappedData.isSimulated = value
+
+    @property
+    def static(self) -> bool:
+        """True if the ChemicalShiftList is static.
+        Overrides chemicalShift.static"""
+        return self._wrappedData.static
+
+    @static.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
+    def static(self, value: bool):
+        self._wrappedData.static = value
+
+    @property
+    def autoChangeStatic(self) -> bool:
+        """Prevent further queries"""
+        return self._wrappedData.autoChangeStatic
+
+    @autoChangeStatic.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
+    def autoChangeStatic(self, value: bool):
+        self._wrappedData.autoChangeStatic = value
 
     def _recalculatePeakShifts(self, nmrResidues, shifts):
         # update the assigned nmrAtom chemical shift values - notify the nmrResidues and chemicalShifts
@@ -558,7 +588,11 @@ class ChemicalShiftList(AbstractWrapperObject):
             #     getLogger().debug(f'updating classType {chemicalShiftList} -> _ChemicalShiftListFrame')
             #     _data = _ChemicalShiftListFrame(_data)
 
+            # remove the deleted shifts, not needed after restore
             _data = _data[_data[CS_ISDELETED] == False]
+            if CS_STATIC not in _data.columns:
+                # add new static column if not defined
+                _data.insert(CS_COLUMNS.index(CS_STATIC), CS_STATIC, False)
             _data.set_index(_data[CS_UNIQUEID], inplace=True, )  # drop=False)
 
             chemicalShiftList._wrappedData.data = _data

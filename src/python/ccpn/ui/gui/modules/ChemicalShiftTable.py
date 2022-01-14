@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:23:25 +0000 (Thu, January 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-14 15:05:27 +0000 (Fri, January 14, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,7 @@ from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.ChemicalShiftList import CS_UNIQUEID, CS_ISDELETED, CS_PID, \
-    CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT, CS_ATOMNAME, \
+    CS_STATIC, CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT, CS_ATOMNAME, \
     CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT, \
     CS_COMMENT, CS_OBJECT, \
     CS_TABLECOLUMNS
@@ -114,7 +114,7 @@ class ChemicalShiftTableModule(CcpnModule):
                                                      moduleParent=self,
                                                      setLayout=True,
                                                      grid=(0, 0),
-                                                     hiddenColumns=['isDeleted', 'allPeaks', 'chainCode', 'sequenceCode', 'residueType'])
+                                                     hiddenColumns=['isDeleted', 'figureOfMerit', 'allPeaks', 'chainCode', 'sequenceCode', 'residueType'])
 
         if chemicalShiftList is not None:
             self.selectChemicalShiftList(chemicalShiftList)
@@ -737,6 +737,7 @@ class ChemicalShiftTable(GuiTable):
         # define self._columns here
         _tipTexts = ('Unique identifier for the chemicalShift',
                      'isDeleted',  # should never be visible
+                     'Static state of chemicalShift',
                      'ChemicalShift.pid',
                      'ChemicalShift value in ppm',
                      'Error in the chemicalShift value in ppm',
@@ -828,9 +829,9 @@ class ChemicalShiftTable(GuiTable):
             # NOTE:ED - this needs to go elsewhere
             #   need to define a row handler rather than a column handler
             _row = data.loc[uniqueId]
-            # make the new row - put into method
+            # make the new row
             newRow = _row[:CS_ISDELETED].copy()
-            _midRow = _row[CS_VALUE:CS_ATOMNAME]
+            _midRow = _row[CS_STATIC:CS_ATOMNAME]
             _comment = _row[CS_COMMENT:]
             _pidCol = pd.Series(obj.pid, index=[CS_PID, ])
             _extraCols = pd.Series(self._derivedFromObject(obj), index=[CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT])

@@ -50,7 +50,7 @@ from statistics import mean
 def assignNmrAtom(seqCode, atomName, offset):
     if offset == -1:
         newsc = ''.join((seqCode, '-1'))
-        newnr = nc.fetchNmrResidue(sequenceCode=newsc, residueType=None)
+        newnr = peakNmrChain.fetchNmrResidue(sequenceCode=newsc, residueType=None)
         newna = newnr.fetchNmrAtom(name=atomName)
         peak.assignDimension(axisCode=assignAxCde, value=newna)
     elif offset == 0:
@@ -123,14 +123,6 @@ if len(current.peaks) == 0:
                                      'assigned root (NH) resonances.')
     sys.exit()
 
-if current.peak.assignmentsByDimensions[rootDim]:
-    nc = current.peak.assignmentsByDimensions[rootDim][0].nmrResidue.nmrChain
-else:
-    showWarning('Missing Root Assignment', 'Please make sure all your peaks have '
-                                           'their root NH NmrAtoms assigned')
-    sys.exit()
-
-
 with undoBlock():
     pkDict = defaultdict(list)
     GlyCheck = False
@@ -143,17 +135,19 @@ with undoBlock():
                     'CB-1': {'shifts': [], 'peaks': []}}
 
     for peak in current.peaks:
-        peakExptType = peak.peakList.spectrum.experimentType
         assignDim = [ind for ind, value in enumerate(peak.peakList.spectrum.isotopeCodes) if value == assignIsotope][0]
+        assignAxCde = peak.peakList.spectrum.axisCodes[assignDim]
         rootDim = [ind for ind, value in enumerate(peak.peakList.spectrum.isotopeCodes) if value == rootIsotope][0]
         # Check peak root dim is assigned
         if peak.assignmentsByDimensions[rootDim]:
             peakNmrRes = peak.assignmentsByDimensions[rootDim][0].nmrResidue
+            peakNmrChain = peak.assignmentsByDimensions[rootDim][0].nmrResidue.nmrChain
         else:
             showWarning('Missing Root Assignment', 'Please make sure all your peaks have '
                                                    'their root NH NmrAtoms assigned')
             sys.exit()
         # Put peaks into pkDict
+        peakExptType = peak.peakList.spectrum.experimentType
         if peakExptType is not None:
             if peakExptType not in pkDict:
                 pkDict[peakExptType] = [peak]
@@ -165,7 +159,6 @@ with undoBlock():
                                                    'associated with them (use shortcut ET '
                                                    'to set these)')
             sys.exit()
-
 
     for expt in pkDict:
         if expt in iSpectra:

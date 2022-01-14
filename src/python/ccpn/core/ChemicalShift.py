@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-14 15:05:26 +0000 (Fri, January 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-14 17:07:05 +0000 (Fri, January 14, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -166,14 +166,14 @@ class ChemicalShift(V3CoreObjectABC):
         """
         return self._static
 
-    @logCommand(get='self')
-    def setStatic(self, value: bool):
-        """Set the local static state for the chemicalShift.
-        """
-        if not isinstance(value, bool):
-            raise ValueError(f'{self.className}.setStatic must be True/False')
-        # use setter above to handle undo/redo
-        self._static = value
+    # @logCommand(get='self')
+    # def setStatic(self, value: bool):
+    #     """Set the local static state for the chemicalShift.
+    #     """
+    #     if not isinstance(value, bool):
+    #         raise ValueError(f'{self.className}.setStatic must be True/False')
+    #     # use setter above to handle undo/redo
+    #     self._static = value
 
     #~~~~~~~~~~~~~~~~
 

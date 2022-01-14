@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-14 15:05:27 +0000 (Fri, January 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-14 18:00:05 +0000 (Fri, January 14, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -42,6 +42,7 @@ from ccpn.core.lib.ContextManagers import newObject, newV3Object, renameObject, 
     undoBlockWithoutSideBar, undoStackBlocking, undoBlock, ccpNmrV3CoreSetter
 from ccpn.util.decorators import logCommand
 from ccpn.util.OrderedSet import OrderedSet
+from ccpn.util.LabelledEnum import LabelledEnum
 
 
 CS_UNIQUEID = 'uniqueId'
@@ -54,7 +55,10 @@ CS_CHAINCODE = 'chainCode'
 CS_SEQUENCECODE = 'sequenceCode'
 CS_RESIDUETYPE = 'residueType'
 CS_ATOMNAME = 'atomName'
+CS_STATE = 'state'
 CS_STATIC = 'static'
+CS_DYNAMIC = 'dynamic'
+CS_ORPHAN = 'orphan'
 CS_SHIFTLISTPEAKS = 'shiftListPeaks'
 CS_ALLPEAKS = 'allPeaks'
 CS_SHIFTLISTPEAKSCOUNT = 'shiftListPeaksCount'
@@ -69,9 +73,10 @@ CS_COLUMNS = (CS_UNIQUEID, CS_ISDELETED,
               CS_NMRATOM, CS_CHAINCODE, CS_SEQUENCECODE, CS_RESIDUETYPE, CS_ATOMNAME,
               CS_COMMENT)
 CS_TABLECOLUMNS = (CS_UNIQUEID, CS_ISDELETED, CS_PID,
-                   CS_STATIC,
+                   # CS_STATIC,
                    CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT,
                    CS_NMRATOM, CS_CHAINCODE, CS_SEQUENCECODE, CS_RESIDUETYPE, CS_ATOMNAME,
+                   CS_STATE,
                    CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT,
                    CS_COMMENT, CS_OBJECT)
 
@@ -79,6 +84,12 @@ CS_TABLECOLUMNS = (CS_UNIQUEID, CS_ISDELETED, CS_PID,
 #   it is the name used in the dataframe and in project._getNextUniqueIdValue
 CS_CLASSNAME = 'ChemicalShift'
 CS_PLURALNAME = 'chemicalShifts'
+
+
+class ChemicalShiftState(LabelledEnum):
+    STATIC = 0, CS_STATIC
+    DYNAMIC = 1, CS_DYNAMIC
+    ORPHAN = 2, CS_ORPHAN
 
 
 class _ChemicalShiftListFrame(DataFrameABC):

@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-14 15:05:27 +0000 (Fri, January 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-14 18:00:05 +0000 (Fri, January 14, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,7 @@ from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.ChemicalShiftList import CS_UNIQUEID, CS_ISDELETED, CS_PID, \
-    CS_STATIC, CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT, CS_ATOMNAME, \
+    CS_STATIC, CS_STATE, CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT, CS_ATOMNAME, \
     CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT, \
     CS_COMMENT, CS_OBJECT, \
     CS_TABLECOLUMNS
@@ -718,8 +718,9 @@ class ChemicalShiftTable(GuiTable):
         except Exception as es:
             shiftPeakCount = 0
         peakCount = len(_peaks) if _peaks else 0
+        state = obj.state.description  # if state needed
 
-        return (allPeaks, shiftPeakCount, peakCount)
+        return (state, allPeaks, shiftPeakCount, peakCount)
 
     def getDataFrameFromExpandedList(self, table=None,
                                      buildList=None,
@@ -737,7 +738,7 @@ class ChemicalShiftTable(GuiTable):
         # define self._columns here
         _tipTexts = ('Unique identifier for the chemicalShift',
                      'isDeleted',  # should never be visible
-                     'Static state of chemicalShift',
+                     # 'Static state of chemicalShift',
                      'ChemicalShift.pid',
                      'ChemicalShift value in ppm',
                      'Error in the chemicalShift value in ppm',
@@ -747,6 +748,7 @@ class ChemicalShiftTable(GuiTable):
                      'SequenceCode of attached nmrAtom, or None',
                      'ResidueType of attached nmrAtom, or None',
                      'AtomName of attached nmrAtom, or None',
+                     'Active state of chemicalShift',
                      'List of assigned peaks associated with this chemicalShift',
                      'Number of assigned peaks attached to a chemicalShift\nbelonging to spectra associated with parent chemicalShiftList',
                      'Total number of assigned peaks attached to a chemicalShift\nbelonging to any spectra',
@@ -774,9 +776,12 @@ class ChemicalShiftTable(GuiTable):
             # is of type _ChemicalShiftListFrame - should move functionality to there
             _table = self.chemicalShiftList._wrappedData.data.copy()
             _table = _table[_table[CS_ISDELETED] == False]
+            _table.drop(columns=[CS_STATIC], inplace=True)  # static not required
+
             _table.set_index(_table[CS_UNIQUEID], inplace=True, )  # drop=False)
 
             _table.insert(CS_TABLECOLUMNS.index(CS_PID), CS_PID, None)
+            _table.insert(CS_TABLECOLUMNS.index(CS_STATE), CS_STATE, None)  # if state require
             _table.insert(CS_TABLECOLUMNS.index(CS_ALLPEAKS), CS_ALLPEAKS, None)
             _table.insert(CS_TABLECOLUMNS.index(CS_SHIFTLISTPEAKSCOUNT), CS_SHIFTLISTPEAKSCOUNT, None)
             _table.insert(CS_TABLECOLUMNS.index(CS_ALLPEAKSCOUNT), CS_ALLPEAKSCOUNT, None)
@@ -788,7 +793,8 @@ class ChemicalShiftTable(GuiTable):
                 _table[CS_PID] = [_shift.pid for _shift in _objs]
 
                 _stats = [self._derivedFromObject(obj) for obj in _objs]
-                _table[[CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT]] = _stats
+                # _table[[CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT]] = _stats
+                _table[[CS_STATE, CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT]] = _stats
 
                 # replace the visible nans with '' for comment column and string 'None' elsewhere
                 _table[CS_COMMENT].fillna('', inplace=True)
@@ -831,10 +837,11 @@ class ChemicalShiftTable(GuiTable):
             _row = data.loc[uniqueId]
             # make the new row
             newRow = _row[:CS_ISDELETED].copy()
-            _midRow = _row[CS_STATIC:CS_ATOMNAME]
+            _midRow = _row[CS_VALUE:CS_ATOMNAME]  # CS_STATIC
             _comment = _row[CS_COMMENT:]
             _pidCol = pd.Series(obj.pid, index=[CS_PID, ])
-            _extraCols = pd.Series(self._derivedFromObject(obj), index=[CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT])
+            # _extraCols = pd.Series(self._derivedFromObject(obj), index=[CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT])
+            _extraCols = pd.Series(self._derivedFromObject(obj), index=[CS_STATE, CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT])  # if state required
 
             newRow = newRow.append([_pidCol, _midRow, _extraCols, _comment])
 

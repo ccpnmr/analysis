@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-14 17:07:05 +0000 (Fri, January 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-14 18:00:05 +0000 (Fri, January 14, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,7 @@ from ccpn.core.lib.ContextManagers import ccpNmrV3CoreSetter, undoStackBlocking,
 from ccpn.core.lib import Pid
 from ccpn.core.ChemicalShiftList import CS_UNIQUEID, CS_ISDELETED, CS_STATIC, CS_VALUE, CS_VALUEERROR, \
     CS_FIGUREOFMERIT, CS_NMRATOM, CS_CHAINCODE, CS_SEQUENCECODE, CS_RESIDUETYPE, CS_ATOMNAME, \
-    CS_COMMENT, CS_COLUMNS
+    CS_COMMENT, CS_COLUMNS, ChemicalShiftState
 from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
 from ccpn.util.Common import makeIterableList
 from ccpn.util.decorators import logCommand
@@ -174,6 +174,18 @@ class ChemicalShift(V3CoreObjectABC):
     #         raise ValueError(f'{self.className}.setStatic must be True/False')
     #     # use setter above to handle undo/redo
     #     self._static = value
+
+    @property
+    def state(self):
+        """State of chemicalShift
+        """
+        if self.static:
+            return ChemicalShiftState.STATIC
+        else:
+            if self.orphan:
+                return ChemicalShiftState.ORPHAN
+            else:
+                return ChemicalShiftState.DYNAMIC
 
     #~~~~~~~~~~~~~~~~
 

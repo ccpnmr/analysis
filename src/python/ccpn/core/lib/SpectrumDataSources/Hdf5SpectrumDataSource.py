@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-13 16:27:02 +0000 (Thu, January 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-14 18:51:46 +0000 (Fri, January 14, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -38,6 +38,7 @@ from ccpn.util.Common import isIterable
 from ccpn.util.traits.CcpNmrTraits import CString
 
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
+from ccpn.core._implementation.SpectrumData import SliceData, PlaneData, RegionData
 
 
 SPECTRUM_DATASET_NAME = 'spectrumData'
@@ -355,6 +356,8 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             firstAxis = yDim - 1
             secondAxis = xDim - 1
 
+        planeData = PlaneData(dataSource=self, dimensions=(xDim, yDim), position=position)
+
         dataset = self.spectrumData
         slices = self._getSlices(position=position, dims=(firstAxis + 1, secondAxis + 1))  # --> slices are x,y,z ordered
         data = dataset[slices[::-1]]  # data are z,y,x ordered
@@ -363,7 +366,8 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             data = data.transpose()
         data *= self.dataScale
 
-        return data
+        planeData[:] = data[:]
+        return planeData
 
     def setPlaneData(self, data, position: Sequence = None, xDim: int = 1, yDim: int = 2):
         """Set data as plane defined by xDim, yDim and position (all 1-based)
@@ -423,13 +427,16 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         if not self.hasOpenFile():
             self.openFile(mode=self.defaultOpenReadMode)
 
+        sliceData = SliceData(dataSource=self, dimensions=(sliceDim,), position=position)
+
         dataset = self.spectrumData
         slices = self._getSlices(position=position, dims=(sliceDim,))
         data = dataset[slices[::-1]]  # data are z,y,x ordered
         data = data.reshape((self.pointCounts[sliceDim-1],))
         data *= self.dataScale
 
-        return data
+        sliceData[:] = data[:]
+        return sliceData
 
     def setSliceData(self, data, position: Sequence = None, sliceDim: int = 1):
         """Set data as slice defined by sliceDim and position (all 1-based)
@@ -509,7 +516,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         if aliasingFlags is None:
             aliasingFlags = [0] * self.dimensionCount
 
-        self.checkForValidRegion(sliceTuples, aliasingFlags)
+        sliceTuples = self.checkForValidRegion(sliceTuples, aliasingFlags)
 
         if not self.hasOpenFile():
             self.openFile(mode=self.defaultOpenReadMode)
@@ -519,14 +526,21 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         if all(withinLimits):
             # we can use the hdf extraction
             dataset = self.spectrumData
+            sizes = [(stop-start+1) for start,stop in sliceTuples]
+            regionData = RegionData(shape=sizes[::-1],
+                                    dataSource=self, dimensions=self.dimensions,
+                                    position = [st[0] for st in sliceTuples]
+                                    )
             slices = tuple(slice(start - 1, stop) for start, stop in sliceTuples)
-            data = dataset[slices[::-1]]  # data are ..,z,y,x ordered
-            data *= self.dataScale
+            # data = dataset[slices[::-1]]  # data are ..,z,y,x ordered
+            # data *= self.dataScale
+            regionData[:] = dataset[slices[::-1]]  # data are ..,z,y,x ordered
+            regionData *= self.dataScale
         else:
             # fall back on the slice-based extraction
-            data = super()._getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
+            regionData = super()._getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
 
-        return data
+        return regionData
 
 
 # Register this format

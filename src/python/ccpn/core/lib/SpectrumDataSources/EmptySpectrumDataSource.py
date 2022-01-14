@@ -8,7 +8,7 @@ See SpectrumDataSourceABC for a description of the methods
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:16 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-14 18:51:45 +0000 (Fri, January 14, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ import numpy
 
 
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
-from ccpn.util.isotopes import Nucleus
+from ccpn.core._implementation.SpectrumData import SliceData, PlaneData, RegionData
 
 
 class EmptySpectrumDataSource(SpectrumDataSourceABC):
@@ -107,8 +107,9 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
         position = self.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
 
         # create the array with zeros
-        pointCounts = (self.pointCounts[yDim-1], self.pointCounts[xDim-1])  # y,x ordering
-        data = numpy.zeros(pointCounts, dtype=self.dataType)
+        # pointCounts = (self.pointCounts[yDim-1], self.pointCounts[xDim-1])  # y,x ordering
+        # data = numpy.zeros(pointCounts, dtype=self.dataType)
+        data = PlaneData(dataSource=self, dimensions=(xDim,yDim), position=position)
 
         return data
 
@@ -122,7 +123,8 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
         position = self.checkForValidSlice(position=position, sliceDim=sliceDim)
 
         # create the array with zeros
-        data = numpy.zeros(self.pointCounts[sliceDim-1], dtype=self.dataType)
+        # data = numpy.zeros(self.pointCounts[sliceDim-1], dtype=self.dataType)
+        data=SliceData(dataSource=self, dimensions=(sliceDim,), position=position)
         return data
 
     def getPointData(self, position:Sequence=None) -> float:
@@ -154,11 +156,15 @@ class EmptySpectrumDataSource(SpectrumDataSourceABC):
         if aliasingFlags is None:
             aliasingFlags = [0] * self.dimensionCount
 
-        self.checkForValidRegion(sliceTuples, aliasingFlags)
+        sliceTuples = self.checkForValidRegion(sliceTuples, aliasingFlags)
 
         sizes = [(stop-start+1) for start,stop in sliceTuples]
         # The result being assembled
-        regionData = numpy.zeros(sizes[::-1], dtype=self.dataType) # ...,z,y,x numpy ordering
+        # regionData = numpy.zeros(sizes[::-1], dtype=self.dataType) # ...,z,y,x numpy ordering
+        regionData = RegionData(shape=sizes[::-1],
+                                dataSource=self, dimensions=self.dimensions,
+                                position = [st[0] for st in sliceTuples]
+                                )
         return regionData
 
 # Register this format

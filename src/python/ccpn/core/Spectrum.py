@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-13 16:27:02 +0000 (Thu, January 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-14 18:51:45 +0000 (Fri, January 14, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -599,7 +599,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     @noiseLevel.setter
     @logCommand(get='self', isProperty=True)
     def noiseLevel(self, value: float):
-        self._wrappedData.noiseLevel = value
+        val = float(value) if value is not None else None
+        self._wrappedData.noiseLevel = val
 
     @property
     @_includeInCopy

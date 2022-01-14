@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-14 10:51:08 +0000 (Fri, January 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-14 18:51:45 +0000 (Fri, January 14, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,6 @@ import numpy as np
 from typing import Sequence
 
 import ccpn.core.lib.SpectrumLib as specLib
-from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
 from ccpn.util.Common import isIterable
 
 
@@ -44,12 +43,17 @@ class SpectrumDataABC(np.ndarray):
 
     # from https://numpy.org/doc/stable/user/basics.subclassing.html
     def __new__(subtype, shape=None, dtype=None, buffer=None, offset=0,
-                strides=None, order=None, dataSource=None, dimensions=()):
+                strides=None, order=None,
+                dataSource=None, dimensions=(), position=None
+                ):
         # Create the ndarray instance of our type, given the usual
         # ndarray input arguments.
         # GWV added the dataSource and dimensions arguments.
         # This will call the standard ndarray constructor, but return an object of our type.
         # It also triggers a call to SpectrumDataABC.__array_finalize__
+
+        # local import to avoid cycles
+        from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
 
         if dataSource is None or not isinstance(dataSource, SpectrumDataSourceABC):
             raise ValueError('Invalid dataSource; got %s' % dataSource)
@@ -63,12 +67,15 @@ class SpectrumDataABC(np.ndarray):
             raise ValueError('Invalid length dimensions; expected at most %d, got %s' %
                              maxDimLen, dimensions)
 
-        pointCounts = dataSource.getByDimensions('pointCounts', dimensions=dimensions)
         if shape is None:
+            pointCounts = dataSource.getByDimensions('pointCounts', dimensions=dimensions)
             shape = pointCounts[::-1]
 
         if dtype is None:
             dtype = subtype._dtype
+
+        if position is None:
+            position = [1]*dataSource.dimensionCount
 
         obj = super().__new__(subtype, shape=shape, dtype=dtype,
                               buffer=buffer, offset=offset, strides=strides, order=order)
@@ -81,7 +88,7 @@ class SpectrumDataABC(np.ndarray):
 
         obj._dataSource = dataSource
         obj._dimensions = tuple(dimensions)
-        obj._position = None
+        obj._position = position
 
         # Finally, we must return the newly created object:
         return obj
@@ -98,8 +105,8 @@ class SpectrumDataABC(np.ndarray):
         #    (we're in the middle of the SpectrumDataABC.__new__
         #    constructor, and self.info will be set when we return to
         #    SpectrumDataABC.__new__)
-
         if obj is None: return
+
         # From view casting - e.g arr.view(SpectrumDataABC):
         #    obj is arr
         #    (type(obj) can be SpectrumDataABC)
@@ -169,7 +176,7 @@ class SpectrumDataABC(np.ndarray):
 
     def getSliced(self, *sliceTuples):
         """Conveniance
-        Get a slice from the data, defined by slices (1-based) in dimension order;
+        Get a part of the data, as defined by slices (1-based) in dimension order;
         updates self.position, so that it points to the actual location in the spectrum
         dataSource, corresponding to the objects data.
 
@@ -194,15 +201,75 @@ class SpectrumDataABC(np.ndarray):
             else:
                 _slices.append((0, np))
 
-        # updat the position (i.e. the place in the spectrum dataSource)
+        sliceObjs = [slice(sl[0], sl[1], 1) for sl in _slices]
+        result = self[tuple(sliceObjs[::-1])]
+        # increments = [sl[0] for sl in _slices]
+        # result._updatePosition(increments)
+
+        return result
+
+    def _shapeToDataSource(self):
+        """Reshape the data with shape to match dataSource dimensions,
+        using size=1, for any dimension of dataSource not in self;
+        e.g. this transforms a 2D plane to a 3D with size 1 in one dimension
+        CCPNINTERNAL: used in hdf5 extraction
+        """
+        newShape = [1]*self.dataSource.dimensionCount
+        for dimIndx, np in zip(self.dimensionIndices, self.pointCounts):
+            newShape[dimIndx] = np
+        self.reshape(tuple(newShape[::-1]))
+
+    def _shapeToSelf(self):
+        """Reshape the data with shape to match self.dimensions
+        CCPNINTERNAL: used in hdf5 extraction
+        """
+        nPoints = self.dataSource.pointCounts
+        newShape = [nPoints[dimIndx] for dimIndx in self.dimensionIndices]
+        self.reshape(tuple(newShape[::-1]))
+
+    def _updatePosition(self, increments):
+        # update the position (i.e. the place in the spectrum dataSource)
         if self._position is not None:
             pos = list(self._position)
-            for dimIndx, sl in zip(self.dimensionIndices, _slices):
-                pos[dimIndx] += sl[0]
+            mapping = dict((idx, dimIdx) for idx, dimIdx in
+                           enumerate(self.dimensionIndices))
+            for idx, incr in enumerate(increments):
+                dimIdx = mapping.get(idx, idx)  # This assures any missing elements
+                pos[dimIdx] += incr
             self._position = pos
 
-        sliceObjs = [slice(sl[0], sl[1], 1) for sl in _slices]
-        return self[tuple(sliceObjs[::-1])]
+    def __getitem__(self, item):
+        """Just subclassed to catch the slice to update the internal position
+        parameter
+        """
+        # print(self, item)
+
+        # item can be many various things:
+        # integer, tuple of int's, slice, tuple of slice's
+        increments = None
+        if isinstance(item, int):
+            pass
+
+        elif isinstance(item, slice) and item.start is not None:
+            # this denotes a slice of the outermost level, eg. a z
+            # in a x,y,z dataset
+            increments = [0]*self.dataSource.dimensionCount
+            # reversed, first becomes last (relative to self)
+            increments[self.dimensionCount-1] = item.start
+
+        elif isinstance(item, (tuple, list)):
+            isSlices = [isinstance(obj,slice) and obj.start is not None for obj in item]
+            if all(isSlices):
+                increments = [sl.start for sl in item]
+                # reverse the list, as the slices came in reversed order; append with zero
+                increments = list(reversed(increments)) + \
+                             [0] * (self.dataSource.dimensionCount - len(item))
+
+        result =  super().__getitem__(item)
+        if increments is not None:
+            result._updatePosition(increments)
+
+        return result
 
     def __str__(self):
 

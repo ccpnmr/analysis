@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:30:48 +0000 (Thu, January 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-14 18:44:56 +0000 (Fri, January 14, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -283,11 +283,11 @@ class Project(AbstractWrapperObject):
             return None
 
     @property
-    def _collectionStore(self):
+    def _collectionData(self):
         return self._wrappedData.collectionData
 
-    @_collectionStore.setter
-    def _collectionStore(self, value):
+    @_collectionData.setter
+    def _collectionData(self, value):
         self._wrappedData.collectionData = value
 
     #-----------------------------------------------------------------------------------------

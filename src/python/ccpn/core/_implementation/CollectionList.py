@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:23:25 +0000 (Thu, January 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-14 18:44:56 +0000 (Fri, January 14, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -109,7 +109,7 @@ class CollectionList():
         """Helper method to get the stored dataframe
         CCPN Internal
         """
-        return self._project._collectionStore
+        return self._project._collectionData
 
     @_data.setter
     def _data(self, data):
@@ -120,7 +120,7 @@ class CollectionList():
             else:
                 raise RuntimeError(f'Unable to set _data: not of type {_CollectionFrame}, pd.DataFrame or None')
 
-        self._project._collectionStore = data
+        self._project._collectionData = data
 
     @property
     def collections(self):
@@ -297,18 +297,18 @@ class CollectionList():
         from ccpn.core.Collection import _newCollection as _newCollection
 
         # create a set of new collection objects linked to the pandas rows - discard deleted
-        _data = project._collectionStore
+        _data = project._collectionData
 
         if _data is not None:
             # check that is the new DataFrameABC class, update as required - for later use
             # if not isinstance(_data, DataFrameABC):
-            #     getLogger().debug(f'updating classType {collectionData} -> _CollectionListFrame')
+            #     getLogger().debug(f'updating classType {dataFrame} -> _CollectionListFrame')
             #     _data = _CollectionListFrame(_data)
 
             _data = _data[_data[CO_ISDELETED] == False]
             _data.set_index(_data[CO_UNIQUEID], inplace=True, )
 
-            project._collectionStore = _data
+            project._collectionData = _data
 
             for ii in range(len(_data)):
                 _row = _data.iloc[ii]
@@ -448,7 +448,7 @@ class CollectionList():
         _data.set_index(_data[CO_UNIQUEID], inplace=True, )  # drop=False)
 
         # create new collection object
-        # new Collection only needs collectionData and uniqueId - properties are linked to dataframe
+        # new Collection only needs storage and uniqueId - properties are linked to dataframe
         collection = _newCollection(self._project, self, _uniqueId=int(_nextUniqueId))
 
         if items:

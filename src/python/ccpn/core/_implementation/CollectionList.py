@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-14 18:44:56 +0000 (Fri, January 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-15 12:11:41 +0000 (Sat, January 15, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -386,7 +386,7 @@ class CollectionList():
                 _data.at[_uniqueId, CO_ITEMS] = [newPid if vv == oldPid else vv for vv in _row[CO_ITEMS]]
 
     #===========================================================================================
-    # new'Object' and other methods
+    # new<Object> and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
 

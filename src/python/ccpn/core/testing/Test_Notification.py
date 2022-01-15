@@ -92,7 +92,7 @@ In that way you need only refresh your peak table once, even when you pick 500 p
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -102,8 +102,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 13:15:21 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-01-15 12:29:32 +0000 (Sat, January 15, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -332,7 +332,7 @@ class NotificationTest(WrapperTesting):
 
         self.assertEqual(ll, ['newSpectrum', 'newSpectrum2', 'newPeakList', 'newPeak',
                               'renameSpectrum', 'renamePeakList', 'renamePeak',
-                              'modPeak', 'modSpectrum', 'modPeak', 'modSpectrum',
+                              'modPeak', 'modPeak',
                               'delPeakList', 'delSpectrum'])
 
         # # NB cascading object deletions do not happen in reproducible order

@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:23:26 +0000 (Thu, January 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-17 16:14:14 +0000 (Mon, January 17, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1580,8 +1580,9 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
         for key in searchables:
             pid_key = lower_to_upper[key]
 
-            if pid_key in self.project._project._pid2Obj:
-                for elem in self.project._project._pid2Obj[pid_key]:
+            _pid2Obj = self.project._pid2Obj
+            if pid_key in _pid2Obj:
+                for elem in _pid2Obj[pid_key]:
                     elem_key = "%s:%s" % (key, str(elem))
 
                     # wrapper = self.project._project._pid2Obj[pid_key][elem]
@@ -1590,7 +1591,7 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
                     # if wrapper_has_flagged_for_delete:
                     #     flagged_for_delete = self.project._project._pid2Obj[pid_key][elem]._flaggedForDelete
                     # if not flagged_for_delete:
-                    if not elem.isDeleted:
+                    if not _pid2Obj[pid_key][elem].isDeleted:
                         if fnmatch.fnmatch(elem_key.lower(), lower_text):
                             if elem not in seen:
                                 self._results_list.append('%s:%s' % (pid_key, str(elem)))

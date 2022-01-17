@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-20 18:47:15 +0000 (Mon, December 20, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-17 16:13:53 +0000 (Mon, January 17, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -143,11 +143,12 @@ class _StripData:
     useRegion = False
     minMaxMode = 0
     axes = None
+    _widget = None
 
     _USEREGION = 'useRegion'
     _MINMAXMODE = 'minMaxMode'
     _AXES = 'axes'
-    _DECIMALS = 5
+    _DECIMALS = 2
 
     def _initialise(self):
         """Initialise the new dataclass from the strip
@@ -179,20 +180,19 @@ class _StripData:
         """
         return f'<{self.strip}: {self.useRegion}, {self.minMaxMode}, {self.axes}>'
 
-    def toDict(self, func=None):
+    def toDict(self):
         """Output the contents as a dict
         """
 
         def _func(val):
             return round(val, self._DECIMALS)
 
-        func = func or _func
         dd = {self._USEREGION : self.useRegion,
               self._MINMAXMODE: self.minMaxMode,
-              self._AXES      : [{STRIPMIN         : func(axis[STRIPMIN]),
-                                  STRIPMAX         : func(axis[STRIPMAX]),
-                                  STRIPCENTRE      : func(axis[STRIPCENTRE]),
-                                  STRIPWIDTH       : func(axis[STRIPWIDTH]),
+              self._AXES      : [{STRIPMIN         : _func(axis[STRIPMIN]),
+                                  STRIPMAX         : _func(axis[STRIPMAX]),
+                                  STRIPCENTRE      : _func(axis[STRIPCENTRE]),
+                                  STRIPWIDTH       : _func(axis[STRIPWIDTH]),
                                   STRIPAXISINVERTED: axis[STRIPAXISINVERTED],
                                   } for axis in self.axes],
               }
@@ -204,11 +204,15 @@ class _StripData:
         self.useRegion = value.get(self._USEREGION)
         self.minMaxMode = value.get(self._MINMAXMODE)
         self.axes = _axes = value.get(self._AXES)
+
+        def _func(val):
+            return float(val)
+
         if _axes:
-            self.axes = [{STRIPMIN         : float(axis[STRIPMIN]),
-                          STRIPMAX         : float(axis[STRIPMAX]),
-                          STRIPCENTRE      : float(axis[STRIPCENTRE]),
-                          STRIPWIDTH       : float(axis[STRIPWIDTH]),
+            self.axes = [{STRIPMIN         : _func(axis[STRIPMIN]),
+                          STRIPMAX         : _func(axis[STRIPMAX]),
+                          STRIPCENTRE      : _func(axis[STRIPCENTRE]),
+                          STRIPWIDTH       : _func(axis[STRIPWIDTH]),
                           STRIPAXISINVERTED: axis[STRIPAXISINVERTED],
                           } for axis in _axes]
 
@@ -496,7 +500,7 @@ class ExportStripToFilePopup(ExportDialogABC):
             for bt in range(len(STRIPBUTTONS[1:])):
                 _spinbox = DoubleSpinbox(self._rangeRight, grid=(_rangeRow, bt + 1), decimals=2, step=0.1,  # hAlign='left',
                                          callback=partial(self._setSpinbox, ii, STRIPBUTTONS[bt + 1]))
-                _spinbox.setFixedWidth(100)
+                _spinbox.setFixedWidth(140)
                 _spinbox._widgetRow = ii
                 # add a filter to update the selected box around the row
                 _spinbox.installEventFilter(self)
@@ -848,11 +852,9 @@ class ExportStripToFilePopup(ExportDialogABC):
         """
         self.printSettings = self.application.preferences.printSettings
 
-        # get the first spinBox, assume all are the same
-        textFromValue = self._axisSpinboxes[0][1].textFromValue
         for strip in self.strips:
             # copy from the local to the stripDict
-            _value = self._localStripDict[strip.id].toDict(textFromValue)
+            _value = self._localStripDict[strip.id].toDict()
             self._stripDict[strip.id].fromDict(_value)
 
             # # NOTE:ED - ranges are currently not saved to preferences correctly
@@ -1083,8 +1085,7 @@ class ExportStripToFilePopup(ExportDialogABC):
     def storeWidgetState(self):
         """Store the state of the widgets between popups
         """
-        textFromValue = self._axisSpinboxes[0][1].textFromValue
-        _value = {k: v.toDict(textFromValue) for k, v in self._localStripDict.items()}
+        _value = {k: v.toDict() for k, v in self._localStripDict.items()}
         ExportStripToFilePopup._storedState[self._SAVESTRIPS] = _value
 
         ExportStripToFilePopup._storedState[self._SAVECURRENTSTRIP] = self._currentStrip
@@ -1509,8 +1510,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         """
         clickedId = self._stripLists._clickedStripId
         if clickedId and clickedId in self._stripDict:
-            textFromValue = self._axisSpinboxes[0][1].textFromValue
-            self._copyRangeValue = self._stripDict[clickedId].toDict(textFromValue)
+            self._copyRangeValue = self._stripDict[clickedId].toDict()
 
     def _pasteRangeCallback(self):
         """Paste the axis range values into the selected strip
@@ -1791,12 +1791,11 @@ class ExportStripToFilePopup(ExportDialogABC):
         """Store the print ranges if they have changed
         """
         # get the first spinBox, assume all are the same
-        textFromValue = self._axisSpinboxes[0][1].textFromValue
         _value = {}
         _valueLocal = {}
         for strip in self.strips:
-            _value[strip.id] = self._stripDict[strip.id].toDict(textFromValue)
-            _valueLocal[strip.id] = self._localStripDict[strip.id].toDict(textFromValue)
+            _value[strip.id] = self._stripDict[strip.id].toDict()
+            _valueLocal[strip.id] = self._localStripDict[strip.id].toDict()
         # any changes to the ranges dict
         if _value != _valueLocal:
             return partial(self._setPrintRange, _value)

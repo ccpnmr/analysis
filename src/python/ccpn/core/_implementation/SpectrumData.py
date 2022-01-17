@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-14 18:56:11 +0000 (Fri, January 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-17 15:32:01 +0000 (Mon, January 17, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -147,7 +147,7 @@ class SpectrumDataABC(np.ndarray):
     @property
     def dimensionCount(self) -> int:
         """Conveniance for nomenclature;
-        :return number of dimensions (i.e. the numpy ndim parameter)
+        :return number of dimensions (i.e. the numpy.ndarray ndim parameter)
         """
         return self.ndim
 
@@ -163,11 +163,27 @@ class SpectrumDataABC(np.ndarray):
 
     @property
     def pointCounts(self) -> tuple:
-        """Conveniance: return the number of points in x,y,z.. order as used in
-        throughout the code
-        :return the shape of self in x,y,z,.. order
+        """Conveniance:
+        :return the shape of self in self.dimension's order
         """
         return tuple(list(self.shape)[::-1])
+
+    @property
+    def isComplex(self) -> tuple:
+        """Conveniance:
+        :return dataSource.isComplex in self.dimension's order
+        """
+        result  = [self.dataSource.isComplex[dimIdx] for dimIdx in self.dimensionIndices]
+        return tuple(result)
+
+    @property
+    def realPointCounts(self) -> tuple:
+        """Conveniance: return a tuple with the number of points in self.dimension's
+        order as used throughout the code
+        :return the shape of self  self.dimension's order
+        """
+        result = [(np/2 if isC else np) for np, isC in zip(self.pointCounts, self.isComplex)]
+        return tuple(result)
 
     @property
     def position(self) -> tuple:
@@ -276,19 +292,17 @@ class SpectrumDataABC(np.ndarray):
 
     def __str__(self):
 
+        rcString = {False:'R', True:'C'}
         pos = ','.join(str(p) for p in self._position) \
                     if self._position is not None else None
+        sizes =  'x'.join('%s%s' % (p, rcString[isC])
+                          for p, isC in zip(self.realPointCounts, self.isComplex))
         return '<%s: %s (%s) @%s>\n%s' % (self.spectrumDataType,
                                           self.dimensionsString,
-                                          'x'.join(str(p) for p in self.pointCounts),
+                                          sizes,
                                           pos,
                                           super().__str__()
                                          )
-
-
-class PlaneData(SpectrumDataABC):
-    spectrumDataType = 'PlaneData'
-    spectrumDataLen = 2
 
 
 class SliceData(SpectrumDataABC):
@@ -296,6 +310,17 @@ class SliceData(SpectrumDataABC):
     spectrumDataLen = 1
 
 
+class PlaneData(SpectrumDataABC):
+    spectrumDataType = 'PlaneData'
+    spectrumDataLen = 2
+
+
+class CubeData(SpectrumDataABC):
+    spectrumDataType = 'CubeData'
+    spectrumDataLen = 3
+
+
 class RegionData(SpectrumDataABC):
     spectrumDataType = 'RegionData'
     spectrumDataLen = None # defined by dimensions
+

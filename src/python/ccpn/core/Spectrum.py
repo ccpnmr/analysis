@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-18 15:09:17 +0000 (Tue, January 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-18 16:20:46 +0000 (Tue, January 18, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -170,8 +170,6 @@ class Spectrum(AbstractWrapperObject):
     _SERIESITEMS = '_seriesItems'
     _DISPLAYFOLDEDCONTOURS = 'displayFoldedContours'
     _NEGATIVENOISELEVEL = 'negativeNoiseLevel'
-
-    # classVersion = 1.0  # for json saving
 
     #-----------------------------------------------------------------------------------------
     # Attributes of the data structure (incomplete?)
@@ -297,9 +295,10 @@ class Spectrum(AbstractWrapperObject):
         """A PeakPicker instance for region picking in this spectrum.
         None indicates no valid PeakPicker has been defined
         """
-        if self._spectrumTraits.peakPicker is None:
-            if (_peakPicker := self._getPeakPicker()) is not None:
-                self._spectrumTraits.peakPicker = _peakPicker
+        # GWV: this should not happen; a default is set on restore or newSpectrum
+        # if self._spectrumTraits.peakPicker is None:
+        #     if (_peakPicker := self._getPeakPicker()) is not None:
+        #         self.peakPicker = _peakPicker
 
         return self._spectrumTraits.peakPicker
 
@@ -307,13 +306,8 @@ class Spectrum(AbstractWrapperObject):
     def peakPicker(self, peakPicker):
         """Set the current peakPicker or deassign when None
         """
-        from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC
-
-        if not isinstance(peakPicker, (PeakPickerABC, type(None))):
-            raise ValueError('Not a valid peakPickerABC class')
-
         if peakPicker and peakPicker.spectrum != self:
-            raise ValueError(f'peakPicker is already linked to spectrum {peakPicker.spectrum}')
+            raise ValueError(f'Invalid peakPicker: already linked to {peakPicker.spectrum}')
 
         if peakPicker:
             with undoBlockWithoutSideBar():
@@ -2736,6 +2730,7 @@ class Spectrum(AbstractWrapperObject):
     def _getPeakPicker(self):
         """Check whether a peakPicker class has been saved with this spectrum.
         Returns new peakPicker instance or None if cannot be defined
+        CCPNINTERNAL: also used in SpectrumTraits._restoreFromSpectrum
         """
         from ccpn.core.lib.SpectrumLib import fetchPeakPicker
 
@@ -2769,34 +2764,13 @@ class Spectrum(AbstractWrapperObject):
         # # NOTE - version 3.0.4 -> 3.1.0 update was executed by the wrapper
         # # move parameters from _ccpnInternal to the correct namespace, delete old parameters
 
+        # This will set all Spectrum traits, including dataStore, dataSource and peakPicker
+        spectrum._spectrumTraits._restoreFromSpectrum()
+
         # Assure at least one peakList
         if len(spectrum.peakLists) == 0:
             spectrum.newPeakList()
             getLogger().warning('%s had no peakList; created one' % spectrum)
-
-        # Restore the dataStore info
-        dataStore = None
-        try:
-            dataStore = DataStore()._importFromSpectrum(spectrum)
-        except (ValueError, RuntimeError) as es:
-            getLogger().warning('Error restoring valid data store for %s (%s)' % (spectrum, es))
-        finally:
-            spectrum._spectrumTraits.dataStore =  dataStore
-
-        # Get a dataSource object
-        dataSource = None
-        try:
-            dataSource = spectrum._getDataSource(dataStore)
-        except (ValueError, RuntimeError) as es:
-            getLogger().warning('Error restoring valid data source for %s (%s)' % (spectrum, es))
-        finally:
-            spectrum._spectrumTraits.dataSource = dataSource
-
-        # Get a peak picker
-        try:
-            spectrum._getPeakPicker()
-        except (ValueError, RuntimeError) as es:
-            getLogger().warning('Error restoring valid peak picker for %s (%s)' % (spectrum, es))
 
         # This will fix any spurious settings on the aliasing (also in update_3_0_4 code)
         _aIndices = spectrum.aliasingIndices
@@ -2804,6 +2778,7 @@ class Spectrum(AbstractWrapperObject):
 
         # Assure a setting of crucial attributes
         spectrum._updateParameterValues()
+
         # save the spectrum metadata
         spectrum._saveSpectrumMetaData()
 

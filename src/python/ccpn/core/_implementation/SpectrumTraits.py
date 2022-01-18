@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-18 15:09:17 +0000 (Tue, January 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-18 16:20:46 +0000 (Tue, January 18, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -27,12 +27,14 @@ __date__ = "$Date: 2022-01-18 10:28:48 +0000 (Tue, January 18, 2022) $"
 #=========================================================================================
 
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson, jsonHandler
-from ccpn.util.traits.CcpNmrTraits import Int, Float, Instance, Any
+from ccpn.util.traits.CcpNmrTraits import Int, Float, Instance, Any, default
 
 from ccpn.core.lib.DataStore import DataStore, DataStoreTrait
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import DataSourceTrait
 from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerTrait
 from ccpn.core.lib.SpectrumLib import SpectrumDimensionTrait
+
+from ccpn.util.Logging import getLogger
 
 
 class SpectrumTraits(CcpNmrJson):
@@ -62,5 +64,39 @@ class SpectrumTraits(CcpNmrJson):
         super().__init__()
         self.spectrum = spectrum
 
-    # @property
-    # def _metadata
+    def _restoreFromSpectrum(self):
+        """Restore the various traits from the spectrum internal data
+        """
+        from ccpn.core.lib.SpectrumLib import fetchPeakPicker
+
+        spectrum = self.spectrum
+
+        # Restore the dataStore info
+        dataStore = None
+        try:
+            dataStore = DataStore()._importFromSpectrum(self.spectrum)
+        except (ValueError, RuntimeError) as es:
+            getLogger().warning('Error restoring valid data store for %s (%s)' % (spectrum, es))
+        finally:
+            self.dataStore =  dataStore
+
+        # Get a dataSource object
+        dataSource = None
+        try:
+            dataSource = spectrum._getDataSource(dataStore)
+        except (ValueError, RuntimeError) as es:
+            getLogger().warning('Error restoring valid data source for %s (%s)' % (spectrum, es))
+        finally:
+            self.dataSource = dataSource
+
+        # Get a peak picker
+        try:
+            peakPicker = spectrum._getPeakPicker()
+        except (ValueError, RuntimeError) as es:
+            getLogger().warning('Error restoring valid peak picker for %s (%s)' % (spectrum, es))
+        finally:
+            self.peakPicker = peakPicker
+#end class
+
+# Register for Json restoring
+SpectrumTraits.register()

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-14 10:51:08 +0000 (Fri, January 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-18 15:09:17 +0000 (Tue, January 18, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2013,7 +2013,7 @@ def _pickPeaksByRegion(spectrum, sliceTuples, peakList, positiveThreshold, negat
         raise ValueError('_pickPeaksByRegion: required peakList instance, got:%r' % peakList)
 
     # get the peakPicker
-    if (peakPicker := spectrum._peakPicker) is None:
+    if (peakPicker := spectrum.peakPicker) is None:
         txt = f'_pickPeakByRegion: No valid peakPicker for {spectrum}'
         logger.warning(txt)
         raise RuntimeError(txt)

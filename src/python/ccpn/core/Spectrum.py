@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-18 11:29:00 +0000 (Tue, January 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-18 15:09:17 +0000 (Tue, January 18, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -125,10 +125,10 @@ from ccpn.core._implementation.Updater import updateObject, UPDATE_POST_PROJECT_
               updateFunction =_updateSpectrum_3_0_4_to_3_1_0,
               updateMethod = UPDATE_POST_PROJECT_INITIALISATION
               )
-class Spectrum(AbstractWrapperObject, CcpNmrJson):
+class Spectrum(AbstractWrapperObject):
     """A Spectrum object contains all the stored properties of an NMR spectrum, as well as the
     path to the NMR (binary) data file. The Spectrum object has methods to get the binary data
-    as numpy arrays.
+    as SpectrumData (i.e. numpy.ndarray) objects.
     """
     #-----------------------------------------------------------------------------------------
 
@@ -171,7 +171,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     _DISPLAYFOLDEDCONTOURS = 'displayFoldedContours'
     _NEGATIVENOISELEVEL = 'negativeNoiseLevel'
 
-    classVersion = 1.0  # for json saving
+    # classVersion = 1.0  # for json saving
 
     #-----------------------------------------------------------------------------------------
     # Attributes of the data structure (incomplete?)
@@ -256,10 +256,10 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def __init__(self, project: Project, wrappedData: Nmr.DataSource):
 
         # super().__init__(project, wrappedData)
-        CcpNmrJson.__init__(self)
+        # CcpNmrJson.__init__(self)
         AbstractWrapperObject.__init__(self, project, wrappedData)
 
-        self._spectrumTraits = SpectrumTraits()
+        self._spectrumTraits = SpectrumTraits(spectrum=self)
 
         # 1D data references
         self._intensities = None
@@ -280,25 +280,10 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
     @property
     def _dataStore(self):
-        """A DataStore instance encoding the path and dataFormat of the (binary) spectrum data.
-           None indicates no spectrum data file path has been defined
+        """A DataStore instance encoding the filePath and dataFormat of the (binary) spectrum data.
+           None indicates no spectrum filePile path has been defined
         """
         return self._spectrumTraits.dataStore
-
-    # _dataStore = DataStoreTrait(default_value=None, read_only=True).tag(
-    #                             saveToJson=True,
-    #                             info="""
-    #                             A DataStore instance encoding the path and dataFormat of the (binary) spectrum data.
-    #                             None indicates no spectrum data file path has been defined"""
-    # )
-
-    # # CCPNINTERNAL: Also used in PeakPickers
-    # dataSource = DataSourceTrait(default_value=None, read_only=True).tag(
-    #                               saveToJson=True,
-    #                               info="""
-    #                               A SpectrumDataSource instance for reading (writing) of the (binary) spectrum data.
-    #                               None indicates no valid spectrum data file has been defined"""
-    # )
 
     @property
     def dataSource(self):
@@ -307,27 +292,16 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """
         return self._spectrumTraits.dataSource
 
-    _peakPicker = PeakPickerTrait(default_value=None).tag(
-                                  saveToJson=True,
-                                  info="A PeakPicker instance"
-    )
-
     @property
     def peakPicker(self):
-        """A peakPicker instance for region picking in this spectrum.
-        None indicates no valid peakPicker has been defined
+        """A PeakPicker instance for region picking in this spectrum.
+        None indicates no valid PeakPicker has been defined
         """
-        from ccpn.core.lib.SpectrumLib import fetchPeakPicker
+        if self._spectrumTraits.peakPicker is None:
+            if (_peakPicker := self._getPeakPicker()) is not None:
+                self._spectrumTraits.peakPicker = _peakPicker
 
-        if not self._peakPicker:
-            _peakPicker = fetchPeakPicker(self)
-            # automatically store in the spectrum internal store
-            if _peakPicker:
-                with undoBlockWithoutSideBar():
-                    self._peakPicker = _peakPicker
-                    self._peakPicker._storeAttributes()
-
-        return self._peakPicker
+        return self._spectrumTraits.peakPicker
 
     @peakPicker.setter
     def peakPicker(self, peakPicker):
@@ -337,21 +311,23 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         if not isinstance(peakPicker, (PeakPickerABC, type(None))):
             raise ValueError('Not a valid peakPickerABC class')
-        elif peakPicker and peakPicker.spectrum != self:
+
+        if peakPicker and peakPicker.spectrum != self:
             raise ValueError(f'peakPicker is already linked to spectrum {peakPicker.spectrum}')
-        elif peakPicker:
+
+        if peakPicker:
             with undoBlockWithoutSideBar():
                 # set the current peakPicker
-                self._peakPicker = peakPicker
+                self._spectrumTraits.peakPicker = peakPicker
                 # automatically store in the spectrum CCPN internal store
-                self._peakPicker._storeAttributes()
+                peakPicker._storeAttributes()
                 getLogger().debug('Setting peakPicker to %s' % peakPicker)
         else:
             with undoBlockWithoutSideBar():
                 # clear the current peakPicker
-                if self._peakPicker:
-                    self._peakPicker._detachFromSpectrum()
-                    self._peakPicker = None
+                if self._spectrumTraits.peakPicker is not None:
+                    self._spectrumTraits.peakPicker._detachFromSpectrum()
+                    self._spectrumTraits.peakPicker = None
                     getLogger().debug('Clearing current peakPicker')
 
     #-----------------------------------------------------------------------------------------
@@ -720,11 +696,9 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         newDataStore, newDataSource = self._getDataSourceFromPath(path=value, dataFormat=self.dataFormat, checkParameters=True)
         if newDataStore is None:
-            raise ValueError('Spectrum.filePath: %s invalid filePath "%s"' %
-                             (self, value))
+            raise ValueError('Spectrum.filePath: %s invalid filePath "%s"' % (self, value))
         if newDataSource is None:
-            raise ValueError('Spectrum.filePath: %s incompatible dataSource "%s"' %
-                             (self, value))
+            raise ValueError('Spectrum.filePath: %s incompatible dataSource "%s"' % (self, value))
 
         # we found a valid new file
         self._close()
@@ -2845,17 +2819,22 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         self._saveSpectrumMetaData()
         return result
 
+    @property
+    def _metaDataPath(self):
+        """Return the path to the metadata file
+        """
+        _tmpPath = aPath(self.project.path).fetchDir(CCPN_STATE_DIRECTORY, self._pluralLinkName)
+        return _tmpPath / self.name + '.json'
+
     def _saveSpectrumMetaData(self):
         """Save the spectrum metadata in the project/state/spectra in json file for optional future reference
         """
-        _tmpPath = aPath(self.project.path).fetchDir(CCPN_STATE_DIRECTORY, self._pluralLinkName)
-        self.save(_tmpPath / self.name + '.json')
+        self._spectrumTraits.save(self._metaDataPath)
 
     def _restoreFromSpectrumMetaData(self):
         """Retore the spectrum metadata from the project/state/spectra json file
         """
-        _tmpPath = aPath(self.project.path).fetchDir(CCPN_STATE_DIRECTORY, self._pluralLinkName)
-        self.restore(_tmpPath / self.name + '.json')
+        self._spectrumTraits.restore(self._metaDataPath)
         self._dataStore.spectrum = self
         self._dataStore._saveInternal()
         self.dataSource.spectrum = self
@@ -2863,8 +2842,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def _deleteSpectrumMetaData(self):
         """Delete the spectrum metadata in the project/state/spectra
         """
-        _tmpPath = aPath(self.project.path).joinpath(CCPN_STATE_DIRECTORY, self._pluralLinkName)
-        _path = _tmpPath / self.name + '.json'
+        _path = self._metaDataPath
         if _path.exists():
             _path.removeFile()
 

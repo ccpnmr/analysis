@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-18 11:05:55 +0000 (Tue, January 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-18 15:09:17 +0000 (Tue, January 18, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -39,6 +39,7 @@ class SpectrumTraits(CcpNmrJson):
     """Spectrum related traits
     """
     saveAllTraitsToJson = True
+    classVersion = 1.0  # for json saving
 
     # References to DataStore / DataSource instances for filePath manipulation and (binary) data reading;
     dataStore = DataStoreTrait(default_value=None).tag(
@@ -47,7 +48,6 @@ class SpectrumTraits(CcpNmrJson):
                                None indicates no spectrum data file path has been defined"""
     )
 
-    # CCPNINTERNAL: Also used in PeakPickers
     dataSource = DataSourceTrait(default_value=None).tag(
                                  info="""
                                  A SpectrumDataSource instance for reading (writing) of the (binary) spectrum data.
@@ -57,3 +57,10 @@ class SpectrumTraits(CcpNmrJson):
     peakPicker = PeakPickerTrait(default_value=None).tag(
                                   info="A PeakPicker instance"
     )
+
+    def __init__(self, spectrum):
+        super().__init__()
+        self.spectrum = spectrum
+
+    # @property
+    # def _metadata

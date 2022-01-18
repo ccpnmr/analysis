@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-14 18:51:45 +0000 (Fri, January 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-18 09:48:14 +0000 (Tue, January 18, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -719,13 +719,17 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         self._saveSpectrumMetaData()
 
     @logCommand(get='self')
-    def reload(self, path:str):
+    def reload(self, path:str = None):
         """Reload the spectrum as defined by path;
         DataFormat and dimensionality need to match with the current Spectrum instance.
         All other parameters will be pulled from the (binary) spectrum data.
 
         :param path: a path to the spectrum; may contain redirections (e.g. $DATA)
+                     defaults to self.filePath.
         """
+        if path is None:
+            path = self.filePath
+
         newDataStore, newDataSource = self._getDataSourceFromPath(path, checkParameters=False)
         if newDataStore is None or newDataSource is None:
             raise ValueError('Spectrum.reload: unable to load "%s"' % path)

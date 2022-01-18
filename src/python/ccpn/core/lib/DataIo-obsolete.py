@@ -1,4 +1,6 @@
-"""Module Documentation here
+"""
+This file is only here for historical reasons and is OBSOLETE and for reference only
+It contains code used for the CASD-NMR analysis
 
 """
 #=========================================================================================
@@ -15,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-18 17:23:34 +0000 (Tue, January 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-18 17:35:56 +0000 (Tue, January 18, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created

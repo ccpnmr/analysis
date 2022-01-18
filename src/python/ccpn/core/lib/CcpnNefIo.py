@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-23 17:37:46 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-01-18 17:23:34 +0000 (Tue, January 18, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -395,9 +395,9 @@ class CcpnNefWriter:
             # NBNB TBD reconsider whether we want the spec summary or something else
             self.specification = Specification.getCcpnSpecification(specificationFile)
 
-        if hasattr(project, '_appBase'):
-            programName = programName or project._appBase.applicationName
-            programVersion = programVersion or project._appBase.applicationVersion
+        if hasattr(project, 'application'):
+            programName = programName or project.application.applicationName
+            programVersion = programVersion or project.application.applicationVersion
         self.programName = programName or 'CcpnNefWriter'
         self.programVersion = programVersion
         self.ccpn2SaveFrameName = {}

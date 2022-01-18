@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-27 19:08:31 +0100 (Mon, September 27, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-01-18 17:23:35 +0000 (Tue, January 18, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -118,7 +118,7 @@ class ZoomPopup(CcpnDialog):
     def _zoom(self):
         from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 
-        with undoBlockWithoutSideBar():  # testing -> _appBase will disappear with the new framework
+        with undoBlockWithoutSideBar():
 
             positions = [(minVal.value(), maxVal.value()) for minVal, maxVal in zip(self.minPositionBoxes, self.maxPositionBoxes)]
             self.current.strip.zoom(positions[0], positions[1])

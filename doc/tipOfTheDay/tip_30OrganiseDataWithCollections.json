@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>Organise your data with Collections. Create a Collection in the sidebar and then add Spectra, SpectrumGroups, Structures, Chemical Shift Lists or any other sidebar object for easy organisation and retrieval. You can even add one Collection to another. A useful way to keep data together for different constructs, structure calculation runs, types of data analysis etc. Simply right-click on the object in the sidebar and add to an existing Collection.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 30,
+  "contents": [
+    "./graphics/OrganiseDataWithCollections.png"
+  ]
+}

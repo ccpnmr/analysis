@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-18 11:19:56 +0000 (Tue, January 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-18 11:29:00 +0000 (Tue, January 18, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -275,12 +275,14 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     # end __init__
     #-----------------------------------------------------------------------------------------
 
+    # References to DataStore / DataSource instances for filePath manipulation and (binary)
+    # data reading;
+
     @property
     def _dataStore(self):
         """A DataStore instance encoding the path and dataFormat of the (binary) spectrum data.
            None indicates no spectrum data file path has been defined
         """
-    # # References to DataStore / DataSource instances for filePath manipulation and (binary) data reading;
         return self._spectrumTraits.dataStore
 
     # _dataStore = DataStoreTrait(default_value=None, read_only=True).tag(
@@ -290,18 +292,20 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     #                             None indicates no spectrum data file path has been defined"""
     # )
 
-    # CCPNINTERNAL: Also used in PeakPickers
-    dataSource = DataSourceTrait(default_value=None, read_only=True).tag(
-                                  saveToJson=True,
-                                  info="""
-                                  A SpectrumDataSource instance for reading (writing) of the (binary) spectrum data.
-                                  None indicates no valid spectrum data file has been defined"""
-    )
+    # # CCPNINTERNAL: Also used in PeakPickers
+    # dataSource = DataSourceTrait(default_value=None, read_only=True).tag(
+    #                               saveToJson=True,
+    #                               info="""
+    #                               A SpectrumDataSource instance for reading (writing) of the (binary) spectrum data.
+    #                               None indicates no valid spectrum data file has been defined"""
+    # )
 
-    # @property
-    # def dataSource(self):
-    #     """Return the dataSource instance"""
-    #     return self._dataSource
+    @property
+    def dataSource(self):
+        """A SpectrumDataSource instance for reading (writing) of the (binary) spectrum data.
+        None indicates no valid spectrum data file has been defined
+        """
+        return self._spectrumTraits.dataSource
 
     _peakPicker = PeakPickerTrait(default_value=None).tag(
                                   saveToJson=True,
@@ -724,7 +728,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         # we found a valid new file
         self._close()
-        self.setTraitValue('dataSource', newDataSource, force=True)
+        self._spectrumTraits.dataSource = newDataSource
         self._spectrumTraits.dataStore =  newDataStore
         self._dataStore._saveInternal()
         self._saveSpectrumMetaData()
@@ -750,7 +754,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         # we found a valid new file
         self._close()
-        self.setTraitValue('dataSource', newDataSource, force=True)
+        self._spectrumTraits.dataSource = newDataSource
         self._spectrumTraits.dataStore = newDataStore
         self.dataSource.exportToSpectrum(self, includePath=False)
         self._dataStore._saveInternal()
@@ -2812,7 +2816,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         except (ValueError, RuntimeError) as es:
             getLogger().warning('Error restoring valid data source for %s (%s)' % (spectrum, es))
         finally:
-            spectrum.setTraitValue('dataSource', dataSource, force=True)
+            spectrum._spectrumTraits.dataSource = dataSource
 
         # Get a peak picker
         try:
@@ -2928,7 +2932,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         self._clearCache()
         if self.dataSource is not None:
             self.dataSource.closeFile()
-            self.setTraitValue('dataSource', None, force=True)
+            self._spectrumTraits.dataSource = None
 
     @logCommand(get='self')
     def delete(self):
@@ -3284,8 +3288,7 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
     dataSource.setPath(dataStore.aPath())
     # Update all parameters from the dataSource to the Spectrum instance; retain the dataSource instance
     dataSource.exportToSpectrum(spectrum, includePath=False)
-    spectrum.setTraitValue('dataSource', dataSource, force=True)
-
+    spectrum._spectrumTraits.dataSource = dataSource
     # get a peak picker
     spectrum._getPeakPicker()
 

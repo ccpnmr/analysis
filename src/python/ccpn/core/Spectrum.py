@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-18 11:05:55 +0000 (Tue, January 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-18 11:19:56 +0000 (Tue, January 18, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -291,7 +291,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     # )
 
     # CCPNINTERNAL: Also used in PeakPickers
-    _dataSource = DataSourceTrait(default_value=None, read_only=True).tag(
+    dataSource = DataSourceTrait(default_value=None, read_only=True).tag(
                                   saveToJson=True,
                                   info="""
                                   A SpectrumDataSource instance for reading (writing) of the (binary) spectrum data.
@@ -714,7 +714,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
             self._dataStore.path = None
             return
 
-        newDataStore, newDataSource = self._getDataSourceFromPath(path=value, checkParameters=True)
+        newDataStore, newDataSource = self._getDataSourceFromPath(path=value, dataFormat=self.dataFormat, checkParameters=True)
         if newDataStore is None:
             raise ValueError('Spectrum.filePath: %s invalid filePath "%s"' %
                              (self, value))
@@ -724,7 +724,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         # we found a valid new file
         self._close()
-        self.setTraitValue('_dataSource', newDataSource, force=True)
+        self.setTraitValue('dataSource', newDataSource, force=True)
         self._spectrumTraits.dataStore =  newDataStore
         self._dataStore._saveInternal()
         self._saveSpectrumMetaData()
@@ -741,7 +741,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         if path is None:
             path = self.filePath
 
-        newDataStore, newDataSource = self._getDataSourceFromPath(path, checkParameters=False)
+        newDataStore, newDataSource = self._getDataSourceFromPath(path, dataFormat=self.dataFormat, checkParameters=False)
         if newDataStore is None or newDataSource is None:
             raise ValueError('Spectrum.reload: unable to load "%s"' % path)
         if newDataSource.dimensionCount != self.dimensionCount:
@@ -750,9 +750,9 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         # we found a valid new file
         self._close()
-        self.setTraitValue('_dataSource', newDataSource, force=True)
+        self.setTraitValue('dataSource', newDataSource, force=True)
         self._spectrumTraits.dataStore = newDataStore
-        self._dataSource.exportToSpectrum(self, includePath=False)
+        self.dataSource.exportToSpectrum(self, includePath=False)
         self._dataStore._saveInternal()
         self._saveSpectrumMetaData()
 
@@ -768,7 +768,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """Return true if the spectrum's dataSource currently defines an valid dataSource object
         with a valid path defined
         """
-        return self._dataSource is not None and self._dataSource.hasValidPath()
+        return self.dataSource is not None and self.dataSource.hasValidPath()
 
     def isEmptySpectrum(self) -> bool:
         """Return True if instance refers to an empty spectrum; i.e. as in without actual spectral data"
@@ -1998,8 +1998,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def estimateNoise(self):
         """Estimate and return the noise level, or None if it cannot be
         """
-        if self._dataSource is not None:
-            noise = self._dataSource.estimateNoise()
+        if self.dataSource is not None:
+            noise = self.dataSource.estimateNoise()
         else:
             noise = None
         return noise
@@ -2011,22 +2011,22 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def isBuffered(self):
         """Return True if dataSource of spectrum is buffered
         """
-        if self._dataSource is None:
+        if self.dataSource is None:
             return False
-        return self._dataSource.isBuffered
+        return self.dataSource.isBuffered
 
     def setBuffering(self, isBuffered:bool, path:str = None):
         """Set temporary Hdf5-buffering.
         :param isBuffered: set the buffering status
         :param path: store hdf5buffer file at path; implies non-temporary buffer
         """
-        if self._dataSource is None:
+        if self.dataSource is None:
             getLogger().warning('No proper (filePath, dataFormat) set for %s' % self)
             return
         bufferIsTemporary = (path is None)
         if path is not None:
             path = aPath(path).uniqueVersion()
-        self._dataSource.setBuffering(isBuffered, bufferIsTemporary=bufferIsTemporary, bufferPath=path)
+        self.dataSource.setBuffering(isBuffered, bufferIsTemporary=bufferIsTemporary, bufferPath=path)
 
     @logCommand(get='self')
     def getIntensity(self, ppmPositions) -> float:
@@ -2059,7 +2059,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         if not all(isinstance(dimVal, (int, float)) for dimVal in pointPositions):
             raise ValueError('position values must be floats.')
 
-        if self._dataSource is None:
+        if self.dataSource is None:
             getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zero' % self)
             return 0.0
 
@@ -2073,7 +2073,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         #     aliasing.append((pp - 1) // np)
 
         aliasingFlags = [1] * self.dimensionCount
-        value = self._dataSource.getPointValue(pointPositions, aliasingFlags=aliasingFlags)
+        value = self.dataSource.getPointValue(pointPositions, aliasingFlags=aliasingFlags)
         return value * self.scale
 
     @logCommand(get='self')
@@ -2088,14 +2088,14 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         NB: use getSlice() method for axisCode based access
         """
-        if self._dataSource is None:
+        if self.dataSource is None:
             getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zeros only' % self)
             data = numpy.zeros((self.pointCounts[sliceDim - 1],), dtype=numpy.float32)
 
         else:
             try:
-                position = self._dataSource.checkForValidSlice(position, sliceDim)
-                data = self._dataSource.getSliceData(position=position, sliceDim=sliceDim)
+                position = self.dataSource.checkForValidSlice(position, sliceDim)
+                data = self.dataSource.getSliceData(position=position, sliceDim=sliceDim)
                 data = data.copy(order='K') * self.scale
 
             except (RuntimeError, ValueError) as es:
@@ -2124,17 +2124,17 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def setSliceData(self, data, position: Sequence = None, sliceDim: int = 1):
         """Set data as slice defined by sliceDim and position (all 1-based)
         """
-        if self._dataSource is None:
+        if self.dataSource is None:
             getLogger().warning('No proper (filePath, dataFormat) set for %s; cannot set plane data' % self)
             return
 
         try:
-            position = self._dataSource.checkForValidSlice(position, sliceDim=sliceDim)
+            position = self.dataSource.checkForValidSlice(position, sliceDim=sliceDim)
         except (RuntimeError, ValueError) as es:
             getLogger().error('invalid arguments: %s' % es)
             raise es
 
-        self._dataSource.setSliceData(data=data, position=position, sliceDim=sliceDim)
+        self.dataSource.setSliceData(data=data, position=position, sliceDim=sliceDim)
 
     @logCommand(get='self')
     def extractSliceToFile(self, axisCode, position, path=None, dataFormat='Hdf5'):
@@ -2150,7 +2150,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         :return: Spectrum instance
         """
-        if self._dataSource is None:
+        if self.dataSource is None:
             text = 'No proper (filePath, dataFormat) set for %s; unable to extract slice' % self
             getLogger().error(text)
             raise RuntimeError(text)
@@ -2160,7 +2160,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         try:
             dimensions = self.getByAxisCodes('dimensions', [axisCode])
-            self._dataSource.checkForValidSlice(position=position, sliceDim=dimensions[0])
+            self.dataSource.checkForValidSlice(position=position, sliceDim=dimensions[0])
             newSpectrum = self._extractToFile(axisCodes=[axisCode], position=position,
                                               path=path, dataFormat=dataFormat, tag='slice')
 
@@ -2187,17 +2187,17 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         if self.dimensionCount < 2:
             raise RuntimeError("Spectrum.getPlaneData: dimensionality < 2")
 
-        if self._dataSource is None:
+        if self.dataSource is None:
             getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zeros only' % self)
             return numpy.zeros((self.pointCounts[yDim - 1], self.pointCounts[xDim - 1]), dtype=numpy.float32)
 
         try:
-            position = self._dataSource.checkForValidPlane(position, xDim=xDim, yDim=yDim)
+            position = self.dataSource.checkForValidPlane(position, xDim=xDim, yDim=yDim)
         except (RuntimeError, ValueError) as es:
             getLogger().error('invalid arguments: %s' % es)
             raise es
 
-        data = self._dataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
+        data = self.dataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
         # Make a copy in order to preserve the original data and apply scaling
         data = data.copy(order='K') * self.scale
 
@@ -2240,17 +2240,17 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         if self.dimensionCount < 2:
             raise RuntimeError("Spectrum.gstPlaneData: dimensionality < 2")
 
-        if self._dataSource is None:
+        if self.dataSource is None:
             getLogger().warning('No proper (filePath, dataFormat) set for %s; cannot set plane data' % self)
             return
 
         try:
-            position = self._dataSource.checkForValidPlane(position, xDim=xDim, yDim=yDim)
+            position = self.dataSource.checkForValidPlane(position, xDim=xDim, yDim=yDim)
         except (RuntimeError, ValueError) as es:
             getLogger().error('invalid arguments: %s' % es)
             raise es
 
-        self._dataSource.setPlaneData(data=data, position=position, xDim=xDim, yDim=yDim)
+        self.dataSource.setPlaneData(data=data, position=position, xDim=xDim, yDim=yDim)
 
     @logCommand(get='self')
     def extractPlaneToFile(self, axisCodes: (tuple, list), position=None, path=None, dataFormat='Hdf5'):
@@ -2264,7 +2264,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         :returns plane as Spectrum instance
         """
-        if self._dataSource is None:
+        if self.dataSource is None:
             text = 'No proper (filePath, dataFormat) set for %s; unable to extract plane' % self
             getLogger().error(text)
             raise RuntimeError(text)
@@ -2274,7 +2274,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         try:
             dimensions = self.getByAxisCodes('dimensions', axisCodes)
-            self._dataSource.checkForValidPlane(position=position, xDim=dimensions[0], yDim=dimensions[1])
+            self.dataSource.checkForValidPlane(position=position, xDim=dimensions[0], yDim=dimensions[1])
             newSpectrum = self._extractToFile(axisCodes=axisCodes, position=position, path=path, dataFormat=dataFormat,
                                               tag='plane')
 
@@ -2314,7 +2314,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         :returns projected plane as Spectrum instance
         """
-        if self._dataSource is None:
+        if self.dataSource is None:
             text = 'No proper (filePath, dataFormat) set for %s; unable to extract plane' % self
             getLogger().error(text)
             raise RuntimeError(text)
@@ -2325,13 +2325,13 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         try:
             xDim, yDim = self.getByAxisCodes('dimensions', axisCodes)
             position = [1] * self.dimensionCount
-            self._dataSource.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
+            self.dataSource.checkForValidPlane(position=position, xDim=xDim, yDim=yDim)
             newSpectrum = self._extractToFile(axisCodes=axisCodes, position=position, path=path, dataFormat=dataFormat,
                                               tag='projection')
             projectionData = self.getProjection(axisCodes=axisCodes, method=method, threshold=threshold)
             # For writing, we need to remap the axisCodes onto the newSpectrum
             xDim2, yDim2 = newSpectrum.getByAxisCodes('dimensions', axisCodes)
-            newSpectrum._dataSource.setPlaneData(data=projectionData, position=position, xDim=xDim2, yDim=yDim2)
+            newSpectrum.dataSource.setPlaneData(data=projectionData, position=position, xDim=xDim2, yDim=yDim2)
 
         except (ValueError, RuntimeError) as es:
             text = 'Spectrum.extractProjectionToFile: %s' % es
@@ -2351,7 +2351,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         name = self.name + '_cloned'
 
-        _path = self._dataSource.parentPath / name
+        _path = self.dataSource.parentPath / name
         suffix = Hdf5SpectrumDataSource.suffixes[0]
         dataFormat = Hdf5SpectrumDataSource.dataFormat
 
@@ -2360,7 +2360,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                                           dataFormat=dataFormat)
 
         # Duplicate the data in an Hdf5 file
-        hdf5DataSource = self._dataSource.duplicateDataToHdf5(dataStore.aPath())
+        hdf5DataSource = self.dataSource.duplicateDataToHdf5(dataStore.aPath())
         # Update the dataSource parameters from self
         # hdf5DataSource.importFromSpectrum(self, includePath=False)
         # hdf5DataSource.writeParameters()
@@ -2479,7 +2479,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         if not self.hasValidPath():
             raise RuntimeError('Not valid path for %s ' % self)
         sliceTuples = self._axisDictToSliceTuples(axisDict)
-        return self._dataSource.getRegionData(sliceTuples, aliasingFlags=[1] * self.dimensionCount)
+        return self.dataSource.getRegionData(sliceTuples, aliasingFlags=[1] * self.dimensionCount)
 
     # def getRegionData(self, exclusionBuffer: Optional[Sequence] = None, minimumDimensionSize: int = 3, **axisDict):
     #     """Return the region of the spectrum data defined by the axis limits.
@@ -2574,7 +2574,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         tagStr = '%s_%s' % (tag, '_'.join(axisCodes))
         if path is None:
             appendToFilename = '_%s_%s' % (tagStr, '_'.join([str(p) for p in position]))
-            path = self._dataSource.parentPath / self.name + appendToFilename
+            path = self.dataSource.parentPath / self.name + appendToFilename
 
         dataStore = DataStore.newFromPath(path=path,
                                           autoVersioning=True, withSuffix=suffix,
@@ -2650,7 +2650,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         if not self.hasValidPath():
             raise RuntimeError('Not valid path for %s ' % self)
-        return self._dataSource.allPlanes(xDim=axisDims[0], yDim=axisDims[1])
+        return self.dataSource.allPlanes(xDim=axisDims[0], yDim=axisDims[1])
 
     def allSlices(self, axisCode:str, exactMatch:bool = True):
         """An iterator over all slices defined by axisCode, yielding (positions, data-array) tuples.
@@ -2662,7 +2662,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         sliceDim = self.getByAxisCodes('dimensions', [axisCode], exactMatch=exactMatch)[0]
         if not self.hasValidPath():
             raise RuntimeError('Not valid path for %s ' % self)
-        return self._dataSource.allSlices(sliceDim=sliceDim)
+        return self.dataSource.allSlices(sliceDim=sliceDim)
 
     def allPoints(self):
         """An iterator over all points yielding (positions, pointValue) tuples.
@@ -2671,7 +2671,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """
         if not self.hasValidPath():
             raise RuntimeError('Not valid path for %s ' % self)
-        return self._dataSource.allPoints()
+        return self.dataSource.allPoints()
 
     #-----------------------------------------------------------------------------------------
     # Implementation properties and functions
@@ -2684,11 +2684,18 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         """
         return self._wrappedData.serial
 
-    def _getDataSourceFromPath(self, path, checkParameters=True):
+    def _getDataSourceFromPath(self, path, dataFormat=None, checkParameters=True) -> tuple:
         """Return a (dataStore, dataSource) tuple if path points  a file compatible
-        with self.dataFormat, or (None, None) otherwise
+        with dataFormat, or (None, None) otherwise.
+
+        :param path: path to check, may contain redirections
+        :param dataFormat: dataFormat string (default to self.dataFormat if None)
+        :param checkParameters: Flag to invoke checking of parameters
         """
-        dataStore = DataStore.newFromPath(path=path, dataFormat=self.dataFormat)
+        if dataFormat is None:
+            dataFormat = self.dataFormat
+
+        dataStore = DataStore.newFromPath(path=path, dataFormat=dataFormat)
         if not dataStore.exists():
             return (None, None)
         dataStore.spectrum = self
@@ -2744,7 +2751,6 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                 if isC_spectrum != isC_dataSource:
                     raise RuntimeError('Spectrum._getDataSource: incompatible isComplex definitions; %s has %r ; %s has %r' %
                                        (self, self.isComplex, dataSource, dataSource.isComplex))
-
 
         dataSource.spectrum = self
         return dataSource
@@ -2806,7 +2812,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         except (ValueError, RuntimeError) as es:
             getLogger().warning('Error restoring valid data source for %s (%s)' % (spectrum, es))
         finally:
-            spectrum.setTraitValue('_dataSource', dataSource, force=True)
+            spectrum.setTraitValue('dataSource', dataSource, force=True)
 
         # Get a peak picker
         try:
@@ -2848,7 +2854,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         self.restore(_tmpPath / self.name + '.json')
         self._dataStore.spectrum = self
         self._dataStore._saveInternal()
-        self._dataSource.spectrum = self
+        self.dataSource.spectrum = self
 
     def _deleteSpectrumMetaData(self):
         """Delete the spectrum metadata in the project/state/spectra
@@ -2911,8 +2917,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     def _clearCache(self):
         """Clear the cache
         """
-        if self._dataSource is not None:
-            self._dataSource.clearCache()
+        if self.dataSource is not None:
+            self.dataSource.clearCache()
 
     def _close(self):
         """Close any open dataSource
@@ -2920,9 +2926,9 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         CCPNINTERNAL: also called by Project.close() to do cleanup
         """
         self._clearCache()
-        if self._dataSource is not None:
-            self._dataSource.closeFile()
-            self.setTraitValue('_dataSource', None, force=True)
+        if self.dataSource is not None:
+            self.dataSource.closeFile()
+            self.setTraitValue('dataSource', None, force=True)
 
     @logCommand(get='self')
     def delete(self):
@@ -3278,7 +3284,7 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
     dataSource.setPath(dataStore.aPath())
     # Update all parameters from the dataSource to the Spectrum instance; retain the dataSource instance
     dataSource.exportToSpectrum(spectrum, includePath=False)
-    spectrum.setTraitValue('_dataSource', dataSource, force=True)
+    spectrum.setTraitValue('dataSource', dataSource, force=True)
 
     # get a peak picker
     spectrum._getPeakPicker()

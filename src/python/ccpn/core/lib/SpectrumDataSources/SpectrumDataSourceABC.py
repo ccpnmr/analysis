@@ -77,7 +77,7 @@ Example 3 (using Spectrum instance to make a hdf5 duplicate):
     outputPath = 'myCopiedHNCA.hdf5'
 
     with Hdf5SpectrumDataSource(spectrum=sp).openNewFile(outputPath) as output:
-        output.copyDataFrom(sp._dataSource)
+        output.copyDataFrom(sp.dataSource)
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-18 09:50:04 +0000 (Tue, January 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-18 11:05:55 +0000 (Tue, January 18, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created

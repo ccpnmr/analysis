@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-18 09:48:14 +0000 (Tue, January 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-18 11:05:55 +0000 (Tue, January 18, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -70,6 +70,8 @@ import numpy
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core._implementation.SpectrumTraits import SpectrumTraits
+
 from ccpn.core.Project import Project
 from ccpn.core.lib import Pid
 
@@ -257,6 +259,8 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         CcpNmrJson.__init__(self)
         AbstractWrapperObject.__init__(self, project, wrappedData)
 
+        self._spectrumTraits = SpectrumTraits()
+
         # 1D data references
         self._intensities = None
         self._positions = None
@@ -271,13 +275,20 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
     # end __init__
     #-----------------------------------------------------------------------------------------
 
-    # References to DataStore / DataSource instances for filePath manipulation and (binary) data reading;
-    _dataStore = DataStoreTrait(default_value=None, read_only=True).tag(
-                                saveToJson=True,
-                                info="""
-                                A DataStore instance encoding the path and dataFormat of the (binary) spectrum data.
-                                None indicates no spectrum data file path has been defined"""
-    )
+    @property
+    def _dataStore(self):
+        """A DataStore instance encoding the path and dataFormat of the (binary) spectrum data.
+           None indicates no spectrum data file path has been defined
+        """
+    # # References to DataStore / DataSource instances for filePath manipulation and (binary) data reading;
+        return self._spectrumTraits.dataStore
+
+    # _dataStore = DataStoreTrait(default_value=None, read_only=True).tag(
+    #                             saveToJson=True,
+    #                             info="""
+    #                             A DataStore instance encoding the path and dataFormat of the (binary) spectrum data.
+    #                             None indicates no spectrum data file path has been defined"""
+    # )
 
     # CCPNINTERNAL: Also used in PeakPickers
     _dataSource = DataSourceTrait(default_value=None, read_only=True).tag(
@@ -287,10 +298,10 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
                                   None indicates no valid spectrum data file has been defined"""
     )
 
-    @property
-    def dataSource(self):
-        """Return the dataSource instance"""
-        return self._dataSource
+    # @property
+    # def dataSource(self):
+    #     """Return the dataSource instance"""
+    #     return self._dataSource
 
     _peakPicker = PeakPickerTrait(default_value=None).tag(
                                   saveToJson=True,
@@ -714,7 +725,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         # we found a valid new file
         self._close()
         self.setTraitValue('_dataSource', newDataSource, force=True)
-        self.setTraitValue('_dataStore', newDataStore, force=True)
+        self._spectrumTraits.dataStore =  newDataStore
         self._dataStore._saveInternal()
         self._saveSpectrumMetaData()
 
@@ -740,7 +751,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         # we found a valid new file
         self._close()
         self.setTraitValue('_dataSource', newDataSource, force=True)
-        self.setTraitValue('_dataStore', newDataStore, force=True)
+        self._spectrumTraits.dataStore = newDataStore
         self._dataSource.exportToSpectrum(self, includePath=False)
         self._dataStore._saveInternal()
         self._saveSpectrumMetaData()
@@ -2684,8 +2695,9 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
 
         try:
             dataSource = self._getDataSource(dataStore, checkParameters=checkParameters)
+
         except RuntimeError as es:
-            getLogger().debug('_getDataSource: caught error: %s' % str(es))
+            getLogger().debug('_getDataSourceFromPath: caught error: %s' % str(es))
             return (None, None)
 
         return (dataStore, dataSource)
@@ -2785,7 +2797,7 @@ class Spectrum(AbstractWrapperObject, CcpNmrJson):
         except (ValueError, RuntimeError) as es:
             getLogger().warning('Error restoring valid data store for %s (%s)' % (spectrum, es))
         finally:
-            spectrum.setTraitValue('_dataStore', dataStore, force=True)
+            spectrum._spectrumTraits.dataStore =  dataStore
 
         # Get a dataSource object
         dataSource = None
@@ -3260,7 +3272,7 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
     dataStore.dataFormat = dataSource.dataFormat
     dataStore.spectrum = spectrum
     dataStore._saveInternal()
-    spectrum.setTraitValue('_dataStore', dataStore, force=True)
+    spectrum._spectrumTraits.dataStore = dataStore
 
     # update dataSource with proper expanded path
     dataSource.setPath(dataStore.aPath())
@@ -3406,7 +3418,7 @@ def _extractRegionToFile(spectrum, dimensions, position, dataStore, name=None) -
 
     if spectrum is None or not isinstance(spectrum, Spectrum):
         raise ValueError('invalid spectrum argument %r' % spectrum)
-    if spectrum._dataSource is None:
+    if spectrum.dataSource is None:
         raise RuntimeError('No proper (filePath, dataFormat) set for %s' % spectrum)
 
     for dim in dimensions:
@@ -3414,7 +3426,7 @@ def _extractRegionToFile(spectrum, dimensions, position, dataStore, name=None) -
             raise ValueError('Invalid dimnsion %r in dimensions argument (%s)' % (dim, dimensions))
     dimensions = list(dimensions)  # assure a list
 
-    position = spectrum._dataSource.checkForValidPosition(position)
+    position = spectrum.dataSource.checkForValidPosition(position)
 
     if dataStore is None:
         raise ValueError('Undefined dataStore')
@@ -3450,7 +3462,7 @@ def _extractRegionToFile(spectrum, dimensions, position, dataStore, name=None) -
     for dim in dimensions[1:]:
         sliceTuples[dim - 1] = (1, spectrum.pointCounts[dim - 1])
 
-    with spectrum._dataSource.openExistingFile() as inputFile:
+    with spectrum.dataSource.openExistingFile() as inputFile:
         with dataSource.openNewFile(path=dataStore.aPath()) as output:
             # loop over all requested slices
             for position, aliased in inputFile._selectedPointsIterator(sliceTuples=sliceTuples,

@@ -4,7 +4,7 @@ update 3.0.4 routines
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-23 17:32:49 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-01-18 11:05:55 +0000 (Tue, January 18, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -54,11 +54,11 @@ def _updateSpectrum_NC_proc(spectrum):
             spectrum.scale /= scale
 
         else:
-            if not spectrum._dataSource:
+            if not spectrum.dataSource:
                 getLogger().warning('Spectrum has no dataSource')
                 return
 
-            scale = spectrum._dataSource.dataScale
+            scale = spectrum.dataSource.dataScale
             if spectrum.dimensionCount >= 2:
                 spectrum.positiveContourBase *= scale
                 spectrum.negativeContourBase *= scale

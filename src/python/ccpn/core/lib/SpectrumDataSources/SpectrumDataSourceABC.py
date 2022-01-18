@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-14 18:51:46 +0000 (Fri, January 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-18 09:50:04 +0000 (Tue, January 18, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1387,12 +1387,12 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         return position
 
-    def getPlaneData(self, position: Sequence = None, xDim: int = 1, yDim: int = 2):
+    def getPlaneData(self, position: Sequence = None, xDim: int = 1, yDim: int = 2) -> PlaneData:
         """Get plane defined by xDim, yDim and position (all 1-based)
         Check for hdf5buffer first, then blocked format
         Optionally to be subclassed
 
-        :return NumPy data array
+        :return PlaneData (i.e. numpy.ndarray) object.
         """
 
         if self.isBuffered:
@@ -1438,12 +1438,12 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         return position
 
-    def getSliceData(self, position: Sequence = None, sliceDim: int = 1):
+    def getSliceData(self, position: Sequence = None, sliceDim: int = 1) -> SliceData:
         """Get slice defined by sliceDim and position (all 1-based)
         Check for hdf5buffer first, then blocked format
         Optionally to be subclassed
 
-        :return NumPy data array
+        :return SliceData object (i.e. a numpy.ndarray) object
         """
         if self.isBuffered:
             self._checkBuffer()
@@ -1468,8 +1468,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
         else:
             raise RuntimeError('setSliceData, not buffered and no valid implementation')
 
-    def getSliceDataFromPlane(self, position, xDim: int, yDim: int, sliceDim: int):
+    def getSliceDataFromPlane(self, position, xDim: int, yDim: int, sliceDim: int) -> SliceData:
         """Routine to get sliceData using getPlaneData
+        :return SliceData object (i.e. a numpy.ndarray) object
         """
         # adapted from earlier Spectrum-class method
 
@@ -1675,17 +1676,19 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         return data
 
-    def getRegionData(self, sliceTuples, aliasingFlags=None):
-        """Return an numpy array containing the points defined by
-        sliceTuples=[(start_1,stop_1), (start_2,stop_2), ...],
+    def getRegionData(self, sliceTuples, aliasingFlags=None) -> RegionData:
+        """Return an numpy array containing the points defined by sliceTuples
 
-        sliceTuples are 1-based; sliceTuple stop values are inclusive (i.e. different
-        from the python slice object)
+        :param sliceTuples, list [(start_1,stop_1), (start_2,stop_2), ...],
+               sliceTuples are 1-based; sliceTuple stop values are inclusive (
+               i.e. different from the python slice object)
 
-        aliasingFlags: Optionally allow for aliasing per dimension:
-            0: No aliasing
-            1: aliasing with positive sign
-           -1: aliasing with negative sign
+        :param aliasingFlags: Optionally allow for aliasing per dimension:
+                 0: No aliasing
+                 1: aliasing with positive sign
+                -1: aliasing with negative sign
+
+        :return RegionData (i.e. numpy.ndarray) object.
         """
         if self.isBuffered:
             self._checkBuffer()

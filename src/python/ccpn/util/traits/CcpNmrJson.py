@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:19 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-18 09:50:04 +0000 (Tue, January 18, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -168,7 +168,9 @@ def update(updateHandler, push=False):
 
     return theDecorator
 
+#--------------------------------------------------------------------------------------------
 # Dummy's to test
+#--------------------------------------------------------------------------------------------
 #
 # def _updateJson_1_0(obj, dataDict):
 #     "dummy to try"
@@ -204,6 +206,8 @@ def update(updateHandler, push=False):
 # decorate the class
 #@update(_updateJson_2_0)
 #@update(_updateJson_1_0)
+#--------------------------------------------------------------------------------------------
+
 
 @fileHandler('.json', 'toJson', 'fromJson')
 class CcpNmrJson(TraitBase):
@@ -263,7 +267,8 @@ class CcpNmrJson(TraitBase):
                    newValue =  --- some action using value ---
                    setattr(obj, trait, newValue)
 
-     Any CcpNmrJson-derived class maintains metadata. Use the setMetadata() method to add data
+     Any CcpNmrJson-derived class maintains metadata. Use the setJsonMetadata(), getJsonMetadata()
+    and hasJsonMetadata() methods to access
 
      NB: Need to register the class for proper restoring from the json data
      Example:
@@ -324,10 +329,11 @@ class CcpNmrJson(TraitBase):
         return cls
 
     @staticmethod
-    def isEncodedObject(theList):
+    def _isEncodedObject(theList):
         """Return True if theList defines an encoded CcpNmr object. To establish this, we look at the structure
         which must be a list of (key,value) items, encoded as a list, with the first (key,value) pair encoding the
         metadata dict.
+        CCPNINTERNAL: used in TraitJsonHandlerBase
         """
         if isinstance(theList, list) and len(theList) > 0 and \
            isinstance(theList[0], (list,tuple)) and len(theList[0]) == 2 and theList[0][0] == Constants.METADATA and \
@@ -373,12 +379,13 @@ class CcpNmrJson(TraitBase):
         return CcpNmrJson._newObjectFromDict(theDict, **kwds)
 
     #--------------------------------------------------------------------------------------------
-
     # _metadata(should be in-sinc with Constants.METADATA)
+    #--------------------------------------------------------------------------------------------
     _metadata = Dict().tag(saveToJson=True)
 
     @default(Constants.METADATA)
-    def _metadata_default(self):
+    def _metadata_default(self) -> dict:
+        """The defaults for the json metadata dict"""
         defaults = {}
         defaults[Constants.JSONVERSION] = self._jsonVersion
         defaults[Constants.CLASSNAME] = self.__class__.__name__
@@ -402,14 +409,29 @@ class CcpNmrJson(TraitBase):
             setattr(obj, trait, currentMetaData)
     # end class
 
-    @property
-    def metadata(self):
-        "Return metadata dict"
-        return getattr(self, Constants.METADATA)
+    # @property
+    # def metadata(self):
+    #     "Return metadata dict"
+    #     return getattr(self, Constants.METADATA)
 
-    def setMetadata(self, **kwds):
-        "Update metadata with kwds (key,value) pairs"
-        self.metadata.update(**kwds)
+    def setJsonMetadata(self, key, value):
+        """Update Json metadata with kwds (key,value) pairs; guard for any json-related keys
+        that should not be changed this way
+        """
+        self._metadata[key] = value
+
+    def getJsonMetadata(self, *keys) -> list:
+        """get values for keys from metadata; get value for all keys if
+        len(keys) == 0
+        """
+        if len(keys) == 0:
+            keys = self._metadata.keys()
+        return [self._metadata.get(key) for key in keys]
+
+    def hasJsonMetadata(self, key) -> bool:
+        """Return: True if metadata has key
+        """
+        return key in self._metadata
 
     #--------------------------------------------------------------------------------------------
 
@@ -430,7 +452,7 @@ class CcpNmrJson(TraitBase):
 
     def __init__(self, **metadata):
         super().__init__()
-        self.metadata.update(metadata)
+        self._metadata.update(metadata)
 
     def duplicate(self, **metadata):
         """Convenience method to return a duplicate of self, using toJson and fromJson methods
@@ -583,7 +605,7 @@ class CcpNmrJson(TraitBase):
             raise RuntimeError('Unable to save; no fileHandler defined for extension "%s"' % extension)
 
         handler.save(self, path, **kwds)
-        self.metadata[Constants.LASTPATH] = str(path)
+        self._metadata[Constants.LASTPATH] = str(path)
 
     def restore(self, path, **kwds):
         """Restore from file using appropriate handlers depending on extension; return self
@@ -603,7 +625,7 @@ class CcpNmrJson(TraitBase):
             raise RuntimeError('Unable to restore; no fileHandler defined for extension "%s"' % extension)
 
         handler.restore(self, path, **kwds)
-        self.metadata[Constants.LASTPATH] = str(path)
+        self._metadata[Constants.LASTPATH] = str(path)
         return self
 
 # end class

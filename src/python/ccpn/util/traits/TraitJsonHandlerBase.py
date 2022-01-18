@@ -1,8 +1,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2018"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                )
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
@@ -12,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: geertenv $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:36 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.b3 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-01-18 09:50:04 +0000 (Tue, January 18, 2022) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -75,7 +76,7 @@ class RecursiveDictHandlerABC(TraitJsonHandlerBase):
         # for each value of (sub-)type CcpNmrJson
 
         # local imports to avoid circular dependencies
-        from ccpn.util.traits.CcpNmrJson import constants, CcpNmrJson
+        from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 
         theDict = getattr(obj, trait)
         if not isinstance(theDict, self.klass):
@@ -94,12 +95,12 @@ class RecursiveDictHandlerABC(TraitJsonHandlerBase):
         # converting this to the relevant object
 
         # local imports to avoid circular dependencies
-        from ccpn.util.traits.CcpNmrJson import constants, CcpNmrJson
+        from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 
         result = []
         for key, value in theList:
             # check if this encoded a CcpNmrJson type object
-            if self.recursion and CcpNmrJson.isEncodedObject(value):
+            if self.recursion and CcpNmrJson._isEncodedObject(value):
                 theDict = dict(value)
                 value = CcpNmrJson._newObjectFromDict(theDict)
             result.append((key, value))
@@ -126,7 +127,7 @@ class RecursiveListHandlerABC(TraitJsonHandlerBase):
         # convert list, recursing for each item of (sub-)type CcpNmrJson
 
         # local imports to avoid circular dependencies
-        from ccpn.util.traits.CcpNmrJson import constants, CcpNmrJson
+        from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 
         theList = getattr(obj, trait)
         if not isinstance(theList, self.klass):
@@ -134,9 +135,8 @@ class RecursiveListHandlerABC(TraitJsonHandlerBase):
                                (trait, type(self.klass), type(theList))
                                )
         result = []
-        recursion = obj.trait_metadata(trait, constants.RECURSION, True)
         for i, item in enumerate(theList):
-            if recursion and isinstance(item, CcpNmrJson):
+            if self.recursion and isinstance(item, CcpNmrJson):
                 item = item._encode()
             result.append(item)
         return result
@@ -146,12 +146,12 @@ class RecursiveListHandlerABC(TraitJsonHandlerBase):
         # converting this to the relevant klass
 
         # local imports to avoid circular dependencies
-        from ccpn.util.traits.CcpNmrJson import constants, CcpNmrJson
+        from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 
         result = []
         for item in theList:
             # check if this encoded a CcpNmrJson type object
-            if self.recursion and CcpNmrJson.isEncodedObject(item):
+            if self.recursion and CcpNmrJson._isEncodedObject(item):
                 theDict = dict(item)
                 item = CcpNmrJson._newObjectFromDict(theDict)
             result.append(item)
@@ -196,7 +196,7 @@ class CcpNmrJsonClassHandlerABC(TraitJsonHandlerBase):
 
         result = value
         # check if this encoded a CcpNmrJson type object
-        if CcpNmrJson.isEncodedObject(value):
+        if CcpNmrJson._isEncodedObject(value):
             theDict = dict(value)
             result = CcpNmrJson._newObjectFromDict(theDict)
 

@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-18 16:20:46 +0000 (Tue, January 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-19 09:26:03 +0000 (Wed, January 19, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -894,6 +894,13 @@ class Spectrum(AbstractWrapperObject):
     def ppmPerPoints(self) -> List[float]:
         """Convenience; ppm-per-point for each dimension"""
         return self._getDimensionalAttributes('ppmPerPoint')
+
+    @property
+    def _valuePerPoints(self) -> List[Optional[float]]:
+        """For backward compatibility; _valuePerPoint for each dimension
+        CCPNINTERNAL: used by Peak.pointLineWidths
+        """
+        return self._getDimensionalAttributes('_valuePerPoint')
 
     # @property
     # def valuesPerPoint(self) -> List[Optional[float]]:

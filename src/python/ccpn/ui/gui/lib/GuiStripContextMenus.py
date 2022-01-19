@@ -8,7 +8,7 @@ To create a menu:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-25 15:56:55 +0100 (Mon, October 25, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-01-19 11:01:25 +0000 (Wed, January 19, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -521,7 +521,7 @@ def _copyAxesMenuItem(strip):
 
 def _selectedPeaksMenuItem(strip):
     return _SCMitem(name='Selected Peaks:',
-                    typeItem=ItemTypes.get(MENU), toolTip='Actions availalbe on the currently selected peaks ',
+                    typeItem=ItemTypes.get(MENU), toolTip='Actions available on the currently selected peaks ',
                     stripMethodName='_selectedPeaksMenu',
                     callback=None)
 
@@ -796,8 +796,11 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
         _separator(),
 
         _estimateNoise(guiStrip1d),
+        _separator(),
+
         _selectedPeaksMenuItem(guiStrip1d),
         _separator(),
+
         _printItem(guiStrip1d),
         ]
     items = [itm for itm in items if itm is not None]
@@ -844,8 +847,10 @@ def _get1dPhasingMenu(guiStrip1d) -> Menu:
         _showSpectraOnPhasingItem(guiStrip1d),
         _stackSpectraPhaseItem(guiStrip1d),
         _separator(),
+
         _exitPhasingConsoleItem(guiStrip1d),
         _separator(),
+
         _printItem(guiStrip1d),
         ]
     items = [itm for itm in items if itm is not None]
@@ -956,6 +961,8 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
 
         _estimateNoise(guiStripNd),
         _makeStripPlot(guiStripNd),
+        _separator(),
+
         _selectedPeaksMenuItem(guiStripNd),
         _separator(),
 
@@ -1024,8 +1031,10 @@ def _getNdPhasingMenu(guiStripNd) -> Menu:
         _setPivotItem(guiStripNd),
         _showActivePhaseTraceItem(guiStripNd),
         _separator(),
+
         _exitPhasingConsoleItem(guiStripNd),
         _separator(),
+
         _printItem(guiStripNd),
         ]
     items = [itm for itm in items if itm is not None]

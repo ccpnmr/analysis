@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:30:48 +0000 (Thu, January 13, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-01-19 12:13:07 +0000 (Wed, January 19, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -377,7 +377,7 @@ class PeakList(PMIListABC):
 
         limits = [sorted(lims) for lims in self.spectrum.spectrumLimits]
         selectedRegion = []
-        minDropFactor = self.project._appBase.preferences.general.peakDropFactor
+        minDropFactor = self.project.application.preferences.general.peakDropFactor
 
         with undoBlockWithoutSideBar():
             for ii, ind in enumerate(indices):

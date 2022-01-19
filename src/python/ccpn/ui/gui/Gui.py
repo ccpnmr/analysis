@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:30:49 +0000 (Thu, January 13, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-01-19 12:13:07 +0000 (Wed, January 19, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -315,11 +315,12 @@ class StripDisplay1d(_coreClassSpectrumDisplay, _SpectrumDisplay1d):
 
     def __init__(self, project: Project, wrappedData: 'ApiBoundDisplay'):
         """Local override init for Qt subclass"""
-        Logging.getLogger().debug('StripDisplay1d>> project: %s, project._appBase: %s' % (project, project._appBase))
+        Logging.getLogger().debug('StripDisplay1d>> project: %s, project.application: %s' %
+                                  (project, project.application))
         _coreClassSpectrumDisplay.__init__(self, project, wrappedData)
 
         # hack for now
-        self.application = project._appBase
+        self.application = project.application
 
         _SpectrumDisplay1d.__init__(self, mainWindow=self.application.ui.mainWindow,
                                     # name=self._id
@@ -349,11 +350,11 @@ class SpectrumDisplayNd(_coreClassSpectrumDisplay, _SpectrumDisplayNd):
 
     def __init__(self, project: Project, wrappedData: 'ApiBoundDisplay'):
         """Local override init for Qt subclass"""
-        Logging.getLogger().debug('SpectrumDisplayNd>> project: %s, project._appBase: %s' % (project, project._appBase))
+        Logging.getLogger().debug('SpectrumDisplayNd>> project: %s, project.application: %s' % (project, project.application))
         _coreClassSpectrumDisplay.__init__(self, project, wrappedData)
 
         # hack for now;
-        self.application = project._appBase
+        self.application = project.application
 
         _SpectrumDisplayNd.__init__(self, mainWindow=self.application.ui.mainWindow,
                                     # name=self._id)
@@ -517,8 +518,7 @@ class _SpectrumView1d(_coreClassSpectrumView, _GuiSpectrumView1d):
         _coreClassSpectrumView.__init__(self, project, wrappedData)
 
         # hack for now
-        self._appBase = project._appBase
-        self.application = project._appBase
+        self.application = project.application
 
         Logging.getLogger().debug('SpectrumView1d>> %s' % self)
         _GuiSpectrumView1d.__init__(self)
@@ -534,8 +534,7 @@ class _SpectrumViewNd(_coreClassSpectrumView, _GuiSpectrumViewNd):
         _coreClassSpectrumView.__init__(self, project, wrappedData)
 
         # hack for now
-        self._appBase = project._appBase
-        self.application = project._appBase
+        self.application = project.application
 
         Logging.getLogger().debug('SpectrumViewNd>> self=%s strip=%s' % (self, self.strip))
         _GuiSpectrumViewNd.__init__(self)
@@ -552,8 +551,6 @@ def _factoryFunction(project: Project, wrappedData):
 
 Gui._factoryFunctions[_coreClassSpectrumView.className] = _factoryFunction
 
-# Any Factory function to _implementation or abstractWrapper
-#
 
 ## PeakListView class
 _coreClassPeakListView = _coreClassMap['PeakListView']
@@ -565,9 +562,9 @@ class _PeakListView(_coreClassPeakListView, _GuiPeakListView):
     def __init__(self, project: Project, wrappedData: 'ApiStripPeakListView'):
         """Local override init for Qt subclass"""
         _coreClassPeakListView.__init__(self, project, wrappedData)
+
         # hack for now
-        self._appBase = project._appBase
-        self.application = project._appBase
+        self.application = project.application
         _GuiPeakListView.__init__(self)
         self._init()
 
@@ -584,9 +581,9 @@ class _IntegralListView(_coreClassIntegralListView, _GuiIntegralListView):
     def __init__(self, project: Project, wrappedData: 'ApiStripIntegralListView'):
         """Local override init for Qt subclass"""
         _coreClassIntegralListView.__init__(self, project, wrappedData)
+
         # hack for now
-        self._appBase = project._appBase
-        self.application = project._appBase
+        self.application = project.application
         _GuiIntegralListView.__init__(self)
         self._init()
 
@@ -602,9 +599,9 @@ class _MultipletListView(_coreClassMultipletListView, _GuiMultipletListView):
     def __init__(self, project: Project, wrappedData: 'ApiStripMultipletListView'):
         """Local override init for Qt subclass"""
         _coreClassMultipletListView.__init__(self, project, wrappedData)
+
         # hack for now
-        self._appBase = project._appBase
-        self.application = project._appBase
+        self.application = project.application
         _GuiMultipletListView.__init__(self)
         self._init()
 

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:30:50 +0000 (Thu, January 13, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-01-19 12:13:07 +0000 (Wed, January 19, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -67,9 +67,11 @@ def navigateToPositionInStrip(strip,
     # if widths is None:
     #   widths = _getCurrentZoomRatio(strip.viewBox.viewRange())
 
-    # _undo = strip.project._undo     # ejb - just a temporary fix
-    # if _undo is not None:
-    #   _undo.increaseBlocking()
+
+    # GWV would like an undo; first collect current settings
+    # _currentPosition = [a.position for a in strip.orderedaxes]
+    # _currentWidths = [a.width for a in strip.orderedaxes]
+    # _currentAxisCodes = strip.axisCodes
 
     indices = getAxisCodeMatchIndices(axisCodes=axisCodes, refAxisCodes=strip.axisCodes)
 

@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:23:25 +0000 (Thu, January 13, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-01-19 12:13:07 +0000 (Wed, January 19, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -522,7 +522,7 @@ def _copyAxesMenuItem(strip):
 
 def _selectedPeaksMenuItem(strip):
     return _SCMitem(name='Selected Peaks:',
-                    typeItem=ItemTypes.get(MENU), toolTip='Actions availalbe on the currently selected peaks ',
+                    typeItem=ItemTypes.get(MENU), toolTip='Actions available on the currently selected peaks ',
                     stripMethodName='_selectedPeaksMenu',
                     callback=None)
 
@@ -797,8 +797,11 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
         _separator(),
 
         _estimateNoise(guiStrip1d),
+        _separator(),
+
         _selectedPeaksMenuItem(guiStrip1d),
         _separator(),
+
         _printItem(guiStrip1d),
         ]
     items = [itm for itm in items if itm is not None]
@@ -845,8 +848,10 @@ def _get1dPhasingMenu(guiStrip1d) -> Menu:
         _showSpectraOnPhasingItem(guiStrip1d),
         _stackSpectraPhaseItem(guiStrip1d),
         _separator(),
+
         _exitPhasingConsoleItem(guiStrip1d),
         _separator(),
+
         _printItem(guiStrip1d),
         ]
     items = [itm for itm in items if itm is not None]
@@ -957,6 +962,8 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
 
         _estimateNoise(guiStripNd),
         _makeStripPlot(guiStripNd),
+        _separator(),
+
         _selectedPeaksMenuItem(guiStripNd),
         _separator(),
 
@@ -1025,8 +1032,10 @@ def _getNdPhasingMenu(guiStripNd) -> Menu:
         _setPivotItem(guiStripNd),
         _showActivePhaseTraceItem(guiStripNd),
         _separator(),
+
         _exitPhasingConsoleItem(guiStripNd),
         _separator(),
+
         _printItem(guiStripNd),
         ]
     items = [itm for itm in items if itm is not None]

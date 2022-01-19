@@ -77,7 +77,7 @@ Example 3 (using Spectrum instance to make a hdf5 duplicate):
     outputPath = 'myCopiedHNCA.hdf5'
 
     with Hdf5SpectrumDataSource(spectrum=sp).openNewFile(outputPath) as output:
-        output.copyDataFrom(sp._dataSource)
+        output.copyDataFrom(sp.dataSource)
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -92,8 +92,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:30:48 +0000 (Thu, January 13, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-01-19 12:13:07 +0000 (Wed, January 19, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -111,17 +111,18 @@ from collections import OrderedDict, defaultdict
 from itertools import product
 
 import tempfile
-
 import numpy
 
 import ccpn.core.lib.SpectrumLib as specLib
+from ccpn.core._implementation.SpectrumData import SliceData, PlaneData, RegionData
+from ccpn.core.lib.ContextManagers import notificationEchoBlocking
+from ccpn.core.lib.Cache import cached, Cache
 
 from ccpn.util.Common import isIterable
 from ccpn.util.Path import aPath
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.ContextManagers import notificationEchoBlocking
+
 from ccpn.util.isotopes import findNucleiFromSpectrometerFrequencies, Nucleus
-from ccpn.core.lib.Cache import cached, Cache
 from ccpn.util.traits.CcpNmrTraits import CFloat, CInt, CBool, Bool, List, \
     CString, CList
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson
@@ -1048,27 +1049,28 @@ class SpectrumDataSourceABC(CcpNmrJson):
             raise RuntimeError('%s is not a blocked format' % self)
 
         # converts to zero-based
-        sliceDim -= 1
+        sliceIdx = sliceDim - 1
         points = [p - 1 for p in position]
 
         # create the array with zeros
-        data = numpy.zeros(self.pointCounts[sliceDim], dtype=self.dataType)
+        # data = numpy.zeros(self.pointCounts[sliceIdx], dtype=self.dataType)
+        data = SliceData(dataSource=self, dimensions=(sliceDim,), position = position)
 
         # we are reading nD blocks; need to slice across these with depth of 1 in non-slice dims and a
-        # size of blockSizes[sliceDim] along the sliceDim (set dynamically during the looping)
+        # size of blockSizes[sliceIdx] along the sliceDim (set dynamically during the looping)
         blockOffsets = [offset for _tmp, offset in self._pointsToBlocksPerDimension(points)]
         slices = [slice(offset, offset + 1) for offset in blockOffsets]
 
         if not self.hasOpenFile():
             self.openFile(mode=self.defaultOpenReadMode)
 
-        # loop through the points p of sliceDim in steps blockSize[sliceDim]
-        for p in range(0, self.pointCounts[sliceDim], self.blockSizes[sliceDim]):
-            points[sliceDim] = p
+        # loop through the points p of sliceDim in steps blockSize[sliceIdx]
+        for p in range(0, self.pointCounts[sliceIdx], self.blockSizes[sliceIdx]):
+            points[sliceIdx] = p
             blockdata = self._readBlock(points)
             # The actual size along sliceDim may not be an integer times the blockSize of sliceDim
-            pStop = min(p + self.blockSizes[sliceDim], self.pointCounts[sliceDim])
-            slices[sliceDim] = slice(0, pStop - p)  # truncate if necessary
+            pStop = min(p + self.blockSizes[sliceIdx], self.pointCounts[sliceIdx])
+            slices[sliceIdx] = slice(0, pStop - p)  # truncate if necessary
             _tmp = blockdata[tuple(slices[::-1])].flatten()  # invert the slices as multi-d numpy arrays are array[z][y][x] (i.e. reversed indexing)
             data[p:pStop] = _tmp
         return data
@@ -1082,14 +1084,18 @@ class SpectrumDataSourceABC(CcpNmrJson):
         if not self.isBlocked:
             raise RuntimeError('%s is not a blocked format' % self)
 
+        # create the array with zeros
+        data = PlaneData(dataSource=self, dimensions=(xDim,yDim), position=position)
+
         # convert to zero-based
         xDim -= 1
         yDim -= 1
         points = [p - 1 for p in position]
 
-        # create the array with zeros
-        pointCounts = (self.pointCounts[yDim], self.pointCounts[xDim])  # y,x ordering
-        data = numpy.zeros(pointCounts, dtype=self.dataType)
+        # # create the array with zeros
+        # pointCounts = (self.pointCounts[yDim], self.pointCounts[xDim])  # y,x ordering
+        # # data = numpy.zeros(pointCounts, dtype=self.dataType)
+        # data = PlaneData(dataSource=self, dimensions=dimensions, position=position)
 
         # we are reading nD blocks; need to slice across these with depth of 1 in non-plane dims and a
         # size of blockSizes[xDim], blockSizes[yDim] along the xDim,yDim (set dynamically during the looping)
@@ -1343,6 +1349,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         if not isIterable(position):
             raise ValueError('checkForValidPosition: position must be an tuple or list')
+        position = list(position)
 
         if len(position) < self.dimensionCount:
             position += [1] * self.dimensionCount - len(position)
@@ -1373,14 +1380,19 @@ class SpectrumDataSourceABC(CcpNmrJson):
         if xDim == yDim:
             raise ValueError('checkForValidPlane: xDim == yDim = %d' % (xDim,))
 
+        # set position of xDim, yDim to 1; to assure compatibilty with SpectrumData
+        # classes
+        position[xDim-1] = 1
+        position[yDim-1] = 1
+
         return position
 
-    def getPlaneData(self, position: Sequence = None, xDim: int = 1, yDim: int = 2):
+    def getPlaneData(self, position: Sequence = None, xDim: int = 1, yDim: int = 2) -> PlaneData:
         """Get plane defined by xDim, yDim and position (all 1-based)
         Check for hdf5buffer first, then blocked format
         Optionally to be subclassed
 
-        :return NumPy data array
+        :return PlaneData (i.e. numpy.ndarray) object.
         """
 
         if self.isBuffered:
@@ -1420,14 +1432,18 @@ class SpectrumDataSourceABC(CcpNmrJson):
         if not (1 <= sliceDim <= self.dimensionCount):
             raise ValueError('invalid sliceDim (%d), should be in range [1,%d]' % (sliceDim, self.dimensionCount))
 
+        # set position of sliceDim to 1; to assure compatibility with SpectrumData
+        # classes
+        position[sliceDim-1] = 1
+
         return position
 
-    def getSliceData(self, position: Sequence = None, sliceDim: int = 1):
+    def getSliceData(self, position: Sequence = None, sliceDim: int = 1) -> SliceData:
         """Get slice defined by sliceDim and position (all 1-based)
         Check for hdf5buffer first, then blocked format
         Optionally to be subclassed
 
-        :return NumPy data array
+        :return SliceData object (i.e. a numpy.ndarray) object
         """
         if self.isBuffered:
             self._checkBuffer()
@@ -1452,8 +1468,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
         else:
             raise RuntimeError('setSliceData, not buffered and no valid implementation')
 
-    def getSliceDataFromPlane(self, position, xDim: int, yDim: int, sliceDim: int):
+    def getSliceDataFromPlane(self, position, xDim: int, yDim: int, sliceDim: int) -> SliceData:
         """Routine to get sliceData using getPlaneData
+        :return SliceData object (i.e. a numpy.ndarray) object
         """
         # adapted from earlier Spectrum-class method
 
@@ -1555,8 +1572,14 @@ class SpectrumDataSourceABC(CcpNmrJson):
             1: aliasing with positive sign
            -1: aliasing with negative sign
         """
+        if sliceTuples is None or not isIterable(sliceTuples):
+            raise ValueError('invalid sliceTuples argument; expect list/tuple, got %s' %
+                             sliceTuples)
+
         if len(sliceTuples) != self.dimensionCount:
             raise ValueError('invalid sliceTuples argument; dimensionality mismatch')
+
+        sliceTuples = list(sliceTuples)
 
         if aliasingFlags is None:
             raise ValueError('invalid aliasing argument; None value')
@@ -1567,9 +1590,13 @@ class SpectrumDataSourceABC(CcpNmrJson):
         for idx, sTuple in enumerate(sliceTuples):  # do not call this slice! as it override the python slice object
             if sTuple is None:
                 sTuple = (1, self.pointCounts[idx])
-            else:
-                # assure a to be a tuple
-                sTuple = tuple(sTuple)
+
+            if not isIterable(sTuple) or len(sTuple) != 2:
+                raise ValueError('invalid sliceTuple for dimension %s; got %s' %
+                                     (idx+1, sTuple))
+
+            # assure a to be a tuple
+            sliceTuples[idx] = tuple(sTuple)
             start, stop = sTuple
 
             if aliasingFlags[idx] == 0:
@@ -1585,80 +1612,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
                 raise ValueError('invalid sliceTuple (start,stop)=%r for dimension %s; start (%s) > stop (%s)' %
                                  (sTuple, idx + 1, start, stop))
 
-    # def _getRegionData(self, sliceTuples, aliasingFlags=None):
-    #     """Return an numpy array containing the region data; see getRegionData description
-    #     implementation based upon getSliceData method
-    #     """
-    #     sizes = [(stop - start + 1) for start, stop in sliceTuples]
-    #     starts = [start - 1 for start, stop in sliceTuples]  # 0-based
-    #     stops = [stop for start, stop in sliceTuples]  # 0-based, non-inclusive
-    #     sliceDim = 1
-    #     sliceAxis = sliceDim - 1  # 0-based axis of sliceDim
-    #
-    #     # The result being assembled
-    #     regionData = numpy.zeros(sizes[::-1], dtype=self.dataType)  # ...,z,y,x numpy ordering
-    #
-    #     # temp buffer for unpacking aliased data along sliceDim
-    #     sliceData2 = numpy.zeros(sizes[sliceAxis], dtype=self.dataType)
-    #     nSlicePoints = self.pointCounts[sliceAxis]
-    #
-    #     for position, aliased in self._selectedPointsIterator(sliceTuples, excludeDimensions=[sliceDim]):
-    #
-    #         unFoldedPosition = [a*np+p for p, a, np in zip(position, aliased, self.pointCounts)]
-    #         # aliased[sliceAxis] = (starts[sliceAxis] < 0 or stops[sliceAxis] >= nPoints)
-    #
-    #         # read the slice using the unfolded position
-    #         position[sliceAxis] = 1  # position is 1-based
-    #         with notificationEchoBlocking():
-    #             sliceData = self.getSliceData(position=position, sliceDim=sliceDim)
-    #
-    #         # # define the data slicing objects
-    #         # # offset to the origin of regionData - mod to the pointCounts of the data
-    #         # dataSlices = [slice((p - 1) - starts[idx], (p - 1) - starts[idx] + 1) for idx, p in enumerate(position)]
-    #         # dataSlices[sliceAxis] = slice(0,sizes[sliceAxis])
-    #         # # FutureWarning: Using a non-tuple sequence for multidimensional indexing is deprecated;
-    #         # # use `arr[tuple(seq)]` instead of `arr[seq]`. In the future this will be interpreted as
-    #         # # an array index, `arr[np.array(seq)]`, which will result either in an error or a different result.
-    #         # dataSlices = tuple(dataSlices)
-    #
-    #         # dataSlices = [slice(((p-1)-start) % np, (((p-1)-start) % np) + 1) for start, p, np in zip(starts, position, self.pointCounts)]
-    #         # define the set of dataSlices in a range bigger than the dataSet in any axis,
-    #         # e.g., a long region across aliased spectrum
-    #         #       if data is (100, 50) and region is (125, 5) then this will need 2 tiles ((0, 0), (1, 0))
-    #         _its = [range(((size - 1) // np) + 1) for size, np in zip(sizes, self.pointCounts)]
-    #         allDataSlices = [
-    #             [slice(al * np + ((p - 1) - start) % np, al * np + (((p - 1) - start) % np) + 1) for start, p, np, al in zip(starts, position, self.pointCounts, alias)]
-    #             for alias in [it for it in product(*_its)]
-    #             ]
-    #         for _slice in allDataSlices:
-    #             _slice[sliceAxis] = slice(0, sizes[sliceAxis])
-    #
-    #         # get aliasing factor determined by dimensions other than sliceDim
-    #         factor = 1.0
-    #         for axis, fac, aliase in zip(self.dimensionIndices, aliasingFlags, aliased):
-    #             if axis != sliceAxis and aliase:
-    #                 factor *= fac
-    #
-    #         if (starts[sliceAxis] >= 1 and stops[sliceAxis] <= nSlicePoints):
-    #             # There are no aliased points along sliceDim
-    #             for dataSlices in allDataSlices:
-    #                 # copy the relevant section of the sliceData into the (nD) data array
-    #                 regionData[tuple(dataSlices[::-1])] = factor * sliceData[starts[sliceAxis]:stops[sliceAxis]]  # dimensions run in ..,z,y,x order
-    #         else:
-    #             # copy the relevant points from sliceData to sliceData2 array; aliasing where needed
-    #
-    #             for idx, p in zip(range(0, sizes[sliceAxis]), range(starts[sliceAxis], stops[sliceAxis])):
-    #                 pointFactor = aliasingFlags[sliceAxis] if (p < 0 or p >= nSlicePoints) else 1.0
-    #                 while p < 0:
-    #                     p += nSlicePoints
-    #                 while p >= nSlicePoints:
-    #                     p -= nSlicePoints
-    #                 sliceData2[idx] = factor * pointFactor * sliceData[p]
-    #             for dataSlices in allDataSlices:
-    #                 # copy the sliceData2 into the (nD) data array
-    #                 regionData[tuple(dataSlices[::-1])] = sliceData2[:]  # dimensions run in ..,z,y,x order
-    #
-    #     return regionData
+        return sliceTuples
 
     def _getRegionData(self, sliceTuples, aliasingFlags=None):
         """Return an numpy array containing the region data; see getRegionData description
@@ -1694,7 +1648,12 @@ class SpectrumDataSourceABC(CcpNmrJson):
         #     print(key, ':', val)
 
         # Assemble the data
-        data = numpy.zeros(newPoints[::-1], dtype='float32')  # the final result
+        # data = numpy.zeros(newPoints[::-1], dtype='float32')  # the final result
+        data = RegionData(shape=newPoints[::-1],
+                          dataSource=self, dimensions=self.dimensions,
+                          position = [st[0] for st in sliceTuples]
+                          )
+
         newSliceData = numpy.zeros(newPoints[sliceIdx], dtype='float32')  # the unaliased slice
 
         for foldedPosition, _vals in pointDict.items():
@@ -1717,17 +1676,19 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         return data
 
-    def getRegionData(self, sliceTuples, aliasingFlags=None):
-        """Return an numpy array containing the points defined by
-        sliceTuples=[(start_1,stop_1), (start_2,stop_2), ...],
+    def getRegionData(self, sliceTuples, aliasingFlags=None) -> RegionData:
+        """Return an numpy array containing the points defined by sliceTuples
 
-        sliceTuples are 1-based; sliceTuple stop values are inclusive (i.e. different
-        from the python slice object)
+        :param sliceTuples, list [(start_1,stop_1), (start_2,stop_2), ...],
+               sliceTuples are 1-based; sliceTuple stop values are inclusive (
+               i.e. different from the python slice object)
 
-        aliasingFlags: Optionally allow for aliasing per dimension:
-            0: No aliasing
-            1: aliasing with positive sign
-           -1: aliasing with negative sign
+        :param aliasingFlags: Optionally allow for aliasing per dimension:
+                 0: No aliasing
+                 1: aliasing with positive sign
+                -1: aliasing with negative sign
+
+        :return RegionData (i.e. numpy.ndarray) object.
         """
         if self.isBuffered:
             self._checkBuffer()
@@ -1736,7 +1697,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         if aliasingFlags is None:
             aliasingFlags = [0] * self.dimensionCount
 
-        self.checkForValidRegion(sliceTuples, aliasingFlags)
+        sliceTuples = self.checkForValidRegion(sliceTuples, aliasingFlags)
         # No need to scale, as _getRegionData relies on getSliceData, which is already scaled
         regionData = self._getRegionData(sliceTuples=sliceTuples, aliasingFlags=aliasingFlags)
 

@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>The upper part of the Python Console (open by clicking the Space bar twice) gives you a log of commands that have been executed. Use these as a starting point for writing your own macros. Execute your own commands by typing or pasting them in the lower section.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 34,
+  "contents": [
+    "./graphics/PythonConsole.png"
+  ]
+}

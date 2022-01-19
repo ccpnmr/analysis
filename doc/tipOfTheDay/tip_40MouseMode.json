@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>If you want to pick lots of peaks manually, you can do so easily by switching your mouse mode to peak picking with <span style=%(purple)s>MM</span>. This draws a box around the centre of your mouse cross hair and allows you to place a peak with a single click. Exit this mouse mode with <span style=%(purple)s>MM</span> again.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 40,
+  "contents": [
+    "./graphics/MouseMode.png"
+  ]
+}

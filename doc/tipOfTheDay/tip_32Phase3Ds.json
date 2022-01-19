@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>When phasing 3D spectra you can do this across multiple strips at different z-plane locations simultaneously.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 32,
+  "contents": [
+    "./graphics/Phase3Ds.png"
+  ]
+}

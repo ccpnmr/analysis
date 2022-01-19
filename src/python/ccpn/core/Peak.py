@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-19 09:26:03 +0000 (Wed, January 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-19 10:26:02 +0000 (Wed, January 19, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -913,6 +913,14 @@ class Peak(AbstractWrapperObject):
             self.dimensionNmrAtoms = assigned
             self._delete()
 
+    def __str__(self):
+        """Readable string representation;
+        """
+        _digits = {'1H':3, '15N':2, '13C':2, '19F':3}
+        # _digits.get(iCode,2)
+        ppms = tuple(round(p, _digits.get(iCode,2))
+                     for p, iCode in zip(self.ppmPositions, self.spectrum.isotopeCodes))
+        return "<%s: @%r>" % (self.pid, ppms)
     #=========================================================================================
     # CCPN functions
     #=========================================================================================

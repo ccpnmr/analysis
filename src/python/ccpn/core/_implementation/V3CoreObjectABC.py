@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:23:25 +0000 (Thu, January 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-19 17:14:28 +0000 (Wed, January 19, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -32,11 +32,10 @@ from collections import OrderedDict
 from functools import partial
 
 from ccpn.core import _importOrder
-from ccpn.core.Project import Project
 from ccpn.core.lib.ContextManagers import renameObject, ccpNmrV3CoreSetter, deleteV3Object, undoStackBlocking
-from ccpn.util.decorators import logCommand
-from ccpn.core.lib import Pid
+from ccpn.core.lib.Pid import Pid, altCharacter
 from ccpn.core.lib.Notifiers import NotifierBase
+from ccpn.util.decorators import logCommand
 
 
 _UNIQUEID = 'uniqueId'
@@ -55,7 +54,8 @@ class V3CoreObjectABC(NotifierBase):
     # Attribute it necessary as subclasses must use superclass className
     className = 'V3CoreObjectABC'
 
-    _parentClass = Project
+    # MUST be defined in subclass
+    _parentClass = None
 
     #: Name of plural link to instances of class
     _pluralLinkName = 'v3CoreObjectABCs'
@@ -73,6 +73,9 @@ class V3CoreObjectABC(NotifierBase):
         _unique Id links the core object to the dataFrame storage and MUST be specified
         before the V3CoreObjectABC can be used
         """
+        if self._parentClass is None:
+            raise RuntimeError(f'{self.className}._parentClass must be defined')
+
         self._wrapperList = wrapperList
         self._project = project
         if not isinstance(_uniqueId, (int, type(None))):
@@ -81,7 +84,6 @@ class V3CoreObjectABC(NotifierBase):
         self._ccpnSortKey = None
         self._deletedId = None
         self._isDeleted = False
-        # self._ccpnSortKey = (id(self.project), len(_importOrder), self._uniqueId)
         self._resetUniqueId(_uniqueId)
 
         # keep last value for undo/redo
@@ -149,20 +151,20 @@ class V3CoreObjectABC(NotifierBase):
         return self._deletedId if self._isDeleted else self.name
 
     @property
-    def pid(self) -> Pid.Pid:
+    def pid(self) -> Pid:
         """Identifier for the object, unique within the project.
         Set automatically from the short class name, the parent wrapperList and object.uniqueId
         E.g. 'SH:default.1'
         """
-        return Pid.Pid(Pid.PREFIXSEP.join((self.shortClassName, self.id)))
+        return Pid.new(self.shortClassName, self.id)
 
     @property
-    def longPid(self) -> Pid.Pid:
+    def longPid(self) -> Pid:
         """Identifier for the object, unique within the project.
         Set automatically from the full class name, the parent wrapperList and object.uniqueId
         E.g. 'Collection:default.1'
         """
-        return Pid.Pid(Pid.PREFIXSEP.join((self.className, self.id)))
+        return Pid.new(self.className, self.id)
 
     @property
     def _parent(self):
@@ -279,9 +281,9 @@ class V3CoreObjectABC(NotifierBase):
                 raise ValueError('%s: %r must be set' %
                                  (cls.__name__, attribName))
 
-            if Pid.altCharacter in value:
+            if altCharacter in value:
                 raise ValueError('%s: Character %r not allowed in %r; got %r' %
-                                 (cls.__name__, Pid.altCharacter, attribName, value))
+                                 (cls.__name__, altCharacter, attribName, value))
 
             if not allowWhitespace and commonUtil.contains_whitespace(value):
                 raise ValueError('%s: Whitespace not allowed in %r; got %r' %
@@ -319,7 +321,7 @@ class V3CoreObjectABC(NotifierBase):
         # if self._chemicalShiftList._searchChemicalShifts(uniqueId=value):
         #     raise ValueError(f'{self.className}._resetUniqueId: uniqueId {value} already exists')
         self._uniqueId = int(value)
-        self._ccpnSortKey = (id(self.project), len(_importOrder), self._uniqueId)
+        self._ccpnSortKey = (id(self.project), _importOrder.index(self.className), self._uniqueId)
 
     def _resetIds(self, oldId):
         """Reset the pids in the project lists
@@ -431,16 +433,42 @@ class V3CoreObjectABC(NotifierBase):
         obj = None
 
         # return if the pid does not conform to a pid definition
-        if not Pid.Pid.isValid(pid):
+        if not Pid.isValid(pid):
             return None
 
-        pid = Pid.Pid(pid)
+        pid = Pid(pid)
         dd = self._project._pid2Obj.get(pid.type)
         if dd is not None:
             obj = dd.get(pid.id)
         if obj is not None and obj._isDeleted:
             raise RuntimeError(f'{self.className}.getByPid "%s" defined a deleted object' % pid)
         return obj
+
+    @classmethod
+    def _linkWrapperClasses(cls, ancestors: list = None, Project: 'Project' = None, _allGetters=None):
+        """Recursively set up links and functions involving children for wrapper classes
+        V3CoreObjectABC should NOT link to any wrapped classes
+        """
+        # Fill in Project._className2Class map - add V3CoreObject name to dicts
+        dd = Project._className2Class
+        dd[cls.className] = dd[cls.shortClassName] = cls
+        Project._className2ClassList.extend([cls.className, cls.shortClassName, cls])
+
+        dd = Project._classNameLower2Class
+        dd[cls.className.lower()] = dd[cls.shortClassName.lower()] = cls
+        Project._classNameLower2ClassList.extend([cls.className.lower(), cls.shortClassName.lower(), cls])
+
+    @classmethod
+    def _getChildClasses(cls, recursion: bool = False) -> list:
+        """list of valid child classes of cls
+        """
+        return []
+
+    @classmethod
+    def _getAllWrappedData(cls, parent) -> list:
+        """get wrappedData - V3CoreObjectABC do not link to _wrappedData
+        """
+        return []
 
     #=========================================================================================
     # CCPN functions
@@ -493,7 +521,7 @@ class V3CoreObjectABC(NotifierBase):
                         redo=partial(wrapperList._undoRedoDeletedObjects, newDeletedObjects))
 
 
-def _newWrappedObject(project: Project, wrapperList, klass, _uniqueId: Optional[int] = None):
+def _newWrappedObject(project: 'Project', wrapperList, klass, _uniqueId: Optional[int] = None):
     """Create a new object attached to the wrappedData.
 
     :param project: core project

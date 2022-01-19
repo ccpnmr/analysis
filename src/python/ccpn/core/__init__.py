@@ -480,7 +480,8 @@ _coreImportOrder = (
     'ChemicalShiftList', '_OldChemicalShift',
     'StructureData', 'RestraintTable', 'Restraint',
     'RestraintContribution', 'CalculationStep', 'Data', 'StructureEnsemble', 'Model', 'Note',
-    'PeakCluster', 'MultipletList', 'Multiplet', 'DataTable', 'ViolationTable'
+    'PeakCluster', 'MultipletList', 'Multiplet', 'DataTable', 'ViolationTable',
+    'ChemicalShift', 'Collection'
     )
 
 # This list includes ui classes (added below)

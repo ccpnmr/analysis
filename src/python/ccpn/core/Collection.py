@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:23:24 +0000 (Thu, January 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-19 17:14:27 +0000 (Wed, January 19, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -308,12 +308,6 @@ class Collection(V3CoreObjectABC):
         self._wrapperList.deleteCollection(uniqueId=self._uniqueId)
         # raise RuntimeError(f'{self.className}.delete: Please use CollectionList.deleteCollection()')  # optional error-trap
 
-    def _updateItems(self):
-        """Restore the links to the nmrAtoms
-        CCPN Internal - called from first creation from _restoreObject
-        """
-        pass
-
     #=========================================================================================
     # CCPN functions
     #=========================================================================================
@@ -351,8 +345,6 @@ class Collection(V3CoreObjectABC):
                     raise ValueError(f'item {_exists[0]} already in collection {self}')
 
             with undoBlock():
-                # NOTE:ED - any item could cause a nested loop - can't check until each object has been added
-                #   then need to reset if there is an error
                 for itm in items:
                     _currentItms += (itm,)
                 self.items = _currentItms
@@ -457,7 +449,7 @@ class Collection(V3CoreObjectABC):
         if disableLeadingTrailingSearch is not None and not search:
             raise ValueError('disableLeadingTrailingSearch only valid when search is specified')
 
-        if isinstance(objectTypes, str) or (objectTypes is not None and hasattr(objectTypes, 'pid')):
+        if isinstance(objectTypes, str) or (objectTypes is not None and self.project.isCoreClass(objectTypes)):
             # change a single item to a list, if is a str or a core object (object with .pid), strings are checked later
             objectTypes = [objectTypes, ]
 

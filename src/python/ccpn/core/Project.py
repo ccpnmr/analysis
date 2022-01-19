@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-14 18:44:56 +0000 (Fri, January 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-19 17:14:27 +0000 (Wed, January 19, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -38,6 +38,7 @@ import json
 # from ccpn.util.Common import isValidPath, isValidFileNameLength
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.Updater import UPDATE_POST_PROJECT_INITIALISATION
+from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
 
 from ccpn.core.lib import Pid
 from ccpn.core.lib import Undo
@@ -248,22 +249,6 @@ class Project(AbstractWrapperObject):
             _shifts.extend(shiftList.chemicalShifts)
         return _shifts
 
-    def getChemicalShift(self, relativeId: str) -> Optional['ChemicalShift']:
-        """Return the chemicalShift from the supplied relativeId
-        """
-        from ccpn.core.ChemicalShift import ChemicalShift
-
-        dd = self._project._pid2Obj.get(ChemicalShift.className)
-        if dd:
-            if self is self._project:
-                key = '{}'.format(relativeId)
-            else:
-                # shouldn't get here
-                key = '{}{}{}'.format(self._id, Pid.IDSEP, relativeId)
-            return dd.get(key)
-        else:
-            return None
-
     @property
     def collections(self):
         """Return the list of collections in the project
@@ -275,7 +260,7 @@ class Project(AbstractWrapperObject):
         """
         from ccpn.core.Collection import Collection
 
-        dd = self._project._pid2Obj.get(Collection.className)
+        dd = self._pid2Obj.get(Collection.className)
         if dd:
             key = '{}'.format(relativeId)
             return dd.get(key)
@@ -436,12 +421,12 @@ class Project(AbstractWrapperObject):
         # initialise, creating the children
         with inactivity():
             self._restoreChildren()
+            # perform any required restoration of project not covered by children
+            self._restoreObject(self, self._wrappedData)
+
             # we always have the default chemicalShift list
             if len(self.chemicalShiftLists) == 0:
                 self.newChemicalShiftList(name='default')
-
-            # perform any required restoration of project not covered by children
-            self._restoreObject(self, self._wrappedData)
 
         # Call any updates
         self._update()
@@ -451,28 +436,11 @@ class Project(AbstractWrapperObject):
         """Process data that must always be performed after updating all children
         """
         from ccpn.core._implementation.CollectionList import CollectionList
-        from ccpn.core.Collection import Collection
-        from ccpn.core.ChemicalShift import ChemicalShift
 
-        # update new collectionTable and collection items
-
-        # NOTE:ED - should this go elsewhere? near _linkWrapperClasses? ... or core/__init__
-
-        # add the non-abstractWrapperObjects to the collections search list
-        for klass in [ChemicalShift, Collection]:
-            # Fill in Project._className2Class map
-            dd = Project._className2Class
-            dd[klass.className] = dd[klass.shortClassName] = klass
-            Project._className2ClassList.extend([klass.className, klass.shortClassName, klass])
-
-            dd = Project._classNameLower2Class
-            dd[klass.className.lower()] = dd[klass.shortClassName.lower()] = klass
-            Project._classNameLower2ClassList.extend([klass.className.lower(), klass.shortClassName.lower(), klass])
-
-        # new collection table if required
+        # create new collection table
         project._collectionList = CollectionList(project=project)
 
-        # create new collections
+        # create new collections from table
         project._collectionList._restoreObject(project, None)
 
         # don't need to call super here
@@ -1280,6 +1248,18 @@ class Project(AbstractWrapperObject):
                                     skipPrefixes=skipPrefixes,
                                     expandSelection=expandSelection,
                                     pidList=pidList)
+
+    @staticmethod
+    def isCoreObject(obj) -> bool:
+        """Return True if obj is a core ccpn object
+        """
+        return isinstance(obj, (AbstractWrapperObject, V3CoreObjectABC))
+
+    @staticmethod
+    def isCoreClass(klass) -> bool:
+        """Return True if type(klass) is a core ccpn object type
+        """
+        return isinstance(klass, type) and issubclass(klass, (AbstractWrapperObject, V3CoreObjectABC))
 
     #===========================================================================================
     # Data loaders

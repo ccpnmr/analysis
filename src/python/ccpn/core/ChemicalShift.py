@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-14 18:35:28 +0000 (Fri, January 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-19 17:14:27 +0000 (Wed, January 19, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ from ccpn.core.Project import Project
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.lib.ContextManagers import ccpNmrV3CoreSetter, undoStackBlocking, deleteV3Object, ccpNmrV3CoreUndoBlock
-from ccpn.core.lib import Pid
+from ccpn.core.lib.Pid import Pid, createId
 from ccpn.core.ChemicalShiftList import CS_UNIQUEID, CS_ISDELETED, CS_STATIC, CS_VALUE, CS_VALUEERROR, \
     CS_FIGUREOFMERIT, CS_NMRATOM, CS_CHAINCODE, CS_SEQUENCECODE, CS_RESIDUETYPE, CS_ATOMNAME, \
     CS_COMMENT, CS_COLUMNS, ChemicalShiftState
@@ -103,7 +103,7 @@ class ChemicalShift(V3CoreObjectABC):
         with the value of one or more key attributes that uniquely identify the object in context
         E.g. 'default.1'
         """
-        return self._deletedId if self._isDeleted else Pid.IDSEP.join((self._wrapperList.name, str(self._uniqueId)))
+        return self._deletedId if self._isDeleted else createId(self._wrapperList.name, str(self._uniqueId))
 
     @property
     def chemicalShiftList(self):
@@ -287,7 +287,7 @@ class ChemicalShift(V3CoreObjectABC):
     @nmrAtom.setter
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreUndoBlock()
-    def nmrAtom(self, value: Union[NmrAtom, str, Pid.Pid, None]):
+    def nmrAtom(self, value: Union[NmrAtom, str, Pid, None]):
         """Set the nmrAtom for the chemicalShift
         nmrAtom can be core object of type NmrAtom, or string pid or None
 

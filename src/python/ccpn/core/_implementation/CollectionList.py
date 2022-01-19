@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-15 12:11:41 +0000 (Sat, January 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-19 17:14:28 +0000 (Wed, January 19, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -32,8 +32,7 @@ from collections import Counter
 
 from ccpn.core._implementation.DataFrameABC import DataFrameABC
 from ccpn.core.Project import Project
-from ccpn.core.NmrAtom import NmrAtom
-from ccpn.core.lib import Pid
+from ccpn.core.lib.Pid import Pid
 from ccpn.core.lib.ContextManagers import newV3Object, undoBlockWithoutSideBar, undoStackBlocking
 from ccpn.core._implementation.V3CoreObjectABC import _UNIQUEID, _ISDELETED, _NAME, _COMMENT
 from ccpn.util.decorators import logCommand
@@ -71,11 +70,12 @@ def _checkItems(project, items: Sequence[Any]) -> Optional[list]:
     """
     items = makeIterableList(items)
     _itms = [project.getByPid(itm) if isinstance(itm, str) else itm for itm in items]
-    # check all items have a pid
-    itms = list(filter(lambda obj: hasattr(obj, 'pid'), _itms))
+    # check all items are core objects
+    itms = list(filter(lambda obj: project.isCoreObject(obj), _itms))
 
     if items and (len(itms) != len(items)):
-        _itms = list(filter(lambda obj: not hasattr(obj, 'pid'), _itms))
+        # get the list of non-core objects
+        _itms = list(filter(lambda obj: not project.isCoreObject(obj), _itms))
         raise ValueError(f'items contains non-core objects: {_itms}')
 
     return itms
@@ -132,23 +132,11 @@ class CollectionList():
         """Return a collection by uniqueId
         Collection is returned as a namedTuple
         """
-        # if nmrAtom and uniqueId:
-        #     raise ValueError('CollectionList.getCollection: use either nmrAtom or uniqueId')
-
         _data = self._data
         if _data is None:
             return
 
         rows = None
-        # if nmrAtom:
-        #     # get collection by nmrAtom
-        #     nmrAtom = self.project.getByPid(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom
-        #     if not isinstance(nmrAtom, (NmrAtom, type(None))):
-        #         raise ValueError('CollectionList.getCollection: nmrAtom must be of type NmrAtom or str')
-        #     if nmrAtom:
-        #         # search dataframe
-        #         rows = _data[_data[CO_NMRATOM] == nmrAtom.pid]
-
         if uniqueId is not None:
             # get collection by uniqueId
             if not isinstance(uniqueId, int):
@@ -257,24 +245,10 @@ class CollectionList():
         collection._deleted = state
 
     def _searchCollections(self, uniqueId=None):
-        """Return True if the nmrAtom/uniqueId already exists in the collections dataframe
+        """Return True if the uniqueId already exists in the collections dataframe
         """
-        # if nmrAtom and uniqueId:
-        #     raise ValueError('CollectionList._searchCollections: use either nmrAtom or uniqueId')
-
         if self._data is None:
             return
-
-        # if nmrAtom:
-        #     # get collection by nmrAtom
-        #     nmrAtom = self.project.getByPid(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom
-        #     if not isinstance(nmrAtom, NmrAtom):
-        #         raise ValueError('CollectionList._searchCollections: nmrAtom must be of type NmrAtom, str')
-        #
-        #     # search dataframe for single element
-        #     _data = self._wrappedData.data
-        #     rows = _data[_data[CO_NMRATOM] == nmrAtom.pid]
-        #     return len(rows) > 0
 
         if uniqueId is not None:
             # get collection by uniqueId
@@ -320,8 +294,7 @@ class CollectionList():
                 # add the new object to the _pid2Obj dict
                 project._finalisePid2Obj(collection, 'create')
 
-                # # restore the nmrAtom, etc., for the new collection
-                # collection._updateItemCollections()
+                # restore the items, etc., for the new collection - not required as dynamic reverse lookup
 
         return project._collectionList
 
@@ -339,28 +312,23 @@ class CollectionList():
                 raise ValueError(f'{self.className}.renameCollection: uniqueId must be an int')
 
             # search dataframe for single element
-            _data = self._data
             rows = _data[_data[CO_UNIQUEID] == uniqueId]
             if len(rows) > 1:
                 raise RuntimeError(f'{self.className}.renameCollection: bad number of collections in list')
             elif len(rows) == 0:
                 raise ValueError(f'{self.className}.renameCollection: uniqueId {uniqueId} not found')
 
-            # should be handled in the Collection class
-            # if name in list(_data[CO_NAME]):
-            #     raise ValueError(f'{self.className}.renameCollection: name {name} already exists')
-
             _oldPid = collection.pid
+            # change the name - pid will automatically change
             _data.loc[uniqueId, CO_NAME] = name
 
-            # pid should have automatically have changed
             _newPid = collection.pid
+            _col = _data.columns.get_loc(CO_ITEMS)
             for ii in range(len(_data)):
-                _row = _data.iloc[ii]
-                if _oldPid in (_row[CO_ITEMS] or []):
-                    # replace the pids in the list - use 'at' to put list into single element
-                    _uniqueId = _row[CO_UNIQUEID]
-                    _data.at[_uniqueId, CO_ITEMS] = [_newPid if vv == _oldPid else vv for vv in _row[CO_ITEMS]]
+                # use indexing as single element contains a list
+                _items = _data.iat[ii, _col] or []
+                if _oldPid in _items:
+                    _data.iat[ii, _col] = [_newPid if vv == _oldPid else vv for vv in _items]
 
     def searchCollections(self, item):
         """Get the list of collections containing the specified item
@@ -378,12 +346,12 @@ class CollectionList():
         if _data is None:
             return
 
+        _col = _data.columns.get_loc(CO_ITEMS)
         for ii in range(len(_data)):
-            _row = _data.iloc[ii]
-            if oldPid in (_row[CO_ITEMS] or []):
-                # replace the pids in the list - use 'at' to put list into single element
-                _uniqueId = _row[CO_UNIQUEID]
-                _data.at[_uniqueId, CO_ITEMS] = [newPid if vv == oldPid else vv for vv in _row[CO_ITEMS]]
+            # use indexing as single element contains a list
+            _items = _data.iat[ii, _col] or []
+            if oldPid in _items:
+                _data.iat[ii, _col] = [newPid if vv == oldPid else vv for vv in _items]
 
     #===========================================================================================
     # new<Object> and other methods
@@ -426,7 +394,7 @@ class CollectionList():
         return collection
 
     @newV3Object()
-    def _newCollectionObject(self, data=None, name: str = None, items: Union[NmrAtom, str, Pid.Pid, None] = None, comment: str = None):
+    def _newCollectionObject(self, data=None, name: str = None, items: Union[str, Pid, None] = None, comment: str = None):
         """Create a new pure V3 Collection object
         Method is wrapped with create/delete notifier
         """
@@ -468,30 +436,11 @@ class CollectionList():
 
     @logCommand(get='self')
     def deleteCollection(self, uniqueId: int = None):
-        """Delete a collection by nmrAtom or uniqueId
+        """Delete a collection by uniqueId
         """
-        # if nmrAtom and uniqueId:
-        #     raise ValueError('CollectionList.deleteCollection: use either nmrAtom or uniqueId')
-
         _data = self._data
         if _data is None:
             return
-
-        # if nmrAtom:
-        #     # get collection by nmrAtom
-        #     nmrAtom = self.project.getByPid(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom
-        #     if not isinstance(nmrAtom, NmrAtom):
-        #         raise ValueError('CollectionList.deleteCollection: nmrAtom must be of type NmrAtom, str')
-        #
-        #     # search dataframe for single element
-        #     _data = self._wrappedData.data
-        #     rows = _data[_data[CO_NMRATOM] == nmrAtom.pid]
-        #     if len(rows) > 1:
-        #         raise RuntimeError('CollectionList.deleteCollection: bad number of collections in list')
-        #     elif len(rows) == 0:
-        #         raise ValueError(f'CollectionList.deleteCollection: nmrAtom {nmrAtom.pid} not found')
-        #
-        #     self._deleteCollectionObject(rows)
 
         if uniqueId is not None:
             # get collection by uniqueId

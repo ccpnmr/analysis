@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-14 18:00:05 +0000 (Fri, January 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-19 17:14:27 +0000 (Wed, January 19, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,7 +37,7 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.NmrAtom import NmrAtom
-from ccpn.core.lib import Pid
+from ccpn.core.lib.Pid import Pid, remapSeparators
 from ccpn.core.lib.ContextManagers import newObject, newV3Object, renameObject, \
     undoBlockWithoutSideBar, undoStackBlocking, undoBlock, ccpNmrV3CoreSetter
 from ccpn.util.decorators import logCommand
@@ -159,7 +159,7 @@ class ChemicalShiftList(AbstractWrapperObject):
     @property
     def _key(self) -> str:
         """name, regularised as used for id"""
-        return self._wrappedData.name.translate(Pid.remapSeparators)
+        return self._wrappedData.name.translate(remapSeparators)
 
     @property
     def serial(self) -> int:
@@ -630,7 +630,7 @@ class ChemicalShiftList(AbstractWrapperObject):
 
     @logCommand(get='self')
     def newChemicalShift(self, value: float = None, valueError: float = None, figureOfMerit: float = 1.0,
-                         nmrAtom: Union[NmrAtom, str, Pid.Pid, None] = None,
+                         nmrAtom: Union[NmrAtom, str, Pid, None] = None,
                          chainCode: str = None, sequenceCode: str = None, residueType: str = None, atomName: str = None,
                          comment: str = None
                          ):

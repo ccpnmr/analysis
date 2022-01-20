@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can have the location of your MAS sidebands shown in your spectra. Enter the MAS rate in the <span style=%(purple)s>General</span> tab of the <span style=%(purple)s>Spectrum Properties</span> pop-up (double-click on the spectrum in the sidebar). Then switch on the MAS sidebands, either for a single spectrum with <span style=%(purple)s>right-click / Customise / Show MAS Sidebands</span> or for all spectra in the <span style=%(purple)s>Spectrum</span> tab of your <span style=%(purple)s>Preferences</span> (go to <span style=%(purple)s>File / Preferences</span>).</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 46,
+  "contents": [
+    "./graphics/MASSidebands.png"
+  ]
+}

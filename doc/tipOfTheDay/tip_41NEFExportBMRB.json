@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can quickly and easily export your chemical shifts for deposition in the BMRB by going to <span style=%(purple)s>File / Export / Nef file</span> or using shortcut <span style=%(purple)s>EX</span>. Select your Chain and Chemical Shift list and deselect CCPN tags, then export with a filename of your choice. You can also  include peak or restraint lists, if you would like.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 41,
+  "contents": [
+    "./graphics/NEFExportBMRB.png"
+  ]
+}

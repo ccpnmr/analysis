@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>Every table contains an editable <span style=%(purple)s>Comment</span> field. Use this to keep notes on your peaks, assignments and other aspects of your project.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 45,
+  "contents": [
+    "./graphics/UseCommentsForNotes.png"
+  ]
+}

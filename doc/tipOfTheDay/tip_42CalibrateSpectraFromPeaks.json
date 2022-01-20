@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can calibrate or re-reference spectra based on two peaks, one in each spectrum. Select both peaks and then go to <span style=%(purple)s>right-click / Calibrate Spectra From Peaks</span>. It will take you to a pop-up where you can select which spectrum and dimensions move and which remain static.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 42,
+  "contents": [
+    "./graphics/CalibrateSpectraFromPeaks.png"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can assign peaks by dragging an NmrResidue or NmrAtom from the sidebar onto one or more selected peaks. If the assignment is not unambiguous, a pop-up will allow you to select which NmrAtom(s) to associate with which spectrum dimension.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 43,
+  "contents": [
+    "./graphics/DragNmrResidueToAssign.png"
+  ]
+}

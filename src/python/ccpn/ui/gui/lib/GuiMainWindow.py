@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-20 13:16:16 +0000 (Thu, January 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-20 13:58:56 +0000 (Thu, January 20, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -611,7 +611,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         Populates recent projects menu with 10 most recently loaded projects
         specified in the preferences file.
         """
-        recentFileLocations = self.application._getRecentFiles()
+        recentFileLocations = self.application._getRecentProjectFiles()
         recentFileMenu = self.getMenuAction('File->Open Recent')
         recentFileMenu.clear()
         for recentFile in recentFileLocations:

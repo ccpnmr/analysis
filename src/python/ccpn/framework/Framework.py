@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-20 13:16:16 +0000 (Thu, January 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-20 13:58:56 +0000 (Thu, January 20, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1254,52 +1254,6 @@ class Framework(NotifierBase, GuiBase):
     #     self.preferences.recentMacros = []
     #     self.ui.mainWindow._fillRecentMacrosMenu()
 
-    # def _loadSpectraCallback(self, paths=None, filter=None, askBeforeOpen_lenght=20):
-    #     """
-    #     Load all the spectra found in paths
-    #
-    #     :param paths: list of str of paths
-    #     :param filter:
-    #     :param askBeforeOpen_lenght: how many spectra can open without asking first
-    #     """
-    #     from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
-    #     from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
-    #
-    #     if paths is None:
-    #         dialog = SpectrumFileDialog(parent=self.ui.mainWindow, acceptMode='load', fileFilter=filter, useNative=False)
-    #
-    #         dialog._show()
-    #         paths = dialog.selectedFiles()
-    #
-    #     if not paths:
-    #         return
-    #
-    #     spectrumLoaders = []
-    #     count = 0
-    #     # Recursively search all paths
-    #     for path in paths:
-    #         _path = Path.aPath(path)
-    #         if _path.is_dir():
-    #             dirLoader = DirectoryDataLoader(path, recursive=False,
-    #                                             filterForDataFormats=(SpectrumDataLoader.dataFormat,))
-    #             spectrumLoaders.append(dirLoader)
-    #             count += len(dirLoader)
-    #
-    #         elif (sLoader := SpectrumDataLoader.checkForValidFormat(path)) is not None:
-    #             spectrumLoaders.append(sLoader)
-    #             count += 1
-    #
-    #     if count > askBeforeOpen_lenght:
-    #         okToOpenAll = MessageDialog.showYesNo('Load data', 'The directory contains multiple items (%d).'
-    #                                                            ' Do you want to open all?' % len(spectrumLoaders))
-    #         if not okToOpenAll:
-    #             return
-    #
-    #     with undoBlockWithoutSideBar():
-    #         with notificationEchoBlocking():
-    #             for sLoader in tqdm(spectrumLoaders):
-    #                 sLoader.load()
-
     @logCommand('application.')
     def loadData(self, *paths) -> list:
         """Loads data from paths.
@@ -1367,7 +1321,8 @@ class Framework(NotifierBase, GuiBase):
             getLogger().debug(str(e))
 
     def _saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
-        """Save project to newPath and return True if successful"""
+        """Save project to newPath and return True if successful
+        """
         if self.preferences.general.keepSpectraInsideProject:
             self._cloneSpectraToProjectDir()
 
@@ -1377,25 +1332,25 @@ class Framework(NotifierBase, GuiBase):
             failMessage = '==> Project save failed\n'
             sys.stderr.write(failMessage)
             self.ui.mainWindow.statusBar().showMessage(failMessage)
+            return successful
 
-        else:
-            successMessage = '==> Project successfully saved\n'
-            self.ui.mainWindow._updateWindowTitle()
-            self.ui.mainWindow.statusBar().showMessage(successMessage)
-            self.ui.mainWindow.getMenuAction('File->Archive').setEnabled(True)
-            self.ui.mainWindow._fillRecentProjectsMenu()
-            # self._createApplicationPaths()
-            self.current._dumpStateToFile(self.statePath)
-            try:
-                if self.preferences.general.autoSaveLayoutOnQuit:
-                    Layout.saveLayoutToJson(self.ui.mainWindow)
-            except Exception as e:
-                getLogger().warning('Unable to save Layout %s' % e)
+        successMessage = '==> Project successfully saved\n'
+        self.ui.mainWindow._updateWindowTitle()
+        self.ui.mainWindow.statusBar().showMessage(successMessage)
+        self.ui.mainWindow.getMenuAction('File->Archive').setEnabled(True)
+        self.ui.mainWindow._fillRecentProjectsMenu()
+        # self._createApplicationPaths()
+        self.current._dumpStateToFile(self.statePath)
+        try:
+            if self.preferences.general.autoSaveLayoutOnQuit:
+                Layout.saveLayoutToJson(self.ui.mainWindow)
+        except Exception as e:
+            getLogger().warning('Unable to save Layout %s' % e)
 
-            # saveIconPath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
-            sys.stderr.write(successMessage)
-            # MessageDialog.showMessage('Project saved', 'Project successfully saved!',
-            #                            iconPath=saveIconPath)
+        # saveIconPath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
+        sys.stderr.write(successMessage)
+        # MessageDialog.showMessage('Project saved', 'Project successfully saved!',
+        #                            iconPath=saveIconPath)
 
         self._getUndo().markSave()
         return successful
@@ -1557,8 +1512,8 @@ class Framework(NotifierBase, GuiBase):
                                expandSelection=expandSelection,
                                pidList=pidList)
 
-    def _getRecentFiles(self, oldPath=None) -> list:
-        """Get and return a list of recent files, setting reference to
+    def _getRecentProjectFiles(self, oldPath=None) -> list:
+        """Get and return a list of recent project files, setting reference to
            self as first element, unless it is a temp project
            update the preferences with the new list
 
@@ -1579,28 +1534,6 @@ class Framework(NotifierBase, GuiBase):
         recentFiles = uniquify(recentFiles)
         self.preferences.recentFiles = recentFiles
         return recentFiles
-
-    # def saveProjectAs(self):
-    #     """Opens save Project as dialog box and saves project to path specified in the file dialog."""
-    #     oldPath = self.project.path
-    #     newPath = getSaveDirectory(self.ui.mainWindow, self.preferences)
-    #
-    #     with catchExceptions(application=self, errorStringTemplate='Error saving project: %s', printTraceBack=True):
-    #         if newPath:
-    #             # Next line unnecessary, but does not hurt
-    #             newProjectPath = apiIo.addCcpnDirectorySuffix(newPath)
-    #             successful = self._saveProject(newPath=newProjectPath, createFallback=False)
-    #
-    #             if not successful:
-    #                 getLogger().warning("Saving project to %s aborted" % newProjectPath)
-    #         else:
-    #             successful = False
-    #             getLogger().info("Project not saved - no valid destination selected")
-    #
-    #         self._getRecentFiles(oldPath=oldPath)  # this will also update the list
-    #         self.ui.mainWindow._fillRecentProjectsMenu()  # Update the menu
-    #
-    #         return successful
 
     @logCommand('application.')
     def undo(self):
@@ -1635,23 +1568,23 @@ class Framework(NotifierBase, GuiBase):
         else:
             raise RuntimeError('Error: decreaseNotificationBlocking, already at 0')
 
-    def saveLogFile(self):
-        pass
+    # def saveLogFile(self):
+    #     pass
+    #
+    # def clearLogFile(self):
+    #     pass
 
-    def clearLogFile(self):
-        pass
-
-    def displayProjectSummary(self, position: str = 'left', relativeTo: CcpnModule = None):
-        """
-        Displays Project summary module on left of main window.
-        """
-        from ccpn.ui.gui.popups.ProjectSummaryPopup import ProjectSummaryPopup
-
-        if self.ui:
-            popup = ProjectSummaryPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, modal=True)
-            popup.show()
-            popup.raise_()
-            popup.exec_()
+    # def displayProjectSummary(self, position: str = 'left', relativeTo: CcpnModule = None):
+    #     """
+    #     Displays Project summary module on left of main window.
+    #     """
+    #     from ccpn.ui.gui.popups.ProjectSummaryPopup import ProjectSummaryPopup
+    #
+    #     if self.ui:
+    #         popup = ProjectSummaryPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, modal=True)
+    #         popup.show()
+    #         popup.raise_()
+    #         popup.exec_()
 
     def archiveProject(self):
 

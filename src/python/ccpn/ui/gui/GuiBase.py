@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-20 13:16:16 +0000 (Thu, January 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-20 13:58:56 +0000 (Thu, January 20, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -155,7 +155,7 @@ class GuiBase(object):
 
             ("Load Data...", lambda: self._loadDataFromMenu(text='Load Data'), [('shortcut', 'ld')]),
             (),
-            ("Save", self.saveProject, [('shortcut', '⌃s')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+            ("Save", self._saveCallback, [('shortcut', '⌃s')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Save As...", self._saveAsCallback, [('shortcut', 'sa')]),
             (),
             ("Import", (("Nef File", self._importNef, [('shortcut', 'in'), ('enabled', True)]),
@@ -173,7 +173,7 @@ class GuiBase(object):
                         ("Open pre-defined", ()),
 
                         )),
-            ("Summary", self.displayProjectSummary),
+            ("Summary", self.showProjectSummaryPopup),
             ("Archive", self.archiveProject, [('enabled', False)]),
             ("Restore From Archive...", self.restoreFromArchive, [('enabled', False)]),
             (),
@@ -181,7 +181,7 @@ class GuiBase(object):
             (),
             ("Quit", self._closeEvent, [('shortcut', '⌃q')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ]
-                   ))
+        ))
 
         ms.append(('Edit', [
             ("Undo", self.undo, [('shortcut', '⌃z')]),  # Unicode U+2303, NOT the carrot on your keyboard.
@@ -193,7 +193,7 @@ class GuiBase(object):
             ("Paste", self._nyi, [('shortcut', '⌃v'), ('enabled', False)]),
             ("Select all", self._nyi, [('shortcut', '⌃a'), ('enabled', False)]),
             ]
-                   ))
+        ))
 
         ms.append(('View', [
             ("Chemical Shift Table", partial(self.showChemicalShiftTable, selectFirstItem=True), [('shortcut', 'ct')]),
@@ -233,7 +233,7 @@ class GuiBase(object):
             ("Python Console", self._toggleConsoleCallback, [('shortcut', '  '),
                                                              ])
             ]
-                   ))
+        ))
 
         ms.append(('Spectrum', [
             ("Load Spectra...", self._loadSpectraCallback, [('shortcut', 'ls')]),
@@ -257,7 +257,7 @@ class GuiBase(object):
             (),
             ("Print to File...", self.showPrintSpectrumDisplayPopup, [('shortcut', '⌃p')]),
             ]
-                   ))
+        ))
 
         ms.append(('Molecules', [
             ("Chain from FASTA...", lambda: self._loadDataFromMenu(text='Load FASTA')),
@@ -269,7 +269,7 @@ class GuiBase(object):
             (),
             ("Reference Chemical Shifts", self.showReferenceChemicalShifts, [('shortcut', 'rc')]),
             ]
-                   ))
+        ))
 
         ms.append(('Macro', [
             ("New Macro Editor", self._showMacroEditorCallback),
@@ -286,13 +286,13 @@ class GuiBase(object):
             (),
             ("Define Macro Shortcuts...", self.defineUserShortcuts, [('shortcut', 'du')]),
             ]
-                   ))
+        ))
 
         ms.append(('Plugins', [
             (CCPNPLUGINSMENU, ()),
             (PLUGINSMENU, ()),
             ]
-                   ))
+        ))
 
         ms.append(('Help', [
             (TUTORIALSMENU, ([
@@ -397,6 +397,10 @@ class GuiBase(object):
         getLogger().info('==> Loaded Star file: "%s"' % (path,))
         return self.project
 
+    def _saveCallback(self):
+        """The project callback"""
+        succes = self._saveProject(newPath=None, createFallback=True, overwriteExisting=True)
+
     def _saveAsCallback(self):
         """Opens save Project as dialog box and saves project to path specified in the file dialog."""
         oldPath = self.project.path
@@ -413,10 +417,21 @@ class GuiBase(object):
                 successful = False
                 getLogger().info("Project not saved - no valid destination selected")
 
-            self._getRecentFiles(oldPath=oldPath)  # this will also update the list
+            self._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
             self.ui.mainWindow._fillRecentProjectsMenu()  # Update the menu
 
             return successful
+
+    def showProjectSummaryPopup(self):
+        """Show the Project summary popup.
+        """
+        from ccpn.ui.gui.popups.ProjectSummaryPopup import ProjectSummaryPopup
+
+        if self.ui:
+            popup = ProjectSummaryPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, modal=True)
+            popup.show()
+            popup.raise_()
+            popup.exec_()
 
     #-----------------------------------------------------------------------------------------
     # Spectra --> callback methods
@@ -445,7 +460,7 @@ class GuiBase(object):
         count = 0
         # Recursively search all paths
         for path in paths:
-            _path = Path.aPath(path)
+            _path = aPath(path)
             if _path.is_dir():
                 dirLoader = DirectoryDataLoader(path, recursive=False,
                                                 filterForDataFormats=(SpectrumDataLoader.dataFormat,))

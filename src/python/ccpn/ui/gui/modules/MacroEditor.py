@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-02 20:42:22 +0100 (Mon, August 02, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-01-20 12:37:17 +0000 (Thu, January 20, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -331,8 +331,18 @@ class MacroEditor(CcpnModule):
                 MessageDialog.showMessage('Format Not Supported.', 'On MacroEditor you can only use a *.py file type')
 
     def revertChanges(self):
-        self.textEditor.clear()
-        self.textEditor.insertPlainText(self._preEditorText)
+        # revert to initial text. If the initial state is empty. a pop-up will ask to confirm.
+        proceed = True
+        if not self._preEditorText and self.textEditor.get():
+            proceed =  MessageDialog.showYesNoWarning('Revert to initial state',
+                                                      'This file does not contain an initial state. '
+                                                      'Reverting will cause to delete all text! Do you want to continue?')
+        elif self._preEditorText != self.textEditor.get():
+            proceed =  MessageDialog.showYesNoWarning('Revert to initial state',
+                                                      'Do you want revert to the initial state and discard all changes?')
+        if proceed:
+            self.textEditor.clear()
+            self.textEditor.insertPlainText(self._preEditorText)
 
     def _textedChanged(self, *args):
         self.saveMacro()

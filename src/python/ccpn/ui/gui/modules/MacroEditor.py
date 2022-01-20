@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-01-20 12:37:17 +0000 (Thu, January 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-20 13:02:09 +0000 (Thu, January 20, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -83,6 +83,21 @@ ShowMaxLines = OrderedDict([
                              ('All'     , 1.0)
                             ])
 
+'''
+    Ideas for future development:
+    
+    - add local history of files.
+     E.g.: dumping to json every xMinutes
+     This is not "simply" and undo. But will allow to add a GUI with a preview to older states and recover it. (bit like Pycharm)
+        macros_dir 
+            myMacro.py
+            myMacro_history.json
+                  {
+                  timeStamp1:"the text at timeStamp1";
+                  timeStamp2:"the text at timeStamp2"
+                  }
+    - add pre-defined code blocks. E.g.: ccpn common commands or common imports
+'''
 
 class MacroEditor(CcpnModule):
     """

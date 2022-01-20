@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-01-20 14:01:15 +0000 (Thu, January 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-20 15:21:06 +0000 (Thu, January 20, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1056,14 +1056,12 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
         heights = allValues[:, 1]
         # nearestPosition = find_nearest(positions, peak.position[0])
         # take the nearest if is at least x% higher than the noise level
-        heightAdjustmentPerc = percentage(5, noiseLevel)
-        minAcceptableHeight = np.max(noiseLevel) + heightAdjustmentPerc
         thePeakHeight = peak.height
-        thePeakPos = peak.position[0]
+        thePeakPos = nearestPosition = peak.position[0]
         # take the nearest if is at least x% higher than the noise level or the initial height
         initialHeight = nearestHeight = thePeakHeight if thePeakHeight > noiseLevel else noiseLevel
         heightAdjustmentPerc = percentage(minPercent, initialHeight)
-        minAcceptableHeight = np.max(noiseLevel) + heightAdjustmentPerc
+        minAcceptableHeight = initialHeight + heightAdjustmentPerc
         #find closest to thePos
         # nearestPosition = find_nearest(positions, thePeakPos)
         diffs = np.absolute(positions - thePeakPos)

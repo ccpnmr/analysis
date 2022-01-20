@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-19 17:14:28 +0000 (Wed, January 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-20 13:11:12 +0000 (Thu, January 20, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -398,7 +398,10 @@ class CollectionList():
         """Create a new pure V3 Collection object
         Method is wrapped with create/delete notifier
         """
-        from ccpn.core.Collection import _getByTuple, _newCollection as _newCollection
+        from ccpn.core.Collection import Collection, _getByTuple, _newCollection as _newCollection
+
+        if not name:
+            name = Collection._uniqueName(self._project, name)
 
         # make new tuple - verifies contents
         _row = _getByTuple(self, name, items, comment)

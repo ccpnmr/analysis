@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-20 13:58:56 +0000 (Thu, January 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-20 15:56:45 +0000 (Thu, January 20, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -179,7 +179,7 @@ class GuiBase(object):
             (),
             ("Preferences...", self.showApplicationPreferences, [('shortcut', '⌃,')]),
             (),
-            ("Quit", self._closeEvent, [('shortcut', '⌃q')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+            ("Quit", self._quitCallback, [('shortcut', '⌃q')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ]
         ))
 
@@ -432,6 +432,13 @@ class GuiBase(object):
             popup.show()
             popup.raise_()
             popup.exec_()
+
+    def _quitCallback(self, event=None):
+        """
+        Saves application preferences. Displays message box asking user to save project or not.
+        Closes Application.
+        """
+        self.ui.mainWindow._closeEvent(event=event)
 
     #-----------------------------------------------------------------------------------------
     # Spectra --> callback methods

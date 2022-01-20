@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-20 13:58:56 +0000 (Thu, January 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-20 15:56:45 +0000 (Thu, January 20, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1675,59 +1675,6 @@ class Framework(NotifierBase, GuiBase):
                 newPath += jsonType
             return newPath
 
-    def _closeEvent(self, event=None):
-        """
-        Saves application preferences. Displays message box asking user to save project or not.
-        Closes Application.
-        """
-        self.ui.mainWindow._closeEvent(event=event)
-
-    def _closeMainWindows(self):
-        tempModules = self.ui.mainWindow.application.ccpnModules
-        if len(tempModules) > 0:
-            for tempModule in tempModules:
-                getLogger().debug('closing module: %s' % tempModule)
-                try:
-                    tempModule.close()
-                except Exception as es:
-                    # wrapped C/C++ object of type StripDisplay1d has been deleted
-                    getLogger().debug(f'_closeMainWindows: {es}')
-
-    def _closeExtraWindows(self):
-        tempAreas = self.ui.mainWindow.moduleArea.tempAreas
-        if len(tempAreas) > 0:
-            for tempArea in tempAreas:
-                getLogger().debug('closing external module: %s' % tempArea.window())
-                try:
-                    tempArea.window().close()
-                except Exception as es:
-                    # wrapped C/C++ object of type StripDisplay1d has been deleted
-                    getLogger().debug(f'_closeExtraWindows: {es}')
-
-    def _setMainWindowsVisible(self, value):
-        """Set visibility of the main windows
-        """
-        tempModules = self.ui.mainWindow.application.ccpnModules
-        if len(tempModules) > 0:
-            for tempModule in tempModules:
-                try:
-                    tempModule.setVisible(value)
-                except Exception as es:
-                    # wrapped C/C++ object of type StripDisplay1d has been deleted
-                    getLogger().debug(f'_setMainWindowsVisible: {es}')
-
-    def _setExtraWindowsVisible(self, value):
-        """Set visibility of the extra windows
-        """
-        tempAreas = self.ui.mainWindow.moduleArea.tempAreas
-        if len(tempAreas) > 0:
-            for tempArea in tempAreas:
-                try:
-                    tempArea.window().setVisible(value)
-                except Exception as es:
-                    # wrapped C/C++ object of type StripDisplay1d has been deleted
-                    getLogger().debug(f'_setExtraWindowsVisible: {es}')
-
     def _closeProject(self):
         """Close project and clean up - when opening another or quitting application
         """
@@ -1737,10 +1684,8 @@ class Framework(NotifierBase, GuiBase):
         self.deleteAllNotifiers()
         if self.ui.mainWindow:
             # ui/gui cleanup
-            self._setMainWindowsVisible(False)
-            self._setExtraWindowsVisible(False)
-            self._closeMainWindows()
-            self._closeExtraWindows()
+            self.ui.mainWindow._closeMainWindowModules()
+            self.ui.mainWindow._closeExtraWindowModules()
             self.ui.mainWindow.sideBar.deleteLater()
             self.ui.mainWindow.deleteLater()
             self.ui.mainWindow = None

@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-20 13:58:56 +0000 (Thu, January 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-20 15:56:45 +0000 (Thu, January 20, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -977,9 +977,31 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     def clearLogFile(self):
         pass
 
-    def displayProjectSummary(self):
-        info = MessageDialog.showInfo('Not implemented yet',
-                                      'This function has not been implemented in the current version')
+    def _closeMainWindowModules(self):
+        """Close modules in main window;
+        CCPNINTERNAL: also called from Framework
+        """
+        for module in self.moduleArea.ccpnModules:
+            getLogger().debug('closing module: %s' % module)
+            try:
+                module.setVisible(False)  # GWV not sure why, but this was the effect of prior code
+                module.close()
+            except Exception as es:
+                # wrapped C/C++ object of type StripDisplay1d has been deleted
+                getLogger().debug(f'_closeMainWindowModules: {es}')
+
+    def _closeExtraWindowModules(self):
+        """Close modules in any extra window;
+        CCPNINTERNAL: also called from Framework
+        """
+        for module in self.moduleArea.tempAreas:
+            getLogger().debug('closing module: %s' % module)
+            try:
+                module.setVisible(False)  # GWV not sure why, but this was the effect of prior code
+                module.close()
+            except Exception as es:
+                # wrapped C/C++ object of type StripDisplay1d has been deleted
+                getLogger().debug(f'_closeExtraWindowModules: {es}')
 
     def _closeWindowFromUpdate(self, event=None, disableCancel=True):
         # set the active window to mainWindow so that the quit popup centres correctly.

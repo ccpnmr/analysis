@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 13:15:21 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-01-20 14:01:15 +0000 (Thu, January 20, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -29,11 +29,10 @@ from ccpn.util.Logging import getLogger
 from collections import OrderedDict
 from scipy.optimize import curve_fit
 from ccpn.core.PeakList import GAUSSIANMETHOD, PARABOLICMETHOD
-from ccpn.util.Common import makeIterableList as mi
 from ccpn.core.lib.ContextManagers import newObject, undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
 import pandas as pd
 from pandas import MultiIndex as m_ix
-from ccpn.util.Common import makeIterableList
+from ccpn.util.Common import makeIterableList, percentage
 
 
 POSITIONS = 'positions'
@@ -609,7 +608,6 @@ def _fitExpDecayCurve(bindingCurves, aFunc=exponenial_func, xfStep=0.01, xfPerce
     :param TODO
     """
 
-    from ccpn.util.Common import percentage
 
     errorValue = (None,) * 6
     if aFunc is None or not callable(aFunc):
@@ -996,13 +994,16 @@ def _getAdjacentPeakPositions1D(peak):
     return previousPeakPosition, nextPeakPosition
 
 
-def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=False, doNeg=True, figOfMeritLimit=1):
+def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=False, doNeg=True,
+                          figOfMeritLimit=1, minPercent = 15):
     """
     :param peak:
     :param maximumLimit:
     :param useAdjacientPeaksAsLimits:
     :param doNeg:
     :param figOfMeritLimit:
+    :param minPercent: the minimum xPercent extra height that the nearest maximum has to have more than the
+     current peak or noiseLevel (to be considered as a valid new extremum)
     :return: position, height : position is a list of length 1,  height is a float
 
     search  maxima close to a given peak based on the maximumLimit (left/right) or using the adjacent peaks position as limits.
@@ -1037,12 +1038,15 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
 
     # refind maxima
     noiseLevel = spectrum.noiseLevel
-    minNoiseLevel = spectrum.negativeNoiseLevel
+    negativeNoiseLevel = spectrum.negativeNoiseLevel
     if not noiseLevel:  # estimate as you can from the spectrum
-        spectrum.noiseLevel, spectrum.negativeNoiseLevel = noiseLevel, minNoiseLevel = estimateNoiseLevel1D(y)
+        spectrum.noiseLevel, spectrum.negativeNoiseLevel = noiseLevel, negativeNoiseLevel = estimateNoiseLevel1D(y)
+    if not negativeNoiseLevel:
+        noiseLevel, negativeNoiseLevel = estimateNoiseLevel1D(y)
+        spectrum.negativeNoiseLevel = negativeNoiseLevel
 
     x_filtered, y_filtered = _1DregionsFromLimits(x, y, [a, b])
-    maxValues, minValues = simple1DPeakPicker(y_filtered, x_filtered, noiseLevel, negDelta=minNoiseLevel,
+    maxValues, minValues = simple1DPeakPicker(y_filtered, x_filtered, noiseLevel, negDelta=negativeNoiseLevel,
                                               negative=doNeg)
     allValues = maxValues + minValues
 
@@ -1050,8 +1054,28 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
         allValues = np.array(allValues)
         positions = allValues[:, 0]
         heights = allValues[:, 1]
-        nearestPosition = find_nearest(positions, peak.position[0])
-        nearestHeight = heights[positions == nearestPosition]
+        # nearestPosition = find_nearest(positions, peak.position[0])
+        # take the nearest if is at least x% higher than the noise level
+        heightAdjustmentPerc = percentage(5, noiseLevel)
+        minAcceptableHeight = np.max(noiseLevel) + heightAdjustmentPerc
+        thePeakHeight = peak.height
+        thePeakPos = peak.position[0]
+        # take the nearest if is at least x% higher than the noise level or the initial height
+        initialHeight = nearestHeight = thePeakHeight if thePeakHeight > noiseLevel else noiseLevel
+        heightAdjustmentPerc = percentage(minPercent, initialHeight)
+        minAcceptableHeight = np.max(noiseLevel) + heightAdjustmentPerc
+        #find closest to thePos
+        # nearestPosition = find_nearest(positions, thePeakPos)
+        diffs = np.absolute(positions - thePeakPos)
+        diff_ind = np.argsort(diffs)
+        for ind in diff_ind:
+            _height = heights[ind]
+            if _height >= minAcceptableHeight:
+                nearestHeight = heights[ind]
+                nearestPosition = positions[ind]
+                break
+
+        # nearestHeight = heights[positions == nearestPosition]
         if useAdjacientPeaksAsLimits:
             if a == nearestPosition or b == nearestPosition:  # avoid snapping to an existing peak, as it might be a wrong snap.
                 height = peak.peakList.spectrum.getHeight(peak.position)
@@ -1060,7 +1084,7 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
 
             else:
                 position = [float(nearestPosition), ]
-                height = nearestHeight[0]
+                height = nearestHeight
         else:
             a, b = _getAdjacentPeakPositions1D(peak)
             if float(nearestPosition) in (a,b): # avoid snapping to an existing peak,
@@ -1068,7 +1092,7 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
 
             else:
                 position = [float(nearestPosition), ]
-                height = nearestHeight[0]
+                height = nearestHeight
     else:
         height = peak.peakList.spectrum.getHeight(peak.position)
 
@@ -1171,7 +1195,8 @@ def _getSpectralPeakPropertyAsDataFrame(spectra, peakProperty=HEIGHT, NR_ID=NR_I
         for peak in peaks:
             positions.append(peak.position)
             values.append(getattr(peak, peakProperty, None))
-            assignedResidues = list(set(filter(None, map(lambda x: x.nmrResidue.id, mi(peak.assignments)))))
+            assignedResidues = list(set(filter(None, map(lambda x: x.nmrResidue.id,
+                                                         makeIterableList(peak.assignments)))))
             nmrResidues.append(", ".join(assignedResidues))
         _df = pd.DataFrame(values, columns=[serieValue], index=m_ix.from_tuples(positions, names=spectrum.axisCodes))
         _df[NR_ID] = nmrResidues

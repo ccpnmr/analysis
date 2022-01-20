@@ -6,7 +6,7 @@ Includes extensions of sys.path functions and CCPN-specific functionality
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:03 +0100 (Tue, July 20, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-01-20 20:21:39 +0000 (Thu, January 20, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -42,19 +42,20 @@ dirsep = '/'
 # note, cannot just use os.sep below because can have window file names cropping up on unix machines
 winsep = '\\'
 
-#This does not belong here and should go to PathsAndUrls;
-# However, the 'Api.py' and Implementation relies on this so it should stay
+# This does not belong here and should go to PathsAndUrls;
+# However, the 'Api.py' and Implementation relies on this, so it should stay
+# DO NOT USE!
 CCPN_API_DIRECTORY = 'ccpnv3'
 CCPN_DIRECTORY_SUFFIX = '.ccpn'
 CCPN_BACKUP_SUFFIX = '_backup'
 CCPN_ARCHIVES_DIRECTORY = 'archives'
 CCPN_SUMMARIES_DIRECTORY = 'summaries'
 CCPN_LOGS_DIRECTORY = 'logs'
-
 CCPN_PYTHON = 'miniconda/bin/python'
-# from ccpn.framework.PathsAndUrls import CCPN_API_DIRECTORY, CCPN_DIRECTORY_SUFFIX, \
-#     CCPN_BACKUP_SUFFIX, CCPN_ARCHIVES_DIRECTORY, CCPN_LOGS_DIRECTORY,  CCPN_SUMMARIES_DIRECTORY
 
+# Can't do because of circular imports:
+# from ccpn.framework.PathsAndUrls import CCPN_API_DIRECTORY, CCPN_DIRECTORY_SUFFIX, \
+#       CCPN_BACKUP_SUFFIX, CCPN_ARCHIVES_DIRECTORY, CCPN_LOGS_DIRECTORY,  CCPN_SUMMARIES_DIRECTORY
 
 from pathlib import Path as _Path_
 from pathlib import _windows_flavour, _posix_flavour
@@ -208,16 +209,26 @@ class Path(_Path_):
         return self.with_suffix(suffix=suffix)
 
     def listDirFiles(self, extension:str=None):
-        """
-        If self is a directory path, return a list of its sub-files as Path instance.
-        If the extensions is given (e.g.: pdf, jpeg...), returns only files of that pattern.
-        Non recursive.
-
+        """Obsolete; extension is without a "."
+        use listdir instead
         """
         if not extension:
             return list(self.glob('*'))
         else:
             return list(self.glob(f'*.{extension}'))
+
+    def listdir(self, suffix:str=None) -> list:
+        """
+        If self is a directory path, return a list of its files as Path instance.
+        If the suffix is given (e.g.: .pdf, .jpeg...), returns only files of that pattern.
+        Non recursive.
+        """
+        if not self.is_dir():
+            raise RuntimeError('listdir: %s: not a directory')
+        if not suffix:
+            return [Path(f) for f in self.glob('*')]
+        else:
+            return [Path(f) for f in self.glob(f'*{suffix}')]
 
     def split3(self):
         """Return a tuple of (.parent, .stem, .suffix) strings

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-20 15:56:45 +0000 (Thu, January 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-20 20:21:39 +0000 (Thu, January 20, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -69,9 +69,8 @@ from ccpn.framework.Current import Current
 from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
 from ccpn.framework.Translation import languages, defaultLanguage
 from ccpn.framework.Translation import translator
-from ccpn.framework.PathsAndUrls import userPreferencesPath
-from ccpn.framework.PathsAndUrls import userPreferencesDirectory
-from ccpn.framework.PathsAndUrls import macroPath
+from ccpn.framework.PathsAndUrls import userPreferencesPath,  userPreferencesDirectory, \
+    macroPath, CCPN_ARCHIVES_DIRECTORY
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
 
 from ccpn.ui import interfaces, defaultInterface
@@ -512,14 +511,6 @@ class Framework(NotifierBase, GuiBase):
         else:
             # The NoUi version has no mainWindow
             self.ui.initialize(None)
-
-    # def _refreshAfterSave(self):
-    #     """Refresh user interface after project save (which may have caused project rename)"""
-    #
-    #     mainWindow = self.ui.mainWindow
-    #     if mainWindow is not None:
-    #         # mainWindow.sideBar.setProjectName(self.project)
-    #         mainWindow.sideBar.setProjectName(self.project)
 
     def _getUI(self):
         if self.args.interface == 'Gui':
@@ -1075,10 +1066,6 @@ class Framework(NotifierBase, GuiBase):
         self._scriptsPath = path
 
 
-    ###################################################################################################################
-    ## MENU callbacks:  File
-    ###################################################################################################################
-
     #@logCommand('application.') #cannot do, as project is not there yet
     def newProject(self, name='default') -> Project:
         """Create new, empty project
@@ -1244,16 +1231,6 @@ class Framework(NotifierBase, GuiBase):
             mainWindow.newHtmlModule(urlPath=str(path), position='top', relativeTo=mainWindow.moduleArea)
         return []
 
-    # GWV 20/1/2022: moved to GuiMainWindow
-    # def clearRecentProjects(self):
-    #     self.preferences.recentFiles = []
-    #     self.ui.mainWindow._fillRecentProjectsMenu()
-
-    # GWV 20/1/2022: moved to GuiMainWindow
-    # def clearRecentMacros(self):
-    #     self.preferences.recentMacros = []
-    #     self.ui.mainWindow._fillRecentMacrosMenu()
-
     @logCommand('application.')
     def loadData(self, *paths) -> list:
         """Loads data from paths.
@@ -1363,6 +1340,9 @@ class Framework(NotifierBase, GuiBase):
         else:
             return self._saveProject(newPath=newPath, createFallback=createFallback,
                                      overwriteExisting=overwriteExisting)
+    #-----------------------------------------------------------------------------------------
+    # NEF-related code
+    #-----------------------------------------------------------------------------------------
 
     def _importNef(self, path=None):
         if not path:
@@ -1535,6 +1515,10 @@ class Framework(NotifierBase, GuiBase):
         self.preferences.recentFiles = recentFiles
         return recentFiles
 
+    #-----------------------------------------------------------------------------------------
+    # undo/redo
+    #-----------------------------------------------------------------------------------------
+
     @logCommand('application.')
     def undo(self):
         if self.project._undo.canUndo():
@@ -1568,67 +1552,53 @@ class Framework(NotifierBase, GuiBase):
         else:
             raise RuntimeError('Error: decreaseNotificationBlocking, already at 0')
 
-    # def saveLogFile(self):
-    #     pass
-    #
-    # def clearLogFile(self):
-    #     pass
+    #-----------------------------------------------------------------------------------------
+    # Archive related code
+    #-----------------------------------------------------------------------------------------
 
-    # def displayProjectSummary(self, position: str = 'left', relativeTo: CcpnModule = None):
-    #     """
-    #     Displays Project summary module on left of main window.
-    #     """
-    #     from ccpn.ui.gui.popups.ProjectSummaryPopup import ProjectSummaryPopup
-    #
-    #     if self.ui:
-    #         popup = ProjectSummaryPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, modal=True)
-    #         popup.show()
-    #         popup.raise_()
-    #         popup.exec_()
-
-    def archiveProject(self):
-
+    @logCommand('application.')
+    def archiveProject(self) -> Path.Path:
+        """Archive the project
+        :return location of the archive as a Path instance
+        """
         project = self.project
         apiProject = project._wrappedData.parent
-        fileName = apiIo.packageProject(apiProject, includeBackups=True, includeLogs=True,
-                                        includeArchives=False, includeSummaries=True)
+        archivePath = apiIo.packageProject(apiProject,
+                                           includeBackups=True, includeLogs=True,
+                                           includeArchives=False, includeSummaries=True)
+        getLogger().info('==> Project archived to %s' % archivePath)
 
-        MessageDialog.showInfo('Project Archived',
-                               'Project archived to %s' % fileName, )
+        if self.hasGui:
+            self.ui.mainWindow._updateRestoreArchiveMenu()
+        return Path.aPath(archivePath)
 
-        self.ui.mainWindow._updateRestoreArchiveMenu()
+    @property
+    def _archiveDirectory(self) -> Path.Path:
+        """Return the archive directory in the project"""
+        archivePath = Path.aPath(self.project.path) / CCPN_ARCHIVES_DIRECTORY
+        return archivePath
 
-    def _archivePaths(self):
+    def _archivePaths(self) -> list:
+        """:return list of archives  from archive directory"""
+        result = [str(path) for path in self._archiveDirectory.listDirFiles(extension='tgz')]
+        return result
 
-        archivesDirectory = os.path.join(self.project.path, Path.CCPN_ARCHIVES_DIRECTORY)
-        if os.path.exists(archivesDirectory):
-            fileNames = os.listdir(archivesDirectory)
-            paths = [os.path.join(archivesDirectory, fileName) for fileName in fileNames if fileName.endswith('.tgz')]
-        else:
-            paths = []
-
-        return paths
-
-    def restoreFromArchive(self, archivePath=None):
-        """Restore a project from archive"""
-
+    def restoreFromArchive(self, archivePath) -> Project:
+        """Restore a project from archive path
+        """
         from ccpn.framework.lib._unpackCcpnTarFile import _unpackCcpnTarfile
+        from subprocess import Popen
 
-        if not archivePath:
-            archivesDirectory = Path.aPath(self.project.path) / Path.CCPN_ARCHIVES_DIRECTORY
-            _filter = '*.tgz'
-            dialog = ArchivesFileDialog(parent=self.ui.mainWindow, acceptMode='select', directory=archivesDirectory, fileFilter=_filter)
-            dialog._show()
-            archivePath = dialog.selectedFile()
+        if archivePath is None or len(archivePath) == 0:
+            raise ValueError('restoreFromArchive: Invalid archivePath %r' % archivePath)
 
-        if archivePath:
-            directoryPrefix = archivePath[:-4]  # -4 removes the .tgz
-            outputPath, temporaryDirectory = _unpackCcpnTarfile(archivePath, outputPath=directoryPrefix)
-            pythonExe = os.path.join(Path.getTopDirectory(), Path.CCPN_PYTHON)
-            command = [pythonExe, sys.argv[0], outputPath]
-            from subprocess import Popen
+        archivePath = Path.aPath(archivePath)
+        _outDirPath = Path.aPath(self.project.path).parent
+        _newProjectPath = _unpackCcpnTarfile(archivePath, outputDirectoryPath=_outDirPath)
+        _newProject = self.loadProject(_newProjectPath)
+        getLogger().info('==> Restored archive %s as %s' % (archivePath, _newProject))
 
-            Popen(command)
+        return _newProject
 
     def showApplicationPreferences(self):
         """

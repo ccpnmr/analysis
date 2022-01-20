@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-20 15:56:45 +0000 (Thu, January 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-20 20:21:39 +0000 (Thu, January 20, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -38,7 +38,7 @@ from PyQt5.QtWidgets import QApplication
 
 from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU, CCPNPLUGINSMENU, PLUGINSMENU
 from ccpn.framework.PathsAndUrls import userPreferencesPath,  userPreferencesDirectory,  \
-    macroPath, CCPN_EXTENSION
+    macroPath, CCPN_EXTENSION, CCPN_ARCHIVES_DIRECTORY
 
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
@@ -174,8 +174,8 @@ class GuiBase(object):
 
                         )),
             ("Summary", self.showProjectSummaryPopup),
-            ("Archive", self.archiveProject, [('enabled', False)]),
-            ("Restore From Archive...", self.restoreFromArchive, [('enabled', False)]),
+            ("Archive", self._archiveProjectCallback, [('enabled', False)]),
+            ("Restore From Archive...", self._restoreFromArchiveCallback, [('enabled', False)]),
             (),
             ("Preferences...", self.showApplicationPreferences, [('shortcut', '⌃,')]),
             (),
@@ -422,6 +422,32 @@ class GuiBase(object):
 
             return successful
 
+    def _archiveProjectCallback(self):
+
+        path = self.archiveProject()
+        MessageDialog.showInfo('Project Archived',
+                               'Project archived to %s' % path )
+
+        if self.hasGui:
+            self.ui.mainWindow._updateRestoreArchiveMenu()
+
+    def _restoreFromArchiveCallback(self):
+        """Restore a project from archive
+        """
+        archivesDirectory = aPath(self.project.path) / CCPN_ARCHIVES_DIRECTORY
+        _filter = '*.tgz'
+        dialog = ArchivesFileDialog(parent=self.ui.mainWindow,
+                                    acceptMode='select',
+                                    directory=self._archiveDirectory,
+                                    fileFilter=_filter)
+        dialog._show()
+        archivePath = dialog.selectedFile()
+
+        if archivePath:
+            newProject = self.restoreFromArchive(archivePath)
+            MessageDialog.showInfo('Project Restore from Archive',
+                                   'Project restored to %s' % newProject.path )
+
     def showProjectSummaryPopup(self):
         """Show the Project summary popup.
         """
@@ -491,7 +517,7 @@ class GuiBase(object):
 
 
     #-----------------------------------------------------------------------------------------
-    # Implementation methods
+    # Menu Implementation methods
     #-----------------------------------------------------------------------------------------
 
     def _addApplicationMenuSpec(self, spec, position=5):

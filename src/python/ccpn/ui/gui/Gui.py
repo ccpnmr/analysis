@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-19 12:13:07 +0000 (Wed, January 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-20 20:21:39 +0000 (Thu, January 20, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -134,17 +134,18 @@ class Gui(Ui):
         self.qtApp.setStyle(myStyle)  # styles.create('fusion'))
 
     def initialize(self, mainWindow):
-        """UI operations done after every project load/create"""
-
+        """UI operations done after every project load/create
+        """
         with notificationEchoBlocking():
             # Set up mainWindow
             self.mainWindow = self._setupMainWindow(mainWindow)
             self.application._initGraphics()
+            self.mainWindow._updateRestoreArchiveMenu()
 
     def start(self):
-        self.mainWindow._fillRecentMacrosMenu()
-        self.mainWindow._updateRestoreArchiveMenu()
+
         project = self.application.project
+        # GWV: why is this here!???
         self.application.experimentClassifications = project.getExperimentClassifications()
 
         self.mainWindow.show()
@@ -237,7 +238,7 @@ class Gui(Ui):
     def loadProject(self, path):
         """Just a stub for now; calling MainWindow methods as it initialises the Gui
         """
-        return self.mainWindow._loadProject(path)
+        return self.mainWindow._loadProject(path=path)
 
 #######################################################################################
 #

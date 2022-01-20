@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-19 17:14:28 +0000 (Wed, January 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-20 13:12:06 +0000 (Thu, January 20, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -243,9 +243,6 @@ class V3CoreObjectABC(NotifierBase):
     def rename(self, value: str):
         """Rename Wrapped object, changing its name and Pid.
         """
-        if not isinstance(value, str):
-            raise ValueError(f'{self.className}.rename must be of type str')
-
         return self._rename(value)
 
     def _rename(self, value):

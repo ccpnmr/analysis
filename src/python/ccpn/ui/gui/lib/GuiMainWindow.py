@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:30:50 +0000 (Thu, January 13, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-01-20 13:16:16 +0000 (Thu, January 20, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -602,6 +602,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         self.application._importNef(path)
 
+    def _clearRecentProjects(self):
+        self.application.preferences.recentFiles = []
+        self._fillRecentProjectsMenu()
+
     def _fillRecentProjectsMenu(self):
         """
         Populates recent projects menu with 10 most recently loaded projects
@@ -619,7 +623,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             recentFileMenu.addAction(action)
         recentFileMenu.addSeparator()
         recentFileMenu.addAction(Action(recentFileMenu, text='Clear',
-                                        callback=self.application.clearRecentProjects))
+                                        callback=self._clearRecentProjects))
 
     def _fillPredefinedLayoutMenu(self):
         """
@@ -678,6 +682,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         except FileNotFoundError:
             pass
 
+    def _clearRecentMacros(self):
+        self.application.preferences.recentMacros = []
+        self._fillRecentMacrosMenu()
+
     def _fillRecentMacrosMenu(self):
         """
         Populates recent macros menu with last ten macros ran.
@@ -702,7 +710,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         recentMacrosMenu.addAction(Action(recentMacrosMenu, text='Browse...',
                                           callback=self.application.runMacro))
         recentMacrosMenu.addAction(Action(recentMacrosMenu, text='Clear',
-                                          callback=self.application.clearRecentMacros))
+                                          callback=self._clearRecentMacros))
 
     def _addPluginSubMenu(self, MENU, Plugin):
         targetMenu = pluginsMenu = self.searchMenuAction(MENU)

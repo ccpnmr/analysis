@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-04 11:38:40 +0000 (Tue, January 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-01-20 13:16:16 +0000 (Thu, January 20, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -314,7 +314,7 @@ class PeakPickerABC(CcpNmrJson):
                                 for sLeft, sRight in self.sliceTuples]
 
         # TODO: use Spectrum aliasing definitions once defined
-        data = self.spectrum._dataSource.getRegionData(self.sliceTuples, aliasingFlags=[1] * self.spectrum.dimensionCount)
+        data = self.spectrum.dataSource.getRegionData(self.sliceTuples, aliasingFlags=[1] * self.spectrum.dimensionCount)
 
         peaks = self.findPeaks(data)
         getLogger().debug('%s.pickPeaks: found %d peaks in spectrum %s; sliceTuples = %r' %
@@ -349,7 +349,7 @@ class PeakPickerABC(CcpNmrJson):
 
                 if pk.height is None:
                     # height was not defined; get the interpolated value from the data
-                    pk.height = self.spectrum._dataSource.getPointValue(pointPositions)
+                    pk.height = self.spectrum.dataSource.getPointValue(pointPositions)
 
                 if (self.positiveThreshold and pk.height > self.positiveThreshold) or \
                         (self.negativeThreshold and pk.height < self.negativeThreshold):

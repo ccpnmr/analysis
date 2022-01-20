@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:25:08 +0100 (Mon, September 13, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-01-20 13:16:16 +0000 (Thu, January 20, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -48,7 +48,7 @@ class TestCourse3e(WrapperTesting):
     def test_Course3e(self):
         outPath = os.path.dirname(self.project.path)[:-5] + '.out.nef'
         CcpnNefIo.saveNefProject(self.project, outPath, overwriteExisting=True)
-        application = self.project._appBase
+        application = self.project.application
         application.loadProject(outPath)
         nefOutput = CcpnNefIo.convert2NefString(application.project)
         # TODO do diff to compare nefOutput with input file
@@ -63,7 +63,7 @@ class TestCourse2c(WrapperTesting):
         outPath = os.path.dirname(self.project.path)[:-5] + '.out.nef'
         with self.assertRaises(NotImplementedError):
             CcpnNefIo.saveNefProject(self.project, outPath, overwriteExisting=True)
-        # application = self.project._appBase
+        # application = self.project.application
         # application.loadProject(outPath)
         # nefOutput = CcpnNefIo.convert2NefString(application.project)
         # # TODO do diff to compare nefOutput with input file

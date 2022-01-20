@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-19 12:13:07 +0000 (Wed, January 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-20 13:16:16 +0000 (Thu, January 20, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -43,15 +43,17 @@ import tarfile
 import tempfile
 import re
 import subprocess
-from typing import Union, Optional
+import faulthandler
+from tqdm import tqdm
+
+from typing import Union, Optional, List, Tuple, Sequence
+
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
+from PyQt5.QtCore import QTimer
+
 from distutils.dir_util import copy_tree
 from functools import partial
-
-from typing import List, Tuple, Sequence
-
-from tqdm import tqdm
 
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
@@ -73,6 +75,8 @@ from ccpn.framework.PathsAndUrls import macroPath
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
 
 from ccpn.ui import interfaces, defaultInterface
+from ccpn.ui.gui.Gui import Gui
+from ccpn.ui.gui.GuiBase import GuiBase
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
@@ -80,6 +84,7 @@ from ccpn.ui.gui.widgets.FileDialog import ProjectFileDialog, DataFileDialog, Ne
     ArchivesFileDialog, MacrosFileDialog, CcpnMacrosFileDialog, LayoutsFileDialog, NMRStarFileDialog, SpectrumFileDialog, \
     ProjectSaveFileDialog
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
+
 from ccpn.util import Logging
 from ccpn.util import Path
 from ccpn.util.AttrDict import AttrDict
@@ -87,11 +92,11 @@ from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable
 from ccpn.util.Logging import getLogger
 from ccpn.util import Layout
 
-from ccpn.ui.gui.Gui import Gui
+
 from ccpnmodel.ccpncore.api.memops import Implementation
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
-from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
+
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideBar, undoBlock, \
     notificationEchoBlocking, logCommandManager
@@ -99,9 +104,6 @@ from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideB
 from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU, CCPNPLUGINSMENU, PLUGINSMENU
 from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_KEY_CONCEPTS
 
-from PyQt5.QtCore import QTimer
-
-import faulthandler
 
 
 faulthandler.enable()
@@ -246,21 +248,37 @@ class AutoBackup(Thread):
                     pass
 
 
-class Framework(NotifierBase):
+class Framework(NotifierBase, GuiBase):
     """
     The Framework class is the base class for all applications.
     """
 
     def __init__(self, applicationName, applicationVersion, args=Arguments()):
 
+        NotifierBase.__init__(self)
+        GuiBase.__init__(self)
+
+        #-----------------------------------------------------------------------------------------
+        # Key attributes related to the data structure
+        #-----------------------------------------------------------------------------------------
+        # Necessary as attribute is queried during initialisation:
+        self._mainWindow = None
+
+        # This is needed to make project available in NoUi (if nothing else)
+        self._project = None
+        self.current = None
+
+        self.plugins = []  # Hack for now, how should we store these?
+        self.ccpnModules = []
+
+        #-----------------------------------------------------------------------------------------
+        # Initialisations
+        #-----------------------------------------------------------------------------------------
         self.args = args
         self.applicationName = applicationName
         self.applicationVersion = applicationVersion
         # NOTE:ED - what is revision for? there are no uses and causes a new error for sphinx documentation unless a string
         # self.revision = Version.revision
-
-        self.plugins = []  # Hack for now, how should we store these?
-        self.ccpnModules = []
 
         printCreditsText(sys.stderr, applicationName, applicationVersion)
 
@@ -276,18 +294,10 @@ class Framework(NotifierBase):
         else:
             self.level = logging.INFO
 
-        self.current = None
-
         self.preferences = None  # initialised by self._getUserPrefs
         self.layout = None  # initialised by self._getUserLayout
         self.styleSheet = None  # initialised by self.getStyleSheet
         self.colourScheme = None  # initialised by self.getStyleSheet
-
-        # Necessary as attribute is queried during initialisation:
-        self._mainWindow = None
-
-        # This is needed to make project available in NoUi (if nothing else)
-        self._project = None
 
         # Blocking level for command echo and logging
         self._echoBlocking = 0
@@ -317,8 +327,6 @@ class Framework(NotifierBase):
         self._registrationDict = {}
         self._setLanguage()
         self.styleSheet = None
-        self.ui = self._getUI()
-        self.setupMenus()
         self.feedbackPopup = None
         self.submitMacroPopup = None
         self.updatePopup = None
@@ -327,13 +335,16 @@ class Framework(NotifierBase):
 
         # register dataLoaders for the first and only time
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders
-
         self._dataLoaders = getDataLoaders()
 
         # register SpectrumDataSource formats for the first and only time
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
-
         self._spectrumDataSourceFormats = getDataFormats()
+
+        #-----------------------------------------------------------------------------------------
+        # get a user interface
+        #-----------------------------------------------------------------------------------------
+        self.ui = self._getUI()
 
     def __str__(self):
         return '<%s version:%s>' % (self.applicationName, self.applicationVersion)
@@ -365,11 +376,7 @@ class Framework(NotifierBase):
         """Return project"""
         return self._project
 
-    def _testShortcuts0(self):
-        print('>>> Testing shortcuts0')
-
-    def _testShortcuts1(self):
-        print('>>> Testing shortcuts1')
+    #-----------------------------------------------------------------------------------------
 
     def start(self):
         """Start the program execution
@@ -520,6 +527,8 @@ class Framework(NotifierBase):
             from ccpn.ui.gui.Gui import Gui
 
             ui = Gui(self)
+            self._setupMenus()
+
             # ui.mainWindow is None upon initialization: gets filled later
             getLogger().debug('%s %s %s' % (self, ui, ui.mainWindow))
         else:
@@ -976,24 +985,6 @@ class Framework(NotifierBase):
         """Convenience"""
         return self.project.getByPid(gid)
 
-    def addApplicationMenuSpec(self, spec, position=5):
-        """Add an entirely new menu at specified position"""
-        self._menuSpec.insert(position, spec)
-
-    def addApplicationMenuItem(self, menuName, menuItem, position):
-        """Add a new item to an existing menu at specified position"""
-        for spec in self._menuSpec:
-            if spec[0] == menuName:
-                spec[1].insert(position, menuItem)
-                return
-
-        raise Exception('No menu with name %s' % menuName)
-
-    def addApplicationMenuItems(self, menuName, menuItems, position):
-        """Add a new items to an existing menu starting at specified position"""
-        for n, menuItem in enumerate(menuItems):
-            self.addApplicationMenuItem(menuName, menuItem, position + n)
-
     #########################################    Create sub dirs   ########################################################
 
     ## dirs are created with decorators because the project path can change dynamically.
@@ -1083,337 +1074,15 @@ class Framework(NotifierBase):
     def scriptsPath(self, path):
         self._scriptsPath = path
 
-    #########################################    Start setup Menus      ############################
-
-    def _updateCheckableMenuItems(self):
-        # This has to be kept in sync with menu items below which are checkable,
-        # and also with MODULE_DICT keys
-        # The code is terrible because Qt has no easy way to get hold of menus / actions
-
-        mainWindow = self.ui.mainWindow
-        if mainWindow is None:
-            # We have a UI with no mainWindow - nothing to do.
-            return
-
-        menuChildren = mainWindow.menuBar().findChildren(QtWidgets.QMenu)
-        if not menuChildren:
-            return
-
-        topActionDict = {}
-        for topMenu in menuChildren:
-            mainActionDict = {}
-            for mainAction in topMenu.actions():
-                mainActionDict[mainAction.text()] = mainAction
-            topActionDict[topMenu.title()] = mainActionDict
-
-        openModuleKeys = set(mainWindow.moduleArea.modules.keys())
-        for key, topActionText, mainActionText in (('SEQUENCE', 'Molecules', 'Show Sequence'),
-                                                   ('PYTHON CONSOLE', 'View', 'Python Console')):
-            if key in openModuleKeys:
-                mainActionDict = topActionDict.get(topActionText)  # should always exist but play safe
-                if mainActionDict:
-                    mainAction = mainActionDict.get(mainActionText)
-                    if mainAction:
-                        mainAction.setChecked(True)
-
-    def setupMenus(self):
-        """Setup the menu specification.
-
-        The menus are specified by a list of lists (actually, an iterable of iterables, but the term
-        ‘list’ will be used here to mean any iterable).  Framework provides 7 menus: Project, Spectrum,
-        Molecules, View, Macro, Plugins, Help.  If you want to create your own menu in a subclass of
-        Framework, you need to create a list in the style described below, then call
-        self.addApplicationMenuSpec and pass in your menu specification list.
-
-        Menu specification lists are composed of two items, the first being a string which is the menu’s
-        title, the second is a list of sub-menu items.  Each item can be zero, two or three items long.
-        A zero-length list indicates a separator.  If the list is length two and the second item is a
-        list, then it specifies a sub-menu in a recursive manner.  If the list is length two and the
-        second item is callable, it specifies a menu action with the first item specifying the label
-        and the second the callable that is triggered when the menu item is selected.  If the list is
-        length three, it is treated as a menu item specification, with the third item a list of keyword,
-        value pairs.
-
-        The examples below may make this more clear…
-
-        Create a menu called ‘Test’ with two items and a separator:
-
-        | - Test
-        |   | - Item One
-        |   | - ------
-        |   | - Item Two
-
-        Where clicking on ‘Item One’ calls method self.itemOneMethod and clicking on ‘Item Two’
-        calls self.itemTwoMethod
-
-        |    def setupMenus(self):
-        |      menuSpec = (‘Test’, [(‘Item One’, self.itemOneMethod),
-        |                           (),
-        |                           (‘Item Two’, self.itemTwoMethod),
-        |                          ]
-        |      self.addApplicationMenuSpec(menuSpec)
-
-
-
-        More complicated menus are possible.  For example, to create the following menu
-
-        | - Test
-        |   | - Item A     ia
-        |   | - ------
-        |   | - Submenu B
-        |      | - Item B1
-        |      | - Item B2
-        |   | - Item C     id
-
-        where Item A can be activated using the two-key shortcut ‘ia’,
-        Submenu B contains two static menu items, B1 and B2
-        Submenu item B2 is checkable, but not checked by default
-        Item C is disabled by default and has a shortcut of ‘ic’
-
-        |   def setupMenus(self):
-        |     subMenuSpecB = [(‘Item B1’, self.itemB1),
-        |                     (‘Item B2’, self.itemB2, [(‘checkable’, True),
-        |                                               (‘checked’, False)])
-        |                    ]
-        |
-        |     menuSpec = (‘Test’, [(‘Item A’, self.itemA, [(‘shortcut’, ‘ia’)]),
-        |                          (),
-        |                          (‘Submenu B’, subMenuB),
-        |                          (‘Item C’, self.itemA, [(‘shortcut’, ‘ic’),
-        |                                                  (‘enabled’, False)]),
-        |                         ]
-        |     self.addApplicationMenuSpec(menuSpec)
-
-
-        If we’re using the PyQt GUI, we can get the Qt action representing Item B2 somewhere in our code
-        (for example, to change the checked status,) via:
-
-        |   action = application.ui.mainWindow.getMenuAction(‘Test->Submenu B->Item B2’)
-        |   action.setChecked(True)
-
-        To see how to add items dynamically, see clearRecentProjects in this class and
-        _fillRecentProjectsMenu in GuiMainWindow
-
-        """
-        self._menuSpec = ms = []
-
-        ms.append(('File', [
-            ("New", self._newProjectMenuCallback, [('shortcut', '⌃n')]),  # Unicode U+2303, NOT the carrot on your keyboard.
-            (),
-            ("Open...", self._openProjectMenuCallback, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
-            ("Open Recent", ()),
-
-            ("Load Data...", lambda: self._loadDataFromMenu(text='Load Data'), [('shortcut', 'ld')]),
-            (),
-            ("Save", self.saveProject, [('shortcut', '⌃s')]),  # Unicode U+2303, NOT the carrot on your keyboard.
-            ("Save As...", self.saveProjectAs, [('shortcut', 'sa')]),
-            (),
-            ("Import", (("Nef File", self._importNef, [('shortcut', 'in'), ('enabled', True)]),
-                        ("NmrStar File", self._loadNMRStarFileCallback, [('shortcut', 'bi')]),
-                        )),
-            ("Export", (("Nef File", self._exportNEF, [('shortcut', 'ex'), ('enabled', True)]),
-                        )),
-            (),
-            ("Layout", (("Save", self.saveLayout, [('enabled', True)]),
-                        ("Save as...", self.saveLayoutAs, [('enabled', True)]),
-                        (),
-                        ("Restore last", self.restoreLastSavedLayout, [('enabled', True)]),
-                        ("Restore from file...", self.restoreLayoutFromFile, [('enabled', True)]),
-                        (),
-                        ("Open pre-defined", ()),
-
-                        )),
-            ("Summary", self.displayProjectSummary),
-            ("Archive", self.archiveProject, [('enabled', False)]),
-            ("Restore From Archive...", self.restoreFromArchive, [('enabled', False)]),
-            (),
-            ("Preferences...", self.showApplicationPreferences, [('shortcut', '⌃,')]),
-            (),
-            ("Quit", self._closeEvent, [('shortcut', '⌃q')]),  # Unicode U+2303, NOT the carrot on your keyboard.
-            ]
-                   ))
-
-        ms.append(('Edit', [
-            ("Undo", self.undo, [('shortcut', '⌃z')]),  # Unicode U+2303, NOT the carrot on your keyboard.
-            ("Redo", self.redo, [('shortcut', '⌃y')]),  # Unicode U+2303, NOT the carrot on your keyboard.
-            (),
-
-            ("Cut", self._nyi, [('shortcut', '⌃x'), ('enabled', False)]),
-            ("Copy", self._nyi, [('shortcut', '⌃c'), ('enabled', False)]),
-            ("Paste", self._nyi, [('shortcut', '⌃v'), ('enabled', False)]),
-            ("Select all", self._nyi, [('shortcut', '⌃a'), ('enabled', False)]),
-            ]
-                   ))
-
-        ms.append(('View', [
-            ("Chemical Shift Table", partial(self.showChemicalShiftTable, selectFirstItem=True), [('shortcut', 'ct')]),
-            ("NmrResidue Table", partial(self.showNmrResidueTable, selectFirstItem=True), [('shortcut', 'nt')]),
-            ("Residue Table", partial(self.showResidueTable, selectFirstItem=True)),
-            ("Peak Table", partial(self.showPeakTable, selectFirstItem=True), [('shortcut', 'pt')]),
-            ("Integral Table", partial(self.showIntegralTable, selectFirstItem=True), [('shortcut', 'it')]),
-            ("Multiplet Table", partial(self.showMultipletTable, selectFirstItem=True), [('shortcut', 'mt')]),
-            ("Restraint Table", partial(self.showRestraintTable, selectFirstItem=True), [('shortcut', 'rt')]),
-            ("Structure Table", partial(self.showStructureTable, selectFirstItem=True), [('shortcut', 'st')]),
-            ("Data Table", partial(self.showDataTable, selectFirstItem=True), [('shortcut', 'dt')]),
-            ("Violation Table", partial(self.showViolationTable, selectFirstItem=True), [('shortcut', 'vt')]),
-            (),
-            ("Restraint Analysis Table", partial(self.showRestraintAnalysisTable, selectFirstItem=True), [('shortcut', 'at')]),
-            ("Chemical Shift Mapping", self.showChemicalShiftMapping, [('shortcut', 'cm')]),
-            ("Notes Editor", partial(self.showNotesEditor, selectFirstItem=True), [('shortcut', 'no'),
-                                                                                   ('icon', 'icons/null')]),
-            (),
-            ("In Active Spectrum Display", (("Show/Hide Toolbar", self.toggleToolbar, [('shortcut', 'tb')]),
-                                            ("Show/Hide Spectrum Toolbar", self.toggleSpectrumToolbar, [('shortcut', 'sb')]),
-                                            ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')]),
-                                            (),
-                                            ("Set Zoom...", self._setZoomPopup, [('shortcut', 'sz')]),
-                                            ("Reset Zoom", self.resetZoom, [('shortcut', 'rz')]),
-                                            (),
-                                            ("New SpectrumDisplay with New Strip, Same Axes", self.copyStrip, []),
-                                            (" .. with X-Y Axes Flipped", self._flipXYAxisCallback, [('shortcut', 'xy')]),
-                                            (" .. with X-Z Axes Flipped", self._flipXZAxisCallback, [('shortcut', 'xz')]),
-                                            (" .. with Y-Z Axes Flipped", self._flipYZAxisCallback, [('shortcut', 'yz')]),
-                                            (" .. with Axes Flipped...", self.showFlipArbitraryAxisPopup, [('shortcut', 'fa')]),
-                                            )),
-            (),
-            (SHOWMODULESMENU, ([
-                ("None", None, [('checkable', True),
-                                ('checked', False)])
-                ])),
-            ("Python Console", self._toggleConsoleCallback, [('shortcut', '  '),
-                                                             ])
-            ]
-                   ))
-
-        ms.append(('Spectrum', [
-            ("Load Spectra...", self._loadSpectraCallback, [('shortcut', 'ls')]),
-            (),
-            # ("Spectrum Groups...", self.showSpectrumGroupsPopup, [('shortcut', 'ss')]), # multiple edit temporarly disabled
-            ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
-            ("Validate Paths...", self.showValidateSpectraPopup, [('shortcut', 'vp')]),
-            (),
-            ("Pick Peaks", (("Pick 1D Peaks...", self.showPeakPick1DPopup, [('shortcut', 'p1')]),
-                            ("Pick ND Peaks...", self.showPeakPickNDPopup, [('shortcut', 'pp')])
-                            )),
-            ("Copy PeakList...", self.showCopyPeakListPopup, [('shortcut', 'cl')]),
-            ("Copy Peaks...", self.showCopyPeaks, [('shortcut', 'cp')]),
-            ("Estimate Volumes...", self.showEstimateVolumesPopup, [('shortcut', 'ev')]),
-            ("Reorder PeakList Axes...", self.showReorderPeakListAxesPopup, [('shortcut', 'rl')]),
-            (),
-            ("Make Strip Plot...", self.makeStripPlotPopup, [('shortcut', 'sp')]),
-
-            (),
-            ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
-            (),
-            ("Print to File...", self.showPrintSpectrumDisplayPopup, [('shortcut', '⌃p')]),
-            ]
-                   ))
-
-        ms.append(('Molecules', [
-            ("Chain from FASTA...", lambda: self._loadDataFromMenu(text='Load FASTA')),
-            (),
-            ("New Chain...", self.showCreateChainPopup),
-            ("Inspect...", self.inspectMolecule, [('enabled', False)]),
-            (),
-            ("Residue Information", self.showResidueInformation, [('shortcut', 'ri')]),
-            (),
-            ("Reference Chemical Shifts", self.showReferenceChemicalShifts, [('shortcut', 'rc')]),
-            ]
-                   ))
-
-        ms.append(('Macro', [
-            ("New Macro Editor", self._showMacroEditorCallback),
-            (),
-            ("Open User Macro...", self._openMacroCallback),
-            ("Open CCPN Macro...", partial(self._openMacroCallback, directory=macroPath)),
-            (),
-            ("Run...", self.runMacro),
-            ("Run Recent", ()),
-            (CCPNMACROSMENU, ([
-                ("None", None, [('checkable', True),
-                                ('checked', False)])
-                ])),
-            (),
-            ("Define Macro Shortcuts...", self.defineUserShortcuts, [('shortcut', 'du')]),
-            ]
-                   ))
-
-        ms.append(('Plugins', [
-            (CCPNPLUGINSMENU, ()),
-            (PLUGINSMENU, ()),
-            ]
-                   ))
-
-        ms.append(('Help', [
-            (TUTORIALSMENU, ([
-
-                ("None", None, [('checkable', True),
-                                ('checked', False)])
-                ])),
-            ("Show Tip of the Day", partial(self._displayTipOfTheDay, standalone=True)),
-            ("Key Concepts", self._displayKeyConcepts),
-            ("Show Shortcuts", self.showShortcuts),
-            ("Show API Documentation", self.showVersion3Documentation),
-            ("Show License", self.showCcpnLicense),
-            (),
-            ("CcpNmr Homepage", self.showAboutCcpn),
-            ("CcpNmr V3 Forum", self.showForum),
-            (),
-            # ("Inspect Code...", self.showCodeInspectionPopup, [('shortcut', 'gv'),
-            #                                                    ('enabled', False)]),
-            # ("Show Issues...", self.showIssuesList),
-            ("Check for Updates...", self.showUpdatePopup),
-            ("Register...", self.showRegisterPopup),
-            (),
-            ("About CcpNmr V3...", self.showAboutPopup),
-            ]
-                   ))
 
     ###################################################################################################################
-    ## These will eventually move to gui (probably via a set of lambda functions.
+    ## MENU callbacks:  File
     ###################################################################################################################
-
-    ###################################################################################################################
-    ## MENU callbacks:  Project
-    ###################################################################################################################
-
-    def _nyi(self):
-        """Not yet implemented"""
-        pass
-
-    def _loadDataFromMenu(self, text='Load Data', filter=None):
-        """Call loadData from the menu and trap errors.
-        """
-        dialog = DataFileDialog(parent=self.ui.mainWindow, acceptMode='load', fileFilter=filter)
-        dialog._show()
-        path = dialog.selectedFile()
-        if not path:
-            return
-        paths = [path]
-
-        try:
-            result = self.loadData(paths)
-        except Exception as es:
-            MessageDialog.showWarning(str(self.ui.mainWindow.windowTitle()), str(es))
-            if self._isInDebugMode:
-                raise es
-
-    def _newProjectMenuCallback(self):
-        """Callback for creating new project"""
-        with catchExceptions(application=self, errorStringTemplate='Error creating new project:', printTraceBack=True):
-            okToContinue = self.ui.mainWindow._queryCloseProject(title='New Project',
-                                                                 phrase='create a new')
-            if okToContinue:
-                self.ui.mainWindow.moduleArea._closeAll()
-                newProject = self.newProject()
-                if newProject is None:
-                    raise RuntimeError('Unable to create new project')
-                newProject._mainWindow.show()
-                QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
 
     #@logCommand('application.') #cannot do, as project is not there yet
-    def newProject(self, name='default'):
-        """Create new, empty project; return Project instance
+    def newProject(self, name='default') -> Project:
+        """Create new, empty project
+        :return a Project instance
         """
         # local import to avoid cycles
         from ccpn.core.Project import _newProject
@@ -1430,10 +1099,13 @@ class Framework(NotifierBase):
 
         return project
 
-    def _openProjectMenuCallback(self):
-        """Just a stub for the menu setup to pass on to mainWindow, to be moved later
+    @logCommand('application.')
+    def loadProject(self, path) -> Project:
+        """Load project defined by path
+        :return a Project instance
         """
-        return self.ui.mainWindow._openProjectCallback()
+        #Just a stub for now; calling MainWindow methods as it initialises the Gui
+        return self.ui.loadProject(path)
 
     def _loadV2Project(self, path) -> List[Project]:
         """Actual V2 project loader
@@ -1484,15 +1156,10 @@ class Framework(NotifierBase):
 
         return [project]
 
-    @logCommand('application.')
-    def loadProject(self, path):
-        """Just a stub for now; calling MainWindow methods as it initialises the Gui
-        """
-        # self.ui.mainWindow._openProject(path)
-        return self.ui.loadProject(path)
-
     def _loadNefFile(self, path: str, makeNewProject=True) -> Project:
-        """Load Project from NEF file at path, and do necessary setup"""
+        """Load Project from NEF file at path, and do necessary setup
+
+        """
 
         from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
         from ccpn.core.lib import CcpnNefIo
@@ -1516,38 +1183,6 @@ class Framework(NotifierBase):
         self.project.shiftAveraging = True
 
         getLogger().info('==> Loaded NEF file: "%s"' % (path,))
-        return self.project
-
-    def _loadNMRStarFileCallback(self, path=None, makeNewProject=False) -> Optional[Project]:
-        if not path:
-            dialog = NMRStarFileDialog(parent=self.ui.mainWindow, acceptMode='import')
-            dialog._show()
-            path = dialog.selectedFile()
-            if not path:
-                return
-
-        from ccpn.ui.gui.popups.ImportStarPopup import StarImporterPopup
-        from ccpn.core.lib import CcpnNefIo
-
-        _nefReader = CcpnNefIo.CcpnNefReader(self)
-        relativePath = os.path.dirname(os.path.realpath(path))
-        dataBlock = _nefReader.getNMRStarData(path)
-
-        self._importedStarDataBlock = dataBlock
-
-        if makeNewProject:
-            if self.project is not None:
-                self._closeProject()
-            self.project = self.newProject(dataBlock.name)
-
-        self.project.shiftAveraging = False
-
-        popup = StarImporterPopup(project=self.project, bmrbFilePath=path, directory=relativePath, dataBlock=dataBlock)
-        popup.exec_()
-
-        self.project.shiftAveraging = True
-
-        getLogger().info('==> Loaded Star file: "%s"' % (path,))
         return self.project
 
     def _loadSparkyFile(self, path: str, createNewProject=True) -> Project:
@@ -1609,59 +1244,61 @@ class Framework(NotifierBase):
             mainWindow.newHtmlModule(urlPath=str(path), position='top', relativeTo=mainWindow.moduleArea)
         return []
 
-    def clearRecentProjects(self):
-        self.preferences.recentFiles = []
-        self.ui.mainWindow._fillRecentProjectsMenu()
+    # GWV 20/1/2022: moved to GuiMainWindow
+    # def clearRecentProjects(self):
+    #     self.preferences.recentFiles = []
+    #     self.ui.mainWindow._fillRecentProjectsMenu()
 
-    def clearRecentMacros(self):
-        self.preferences.recentMacros = []
-        self.ui.mainWindow._fillRecentMacrosMenu()
+    # GWV 20/1/2022: moved to GuiMainWindow
+    # def clearRecentMacros(self):
+    #     self.preferences.recentMacros = []
+    #     self.ui.mainWindow._fillRecentMacrosMenu()
 
-    def _loadSpectraCallback(self, paths=None, filter=None, askBeforeOpen_lenght=20):
-        """
-        Load all the spectra found in paths
-
-        :param paths: list of str of paths
-        :param filter:
-        :param askBeforeOpen_lenght: how many spectra can open without asking first
-        """
-        from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
-        from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
-
-        if paths is None:
-            dialog = SpectrumFileDialog(parent=self.ui.mainWindow, acceptMode='load', fileFilter=filter, useNative=False)
-
-            dialog._show()
-            paths = dialog.selectedFiles()
-
-        if not paths:
-            return
-
-        spectrumLoaders = []
-        count = 0
-        # Recursively search all paths
-        for path in paths:
-            _path = Path.aPath(path)
-            if _path.is_dir():
-                dirLoader = DirectoryDataLoader(path, recursive=False,
-                                                filterForDataFormats=(SpectrumDataLoader.dataFormat,))
-                spectrumLoaders.append(dirLoader)
-                count += len(dirLoader)
-
-            elif (sLoader := SpectrumDataLoader.checkForValidFormat(path)) is not None:
-                spectrumLoaders.append(sLoader)
-                count += 1
-
-        if count > askBeforeOpen_lenght:
-            okToOpenAll = MessageDialog.showYesNo('Load data', 'The directory contains multiple items (%d).'
-                                                               ' Do you want to open all?' % len(spectrumLoaders))
-            if not okToOpenAll:
-                return
-
-        with undoBlockWithoutSideBar():
-            with notificationEchoBlocking():
-                for sLoader in tqdm(spectrumLoaders):
-                    sLoader.load()
+    # def _loadSpectraCallback(self, paths=None, filter=None, askBeforeOpen_lenght=20):
+    #     """
+    #     Load all the spectra found in paths
+    #
+    #     :param paths: list of str of paths
+    #     :param filter:
+    #     :param askBeforeOpen_lenght: how many spectra can open without asking first
+    #     """
+    #     from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
+    #     from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
+    #
+    #     if paths is None:
+    #         dialog = SpectrumFileDialog(parent=self.ui.mainWindow, acceptMode='load', fileFilter=filter, useNative=False)
+    #
+    #         dialog._show()
+    #         paths = dialog.selectedFiles()
+    #
+    #     if not paths:
+    #         return
+    #
+    #     spectrumLoaders = []
+    #     count = 0
+    #     # Recursively search all paths
+    #     for path in paths:
+    #         _path = Path.aPath(path)
+    #         if _path.is_dir():
+    #             dirLoader = DirectoryDataLoader(path, recursive=False,
+    #                                             filterForDataFormats=(SpectrumDataLoader.dataFormat,))
+    #             spectrumLoaders.append(dirLoader)
+    #             count += len(dirLoader)
+    #
+    #         elif (sLoader := SpectrumDataLoader.checkForValidFormat(path)) is not None:
+    #             spectrumLoaders.append(sLoader)
+    #             count += 1
+    #
+    #     if count > askBeforeOpen_lenght:
+    #         okToOpenAll = MessageDialog.showYesNo('Load data', 'The directory contains multiple items (%d).'
+    #                                                            ' Do you want to open all?' % len(spectrumLoaders))
+    #         if not okToOpenAll:
+    #             return
+    #
+    #     with undoBlockWithoutSideBar():
+    #         with notificationEchoBlocking():
+    #             for sLoader in tqdm(spectrumLoaders):
+    #                 sLoader.load()
 
     @logCommand('application.')
     def loadData(self, *paths) -> list:
@@ -1790,7 +1427,8 @@ class Framework(NotifierBase):
             self.ui.mainWindow.sideBar.buildTree(self.project)
 
     def _importNefFile(self, path: Union[str, Path.Path], makeNewProject=True) -> Project:
-        """Load Project from NEF file at path, and do necessary setup"""
+        """Load Project from NEF file at path, and do necessary setup
+        """
 
         from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
         from ccpn.ui.gui.popups.ImportNefPopup import ImportNefPopup, NEFFRAMEKEY_ENABLERENAME, \
@@ -1942,27 +1580,27 @@ class Framework(NotifierBase):
         self.preferences.recentFiles = recentFiles
         return recentFiles
 
-    def saveProjectAs(self):
-        """Opens save Project as dialog box and saves project to path specified in the file dialog."""
-        oldPath = self.project.path
-        newPath = getSaveDirectory(self.ui.mainWindow, self.preferences)
-
-        with catchExceptions(application=self, errorStringTemplate='Error saving project: %s', printTraceBack=True):
-            if newPath:
-                # Next line unnecessary, but does not hurt
-                newProjectPath = apiIo.addCcpnDirectorySuffix(newPath)
-                successful = self._saveProject(newPath=newProjectPath, createFallback=False)
-
-                if not successful:
-                    getLogger().warning("Saving project to %s aborted" % newProjectPath)
-            else:
-                successful = False
-                getLogger().info("Project not saved - no valid destination selected")
-
-            self._getRecentFiles(oldPath=oldPath)  # this will also update the list
-            self.ui.mainWindow._fillRecentProjectsMenu()  # Update the menu
-
-            return successful
+    # def saveProjectAs(self):
+    #     """Opens save Project as dialog box and saves project to path specified in the file dialog."""
+    #     oldPath = self.project.path
+    #     newPath = getSaveDirectory(self.ui.mainWindow, self.preferences)
+    #
+    #     with catchExceptions(application=self, errorStringTemplate='Error saving project: %s', printTraceBack=True):
+    #         if newPath:
+    #             # Next line unnecessary, but does not hurt
+    #             newProjectPath = apiIo.addCcpnDirectorySuffix(newPath)
+    #             successful = self._saveProject(newPath=newProjectPath, createFallback=False)
+    #
+    #             if not successful:
+    #                 getLogger().warning("Saving project to %s aborted" % newProjectPath)
+    #         else:
+    #             successful = False
+    #             getLogger().info("Project not saved - no valid destination selected")
+    #
+    #         self._getRecentFiles(oldPath=oldPath)  # this will also update the list
+    #         self.ui.mainWindow._fillRecentProjectsMenu()  # Update the menu
+    #
+    #         return successful
 
     @logCommand('application.')
     def undo(self):
@@ -2058,40 +1696,6 @@ class Framework(NotifierBase):
             from subprocess import Popen
 
             Popen(command)
-
-    # def _unpackCcpnTarfile(self, tarfilePath, outputPath=None, directoryPrefix='CcpnProject_'):
-    #     """
-    #     # CCPN INTERNAL - called in loadData method of Project
-    #     """
-    #
-    #     if outputPath:
-    #         if not os.path.exists(outputPath):
-    #             os.makedirs(outputPath)
-    #         temporaryDirectory = None
-    #     else:
-    #         temporaryDirectory = tempfile.TemporaryDirectory(prefix=directoryPrefix)
-    #         outputPath = temporaryDirectory.name
-    #
-    #     cwd = os.getcwd()
-    #     try:
-    #         os.chdir(outputPath)
-    #         tp = tarfile.open(tarfilePath)
-    #         tp.extractall()
-    #
-    #         # look for a directory inside and assume the first found is the project directory (there should be exactly one)
-    #         relfiles = os.listdir('.')
-    #         for relfile in relfiles:
-    #             fullfile = os.path.join(outputPath, relfile)
-    #             if os.path.isdir(fullfile):
-    #                 outputPath = fullfile
-    #                 break
-    #         else:
-    #             raise IOError('Could not find project directory in tarfile')
-    #
-    #     finally:
-    #         os.chdir(cwd)
-    #
-    #     return outputPath, temporaryDirectory
 
     def showApplicationPreferences(self):
         """
@@ -2922,49 +2526,31 @@ class Framework(NotifierBase):
 
     def showShortcuts(self):
         from ccpn.framework.PathsAndUrls import shortcutsPath
-
         self._systemOpen(shortcutsPath)
 
     def showAboutPopup(self):
         from ccpn.ui.gui.popups.AboutPopup import AboutPopup
-
         popup = AboutPopup(parent=self.ui.mainWindow)
         popup.exec_()
 
     def showAboutCcpn(self):
         from ccpn.framework.PathsAndUrls import ccpnUrl
-
-        # import webbrowser
-
-        # webbrowser.open(ccpnUrl)
         self._showHtmlFile("About CCPN", ccpnUrl)
 
     def showCcpnLicense(self):
         from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
-
-        # import webbrowser
-
-        # webbrowser.open(ccpnLicenceUrl)
         self._showHtmlFile("CCPN Licence", ccpnLicenceUrl)
 
-    def showCodeInspectionPopup(self):
-        # TODO: open a file browser to top of source directory
-        pass
+    # def showCodeInspectionPopup(self):
+    #     # TODO: open a file browser to top of source directory
+    #     pass
 
     def showIssuesList(self):
         from ccpn.framework.PathsAndUrls import ccpnIssuesUrl
-
-        # import webbrowser
-
-        # webbrowser.open(ccpnIssuesUrl)
         self._showHtmlFile("CCPN Issues", ccpnIssuesUrl)
 
     def showTutorials(self):
         from ccpn.framework.PathsAndUrls import ccpnTutorials
-
-        # import webbrowser
-
-        # webbrowser.open(ccpnTutorials)
         self._showHtmlFile("CCPN Tutorials", ccpnTutorials)
 
     def showUpdatePopup(self):
@@ -3029,54 +2615,13 @@ class Framework(NotifierBase):
 
     def showLicense(self):
         from ccpn.framework.PathsAndUrls import licensePath
-
-        # self._systemOpen(licensePath)
         self._showHtmlFile("CCPN Licence", licensePath)
 
     #########################################    End Menu callbacks   ##################################################
 
     def _initialiseFonts(self):
-
         from ccpn.ui.gui.guiSettings import fontSettings
-
         self._fontSettings = fontSettings(self.preferences)
-
-
-def getSaveDirectory(parent, preferences=None):
-    """Opens save Project as dialog box and gets directory specified in the file dialog."""
-
-    dialog = ProjectSaveFileDialog(parent=parent, acceptMode='save')
-    dialog._show()
-    newPath = dialog.selectedFile()
-
-    # if not iterable then ignore - dialog may return string or tuple(<path>, <fileOptions>)
-    if isinstance(newPath, tuple) and len(newPath) > 0:
-        newPath = newPath[0]
-
-    # ignore if empty
-    if not newPath:
-        return
-
-    if newPath:
-
-        # native dialog returns a tuple: (path, ''); ccpn returns a string
-        if isinstance(newPath, tuple):
-            newPath = newPath[0]
-            if not newPath:
-                return None
-
-        newPath = apiIo.addCcpnDirectorySuffix(newPath)
-        if os.path.exists(newPath) and (os.path.isfile(newPath) or os.listdir(newPath)):
-            # should not really need to check the second and third condition above, only
-            # the Qt dialog stupidly insists a directory exists before you can select it
-            # so if it exists but is empty then don't bother asking the question
-            title = 'Overwrite path'
-            msg = 'Path "%s" already exists, continue?' % newPath
-            if not MessageDialog.showYesNo(title, msg):
-                newPath = ''
-
-        return newPath
-
 
 ########
 

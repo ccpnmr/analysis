@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:16 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-20 13:16:16 +0000 (Thu, January 20, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -136,7 +136,7 @@ class PseudoDimension(AbstractWrapperObject, SpectrumDimensionAttributes):
 
     @property
     def pointValues(self) -> Tuple[float, ...]:
-        """point values for PseudoDimension)."""
+        """point values for PseudoDimension."""
         return tuple(self._wrappedData.pointValues)
 
     @pointValues.setter
@@ -221,12 +221,23 @@ class PseudoDimension(AbstractWrapperObject, SpectrumDimensionAttributes):
     @property
     def referenceValue(self) -> float:
         """ppm-value used for axis (chemical shift) referencing.
-        emulated to always be pointCount
+        emulated to always be 1.0 (as axis is not reversed)
         """
-        return float(self.pointCount)
+        return 1.0
 
     @referenceValue.setter
     def referenceValue(self, value: float):
+        pass
+
+    @property
+    def spectrometerFrequency(self) -> float:
+        """Absolute frequency at carrier (or at splitting 0.0). In MHz or dimensionless.
+        Emulated to always be 1.0
+        """
+        return 1.0
+
+    @spectrometerFrequency.setter
+    def spectrometerFrequency(self, value):
         pass
 
     @property
@@ -302,7 +313,7 @@ class PseudoDimension(AbstractWrapperObject, SpectrumDimensionAttributes):
         """
         pointOffset = point - self.referencePoint
         ppmPerPoint = self._valuePerPoint / self.spectrometerFrequency
-        factor = -1.0 # (axis runs backward) if self.isReversed else 1.0
+        factor = -1.0 if self.isReversed else 1.0
         value = self.referenceValue + factor * pointOffset *  ppmPerPoint
         return value
 
@@ -312,7 +323,7 @@ class PseudoDimension(AbstractWrapperObject, SpectrumDimensionAttributes):
         """:return point (float) corresponding to ppm-value"""
         ppmPerPoint = self._valuePerPoint / self.spectrometerFrequency
         valOffset = value - self.referenceValue
-        factor = -1.0 # (axis runs backward) if self.isReversed else 1.0
+        factor = -1.0 if self.isReversed else 1.0
         point =  self.referencePoint + factor * valOffset / ppmPerPoint
         return point
 

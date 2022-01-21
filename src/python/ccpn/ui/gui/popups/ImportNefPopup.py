@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 14:29:57 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 16:06:57 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -362,6 +362,8 @@ class NefDictFrame(Frame):
             # find item in treeItem
             pluralItem = self.nefTreeView.findSection(plural)
             if pluralItem:
+                pluralItem = pluralItem[0] if isinstance(pluralItem, list) else pluralItem
+
                 sectionColour = self.nefTreeView._foregroundColour
 
                 # iterate through the items in the group, e.g., peakList/integralList/sample
@@ -629,6 +631,16 @@ class NefDictFrame(Frame):
         if not item:
             getLogger().debug2('>>> not found {} {} {}'.format(name, saveFrame, parentGroup))
             return
+        if isinstance(item, list):
+            # find the correct one from the saveframe
+            for itm in item:
+                if itm.data(1, 0) == saveFrame:
+                    item = itm
+                    break
+            else:
+                getLogger().debug2('>>> not found {} {} {}'.format(name, saveFrame, parentGroup))
+                return
+
         itemName = item.data(0, 0)
 
         mappingCode = mappingCode or ''
@@ -651,6 +663,16 @@ class NefDictFrame(Frame):
         if not item:
             getLogger().debug2('>>> not found {} {} {}'.format(name, saveFrame, parentGroup))
             return
+        if isinstance(item, list):
+            # find the correct one from the saveframe
+            for itm in item:
+                if itm.data(1, 0) == saveFrame:
+                    item = itm
+                    break
+            else:
+                getLogger().debug2('>>> not found {} {} {}'.format(name, saveFrame, parentGroup))
+                return
+
         itemName = item.data(0, 0)
 
         _importList = self._nefReader._importDict.get(saveFrame.name)
@@ -671,6 +693,16 @@ class NefDictFrame(Frame):
         if not item:
             getLogger().debug2('>>> not found {} {} {}'.format(name, saveFrame, parentGroup))
             return
+        if isinstance(item, list):
+            # find the correct one from the saveframe
+            for itm in item:
+                if itm.data(1, 0) == saveFrame:
+                    item = itm
+                    break
+            else:
+                getLogger().debug2('>>> not found {} {} {}'.format(name, saveFrame, parentGroup))
+                return
+
         itemName = item.data(0, 0)
         saveFrame = item.data(1, 0)
 
@@ -991,14 +1023,18 @@ class NefDictFrame(Frame):
 
             _parent = self.nefTreeView.findSection(_treeParent)
             if _parent:
+                # should be a single item
                 _checkItem = self.nefTreeView.findSection(_name, _parent)
                 if _checkItem:
+                    _checkItem = _checkItem[0] if isinstance(_checkItem, list) else _checkItem
                     _checkItem.setCheckState(0, QtCore.Qt.Checked)
         # _parent = self.nefTreeView._contentParent(self.project, saveFrame, cat)\
         _parent = self.nefTreeView.findSection(parentName)
         if _parent:
+            # should be a single item
             newItem = self.nefTreeView.findSection(newName or itemName, _parent)
             if newItem:
+                newItem = newItem[0] if isinstance(newItem, list) else newItem
                 self._nefTreeClickedCallback(newItem, 0)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

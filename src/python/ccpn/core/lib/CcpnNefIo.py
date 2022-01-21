@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 14:29:35 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 16:06:57 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2876,7 +2876,11 @@ class CcpnNefReader(CcpnNefContent):
                 elif sf_category in ['nef_distance_restraint_list',
                                      'nef_dihedral_restraint_list',
                                      'nef_rdc_restraint_list',
-                                     'ccpn_restraint_list']:
+                                     'ccpn_restraint_list',
+                                     'ccpn_distance_restraint_violation_list',
+                                     'ccpn_dihedral_restraint_violation_list',
+                                     'ccpn_rdc_restraint_violation_list',
+                                     ]:
                     # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
                     name = saveFrameName[len(sf_category) + 1:]
                     dataSetId = saveFrame.get('ccpn_dataset_id')
@@ -5079,7 +5083,7 @@ class CcpnNefReader(CcpnNefContent):
         # need to fix the names here... cannot contain '.'
 
         # previous = dataSet.getRestraintTable(name)
-        if previous and len(previous) == 1:
+        if previous and len(previous) == 1 and not dataSetId:
             dataSet = previous[0].structureData
         else:
             # dataSet = project.newDataSet()

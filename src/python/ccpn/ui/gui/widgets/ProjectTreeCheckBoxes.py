@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 11:18:41 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 16:06:57 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -618,29 +618,30 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
             thisList = saveFrame._content[category]
             treeItem, _ = self.nefToTreeViewMapping[category]
             found = self.findItems(treeItem, QtCore.Qt.MatchExactly | QtCore.Qt.MatchRecursive)
-            if found:
-                if len(found) == 1:
-                    # add to the tree
+            if found and len(found) == 1:
+                # add to the tree
 
-                    if self._enableCheckBoxes:
-                        found[0].setCheckState(0, QtCore.Qt.Unchecked)
+                if self._enableCheckBoxes:
+                    found[0].setCheckState(0, QtCore.Qt.Unchecked)
 
-                    # NOTE:ED - this defines the list of items that are added to each plural group in the tree
-                    #           i.e. Chains = saveFrame._content['chain_code'] from nefToTreeViewMapping
-                    if thisList:
-                        for listItem in thisList:
-                            child = QtWidgets.QTreeWidgetItem(found[0])
-                            if self._enableCheckBoxes:
-                                child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
-                            else:
-                                child.setFlags(child.flags() & ~QtCore.Qt.ItemIsUserCheckable)
-                            child.setData(1, 0, saveFrame)
-                            child.setText(0, str(listItem))
-                            if self._enableCheckBoxes:
-                                child.setCheckState(0, QtCore.Qt.Unchecked)
-                    # else:
-                    # found[0].setHidden(False)
-                    # found[0].setDisabled(False)
+                # NOTE:ED - this defines the list of items that are added to each plural group in the tree
+                #           i.e. Chains = saveFrame._content['chain_code'] from nefToTreeViewMapping
+                if thisList:
+                    for listItem in thisList:
+                        child = QtWidgets.QTreeWidgetItem(found[0])
+                        if self._enableCheckBoxes:
+                            child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
+                        else:
+                            child.setFlags(child.flags() & ~QtCore.Qt.ItemIsUserCheckable)
+                        child.setData(1, 0, saveFrame)
+                        child.setText(0, str(listItem))
+
+                        print(f'fill  {saveFrame}   {listItem}')
+                        if self._enableCheckBoxes:
+                            child.setCheckState(0, QtCore.Qt.Unchecked)
+                # else:
+                # found[0].setHidden(False)
+                # found[0].setDisabled(False)
 
     def _contentLoops(self, project: Project, saveFrame: StarIo.NmrSaveFrame, saveFrameTag=None,
                       addLoopAttribs=None, excludeList=(), **kwds):
@@ -791,8 +792,10 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
             found = [item for item in found
                      if (isinstance(_parent, str) and item.parent() and item.parent().data(0, 0) == _parent) or
                      (isinstance(_parent, QtWidgets.QTreeWidgetItem) and item.parent() == _parent)]
-        if found and len(found) == 1:
-            return found[0]
+        if found:
+            if len(found) == 1:
+                return found[0]
+            return found
 
     def getFirstChild(self):
         pass

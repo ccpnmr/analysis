@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-21 13:21:25 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 13:23:17 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -268,7 +268,6 @@ class Framework(NotifierBase, GuiBase):
         self.current = None
 
         self.plugins = []  # Hack for now, how should we store these?
-        self.ccpnModules = []
 
         #-----------------------------------------------------------------------------------------
         # Initialisations

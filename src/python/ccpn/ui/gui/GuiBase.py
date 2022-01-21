@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-21 16:53:11 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 19:10:48 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -591,7 +591,7 @@ class GuiBase(object):
     # Menu Implementation methods
     #-----------------------------------------------------------------------------------------
 
-    def _addApplicationMenuSpec(self, spec, position=5):
+    def _addApplicationMenuSpec(self, spec, position=-3):
         """Add an entirely new menu at specified position"""
         self._menuSpec.insert(position, spec)
 

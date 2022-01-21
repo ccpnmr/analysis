@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-21 17:37:15 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 19:10:48 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -126,12 +126,6 @@ faulthandler.enable()
 
 _DEBUG = False
 
-# AnalysisAssign = 'AnalysisAssign'
-# AnalysisScreen = 'AnalysisScreen'
-# AnalysisMetabolomics = 'AnalysisMetabolomics'
-# AnalysisStructure = 'AnalysisStructure'
-# ApplicationNames = [AnalysisAssign, AnalysisScreen, AnalysisMetabolomics, AnalysisStructure]
-
 interfaceNames = ('NoUi', 'Gui')
 
 
@@ -151,7 +145,6 @@ def _ccpnExceptionhook(ccpnType, value, tback):
         MessageDialog.showError(title=title, message=text)
 
     sys.__excepthook__(ccpnType, value, tback)
-
 
 sys.excepthook = _ccpnExceptionhook
 
@@ -240,8 +233,9 @@ class Framework(NotifierBase, GuiBase):
 
     # to be sub-classed
     applicationName = None
+    applicationVersion = None
 
-    def __init__(self, applicationName, applicationVersion, args=Arguments()):
+    def __init__(self, args=Arguments()):
 
         NotifierBase.__init__(self)
         GuiBase.__init__(self)
@@ -263,12 +257,12 @@ class Framework(NotifierBase, GuiBase):
         # Initialisations
         #-----------------------------------------------------------------------------------------
         self.args = args
-        self.applicationName = applicationName
-        self.applicationVersion = applicationVersion
+        # self.applicationName = applicationName
+        # self.applicationVersion = applicationVersion
         # NOTE:ED - what is revision for? there are no uses and causes a new error for sphinx documentation unless a string
         # self.revision = Version.revision
 
-        printCreditsText(sys.stderr, applicationName, applicationVersion)
+        printCreditsText(sys.stderr, self.applicationName, self.applicationVersion)
 
         # self.setupComponents(args)
 

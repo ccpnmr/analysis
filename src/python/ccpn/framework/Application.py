@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-21 17:37:15 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 19:10:48 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,13 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 
 from ccpn.util.decorators import singleton
 from ccpn.framework.Translation import defaultLanguage
+
+AnalysisAssign = 'AnalysisAssign'
+AnalysisScreen = 'AnalysisScreen'
+AnalysisMetabolomics = 'AnalysisMetabolomics'
+AnalysisStructure = 'AnalysisStructure'
+ApplicationNames = [AnalysisAssign, AnalysisScreen, AnalysisMetabolomics, AnalysisStructure]
+
 
 @singleton
 class ApplicationContainer():
@@ -59,12 +66,8 @@ class Arguments:
 
     def __init__(self, projectPath=None, **kwds):
 
-        # # local import to avoid cycles
-        # from ccpn.AnalysisAssign.__main__ import ANALYSIS_ASSIGN
-
         # Dummy values; GWV: no idea as to what purpose
-        for component in \
-            'AnalysisAssign AnalysisScreen AnalysisMetabolomics AnalysisStructure'.split():
+        for component in ApplicationNames:
             setattr(self, 'include' + component, None)
 
         self.projectPath = projectPath

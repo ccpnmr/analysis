@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-21 13:37:41 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 14:01:22 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -297,6 +297,7 @@ class Framework(NotifierBase, GuiBase):
         self.layout = None  # initialised by self._getUserLayout
         self._styleSheet = None  # initialised by self._setColourSchemeAndStyleSheet
         self._colourScheme = None  # initialised by self._setColourSchemeAndStyleSheet
+        self._fontSettings = None # initialiased by self.__initialiseFonts
 
         # Blocking level for command echo and logging
         self._echoBlocking = 0
@@ -317,7 +318,7 @@ class Framework(NotifierBase, GuiBase):
 
         self._registrationDict = {}
         self._setLanguage()
-        self.feedbackPopup = None
+        # self.feedbackPopup = None
         self.submitMacroPopup = None
         self.updatePopup = None
         self._disableUndoException = getattr(self.args, 'disableUndoException', False)
@@ -344,22 +345,13 @@ class Framework(NotifierBase, GuiBase):
     #-----------------------------------------------------------------------------------------
 
     @property
+    def project(self):
+        """Return project"""
+        return self._project
+
+    @property
     def current(self):
         return self._current
-
-    @property
-    def _isInDebugMode(self) -> bool:
-        """Return True if either of the debug flags has been set
-        CCPNINTERNAL: used throughout to check
-        """
-        if self.level == Logging.DEBUG1 or self.level == Logging.DEBUG2 or self.level == Logging.DEBUG3:
-            return True
-        return False
-
-    @property
-    def hasGui(self) -> bool:
-        """Return True if application has a gui"""
-        return isinstance(self.ui, Gui)
 
     @property
     def mainWindow(self):
@@ -370,21 +362,26 @@ class Framework(NotifierBase, GuiBase):
         return None
 
     @property
-    def project(self):
-        """Return project"""
-        return self._project
+    def hasGui(self) -> bool:
+        """Return True if application has a gui"""
+        return isinstance(self.ui, Gui)
+
+    @property
+    def _isInDebugMode(self) -> bool:
+        """Return True if either of the debug flags has been set
+        CCPNINTERNAL: used throughout to check
+        """
+        if self.level == Logging.DEBUG1 or \
+           self.level == Logging.DEBUG2 or \
+           self.level == Logging.DEBUG3:
+            return True
+        return False
 
     #-----------------------------------------------------------------------------------------
 
     def start(self):
         """Start the program execution
         """
-
-        # # register the programme for later
-        # from ccpn.framework.Application import ApplicationContainer
-        #
-        # container = ApplicationContainer()
-        # container.register(self)
 
         self._initialiseFonts()
 
@@ -2369,9 +2366,6 @@ class Framework(NotifierBase, GuiBase):
         from ccpn.framework.PathsAndUrls import ccpnUrl
         self._showHtmlFile("About CCPN", ccpnUrl)
 
-    def showCcpnLicense(self):
-        from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
-        self._showHtmlFile("CCPN Licence", ccpnLicenceUrl)
 
     # def showCodeInspectionPopup(self):
     #     # TODO: open a file browser to top of source directory
@@ -2408,46 +2402,6 @@ class Framework(NotifierBase, GuiBase):
         """Open the registration popup
         """
         self.ui._registerDetails()
-
-    def showFeedbackPopup(self):
-        """Open the submit feedback popup
-        """
-        from ccpn.ui.gui.popups.FeedbackPopup import FeedbackPopup
-        from ccpn.util import Url
-
-        # check valid internet connection first
-        if Url.checkInternetConnection():
-
-            # this is non-modal so you can copy/paste from the project as required
-            if not self.feedbackPopup:
-                self.feedbackPopup = FeedbackPopup(parent=self.ui.mainWindow)
-            self.feedbackPopup.show()
-            self.feedbackPopup.raise_()
-
-        else:
-            MessageDialog.showWarning('Submit Feedback',
-                                      'Could not connect to the server, please check your internet connection.')
-
-    def showSubmitMacroPopup(self):
-        """Open the submit macro popup
-        """
-        from ccpn.ui.gui.popups.SubmitMacroPopup import SubmitMacroPopup
-        from ccpn.util import Url
-
-        # check valid internet connection first
-        if Url.checkInternetConnection():
-            if not self.submitMacroPopup:
-                self.submitMacroPopup = SubmitMacroPopup(parent=self.ui.mainWindow)
-            self.submitMacroPopup.show()
-            self.submitMacroPopup.raise_()
-
-        else:
-            MessageDialog.showWarning('Submit Macro',
-                                      'Could not connect to the server, please check your internet connection.')
-
-    def showLicense(self):
-        from ccpn.framework.PathsAndUrls import licensePath
-        self._showHtmlFile("CCPN Licence", licensePath)
 
     #########################################    End Menu callbacks   ##################################################
 

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-21 12:41:19 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 14:01:22 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -304,7 +304,7 @@ class GuiBase(object):
             ("Key Concepts", self._displayKeyConcepts),
             ("Show Shortcuts", self.showShortcuts),
             ("Show API Documentation", self.showVersion3Documentation),
-            ("Show License", self.showCcpnLicense),
+            ("Show License", self._showCcpnLicense),
             (),
             ("CcpNmr Homepage", self.showAboutCcpn),
             ("CcpNmr V3 Forum", self.showForum),
@@ -518,6 +518,56 @@ class GuiBase(object):
                 for sLoader in tqdm(spectrumLoaders):
                     sLoader.load()
 
+    #-----------------------------------------------------------------------------------------
+    # Help -->
+    #-----------------------------------------------------------------------------------------
+
+    def _showCcpnLicense(self):
+        from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
+        self._showHtmlFile("CCPN Licence", ccpnLicenceUrl)
+
+    #-----------------------------------------------------------------------------------------
+    # Inactive
+    #-----------------------------------------------------------------------------------------
+
+    def _showLicense(self):
+        from ccpn.framework.PathsAndUrls import licensePath
+        self._showHtmlFile("CCPN Licence", licensePath)
+
+    def _showSubmitMacroPopup(self):
+        """Open the submit macro popup
+        """
+        from ccpn.ui.gui.popups.SubmitMacroPopup import SubmitMacroPopup
+        from ccpn.util import Url
+
+        # check valid internet connection first
+        if Url.checkInternetConnection():
+            if not self.submitMacroPopup:
+                self.submitMacroPopup = SubmitMacroPopup(parent=self.ui.mainWindow)
+            self.submitMacroPopup.show()
+            self.submitMacroPopup.raise_()
+
+        else:
+            MessageDialog.showWarning('Submit Macro',
+                                      'Could not connect to the server, please check your internet connection.')
+
+    def _showFeedbackPopup(self):
+        """Open the submit feedback popup
+        """
+        from ccpn.ui.gui.popups.FeedbackPopup import FeedbackPopup
+        from ccpn.util import Url
+
+        # check valid internet connection first
+        if Url.checkInternetConnection():
+
+            # this is non-modal so you can copy/paste from the project as required
+            feedbackPopup = FeedbackPopup(parent=self.ui.mainWindow)
+            feedbackPopup.show()
+            feedbackPopup.raise_()
+
+        else:
+            MessageDialog.showWarning('Submit Feedback',
+                                      'Could not connect to the server, please check your internet connection.')
 
     #-----------------------------------------------------------------------------------------
     # Menu Implementation methods

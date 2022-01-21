@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-21 12:41:19 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 17:02:03 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -937,7 +937,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
     def startPlugin(self, Plugin):
         plugin = Plugin(application=self.application)
-        self.application.plugins.append(plugin)
+        self.application._plugins.append(plugin)
         if plugin.guiModule is None:
             if not plugin.UiPlugin:
                 plugin.run()

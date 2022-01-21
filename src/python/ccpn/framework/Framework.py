@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-21 16:53:11 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 17:02:03 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -276,7 +276,8 @@ class Framework(NotifierBase, GuiBase):
         self._project = None
         self._current = None
 
-        self.plugins = []  # Hack for now, how should we store these?
+        self._plugins = []  # Hack for now, how should we store these?
+                            # used in GuiMainWindow by startPlugin()
 
         #-----------------------------------------------------------------------------------------
         # Initialisations
@@ -315,10 +316,6 @@ class Framework(NotifierBase, GuiBase):
         self._backupTimerQ = None
         self.autoBackupThread = None
 
-        # Assure that .ccpn exists
-        ccpnDir = aPath(userPreferencesDirectory)
-        if not ccpnDir.exists():
-            ccpnDir.mkdir()
         self._getUserPrefs()
 
         self._tip_of_the_day = None
@@ -616,6 +613,9 @@ class Framework(NotifierBase, GuiBase):
         self._styleSheet = styleSheet
 
     def _getUserPrefs(self):
+        # Assure that preferences directory (.ccpn) exists
+        if not userPreferencesDirectory.exists():
+            userPreferencesDirectory.mkdir()
         # user preferences
         if not self.args.skipUserPreferences:
             sys.stderr.write('==> Getting user preferences\n')

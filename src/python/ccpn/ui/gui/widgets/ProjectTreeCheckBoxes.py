@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 16:06:57 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 16:12:15 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -636,7 +636,6 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
                         child.setData(1, 0, saveFrame)
                         child.setText(0, str(listItem))
 
-                        print(f'fill  {saveFrame}   {listItem}')
                         if self._enableCheckBoxes:
                             child.setCheckState(0, QtCore.Qt.Unchecked)
                 # else:

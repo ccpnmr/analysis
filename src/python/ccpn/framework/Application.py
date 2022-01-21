@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-20 21:57:01 +0100 (Tue, July 20, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-01-21 17:37:15 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,7 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 #=========================================================================================
 
 from ccpn.util.decorators import singleton
+from ccpn.framework.Translation import defaultLanguage
 
 @singleton
 class ApplicationContainer():
@@ -42,3 +43,30 @@ def getApplication():
     """Return the application instance"""
     container = ApplicationContainer()
     return container.application
+
+
+class Arguments:
+    """Class for setting FrameWork input arguments directly"""
+    language = defaultLanguage
+    interface = 'NoUi'
+    nologging = True
+    debug = False
+    debug2 = False
+    debug3 = False
+    skipUserPreferences = True
+    projectPath = None
+    _skipUpdates = False
+
+    def __init__(self, projectPath=None, **kwds):
+
+        # # local import to avoid cycles
+        # from ccpn.AnalysisAssign.__main__ import ANALYSIS_ASSIGN
+
+        # Dummy values; GWV: no idea as to what purpose
+        for component in \
+            'AnalysisAssign AnalysisScreen AnalysisMetabolomics AnalysisStructure'.split():
+            setattr(self, 'include' + component, None)
+
+        self.projectPath = projectPath
+        for tag, val in kwds.items():
+            setattr(self, tag, val)

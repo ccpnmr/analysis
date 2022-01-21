@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-21 17:02:03 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 17:37:15 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -64,7 +64,7 @@ from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.lib.Pid import Pid, PREFIXSEP
 
-from ccpn.framework.Application import getApplication
+from ccpn.framework.Application import getApplication, Arguments
 from ccpn.framework import Version
 from ccpn.framework.credits import printCreditsText
 from ccpn.framework.Current import Current
@@ -126,11 +126,11 @@ faulthandler.enable()
 
 _DEBUG = False
 
-AnalysisAssign = 'AnalysisAssign'
-AnalysisScreen = 'AnalysisScreen'
-AnalysisMetabolomics = 'AnalysisMetabolomics'
-AnalysisStructure = 'AnalysisStructure'
-ApplicationNames = [AnalysisAssign, AnalysisScreen, AnalysisMetabolomics, AnalysisStructure]
+# AnalysisAssign = 'AnalysisAssign'
+# AnalysisScreen = 'AnalysisScreen'
+# AnalysisMetabolomics = 'AnalysisMetabolomics'
+# AnalysisStructure = 'AnalysisStructure'
+# ApplicationNames = [AnalysisAssign, AnalysisScreen, AnalysisMetabolomics, AnalysisStructure]
 
 interfaceNames = ('NoUi', 'Gui')
 
@@ -196,29 +196,6 @@ def defineProgramArguments():
     return parser
 
 
-class Arguments:
-    """Class for setting FrameWork input arguments directly"""
-    language = defaultLanguage
-    interface = 'NoUi'
-    nologging = True
-    debug = False
-    debug2 = False
-    debug3 = False
-    skipUserPreferences = True
-    projectPath = None
-    _skipUpdates = False
-
-    def __init__(self, projectPath=None, **kwds):
-
-        # Dummy values
-        for component in ApplicationNames:
-            setattr(self, 'include' + component, None)
-
-        self.projectPath = projectPath
-        for tag, val in kwds.items():
-            setattr(self, tag, val)
-
-
 def createFramework(projectPath=None, **kwds):
     args = Arguments(projectPath=projectPath, **kwds)
     result = Framework('CcpNmr', Version.applicationVersion, args)
@@ -260,6 +237,9 @@ class Framework(NotifierBase, GuiBase):
     """
     The Framework class is the base class for all applications.
     """
+
+    # to be sub-classed
+    applicationName = None
 
     def __init__(self, applicationName, applicationVersion, args=Arguments()):
 

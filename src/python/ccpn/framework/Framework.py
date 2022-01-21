@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-21 12:41:19 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 12:59:06 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -295,7 +295,7 @@ class Framework(NotifierBase, GuiBase):
 
         self.preferences = None  # initialised by self._getUserPrefs
         self.layout = None  # initialised by self._getUserLayout
-        self.styleSheet = None  # initialised by self.getStyleSheet
+        self._styleSheet = None  # initialised by self.getStyleSheet
         self.colourScheme = None  # initialised by self.getStyleSheet
 
         # Blocking level for command echo and logging
@@ -325,7 +325,6 @@ class Framework(NotifierBase, GuiBase):
 
         self._registrationDict = {}
         self._setLanguage()
-        self.styleSheet = None
         self.feedbackPopup = None
         self.submitMacroPopup = None
         self.updatePopup = None
@@ -514,25 +513,26 @@ class Framework(NotifierBase, GuiBase):
 
     def _getUI(self):
         if self.args.interface == 'Gui':
-            self.styleSheet = self.getStyleSheet()
             from ccpn.ui.gui.Gui import Gui
 
-            ui = Gui(self)
+            self._styleSheet = self._getStyleSheet()
+            ui = Gui(application=self)
             self._setupMenus()
 
             # ui.mainWindow is None upon initialization: gets filled later
             getLogger().debug('%s %s %s' % (self, ui, ui.mainWindow))
+
         else:
             from ccpn.ui.Ui import NoUi
 
-            ui = NoUi(self)
+            ui = NoUi(application=self)
 
         # Connect UI classes for chosen ui
         ui.setUp()
 
         return ui
 
-    def getStyleSheet(self):
+    def _getStyleSheet(self):
         """return Stylesheet as determined by arguments --dark, --light or preferences
         """
         colourScheme = None
@@ -1565,20 +1565,6 @@ class Framework(NotifierBase, GuiBase):
     #     if self.hasGui:
     #         self.ui.mainWindow._updateRestoreArchiveMenu()
     #     return archivePath
-
-    @property
-    def _archiveDirectory(self) -> Path.Path:
-        """Return the archive directory in the project"""
-        archivePath = Path.aPath(self.project.path) / CCPN_ARCHIVES_DIRECTORY
-        return archivePath
-
-    # def _archivePaths(self) -> list:
-    #     """:return list of archives from archive directory
-    #     """
-    #     from ccpn.core.lib.ProjectArchiver import ProjectArchiver
-    #     archiver = ProjectArchiver(project=self.project)
-    #     result = [str(path) for path in archiver.archives]
-    #     return result
 
     def restoreFromArchive(self, archivePath) -> Project:
         """Restore a project from archive path

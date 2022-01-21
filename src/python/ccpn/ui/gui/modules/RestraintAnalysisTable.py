@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 11:18:41 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 11:23:42 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -889,30 +889,30 @@ class RestraintAnalysisTableWidget(GuiTable):
             #                     for data in resList.structureData.data if resList.name == data.name
             #                     for k, viols in data.dataParameters.items() if k == 'results'}
 
-            print(f'  {self._dataTables}')
+            # print(f'  {self._dataTables}')
             # get the dataSets that contain data with a matching 'result' name - should be violations
             violationResults = {resList: viols.data.copy() if viols is not None else None
                                 for resList in resLists
                                 for viols in self._dataTables if resList.pid == viols.getMetadata('restraintTable')
                                 }
 
-            print(f'violation results  {violationResults.keys()}   {[val.size for val in violationResults.values()]}')
+            # print(f'violation results  {violationResults.keys()}   {[val.size for val in violationResults.values()]}')
 
             # rename the columns to match the order in visible list - number must match the position in the selected restraintTables
             for ii, (k, resViol) in enumerate(violationResults.items()):
                 ind = resLists.index(k)
                 resViol.columns = [vv + f'_{ind + 1}' for vv in resViol.columns]
 
-                print(f'columns  {resViol.columns}')
+                # print(f'columns  {resViol.columns}')
 
             # merge all the tables for each restraintTable
             _out = {}
             zeroCols = []
             for ii, resList in enumerate(resLists):
-                print(f'      resList {ii}   {resList}')
+                # print(f'      resList {ii}   {resList}')
 
                 if resList in violationResults:
-                    print(f'       in')
+                    # print(f'       in')
 
                     _left = dfs[resList]
                     _right = violationResults[resList]

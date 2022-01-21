@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 13:08:57 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 14:29:57 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -229,6 +229,8 @@ class NefDictFrame(Frame):
         """
         self.headerFrame = Frame(self, setLayout=True, showBorder=False, grid=(0, 0))
         self.headerLabel = Label(self.headerFrame, text='FRAMEFRAME', grid=(0, 0))
+        self.verifyButton = Button(self.headerFrame, text='Verify', grid=(0, 1), callback=self._verifyPopulate)
+        self.verifyButton.setVisible(not self._primaryProject)
 
         # add the pane for the treeview/tables
         self._paneSplitter = Splitter(self, setLayout=True, horizontal=True)
@@ -1600,11 +1602,16 @@ class NefDictFrame(Frame):
         self._nefLoader._attachReader(self._nefReader.importExistingProject)
         self._nefLoader._attachContent(self._nefReader.contentNef)
         self._nefLoader._attachClear(self._nefReader.clearSaveFrames)
+
+        self._nefLoader.loadValidateDictionary(nefValidationPath)
+
+        # process the contents and verify
         self._nefLoader._clearNef(self.project, self._nefDict)
         self._nefLoader._contentNef(self.project, self._nefDict, selection=None)
-        self._nefLoader.loadValidateDictionary(nefValidationPath)
-        if not self._primaryProject:
-            warnings, errors = self._nefLoader._verifyNef(self.project, self._nefDict, selection=None)
+
+        # changed to verify with the button
+        # if not self._primaryProject:
+        #     warnings, errors = self._nefLoader._verifyNef(self.project, self._nefDict, selection=None)
 
         try:
             self.valid = self._nefLoader.isValid
@@ -1612,6 +1619,23 @@ class NefDictFrame(Frame):
             getLogger().warning(str(es))
 
         self._populate()
+
+    def _verifyPopulate(self):
+        """Respond to clicking the verify button
+        """
+        from ccpn.core.lib.ContextManagers import notificationEchoBlocking
+
+        if not self._primaryProject:
+            with notificationEchoBlocking():
+                self.nefTreeView._populateTreeView(self.project)
+                warnings, errors = self._nefLoader._verifyNef(self.project, self._nefDict, selection=None)
+
+                try:
+                    self.valid = self._nefLoader.isValid
+                except Exception as es:
+                    getLogger().warning(str(es))
+
+                self._populate()
 
     def getItemsToImport(self):
         self._nefReader.setImportAll(False)

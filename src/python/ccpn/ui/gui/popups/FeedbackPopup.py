@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-09 11:37:20 +0000 (Thu, December 09, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-01-21 12:41:19 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -101,14 +101,16 @@ class FeedbackPopup(CcpnDialogMainWidget):
         application = self.getParent().application
 
         if includeProject:
-            # cannot use tempfile because that always hands back open object and tarfile needs actual path
-            filePrefix = 'feedback%s' % random.randint(1, 10000000)
-            project = application.project
-            projectPath = aPath(project.path)
-            directory = projectPath.parent
-            filePrefix = directory / filePrefix
+            fileName = application.project.makeArchive()
 
-            fileName = project.packageProject(filePrefix, includeBackups=True, includeLogs=includeLog)
+            # # cannot use tempfile because that always hands back open object and tarfile needs actual path
+            # filePrefix = 'feedback%s' % random.randint(1, 10000000)
+            # project = application.project
+            # projectPath = aPath(project.path)
+            # directory = projectPath.parent
+            # filePrefix = directory / filePrefix
+            #
+            # fileName = project.packageProject(filePrefix, includeBackups=True, includeLogs=includeLog)
 
         elif includeLog:
             logger = Logging.getLogger()

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-14 18:44:56 +0000 (Fri, January 14, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-01-21 12:41:19 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,7 @@ import functools
 # import os
 import typing
 import operator
-from typing import Sequence, Union, Optional
+from typing import Sequence, Union, Optional, List
 from collections import OrderedDict
 # from time import time
 from datetime import datetime
@@ -1403,13 +1403,32 @@ class Project(AbstractWrapperObject):
 
         return getCcpCodeData(self._apiNmrProject, ccpCode, molType='protein', atomType=atomType)
 
-    def packageProject(self, filePrefix, includeBackups=True, includeLogs=True):
-        """Package the project
-        """
-        from ccpnmodel.ccpncore.lib.Io import Api as apiIo
+    # def packageProject(self, filePrefix, includeBackups=True, includeLogs=True):
+    #     """Package the project
+    #     """
+    #     from ccpnmodel.ccpncore.lib.Io import Api as apiIo
+    #
+    #     return apiIo.packageProject(self._wrappedData.parent, filePrefix,
+    #                                 includeBackups=includeBackups, includeLogs=includeLogs)
 
-        return apiIo.packageProject(self._wrappedData.parent, filePrefix,
-                                    includeBackups=includeBackups, includeLogs=includeLogs)
+    @logCommand('project.')
+    def makeArchive(self) -> Path:
+        """Make new time-stamped archive of project
+        :return path to .tgz archive file as a Path object
+        """
+        from ccpn.core.lib.ProjectArchiver import ProjectArchiver
+        archiver = ProjectArchiver(project=self)
+        archivePath = archiver.makeArchive()
+        getLogger().info('==> Project archived to %s' % archivePath)
+        return archivePath
+
+    def _getArchivePaths(self) -> List[Path]:
+        """:return list of archives from archive directory
+        CCPNINTERAL: used in GuiMainWindow
+        """
+        from ccpn.core.lib.ProjectArchiver import ProjectArchiver
+        archiver = ProjectArchiver(project=self.project)
+        return archiver.archives
 
     def getExperimentClassifications(self) -> dict:
         """Get a dictionary of dictionaries of dimensionCount:sortedNuclei:ExperimentClassification named tuples.

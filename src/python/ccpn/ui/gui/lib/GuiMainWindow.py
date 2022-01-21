@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-20 15:56:45 +0000 (Thu, January 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 12:41:19 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -963,7 +963,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     def _updateRestoreArchiveMenu(self):
 
         action = self.getMenuAction('File->Restore From Archive...')
-        action.setEnabled(bool(self.application._archivePaths()))
+        action.setEnabled(bool(self._project._getArchivePaths()))
 
     def undo(self):
         self._project._undo.undo()

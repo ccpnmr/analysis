@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-20 20:21:39 +0000 (Thu, January 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 12:41:19 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -424,11 +424,14 @@ class GuiBase(object):
 
     def _archiveProjectCallback(self):
 
-        path = self.archiveProject()
-        MessageDialog.showInfo('Project Archived',
-                               'Project archived to %s' % path )
+        if (path := self.project.makeArchive()) is None:
+            MessageDialog.showInfo('Archive Project',
+                                   'Unable to archive Projec' )
 
-        if self.hasGui:
+        else:
+            MessageDialog.showInfo('Archive Project',
+                                   'Project archived to %s' % path )
+
             self.ui.mainWindow._updateRestoreArchiveMenu()
 
     def _restoreFromArchiveCallback(self):
@@ -443,10 +446,10 @@ class GuiBase(object):
         dialog._show()
         archivePath = dialog.selectedFile()
 
-        if archivePath:
-            newProject = self.restoreFromArchive(archivePath)
-            MessageDialog.showInfo('Project Restore from Archive',
-                                   'Project restored to %s' % newProject.path )
+        if archivePath and \
+           (newProject := self.restoreFromArchive(archivePath)) is not None:
+            MessageDialog.showInfo('Restore from Archive',
+                                   'Project restored as %s' % newProject.path )
 
     def showProjectSummaryPopup(self):
         """Show the Project summary popup.

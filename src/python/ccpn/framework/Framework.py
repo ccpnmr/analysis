@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-20 20:21:39 +0000 (Thu, January 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 12:41:19 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1556,21 +1556,15 @@ class Framework(NotifierBase, GuiBase):
     # Archive related code
     #-----------------------------------------------------------------------------------------
 
-    @logCommand('application.')
-    def archiveProject(self) -> Path.Path:
-        """Archive the project
-        :return location of the archive as a Path instance
-        """
-        project = self.project
-        apiProject = project._wrappedData.parent
-        archivePath = apiIo.packageProject(apiProject,
-                                           includeBackups=True, includeLogs=True,
-                                           includeArchives=False, includeSummaries=True)
-        getLogger().info('==> Project archived to %s' % archivePath)
-
-        if self.hasGui:
-            self.ui.mainWindow._updateRestoreArchiveMenu()
-        return Path.aPath(archivePath)
+    # @logCommand('application.')
+    # def archiveProject(self) -> Path.Path:
+    #     """Archive the project
+    #     :return location of the archive as a Path instance
+    #     """
+    #     archivePath = self.project.makeArchive()
+    #     if self.hasGui:
+    #         self.ui.mainWindow._updateRestoreArchiveMenu()
+    #     return archivePath
 
     @property
     def _archiveDirectory(self) -> Path.Path:
@@ -1578,25 +1572,28 @@ class Framework(NotifierBase, GuiBase):
         archivePath = Path.aPath(self.project.path) / CCPN_ARCHIVES_DIRECTORY
         return archivePath
 
-    def _archivePaths(self) -> list:
-        """:return list of archives  from archive directory"""
-        result = [str(path) for path in self._archiveDirectory.listDirFiles(extension='tgz')]
-        return result
+    # def _archivePaths(self) -> list:
+    #     """:return list of archives from archive directory
+    #     """
+    #     from ccpn.core.lib.ProjectArchiver import ProjectArchiver
+    #     archiver = ProjectArchiver(project=self.project)
+    #     result = [str(path) for path in archiver.archives]
+    #     return result
 
     def restoreFromArchive(self, archivePath) -> Project:
         """Restore a project from archive path
+        :return the restored project or None on error
         """
-        from ccpn.framework.lib._unpackCcpnTarFile import _unpackCcpnTarfile
-        from subprocess import Popen
+        from ccpn.core.lib.ProjectArchiver import ProjectArchiver
+        archiver = ProjectArchiver(project=self.project)
 
-        if archivePath is None or len(archivePath) == 0:
-            raise ValueError('restoreFromArchive: Invalid archivePath %r' % archivePath)
+        if (_newProjectPath := archiver.restoreArchive(archivePath=archivePath)) is not None and \
+           (_newProject := self.loadProject(_newProjectPath)) is not None:
 
-        archivePath = Path.aPath(archivePath)
-        _outDirPath = Path.aPath(self.project.path).parent
-        _newProjectPath = _unpackCcpnTarfile(archivePath, outputDirectoryPath=_outDirPath)
-        _newProject = self.loadProject(_newProjectPath)
-        getLogger().info('==> Restored archive %s as %s' % (archivePath, _newProject))
+            getLogger().info('==> Restored archive %s as %s' % (archivePath, _newProject))
+
+        else:
+            getLogger().warning('Failed to restore archive %s' % (archivePath,))
 
         return _newProject
 

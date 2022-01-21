@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 13:08:57 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 13:49:23 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -4707,22 +4707,21 @@ class CcpnNefReader(CcpnNefContent):
             self.error('Undefined chemicalShiftList', loop, None)
             return
 
-        mapping = nef2CcpnMap.get(loop.name) or {}
-        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        # Verify main object
+        shiftList = parent.getChemicalShiftList(name)
+        if shiftList is None:
+            return
+
         for row in loop.data:
-            parameters = _parametersFromLoopRow(row, map2)
             tt = tuple(row.get(tag) for tag in ('chain_code', 'sequence_code', 'residue_name',
                                                 'atom_name'))
             shiftId = Pid.IDSEP.join(('' if x is None else str(x)) for x in tt)
 
-            # Verify main object
-            shiftList = parent.getChemicalShiftList(name)
-            if shiftList is not None:
-                # find the chemicalShift
-                shift = shiftList.getChemicalShift(shiftId)
-                if shift is not None:
-                    self.error('nef_chemical_shift - ChemicalShift {} already exists'.format(shift), loop, (shift,))
-                    _rowErrors.add(loop.data.index(row))
+            # find the chemicalShift
+            shift = shiftList.getChemicalShift(shiftId)
+            if shift is not None:
+                self.error('nef_chemical_shift - ChemicalShift {} already exists'.format(shift), loop, (shift,))
+                _rowErrors.add(loop.data.index(row))
 
     verifiers['nef_chemical_shift'] = verify_nef_chemical_shift
 

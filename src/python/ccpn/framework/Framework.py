@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-21 12:59:06 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 13:21:25 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -294,9 +294,10 @@ class Framework(NotifierBase, GuiBase):
             self.level = logging.INFO
 
         self.preferences = None  # initialised by self._getUserPrefs
+
         self.layout = None  # initialised by self._getUserLayout
-        self._styleSheet = None  # initialised by self.getStyleSheet
-        self.colourScheme = None  # initialised by self.getStyleSheet
+        self._styleSheet = None  # initialised by self._setColourSchemeAndStyleSheet
+        self._colourScheme = None  # initialised by self._setColourSchemeAndStyleSheet
 
         # Blocking level for command echo and logging
         self._echoBlocking = 0
@@ -310,14 +311,6 @@ class Framework(NotifierBase, GuiBase):
         if not ccpnDir.exists():
             ccpnDir.mkdir()
         self._getUserPrefs()
-
-        if hasattr(self.args, 'darkColourScheme') and hasattr(self.args, 'lightColourScheme'):
-            # set the preferences if added from the commandline
-            # this causes errors when running the nose_tests
-            if self.args.darkColourScheme:
-                self.preferences.general.colourScheme = 'dark'
-            elif self.args.lightColourScheme:
-                self.preferences.general.colourScheme = 'light'
 
         self._tip_of_the_day = None
         self._initial_show_timer = None
@@ -515,7 +508,7 @@ class Framework(NotifierBase, GuiBase):
         if self.args.interface == 'Gui':
             from ccpn.ui.gui.Gui import Gui
 
-            self._styleSheet = self._getStyleSheet()
+            self._setColourSchemeAndStyleSheet()
             ui = Gui(application=self)
             self._setupMenus()
 
@@ -532,8 +525,8 @@ class Framework(NotifierBase, GuiBase):
 
         return ui
 
-    def _getStyleSheet(self):
-        """return Stylesheet as determined by arguments --dark, --light or preferences
+    def _setColourSchemeAndStyleSheet(self):
+        """Set the colourScheme and stylesheet as determined by arguments --dark, --light or preferences
         """
         colourScheme = None
         if self.args.darkColourScheme:
@@ -546,7 +539,7 @@ class Framework(NotifierBase, GuiBase):
         if colourScheme is None:
             raise RuntimeError('invalid colourScheme')
 
-        self.colourScheme = colourScheme
+        self._colourScheme = colourScheme
 
         with open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
                                '%sStyleSheet.qss' % metaUtil.upperFirst(colourScheme))) as fp:
@@ -558,7 +551,8 @@ class Framework(NotifierBase, GuiBase):
                 additions = fp.read()
 
             styleSheet += additions
-        return ''  # GST for debug this should not be comitted! styleSheet
+
+        self._styleSheet = styleSheet
 
     def _getUserPrefs(self):
         # user preferences

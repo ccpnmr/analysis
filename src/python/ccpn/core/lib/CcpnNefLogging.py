@@ -6,7 +6,7 @@ in nef files.
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-25 12:04:18 +0000 (Thu, November 25, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-21 11:14:42 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -55,7 +55,7 @@ def getCcpnNefLogNames(project: 'Project'):
 
     except Exception as es:
         # cannot read, return None
-        getLogger().debug(f'Cannot read ccpnLogging: {es}')
+        getLogger().debug(f'skipping ccpnLogging')
 
     else:
         return keys
@@ -92,7 +92,7 @@ def getCcpnNefLog(project: 'Project', name: str):
 
     except Exception as es:
         # cannot read, return None
-        getLogger().debug(f'Cannot read ccpnLogging {repr(name)}: {es}')
+        getLogger().debug(f'skipping ccpnLogging')  # {repr(name)}: {es}')
 
     else:
         return val

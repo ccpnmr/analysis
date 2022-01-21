@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>By default triple resonance 3D spectra are shown with 13-C along the y-axis and 3Ds with a homonuclear plane (e.g. two 1-H dimensions) place this in the xy plane. But if you want your spectrum to be displayed in a different way by default, simply reset the <span style=%(purple)s>Preferred dimension order</span>  at the bottom of the <span style=%(purple)s>Dimensions</span> tab in the <span style=%(purple)s>Spectrum Properties</span> pop-up.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 51,
+  "contents": [
+    "./graphics/SetDefaultSpectrumOrientation.png"
+  ]
+}

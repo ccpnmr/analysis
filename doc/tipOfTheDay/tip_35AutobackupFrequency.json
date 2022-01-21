@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can change the frequency of your autobackups (or switch them off completely) in the General tab of your Preferences (<span style=%(purple)s>File / Preferences</span>). The maximum frequency is once every 10 minutes.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 35,
+  "contents": [
+    "./graphics/AutobackupFrequency.png"
+  ]
+}

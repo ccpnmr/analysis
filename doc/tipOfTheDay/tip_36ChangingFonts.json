@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can change the size and type of Font used in several different parts of the program in the <span style=%(purple)s>Appearance</span> tab of your Preferences (open with <span style=%(purple)s>File / Preferences</span).</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 36,
+  "contents": [
+    "./graphics/ChangingFonts.png"
+  ]
+}

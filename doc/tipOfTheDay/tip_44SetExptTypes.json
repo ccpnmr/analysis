@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>Setting experiment types for your spectra will allow you to use some advanced features in Analysis. Set the experiment type for a single spectrum in the <span style=%(purple)s>Spectrum Properties</span> pop-up (double-click on the spectrum in the sidebar) or set experiment types for all spectra by going to <span style=%(purple)s>Spectrum / Set Experiment Types</span> or using shortcut <span style=%(purple)s>ET</span>.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 44,
+  "contents": [
+    "./graphics/SetExptTypes.png"
+  ]
+}

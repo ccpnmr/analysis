@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>The <span style=%(purple)s>Residue Information</span> module provides you with useful information about the amino acids and sequence motifs in your protein chains. Open the module via <span style=%(purple)s>Molecules / Residue Information</span> or with the shortcut <span style=%(purple)s>RI</span>.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 39,
+  "contents": [
+    "./graphics/ResidueInformation.png"
+  ]
+}

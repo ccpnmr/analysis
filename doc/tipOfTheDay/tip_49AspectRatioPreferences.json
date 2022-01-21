@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>Set your preferred default <span style=%(purple)s>Aspect Ratio Mode</span> (Free, Locked or Fixed) and <span style=%(purple)s>Fixed Aspect Ratios</span> in your <span style=%(purple)s>Preferences</span> (go to <span style=%(purple)s>File / Preferences / Spectrum</span> tab).</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 49,
+  "contents": [
+    "./graphics/AspectRatioPreferences.png"
+  ]
+}

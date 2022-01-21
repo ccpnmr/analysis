@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>Make a 2D projection of a 3D spectrum with <span style=%(purple)s>Spectrum / Make Projection...</span> or shortcut <span style=%(purple)s>PJ</span>. Make sure to select an appropriate projection method, using only positive (max), negative (min) or all (sum) signals depending on the signs of your peaks.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 47,
+  "contents": [
+    "./graphics/MakeProjection.png"
+  ]
+}

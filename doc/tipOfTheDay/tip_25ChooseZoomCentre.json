@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can choose whether zooming with the mouse will zoom to the centre of the Spectrum Display or to your mouse position in the <span style=%(purple)s>Spectrum</span> tab of your <span style=%(purple)s>Preferences</span> (in the <span style=%(purple)s>File</span> menu). Zooming with shortcuts <span style=%(purple)s>ZI</span> and <span style=%(purple)s>ZO</span> will always zoom to the centre of the Spectrum Display.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 25,
+  "contents": [
+    "./graphics/ChooseZoomCentre.png"
+  ]
+}

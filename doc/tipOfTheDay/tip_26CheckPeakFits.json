@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can check how well your peak fitting has worked by switching the peak symbol to <span style=%(purple)s>Filled Line Widths</span>. Do this either in the Spectrum Display Settings, or by cycling through the different peak symbol options with <span style=%(purple)s>PL</span>. If a peak has been well fit, the filled line widths (at half height) should sit nicely within the contours. Peaks that have not been fitted are shown with a 'flower/snowflake' peak symbol. Fit peaks with shortcut <span style=%(purple)s>RP</span> or fit a group of close or overlapping peaks together with <span style=%(purple)s>RG</span></p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 26,
+  "contents": [
+    "./graphics/CheckPeakFits.png"
+  ]
+}

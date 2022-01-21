@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can choose to see multiple z-planes as a single or multiple contours by selecting or deselecting <span style=%(purple)s>Single contours per plane</span>, respectively, in the <span style=%(purple)s>Spectrum</span> tab of our <span style=%(purple)s>Preferences</span> (open with <span style=%(purple)s>File / Preferences</span>).</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 53,
+  "contents": [
+    "./graphics/ViewMultiplePlanesAsSingleContour.png"
+  ]
+}

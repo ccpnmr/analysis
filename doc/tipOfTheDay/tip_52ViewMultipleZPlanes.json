@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>Select to view multiple planes in a z-dimension. This can be useful when peak picking: peaks are only picked on visible contours, and so showing more z-planes can ensure your peak maximum is shown in the Spectrum Display and can thus be picked, rather than being in a plane which is not shown. This may be particular helpful if your z-dimension is very highly sampled.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 52,
+  "contents": [
+    "./graphics/ViewMultipleZPlanes.png"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can manually move one or more selected peaks by holding down the middle mouse button and dragging it to the new position. The crosshair shows the new position and the difference to the previous position.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 48,
+  "contents": [
+    "./graphics/MovePeakWithMiddleMouseButton.png"
+  ]
+}

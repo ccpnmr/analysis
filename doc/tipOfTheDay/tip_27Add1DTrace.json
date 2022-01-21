@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can switch horizontal or vertical 1D traces on the mouse cursor on or off with shortcuts <span style=%(purple)s>HT</span> and <span style=%(purple)s>VT</span>, respectively; or use the right-hand mouse menu. Increase or decrease the height of your traces with <span style=%(purple)s>TU</span> (trace up) or <span style=%(purple)s>TD</span> (trace down).</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 27,
+  "contents": [
+    "./graphics/Add1DTrace.png"
+  ]
+}

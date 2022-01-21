@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can easily make tentative assignments because your NmrResidues and NmrAtoms can take on any name you like. Simply give them a Sequence Code of <span style=%(purple)s>28/45</span> or <span style=%(purple)s>37?</span>, a Residue Type of <span style=%(purple)s>ASN/GLN</span> or an Atom Name of <span style=%(purple)s>HB/HG</span> while you are still unsure of the correct assignment. Once you are confident, you can change any of these fields to the correct assignment and all your peak labels etc. will be updated automatically. Make edits by double-clicking on an NmrResidue or NmrAtom in the sidebar or clicking <span style=%(purple)s>Edit</span> in the Peak Assigner. Then type directly into the boxes instead of using the drop-down menus.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 28,
+  "contents": [
+    "./graphics/TentativeAssignments.png"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>Fit your peaks by selecting them and using shortcut <span style=%(purple)s>RP</span> (refit peak). Fit a group of close or overlapped peaks together by selecting them and using shortcut <span style=%(purple)s>RG</span> (refit group). Select in <span style=%(purple)s>File / Preferences</span> (<span style=%(purple)s>Ctrl,</span>) whether to use a gaussian or parabolic fit.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 29,
+  "contents": [
+    "./graphics/PeakFitting.png"
+  ]
+}

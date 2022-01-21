@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>Right-click on a spectrum to enter the Phasing Console or use shortcut <span style=%(purple)s>PC</span>. Here you can phase your spectra to get phasing parameters for NmrPipe processing scripts. Right-click in the Phasing Console to add 1D traces and more.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 31,
+  "contents": [
+    "./graphics/PhaseSpectra.png"
+  ]
+}

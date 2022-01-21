@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 18:40:01 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 18:55:47 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -3842,33 +3842,9 @@ class CcpnNefReader(CcpnNefContent):
             self._renameDataBlock(project, dataBlock, saveFrame, newSaveFrameName)
 
             # search in additionalData for the pid and change
-            if category in NAMETOOBJECTMAPPING:
-                obj = NAMETOOBJECTMAPPING[category]
+            self._checkAdditionalDataCollections(category, dataBlock, frames, itemName, newName, project)
 
-                frameCats = frames.get('ccpn_additional_data') or []
-                frameList = [frame.name for frame in frameCats]
-                attList = ('None',)
-                loopList = ('ccpn_internal_data',)
-                replaceList = ('ccpn_object_pid', 'internal_data_string',)
-
-                # rename the items in the additionalData saveFrame
-                _oldPid = Pid.Pid._join(obj.shortClassName, itemName)
-                _newPid = Pid.Pid._join(obj.shortClassName, newName)
-                # rename the items in the additionalData saveFrame
-                _oldLongPid = Pid.Pid._join(obj.className, itemName)
-                _newLongPid = Pid.Pid._join(obj.className, newName)
-
-                # need different search
-                self.searchReplaceDict(project, dataBlock, True, None,
-                                       (f'(\"{_oldPid}\")', f'(\"{_oldLongPid}\")'),
-                                       (f'\"{_newPid}\"', f'\"{_newLongPid}\"'),
-                                       replace=True, validFramesOnly=True,
-                                       frameSearchList=frameList, attributeSearchList=attList,
-                                       loopSearchList=loopList, rowSearchList=replaceList)
-
-                self._replaceInCollections(dataBlock, _oldPid, _newPid, _oldLongPid, _newLongPid)
-
-            return newName
+        return newName
 
     def rename_ccpn_table(self, project: Project,
                          dataBlock: StarIo.NmrDataBlock, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...],
@@ -3959,7 +3935,7 @@ class CcpnNefReader(CcpnNefContent):
 
                 self._replaceInCollections(dataBlock, _oldPid, _newPid, _oldLongPid, _newLongPid)
 
-            return newName
+        return newName
 
     def rename_nef_molecular_system(self, project: Project,
                                     dataBlock: StarIo.NmrDataBlock, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...],
@@ -4215,31 +4191,7 @@ class CcpnNefReader(CcpnNefContent):
                            loopSearchList=loopList, rowSearchList=replaceList)
 
         # search in additionalData for the pid and change
-        if category in NAMETOOBJECTMAPPING:
-            obj = NAMETOOBJECTMAPPING[category]
-
-            frameCats = frames.get('ccpn_additional_data') or []
-            frameList = [frame.name for frame in frameCats]
-            attList = ('None',)
-            loopList = ('ccpn_internal_data',)
-            replaceList = ('ccpn_object_pid', 'internal_data_string',)
-
-            # rename the items in the additionalData saveFrame
-            _oldPid = Pid.Pid._join(obj.shortClassName, itemName)
-            _newPid = Pid.Pid._join(obj.shortClassName, newName)
-            # rename the items in the additionalData saveFrame
-            _oldLongPid = Pid.Pid._join(obj.className, itemName)
-            _newLongPid = Pid.Pid._join(obj.className, newName)
-
-            # need different search
-            self.searchReplaceDict(project, dataBlock, True, None,
-                                   (f'(\"{_oldPid}\")', f'(\"{_oldLongPid}\")'),
-                                   (f'\"{_newPid}\"', f'\"{_newLongPid}\"'),
-                                   replace=True, validFramesOnly=True,
-                                   frameSearchList=frameList, attributeSearchList=attList,
-                                   loopSearchList=loopList, rowSearchList=replaceList)
-
-            self._replaceInCollections(dataBlock, _oldPid, _newPid, _oldLongPid, _newLongPid)
+        self._checkAdditionalDataCollections(category, dataBlock, frames, itemName, newName, project)
 
         return newName
 
@@ -4299,31 +4251,7 @@ class CcpnNefReader(CcpnNefContent):
                            loopSearchList=loopList, rowSearchList=replaceList)
 
         # search in additionalData for the pid and change
-        if category in NAMETOOBJECTMAPPING:
-            obj = NAMETOOBJECTMAPPING[category]
-
-            frameCats = frames.get('ccpn_additional_data') or []
-            frameList = [frame.name for frame in frameCats]
-            attList = ('None',)
-            loopList = ('ccpn_internal_data',)
-            replaceList = ('ccpn_object_pid', 'internal_data_string',)
-
-            # rename the items in the additionalData saveFrame
-            _oldPid = Pid.Pid._join(obj.shortClassName, itemName)
-            _newPid = Pid.Pid._join(obj.shortClassName, newName)
-            # rename the items in the additionalData saveFrame
-            _oldLongPid = Pid.Pid._join(obj.className, itemName)
-            _newLongPid = Pid.Pid._join(obj.className, newName)
-
-            # need different search
-            self.searchReplaceDict(project, dataBlock, True, None,
-                                   (f'(\"{_oldPid}\")', f'(\"{_oldLongPid}\")'),
-                                   (f'\"{_newPid}\"', f'\"{_newLongPid}\"'),
-                                   replace=True, validFramesOnly=True,
-                                   frameSearchList=frameList, attributeSearchList=attList,
-                                   loopSearchList=loopList, rowSearchList=replaceList)
-
-            self._replaceInCollections(dataBlock, _oldPid, _newPid, _oldLongPid, _newLongPid)
+        self._checkAdditionalDataCollections(category, dataBlock, frames, itemName, newName, project)
 
         return newName
 
@@ -4454,31 +4382,7 @@ class CcpnNefReader(CcpnNefContent):
                            loopSearchList=loopList, rowSearchList=replaceList)
 
         # search in additionalData for the pid and change
-        if _lowerCaseName in NAMETOOBJECTMAPPING:
-            obj = NAMETOOBJECTMAPPING[_lowerCaseName]
-
-            frameCats = frames.get('ccpn_additional_data') or []
-            frameList = [frame.name for frame in frameCats]
-            attList = ('None',)
-            loopList = ('ccpn_internal_data',)
-            replaceList = ('ccpn_object_pid', 'internal_data_string',)
-
-            # rename the items in the additionalData saveFrame
-            _oldPid = Pid.Pid._join(obj.shortClassName, itemName)
-            _newPid = Pid.Pid._join(obj.shortClassName, newName)
-            # rename the items in the additionalData saveFrame
-            _oldLongPid = Pid.Pid._join(obj.className, itemName)
-            _newLongPid = Pid.Pid._join(obj.className, newName)
-
-            # need different search
-            self.searchReplaceDict(project, dataBlock, True, None,
-                                   (f'(\"{_oldPid}\")', f'(\"{_oldLongPid}\")'),
-                                   (f'\"{_newPid}\"', f'\"{_newLongPid}\"'),
-                                   replace=True, validFramesOnly=True,
-                                   frameSearchList=frameList, attributeSearchList=attList,
-                                   loopSearchList=loopList, rowSearchList=replaceList)
-
-            self._replaceInCollections(dataBlock, _oldPid, _newPid, _oldLongPid, _newLongPid)
+        self._checkAdditionalDataCollections(_lowerCaseName, dataBlock, frames, itemName, newName, project)
 
         return newName
 
@@ -4732,6 +4636,11 @@ class CcpnNefReader(CcpnNefContent):
                            loopSearchList=loopList, rowSearchList=replaceList)
 
         # search in additionalData for the pid and change
+        self._checkAdditionalDataCollections(category, dataBlock, frames, itemName, newName, project)
+
+        return newName
+
+    def _checkAdditionalDataCollections(self, category, dataBlock, frames, itemName, newName, project):
         if category in NAMETOOBJECTMAPPING:
             obj = NAMETOOBJECTMAPPING[category]
 
@@ -4757,8 +4666,6 @@ class CcpnNefReader(CcpnNefContent):
                                    loopSearchList=loopList, rowSearchList=replaceList)
 
             self._replaceInCollections(dataBlock, _oldPid, _newPid, _oldLongPid, _newLongPid)
-
-        return newName
 
     renames['nef_chemical_shift_list'] = rename_ccpn_table
     renames['nef_distance_restraint_list'] = rename_ccpn_table

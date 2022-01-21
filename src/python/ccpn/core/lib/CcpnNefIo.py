@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 11:22:07 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 13:08:57 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -4824,6 +4824,9 @@ class CcpnNefReader(CcpnNefContent):
     importers['nef_rdc_restraint_list'] = load_nef_restraint_list
     importers['ccpn_restraint_list'] = load_nef_restraint_list
 
+    # from ccpn.util.decorators import profile
+    #
+    # @profile()
     def verify_nef_restraint_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         """Serves to verify nef_distance_restraint_list, nef_dihedral_restraint_list,
         nef_rdc_restraint_list and ccpn_restraint_list"""

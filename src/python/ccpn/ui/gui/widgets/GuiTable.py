@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-01-13 10:42:38 +0000 (Thu, January 13, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-01-21 13:08:57 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2452,10 +2452,10 @@ class GuiTable(TableWidget, Base):
         """
         # NOTE:ED - need colour/row checking, ignore for the minute
         try:
-            model = self.model()
+            # model = self.model()
             _rowMapping = [self.item(xx, 0).index for xx in range(self.rowCount())]
             _rowIndex = _rowMapping.index(row)
-            rowIndex = model.index(row, 0).row()
+            # rowIndex = model.index(row, 0).row()
 
             if not isinstance(columnList, (type(None), list, tuple)):
                 raise TypeError('columnList must be None, or a list of integers')
@@ -2467,7 +2467,7 @@ class GuiTable(TableWidget, Base):
             for j in cols:
                 self.item(_rowIndex, j).setBackground(colour)
         except Exception as es:
-            pass
+            getLogger().debug(f'error setting background colour: {es}')
 
     def _getSaveState(self):
         """

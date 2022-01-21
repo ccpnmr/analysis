@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 11:18:41 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 13:08:57 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -51,6 +51,7 @@ from ccpn.util.nef import StarIo
 from ccpn.util.nef import NefImporter as Nef
 from ccpn.util.Logging import getLogger
 from ccpn.util.PrintFormatter import PrintFormatter
+from ccpn.util.AttrDict import AttrDict
 from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
@@ -433,8 +434,10 @@ class NefDictFrame(Frame):
             chainErrors = _errors.get('nef_sequence_' + itemName)
             if chainErrors:
                 table = self._nefTables.get('nef_sequence')
-                for rowIndex in chainErrors:
-                    table.setRowBackgroundColour(rowIndex, _fillColour)
+
+                with self._tableColouring(table) as setRowBackgroundColour:
+                    for rowIndex in chainErrors:
+                        setRowBackgroundColour(rowIndex, _fillColour)
 
     def table_ccpn_assignment(self, saveFrame, item, listName=None):
         tables = ['nmr_chain', 'nmr_residue', 'nmr_atom']
@@ -455,8 +458,10 @@ class NefDictFrame(Frame):
                 chainErrors = _errors.get('_'.join([tableName, itemName]))
                 if chainErrors:
                     table = self._nefTables.get(tableName)
-                    for rowIndex in chainErrors:
-                        table.setRowBackgroundColour(rowIndex, _fillColour)
+
+                    with self._tableColouring(table) as setRowBackgroundColour:
+                        for rowIndex in chainErrors:
+                            setRowBackgroundColour(rowIndex, _fillColour)
 
     def table_lists(self, saveFrame, item, listName, postFix='list'):
         itemName = item.data(0, 0)
@@ -475,13 +480,17 @@ class NefDictFrame(Frame):
             chainErrors = _errors.get('_'.join([listName, itemName]))
             if chainErrors:
                 table = self._nefTables.get(listName)
-                for rowIndex in chainErrors:
-                    table.setRowBackgroundColour(rowIndex, _fillColour)
+
+                with self._tableColouring(table) as setRowBackgroundColour:
+                    for rowIndex in chainErrors:
+                        setRowBackgroundColour(rowIndex, _fillColour)
             chainErrors = _errors.get('_'.join([listName, postFix, itemName]))
             if chainErrors:
                 table = self._nefTables.get('_'.join([listName, postFix]))
-                for rowIndex in chainErrors:
-                    table.setRowBackgroundColour(rowIndex, _fillColour)
+
+                with self._tableColouring(table) as setRowBackgroundColour:
+                    for rowIndex in chainErrors:
+                        setRowBackgroundColour(rowIndex, _fillColour)
 
     def table_peak_lists(self, saveFrame, item, listName=None):
         listItemName = 'nef_peak'
@@ -502,13 +511,17 @@ class NefDictFrame(Frame):
             chainErrors = _errors.get('_'.join([listItemName, itemName]))
             if chainErrors:
                 table = self._nefTables.get(listItemName)
-                for rowIndex in chainErrors:
-                    table.setRowBackgroundColour(rowIndex, _fillColour)
+
+                with self._tableColouring(table) as setRowBackgroundColour:
+                    for rowIndex in chainErrors:
+                        setRowBackgroundColour(rowIndex, _fillColour)
             chainErrors = _errors.get('_'.join([listName, 'list', itemName]))
             if chainErrors:
                 table = self._nefTables.get('_'.join([listName, 'list']))
-                for rowIndex in chainErrors:
-                    table.setRowBackgroundColour(rowIndex, _fillColour)
+
+                with self._tableColouring(table) as setRowBackgroundColour:
+                    for rowIndex in chainErrors:
+                        setRowBackgroundColour(rowIndex, _fillColour)
 
     def table_peak_clusters(self, saveFrame, item, listName=None):
         listItemName = 'ccpn_peak_cluster'
@@ -529,13 +542,17 @@ class NefDictFrame(Frame):
             chainErrors = _errors.get('_'.join([listItemName, itemName]))
             if chainErrors:
                 table = self._nefTables.get(listItemName)
-                for rowIndex in chainErrors:
-                    table.setRowBackgroundColour(rowIndex, _fillColour)
+
+                with self._tableColouring(table) as setRowBackgroundColour:
+                    for rowIndex in chainErrors:
+                        setRowBackgroundColour(rowIndex, _fillColour)
             chainErrors = _errors.get('_'.join([listName, 'peaks', itemName]))
             if chainErrors:
                 table = self._nefTables.get('_'.join([listName, 'peaks']))
-                for rowIndex in chainErrors:
-                    table.setRowBackgroundColour(rowIndex, _fillColour)
+
+                with self._tableColouring(table) as setRowBackgroundColour:
+                    for rowIndex in chainErrors:
+                        setRowBackgroundColour(rowIndex, _fillColour)
 
     def table_ccpn_notes(self, saveFrame, item):
         itemName = item.data(0, 0)
@@ -554,8 +571,10 @@ class NefDictFrame(Frame):
             chainErrors = _errors.get('ccpn_note_' + itemName)
             if chainErrors:
                 table = self._nefTables.get('ccpn_note')
-                for rowIndex in chainErrors:
-                    table.setRowBackgroundColour(rowIndex, _fillColour)
+
+                with self._tableColouring(table) as setRowBackgroundColour:
+                    for rowIndex in chainErrors:
+                        setRowBackgroundColour(rowIndex, _fillColour)
 
     def table_ccpn_collections(self, saveFrame, item):
         itemName = item.data(0, 0)
@@ -574,8 +593,10 @@ class NefDictFrame(Frame):
             chainErrors = _errors.get('ccpn_collection_' + itemName)
             if chainErrors:
                 table = self._nefTables.get('ccpn_collection')
-                for rowIndex in chainErrors:
-                    table.setRowBackgroundColour(rowIndex, _fillColour)
+
+                with self._tableColouring(table) as setRowBackgroundColour:
+                    for rowIndex in chainErrors:
+                        setRowBackgroundColour(rowIndex, _fillColour)
 
     def table_ccpn_additional_data(self, saveFrame, item):
         itemName = item.data(0, 0)
@@ -594,8 +615,10 @@ class NefDictFrame(Frame):
             chainErrors = _errors.get('ccpn_internal_data_' + itemName)
             if chainErrors:
                 table = self._nefTables.get('ccpn_internal_data')
-                for rowIndex in chainErrors:
-                    table.setRowBackgroundColour(rowIndex, _fillColour)
+
+                with self._tableColouring(table) as setRowBackgroundColour:
+                    for rowIndex in chainErrors:
+                        setRowBackgroundColour(rowIndex, _fillColour)
 
     def _set_bad_saveframe(self, name=None, saveFrame=None, parentGroup=None, prefix=None, mappingCode=None,
                            errorCode=None, tableColourFunc=None):
@@ -1459,6 +1482,9 @@ class NefDictFrame(Frame):
                 # handler(self, saveFrame, item)
                 return handler(self, name=name, saveFrame=saveFrame, parentGroup=parentGroup, )  #, item)
 
+    # from ccpn.util.decorators import profile
+    #
+    # @profile()
     def _nefTreeClickedCallback(self, item, column=0):
         """Handle clicking on an item in the nef tree
         """
@@ -1510,8 +1536,9 @@ class NefDictFrame(Frame):
                             loop.name in saveFrame._rowErrors:
                         badRows = list(saveFrame._rowErrors[loop.name])
 
-                        for rowIndex in badRows:
-                            table.setRowBackgroundColour(rowIndex, _fillColour)
+                        with self._tableColouring(table) as setRowBackgroundColour:
+                            for rowIndex in badRows:
+                                setRowBackgroundColour(rowIndex, _fillColour)
 
                 if primaryHandler:
                     handler = self.handleSaveFrames.get(primaryHandler)
@@ -1527,15 +1554,31 @@ class NefDictFrame(Frame):
 
             self._tableSplitter.setVisible(True)
 
+    @contextmanager
+    def _tableColouring(self, table):
+
+        def _setRowBackgroundColour(row, colour):
+            _rowIndex = _rowMapping.index(row)
+            for j in _cols:
+                table.item(_rowIndex, j).setBackground(colour)
+
+        _rowMapping = [table.item(xx, 0).index for xx in range(table.rowCount())]
+        _cols = range(table.columnCount())
+
+        yield _setRowBackgroundColour
+
     def _addTableToFrame(self, _data, _name):
         """Add a new gui table into a moreLess frame to hold a nef loop
         """
         frame = MoreLessFrame(self, name=_name, showMore=True, grid=(0, 0))
         table = GuiTable(frame.contentsFrame, grid=(0, 0), gridSpan=(1, 1), multiSelect=True)
         table._hiddenColumns = []
-        table.setData(_data)
-        table.resizeColumnsToContents()
-        table.resizeRowsToContents()
+
+        with table.blockWidgetSignals(root=table, recursive=False):
+            table.setData(_data)
+        # table.resizeColumnsToContents()  # these are fairly slow
+        # table.resizeRowsToContents()
+
         self._nefTables[_name] = table
 
         return frame, table

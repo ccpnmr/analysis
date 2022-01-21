@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-04 20:12:04 +0000 (Thu, November 04, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-21 11:18:41 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -122,8 +122,12 @@ saveFrameReadingOrder = [
     'ccpn_restraint_list',
     'ccpn_peak_cluster_list',
     'ccpn_notes',
-    'ccpn_additional_data',
     'ccpn_distance_restraint_violation_list',
+    'ccpn_dihedral_restraint_violation_list',
+    'ccpn_rdc_restraint_violation_list',
+    'ccpn_datatable',
+    'ccpn_collections',
+    'ccpn_additional_data',
     'ccpn_parameter',
     'ccpn_logging'
     ]
@@ -964,9 +968,36 @@ nef2CcpnMap = {
         ('internal_data_string', None)
         )),
 
+    'ccpn_datatable'                        : OD((
+        ('ccpn_datatable_columns', None),
+        ('ccpn_datatable_metadata', _isALoop),
+        ('ccpn_datatable_data', _isALoop),
+        )),
+
+    'ccpn_datatable_metadata'               : OD((
+        ('name', None),
+        ('parameter', None)
+        )),
+
+    'ccpn_datatable_data'                   : OD((
+    )),
+
+    'ccpn_collections'                      : OD((
+        ('ccpn_collection', _isALoop),
+        )),
+
+    'ccpn_collection'                  : OD((
+        ('uniqueId', 'uniqueId'),
+        ('name', 'name'),
+        ('items', None),
+        ('comment', 'comment'),
+        )),
+
     'ccpn_distance_restraint_violation_list': OD((
+        ('serial', 'serial'),
+        ('name', 'name'),
         ('nef_spectrum', None),
-        ('nef_restraint_list', 'restraintTable.pid'),
+        ('nef_restraint_list', 'restraintTable.id'),
         ('run_id', 'runId'),
         ('program', None),
         ('program_version', None),
@@ -974,10 +1005,80 @@ nef2CcpnMap = {
         ('protocol_version', None),
         ('protocol_parameters', None),
         ('ccpn_dataset_id', 'structureData.id'),
+        ('comment', 'comment'),
+        ('ccpn_restraint_violation_list_columns', None),
+        ('ccpn_restraint_violation_list_metadata', _isALoop),
         ('ccpn_distance_restraint_violation', _isALoop),
         )),
 
-    'ccpn_distance_restraint_violation'     : OD((
+    'ccpn_dihedral_restraint_violation_list': OD((
+        ('serial', 'serial'),
+        ('name', 'name'),
+        ('nef_spectrum', None),
+        ('nef_restraint_list', 'restraintTable.id'),
+        ('run_id', 'runId'),
+        ('program', None),
+        ('program_version', None),
+        ('protocol', None),
+        ('protocol_version', None),
+        ('protocol_parameters', None),
+        ('ccpn_dataset_id', 'structureData.id'),
+        ('comment', 'comment'),
+        ('ccpn_restraint_violation_list_columns', None),
+        ('ccpn_restraint_violation_list_metadata', _isALoop),
+        ('ccpn_dihedral_restraint_violation', _isALoop),
+        )),
+
+    'ccpn_rdc_restraint_violation_list'     : OD((
+        ('serial', 'serial'),
+        ('name', 'name'),
+        ('nef_spectrum', None),
+        ('nef_restraint_list', 'restraintTable.id'),
+        ('run_id', 'runId'),
+        ('program', None),
+        ('program_version', None),
+        ('protocol', None),
+        ('protocol_version', None),
+        ('protocol_parameters', None),
+        ('ccpn_dataset_id', 'structureData.id'),
+        ('comment', 'comment'),
+        ('ccpn_restraint_violation_list_columns', None),
+        ('ccpn_restraint_violation_list_metadata', _isALoop),
+        ('ccpn_rdc_restraint_violation', _isALoop),
+        )),
+
+    'ccpn_restraint_violation_list_metadata': OD((
+        ('name', None),
+        ('parameter', None)
+        )),
+
+    'ccpn_distance_restraint_violation'              : OD((
+        ('index', None),
+        ('model_id', None),
+        ('restraint_id', None),
+        ('restraint_sub_id', None),
+        ('chain_code_1', None),
+        ('sequence_code_1', None),
+        ('residue_name_1', None),
+        ('atom_name_1', None),
+        ('chain_code_2', None),
+        ('sequence_code_2', None),
+        ('residue_name_2', None),
+        ('atom_name_2', None),
+        ('weight', 'weight'),
+        ('probability', 'probability'),
+        ('lower_limit', 'lowerLimit'),
+        ('upper_limit', 'upperLimit'),
+        ('distance', 'distance'),
+        ('violation', 'violation'),
+        ('violation_file', None),
+        ('structure_file', None),
+        ('structure_index', None),
+        ('nef_peak_id', 'peakID'),
+        ('comment', None),
+        )),
+
+    'ccpn_dihedral_restraint_violation': OD((
         ('index', None),
         ('model_id', None),
         ('restraint_id', None),
@@ -998,6 +1099,32 @@ nef2CcpnMap = {
         ('sequence_code_4', None),
         ('residue_name_4', None),
         ('atom_name_4', None),
+        ('weight', 'weight'),
+        ('probability', 'probability'),
+        ('lower_limit', 'lowerLimit'),
+        ('upper_limit', 'upperLimit'),
+        ('distance', 'distance'),
+        ('violation', 'violation'),
+        ('violation_file', None),
+        ('structure_file', None),
+        ('structure_index', None),
+        ('nef_peak_id', 'peakID'),
+        ('comment', None),
+        )),
+
+    'ccpn_rdc_restraint_violation': OD((
+        ('index', None),
+        ('model_id', None),
+        ('restraint_id', None),
+        ('restraint_sub_id', None),
+        ('chain_code_1', None),
+        ('sequence_code_1', None),
+        ('residue_name_1', None),
+        ('atom_name_1', None),
+        ('chain_code_2', None),
+        ('sequence_code_2', None),
+        ('residue_name_2', None),
+        ('atom_name_2', None),
         ('weight', 'weight'),
         ('probability', 'probability'),
         ('lower_limit', 'lowerLimit'),

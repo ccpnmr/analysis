@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-04 20:12:04 +0000 (Thu, November 04, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-21 11:18:41 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -592,6 +592,20 @@ class CcpnNefContent:
 
     contents['nef_chemical_shift_list'] = content_nef_chemical_shift_list
 
+    def content_ccpn_datatable(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        """Get the contents of ccpn_datatable saveFrame"""
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+
+        # store the name of the chemicalShiftList
+        name = framecode[len(category) + 1:]
+        result = {category: (name,)}
+
+        self._contentLoops(project, saveFrame)
+        self.updateContent(saveFrame, result)
+
+    contents['ccpn_datatable'] = content_ccpn_datatable
+
     def content_nef_covalent_links(self, project: Project, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame) -> OrderedSet:
         """get the contents of nef_covalent_links loop"""
         covalentLinks = OrderedSet()
@@ -901,7 +915,12 @@ class CcpnNefContent:
 
         return result
 
-    contents['ccpn_distance_restraint_violation'] = partial(content_ccpn_restraint_violation, itemLength=2)
+    contents['ccpn_distance_restraint_violation'] = partial(content_ccpn_restraint_violation,
+                                                            itemLength=coreConstants.constraintListType2ItemLength.get('Distance'))
+    contents['ccpn_dihedral_restraint_violation'] = partial(content_ccpn_restraint_violation,
+                                                            itemLength=coreConstants.constraintListType2ItemLength.get('Dihedral'))
+    contents['ccpn_rdc_restraint_violation'] = partial(content_ccpn_restraint_violation,
+                                                       itemLength=coreConstants.constraintListType2ItemLength.get('Rdc'))
 
     def content_ccpn_restraint_violation_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         """Get the contents of ccpn_distance_restraint_violation_list saveFrame
@@ -931,6 +950,10 @@ class CcpnNefContent:
         self.updateContent(saveFrame, result)
 
     contents['ccpn_distance_restraint_violation_list'] = content_ccpn_restraint_violation_list  # could be _contentLoops
+    contents['ccpn_dihedral_restraint_violation_list'] = content_ccpn_restraint_violation_list  # could be _contentLoops
+    contents['ccpn_rdc_restraint_violation_list'] = content_ccpn_restraint_violation_list  # could be _contentLoops
+
+    contents['ccpn_restraint_violation_list_metadata'] = _noLoopContent
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1057,6 +1080,27 @@ class CcpnNefContent:
     contents['ccpn_additional_data'] = content_ccpn_additional_data
     contents['ccpn_internal_data'] = _noLoopContent
 
+    def content_ccpn_collections(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        collections = OrderedSet()
+
+        loopName = 'ccpn_collection'
+        saveFrameName = saveFrame['sf_category']
+
+        loop = saveFrame[loopName]
+        mapping = nef2CcpnMap.get(loopName) or {}
+        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        for row in loop.data:
+            parameters = _parametersFromLoopRow(row, map2)
+            collections.add(parameters['name'])
+
+        result = {saveFrameName: collections}
+
+        self._contentLoops(project, saveFrame)
+        self.updateContent(saveFrame, result)
+
+    contents['ccpn_collections'] = content_ccpn_collections
+    contents['ccpn_collection'] = _noLoopContent
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # these are the empty ones that need methods adding as required
 
@@ -1068,3 +1112,6 @@ class CcpnNefContent:
     contents['ccpn_spectrum_dimension'] = _noLoopContent
     contents['nef_spectrum_dimension'] = _noLoopContent
     contents['ccpn_substance_synonym'] = _noLoopContent
+
+    contents['ccpn_datatable_data'] = _noLoopContent
+    contents['ccpn_datatable_metadata'] = _noLoopContent

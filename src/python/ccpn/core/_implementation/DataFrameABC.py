@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-01 11:20:56 +0000 (Mon, November 01, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-21 11:18:41 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -33,6 +33,7 @@ import numbers
 import typing
 import numpy
 import pandas as pd
+import re
 from ccpn.util import Sorting
 from ccpn.util.ListFromString import listFromString
 from functools import partial
@@ -42,6 +43,7 @@ from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlockWithoutSid
 # Pid.IDSEP - but we do not want to import from ccpn.core here
 IDSEP = '.'
 NaN = math.nan
+_REGEXNEFCOMPATIBLE = u'[^0-9a-zA-Z]+'
 
 
 class DataFrameABC(pd.DataFrame):
@@ -872,6 +874,16 @@ class DataFrameABC(pd.DataFrame):
                                 else:
                                     super().__setitem__(key, oldValue)
                                 raise
+
+    @property
+    def nefCompatibleColumns(self):
+        """Return the columns as nef compatible
+        changes all upper to lower, replaces all others with _
+        """
+        cols = []
+        for col in self.columns:
+            cols.append(re.sub(_REGEXNEFCOMPATIBLE, '_', col.lower()))
+        return cols
 
 
 def fitToDataType(data: collections.Sequence, dataType: type, force: bool = False) -> list:

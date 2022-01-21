@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-23 17:37:47 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-21 11:18:41 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -40,6 +40,7 @@ from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Restraint import Restraint
 from ccpn.core.RestraintTable import RestraintTable
+from ccpn.core.DataTable import DataTable
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.DataFrameObject import DataFrameObject
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -53,7 +54,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.TableSorting import MultiColumnTableWidgetItem
 from ccpn.ui.gui.widgets.SettingsWidgets import ModuleSettingsWidget, \
-    RestraintTableSelectionWidget, SpectrumDisplaySelectionWidget
+    RestraintTableSelectionWidget, SpectrumDisplaySelectionWidget, DataTableSelectionWidget
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import makeIterableList
 import ccpn.ui.gui.modules.PyMolUtil as pyMolUtil
@@ -144,6 +145,17 @@ class RestraintAnalysisTableModule(CcpnModule):
                                                                      'defaults'   : [],
                                                                      'objectName' : 'RestraintTablesSelection'},
                                                         }),
+                                    ('DataTables', {'label'   : '',
+                                                        'tipText' : '',
+                                                        'callBack': None,
+                                                        'enabled' : True,
+                                                        '_init'   : None,
+                                                        'type'    : DataTableSelectionWidget,
+                                                        'kwds'    : {'texts'      : [],
+                                                                     'displayText': [],
+                                                                     'defaults'   : [],
+                                                                     'objectName' : 'RestraintTablesSelection'},
+                                                        }),
                                     # ('autoExpand', {'label'   : '',
                                     #                 'tipText' : '',
                                     #                 'callBack': self._updateAutoExpand,
@@ -216,6 +228,8 @@ class RestraintAnalysisTableModule(CcpnModule):
         self._displayListWidget = self._RATwidget.getWidget('SpectrumDisplays')
         self._restraintTable = self._RATwidget.getWidget('RestraintTables')
         self._restraintTable.listWidget.changed.connect(self._updateRestraintTables)
+        self._dataTable = self._RATwidget.getWidget('DataTables')
+        self._dataTable.listWidget.changed.connect(self._updateDataTables)
         # self._expandSelector = self._RATwidget.checkBoxes['autoExpand']['widget']
 
         self._meanLowerLimitSpinBox = self._RATwidget.checkBoxes['meanLowerLimit']['widget']
@@ -285,6 +299,18 @@ class RestraintAnalysisTableModule(CcpnModule):
 
         self.restraintAnalysisTable.updateRestraintTables(restraintTables)
 
+    def _updateDataTables(self, *args):
+        """Update the selected dataTables
+        """
+        dataTables = self._dataTable.getTexts()
+        if ALL in dataTables:
+            dataTables = self.project.dataTables
+        else:
+            dataTables = [self.project.getByPid(rList) for rList in dataTables]
+            dataTables = list(filter(None, dataTables))
+
+        self.restraintAnalysisTable.updateDataTables(dataTables)
+
     def _updateAutoExpand(self, expand):
         # index = self._expandSelector.getIndex()
         self.restraintAnalysisTable.updateAutoExpand(expand)
@@ -338,6 +364,8 @@ class RestraintAnalysisTableWidget(GuiTable):
         self._selectedPeakList = None
         kwds['setLayout'] = True  # Assure we have a layout with the widget
         self._restraintTables = []
+        self._dataTables = []
+
         self._autoExpand = False
         self._meanLowerLimit = 0.0
 
@@ -436,6 +464,12 @@ class RestraintAnalysisTableWidget(GuiTable):
         """Update the selected restraint lists from the parent module
         """
         self._restraintTables = restraintTables
+        self._updateTable()
+
+    def updateDataTables(self, dataTables):
+        """Update the selected data lists from the parent module
+        """
+        self._dataTables = dataTables
         self._updateTable()
 
     def _updateTable(self, useSelectedPeakList=True, peaks=None, peakList=None):
@@ -849,22 +883,36 @@ class RestraintAnalysisTableWidget(GuiTable):
                                      pd.DataFrame(ll, columns=[f'{HeaderRestraint}_{lCount + 1}',
                                                                f'Atoms_{lCount + 1}'])], axis=1)
 
+            # # get the dataSets that contain data with a matching 'result' name - should be violations
+            # violationResults = {resList: viols.copy() if viols is not None else None
+            #                     for resList in resLists
+            #                     for data in resList.structureData.data if resList.name == data.name
+            #                     for k, viols in data.dataParameters.items() if k == 'results'}
+
+            print(f'  {self._dataTables}')
             # get the dataSets that contain data with a matching 'result' name - should be violations
-            violationResults = {resList: viols.copy() if viols is not None else None
+            violationResults = {resList: viols.data.copy() if viols is not None else None
                                 for resList in resLists
-                                for data in resList.structureData.data if resList.name == data.name
-                                for k, viols in data.dataParameters.items() if k == 'results'}
+                                for viols in self._dataTables if resList.pid == viols.getMetadata('restraintTable')
+                                }
+
+            print(f'violation results  {violationResults.keys()}   {[val.size for val in violationResults.values()]}')
 
             # rename the columns to match the order in visible list - number must match the position in the selected restraintTables
             for ii, (k, resViol) in enumerate(violationResults.items()):
                 ind = resLists.index(k)
                 resViol.columns = [vv + f'_{ind + 1}' for vv in resViol.columns]
 
+                print(f'columns  {resViol.columns}')
+
             # merge all the tables for each restraintTable
             _out = {}
             zeroCols = []
             for ii, resList in enumerate(resLists):
+                print(f'      resList {ii}   {resList}')
+
                 if resList in violationResults:
+                    print(f'       in')
 
                     _left = dfs[resList]
                     _right = violationResults[resList]

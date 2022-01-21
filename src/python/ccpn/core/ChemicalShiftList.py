@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-19 17:14:27 +0000 (Wed, January 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 11:18:41 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -665,19 +665,22 @@ class ChemicalShiftList(AbstractWrapperObject):
         if data is not None and nmrAtom and nmrAtom.pid in list(data[CS_NMRATOM]):
             raise ValueError(f'{self.className}.newChemicalShift: nmrAtom {nmrAtom} already exists')
 
-        shift = self._newChemicalShiftObject(atomName, chainCode, comment, data, figureOfMerit, nmrAtom, residueType, sequenceCode, value, valueError)
+        shift = self._newChemicalShiftObject(data, value, valueError, figureOfMerit,
+                                             nmrAtom, chainCode, sequenceCode, residueType, atomName, comment)
 
         return shift
 
     @newV3Object()
-    def _newChemicalShiftObject(self, atomName, chainCode, comment, data, figureOfMerit, nmrAtom, residueType, sequenceCode, value, valueError):
+    def _newChemicalShiftObject(self, data, value, valueError, figureOfMerit,
+                                nmrAtom, chainCode, sequenceCode, residueType, atomName, comment):
         """Create a new pure V3 ChemicalShift object
         Method is wrapped with create/delete notifier
         """
         from ccpn.core.ChemicalShift import _getByTuple, _newChemicalShift as _newShift
 
         # make new tuple - verifies contents
-        _row = _getByTuple(self, value, valueError, figureOfMerit,
+        _row = _getByTuple(self, False,
+                           value, valueError, figureOfMerit,
                            nmrAtom, chainCode, sequenceCode, residueType, atomName,
                            comment)
         _nextUniqueId = self.project._getNextUniqueIdValue(CS_CLASSNAME)

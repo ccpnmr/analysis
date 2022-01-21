@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:23:25 +0000 (Thu, January 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 11:18:41 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -39,6 +39,7 @@ from ccpn.util.Logging import getLogger
 
 
 logger = getLogger()
+ALLOWED_METADATA_TYPES = (dict, list, str, int, float, bool, type(None))
 
 
 class ViolationFrame(DataFrameABC):
@@ -151,6 +152,21 @@ class ViolationTable(AbstractWrapperObject):
     @ccpNmrV3CoreUndoBlock()
     def setMetadata(self, name: str, value):
         """Add name:value to metadata, overwriting existing entry."""
+        # check that the metadata parameter belongs to the defined list
+
+        def _checkMetaTypes(value):
+            if isinstance(value, dict):
+                return all(_checkMetaTypes(val) for val in value.keys()) and all(_checkMetaTypes(val) for val in value.values())
+            elif isinstance(value, list):
+                return all(_checkMetaTypes(val) for val in value)
+            else:
+                return isinstance(value, ALLOWED_METADATA_TYPES)
+            # could use json.dumps(value) with (TypeError, OverflowError) but allows tuples
+
+        # check that the metadata parameter belongs to the defined list
+        if not _checkMetaTypes(value):
+            raise ValueError(f'value contains non-serialisable element')
+
         apiData = self._wrappedData
         metadata = apiData.findFirstViolationTableParameter(name=name)
         if metadata is None:
@@ -183,6 +199,18 @@ class ViolationTable(AbstractWrapperObject):
         Calls self.setMetadata(key, value) for each key,value pair in the input."""
         for key, val in value.items():
             self.setMetadata(key, val)
+
+    @property
+    def columns(self) -> list:
+        """Return the columns in the dataFrame
+        """
+        return list(self.data.columns)
+
+    @property
+    def nefCompatibleColumns(self):
+        """Return the columns in the dataFrame
+        """
+        return self.data.nefCompatibleColumns()
 
     #=========================================================================================
     # Implementation functions

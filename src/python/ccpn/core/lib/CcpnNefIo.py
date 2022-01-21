@@ -3,7 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-23 17:37:46 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-21 11:18:41 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,7 @@ import time
 import typing
 import re
 import pandas as pd
+import json
 from functools import partial
 from datetime import datetime
 from collections import OrderedDict as OD, namedtuple
@@ -77,10 +78,12 @@ from ccpn.core.StructureData import StructureData
 from ccpn.core.Data import Data
 from ccpn.core.RestraintTable import RestraintTable
 from ccpn.core.Note import Note
+from ccpn.core.ViolationTable import ViolationTable
+from ccpn.core.DataTable import DataTable
+from ccpn.core.Collection import Collection
 from ccpn.core.lib import SpectrumLib
 from ccpn.core.lib.MoleculeLib import extraBoundAtomPairs
 from ccpn.core.lib import RestraintLib
-from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpn.util.Logging import getLogger
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.AttrDict import AttrDict
@@ -112,7 +115,9 @@ COMPLEXES = 'complexes'
 SPECTRUMGROUPS = 'spectrumGroups'
 NOTES = 'notes'
 PEAKCLUSTERS = 'peakClusters'
-VIOLATIONLISTS = 'violationLists'
+VIOLATIONTABLES = 'violationTables'
+DATATABLES = 'dataTables'
+COLLECTIONS = 'collections'
 
 POSITIONCERTAINTY = 'position_uncertainty_'
 POSITIONCERTAINTYLEN = len(POSITIONCERTAINTY)
@@ -148,7 +153,11 @@ NAMETOOBJECTMAPPING = {'nef_chemical_shift_list'               : ChemicalShiftLi
                        'nef_dihedral_restraint_list'           : RestraintTable,
                        'nef_rdc_restraint_list'                : RestraintTable,
                        'ccpn_restraint_list'                   : RestraintTable,
-                       'ccpn_distance_restraint_violation_list': RestraintTable,
+                       'ccpn_distance_restraint_violation_list': ViolationTable,
+                       'ccpn_dihedral_restraint_violation_list': ViolationTable,
+                       'ccpn_rdc_restraint_violation_list'     : ViolationTable,
+                       'ccpn_datatable'                        : DataTable,
+                       'ccpn_collections'                      : Collection,
                        'ccpn_notes'                            : Note,
                        }
 
@@ -416,7 +425,11 @@ class CcpnNefWriter:
                       complexes: typing.Sequence[Complex] = (),
                       spectrumGroups: typing.Sequence[SpectrumGroup] = (),
                       notes: typing.Sequence[Note] = (),
-                      peakClusters: typing.Sequence[PeakCluster] = (), ):
+                      peakClusters: typing.Sequence[PeakCluster] = (),
+                      violationTables: typing.Sequence[ViolationTable] = (),
+                      dataTables: typing.Sequence[DataTable] = (),
+                      collections: typing.Sequence[Collection] = (),
+                      ):
         """Export objects passed in and objects they are linked to.
 
             if expandSelection is True (strongly recommended):
@@ -650,13 +663,34 @@ class CcpnNefWriter:
         for obj in project.complexes:
             saveFrames.append(self.complex2Nef(obj))
 
-        if project.structureData:
-            saveFrames.extend(self.structureData2Nef(project.structureData))
+        # structureData
+        if structureData:
+            saveFrames.extend(self.structureData2Nef(sorted(structureData)))
 
         # Notes
-        saveFrame = self.notes2Nef(sorted(notes))
+        saveFrame = self.notes2Nef(project, sorted(notes))
         if saveFrame:
             saveFrames.append(saveFrame)
+
+        # # violation tables
+        # if project.violationTables:
+        #     if (found := self.violationTables2Nef(project)):
+        #         saveFrames.extend(found)
+
+        # RestraintLists and
+        violationTables = sorted(violationTables)
+        singleStructureTable = bool(violationTables) and len(set(x.structureData for x in violationTables)) == 1
+        for obj in violationTables:
+            saveFrames.append(self.violationTable2Nef(obj, singleStructureTable=singleStructureTable))
+
+        # data tables
+        for dataTable in sorted(dataTables):
+            if (found := self.dataTable2Nef(project, dataTable)):
+                saveFrames.append(found)
+
+        # collections
+        if (found := self.collections2Nef(project, sorted(collections))):
+            saveFrames.append(found)
 
         # Additional data
         saveFrame = self.additionalData2Nef(project)
@@ -712,7 +746,9 @@ class CcpnNefWriter:
                                       samples=project.samples, substances=project.substances,
                                       nmrChains=project.nmrChains, structureData=project.structureData,
                                       complexes=project.complexes, spectrumGroups=project.spectrumGroups,
-                                      notes=project.notes, peakClusters=project.peakClusters)
+                                      notes=project.notes, peakClusters=project.peakClusters,
+                                      violationTables=project.violationTables, dataTables=project.dataTables,
+                                      collections=project.collections)
         else:
             # export selection of objects
             # either everything minus the exclusionDict or the list of pids
@@ -734,11 +770,15 @@ class CcpnNefWriter:
             self.spectrumGroups = []
             self.notes = []
             self.peakClusters = []
+            self.violationTables = []
+            self.dataTables = []
+            self.collections = []
 
             checkList = [CHAINS, CHEMICALSHIFTLISTS, RESTRAINTTABLES, PEAKLISTS,
                          INTEGRALLISTS, MULTIPLETLISTS,
                          SAMPLES, SUBSTANCES, NMRCHAINS,
-                         STRUCTUREDATA, COMPLEXES, SPECTRUMGROUPS, NOTES, PEAKCLUSTERS]
+                         STRUCTUREDATA, COMPLEXES, SPECTRUMGROUPS, NOTES, PEAKCLUSTERS,
+                         VIOLATIONTABLES, DATATABLES, COLLECTIONS]
 
             # put the pids in the correct lists
             for name in checkList:
@@ -763,7 +803,10 @@ class CcpnNefWriter:
                                       samples=self.samples, substances=self.substances,
                                       nmrChains=self.nmrChains, structureData=self.structureData,
                                       complexes=self.complexes, spectrumGroups=self.spectrumGroups,
-                                      notes=self.notes, peakClusters=self.peakClusters)
+                                      notes=self.notes, peakClusters=self.peakClusters,
+                                      violationTables=self.violationTables, dataTables=self.dataTables,
+                                      collections=self.collections
+                                      )
 
         # self.ccpn2SaveFrameName = {}
         # saveFrames = []
@@ -1781,13 +1824,13 @@ class CcpnNefWriter:
         #
         return result
 
-    def notes2Nef(self, notes: List[Note]) -> StarIo.NmrSaveFrame:
+    def notes2Nef(self, project: Project, notes: List[Note]) -> StarIo.NmrSaveFrame:
         """Convert Notes to CCPN NEF saveframe"""
 
         # Set up frame
         category = 'ccpn_notes'
         if notes:
-            result = self._newNefSaveFrame(notes[0].project, category, category)
+            result = self._newNefSaveFrame(project, category, category)
             loopName = 'ccpn_note'
             loop = result[loopName]
             for note in sorted(notes):
@@ -1812,9 +1855,10 @@ class CcpnNefWriter:
             dd = pid2Obj.get(className)
             if dd:
                 for obj in dd.values():
-                    internalData = obj._ccpnInternalData
-                    if internalData:
-                        data[obj.longPid] = internalData
+                    if hasattr(obj, '_ccpnInternalData'):
+                        internalData = obj._ccpnInternalData
+                        if internalData:
+                            data[obj.longPid] = internalData
 
         if data:
             result = self._newNefSaveFrame(project, category, category)
@@ -1827,14 +1871,200 @@ class CcpnNefWriter:
         #
         return result
 
+    def violationTable2Nef(self, violationTable: ViolationTable, singleStructureTable: bool = False
+                           ) -> Optional[StarIo.NmrSaveFrame]:
+        """Make a saveFrame for a violationTable"""
+
+        project = violationTable._project
+
+        # Set up frame
+        # if violationTable.restraintTable:
+        #     restraintType = violationTable.restraintType
+        # else:
+        #     return
+
+        restraintType = 'Distance'
+
+        if restraintType == 'Distance':
+            category = 'ccpn_distance_restraint_violation_list'
+            loopName = 'ccpn_distance_restraint_violation'
+            itemLength = 2
+        elif restraintType == 'Dihedral':
+            category = 'ccpn_dihedral_restraint_violation_list'
+            loopName = 'ccpn_dihedral_restraint_violation'
+            itemLength = 4
+        elif restraintType == 'Rdc':
+            category = 'ccpn_rdc_restraint_violation_list'
+            loopName = 'ccpn_rdc_restraint_violation'
+            itemLength = 2
+        else:
+            return
+
+        name = violationTable.name
+        if not singleStructureTable:
+            # If there are multiple StructureData, add the structureData serial for disambiguation
+            ss = '`%s`' % violationTable.structureData.serial
+            if not name.startswith(ss):
+                name = ss + name
+
+        result = self._newNefSaveFrame(violationTable, category, name)
+        self.ccpn2SaveFrameName[violationTable] = result['sf_framecode']
+        result['ccpn_restraint_violation_list_columns'] = json.dumps(list(violationTable.columns))
+
+        metaloopName = 'ccpn_restraint_violation_list_metadata'
+        loop = result[metaloopName]
+
+        # add the metadata loop to the saveframe
+        if violationTable.metadata.items():
+            for k, val in violationTable.metadata.items():
+                row = loop.newRow(self._loopRowData(metaloopName, {}))
+                row['name'] = k
+                row['parameter'] = json.dumps(val)
+        else:
+            del loop
+
+        # add the dataFrame to the saveframe
+        _data = violationTable.data
+
+        if isinstance(_data, pd.DataFrame) and not _data.empty:
+            # create a loop from a pd.dataFrame
+
+            # delete the old list - easier to create a new one
+            del result[loopName]
+
+            cols = list(_data.nefCompatibleColumns)
+            loop = result.newLoop(loopName, list(cols))
+            for _row in _data.itertuples(index=False):
+                loop.newRow(_row)
+
+        else:
+            del result[loopName]
+
+        return result
+
+        # # Set up frame
+        # category = 'ccpn_datatable'
+        # name = '%s.%s' % (category, violationTable.name)
+        # result = self._newNefSaveFrame(violationTable, category, name)
+        #
+        # loopName = 'ccpn_datatable_metadata'
+        # loop = result[loopName]
+        #
+        # # add the metadata loop to the saveframe
+        # if violationTable.metadata.items():
+        #     for k, val in violationTable.metadata.items():
+        #         row = loop.newRow(self._loopRowData(loopName, {}))
+        #         row['name'] = k
+        #         row['parameter'] = val
+        # else:
+        #     del loop
+        #
+        # # add the dataFrame to the saveframe
+        # _data = violationTable.data
+        # loopName = 'ccpn_datatable_data'
+        # if isinstance(_data, pd.DataFrame) and not _data.empty:
+        #     # create a loop from a pd.dataFrame - needs improvement
+        #
+        #     del result[loopName]
+        #
+        #     cols = list(_data.columns)
+        #     loop = result.newLoop(loopName, list(cols))
+        #     for _row in _data.itertuples(index=False):
+        #         loop.newRow(_row)
+        #
+        # else:
+        #     del result[loopName]
+        #
+        # return result
+
+    def dataTable2Nef(self, project: Project, dataTable: DataTable) -> StarIo.NmrSaveFrame:
+        """Make a saveFrame for a datatable"""
+
+        # Set up frame
+        category = 'ccpn_datatable'
+        result = self._newNefSaveFrame(dataTable, category, dataTable.name)
+        result['ccpn_datatable_columns'] = json.dumps(list(dataTable.columns))
+
+        loopName = 'ccpn_datatable_metadata'
+        loop = result[loopName]
+
+        # add the metadata loop to the saveframe
+        if dataTable.metadata.items():
+            for k, val in dataTable.metadata.items():
+                row = loop.newRow(self._loopRowData(loopName, {}))
+                row['name'] = k
+                row['parameter'] = json.dumps(val)
+        else:
+            del loop
+
+        # add the dataFrame to the saveframe
+        _data = dataTable.data
+        loopName = 'ccpn_datatable_data'
+        if isinstance(_data, pd.DataFrame) and not _data.empty:
+            # create a loop from a pd.dataFrame - needs improvement
+
+            del result[loopName]
+
+            # get the nef compatible columns from the dataTable
+            cols = list(_data.nefCompatibleColumns)
+            loop = result.newLoop(loopName, list(cols))
+            for _row in _data.itertuples(index=False):
+                loop.newRow(_row)
+
+        else:
+            del result[loopName]
+
+        return result
+
+        # if isinstance(val, pd.DataFrame):
+        #     # create a loop from a pd.dataFrame - needs improvement
+        #     loopName = f'ccpn_dataframe'
+        #     cols = list(val.columns)
+        #
+        #     # NOTE:ED - need to modify the headers somewhere more sensible
+        #     from ccpn.ui.gui.modules.RestraintAnalysisTable import nefHeaders, Headers
+        #
+        #     # list of header types that need swapping - need the opposite to load
+        #     _headers = [(nefHeaders, Headers),
+        #                 ]
+        #
+        #     for oldHeaders, newHeaders in _headers:
+        #         if all(hh in newHeaders for hh in cols) and len(cols) == len(newHeaders):
+        #             # rename all the column headers to the correct names
+        #             cols = [oldHeaders[newHeaders.index(cc)] if cc in newHeaders else cc for cc in cols]
+        #
+        #     loop = result.newLoop(loopName, list(cols))
+        #     for _row in val.itertuples(index=False):
+        #         loop.newRow(_row)
+
+    def collections2Nef(self, project: Project, collections) -> StarIo.NmrSaveFrame:
+        """Make singleton saveFrame for collections"""
+
+        # Set up frame
+        category = 'ccpn_collections'
+        if collections:
+            result = self._newNefSaveFrame(project, category, category)
+            loopName = 'ccpn_collection'
+            loop = result[loopName]
+            for collection in collections:
+                row = loop.newRow(self._loopRowData(loopName, collection))
+                row['items'] = json.dumps([itm.pid for itm in collection.items])
+        else:
+            result = None
+
+        return result
+
     def _saveFrameNefOrder(self, saveframes: List[Optional[StarIo.NmrSaveFrame]]
                            ) -> List[StarIo.NmrSaveFrame]:
         """Reorder saveframes in NEF export order, and filter out Nones"""
         dd = {}
         for saveframe in saveframes:
             if saveframe is not None:
-                ll = dd.setdefault(saveframe['sf_category'], [])
-                ll.append(saveframe)
+                try:
+                    ll = dd.setdefault(saveframe['sf_category'], [])
+                    ll.append(saveframe)
+                except Exception as es:
+                    pass
         #
         result = []
         for tag in saveFrameWritingOrder:
@@ -3348,6 +3578,86 @@ class CcpnNefReader(CcpnNefContent):
 
     verifiers['nef_chemical_shift_list'] = verify_nef_chemical_shift_list
 
+    def load_ccpn_datatable(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        """load ccpn_datatable saveFrame"""
+
+        # Get ccpn-to-nef mapping for saveframe
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+        mapping = nef2CcpnMap.get(category) or {}
+
+        parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
+        self._updateStringParameters(parameters)
+
+        parameters['name'] = framecode[len(category) + 1:]
+        serial = parameters.pop('serial', 1)
+        # columns = parameters.pop('columns', None)
+        columns = saveFrame['ccpn_datatable_columns']
+        if columns:
+            columns = json.loads(columns)
+
+        # Make main object
+        result = project.newDataTable(**parameters)
+        try:
+            result._resetSerial(serial)
+        except Exception as es:
+            self.warning('Could not set serial for {} to {}'.format(result, serial), saveFrame)
+
+        # Load loops, with object as parent
+        for loopName in loopNames:
+            loop = saveFrame.get(loopName)
+            if loop:
+                importer = self.importers[loopName]
+                importer(self, result, loop, saveFrame)
+
+        # set columns back to the correct non-nef values
+        if columns:
+            result.data.columns = columns
+
+        return result
+
+    importers['ccpn_datatable'] = load_ccpn_datatable
+
+    def verify_ccpn_datatable(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        """verify ccpn_datatable saveFrame"""
+
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+        name = framecode[len(category) + 1:]
+
+        # Verify main object
+        result = project.getDataTable(name)
+        if result is not None:
+            self.error('ccpn_datatable - DataTable {} already exists'.format(result), saveFrame, (result,))
+            saveFrame._rowErrors[category] = (name,)
+
+        self._verifyLoops(project, saveFrame, name=name)
+
+    verifiers['ccpn_datatable'] = verify_ccpn_datatable
+
+    def load_ccpn_datatable_metadata(self, data: Data, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame,
+                                      run_id: str = '', itemLength: int = None):
+        """Serves to load ccpn_<type>_datatable_metadata loops"""
+
+        if loop and loop.data:
+            for row in loop.data:
+                name = row.get('name')
+                parameter = row.get('parameter')
+
+                data.setMetadata(name, json.loads(parameter))
+
+    importers['ccpn_datatable_metadata'] = load_ccpn_datatable_metadata
+
+    def load_ccpn_datatable_data(self, data: Data, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame,
+                                      run_id: str = '', itemLength: int = None):
+        """Serves to load ccpn_<type>_datatable_data loop"""
+
+        if loop and loop.data:
+            _df = pd.DataFrame(loop.data)
+            data.data = _df
+
+    importers['ccpn_datatable_data'] = load_ccpn_datatable_data
+
     def _ordered_dict_prepend(self, dct, key, value, dict_setitem=dict.__setitem__):
         """Prepend an item to an OrderedDict
         """
@@ -3829,6 +4139,65 @@ class CcpnNefReader(CcpnNefContent):
 
         return newName
 
+    def rename_ccpn_collection(self, project: Project,
+                         dataBlock: StarIo.NmrDataBlock, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...],
+                         saveFrame: StarIo.NmrSaveFrame,
+                         itemName=None, newName=None):
+        """Rename a ccpn_collection in ccpn_collections
+        :param itemName: name of the item to rename - dependent on saveFrame type
+        :param newName: new item name or None to autorename to next available name
+        """
+        if not itemName or newName == itemName:
+            return
+
+        _frameID = _saveFrameNameFromCategory(saveFrame)
+        framecode, frameName, subName, prefix, postfix, preSerial, postSerial, category = _frameID
+
+        frames = None
+        for contentBlock in contentDataBlocks:
+            framesBlock = self._getSaveFramesInOrder(contentBlock)
+            if not frames:
+                frames = framesBlock
+            else:
+                # merge the frames dict
+                frames = self._mergeSaveFramesInOrder(frames, framesBlock)
+
+        newName = self._getNewName(contentDataBlocks, saveFrame, itemName, newName, 'ccpn_collections', 'Collection')
+
+        loopList = ('ccpn_collection')
+        replaceList = ('name')
+        self.searchReplace(project, dataBlock, True, None, itemName, newName, replace=True,
+                           loopSearchList=loopList, rowSearchList=replaceList)
+
+        # search in the items of collections
+        
+        # # search in additionalData for the pid and change
+        # if category in NAMETOOBJECTMAPPING:
+        #     obj = NAMETOOBJECTMAPPING[category]
+        # 
+        #     frameCats = frames.get('ccpn_additional_data') or []
+        #     frameList = [frame.name for frame in frameCats]
+        #     attList = ('None',)
+        #     loopList = ('ccpn_internal_data',)
+        #     replaceList = ('ccpn_object_pid', 'internal_data_string',)
+        # 
+        #     # rename the items in the additionalData saveFrame
+        #     _oldPid = Pid.PREFIXSEP.join([obj.shortClassName, itemName])
+        #     _newPid = Pid.PREFIXSEP.join([obj.shortClassName, newName])
+        #     # rename the items in the additionalData saveFrame
+        #     _oldLongPid = Pid.PREFIXSEP.join([obj.className, itemName])
+        #     _newLongPid = Pid.PREFIXSEP.join([obj.className, newName])
+        # 
+        #     # need different search
+        #     self.searchReplaceDict(project, dataBlock, True, None,
+        #                            (f'(\"{_oldPid}\")', f'(\"{_oldLongPid}\")'),
+        #                            (f'\"{_newPid}\"', f'\"{_newLongPid}\"'),
+        #                            replace=True, validFramesOnly=True,
+        #                            frameSearchList=frameList, attributeSearchList=attList,
+        #                            loopSearchList=loopList, rowSearchList=replaceList)
+
+        return newName
+
     def _getNewListName(self, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...], saveFrame, itemName, newName, contentItem, descriptor):
 
         def incrementName(name):
@@ -3986,7 +4355,7 @@ class CcpnNefReader(CcpnNefContent):
                                       dataBlock: StarIo.NmrDataBlock, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...],
                                       saveFrame: StarIo.NmrSaveFrame,
                                       itemName=None, newName=None):
-        """Rename a ccpn_note in ccpn_notes
+        """Rename a ccpn_peak_cluster in ccpn_peak_cluster_list
         :param itemName: name of the item to rename - dependent on saveFrame type
         :param newName: new item name or None to autorename to next available name
         """
@@ -4275,6 +4644,10 @@ class CcpnNefReader(CcpnNefContent):
     renames['ccpn_peak_cluster_list'] = rename_ccpn_peak_cluster_list
     renames['ccpn_substance'] = rename_ccpn_substance
     renames['ccpn_distance_restraint_violation_list'] = rename_saveframe
+    renames['ccpn_dihedral_restraint_violation_list'] = rename_saveframe
+    renames['ccpn_rdc_restraint_violation_list'] = rename_saveframe
+    renames['ccpn_collection'] = rename_ccpn_collection
+    renames['ccpn_datatable'] = rename_saveframe
     renames['ccpn_logging'] = rename_saveframe
     renames['ccpn_dataset'] = rename_saveframe
 
@@ -4665,25 +5038,31 @@ class CcpnNefReader(CcpnNefContent):
         if category == 'ccpn_distance_restraint_violation_list':
             restraintType = 'Distance'
             itemLength = 2
+        elif category == 'ccpn_dihedral_restraint_violation_list':
+            restraintType = 'Dihedral'
+            itemLength = 4
+        elif category == 'ccpn_rdc_restraint_violation_list':
+            restraintType = 'Rdc'
+            itemLength = 2
         else:
             return
-        # elif category == 'nef_dihedral_restraint_list':
-        #     restraintType = 'Dihedral'
-        # elif category == 'nef_rdc_restraint_list':
-        #     restraintType = 'Rdc'
-        # else:
         #     restraintType = saveFrame.get('restraint_type')
         #     if not restraintType:
         #         self.warning("Missing restraint_type for saveFrame %s - value was %s" %
         #                      (framecode, restraintType),
         #                      saveFrame)
         #         return
+
         parameters['restraintType'] = restraintType
         namePrefix = restraintType[:3].capitalize() + '-'
 
         # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
         name = framecode[len(category) + 1:]
         dataSetId = saveFrame.get('ccpn_dataset_id')
+        _serial = saveFrame.get('serial')
+        columns = saveFrame['ccpn_restraint_violation_list_columns']
+        if columns:
+            columns = json.loads(columns)
 
         # ejb - need to remove the rogue `n` at the beginning of the name if it exists
         #       as it is passed into the namespace and gets added iteratively every save
@@ -4707,11 +5086,14 @@ class CcpnNefReader(CcpnNefContent):
         # read list
         parameters['name'] = name
 
-        # create a data item with the same name as the restraintList
-        result = dataSet.getData(name) or dataSet.newData(name)
+        # # create a data item with the same name as the restraintList
+        # result = dataSet.getData(name) or dataSet.newData(name)
+        #
+        # # get a unique parameter name if undefined
+        # run_id = run_id or self._uniqueParameterName(result, run_id)
 
-        # get a unique parameter name if undefined
-        run_id = run_id or self._uniqueParameterName(result, run_id)
+        # create a new violationTable
+        result = dataSet.getViolationTable(name) or dataSet.newViolationTable(name)
 
         # Load loops, with object as parent
         for loopName in loopNames:
@@ -4731,14 +5113,18 @@ class CcpnNefReader(CcpnNefContent):
         #
         # result.setDataParameter(run_id, _df)
 
+        # set columns back to the correct non-nef values
+        if columns:
+            result.data.columns = columns
+
         return result
 
     importers['ccpn_distance_restraint_violation_list'] = load_ccpn_restraint_violation_list
+    importers['ccpn_dihedral_restraint_violation_list'] = load_ccpn_restraint_violation_list
+    importers['ccpn_rdc_restraint_violation_list'] = load_ccpn_restraint_violation_list
 
     def verify_ccpn_restraint_violation_list(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
-        """Serves to verify ccpn_restraint_violation_list"""
-        # Get ccpn-to-nef mapping for saveframe
-        # _rowErrors = saveFrame._rowErrors[saveFrame.name] = OrderedSet()
+        """Serves to verify ccpn_<type>_restraint_violation_list"""
 
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
@@ -4746,7 +5132,58 @@ class CcpnNefReader(CcpnNefContent):
 
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
 
+        if category == 'ccpn_distance_restraint_violation_list':
+            restraintType = 'Distance'
+        elif category == 'ccpn_dihedral_restraint_violation_list':
+            restraintType = 'Dihedral'
+        elif category == 'ccpn_rdc_restraint_violation_list':
+            restraintType = 'Rdc'
+        else:
+            return
+
+        parameters['restraintType'] = restraintType
+
+        # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
+        name = framecode[len(category) + 1:]
+        dataSetId = saveFrame.get('ccpn_dataset_id')
+        _serial = saveFrame.get('serial')
+
+        # ejb - need to remove the rogue `n` at the beginning of the name if it exists
+        #       as it is passed into the namespace and gets added iteratively every save
+        #       next three lines remove all occurrences of `n` from name
+        name = re.sub(REGEXREMOVEENDQUOTES, '', name)  # substitute with ''
+
+        dataSet = self.project.getStructureData(dataSetId) if dataSetId else None
+        # Make main object
+        dataSet = dataSet or self.getStructureData(_serial)
+        if dataSet is not None:
+            # find the restraintList
+            violationTable = dataSet.getViolationTable(name)
+            if violationTable is not None:
+                self.error(f'{category} - violationTable {violationTable} already exists', saveFrame, (violationTable,))
+                # _rowErrors.add(name)
+
+                # NOTE:ED - this causes an issue with same name violation tables in different structureData
+                saveFrame._rowErrors[category] = (name,)
+
+                self._verifyLoops(violationTable, saveFrame, name=name)
+
     verifiers['ccpn_distance_restraint_violation_list'] = verify_ccpn_restraint_violation_list
+    verifiers['ccpn_dihedral_restraint_violation_list'] = verify_ccpn_restraint_violation_list
+    verifiers['ccpn_rdc_restraint_violation_list'] = verify_ccpn_restraint_violation_list
+
+    def load_ccpn_restraint_violation_list_metadata(self, data: Data, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame,
+                                      run_id: str = '', itemLength: int = None):
+        """Serves to load ccpn_<type>_restraint_violation loops"""
+
+        if loop and loop.data:
+            for row in loop.data:
+                name = row.get('name')
+                parameter = row.get('parameter')
+
+                data.setMetadata(name, json.loads(parameter))
+
+    importers['ccpn_restraint_violation_list_metadata'] = load_ccpn_restraint_violation_list_metadata
 
     def _uniqueParameterName(self, data, name):
         """Return a unique name based on name (set to defaultName if None)
@@ -4761,10 +5198,10 @@ class CcpnNefReader(CcpnNefContent):
 
     def load_ccpn_restraint_violation(self, data: Data, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame,
                                       run_id: str = '', itemLength: int = None):
-        """Serves to load ccpn_distance_restraint_violation loops"""
+        """Serves to load ccpn_<type>_restraint_violation loops"""
 
-        if not run_id:
-            raise RuntimeError('run_id is not defined')
+        # if not run_id:
+        #     raise RuntimeError('run_id is not defined')
 
         if loop and loop.data:
             # if loop.data exists then load as a pandas dataFrame
@@ -4792,16 +5229,21 @@ class CcpnNefReader(CcpnNefContent):
             # vset3 = [v for k, v in p1.groupby(['model_id'])]
             # pd.concat([v.reset_index()['violation'] for v in vset3], axis=1).agg(['sum', 'mean', 'min', 'max', lambda x : sum(x > 0.3), lambda x : sum(x > 0.3)], axis=1)
 
-            data.setDataParameter(run_id, _df)
+            # data.setDataParameter(run_id, _df)
+            data.data = _df
 
     importers['ccpn_distance_restraint_violation'] = load_ccpn_restraint_violation
+    importers['ccpn_dihedral_restraint_violation'] = load_ccpn_restraint_violation
+    importers['ccpn_rdc_restraint_violation'] = load_ccpn_restraint_violation
 
     def verify_ccpn_restraint_violation(self, restraintTable: RestraintTable, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame,
                                         name=None, itemLength: int = None):
-        """Verify the contents of ccpn_distance_restraint_violation loops"""
+        """Verify the contents of ccpn_<type>_restraint_violation loops"""
         result = []
 
     verifiers['ccpn_distance_restraint_violation'] = verify_ccpn_restraint_violation
+    verifiers['ccpn_dihedral_restraint_violation'] = verify_ccpn_restraint_violation
+    verifiers['ccpn_rcd_restraint_violation'] = verify_ccpn_restraint_violation
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -6681,6 +7123,54 @@ class CcpnNefReader(CcpnNefContent):
     #
     importers['ccpn_notes'] = load_ccpn_notes
 
+    def load_ccpn_collections(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+
+        # ccpn_collections contains nothing except for the ccpn_collection loop
+        loopName = 'ccpn_collection'
+        loop = saveFrame[loopName]
+        creatorFunc = project.newCollection
+
+        result = []
+        mapping = nef2CcpnMap.get(loopName) or {}
+        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+
+        try:
+            # check the list of items in the import dict
+            _frame = self._importDict[saveFrame.name]
+            importRows = _frame['_importRows']
+        except:
+            importRows = []
+
+        for row in loop.data:
+            parameters = _parametersFromLoopRow(row, map2)
+            self._updateStringParameters(parameters)
+
+            if parameters['name'] not in importRows:
+                # skip if not in the import list
+                continue
+
+            parameters.pop('uniqueId', None)  # remove from parameters, although shouldn't be there
+            obj = creatorFunc(**parameters)
+            result.append(obj)
+
+            # load serial and items
+            uniqueId = row.get('uniqueId')
+            if uniqueId is not None:
+                try:
+                    obj._resetUniqueId(uniqueId)
+                except:
+                    getLogger().debug('cannot reset collections.uniqueId')
+            itms = row.get('items')
+            if itms:
+                itms = json.loads(itms)
+                _itms = [project.getByPid(itm) for itm in itms]
+                obj.items = list(filter(None, _itms))
+        #
+        return result
+
+    #
+    importers['ccpn_collections'] = load_ccpn_collections
+
     def verify_ccpn_notes(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         loopName = 'ccpn_note'
         loop = saveFrame[loopName]
@@ -6703,6 +7193,29 @@ class CcpnNefReader(CcpnNefContent):
 
     verifiers['ccpn_notes'] = verify_ccpn_notes
     verifiers['ccpn_note'] = _noLoopVerify
+
+    def verify_ccpn_collections(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        loopName = 'ccpn_collection'
+        loop = saveFrame[loopName]
+        _rowErrors = saveFrame._rowErrors[loopName] = OrderedSet()
+        saveFrame._rowErrors['ccpn_collections'] = OrderedSet()
+        verifyFunc = project.getCollection
+
+        result = []
+        mapping = nef2CcpnMap.get(loopName) or {}
+        map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+        for row in loop.data:
+            parameters = _parametersFromLoopRow(row, map2)
+            name = parameters['name']
+            result = verifyFunc(name)
+            if result:
+                self.error('ccpn_collections - Collection {} already exists'.format(result), saveFrame, (result,))
+                _rowErrors.add(loop.data.index(row))
+                saveFrame._rowErrors['ccpn_collections'].add(name)
+                saveFrame._rowErrors['ccpn_collection_' + name] = (loop.data.index(row),)
+
+    verifiers['ccpn_collections'] = verify_ccpn_collections
+    verifiers['ccpn_collection'] = _noLoopVerify
 
     def load_ccpn_additional_data(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
 

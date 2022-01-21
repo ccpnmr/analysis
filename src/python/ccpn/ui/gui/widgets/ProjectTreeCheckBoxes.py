@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-09 16:11:17 +0000 (Thu, December 09, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-21 11:18:41 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -40,10 +40,13 @@ from ccpn.core.Sample import Sample
 from ccpn.core.Substance import Substance
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.StructureData import StructureData
+from ccpn.core.ViolationTable import ViolationTable
 from ccpn.core.Complex import Complex
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.Note import Note
 from ccpn.core.Project import Project
+from ccpn.core.DataTable import DataTable
+from ccpn.core.Collection import Collection
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
 from ccpn.util.nef import Specification
 from ccpn.util.nef import StarIo
@@ -82,10 +85,13 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         Substance._pluralLinkName,
         NmrChain._pluralLinkName,
         StructureData._pluralLinkName,
+        ViolationTable._pluralLinkName,
         Complex._pluralLinkName,
         SpectrumGroup._pluralLinkName,
         Note._pluralLinkName,
         PeakCluster._pluralLinkName,
+        DataTable._pluralLinkName,
+        Collection._pluralLinkName
         ]
 
     # set which items can be selected/deselected, others are automatically set
@@ -413,8 +419,10 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         Note._pluralLinkName,
         PeakCluster._pluralLinkName,
         'restraintLinks',
+        ViolationTable._pluralLinkName,
+        DataTable._pluralLinkName,
+        Collection._pluralLinkName,
         'additionalData',
-        'restraintViolations',
         'ccpnDataSetParameters',
         'ccpnLogging',
         ]
@@ -445,10 +453,14 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         'ccpn_peak_cluster'                     : (PeakCluster._pluralLinkName, PeakCluster.className),
         # 'ccpn_peak_cluster_serial'          : (PeakCluster._pluralLinkName, PeakCluster.className),
         'nef_peak_restraint_links'              : ('restraintLinks', 'RestraintLink'),
+        'ccpn_distance_restraint_violation_list': (ViolationTable._pluralLinkName, ViolationTable.className),
+        'ccpn_dihedral_restraint_violation_list': (ViolationTable._pluralLinkName, ViolationTable.className),
+        'ccpn_rdc_restraint_violation_list'     : (ViolationTable._pluralLinkName, ViolationTable.className),
+        'ccpn_datatable'                        : (DataTable._pluralLinkName, DataTable.className),
+        'ccpn_collections'                      : (Collection._pluralLinkName, Collection.className),
         'ccpn_additional_data'                  : ('additionalData', 'internalData'),
-        'ccpn_distance_restraint_violation_list': ('restraintViolations', 'restraintViolation'),
-        'ccpn_logging'                          : ('ccpnLogging', 'ccpnHistory'),
         'ccpn_parameter'                        : ('ccpnDataSetParameters', 'ccpnDataFrame'),
+        'ccpn_logging'                          : ('ccpnLogging', 'ccpnHistory'),
         }
 
     # defines the names of the saveframe loops that are displayed
@@ -456,27 +468,34 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         # Chain._pluralLinkName : [],
         Chain._pluralLinkName            : ['nef_sequence'],
         ChemicalShiftList._pluralLinkName: ['nef_chemical_shift_list', 'nef_chemical_shift'],
-        RestraintTable._pluralLinkName: ['nef_distance_restraint_list', 'nef_distance_restraint',
+        RestraintTable._pluralLinkName   : ['nef_distance_restraint_list', 'nef_distance_restraint',
                                             'nef_dihedral_restraint_list', 'nef_dihedral_restraint',
                                             'nef_rdc_restraint_list', 'nef_rdc_restraint',
-                                            'ccpn_restraint_list', 'ccpn_restraint'],
-        PeakList._pluralLinkName     : ['ccpn_peak_list', 'nef_peak', 'nef_spectrum_dimension', 'nef_spectrum_dimension_transfer'],
-        IntegralList._pluralLinkName : ['ccpn_integral_list', 'ccpn_integral'],
-        MultipletList._pluralLinkName: ['ccpn_multiplet_list', 'ccpn_multiplet', 'ccpn_multiplet_peaks'],
-        Sample._pluralLinkName       : ['ccpn_sample', 'ccpn_sample_component'],
-        Substance._pluralLinkName    : ['ccpn_substance'],
-        NmrChain._pluralLinkName     : ['nmr_chain', 'nmr_residue', 'nmr_atom'],
+                                            'ccpn_restraint_list', 'ccpn_restraint'
+                                            ],
+        PeakList._pluralLinkName         : ['ccpn_peak_list', 'nef_peak', 'nef_spectrum_dimension', 'nef_spectrum_dimension_transfer'],
+        IntegralList._pluralLinkName     : ['ccpn_integral_list', 'ccpn_integral'],
+        MultipletList._pluralLinkName    : ['ccpn_multiplet_list', 'ccpn_multiplet', 'ccpn_multiplet_peaks'],
+        Sample._pluralLinkName           : ['ccpn_sample', 'ccpn_sample_component'],
+        Substance._pluralLinkName        : ['ccpn_substance'],
+        NmrChain._pluralLinkName         : ['nmr_chain', 'nmr_residue', 'nmr_atom'],
         # TODO:ED - not done yet
-        StructureData._pluralLinkName: ['ccpn_dataset', 'ccpn_calculation_step', 'ccpn_calculation_data'],
-        Complex._pluralLinkName      : ['ccpn_complex', 'ccpn_complex_chain'],
-        SpectrumGroup._pluralLinkName: ['ccpn_spectrum_group', 'ccpn_group_spectrum'],
-        Note._pluralLinkName         : ['ccpn_note'],
-        PeakCluster._pluralLinkName  : ['ccpn_peak_cluster_list', 'ccpn_peak_cluster', 'ccpn_peak_cluster_peaks'],
-        'restraintLinks'             : ['nef_peak_restraint_link'],
-        'additionalData'             : ['ccpn_internal_data'],
-        'restraintViolations'        : ['ccpn_distance_restraint_violation_list', 'ccpn_distance_restraint_violation'],
-        'ccpnLogging'                : ['ccpn_logging', 'ccpn_history'],
-        'ccpnDataSetParameters'      : ['ccpn_parameter', 'ccpn_dataframe']
+        StructureData._pluralLinkName    : ['ccpn_dataset', 'ccpn_calculation_step', 'ccpn_calculation_data'],
+        Complex._pluralLinkName          : ['ccpn_complex', 'ccpn_complex_chain'],
+        SpectrumGroup._pluralLinkName    : ['ccpn_spectrum_group', 'ccpn_group_spectrum'],
+        Note._pluralLinkName             : ['ccpn_note'],
+        PeakCluster._pluralLinkName      : ['ccpn_peak_cluster_list', 'ccpn_peak_cluster', 'ccpn_peak_cluster_peaks'],
+        'restraintLinks'                 : ['nef_peak_restraint_link'],
+        'additionalData'                 : ['ccpn_internal_data'],
+        ViolationTable._pluralLinkName   : ['ccpn_distance_restraint_violation_list', 'ccpn_distance_restraint_violation',
+                                            'ccpn_dihedral_restraint_violation_list', 'ccpn_dihedral_restraint_violation',
+                                            'ccpn_rdc_restraint_violation_list', 'ccpn_rdc_restraint_violation',
+                                            'ccpn_restraint_violation_list_metadata'
+                                            ],
+        DataTable._pluralLinkName        : ['ccpn_datatable', 'ccpn_datatable_data', 'ccpn_datatable_metadata'],
+        Collection._pluralLinkName       : ['ccpn_collection'],
+        'ccpnLogging'                    : ['ccpn_logging', 'ccpn_history'],
+        'ccpnDataSetParameters'          : ['ccpn_parameter', 'ccpn_dataframe']
         }
 
     nefProjectToHandlerMapping = {
@@ -498,7 +517,9 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         PeakCluster._pluralLinkName      : None,
         'restraintLinks'                 : None,
         'additionalData'                 : 'ccpn_internal_data',
-        'restraintViolations'            : None,
+        ViolationTable._pluralLinkName   : None,
+        DataTable._pluralLinkName        : None,
+        Collection._pluralLinkName       : 'ccpn_collection',
         'ccpnDataSetParameters'          : None,
         'ccpnLogging'                    : None,
         }
@@ -694,7 +715,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         self._contentLoops(project, saveFrame, saveFrameTag,  #name=spectrumName, itemLength=saveFrame['num_dimensions'],
                            )
 
-    def content_ccpn_notes(self, project: Project, saveFrame: StarIo.NmrSaveFrame, saveFrameTag):
+    def content_ccpn_default(self, project: Project, saveFrame: StarIo.NmrSaveFrame, saveFrameTag):
         self._contentLoops(project, saveFrame, saveFrameTag,  #name=spectrumName, itemLength=saveFrame['num_dimensions'],
                            )
 
@@ -716,7 +737,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
     # contents['nef_rdc_restraint'] = partial(content_nef_restraint, itemLength=coreConstants.constraintListType2ItemLength.get('Rdc'))
     # contents['ccpn_restraint'] = partial(content_nef_restraint, itemLength=coreConstants.constraintListType2ItemLength.get('Distance'))
 
-    contents['nef_nmr_spectrum'] = content_ccpn_notes  # content_nef_nmr_spectrum
+    contents['nef_nmr_spectrum'] = content_ccpn_default  # content_nef_nmr_spectrum
     contents['nef_peak'] = content_list
 
     contents['ccpn_integral_list'] = content_list  # content_ccpn_integral_list
@@ -733,16 +754,21 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
     contents['ccpn_sample'] = content_list  # content_ccpn_sample
     contents['ccpn_substance'] = content_list  # content_ccpn_substance
 
-    contents['ccpn_assignment'] = content_ccpn_notes
+    contents['ccpn_assignment'] = content_ccpn_default
     contents['nmr_chain'] = content_list
 
     contents['ccpn_notes'] = content_list  # content_ccpn_notes
+    contents['ccpn_collections'] = content_list  # content_ccpn_collections
 
-    contents['nef_peak_restraint_links'] = content_list  # content_ccpn_notes
+    contents['nef_peak_restraint_links'] = content_list
 
     contents['ccpn_additional_data'] = content_list
 
     contents['ccpn_distance_restraint_violation_list'] = content_list  # content_nef_restraint_list
+    contents['ccpn_dihedral_restraint_violation_list'] = content_list  # content_nef_restraint_list
+    contents['ccpn_rdc_restraint_violation_list'] = content_list  # content_nef_restraint_list
+
+    contents['ccpn_datatable'] = content_list
 
     contents['ccpn_logging'] = content_list
     contents['ccpn_dataset'] = content_list

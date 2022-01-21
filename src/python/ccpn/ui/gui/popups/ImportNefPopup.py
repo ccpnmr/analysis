@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-04 20:15:04 +0000 (Thu, November 04, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-21 11:18:41 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -557,6 +557,26 @@ class NefDictFrame(Frame):
                 for rowIndex in chainErrors:
                     table.setRowBackgroundColour(rowIndex, _fillColour)
 
+    def table_ccpn_collections(self, saveFrame, item):
+        itemName = item.data(0, 0)
+        primaryCode = 'ccpn_collections'
+        _content = getattr(saveFrame, '_content', None)
+        _errors = getattr(saveFrame, '_rowErrors', {})
+
+        numPrimary = _content.get(primaryCode)
+        if numPrimary and len(numPrimary) <= 1:
+            return
+
+        if _errors:
+            _fillColour = INVALIDTABLEFILLCHECKCOLOUR if item.checkState(0) else INVALIDTABLEFILLNOCHECKCOLOUR
+
+            # colour rows by extra colour
+            chainErrors = _errors.get('ccpn_collection_' + itemName)
+            if chainErrors:
+                table = self._nefTables.get('ccpn_collection')
+                for rowIndex in chainErrors:
+                    table.setRowBackgroundColour(rowIndex, _fillColour)
+
     def table_ccpn_additional_data(self, saveFrame, item):
         itemName = item.data(0, 0)
         primaryCode = 'ccpn_additional_data'
@@ -1073,6 +1093,30 @@ class NefDictFrame(Frame):
                                                                          errorCode='ccpn_distance_restraint_violation_list',
                                                                          tableColourFunc=None)
 
+    handleSaveFrames['ccpn_dihedral_restraint_violation_list'] = partial(handle_treeView_selection,
+                                                                         prefix='ccpn_dihedral_restraint_violation_',
+                                                                         mappingCode='ccpn_dihedral_restraint_violation_list',
+                                                                         errorCode='ccpn_dihedral_restraint_violation_list',
+                                                                         tableColourFunc=None)
+
+    handleSaveFrames['ccpn_rdc_restraint_violation_list'] = partial(handle_treeView_selection,
+                                                                         prefix='ccpn_rdc_restraint_violation_',
+                                                                         mappingCode='ccpn_rdc_restraint_violation_list',
+                                                                         errorCode='ccpn_rdc_restraint_violation_list',
+                                                                         tableColourFunc=None)
+
+    handleSaveFrames['ccpn_datatable'] = partial(handle_treeView_selection,
+                                                          prefix='ccpn_datatable_data_',
+                                                          mappingCode='ccpn_datatable',
+                                                          errorCode='ccpn_datatable',
+                                                          tableColourFunc=None)
+
+    handleSaveFrames['ccpn_collection'] = partial(handle_treeView_selection,
+                                                                         prefix='ccpn_collection_',
+                                                                         mappingCode='ccpn_collections',
+                                                                         errorCode='ccpn_collections',
+                                                                         tableColourFunc=table_ccpn_collections)
+
     handleSaveFrames['ccpn_logging'] = partial(handle_treeView_selection,
                                                prefix='ccpn_history_',
                                                mappingCode='ccpn_logging',
@@ -1208,6 +1252,29 @@ class NefDictFrame(Frame):
                                                                           errorCode='ccpn_distance_restraint_violation_list',
                                                                           tableColourFunc=None)
 
+    _setBadSaveFrames['ccpn_dihedral_restraint_violation_list'] = partial(_set_bad_saveframe,
+                                                                          prefix='ccpn_dihedral_restraint_violation_',
+                                                                          mappingCode='ccpn_dihedral_restraint_violation_list',
+                                                                          errorCode='ccpn_dihedral_restraint_violation_list',
+                                                                          tableColourFunc=None)
+
+    _setBadSaveFrames['ccpn_rdc_restraint_violation_list'] = partial(_set_bad_saveframe,
+                                                                          prefix='ccpn_rdc_restraint_violation_',
+                                                                          mappingCode='ccpn_rdc_restraint_violation_list',
+                                                                          errorCode='ccpn_rdc_restraint_violation_list',
+                                                                          tableColourFunc=None)
+
+    _setBadSaveFrames['ccpn_datatable'] = partial(_set_bad_saveframe,
+                                                           prefix='ccpn_datatable_data_',
+                                                           mappingCode='ccpn_datatable',
+                                                           errorCode='ccpn_datatable',
+                                                           tableColourFunc=None)
+
+    _setBadSaveFrames['ccpn_collection'] = partial(_set_bad_saveframe,
+                                                                          prefix='ccpn_collection_',
+                                                                          mappingCode='ccpn_collections',
+                                                                          errorCode='ccpn_collections',
+                                                                          tableColourFunc=table_ccpn_collections)
     _setBadSaveFrames['ccpn_logging'] = partial(_set_bad_saveframe,
                                                 prefix='ccpn_history_',
                                                 mappingCode='ccpn_logging',
@@ -1329,6 +1396,26 @@ class NefDictFrame(Frame):
     applyCheckBoxes['ccpn_distance_restraint_violation_list'] = partial(apply_checkBox_item,
                                                                         prefix='ccpn_distance_restraint_violation_',
                                                                         mappingCode='ccpn_distance_restraint_violation_list',
+                                                                        )
+
+    applyCheckBoxes['ccpn_dihedral_restraint_violation_list'] = partial(apply_checkBox_item,
+                                                                        prefix='ccpn_dihedral_restraint_violation_',
+                                                                        mappingCode='ccpn_dihedral_restraint_violation_list',
+                                                                        )
+
+    applyCheckBoxes['ccpn_rdc_restraint_violation_list'] = partial(apply_checkBox_item,
+                                                                        prefix='ccpn_rdc_restraint_violation_',
+                                                                        mappingCode='ccpn_rdc_restraint_violation_list',
+                                                                        )
+
+    applyCheckBoxes['ccpn_datatable'] = partial(apply_checkBox_item,
+                                                         prefix='ccpn_datatable_data_',
+                                                         mappingCode='ccpn_datatable',
+                                                         )
+
+    applyCheckBoxes['ccpn_collection'] = partial(apply_checkBox_item,
+                                                                        prefix='ccpn_collection_',
+                                                                        mappingCode='ccpn_collections',
                                                                         )
 
     applyCheckBoxes['ccpn_logging'] = partial(apply_checkBox_item,

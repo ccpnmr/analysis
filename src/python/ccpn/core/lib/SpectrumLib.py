@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-04 17:18:54 +0000 (Tue, January 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 11:22:09 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -68,6 +68,7 @@ axisNames = {X_AXIS        : "x-axis", Y_AXIS: "y-axis", Z_AXIS: "z-axis", A_AXI
              UNDEFINED_AXIS: "undefined-axis"
              }
 
+INTENSITY_DIM = 0
 X_DIM = 1
 Y_DIM = 2
 Z_DIM = 3
@@ -76,6 +77,12 @@ B_DIM = 5
 C_DIM = 6
 D_DIM = 7
 E_DIM = 8
+UNDEFINED_DIM = 9
+dimensionNames = {INTENSITY_DIM: "intensity",
+                  X_DIM        : "x-dimension", Y_DIM: "y-dimension", Z_DIM: "z-dimension", A_DIM: "a-dimension",
+                  B_DIM        : "b-dimension", C_DIM: "c-dimension", D_DIM: "d-dimension", E_DIM: "e-dimension",
+                  UNDEFINED_DIM: "undefined-dimension"
+                 }
 
 X_DIM_INDEX = 0
 Y_DIM_INDEX = 1
@@ -86,10 +93,7 @@ C_DIM_INDEX = 5
 D_DIM_INDEX = 6
 E_DIM_INDEX = 7
 UNDEFINED_DIM_INDEX = 8
-dimensionNames = {X_DIM_INDEX        : "x-dimension", Y_DIM_INDEX: "y-dimension", Z_DIM_INDEX: "z-dimension", A_DIM_INDEX: "a-dimension",
-                  B_DIM_INDEX        : "b-dimension", C_DIM_INDEX: "c-dimension", D_DIM_INDEX: "d-dimension", E_DIM_INDEX: "e-dimension",
-                  UNDEFINED_AXIS: "undefined-dimension"
-                 }
+
 
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple', 'dimension1 dimension2 transferType isIndirect')
 NoiseEstimateTuple = collections.namedtuple('NoiseEstimateTuple', 'mean std min max noiseLevel')
@@ -2009,7 +2013,7 @@ def _pickPeaksByRegion(spectrum, sliceTuples, peakList, positiveThreshold, negat
         raise ValueError('_pickPeaksByRegion: required peakList instance, got:%r' % peakList)
 
     # get the peakPicker
-    if (peakPicker := spectrum._peakPicker) is None:
+    if (peakPicker := spectrum.peakPicker) is None:
         txt = f'_pickPeakByRegion: No valid peakPicker for {spectrum}'
         logger.warning(txt)
         raise RuntimeError(txt)

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 11:18:41 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 11:22:07 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -404,9 +404,9 @@ class CcpnNefWriter:
             # NBNB TBD reconsider whether we want the spec summary or something else
             self.specification = Specification.getCcpnSpecification(specificationFile)
 
-        if hasattr(project, '_appBase'):
-            programName = programName or project._appBase.applicationName
-            programVersion = programVersion or project._appBase.applicationVersion
+        if hasattr(project, 'application'):
+            programName = programName or project.application.applicationName
+            programVersion = programVersion or project.application.applicationVersion
         self.programName = programName or 'CcpnNefWriter'
         self.programVersion = programVersion
         self.ccpn2SaveFrameName = {}
@@ -4170,24 +4170,24 @@ class CcpnNefReader(CcpnNefContent):
                            loopSearchList=loopList, rowSearchList=replaceList)
 
         # search in the items of collections
-        
+
         # # search in additionalData for the pid and change
         # if category in NAMETOOBJECTMAPPING:
         #     obj = NAMETOOBJECTMAPPING[category]
-        # 
+        #
         #     frameCats = frames.get('ccpn_additional_data') or []
         #     frameList = [frame.name for frame in frameCats]
         #     attList = ('None',)
         #     loopList = ('ccpn_internal_data',)
         #     replaceList = ('ccpn_object_pid', 'internal_data_string',)
-        # 
+        #
         #     # rename the items in the additionalData saveFrame
         #     _oldPid = Pid.PREFIXSEP.join([obj.shortClassName, itemName])
         #     _newPid = Pid.PREFIXSEP.join([obj.shortClassName, newName])
         #     # rename the items in the additionalData saveFrame
         #     _oldLongPid = Pid.PREFIXSEP.join([obj.className, itemName])
         #     _newLongPid = Pid.PREFIXSEP.join([obj.className, newName])
-        # 
+        #
         #     # need different search
         #     self.searchReplaceDict(project, dataBlock, True, None,
         #                            (f'(\"{_oldPid}\")', f'(\"{_oldLongPid}\")'),

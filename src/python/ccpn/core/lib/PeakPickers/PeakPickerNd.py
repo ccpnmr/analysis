@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 13:15:21 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-01-21 11:22:07 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -280,7 +280,7 @@ class PeakPickerNd(PeakPickerABC):
         startPoint = np.maximum(pLower - boxWidths, 0)
 
         self.sliceTuples = [(int(pos - bWidth), int(pos + bWidth + 1)) for pos, bWidth in zip(pointPositions, boxWidths)]
-        data = self.spectrum._dataSource.getRegionData(self.sliceTuples, aliasingFlags=[1] * self.spectrum.dimensionCount)
+        data = self.spectrum.dataSource.getRegionData(self.sliceTuples, aliasingFlags=[1] * self.spectrum.dimensionCount)
 
         # getLogger().debug('%s.snapToExtremum: found %d peaks in spectrum %s; %r' %
         #                   (self.__class__.__name__, len(peaks), self.spectrum, axisDict))
@@ -439,7 +439,7 @@ class PeakPickerNd(PeakPickerABC):
             regionArray = np.array((firstArray - firstArray, lastArray - firstArray))
 
             self.sliceTuples = [(fst, lst) for fst, lst in zip(firstArray, lastArray)]
-            data = self.spectrum._dataSource.getRegionData(self.sliceTuples, aliasingFlags=[1] * self.spectrum.dimensionCount)
+            data = self.spectrum.dataSource.getRegionData(self.sliceTuples, aliasingFlags=[1] * self.spectrum.dimensionCount)
 
             # update positions relative to the corner of the data array
             firstArray = firstArray.astype(np.float32)

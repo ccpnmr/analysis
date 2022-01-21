@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:23:25 +0000 (Thu, January 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 11:22:10 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -421,7 +421,7 @@ class Current:
         # if not isinstance(param, str):
         #     # param is a class - Add notifiers for deleted objects
         #     def cleanup(self: AbstractWrapperObject):
-        #         current = self._project._appBase.current
+        #         current = self._project.application.current
         #         if current:
         #             fieldData = getField(current)
         #             if self in fieldData:

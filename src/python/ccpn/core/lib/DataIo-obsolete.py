@@ -1,10 +1,12 @@
-"""Module Documentation here
+"""
+This file is only here for historical reasons and is OBSOLETE and for reference only
+It contains code used for the CASD-NMR analysis
 
 """
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-04 20:12:04 +0000 (Thu, November 04, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-21 11:22:07 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -281,7 +283,7 @@ def loadCasdRdcList(project, path):
     name, dummy = os.path.splitext(basename)
 
     restraintLists = {}
-    project._appBase._echoBlocking += 1
+    project.application._echoBlocking += 1
     try:
         for line in open(path):
             line = line.strip()
@@ -309,7 +311,7 @@ def loadCasdRdcList(project, path):
                                                               tensorSequenceCode=sequenceCode)
                     restraintLists[orientation] = restraintList
     finally:
-        project._appBase._echoBlocking -= 1
+        project.application._echoBlocking -= 1
 
 
 def loadSimplePeakList(spectrum, peakFile, axisCodes=None, skipColumns=0):
@@ -323,7 +325,7 @@ def loadSimplePeakList(spectrum, peakFile, axisCodes=None, skipColumns=0):
         reordering = [axisCodes.index(x) for x in spectrum.axisCodes]
 
     peakList = spectrum.newPeakList()
-    project._appBase._echoBlocking += 1
+    project.application._echoBlocking += 1
     try:
         for line in open(peakFile):
             line = line.strip()
@@ -337,7 +339,7 @@ def loadSimplePeakList(spectrum, peakFile, axisCodes=None, skipColumns=0):
                 params['height'] = float(ll[3 + skipColumns])
                 peakList.newPeak(**params)
     finally:
-        project._appBase._echoBlocking -= 1
+        project.application._echoBlocking -= 1
 
 
 def loadCyanaPeakList(spectrum, peakFile, axisCodes=None):
@@ -353,7 +355,7 @@ def loadCyanaPeakList(spectrum, peakFile, axisCodes=None):
         reordering = [axisCodes.index(x) for x in spectrum.axisCodes]
 
     peakList = spectrum.newPeakList()
-    project._appBase._echoBlocking += 1
+    project.application._echoBlocking += 1
     try:
         for line in lines:
             params = {}
@@ -367,7 +369,7 @@ def loadCyanaPeakList(spectrum, peakFile, axisCodes=None):
             params['volumeError'] = float(ll[7])
             peakList.newPeak(**params)
     finally:
-        project._appBase._echoBlocking -= 1
+        project.application._echoBlocking -= 1
 
 
 def loadCasdPeakList(project, nmrPipeScriptFile, peakFile, spectrumName=None):
@@ -437,7 +439,7 @@ def loadCasdPeakList(project, nmrPipeScriptFile, peakFile, spectrumName=None):
                                         dimensionData=params)
 
     peakList = spectrum.newPeakList()
-    project._appBase._echoBlocking += 1
+    project.application._echoBlocking += 1
     try:
         for line in lines:
             params = {}
@@ -448,7 +450,7 @@ def loadCasdPeakList(project, nmrPipeScriptFile, peakFile, spectrumName=None):
             params['volumeError'] = float(ll[7])
             peakList.newPeak(**params)
     finally:
-        project._appBase._echoBlocking -= 1
+        project.application._echoBlocking -= 1
     #
     return peakList
 
@@ -530,7 +532,7 @@ def loadNmrStarChemicalShifts(project, nmrStarDatablock, chainOrder: str = None)
                                                          autoUpdate=False,
                                                          comment='Loaded from NmrStar')
         result.append(chemicalShiftList)
-        project._appBase._echoBlocking += 1
+        project.application._echoBlocking += 1
         try:
             for row in loop.data:
                 entityId = row.get('entity_assembly_id')
@@ -579,7 +581,7 @@ def loadNmrStarChemicalShifts(project, nmrStarDatablock, chainOrder: str = None)
                                                                    valueError=error, comment='Original name: %s, ambiguityCode: %s' % (atomName, ambiguityCode)
                                                                    )
         finally:
-            project._appBase._echoBlocking -= 1
+            project.application._echoBlocking -= 1
     #
     return result
 

@@ -88,7 +88,7 @@ def test():
     js = obj1.toJson(ident=None)
     print(js)
     obj2 = TestObj().fromJson(js)
-    obj2.setMetadata(id='copy from obj1')
+    obj2.setMetadata(key='id', value='copy from obj1')
     print(obj2)
 
     return (obj1, obj2)

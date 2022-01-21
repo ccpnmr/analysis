@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:30:50 +0000 (Thu, January 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 11:22:11 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -602,12 +602,16 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         self.application._importNef(path)
 
+    def _clearRecentProjects(self):
+        self.application.preferences.recentFiles = []
+        self._fillRecentProjectsMenu()
+
     def _fillRecentProjectsMenu(self):
         """
         Populates recent projects menu with 10 most recently loaded projects
         specified in the preferences file.
         """
-        recentFileLocations = self.application._getRecentFiles()
+        recentFileLocations = self.application._getRecentProjectFiles()
         recentFileMenu = self.getMenuAction('File->Open Recent')
         recentFileMenu.clear()
         for recentFile in recentFileLocations:
@@ -619,7 +623,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             recentFileMenu.addAction(action)
         recentFileMenu.addSeparator()
         recentFileMenu.addAction(Action(recentFileMenu, text='Clear',
-                                        callback=self.application.clearRecentProjects))
+                                        callback=self._clearRecentProjects))
 
     def _fillPredefinedLayoutMenu(self):
         """
@@ -678,6 +682,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         except FileNotFoundError:
             pass
 
+    def _clearRecentMacros(self):
+        self.application.preferences.recentMacros = []
+        self._fillRecentMacrosMenu()
+
     def _fillRecentMacrosMenu(self):
         """
         Populates recent macros menu with last ten macros ran.
@@ -702,7 +710,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         recentMacrosMenu.addAction(Action(recentMacrosMenu, text='Browse...',
                                           callback=self.application.runMacro))
         recentMacrosMenu.addAction(Action(recentMacrosMenu, text='Clear',
-                                          callback=self.application.clearRecentMacros))
+                                          callback=self._clearRecentMacros))
 
     def _addPluginSubMenu(self, MENU, Plugin):
         targetMenu = pluginsMenu = self.searchMenuAction(MENU)
@@ -969,9 +977,31 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     def clearLogFile(self):
         pass
 
-    def displayProjectSummary(self):
-        info = MessageDialog.showInfo('Not implemented yet',
-                                      'This function has not been implemented in the current version')
+    def _closeMainWindowModules(self):
+        """Close modules in main window;
+        CCPNINTERNAL: also called from Framework
+        """
+        for module in self.moduleArea.ccpnModules:
+            getLogger().debug('closing module: %s' % module)
+            try:
+                module.setVisible(False)  # GWV not sure why, but this was the effect of prior code
+                module.close()
+            except Exception as es:
+                # wrapped C/C++ object of type StripDisplay1d has been deleted
+                getLogger().debug(f'_closeMainWindowModules: {es}')
+
+    def _closeExtraWindowModules(self):
+        """Close modules in any extra window;
+        CCPNINTERNAL: also called from Framework
+        """
+        for module in self.moduleArea.tempAreas:
+            getLogger().debug('closing module: %s' % module)
+            try:
+                module.setVisible(False)  # GWV not sure why, but this was the effect of prior code
+                module.close()
+            except Exception as es:
+                # wrapped C/C++ object of type StripDisplay1d has been deleted
+                getLogger().debug(f'_closeExtraWindowModules: {es}')
 
     def _closeWindowFromUpdate(self, event=None, disableCancel=True):
         # set the active window to mainWindow so that the quit popup centres correctly.

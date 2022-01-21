@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:30:48 +0000 (Thu, January 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 11:22:07 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -368,7 +368,8 @@ class Peak(AbstractWrapperObject):
 
     @property
     def lineWidths(self) -> Tuple[Optional[float], ...]:
-        """Full-width-half-height of peak for each dimension, in Hz/ppm."""
+        """Full-width-half-height of peak for each dimension, in Hz/ppm.
+        """
         return tuple(x.lineWidth for x in self._wrappedData.sortedPeakDims())
 
     @lineWidths.setter
@@ -395,17 +396,25 @@ class Peak(AbstractWrapperObject):
 
     @property
     def pointLineWidths(self) -> Tuple[Optional[float], ...]:
-        """Full-width-half-height of peak for each dimension, in points."""
-        # currently assumes that internal storage is in ppms
-        return tuple(peakDim.lineWidth / peakDim.dataDim.valuePerPoint if peakDim.lineWidth is not None else None
-                     for peakDim in self._wrappedData.sortedPeakDims())
+        """Full-width-half-height of peak for each dimension, in points.
+        """
+        # currently assumes that internal storage is in ppm's; GWV thinks Hz????
+
+        result = []
+        for peakDim, valuePerPoint in zip(self._wrappedData.sortedPeakDims(), self.spectrum._valuePerPoints):
+            val = peakDim.lineWidth / valuePerPoint if peakDim.lineWidth is not None else None
+            result.append(val)
+
+        return tuple(result)
 
     @pointLineWidths.setter
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def pointLineWidths(self, value: Sequence):
-        for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-            peakDim.lineWidth = value[ii] * peakDim.dataDim.valuePerPoint if value[ii] is not None else None
+         for val, peakDim, valuePerPoint in zip(value,
+                                               self._wrappedData.sortedPeakDims(),
+                                               self.spectrum._valuePerPoints):
+            peakDim.lineWidth = val * valuePerPoint if val is not None else None
 
     @property
     def aliasing(self) -> Tuple[Optional[float], ...]:
@@ -904,6 +913,14 @@ class Peak(AbstractWrapperObject):
             self.dimensionNmrAtoms = assigned
             self._delete()
 
+    def __str__(self):
+        """Readable string representation;
+        """
+        _digits = {'1H':3, '15N':2, '13C':2, '19F':3}
+        # _digits.get(iCode,2)
+        ppms = tuple(round(p, _digits.get(iCode,2))
+                     for p, iCode in zip(self.ppmPositions, self.spectrum.isotopeCodes))
+        return "<%s: @%r>" % (self.pid, ppms)
     #=========================================================================================
     # CCPN functions
     #=========================================================================================

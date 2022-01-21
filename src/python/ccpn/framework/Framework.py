@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-21 13:23:17 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 13:37:41 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -265,7 +265,7 @@ class Framework(NotifierBase, GuiBase):
 
         # This is needed to make project available in NoUi (if nothing else)
         self._project = None
-        self.current = None
+        self._current = None
 
         self.plugins = []  # Hack for now, how should we store these?
 
@@ -331,13 +331,21 @@ class Framework(NotifierBase, GuiBase):
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
         self._spectrumDataSourceFormats = getDataFormats()
 
-        #-----------------------------------------------------------------------------------------
         # get a user interface
-        #-----------------------------------------------------------------------------------------
         self.ui = self._getUI()
 
-    def __str__(self):
-        return '<%s version:%s>' % (self.applicationName, self.applicationVersion)
+        # register the programme for later
+        from ccpn.framework.Application import ApplicationContainer
+        container = ApplicationContainer()
+        container.register(self)
+
+    #-----------------------------------------------------------------------------------------
+    # properties of Framework
+    #-----------------------------------------------------------------------------------------
+
+    @property
+    def current(self):
+        return self._current
 
     @property
     def _isInDebugMode(self) -> bool:
@@ -372,11 +380,11 @@ class Framework(NotifierBase, GuiBase):
         """Start the program execution
         """
 
-        # register the programme for later
-        from ccpn.framework.Application import ApplicationContainer
-
-        container = ApplicationContainer()
-        container.register(self)
+        # # register the programme for later
+        # from ccpn.framework.Application import ApplicationContainer
+        #
+        # container = ApplicationContainer()
+        # container.register(self)
 
         self._initialiseFonts()
 
@@ -474,7 +482,7 @@ class Framework(NotifierBase, GuiBase):
         logger.debug('Framework._initialiseProject>>>')
 
         # Set up current; we need it when restoring
-        self.current = Current(project=project)
+        self._current = Current(project=project)
 
         # This wraps the underlying data, including the wrapped graphics data
         #  - the project is now ready to use
@@ -1638,7 +1646,7 @@ class Framework(NotifierBase, GuiBase):
 
         if self.current:
             self.current._unregisterNotifiers()
-            self.current = None
+            self._current = None
 
         if self.project is not None:
             # Cleans up wrapper project, including graphics data objects (Window, Strip, etc.)
@@ -2447,7 +2455,14 @@ class Framework(NotifierBase, GuiBase):
         from ccpn.ui.gui.guiSettings import fontSettings
         self._fontSettings = fontSettings(self.preferences)
 
-########
+
+    def __str__(self):
+        return '<%s version:%s>' % (self.applicationName, self.applicationVersion)
+
+    __repr__ = __str__
+
+#end class
+
 
 def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):
     from ccpn.framework.PathsAndUrls import defaultPreferencesPath

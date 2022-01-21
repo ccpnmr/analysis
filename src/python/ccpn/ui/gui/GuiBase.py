@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-21 14:01:22 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 16:53:11 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -29,16 +29,17 @@ __date__ = "$Date: 2022-01-18 10:28:48 +0000 (Tue, January 18, 2022) $"
 
 import os
 from tqdm import tqdm
-
 from functools import partial
 from typing import Union, Optional, List, Tuple, Sequence
 
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication
 
-from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU, CCPNPLUGINSMENU, PLUGINSMENU
-from ccpn.framework.PathsAndUrls import userPreferencesPath,  userPreferencesDirectory,  \
-    macroPath, CCPN_EXTENSION, CCPN_ARCHIVES_DIRECTORY
+from ccpn.framework.PathsAndUrls import \
+    userPreferencesPath,  \
+    userPreferencesDirectory,  \
+    macroPath, \
+    CCPN_EXTENSION, \
+    CCPN_ARCHIVES_DIRECTORY
 
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
@@ -46,18 +47,35 @@ from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.lib.Pid import Pid, PREFIXSEP
-
+from ccpn.core.lib.ContextManagers import \
+    catchExceptions, \
+    undoBlockWithoutSideBar, \
+    undoBlock, \
+    notificationEchoBlocking, \
+    logCommandManager
 from ccpn.util.decorators import logCommand
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideBar, undoBlock, \
-    notificationEchoBlocking, logCommandManager
 from ccpn.util.Path import Path, aPath
 
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.FileDialog import ProjectFileDialog, DataFileDialog, NefFileDialog, \
-    ArchivesFileDialog, MacrosFileDialog, CcpnMacrosFileDialog, LayoutsFileDialog, NMRStarFileDialog, SpectrumFileDialog, \
+from ccpn.ui.gui.widgets.FileDialog import \
+    ProjectFileDialog, \
+    DataFileDialog, \
+    NefFileDialog, \
+    ArchivesFileDialog, \
+    MacrosFileDialog, \
+    CcpnMacrosFileDialog, \
+    LayoutsFileDialog, \
+    NMRStarFileDialog, \
+    SpectrumFileDialog, \
     ProjectSaveFileDialog
 
+from ccpn.ui.gui.widgets.Menu import \
+    SHOWMODULESMENU, \
+    CCPNMACROSMENU, \
+    TUTORIALSMENU, \
+    CCPNPLUGINSMENU, \
+    PLUGINSMENU
 
 class GuiBase(object):
     """Just methods taken from Framework for now

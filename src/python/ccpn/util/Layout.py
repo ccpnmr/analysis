@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:30:51 +0000 (Thu, January 13, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-01-21 16:53:11 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -38,8 +38,10 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.Path import aPath
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 
+from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY
 
-StateDirName = 'state'
+
+StateDirName = CCPN_STATE_DIRECTORY
 DefaultLayoutFileName = 'Layout.json'
 Warning = "warning"
 WarningMessage = "Warning. Any changes in this file will be overwritten when saving a new layout."

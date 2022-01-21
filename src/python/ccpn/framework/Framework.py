@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-21 14:01:22 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 16:53:11 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -23,9 +23,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-# import time as systime
-#
-#
+
 # if not hasattr(systime, 'clock'):
 #     # NOTE:ED - quick patch to fix bug in pyqt 5.9
 #     systime.clock = systime.process_time
@@ -45,6 +43,10 @@ import re
 import subprocess
 import faulthandler
 from tqdm import tqdm
+
+from threading import Thread
+from time import time, sleep
+
 
 from typing import Union, Optional, List, Tuple, Sequence
 
@@ -69,9 +71,17 @@ from ccpn.framework.Current import Current
 from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
 from ccpn.framework.Translation import languages, defaultLanguage
 from ccpn.framework.Translation import translator
-from ccpn.framework.PathsAndUrls import userPreferencesPath,  userPreferencesDirectory, \
-    macroPath, CCPN_ARCHIVES_DIRECTORY
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
+from ccpn.framework.PathsAndUrls import \
+    userPreferencesPath,  \
+    userPreferencesDirectory, \
+    userCcpnMacroPath, \
+    CCPN_ARCHIVES_DIRECTORY, \
+    CCPN_STATE_DIRECTORY, \
+    CCPN_DATA_DIRECTORY, \
+    CCPN_SPECTRA_DIRECTORY, \
+    CCPN_PLUGINS_DIRECTORY, \
+    CCPN_SCRIPTS_DIRECTORY
 
 from ccpn.ui import interfaces, defaultInterface
 from ccpn.ui.gui.Gui import Gui
@@ -79,18 +89,27 @@ from ccpn.ui.gui.GuiBase import GuiBase
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.FileDialog import ProjectFileDialog, DataFileDialog, NefFileDialog, \
-    ArchivesFileDialog, MacrosFileDialog, CcpnMacrosFileDialog, LayoutsFileDialog, NMRStarFileDialog, SpectrumFileDialog, \
+from ccpn.ui.gui.widgets.FileDialog import \
+    ProjectFileDialog, \
+    DataFileDialog, \
+    NefFileDialog, \
+    ArchivesFileDialog, \
+    MacrosFileDialog, \
+    CcpnMacrosFileDialog, \
+    LayoutsFileDialog, \
+    NMRStarFileDialog, \
+    SpectrumFileDialog, \
     ProjectSaveFileDialog
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
 
 from ccpn.util import Logging
-from ccpn.util import Path
+from ccpn.util.Path import Path, aPath, fetchDir, getPathToImport
+
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable
 from ccpn.util.Logging import getLogger
-from ccpn.util import Layout
 
+from ccpn.util import Layout
 
 from ccpnmodel.ccpncore.api.memops import Implementation
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
@@ -100,9 +119,7 @@ from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideBar, undoBlock, \
     notificationEchoBlocking, logCommandManager
 
-from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU, CCPNPLUGINSMENU, PLUGINSMENU
 from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_KEY_CONCEPTS
-
 
 
 faulthandler.enable()
@@ -114,12 +131,8 @@ AnalysisScreen = 'AnalysisScreen'
 AnalysisMetabolomics = 'AnalysisMetabolomics'
 AnalysisStructure = 'AnalysisStructure'
 ApplicationNames = [AnalysisAssign, AnalysisScreen, AnalysisMetabolomics, AnalysisStructure]
+
 interfaceNames = ('NoUi', 'Gui')
-DataDirName = 'data'
-SpectraDirName = 'spectra'
-PluginDataDirName = 'pluginData'
-ScriptsDirName = 'scripts'
-MacrosDirName = 'macros'
 
 
 def _ccpnExceptionhook(ccpnType, value, tback):
@@ -214,10 +227,6 @@ def createFramework(projectPath=None, **kwds):
     return result
 
 
-from threading import Thread
-from time import time, sleep
-
-
 class AutoBackup(Thread):
 
     def __init__(self, q, backupFunction, sleepTime=1):
@@ -307,7 +316,7 @@ class Framework(NotifierBase, GuiBase):
         self.autoBackupThread = None
 
         # Assure that .ccpn exists
-        ccpnDir = Path.aPath(userPreferencesDirectory)
+        ccpnDir = aPath(userPreferencesDirectory)
         if not ccpnDir.exists():
             ccpnDir.mkdir()
         self._getUserPrefs()
@@ -345,12 +354,17 @@ class Framework(NotifierBase, GuiBase):
     #-----------------------------------------------------------------------------------------
 
     @property
-    def project(self):
-        """Return project"""
+    def project(self) -> Project:
+        """:return currently active project
+        """
         return self._project
 
     @property
-    def current(self):
+    def current(self) -> Current:
+        """Current contains selected peaks, selected restraints, cursor position, etc.
+        see Current.py for detailed descriptiom
+        :return the Current object
+        """
         return self._current
 
     @property
@@ -363,12 +377,12 @@ class Framework(NotifierBase, GuiBase):
 
     @property
     def hasGui(self) -> bool:
-        """Return True if application has a gui"""
+        """:return True if application has a gui"""
         return isinstance(self.ui, Gui)
 
     @property
     def _isInDebugMode(self) -> bool:
-        """Return True if either of the debug flags has been set
+        """:return True if either of the debug flags has been set
         CCPNINTERNAL: used throughout to check
         """
         if self.level == Logging.DEBUG1 or \
@@ -376,6 +390,62 @@ class Framework(NotifierBase, GuiBase):
            self.level == Logging.DEBUG3:
             return True
         return False
+
+    @property
+    def statePath(self) -> Path:
+        """
+        :return: the absolute path to the state sub-directory of the current project
+                 as a Path instance
+        """
+        return aPath(self.project.path) / CCPN_STATE_DIRECTORY
+
+    @property
+    def pipelinePath(self) -> Path:
+        """
+        :return: the absolute path to the state/pipeline sub-directory of
+                 the current project as a Path instance
+        """
+        return self.statePath / Pipeline.className
+
+    @property
+    def dataPath(self) -> Path:
+        """
+        :return: the absolute path to the data sub-directory of the current project
+                 as a Path instance
+        """
+        return aPath(self.project.path) / CCPN_DATA_DIRECTORY
+
+    @property
+    def spectraPath(self):
+        """
+        :return: the absolute path to the data sub-directory of the current project
+                 as a Path instance
+        """
+        return aPath(self.project.path) / CCPN_SPECTRA_DIRECTORY
+
+    @property
+    def pluginDataPath(self) -> Path:
+        """
+        :return: the absolute path to the data/plugins sub-directory of the
+                 current project as a Path instance
+        """
+        return aPath(self.project.path) / CCPN_PLUGINS_DIRECTORY
+
+    @property
+    def scriptsPath(self) -> Path:
+        """
+        :return: the absolute path to the script sub-directory of the current project
+                 as a Path instance
+        """
+        return aPath(self.project.path) / CCPN_SCRIPTS_DIRECTORY
+
+    @property
+    def tempMacrosPath(self):
+        """
+        :return: the absolute path to the ~/.ccpn/macros directory
+                 as a Path instance
+        """
+        return userCcpnMacroPath
 
     #-----------------------------------------------------------------------------------------
 
@@ -452,7 +522,7 @@ class Framework(NotifierBase, GuiBase):
         apiIo.backupProject(self.project._wrappedData.parent)
         backupPath = self.project.backupPath
 
-        backupStatePath = Path.fetchDir(backupPath, Layout.StateDirName)
+        backupStatePath = fetchDir(backupPath, Layout.StateDirName)
 
         copy_tree(self.statePath, backupStatePath)
         layoutFile = os.path.join(backupStatePath, Layout.DefaultLayoutFileName)
@@ -460,11 +530,7 @@ class Framework(NotifierBase, GuiBase):
         self.current._dumpStateToFile(backupStatePath)
 
         #Spectra should not be copied over. Dangerous for disk space
-        # backupDataPath = Path.fetchDir(backupPath, DataDirName)
-
-        #   TODO add other files inside this dirs
-        backupScriptsPath = Path.fetchDir(backupPath, ScriptsDirName)
-        backupLogsPath = Path.fetchDir(backupPath, ScriptsDirName)
+        # backupDataPath = fetchDir(backupPath, DataDirName)
 
     def _initialiseProject(self, project: Project):
         """Initialise project and set up links and objects that involve it"""
@@ -487,15 +553,6 @@ class Framework(NotifierBase, GuiBase):
 
         # Adapt project to preferences
         self.applyPreferences(project)
-
-        # init application directory
-        self.scriptsPath = self.scriptsPath
-        self.pymolScriptsPath = Path.fetchDir(self.scriptsPath, 'pymol')
-        self.statePath = self.statePath
-        self.dataPath = self.dataPath
-        self.pipelinePath = self.pipelinePath
-        self.spectraPath = self.spectraPath
-        self.pluginDataPath = self.pluginDataPath
 
         # restore current
         self.current._restoreStateFromFile(self.statePath)
@@ -545,12 +602,12 @@ class Framework(NotifierBase, GuiBase):
 
         self._colourScheme = colourScheme
 
-        with open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
+        with open(os.path.join(getPathToImport('ccpn.ui.gui.widgets'),
                                '%sStyleSheet.qss' % metaUtil.upperFirst(colourScheme))) as fp:
             styleSheet = fp.read()
 
         if platform.system() == 'Linux':
-            with open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
+            with open(os.path.join(getPathToImport('ccpn.ui.gui.widgets'),
                                    '%sAdditionsLinux.qss' % metaUtil.upperFirst(colourScheme))) as fp:
                 additions = fp.read()
 
@@ -974,95 +1031,6 @@ class Framework(NotifierBase, GuiBase):
         """Convenience"""
         return self.project.getByPid(gid)
 
-    #########################################    Create sub dirs   ########################################################
-
-    ## dirs are created with decorators because the project path can change dynamically.
-    ##  When a project is saved in a new location, all the dirs get refreshed automatically'
-
-    @property
-    def statePath(self):
-        return self._statePath
-
-    @statePath.getter
-    def statePath(self):
-        return Path.fetchDir(self.project.path, Layout.StateDirName)
-
-    @statePath.setter
-    def statePath(self, path):
-        self._statePath = path
-
-    @property
-    def pipelinePath(self):
-        return self._pipelinePath
-
-    @pipelinePath.getter
-    def pipelinePath(self):
-        return Path.fetchDir(self.statePath, Pipeline.className)
-
-    @pipelinePath.setter
-    def pipelinePath(self, path):
-        self._pipelinePath = path
-
-    @property
-    def dataPath(self):
-        return self._dataPath
-
-    @dataPath.getter
-    def dataPath(self):
-        return Path.fetchDir(self.project.path, DataDirName)
-
-    @dataPath.setter
-    def dataPath(self, path):
-        self._dataPath = path
-
-    @property
-    def spectraPath(self):
-        return self._spectraPath
-
-    @spectraPath.getter
-    def spectraPath(self):
-        return Path.fetchDir(self.dataPath, SpectraDirName)
-
-    @spectraPath.setter
-    def spectraPath(self, path):
-        self._spectraPath = path
-
-    @property
-    def pluginDataPath(self):
-        return self._pluginDataPath
-
-    @pluginDataPath.getter
-    def pluginDataPath(self):
-        return Path.fetchDir(self.dataPath, PluginDataDirName)
-
-    @pluginDataPath.setter
-    def pluginDataPath(self, path):
-        self._pluginDataPath = path
-
-    @property
-    def tempMacrosPath(self):
-        return self._tempMacrosPath
-
-    @tempMacrosPath.getter
-    def tempMacrosPath(self):
-        return Path.fetchDir(userPreferencesDirectory, MacrosDirName)
-
-    @tempMacrosPath.setter
-    def tempMacrosPath(self, path):
-        self._tempMacrosPath = path
-
-    @property
-    def scriptsPath(self):
-        return self._scriptsPath
-
-    @scriptsPath.getter
-    def scriptsPath(self):
-        return Path.fetchDir(self.project.path, ScriptsDirName)
-
-    @scriptsPath.setter
-    def scriptsPath(self, path):
-        self._scriptsPath = path
-
 
     #@logCommand('application.') #cannot do, as project is not there yet
     def newProject(self, name='default') -> Project:
@@ -1124,12 +1092,12 @@ class Framework(NotifierBase, GuiBase):
         from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory
         from ccpn.core.Project import _loadProject
 
-        if not isinstance(path, (Path.Path, str)):
+        if not isinstance(path, (Path, str)):
             raise ValueError('invalid path "%s"' % path)
 
         with logCommandManager('application.', 'loadProject', path):
 
-            _path = Path.aPath(path)
+            _path = aPath(path)
             if not _path.exists():
                 raise ValueError('path "%s" does not exist' % path)
 
@@ -1225,7 +1193,7 @@ class Framework(NotifierBase, GuiBase):
         """
         mainWindow = self.mainWindow
         with logCommandManager('application.', 'loadData', path):
-            path = Path.aPath(path)
+            path = aPath(path)
             mainWindow.newHtmlModule(urlPath=str(path), position='top', relativeTo=mainWindow.moduleArea)
         return []
 
@@ -1322,7 +1290,7 @@ class Framework(NotifierBase, GuiBase):
         except Exception as e:
             getLogger().warning('Unable to save Layout %s' % e)
 
-        # saveIconPath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
+        # saveIconPath = os.path.join(getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
         sys.stderr.write(successMessage)
         # MessageDialog.showMessage('Project saved', 'Project successfully saved!',
         #                            iconPath=saveIconPath)
@@ -1352,14 +1320,14 @@ class Framework(NotifierBase, GuiBase):
             if not path:
                 return
 
-        path = Path.aPath(path)
+        path = aPath(path)
 
         with catchExceptions(application=self, errorStringTemplate='Error Importing Nef File: %s', printTraceBack=True):
             with undoBlockWithoutSideBar():
                 self._importNefFile(path=path, makeNewProject=False)
             self.ui.mainWindow.sideBar.buildTree(self.project)
 
-    def _importNefFile(self, path: Union[str, Path.Path], makeNewProject=True) -> Project:
+    def _importNefFile(self, path: Union[str, Path], makeNewProject=True) -> Project:
         """Load Project from NEF file at path, and do necessary setup
         """
 
@@ -1463,7 +1431,7 @@ class Framework(NotifierBase, GuiBase):
         from ccpn.ui.gui.popups.ExportNefPopup import ExportNefPopup
         from ccpn.core.lib.CcpnNefIo import NEFEXTENSION
 
-        _path = Path.aPath(self.preferences.general.userWorkingPath or '~').filepath / (self.project.name + NEFEXTENSION)
+        _path = aPath(self.preferences.general.userWorkingPath or '~').filepath / (self.project.name + NEFEXTENSION)
         dialog = ExportNefPopup(self.ui.mainWindow,
                                 mainWindow=self.ui.mainWindow,
                                 selectFile=_path,
@@ -1551,11 +1519,11 @@ class Framework(NotifierBase, GuiBase):
             raise RuntimeError('Error: decreaseNotificationBlocking, already at 0')
 
     #-----------------------------------------------------------------------------------------
-    # Archive related code
+    # Archive code
     #-----------------------------------------------------------------------------------------
 
     # @logCommand('application.')
-    # def archiveProject(self) -> Path.Path:
+    # def archiveProject(self) -> Path:
     #     """Archive the project
     #     :return location of the archive as a Path instance
     #     """

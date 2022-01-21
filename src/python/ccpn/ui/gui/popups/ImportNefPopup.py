@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 16:06:57 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-21 16:29:38 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -44,6 +44,7 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.core.lib import CcpnNefIo
 from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.core.Project import Project
@@ -229,8 +230,13 @@ class NefDictFrame(Frame):
         """
         self.headerFrame = Frame(self, setLayout=True, showBorder=False, grid=(0, 0))
         self.headerLabel = Label(self.headerFrame, text='FRAMEFRAME', grid=(0, 0))
-        self.verifyButton = Button(self.headerFrame, text='Verify', grid=(0, 1), callback=self._verifyPopulate)
+        self.verifyButton = Button(self.headerFrame, text='Verify Now', grid=(0, 1), callback=self._verifyPopulate)
         self.verifyButton.setVisible(not self._primaryProject)
+
+        _verifyLabel = Label(self.headerFrame, 'always verify', grid=(0, 2), hPolicy='minimum', vPolicy='minimum')
+        self.verifyCheckBox = CheckBox(self.headerFrame, grid=(0, 3), checked=False, checkable=True)
+        _verifyLabel.setVisible(not self._primaryProject)
+        self.verifyCheckBox.setVisible(not self._primaryProject)
 
         # add the pane for the treeview/tables
         self._paneSplitter = Splitter(self, setLayout=True, horizontal=True)
@@ -1646,8 +1652,8 @@ class NefDictFrame(Frame):
         self._nefLoader._contentNef(self.project, self._nefDict, selection=None)
 
         # changed to verify with the button
-        # if not self._primaryProject:
-        #     warnings, errors = self._nefLoader._verifyNef(self.project, self._nefDict, selection=None)
+        if not self._primaryProject and self.verifyCheckBox.isChecked():
+            warnings, errors = self._nefLoader._verifyNef(self.project, self._nefDict, selection=None)
 
         try:
             self.valid = self._nefLoader.isValid

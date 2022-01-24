@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-24 11:13:31 +0000 (Mon, January 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-24 11:23:17 +0000 (Mon, January 24, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -147,14 +147,6 @@ def _ccpnExceptionhook(ccpnType, value, tback):
 
 sys.excepthook = _ccpnExceptionhook
 
-
-
-def createFramework(projectPath=None, **kwds):
-    args = Arguments(projectPath=projectPath, **kwds)
-    result = Framework('CcpNmr', Version.applicationVersion, args)
-    result.start()
-    #
-    return result
 
 
 class AutoBackup(Thread):
@@ -369,6 +361,14 @@ class Framework(NotifierBase, GuiBase):
                  as a Path instance
         """
         return aPath(self.project.path) / CCPN_SCRIPTS_DIRECTORY
+
+    @property
+    def archivesPath(self) -> Path:
+        """
+        :return: the absolute path to the archives sub-directory of the current project
+                 as a Path instance
+        """
+        return aPath(self.project.path) / CCPN_ARCHIVES_DIRECTORY\
 
     @property
     def tempMacrosPath(self):
@@ -2317,7 +2317,9 @@ class Framework(NotifierBase, GuiBase):
 
     __repr__ = __str__
 
+#-----------------------------------------------------------------------------------------
 #end class
+#-----------------------------------------------------------------------------------------
 
 
 def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):
@@ -2361,26 +2363,33 @@ def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):
     return preferences
 
 
-def testMain():
-    # from sandbox.Geerten.Refactored.framework import Framework
-    # from sandbox.Geerten.Refactored.programArguments import Arguments
+#-----------------------------------------------------------------------------------------
+# code for testing purposes
+#-----------------------------------------------------------------------------------------
 
-    # from ccpn.framework.Framework import Framework
-    # from ccpn.framework.Framework import Arguments
+class MyProgramme(Framework):
+    """My first app"""
+    applicationName = 'CcpNmr'
+    applicationVersion = Version.applicationVersion
+
+
+def createFramework(projectPath=None, **kwds):
+    args = Arguments(projectPath=projectPath, **kwds)
+    result = MyProgramme(args)
+    result.start()
+    #
+    return result
+
+
+def testMain():
 
     _makeMainWindowVisible = False
-
-
-    class MyProgramme(Framework):
-        """My first app"""
-        pass
-
 
     myArgs = Arguments()
     myArgs.noGui = False
     myArgs.debug = True
 
-    application = MyProgramme('MyProgramme', '3.0.1', args=myArgs)
+    application = MyProgramme(args=myArgs)
     ui = application.ui
     ui.initialize(ui.mainWindow)  # ui.mainWindow not needed for refactored?
 

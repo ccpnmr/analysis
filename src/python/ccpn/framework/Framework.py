@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-24 18:09:58 +0000 (Mon, January 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-24 20:35:46 +0000 (Mon, January 24, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -249,7 +249,10 @@ class Framework(NotifierBase, GuiBase):
         self._key_concepts = None
 
         self._registrationDict = {}
+
         self._setLanguage()
+
+        self._experimentClassifications = None  # initialised in _startApplication once a project has loaded
 
         self._disableUndoException = getattr(self.args, 'disableUndoException', False)
         self._ccpnLogging = getattr(self.args, 'ccpnLogging', False)
@@ -405,10 +408,10 @@ class Framework(NotifierBase, GuiBase):
             sys.stderr.write('==> No project, aborting ...\n')
             return
 
+        self._experimentClassifications = project.getExperimentClassifications()
         self.updateAutoBackup()
 
         sys.stderr.write('==> Done, %s is starting\n' % self.applicationName)
-
         self.ui.startUi()
         self._cleanup()
 
@@ -437,9 +440,10 @@ class Framework(NotifierBase, GuiBase):
             self.autoBackupThread.start()
 
     def _cleanup(self):
+        """Cleanup at the end of program execution; i.e. once the command loop
+        has stopped
+        """
         self.setAutoBackupTime('kill')
-        # project._resetUndo(debug=_DEBUG)
-        pass
 
     def backupProject(self):
         apiIo.backupProject(self.project._wrappedData.parent)
@@ -626,41 +630,12 @@ class Framework(NotifierBase, GuiBase):
         # translator.setDebug(True)
         sys.stderr.write('==> Language set to "%s"\n' % translator._language)
 
-    # def _isRegistered(self):
-    #   """return True if registered"""
-    #   self._registrationDict = Register.loadDict()
-    #   return not Register.isNewRegistration(self._registrationDict)
-    #
-    #
-    # def _checkRegistration(self):
-    #   """
-    #   Display registration popup if there is a gui
-    #   return True if ok
-    #   return False on error
-    #   """
-    #   from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
-    #
-    #   if self.ui:
-    #     if not self._isRegistered():
-    #       self.ui.mainWindow.show()
-    #       QtWidgets.QApplication.processEvents()
-    #       popup = RegisterPopup(self.ui.mainWindow, version=self.applicationVersion, modal=True)
-    #       QtWidgets.QApplication.processEvents()
-    #       popup.show()
-    #       # popup.raise_()
-    #       popup.exec_()
-    #
-    #   if not self._isRegistered():
-    #     return False
-    #
-    #   Register.updateServer(self._registrationDict, self.applicationVersion)
-    #   return True
 
     def applyPreferences(self, project):
         """Apply user preferences
-
-        NBNB project should be implicit rather than a parameter (once reorganisation is finished)
         """
+        #NBNB project should be implicit rather than a parameter (once reorganisation is finished)
+
         # Reset remoteData DataStores to match preferences setting
         dataPath = self.preferences.general.dataPath
         if not dataPath or not os.path.isdir(dataPath):
@@ -2253,11 +2228,6 @@ class Framework(NotifierBase, GuiBase):
         from ccpn.framework.PathsAndUrls import ccpnUrl
         self._showHtmlFile("About CCPN", ccpnUrl)
 
-
-    # def showCodeInspectionPopup(self):
-    #     # TODO: open a file browser to top of source directory
-    #     pass
-
     def showIssuesList(self):
         from ccpn.framework.PathsAndUrls import ccpnIssuesUrl
         self._showHtmlFile("CCPN Issues", ccpnIssuesUrl)
@@ -2265,26 +2235,6 @@ class Framework(NotifierBase, GuiBase):
     def showTutorials(self):
         from ccpn.framework.PathsAndUrls import ccpnTutorials
         self._showHtmlFile("CCPN Tutorials", ccpnTutorials)
-
-    # def _showUpdatePopup(self):
-    #     """Open the update popup
-    #     CCPNINTERNAL: Also called from.Gui._executeUpdates
-    #     """
-    #     from ccpn.framework.update.UpdatePopup import UpdatePopup
-    #     from ccpn.util import Url
-    #
-    #     # check valid internet connection first
-    #     if Url.checkInternetConnection():
-    #         updatePopup = UpdatePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-    #         updatePopup.exec_()
-    #
-    #         # if updates have been installed then popup the quit dialog with no cancel button
-    #         if updatePopup._numUpdatesInstalled > 0:
-    #             self.ui.mainWindow._closeWindowFromUpdate(disableCancel=True)
-    #
-    #     else:
-    #         MessageDialog.showWarning('Check For Updates',
-    #                                   'Could not connect to the update server, please check your internet connection.')
 
     def showRegisterPopup(self):
         """Open the registration popup

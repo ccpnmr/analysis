@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-21 12:41:19 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-24 20:35:46 +0000 (Mon, January 24, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1434,9 +1434,7 @@ class Project(AbstractWrapperObject):
         """Get a dictionary of dictionaries of dimensionCount:sortedNuclei:ExperimentClassification named tuples.
         """
         # NOTE:ED - better than being in spectrumLib but still needs moving
-
         from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import getExpClassificationDict
-
         return getExpClassificationDict(self._wrappedData)
 
     #===========================================================================================

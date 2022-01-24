@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-24 18:09:58 +0000 (Mon, January 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-24 20:35:46 +0000 (Mon, January 24, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -159,17 +159,13 @@ class Gui(Ui):
             self.application._updateCheckableMenuItems()
 
     def startUi(self):
-
-        project = self.application.project
-        # GWV: why is this here!???
-        self.application.experimentClassifications = project.getExperimentClassifications()
-
+        """Start the UI
+        """
         self.mainWindow.show()
         QtWidgets.QApplication.setActiveWindow(self.mainWindow)
 
         # check whether to skip the execution loop for testing with mainWindow
         import builtins
-
         _skip = getattr(builtins, '_skipExecuteLoop', False)
         if not _skip:
             self.qtApp.start()

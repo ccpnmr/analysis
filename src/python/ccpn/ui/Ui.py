@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-24 17:30:31 +0000 (Mon, January 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-24 18:09:58 +0000 (Mon, January 24, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -56,14 +56,6 @@ class Ui(NotifierBase):
 
         self._setUpGraphicsDataClasses()
 
-    def addMenu(self, name, position=None):
-        """
-        Add a menu specification for the top menu bar.
-        """
-        if position is None:
-            position = len(self._menuSpec)
-        self._menuSpec.insert(position, (str(name), []))
-
     @classmethod
     def _setUpGraphicsDataClasses(cls):
         """Set up graphics data classes, cleaning up previous settings
@@ -77,12 +69,9 @@ class Ui(NotifierBase):
         """UI operations done after every project load/create"""
         pass
 
-    def start(self):
-        """Start the program execution"""
-
-        # self._checkRegistered()
-        # Register.updateServer(Register.loadDict(), self.application.applicationVersion)
-
+    def startUi(self):
+        """Start the ui execution
+        """
         sys.stderr.write('==> %s interface is ready\n' % self.__class__.__name__)
 
     def _checkRegistration(self) -> bool:
@@ -348,7 +337,7 @@ class NoUi(Ui):
 
         from ccpn.framework.Version import applicationVersion
         # applicationVersion = __version__.split()[1]  # ejb - read from the header
-        installUpdates(applicationVersion, dryRun=False)
+        installUpdates(applicationVersion.withoutRelease(), dryRun=False)
 
         sys.stderr.write('Please restart the program to apply the updates\n')
         sys.exit(1)

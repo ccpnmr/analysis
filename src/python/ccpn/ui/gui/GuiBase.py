@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-24 17:30:31 +0000 (Mon, January 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-24 18:09:58 +0000 (Mon, January 24, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -664,6 +664,15 @@ class GuiBase(object):
 
     def _testShortcuts1(self):
         print('>>> Testing shortcuts1')
+
+    # GWV 22022/1/24: Copied from Ui
+    # def addMenu(self, name, position=None):
+    #     """
+    #     Add a menu specification for the top menu bar.
+    #     """
+    #     if position is None:
+    #         position = len(self._menuSpec)
+    #     self._menuSpec.insert(position, (str(name), []))
 
 #end class
 

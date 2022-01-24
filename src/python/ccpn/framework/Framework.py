@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-24 17:36:16 +0000 (Mon, January 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-24 18:09:58 +0000 (Mon, January 24, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -394,8 +394,6 @@ class Framework(NotifierBase, GuiBase):
         else:
             project = self.newProject()
 
-        self._updateCheckableMenuItems()
-
         if self.preferences.general.checkUpdatesAtStartup and not getattr(self.args, '_skipUpdates', False):
             self.ui._checkForUpdates()
 
@@ -411,7 +409,7 @@ class Framework(NotifierBase, GuiBase):
 
         sys.stderr.write('==> Done, %s is starting\n' % self.applicationName)
 
-        self.ui.start()
+        self.ui.startUi()
         self._cleanup()
 
     def updateAutoBackup(self):
@@ -469,7 +467,7 @@ class Framework(NotifierBase, GuiBase):
         Logging.setLevel(logger, self.level)
         logger.debug('Framework._initialiseProject>>>')
 
-        # Set up current; we need it when restoring
+        # Set up current; we need it when restoring project graphics data below
         self._current = Current(project=project)
 
         # This wraps the underlying data, including the wrapped graphics data
@@ -479,7 +477,7 @@ class Framework(NotifierBase, GuiBase):
         # Adapt project to preferences
         self.applyPreferences(project)
 
-        # restore current
+        # Now that all objects, including the graphics are there, restore current
         self.current._restoreStateFromFile(self.statePath)
 
         if self.hasGui:
@@ -496,12 +494,7 @@ class Framework(NotifierBase, GuiBase):
         """
         if self.args.interface == 'Gui':
             from ccpn.ui.gui.Gui import Gui
-            # self._setColourSchemeAndStyleSheet()
             ui = Gui(application=self)
-            # self._setupMenus()
-
-            # ui.mainWindow is None upon initialization: gets filled later
-            getLogger().debug('%s %s %s' % (self, ui, ui.mainWindow))
 
         else:
             from ccpn.ui.Ui import NoUi

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-24 17:30:31 +0000 (Mon, January 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-24 18:09:58 +0000 (Mon, January 24, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -156,8 +156,9 @@ class Gui(Ui):
             self.mainWindow = self._setupMainWindow(mainWindow)
             self.application._initGraphics()
             self.mainWindow._updateRestoreArchiveMenu()
+            self.application._updateCheckableMenuItems()
 
-    def start(self):
+    def startUi(self):
 
         project = self.application.project
         # GWV: why is this here!???

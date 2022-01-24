@@ -2243,6 +2243,16 @@ def _getParameterValues(obj, parameterName:str, dimensions:Sequence, dimensionCo
         raise ValueError('%s: unable to get parameter "%s"' % (obj, parameterName))
 
     newValues = []
+    if all(isinstance(i, tuple) for i in values):
+        # this could be the case as in peak.assignedNmrAtoms
+        for ll in values:
+            _newValuesForDim = []
+            for dim in dimensions:
+                _newValuesForDim.append(ll[dim - 1])
+            newValues.append(tuple(_newValuesForDim))
+        return newValues
+
+    newValues = []
     for dim in dimensions:
         if dim < 1 or dim > dimensionCount:
             # report error in 1-based, as the error is caught by the calling routines

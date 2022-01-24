@@ -944,12 +944,14 @@ class Peak(AbstractWrapperObject):
         peakList = self.peakList
         dimensionCount = peakList.spectrum.dimensionCount
 
-        if dimensionCount != targetPeakList.spectrum.dimensionCount:
-            raise ValueError("Cannot copy %sD %s to %sD %s"
-                             % (dimensionCount, self.longPid,
-                                targetPeakList.spectrum.dimensionCount, targetPeakList.longPid))
+        if dimensionCount < targetPeakList.spectrum.dimensionCount:
+            raise ValueError("Cannot copy %sD %s to %sD %s. Incompatible dimensionality."
+                         % (dimensionCount, self.longPid,
+                            targetPeakList.spectrum.dimensionCount, targetPeakList.longPid))
 
-        dimensionMapping = _axisCodeMapIndices(peakList.spectrum.axisCodes, targetPeakList.spectrum.axisCodes)
+        destinationAxisCodes = targetPeakList.spectrum.axisCodes
+        dimensionMapping = peakList.spectrum.getByAxisCodes('dimensions', destinationAxisCodes, exactMatch=True)
+
         if None in dimensionMapping:
             raise ValueError("%s axisCodes %s not compatible with targetSpectrum axisCodes %s"
                              % (self, peakList.spectrum.axisCodes, targetPeakList.spectrum.axisCodes))
@@ -957,16 +959,14 @@ class Peak(AbstractWrapperObject):
         with undoBlockWithoutSideBar():
             params = dict((tag, getattr(self, tag)) for tag in singleValueTags)
             for tag in dimensionValueTags:
-                value = getattr(self, tag)
-                params[tag] = [value[dimensionMapping[ii]] for ii in range(dimensionCount)]
+                value = self.getByDimensions(tag, dimensions=dimensionMapping)
+                params[tag] = value
             newPeak = targetPeakList.newPeak(**params)
 
-            assignments = []
-            for assignment in self.assignedNmrAtoms:
-                assignments.append([assignment[dimensionMapping[ii]] for ii in range(dimensionCount)])
+            assignments = self.getByDimensions('assignedNmrAtoms', dimensionMapping)
             if assignments:
                 newPeak.assignedNmrAtoms = assignments
-            #
+
             return newPeak
 
     def reorderValues(self, values, newAxisCodeOrder):

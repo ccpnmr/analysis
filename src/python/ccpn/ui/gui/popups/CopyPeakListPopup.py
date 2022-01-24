@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:30:50 +0000 (Thu, January 13, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-01-24 19:33:14 +0000 (Mon, January 24, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -113,11 +113,11 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
             visibleSpectra = spectra = self.project.spectra
         else:
             _dimCount = sourcePeakList.spectrum.dimensionCount
-            visibleSpectra = spectra = [spec for spec in self.project.spectra if spec.dimensionCount == _dimCount]
+            visibleSpectra = spectra = [spec for spec in self.project.spectra if spec.dimensionCount <= _dimCount]
 
             if self.spectrumDisplay is not None:
                 _tmp = self.spectrumDisplay.strips[0].getVisibleSpectra()
-                visibleSpectra = [spec for spec in _tmp if spec.dimensionCount == _dimCount]
+                visibleSpectra = [spec for spec in _tmp if spec.dimensionCount <= _dimCount]
 
         #
         # if self.spectrumDisplay and self.spectrumDisplay.strips:

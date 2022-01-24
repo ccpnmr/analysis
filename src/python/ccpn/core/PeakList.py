@@ -278,7 +278,7 @@ class PeakList(PMIListABC):
         # checking targetSpectrum for compatibility
         # TODO enable copying across different dimensionalities
         dimensionCount = self.spectrum.dimensionCount
-        if dimensionCount != targetSpectrum.dimensionCount:
+        if dimensionCount < targetSpectrum.dimensionCount:
             raise ValueError("Cannot copy %sD %s to %sD %s"
                              % (dimensionCount, self.longPid,
                                 targetSpectrum.dimensionCount, targetSpectrum.longPid))

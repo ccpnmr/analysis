@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:30:50 +0000 (Thu, January 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-24 10:40:26 +0000 (Mon, January 24, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2338,52 +2338,52 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if int(ev.buttons() & (Qt.LeftButton | Qt.RightButton)):
             # find the bounds for the region that has currently been clicked
-            if (keyModifiers & (Qt.ShiftModifier | Qt.ControlModifier)):
+            # if (keyModifiers & (Qt.ShiftModifier | Qt.ControlModifier)):
 
-                if self.is1D:
-                    bounds = ([],)
-                    self._minBounds = [None, ]
-                    self._maxBounds = [None, ]
-                else:
-                    bounds = ([], [])
-                    self._minBounds = [None, None]
-                    self._maxBounds = [None, None]
+            if self.is1D:
+                bounds = ([],)
+                self._minBounds = [None, ]
+                self._maxBounds = [None, ]
+            else:
+                bounds = ([], [])
+                self._minBounds = [None, None]
+                self._maxBounds = [None, None]
 
-                # get the list of visible spectrumViews, or the first in the list
-                visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isDisplayed]
+            # get the list of visible spectrumViews, or the first in the list
+            visibleSpectrumViews = [specView for specView in self._ordering if not specView.isDeleted and specView.isDisplayed]
 
-                for specView in visibleSpectrumViews:
-                    specSettings = self._spectrumSettings[specView]
+            for specView in visibleSpectrumViews:
+                specSettings = self._spectrumSettings[specView]
 
-                    if not self.is1D:
-                        pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
-                        if None in pIndex:
-                            continue
+                if not self.is1D:
+                    pIndex = specSettings[GLDefs.SPECTRUM_POINTINDEX]
+                    if None in pIndex:
+                        continue
 
-                    for ii in range(len(bounds)):
-                        _rb = list(specSettings[GLDefs.SPECTRUM_REGIONBOUNDS][ii])
-                        bounds[ii].extend(_rb[1:-1])  # skip the outer ppm values
+                for ii in range(len(bounds)):
+                    _rb = list(specSettings[GLDefs.SPECTRUM_REGIONBOUNDS][ii])
+                    bounds[ii].extend(_rb[1:-1])  # skip the outer ppm values
 
-                bounds = [sorted(set([round(b, 12) for b in bnd])) for bnd in bounds]
+            bounds = [sorted(set([round(b, 12) for b in bnd])) for bnd in bounds]
 
-                mn = min(self.axisL, self.axisR)
-                mx = max(self.axisL, self.axisR)
-                bounds[0] = [mn] + [bnd for bnd in bounds[0] if mn < bnd < mx] + [mx]
-                if len(bounds) > 1:
-                    mn = min(self.axisB, self.axisT)
-                    mx = max(self.axisB, self.axisT)
-                    bounds[1] = [mn] + [bnd for bnd in bounds[1] if mn < bnd < mx] + [mx]
+            mn = min(self.axisL, self.axisR)
+            mx = max(self.axisL, self.axisR)
+            bounds[0] = [mn] + [bnd for bnd in bounds[0] if mn < bnd < mx] + [mx]
+            if len(bounds) > 1:
+                mn = min(self.axisB, self.axisT)
+                mx = max(self.axisB, self.axisT)
+                bounds[1] = [mn] + [bnd for bnd in bounds[1] if mn < bnd < mx] + [mx]
 
-                for jj in range(len(bounds)):
-                    for minB, maxB in zip(bounds[jj], bounds[jj][1:]):
-                        if minB < self._startCoordinate[jj] < maxB:
-                            self._minBounds[jj] = minB
-                            self._maxBounds[jj] = maxB
-                            break
+            for jj in range(len(bounds)):
+                for minB, maxB in zip(bounds[jj], bounds[jj][1:]):
+                    if minB < self._startCoordinate[jj] < maxB:
+                        self._minBounds[jj] = minB
+                        self._maxBounds[jj] = maxB
+                        break
 
-                if None not in self._minBounds and None not in self._maxBounds:
-                    # not currently used, but available to set the region to red if required
-                    self._validRegionPick = True
+            if None not in self._minBounds and None not in self._maxBounds:
+                # not currently used, but available to set the region to red if required
+                self._validRegionPick = True
 
         self.current.strip = self.strip
         self.update()

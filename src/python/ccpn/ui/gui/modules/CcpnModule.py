@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-01-13 16:11:39 +0000 (Thu, January 13, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-01-24 12:09:17 +0000 (Mon, January 24, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1302,7 +1302,7 @@ class CcpnModuleLabel(DockLabel):
     def _modulesMenu(self, menuName, module):
 
         menu = Menu(menuName.title(), self, isFloatWidget=True)
-        if module:
+        if module and module.area:
             toAll = menu.addAction('All', partial(self.module.area.moveModule, module, menuName, None))
             for availableModule in self.module.area.ccpnModules:
                 if availableModule != module:
@@ -1314,7 +1314,9 @@ class CcpnModuleLabel(DockLabel):
         """
         Re-implementation of the  mouse event so a right mouse context menu can be raised.
         """
-        self.module.area._finaliseAllNameEditing()  # so to close the on-going operation
+        if self.module and self.module.area:
+            self.module.area._finaliseAllNameEditing()  # so to close the on-going operation
+
         if event.button() == QtCore.Qt.RightButton:
             menu = self._createContextMenu()
             if menu:

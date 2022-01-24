@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-24 17:30:30 +0000 (Mon, January 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-24 17:36:16 +0000 (Mon, January 24, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -378,7 +378,7 @@ class Framework(NotifierBase, GuiBase):
 
     #-----------------------------------------------------------------------------------------
 
-    def start(self):
+    def _startApplication(self):
         """Start the program execution
         """
 
@@ -2366,7 +2366,7 @@ class MyProgramme(Framework):
 def createFramework(projectPath=None, **kwds):
     args = Arguments(projectPath=projectPath, **kwds)
     result = MyProgramme(args)
-    result.start()
+    result._startApplication()
     #
     return result
 

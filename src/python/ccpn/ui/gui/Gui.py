@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-20 20:21:39 +0000 (Thu, January 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-24 17:30:31 +0000 (Mon, January 24, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -30,16 +30,21 @@ import sys
 import typing
 import re
 from PyQt5 import QtWidgets, QtCore
+
 from ccpn.core import _coreClassMap
 from ccpn.core.Project import Project
+
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
+
 from ccpn.ui.Ui import Ui
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPopup
 from ccpn.ui.gui.widgets.Application import Application
 from ccpn.ui.gui.widgets.MessageDialog import showError, showWarning
+
+from ccpn.ui.gui.guiSettings import FontSettings
 from ccpn.ui.gui.widgets.Font import getFontHeight, setWidgetFont
-# This import initializes relative paths for QT style-sheets.  Do not remove!
+# This import initializes relative paths for QT style-sheets.  Do not remove! GWV ????
 from ccpn.framework.PathsAndUrls import userPreferencesPath
 from ccpn.util import Logging
 from ccpn.util import Register
@@ -98,11 +103,21 @@ class _MyAppProxyStyle(QtWidgets.QProxyStyle):
 
 
 class Gui(Ui):
+    """Top class for the GUI interface
+    """
     # Factory functions for UI-specific instantiation of wrapped graphics classes
     _factoryFunctions = {}
 
     def __init__(self, application):
+
+        # sets self.mainWindow (None), self.application and self.pluginModules
         Ui.__init__(self, application)
+
+        # GWV: this is not ideal and needs to move into the Gui class
+        application._fontSettings = FontSettings(application.preferences)
+        application._setColourSchemeAndStyleSheet()
+        application._setupMenus()
+
         self._initQtApp()
 
     def _initQtApp(self):
@@ -218,22 +233,9 @@ class Gui(Ui):
         return self.application.getByGid(gid)
 
     def _execUpdates(self):
-        sys.stderr.write('==> Gui update\n')
-        from ccpn.framework.update.UpdatePopup import UpdatePopup
-        from ccpn.util import Url
-
-        # check valid internet connection first
-        if Url.checkInternetConnection():
-            self.updatePopup = UpdatePopup(parent=self.mainWindow, mainWindow=self.mainWindow)
-            self.updatePopup.exec_()
-
-            # if updates have been installed then popup the quit dialog with no cancel button
-            if self.updatePopup._numUpdatesInstalled > 0:
-                self.mainWindow._closeWindowFromUpdate(disableCancel=True)
-
-        else:
-            showWarning('Check For Updates',
-                        'Could not connect to the update server, please check your internet connection.')
+        """Use the Update popup to execute any updates
+        """
+        self.application._showUpdatePopup()
 
     def loadProject(self, path):
         """Just a stub for now; calling MainWindow methods as it initialises the Gui

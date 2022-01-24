@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-21 19:10:48 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-24 17:30:31 +0000 (Mon, January 24, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -330,7 +330,7 @@ class GuiBase(object):
             # ("Inspect Code...", self.showCodeInspectionPopup, [('shortcut', 'gv'),
             #                                                    ('enabled', False)]),
             # ("Show Issues...", self.showIssuesList),
-            ("Check for Updates...", self.showUpdatePopup),
+            ("Check for Updates...", self._showUpdatePopup),
             ("Register...", self.showRegisterPopup),
             (),
             ("About CcpNmr V3...", self.showAboutPopup),
@@ -544,6 +544,26 @@ class GuiBase(object):
         from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
         self._showHtmlFile("CCPN Licence", ccpnLicenceUrl)
 
+    def _showUpdatePopup(self):
+        """Open the update popup
+        CCPNINTERNAL: Also called from.Gui._executeUpdates
+        """
+        from ccpn.framework.update.UpdatePopup import UpdatePopup
+        from ccpn.util import Url
+
+        # check valid internet connection first
+        if Url.checkInternetConnection():
+            updatePopup = UpdatePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+            updatePopup.exec_()
+
+            # if updates have been installed then popup the quit dialog with no cancel button
+            if updatePopup._numUpdatesInstalled > 0:
+                self.ui.mainWindow._closeWindowFromUpdate(disableCancel=True)
+
+        else:
+            MessageDialog.showWarning('Check For Updates',
+                                      'Could not connect to the update server, please check your internet connection.')
+
     #-----------------------------------------------------------------------------------------
     # Inactive
     #-----------------------------------------------------------------------------------------
@@ -560,10 +580,9 @@ class GuiBase(object):
 
         # check valid internet connection first
         if Url.checkInternetConnection():
-            if not self.submitMacroPopup:
-                self.submitMacroPopup = SubmitMacroPopup(parent=self.ui.mainWindow)
-            self.submitMacroPopup.show()
-            self.submitMacroPopup.raise_()
+            submitMacroPopup = SubmitMacroPopup(parent=self.ui.mainWindow)
+            submitMacroPopup.show()
+            submitMacroPopup.raise_()
 
         else:
             MessageDialog.showWarning('Submit Macro',

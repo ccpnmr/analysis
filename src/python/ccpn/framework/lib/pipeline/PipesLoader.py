@@ -1,15 +1,14 @@
-from ccpn.framework.Framework import AnalysisScreen, AnalysisAssign, AnalysisMetabolomics, AnalysisStructure
 from ccpn.util import Path
 from ccpn.framework.PathsAndUrls import userPreferencesDirectory
 import os
 
 
 def loadPipeSysModules(paths):
-    '''
+    """"
     dynamic pipe importer. Called upon initialisation of the program for loading the registered ccpn Pipes.
     Path = path of the top dir containing the pipes files.
     Users pipes are loaded only when opening a Gui Pipeline.
-    '''
+    """
     import pkgutil as _pkgutil
     import traceback
     from ccpn.util.Logging import getLogger

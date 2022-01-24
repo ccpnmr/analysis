@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-24 11:23:17 +0000 (Mon, January 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-24 17:30:30 +0000 (Mon, January 24, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,10 +28,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #     # NOTE:ED - quick patch to fix bug in pyqt 5.9
 #     systime.clock = systime.process_time
 
-# how frequently to check if license dialog has closed when waiting to show the tip of the day
-WAIT_EVENT_LOOP_EMPTY = 0
-WAIT_LICENSE_DIALOG_CLOSE_TIME = 100
-
 import json
 import logging
 import os
@@ -41,12 +37,14 @@ import tarfile
 import tempfile
 import re
 import subprocess
+
 import faulthandler
+faulthandler.enable()
+
 from tqdm import tqdm
 
 from threading import Thread
 from time import time, sleep
-
 
 from typing import Union, Optional, List, Tuple, Sequence
 
@@ -100,34 +98,35 @@ from ccpn.ui.gui.widgets.FileDialog import \
     SpectrumFileDialog, \
     ProjectSaveFileDialog
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
+from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_KEY_CONCEPTS
 
 from ccpn.util import Logging
 from ccpn.util.Path import Path, aPath, fetchDir, getPathToImport
-
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable
 from ccpn.util.Logging import getLogger
-
 from ccpn.util import Layout
+from ccpn.util.decorators import logCommand
 
 from ccpnmodel.ccpncore.api.memops import Implementation
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 
-from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideBar, undoBlock, \
     notificationEchoBlocking, logCommandManager
 
-from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_KEY_CONCEPTS
-
-
-faulthandler.enable()
+#-----------------------------------------------------------------------------------------
+# how frequently to check if license dialog has closed when waiting to show the tip of the day
+WAIT_EVENT_LOOP_EMPTY = 0
+WAIT_LICENSE_DIALOG_CLOSE_TIME = 100
 
 _DEBUG = False
 
 interfaceNames = ('NoUi', 'Gui')
 
-
+#-----------------------------------------------------------------------------------------
+# Subclass the exception hook
+#-----------------------------------------------------------------------------------------
 def _ccpnExceptionhook(ccpnType, value, tback):
     """This because PyQT raises and catches exceptions,
     but doesn't pass them along instead makes the program crashing miserably.
@@ -146,7 +145,7 @@ def _ccpnExceptionhook(ccpnType, value, tback):
     sys.__excepthook__(ccpnType, value, tback)
 
 sys.excepthook = _ccpnExceptionhook
-
+#-----------------------------------------------------------------------------------------
 
 
 class AutoBackup(Thread):
@@ -182,15 +181,18 @@ class Framework(NotifierBase, GuiBase):
     """
     The Framework class is the base class for all applications.
     """
-
+    #-----------------------------------------------------------------------------------------
     # to be sub-classed
     applicationName = None
     applicationVersion = None
+    #-----------------------------------------------------------------------------------------
 
     def __init__(self, args=Arguments()):
 
         NotifierBase.__init__(self)
         GuiBase.__init__(self)
+
+        printCreditsText(sys.stderr, self.applicationName, self.applicationVersion)
 
         #-----------------------------------------------------------------------------------------
         # Key attributes related to the data structure
@@ -209,14 +211,9 @@ class Framework(NotifierBase, GuiBase):
         # Initialisations
         #-----------------------------------------------------------------------------------------
         self.args = args
-        # self.applicationName = applicationName
-        # self.applicationVersion = applicationVersion
+
         # NOTE:ED - what is revision for? there are no uses and causes a new error for sphinx documentation unless a string
         # self.revision = Version.revision
-
-        printCreditsText(sys.stderr, self.applicationName, self.applicationVersion)
-
-        # self.setupComponents(args)
 
         self.useFileLogger = not self.args.nologging
         if self.args.debug3:
@@ -229,11 +226,16 @@ class Framework(NotifierBase, GuiBase):
             self.level = logging.INFO
 
         self.preferences = None  # initialised by self._getUserPrefs
+        self._getUserPrefs()
 
         self.layout = None  # initialised by self._getUserLayout
-        self._styleSheet = None  # initialised by self._setColourSchemeAndStyleSheet
-        self._colourScheme = None  # initialised by self._setColourSchemeAndStyleSheet
-        self._fontSettings = None # initialiased by self.__initialiseFonts
+
+        # GWV these attributes should move to the GUI class (in 3.2x ??)
+        # For now, initialiased by calls in Gui.__init_
+        self._styleSheet = None
+        self._colourScheme = None
+        self._fontSettings = None
+        self._menuSpec = None
 
         # Blocking level for command echo and logging
         self._echoBlocking = 0
@@ -242,17 +244,13 @@ class Framework(NotifierBase, GuiBase):
         self._backupTimerQ = None
         self.autoBackupThread = None
 
-        self._getUserPrefs()
-
         self._tip_of_the_day = None
         self._initial_show_timer = None
         self._key_concepts = None
 
         self._registrationDict = {}
         self._setLanguage()
-        # self.feedbackPopup = None
-        self.submitMacroPopup = None
-        self.updatePopup = None
+
         self._disableUndoException = getattr(self.args, 'disableUndoException', False)
         self._ccpnLogging = getattr(self.args, 'ccpnLogging', False)
 
@@ -264,10 +262,10 @@ class Framework(NotifierBase, GuiBase):
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
         self._spectrumDataSourceFormats = getDataFormats()
 
-        # get a user interface
+        # get a user interface; nb. ui.start() is called by the application
         self.ui = self._getUI()
 
-        # register the programme for later
+        # register the programme for later with the getApplication() call
         from ccpn.framework.Application import ApplicationContainer
         container = ApplicationContainer()
         container.register(self)
@@ -384,25 +382,22 @@ class Framework(NotifierBase, GuiBase):
         """Start the program execution
         """
 
-        self._initialiseFonts()
-
         # NOTE:ED - there are currently issues when loading projects from the command line, or from test cases
         #   There is no project.application and project is None
         #   The Logger instantiated is the default logger, required adding extra methods so that, e.g., echoInfo worked
         #   logCommand has no self.project.application, and requires getApplication() instead
         #   There is NoUi instantiated yet, so temporarily added loadProject to Ui class called by loadProject below)
-        # Load / create project
-        projectPath = self.args.projectPath
-        if projectPath:
-            project = self.loadProject(projectPath)
 
+        # Load / create project
+        if (projectPath := self.args.projectPath) is not None:
+            project = self.loadProject(projectPath)
         else:
             project = self.newProject()
+
         self._updateCheckableMenuItems()
 
         if self.preferences.general.checkUpdatesAtStartup and not getattr(self.args, '_skipUpdates', False):
-            if not self.ui._checkUpdates():
-                return
+            self.ui._checkForUpdates()
 
         if not self.ui._checkRegistration():
             return
@@ -416,7 +411,6 @@ class Framework(NotifierBase, GuiBase):
 
         sys.stderr.write('==> Done, %s is starting\n' % self.applicationName)
 
-        # self.project = project
         self.ui.start()
         self._cleanup()
 
@@ -497,23 +491,21 @@ class Framework(NotifierBase, GuiBase):
             self.ui.initialize(None)
 
     def _getUI(self):
+        """Get the user interface
+        :return a Ui instance
+        """
         if self.args.interface == 'Gui':
             from ccpn.ui.gui.Gui import Gui
-
-            self._setColourSchemeAndStyleSheet()
+            # self._setColourSchemeAndStyleSheet()
             ui = Gui(application=self)
-            self._setupMenus()
+            # self._setupMenus()
 
             # ui.mainWindow is None upon initialization: gets filled later
             getLogger().debug('%s %s %s' % (self, ui, ui.mainWindow))
 
         else:
             from ccpn.ui.Ui import NoUi
-
             ui = NoUi(application=self)
-
-        # Connect UI classes for chosen ui
-        ui.setUp()
 
         return ui
 
@@ -2281,24 +2273,25 @@ class Framework(NotifierBase, GuiBase):
         from ccpn.framework.PathsAndUrls import ccpnTutorials
         self._showHtmlFile("CCPN Tutorials", ccpnTutorials)
 
-    def showUpdatePopup(self):
-        """Open the update popup
-        """
-        from ccpn.framework.update.UpdatePopup import UpdatePopup
-        from ccpn.util import Url
-
-        # check valid internet connection first
-        if Url.checkInternetConnection():
-            self.updatePopup = UpdatePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-            self.updatePopup.exec_()
-
-            # if updates have been installed then popup the quit dialog with no cancel button
-            if self.updatePopup._numUpdatesInstalled > 0:
-                self.ui.mainWindow._closeWindowFromUpdate(disableCancel=True)
-
-        else:
-            MessageDialog.showWarning('Check For Updates',
-                                      'Could not connect to the update server, please check your internet connection.')
+    # def _showUpdatePopup(self):
+    #     """Open the update popup
+    #     CCPNINTERNAL: Also called from.Gui._executeUpdates
+    #     """
+    #     from ccpn.framework.update.UpdatePopup import UpdatePopup
+    #     from ccpn.util import Url
+    #
+    #     # check valid internet connection first
+    #     if Url.checkInternetConnection():
+    #         updatePopup = UpdatePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+    #         updatePopup.exec_()
+    #
+    #         # if updates have been installed then popup the quit dialog with no cancel button
+    #         if updatePopup._numUpdatesInstalled > 0:
+    #             self.ui.mainWindow._closeWindowFromUpdate(disableCancel=True)
+    #
+    #     else:
+    #         MessageDialog.showWarning('Check For Updates',
+    #                                   'Could not connect to the update server, please check your internet connection.')
 
     def showRegisterPopup(self):
         """Open the registration popup
@@ -2307,9 +2300,6 @@ class Framework(NotifierBase, GuiBase):
 
     #########################################    End Menu callbacks   ##################################################
 
-    def _initialiseFonts(self):
-        from ccpn.ui.gui.guiSettings import fontSettings
-        self._fontSettings = fontSettings(self.preferences)
 
 
     def __str__(self):

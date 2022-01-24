@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-21 13:21:25 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-24 17:30:31 +0000 (Mon, January 24, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -55,7 +55,7 @@ class FontSizes(LabelledEnum):
     MAXIMUM = 3.0, 'maximum, triple default size'
 
 
-class fontSettings():
+class FontSettings():
 
     def __init__(self, preferences):
 

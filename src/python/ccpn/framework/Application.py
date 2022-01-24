@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-21 19:10:48 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-24 11:13:31 +0000 (Mon, January 24, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,9 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 #=========================================================================================
 
 from ccpn.util.decorators import singleton
-from ccpn.framework.Translation import defaultLanguage
+from ccpn.framework.Translation import languages, defaultLanguage
+from ccpn.ui import interfaces, defaultInterface
+
 
 AnalysisAssign = 'AnalysisAssign'
 AnalysisScreen = 'AnalysisScreen'
@@ -73,3 +75,43 @@ class Arguments:
         self.projectPath = projectPath
         for tag, val in kwds.items():
             setattr(self, tag, val)
+
+
+def defineProgramArguments():
+    """Define the arguments of the program
+    return argparse instance
+    """
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Process startup arguments')
+    # for component in componentNames:
+    #   parser.add_argument('--'+component.lower(), dest='include'+component, action='store_true',
+    #                                               help='Show %s component' % component.lower())
+    parser.add_argument('--language',
+                        help=('Language for menus, etc.; valid options = (%s); default=%s' %
+                              ('|'.join(languages), defaultLanguage)))
+    parser.add_argument('--interface',
+                        help=('User interface, to use; one of  = (%s); default=%s' %
+                              ('|'.join(interfaces), defaultInterface)),
+                        default=defaultInterface)
+    parser.add_argument('--skip-user-preferences', dest='skipUserPreferences', action='store_true',
+                        help='Skip loading user preferences')
+    parser.add_argument('--dark', dest='darkColourScheme', action='store_true',
+                        help='Use dark colour scheme')
+    parser.add_argument('--light', dest='lightColourScheme', action='store_true',
+                        help='Use dark colour scheme')
+    parser.add_argument('--nologging', dest='nologging', action='store_true', help='Do not log information to a file')
+    parser.add_argument('--debug', dest='debug', action='store_true', help='Set logging level to debug')
+    parser.add_argument('--debug1', dest='debug', action='store_true', help='Set logging level to debug1 (=debug)')
+    parser.add_argument('--debug2', dest='debug2', action='store_true', help='Set logging level to debug2')
+    parser.add_argument('--debug3', dest='debug3', action='store_true', help='Set logging level to debug3')
+
+    # Ccpn logging options - traceback can sometimes be masked in undo/redo
+    # --disable-undo-exception removes the try:except to allow full traceback to occur
+    parser.add_argument('--disable-undo-exception', dest='disableUndoException', action='store_true', help='Disable exception wrapping undo/redo actions, reserved for high-level debugging.')
+    # log information at end of undo/redo if exception occurs (not called if --disable-undo-exception set), calls _logObjects
+    parser.add_argument('--ccpn-logging', dest='ccpnLogging', action='store_true', help='Additional logging of some ccpn objects, reserved for high-level debugging.')
+
+    parser.add_argument('projectPath', nargs='?', help='Project path')
+
+    return parser

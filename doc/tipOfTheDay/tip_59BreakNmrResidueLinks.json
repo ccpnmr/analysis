@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>You can break the sequential links between NmrResidues by right-clicking on an NmrResidue in the Sequence Graph (open this with <span style=%(purple)s>View / Sequence Graph</span> or shortcut <span style=%(purple)s>SG</span>). You then have the option to break the links on only one or both sides of the NmrResidue or to break all links in that NmrChain.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 59,
+  "contents": [
+    "./graphics/BreakNmrResidueLinks.png"
+  ]
+}

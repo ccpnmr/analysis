@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>If you want to make manual changes to the referencing of a spectrum you can do this in the <span style=%(purple)s>Dimensions</span> tab of the <span style=%(purple)s>Spectrum Properties</span> pop-up. Open this by double-clicking on the spectrum in the sidebar.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 60,
+  "contents": [
+    "./graphics/ManualChangesToReferencing.png"
+  ]
+}

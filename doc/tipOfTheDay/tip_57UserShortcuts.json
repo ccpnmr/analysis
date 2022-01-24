@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>If you use macros (either your own or those provided by CCPN) then you can associate these with your own shortcuts by going to <span style=%(purple)s>Macros / Define Macro Shortcuts</span> or using shortcut <span style=%(purple)s>DU</span>.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 57,
+  "contents": [
+    "./graphics/UserShortcuts.png"
+  ]
+}

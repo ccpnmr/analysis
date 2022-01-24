@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>Rather than using Collections, you can use Spectrum Groups to organise your Spectra. This will allow you to find and open them quickly. Double-click on a Spectrum Group to add or remove spectra easily.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 58,
+  "contents": [
+    "./graphics/OrganiseSpectraWithSpectrumGroups.png"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "header": "<p style=%(para)s>If you have a spectrum with a diagonal in the XY plane (i.e. a homonuclear XY plane), then you can switch on a Double Crosshair with <span style=%(purple)s>right-mouse / Customise / Double Crosshair</span> or shortcut <span style=%(purple)s>CD</span>. This will show an additional crosshair on the opposite side of the diagonal from our mouse position and the equivalent crosshairs will also be shown in other Spectrum Displays.</p>",
+  "type": "picture",
+  "styles": {
+    "style_file": "tipStyles.txt"
+  },
+  "color": "#ffffff",
+  "order": 56,
+  "contents": [
+    "./graphics/DoubleCrosshair.png"
+  ]
+}

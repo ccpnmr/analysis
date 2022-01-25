@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-21 16:53:11 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-25 10:26:44 +0000 (Tue, January 25, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -32,7 +32,7 @@ ccpnUrl                         = 'http://www.ccpn.ac.uk'
 ccpn2Url                        = 'http://www.ccpn.ac.uk'
 ccpnLicenceUrl                  = 'http://www.ccpn.ac.uk/v3-software/licences'
 ccpnTutorials                   = 'https://www.ccpn.ac.uk/v3-software/tutorials'
-ccpnForum                       = 'https://www.ccpn.ac.uk/v3-software/v3-forum'
+ccpnForum                       = 'https://forum.ccpn.ac.uk'
 ccpnVideos                      = 'https://www.ccpn.ac.uk/v3-software/v3-video-tutorials'
 oldCcpnIssuesUrl                = 'https://sourceforge.net/p/ccpn/bugs/'
 ccpnIssuesUrl                   = 'https://bitbucket.org/ccpnmr/issue-tracker/issues?status=new&status=open'

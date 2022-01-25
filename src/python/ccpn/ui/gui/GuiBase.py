@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-24 18:09:58 +0000 (Mon, January 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-25 10:26:45 +0000 (Tue, January 25, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -53,6 +53,8 @@ from ccpn.core.lib.ContextManagers import \
     undoBlock, \
     notificationEchoBlocking, \
     logCommandManager
+
+from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable
 from ccpn.util.decorators import logCommand
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import Path, aPath
@@ -82,7 +84,12 @@ class GuiBase(object):
     """
 
     def __init__(self):
-        pass
+        # GWV these attributes should move to the GUI class (in 3.2x ??)
+        # For now, initialised by calls in Gui.__init_
+        self._styleSheet = None
+        self._colourScheme = None
+        self._fontSettings = None
+        self._menuSpec = None
 
     def _setupMenus(self):
         """Setup the menu specification.
@@ -314,26 +321,25 @@ class GuiBase(object):
 
         ms.append(('Help', [
             (TUTORIALSMENU, ([
-
                 ("None", None, [('checkable', True),
                                 ('checked', False)])
                 ])),
             ("Show Tip of the Day", partial(self._displayTipOfTheDay, standalone=True)),
             ("Key Concepts", self._displayKeyConcepts),
-            ("Show Shortcuts", self.showShortcuts),
-            ("Show API Documentation", self.showVersion3Documentation),
+            ("Show Shortcuts", self._showShortcuts),
+            ("Show API Documentation", self._showVersion3Documentation),
             ("Show License", self._showCcpnLicense),
             (),
-            ("CcpNmr Homepage", self.showAboutCcpn),
-            ("CcpNmr V3 Forum", self.showForum),
+            ("CcpNmr Homepage", self._showAboutCcpn),
+            ("CcpNmr V3 Forum", self._showForum),
             (),
             # ("Inspect Code...", self.showCodeInspectionPopup, [('shortcut', 'gv'),
             #                                                    ('enabled', False)]),
             # ("Show Issues...", self.showIssuesList),
             ("Check for Updates...", self._showUpdatePopup),
-            ("Register...", self.showRegisterPopup),
+            ("Register...", self._showRegisterPopup),
             (),
-            ("About CcpNmr V3...", self.showAboutPopup),
+            ("About CcpNmr V3...", self._showAboutPopup),
             ]
         ))
 
@@ -540,6 +546,60 @@ class GuiBase(object):
     # Help -->
     #-----------------------------------------------------------------------------------------
 
+    def _showBeginnersTutorial(self):
+        from ccpn.framework.PathsAndUrls import beginnersTutorialPath
+        self._systemOpen(beginnersTutorialPath)
+
+    def _showBackboneTutorial(self):
+        from ccpn.framework.PathsAndUrls import backboneAssignmentTutorialPath
+        self._systemOpen(backboneAssignmentTutorialPath)
+
+    def _showCSPtutorial(self):
+        from ccpn.framework.PathsAndUrls import cspTutorialPath
+        self._systemOpen(cspTutorialPath)
+
+    def _showScreenTutorial(self):
+        from ccpn.framework.PathsAndUrls import screenTutorialPath
+        self._systemOpen(screenTutorialPath)
+
+    def _showVersion3Documentation(self):
+        """Displays CCPN wrapper documentation in a module.
+        """
+        from ccpn.framework.PathsAndUrls import documentationPath
+        self._showHtmlFile("Analysis Version-3 Documentation", documentationPath)
+
+    def _showForum(self):
+        """Displays Forum in a module.
+        """
+        from ccpn.framework.PathsAndUrls import ccpnForum
+        self._showHtmlFile("Analysis Version-3 Forum", ccpnForum)
+
+    def _showShortcuts(self):
+        from ccpn.framework.PathsAndUrls import shortcutsPath
+        self._systemOpen(shortcutsPath)
+
+    def _showAboutPopup(self):
+        from ccpn.ui.gui.popups.AboutPopup import AboutPopup
+        popup = AboutPopup(parent=self.ui.mainWindow)
+        popup.exec_()
+
+    def _showAboutCcpn(self):
+        from ccpn.framework.PathsAndUrls import ccpnUrl
+        self._showHtmlFile("About CCPN", ccpnUrl)
+
+    def _showIssuesList(self):
+        from ccpn.framework.PathsAndUrls import ccpnIssuesUrl
+        self._showHtmlFile("CCPN Issues", ccpnIssuesUrl)
+
+    def _showTutorials(self):
+        from ccpn.framework.PathsAndUrls import ccpnTutorials
+        self._showHtmlFile("CCPN Tutorials", ccpnTutorials)
+
+    def _showRegisterPopup(self):
+        """Open the registration popup
+        """
+        self.ui._registerDetails()
+
     def _showCcpnLicense(self):
         from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
         self._showHtmlFile("CCPN Licence", ccpnLicenceUrl)
@@ -607,8 +667,43 @@ class GuiBase(object):
                                       'Could not connect to the server, please check your internet connection.')
 
     #-----------------------------------------------------------------------------------------
-    # Menu Implementation methods
+    # Implementation methods
     #-----------------------------------------------------------------------------------------
+
+    def _showHtmlFile(self, title, urlPath):
+        """Displays html files in program QT viewer or using native webbrowser
+        depending on useNativeWebbrowser option in preferences
+        """
+        mainWindow = self.ui.mainWindow
+        useNative = self.preferences.general.useNativeWebbrowser
+
+        if useNative:
+            import webbrowser
+            import posixpath
+
+            # may be a Path object
+            urlPath = str(urlPath)
+
+            urlPath = urlPath or ''
+            if (urlPath.startswith('http://') or urlPath.startswith('https://')):
+                pass
+            elif urlPath.startswith('file://'):
+                urlPath = urlPath[len('file://'):]
+                if isWindowsOS():
+                    urlPath = urlPath.replace(os.sep, posixpath.sep)
+                else:
+                    urlPath = 'file://' + urlPath
+            else:
+                if isWindowsOS():
+                    urlPath = urlPath.replace(os.sep, posixpath.sep)
+                else:
+                    urlPath = 'file://' + urlPath
+
+            webbrowser.open(urlPath)
+            # self._systemOpen(path)
+
+        else:
+            mainWindow.newHtmlModule(urlPath=urlPath, position='top', relativeTo=mainWindow.moduleArea)
 
     def _addApplicationMenuSpec(self, spec, position=-3):
         """Add an entirely new menu at specified position"""

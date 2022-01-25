@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-24 20:35:46 +0000 (Mon, January 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-25 10:26:44 +0000 (Tue, January 25, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -173,8 +173,8 @@ class AutoBackup(Thread):
                 self.startTime = time()
                 try:
                     self.backupProject()
-                except:
-                    pass
+                except Exception as es:
+                    getLogger().warning('Project backup failed with error %s' % es)
 
 
 class Framework(NotifierBase, GuiBase):
@@ -231,11 +231,11 @@ class Framework(NotifierBase, GuiBase):
         self.layout = None  # initialised by self._getUserLayout
 
         # GWV these attributes should move to the GUI class (in 3.2x ??)
-        # For now, initialiased by calls in Gui.__init_
-        self._styleSheet = None
-        self._colourScheme = None
-        self._fontSettings = None
-        self._menuSpec = None
+        # For now, they are set in GuiBase and initialised by calls in Gui.__init_
+        # self._styleSheet = None
+        # self._colourScheme = None
+        # self._fontSettings = None
+        # self._menuSpec = None
 
         # Blocking level for command echo and logging
         self._echoBlocking = 0
@@ -380,6 +380,51 @@ class Framework(NotifierBase, GuiBase):
         return userCcpnMacroPath
 
     #-----------------------------------------------------------------------------------------
+    # "get" methods
+    #-----------------------------------------------------------------------------------------
+    def get(self, identifier):
+        """General method to obtain object (either gui or data) from identifier (pid, gid, obj-string)
+        """
+        if identifier is None:
+            raise ValueError('Expected str or Pid, got "None"')
+
+        if not isinstance(identifier, (str, Pid)):
+            raise ValueError('Expected str or Pid, got "%s" %s' % (identifier, type(identifier)))
+        identifier = str(identifier)
+
+        if len(identifier) == 0:
+            raise ValueError('Expected str or Pid, got zero-length identifier')
+
+        if len(identifier) >= 2 and identifier[0] == '<' and identifier[-1] == '>':
+            identifier = identifier[1:-1]
+
+        return self.project.getByPid(identifier)
+
+    def getByPid(self, pid):
+        """Convenience"""
+        return self.project.getByPid(pid)
+
+    def getByGid(self, gid):
+        """Convenience"""
+        return self.project.getByPid(gid)
+
+    #-----------------------------------------------------------------------------------------
+    # Initialisations and cleanup
+    #-----------------------------------------------------------------------------------------
+
+    def _getUI(self):
+        """Get the user interface
+        :return a Ui instance
+        """
+        if self.args.interface == 'Gui':
+            from ccpn.ui.gui.Gui import Gui
+            ui = Gui(application=self)
+
+        else:
+            from ccpn.ui.Ui import NoUi
+            ui = NoUi(application=self)
+
+        return ui
 
     def _startApplication(self):
         """Start the program execution
@@ -415,6 +460,14 @@ class Framework(NotifierBase, GuiBase):
         self.ui.startUi()
         self._cleanup()
 
+    def _cleanup(self):
+        """Cleanup at the end of program execution; i.e. once the command loop
+        has stopped
+        """
+        self.setAutoBackupTime('kill')
+
+    #-----------------------------------------------------------------------------------------
+
     def updateAutoBackup(self):
 
         if self.preferences.general.autoBackupEnabled:
@@ -439,12 +492,6 @@ class Framework(NotifierBase, GuiBase):
                                                backupFunction=self.backupProject)
             self.autoBackupThread.start()
 
-    def _cleanup(self):
-        """Cleanup at the end of program execution; i.e. once the command loop
-        has stopped
-        """
-        self.setAutoBackupTime('kill')
-
     def backupProject(self):
         apiIo.backupProject(self.project._wrappedData.parent)
         backupPath = self.project.backupPath
@@ -459,8 +506,11 @@ class Framework(NotifierBase, GuiBase):
         #Spectra should not be copied over. Dangerous for disk space
         # backupDataPath = fetchDir(backupPath, DataDirName)
 
+    #-----------------------------------------------------------------------------------------
+
     def _initialiseProject(self, project: Project):
-        """Initialise project and set up links and objects that involve it"""
+        """Initialise project and set up links and objects that involve it
+        """
 
         # Linkages
         self._project = project
@@ -475,11 +525,9 @@ class Framework(NotifierBase, GuiBase):
         self._current = Current(project=project)
 
         # This wraps the underlying data, including the wrapped graphics data
-        #  - the project is now ready to use
         project._initialiseProject()
-
-        # Adapt project to preferences
-        self.applyPreferences(project)
+        project._updateApiDataUrl(self.preferences.general.dataPath)
+        #  the project is now ready to use
 
         # Now that all objects, including the graphics are there, restore current
         self.current._restoreStateFromFile(self.statePath)
@@ -491,20 +539,6 @@ class Framework(NotifierBase, GuiBase):
         else:
             # The NoUi version has no mainWindow
             self.ui.initialize(None)
-
-    def _getUI(self):
-        """Get the user interface
-        :return a Ui instance
-        """
-        if self.args.interface == 'Gui':
-            from ccpn.ui.gui.Gui import Gui
-            ui = Gui(application=self)
-
-        else:
-            from ccpn.ui.Ui import NoUi
-            ui = NoUi(application=self)
-
-        return ui
 
     def _setColourSchemeAndStyleSheet(self):
         """Set the colourScheme and stylesheet as determined by arguments --dark, --light or preferences
@@ -534,6 +568,7 @@ class Framework(NotifierBase, GuiBase):
             styleSheet += additions
 
         self._styleSheet = styleSheet
+    #-----------------------------------------------------------------------------------------
 
     def _getUserPrefs(self):
         # Assure that preferences directory (.ccpn) exists
@@ -552,6 +587,8 @@ class Framework(NotifierBase, GuiBase):
                 os.makedirs(directory)
             with open(userPreferencesPath, 'w+') as prefFile:
                 json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+
+    #-----------------------------------------------------------------------------------------
 
     def _getUserLayout(self, userPath=None):
         """defines the application.layout dictionary.
@@ -617,6 +654,8 @@ class Framework(NotifierBase, GuiBase):
             layoutFile = Layout.getLayoutFile(self)
             return layoutFile
 
+    #-----------------------------------------------------------------------------------------
+
     def _setLanguage(self):
         # Language, check for command line override, or use preferences
         if self.args.language:
@@ -630,21 +669,7 @@ class Framework(NotifierBase, GuiBase):
         # translator.setDebug(True)
         sys.stderr.write('==> Language set to "%s"\n' % translator._language)
 
-
-    def applyPreferences(self, project):
-        """Apply user preferences
-        """
-        #NBNB project should be implicit rather than a parameter (once reorganisation is finished)
-
-        # Reset remoteData DataStores to match preferences setting
-        dataPath = self.preferences.general.dataPath
-        if not dataPath or not os.path.isdir(dataPath):
-            dataPath = os.path.expanduser('~')
-        memopsRoot = project._wrappedData.root
-        dataUrl = memopsRoot.findFirstDataLocationStore(name='standard').findFirstDataUrl(
-                name='remoteData'
-                )
-        dataUrl.url = Implementation.Url(path=dataPath)
+    #-----------------------------------------------------------------------------------------
 
     def _correctColours(self):
         """Autocorrect all colours that are too close to the background colour
@@ -809,6 +834,8 @@ class Framework(NotifierBase, GuiBase):
         self._tip_of_the_day_wait_dialogs = (RegisterPopup,)
         self._startupShowTipofTheDay()
 
+    #-----------------------------------------------------------------------------------------
+
     def _startupShowTipofTheDay(self):
         if self._shouldDisplayTipOfTheDay():
             self._initial_show_timer = QTimer(parent=self._mainWindow)
@@ -899,31 +926,7 @@ class Framework(NotifierBase, GuiBase):
     def _shouldDisplayTipOfTheDay(self):
         return self.preferences['general'].setdefault('showTipOfTheDay', True)
 
-    def get(self, identifier):
-        """General method to obtain object (either gui or data) from identifier (pid, gid, obj-string)
-        """
-        if identifier is None:
-            raise ValueError('Expected str or Pid, got "None"')
-
-        if not isinstance(identifier, (str, Pid)):
-            raise ValueError('Expected str or Pid, got "%s" %s' % (identifier, type(identifier)))
-        identifier = str(identifier)
-
-        if len(identifier) == 0:
-            raise ValueError('Expected str or Pid, got zero-length identifier')
-
-        if len(identifier) >= 2 and identifier[0] == '<' and identifier[-1] == '>':
-            identifier = identifier[1:-1]
-
-        return self.project.getByPid(identifier)
-
-    def getByPid(self, pid):
-        """Convenience"""
-        return self.project.getByPid(pid)
-
-    def getByGid(self, gid):
-        """Convenience"""
-        return self.project.getByPid(gid)
+    #-----------------------------------------------------------------------------------------
 
 
     #@logCommand('application.') #cannot do, as project is not there yet
@@ -2147,99 +2150,6 @@ class Framework(NotifierBase, GuiBase):
             else:
                 raise TypeError('PDFViewer not defined for linux')
 
-    def _showHtmlFile(self, title, urlPath):
-        """Displays html files in program QT viewer or using native webbrowser depending on useNativeWebbrowser option"""
-
-        mainWindow = self.ui.mainWindow
-
-        if self.preferences.general.useNativeWebbrowser:
-            import webbrowser
-            import posixpath
-
-            # may be a Path object
-            urlPath = str(urlPath)
-
-            urlPath = urlPath or ''
-            if (urlPath.startswith('http://') or urlPath.startswith('https://')):
-                pass
-            elif urlPath.startswith('file://'):
-                urlPath = urlPath[len('file://'):]
-                if isWindowsOS():
-                    urlPath = urlPath.replace(os.sep, posixpath.sep)
-                else:
-                    urlPath = 'file://' + urlPath
-            else:
-                if isWindowsOS():
-                    urlPath = urlPath.replace(os.sep, posixpath.sep)
-                else:
-                    urlPath = 'file://' + urlPath
-
-            webbrowser.open(urlPath)
-            # self._systemOpen(path)
-        else:
-            # from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView
-            #
-            # _newModule = CcpnWebView(mainWindow=mainWindow, name=title, urlPath=urlPath)
-            # self.ui.mainWindow.moduleArea.addModule(_newModule, position='top', relativeTo=mainWindow.moduleArea)
-            mainWindow.newHtmlModule(urlPath=urlPath, position='top', relativeTo=mainWindow.moduleArea)
-
-    def showBeginnersTutorial(self):
-        from ccpn.framework.PathsAndUrls import beginnersTutorialPath
-
-        self._systemOpen(beginnersTutorialPath)
-
-    def showBackboneTutorial(self):
-        from ccpn.framework.PathsAndUrls import backboneAssignmentTutorialPath
-
-        self._systemOpen(backboneAssignmentTutorialPath)
-
-    def showCSPtutorial(self):
-        from ccpn.framework.PathsAndUrls import cspTutorialPath
-
-        self._systemOpen(cspTutorialPath)
-
-    def showScreenTutorial(self):
-        from ccpn.framework.PathsAndUrls import screenTutorialPath
-
-        self._systemOpen(screenTutorialPath)
-
-    def showVersion3Documentation(self):
-        """Displays CCPN wrapper documentation in a module."""
-        from ccpn.framework.PathsAndUrls import documentationPath
-
-        self._showHtmlFile("Analysis Version-3 Documentation", documentationPath)
-
-    def showForum(self):
-        """Displays Forum in a module."""
-        from ccpn.framework.PathsAndUrls import ccpnForum
-
-        self._showHtmlFile("Analysis Version-3 Forum", ccpnForum)
-
-    def showShortcuts(self):
-        from ccpn.framework.PathsAndUrls import shortcutsPath
-        self._systemOpen(shortcutsPath)
-
-    def showAboutPopup(self):
-        from ccpn.ui.gui.popups.AboutPopup import AboutPopup
-        popup = AboutPopup(parent=self.ui.mainWindow)
-        popup.exec_()
-
-    def showAboutCcpn(self):
-        from ccpn.framework.PathsAndUrls import ccpnUrl
-        self._showHtmlFile("About CCPN", ccpnUrl)
-
-    def showIssuesList(self):
-        from ccpn.framework.PathsAndUrls import ccpnIssuesUrl
-        self._showHtmlFile("CCPN Issues", ccpnIssuesUrl)
-
-    def showTutorials(self):
-        from ccpn.framework.PathsAndUrls import ccpnTutorials
-        self._showHtmlFile("CCPN Tutorials", ccpnTutorials)
-
-    def showRegisterPopup(self):
-        """Open the registration popup
-        """
-        self.ui._registerDetails()
 
     #########################################    End Menu callbacks   ##################################################
 

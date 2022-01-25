@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-01-25 16:31:24 +0000 (Tue, January 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-25 17:38:20 +0000 (Tue, January 25, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -347,7 +347,10 @@ class RadioButtonsWithSubCheckBoxes(QtWidgets.QWidget, Base):
                 dd[radioButton.getText()] = radioButton.getSelectedCheckBoxes()
         return dd
 
-
+    def getRadioButtonByText(self, text):
+        for rb in self.radioButtons:
+            if rb.getText() == text:
+                return rb
 
 
 

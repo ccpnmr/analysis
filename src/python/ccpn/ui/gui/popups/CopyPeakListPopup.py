@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-01-25 16:31:24 +0000 (Tue, January 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-25 17:38:20 +0000 (Tue, January 25, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -31,17 +31,19 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons, RadioButtonsWithSubCheckBoxes
 from ccpn.ui.gui.widgets.RadioButton import CheckBoxCheckedText, CheckBoxCallbacks, CheckBoxTexts, CheckBoxTipTexts
 from collections import OrderedDict as od
+from ccpn.ui.gui.widgets.MessageDialog import showWarning, _stoppableProgressBar, progressManager
+
 
 _OnlyPositionAndAssignments = 'Copy Position and Assignments only'
 _IncludeAllPeakProperties   = 'Copy all existing properties'
-_SnapToExtremum             = 'Snap to Extremum'
-_RefitPeaks                 = 'Refit Peaks'
-_RefitPeaksAtPosition       = 'Refit Peaks and preserve position'
-_RecalculateVolume          = 'Recalculate Volume'
+_SnapToExtremum             = 'Snap to extremum'
+_RefitPeaks                 = 'Refit peaks'
+_RefitPeaksAtPosition       = 'Refit peaks and preserve position'
+_RecalculateVolume          = 'Recalculate volume'
 _tipTextOnlyPos = f'''Copy Peaks and include only the original Position and Assignments (if available).
                      \nAdditionally, execute the selected operations'''
 _tipTextIncludeAll = f'''Copy Peaks and include all the original properties: 
@@ -79,6 +81,12 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
         self.setCloseButton(callback=self.reject, tipText='Close popup')
         self.setDefaultButton(CcpnDialogMainWidget.CLOSEBUTTON)
         self.__postInit__()
+        self._extraActionDefs = {
+                                _SnapToExtremum: self._snapPeaksToExtremum,
+                                _RefitPeaks: self._refitPeaks,
+                                _RecalculateVolume: self._recalculateVolume,
+                                _RefitPeaksAtPosition: self._refitPeaks,
+                                }
 
     def setWidgets(self):
         self.sourcePeakListLabel = Label(self.mainWidget, 'Source PeakList', grid=(0, 0))
@@ -122,19 +130,20 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
 
     def _copyPeakListToSpectrum(self):
         includeAllProperties = self.copyOptionsRadioButtons.getSelectedText() == _IncludeAllPeakProperties
+
         if self.sourcePeakList is not None:
             try:
                 if self.targetSpectrum is not None:
-                    newPeakList = self.sourcePeakList.copyTo(self.targetSpectrum, includeAllPeakProperties=includeAllProperties)
-                    # need to execute further operations
-                    ddValues = self.copyOptionsRadioButtons.get()
-                    extraActionsTexts = ddValues.get(_OnlyPositionAndAssignments, [])
-                    if _SnapToExtremum in extraActionsTexts:
-                        self._snapPeaksToExtremum(newPeakList)
-                    if _RefitPeaks in extraActionsTexts:
-                        newPeakList.fitExistingPeaks(newPeakList.peaks)
-                    if _RecalculateVolume in extraActionsTexts:
-                        newPeakList.estimateVolumes()
+                    with progressManager(self, 'Copying Peaks. See terminal window for more info...'):
+                        newPeakList = self.sourcePeakList.copyTo(self.targetSpectrum, includeAllPeakProperties=includeAllProperties)
+                        # need to execute further operations
+                        ddValues = self.copyOptionsRadioButtons.get()
+                        extraActionsTexts = ddValues.get(_OnlyPositionAndAssignments, [])
+
+                        for action in extraActionsTexts:
+                            funcDef = self._extraActionDefs.get(action)
+                            if funcDef:
+                                funcDef(newPeakList)
 
             except Exception as es:
                 getLogger().warning('Error copying peakList: %s' % str(es))
@@ -175,10 +184,6 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
                 _tmp = self.spectrumDisplay.strips[0].getVisibleSpectra()
                 visibleSpectra = [spec for spec in _tmp if spec.dimensionCount <= _dimCount]
 
-        #
-        # if self.spectrumDisplay and self.spectrumDisplay.strips:
-        #     orderedSpectra = self.spectrumDisplay.strips[0].getSpectra()
-        #     visibleSpectra = self.spectrumDisplay.strips[0].getVisibleSpectra()
 
         if spectra:
             targetPullDownData = [str(sp.pid) for sp in spectra]
@@ -207,17 +212,41 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
         return result
 
     def _subSelectionCallback(self, value):
+        #  need to uncheck the mutually exclusive.
         clickedCheckBox = self.sender()
-        ddValues = self.copyOptionsRadioButtons.get()
-        extraActionsTexts = ddValues.get(_OnlyPositionAndAssignments, [])
-        # if clickedCheckBox.getText() == _RefitPeaksAtPosition:
-        #     if _SnapToExtremum in extraActionsTexts:
-        #         self.copyOptionsRadioButtons.
-        pass
+        radioButton = self.copyOptionsRadioButtons.getRadioButtonByText(_OnlyPositionAndAssignments)
+        selectedExtraActions = radioButton.getSelectedCheckBoxes()
+
+        if clickedCheckBox.getText() == _RefitPeaksAtPosition:
+            _exclude = [_SnapToExtremum, _RefitPeaks]
+            radioButton.setSelectedCheckBoxes([i for i in selectedExtraActions if i not in _exclude])
+
+        if clickedCheckBox.getText() == _SnapToExtremum:
+            _exclude = [_RefitPeaksAtPosition]
+            radioButton.setSelectedCheckBoxes([i for i in selectedExtraActions if i not in _exclude])
+
+        if clickedCheckBox.getText() == _RefitPeaks:
+            _exclude = [_RefitPeaksAtPosition]
+            radioButton.setSelectedCheckBoxes([i for i in selectedExtraActions if i not in _exclude])
 
 
-        # if _SnapToExtremum and _RefitPeaksAtPosition in extraActionsTexts:
+    def _refitPeaks(self, peakList, keepPosition=False):
+        peaks = peakList.peaks
+        fitMethod = self.application.preferences.general.peakFittingMethod
+        getLogger().info('Refitting peaks')
+        with undoBlockWithoutSideBar():
+            with notificationEchoBlocking():
+                for peak in peaks:
+                    peak.fit(fitMethod=fitMethod, keepPosition=keepPosition)
 
+    def _refitPeaksAtPositions(self, peakList, keepPosition=True):
+        self._refitPeaks(peakList, keepPosition=keepPosition)
+
+    def _recalculateVolume(self, peakList):
+        getLogger().info('Recalculating  peak volumes.')
+        with undoBlockWithoutSideBar():
+            with notificationEchoBlocking():
+                peakList.estimateVolumes()
 
     def _snapPeaksToExtremum(self, peakList):
         # get the default from the preferences
@@ -226,12 +255,14 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
         searchBoxDoFit = self.application.preferences.general.searchBoxDoFit
         fitMethod = self.application.preferences.general.peakFittingMethod
         peaks = peakList.peaks
+        getLogger().info('Snapping Peaks To Extremum.')
         with undoBlockWithoutSideBar():
-            peaks.sort(key=lambda x: x.position[0], reverse=False)  # reorder peaks by position
-            for peak in peaks:
-                peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
-                                    minDropFactor=minDropFactor, searchBoxMode=searchBoxMode,
-                                    searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
+            with notificationEchoBlocking():
+                peaks.sort(key=lambda x: x.position[0], reverse=False)  # reorder peaks by position
+                for peak in peaks:
+                    peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
+                                        minDropFactor=minDropFactor, searchBoxMode=searchBoxMode,
+                                        searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
 
 
 if __name__ == '__main__':

@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 11:22:12 +0000 (Fri, January 21, 2022) $"
+__modifiedBy__ = "$modifiedBy: VickyAH $"
+__dateModified__ = "$dateModified: 2022-01-25 11:39:40 +0000 (Tue, January 25, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -301,30 +301,30 @@ def _separator():
 
 
 def _newStripPlotItem(strip):
-    return _SCMitem(name='New strip with same axes',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Create new spectrumDisplay from the current strip',
+    return _SCMitem(name='New Spectrum Display with same Axes',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Create new Spectrum Display from the current strip',
                     callback=strip.copyStrip)
 
 
 def _newStripPlotXYItem(strip):
-    return _SCMitem(name='New strip with X-Y Axes flipped',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Create new spectrumDisplay from the current strip\n'
+    return _SCMitem(name='New Spectrum Display with X-Y Axes flipped',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Create new Spectrum Display from the current strip\n'
                                                           'with the X-Y axes flipped',
                     shortcut='xy',
                     callback=strip.flipXYAxis)
 
 
 def _newStripPlotXZItem(strip):
-    return _SCMitem(name='New strip with X-Z Axes flipped',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Create new spectrumDisplay from the current strip\n'
+    return _SCMitem(name='New Spectrum Display with X-Z Axes flipped',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Create new Spectrum Display from the current strip\n'
                                                           'with the X-Z axes flipped',
                     shortcut='xz',
                     callback=strip.flipXZAxis)
 
 
 def _newStripPlotYZItem(strip):
-    return _SCMitem(name='New strip with Y-Z Axes flipped',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Create new spectrumDisplay from the current strip\n'
+    return _SCMitem(name='New Spectrum Display with Y-Z Axes flipped',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Create new Spectrum Display from the current strip\n'
                                                           'with the Y-Z axes flipped',
                     shortcut='yz',
                     callback=strip.flipYZAxis)
@@ -334,8 +334,8 @@ def _newStripPlotFAItem(strip):
     from ccpn.framework.Application import getApplication
 
     app = getApplication()
-    return _SCMitem(name='New strip with Axes Flipped...',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Create new spectrumDisplay from the current strip',
+    return _SCMitem(name='New Spectrum Display with Axes flipped...',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Create new Spectrum Display from the current strip',
                     shortcut='fa',
                     callback=app.showFlipArbitraryAxisPopup)
 
@@ -528,8 +528,8 @@ def _selectedPeaksMenuItem(strip):
 
 
 def _flipAxesMenuItem(strip):
-    return _SCMitem(name='New spectrumDisplay from current strip:',
-                    typeItem=ItemTypes.get(MENU), toolTip='Create new spectrumDisplay from current strip with flipped axes ',
+    return _SCMitem(name='Flip Axes:',
+                    typeItem=ItemTypes.get(MENU), toolTip='Flip axes of current Spectrum Display and open in a new Spectrum Display  ',
                     stripMethodName='_flipAxesMenu',
                     callback=None)
 

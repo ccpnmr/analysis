@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-25 10:26:44 +0000 (Tue, January 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-25 11:22:33 +0000 (Tue, January 25, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -383,7 +383,10 @@ class Framework(NotifierBase, GuiBase):
     # "get" methods
     #-----------------------------------------------------------------------------------------
     def get(self, identifier):
-        """General method to obtain object (either gui or data) from identifier (pid, gid, obj-string)
+        """General method to obtain object (either gui or data) from identifier (pid, gid,
+        obj-string)
+        :param identifier: a Pid, Gid or string object identifier
+        :return a Version-3 core data or graphics object
         """
         if identifier is None:
             raise ValueError('Expected str or Pid, got "None"')
@@ -401,12 +404,20 @@ class Framework(NotifierBase, GuiBase):
         return self.project.getByPid(identifier)
 
     def getByPid(self, pid):
-        """Convenience"""
-        return self.project.getByPid(pid)
+        """Legacy; obtain data object from identifier (pid or obj-string)
+        replaced by get(identifier).
+        :param pid: a Pid or string object identifier
+        :return a Version-3 core data object
+        """
+        return self.get(pid)
 
     def getByGid(self, gid):
-        """Convenience"""
-        return self.project.getByPid(gid)
+        """Legacy; obtain graphics object from identifier (gid or obj-string)
+        replaced by get(identifier).
+        :param gid: a Gid or string object identifier
+        :return a Version-3 graphics object
+        """
+        return self.get(gid)
 
     #-----------------------------------------------------------------------------------------
     # Initialisations and cleanup
@@ -436,7 +447,7 @@ class Framework(NotifierBase, GuiBase):
         #   logCommand has no self.project.application, and requires getApplication() instead
         #   There is NoUi instantiated yet, so temporarily added loadProject to Ui class called by loadProject below)
 
-        # Load / create project
+        # Load / create project on start
         if (projectPath := self.args.projectPath) is not None:
             project = self.loadProject(projectPath)
         else:
@@ -509,7 +520,7 @@ class Framework(NotifierBase, GuiBase):
     #-----------------------------------------------------------------------------------------
 
     def _initialiseProject(self, project: Project):
-        """Initialise project and set up links and objects that involve it
+        """Initialise a project and set up links and objects that involve it
         """
 
         # Linkages
@@ -1445,15 +1456,6 @@ class Framework(NotifierBase, GuiBase):
             getLogger().warning('Failed to restore archive %s' % (archivePath,))
 
         return _newProject
-
-    def showApplicationPreferences(self):
-        """
-        Displays Application Preferences Popup.
-        """
-        from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
-
-        popup = PreferencesPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, preferences=self.preferences)
-        popup.exec_()
 
     def getSavedLayoutPath(self):
         """Opens a saved Layout as dialog box and gets directory specified in the file dialog."""

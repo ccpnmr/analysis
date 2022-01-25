@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-25 10:26:45 +0000 (Tue, January 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-25 11:22:33 +0000 (Tue, January 25, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -85,7 +85,8 @@ class GuiBase(object):
 
     def __init__(self):
         # GWV these attributes should move to the GUI class (in 3.2x ??)
-        # For now, initialised by calls in Gui.__init_
+        # For now, initialised by calls in Gui.__init_ as we need programme
+        # arguments and preferences to have been initialised
         self._styleSheet = None
         self._colourScheme = None
         self._fontSettings = None
@@ -198,11 +199,11 @@ class GuiBase(object):
                         ("Open pre-defined", ()),
 
                         )),
-            ("Summary", self.showProjectSummaryPopup),
+            ("Summary", self._showProjectSummaryPopup),
             ("Archive", self._archiveProjectCallback, [('enabled', False)]),
             ("Restore From Archive...", self._restoreFromArchiveCallback, [('enabled', False)]),
             (),
-            ("Preferences...", self.showApplicationPreferences, [('shortcut', '⌃,')]),
+            ("Preferences...", self._showApplicationPreferences, [('shortcut', '⌃,')]),
             (),
             ("Quit", self._quitCallback, [('shortcut', '⌃q')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ]
@@ -455,7 +456,6 @@ class GuiBase(object):
         else:
             MessageDialog.showInfo('Archive Project',
                                    'Project archived to %s' % path )
-
             self.ui.mainWindow._updateRestoreArchiveMenu()
 
     def _restoreFromArchiveCallback(self):
@@ -475,7 +475,7 @@ class GuiBase(object):
             MessageDialog.showInfo('Restore from Archive',
                                    'Project restored as %s' % newProject.path )
 
-    def showProjectSummaryPopup(self):
+    def _showProjectSummaryPopup(self):
         """Show the Project summary popup.
         """
         from ccpn.ui.gui.popups.ProjectSummaryPopup import ProjectSummaryPopup
@@ -485,6 +485,14 @@ class GuiBase(object):
             popup.show()
             popup.raise_()
             popup.exec_()
+
+    def _showApplicationPreferences(self):
+        """
+        Displays Application Preferences Popup.
+        """
+        from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
+        popup = PreferencesPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, preferences=self.preferences)
+        popup.exec_()
 
     def _quitCallback(self, event=None):
         """

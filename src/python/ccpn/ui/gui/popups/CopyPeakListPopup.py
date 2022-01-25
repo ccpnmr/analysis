@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-01-24 19:33:14 +0000 (Mon, January 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-25 16:31:24 +0000 (Tue, January 25, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -32,6 +32,21 @@ from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons, RadioButtonsWithSubCheckBoxes
+from ccpn.ui.gui.widgets.RadioButton import CheckBoxCheckedText, CheckBoxCallbacks, CheckBoxTexts, CheckBoxTipTexts
+from collections import OrderedDict as od
+
+_OnlyPositionAndAssignments = 'Copy Position and Assignments only'
+_IncludeAllPeakProperties   = 'Copy all existing properties'
+_SnapToExtremum             = 'Snap to Extremum'
+_RefitPeaks                 = 'Refit Peaks'
+_RefitPeaksAtPosition       = 'Refit Peaks and preserve position'
+_RecalculateVolume          = 'Recalculate Volume'
+_tipTextOnlyPos = f'''Copy Peaks and include only the original Position and Assignments (if available).
+                     \nAdditionally, execute the selected operations'''
+_tipTextIncludeAll = f'''Copy Peaks and include all the original properties: 
+                Position, Assignments, Heights, Linewidths, Volumes etc...'''
+
 
 
 class CopyPeakListPopup(CcpnDialogMainWidget):
@@ -43,10 +58,12 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
             self.mainWindow = mainWindow
             self.application = self.mainWindow.application
             self.project = self.mainWindow.project
+            self.current = self.application.current
         else:
             self.mainWindow = None
             self.application = None
             self.project = None
+            self.current = None
 
         self.spectrumDisplay = spectrumDisplay
         self.sourcePeakList = None
@@ -70,6 +87,28 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
         self.targetSpectraLabel = Label(self.mainWidget, 'Target Spectrum', grid=(1, 0))
         self.targetSpectraPullDown = PulldownList(self.mainWidget, grid=(1, 1))
 
+        checkBoxTexts = [_SnapToExtremum, _RefitPeaks, _RefitPeaksAtPosition, _RecalculateVolume]
+
+        checkBoxesDict = od([
+                            (_OnlyPositionAndAssignments,
+                             {
+                             CheckBoxTexts: checkBoxTexts,
+                             CheckBoxCheckedText: [_SnapToExtremum, _RefitPeaks, _RecalculateVolume],
+                             CheckBoxTipTexts: [f'Perform the following action {i} on all peaks' for i in checkBoxTexts],
+                             CheckBoxCallbacks: [self._subSelectionCallback] * len(checkBoxTexts)
+                             }
+                            ),
+                            ])
+
+        self.copyOptionsRadioButtons = RadioButtonsWithSubCheckBoxes(self.mainWidget,
+                                                                     texts=[_OnlyPositionAndAssignments, _IncludeAllPeakProperties],
+                                                                     selectedInd=0,
+                                                                     tipTexts=[_tipTextOnlyPos, _tipTextIncludeAll],
+                                                                     checkBoxesDictionary=checkBoxesDict,
+                                                                     grid=(2, 0),
+                                                                     )
+
+
     def _populate(self):
         self._populateSourcePeakListPullDown()
         self._populateTargetSpectraPullDown()
@@ -82,10 +121,20 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
         self.accept()
 
     def _copyPeakListToSpectrum(self):
+        includeAllProperties = self.copyOptionsRadioButtons.getSelectedText() == _IncludeAllPeakProperties
         if self.sourcePeakList is not None:
             try:
                 if self.targetSpectrum is not None:
-                    self.sourcePeakList.copyTo(self.targetSpectrum)
+                    newPeakList = self.sourcePeakList.copyTo(self.targetSpectrum, includeAllPeakProperties=includeAllProperties)
+                    # need to execute further operations
+                    ddValues = self.copyOptionsRadioButtons.get()
+                    extraActionsTexts = ddValues.get(_OnlyPositionAndAssignments, [])
+                    if _SnapToExtremum in extraActionsTexts:
+                        self._snapPeaksToExtremum(newPeakList)
+                    if _RefitPeaks in extraActionsTexts:
+                        newPeakList.fitExistingPeaks(newPeakList.peaks)
+                    if _RecalculateVolume in extraActionsTexts:
+                        newPeakList.estimateVolumes()
 
             except Exception as es:
                 getLogger().warning('Error copying peakList: %s' % str(es))
@@ -94,6 +143,9 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
     def _populateSourcePeakListPullDown(self):
         """Populate the pulldown with the list of spectra in the project
         """
+        if not self.project:
+            return
+
         if len(self.project.peakLists) == 0:
             raise RuntimeError('Project has no PeakList\'s')
 
@@ -108,7 +160,11 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
         """Populate the pulldown with the list of spectra on the selected spectrumDisplay and select the
         first visible spectrum
         """
+        if not self.project:
+            return
+
         sourcePeakList = self.application.get(args[0]) if len(args)>0 else self.sourcePeakList
+
         if sourcePeakList is None:
             visibleSpectra = spectra = self.project.spectra
         else:
@@ -135,12 +191,14 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
         """:return the default PeakList based on current settings, or None
         """
         result = None
+        if not self.current:
+            return result
 
-        if self.application.current.peak is not None:
-            result = self.application.current.peak.peakList
+        if self.current.peak is not None:
+            result = self.current.peak.peakList
 
-        elif self.application.current.strip is not None and not self.application.current.strip.isDeleted:
-            _spec = self.application.current.strip.spectra[0]
+        elif self.current.strip is not None and not self.current.strip.isDeleted:
+            _spec = self.current.strip.spectra[0]
             result = _spec.peakLists[-1]
 
         elif len(self.project.peakLists)>0:
@@ -148,28 +206,32 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
 
         return result
 
-    #GWV 11/12/2022: implementation change
-    # def _selectDefaultPeakList(self):
-    #     if self.application.current.peak is not None:
-    #         defaultPeakList = self.application.current.peak.peakList
-    #         self.sourcePeakListPullDown.select(defaultPeakList.pid)
-    #         # print('Selected defaultPeakList: "current.peak.peakList" ',defaultPeakList) #Testing statement to be deleted
-    #         return
-    #     if self.application.current.strip is not None and not self.application.current.strip.isDeleted:
-    #         if len(self.application.current.strip.spectra[0].peakLists)>0:
-    #             defaultPeakList = self.application.current.strip.spectra[0].peakLists[-1]
-    #         else:
-    #             defaultPeakList = self.application.current.strip.spectra[0].newPeakList()
-    #         self.sourcePeakListPullDown.select(defaultPeakList.pid)
-    #         # print('Selected defaultPeakList: "current.strip.spectra[0].peakLists[-1]" ', defaultPeakList)  #Testing statement to be deleted
-    #         return
-    #     else:
-    #         # why this else!
-    #         if len(self.project.peakLists)>0:
-    #             defaultPeakList = self.project.peakLists[0]
-    #             self.sourcePeakListPullDown.select(defaultPeakList.pid)
-    #         # print('Selected defaultPeakList: "self.project.spectra[0].peakLists[-1]" ', defaultPeakList) #Testing statement to be deleted
-    #         return
+    def _subSelectionCallback(self, value):
+        clickedCheckBox = self.sender()
+        ddValues = self.copyOptionsRadioButtons.get()
+        extraActionsTexts = ddValues.get(_OnlyPositionAndAssignments, [])
+        # if clickedCheckBox.getText() == _RefitPeaksAtPosition:
+        #     if _SnapToExtremum in extraActionsTexts:
+        #         self.copyOptionsRadioButtons.
+        pass
+
+
+        # if _SnapToExtremum and _RefitPeaksAtPosition in extraActionsTexts:
+
+
+    def _snapPeaksToExtremum(self, peakList):
+        # get the default from the preferences
+        minDropFactor = self.application.preferences.general.peakDropFactor
+        searchBoxMode = self.application.preferences.general.searchBoxMode
+        searchBoxDoFit = self.application.preferences.general.searchBoxDoFit
+        fitMethod = self.application.preferences.general.peakFittingMethod
+        peaks = peakList.peaks
+        with undoBlockWithoutSideBar():
+            peaks.sort(key=lambda x: x.position[0], reverse=False)  # reorder peaks by position
+            for peak in peaks:
+                peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
+                                    minDropFactor=minDropFactor, searchBoxMode=searchBoxMode,
+                                    searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
 
 
 if __name__ == '__main__':

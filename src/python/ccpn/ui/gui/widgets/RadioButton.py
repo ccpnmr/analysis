@@ -4,7 +4,7 @@ This module implements the Button class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-30 20:44:26 +0100 (Fri, July 30, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-01-25 16:31:24 +0000 (Tue, January 25, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,8 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.framework.Translation import translator
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
-
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 
 class RadioButton(QtWidgets.QRadioButton, Base):
 
@@ -141,6 +142,101 @@ class EditableRadioButton(Widget):
             self.callback()
 
 
+def _fillMissingValuesInSecondList(aa, bb, value):
+    if not value:
+        value = ''
+    if bb is None:
+        bb = [value] * len(aa)
+    if len(aa) != len(bb):
+        if len(aa) > len(bb):
+            m = len(aa) - len(bb)
+            bb += [value] * m
+        else:
+            raise NameError('Lists are not of same length.')
+    return aa, bb
+
+
+CheckBoxTexts = 'CheckBoxTexts'
+CheckBoxTipTexts = 'CheckBoxTipTexts'
+CheckBoxCheckedText = 'CheckBoxCheckedText'
+CheckBoxCallbacks = 'CheckBoxCallbacks'
+
+class RadioButtonWithSubSelection(QtWidgets.QWidget, Base):
+
+    def __init__(self, parent, text=None, callback=None, checked=False, tipText=None, checkBoxDictionary=None,
+                 autoHideCheckBoxes=True,
+                  **kwds):
+
+        """A radioButton with a list of sub CheckBoxes
+        autoHideCheckBoxes: True to hide subcheckboxes if radioButton is not selected.
+        """
+        super().__init__(parent)
+        Base._init(self, setLayout=True, **kwds)
+
+        self.radioButton = RadioButton(self, text=text, callback=callback, tipText=tipText, grid=(0, 0))
+        self.radioButton.setChecked(checked)
+        self.checkBoxDictionary = checkBoxDictionary
+        self.checkBoxes = []
+        self.checkBoxesFrame = Frame(self, setLayout=True, grid=(1,1), )
+        if self.checkBoxDictionary:
+            checkBoxTexts = self.checkBoxDictionary.get(CheckBoxTexts, [])
+            _checkBoxTipTexts = self.checkBoxDictionary.get(CheckBoxTipTexts, [])
+            _checkBoxCallbacks = self.checkBoxDictionary.get(CheckBoxCallbacks, [])
+            # just make sure all lists are of same length
+            _, checkBoxTipTexts = _fillMissingValuesInSecondList(checkBoxTexts, _checkBoxTipTexts, value='')
+            _, checkBoxCallbacks = _fillMissingValuesInSecondList(checkBoxTexts, _checkBoxCallbacks, value=None)
+            checkBoxCheckedText = self.checkBoxDictionary.get(CheckBoxCheckedText, [])
+
+
+            for i, checkBoxText in enumerate(checkBoxTexts):
+                _callback = checkBoxCallbacks[i]
+                _tipText = checkBoxTipTexts[i]
+                _checked = checkBoxText in checkBoxCheckedText
+                checkBox = CheckBox(self.checkBoxesFrame, text=checkBoxText, checked= _checked,
+                                         callback=_callback, tipText=_tipText, grid=(i+1, 1), hAlign='l')
+                self.checkBoxes.append(checkBox)
+
+        # self._defaultCallback()
+        # self.radioButton.clicked.connect(self._defaultCallback)
+
+    def _defaultCallback(self):
+        # hide checkboxes frame if not selected
+        checked = self.isChecked()
+        self.checkBoxesFrame.setVisible(checked)
+
+    def get(self):
+        return self.radioButton.text()
+
+    def set(self, value):
+        self.radioButton.setText(value)
+
+    def getText(self):
+        return self.get()
+
+    def setText(self, value):
+       self.radioButton.setText(value)
+
+    def isChecked(self):
+        return self.radioButton.isChecked()
+
+    def setChecked(self, value):
+        return self.radioButton.setChecked(value)
+
+    def getSelectedCheckBoxesIndexes(self):
+        return [ii for ii, checkBox in enumerate(self.checkBoxes) if checkBox.isChecked()]
+
+    def getSelectedCheckBoxes(self):
+        return [checkBox.text() for checkBox in self.checkBoxes if checkBox.isChecked()]
+
+    def setSelectedCheckBoxes(self, texts):
+        for checkBox in self.checkBoxes:
+            if checkBox.text() in texts:
+                checkBox.setChecked(True)
+            else:
+                checkBox.setChecked(False)
+
+
+
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
@@ -153,10 +249,18 @@ if __name__ == '__main__':
         print('callback ~~~~')
 
 
+
     popup = CcpnDialog(setLayout=True)
-
-    rb = EditableRadioButton(parent=popup, text="test", editable=False, callback=callback, grid=(0, 0))
-
+    checkBoxesDict = {
+                    CheckBoxTexts: ['A','B','C'],
+                    CheckBoxTipTexts: ['A','B','C'],
+                    CheckBoxCheckedText:['B'],
+                    CheckBoxCallbacks: [None, None, None]
+                    }
+    rb = RadioButtonWithSubSelection(parent=popup, text="test", checkBoxDictionary=None,
+                                     callback=callback, grid=(0, 0))
+    print(rb.getSelectedCheckBoxes())
+    rb.setSelectedCheckBoxes(['A', 'C'])
     popup.show()
     popup.raise_()
     app.start()

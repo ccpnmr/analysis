@@ -13,6 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-01-25 16:31:24 +0000 (Tue, January 25, 2022) $"
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
 __dateModified__ = "$dateModified: 2022-01-21 11:22:07 +0000 (Fri, January 21, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
@@ -934,12 +936,18 @@ class Peak(AbstractWrapperObject):
         return all(self.dimensionNmrAtoms)
 
     @logCommand(get='self')
-    def copyTo(self, targetPeakList: PeakList) -> 'Peak':
-        """Make (and return) a copy of the Peak in targetPeakList."""
+    def copyTo(self, targetPeakList: PeakList, includeAllProperties: bool=True) -> 'Peak':
+        """Make (and return) a copy of the Peak in targetPeakList.
+        IncludeAll, True to copy all properties from origin to target Peak. False will copy
+        only position and assignments (if available)"""
 
-        singleValueTags = ['height', 'volume', 'heightError', 'volumeError', 'figureOfMerit',
-                           'annotation', 'comment', ]
-        dimensionValueTags = ['ppmPositions', 'positionError', 'boxWidths', 'lineWidths', ]
+        if includeAllProperties:
+            singleValueTags = ['height', 'volume', 'heightError', 'volumeError', 'figureOfMerit',
+                               'annotation', 'comment', ]
+            dimensionValueTags = ['ppmPositions', 'positionError', 'boxWidths', 'lineWidths', ]
+        else:
+            singleValueTags = []
+            dimensionValueTags = ['ppmPositions', 'positionError']
 
         peakList = self.peakList
         dimensionCount = peakList.spectrum.dimensionCount
@@ -961,6 +969,7 @@ class Peak(AbstractWrapperObject):
             for tag in dimensionValueTags:
                 value = self.getByDimensions(tag, dimensions=dimensionMapping)
                 params[tag] = value
+
             newPeak = targetPeakList.newPeak(**params)
 
             assignments = self.getByDimensions('assignedNmrAtoms', dimensionMapping)

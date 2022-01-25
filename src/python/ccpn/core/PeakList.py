@@ -254,7 +254,8 @@ class PeakList(PMIListABC):
                              useXRange=useXRange)
 
     @logCommand(get='self')
-    def copyTo(self, targetSpectrum: Spectrum, targetPeakList=None, **kwargs) -> 'PeakList':
+    def copyTo(self, targetSpectrum: Spectrum, targetPeakList=None, includeAllPeakProperties=True,
+               **kwargs) -> 'PeakList':
         """
         Copy the origin PeakList peaks to a targetSpectrum.
         If targetPeakList is given, peaks will be added to it, otherwise a new PeakList is created (default behaviour).
@@ -310,7 +311,7 @@ class PeakList(PMIListABC):
                targetPeakList = targetSpectrum.newPeakList(**params)
 
             for peak in self.peaks:
-                peak.copyTo(targetPeakList)
+                peak.copyTo(targetPeakList, includeAllProperties=includeAllPeakProperties)
 
         return targetPeakList
 

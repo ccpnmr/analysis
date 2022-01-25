@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-07-30 20:44:26 +0100 (Fri, July 30, 2021) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-01-25 16:31:24 +0000 (Tue, January 25, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 from PyQt5 import QtGui, QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.RadioButton import RadioButton, EditableRadioButton
+from ccpn.ui.gui.widgets.RadioButton import RadioButton, EditableRadioButton, RadioButtonWithSubSelection
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Font import setWidgetFont
 from functools import partial
@@ -249,6 +249,108 @@ def _fillMissingValuesInSecondList(aa, bb, value):
     return aa, bb
 
 
+class RadioButtonsWithSubCheckBoxes(QtWidgets.QWidget, Base):
+    """
+    Re-implementation of RadioButtons with the option to add a list of Checkboxes.
+    Direction: only vertical.
+    exclusive only,
+    checkBoxesTexts = # orderedDictionary
+                {
+                RadioButtonText1:
+                    {
+                    CheckBoxTexts: ['A','B','C'],
+                    CheckBoxTipTexts: ['A','B','C'],
+                    CheckBoxCheckedText:['B'],
+                    CheckBoxCallbacks: [None, None, None]
+                    },
+                ...
+                }
+
+    """
+
+    def __init__(self, parent,
+                 texts=None,
+                 selectedInd=0,
+                 callback=None,
+                 tipTexts=None,
+                 objectNames=None,
+                 ##checkBoxes
+                 checkBoxesDictionary = None, # see docs
+                 **kwds):
+        super().__init__(parent)
+        Base._init(self, setLayout=True, **kwds)
+
+        self.texts = texts
+        self.parent = parent
+        texts, tipTexts = _fillMissingValuesInSecondList(texts, tipTexts, value='')
+        self.isExclusive = True
+        self.direction = 'v'
+        self.callback = callback
+        self.radioButtons = []
+        self.checkBoxesDictionary = checkBoxesDictionary or {}
+        self._setButtons(texts=texts,  selectedInd=selectedInd, tipTexts=tipTexts,
+                         checkBoxesDictionary=self.checkBoxesDictionary)
+
+
+    def _setButtons(self, texts,  selectedInd, tipTexts, checkBoxesDictionary):
+        self.radioButtons = []
+        for i, radioButtonText in enumerate(texts):
+            checkBoxesDict = checkBoxesDictionary.get(radioButtonText)
+            _tiptext = tipTexts[i]
+            _checked = i == selectedInd
+            radioButtonWithSubSelection = RadioButtonWithSubSelection(self, text=radioButtonText,
+                                                      checked=_checked,
+                                                      tipText=_tiptext,
+                                                      checkBoxDictionary=checkBoxesDict,
+                                                      grid=(i+1,0))
+            radioButtonWithSubSelection.radioButton.clicked.connect(
+                partial(self._buttonClicked, radioButtonWithSubSelection, i))
+
+            self.radioButtons.append(radioButtonWithSubSelection)
+
+    def setIndex(self, i):
+        if self.isExclusive:
+            self.deselectAll()
+        self.radioButtons[i].setChecked(True)
+
+    def _buttonClicked(self, button, index):
+        if not self.isExclusive:
+            self.radioButtons[index].setChecked(button.isChecked())
+            self._callback(button)
+        else:
+            self.setIndex(index)
+            self._callback(button)
+
+    def _callback(self, button):
+        if self.callback and button:
+            self.callback(self.get())
+
+    def deselectAll(self):
+        for i in self.radioButtons:
+            i.setChecked(False)
+
+    def getSelectedText(self):
+        for radioButton in self.radioButtons:
+            if radioButton.isChecked():
+                name = radioButton.getText()
+                if name:
+                    return name
+
+    def get(self):
+        """
+        :return: A dictionary of selected radioButton text and a list of Selected CheckBoxes text
+
+        """
+        dd = {}
+        for radioButton in self.radioButtons:
+            if radioButton.isChecked():
+                dd[radioButton.getText()] = radioButton.getSelectedCheckBoxes()
+        return dd
+
+
+
+
+
 class EditableRadioButtons(Widget, Base):
     """
     Re-implementation of RadioButtons with the option to edit a selection
@@ -428,13 +530,13 @@ if __name__ == '__main__':
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
 
-    def testCallback(self, *args):
+    def _testCallback(self, *args):
         print('GET:', self.get())
         print('INDEX', self.getIndex())
         print('SELECTED:', self.getSelectedText())
 
 
-    def testCall(*args):
+    def _testCall(*args):
         print('ddd', args)
 
 
@@ -442,10 +544,21 @@ if __name__ == '__main__':
     popup = CcpnDialog(windowTitle='Test radioButtons', setLayout=True)
 
     buttonGroup = QtWidgets.QButtonGroup(popup)
-    radioButtons = EditableRadioButtons(parent=popup, texts=['a', ''], tipTexts=['', ''],
-                                        editables=[False, True], grid=(0, 0),
-                                        callback=testCall, direction='v')
+    # radioButtons = EditableRadioButtons(parent=popup, texts=['a', ''], tipTexts=['', ''],
+    #                                     editables=[False, True], grid=(0, 0),
+    #                                     callback=_testCall, direction='v')
 
+    checkBoxesDict = {
+        '_txt1':
+         {'CheckBoxTexts': ['_cb1Txt1', '_cb1Txt2', '_cb1Txt3']},
+        '_txt2':
+            {'CheckBoxTexts': ['_cb2Txt1', '_cb2Txt2', '_cb3Txt3']},
+        }
+    rbs = RadioButtonsWithSubCheckBoxes(parent=popup,
+                                        texts=['_txt1','_txt2'],
+                                        tipTexts=[''],
+                                        checkBoxesDictionary=checkBoxesDict,
+                                        grid=(1, 0))
     # radioButtons.setCallback(partial(testCallback, radioButtons))
     # for i in range(10):
     #     button = RadioButton(popup, text='TEST', grid=(i, 0),

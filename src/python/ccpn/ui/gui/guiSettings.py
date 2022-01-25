@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-24 17:30:31 +0000 (Mon, January 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-25 18:54:25 +0000 (Tue, January 25, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -409,7 +409,7 @@ def setColourScheme(colourScheme):
         if colourScheme not in COLOUR_SCHEMES:
             raise RuntimeError('Undefined colour scheme')
 
-        application.colourScheme = colourScheme
+        application._colourScheme = colourScheme
         ColourDict(colourScheme).setColourScheme(colourScheme)
 
     else:

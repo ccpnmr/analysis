@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 11:22:09 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-25 12:09:20 +0000 (Tue, January 25, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2013,23 +2013,36 @@ def _fillSlice(sliceData, start, stop, aliasing, resultSlice=None):
 
     # Simple cases:
     if start >= 0 and stop <= nPoints:
-        #  within the limits of sliceData
+        # within the limits of sliceData
         resultSlice[:] = sliceData[start:stop]
+        # print(f' > mid        {start+1}  {stop}    {resultSlice}')
         return resultSlice
 
-    elif -nPoints < start < 0 and stop <= nPoints:
+    elif -nPoints <= start < 0 and stop <= 0:
+        # exclusively in the left extension
+        sliceFactor = pow(aliasing, 1)
+        resultSlice[:] = sliceData[start+nPoints:stop+nPoints]*sliceFactor  # need to account for zero
+        return resultSlice
+
+    elif nPoints <= start < nPoints*2 and stop <= nPoints*2:
+        # exclusively in the right extension
+        sliceFactor = pow(aliasing, 1)
+        resultSlice[:] = sliceData[start-nPoints:stop-nPoints]*sliceFactor
+        return resultSlice
+
+    elif -nPoints <= start < 0 and stop <= nPoints:
         # at most one extension on left
         sliceFactor = pow(aliasing, 1)
         numpy.concatenate((sliceData[start:]*sliceFactor, sliceData[0:stop]), out=resultSlice)
         return  resultSlice
 
-    elif start > 0 and  stop <= nPoints*2:
+    elif start >= 0 and stop <= nPoints*2:
         # at most one extension on the right
         sliceFactor = pow(aliasing, 1)
         numpy.concatenate((sliceData[start:], sliceData[0:stop-nPoints]*sliceFactor), out=resultSlice)
         return  resultSlice
 
-    elif -nPoints < start < 0 and stop <= nPoints <= nPoints*2:
+    elif -nPoints < start < 0 and nPoints <= stop <= nPoints*2:
         # at most one extension on the left and right;
         # might occur regularly for peak picking of a plane with one-point extension
         sliceFactor = pow(aliasing, 1)
@@ -2051,8 +2064,8 @@ def _fillSlice(sliceData, start, stop, aliasing, resultSlice=None):
             # This accommodates the stop point
             idx_2 = foldedStopIdx
         else:
-            # This accomodates any start value, also < 0; i.e. the initial left part will be
-            # trucated to the first multiple of nPoints
+            # This accommodates any start value, also < 0; i.e. the initial left part will be
+            # truncated to the first multiple of nPoints
             idx_2 = min(idx_1 + nPoints, nPoints)
         increment = idx_2 - idx_1
         # print('>', start, stop, '>>', idx_1, idx_2)
@@ -2080,3 +2093,18 @@ class DataSourceTrait(Instance):
     class jsonHandler(CcpNmrJsonClassHandlerABC):
         # klass = SpectrumDataSourceABC
         pass
+
+
+def testMain():
+    testSlice = numpy.arange(4, dtype=numpy.int32) + 1
+    aliasing = -1
+
+    for ln in (0, 2, 4, 7, 13):
+        print(f'\nARRAY   {testSlice*aliasing}{testSlice}{testSlice*aliasing} {testSlice} {testSlice*aliasing}{testSlice}')
+        print(f'LEN -> {ln}')
+        for start in range(-7, 11-ln, 1):
+            _fillSlice(testSlice, start, start+ln, aliasing=aliasing)
+
+
+if __name__ == '__main__':
+    testMain()

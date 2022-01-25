@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-25 17:06:58 +0000 (Tue, January 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-25 18:04:24 +0000 (Tue, January 25, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -554,34 +554,6 @@ class Framework(NotifierBase, GuiBase):
             # The NoUi version has no mainWindow
             self.ui.initialize(None)
 
-    def _setColourSchemeAndStyleSheet(self):
-        """Set the colourScheme and stylesheet as determined by arguments --dark, --light or preferences
-        """
-        colourScheme = None
-        if self.args.darkColourScheme:
-            colourScheme = 'dark'
-        elif self.args.lightColourScheme:
-            colourScheme = 'light'
-        else:
-            colourScheme = self.preferences.general.colourScheme
-
-        if colourScheme is None:
-            raise RuntimeError('invalid colourScheme')
-
-        self._colourScheme = colourScheme
-
-        with open(os.path.join(getPathToImport('ccpn.ui.gui.widgets'),
-                               '%sStyleSheet.qss' % metaUtil.upperFirst(colourScheme))) as fp:
-            styleSheet = fp.read()
-
-        if platform.system() == 'Linux':
-            with open(os.path.join(getPathToImport('ccpn.ui.gui.widgets'),
-                                   '%sAdditionsLinux.qss' % metaUtil.upperFirst(colourScheme))) as fp:
-                additions = fp.read()
-
-            styleSheet += additions
-
-        self._styleSheet = styleSheet
     #-----------------------------------------------------------------------------------------
 
     def _savePreferences(self):
@@ -930,7 +902,6 @@ class Framework(NotifierBase, GuiBase):
 
     #-----------------------------------------------------------------------------------------
 
-
     #@logCommand('application.') #cannot do, as project is not there yet
     def newProject(self, name='default') -> Project:
         """Create new, empty project
@@ -948,7 +919,6 @@ class Framework(NotifierBase, GuiBase):
         self._closeProject()
         project = _newProject(self, name=newName)
         self._initialiseProject(project)  # This also set the linkages
-
         return project
 
     @logCommand('application.')
@@ -958,6 +928,79 @@ class Framework(NotifierBase, GuiBase):
         """
         #Just a stub for now; calling MainWindow methods as it initialises the Gui
         return self.ui.loadProject(path)
+
+    def _saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
+        """Save project to newPath and return True if successful
+        """
+        if self.preferences.general.keepSpectraInsideProject:
+            self._cloneSpectraToProjectDir()
+
+        successful = self.project.save(newPath=newPath, createFallback=createFallback,
+                                       overwriteExisting=overwriteExisting)
+        if not successful:
+            failMessage = '==> Project save failed\n'
+            sys.stderr.write(failMessage)
+            self.ui.mainWindow.statusBar().showMessage(failMessage)
+            return successful
+
+        successMessage = '==> Project successfully saved\n'
+        self.ui.mainWindow._updateWindowTitle()
+        self.ui.mainWindow.statusBar().showMessage(successMessage)
+        self.ui.mainWindow.getMenuAction('File->Archive').setEnabled(True)
+        self.ui.mainWindow._fillRecentProjectsMenu()
+        # self._createApplicationPaths()
+        self.current._dumpStateToFile(self.statePath)
+        try:
+            if self.preferences.general.autoSaveLayoutOnQuit:
+                Layout.saveLayoutToJson(self.ui.mainWindow)
+        except Exception as e:
+            getLogger().warning('Unable to save Layout %s' % e)
+
+        # saveIconPath = os.path.join(getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
+        sys.stderr.write(successMessage)
+        self._getUndo().markSave()
+        return successful
+
+    @logCommand('application.')
+    def saveProjectAs(self, newPath, overwrite=False) -> bool:
+        """Save project to newPath
+        :return True if successful
+        """
+        return self._saveProject(newPath=newPath,
+                                 createFallback=False,
+                                 overwriteExisting=overwrite)
+
+    @logCommand('application.')
+    def saveProject(self) -> bool:
+        """Save project
+        :return True if successful
+        """
+        return self._saveProject(newPath=None,
+                                 createFallback=True,
+                                 overwriteExisting=True)
+
+    def _closeProject(self):
+        """Close project and clean up - when opening another or quitting application
+        """
+        # NB: this function must clean up both wrapper and ui/gui
+
+        self.deleteAllNotifiers()
+        if self.ui.mainWindow:
+            # ui/gui cleanup
+            self.ui.mainWindow._closeMainWindowModules()
+            self.ui.mainWindow._closeExtraWindowModules()
+            self.ui.mainWindow.sideBar.deleteLater()
+            self.ui.mainWindow.deleteLater()
+            self.ui.mainWindow = None
+
+        if self.current:
+            self.current._unregisterNotifiers()
+            self._current = None
+
+        if self.project is not None:
+            # Cleans up wrapper project, including graphics data objects (Window, Strip, etc.)
+            self.project._close()
+            self._project = None
 
     def _loadV2Project(self, path) -> List[Project]:
         """Actual V2 project loader
@@ -1010,7 +1053,7 @@ class Framework(NotifierBase, GuiBase):
 
     def _loadNefFile(self, path: str, makeNewProject=True) -> Project:
         """Load Project from NEF file at path, and do necessary setup
-
+        :return Project instance
         """
 
         from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
@@ -1162,49 +1205,6 @@ class Framework(NotifierBase, GuiBase):
         except Exception as e:
             getLogger().debug(str(e))
 
-    def _saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
-        """Save project to newPath and return True if successful
-        """
-        if self.preferences.general.keepSpectraInsideProject:
-            self._cloneSpectraToProjectDir()
-
-        successful = self.project.save(newPath=newPath, createFallback=createFallback,
-                                       overwriteExisting=overwriteExisting)
-        if not successful:
-            failMessage = '==> Project save failed\n'
-            sys.stderr.write(failMessage)
-            self.ui.mainWindow.statusBar().showMessage(failMessage)
-            return successful
-
-        successMessage = '==> Project successfully saved\n'
-        self.ui.mainWindow._updateWindowTitle()
-        self.ui.mainWindow.statusBar().showMessage(successMessage)
-        self.ui.mainWindow.getMenuAction('File->Archive').setEnabled(True)
-        self.ui.mainWindow._fillRecentProjectsMenu()
-        # self._createApplicationPaths()
-        self.current._dumpStateToFile(self.statePath)
-        try:
-            if self.preferences.general.autoSaveLayoutOnQuit:
-                Layout.saveLayoutToJson(self.ui.mainWindow)
-        except Exception as e:
-            getLogger().warning('Unable to save Layout %s' % e)
-
-        # saveIconPath = os.path.join(getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
-        sys.stderr.write(successMessage)
-        # MessageDialog.showMessage('Project saved', 'Project successfully saved!',
-        #                            iconPath=saveIconPath)
-
-        self._getUndo().markSave()
-        return successful
-
-    @logCommand('application.')
-    def saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
-        """Save project to newPath and return True if successful"""
-        if self.project.isTemporary:
-            return self.saveProjectAs()
-        else:
-            return self._saveProject(newPath=newPath, createFallback=createFallback,
-                                     overwriteExisting=overwriteExisting)
     #-----------------------------------------------------------------------------------------
     # NEF-related code
     #-----------------------------------------------------------------------------------------
@@ -1485,29 +1485,7 @@ class Framework(NotifierBase, GuiBase):
                 newPath += jsonType
             return newPath
 
-    def _closeProject(self):
-        """Close project and clean up - when opening another or quitting application
-        """
 
-        # NB: this function must clean up both wrapper and ui/gui
-
-        self.deleteAllNotifiers()
-        if self.ui.mainWindow:
-            # ui/gui cleanup
-            self.ui.mainWindow._closeMainWindowModules()
-            self.ui.mainWindow._closeExtraWindowModules()
-            self.ui.mainWindow.sideBar.deleteLater()
-            self.ui.mainWindow.deleteLater()
-            self.ui.mainWindow = None
-
-        if self.current:
-            self.current._unregisterNotifiers()
-            self._current = None
-
-        if self.project is not None:
-            # Cleans up wrapper project, including graphics data objects (Window, Strip, etc.)
-            self.project._close()
-            self._project = None
 
     ###################################################################################################################
     ## MENU callbacks:  Spectrum

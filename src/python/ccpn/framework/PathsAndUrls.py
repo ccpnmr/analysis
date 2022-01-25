@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-25 10:26:44 +0000 (Tue, January 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-25 18:04:24 +0000 (Tue, January 25, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -56,9 +56,10 @@ macroPath                       = ccpnPythonPath / 'macros'
 pluginPath                      = ccpnPythonPath / 'plugins'
 pipePath                        = ccpnPythonPath / 'pipes'
 pipeTemplates                   = ccpnPythonPath / 'framework' / 'lib' / 'pipeline' / 'templates'
-fontsPath                       = ccpnPythonPath / 'ui' / 'gui' / 'widgets' / 'fonts'
-iconsPath                       = ccpnPythonPath / 'ui' / 'gui' / 'widgets' / 'icons'
-openGLFontsPath                 = fontsPath / 'Fonts'
+widgetsPath                     = ccpnPythonPath / 'ui' / 'gui' / 'widgets'
+fontsPath                       = widgetsPath    / 'fonts'
+iconsPath                       = widgetsPath    / 'icons'
+openGLFontsPath                 = fontsPath      / 'Fonts'
 nefValidationPath               = ccpnPythonPath / 'util' / 'nef' / 'NEF' / 'specification' / 'mmcif_nef_v1_1.dic'
 peakPickerPath                  = ccpnPythonPath / 'core' / 'lib' / 'PeakPickers'
 

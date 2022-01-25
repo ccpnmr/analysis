@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-25 11:22:33 +0000 (Tue, January 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-25 18:04:24 +0000 (Tue, January 25, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,8 @@ __date__ = "$Date: 2022-01-18 10:28:48 +0000 (Tue, January 18, 2022) $"
 #=========================================================================================
 
 import os
+import platform
+
 from tqdm import tqdm
 from functools import partial
 from typing import Union, Optional, List, Tuple, Sequence
@@ -35,9 +37,8 @@ from typing import Union, Optional, List, Tuple, Sequence
 from PyQt5 import QtWidgets
 
 from ccpn.framework.PathsAndUrls import \
-    userPreferencesPath,  \
-    userPreferencesDirectory,  \
     macroPath, \
+    widgetsPath, \
     CCPN_EXTENSION, \
     CCPN_ARCHIVES_DIRECTORY
 
@@ -78,6 +79,7 @@ from ccpn.ui.gui.widgets.Menu import \
     TUTORIALSMENU, \
     CCPNPLUGINSMENU, \
     PLUGINSMENU
+
 
 class GuiBase(object):
     """Just methods taken from Framework for now
@@ -344,6 +346,32 @@ class GuiBase(object):
             ]
         ))
 
+    def _setColourSchemeAndStyleSheet(self):
+        """Set the colourScheme and stylesheet as determined by arguments --dark, --light or preferences
+        """
+        if self.args.darkColourScheme:
+            colourScheme = 'dark'
+        elif self.args.lightColourScheme:
+            colourScheme = 'light'
+        else:
+            colourScheme = self.preferences.general.colourScheme
+
+        if colourScheme is None:
+            raise RuntimeError('invalid colourScheme')
+        self._colourScheme = colourScheme
+
+        _qssPath = widgetsPath / ('%sStyleSheet.qss' % colourScheme.capitalize())
+        with _qssPath.open(mode='r') as fp:
+            styleSheet = fp.read()
+
+        if platform.system() == 'Linux':
+            _qssPath = widgetsPath / ('%sAdditionsLinux.qss' % colourScheme.capitalize())
+            with _qssPath.open(mode='r') as fp:
+                additions = fp.read()
+            styleSheet += additions
+
+        self._styleSheet = styleSheet
+
     #-----------------------------------------------------------------------------------------
     # callback methods
     #-----------------------------------------------------------------------------------------
@@ -424,18 +452,24 @@ class GuiBase(object):
 
     def _saveCallback(self):
         """The project callback"""
-        succes = self._saveProject(newPath=None, createFallback=True, overwriteExisting=True)
+        successful = self.saveProject()
+        if not successful:
+            getLogger().warning("Error saving project")
+            MessageDialog.showError('Save Project', 'Error saving %s', self.project)
 
     def _saveAsCallback(self):
-        """Opens save Project as dialog box and saves project to path specified in the file dialog."""
+        """Opens save Project as dialog box and saves project to path specified
+        in the file dialog.
+        """
         oldPath = self.project.path
         newPath = getSaveDirectory(self.ui.mainWindow, self.preferences)
 
-        with catchExceptions(application=self, errorStringTemplate='Error saving project: %s', printTraceBack=True):
+        with catchExceptions(application=self,
+                             errorStringTemplate='Error saving project: %s',
+                             printTraceBack=True):
             if newPath:
                 # Next line unnecessary, but does not hurt
-                successful = self._saveProject(newPath=newPath, createFallback=False)
-
+                successful = self.saveProjectAs(newPath=newPath, overwrite=True)
                 if not successful:
                     getLogger().warning("Saving project to %s aborted" % newPath)
             else:
@@ -444,8 +478,6 @@ class GuiBase(object):
 
             self._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
             self.ui.mainWindow._fillRecentProjectsMenu()  # Update the menu
-
-            return successful
 
     def _archiveProjectCallback(self):
 

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-25 11:22:33 +0000 (Tue, January 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-25 17:06:58 +0000 (Tue, January 25, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -69,6 +69,7 @@ from ccpn.framework.Current import Current
 from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
 from ccpn.framework.Translation import languages, defaultLanguage
 from ccpn.framework.Translation import translator
+from ccpn.framework.Preferences import Preferences
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
 from ccpn.framework.PathsAndUrls import \
     userPreferencesPath,  \
@@ -225,8 +226,10 @@ class Framework(NotifierBase, GuiBase):
         else:
             self.level = logging.INFO
 
-        self.preferences = None  # initialised by self._getUserPrefs
-        self._getUserPrefs()
+        self.preferences = Preferences(application=self)
+        if not self.args.skipUserPreferences:
+            sys.stderr.write('==> Getting user preferences\n')
+            self.preferences._getUserPreferences()
 
         self.layout = None  # initialised by self._getUserLayout
 
@@ -581,23 +584,11 @@ class Framework(NotifierBase, GuiBase):
         self._styleSheet = styleSheet
     #-----------------------------------------------------------------------------------------
 
-    def _getUserPrefs(self):
-        # Assure that preferences directory (.ccpn) exists
-        if not userPreferencesDirectory.exists():
-            userPreferencesDirectory.mkdir()
-        # user preferences
-        if not self.args.skipUserPreferences:
-            sys.stderr.write('==> Getting user preferences\n')
-        self.preferences = getPreferences(self.args.skipUserPreferences)
-
     def _savePreferences(self):
-        """Save the preferences to file"""
-        with catchExceptions(application=self, errorStringTemplate='Error saving preferences; "%s"', printTraceBack=True):
-            directory = os.path.dirname(userPreferencesPath)
-            if not os.path.exists(directory):
-                os.makedirs(directory)
-            with open(userPreferencesPath, 'w+') as prefFile:
-                json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
+        """Save the user preferences to file
+        CCPNINTERNAL: used in PreferencesPopup and GuiMainWindow._close()
+        """
+        self.preferences._saveUserPreferences()
 
     #-----------------------------------------------------------------------------------------
 
@@ -1371,7 +1362,7 @@ class Framework(NotifierBase, GuiBase):
            self as first element, unless it is a temp project
            update the preferences with the new list
 
-           CCPN INTERNAL: called by MainWindow
+           CCPNINTERNAL: called by MainWindow
         """
         project = self.project
         path = project.path
@@ -1440,6 +1431,7 @@ class Framework(NotifierBase, GuiBase):
     #         self.ui.mainWindow._updateRestoreArchiveMenu()
     #     return archivePath
 
+    @logCommand('application')
     def restoreFromArchive(self, archivePath) -> Project:
         """Restore a project from archive path
         :return the restored project or None on error
@@ -2165,47 +2157,6 @@ class Framework(NotifierBase, GuiBase):
 #-----------------------------------------------------------------------------------------
 #end class
 #-----------------------------------------------------------------------------------------
-
-
-def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):
-    from ccpn.framework.PathsAndUrls import defaultPreferencesPath
-
-    try:
-        def _updateDict(d, u):
-            import collections
-
-            # recursive update of dictionary
-            # this deletes every key in u that is not in d
-            # if we want every key regardless, then remove first if check below
-            for k, v in u.items():
-                if k not in d:
-                    continue
-                if isinstance(v, collections.Mapping):
-                    r = _updateDict(d.get(k, {}), v)
-                    d[k] = r
-                else:
-                    d[k] = u[k]
-            return d
-
-        # read the default settings
-        preferencesPath = (defaultPath if defaultPath else defaultPreferencesPath)
-        with open(preferencesPath) as fp:
-            preferences = json.load(fp, object_hook=AttrDict)
-
-        # read user settings and update if not skipped
-        if not skipUserPreferences:
-            # from ccpn.framework.PathsAndUrls import userPreferencesPath
-
-            preferencesPath = (userPath if userPath else os.path.expanduser(userPreferencesPath))
-            if os.path.isfile(preferencesPath):
-                with open(preferencesPath) as fp:
-                    userPreferences = json.load(fp, object_hook=AttrDict)
-                preferences = _updateDict(preferences, userPreferences)
-    except:  #should we have the preferences hard coded as py dict for extra safety? if json goes wrong the whole project crashes!
-        with open(defaultPreferencesPath) as fp:
-            preferences = json.load(fp, object_hook=AttrDict)
-
-    return preferences
 
 
 #-----------------------------------------------------------------------------------------

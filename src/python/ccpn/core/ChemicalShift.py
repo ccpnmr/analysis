@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-19 17:14:27 +0000 (Wed, January 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-26 16:50:48 +0000 (Wed, January 26, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -537,7 +537,7 @@ class ChemicalShift(V3CoreObjectABC):
         """Calculate the shift value
         """
         nmrAtom = nmrAtom or self.nmrAtom
-        if self._wrapperList.autoUpdate:
+        if not self.static:
             if nmrAtom:
                 if nmrAtom.assignedPeaks:
                     # remember the oldest setting
@@ -548,6 +548,7 @@ class ChemicalShift(V3CoreObjectABC):
                 value, valueError = nmrAtom._recalculateShiftValue(self._wrapperList.spectra)
             else:
                 value, valueError = None, None
+            valueError = valueError if value is not None else None
 
             if not (value is None and valueError is None):
                 # update the dataframe

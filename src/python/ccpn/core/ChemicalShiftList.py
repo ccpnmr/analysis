@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 11:18:41 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-26 16:50:48 +0000 (Wed, January 26, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -76,7 +76,7 @@ CS_TABLECOLUMNS = (CS_UNIQUEID, CS_ISDELETED, CS_PID,
                    # CS_STATIC,
                    CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT,
                    CS_NMRATOM, CS_CHAINCODE, CS_SEQUENCECODE, CS_RESIDUETYPE, CS_ATOMNAME,
-                   CS_STATE,
+                   CS_STATE, CS_ORPHAN,
                    CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT,
                    CS_COMMENT, CS_OBJECT)
 
@@ -621,6 +621,11 @@ class ChemicalShiftList(AbstractWrapperObject):
                 # restore the nmrAtom, etc., for the new shift
                 shift._updateNmrAtomShifts()
 
+            for sh in chemicalShiftList._shifts:
+                # ensure that all shifts have the correct value/valueError
+                if sh.value is None:
+                    sh._recalculateShiftValue()
+
         return chemicalShiftList
 
     #===========================================================================================
@@ -681,7 +686,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         # make new tuple - verifies contents
         _row = _getByTuple(self, False,
                            value, valueError, figureOfMerit,
-                           nmrAtom, chainCode, sequenceCode, residueType, atomName,
+                           None, chainCode, sequenceCode, residueType, atomName,
                            comment)
         _nextUniqueId = self.project._getNextUniqueIdValue(CS_CLASSNAME)
         # add to dataframe - this is in undo stack and marked as modified
@@ -700,6 +705,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         # new Shift only needs chemicalShiftList and uniqueId - properties are linked to dataframe
         shift = _newShift(self.project, self, _uniqueId=int(_nextUniqueId))
         if nmrAtom:
+            # None above should ensure recalculation of shift values from assignments
             shift.nmrAtom = nmrAtom
 
         _oldShifts = self._shifts[:]

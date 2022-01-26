@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 11:22:10 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-26 10:43:26 +0000 (Wed, January 26, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -695,7 +695,8 @@ class Framework(NotifierBase, GuiBase):
         dataUrl = memopsRoot.findFirstDataLocationStore(name='standard').findFirstDataUrl(
                 name='remoteData'
                 )
-        dataUrl.url = Implementation.Url(path=dataPath)
+        _path = str(dataPath.replace(os.sep, '/'))
+        dataUrl.url = Implementation.Url(path=_path)
 
     def _correctColours(self):
         """Autocorrect all colours that are too close to the background colour

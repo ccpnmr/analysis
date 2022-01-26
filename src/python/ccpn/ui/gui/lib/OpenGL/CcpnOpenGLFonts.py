@@ -4,8 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-02 13:57:32 +0000 (Tue, March 02, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-01-26 11:55:20 +0000 (Wed, January 26, 2022) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -109,6 +110,12 @@ class CcpnGLFont():
         self.activeTexture = GL.GL_TEXTURE0 + activeTexture
         self.activeTextureNum = activeTexture
 
+        # self._bindFontTexture  # causing threading error on Windows?
+
+    def _bindFontTexture(self):
+        """Bind the texture to font
+        MUST be called inside GL current context, i.e., after GL.makeCurrent or inside initializeGL, paintGL
+        """
         self.textureId = GL.glGenTextures(1)
         # GL.glEnable(GL.GL_TEXTURE_2D)
         GL.glActiveTexture(self.activeTexture)
@@ -367,10 +374,16 @@ class GLString(GLVertexArray):
         # width = penX - glyph.advance[0] / 64.0 + glyph.size[0]
 
     def drawTextArray(self):
+        """Draw text array with textures
+        MUST be called inside GL current context, i.e., after GL.makeCurrent or inside initializeGL, paintGL
+        """
         self._GLContext.globalGL._shaderProgramTex.setTextureID(self.font._parent.activeTextureNum)
         super().drawTextArray()
 
     def drawTextArrayVBO(self, enableClientState=False, disableClientState=False):
+        """Draw text array with textures and VBO
+        MUST be called inside GL current context, i.e., after GL.makeCurrent or inside initializeGL, paintGL
+        """
         self._GLContext.globalGL._shaderProgramTex.setTextureID(self.font._parent.activeTextureNum)
         super().drawTextArrayVBO()
 

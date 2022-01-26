@@ -4,8 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -13,9 +14,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2021-03-02 13:57:32 +0000 (Tue, March 02, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-01-26 11:55:20 +0000 (Wed, January 26, 2022) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -85,6 +86,8 @@ class GLGlobalData(QtWidgets.QWidget):
         self.initialiseShaders()
         self._glClientIndex = 0
 
+        self._texturesBound = False
+
     def getNextClientIndex(self):
         self._glClientIndex += 1
         return 1  #self._glClientIndex
@@ -105,6 +108,15 @@ class GLGlobalData(QtWidgets.QWidget):
             self.glSmallFontSize = _size
         else:
             self.glSmallFontSize = GLFONT_DEFAULTSIZE
+
+    def bindFonts(self):
+        """Bind the font textures to the GL textures
+        MUST be called inside GL current context, i.e., after GL.makeCurrent or inside initializeGL, paintGL
+        """
+        if not self._texturesBound:
+            for name, fnt in self.fonts.items():
+                fnt._bindFontTexture()
+            self._texturesBound = True
 
     def initialiseShaders(self):
         """Initialise the shaders

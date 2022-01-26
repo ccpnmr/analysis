@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-01-26 10:59:46 +0000 (Wed, January 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-26 11:23:15 +0000 (Wed, January 26, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -128,6 +128,16 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
             self._copyPeakListToSpectrum()
         self.accept()
 
+    def _executeAfterCopyPeaks(self, peakList):
+
+        # execute further operations to the new peakList if required.
+        ddValues = self.copyOptionsRadioButtons.get()
+        extraActionsTexts = ddValues.get(_OnlyPositionAndAssignments, [])
+        for action in extraActionsTexts:
+            func = self._extraActionDefs.get(action)
+            if func:
+                func(peakList)
+
     def _copyPeakListToSpectrum(self):
         includeAllProperties = self.copyOptionsRadioButtons.getSelectedText() == _IncludeAllPeakProperties
 
@@ -136,15 +146,8 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
                 if self.targetSpectrum is not None:
                     with progressManager(self, 'Copying Peaks. See terminal window for more info...'):
                         newPeakList = self.sourcePeakList.copyTo(self.targetSpectrum, includeAllPeakProperties=includeAllProperties)
-                        # need to execute further operations
-                        ddValues = self.copyOptionsRadioButtons.get()
-                        extraActionsTexts = ddValues.get(_OnlyPositionAndAssignments, [])
-
-                        for action in extraActionsTexts:
-                            funcDef = self._extraActionDefs.get(action)
-                            if funcDef:
-                                funcDef(newPeakList)
-
+                        self._executeAfterCopyPeaks(newPeakList)
+                    
             except Exception as es:
                 getLogger().warning('Error copying peakList: %s' % str(es))
                 showWarning(str(self.windowTitle()), str(es))

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-26 10:26:01 +0000 (Wed, January 26, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-01-26 11:23:15 +0000 (Wed, January 26, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -446,7 +446,7 @@ class PeakList(PMIListABC):
         """
         from ccpn.core.lib.PeakListLib import _fitExistingPeaks
 
-        getLogger().warning('Deprecated, please use spectrum.fitExistingPeaks()')
+        # getLogger().warning('Deprecated, please use spectrum.fitExistingPeaks()') #comment-out until it is clear what is the new routine to use instead.
 
         return _fitExistingPeaks(self,
                                  peaks=peaks,

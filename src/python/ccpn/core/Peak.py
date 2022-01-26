@@ -14,9 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-01-25 16:31:24 +0000 (Tue, January 25, 2022) $"
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 11:22:07 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-26 11:23:15 +0000 (Wed, January 26, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -958,7 +956,7 @@ class Peak(AbstractWrapperObject):
                             targetPeakList.spectrum.dimensionCount, targetPeakList.longPid))
 
         destinationAxisCodes = targetPeakList.spectrum.axisCodes
-        dimensionMapping = peakList.spectrum.getByAxisCodes('dimensions', destinationAxisCodes, exactMatch=True)
+        dimensionMapping = peakList.spectrum.getByAxisCodes('dimensions', destinationAxisCodes, exactMatch=False)
 
         if None in dimensionMapping:
             raise ValueError("%s axisCodes %s not compatible with targetSpectrum axisCodes %s"

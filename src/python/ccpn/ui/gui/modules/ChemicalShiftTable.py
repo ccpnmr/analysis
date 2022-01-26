@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-14 18:53:06 +0000 (Fri, January 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-26 16:52:20 +0000 (Wed, January 26, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,10 +37,10 @@ from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.ChemicalShiftList import CS_UNIQUEID, CS_ISDELETED, CS_PID, \
-    CS_STATIC, CS_STATE, CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT, CS_ATOMNAME, \
+    CS_STATIC, CS_STATE, CS_ORPHAN, CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT, CS_ATOMNAME, \
     CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT, \
     CS_COMMENT, CS_OBJECT, \
-    CS_TABLECOLUMNS
+    CS_TABLECOLUMNS, ChemicalShiftState
 from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import makeIterableList
@@ -109,7 +109,7 @@ class ChemicalShiftTableModule(CcpnModule):
                     )
 
         # main window
-        _hidden = ['isDeleted', 'figureOfMerit', 'allPeaks', 'chainCode', 'sequenceCode', 'residueType', 'state']
+        _hidden = ['isDeleted', 'figureOfMerit', 'allPeaks', 'chainCode', 'sequenceCode', 'residueType', 'state', 'orphan']
         self.chemicalShiftTable = ChemicalShiftTable(parent=self.mainWidget,
                                                      mainWindow=self.mainWindow,
                                                      moduleParent=self,
@@ -719,9 +719,14 @@ class ChemicalShiftTable(GuiTable):
         except Exception as es:
             shiftPeakCount = 0
         peakCount = len(_peaks) if _peaks else 0
-        state = obj.state.description  # if state needed
 
-        return (state, allPeaks, shiftPeakCount, peakCount)
+        state = obj.state
+        if state == ChemicalShiftState.ORPHAN:
+            state = ChemicalShiftState.DYNAMIC
+        state = state.description  # if state needed
+        orphan = u'\u2713' if obj.orphan else ''  # unicode tick character
+
+        return (state, orphan, allPeaks, shiftPeakCount, peakCount)
 
     def getDataFrameFromExpandedList(self, table=None,
                                      buildList=None,
@@ -750,6 +755,7 @@ class ChemicalShiftTable(GuiTable):
                      'ResidueType of attached nmrAtom, or None',
                      'AtomName of attached nmrAtom, or None',
                      'Active state of chemicalShift',
+                     'Orphaned state of chemicalShift',
                      'List of assigned peaks associated with this chemicalShift',
                      'Number of assigned peaks attached to a chemicalShift\nbelonging to spectra associated with parent chemicalShiftList',
                      'Total number of assigned peaks attached to a chemicalShift\nbelonging to any spectra',
@@ -783,6 +789,7 @@ class ChemicalShiftTable(GuiTable):
 
             _table.insert(CS_TABLECOLUMNS.index(CS_PID), CS_PID, None)
             _table.insert(CS_TABLECOLUMNS.index(CS_STATE), CS_STATE, None)  # if state require
+            _table.insert(CS_TABLECOLUMNS.index(CS_ORPHAN), CS_ORPHAN, None)  # if state require
             _table.insert(CS_TABLECOLUMNS.index(CS_ALLPEAKS), CS_ALLPEAKS, None)
             _table.insert(CS_TABLECOLUMNS.index(CS_SHIFTLISTPEAKSCOUNT), CS_SHIFTLISTPEAKSCOUNT, None)
             _table.insert(CS_TABLECOLUMNS.index(CS_ALLPEAKSCOUNT), CS_ALLPEAKSCOUNT, None)
@@ -795,7 +802,7 @@ class ChemicalShiftTable(GuiTable):
 
                 _stats = [self._derivedFromObject(obj) for obj in _objs]
                 # _table[[CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT]] = _stats
-                _table[[CS_STATE, CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT]] = _stats
+                _table[[CS_STATE, CS_ORPHAN, CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT]] = _stats
 
                 # replace the visible nans with '' for comment column and string 'None' elsewhere
                 _table[CS_COMMENT].fillna('', inplace=True)
@@ -842,7 +849,7 @@ class ChemicalShiftTable(GuiTable):
             _comment = _row[CS_COMMENT:]
             _pidCol = pd.Series(obj.pid, index=[CS_PID, ])
             # _extraCols = pd.Series(self._derivedFromObject(obj), index=[CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT])
-            _extraCols = pd.Series(self._derivedFromObject(obj), index=[CS_STATE, CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT])  # if state required
+            _extraCols = pd.Series(self._derivedFromObject(obj), index=[CS_STATE, CS_ORPHAN, CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT])  # if state required
 
             newRow = newRow.append([_pidCol, _midRow, _extraCols, _comment])
 

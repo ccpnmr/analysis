@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-26 11:55:20 +0000 (Wed, January 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-26 17:53:29 +0000 (Wed, January 26, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -29,15 +29,15 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 import os
 import sys
 import numpy as np
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 
 
 from ccpn.ui.gui.lib.OpenGL import GL, GLU, GLUT
-
 from ccpn.util.decorators import singleton
 from ccpn.framework.PathsAndUrls import openGLFontsPath
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import CcpnGLFont
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLShader import ShaderProgramABC
+from ccpn.util.Logging import getLogger
 
 
 GLFONT_DEFAULT = 'OpenSans-Regular'
@@ -80,9 +80,17 @@ class GLGlobalData(QtWidgets.QWidget):
         # self._spectrumDisplay = spectrumDisplay
 
         self.fonts = {}
-        self.loadFonts()
-
         self.shaders = None
+
+        _ver = QtGui.QOpenGLVersionProfile()
+        self._GLVersion = GL.glGetString(GL.GL_VERSION)
+        self._GLShaderVersion = GL.glGetString(GL.GL_SHADING_LANGUAGE_VERSION)
+        getLogger().debug(f"OpenGL: {self._GLVersion.decode('utf-8')}")
+        getLogger().debug(f"GLSL: {self._GLShaderVersion.decode('utf-8')}")
+        _format = QtGui.QSurfaceFormat()
+        getLogger().debug(f"Surface: {_format.version()}")
+
+        self.loadFonts()
         self.initialiseShaders()
         self._glClientIndex = 0
 

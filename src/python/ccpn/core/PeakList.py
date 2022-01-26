@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 11:22:07 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-26 10:26:01 +0000 (Wed, January 26, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -382,7 +382,7 @@ class PeakList(PMIListABC):
 
         with undoBlockWithoutSideBar():
             for ii, ind in enumerate(indices):
-                if ind is not None:
+                if ind is not None and positions[ind] is not None:
                     selectedRegion.insert(ii, [positions[ind] - tolerances[ii], positions[ind] + tolerances[ii]])
                 else:
                     selectedRegion.insert(ii, [limits[ii][0], limits[ii][1]])

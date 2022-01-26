@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-01-26 12:29:40 +0000 (Wed, January 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-26 13:49:33 +0000 (Wed, January 26, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -46,7 +46,10 @@ _RefitPeaksAtPosition       = 'Refit peaks at position'
 _RecalculateVolume          = 'Recalculate volume'
 _tipTextOnlyPos             = f'''Copy Peaks and include only the original position and assignments (if available).\nAdditionally, execute the selected operations'''
 _tipTextIncludeAll          = f'''Copy Peaks and include all the original properties: \nPosition, Assignments, Heights, Linewidths, Volumes etc...'''
-
+_tipTextSnapToExtremum      = 'Snap all new peaks to extremum. Default properties set in the General Preferences'
+_tipTextRefitPeaks          = 'Refit all new peaks. Default properties set in the General Preferences'
+_tipTextRefitPeaksAtPosition= 'Refit peaks and force to maintain the original position. Default properties set in the General Preferences'
+_tipTextRecalculateVolume   = 'Recalculate volume for all peaks. Requires a Refit.'
 
 
 class CopyPeakListPopup(CcpnDialogMainWidget):
@@ -96,13 +99,14 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
 
 
         checkBoxTexts = [_SnapToExtremum, _RefitPeaks, _RefitPeaksAtPosition, _RecalculateVolume]
+        checkBoxTipTexts = [_tipTextSnapToExtremum, _tipTextRefitPeaks, _tipTextRefitPeaksAtPosition, _tipTextRecalculateVolume]
 
         checkBoxesDict = od([
                             (_OnlyPositionAndAssignments,
                              {
                              CheckBoxTexts: checkBoxTexts,
                              CheckBoxCheckedText: [_SnapToExtremum, _RefitPeaks, _RecalculateVolume],
-                             CheckBoxTipTexts: [f'Perform the following action {i} on all peaks' for i in checkBoxTexts],
+                             CheckBoxTipTexts: checkBoxTipTexts,
                              CheckBoxCallbacks: [self._subSelectionCallback] * len(checkBoxTexts)
                              }
                             ),

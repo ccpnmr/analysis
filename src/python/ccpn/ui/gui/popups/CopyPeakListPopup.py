@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-01-26 11:23:15 +0000 (Wed, January 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-26 12:29:40 +0000 (Wed, January 26, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -214,24 +214,48 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
 
         return result
 
-    def _subSelectionCallback(self, value):
-        #  need to uncheck the mutually exclusive.
-        clickedCheckBox = self.sender()
+    def _subSelectionCallback(self, checked):
+        """
+        This routine is to ensure there are not mutually exclusive selections.
+        Behaviour:
+            allowed combinations:
+                - _SnapToExtremum, _RefitPeaks, _RecalculateVolume
+                - _SnapToExtremum, _RecalculateVolume
+                - _RefitPeaks, _RecalculateVolume
+                - _RefitPeaksAtPosition, _RecalculateVolume
+
+            not allowed:
+                - _RecalculateVolume alone
+                - _RefitPeaksAtPosition excludes any of  _RefitPeaks, _SnapToExtremum
+
+        It is convoluted and a refactor might be needed for readability.
+        But double check the intended behaviour is maintained!
+
+        :param checked: bool
+        :return: None
+        """
+        clicked = self.sender().getText()
         radioButton = self.copyOptionsRadioButtons.getRadioButtonByText(_OnlyPositionAndAssignments)
-        selectedExtraActions = radioButton.getSelectedCheckBoxes()
+        _include = radioButton.getSelectedCheckBoxes()
+        _exclude = []
 
-        if clickedCheckBox.getText() == _RefitPeaksAtPosition:
-            _exclude = [_SnapToExtremum, _RefitPeaks]
-            radioButton.setSelectedCheckBoxes([i for i in selectedExtraActions if i not in _exclude])
+        if clicked == _RefitPeaksAtPosition:
+            if checked:
+                _exclude += [_SnapToExtremum, _RefitPeaks]
 
-        if clickedCheckBox.getText() == _SnapToExtremum:
-            _exclude = [_RefitPeaksAtPosition]
-            radioButton.setSelectedCheckBoxes([i for i in selectedExtraActions if i not in _exclude])
+        if clicked == _SnapToExtremum:
+            _exclude += [_RefitPeaksAtPosition]
 
-        if clickedCheckBox.getText() == _RefitPeaks:
-            _exclude = [_RefitPeaksAtPosition]
-            radioButton.setSelectedCheckBoxes([i for i in selectedExtraActions if i not in _exclude])
+        if clicked == _RefitPeaks:
+            _exclude += [_RefitPeaksAtPosition]
 
+        if _RecalculateVolume in _include:
+            if _RefitPeaks not in _include:
+                if _RefitPeaksAtPosition not in _include:
+                    _include += [_RefitPeaks]
+
+        newSelection = list(set([i for i in _include if i not in _exclude]))
+        radioButton.setSelectedCheckBoxes(newSelection)
 
     def _refitPeaks(self, peakList, keepPosition=False):
         peaks = peakList.peaks

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-01-25 17:38:20 +0000 (Tue, January 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-26 10:59:46 +0000 (Wed, January 26, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -36,25 +36,23 @@ from ccpn.ui.gui.widgets.RadioButtons import RadioButtons, RadioButtonsWithSubCh
 from ccpn.ui.gui.widgets.RadioButton import CheckBoxCheckedText, CheckBoxCallbacks, CheckBoxTexts, CheckBoxTipTexts
 from collections import OrderedDict as od
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, _stoppableProgressBar, progressManager
+import ccpn.ui.gui.widgets.CompoundWidgets as cw
 
-
-_OnlyPositionAndAssignments = 'Copy Position and Assignments only'
+_OnlyPositionAndAssignments = 'Copy position and assignments'
 _IncludeAllPeakProperties   = 'Copy all existing properties'
 _SnapToExtremum             = 'Snap to extremum'
 _RefitPeaks                 = 'Refit peaks'
-_RefitPeaksAtPosition       = 'Refit peaks and preserve position'
+_RefitPeaksAtPosition       = 'Refit peaks at position'
 _RecalculateVolume          = 'Recalculate volume'
-_tipTextOnlyPos = f'''Copy Peaks and include only the original Position and Assignments (if available).
-                     \nAdditionally, execute the selected operations'''
-_tipTextIncludeAll = f'''Copy Peaks and include all the original properties: 
-                Position, Assignments, Heights, Linewidths, Volumes etc...'''
+_tipTextOnlyPos             = f'''Copy Peaks and include only the original position and assignments (if available).\nAdditionally, execute the selected operations'''
+_tipTextIncludeAll          = f'''Copy Peaks and include all the original properties: \nPosition, Assignments, Heights, Linewidths, Volumes etc...'''
 
 
 
 class CopyPeakListPopup(CcpnDialogMainWidget):
     def __init__(self, parent=None, mainWindow=None, title='Copy PeakList', spectrumDisplay=None,
                        selectItem=None, **kwds):
-        super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
+        super().__init__(parent, setLayout=True, size=(350, 250),minimumSize=(450, 250), windowTitle=title, **kwds)
 
         if mainWindow:
             self.mainWindow = mainWindow
@@ -89,11 +87,13 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
                                 }
 
     def setWidgets(self):
-        self.sourcePeakListLabel = Label(self.mainWidget, 'Source PeakList', grid=(0, 0))
-        self.sourcePeakListPullDown = PulldownList(self.mainWidget, grid=(0, 1),
-                                                   callback=self._populateTargetSpectraPullDown)
-        self.targetSpectraLabel = Label(self.mainWidget, 'Target Spectrum', grid=(1, 0))
-        self.targetSpectraPullDown = PulldownList(self.mainWidget, grid=(1, 1))
+        self.sourcePeakListPullDownCW = cw.PulldownListCompoundWidget(self.mainWidget, labelText='Source PeakList',
+                                                              grid=(0, 0), callback=self._populateTargetSpectraPullDown)
+        self.sourcePeakListPullDown = self.sourcePeakListPullDownCW.pulldownList
+        self.targetSpectraPullDownCW = cw.PulldownListCompoundWidget(self.mainWidget, labelText='Target Spectrum',
+                                                              grid=(1, 0))
+        self.targetSpectraPullDown = self.targetSpectraPullDownCW.pulldownList
+
 
         checkBoxTexts = [_SnapToExtremum, _RefitPeaks, _RefitPeaksAtPosition, _RecalculateVolume]
 

@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-09 14:06:37 +0000 (Tue, November 09, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-27 14:32:38 +0000 (Thu, January 27, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,10 @@ from functools import partial
 from PyQt5 import QtWidgets, QtCore, QtGui
 from itertools import permutations
 from collections import Iterable
+from time import sleep
+
 from ccpn.core.Spectrum import MAXALIASINGRANGE, Spectrum
+from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
@@ -41,27 +44,26 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.popups.ExperimentTypePopup import _getExperimentTypes
-from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, \
-    colourNameNoSpace, _setColourPulldown, getSpectrumColour
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Tabs import Tabs
-from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
-from ccpn.util.OrderedSet import OrderedSet
-from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
+from ccpn.ui.gui.popups.ExperimentTypePopup import _getExperimentTypes
+from ccpn.ui.gui.popups.AttributeEditorPopupABC import getAttributeTipText
+from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForSpectrumPopup
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, handleDialogApply, _verifyPopupApply
+from ccpn.ui.gui.guiSettings import getColours, DIVIDER
+from ccpn.ui.gui.lib.ChangeStateHandler import changeState, ChangeDict
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.core.lib.SpectrumLib import getContourLevelsFromNoise
 from ccpn.core.lib.ContextManagers import queueStateChange
-from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForSpectrumPopup
-from ccpn.ui.gui.lib.ChangeStateHandler import changeState, ChangeDict
-from ccpn.core.SpectrumGroup import SpectrumGroup
-from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.util.AttrDict import AttrDict
-from ccpn.ui.gui.popups.AttributeEditorPopupABC import getAttributeTipText
+from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, \
+    colourNameNoSpace, _setColourPulldown, getSpectrumColour
+from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
+from ccpn.util.OrderedSet import OrderedSet
 
 
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
@@ -89,8 +91,12 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
     # The apply button then steps through each tab, and calls each function in the _changes dictionary
     # in order to set the parameters.
 
+    FIXEDWIDTH = False
+    FIXEDHEIGHT = False
+
     MINIMUM_WIDTH_PER_TAB = 120
     MINIMUM_WIDTH = 500
+    BORDER_OFFSET = 20
 
     def __init__(self, parent=None, mainWindow=None, spectrum=None,
                  title='Spectrum Properties', **kwds):
@@ -104,6 +110,7 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
         self.spectrum = spectrum
 
         self.tabWidget = Tabs(self.mainWidget, setLayout=True, grid=(0, 0), focusPolicy='strong')
+        self.tabWidget.setTabClickCallback(self._resizeWidth)
 
         # enable the buttons
         self.setOkButton(callback=self._okClicked)
@@ -237,6 +244,61 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
         # MUST BE SUBCLASSED
         raise NotImplementedError("Code error: function not implemented")
 
+    def _resizeWidth(self, tab):
+        """change the width to the new tab
+        """
+        # create a singleshot - waits until gui is up-to-date before firing
+        QtCore.QTimer.singleShot(0, self._widthAdjust)
+
+    def _widthAdjust(self, step=1024):
+        """iterate until the width matches the tab contents
+        """
+        if step < 1:
+            # exit as close enough to target width
+            return
+
+        # get the widths of the tabWidget and the current tab to match against
+        _tab = self.tabWidget.currentWidget()
+        _width = self.tabWidget.width()
+        _target = _tab._scrollContents.sizeHint().width() + self.BORDER_OFFSET
+
+        if abs(_width - _target) >= step:
+            # change size
+            self.resize(self.width() + (step if _width < _target else -step), self.height())
+            # create another singleshot - waits until gui is up-to-date before firing
+            QtCore.QTimer.singleShot(0, partial(self._widthAdjust, step))
+
+        else:
+            # half the step as closer to the target width
+            step /= 2
+            self._widthAdjust(step)
+
+
+class _SpectrumPropertiesFrame(ScrollableFrame):
+
+    def __init__(self, *args, **kwds):
+        super(_SpectrumPropertiesFrame, self).__init__(*args, **kwds)
+        self._widget = None
+
+    def _revertClicked(self):
+        """Revert button signal comes here
+        Revert (roll-back) the state of the project to before the popup was opened
+        """
+        if self._widget:
+            return self._thisparent.parent()._revertClicked()
+
+    def _getChangeState(self):
+        """Get the change state from the popup tabs
+        """
+        if self._widget:
+            return self._thisparent.parent()._getChangeState()
+
+    def addWidget(self, widget, *args):
+        """Add a widget to the frame
+        """
+        self.getLayout().addWidget(widget, *args)
+        self._widget = widget
+
 
 class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
     # The values on the 'General' and 'Dimensions' tabs are queued as partial functions when set.
@@ -250,22 +312,34 @@ class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
                          spectrum=spectrum, title=title, **kwds)
 
         if spectrum.dimensionCount == 1:
-            self._generalTab = GeneralTab(parent=self, mainWindow=self.mainWindow, spectrum=spectrum)
-            self._dimensionsTab = DimensionsTab(parent=self, mainWindow=self.mainWindow,
-                                                spectrum=spectrum, dimensions=spectrum.dimensionCount)
+            self._generalTab = self._dimensionsTab = self._contoursTab = None
+            for (tabName, attrName, tabFunc) in (('General', '_generalTab', partial(GeneralTab, mainWindow=self.mainWindow, spectrum=spectrum)),
+                                                 ('Dimensions', '_dimensionsTab', partial(DimensionsTab, mainWindow=self.mainWindow, spectrum=spectrum, dimensions=spectrum.dimensionCount)),
+                                                 ):
+                fr = _SpectrumPropertiesFrame(self.mainWidget, setLayout=True, spacing=DEFAULTSPACING,
+                                              scrollBarPolicies=('never', 'asNeeded'), margins=TABMARGINS)
 
-            self.tabWidget.addTab(self._generalTab, "General")
-            self.tabWidget.addTab(self._dimensionsTab, "Dimensions")
-            self._contoursTab = None
+                self.tabWidget.addTab(fr.scrollArea, tabName)
+                _tab = tabFunc(parent=fr)
+                fr.addWidget(_tab, 0, 0)  # add to the gridlayout
+                setattr(self, attrName, _tab)
+
+            self.tabWidget.setCurrentIndex(1)
+
         else:
-            self._generalTab = GeneralTab(parent=self, mainWindow=self.mainWindow, spectrum=spectrum)
-            self._dimensionsTab = DimensionsTab(parent=self, mainWindow=self.mainWindow,
-                                                spectrum=spectrum, dimensions=spectrum.dimensionCount)
-            self._contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=spectrum, showCopyOptions=False)
+            self._generalTab = self._dimensionsTab = self._contoursTab = None
+            for (tabName, attrName, tabFunc) in (('General', '_generalTab', partial(GeneralTab, mainWindow=self.mainWindow, spectrum=spectrum)),
+                                                 ('Dimensions', '_dimensionsTab', partial(DimensionsTab, mainWindow=self.mainWindow, spectrum=spectrum, dimensions=spectrum.dimensionCount)),
+                                                 ('Contours', '_contoursTab', partial(ContoursTab, mainWindow=self.mainWindow, spectrum=spectrum, showCopyOptions=False)),
+                                                 ):
+                fr = _SpectrumPropertiesFrame(self.mainWidget, setLayout=True, spacing=DEFAULTSPACING,
+                                              scrollBarPolicies=('never', 'asNeeded'), margins=TABMARGINS)
 
-            self.tabWidget.addTab(self._generalTab, "General")
-            self.tabWidget.addTab(self._dimensionsTab, "Dimensions")
-            self.tabWidget.addTab(self._contoursTab, "Contours")
+                self.tabWidget.addTab(fr.scrollArea, tabName)
+                _tab = tabFunc(parent=fr)
+                fr.addWidget(_tab, 0, 0)  # add to the gridlayout
+                setattr(self, attrName, _tab)
+
             self.tabWidget.setCurrentIndex(2)
 
         # don't forget to call postInit to finish initialise
@@ -566,8 +640,8 @@ class GeneralTab(Widget):
             _specLabel = Label(self, text="Reference Experiment Type ", vAlign='t', hAlign='l', grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'experimentType'))
             self.spectrumType = FilteringPulldownList(self, vAlign='t', grid=(row, 1))
             _specButton = Button(self, grid=(row, 2),
-                              callback=partial(self._raiseExperimentFilterPopup, spectrum),
-                              hPolicy='fixed', icon='icons/applications-system')
+                                 callback=partial(self._raiseExperimentFilterPopup, spectrum),
+                                 hPolicy='fixed', icon='icons/applications-system')
 
             self.spectrumType.currentIndexChanged.connect(partial(self._queueSetSpectrumType, spectrum))
             _specLabel.setVisible(False)
@@ -592,6 +666,7 @@ class GeneralTab(Widget):
 
             noiseLevelLabel = Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'noiseLevel'))
             self.noiseLevelData = ScientificDoubleSpinBox(self, vAlign='t', grid=(row, 1))
+            self.layout().addItem(QtWidgets.QSpacerItem(26, 10), row, 2)
             row += 1
 
             self.noiseLevelData.valueChanged.connect(partial(self._queueNoiseLevelDataChange, spectrum, self.noiseLevelData.textFromValue))
@@ -926,7 +1001,7 @@ class DimensionsTab(Widget):
             row = 2
             self.axisCodeEdits[i] = LineEdit(self, grid=(row, i + 1), vAlign='t', hAlign='l')
             self.axisCodeEdits[i].textChanged.connect(partial(self._queueSetAxisCodes, spectrum, ))
-                                                              # self.axisCodeEdits[i].text, i))
+            # self.axisCodeEdits[i].text, i))
 
             row += 1
             self.isotopeCodePullDowns[i] = PulldownList(self, grid=(row, i + 1), vAlign='t')
@@ -938,8 +1013,8 @@ class DimensionsTab(Widget):
                 # reference experiment type
                 self.spectrumType = FilteringPulldownList(self, vAlign='t', grid=(row, i + 1), gridSpan=(1, dimensions))
                 _specButton = Button(self, grid=(row, i + 1 + dimensions),
-                                  callback=partial(self._raiseExperimentFilterPopup, spectrum),
-                                  hPolicy='fixed', icon='icons/applications-system')
+                                     callback=partial(self._raiseExperimentFilterPopup, spectrum),
+                                     hPolicy='fixed', icon='icons/applications-system')
                 # Added to account for renaming of experiments
                 self.spectrumType.currentIndexChanged.connect(partial(self._queueSetSpectrumType, spectrum))
 
@@ -953,7 +1028,7 @@ class DimensionsTab(Widget):
             row += 1
             # reference axis codes
             _refPullDown = self.referenceDimensionPullDowns[i] = PulldownList(self, grid=(row, i + 1), vAlign='t')
-            self.referenceDimensionPullDowns[i].currentIndexChanged.connect(partial(self._queueSetReferenceDimensions, spectrum, )) #self.referenceDimensionPullDowns[i].getText, i))
+            self.referenceDimensionPullDowns[i].currentIndexChanged.connect(partial(self._queueSetReferenceDimensions, spectrum, ))  #self.referenceDimensionPullDowns[i].getText, i))
             if self.dimensions < 2:
                 # hide as not required for 1d
                 _refPullDown.setVisible(False)
@@ -971,7 +1046,7 @@ class DimensionsTab(Widget):
 
             row += 1
             # line spacer
-            
+
             row += 1
             self._pointCountsLabels[i] = Label(self, grid=(row, i + 1), vAlign='t', hAlign='l')
 
@@ -1102,7 +1177,7 @@ class DimensionsTab(Widget):
         refDimensions = self._referenceDimensions or self.spectrum.referenceExperimentDimensions
 
         if (self._referenceExperiment or self.spectrum.experimentType) is None:
-            _referenceLists = [['', val] if val else ['',] for val in refDimensions]
+            _referenceLists = [['', val] if val else ['', ] for val in refDimensions]
             _refDimensions = [val if val else '' for val in refDimensions]
 
             for ii, (refList, ref) in enumerate(zip(_referenceLists, _refDimensions)):
@@ -1110,7 +1185,7 @@ class DimensionsTab(Widget):
                 self.referenceDimensionPullDowns[ii].setIndex(refList.index(ref))
 
         else:
-            _referenceLists = [['',] for val in refDimensions]
+            _referenceLists = [['', ] for val in refDimensions]
             _refDimensions = [val if val else '' for val in refDimensions]
 
             # get the permutations of the available experiment dimensions
@@ -1272,7 +1347,7 @@ class DimensionsTab(Widget):
         # set the axisCodes in single operation
         value = tuple(val.text() for val in self.axisCodeEdits)
         if value != spectrum.axisCodes:
-            return partial(self._setAxisCodes, spectrum ,value) #, dim, value)
+            return partial(self._setAxisCodes, spectrum, value)  #, dim, value)
 
         # repopulate the preferred axis order pulldown
         self._fillPreferredWidgetFromAxisTexts()
@@ -1341,9 +1416,9 @@ class DimensionsTab(Widget):
         self._referenceDimensions = tuple(_refDims)
 
         if value != spectrum.referenceExperimentDimensions:
-            return partial(self._setReferenceDimensions, spectrum, value) #, dim, value)
+            return partial(self._setReferenceDimensions, spectrum, value)  #, dim, value)
 
-    def _setReferenceDimensions(self, spectrum, value): #, dim, value):
+    def _setReferenceDimensions(self, spectrum, value):  #, dim, value):
         """Set the value for a single referenceDimension
         - this can lead to non-unique values"""
         spectrum.referenceExperimentDimensions = value
@@ -2326,10 +2401,9 @@ class ColourFrameABC(Frame):
                                             icon='icons/colours', hPolicy='fixed')
             self.sliceColourButton.clicked.connect(partial(self._queueChangeSliceColour, self.spectrumGroup))
             self.copySliceColourButton = Button(self, text='Copy to All Spectra', grid=(row, 3), vAlign='t', hAlign='l',
-                                           hPolicy='fixed')
+                                                hPolicy='fixed')
             self.copySliceColourButton.clicked.connect(partial(self._queueChangeSliceColourToAll, self.spectrumGroup))
             row += 1
-
 
         self._fillPullDowns()
 

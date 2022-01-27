@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-24 10:40:26 +0000 (Mon, January 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-27 15:24:37 +0000 (Thu, January 27, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1695,6 +1695,9 @@ class CcpnGLWidget(QOpenGLWidget):
 
         # initialise a common to all OpenGL windows
         self.globalGL = GLGlobalData(parent=self, mainWindow=self.mainWindow)
+
+        # move outside of GLGlobalData to check threading on windows
+        self.globalGL.bindFonts()
 
         # initialise the arrays for the grid and axes
         self.gridList = []

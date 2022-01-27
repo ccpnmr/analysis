@@ -4,7 +4,7 @@ Module containing functions for defining GLSL shaders.
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-07 12:11:51 +0100 (Mon, June 07, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-27 15:24:37 +0000 (Thu, January 27, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,12 +28,10 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 
 import sys
 import os
-from PyQt5 import QtWidgets
+from PyQt5 import QtGui
 import numpy as np
 from ccpn.util.Logging import getLogger
-
-
-from ccpn.ui.gui.lib.OpenGL import GL, GLU, GLUT
+from ccpn.ui.gui.lib.OpenGL import GL
 
 
 class ShaderProgramABC(object):
@@ -96,9 +94,24 @@ class ShaderProgramABC(object):
 
         # check that the required fields have been set
         if not (self.vertexShader or self.fragmentShader) or self.attributes == {}:
-            raise RuntimeError('ShaderProgram is not correctlt defined')
+            raise RuntimeError('ShaderProgram is not correctly defined')
 
-        self.program_id = GL.glCreateProgram()
+        try:
+            self.program_id = GL.glCreateProgram()
+        except Exception as es:
+            esType, esValue, esTraceback = sys.exc_info()
+            _ver = QtGui.QOpenGLVersionProfile()
+            self._GLVersion = GL.glGetString(GL.GL_VERSION)
+            self._GLShaderVersion = GL.glGetString(GL.GL_SHADING_LANGUAGE_VERSION)
+            _format = QtGui.QSurfaceFormat()
+            msg = f"OpenGL: {self._GLVersion.decode('utf-8')}\n" \
+                  f"GLSL: {self._GLShaderVersion.decode('utf-8')}\n" \
+                  f"Surface: {_format.version()}\n\n" \
+                  f"{es}\n" \
+                  f"{esType}\n" \
+                  f"{esTraceback}"
+            raise RuntimeError(msg)
+
         self.vs_id = self._addGLShader(self.vertexShader, GL.GL_VERTEX_SHADER)
         self.frag_id = self._addGLShader(self.fragmentShader, GL.GL_FRAGMENT_SHADER)
         # self.attributes = attributes

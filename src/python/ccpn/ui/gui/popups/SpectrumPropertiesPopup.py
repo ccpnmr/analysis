@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:18 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-01-27 15:24:37 +0000 (Thu, January 27, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ from functools import partial
 from PyQt5 import QtWidgets, QtCore, QtGui
 from itertools import permutations
 from collections.abc import Iterable
+from time import sleep
 
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
@@ -58,7 +59,7 @@ from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget, handleDialogApply, _verifyPopupApply
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState, ChangeDict
-from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import _complexAttribContainer
 
 from ccpn.util.AttrDict import AttrDict
@@ -95,8 +96,12 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
     # The apply button then steps through each tab, and calls each function in the _changes dictionary
     # in order to set the parameters.
 
+    FIXEDWIDTH = False
+    FIXEDHEIGHT = False
+
     MINIMUM_WIDTH_PER_TAB = 120
     MINIMUM_WIDTH = 500
+    BORDER_OFFSET = 20
 
     def __init__(self, parent=None, mainWindow=None, spectrum=None,
                  title='Spectrum Properties', **kwds):
@@ -110,6 +115,7 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
         self.spectrum = spectrum
 
         self.tabWidget = Tabs(self.mainWidget, setLayout=True, grid=(0, 0), focusPolicy='strong')
+        self.tabWidget.setTabClickCallback(self._resizeWidth)
 
         # enable the buttons
         self.setOkButton(callback=self._okClicked)
@@ -243,6 +249,61 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
         # MUST BE SUBCLASSED
         raise NotImplementedError("Code error: function not implemented")
 
+    def _resizeWidth(self, tab):
+        """change the width to the new tab
+        """
+        # create a singleshot - waits until gui is up-to-date before firing
+        QtCore.QTimer.singleShot(0, self._widthAdjust)
+
+    def _widthAdjust(self, step=1024):
+        """iterate until the width matches the tab contents
+        """
+        if step < 1:
+            # exit as close enough to target width
+            return
+
+        # get the widths of the tabWidget and the current tab to match against
+        _tab = self.tabWidget.currentWidget()
+        _width = self.tabWidget.width()
+        _target = _tab._scrollContents.sizeHint().width() + self.BORDER_OFFSET
+
+        if abs(_width - _target) >= step:
+            # change size
+            self.resize(self.width() + (step if _width < _target else -step), self.height())
+            # create another singleshot - waits until gui is up-to-date before firing
+            QtCore.QTimer.singleShot(0, partial(self._widthAdjust, step))
+
+        else:
+            # half the step as closer to the target width
+            step /= 2
+            self._widthAdjust(step)
+
+
+class _SpectrumPropertiesFrame(ScrollableFrame):
+
+    def __init__(self, *args, **kwds):
+        super(_SpectrumPropertiesFrame, self).__init__(*args, **kwds)
+        self._widget = None
+
+    def _revertClicked(self):
+        """Revert button signal comes here
+        Revert (roll-back) the state of the project to before the popup was opened
+        """
+        if self._widget:
+            return self._thisparent.parent()._revertClicked()
+
+    def _getChangeState(self):
+        """Get the change state from the popup tabs
+        """
+        if self._widget:
+            return self._thisparent.parent()._getChangeState()
+
+    def addWidget(self, widget, *args):
+        """Add a widget to the frame
+        """
+        self.getLayout().addWidget(widget, *args)
+        self._widget = widget
+
 
 class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
     # The values on the 'General' and 'Dimensions' tabs are queued as partial functions when set.
@@ -261,22 +322,34 @@ class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
         self._contoursTab = None
 
         if spectrum.dimensionCount == 1:
-            self._generalTab = GeneralTab(parent=self, mainWindow=self.mainWindow, spectrum=spectrum)
-            self._dimensionsTab = DimensionsTab(parent=self, mainWindow=self.mainWindow,
-                                                spectrum=spectrum, dimensions=spectrum.dimensionCount)
+            self._generalTab = self._dimensionsTab = self._contoursTab = None
+            for (tabName, attrName, tabFunc) in (('General', '_generalTab', partial(GeneralTab, mainWindow=self.mainWindow, spectrum=spectrum)),
+                                                 ('Dimensions', '_dimensionsTab', partial(DimensionsTab, mainWindow=self.mainWindow, spectrum=spectrum, dimensions=spectrum.dimensionCount)),
+                                                 ):
+                fr = _SpectrumPropertiesFrame(self.mainWidget, setLayout=True, spacing=DEFAULTSPACING,
+                                              scrollBarPolicies=('never', 'asNeeded'), margins=TABMARGINS)
 
-            self.tabWidget.addTab(self._generalTab, "General")
-            self.tabWidget.addTab(self._dimensionsTab, "Dimensions")
-            self._contoursTab = None
+                self.tabWidget.addTab(fr.scrollArea, tabName)
+                _tab = tabFunc(parent=fr)
+                fr.addWidget(_tab, 0, 0)  # add to the gridlayout
+                setattr(self, attrName, _tab)
+
+            self.tabWidget.setCurrentIndex(1)
+
         else:
-            self._generalTab = GeneralTab(parent=self, mainWindow=self.mainWindow, spectrum=spectrum)
-            self._dimensionsTab = DimensionsTab(parent=self, mainWindow=self.mainWindow,
-                                                spectrum=spectrum, dimensions=spectrum.dimensionCount)
-            self._contoursTab = ContoursTab(parent=self, mainWindow=self.mainWindow, spectrum=spectrum, showCopyOptions=False)
+            self._generalTab = self._dimensionsTab = self._contoursTab = None
+            for (tabName, attrName, tabFunc) in (('General', '_generalTab', partial(GeneralTab, mainWindow=self.mainWindow, spectrum=spectrum)),
+                                                 ('Dimensions', '_dimensionsTab', partial(DimensionsTab, mainWindow=self.mainWindow, spectrum=spectrum, dimensions=spectrum.dimensionCount)),
+                                                 ('Contours', '_contoursTab', partial(ContoursTab, mainWindow=self.mainWindow, spectrum=spectrum, showCopyOptions=False)),
+                                                 ):
+                fr = _SpectrumPropertiesFrame(self.mainWidget, setLayout=True, spacing=DEFAULTSPACING,
+                                              scrollBarPolicies=('never', 'asNeeded'), margins=TABMARGINS)
 
-            self.tabWidget.addTab(self._generalTab, "General")
-            self.tabWidget.addTab(self._dimensionsTab, "Dimensions")
-            self.tabWidget.addTab(self._contoursTab, "Contours")
+                self.tabWidget.addTab(fr.scrollArea, tabName)
+                _tab = tabFunc(parent=fr)
+                fr.addWidget(_tab, 0, 0)  # add to the gridlayout
+                setattr(self, attrName, _tab)
+
             self.tabWidget.setCurrentIndex(2)
 
         # don't forget to call postInit to finish initialise
@@ -600,6 +673,7 @@ class GeneralTab(Widget):
 
             noiseLevelLabel = Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(row, 0), tipText=getAttributeTipText(Spectrum, 'noiseLevel'))
             self.noiseLevelData = ScientificDoubleSpinBox(self, vAlign='t', grid=(row, 1))
+            self.layout().addItem(QtWidgets.QSpacerItem(26, 10), row, 2)
             row += 1
 
             self.noiseLevelData.valueChanged.connect(partial(self._queueNoiseLevelDataChange, spectrum, self.noiseLevelData.textFromValue))
@@ -2362,10 +2436,9 @@ class ColourFrameABC(Frame):
                                             icon='icons/colours', hPolicy='fixed')
             self.sliceColourButton.clicked.connect(partial(self._queueChangeSliceColour, self.spectrumGroup))
             self.copySliceColourButton = Button(self, text='Copy to All Spectra', grid=(row, 3), vAlign='t', hAlign='l',
-                                           hPolicy='fixed')
+                                                hPolicy='fixed')
             self.copySliceColourButton.clicked.connect(partial(self._queueChangeSliceColourToAll, self.spectrumGroup))
             row += 1
-
 
         self._fillPullDowns()
 

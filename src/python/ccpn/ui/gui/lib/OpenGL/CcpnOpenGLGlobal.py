@@ -4,8 +4,9 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-09 19:13:27 +0000 (Tue, March 09, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2022-01-27 15:24:37 +0000 (Thu, January 27, 2022) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,12 +27,13 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 #=========================================================================================
 
 import numpy as np
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 from ccpn.ui.gui.lib.OpenGL import GL
 from ccpn.util.decorators import singleton
 from ccpn.framework.PathsAndUrls import openGLFontsPath
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLFonts import CcpnGLFont
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLShader import ShaderProgramABC
+from ccpn.util.Logging import getLogger
 
 
 GLFONT_DEFAULT = 'OpenSans-Regular'
@@ -70,10 +72,20 @@ class GLGlobalData(QtWidgets.QWidget):
         self.mainWindow = mainWindow
 
         self.fonts = {}
-        self.loadFonts()
         self.shaders = None
 
+        _ver = QtGui.QOpenGLVersionProfile()
+        self._GLVersion = GL.glGetString(GL.GL_VERSION)
+        self._GLShaderVersion = GL.glGetString(GL.GL_SHADING_LANGUAGE_VERSION)
+        getLogger().debug(f"OpenGL: {self._GLVersion.decode('utf-8')}")
+        getLogger().debug(f"GLSL: {self._GLShaderVersion.decode('utf-8')}")
+        _format = QtGui.QSurfaceFormat()
+        getLogger().debug(f"Surface: {_format.version()}")
+
+        self.loadFonts()
         self.initialiseShaders()
+
+        self._texturesBound = False
 
     def loadFonts(self):
         """Load all the necessary GLFonts
@@ -91,6 +103,15 @@ class GLGlobalData(QtWidgets.QWidget):
             self.glSmallFontSize = _size
         else:
             self.glSmallFontSize = GLFONT_DEFAULTSIZE
+
+    def bindFonts(self):
+        """Bind the font textures to the GL textures
+        MUST be called inside GL current context, i.e., after GL.makeCurrent or inside initializeGL, paintGL
+        """
+        if not self._texturesBound:
+            for name, fnt in self.fonts.items():
+                fnt._bindFontTexture()
+            self._texturesBound = True
 
     def initialiseShaders(self):
         """Initialise the shaders

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-27 14:32:38 +0000 (Thu, January 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-27 15:56:30 +0000 (Thu, January 27, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -184,8 +184,10 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
         if not self.tabs:
             raise RuntimeError("Code error: tabs not implemented")
 
+        _tabs = self.getActiveTabList()
+
         # get the list of widgets that have been changed - exit if all empty
-        allChanges = any(t._changes for t in self.tabs if t is not None)
+        allChanges = any(t._changes for t in _tabs if t is not None)
         if not allChanges:
             return True
 
@@ -194,7 +196,7 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
 
             # get the list of spectra that have changed - for refreshing the displays
             spectrumList = []
-            for t in self.tabs:
+            for t in _tabs:
                 if t is not None:
                     changes = t._changes
                     if changes:
@@ -205,7 +207,7 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
                 addUndoItem(undo=partial(_updateGl, self, spectrumList))
 
             # apply all functions to the spectra
-            for t in self.tabs:
+            for t in _tabs:
                 if t is not None:
                     changes = t._changes
                     if changes:
@@ -231,7 +233,7 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
             return False
 
         # remove all changes
-        for tab in self.tabs:
+        for tab in _tabs:
             tab._changes = ChangeDict()
 
         self._currentNumApplies += 1
@@ -240,6 +242,12 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
 
     def copySpectra(self, fromSpectrum, toSpectra):
         """Copy the contents of tabs to other spectra
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError("Code error: function not implemented")
+
+    def getActiveTabList(self):
+        """Return the list of active tabs
         """
         # MUST BE SUBCLASSED
         raise NotImplementedError("Code error: function not implemented")
@@ -387,7 +395,7 @@ class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
     def getActiveTabList(self):
         """Return the list of active tabs
         """
-        return (self._generalTab, self._dimensionsTab, self._contoursTab)
+        return tuple(tab for tab in (self._generalTab, self._dimensionsTab, self._contoursTab) if tab is not None)
 
 
 class SpectrumDisplayPropertiesPopupNd(SpectrumPropertiesPopupABC):

@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-09 14:44:13 +0000 (Tue, November 09, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-28 17:19:21 +0000 (Fri, January 28, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -410,7 +410,7 @@ class Framework(NotifierBase):
 
     @property
     def hasGui(self) -> bool:
-        "Return True if application has a gui"
+        """Return True if application has a gui"""
         return isinstance(self.ui, Gui)
 
     def _testShortcuts0(self):
@@ -613,7 +613,7 @@ class Framework(NotifierBase):
         self.preferences = getPreferences(self.args.skipUserPreferences)
 
     def _savePreferences(self):
-        "Save the preferences to file"
+        """Save the preferences to file"""
         with catchExceptions(application=self, errorStringTemplate='Error saving preferences; "%s"', printTraceBack=True):
             directory = os.path.dirname(userPreferencesPath)
             if not os.path.exists(directory):
@@ -922,7 +922,7 @@ class Framework(NotifierBase):
         return self.getByPid(identifier)
 
     def getByPid(self, pid):
-        "Convenience"
+        """Convenience"""
         obj = self.project.getByPid(pid)
         if obj:
             return obj
@@ -931,7 +931,7 @@ class Framework(NotifierBase):
             return modules[0] if modules else None
 
     def getByGid(self, gid):
-        "Convenience"
+        """Convenience"""
         return self.ui.getByGid(gid)
 
     # def _startCommandBlock(self, command: str, quiet: bool = False, **objectParameters):
@@ -1412,7 +1412,7 @@ class Framework(NotifierBase):
                 raise es
 
     def createNewProject(self):
-        "Callback for creating new project"
+        """Callback for creating new project"""
         with catchExceptions(application=self, errorStringTemplate='Error creating new project:', printTraceBack=True):
             okToContinue = self.ui.mainWindow._queryCloseProject(title='New Project',
                                                                  phrase='create a new')
@@ -3133,10 +3133,12 @@ class Framework(NotifierBase):
                 # NOTE:ED - this could be quite nasty, but can't think of another way to get Linux to open a pdf
                 subprocess.run([ccpnRunTerminal, linuxCommand, path], check=True)
             else:
-                raise TypeError('PDFViewer not defined for linux')
+                # raise TypeError('PDFViewer not defined for linux')
+                MessageDialog.showWarning('Open File',
+                                          'Please select PDFViewer in Preferences->External Programs')
 
     def _showHtmlFile(self, title, urlPath):
-        "Displays html files in program QT viewer or using native webbrowser depending on useNativeWebbrowser option"
+        """Displays html files in program QT viewer or using native webbrowser depending on useNativeWebbrowser option"""
 
         mainWindow = self.ui.mainWindow
 
@@ -3386,7 +3388,7 @@ if __name__ == '__main__':
 
 
     class MyProgramme(Framework):
-        "My first app"
+        """My first app"""
         pass
 
 

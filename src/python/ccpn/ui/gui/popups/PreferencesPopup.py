@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-09 14:06:37 +0000 (Tue, November 09, 2021) $"
+__dateModified__ = "$dateModified: 2022-01-28 17:19:21 +0000 (Fri, January 28, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -55,7 +55,7 @@ from ccpn.util.UserPreferences import UserPreferences
 from ccpn.util.Common import ZPlaneNavigationModes, camelCaseToString
 from ccpn.util.Path import aPath
 from ccpn.util.Constants import AXIS_UNITS
-from ccpn.ui.gui.lib.GuiPath import PathEdit
+from ccpn.ui.gui.lib.GuiPath import PathEdit, VALIDFILE
 from ccpn.ui.gui.popups.ValidateSpectraPopup import ValidateSpectraForPreferences
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.core.lib.ContextManagers import queueStateChange, undoStackBlocking
@@ -1176,7 +1176,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         for dim, (name, external) in enumerate(extPrograms):
             Label(parent, name, grid=(row, 0), )
 
-            externalPath = PathEdit(parent, grid=(row, 1), hAlign='t')
+            externalPath = PathEdit(parent, grid=(row, 1), hAlign='t', fileMode=VALIDFILE)
             externalPath.setMinimumWidth(LineEditsMinimumWidth)
             externalPath.textChanged.connect(partial(self._queueSetExternalPath, external, dim))
 

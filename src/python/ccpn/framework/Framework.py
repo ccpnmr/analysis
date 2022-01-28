@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-01-26 10:59:45 +0000 (Wed, January 26, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-01-28 20:49:41 +0000 (Fri, January 28, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -104,6 +104,8 @@ from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSM
 from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_KEY_CONCEPTS
 
 
+
+# strange error check
 
 faulthandler.enable()
 
@@ -2296,13 +2298,24 @@ class Framework(NotifierBase, GuiBase):
         else:
             linuxCommand = self.preferences.externalPrograms.PDFViewer
             # assume a linux and use the choice given in the preferences
-            if linuxCommand:
+            if linuxCommand and Path.aPath(linuxCommand).is_file():
                 from ccpn.framework.PathsAndUrls import ccpnRunTerminal
 
-                # NOTE:ED - this could be quite nasty, but can't think of another way to get Linux to open a pdf
-                subprocess.run([ccpnRunTerminal, linuxCommand, path], check=True)
+                try:
+                    # NOTE:ED - this could be quite nasty, but can't think of another way to get Linux to open a pdf
+                    subprocess.run([ccpnRunTerminal, linuxCommand, path])
+
+                except Exception as es:
+                    getLogger().warning(f'Error opening PDFViewer. {es}')
+                    MessageDialog.showWarning('Open File',
+                                              f'Error opening PDFViewer. {es}\n'
+                                              f'Check settings in Preferences->External Programs'
+                                              )
+
             else:
-                raise TypeError('PDFViewer not defined for linux')
+                # raise TypeError('PDFViewer not defined for linux')
+                MessageDialog.showWarning('Open File',
+                                          'Please select PDFViewer in Preferences->External Programs')
 
     def _showHtmlFile(self, title, urlPath):
         """Displays html files in program QT viewer or using native webbrowser depending on useNativeWebbrowser option"""
@@ -2374,7 +2387,8 @@ class Framework(NotifierBase, GuiBase):
 
     def showShortcuts(self):
         from ccpn.framework.PathsAndUrls import shortcutsPath
-        self._systemOpen(shortcutsPath)
+
+        self._showHtmlFile("Analysis Version-3 Shortcuts", shortcutsPath)
 
     def showAboutPopup(self):
         from ccpn.ui.gui.popups.AboutPopup import AboutPopup

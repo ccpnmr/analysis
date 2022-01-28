@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-28 20:10:42 +0000 (Fri, January 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-28 20:37:06 +0000 (Fri, January 28, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -3223,7 +3223,7 @@ class Framework(NotifierBase):
     def showShortcuts(self):
         from ccpn.framework.PathsAndUrls import shortcutsPath
 
-        self._systemOpen(shortcutsPath)
+        self._showHtmlFile("Analysis Version-3 Shortcuts", shortcutsPath)
 
     def showAboutPopup(self):
         from ccpn.ui.gui.popups.AboutPopup import AboutPopup

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-28 17:38:30 +0000 (Fri, January 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-28 20:10:42 +0000 (Fri, January 28, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -3128,14 +3128,12 @@ class Framework(NotifierBase):
         else:
             linuxCommand = self.preferences.externalPrograms.PDFViewer
             # assume a linux and use the choice given in the preferences
-            if linuxCommand:
+            if linuxCommand and Path.aPath(linuxCommand).is_file():
                 from ccpn.framework.PathsAndUrls import ccpnRunTerminal
 
                 try:
                     # NOTE:ED - this could be quite nasty, but can't think of another way to get Linux to open a pdf
-                    result = subprocess.run([ccpnRunTerminal, linuxCommand, path], capture_output=True)
-                    print(f'   OUTPUT  {result.stdout}')
-                    print(f'   OUTPUT  {result.stderr}')
+                    subprocess.run([ccpnRunTerminal, linuxCommand, path])
 
                 except Exception as es:
                     getLogger().warning(f'Error opening PDFViewer. {es}')

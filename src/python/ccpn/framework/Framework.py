@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-28 17:19:21 +0000 (Fri, January 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-28 17:29:51 +0000 (Fri, January 28, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -85,6 +85,7 @@ from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSM
 from ccpn.framework.Version import authors
 
 import faulthandler
+
 
 # strange error check
 
@@ -1933,7 +1934,7 @@ class Framework(NotifierBase):
             return self.project
 
     @logCommand('application.')
-    def readNefFile(self, path: Union[str, Path.aPath], nefValidationPath: Union[str, Path.aPath, None]=None, errorLogging=None, hidePrefix=True):
+    def readNefFile(self, path: Union[str, Path.aPath], nefValidationPath: Union[str, Path.aPath, None] = None, errorLogging=None, hidePrefix=True):
         """Create a Nef loader object and load a nef file into it together with a Nef validation file.
         If no validation file is specified, the default is taken from PathsAndUrls
 
@@ -1976,7 +1977,7 @@ class Framework(NotifierBase):
         return _loader
 
     @logCommand('application.')
-    def readNefText(self, text: str, nefValidationPath: Union[str, Path.aPath, None]=None, errorLogging=None, hidePrefix=True):
+    def readNefText(self, text: str, nefValidationPath: Union[str, Path.aPath, None] = None, errorLogging=None, hidePrefix=True):
         """Create a Nef loader object and populate from a text string containing the nef structure together with a Nef validation file.
 
         If no validation file is specified, the default is taken from PathsAndUrls
@@ -3130,8 +3131,17 @@ class Framework(NotifierBase):
             if linuxCommand:
                 from ccpn.framework.PathsAndUrls import ccpnRunTerminal
 
-                # NOTE:ED - this could be quite nasty, but can't think of another way to get Linux to open a pdf
-                subprocess.run([ccpnRunTerminal, linuxCommand, path], check=True)
+                try:
+                    # NOTE:ED - this could be quite nasty, but can't think of another way to get Linux to open a pdf
+                    subprocess.run([ccpnRunTerminal, linuxCommand, path], check=True)
+
+                except Exception as es:
+                    getLogger().warning(f'Error opening PDFViewer. {es}')
+                    MessageDialog.showWarning('Open File',
+                                              f'Error opening PDFViewer. {es}\n'
+                                              f'Check settings in Preferences->External Programs'
+                                              )
+
             else:
                 # raise TypeError('PDFViewer not defined for linux')
                 MessageDialog.showWarning('Open File',

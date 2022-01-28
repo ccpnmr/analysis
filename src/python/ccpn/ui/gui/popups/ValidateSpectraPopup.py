@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:18 +0000 (Thu, December 23, 2021) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-01-28 16:54:26 +0000 (Fri, January 28, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -129,7 +129,7 @@ class PathRowABC(object):
         self.labelText = labelText
         self.obj = obj
         self.enabled = enabled
-        self.callback = callback  # callback for this row upon change of value /validate()
+        self.callback = None
         # if defined called as: callback(self)
 
         self.row = None  # Undefined
@@ -142,6 +142,8 @@ class PathRowABC(object):
 
         self.initDone = False
         self._addRow(widget=parentWidget, row=row)
+
+        self.callback = callback  # callback for this row upon change of value /validate()
         self.initDone = True
 
     @property
@@ -328,7 +330,25 @@ class SpectrumPathRow(PathRowABC):
     dialogFileMode = 1
     validatorClass = SpectrumValidator
 
+    def __init__(self, *args, **kwds):
+        super(SpectrumPathRow, self).__init__(*args, **kwds)
+
+        # remember the initial filePath for the popups
+        self._initialFilePath = str(self.obj.filePath) if self.obj else None
+        pass
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @property
+    def initialFilePath(self):
+        """Return the initialFilePath if the obj is specified"""
+        return self._initialFilePath
+
+    def _resetFilePath(self):
+        """Reset the filePath if populating in popups"""
+        if self._initialFilePath:
+            # set the text to the value set when the row was initialised
+            self._setDataInWidget(self._initialFilePath)
 
     def getPath(self) -> str:
         """Get the filePath from spectrum"""
@@ -341,8 +361,9 @@ class SpectrumPathRow(PathRowABC):
         if path != oldPath or not self.obj.hasValidPath():
             try:
                 self.obj.filePath = path
-            except Exception as es:
-                pass
+                return True
+            except Exception:
+                getLogger().debug2('ignoring filePath error')
 
     def getDialogPath(self) -> str:
         """Get the directory path to start the selection;

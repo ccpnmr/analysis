@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-27 16:00:02 +0000 (Thu, January 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-28 16:54:26 +0000 (Fri, January 28, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -590,7 +590,8 @@ class GeneralTab(Widget):
 
         self.spectrumRow = SpectrumPathRow(parentWidget=self, row=row, labelText='Path',
                                            obj=self.spectrum,
-                                           enabled=(not self.spectrum.isEmptySpectrum())
+                                           enabled=(not self.spectrum.isEmptySpectrum()),
+                                           callback=partial(self._queueSpectrumPathChange, spectrum),
                                            )
         row += 1
 
@@ -705,8 +706,8 @@ class GeneralTab(Widget):
         self._changes.clear()
 
         with self._changes.blockChanges():
-            # self._validateFrame._populate()
 
+            self.spectrumRow._resetFilePath()
             self.spectrumPidLabel.setText(self.spectrum.pid)
             self.nameData.setText(self.spectrum.name)
             self.commentData.setText(self.spectrum.comment)
@@ -790,6 +791,15 @@ class GeneralTab(Widget):
 
     def _changeSpectrumName(self, spectrum, name):
         spectrum.rename(name)
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSpectrumPathChange(self, spectrum, value):
+        if value.text != value.initialFilePath:  # spectrum.filePath:
+            return partial(self._changeSpectrumPath, spectrum, value.text)
+
+    def _changeSpectrumPath(self, spectrum, name):
+        # handled in the spectrumRow class
+        pass
 
     @queueStateChange(_verifyPopupApply)
     def _queueSpectrumCommentChange(self, spectrum, value):

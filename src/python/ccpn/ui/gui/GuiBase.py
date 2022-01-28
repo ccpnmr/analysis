@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-25 18:04:24 +0000 (Tue, January 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-28 12:21:57 +0000 (Fri, January 28, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -497,7 +497,7 @@ class GuiBase(object):
         _filter = '*.tgz'
         dialog = ArchivesFileDialog(parent=self.ui.mainWindow,
                                     acceptMode='select',
-                                    directory=self._archiveDirectory,
+                                    directory=archivesDirectory,
                                     fileFilter=_filter)
         dialog._show()
         archivePath = dialog.selectedFile()

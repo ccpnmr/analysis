@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:30:50 +0000 (Thu, January 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-28 12:54:44 +0000 (Fri, January 28, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -56,7 +56,13 @@ class IpythonConsole(Widget):
 
             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-        km = QtInProcessKernelManager()
+        import warnings
+
+        with warnings.catch_warnings():
+            # temporarily suppress the warnings from the incompatible pydevd - not sure how else to solve this :|
+            warnings.simplefilter('ignore')
+            km = QtInProcessKernelManager()
+
         km.start_kernel()
         km.kernel.gui = 'qt4'
         self.mainWindow = mainWindow

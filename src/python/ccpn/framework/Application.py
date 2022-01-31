@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-24 11:13:31 +0000 (Mon, January 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-31 16:53:58 +0000 (Mon, January 31, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -35,7 +35,7 @@ AnalysisAssign = 'AnalysisAssign'
 AnalysisScreen = 'AnalysisScreen'
 AnalysisMetabolomics = 'AnalysisMetabolomics'
 AnalysisStructure = 'AnalysisStructure'
-ApplicationNames = [AnalysisAssign, AnalysisScreen, AnalysisMetabolomics, AnalysisStructure]
+applicationNames = [AnalysisAssign, AnalysisScreen, AnalysisMetabolomics, AnalysisStructure]
 
 
 @singleton
@@ -54,6 +54,11 @@ def getApplication():
     return container.application
 
 
+def getPreferences():
+    """Return the Preferences instance"""
+    return getApplication().preferences
+
+
 class Arguments:
     """Class for setting FrameWork input arguments directly"""
     language = defaultLanguage
@@ -69,7 +74,7 @@ class Arguments:
     def __init__(self, projectPath=None, **kwds):
 
         # Dummy values; GWV: no idea as to what purpose
-        for component in ApplicationNames:
+        for component in applicationNames:
             setattr(self, 'include' + component, None)
 
         self.projectPath = projectPath

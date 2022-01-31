@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-20 13:16:16 +0000 (Thu, January 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-01-31 16:47:53 +0000 (Mon, January 31, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -60,6 +60,8 @@ class Constants(object):
     CLASSVERSION = 'classVersion'
     USER = 'user'
     LASTPATH = 'lastPath'
+    METADATA_KEYS = (JSONVERSION, CLASSNAME, CLASSVERSION, USER, LASTPATH)
+
 # end class
 
 
@@ -414,10 +416,20 @@ class CcpNmrJson(TraitBase):
     #     "Return metadata dict"
     #     return getattr(self, Constants.METADATA)
 
-    def setJsonMetadata(self, key, value):
-        """Update Json metadata with kwds (key,value) pairs; guard for any json-related keys
-        that should not be changed this way
+    def setJsonMetadata(self, key, value, force=False):
+        """Update Json metadata with kwds (key,value) pairs;
+        guard for any json-related keys that should not be changed this way
+        :param key: the key of the metadata to be updated
+        :param value: the value of the metadata to be updated; must be json serialisable
         """
+        if key in Constants.METADATA_KEYS and not force:
+            raise ValueError('setJsonMetadata: Attempted to set protected metadata key "%s" on object %s' %
+                             (key, self))
+        try:
+            _tmp = json.dumps(value)
+        except Exception:
+            raise ValueError('setJsonMetadata: Attempted to set metadata key "%s" on object %s '
+                             'to non Json-serialisable value %r' % (key, self, value))
         self._metadata[key] = value
 
     def getJsonMetadata(self, *keys) -> list:
@@ -452,7 +464,10 @@ class CcpNmrJson(TraitBase):
 
     def __init__(self, **metadata):
         super().__init__()
-        self._metadata.update(metadata)
+        for key, value in metadata.items():
+            # This affords the necesary safeguarding against accidentially overwriting
+            # any protected keys.
+            self.setJsonMetadata(key=key, value=value)
 
     def duplicate(self, **metadata):
         """Convenience method to return a duplicate of self, using toJson and fromJson methods

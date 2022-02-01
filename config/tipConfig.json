@@ -10,7 +10,7 @@
         "TITLE"         : "Tip of the Day",
         "MIN_SIZE"      : [
             498,
-            280
+            300
         ],
         "LAYOUT"        : [
             "Random",
@@ -24,7 +24,7 @@
             "tip_*.json",
             "*/tip_*.json"
         ],
-        "EMPTY_TEXT"    : "All tips viewed to reset go to Project / Preferences -> Tips and click 'reset tips'",
+        "EMPTY_TEXT"    : "All tips viewed. To reset go to Project / Preferences -> Tips and click 'reset tips'",
         "DIRECTORIES"   : [
             "/Users/vad5/PycharmProjects/Git/AnalysisV3/doc/tipOfTheDay"
         ],

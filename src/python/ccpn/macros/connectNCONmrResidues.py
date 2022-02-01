@@ -16,9 +16,18 @@ def _checkNumPeaks():
     else:
         return(True)
 
+def _checkExptType(expType):
+    if 'NCO' in expType:
+        return True
+    elif 'Nco' in expType:
+        return True
+    else:
+        return False
+
+
 def _connectNmrResidues():
     peak = current.peak
-    if 'NCO' in peak.spectrum.experimentType:
+    if _checkExptType(peak.spectrum.experimentType):
         for assignments in peak.assignedNmrAtoms:
             for na in assignments:
                 if na.name == 'N':

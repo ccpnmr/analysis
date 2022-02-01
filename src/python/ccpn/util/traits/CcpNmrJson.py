@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-31 16:47:53 +0000 (Mon, January 31, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-01 11:38:15 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,6 +37,7 @@ from ccpn.util.traits.TraitBase import TraitBase
 from ccpn.util.traits.TraitJsonHandlerBase import TraitJsonHandlerBase
 from ccpn.util.traits.CcpNmrTraits import default, Dict
 from ccpn.util.Logging import getLogger
+from ccpn.util.Time import now
 from ccpn.util.decorators import debug2Enter, debug3Enter, debug3Leave  # Not used now to avoid circular import
 
 
@@ -60,7 +61,8 @@ class Constants(object):
     CLASSVERSION = 'classVersion'
     USER = 'user'
     LASTPATH = 'lastPath'
-    METADATA_KEYS = (JSONVERSION, CLASSNAME, CLASSVERSION, USER, LASTPATH)
+    TIMESTAMP = 'timestamp'
+    METADATA_KEYS = (JSONVERSION, CLASSNAME, CLASSVERSION, USER, LASTPATH, TIMESTAMP)
 
 # end class
 
@@ -118,7 +120,7 @@ class _GenericFileHandler(object):
 
 
 def fileHandler(extension, toString, fromString):
-    """Define toString, fromString methods for a file with extension.
+    """Decorator to define toString, fromString methods for a file with extension.
     It defines the _fileHandler dict for the class, used to store the various fileHandlers
     (for each extension type).
     """
@@ -143,15 +145,15 @@ def fileHandler(extension, toString, fromString):
 def update(updateHandler, push=False):
     """Decorator to register updateHandler function
     It also defines the _update method and _updateHandlers list for the class. 
+
+    :param updateHandler: a function to update the dataDict with profile:
     
-    profile updateHandler function:
-    
-        updateHandler(obj, dataDict) -> dataDict
-        
-        obj: object that is being restored
-        dataDict: (attribute, value) pairs
-        
-        returns: dataDict in-line with obj
+                updateHandler(obj, dataDict) -> dataDict
+                    obj: object that is being restored
+                    dataDict: original dict with (attribute, value) pairs
+                    returns: dataDict consistent with obj
+
+    :param push: push to the front of the _updateHandlersList (i.e executed first)
     """
 
     def theDecorator(cls):
@@ -394,6 +396,7 @@ class CcpNmrJson(TraitBase):
         defaults[Constants.CLASSVERSION] = self.classVersion
         defaults[Constants.USER] = getpass.getuser()
         defaults[Constants.LASTPATH] = 'undefined'
+        defaults[Constants.TIMESTAMP] = str(now())
         return defaults
 
     # _metadata-specific json handler; note the invocation with the attribute, not a string!
@@ -619,8 +622,9 @@ class CcpNmrJson(TraitBase):
         if (handler := _fileHandlers.get(extension)) is None:
             raise RuntimeError('Unable to save; no fileHandler defined for extension "%s"' % extension)
 
-        handler.save(self, path, **kwds)
         self._metadata[Constants.LASTPATH] = str(path)
+        self._metadata[Constants.TIMESTAMP] = str(now())
+        handler.save(self, path, **kwds)
 
     def restore(self, path, **kwds):
         """Restore from file using appropriate handlers depending on extension; return self

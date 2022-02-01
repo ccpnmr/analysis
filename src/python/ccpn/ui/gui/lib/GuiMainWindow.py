@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-24 17:30:31 +0000 (Mon, January 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-01 14:01:19 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -637,7 +637,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         prelayoutMenu.clear()
         for name, path in prelayouts.items():
             action = Action(self, text=name, translate=False,
-                            callback=partial(self.application.restoreLayoutFromFile, path))
+                            callback=partial(self.application._restoreLayoutFromFile, path))
             prelayoutMenu.addAction(action)
         prelayoutMenu.addSeparator()
         userLayouts = Layout._dictLayoutsNamePath(Layout._getPredefinedLayouts(userDefinedLayoutDirPath))

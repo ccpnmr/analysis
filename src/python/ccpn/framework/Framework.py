@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 11:38:56 +0000 (Tue, February 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-01 14:01:18 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -649,22 +649,23 @@ class Framework(NotifierBase, GuiBase):
         except Exception as e:
             getLogger().warning('Impossible to restore SpectrumDisplays')
 
-        # try:
-        #     if self.preferences.general.restoreLayoutOnOpening and \
-        #             mainWindow.moduleLayouts:
-        #         Layout.restoreLayout(self._mainWindow, mainWindow.moduleLayouts, restoreSpectrumDisplay=False)
-        # except Exception as e:
-        #     getLogger().warning('Impossible to restore Layout %s' % e)
         try:
-            from ccpn.framework.LayoutManager import LayoutManager
-            layout = LayoutManager(mainWindow)
-            path = self.statePath / 'Layout.json'
-            layout.restore(path)
-            layout.saveState()
-            layout.restoreState()
+            if self.preferences.general.restoreLayoutOnOpening and \
+                    mainWindow.moduleLayouts:
+                Layout.restoreLayout(mainWindow, mainWindow.moduleLayouts, restoreSpectrumDisplay=False)
+        except Exception as e:
+            getLogger().warning('Impossible to restore Layout %s' % e)
 
-        except Exception as es:
-            getLogger().warning('Error restoring layout: %s' % es)
+        # New LayoutManager implementation; awaiting completion
+        # try:
+        #     from ccpn.framework.LayoutManager import LayoutManager
+        #     layout = LayoutManager(mainWindow)
+        #     path = self.statePath / 'Layout.json'
+        #     layout.restoreState(path)
+        #     layout.saveState()
+        #
+        # except Exception as es:
+        #     getLogger().warning('Error restoring layout: %s' % es)
 
         try:
             # Initialise colours
@@ -1407,41 +1408,46 @@ class Framework(NotifierBase, GuiBase):
     # Layouts
     #-----------------------------------------------------------------------------------------
 
-    def getSavedLayoutPath(self):
-        """Opens a saved Layout as dialog box and gets directory specified in the file dialog."""
-
-        fType = 'JSON (*.json)'
-        dialog = LayoutsFileDialog(parent=self.ui.mainWindow, acceptMode='open', fileFilter=fType)
-        dialog._show()
-        path = dialog.selectedFile()
-        if not path:
-            return
-        if path:
-            return path
-
-    def getSaveLayoutPath(self):
-        """Opens save Layout as dialog box and gets directory specified in the file dialog."""
-
-        jsonType = '.json'
-        fType = 'JSON (*.json)'
-        dialog = LayoutsFileDialog(parent=self.ui.mainWindow, acceptMode='save', fileFilter=fType)
-        dialog._show()
-        newPath = dialog.selectedFile()
-        if not newPath:
-            return
-        if newPath:
-
-            if os.path.exists(newPath):
-                # should not really need to check the second and third condition above, only
-                # the Qt dialog stupidly insists a directory exists before you can select it
-                # so if it exists but is empty then don't bother asking the question
-                title = 'Overwrite path'
-                msg = 'Path "%s" already exists, continue?' % newPath
-                if not MessageDialog.showYesNo(title, msg):
-                    newPath = ''
-            if not newPath.endswith(jsonType):
-                newPath += jsonType
-            return newPath
+    # def _getOpenLayoutPath(self):
+    #     """Opens a saved Layout as dialog box and gets directory specified in the
+    #     file dialog.
+    #     :return selected path or None
+    #     """
+    #
+    #     fType = 'JSON (*.json)'
+    #     dialog = LayoutsFileDialog(parent=self.ui.mainWindow, acceptMode='open', fileFilter=fType)
+    #     dialog._show()
+    #     path = dialog.selectedFile()
+    #     if not path:
+    #         return None
+    #     if path:
+    #         return path
+    #
+    # def _getSaveLayoutPath(self):
+    #     """Opens save Layout as dialog box and gets directory specified in the
+    #     file dialog.
+    #     """
+    #
+    #     jsonType = '.json'
+    #     fType = 'JSON (*.json)'
+    #     dialog = LayoutsFileDialog(parent=self.ui.mainWindow, acceptMode='save', fileFilter=fType)
+    #     dialog._show()
+    #     newPath = dialog.selectedFile()
+    #     if not newPath:
+    #         return None
+    #
+    #     newPath = aPath(newPath)
+    #     if newPath.exists():
+    #         # should not really need to check the second and third condition above, only
+    #         # the Qt dialog stupidly insists a directory exists before you can select it
+    #         # so if it exists but is empty then don't bother asking the question
+    #         title = 'Overwrite path'
+    #         msg = 'Path "%s" already exists, continue?' % newPath
+    #         if not MessageDialog.showYesNo(title, msg):
+    #             return None
+    #
+    #     newPath.assureSuffix(jsonType)
+    #     return newPath
 
     def _getUserLayout(self, userPath=None):
         """defines the application.layout dictionary.
@@ -1469,35 +1475,28 @@ class Framework(NotifierBase, GuiBase):
 
         return self.layout
 
-    def saveLayout(self):
-        Layout.updateSavedLayout(self.ui.mainWindow)
-        getLogger().info('Layout saved')
+    # def _saveLayoutCallback(self):
+    #     Layout.updateSavedLayout(self.ui.mainWindow)
+    #     getLogger().info('Layout saved')
+    #
+    # def _saveLayoutAsCallback(self):
+    #     path = self.getSaveLayoutPath()
+    #     try:
+    #         Layout.saveLayoutToJson(self.ui.mainWindow, jsonFilePath=path)
+    #         getLogger().info('Layout saved')
+    #     except Exception as es:
+    #         getLogger().warning('Impossible to save layout. %s' % es)
 
-    def saveLayoutAs(self):
-        fp = self.getSaveLayoutPath()
+    # def restoreLastSavedLayout(self):
+    #     self.ui.mainWindow.moduleArea._closeAll()
+    #     Layout.restoreLayout(self.ui.mainWindow, self.layout, restoreSpectrumDisplay=True)
+
+    def _restoreLayoutFromFile(self, path):
+        if path is None:
+            raise ValueError('_restoreLayoutFromFile: undefined path')
         try:
-            Layout.saveLayoutToJson(self.ui.mainWindow, jsonFilePath=fp)
-            getLogger().info('Layout saved')
-        except Exception as e:
-            getLogger().warning('Impossible to save layout. %s' % e)
-
-    def restoreLastSavedLayout(self):
-        self.ui.mainWindow.moduleArea._closeAll()
-        Layout.restoreLayout(self.ui.mainWindow, self.layout, restoreSpectrumDisplay=True)
-
-    def restoreLayoutFromFile(self, jsonFilePath=None):
-        if jsonFilePath is None:
-            #asks with a dialog
-            jsonFilePath = self.getSavedLayoutPath()
-            if jsonFilePath and not os.path.exists(jsonFilePath):
-                again = MessageDialog.showOkCancelWarning(title='File Does not exist', message='Try again?')
-                if again:
-                    self.restoreLayoutFromFile()
-                else:
-                    return
-        try:
+            self._getUserLayout(path)
             self.ui.mainWindow.moduleArea._closeAll()
-            self._getUserLayout(jsonFilePath)
             Layout.restoreLayout(self.ui.mainWindow, self.layout, restoreSpectrumDisplay=True)
         except Exception as e:
             getLogger().warning('Impossible to restore layout. %s' % e)

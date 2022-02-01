@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-28 12:21:57 +0000 (Fri, January 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-01 14:01:19 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -59,6 +59,7 @@ from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable
 from ccpn.util.decorators import logCommand
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import Path, aPath
+import ccpn.util.Layout as Layout
 
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import \
@@ -192,11 +193,11 @@ class GuiBase(object):
             ("Export", (("Nef File", self._exportNEF, [('shortcut', 'ex'), ('enabled', True)]),
                         )),
             (),
-            ("Layout", (("Save", self.saveLayout, [('enabled', True)]),
-                        ("Save as...", self.saveLayoutAs, [('enabled', True)]),
+            ("Layout", (("Save", self._saveLayoutCallback, [('enabled', True)]),
+                        ("Save as...", self._saveLayoutAsCallback, [('enabled', True)]),
                         (),
-                        ("Restore last", self.restoreLastSavedLayout, [('enabled', True)]),
-                        ("Restore from file...", self.restoreLayoutFromFile, [('enabled', True)]),
+                        ("Restore last", self._restoreLastSavedLayoutCallback, [('enabled', True)]),
+                        ("Restore from file...", self._restoreLayoutFromFileCallback, [('enabled', True)]),
                         (),
                         ("Open pre-defined", ()),
 
@@ -462,7 +463,7 @@ class GuiBase(object):
         in the file dialog.
         """
         oldPath = self.project.path
-        newPath = getSaveDirectory(self.ui.mainWindow, self.preferences)
+        newPath = _getSaveDirectory(self.mainWindow)
 
         with catchExceptions(application=self,
                              errorStringTemplate='Error saving project: %s',
@@ -506,6 +507,27 @@ class GuiBase(object):
            (newProject := self.restoreFromArchive(archivePath)) is not None:
             MessageDialog.showInfo('Restore from Archive',
                                    'Project restored as %s' % newProject.path )
+
+    def _saveLayoutCallback(self):
+        Layout.updateSavedLayout(self.ui.mainWindow)
+        getLogger().info('Layout saved')
+
+    def _saveLayoutAsCallback(self):
+        path = _getSaveLayoutPath(self.mainWindow)
+        try:
+            Layout.saveLayoutToJson(self.mainWindow, jsonFilePath=path)
+            getLogger().info('Layout saved to %s' % path)
+        except Exception as es:
+            getLogger().warning('Impossible to save layout. %s' % es)
+
+    def _restoreLastSavedLayoutCallback(self):
+        self.ui.mainWindow.moduleArea._closeAll()
+        Layout.restoreLayout(self.ui.mainWindow, self.layout, restoreSpectrumDisplay=True)
+
+    def _restoreLayoutFromFileCallback(self):
+        if (path := _getOpenLayoutPath(self.mainWindow)) is None:
+            return
+        self._restoreLayoutFromFile(path)
 
     def _showProjectSummaryPopup(self):
         """Show the Project summary popup.
@@ -815,10 +837,12 @@ class GuiBase(object):
 # Helper code
 #-----------------------------------------------------------------------------------------
 
-def getSaveDirectory(parent, preferences=None):
-    """Opens save Project as dialog box and gets directory specified in the file dialog."""
+def _getSaveDirectory(mainWindow):
+    """Opens save Project as dialog box and gets directory specified in
+    the file dialog.
+    """
 
-    dialog = ProjectSaveFileDialog(parent=parent, acceptMode='save')
+    dialog = ProjectSaveFileDialog(parent=mainWindow, acceptMode='save')
     dialog._show()
     newPath = dialog.selectedFile()
 
@@ -828,7 +852,7 @@ def getSaveDirectory(parent, preferences=None):
 
     # ignore if empty
     if not newPath:
-        return
+        return None
 
     if newPath:
 
@@ -851,3 +875,45 @@ def getSaveDirectory(parent, preferences=None):
                 newPath = ''
 
         return newPath
+
+def _getOpenLayoutPath(mainWindow):
+    """Opens a saved Layout as dialog box and gets directory specified in the
+    file dialog.
+    :return selected path or None
+    """
+
+    fType = 'JSON (*.json)'
+    dialog = LayoutsFileDialog(parent=mainWindow, acceptMode='open', fileFilter=fType)
+    dialog._show()
+    path = dialog.selectedFile()
+    if not path:
+        return None
+    if path:
+        return path
+
+def _getSaveLayoutPath(mainWindow):
+    """Opens save Layout as dialog box and gets directory specified in the
+    file dialog.
+    :return selected path or None
+    """
+
+    jsonType = '.json'
+    fType = 'JSON (*.json)'
+    dialog = LayoutsFileDialog(parent=mainWindow, acceptMode='save', fileFilter=fType)
+    dialog._show()
+    newPath = dialog.selectedFile()
+    if not newPath:
+        return None
+
+    newPath = aPath(newPath)
+    if newPath.exists():
+        # should not really need to check the second and third condition above, only
+        # the Qt dialog stupidly insists a directory exists before you can select it
+        # so if it exists but is empty then don't bother asking the question
+        title = 'Overwrite path'
+        msg = 'Path "%s" already exists, continue?' % newPath
+        if not MessageDialog.showYesNo(title, msg):
+            return None
+
+    newPath.assureSuffix(jsonType)
+    return newPath

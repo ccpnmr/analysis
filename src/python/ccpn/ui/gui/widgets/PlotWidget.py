@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:19 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2022-02-01 15:30:09 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -96,7 +96,7 @@ class PlotWidget(pg.PlotWidget):
         #TODO:GEERTEN: Fix with proper stylesheet
         # Also used in AxisTextItem
         # NOTE: self.highlightColour is also being used in GuiPeakListView for selected peaks
-        if strip.spectrumDisplay.mainWindow.application.colourScheme == 'light':
+        if strip.spectrumDisplay.mainWindow.application._colourScheme == 'light':
             self.background = '#f7ffff'
             self.foreground = '#080000'
             self.gridColour = '#080000'

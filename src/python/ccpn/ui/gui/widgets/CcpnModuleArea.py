@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-01-13 16:54:12 +0000 (Thu, January 13, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-01 15:30:09 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -454,8 +454,6 @@ class CcpnModuleArea(ModuleArea, DropBase):
         module.area = self
 
         self.modules[module.moduleName] = module  # ejb - testing
-        if self.mainWindow is not None:
-            self.mainWindow.application.ccpnModules = self.ccpnModules
 
         #module.label.sigDragEntered.connect(self._dragEntered)
         if wasMaximised:

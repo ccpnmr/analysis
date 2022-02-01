@@ -21,8 +21,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:23:26 +0000 (Thu, January 13, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-01 15:30:10 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -319,67 +319,6 @@ def getUuid(programName, timeStamp=None):
     return '%s-%s-%s' % (programName, timeStamp, random.randint(0, maxRandomInt))
 
 
-# GWV 20210803: moved to util/isotopes.py
-# def name2ElementSymbol(name):
-#     """Get standard element symbol matching name or axisCode
-#
-#     NB, the first letter takes precedence, so e.g. 'CD' returns 'C' (carbon)
-#     rather than 'CD' (Cadmium)"""
-#
-#     # NB, We deliberately do NOT use 'value in Constants.DEFAULT_ISOTOPE_DICT'
-#     # We want to avoid elements that are in the dict but have value None.
-#     if not name:
-#         return None
-#     elif Constants.DEFAULT_ISOTOPE_DICT.get(name[0]) is not None:
-#         return name[0]
-#     elif Constants.DEFAULT_ISOTOPE_DICT.get(name[:2]) is not None:
-#         return name[:2]
-#     elif name[0].isdigit():
-#         ss = name.title()
-#         for key, record in isotopeRecords.items():
-#             if ss.startswith(key):
-#                 if name[:len(key)].isupper():
-#                     return record.symbol.upper()
-#                 break
-#     #
-#     return None
-
-
-# def checkIsotope(text):
-#     """Convert isotope specifier string to most probable isotope code - defaulting to '1H'
-#
-#     This function is intended for external format isotope specifications, *not* for
-#     axisCodes or atom names, hence the difference to name2ElementSymbol.
-#     """
-#     defaultIsotope = '1H'
-#
-#     if not text:
-#         return defaultIsotope
-#
-#     name = text.strip().upper()
-#     if name in isotopeRecords:
-#         # Superfluous but should speed things up
-#         return name
-#
-#     for isotopeCode in isotopeRecords:
-#         # NB checking this first means that e.g. 'H13C' returns '13C' rather than '1H'
-#         if isotopeCode.upper() in name:
-#             return isotopeCode
-#
-#     # NB order of checking means that e.g. 'CA' returns Calcium rather than Carbon
-#     result = (Constants.DEFAULT_ISOTOPE_DICT.get(name[:2])
-#               or Constants.DEFAULT_ISOTOPE_DICT.get(name[0]))
-#
-#     if result is None:
-#         if name == 'D':
-#             # special case
-#             result = '2H'
-#         else:
-#             result = defaultIsotope
-#     #
-#     return result
-
-
 def reorder(values, axisCodes, refAxisCodes):
     """reorder values in axisCode order to refAxisCode order, by matching axisCodes
 
@@ -489,24 +428,6 @@ def _traverse(obj, tree_types=(list, tuple)):
                 yield subvalue
     else:
         yield obj
-
-
-# GWV 01/12/2021; commented, should not be here and not used?
-# def _getChildren(obj, path=None):
-#     """
-#     Walks in a tree like obj and put all children/parents in list of list eg: [[Parent,child...,],...]
-#     """
-#     children = []
-#     if path is None:
-#         path = []
-#     path.append(obj)
-#     if obj._childClasses:
-#         for att in obj._childClasses:
-#             for child in getattr(obj, att._pluralLinkName):
-#                 children.extend(_getChildren(child, path[:]))
-#     else:
-#         children.append(path)
-#     return children
 
 
 def percentage(percent, whole):

@@ -4,7 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:17 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2022-02-01 15:30:05 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,8 @@ import sys
 import typing
 import re
 import os
+
+from ccpn.framework.Version import applicationVersion
 
 from ccpn.ui._implementation import _uiImportOrder
 from ccpn.core import _coreClassMap
@@ -52,18 +54,13 @@ class Ui(NotifierBase):
         self.mainWindow = None
         self.pluginModules = []
 
-    def addMenu(self, name, position=None):
-        """
-        Add a menu specification for the top menu bar.
-        """
-        if position is None:
-            position = len(self._menuSpec)
-        self._menuSpec.insert(position, (str(name), []))
+        self._setUpGraphicsDataClasses()
 
     @classmethod
-    def setUp(cls):
-        """Set up graphics data classes, cleaning up previous settings"""
-
+    def _setUpGraphicsDataClasses(cls):
+        """Set up graphics data classes, cleaning up previous settings
+        GWV: This is daft and will be refactored in 3.2.x
+        """
         for className in _uiImportOrder:
             # Remove ui-specific settings. Will be reset as necessary in subclasses
             _coreClassMap[className]._factoryFunction = cls._factoryFunctions.get(className)
@@ -72,16 +69,16 @@ class Ui(NotifierBase):
         """UI operations done after every project load/create"""
         pass
 
-    def start(self):
-        """Start the program execution"""
-
-        # self._checkRegistered()
-        # Register.updateServer(Register.loadDict(), self.application.applicationVersion)
-
+    def startUi(self):
+        """Start the ui execution
+        """
         sys.stderr.write('==> %s interface is ready\n' % self.__class__.__name__)
 
-    def _checkRegistration(self):
-        """Check if registered and if not popup registration and if still no good then exit"""
+    def _checkRegistration(self) -> bool:
+        """Check if registered and if not popup registration and if still
+        no good then exit
+        :return True if properly registered
+        """
 
         # checking the registration; need to have the app running, but before the splashscreen, as it will hang
         # in case the popup is needed.
@@ -89,6 +86,7 @@ class Ui(NotifierBase):
         # sys.stderr.write('==> Checking registration ... \n')
         sys.stderr.flush()  # It seems to be necessary as without the output comes after the registration screen
         sys.stderr.write('==> Checking registration on server\n' )
+
         # check local registration details
         if not (self._isRegistered and self._termsConditions):
             # call the subclassed register method
@@ -129,21 +127,18 @@ class Ui(NotifierBase):
             logger.echoInfo(command)
 
     def _execUpdates(self):
-        raise ('ERROR: ..to be subclassed by ui types')
+        raise NotImplementedError('ERROR: ..to be subclassed by ui types')
 
-    def _checkUpdates(self):
-        from ccpn.framework.Version import applicationVersion
+    def _checkForUpdates(self):
+        """Check for updates
+        """
         # applicationVersion = __version__.split()[1]  # ejb - read from the header
-
         _version = applicationVersion.withoutRelease()
         updateAgent = UpdateAgent(_version, dryRun=False)
         numUpdates = updateAgent.checkNumberUpdates()
-        # sys.stderr.write('==> Updates available: %s\n' % str(numUpdates))
-
-        if numUpdates:
+        getLogger().debug('_checkUpdates: %s updates available' % numUpdates)
+        if numUpdates > 0:
             self._execUpdates()
-
-        return True
 
     @property
     def _isRegistered(self):
@@ -342,7 +337,7 @@ class NoUi(Ui):
 
         from ccpn.framework.Version import applicationVersion
         # applicationVersion = __version__.split()[1]  # ejb - read from the header
-        installUpdates(applicationVersion, dryRun=False)
+        installUpdates(applicationVersion.withoutRelease(), dryRun=False)
 
         sys.stderr.write('Please restart the program to apply the updates\n')
         sys.exit(1)

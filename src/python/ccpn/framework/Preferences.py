@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 15:30:05 +0000 (Tue, February 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-01 16:41:59 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -117,7 +117,7 @@ class Preferences(AttrDict):
         for key, value in theDict.items():
             _keys = keys[:] + [key]
 
-            if isinstance(value, (dict, AttrDict)):
+            if isinstance(value, AttrDict):
                 self._recursivePrint(value, keys=_keys )
 
             else:

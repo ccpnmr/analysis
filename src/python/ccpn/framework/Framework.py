@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-25 18:54:25 +0000 (Tue, January 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-01 11:38:56 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -196,6 +196,13 @@ class Framework(NotifierBase, GuiBase):
         printCreditsText(sys.stderr, self.applicationName, self.applicationVersion)
 
         #-----------------------------------------------------------------------------------------
+        # register the programme for later with the getApplication() call
+        #-----------------------------------------------------------------------------------------
+        from ccpn.framework.Application import ApplicationContainer
+        container = ApplicationContainer()
+        container.register(self)
+
+        #-----------------------------------------------------------------------------------------
         # Key attributes related to the data structure
         #-----------------------------------------------------------------------------------------
         # Necessary as attribute is queried during initialisation:
@@ -270,11 +277,6 @@ class Framework(NotifierBase, GuiBase):
 
         # get a user interface; nb. ui.start() is called by the application
         self.ui = self._getUI()
-
-        # register the programme for later with the getApplication() call
-        from ccpn.framework.Application import ApplicationContainer
-        container = ApplicationContainer()
-        container.register(self)
 
     #-----------------------------------------------------------------------------------------
     # properties of Framework
@@ -647,12 +649,22 @@ class Framework(NotifierBase, GuiBase):
         except Exception as e:
             getLogger().warning('Impossible to restore SpectrumDisplays')
 
+        # try:
+        #     if self.preferences.general.restoreLayoutOnOpening and \
+        #             mainWindow.moduleLayouts:
+        #         Layout.restoreLayout(self._mainWindow, mainWindow.moduleLayouts, restoreSpectrumDisplay=False)
+        # except Exception as e:
+        #     getLogger().warning('Impossible to restore Layout %s' % e)
         try:
-            if self.preferences.general.restoreLayoutOnOpening and \
-                    mainWindow.moduleLayouts:
-                Layout.restoreLayout(self._mainWindow, mainWindow.moduleLayouts, restoreSpectrumDisplay=False)
-        except Exception as e:
-            getLogger().warning('Impossible to restore Layout %s' % e)
+            from ccpn.framework.LayoutManager import LayoutManager
+            layout = LayoutManager(mainWindow)
+            path = self.statePath / 'Layout.json'
+            layout.restore(path)
+            layout.saveState()
+            layout.restoreState()
+
+        except Exception as es:
+            getLogger().warning('Error restoring layout: %s' % es)
 
         try:
             # Initialise colours

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-25 18:04:24 +0000 (Tue, January 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-01 11:38:56 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -43,15 +43,20 @@ ccpnConfigPath                  = ccpnCodePath / 'config'
 ccpnRunTerminal                 = ccpnCodePath / 'bin' / 'runTerminal.sh'
 defaultPreferencesPath          = ccpnConfigPath / 'defaultv3settings.json'
 tipOfTheDayConfig               = ccpnConfigPath / 'tipConfig.json'
+
 _ccpnPythonPath                 = Path.aPath(Path.getPythonDirectory())
 ccpnmodelPythonPath             = _ccpnPythonPath / 'ccpnmodel'
 ccpnmodelDataPythonPath         = _ccpnPythonPath / 'ccpnmodel' / 'data'
 ccpnmodelRefDataPythonPath      = _ccpnPythonPath / 'ccpnmodel' / 'data' / 'ccpnv3'
+
 ccpnPythonPath                  = _ccpnPythonPath / 'ccpn'
+
 analysisAssignPath              = ccpnPythonPath / 'AnalysisAssign'
 analysisScreenPath              = ccpnPythonPath / 'AnalysisScreen'
 analysisStructurePath           = ccpnPythonPath / 'AnalysisStructure'
 analysisMetabolomicsPath        = ccpnPythonPath / 'AnalysisMetabolomics'
+ccpnApplicationPaths            = (analysisAssignPath, analysisScreenPath, analysisStructurePath, analysisMetabolomicsPath)
+
 macroPath                       = ccpnPythonPath / 'macros'
 pluginPath                      = ccpnPythonPath / 'plugins'
 pipePath                        = ccpnPythonPath / 'pipes'
@@ -92,6 +97,8 @@ userDefaultProjectPath          = userCcpnDataPath / 'default.ccpn'
 
 # Predefined layouts
 predefinedLayouts               = ccpnCodePath / 'layouts'
+# layout file name in the Project/State directory
+projectStateLayoutFileName      = 'layout_3_1.json'
 
 # others; also defined in util.Path and from there imported in Api and Implementation
 # DO NOT REMOVE and keep in sync (for circular import reasons) (for now!)

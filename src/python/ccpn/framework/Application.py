@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-31 16:53:58 +0000 (Mon, January 31, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-01 11:38:56 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -30,22 +30,11 @@ from ccpn.util.decorators import singleton
 from ccpn.framework.Translation import languages, defaultLanguage
 from ccpn.ui import interfaces, defaultInterface
 
-
 AnalysisAssign = 'AnalysisAssign'
 AnalysisScreen = 'AnalysisScreen'
 AnalysisMetabolomics = 'AnalysisMetabolomics'
 AnalysisStructure = 'AnalysisStructure'
 applicationNames = [AnalysisAssign, AnalysisScreen, AnalysisMetabolomics, AnalysisStructure]
-
-
-@singleton
-class ApplicationContainer():
-    """A singleton class used to register the application (eg AnalysisScreen)
-    """
-    application = None
-
-    def register(self, application):
-        self.application = application
 
 
 def getApplication():
@@ -57,6 +46,49 @@ def getApplication():
 def getPreferences():
     """Return the Preferences instance"""
     return getApplication().preferences
+
+
+def getProject():
+    """Return the active Project instance"""
+    container = ApplicationContainer()
+    return container.project
+
+
+def getCurrent():
+    """Return the Current instance"""
+    container = ApplicationContainer()
+    return container.current
+
+
+def getMainWindow():
+    """Return the MainWindow instance (if present
+    """
+    container = ApplicationContainer()
+    return container.mainWindow
+
+
+@singleton
+class ApplicationContainer():
+    """A singleton class used to register the application (eg AnalysisScreen)
+    and properties defining the top objects application, project, current and
+    mainWindow
+    """
+    application = None
+
+    def register(self, application):
+        self.application = application
+
+    @property
+    def project(self):
+        return self.application.project
+
+    @property
+    def current(self):
+        return self.application.current
+
+    @property
+    def mainWindow(self):
+        return self.application.mainWindow
 
 
 class Arguments:

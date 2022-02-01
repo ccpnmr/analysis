@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 16:02:36 +0000 (Tue, February 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-01 16:20:44 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -81,11 +81,9 @@ class ProjectArchiver(object):
         :return absolute path to the new archives as a Path instance
                 or None on IOerror
         """
-        now = datetime.datetime.now().strftime('-%Y-%m-%d-%H%M%S')
-        name = self._projectPath.basename
-        archivePath = self.archiveDirectory / (name + \
-                                               now + CCPN_DIRECTORY_SUFFIX + ARCHIVE_SUFFIX)
-
+        archivePath = self.archiveDirectory / self._projectPath.basename
+        archivePath = archivePath.addTimeStamp().withSuffix(
+                                                CCPN_DIRECTORY_SUFFIX + ARCHIVE_SUFFIX)
         cwd = os.getcwd()
 
         try:

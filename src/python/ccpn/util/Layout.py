@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-01-21 19:10:48 +0000 (Fri, January 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-01 15:02:29 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -212,8 +212,7 @@ def updateSavedLayout(mainWindow):
 
 def saveLayoutToJson(mainWindow, jsonFilePath=None):
     """
-
-    :param application:
+    :param mainWindow:
     :param jsonFilePath: User defined file path where to save the layout. Default is in .ccpn/layout/v3Layout.json
     :return: None
     """
@@ -227,7 +226,7 @@ def saveLayoutToJson(mainWindow, jsonFilePath=None):
             json.dump(layout, file, sort_keys=False, indent=4, separators=(',', ': '))
 
     except Exception as e:
-        getLogger().debug('Impossible to save Layout %s' % e)
+        getLogger().debug('Error saving Layout to "%s":  %s' % (jsonFilePath, e))
 
 
 def _ccpnModulesImporter(path, neededModules):

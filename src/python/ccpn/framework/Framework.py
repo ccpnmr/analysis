@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-28 20:49:41 +0000 (Fri, January 28, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-01 17:08:13 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -23,16 +23,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-# import time as systime
-#
-#
+
 # if not hasattr(systime, 'clock'):
 #     # NOTE:ED - quick patch to fix bug in pyqt 5.9
 #     systime.clock = systime.process_time
-
-# how frequently to check if license dialog has closed when waiting to show the tip of the day
-WAIT_EVENT_LOOP_EMPTY = 0
-WAIT_LICENSE_DIALOG_CLOSE_TIME = 100
 
 import json
 import logging
@@ -43,8 +37,14 @@ import tarfile
 import tempfile
 import re
 import subprocess
+
 import faulthandler
+faulthandler.enable()
+
 from tqdm import tqdm
+
+from threading import Thread
+from time import time, sleep
 
 from typing import Union, Optional, List, Tuple, Sequence
 
@@ -62,68 +62,75 @@ from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.lib.Pid import Pid, PREFIXSEP
 
-from ccpn.framework.Application import getApplication
+from ccpn.framework.Application import getApplication, Arguments
 from ccpn.framework import Version
 from ccpn.framework.credits import printCreditsText
 from ccpn.framework.Current import Current
 from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
 from ccpn.framework.Translation import languages, defaultLanguage
 from ccpn.framework.Translation import translator
-from ccpn.framework.PathsAndUrls import userPreferencesPath,  userPreferencesDirectory, \
-    macroPath, CCPN_ARCHIVES_DIRECTORY
+from ccpn.framework.Preferences import Preferences
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
+from ccpn.framework.PathsAndUrls import \
+    userPreferencesPath,  \
+    userPreferencesDirectory, \
+    userCcpnMacroPath, \
+    CCPN_ARCHIVES_DIRECTORY, \
+    CCPN_STATE_DIRECTORY, \
+    CCPN_DATA_DIRECTORY, \
+    CCPN_SPECTRA_DIRECTORY, \
+    CCPN_PLUGINS_DIRECTORY, \
+    CCPN_SCRIPTS_DIRECTORY
 
-from ccpn.ui import interfaces, defaultInterface
 from ccpn.ui.gui.Gui import Gui
 from ccpn.ui.gui.GuiBase import GuiBase
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.FileDialog import ProjectFileDialog, DataFileDialog, NefFileDialog, \
-    ArchivesFileDialog, MacrosFileDialog, CcpnMacrosFileDialog, LayoutsFileDialog, NMRStarFileDialog, SpectrumFileDialog, \
+from ccpn.ui.gui.widgets.FileDialog import \
+    ProjectFileDialog, \
+    DataFileDialog, \
+    NefFileDialog, \
+    ArchivesFileDialog, \
+    MacrosFileDialog, \
+    CcpnMacrosFileDialog, \
+    LayoutsFileDialog, \
+    NMRStarFileDialog, \
+    SpectrumFileDialog, \
     ProjectSaveFileDialog
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
+from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_KEY_CONCEPTS
 
 from ccpn.util import Logging
-from ccpn.util import Path
+from ccpn.util.Path import Path, aPath, fetchDir, getPathToImport
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable
 from ccpn.util.Logging import getLogger
 from ccpn.util import Layout
-
+from ccpn.util.decorators import logCommand
 
 from ccpnmodel.ccpncore.api.memops import Implementation
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 
-from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideBar, undoBlock, \
     notificationEchoBlocking, logCommandManager
 
 from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU, CCPNPLUGINSMENU, PLUGINSMENU
 from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_KEY_CONCEPTS
 
-
-
-# strange error check
-
-faulthandler.enable()
+#-----------------------------------------------------------------------------------------
+# how frequently to check if license dialog has closed when waiting to show the tip of the day
+WAIT_EVENT_LOOP_EMPTY = 0
+WAIT_LICENSE_DIALOG_CLOSE_TIME = 100
 
 _DEBUG = False
 
-AnalysisAssign = 'AnalysisAssign'
-AnalysisScreen = 'AnalysisScreen'
-AnalysisMetabolomics = 'AnalysisMetabolomics'
-AnalysisStructure = 'AnalysisStructure'
-ApplicationNames = [AnalysisAssign, AnalysisScreen, AnalysisMetabolomics, AnalysisStructure]
 interfaceNames = ('NoUi', 'Gui')
-DataDirName = 'data'
-SpectraDirName = 'spectra'
-PluginDataDirName = 'pluginData'
-ScriptsDirName = 'scripts'
-MacrosDirName = 'macros'
 
-
+#-----------------------------------------------------------------------------------------
+# Subclass the exception hook
+#-----------------------------------------------------------------------------------------
 def _ccpnExceptionhook(ccpnType, value, tback):
     """This because PyQT raises and catches exceptions,
     but doesn't pass them along instead makes the program crashing miserably.
@@ -141,83 +148,8 @@ def _ccpnExceptionhook(ccpnType, value, tback):
 
     sys.__excepthook__(ccpnType, value, tback)
 
-
 sys.excepthook = _ccpnExceptionhook
-
-
-def defineProgramArguments():
-    """Define the arguments of the program
-    return argparse instance
-    """
-    import argparse
-
-    parser = argparse.ArgumentParser(description='Process startup arguments')
-    # for component in componentNames:
-    #   parser.add_argument('--'+component.lower(), dest='include'+component, action='store_true',
-    #                                               help='Show %s component' % component.lower())
-    parser.add_argument('--language',
-                        help=('Language for menus, etc.; valid options = (%s); default=%s' %
-                              ('|'.join(languages), defaultLanguage)))
-    parser.add_argument('--interface',
-                        help=('User interface, to use; one of  = (%s); default=%s' %
-                              ('|'.join(interfaces), defaultInterface)),
-                        default=defaultInterface)
-    parser.add_argument('--skip-user-preferences', dest='skipUserPreferences', action='store_true',
-                        help='Skip loading user preferences')
-    parser.add_argument('--dark', dest='darkColourScheme', action='store_true',
-                        help='Use dark colour scheme')
-    parser.add_argument('--light', dest='lightColourScheme', action='store_true',
-                        help='Use dark colour scheme')
-    parser.add_argument('--nologging', dest='nologging', action='store_true', help='Do not log information to a file')
-    parser.add_argument('--debug', dest='debug', action='store_true', help='Set logging level to debug')
-    parser.add_argument('--debug1', dest='debug', action='store_true', help='Set logging level to debug1 (=debug)')
-    parser.add_argument('--debug2', dest='debug2', action='store_true', help='Set logging level to debug2')
-    parser.add_argument('--debug3', dest='debug3', action='store_true', help='Set logging level to debug3')
-
-    # Ccpn logging options - traceback can sometimes be masked in undo/redo
-    # --disable-undo-exception removes the try:except to allow full traceback to occur
-    parser.add_argument('--disable-undo-exception', dest='disableUndoException', action='store_true', help='Disable exception wrapping undo/redo actions, reserved for high-level debugging.')
-    # log information at end of undo/redo if exception occurs (not called if --disable-undo-exception set), calls _logObjects
-    parser.add_argument('--ccpn-logging', dest='ccpnLogging', action='store_true', help='Additional logging of some ccpn objects, reserved for high-level debugging.')
-
-    parser.add_argument('projectPath', nargs='?', help='Project path')
-
-    return parser
-
-
-class Arguments:
-    """Class for setting FrameWork input arguments directly"""
-    language = defaultLanguage
-    interface = 'NoUi'
-    nologging = True
-    debug = False
-    debug2 = False
-    debug3 = False
-    skipUserPreferences = True
-    projectPath = None
-    _skipUpdates = False
-
-    def __init__(self, projectPath=None, **kwds):
-
-        # Dummy values
-        for component in ApplicationNames:
-            setattr(self, 'include' + component, None)
-
-        self.projectPath = projectPath
-        for tag, val in kwds.items():
-            setattr(self, tag, val)
-
-
-def createFramework(projectPath=None, **kwds):
-    args = Arguments(projectPath=projectPath, **kwds)
-    result = Framework('CcpNmr', Version.applicationVersion, args)
-    result.start()
-    #
-    return result
-
-
-from threading import Thread
-from time import time, sleep
+#-----------------------------------------------------------------------------------------
 
 
 class AutoBackup(Thread):
@@ -245,19 +177,33 @@ class AutoBackup(Thread):
                 self.startTime = time()
                 try:
                     self.backupProject()
-                except:
-                    pass
+                except Exception as es:
+                    getLogger().warning('Project backup failed with error %s' % es)
 
 
 class Framework(NotifierBase, GuiBase):
     """
     The Framework class is the base class for all applications.
     """
+    #-----------------------------------------------------------------------------------------
+    # to be sub-classed
+    applicationName = None
+    applicationVersion = None
+    #-----------------------------------------------------------------------------------------
 
-    def __init__(self, applicationName, applicationVersion, args=Arguments()):
+    def __init__(self, args=Arguments()):
 
         NotifierBase.__init__(self)
         GuiBase.__init__(self)
+
+        printCreditsText(sys.stderr, self.applicationName, self.applicationVersion)
+
+        #-----------------------------------------------------------------------------------------
+        # register the programme for later with the getApplication() call
+        #-----------------------------------------------------------------------------------------
+        from ccpn.framework.Application import ApplicationContainer
+        container = ApplicationContainer()
+        container.register(self)
 
         #-----------------------------------------------------------------------------------------
         # Key attributes related to the data structure
@@ -267,23 +213,18 @@ class Framework(NotifierBase, GuiBase):
 
         # This is needed to make project available in NoUi (if nothing else)
         self._project = None
-        self.current = None
+        self._current = None
 
-        self.plugins = []  # Hack for now, how should we store these?
-        self.ccpnModules = []
+        self._plugins = []  # Hack for now, how should we store these?
+                            # used in GuiMainWindow by startPlugin()
 
         #-----------------------------------------------------------------------------------------
         # Initialisations
         #-----------------------------------------------------------------------------------------
         self.args = args
-        self.applicationName = applicationName
-        self.applicationVersion = applicationVersion
+
         # NOTE:ED - what is revision for? there are no uses and causes a new error for sphinx documentation unless a string
         # self.revision = Version.revision
-
-        printCreditsText(sys.stderr, applicationName, applicationVersion)
-
-        # self.setupComponents(args)
 
         self.useFileLogger = not self.args.nologging
         if self.args.debug3:
@@ -295,10 +236,19 @@ class Framework(NotifierBase, GuiBase):
         else:
             self.level = logging.INFO
 
-        self.preferences = None  # initialised by self._getUserPrefs
+        self.preferences = Preferences(application=self)
+        if not self.args.skipUserPreferences:
+            sys.stderr.write('==> Getting user preferences\n')
+            self.preferences._getUserPreferences()
+
         self.layout = None  # initialised by self._getUserLayout
-        self.styleSheet = None  # initialised by self.getStyleSheet
-        self.colourScheme = None  # initialised by self.getStyleSheet
+
+        # GWV these attributes should move to the GUI class (in 3.2x ??)
+        # For now, they are set in GuiBase and initialised by calls in Gui.__init_
+        # self._styleSheet = None
+        # self._colourScheme = None
+        # self._fontSettings = None
+        # self._menuSpec = None
 
         # Blocking level for command echo and logging
         self._echoBlocking = 0
@@ -307,30 +257,16 @@ class Framework(NotifierBase, GuiBase):
         self._backupTimerQ = None
         self.autoBackupThread = None
 
-        # Assure that .ccpn exists
-        ccpnDir = Path.aPath(userPreferencesDirectory)
-        if not ccpnDir.exists():
-            ccpnDir.mkdir()
-        self._getUserPrefs()
-
-        if hasattr(self.args, 'darkColourScheme') and hasattr(self.args, 'lightColourScheme'):
-            # set the preferences if added from the commandline
-            # this causes errors when running the nose_tests
-            if self.args.darkColourScheme:
-                self.preferences.general.colourScheme = 'dark'
-            elif self.args.lightColourScheme:
-                self.preferences.general.colourScheme = 'light'
-
         self._tip_of_the_day = None
         self._initial_show_timer = None
         self._key_concepts = None
 
         self._registrationDict = {}
+
         self._setLanguage()
-        self.styleSheet = None
-        self.feedbackPopup = None
-        self.submitMacroPopup = None
-        self.updatePopup = None
+
+        self._experimentClassifications = None  # initialised in _startApplication once a project has loaded
+
         self._disableUndoException = getattr(self.args, 'disableUndoException', False)
         self._ccpnLogging = getattr(self.args, 'ccpnLogging', False)
 
@@ -342,27 +278,26 @@ class Framework(NotifierBase, GuiBase):
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
         self._spectrumDataSourceFormats = getDataFormats()
 
-        #-----------------------------------------------------------------------------------------
-        # get a user interface
-        #-----------------------------------------------------------------------------------------
+        # get a user interface; nb. ui.start() is called by the application
         self.ui = self._getUI()
 
-    def __str__(self):
-        return '<%s version:%s>' % (self.applicationName, self.applicationVersion)
+    #-----------------------------------------------------------------------------------------
+    # properties of Framework
+    #-----------------------------------------------------------------------------------------
 
     @property
-    def _isInDebugMode(self) -> bool:
-        """Return True if either of the debug flags has been set
-        CCPNINTERNAL: used throughout to check
+    def project(self) -> Project:
+        """:return currently active project
         """
-        if self.level == Logging.DEBUG1 or self.level == Logging.DEBUG2 or self.level == Logging.DEBUG3:
-            return True
-        return False
+        return self._project
 
     @property
-    def hasGui(self) -> bool:
-        """Return True if application has a gui"""
-        return isinstance(self.ui, Gui)
+    def current(self) -> Current:
+        """Current contains selected peaks, selected restraints, cursor position, etc.
+        see Current.py for detailed descriptiom
+        :return the Current object
+        """
+        return self._current
 
     @property
     def mainWindow(self):
@@ -373,41 +308,161 @@ class Framework(NotifierBase, GuiBase):
         return None
 
     @property
-    def project(self):
-        """Return project"""
-        return self._project
+    def hasGui(self) -> bool:
+        """:return True if application has a gui"""
+        return isinstance(self.ui, Gui)
+
+    @property
+    def _isInDebugMode(self) -> bool:
+        """:return True if either of the debug flags has been set
+        CCPNINTERNAL: used throughout to check
+        """
+        if self.level == Logging.DEBUG1 or \
+           self.level == Logging.DEBUG2 or \
+           self.level == Logging.DEBUG3:
+            return True
+        return False
+
+    @property
+    def statePath(self) -> Path:
+        """
+        :return: the absolute path to the state sub-directory of the current project
+                 as a Path instance
+        """
+        return aPath(self.project.path) / CCPN_STATE_DIRECTORY
+
+    @property
+    def pipelinePath(self) -> Path:
+        """
+        :return: the absolute path to the state/pipeline sub-directory of
+                 the current project as a Path instance
+        """
+        return self.statePath / Pipeline.className
+
+    @property
+    def dataPath(self) -> Path:
+        """
+        :return: the absolute path to the data sub-directory of the current project
+                 as a Path instance
+        """
+        return aPath(self.project.path) / CCPN_DATA_DIRECTORY
+
+    @property
+    def spectraPath(self):
+        """
+        :return: the absolute path to the data sub-directory of the current project
+                 as a Path instance
+        """
+        return aPath(self.project.path) / CCPN_SPECTRA_DIRECTORY
+
+    @property
+    def pluginDataPath(self) -> Path:
+        """
+        :return: the absolute path to the data/plugins sub-directory of the
+                 current project as a Path instance
+        """
+        return aPath(self.project.path) / CCPN_PLUGINS_DIRECTORY
+
+    @property
+    def scriptsPath(self) -> Path:
+        """
+        :return: the absolute path to the script sub-directory of the current project
+                 as a Path instance
+        """
+        return aPath(self.project.path) / CCPN_SCRIPTS_DIRECTORY
+
+    @property
+    def archivesPath(self) -> Path:
+        """
+        :return: the absolute path to the archives sub-directory of the current project
+                 as a Path instance
+        """
+        return aPath(self.project.path) / CCPN_ARCHIVES_DIRECTORY\
+
+    @property
+    def tempMacrosPath(self):
+        """
+        :return: the absolute path to the ~/.ccpn/macros directory
+                 as a Path instance
+        """
+        return userCcpnMacroPath
 
     #-----------------------------------------------------------------------------------------
+    # "get" methods
+    #-----------------------------------------------------------------------------------------
+    def get(self, identifier):
+        """General method to obtain object (either gui or data) from identifier (pid, gid,
+        obj-string)
+        :param identifier: a Pid, Gid or string object identifier
+        :return a Version-3 core data or graphics object
+        """
+        if identifier is None:
+            raise ValueError('Expected str or Pid, got "None"')
 
-    def start(self):
+        if not isinstance(identifier, (str, Pid)):
+            raise ValueError('Expected str or Pid, got "%s" %s' % (identifier, type(identifier)))
+        identifier = str(identifier)
+
+        if len(identifier) == 0:
+            raise ValueError('Expected str or Pid, got zero-length identifier')
+
+        if len(identifier) >= 2 and identifier[0] == '<' and identifier[-1] == '>':
+            identifier = identifier[1:-1]
+
+        return self.project.getByPid(identifier)
+
+    def getByPid(self, pid):
+        """Legacy; obtain data object from identifier (pid or obj-string)
+        replaced by get(identifier).
+        :param pid: a Pid or string object identifier
+        :return a Version-3 core data object
+        """
+        return self.get(pid)
+
+    def getByGid(self, gid):
+        """Legacy; obtain graphics object from identifier (gid or obj-string)
+        replaced by get(identifier).
+        :param gid: a Gid or string object identifier
+        :return a Version-3 graphics object
+        """
+        return self.get(gid)
+
+    #-----------------------------------------------------------------------------------------
+    # Initialisations and cleanup
+    #-----------------------------------------------------------------------------------------
+
+    def _getUI(self):
+        """Get the user interface
+        :return a Ui instance
+        """
+        if self.args.interface == 'Gui':
+            from ccpn.ui.gui.Gui import Gui
+            ui = Gui(application=self)
+
+        else:
+            from ccpn.ui.Ui import NoUi
+            ui = NoUi(application=self)
+
+        return ui
+
+    def _startApplication(self):
         """Start the program execution
         """
-
-        # register the programme for later
-        from ccpn.framework.Application import ApplicationContainer
-
-        container = ApplicationContainer()
-        container.register(self)
-
-        self._initialiseFonts()
 
         # NOTE:ED - there are currently issues when loading projects from the command line, or from test cases
         #   There is no project.application and project is None
         #   The Logger instantiated is the default logger, required adding extra methods so that, e.g., echoInfo worked
         #   logCommand has no self.project.application, and requires getApplication() instead
         #   There is NoUi instantiated yet, so temporarily added loadProject to Ui class called by loadProject below)
-        # Load / create project
-        projectPath = self.args.projectPath
-        if projectPath:
-            project = self.loadProject(projectPath)
 
+        # Load / create project on start
+        if (projectPath := self.args.projectPath) is not None:
+            project = self.loadProject(projectPath)
         else:
             project = self.newProject()
-        self._updateCheckableMenuItems()
 
         if self.preferences.general.checkUpdatesAtStartup and not getattr(self.args, '_skipUpdates', False):
-            if not self.ui._checkUpdates():
-                return
+            self.ui._checkForUpdates()
 
         if not self.ui._checkRegistration():
             return
@@ -417,13 +472,20 @@ class Framework(NotifierBase, GuiBase):
             sys.stderr.write('==> No project, aborting ...\n')
             return
 
+        self._experimentClassifications = project.getExperimentClassifications()
         self.updateAutoBackup()
 
         sys.stderr.write('==> Done, %s is starting\n' % self.applicationName)
-
-        # self.project = project
-        self.ui.start()
+        self.ui.startUi()
         self._cleanup()
+
+    def _cleanup(self):
+        """Cleanup at the end of program execution; i.e. once the command loop
+        has stopped
+        """
+        self.setAutoBackupTime('kill')
+
+    #-----------------------------------------------------------------------------------------
 
     def updateAutoBackup(self):
 
@@ -449,16 +511,11 @@ class Framework(NotifierBase, GuiBase):
                                                backupFunction=self.backupProject)
             self.autoBackupThread.start()
 
-    def _cleanup(self):
-        self.setAutoBackupTime('kill')
-        # project._resetUndo(debug=_DEBUG)
-        pass
-
     def backupProject(self):
         apiIo.backupProject(self.project._wrappedData.parent)
         backupPath = self.project.backupPath
 
-        backupStatePath = Path.fetchDir(backupPath, Layout.StateDirName)
+        backupStatePath = fetchDir(backupPath, Layout.StateDirName)
 
         copy_tree(self.statePath, backupStatePath)
         layoutFile = os.path.join(backupStatePath, Layout.DefaultLayoutFileName)
@@ -466,14 +523,13 @@ class Framework(NotifierBase, GuiBase):
         self.current._dumpStateToFile(backupStatePath)
 
         #Spectra should not be copied over. Dangerous for disk space
-        # backupDataPath = Path.fetchDir(backupPath, DataDirName)
+        # backupDataPath = fetchDir(backupPath, DataDirName)
 
-        #   TODO add other files inside this dirs
-        backupScriptsPath = Path.fetchDir(backupPath, ScriptsDirName)
-        backupLogsPath = Path.fetchDir(backupPath, ScriptsDirName)
+    #-----------------------------------------------------------------------------------------
 
     def _initialiseProject(self, project: Project):
-        """Initialise project and set up links and objects that involve it"""
+        """Initialise a project and set up links and objects that involve it
+        """
 
         # Linkages
         self._project = project
@@ -484,26 +540,15 @@ class Framework(NotifierBase, GuiBase):
         Logging.setLevel(logger, self.level)
         logger.debug('Framework._initialiseProject>>>')
 
-        # Set up current; we need it when restoring
-        self.current = Current(project=project)
+        # Set up current; we need it when restoring project graphics data below
+        self._current = Current(project=project)
 
         # This wraps the underlying data, including the wrapped graphics data
-        #  - the project is now ready to use
         project._initialiseProject()
+        project._updateApiDataUrl(self.preferences.general.dataPath)
+        #  the project is now ready to use
 
-        # Adapt project to preferences
-        self.applyPreferences(project)
-
-        # init application directory
-        self.scriptsPath = self.scriptsPath
-        self.pymolScriptsPath = Path.fetchDir(self.scriptsPath, 'pymol')
-        self.statePath = self.statePath
-        self.dataPath = self.dataPath
-        self.pipelinePath = self.pipelinePath
-        self.spectraPath = self.spectraPath
-        self.pluginDataPath = self.pluginDataPath
-
-        # restore current
+        # Now that all objects, including the graphics are there, restore current
         self.current._restoreStateFromFile(self.statePath)
 
         if self.hasGui:
@@ -514,132 +559,17 @@ class Framework(NotifierBase, GuiBase):
             # The NoUi version has no mainWindow
             self.ui.initialize(None)
 
-    def _getUI(self):
-        if self.args.interface == 'Gui':
-            self.styleSheet = self.getStyleSheet()
-            from ccpn.ui.gui.Gui import Gui
-
-            ui = Gui(self)
-            self._setupMenus()
-
-            # ui.mainWindow is None upon initialization: gets filled later
-            getLogger().debug('%s %s %s' % (self, ui, ui.mainWindow))
-        else:
-            from ccpn.ui.Ui import NoUi
-
-            ui = NoUi(self)
-
-        # Connect UI classes for chosen ui
-        ui.setUp()
-
-        return ui
-
-    def getStyleSheet(self):
-        """return Stylesheet as determined by arguments --dark, --light or preferences
-        """
-        colourScheme = None
-        if self.args.darkColourScheme:
-            colourScheme = 'dark'
-        elif self.args.lightColourScheme:
-            colourScheme = 'light'
-        else:
-            colourScheme = self.preferences.general.colourScheme
-
-        if colourScheme is None:
-            raise RuntimeError('invalid colourScheme')
-
-        self.colourScheme = colourScheme
-
-        with open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
-                               '%sStyleSheet.qss' % metaUtil.upperFirst(colourScheme))) as fp:
-            styleSheet = fp.read()
-
-        if platform.system() == 'Linux':
-            with open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
-                                   '%sAdditionsLinux.qss' % metaUtil.upperFirst(colourScheme))) as fp:
-                additions = fp.read()
-
-            styleSheet += additions
-        return ''  # GST for debug this should not be comitted! styleSheet
-
-    def _getUserPrefs(self):
-        # user preferences
-        if not self.args.skipUserPreferences:
-            sys.stderr.write('==> Getting user preferences\n')
-        self.preferences = getPreferences(self.args.skipUserPreferences)
+    #-----------------------------------------------------------------------------------------
 
     def _savePreferences(self):
-        """Save the preferences to file"""
-        with catchExceptions(application=self, errorStringTemplate='Error saving preferences; "%s"', printTraceBack=True):
-            directory = os.path.dirname(userPreferencesPath)
-            if not os.path.exists(directory):
-                os.makedirs(directory)
-            with open(userPreferencesPath, 'w+') as prefFile:
-                json.dump(self.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
-
-    def _getUserLayout(self, userPath=None):
-        """defines the application.layout dictionary.
-        For a saved project: uses the auto-generated during the saving process, if a user specified json file is given then
-        is used that one instead.
-        For a new project, it is used the default.
+        """Save the user preferences to file
+        CCPNINTERNAL: used in PreferencesPopup and GuiMainWindow._close()
         """
-        # try:
-        if userPath:
-            with open(userPath) as fp:
-                layout = json.load(fp, object_hook=AttrDict)
-                self.layout = layout
-        else:
-            # opens the autogenerated if an existing project
-            savedLayoutPath = self._getAutogeneratedLayoutFile()
-            if savedLayoutPath:
-                with open(savedLayoutPath) as fp:
-                    layout = json.load(fp, object_hook=AttrDict)
-                    self.layout = layout
-            else:  # opens the default
-                Layout._createLayoutFile(self)
-                self._getUserLayout()
-        # except Exception as e:
-        #   getLogger().warning('No layout found. %s' %e)
+        self.preferences._saveUserPreferences()
 
-        return self.layout
+    #-----------------------------------------------------------------------------------------
 
-    def saveLayout(self):
-        Layout.updateSavedLayout(self.ui.mainWindow)
-        getLogger().info('Layout saved')
-
-    def saveLayoutAs(self):
-        fp = self.getSaveLayoutPath()
-        try:
-            Layout.saveLayoutToJson(self.ui.mainWindow, jsonFilePath=fp)
-            getLogger().info('Layout saved')
-        except Exception as e:
-            getLogger().warning('Impossible to save layout. %s' % e)
-
-    def restoreLastSavedLayout(self):
-        self.ui.mainWindow.moduleArea._closeAll()
-        Layout.restoreLayout(self.ui.mainWindow, self.layout, restoreSpectrumDisplay=True)
-
-    def restoreLayoutFromFile(self, jsonFilePath=None):
-        if jsonFilePath is None:
-            #asks with a dialog
-            jsonFilePath = self.getSavedLayoutPath()
-            if jsonFilePath and not os.path.exists(jsonFilePath):
-                again = MessageDialog.showOkCancelWarning(title='File Does not exist', message='Try again?')
-                if again:
-                    self.restoreLayoutFromFile()
-                else:
-                    return
-        try:
-            self.ui.mainWindow.moduleArea._closeAll()
-            self._getUserLayout(jsonFilePath)
-            Layout.restoreLayout(self.ui.mainWindow, self.layout, restoreSpectrumDisplay=True)
-        except Exception as e:
-            getLogger().warning('Impossible to restore layout. %s' % e)
-
-    def _getAutogeneratedLayoutFile(self):
-        if self.project:
-            layoutFile = Layout.getLayoutFile(self)
-            return layoutFile
+    #-----------------------------------------------------------------------------------------
 
     def _setLanguage(self):
         # Language, check for command line override, or use preferences
@@ -654,51 +584,7 @@ class Framework(NotifierBase, GuiBase):
         # translator.setDebug(True)
         sys.stderr.write('==> Language set to "%s"\n' % translator._language)
 
-    # def _isRegistered(self):
-    #   """return True if registered"""
-    #   self._registrationDict = Register.loadDict()
-    #   return not Register.isNewRegistration(self._registrationDict)
-    #
-    #
-    # def _checkRegistration(self):
-    #   """
-    #   Display registration popup if there is a gui
-    #   return True if ok
-    #   return False on error
-    #   """
-    #   from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
-    #
-    #   if self.ui:
-    #     if not self._isRegistered():
-    #       self.ui.mainWindow.show()
-    #       QtWidgets.QApplication.processEvents()
-    #       popup = RegisterPopup(self.ui.mainWindow, version=self.applicationVersion, modal=True)
-    #       QtWidgets.QApplication.processEvents()
-    #       popup.show()
-    #       # popup.raise_()
-    #       popup.exec_()
-    #
-    #   if not self._isRegistered():
-    #     return False
-    #
-    #   Register.updateServer(self._registrationDict, self.applicationVersion)
-    #   return True
-
-    def applyPreferences(self, project):
-        """Apply user preferences
-
-        NBNB project should be implicit rather than a parameter (once reorganisation is finished)
-        """
-        # Reset remoteData DataStores to match preferences setting
-        dataPath = self.preferences.general.dataPath
-        if not dataPath or not os.path.isdir(dataPath):
-            dataPath = os.path.expanduser('~')
-        memopsRoot = project._wrappedData.root
-        dataUrl = memopsRoot.findFirstDataLocationStore(name='standard').findFirstDataUrl(
-                name='remoteData'
-                )
-        _path = str(dataPath.replace(os.sep, '/'))
-        dataUrl.url = Implementation.Url(path=_path)
+    #-----------------------------------------------------------------------------------------
 
     def _correctColours(self):
         """Autocorrect all colours that are too close to the background colour
@@ -769,9 +655,20 @@ class Framework(NotifierBase, GuiBase):
         try:
             if self.preferences.general.restoreLayoutOnOpening and \
                     mainWindow.moduleLayouts:
-                Layout.restoreLayout(self._mainWindow, mainWindow.moduleLayouts, restoreSpectrumDisplay=False)
+                Layout.restoreLayout(mainWindow, mainWindow.moduleLayouts, restoreSpectrumDisplay=False)
         except Exception as e:
             getLogger().warning('Impossible to restore Layout %s' % e)
+
+        # New LayoutManager implementation; awaiting completion
+        # try:
+        #     from ccpn.framework.LayoutManager import LayoutManager
+        #     layout = LayoutManager(mainWindow)
+        #     path = self.statePath / 'Layout.json'
+        #     layout.restoreState(path)
+        #     layout.saveState()
+        #
+        # except Exception as es:
+        #     getLogger().warning('Error restoring layout: %s' % es)
 
         try:
             # Initialise colours
@@ -863,6 +760,8 @@ class Framework(NotifierBase, GuiBase):
         self._tip_of_the_day_wait_dialogs = (RegisterPopup,)
         self._startupShowTipofTheDay()
 
+    #-----------------------------------------------------------------------------------------
+
     def _startupShowTipofTheDay(self):
         if self._shouldDisplayTipOfTheDay():
             self._initial_show_timer = QTimer(parent=self._mainWindow)
@@ -953,121 +852,9 @@ class Framework(NotifierBase, GuiBase):
     def _shouldDisplayTipOfTheDay(self):
         return self.preferences['general'].setdefault('showTipOfTheDay', True)
 
-    def get(self, identifier):
-        """General method to obtain object (either gui or data) from identifier (pid, gid, obj-string)
-        """
-        if identifier is None:
-            raise ValueError('Expected str or Pid, got "None"')
-
-        if not isinstance(identifier, (str, Pid)):
-            raise ValueError('Expected str or Pid, got "%s" %s' % (identifier, type(identifier)))
-        identifier = str(identifier)
-
-        if len(identifier) == 0:
-            raise ValueError('Expected str or Pid, got zero-length identifier')
-
-        if len(identifier) >= 2 and identifier[0] == '<' and identifier[-1] == '>':
-            identifier = identifier[1:-1]
-
-        return self.project.getByPid(identifier)
-
-    def getByPid(self, pid):
-        """Convenience"""
-        return self.project.getByPid(pid)
-
-    def getByGid(self, gid):
-        """Convenience"""
-        return self.project.getByPid(gid)
-
-    #########################################    Create sub dirs   ########################################################
-
-    ## dirs are created with decorators because the project path can change dynamically.
-    ##  When a project is saved in a new location, all the dirs get refreshed automatically'
-
-    @property
-    def statePath(self):
-        return self._statePath
-
-    @statePath.getter
-    def statePath(self):
-        return Path.fetchDir(self.project.path, Layout.StateDirName)
-
-    @statePath.setter
-    def statePath(self, path):
-        self._statePath = path
-
-    @property
-    def pipelinePath(self):
-        return self._pipelinePath
-
-    @pipelinePath.getter
-    def pipelinePath(self):
-        return Path.fetchDir(self.statePath, Pipeline.className)
-
-    @pipelinePath.setter
-    def pipelinePath(self, path):
-        self._pipelinePath = path
-
-    @property
-    def dataPath(self):
-        return self._dataPath
-
-    @dataPath.getter
-    def dataPath(self):
-        return Path.fetchDir(self.project.path, DataDirName)
-
-    @dataPath.setter
-    def dataPath(self, path):
-        self._dataPath = path
-
-    @property
-    def spectraPath(self):
-        return self._spectraPath
-
-    @spectraPath.getter
-    def spectraPath(self):
-        return Path.fetchDir(self.dataPath, SpectraDirName)
-
-    @spectraPath.setter
-    def spectraPath(self, path):
-        self._spectraPath = path
-
-    @property
-    def pluginDataPath(self):
-        return self._pluginDataPath
-
-    @pluginDataPath.getter
-    def pluginDataPath(self):
-        return Path.fetchDir(self.dataPath, PluginDataDirName)
-
-    @pluginDataPath.setter
-    def pluginDataPath(self, path):
-        self._pluginDataPath = path
-
-    @property
-    def tempMacrosPath(self):
-        return self._tempMacrosPath
-
-    @tempMacrosPath.getter
-    def tempMacrosPath(self):
-        return Path.fetchDir(userPreferencesDirectory, MacrosDirName)
-
-    @tempMacrosPath.setter
-    def tempMacrosPath(self, path):
-        self._tempMacrosPath = path
-
-    @property
-    def scriptsPath(self):
-        return self._scriptsPath
-
-    @scriptsPath.getter
-    def scriptsPath(self):
-        return Path.fetchDir(self.project.path, ScriptsDirName)
-
-    @scriptsPath.setter
-    def scriptsPath(self, path):
-        self._scriptsPath = path
-
+    #-----------------------------------------------------------------------------------------
+    # Project related methods
+    #-----------------------------------------------------------------------------------------
 
     #@logCommand('application.') #cannot do, as project is not there yet
     def newProject(self, name='default') -> Project:
@@ -1086,7 +873,6 @@ class Framework(NotifierBase, GuiBase):
         self._closeProject()
         project = _newProject(self, name=newName)
         self._initialiseProject(project)  # This also set the linkages
-
         return project
 
     @logCommand('application.')
@@ -1096,6 +882,107 @@ class Framework(NotifierBase, GuiBase):
         """
         #Just a stub for now; calling MainWindow methods as it initialises the Gui
         return self.ui.loadProject(path)
+
+    def _saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
+        """Save project to newPath and return True if successful
+        """
+        if self.preferences.general.keepSpectraInsideProject:
+            self._cloneSpectraToProjectDir()
+
+        successful = self.project.save(newPath=newPath, createFallback=createFallback,
+                                       overwriteExisting=overwriteExisting)
+        if not successful:
+            failMessage = '==> Project save failed\n'
+            sys.stderr.write(failMessage)
+            self.ui.mainWindow.statusBar().showMessage(failMessage)
+            return successful
+
+        successMessage = '==> Project successfully saved\n'
+        self.ui.mainWindow._updateWindowTitle()
+        self.ui.mainWindow.statusBar().showMessage(successMessage)
+        self.ui.mainWindow.getMenuAction('File->Archive').setEnabled(True)
+        self.ui.mainWindow._fillRecentProjectsMenu()
+        # self._createApplicationPaths()
+        self.current._dumpStateToFile(self.statePath)
+        try:
+            if self.preferences.general.autoSaveLayoutOnQuit:
+                Layout.saveLayoutToJson(self.ui.mainWindow)
+        except Exception as e:
+            getLogger().warning('Unable to save Layout %s' % e)
+
+        # saveIconPath = os.path.join(getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
+        sys.stderr.write(successMessage)
+        self._getUndo().markSave()
+        return successful
+
+    @logCommand('application.')
+    def saveProjectAs(self, newPath, overwrite=False) -> bool:
+        """Save project to newPath
+        :return True if successful
+        """
+        return self._saveProject(newPath=newPath,
+                                 createFallback=False,
+                                 overwriteExisting=overwrite)
+
+    @logCommand('application.')
+    def saveProject(self) -> bool:
+        """Save project
+        :return True if successful
+        """
+        return self._saveProject(newPath=None,
+                                 createFallback=True,
+                                 overwriteExisting=True)
+
+    def _closeProject(self):
+        """Close project and clean up - when opening another or quitting application
+        """
+        # NB: this function must clean up both wrapper and ui/gui
+
+        self.deleteAllNotifiers()
+        if self.ui.mainWindow:
+            # ui/gui cleanup
+            self.ui.mainWindow._closeMainWindowModules()
+            self.ui.mainWindow._closeExtraWindowModules()
+            self.ui.mainWindow.sideBar.deleteLater()
+            self.ui.mainWindow.deleteLater()
+            self.ui.mainWindow = None
+
+        if self.current:
+            self.current._unregisterNotifiers()
+            self._current = None
+
+        if self.project is not None:
+            # Cleans up wrapper project, including graphics data objects (Window, Strip, etc.)
+            self.project._close()
+            self._project = None
+
+    #-----------------------------------------------------------------------------------------
+    # Data loaders
+    #-----------------------------------------------------------------------------------------
+
+    @logCommand('application.')
+    def loadData(self, *paths) -> list:
+        """Loads data from paths.
+        :returns list of loaded objects
+        """
+        objs = []
+        for path in paths:
+            dataLoader = checkPathForDataLoader(path)
+
+            if dataLoader is None:
+                getLogger().warning('Unable to load "%s"' % path)
+
+            elif dataLoader.alwaysCreateNewProject:
+                getLogger().warning('Loading of "%s" would create a new project; use application.loadProject() instead')
+
+            else:
+                dataLoader.createNewObject = False  # The loadData() method was used; No project created
+                result = dataLoader.load()
+                if not isIterable(result):
+                    result = [result]
+                objs.extend(result)
+
+        return objs
 
     def _loadV2Project(self, path) -> List[Project]:
         """Actual V2 project loader
@@ -1129,12 +1016,12 @@ class Framework(NotifierBase, GuiBase):
         from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory
         from ccpn.core.Project import _loadProject
 
-        if not isinstance(path, (Path.Path, str)):
+        if not isinstance(path, (Path, str)):
             raise ValueError('invalid path "%s"' % path)
 
         with logCommandManager('application.', 'loadProject', path):
 
-            _path = Path.aPath(path)
+            _path = aPath(path)
             if not _path.exists():
                 raise ValueError('path "%s" does not exist' % path)
 
@@ -1148,7 +1035,7 @@ class Framework(NotifierBase, GuiBase):
 
     def _loadNefFile(self, path: str, makeNewProject=True) -> Project:
         """Load Project from NEF file at path, and do necessary setup
-
+        :return Project instance
         """
 
         from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
@@ -1230,33 +1117,9 @@ class Framework(NotifierBase, GuiBase):
         """
         mainWindow = self.mainWindow
         with logCommandManager('application.', 'loadData', path):
-            path = Path.aPath(path)
+            path = aPath(path)
             mainWindow.newHtmlModule(urlPath=str(path), position='top', relativeTo=mainWindow.moduleArea)
         return []
-
-    @logCommand('application.')
-    def loadData(self, *paths) -> list:
-        """Loads data from paths.
-        :returns list of loaded objects
-        """
-        objs = []
-        for path in paths:
-            dataLoader = checkPathForDataLoader(path)
-
-            if dataLoader is None:
-                getLogger().warning('Unable to load "%s"' % path)
-
-            elif dataLoader.alwaysCreateNewProject:
-                getLogger().warning('Loading of "%s" would create a new project; use application.loadProject() instead')
-
-            else:
-                dataLoader.createNewObject = False  # The loadData() method was used; No project created
-                result = dataLoader.load()
-                if not isIterable(result):
-                    result = [result]
-                objs.extend(result)
-
-        return objs
 
     def _cloneSpectraToProjectDir(self):
         """ Keep a copy of spectra inside the project directory "myproject.ccpn/data/spectra".
@@ -1300,49 +1163,6 @@ class Framework(NotifierBase, GuiBase):
         except Exception as e:
             getLogger().debug(str(e))
 
-    def _saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
-        """Save project to newPath and return True if successful
-        """
-        if self.preferences.general.keepSpectraInsideProject:
-            self._cloneSpectraToProjectDir()
-
-        successful = self.project.save(newPath=newPath, createFallback=createFallback,
-                                       overwriteExisting=overwriteExisting)
-        if not successful:
-            failMessage = '==> Project save failed\n'
-            sys.stderr.write(failMessage)
-            self.ui.mainWindow.statusBar().showMessage(failMessage)
-            return successful
-
-        successMessage = '==> Project successfully saved\n'
-        self.ui.mainWindow._updateWindowTitle()
-        self.ui.mainWindow.statusBar().showMessage(successMessage)
-        self.ui.mainWindow.getMenuAction('File->Archive').setEnabled(True)
-        self.ui.mainWindow._fillRecentProjectsMenu()
-        # self._createApplicationPaths()
-        self.current._dumpStateToFile(self.statePath)
-        try:
-            if self.preferences.general.autoSaveLayoutOnQuit:
-                Layout.saveLayoutToJson(self.ui.mainWindow)
-        except Exception as e:
-            getLogger().warning('Unable to save Layout %s' % e)
-
-        # saveIconPath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
-        sys.stderr.write(successMessage)
-        # MessageDialog.showMessage('Project saved', 'Project successfully saved!',
-        #                            iconPath=saveIconPath)
-
-        self._getUndo().markSave()
-        return successful
-
-    @logCommand('application.')
-    def saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
-        """Save project to newPath and return True if successful"""
-        if self.project.isTemporary:
-            return self.saveProjectAs()
-        else:
-            return self._saveProject(newPath=newPath, createFallback=createFallback,
-                                     overwriteExisting=overwriteExisting)
     #-----------------------------------------------------------------------------------------
     # NEF-related code
     #-----------------------------------------------------------------------------------------
@@ -1357,14 +1177,14 @@ class Framework(NotifierBase, GuiBase):
             if not path:
                 return
 
-        path = Path.aPath(path)
+        path = aPath(path)
 
         with catchExceptions(application=self, errorStringTemplate='Error Importing Nef File: %s', printTraceBack=True):
             with undoBlockWithoutSideBar():
                 self._importNefFile(path=path, makeNewProject=False)
             self.ui.mainWindow.sideBar.buildTree(self.project)
 
-    def _importNefFile(self, path: Union[str, Path.Path], makeNewProject=True) -> Project:
+    def _importNefFile(self, path: Union[str, Path], makeNewProject=True) -> Project:
         """Load Project from NEF file at path, and do necessary setup
         """
 
@@ -1417,7 +1237,7 @@ class Framework(NotifierBase, GuiBase):
 
             if makeNewProject:
                 self._closeProject()
-                self.project = self.newProject(_loader._nefDict.name)
+                self._project = self.newProject(_loader._nefDict.name)
 
             # import from the loader into the current project
             self.importFromLoader(_loader, reader=_nefReader)
@@ -1468,7 +1288,7 @@ class Framework(NotifierBase, GuiBase):
         from ccpn.ui.gui.popups.ExportNefPopup import ExportNefPopup
         from ccpn.core.lib.CcpnNefIo import NEFEXTENSION
 
-        _path = Path.aPath(self.preferences.general.userWorkingPath or '~').filepath / (self.project.name + NEFEXTENSION)
+        _path = aPath(self.preferences.general.userWorkingPath or '~').filepath / (self.project.name + NEFEXTENSION)
         dialog = ExportNefPopup(self.ui.mainWindow,
                                 mainWindow=self.ui.mainWindow,
                                 selectFile=_path,
@@ -1500,7 +1320,7 @@ class Framework(NotifierBase, GuiBase):
            self as first element, unless it is a temp project
            update the preferences with the new list
 
-           CCPN INTERNAL: called by MainWindow
+           CCPNINTERNAL: called by MainWindow
         """
         project = self.project
         path = project.path
@@ -1556,121 +1376,136 @@ class Framework(NotifierBase, GuiBase):
             raise RuntimeError('Error: decreaseNotificationBlocking, already at 0')
 
     #-----------------------------------------------------------------------------------------
-    # Archive related code
+    # Archive code
     #-----------------------------------------------------------------------------------------
 
     @logCommand('application.')
-    def archiveProject(self) -> Path.Path:
-        """Archive the project
+    def saveToArchive(self) -> Path:
+        """Archive the project.
         :return location of the archive as a Path instance
         """
-        project = self.project
-        apiProject = project._wrappedData.parent
-        archivePath = apiIo.packageProject(apiProject,
-                                           includeBackups=True, includeLogs=True,
-                                           includeArchives=False, includeSummaries=True)
-        getLogger().info('==> Project archived to %s' % archivePath)
-
-        if self.hasGui:
-            self.ui.mainWindow._updateRestoreArchiveMenu()
-        return Path.aPath(archivePath)
-
-    @property
-    def _archiveDirectory(self) -> Path.Path:
-        """Return the archive directory in the project"""
-        archivePath = Path.aPath(self.project.path) / CCPN_ARCHIVES_DIRECTORY
+        archivePath = self.project.saveToArchive()
         return archivePath
 
-    def _archivePaths(self) -> list:
-        """:return list of archives  from archive directory"""
-        result = [str(path) for path in self._archiveDirectory.listDirFiles(extension='tgz')]
-        return result
-
+    @logCommand('application')
     def restoreFromArchive(self, archivePath) -> Project:
         """Restore a project from archive path
+        :return the restored project or None on error
         """
-        from ccpn.framework.lib._unpackCcpnTarFile import _unpackCcpnTarfile
-        from subprocess import Popen
+        from ccpn.core.lib.ProjectArchiver import ProjectArchiver
+        archiver = ProjectArchiver(projectPath=self.project.path)
 
-        if archivePath is None or len(archivePath) == 0:
-            raise ValueError('restoreFromArchive: Invalid archivePath %r' % archivePath)
+        if (_newProjectPath := archiver.restoreArchive(archivePath=archivePath)) is not None and \
+           (_newProject := self.loadProject(_newProjectPath)) is not None:
 
-        archivePath = Path.aPath(archivePath)
-        _outDirPath = Path.aPath(self.project.path).parent
-        _newProjectPath = _unpackCcpnTarfile(archivePath, outputDirectoryPath=_outDirPath)
-        _newProject = self.loadProject(_newProjectPath)
-        getLogger().info('==> Restored archive %s as %s' % (archivePath, _newProject))
+            getLogger().info('==> Restored archive %s as %s' % (archivePath, _newProject))
+
+        else:
+            getLogger().warning('Failed to restore archive %s' % (archivePath,))
 
         return _newProject
 
-    def showApplicationPreferences(self):
+    #-----------------------------------------------------------------------------------------
+    # Layouts
+    #-----------------------------------------------------------------------------------------
+
+    # def _getOpenLayoutPath(self):
+    #     """Opens a saved Layout as dialog box and gets directory specified in the
+    #     file dialog.
+    #     :return selected path or None
+    #     """
+    #
+    #     fType = 'JSON (*.json)'
+    #     dialog = LayoutsFileDialog(parent=self.ui.mainWindow, acceptMode='open', fileFilter=fType)
+    #     dialog._show()
+    #     path = dialog.selectedFile()
+    #     if not path:
+    #         return None
+    #     if path:
+    #         return path
+    #
+    # def _getSaveLayoutPath(self):
+    #     """Opens save Layout as dialog box and gets directory specified in the
+    #     file dialog.
+    #     """
+    #
+    #     jsonType = '.json'
+    #     fType = 'JSON (*.json)'
+    #     dialog = LayoutsFileDialog(parent=self.ui.mainWindow, acceptMode='save', fileFilter=fType)
+    #     dialog._show()
+    #     newPath = dialog.selectedFile()
+    #     if not newPath:
+    #         return None
+    #
+    #     newPath = aPath(newPath)
+    #     if newPath.exists():
+    #         # should not really need to check the second and third condition above, only
+    #         # the Qt dialog stupidly insists a directory exists before you can select it
+    #         # so if it exists but is empty then don't bother asking the question
+    #         title = 'Overwrite path'
+    #         msg = 'Path "%s" already exists, continue?' % newPath
+    #         if not MessageDialog.showYesNo(title, msg):
+    #             return None
+    #
+    #     newPath.assureSuffix(jsonType)
+    #     return newPath
+
+    def _getUserLayout(self, userPath=None):
+        """defines the application.layout dictionary.
+        For a saved project: uses the auto-generated during the saving process, if a user specified json file is given then
+        is used that one instead.
+        For a new project, it is used the default.
         """
-        Displays Application Preferences Popup.
-        """
-        from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
+        # try:
+        if userPath:
+            with open(userPath) as fp:
+                layout = json.load(fp, object_hook=AttrDict)
+                self.layout = layout
+        else:
+            # opens the autogenerated if an existing project
+            savedLayoutPath = self._getAutogeneratedLayoutFile()
+            if savedLayoutPath:
+                with open(savedLayoutPath) as fp:
+                    layout = json.load(fp, object_hook=AttrDict)
+                    self.layout = layout
+            else:  # opens the default
+                Layout._createLayoutFile(self)
+                self._getUserLayout()
+        # except Exception as e:
+        #   getLogger().warning('No layout found. %s' %e)
 
-        popup = PreferencesPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, preferences=self.preferences)
-        popup.exec_()
+        return self.layout
 
-    def getSavedLayoutPath(self):
-        """Opens a saved Layout as dialog box and gets directory specified in the file dialog."""
+    # def _saveLayoutCallback(self):
+    #     Layout.updateSavedLayout(self.ui.mainWindow)
+    #     getLogger().info('Layout saved')
+    #
+    # def _saveLayoutAsCallback(self):
+    #     path = self.getSaveLayoutPath()
+    #     try:
+    #         Layout.saveLayoutToJson(self.ui.mainWindow, jsonFilePath=path)
+    #         getLogger().info('Layout saved')
+    #     except Exception as es:
+    #         getLogger().warning('Impossible to save layout. %s' % es)
 
-        fType = 'JSON (*.json)'
-        dialog = LayoutsFileDialog(parent=self.ui.mainWindow, acceptMode='open', fileFilter=fType)
-        dialog._show()
-        path = dialog.selectedFile()
-        if not path:
-            return
-        if path:
-            return path
+    # def restoreLastSavedLayout(self):
+    #     self.ui.mainWindow.moduleArea._closeAll()
+    #     Layout.restoreLayout(self.ui.mainWindow, self.layout, restoreSpectrumDisplay=True)
 
-    def getSaveLayoutPath(self):
-        """Opens save Layout as dialog box and gets directory specified in the file dialog."""
+    def _restoreLayoutFromFile(self, path):
+        if path is None:
+            raise ValueError('_restoreLayoutFromFile: undefined path')
+        try:
+            self._getUserLayout(path)
+            self.ui.mainWindow.moduleArea._closeAll()
+            Layout.restoreLayout(self.ui.mainWindow, self.layout, restoreSpectrumDisplay=True)
+        except Exception as e:
+            getLogger().warning('Impossible to restore layout. %s' % e)
 
-        jsonType = '.json'
-        fType = 'JSON (*.json)'
-        dialog = LayoutsFileDialog(parent=self.ui.mainWindow, acceptMode='save', fileFilter=fType)
-        dialog._show()
-        newPath = dialog.selectedFile()
-        if not newPath:
-            return
-        if newPath:
-
-            if os.path.exists(newPath):
-                # should not really need to check the second and third condition above, only
-                # the Qt dialog stupidly insists a directory exists before you can select it
-                # so if it exists but is empty then don't bother asking the question
-                title = 'Overwrite path'
-                msg = 'Path "%s" already exists, continue?' % newPath
-                if not MessageDialog.showYesNo(title, msg):
-                    newPath = ''
-            if not newPath.endswith(jsonType):
-                newPath += jsonType
-            return newPath
-
-    def _closeProject(self):
-        """Close project and clean up - when opening another or quitting application
-        """
-
-        # NB: this function must clean up both wrapper and ui/gui
-
-        self.deleteAllNotifiers()
-        if self.ui.mainWindow:
-            # ui/gui cleanup
-            self.ui.mainWindow._closeMainWindowModules()
-            self.ui.mainWindow._closeExtraWindowModules()
-            self.ui.mainWindow.sideBar.deleteLater()
-            self.ui.mainWindow.deleteLater()
-            self.ui.mainWindow = None
-
-        if self.current:
-            self.current._unregisterNotifiers()
-            self.current = None
-
-        if self.project is not None:
-            # Cleans up wrapper project, including graphics data objects (Window, Strip, etc.)
-            self.project._close()
-            self._project = None
+    def _getAutogeneratedLayoutFile(self):
+        if self.project:
+            layoutFile = Layout.getLayoutFile(self)
+            return layoutFile
 
     ###################################################################################################################
     ## MENU callbacks:  Spectrum
@@ -1766,8 +1601,9 @@ class Framework(NotifierBase, GuiBase):
 
     def showCopyPeakListPopup(self):
         if not self.project.peakLists:
-            getLogger().warning('Project has no Peak Lists. Peak Lists cannot be copied')
-            MessageDialog.showWarning('Project has no Peak Lists.', 'Peak Lists cannot be copied')
+            txt = 'Project has no PeakList\'s. Peak Lists cannot be copied'
+            getLogger().warning(txt)
+            MessageDialog.showWarning(txt)
             return
         else:
             from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
@@ -2220,13 +2056,6 @@ class Framework(NotifierBase, GuiBase):
         else:
             getLogger().warning('No strip selected')
 
-    def _findMenuAction(self, menubarText, menuText):
-        # not sure if this function will be needed more widely or just in console context
-        # CCPN internal: now also used in SequenceModule._closeModule
-
-        #GWV should not be here; moved to GuiMainWindow
-        self.ui.mainWindow._findMenuAction(menubarText, menuText)
-
     def _toggleConsoleCallback(self):
         """Toggles whether python console is displayed at bottom of the main window.
         """
@@ -2285,12 +2114,11 @@ class Framework(NotifierBase, GuiBase):
             self.preferences.recentMacros.append(macroFile)
         self.ui.mainWindow.pythonConsole._runMacro(macroFile)
 
-    ###################################################################################################################
-    ## MENU callbacks:  Help
-    ###################################################################################################################
+    #################################################################################################
 
     def _systemOpen(self, path):
-        """Open path on system"""
+        """Open path to pdf file on system
+        """
         if isWindowsOS():
             os.startfile(path)
         elif isMacOS():
@@ -2317,237 +2145,43 @@ class Framework(NotifierBase, GuiBase):
                 MessageDialog.showWarning('Open File',
                                           'Please select PDFViewer in Preferences->External Programs')
 
-    def _showHtmlFile(self, title, urlPath):
-        """Displays html files in program QT viewer or using native webbrowser depending on useNativeWebbrowser option"""
+    def __str__(self):
+        return '<%s version:%s>' % (self.applicationName, self.applicationVersion)
 
-        mainWindow = self.ui.mainWindow
+    __repr__ = __str__
 
-        if self.preferences.general.useNativeWebbrowser:
-            import webbrowser
-            import posixpath
+#-----------------------------------------------------------------------------------------
+#end class
+#-----------------------------------------------------------------------------------------
 
-            # may be a Path object
-            urlPath = str(urlPath)
 
-            urlPath = urlPath or ''
-            if (urlPath.startswith('http://') or urlPath.startswith('https://')):
-                pass
-            elif urlPath.startswith('file://'):
-                urlPath = urlPath[len('file://'):]
-                if isWindowsOS():
-                    urlPath = urlPath.replace(os.sep, posixpath.sep)
-                else:
-                    urlPath = 'file://' + urlPath
-            else:
-                if isWindowsOS():
-                    urlPath = urlPath.replace(os.sep, posixpath.sep)
-                else:
-                    urlPath = 'file://' + urlPath
+#-----------------------------------------------------------------------------------------
+# code for testing purposes
+#-----------------------------------------------------------------------------------------
 
-            webbrowser.open(urlPath)
-            # self._systemOpen(path)
-        else:
-            # from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView
-            #
-            # _newModule = CcpnWebView(mainWindow=mainWindow, name=title, urlPath=urlPath)
-            # self.ui.mainWindow.moduleArea.addModule(_newModule, position='top', relativeTo=mainWindow.moduleArea)
-            mainWindow.newHtmlModule(urlPath=urlPath, position='top', relativeTo=mainWindow.moduleArea)
+class MyProgramme(Framework):
+    """My first app"""
+    applicationName = 'CcpNmr'
+    applicationVersion = Version.applicationVersion
 
-    def showBeginnersTutorial(self):
-        from ccpn.framework.PathsAndUrls import beginnersTutorialPath
 
-        self._systemOpen(beginnersTutorialPath)
-
-    def showBackboneTutorial(self):
-        from ccpn.framework.PathsAndUrls import backboneAssignmentTutorialPath
-
-        self._systemOpen(backboneAssignmentTutorialPath)
-
-    def showCSPtutorial(self):
-        from ccpn.framework.PathsAndUrls import cspTutorialPath
-
-        self._systemOpen(cspTutorialPath)
-
-    def showScreenTutorial(self):
-        from ccpn.framework.PathsAndUrls import screenTutorialPath
-
-        self._systemOpen(screenTutorialPath)
-
-    def showVersion3Documentation(self):
-        """Displays CCPN wrapper documentation in a module."""
-        from ccpn.framework.PathsAndUrls import documentationPath
-
-        self._showHtmlFile("Analysis Version-3 Documentation", documentationPath)
-
-    def showForum(self):
-        """Displays Forum in a module."""
-        from ccpn.framework.PathsAndUrls import ccpnForum
-
-        self._showHtmlFile("Analysis Version-3 Forum", ccpnForum)
-
-    def showShortcuts(self):
-        from ccpn.framework.PathsAndUrls import shortcutsPath
-
-        self._showHtmlFile("Analysis Version-3 Shortcuts", shortcutsPath)
-
-    def showAboutPopup(self):
-        from ccpn.ui.gui.popups.AboutPopup import AboutPopup
-        popup = AboutPopup(parent=self.ui.mainWindow)
-        popup.exec_()
-
-    def showAboutCcpn(self):
-        from ccpn.framework.PathsAndUrls import ccpnUrl
-        self._showHtmlFile("About CCPN", ccpnUrl)
-
-    def showCcpnLicense(self):
-        from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
-        self._showHtmlFile("CCPN Licence", ccpnLicenceUrl)
-
-    # def showCodeInspectionPopup(self):
-    #     # TODO: open a file browser to top of source directory
-    #     pass
-
-    def showIssuesList(self):
-        from ccpn.framework.PathsAndUrls import ccpnIssuesUrl
-        self._showHtmlFile("CCPN Issues", ccpnIssuesUrl)
-
-    def showTutorials(self):
-        from ccpn.framework.PathsAndUrls import ccpnTutorials
-        self._showHtmlFile("CCPN Tutorials", ccpnTutorials)
-
-    def showUpdatePopup(self):
-        """Open the update popup
-        """
-        from ccpn.framework.update.UpdatePopup import UpdatePopup
-        from ccpn.util import Url
-
-        # check valid internet connection first
-        if Url.checkInternetConnection():
-            self.updatePopup = UpdatePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
-            self.updatePopup.exec_()
-
-            # if updates have been installed then popup the quit dialog with no cancel button
-            if self.updatePopup._numUpdatesInstalled > 0:
-                self.ui.mainWindow._closeWindowFromUpdate(disableCancel=True)
-
-        else:
-            MessageDialog.showWarning('Check For Updates',
-                                      'Could not connect to the update server, please check your internet connection.')
-
-    def showRegisterPopup(self):
-        """Open the registration popup
-        """
-        self.ui._registerDetails()
-
-    def showFeedbackPopup(self):
-        """Open the submit feedback popup
-        """
-        from ccpn.ui.gui.popups.FeedbackPopup import FeedbackPopup
-        from ccpn.util import Url
-
-        # check valid internet connection first
-        if Url.checkInternetConnection():
-
-            # this is non-modal so you can copy/paste from the project as required
-            if not self.feedbackPopup:
-                self.feedbackPopup = FeedbackPopup(parent=self.ui.mainWindow)
-            self.feedbackPopup.show()
-            self.feedbackPopup.raise_()
-
-        else:
-            MessageDialog.showWarning('Submit Feedback',
-                                      'Could not connect to the server, please check your internet connection.')
-
-    def showSubmitMacroPopup(self):
-        """Open the submit macro popup
-        """
-        from ccpn.ui.gui.popups.SubmitMacroPopup import SubmitMacroPopup
-        from ccpn.util import Url
-
-        # check valid internet connection first
-        if Url.checkInternetConnection():
-            if not self.submitMacroPopup:
-                self.submitMacroPopup = SubmitMacroPopup(parent=self.ui.mainWindow)
-            self.submitMacroPopup.show()
-            self.submitMacroPopup.raise_()
-
-        else:
-            MessageDialog.showWarning('Submit Macro',
-                                      'Could not connect to the server, please check your internet connection.')
-
-    def showLicense(self):
-        from ccpn.framework.PathsAndUrls import licensePath
-        self._showHtmlFile("CCPN Licence", licensePath)
-
-    #########################################    End Menu callbacks   ##################################################
-
-    def _initialiseFonts(self):
-        from ccpn.ui.gui.guiSettings import fontSettings
-        self._fontSettings = fontSettings(self.preferences)
-
-########
-
-def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):
-    from ccpn.framework.PathsAndUrls import defaultPreferencesPath
-
-    try:
-        def _updateDict(d, u):
-            import collections
-
-            # recursive update of dictionary
-            # this deletes every key in u that is not in d
-            # if we want every key regardless, then remove first if check below
-            for k, v in u.items():
-                if k not in d:
-                    continue
-                if isinstance(v, collections.Mapping):
-                    r = _updateDict(d.get(k, {}), v)
-                    d[k] = r
-                else:
-                    d[k] = u[k]
-            return d
-
-        # read the default settings
-        preferencesPath = (defaultPath if defaultPath else defaultPreferencesPath)
-        with open(preferencesPath) as fp:
-            preferences = json.load(fp, object_hook=AttrDict)
-
-        # read user settings and update if not skipped
-        if not skipUserPreferences:
-            # from ccpn.framework.PathsAndUrls import userPreferencesPath
-
-            preferencesPath = (userPath if userPath else os.path.expanduser(userPreferencesPath))
-            if os.path.isfile(preferencesPath):
-                with open(preferencesPath) as fp:
-                    userPreferences = json.load(fp, object_hook=AttrDict)
-                preferences = _updateDict(preferences, userPreferences)
-    except:  #should we have the preferences hard coded as py dict for extra safety? if json goes wrong the whole project crashes!
-        with open(defaultPreferencesPath) as fp:
-            preferences = json.load(fp, object_hook=AttrDict)
-
-    return preferences
+def createFramework(projectPath=None, **kwds):
+    args = Arguments(projectPath=projectPath, **kwds)
+    result = MyProgramme(args)
+    result._startApplication()
+    #
+    return result
 
 
 def testMain():
-    # from sandbox.Geerten.Refactored.framework import Framework
-    # from sandbox.Geerten.Refactored.programArguments import Arguments
-
-    # from ccpn.framework.Framework import Framework
-    # from ccpn.framework.Framework import Arguments
 
     _makeMainWindowVisible = False
-
-
-    class MyProgramme(Framework):
-        """My first app"""
-        pass
-
 
     myArgs = Arguments()
     myArgs.noGui = False
     myArgs.debug = True
 
-    application = MyProgramme('MyProgramme', '3.0.1', args=myArgs)
+    application = MyProgramme(args=myArgs)
     ui = application.ui
     ui.initialize(ui.mainWindow)  # ui.mainWindow not needed for refactored?
 

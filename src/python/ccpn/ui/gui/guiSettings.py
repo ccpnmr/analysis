@@ -5,7 +5,7 @@ Settings used in gui modules, widgets and popups
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-25 17:59:13 +0000 (Thu, November 25, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-01 15:30:05 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -55,7 +55,7 @@ class FontSizes(LabelledEnum):
     MAXIMUM = 3.0, 'maximum, triple default size'
 
 
-class fontSettings():
+class FontSettings():
 
     def __init__(self, preferences):
 
@@ -390,7 +390,7 @@ def getColourScheme():
 
     application = getApplication()
     if application:
-        colourScheme = application.colourScheme
+        colourScheme = application._colourScheme
         if colourScheme not in COLOUR_SCHEMES:
             getLogger().warning('Undefined colour scheme')
             return DEFAULT
@@ -409,7 +409,7 @@ def setColourScheme(colourScheme):
         if colourScheme not in COLOUR_SCHEMES:
             raise RuntimeError('Undefined colour scheme')
 
-        application.colourScheme = colourScheme
+        application._colourScheme = colourScheme
         ColourDict(colourScheme).setColourScheme(colourScheme)
 
     else:

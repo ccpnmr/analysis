@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-01-26 13:49:33 +0000 (Wed, January 26, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-01 15:30:08 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -151,7 +151,7 @@ class CopyPeakListPopup(CcpnDialogMainWidget):
                     with progressManager(self, 'Copying Peaks. See terminal window for more info...'):
                         newPeakList = self.sourcePeakList.copyTo(self.targetSpectrum, includeAllPeakProperties=includeAllProperties)
                         self._executeAfterCopyPeaks(newPeakList)
-                    
+
             except Exception as es:
                 getLogger().warning('Error copying peakList: %s' % str(es))
                 showWarning(str(self.windowTitle()), str(es))
@@ -302,7 +302,6 @@ if __name__ == '__main__':
 
 
     app = TestApplication()
-    app.colourScheme = 'dark'
 
     thisWT = WT.WrapperTesting()
     thisWT.setUp()

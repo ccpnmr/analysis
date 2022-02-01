@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 15:18:25 +0000 (Thu, December 23, 2021) $"
+__dateModified__ = "$dateModified: 2022-02-01 15:30:07 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -150,7 +150,7 @@ class ResidueInformation(CcpnModule):
         self.selectedChain = None  #self.project.getByPid(self.chainPulldown.currentText())
         self.residueLabel = Label(self._pulldownFrame, text='Residue', grid=(0, 3))
 
-        self.colourScheme = self.application.colourScheme
+        self.colourScheme = self.application._colourScheme
         self.residuePulldown = PulldownList(self._pulldownFrame, callback=self._setCurrentResidue,
                                             grid=(0, 4))
 

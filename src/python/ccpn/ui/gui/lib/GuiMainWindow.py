@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 11:22:11 +0000 (Fri, January 21, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-01 15:30:06 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -152,7 +152,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self._setupNotifiers()
 
         self.feedbackPopup = None
-        self.updatePopup = None
 
         self.setWindowIcon(Icon('icons/ccpn-icon'))
         # self.fileIcon = self.style().standardIcon(QtWidgets.QStyle.SP_FileIcon, None, self)
@@ -638,7 +637,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         prelayoutMenu.clear()
         for name, path in prelayouts.items():
             action = Action(self, text=name, translate=False,
-                            callback=partial(self.application.restoreLayoutFromFile, path))
+                            callback=partial(self.application._restoreLayoutFromFile, path))
             prelayoutMenu.addAction(action)
         prelayoutMenu.addSeparator()
         userLayouts = Layout._dictLayoutsNamePath(Layout._getPredefinedLayouts(userDefinedLayoutDirPath))
@@ -937,7 +936,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
     def startPlugin(self, Plugin):
         plugin = Plugin(application=self.application)
-        self.application.plugins.append(plugin)
+        self.application._plugins.append(plugin)
         if plugin.guiModule is None:
             if not plugin.UiPlugin:
                 plugin.run()
@@ -963,7 +962,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     def _updateRestoreArchiveMenu(self):
 
         action = self.getMenuAction('File->Restore From Archive...')
-        action.setEnabled(bool(self.application._archivePaths()))
+        action.setEnabled(bool(self._project._getArchivePaths()))
 
     def undo(self):
         self._project._undo.undo()

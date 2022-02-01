@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-19 17:14:27 +0000 (Wed, January 19, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-01 17:08:13 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -29,13 +29,12 @@ import functools
 # import os
 import typing
 import operator
-from typing import Sequence, Union, Optional
+from typing import Sequence, Union, Optional, List
 from collections import OrderedDict
 # from time import time
 from datetime import datetime
 import json
 
-# from ccpn.util.Common import isValidPath, isValidFileNameLength
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.Updater import UPDATE_POST_PROJECT_INITIALISATION
 from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
@@ -43,10 +42,15 @@ from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
 from ccpn.core.lib import Pid
 from ccpn.core.lib import Undo
 from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory, newProjectSaveHistory
+from ccpn.core.lib.ContextManagers import notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
+    inactivity, logCommandManager
+
 from ccpn.util import Logging
 from ccpn.util.ExcelReader import ExcelReader
 from ccpn.util.Path import aPath, Path
 from ccpn.util.Common import isIterable
+from ccpn.util.Logging import getLogger
+from ccpn.util.decorators import logCommand
 
 from ccpn.framework.Version import VersionString
 from ccpn.framework.PathsAndUrls import CCPN_EXTENSION
@@ -64,11 +68,7 @@ from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib import ApiPath
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
-
-from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
-    inactivity, logCommandManager
-from ccpn.util.Logging import getLogger
+from ccpnmodel.ccpncore.api.memops import Implementation
 
 
 # TODO These should be merged with the same constants in CcpnNefIo
@@ -1188,6 +1188,24 @@ class Project(AbstractWrapperObject):
     # Library functions
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    def _updateApiDataUrl(self, path):
+        """Update the data url to path; for legacy purposes
+        """
+        # Reset remoteData DataStores to match path
+        if path is None or len(path) == 0:
+            getLogger().debug('_updateApiDataUrl: invalid path %r' % path)
+            return
+        path = aPath(path)
+        if not path.exists():
+            getLogger().debug('_updateApiDataUrl: path %r does not exist' % path)
+            return
+
+        memopsRoot = self._wrappedData.root
+        dataUrl = memopsRoot.findFirstDataLocationStore(name='standard').findFirstDataUrl(
+                name='remoteData'
+                )
+        dataUrl.url = Implementation.Url(path=str(path))
+
     def _getAPIObjectsStatus(self, completeScan=False, includeDefaultChildren=False):
         """
         Scan all API objects and check their validity.
@@ -1383,21 +1401,38 @@ class Project(AbstractWrapperObject):
 
         return getCcpCodeData(self._apiNmrProject, ccpCode, molType='protein', atomType=atomType)
 
-    def packageProject(self, filePrefix, includeBackups=True, includeLogs=True):
-        """Package the project
-        """
-        from ccpnmodel.ccpncore.lib.Io import Api as apiIo
+    # def packageProject(self, filePrefix, includeBackups=True, includeLogs=True):
+    #     """Package the project
+    #     """
+    #     from ccpnmodel.ccpncore.lib.Io import Api as apiIo
+    #
+    #     return apiIo.packageProject(self._wrappedData.parent, filePrefix,
+    #                                 includeBackups=includeBackups, includeLogs=includeLogs)
 
-        return apiIo.packageProject(self._wrappedData.parent, filePrefix,
-                                    includeBackups=includeBackups, includeLogs=includeLogs)
+    @logCommand('project.')
+    def saveToArchive(self) -> Path:
+        """Make new time-stamped archive of project
+        :return path to .tgz archive file as a Path object
+        """
+        from ccpn.core.lib.ProjectArchiver import ProjectArchiver
+        archiver = ProjectArchiver(projectPath=self.path)
+        archivePath = archiver.makeArchive()
+        getLogger().info('==> Project archived to %s' % archivePath)
+        return archivePath
+
+    def _getArchivePaths(self) -> List[Path]:
+        """:return list of archives from archive directory
+        CCPNINTERAL: used in GuiMainWindow
+        """
+        from ccpn.core.lib.ProjectArchiver import ProjectArchiver
+        archiver = ProjectArchiver(projectPath=self.project.path)
+        return archiver.archives
 
     def getExperimentClassifications(self) -> dict:
         """Get a dictionary of dictionaries of dimensionCount:sortedNuclei:ExperimentClassification named tuples.
         """
         # NOTE:ED - better than being in spectrumLib but still needs moving
-
         from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import getExpClassificationDict
-
         return getExpClassificationDict(self._wrappedData)
 
     #===========================================================================================
@@ -1847,7 +1882,6 @@ class Project(AbstractWrapperObject):
     @logCommand('project.')
     def fetchSubstance(self, name: str, labelling: str = None):
         """Get or create Substance with given name and labelling.
-
         See the Substance class for details.
 
         :param self:
@@ -1856,15 +1890,12 @@ class Project(AbstractWrapperObject):
         :return: new or existing Substance instance.
         """
         from ccpn.core.Substance import _fetchSubstance
-
         return _fetchSubstance(self, name=name, labelling=labelling)
 
     @logCommand('project.')
     def newComplex(self, name: str, chains=(), **kwds):
         """Create new Complex.
-
         See the Complex class for details.
-
         Optional keyword arguments can be passed in; see Complex._newComplex for details.
 
         :param name:
@@ -1872,13 +1903,11 @@ class Project(AbstractWrapperObject):
         :return: a new Complex instance.
         """
         from ccpn.core.Complex import _newComplex
-
         return _newComplex(self, name=name, chains=chains, **kwds)
 
     @logCommand('project.')
     def newChemicalShiftList(self, name: str = None, spectra=(), **kwds):
         """Create new ChemicalShiftList.
-
         See the ChemicalShiftList class for details.
 
         :param name:
@@ -1886,13 +1915,11 @@ class Project(AbstractWrapperObject):
         :return: a new ChemicalShiftList instance.
         """
         from ccpn.core.ChemicalShiftList import _newChemicalShiftList
-
         return _newChemicalShiftList(self, name=name, spectra=spectra, **kwds)
 
     @logCommand('project.')
     def getChemicalShiftList(self, name: str = None, **kwds):
         """Get existing ChemicalShiftList.
-
         See the ChemicalShiftList class for details.
 
         :param name:
@@ -1900,7 +1927,6 @@ class Project(AbstractWrapperObject):
         :return: a new ChemicalShiftList instance.
         """
         from ccpn.core.ChemicalShiftList import _getChemicalShiftList
-
         return _getChemicalShiftList(self, name=name, **kwds)
 
 

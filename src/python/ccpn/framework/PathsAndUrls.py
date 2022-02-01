@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-28 20:49:41 +0000 (Fri, January 28, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-01 15:30:05 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -32,7 +32,7 @@ ccpnUrl                         = 'http://www.ccpn.ac.uk'
 ccpn2Url                        = 'http://www.ccpn.ac.uk'
 ccpnLicenceUrl                  = 'http://www.ccpn.ac.uk/v3-software/licences'
 ccpnTutorials                   = 'https://www.ccpn.ac.uk/v3-software/tutorials'
-ccpnForum                       = 'https://www.ccpn.ac.uk/v3-software/v3-forum'
+ccpnForum                       = 'https://forum.ccpn.ac.uk'
 ccpnVideos                      = 'https://www.ccpn.ac.uk/v3-software/v3-video-tutorials'
 oldCcpnIssuesUrl                = 'https://sourceforge.net/p/ccpn/bugs/'
 ccpnIssuesUrl                   = 'https://bitbucket.org/ccpnmr/issue-tracker/issues?status=new&status=open'
@@ -43,22 +43,28 @@ ccpnConfigPath                  = ccpnCodePath / 'config'
 ccpnRunTerminal                 = ccpnCodePath / 'bin' / 'runTerminal.sh'
 defaultPreferencesPath          = ccpnConfigPath / 'defaultv3settings.json'
 tipOfTheDayConfig               = ccpnConfigPath / 'tipConfig.json'
+
 _ccpnPythonPath                 = Path.aPath(Path.getPythonDirectory())
 ccpnmodelPythonPath             = _ccpnPythonPath / 'ccpnmodel'
 ccpnmodelDataPythonPath         = _ccpnPythonPath / 'ccpnmodel' / 'data'
 ccpnmodelRefDataPythonPath      = _ccpnPythonPath / 'ccpnmodel' / 'data' / 'ccpnv3'
+
 ccpnPythonPath                  = _ccpnPythonPath / 'ccpn'
+
 analysisAssignPath              = ccpnPythonPath / 'AnalysisAssign'
 analysisScreenPath              = ccpnPythonPath / 'AnalysisScreen'
 analysisStructurePath           = ccpnPythonPath / 'AnalysisStructure'
 analysisMetabolomicsPath        = ccpnPythonPath / 'AnalysisMetabolomics'
+ccpnApplicationPaths            = (analysisAssignPath, analysisScreenPath, analysisStructurePath, analysisMetabolomicsPath)
+
 macroPath                       = ccpnPythonPath / 'macros'
 pluginPath                      = ccpnPythonPath / 'plugins'
 pipePath                        = ccpnPythonPath / 'pipes'
 pipeTemplates                   = ccpnPythonPath / 'framework' / 'lib' / 'pipeline' / 'templates'
-fontsPath                       = ccpnPythonPath / 'ui' / 'gui' / 'widgets' / 'fonts'
-iconsPath                       = ccpnPythonPath / 'ui' / 'gui' / 'widgets' / 'icons'
-openGLFontsPath                 = fontsPath / 'Fonts'
+widgetsPath                     = ccpnPythonPath / 'ui' / 'gui' / 'widgets'
+fontsPath                       = widgetsPath    / 'fonts'
+iconsPath                       = widgetsPath    / 'icons'
+openGLFontsPath                 = fontsPath      / 'Fonts'
 nefValidationPath               = ccpnPythonPath / 'util' / 'nef' / 'NEF' / 'specification' / 'mmcif_nef_v1_1.dic'
 peakPickerPath                  = ccpnPythonPath / 'core' / 'lib' / 'PeakPickers'
 
@@ -79,14 +85,20 @@ licensePath                     = ccpnCodePath / 'LICENSE.txt'
 
 # User settings
 userPreferencesDirectory        = Path.aPath('~/.ccpn')
-userCcpnPath                    = userPreferencesDirectory
 userPreferencesPath             = userPreferencesDirectory / 'v3settings.json'
+
+userCcpnPath                    = Path.aPath('~/.ccpn')
 userCcpnDataPath                = userCcpnPath / 'data'
-userDefaultProjectPath          = userCcpnDataPath / 'default.ccpn'
+userCcpnMacroPath               = userCcpnPath / 'macro'
+userCcpnPipesPath               = userCcpnPath / 'pipes'
 userCcpnPathSubDirectories      = ['data', 'macros', 'pipes']  # These get created by framework
+
+userDefaultProjectPath          = userCcpnDataPath / 'default.ccpn'
 
 # Predefined layouts
 predefinedLayouts               = ccpnCodePath / 'layouts'
+# layout file name in the Project/State directory
+projectStateLayoutFileName      = 'layout_3_1.json'
 
 # others; also defined in util.Path and from there imported in Api and Implementation
 # DO NOT REMOVE and keep in sync (for circular import reasons) (for now!)

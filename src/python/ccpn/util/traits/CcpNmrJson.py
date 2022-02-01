@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 11:22:12 +0000 (Fri, January 21, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-01 15:30:10 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,6 +37,7 @@ from ccpn.util.traits.TraitBase import TraitBase
 from ccpn.util.traits.TraitJsonHandlerBase import TraitJsonHandlerBase
 from ccpn.util.traits.CcpNmrTraits import default, Dict
 from ccpn.util.Logging import getLogger
+from ccpn.util.Time import now
 from ccpn.util.decorators import debug2Enter, debug3Enter, debug3Leave  # Not used now to avoid circular import
 
 
@@ -60,6 +61,9 @@ class Constants(object):
     CLASSVERSION = 'classVersion'
     USER = 'user'
     LASTPATH = 'lastPath'
+    TIMESTAMP = 'timestamp'
+    METADATA_KEYS = (JSONVERSION, CLASSNAME, CLASSVERSION, USER, LASTPATH, TIMESTAMP)
+
 # end class
 
 
@@ -116,7 +120,7 @@ class _GenericFileHandler(object):
 
 
 def fileHandler(extension, toString, fromString):
-    """Define toString, fromString methods for a file with extension.
+    """Decorator to define toString, fromString methods for a file with extension.
     It defines the _fileHandler dict for the class, used to store the various fileHandlers
     (for each extension type).
     """
@@ -141,15 +145,15 @@ def fileHandler(extension, toString, fromString):
 def update(updateHandler, push=False):
     """Decorator to register updateHandler function
     It also defines the _update method and _updateHandlers list for the class. 
+
+    :param updateHandler: a function to update the dataDict with profile:
     
-    profile updateHandler function:
-    
-        updateHandler(obj, dataDict) -> dataDict
-        
-        obj: object that is being restored
-        dataDict: (attribute, value) pairs
-        
-        returns: dataDict in-line with obj
+                updateHandler(obj, dataDict) -> dataDict
+                    obj: object that is being restored
+                    dataDict: original dict with (attribute, value) pairs
+                    returns: dataDict consistent with obj
+
+    :param push: push to the front of the _updateHandlersList (i.e executed first)
     """
 
     def theDecorator(cls):
@@ -392,6 +396,7 @@ class CcpNmrJson(TraitBase):
         defaults[Constants.CLASSVERSION] = self.classVersion
         defaults[Constants.USER] = getpass.getuser()
         defaults[Constants.LASTPATH] = 'undefined'
+        defaults[Constants.TIMESTAMP] = str(now())
         return defaults
 
     # _metadata-specific json handler; note the invocation with the attribute, not a string!
@@ -414,10 +419,20 @@ class CcpNmrJson(TraitBase):
     #     "Return metadata dict"
     #     return getattr(self, Constants.METADATA)
 
-    def setJsonMetadata(self, key, value):
-        """Update Json metadata with kwds (key,value) pairs; guard for any json-related keys
-        that should not be changed this way
+    def setJsonMetadata(self, key, value, force=False):
+        """Update Json metadata with kwds (key,value) pairs;
+        guard for any json-related keys that should not be changed this way
+        :param key: the key of the metadata to be updated
+        :param value: the value of the metadata to be updated; must be json serialisable
         """
+        if key in Constants.METADATA_KEYS and not force:
+            raise ValueError('setJsonMetadata: Attempted to set protected metadata key "%s" on object %s' %
+                             (key, self))
+        try:
+            _tmp = json.dumps(value)
+        except Exception:
+            raise ValueError('setJsonMetadata: Attempted to set metadata key "%s" on object %s '
+                             'to non Json-serialisable value %r' % (key, self, value))
         self._metadata[key] = value
 
     def getJsonMetadata(self, *keys) -> list:
@@ -452,7 +467,10 @@ class CcpNmrJson(TraitBase):
 
     def __init__(self, **metadata):
         super().__init__()
-        self._metadata.update(metadata)
+        for key, value in metadata.items():
+            # This affords the necesary safeguarding against accidentially overwriting
+            # any protected keys.
+            self.setJsonMetadata(key=key, value=value)
 
     def duplicate(self, **metadata):
         """Convenience method to return a duplicate of self, using toJson and fromJson methods
@@ -604,8 +622,9 @@ class CcpNmrJson(TraitBase):
         if (handler := _fileHandlers.get(extension)) is None:
             raise RuntimeError('Unable to save; no fileHandler defined for extension "%s"' % extension)
 
-        handler.save(self, path, **kwds)
         self._metadata[Constants.LASTPATH] = str(path)
+        self._metadata[Constants.TIMESTAMP] = str(now())
+        handler.save(self, path, **kwds)
 
     def restore(self, path, **kwds):
         """Restore from file using appropriate handlers depending on extension; return self

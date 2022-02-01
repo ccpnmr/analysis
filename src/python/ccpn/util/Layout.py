@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:30:51 +0000 (Thu, January 13, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-01 15:30:10 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -38,8 +38,10 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.Path import aPath
 from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 
+from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY
 
-StateDirName = 'state'
+
+StateDirName = CCPN_STATE_DIRECTORY
 DefaultLayoutFileName = 'Layout.json'
 Warning = "warning"
 WarningMessage = "Warning. Any changes in this file will be overwritten when saving a new layout."
@@ -210,8 +212,7 @@ def updateSavedLayout(mainWindow):
 
 def saveLayoutToJson(mainWindow, jsonFilePath=None):
     """
-
-    :param application:
+    :param mainWindow:
     :param jsonFilePath: User defined file path where to save the layout. Default is in .ccpn/layout/v3Layout.json
     :return: None
     """
@@ -225,7 +226,7 @@ def saveLayoutToJson(mainWindow, jsonFilePath=None):
             json.dump(layout, file, sort_keys=False, indent=4, separators=(',', ': '))
 
     except Exception as e:
-        getLogger().debug('Impossible to save Layout %s' % e)
+        getLogger().debug('Error saving Layout to "%s":  %s' % (jsonFilePath, e))
 
 
 def _ccpnModulesImporter(path, neededModules):
@@ -275,10 +276,13 @@ def _openCcpnModule(mainWindow, ccpnModules, className, moduleName=None):
                     getLogger().debug("Layout restore failed: %s" % e)
 
 
-def _getApplicationSpecificModules(mainWindow, applicationName):
-    """init imports. try except as some applications may not be distribuited """
+def _getApplicationSpecificModules(mainWindow, applicationName) -> list:
+    """init imports.
+     use try except as some applications may not have been distributed
+     :return a list of modules
+     """
     modules = []
-    from ccpn.framework.Framework import AnalysisAssign, AnalysisMetabolomics, AnalysisStructure, AnalysisScreen
+    from ccpn.framework.Application import AnalysisAssign, AnalysisMetabolomics, AnalysisStructure, AnalysisScreen
 
     if applicationName == AnalysisScreen:
         try:

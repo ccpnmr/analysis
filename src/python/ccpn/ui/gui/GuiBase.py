@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 11:22:11 +0000 (Fri, January 21, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-01 17:08:13 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,17 +28,19 @@ __date__ = "$Date: 2022-01-18 10:28:48 +0000 (Tue, January 18, 2022) $"
 #=========================================================================================
 
 import os
-from tqdm import tqdm
+import platform
 
+from tqdm import tqdm
 from functools import partial
 from typing import Union, Optional, List, Tuple, Sequence
 
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication
 
-from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU, CCPNPLUGINSMENU, PLUGINSMENU
-from ccpn.framework.PathsAndUrls import userPreferencesPath,  userPreferencesDirectory,  \
-    macroPath, CCPN_EXTENSION, CCPN_ARCHIVES_DIRECTORY
+from ccpn.framework.PathsAndUrls import \
+    macroPath, \
+    widgetsPath, \
+    CCPN_EXTENSION, \
+    CCPN_ARCHIVES_DIRECTORY
 
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
@@ -46,17 +48,38 @@ from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.lib.Pid import Pid, PREFIXSEP
+from ccpn.core.lib.ContextManagers import \
+    catchExceptions, \
+    undoBlockWithoutSideBar, \
+    undoBlock, \
+    notificationEchoBlocking, \
+    logCommandManager
 
+from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable
 from ccpn.util.decorators import logCommand
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideBar, undoBlock, \
-    notificationEchoBlocking, logCommandManager
 from ccpn.util.Path import Path, aPath
+import ccpn.util.Layout as Layout
 
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.FileDialog import ProjectFileDialog, DataFileDialog, NefFileDialog, \
-    ArchivesFileDialog, MacrosFileDialog, CcpnMacrosFileDialog, LayoutsFileDialog, NMRStarFileDialog, SpectrumFileDialog, \
+from ccpn.ui.gui.widgets.FileDialog import \
+    ProjectFileDialog, \
+    DataFileDialog, \
+    NefFileDialog, \
+    ArchivesFileDialog, \
+    MacrosFileDialog, \
+    CcpnMacrosFileDialog, \
+    LayoutsFileDialog, \
+    NMRStarFileDialog, \
+    SpectrumFileDialog, \
     ProjectSaveFileDialog
+
+from ccpn.ui.gui.widgets.Menu import \
+    SHOWMODULESMENU, \
+    CCPNMACROSMENU, \
+    TUTORIALSMENU, \
+    CCPNPLUGINSMENU, \
+    PLUGINSMENU
 
 
 class GuiBase(object):
@@ -64,7 +87,13 @@ class GuiBase(object):
     """
 
     def __init__(self):
-        pass
+        # GWV these attributes should move to the GUI class (in 3.2x ??)
+        # For now, initialised by calls in Gui.__init_ as we need programme
+        # arguments and preferences to have been initialised
+        self._styleSheet = None
+        self._colourScheme = None
+        self._fontSettings = None
+        self._menuSpec = None
 
     def _setupMenus(self):
         """Setup the menu specification.
@@ -164,20 +193,20 @@ class GuiBase(object):
             ("Export", (("Nef File", self._exportNEF, [('shortcut', 'ex'), ('enabled', True)]),
                         )),
             (),
-            ("Layout", (("Save", self.saveLayout, [('enabled', True)]),
-                        ("Save as...", self.saveLayoutAs, [('enabled', True)]),
+            ("Layout", (("Save", self._saveLayoutCallback, [('enabled', True)]),
+                        ("Save as...", self._saveLayoutAsCallback, [('enabled', True)]),
                         (),
-                        ("Restore last", self.restoreLastSavedLayout, [('enabled', True)]),
-                        ("Restore from file...", self.restoreLayoutFromFile, [('enabled', True)]),
+                        ("Restore last", self._restoreLastSavedLayoutCallback, [('enabled', True)]),
+                        ("Restore from file...", self._restoreLayoutFromFileCallback, [('enabled', True)]),
                         (),
                         ("Open pre-defined", ()),
 
                         )),
-            ("Summary", self.showProjectSummaryPopup),
+            ("Summary", self._showProjectSummaryPopup),
             ("Archive", self._archiveProjectCallback, [('enabled', False)]),
             ("Restore From Archive...", self._restoreFromArchiveCallback, [('enabled', False)]),
             (),
-            ("Preferences...", self.showApplicationPreferences, [('shortcut', '⌃,')]),
+            ("Preferences...", self._showApplicationPreferences, [('shortcut', '⌃,')]),
             (),
             ("Quit", self._quitCallback, [('shortcut', '⌃q')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ]
@@ -296,28 +325,53 @@ class GuiBase(object):
 
         ms.append(('Help', [
             (TUTORIALSMENU, ([
-
                 ("None", None, [('checkable', True),
                                 ('checked', False)])
                 ])),
             ("Show Tip of the Day", partial(self._displayTipOfTheDay, standalone=True)),
             ("Key Concepts", self._displayKeyConcepts),
-            ("Show Shortcuts", self.showShortcuts),
-            ("Show API Documentation", self.showVersion3Documentation),
-            ("Show License", self.showCcpnLicense),
+            ("Show Shortcuts", self._showShortcuts),
+            ("Show API Documentation", self._showVersion3Documentation),
+            ("Show License", self._showCcpnLicense),
             (),
-            ("CcpNmr Homepage", self.showAboutCcpn),
-            ("CcpNmr V3 Forum", self.showForum),
+            ("CcpNmr Homepage", self._showAboutCcpn),
+            ("CcpNmr V3 Forum", self._showForum),
             (),
             # ("Inspect Code...", self.showCodeInspectionPopup, [('shortcut', 'gv'),
             #                                                    ('enabled', False)]),
             # ("Show Issues...", self.showIssuesList),
-            ("Check for Updates...", self.showUpdatePopup),
-            ("Register...", self.showRegisterPopup),
+            ("Check for Updates...", self._showUpdatePopup),
+            ("Register...", self._showRegisterPopup),
             (),
-            ("About CcpNmr V3...", self.showAboutPopup),
+            ("About CcpNmr V3...", self._showAboutPopup),
             ]
         ))
+
+    def _setColourSchemeAndStyleSheet(self):
+        """Set the colourScheme and stylesheet as determined by arguments --dark, --light or preferences
+        """
+        if self.args.darkColourScheme:
+            colourScheme = 'dark'
+        elif self.args.lightColourScheme:
+            colourScheme = 'light'
+        else:
+            colourScheme = self.preferences.general.colourScheme
+
+        if colourScheme is None:
+            raise RuntimeError('invalid colourScheme')
+        self._colourScheme = colourScheme
+
+        _qssPath = widgetsPath / ('%sStyleSheet.qss' % colourScheme.capitalize())
+        with _qssPath.open(mode='r') as fp:
+            styleSheet = fp.read()
+
+        if platform.system() == 'Linux':
+            _qssPath = widgetsPath / ('%sAdditionsLinux.qss' % colourScheme.capitalize())
+            with _qssPath.open(mode='r') as fp:
+                additions = fp.read()
+            styleSheet += additions
+
+        self._styleSheet = styleSheet
 
     #-----------------------------------------------------------------------------------------
     # callback methods
@@ -399,18 +453,24 @@ class GuiBase(object):
 
     def _saveCallback(self):
         """The project callback"""
-        succes = self._saveProject(newPath=None, createFallback=True, overwriteExisting=True)
+        successful = self.saveProject()
+        if not successful:
+            getLogger().warning("Error saving project")
+            MessageDialog.showError('Save Project', 'Error saving %s', self.project)
 
     def _saveAsCallback(self):
-        """Opens save Project as dialog box and saves project to path specified in the file dialog."""
+        """Opens save Project as dialog box and saves project to path specified
+        in the file dialog.
+        """
         oldPath = self.project.path
-        newPath = getSaveDirectory(self.ui.mainWindow, self.preferences)
+        newPath = _getSaveDirectory(self.mainWindow)
 
-        with catchExceptions(application=self, errorStringTemplate='Error saving project: %s', printTraceBack=True):
+        with catchExceptions(application=self,
+                             errorStringTemplate='Error saving project: %s',
+                             printTraceBack=True):
             if newPath:
                 # Next line unnecessary, but does not hurt
-                successful = self._saveProject(newPath=newPath, createFallback=False)
-
+                successful = self.saveProjectAs(newPath=newPath, overwrite=True)
                 if not successful:
                     getLogger().warning("Saving project to %s aborted" % newPath)
             else:
@@ -420,15 +480,15 @@ class GuiBase(object):
             self._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
             self.ui.mainWindow._fillRecentProjectsMenu()  # Update the menu
 
-            return successful
-
     def _archiveProjectCallback(self):
 
-        path = self.archiveProject()
-        MessageDialog.showInfo('Project Archived',
-                               'Project archived to %s' % path )
+        if (path := self.saveToArchive()) is None:
+            MessageDialog.showInfo('Archive Project',
+                                   'Unable to archive Project' )
 
-        if self.hasGui:
+        else:
+            MessageDialog.showInfo('Archive Project',
+                                   'Project archived to %s' % path )
             self.ui.mainWindow._updateRestoreArchiveMenu()
 
     def _restoreFromArchiveCallback(self):
@@ -438,17 +498,38 @@ class GuiBase(object):
         _filter = '*.tgz'
         dialog = ArchivesFileDialog(parent=self.ui.mainWindow,
                                     acceptMode='select',
-                                    directory=self._archiveDirectory,
+                                    directory=archivesDirectory,
                                     fileFilter=_filter)
         dialog._show()
         archivePath = dialog.selectedFile()
 
-        if archivePath:
-            newProject = self.restoreFromArchive(archivePath)
-            MessageDialog.showInfo('Project Restore from Archive',
-                                   'Project restored to %s' % newProject.path )
+        if archivePath and \
+           (newProject := self.restoreFromArchive(archivePath)) is not None:
+            MessageDialog.showInfo('Restore from Archive',
+                                   'Project restored as %s' % newProject.path )
 
-    def showProjectSummaryPopup(self):
+    def _saveLayoutCallback(self):
+        Layout.updateSavedLayout(self.ui.mainWindow)
+        getLogger().info('Layout saved')
+
+    def _saveLayoutAsCallback(self):
+        path = _getSaveLayoutPath(self.mainWindow)
+        try:
+            Layout.saveLayoutToJson(self.mainWindow, jsonFilePath=path)
+            getLogger().info('Layout saved to %s' % path)
+        except Exception as es:
+            getLogger().warning('Impossible to save layout. %s' % es)
+
+    def _restoreLastSavedLayoutCallback(self):
+        self.ui.mainWindow.moduleArea._closeAll()
+        Layout.restoreLayout(self.ui.mainWindow, self.layout, restoreSpectrumDisplay=True)
+
+    def _restoreLayoutFromFileCallback(self):
+        if (path := _getOpenLayoutPath(self.mainWindow)) is None:
+            return
+        self._restoreLayoutFromFile(path)
+
+    def _showProjectSummaryPopup(self):
         """Show the Project summary popup.
         """
         from ccpn.ui.gui.popups.ProjectSummaryPopup import ProjectSummaryPopup
@@ -458,6 +539,14 @@ class GuiBase(object):
             popup.show()
             popup.raise_()
             popup.exec_()
+
+    def _showApplicationPreferences(self):
+        """
+        Displays Application Preferences Popup.
+        """
+        from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
+        popup = PreferencesPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, preferences=self.preferences)
+        popup.exec_()
 
     def _quitCallback(self, event=None):
         """
@@ -515,12 +604,170 @@ class GuiBase(object):
                 for sLoader in tqdm(spectrumLoaders):
                     sLoader.load()
 
+    #-----------------------------------------------------------------------------------------
+    # Help -->
+    #-----------------------------------------------------------------------------------------
+
+    def _showBeginnersTutorial(self):
+        from ccpn.framework.PathsAndUrls import beginnersTutorialPath
+        self._systemOpen(beginnersTutorialPath)
+
+    def _showBackboneTutorial(self):
+        from ccpn.framework.PathsAndUrls import backboneAssignmentTutorialPath
+        self._systemOpen(backboneAssignmentTutorialPath)
+
+    def _showCSPtutorial(self):
+        from ccpn.framework.PathsAndUrls import cspTutorialPath
+        self._systemOpen(cspTutorialPath)
+
+    def _showScreenTutorial(self):
+        from ccpn.framework.PathsAndUrls import screenTutorialPath
+        self._systemOpen(screenTutorialPath)
+
+    def _showVersion3Documentation(self):
+        """Displays CCPN wrapper documentation in a module.
+        """
+        from ccpn.framework.PathsAndUrls import documentationPath
+        self._showHtmlFile("Analysis Version-3 Documentation", documentationPath)
+
+    def _showForum(self):
+        """Displays Forum in a module.
+        """
+        from ccpn.framework.PathsAndUrls import ccpnForum
+        self._showHtmlFile("Analysis Version-3 Forum", ccpnForum)
+
+    def _showShortcuts(self):
+        from ccpn.framework.PathsAndUrls import shortcutsPath
+        self._systemOpen(shortcutsPath)
+
+    def _showAboutPopup(self):
+        from ccpn.ui.gui.popups.AboutPopup import AboutPopup
+        popup = AboutPopup(parent=self.ui.mainWindow)
+        popup.exec_()
+
+    def _showAboutCcpn(self):
+        from ccpn.framework.PathsAndUrls import ccpnUrl
+        self._showHtmlFile("About CCPN", ccpnUrl)
+
+    def _showIssuesList(self):
+        from ccpn.framework.PathsAndUrls import ccpnIssuesUrl
+        self._showHtmlFile("CCPN Issues", ccpnIssuesUrl)
+
+    def _showTutorials(self):
+        from ccpn.framework.PathsAndUrls import ccpnTutorials
+        self._showHtmlFile("CCPN Tutorials", ccpnTutorials)
+
+    def _showRegisterPopup(self):
+        """Open the registration popup
+        """
+        self.ui._registerDetails()
+
+    def _showCcpnLicense(self):
+        from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
+        self._showHtmlFile("CCPN Licence", ccpnLicenceUrl)
+
+    def _showUpdatePopup(self):
+        """Open the update popup
+        CCPNINTERNAL: Also called from.Gui._executeUpdates
+        """
+        from ccpn.framework.update.UpdatePopup import UpdatePopup
+        from ccpn.util import Url
+
+        # check valid internet connection first
+        if Url.checkInternetConnection():
+            updatePopup = UpdatePopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+            updatePopup.exec_()
+
+            # if updates have been installed then popup the quit dialog with no cancel button
+            if updatePopup._numUpdatesInstalled > 0:
+                self.ui.mainWindow._closeWindowFromUpdate(disableCancel=True)
+
+        else:
+            MessageDialog.showWarning('Check For Updates',
+                                      'Could not connect to the update server, please check your internet connection.')
 
     #-----------------------------------------------------------------------------------------
-    # Menu Implementation methods
+    # Inactive
     #-----------------------------------------------------------------------------------------
 
-    def _addApplicationMenuSpec(self, spec, position=5):
+    def _showLicense(self):
+        from ccpn.framework.PathsAndUrls import licensePath
+        self._showHtmlFile("CCPN Licence", licensePath)
+
+    def _showSubmitMacroPopup(self):
+        """Open the submit macro popup
+        """
+        from ccpn.ui.gui.popups.SubmitMacroPopup import SubmitMacroPopup
+        from ccpn.util import Url
+
+        # check valid internet connection first
+        if Url.checkInternetConnection():
+            submitMacroPopup = SubmitMacroPopup(parent=self.ui.mainWindow)
+            submitMacroPopup.show()
+            submitMacroPopup.raise_()
+
+        else:
+            MessageDialog.showWarning('Submit Macro',
+                                      'Could not connect to the server, please check your internet connection.')
+
+    def _showFeedbackPopup(self):
+        """Open the submit feedback popup
+        """
+        from ccpn.ui.gui.popups.FeedbackPopup import FeedbackPopup
+        from ccpn.util import Url
+
+        # check valid internet connection first
+        if Url.checkInternetConnection():
+
+            # this is non-modal so you can copy/paste from the project as required
+            feedbackPopup = FeedbackPopup(parent=self.ui.mainWindow)
+            feedbackPopup.show()
+            feedbackPopup.raise_()
+
+        else:
+            MessageDialog.showWarning('Submit Feedback',
+                                      'Could not connect to the server, please check your internet connection.')
+
+    #-----------------------------------------------------------------------------------------
+    # Implementation methods
+    #-----------------------------------------------------------------------------------------
+
+    def _showHtmlFile(self, title, urlPath):
+        """Displays html files in program QT viewer or using native webbrowser
+        depending on useNativeWebbrowser option in preferences
+        """
+        mainWindow = self.ui.mainWindow
+        useNative = self.preferences.general.useNativeWebbrowser
+
+        if useNative:
+            import webbrowser
+            import posixpath
+
+            # may be a Path object
+            urlPath = str(urlPath)
+
+            urlPath = urlPath or ''
+            if (urlPath.startswith('http://') or urlPath.startswith('https://')):
+                pass
+            elif urlPath.startswith('file://'):
+                urlPath = urlPath[len('file://'):]
+                if isWindowsOS():
+                    urlPath = urlPath.replace(os.sep, posixpath.sep)
+                else:
+                    urlPath = 'file://' + urlPath
+            else:
+                if isWindowsOS():
+                    urlPath = urlPath.replace(os.sep, posixpath.sep)
+                else:
+                    urlPath = 'file://' + urlPath
+
+            webbrowser.open(urlPath)
+            # self._systemOpen(path)
+
+        else:
+            mainWindow.newHtmlModule(urlPath=urlPath, position='top', relativeTo=mainWindow.moduleArea)
+
+    def _addApplicationMenuSpec(self, spec, position=-3):
         """Add an entirely new menu at specified position"""
         self._menuSpec.insert(position, spec)
 
@@ -575,16 +822,27 @@ class GuiBase(object):
     def _testShortcuts1(self):
         print('>>> Testing shortcuts1')
 
+    # GWV 22022/1/24: Copied from Ui
+    # def addMenu(self, name, position=None):
+    #     """
+    #     Add a menu specification for the top menu bar.
+    #     """
+    #     if position is None:
+    #         position = len(self._menuSpec)
+    #     self._menuSpec.insert(position, (str(name), []))
+
 #end class
 
 #-----------------------------------------------------------------------------------------
 # Helper code
 #-----------------------------------------------------------------------------------------
 
-def getSaveDirectory(parent, preferences=None):
-    """Opens save Project as dialog box and gets directory specified in the file dialog."""
+def _getSaveDirectory(mainWindow):
+    """Opens save Project as dialog box and gets directory specified in
+    the file dialog.
+    """
 
-    dialog = ProjectSaveFileDialog(parent=parent, acceptMode='save')
+    dialog = ProjectSaveFileDialog(parent=mainWindow, acceptMode='save')
     dialog._show()
     newPath = dialog.selectedFile()
 
@@ -594,7 +852,7 @@ def getSaveDirectory(parent, preferences=None):
 
     # ignore if empty
     if not newPath:
-        return
+        return None
 
     if newPath:
 
@@ -617,3 +875,45 @@ def getSaveDirectory(parent, preferences=None):
                 newPath = ''
 
         return newPath
+
+def _getOpenLayoutPath(mainWindow):
+    """Opens a saved Layout as dialog box and gets directory specified in the
+    file dialog.
+    :return selected path or None
+    """
+
+    fType = 'JSON (*.json)'
+    dialog = LayoutsFileDialog(parent=mainWindow, acceptMode='open', fileFilter=fType)
+    dialog._show()
+    path = dialog.selectedFile()
+    if not path:
+        return None
+    if path:
+        return path
+
+def _getSaveLayoutPath(mainWindow):
+    """Opens save Layout as dialog box and gets directory specified in the
+    file dialog.
+    :return selected path or None
+    """
+
+    jsonType = '.json'
+    fType = 'JSON (*.json)'
+    dialog = LayoutsFileDialog(parent=mainWindow, acceptMode='save', fileFilter=fType)
+    dialog._show()
+    newPath = dialog.selectedFile()
+    if not newPath:
+        return None
+
+    newPath = aPath(newPath)
+    if newPath.exists():
+        # should not really need to check the second and third condition above, only
+        # the Qt dialog stupidly insists a directory exists before you can select it
+        # so if it exists but is empty then don't bother asking the question
+        title = 'Overwrite path'
+        msg = 'Path "%s" already exists, continue?' % newPath
+        if not MessageDialog.showYesNo(title, msg):
+            return None
+
+    newPath.assureSuffix(jsonType)
+    return newPath

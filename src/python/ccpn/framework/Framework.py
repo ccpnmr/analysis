@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 16:02:36 +0000 (Tue, February 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-01 17:08:13 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1237,7 +1237,7 @@ class Framework(NotifierBase, GuiBase):
 
             if makeNewProject:
                 self._closeProject()
-                self.project = self.newProject(_loader._nefDict.name)
+                self._project = self.newProject(_loader._nefDict.name)
 
             # import from the loader into the current project
             self.importFromLoader(_loader, reader=_nefReader)
@@ -1379,15 +1379,13 @@ class Framework(NotifierBase, GuiBase):
     # Archive code
     #-----------------------------------------------------------------------------------------
 
-    # @logCommand('application.')
-    # def archiveProject(self) -> Path:
-    #     """Archive the project
-    #     :return location of the archive as a Path instance
-    #     """
-    #     archivePath = self.project.makeArchive()
-    #     if self.hasGui:
-    #         self.ui.mainWindow._updateRestoreArchiveMenu()
-    #     return archivePath
+    @logCommand('application.')
+    def saveToArchive(self) -> Path:
+        """Archive the project.
+        :return location of the archive as a Path instance
+        """
+        archivePath = self.project.saveToArchive()
+        return archivePath
 
     @logCommand('application')
     def restoreFromArchive(self, archivePath) -> Project:

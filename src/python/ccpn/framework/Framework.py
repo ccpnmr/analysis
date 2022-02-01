@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 15:30:04 +0000 (Tue, February 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-01 16:02:36 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1395,7 +1395,7 @@ class Framework(NotifierBase, GuiBase):
         :return the restored project or None on error
         """
         from ccpn.core.lib.ProjectArchiver import ProjectArchiver
-        archiver = ProjectArchiver(project=self.project)
+        archiver = ProjectArchiver(projectPath=self.project.path)
 
         if (_newProjectPath := archiver.restoreArchive(archivePath=archivePath)) is not None and \
            (_newProject := self.loadProject(_newProjectPath)) is not None:

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 15:30:05 +0000 (Tue, February 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-01 16:02:36 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -484,7 +484,7 @@ class GuiBase(object):
 
         if (path := self.project.makeArchive()) is None:
             MessageDialog.showInfo('Archive Project',
-                                   'Unable to archive Projec' )
+                                   'Unable to archive Project' )
 
         else:
             MessageDialog.showInfo('Archive Project',

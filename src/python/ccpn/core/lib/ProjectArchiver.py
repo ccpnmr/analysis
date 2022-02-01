@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 15:30:04 +0000 (Tue, February 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-01 16:02:36 +0000 (Tue, February 01, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -62,13 +62,8 @@ class ProjectArchiver(object):
     """A class to manage the archives of a project
     """
 
-    def __init__(self, project):
-        self.project = project
-
-    @property
-    def _projectPath(self) -> Path:
-        """:return a project.path as a Path instance"""
-        return aPath(self.project.path)
+    def __init__(self, projectPath):
+        self._projectPath = aPath(projectPath)
 
     @property
     def archiveDirectory(self) -> Path:
@@ -87,7 +82,8 @@ class ProjectArchiver(object):
                 or None on IOerror
         """
         now = datetime.datetime.now().strftime('-%Y-%m-%d-%H%M%S')
-        archivePath = self.archiveDirectory / (self.project.name + \
+        name = self._projectPath.basename
+        archivePath = self.archiveDirectory / (name + \
                                                now + CCPN_DIRECTORY_SUFFIX + ARCHIVE_SUFFIX)
 
         cwd = os.getcwd()
@@ -142,4 +138,4 @@ class ProjectArchiver(object):
         return _restoredPath
 
     def __str__(self):
-        return '<ProjectArchiver: %s>' % self.project.pid
+        return '<ProjectArchiver: %s>' % self._projectPath

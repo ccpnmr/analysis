@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-02 13:04:53 +0000 (Wed, February 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-02 14:03:08 +0000 (Wed, February 02, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -168,7 +168,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # install handler to resize when moving between displays
         self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
         # self.setUnifiedTitleAndToolBarOnMac(True) #uncomment this to remove the extra title bar on osx 10.14+
-
 
     @property
     def project(self):
@@ -526,7 +525,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         if badSpectra:
             text = 'Use menu "Spectrum --> Validate paths..." Or "VP" shortcut to correct.\n'
             text += 'Please inspect file path(s) for:\n'
-            for sp in badSpectra: # these can be >1000 lines message. Added in a scrollable area.
+            for sp in badSpectra:  # these can be >1000 lines message. Added in a scrollable area.
                 text += '%s\n' % str(sp)
             title = 'Detected invalid Spectrum file paths'
             showWarning(title=title, message=text, scrollableMessage=True)
@@ -1056,7 +1055,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 reply = QUIT_WITHOUT_SAVING
 
         if (QUIT in reply) and (SAVE_DATA in reply or SAVE_QUIT in reply):
-        # if (reply in [SAVE_QUIT, SAVE_DATA, SAVE]):
+            # if (reply in [SAVE_QUIT, SAVE_DATA, SAVE]):
             if event:
                 event.accept()
 
@@ -1074,7 +1073,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                     event.ignore()
 
         elif (QUIT in reply and SAVE_DATA not in reply) or (reply == QUIT_WITHOUT_SAVING):
-        # elif (reply in [QUIT, QUIT_WITHOUT_SAVING]):
+            # elif (reply in [QUIT, QUIT_WITHOUT_SAVING]):
             if event:
                 event.accept()
 
@@ -1192,7 +1191,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         createNewProject = dataLoader.createNewProject
         ignore = False
 
-        # local import here, as checkPathForDataLoaders needs to be called first to assure proper import orer
+        # local import here, as checkPathForDataLoaders needs to be called first to assure proper import order
         from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
         from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
@@ -1222,16 +1221,16 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                                                 f'already exists in the project\n'
                                                 '\n'
                                                 'do you want to load?'
-                               )
+                                                )
             if not ok:
                 ignore = True
 
         elif dataLoader.dataFormat == DirectoryDataLoader.dataFormat and len(dataLoader) > MAXITEMLOGGING:
-            ok = MessageDialog.showYesNoWarning('Directory "%s"\n' %dataLoader.path,
+            ok = MessageDialog.showYesNoWarning('Directory "%s"\n' % dataLoader.path,
                                                 f'\n'
                                                 'CAUTION: You are trying to load %d items\n'
                                                 '\n'
-                                                'Do you want to continue?' % (len(dataLoader,))
+                                                'Do you want to continue?' % (len(dataLoader, ))
                                                 )
 
             if not ok:
@@ -1288,6 +1287,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 with undoBlockWithoutSideBar():
                     result = dLoader.load()
             return result
+
         #end def
 
         objs = []
@@ -1397,6 +1397,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
         from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
 
+        makeArchive = False
         path = dataLoader.path
         if dataLoader.dataFormat == CcpNmrV2ProjectDataLoader.dataFormat:
             ok = MessageDialog.showYesNoWarning('Load Project',
@@ -1404,7 +1405,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                                                 '\n'
                                                 'CAUTION:\n'
                                                 '\tThe project will be converted to a version-3 project and saved '
-                                                '\tas a new directory with .cppn extension.\n'
+                                                '\tas a new directory with .ccpn extension.\n'
                                                 '\n'
                                                 'Do you want to continue loading?')
 
@@ -1414,22 +1415,33 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 return None
 
         elif dataLoader.dataFormat == CcpNmrV3ProjectDataLoader.dataFormat and Project._needsUpgrading(path):
-            ok = MessageDialog.showYesNoWarning('Load Project',
-                                                f'Project "%s" was saved with an earlier version of AnalysisV3, '
-                                                'and will be converted to version %s.\n'
-                                                '\n'
-                                                'CAUTION:\n' 
-                                                '\tAfter saving, it can NO LONGER be loaded in earlier AnalysisV3 versions.\n'
-                                                '\t(If you are in any doubt, use "File --> Save As..)\n'
-                                                '\n'
-                                                'Do you want to continue loading?' % (
-                                                    path, self.application.applicationVersion.withoutRelease())
-                                                )
+            DONT_OPEN = "Don't Open"
+            CONTINUE = 'Continue'
+            MAKE_ARCHIVE = 'Make an archive (.tgz) of the project (readable by versions 3.0.x)'
 
-            if not ok:
+            ok = MessageDialog.showMulti('Load Project',
+                                         f'You are opening an older project (version 3.0.x).\n'
+                                         f'{path}\n'
+                                         f'\n'
+                                         f'When you save, it will be upgraded and will not be readable by previous versions of the software (except via NEF export/import).\n'
+                                         f'Note that the archive will only include ccpn project specific folders.',
+                                         [DONT_OPEN, CONTINUE],
+                                         checkbox=MAKE_ARCHIVE, checked=False,
+                                         )
+
+            if not any(ss in ok for ss in [DONT_OPEN, MAKE_ARCHIVE, CONTINUE]):
                 # skip loading so that user can backup/copy project
                 getLogger().info('==> Cancelled loading ccpn project "%s"' % path)
                 return None
+
+            if DONT_OPEN in ok:
+                # skip loading so that user can backup/copy project
+                getLogger().info('==> Cancelled loading ccpn project "%s"' % path)
+                return None
+
+            elif MAKE_ARCHIVE in ok:
+                # make a backup
+                makeArchive = True
 
         if not self._queryCloseProject(title='Load Project', phrase='open another'):
             return None
@@ -1440,6 +1452,20 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         try:
             with progressManager(self, 'Loading project %s ... ' % dataLoader.path):
+
+                if makeArchive:
+                    # make an archive in the project specific archive folder before loading
+                    from ccpn.core.lib.ProjectArchiver import ProjectArchiver
+
+                    archiver = ProjectArchiver(projectPath=dataLoader.path)
+                    archivePath = archiver.makeArchive()
+                    getLogger().info('==> Project archived to %s' % archivePath)
+                    if not archivePath:
+                        MessageDialog.showWarning('Archive Project',
+                                                f'There was a problem creating an archive for {dataLoader.path}',
+                                                parent=self
+                                                )
+                # continue loading
                 _loaded = dataLoader.load()
                 if not _loaded:
                     return None

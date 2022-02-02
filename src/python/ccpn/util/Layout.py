@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 15:30:10 +0000 (Tue, February 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-02 10:17:26 +0000 (Wed, February 02, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -282,9 +282,9 @@ def _getApplicationSpecificModules(mainWindow, applicationName) -> list:
      :return a list of modules
      """
     modules = []
-    from ccpn.framework.Application import AnalysisAssign, AnalysisMetabolomics, AnalysisStructure, AnalysisScreen
+    from ccpn.framework.Application import ANALYSIS_ASSIGN, ANALYSIS_METABOLOMICS, ANALYSIS_STRUCTURE, ANALYSIS_SCREEN
 
-    if applicationName == AnalysisScreen:
+    if applicationName == ANALYSIS_SCREEN:
         try:
             from ccpn.AnalysisScreen.gui import modules as aS
 
@@ -292,7 +292,7 @@ def _getApplicationSpecificModules(mainWindow, applicationName) -> list:
         except Exception as e:
             getLogger().debug("Import Error for AnalysisScreen, %s" % e)
 
-    if applicationName == AnalysisAssign:
+    if applicationName == ANALYSIS_ASSIGN:
         try:
             from ccpn.AnalysisAssign import modules as aA
 
@@ -300,7 +300,7 @@ def _getApplicationSpecificModules(mainWindow, applicationName) -> list:
         except Exception as e:
             getLogger().debug("Import Error for AnalysisAssign, %s" % e)
 
-    if applicationName == AnalysisMetabolomics:
+    if applicationName == ANALYSIS_METABOLOMICS:
         try:
             from ccpn.AnalysisMetabolomics.ui.gui import modules as aM
 
@@ -308,7 +308,7 @@ def _getApplicationSpecificModules(mainWindow, applicationName) -> list:
         except Exception as e:
             getLogger().debug("Import Error for AnalysisMetabolomics, %s" % e)
 
-    if applicationName == AnalysisStructure:
+    if applicationName == ANALYSIS_STRUCTURE:
         try:
             from ccpn.AnalysisStructure import modules as aS
 

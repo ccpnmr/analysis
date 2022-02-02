@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-02 10:07:57 +0000 (Wed, February 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-02 10:17:26 +0000 (Wed, February 02, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -30,11 +30,11 @@ from ccpn.util.decorators import singleton
 from ccpn.framework.Translation import languages, defaultLanguage
 from ccpn.ui import interfaces, defaultInterface
 
-AnalysisAssign = 'AnalysisAssign'
-AnalysisScreen = 'AnalysisScreen'
-AnalysisMetabolomics = 'AnalysisMetabolomics'
-AnalysisStructure = 'AnalysisStructure'
-applicationNames = [AnalysisAssign, AnalysisScreen, AnalysisMetabolomics, AnalysisStructure]
+ANALYSIS_ASSIGN = 'AnalysisAssign'
+ANALYSIS_SCREEN = 'AnalysisScreen'
+ANALYSIS_METABOLOMICS = 'AnalysisMetabolomics'
+ANALYSIS_STRUCTURE = 'AnalysisStructure'
+applicationNames = (ANALYSIS_ASSIGN, ANALYSIS_SCREEN, ANALYSIS_METABOLOMICS, ANALYSIS_STRUCTURE)
 
 
 def getApplication():

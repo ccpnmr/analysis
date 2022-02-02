@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-27 15:56:30 +0000 (Thu, January 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-02 18:20:55 +0000 (Wed, February 02, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -62,6 +62,7 @@ from ccpn.core.lib.ContextManagers import queueStateChange
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown, \
     colourNameNoSpace, _setColourPulldown, getSpectrumColour
+from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import DEFAULT_ISOTOPE_DICT
 from ccpn.util.OrderedSet import OrderedSet
 
@@ -255,31 +256,41 @@ class SpectrumPropertiesPopupABC(CcpnDialogMainWidget):
     def _resizeWidth(self, tab):
         """change the width to the new tab
         """
-        # create a singleshot - waits until gui is up-to-date before firing
-        QtCore.QTimer.singleShot(0, self._widthAdjust)
+        if tab != self.tabWidget.currentIndex():
+            # create a singleshot - waits until gui is up-to-date before firing
+            QtCore.QTimer.singleShot(0, self._widthAdjust)
 
-    def _widthAdjust(self, step=1024):
+    def _widthAdjust(self, step=1024, _lastStep=None, _lastWidth=None):
         """iterate until the width matches the tab contents
         """
-        if step < 1:
-            # exit as close enough to target width
-            return
+        try:
+            if step < 1:
+                # exit as close enough to target width - don't want widget iterating forever
+                return
 
-        # get the widths of the tabWidget and the current tab to match against
-        _tab = self.tabWidget.currentWidget()
-        _width = self.tabWidget.width()
-        _target = _tab._scrollContents.sizeHint().width() + self.BORDER_OFFSET
+            # get the widths of the tabWidget and the current tab to match against
+            tab = self.tabWidget.currentWidget()
+            width = self.tabWidget.width()
+            target = tab._scrollContents.sizeHint().width() + self.BORDER_OFFSET
 
-        if abs(_width - _target) >= step:
-            # change size
-            self.resize(self.width() + (step if _width < _target else -step), self.height())
-            # create another singleshot - waits until gui is up-to-date before firing
-            QtCore.QTimer.singleShot(0, partial(self._widthAdjust, step))
+            if (_lastStep == step) and (_lastWidth == width):
+                # stop if widget can't be resizing to the target width
+                return
 
-        else:
-            # half the step as closer to the target width
-            step /= 2
-            self._widthAdjust(step)
+            _lastStep, _lastWidth = step, width
+            while abs(width - target) < step:
+                step /= 2
+                if step < 1:
+                    # if too small then stop iteration
+                    break
+            else:
+                # adjust the width
+                self.resize(self.width() + (int(step) if width < target else -int(step)), self.height())
+                # create another singleshot - waits until gui is up-to-date before firing
+                QtCore.QTimer.singleShot(0, partial(self._widthAdjust, step, _lastStep, _lastWidth))
+
+        except Exception as es:
+            getLogger().debug2(f'_widthAdjust failed {es}')
 
 
 class _SpectrumPropertiesFrame(ScrollableFrame):
@@ -318,6 +329,11 @@ class SpectrumPropertiesPopup(SpectrumPropertiesPopupABC):
 
         super().__init__(parent=parent, mainWindow=mainWindow,
                          spectrum=spectrum, title=title, **kwds)
+
+        # define first, as calling routines are dependant on existance of attributes
+        self._generalTab = None
+        self._dimensionsTab = None
+        self._contoursTab = None
 
         if spectrum.dimensionCount == 1:
             self._generalTab = self._dimensionsTab = self._contoursTab = None

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-02 14:03:35 +0000 (Wed, February 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-02 16:25:59 +0000 (Wed, February 02, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -334,27 +334,26 @@ class Integral(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def limits(self, value):
-
         self._wrappedData.limits = value
 
-        # automatically calculates Volume given the limits for 1Ds
-        spectrum = self.integralList.spectrum
-
-        if spectrum.dimensionCount == 1:
-            for ii in range(spectrum.dimensionCount):
-                limits = value[ii] if value and len(value) > ii else ()
-                if len(limits) == 2:
-
-                    if spectrum.intensities is not None and spectrum.intensities.size != 0:
-                        limit1, limit2 = limits
-                        x = spectrum.positions
-                        index01 = np.where((x <= limit2) & (x >= limit1))
-                        values = spectrum.intensities[index01]
-                        self.value = float(trapz(values))
-
-                        # small change, only calculate if there is a peak
-                        if self.peak:
-                            self.peak.volume = self.value
+        # # automatically calculates Volume given the limits for 1Ds
+        # spectrum = self.integralList.spectrum
+        #
+        # if spectrum.dimensionCount == 1:
+        #     for ii in range(spectrum.dimensionCount):
+        #         limits = value[ii] if value and len(value) > ii else ()
+        #         if len(limits) == 2:
+        #
+        #             if spectrum.intensities is not None and spectrum.intensities.size != 0:
+        #                 limit1, limit2 = limits
+        #                 x = spectrum.positions
+        #                 index01 = np.where((x <= limit2) & (x >= limit1))
+        #                 values = spectrum.intensities[index01]
+        #                 self.value = float(trapz(values))
+        #
+        #                 # small change, only calculate if there is a peak
+        #                 if self.peak:
+        #                     self.peak.volume = self.value
 
     @property
     def pointLimits(self) -> List[Tuple[float, float]]:

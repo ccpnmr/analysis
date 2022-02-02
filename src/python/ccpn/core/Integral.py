@@ -4,7 +4,7 @@ Module documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 22:18:49 +0100 (Fri, August 20, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-02 14:03:35 +0000 (Wed, February 02, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -324,43 +324,18 @@ class Integral(AbstractWrapperObject):
 
     @property
     def limits(self) -> List[Tuple[float, float]]:
+        """Integration limits in axis value (ppm), per dimension, with lowest
+        ppm value first
+        :return list of (low_ppm, high_ppm) tuples
+        """
         return self._wrappedData.limits
-        # """Integration limits in axis value (ppm), per dimension, with lowest value first
-        #
-        # For Fid or sampled dimensions the individual limit values will be points"""
-        # result = []
-        # dataDimRefs = self.integralList.spectrum._mainDataDimRefs()
-        # for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-        #   dataDimRef = dataDimRefs[ii]
-        #   if dataDimRef is None:
-        #     value = (peakDim.position or 0)
-        #     halfWidth = 0.5 * (peakDim.boxWidth or 0)
-        #   else:
-        #     value = (peakDim.value or 0)
-        #     halfWidth = abs(0.5 * (peakDim.boxWidth or 0) * dataDimRef.valuePerPoint)
-        #   result.append((value - halfWidth, value + halfWidth))
-        # #
-        # return result
 
     @limits.setter
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def limits(self, value):
+
         self._wrappedData.limits = value
-        # dataDimRefs = self.integralList.spectrum._mainDataDimRefs()
-        # for ii,peakDim in enumerate(self._wrappedData.sortedPeakDims()):
-        #   dataDimRef = dataDimRefs[ii]
-        #   limit1, limit2 = value[ii]
-        #   if None in value[ii]:
-        #     peakDim.position = None
-        #     peakDim.boxWidth = None
-        #   elif dataDimRef is None:
-        #     peakDim.position = 0.5 * (limit1 + limit2)
-        #     peakDim.boxWidth = abs(limit1 - limit2)
-        #   else:
-        #     peakDim.value = 0.5 * (limit1 + limit2)
-        #     peakDim.boxWidth = abs((limit1 - limit2)/ dataDimRef.valuePerPoint)
-        #
 
         # automatically calculates Volume given the limits for 1Ds
         spectrum = self.integralList.spectrum

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 15:30:05 +0000 (Tue, February 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-02 10:17:26 +0000 (Wed, February 02, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -33,13 +33,13 @@ from typing import List
 import numpy as np
 import pandas as pd
 
-from ccpn.framework.Application import AnalysisScreen, AnalysisAssign, AnalysisMetabolomics, AnalysisStructure
+from ccpn.framework.Application import ANALYSIS_SCREEN, ANALYSIS_ASSIGN, ANALYSIS_METABOLOMICS, ANALYSIS_STRUCTURE
 
 PIPE_ANALYSIS = 'Analysis'
-PIPE_ASSIGN = AnalysisAssign
-PIPE_SCREEN = AnalysisScreen
-PIPE_METABOLOMICS = AnalysisMetabolomics
-PIPE_STRUCTURE = AnalysisStructure
+PIPE_ASSIGN = ANALYSIS_ASSIGN
+PIPE_SCREEN = ANALYSIS_SCREEN
+PIPE_METABOLOMICS = ANALYSIS_METABOLOMICS
+PIPE_STRUCTURE = ANALYSIS_STRUCTURE
 
 PIPE_PROCESSING = 'Processing'
 PIPE_POSTPROCESSING = 'Post-Processing'

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-02 16:26:00 +0000 (Wed, February 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-02 17:59:23 +0000 (Wed, February 02, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -5624,9 +5624,6 @@ class CcpnNefReader(CcpnNefContent):
         value = extras.get('dimension_is_complex')
         if value:
             spectrum.isComplex = value
-        value = extras.get('dimension_block_size')
-        if value:
-            spectrum.blockSizes = value
 
         # set aliasingLimits
         defaultLimits = spectrum.dimensionCount * [None]
@@ -7859,7 +7856,10 @@ def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict
 
             # make new spectrum with default parameters
             spectrum = project.newEmptySpectrum(isotopeCodes=dimensionData['isotopeCodes'],
-                                                name=spectrumName, path=filePath)
+                                                spectralWidths=dimensionData['spectralWidths'],
+                                                spectrometerFrequencies=dimensionData['spectrometerFrequencies'],
+                                                name=spectrumName,
+                                                path=filePath)
             if spectrumParameters.get('chemicalShiftList') is not None:
                 spectrum.chemicalShiftList = spectrumParameters.get('chemicalShiftList')
 

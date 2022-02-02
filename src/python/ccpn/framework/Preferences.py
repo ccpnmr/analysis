@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 16:41:59 +0000 (Tue, February 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-02 09:53:48 +0000 (Wed, February 02, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,6 +37,20 @@ from ccpn.framework.PathsAndUrls import \
     userPreferencesPath, \
     userPreferencesDirectory, \
     defaultPreferencesPath
+
+ARIA_PATH ='externalPrograms.aria'
+CYANA_PATH ='externalPrograms.cyana'
+XPLOR_NIH_PATH = 'externalPrograms.xplor'
+TALOS_PATH ='externalPrograms.talos'
+PYMOL_PATH = 'externalPrograms.pymol'
+
+USER_DATA_PATH = 'general.dataPath'
+USER_MACRO_PATH = 'general.userMacroPath'
+USER_PLUGIN_PATH = 'general.userPluginPath'
+USER_PIPES_PATH = 'general.userPipesPath'
+USER_LAYOUTS_PATH = 'general.userLayoutsPath'
+
+PRINT_OPTIONS = 'printSettings.printOptions'
 
 
 @singleton
@@ -117,12 +131,35 @@ class Preferences(AttrDict):
         for key, value in theDict.items():
             _keys = keys[:] + [key]
 
-            if isinstance(value, AttrDict):
+            if isinstance(value, AttrDict) and len(_keys) < 2:
                 self._recursivePrint(value, keys=_keys )
 
             else:
                 _keyStr = '.'.join(_keys)
                 print('%-40s : %r' % (_keyStr, value))  \
+
+    def get(self, key, default=None):
+        """Return the value for key if key is in the dictionary, else default.
+        Check for key to be a "dotted" one; e.g. "aap.noot" If so, recusively
+        decent.
+        """
+        if key is None or not isinstance(key, str) or len(key) == 0:
+            raise KeyError('invalid key %r' % key)
+
+        _keys = key.split('.')
+        _value = AttrDict.get(self, _keys[0], default)
+
+        if _value is None or \
+           len(_keys) == 1 or \
+           len(_keys) > 1 and len(_keys[1]) == 0:
+            return _value
+
+        elif isinstance(_value, (dict, AttrDict)):
+            # Re
+            return Preferences.get(_value, '.'.join(_keys[1:]), default=default)
+
+        else:
+            raise KeyError('invalid key %r; unable to decode' % key)
 
     def print(self):
         """Print items of self
@@ -131,7 +168,7 @@ class Preferences(AttrDict):
         self._recursivePrint(self)
 
     def __str__(self):
-        return '<Preferences: %s>' % self._lastPath
+        return '<Preferences: %r>' % self._lastPath
 
 
 

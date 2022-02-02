@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-02 13:04:53 +0000 (Wed, February 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-02 23:55:21 +0000 (Wed, February 02, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1474,6 +1474,7 @@ class Project(AbstractWrapperObject):
     def newEmptySpectrum(self, isotopeCodes: Sequence[str], name='emptySpectrum', **parameters):
         """
         Make new Empty spectrum from isotopeCodes list - without data and with default parameters.
+        default parameters are defined in: SpectrumDataSourceABC.isotopeDefaultDataDict
 
         :param isotopeCodes:
         :param name:

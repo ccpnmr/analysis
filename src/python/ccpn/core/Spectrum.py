@@ -40,10 +40,10 @@ See doc strings of these methods for detailed documentation
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -51,8 +51,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 11:22:07 +0000 (Fri, January 21, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-02-02 23:55:21 +0000 (Wed, February 02, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -751,12 +751,24 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     def dataFormat(self) -> str:
-        """Return the spectrum data-format identifier (e.g. Hdf5, NMRPipe)
+        """The spectrum data-format identifier (e.g. Hdf5, NMRPipe);
+        Automatically determined upon creating newSpectrum from a path containing spectral data.
+        (change at your own peril!)
         """
         if self._dataStore is None:
             raise RuntimeError('dataStore not defined')
 
         return self._dataStore.dataFormat
+
+    @dataFormat.setter
+    def dataFormat(self, value):
+        validFormats = tuple(getDataFormats().keys())
+        if not isinstance(value, str) or value not in validFormats:
+            raise ValueError('invalid dataFormat %r; should be one of %r' % (value, validFormats))
+
+        self._close()
+        ds = DataStore.newFromPath(path=self.filePath, dataFormat=value)
+        self._spectrumTraits.dataStore = ds
 
     #-----------------------------------------------------------------------------------------
     # Dimensional Attributes
@@ -3271,7 +3283,8 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
     return spectrum
 
 
-def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], name: str = 'emptySpectrum', **parameters) -> Spectrum:
+def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], name: str = 'emptySpectrum', path=None,
+                      **parameters) -> Spectrum:
     """Creation of new Empty Spectrum;
     :return: Spectrum instance or None on error
     """
@@ -3279,7 +3292,10 @@ def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], name: str =
     if not isIterable(isotopeCodes) or len(isotopeCodes) == 0:
         raise ValueError('invalid isotopeCodes "%s"' % isotopeCodes)
 
-    dataStore = DataStore()
+    if path is None:
+        dataStore = DataStore()
+    else:
+        dataStore = DataStore.newFromPath(path=path, dataFormat=EmptySpectrumDataSource.dataFormat)
 
     # Initialise a dataSource instance
     dataSource = EmptySpectrumDataSource()

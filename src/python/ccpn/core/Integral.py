@@ -4,19 +4,19 @@ Module documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-02 14:03:35 +0000 (Wed, February 02, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-02 23:55:21 +0000 (Wed, February 02, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -334,27 +334,26 @@ class Integral(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def limits(self, value):
-
         self._wrappedData.limits = value
 
-        # automatically calculates Volume given the limits for 1Ds
-        spectrum = self.integralList.spectrum
-
-        if spectrum.dimensionCount == 1:
-            for ii in range(spectrum.dimensionCount):
-                limits = value[ii] if value and len(value) > ii else ()
-                if len(limits) == 2:
-
-                    if spectrum.intensities is not None and spectrum.intensities.size != 0:
-                        limit1, limit2 = limits
-                        x = spectrum.positions
-                        index01 = np.where((x <= limit2) & (x >= limit1))
-                        values = spectrum.intensities[index01]
-                        self.value = float(trapz(values))
-
-                        # small change, only calculate if there is a peak
-                        if self.peak:
-                            self.peak.volume = self.value
+        # # automatically calculates Volume given the limits for 1Ds
+        # spectrum = self.integralList.spectrum
+        #
+        # if spectrum.dimensionCount == 1:
+        #     for ii in range(spectrum.dimensionCount):
+        #         limits = value[ii] if value and len(value) > ii else ()
+        #         if len(limits) == 2:
+        #
+        #             if spectrum.intensities is not None and spectrum.intensities.size != 0:
+        #                 limit1, limit2 = limits
+        #                 x = spectrum.positions
+        #                 index01 = np.where((x <= limit2) & (x >= limit1))
+        #                 values = spectrum.intensities[index01]
+        #                 self.value = float(trapz(values))
+        #
+        #                 # small change, only calculate if there is a peak
+        #                 if self.peak:
+        #                     self.peak.volume = self.value
 
     @property
     def pointLimits(self) -> List[Tuple[float, float]]:

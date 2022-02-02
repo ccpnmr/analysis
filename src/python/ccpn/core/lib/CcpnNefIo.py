@@ -3,10 +3,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 18:55:47 +0000 (Fri, January 21, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-02-02 23:55:21 +0000 (Wed, February 02, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -5624,9 +5624,6 @@ class CcpnNefReader(CcpnNefContent):
         value = extras.get('dimension_is_complex')
         if value:
             spectrum.isComplex = value
-        value = extras.get('dimension_block_size')
-        if value:
-            spectrum.blockSizes = value
 
         # set aliasingLimits
         defaultLimits = spectrum.dimensionCount * [None]
@@ -7858,7 +7855,11 @@ def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict
                                              transferData=transferData)
 
             # make new spectrum with default parameters
-            spectrum = project.newEmptySpectrum(isotopeCodes=dimensionData['isotopeCodes'], name=spectrumName)
+            spectrum = project.newEmptySpectrum(isotopeCodes=dimensionData['isotopeCodes'],
+                                                spectralWidths=dimensionData['spectralWidths'],
+                                                spectrometerFrequencies=dimensionData['spectrometerFrequencies'],
+                                                name=spectrumName,
+                                                path=filePath)
             if spectrumParameters.get('chemicalShiftList') is not None:
                 spectrum.chemicalShiftList = spectrumParameters.get('chemicalShiftList')
 

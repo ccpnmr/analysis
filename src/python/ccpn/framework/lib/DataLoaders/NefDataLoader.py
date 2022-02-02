@@ -5,7 +5,7 @@ This module defines the data loading mechanism for loading a NEF file
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-08 15:36:30 +0000 (Wed, December 08, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-02 20:38:18 +0000 (Wed, February 02, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -104,13 +104,13 @@ class NefDataLoader(DataLoaderABC):
         _validation = Path.aPath(_validation) if isinstance(_validation, str) else _validation
 
         # create the nef importer instance
-        _loader = Nef.NefImporter(errorLogging=_errorLogging, hidePrefix=hidePrefix)
+        _importer = Nef.NefImporter(errorLogging=_errorLogging, hidePrefix=hidePrefix)
 
         # load the nef file and the validation file
-        _loader.loadFile(path)
-        _loader.loadValidateDictionary(_validation)
+        _importer.loadFile(path)
+        _importer.loadValidateDictionary(_validation)
 
-        return _loader
+        return _importer
 
     @staticmethod
     def readNefText(text: str, nefValidationPath: Union[str, Path.aPath, None] = None, errorLogging=None, hidePrefix=True):

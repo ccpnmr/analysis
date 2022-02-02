@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 15:30:05 +0000 (Tue, February 01, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-02 12:55:33 +0000 (Wed, February 02, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -69,37 +69,19 @@ class _MyAppProxyStyle(QtWidgets.QProxyStyle):
     def pixelMetric(self, QStyle_PixelMetric, option=None, widget=None):
         if QStyle_PixelMetric == QtWidgets.QStyle.PM_SmallIconSize:
             # change the size of the icons in menus - overrides checkBoxes in menus
-            return (getFontHeight() or 15) + 3
+            return (getFontHeight(size='SMALL') or 15)
         elif QStyle_PixelMetric in (QtWidgets.QStyle.PM_IndicatorHeight,
                                     QtWidgets.QStyle.PM_IndicatorWidth,
                                     QtWidgets.QStyle.PM_ExclusiveIndicatorWidth,
                                     QtWidgets.QStyle.PM_ExclusiveIndicatorHeight,
                                     ):
-            # change the sizeof checkBoxes and radioButtons
-            return (getFontHeight() or 17) - 2
+            # change the size of checkBoxes and radioButtons
+            return (getFontHeight(size='SMALL') or 15)
         elif QStyle_PixelMetric == QtWidgets.QStyle.PM_MessageBoxIconSize:
-            # change the iconsize in messageDialog
-            return getFontHeight(size='MAXIMUM') or 18
-        else:
-            return super().pixelMetric(QStyle_PixelMetric, option, widget)
+            # change the icon size in messageDialog
+            return getFontHeight(size='SMALL') or 15
 
-    # def drawPrimitive(self, element: QtWidgets.QStyle.PrimitiveElement, option: 'QStyleOption', painter: QtGui.QPainter, widget: typing.Optional[QtWidgets.QWidget] = ...) -> None:
-    #     if element == QtWidgets.QStyle.PE_IndicatorBranch:
-    #         # draw a scaled image here
-    #
-    #         # QPixmap
-    #         # pixmap;
-    #         # pixmap.load(":/res/background.jpg");
-    #         # QPainter
-    #         # paint(this);
-    #         # int
-    #         # widWidth = this->ui->centralWidget->width();
-    #         # int
-    #         # widHeight = this->ui->centralWidget->height();
-    #         # pixmap = pixmap.scaled(widWidth, widHeight, Qt::KeepAspectRatioByExpanding);
-    #         # paint.drawPixmap(0, 0, pixmap);
-    #     else:
-    #         return super(_MyAppProxyStyle, self).drawPrimitive(element, option, painter, widget)
+        return super().pixelMetric(QStyle_PixelMetric, option, widget)
 
 
 class Gui(Ui):
@@ -142,11 +124,14 @@ class Gui(Ui):
                                  self.application.applicationVersion,
                                  organizationName='CCPN', organizationDomain='ccpn.ac.uk')
 
+        # patch for icon sizes in menus, etc.
         styles = QtWidgets.QStyleFactory()
         myStyle = _MyAppProxyStyle(styles.create('fusion'))
-        # # QtWidgets.QApplication.setStyle(myStyle)
-        #
-        self.qtApp.setStyle(myStyle)  # styles.create('fusion'))
+        self.qtApp.setStyle(myStyle)
+
+        # # original - no patch for icon sizes
+        # styles = QtWidgets.QStyleFactory()
+        # self.qtApp.setStyle(styles.create('fusion'))
 
     def initialize(self, mainWindow):
         """UI operations done after every project load/create
@@ -166,6 +151,7 @@ class Gui(Ui):
 
         # check whether to skip the execution loop for testing with mainWindow
         import builtins
+
         _skip = getattr(builtins, '_skipExecuteLoop', False)
         if not _skip:
             self.qtApp.start()
@@ -208,8 +194,8 @@ class Gui(Ui):
             logger.echoInfo(command)
 
         if self.application.ui is not None and \
-           self.application.ui.mainWindow is not None and \
-           self.application._enableLoggingToConsole:
+                self.application.ui.mainWindow is not None and \
+                self.application._enableLoggingToConsole:
 
             console = self.application.ui.mainWindow.pythonConsole
             for command in commands:
@@ -239,6 +225,7 @@ class Gui(Ui):
         """
         return self.mainWindow._loadProject(path=path)
 
+
 #######################################################################################
 #
 #  Ui classes that map ccpn.ui._implementation
@@ -249,6 +236,7 @@ class Gui(Ui):
 ## Window class
 _coreClassWindow = _coreClassMap['Window']
 from ccpn.ui.gui.lib.GuiMainWindow import GuiMainWindow as _GuiMainWindow
+
 
 class MainWindow(_coreClassWindow, _GuiMainWindow):
     """GUI main window, corresponds to OS window"""
@@ -282,6 +270,8 @@ class MainWindow(_coreClassWindow, _GuiMainWindow):
 
 
 from ccpn.ui.gui.lib.GuiWindow import GuiWindow as _GuiWindow
+
+
 class SideWindow(_coreClassWindow, _GuiWindow):
     """GUI side window, corresponds to OS window"""
 
@@ -310,6 +300,7 @@ Mark = _coreClassMap['Mark']
 _coreClassSpectrumDisplay = _coreClassMap['SpectrumDisplay']
 from ccpn.ui.gui.modules.SpectrumDisplay1d import SpectrumDisplay1d as _SpectrumDisplay1d
 
+
 class StripDisplay1d(_coreClassSpectrumDisplay, _SpectrumDisplay1d):
     """1D bound display"""
 
@@ -322,17 +313,7 @@ class StripDisplay1d(_coreClassSpectrumDisplay, _SpectrumDisplay1d):
         # hack for now
         self.application = project.application
 
-        _SpectrumDisplay1d.__init__(self, mainWindow=self.application.ui.mainWindow,
-                                    # name=self._id
-                                    )
-
-        # 20191113: ED moved to initGraphics
-        # if not project._isNew:
-        #     # hack for now;  Needs to know this for restoring the GuiSpectrum Module. This has to be removed after decoupling Gui and Data!
-        #     # This is a normal guiModule that should be opened in module area from the position
-        #     # where is created. E.g. and not hardcoded on the "right" and coupled with api calls!
-        #     self.application.ui.mainWindow.moduleArea.addModule(self, position='right',
-        #                                                         relativeTo=self.application.ui.mainWindow.moduleArea)
+        _SpectrumDisplay1d.__init__(self, mainWindow=self.application.ui.mainWindow)
 
 
 from ccpn.ui.gui.modules.SpectrumDisplayNd import SpectrumDisplayNd as _SpectrumDisplayNd
@@ -342,7 +323,7 @@ from ccpn.ui.gui.modules.SpectrumDisplayNd import SpectrumDisplayNd as _Spectrum
 
 # NB: GWV had to comment out the name property to make it work
 # conflicts existed between the 'name' and 'window' attributes of the two classes
-# the pyqtgraph decendents need name(), GuiStripNd had 'window', but that could be replaced with
+# the pyqtgraph descendents need name(), GuiStripNd had 'window', but that could be replaced with
 # mainWindow throughout
 
 class SpectrumDisplayNd(_coreClassSpectrumDisplay, _SpectrumDisplayNd):
@@ -356,21 +337,12 @@ class SpectrumDisplayNd(_coreClassSpectrumDisplay, _SpectrumDisplayNd):
         # hack for now;
         self.application = project.application
 
-        _SpectrumDisplayNd.__init__(self, mainWindow=self.application.ui.mainWindow,
-                                    # name=self._id)
-                                    )
-
-        # 20191113: ED moved to initGraphics
-        # if not project._isNew:
-        #     # hack for now;  Needs to know this for restoring the GuiSpectrum Module. This has to be removed after decoupling Gui and Data!
-        #     # This is a normal guiModule that should be opened in module area from the position
-        #     # where is created. E.g. and not hardcoded on the "right" and coupled with api calls!
-        #     self.application.ui.mainWindow.moduleArea.addModule(self, position='right',
-        #                                                         relativeTo=self.application.ui.mainWindow.moduleArea)
+        _SpectrumDisplayNd.__init__(self, mainWindow=self.application.ui.mainWindow)
 
 
 #old name
 StripDisplayNd = SpectrumDisplayNd
+
 
 def _factoryFunction(project: Project, wrappedData):
     """create SpectrumDisplay, dispatching to subtype depending on wrappedData"""
@@ -379,11 +351,13 @@ def _factoryFunction(project: Project, wrappedData):
     else:
         return StripDisplayNd(project, wrappedData)
 
+
 Gui._factoryFunctions[_coreClassSpectrumDisplay.className] = _factoryFunction
 
 ## Strip class
 _coreClassStrip = _coreClassMap['Strip']
 from ccpn.ui.gui.lib.GuiStrip1d import GuiStrip1d as _GuiStrip1d
+
 
 class Strip1d(_coreClassStrip, _GuiStrip1d):
     """1D strip"""
@@ -438,6 +412,7 @@ class Strip1d(_coreClassStrip, _GuiStrip1d):
 
 
 from ccpn.ui.gui.lib.GuiStripNd import GuiStripNd as _GuiStripNd
+
 
 class StripNd(_coreClassStrip, _GuiStripNd):
     """ND strip """
@@ -499,6 +474,7 @@ def _factoryFunction(project: Project, wrappedData):
     else:
         return StripNd(project, wrappedData)
 
+
 Gui._factoryFunctions[_coreClassStrip.className] = _factoryFunction
 
 ## Axis class - put in namespace for documentation
@@ -509,6 +485,7 @@ Axis = _coreClassMap['Axis']
 ## SpectrumView class
 _coreClassSpectrumView = _coreClassMap['SpectrumView']
 from ccpn.ui.gui.lib.GuiSpectrumView1d import GuiSpectrumView1d as _GuiSpectrumView1d
+
 
 class _SpectrumView1d(_coreClassSpectrumView, _GuiSpectrumView1d):
     """1D Spectrum View"""
@@ -525,6 +502,7 @@ class _SpectrumView1d(_coreClassSpectrumView, _GuiSpectrumView1d):
 
 
 from ccpn.ui.gui.lib.GuiSpectrumViewNd import GuiSpectrumViewNd as _GuiSpectrumViewNd
+
 
 class _SpectrumViewNd(_coreClassSpectrumView, _GuiSpectrumViewNd):
     """ND Spectrum View"""
@@ -549,12 +527,13 @@ def _factoryFunction(project: Project, wrappedData):
         # ND display
         return _SpectrumViewNd(project, wrappedData)
 
-Gui._factoryFunctions[_coreClassSpectrumView.className] = _factoryFunction
 
+Gui._factoryFunctions[_coreClassSpectrumView.className] = _factoryFunction
 
 ## PeakListView class
 _coreClassPeakListView = _coreClassMap['PeakListView']
 from ccpn.ui.gui.lib.GuiPeakListView import GuiPeakListView as _GuiPeakListView
+
 
 class _PeakListView(_coreClassPeakListView, _GuiPeakListView):
     """Peak List View for 1D or nD PeakList"""
@@ -568,12 +547,13 @@ class _PeakListView(_coreClassPeakListView, _GuiPeakListView):
         _GuiPeakListView.__init__(self)
         self._init()
 
-Gui._factoryFunctions[_coreClassPeakListView.className] = _PeakListView
 
+Gui._factoryFunctions[_coreClassPeakListView.className] = _PeakListView
 
 ## IntegralListView class
 _coreClassIntegralListView = _coreClassMap['IntegralListView']
 from ccpn.ui.gui.lib.GuiIntegralListView import GuiIntegralListView as _GuiIntegralListView
+
 
 class _IntegralListView(_coreClassIntegralListView, _GuiIntegralListView):
     """Integral List View for 1D or nD IntegralList"""
@@ -587,11 +567,13 @@ class _IntegralListView(_coreClassIntegralListView, _GuiIntegralListView):
         _GuiIntegralListView.__init__(self)
         self._init()
 
+
 Gui._factoryFunctions[_coreClassIntegralListView.className] = _IntegralListView
 
 ## MultipletListView class
 _coreClassMultipletListView = _coreClassMap['MultipletListView']
 from ccpn.ui.gui.lib.GuiMultipletListView import GuiMultipletListView as _GuiMultipletListView
+
 
 class _MultipletListView(_coreClassMultipletListView, _GuiMultipletListView):
     """Multiplet List View for 1D or nD MultipletList"""
@@ -604,6 +586,7 @@ class _MultipletListView(_coreClassMultipletListView, _GuiMultipletListView):
         self.application = project.application
         _GuiMultipletListView.__init__(self)
         self._init()
+
 
 Gui._factoryFunctions[_coreClassMultipletListView.className] = _MultipletListView
 

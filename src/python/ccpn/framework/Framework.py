@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 17:08:13 +0000 (Tue, February 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-02 14:03:36 +0000 (Wed, February 02, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -967,13 +967,21 @@ class Framework(NotifierBase, GuiBase):
         """
         objs = []
         for path in paths:
-            dataLoader = checkPathForDataLoader(path)
+            if not isinstance(path, (str, Path)):
+                raise ValueError('invalid path %r' % path)
 
-            if dataLoader is None:
+            _path = aPath(path)
+            if not _path.exists():
+                getLogger().warning('application.loadData: path %r does not exist' % path)
+                continue
+
+            if (dataLoader := checkPathForDataLoader(path)) is None:
                 getLogger().warning('Unable to load "%s"' % path)
+                continue
 
-            elif dataLoader.alwaysCreateNewProject:
+            if dataLoader.alwaysCreateNewProject:
                 getLogger().warning('Loading of "%s" would create a new project; use application.loadProject() instead')
+                continue
 
             else:
                 dataLoader.createNewObject = False  # The loadData() method was used; No project created
@@ -1041,23 +1049,24 @@ class Framework(NotifierBase, GuiBase):
         from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
         from ccpn.core.lib import CcpnNefIo
 
+        from ccpn.util.nef.NefImporter import NefImporter
+
         _nefReader = CcpnNefIo.CcpnNefReader(self)
-        dataBlock = _nefReader.getNefData(path)
+        # dataBlock = _nefReader.getNefData(path)
+
+        _nefImporter = NefImporter()
+        _nefImporter.loadFile(path)
+        _nefImporter._attachReader(_nefReader.importExistingProject)
 
         if makeNewProject:
             self._closeProject()
-            self._project = self.newProject(dataBlock.name)
-
-        self.project.shiftAveraging = False
+            self._project = self.newProject(_nefImporter.getName())
 
         with undoBlockWithoutSideBar():
             with notificationEchoBlocking():
-                with catchExceptions(application=self, errorStringTemplate='Error loading Nef file: %s', printTraceBack=True):
-                    # need datablock selector here, with subset selection dependent on datablock type
-
-                    _nefReader.importNewProject(self.project, dataBlock)
-
-        self.project.shiftAveraging = True
+                with catchExceptions(application=self, errorStringTemplate='Error loading Nef file: %s',
+                                     printTraceBack=True):
+                    _nefImporter._importNef(self.project, _nefImporter._nefDict)
 
         getLogger().info('==> Loaded NEF file: "%s"' % (path,))
         return self.project

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 17:08:13 +0000 (Tue, February 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-02 14:03:36 +0000 (Wed, February 02, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -387,17 +387,16 @@ class GuiBase(object):
     def _loadDataFromMenu(self, text='Load Data', filter=None):
         """Call loadData from the menu and trap errors.
         """
-        dialog = DataFileDialog(parent=self.ui.mainWindow, acceptMode='load', fileFilter=filter)
+        dialog = DataFileDialog(parent=self.mainWindow, acceptMode='load', fileFilter=filter)
         dialog._show()
-        path = dialog.selectedFile()
-        if not path:
+        if (path := dialog.selectedFile()) is None:
             return
-        paths = [path]
 
         try:
-            result = self.loadData(paths)
+            result = self.loadData(path)
+
         except Exception as es:
-            MessageDialog.showWarning(str(self.ui.mainWindow.windowTitle()), str(es))
+            MessageDialog.showWarning(str(self.mainWindow.windowTitle()), str(es))
             if self._isInDebugMode:
                 raise es
 

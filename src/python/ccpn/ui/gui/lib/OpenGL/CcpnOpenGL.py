@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-26 11:55:20 +0000 (Wed, January 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-03 16:32:06 +0000 (Thu, February 03, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -789,7 +789,7 @@ class CcpnGLWidget(QOpenGLWidget):
         newPixelRatio = self.devicePixelRatioF()
         if newPixelRatio != self.lastPixelRatio:
             self.lastPixelRatio = newPixelRatio
-            if hasattr(self, GLDefs.VIEWPORTSATTRIB):
+            if hasattr(self, GLDefs.VIEWPORTSATTRIB) and self.viewports:
                 self.viewports.devicePixelRatio = newPixelRatio
 
             self.buildOverlayStrings()

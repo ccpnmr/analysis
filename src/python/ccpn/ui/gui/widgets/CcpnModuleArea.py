@@ -1,8 +1,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
@@ -11,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-25 18:46:36 +0000 (Thu, March 25, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2022-02-03 16:02:33 +0000 (Thu, February 03, 2022) $"
+__version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -313,6 +314,9 @@ class CcpnModuleArea(ModuleArea, DropBase):
         """With these settings the user can close all the modules from the label 'close module' or pop up and
          when re-add a new module it makes sure there is a container available.
         """
+        if module is None:
+            raise RuntimeError('No module given')
+
         wasMaximised = False
 
         # seems to add too many containers if relativeTo is None
@@ -343,12 +347,31 @@ class CcpnModuleArea(ModuleArea, DropBase):
             setattr(type(module), '_alreadyOpened', True)
             setattr(type(module), '_currentModule', module)  # remember the module
 
-        if module is None:
-            raise RuntimeError('No module given')
-
         if position is None:
             position = 'top'
 
+        # store original area that the dock will return to when un-floated (not strictly necessary here)
+        if not self.temporary:
+            module.orig_area = self
+
+        ## Determine the container to insert this module into.
+        ## If there is no neighbor, then the container is the top.
+        if relativeTo is None or relativeTo is self:
+            if self.topContainer is None:
+                container = self
+                neighbor = None
+            else:
+                container = self.topContainer
+                neighbor = None
+        else:
+            if isinstance(relativeTo, str):
+                relativeTo = self.docks[relativeTo]
+            container = self.getContainer(relativeTo)
+            if container is None:
+                raise TypeError("Dock %s is not contained in a DockArea; cannot add another dock relative to it." % relativeTo)
+            neighbor = relativeTo
+
+        ## what container type do we need?
         neededContainer = {
             'bottom': 'vertical',
             'top'   : 'vertical',
@@ -358,41 +381,19 @@ class CcpnModuleArea(ModuleArea, DropBase):
             'below' : 'tab'
             }[position]
 
-        if relativeTo is None:
-            neighbor = None
-            container = self.addContainer(neededContainer, self.topContainer)
+        if neededContainer != container.type() and container.type() == 'tab':
+            neighbor = container
+            container = container.container()
 
-        ## Determine the container to insert this module into.
-        ## If there is no neighbor, then the container is the top.
-        else:
-            if relativeTo is None or relativeTo is self:
-                if self.topContainer is None:
-                    container = self
-                    neighbor = None
-                else:
-                    container = self.topContainer
-                    neighbor = None
+        ## Decide if the container we have is suitable.
+        ## If not, insert a new container inside.
+        if neededContainer != container.type():
+            if neighbor is None:
+                container = self.addContainer(neededContainer, self.topContainer)
             else:
-                if isinstance(relativeTo, str):
-                    relativeTo = self.modules[relativeTo]
-                container = self.getContainer(relativeTo)
-                neighbor = relativeTo
+                container = self.addContainer(neededContainer, neighbor)
 
-        if not container:
-            container = self.addContainer(neededContainer, self.topContainer)
-
-        else:
-            if neededContainer != container.type() and container.type() == 'tab':
-                neighbor = container
-                container = container.container()
-
-            if neededContainer != container.type():
-
-                if neighbor is None:
-                    container = self.addContainer(neededContainer, self.topContainer)
-                else:
-                    container = self.addContainer(neededContainer, neighbor)
-
+        ## Insert the new dock before/after its neighbor
         insertPos = {
             'bottom': 'after',
             'top'   : 'before',
@@ -401,21 +402,15 @@ class CcpnModuleArea(ModuleArea, DropBase):
             'above' : 'before',
             'below' : 'after'
             }[position]
-        if container is not None:
-            container.insert(module, insertPos, neighbor)
-        else:
-            container = self.topContainer
-            container.insert(module, insertPos, neighbor)
+
         module.area = self
-        #    self.modules[module.getName()] = module
-        # explicitly calling the CcpnModule.name() method as GuiDisplay modules have their name masked by
+        old = module.container()
+        container.insert(module, insertPos, neighbor)
+        self.docks[module.name()] = module
+        if old is not None:
+            old.apoptose()
 
-        # ejb - I think there is a logic error here when adding a module
-        #       that leaves the blank display without a parent
 
-        # from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-        # self.modules[CcpnModule.name(module)] = module
-        self.modules[module.name()] = module  # ejb - testing
         # self.movePythonConsole()
         if self.mainWindow is not None:
             self.mainWindow.application.ccpnModules = self.ccpnModules
@@ -424,6 +419,15 @@ class CcpnModuleArea(ModuleArea, DropBase):
         if wasMaximised:
             module.toggleMaximised()
         return module
+
+    def moveDock(self, dock, position, neighbor):
+        """
+        Move an existing Dock to a new location.
+        """
+        ## Moving to the edge of a tabbed dock causes a drop outside the tab box
+        if position in ['left', 'right', 'top', 'bottom'] and neighbor is not None and neighbor.container() is not None and neighbor.container().type() == 'tab':
+            neighbor = neighbor.container()
+        self.addModule(dock, position, neighbor)
 
     def makeContainer(self, typ):
         # stop the child containers from collapsing
@@ -440,11 +444,11 @@ class CcpnModuleArea(ModuleArea, DropBase):
                     self._container = i
         return obj.container()
 
-    def apoptose(self):
-        if self.temporary and self.topContainer.count() == 0:
-            self.topContainer = None
-            if self.home:
-                self.home.removeTempArea(self)
+    # def apoptose(self):
+    #     if self.temporary and self.topContainer.count() == 0:
+    #         self.topContainer = None
+    #         if self.home:
+    #             self.home.removeTempArea(self)
 
     def _closeOthers(self, moduleToClose):
         modules = [module for module in self.ccpnModules if module != moduleToClose]

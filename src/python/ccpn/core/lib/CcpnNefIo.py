@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-02 17:59:23 +0000 (Wed, February 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-03 16:59:23 +0000 (Thu, February 03, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -2933,7 +2933,7 @@ class CcpnNefReader(CcpnNefContent):
         getLogger().debug('Loaded NEF file, time = %.2fs' % (t2 - t0))
 
         for msg in self.warnings:
-            getLogger().warning(f'====> {msg}')
+            getLogger().warning(f'{msg}')
         self.project = None
 
     def importNewNMRStarProject(self, project: Project, dataBlock: StarIo.NmrDataBlock,
@@ -3015,7 +3015,7 @@ class CcpnNefReader(CcpnNefContent):
         getLogger().debug('Loaded NEF file, time = %.2fs' % (t2 - t0))
 
         for msg in self.warnings:
-            getLogger().warning(f'====> {msg}')
+            getLogger().warning(f'{msg}')
         self.project = None
 
     def _verifyLoops(self, project: Project, saveFrame: StarIo.NmrSaveFrame, addLoopAttribs=None,
@@ -7545,7 +7545,7 @@ class CcpnNefReader(CcpnNefContent):
         self.errors.append((template.format(self._saveFrameName, message), source, objects))
 
     def warning(self, message: str, loopName=None):
-        template = "Warning in saveFrame%s\n%s"
+        template = "in saveFrame %s:\n%s"
         self.warnings.append(template % (self._saveFrameName, message))
 
     def storeContent(self, source, objects: Optional[dict] = None):

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-02 20:38:18 +0000 (Wed, February 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-03 16:59:23 +0000 (Thu, February 03, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1202,28 +1202,18 @@ class Framework(NotifierBase, GuiBase):
             NEFFRAMEKEY_IMPORT, NEFFRAMEKEY_ENABLEMOUSEMENU, NEFFRAMEKEY_PATHNAME, \
             NEFFRAMEKEY_ENABLEFILTERFRAME, NEFFRAMEKEY_ENABLECHECKBOXES
         from ccpn.util.nef import NefImporter as Nef
-        from ccpn.util.CcpnNefImporter import CcpnNefImporter
-        from ccpn.framework.PathsAndUrls import nefValidationPath
-
-        # dataBlock = self.nefReader.getNefData(path)
-
-        # the loader can be subclassed if required, and the type passed as nefImporterClass
-        # _loader = CcpnNefImporter(errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
-
-        # _loader = Nef.NefImporter(errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
-        # _loader.loadFile(path)
-        # _loader.loadValidateDictionary(nefValidationPath)
 
         # create/read the nef file
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
 
         _dataLoader = checkPathForDataLoader(path)
-        _loader = _dataLoader.readNefFile(path, nefValidationPath=nefValidationPath, errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
+        _loader = _dataLoader.readNefFile(path, errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
 
         # verify popup here
         selection = None
 
-        dialog = ImportNefPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
+        dialog = ImportNefPopup(parent=self.ui.mainWindow,
+                                mainWindow=self.ui.mainWindow,
                                 # nefImporterClass=CcpnNefImporter,
                                 nefObjects=({NEFFRAMEKEY_IMPORT: self.project,
                                              },

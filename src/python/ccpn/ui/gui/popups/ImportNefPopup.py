@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 15:30:08 +0000 (Tue, February 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-03 16:59:24 +0000 (Thu, February 03, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -57,7 +57,6 @@ from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
-from ccpn.framework.PathsAndUrls import nefValidationPath
 
 
 INVALIDTEXTROWCHECKCOLOUR = QtGui.QColor('crimson')
@@ -73,8 +72,6 @@ RESTRAINTTABLES = 'restraintTables'
 CCPNTAG = 'ccpn'
 SKIPPREFIXES = 'skipPrefixes'
 EXPANDSELECTION = 'expandSelection'
-
-VALIDATEDICT = '/Users/ejb66/Desktop/mmcif_nef_v1_1.dic'
 
 PulldownListsMinimumWidth = 200
 LineEditsMinimumWidth = 195
@@ -1645,8 +1642,6 @@ class NefDictFrame(Frame):
         self._nefLoader._attachContent(self._nefReader.contentNef)
         self._nefLoader._attachClear(self._nefReader.clearSaveFrames)
 
-        self._nefLoader.loadValidateDictionary(nefValidationPath)
-
         # process the contents and verify
         self._nefLoader._clearNef(self.project, self._nefDict)
         self._nefLoader._contentNef(self.project, self._nefDict, selection=None)
@@ -1713,19 +1708,17 @@ class ImportNefPopup(CcpnDialogMainWidget):
     FIXEDHEIGHT = False
     DEFAULTMARGINS = (5, 5, 5, 5)
 
-    def __init__(self, parent=None, mainWindow=None, title='Import Nef', size=(1000, 700),
-                 nefImporterClass=None, nefObjects=(), **kwds):
+    def __init__(self, parent=None, mainWindow=None, size=(1000, 700), nefImporterClass=None, nefObjects=(), **kwds):
         """
         Initialise the main form
 
         :param parent: calling widget
         :param mainWindow: gui mainWindow class for the application
-        :param title: window title
         :param size: initial size of the window
         :param nefObjects: a tuple of tuples of the form ((nefImporter | project, checkboxes visible),)
         :param kwds: additional parameters to pass to the window
         """
-        super().__init__(parent, setLayout=True, windowTitle=title, size=size, **kwds)
+        super().__init__(parent, setLayout=True, windowTitle='Import Nef', size=size, **kwds)
 
         if mainWindow:
             self.mainWindow = mainWindow
@@ -1959,12 +1952,10 @@ if __name__ == '__main__':
     # load the file and the validate dict
     _loader = Nef.NefImporter(errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
     _loader.loadFile(TESTNEF)
-    _loader.loadValidateDictionary(nefValidationPath)
 
     # load the file and the validate dict
     _loader2 = Nef.NefImporter(errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
     _loader2.loadFile(TESTNEF2)
-    _loader2.loadValidateDictionary(nefValidationPath)
 
     # validate
     valid = _loader.isValid

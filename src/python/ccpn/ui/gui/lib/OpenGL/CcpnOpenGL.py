@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-03 16:32:06 +0000 (Thu, February 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-03 16:44:58 +0000 (Thu, February 03, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -792,16 +792,16 @@ class CcpnGLWidget(QOpenGLWidget):
             if hasattr(self, GLDefs.VIEWPORTSATTRIB) and self.viewports:
                 self.viewports.devicePixelRatio = newPixelRatio
 
-            self.buildOverlayStrings()
-            for spectrumView in self._ordering:
-                for listView in spectrumView.peakListViews:
-                    listView.buildLabels = True
-                for listView in spectrumView.integralListViews:
-                    listView.buildLabels = True
-                for listView in spectrumView.multipletListViews:
-                    listView.buildLabels = True
-            self.buildMarks = True
-            self.update()
+                self.buildOverlayStrings()
+                for spectrumView in self._ordering:
+                    for listView in spectrumView.peakListViews:
+                        listView.buildLabels = True
+                    for listView in spectrumView.integralListViews:
+                        listView.buildLabels = True
+                    for listView in spectrumView.multipletListViews:
+                        listView.buildLabels = True
+                self.buildMarks = True
+                self.update()
 
     def _getValidAspectRatio(self, axisCode):
         va = [ax for ax in self._aspectRatios.keys() if ax.upper()[0] == axisCode.upper()[0]]

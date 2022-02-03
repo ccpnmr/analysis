@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-03 16:02:33 +0000 (Thu, February 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-03 16:24:48 +0000 (Thu, February 03, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -84,9 +84,14 @@ class TempAreaWindow(GuiWindow, MainWindow):
     def _screenChanged(self, *args):
         getLogger().debug2('tempAreaWindow screenchanged')
         project = self.application.project
+
         for spectrumDisplay in project.spectrumDisplays:
+            if spectrumDisplay.isDeleted:
+                continue
+
             for strip in spectrumDisplay.strips:
-                strip.refreshDevicePixelRatio()
+                if not strip.isDeleted:
+                    strip.refreshDevicePixelRatio()
 
             # NOTE:ED - set pixelratio for extra axes
             if hasattr(spectrumDisplay, '_rightGLAxis'):
@@ -444,11 +449,12 @@ class CcpnModuleArea(ModuleArea, DropBase):
                     self._container = i
         return obj.container()
 
-    # def apoptose(self):
-    #     if self.temporary and self.topContainer.count() == 0:
-    #         self.topContainer = None
-    #         if self.home:
-    #             self.home.removeTempArea(self)
+    def apoptose(self, propagate=True):
+        # remove top container if possible, close this area if it is temporary.
+        if self.topContainer is None or self.topContainer.count() == 0:
+            self.topContainer = None
+            if self.temporary and self.home:
+                self.home.removeTempArea(self)
 
     def _closeOthers(self, moduleToClose):
         modules = [module for module in self.ccpnModules if module != moduleToClose]

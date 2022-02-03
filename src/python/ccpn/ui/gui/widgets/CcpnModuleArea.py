@@ -1,19 +1,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 15:30:09 +0000 (Tue, February 01, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-03 17:17:29 +0000 (Thu, February 03, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -86,9 +86,14 @@ class TempAreaWindow(GuiWindow, MainWindow):
     def _screenChanged(self, *args):
         getLogger().debug2('tempAreaWindow screenchanged')
         project = self.application.project
+
         for spectrumDisplay in project.spectrumDisplays:
+            if spectrumDisplay.isDeleted:
+                continue
+
             for strip in spectrumDisplay.strips:
-                strip.refreshDevicePixelRatio()
+                if not strip.isDeleted:
+                    strip.refreshDevicePixelRatio()
 
             # NOTE:ED - set pixelratio for extra axes
             if hasattr(spectrumDisplay, '_rightGLAxis'):
@@ -353,6 +358,9 @@ class CcpnModuleArea(ModuleArea, DropBase):
         """With these settings the user can close all the modules from the label 'close module' or pop up and
          when re-add a new module it makes sure there is a container available.
         """
+        if module is None:
+            raise RuntimeError('No module given')
+
         wasMaximised = False
 
         # seems to add too many containers if relativeTo is None
@@ -388,12 +396,31 @@ class CcpnModuleArea(ModuleArea, DropBase):
             setattr(type(module), '_alreadyOpened', True)
             setattr(type(module), '_currentModule', module)  # remember the module
 
-        if module is None:
-            raise RuntimeError('No module given')
-
         if position is None:
             position = 'top'
 
+        # store original area that the dock will return to when un-floated (not strictly necessary here)
+        if not self.temporary:
+            module.orig_area = self
+
+        ## Determine the container to insert this module into.
+        ## If there is no neighbor, then the container is the top.
+        if relativeTo is None or relativeTo is self:
+            if self.topContainer is None:
+                container = self
+                neighbor = None
+            else:
+                container = self.topContainer
+                neighbor = None
+        else:
+            if isinstance(relativeTo, str):
+                relativeTo = self.docks[relativeTo]
+            container = self.getContainer(relativeTo)
+            if container is None:
+                raise TypeError("Dock %s is not contained in a DockArea; cannot add another dock relative to it." % relativeTo)
+            neighbor = relativeTo
+
+        ## what container type do we need?
         neededContainer = {
             'bottom': 'vertical',
             'top'   : 'vertical',
@@ -403,41 +430,19 @@ class CcpnModuleArea(ModuleArea, DropBase):
             'below' : 'tab'
             }[position]
 
-        if relativeTo is None:
-            neighbor = None
-            container = self.addContainer(neededContainer, self.topContainer)
+        if neededContainer != container.type() and container.type() == 'tab':
+            neighbor = container
+            container = container.container()
 
-        ## Determine the container to insert this module into.
-        ## If there is no neighbor, then the container is the top.
-        else:
-            if relativeTo is None or relativeTo is self:
-                if self.topContainer is None:
-                    container = self
-                    neighbor = None
-                else:
-                    container = self.topContainer
-                    neighbor = None
+        ## Decide if the container we have is suitable.
+        ## If not, insert a new container inside.
+        if neededContainer != container.type():
+            if neighbor is None:
+                container = self.addContainer(neededContainer, self.topContainer)
             else:
-                if isinstance(relativeTo, str):
-                    relativeTo = self.modules[relativeTo]
-                container = self.getContainer(relativeTo)
-                neighbor = relativeTo
+                container = self.addContainer(neededContainer, neighbor)
 
-        if not container:
-            container = self.addContainer(neededContainer, self.topContainer)
-
-        else:
-            if neededContainer != container.type() and container.type() == 'tab':
-                neighbor = container
-                container = container.container()
-
-            if neededContainer != container.type():
-
-                if neighbor is None:
-                    container = self.addContainer(neededContainer, self.topContainer)
-                else:
-                    container = self.addContainer(neededContainer, neighbor)
-
+        ## Insert the new dock before/after its neighbor
         insertPos = {
             'bottom': 'after',
             'top'   : 'before',
@@ -446,14 +451,14 @@ class CcpnModuleArea(ModuleArea, DropBase):
             'above' : 'before',
             'below' : 'after'
             }[position]
-        if container is not None:
-            container.insert(module, insertPos, neighbor)
-        else:
-            container = self.topContainer
-            container.insert(module, insertPos, neighbor)
-        module.area = self
 
-        self.modules[module.moduleName] = module  # ejb - testing
+        module.area = self
+        old = module.container()
+        container.insert(module, insertPos, neighbor)
+        if old is not None:
+            old.apoptose()
+
+        self.docks[module.moduleName] = module
 
         #module.label.sigDragEntered.connect(self._dragEntered)
         if wasMaximised:
@@ -497,6 +502,15 @@ class CcpnModuleArea(ModuleArea, DropBase):
         for module in self._getModulesOnActiveNameEditing():
             module.label._renameLabel()
 
+    def moveDock(self, dock, position, neighbor):
+        """
+        Move an existing Dock to a new location.
+        """
+        ## Moving to the edge of a tabbed dock causes a drop outside the tab box
+        if position in ['left', 'right', 'top', 'bottom'] and neighbor is not None and neighbor.container() is not None and neighbor.container().type() == 'tab':
+            neighbor = neighbor.container()
+        self.addModule(dock, position, neighbor)
+
     def makeContainer(self, typ):
         # stop the child containers from collapsing
         new = super(CcpnModuleArea, self).makeContainer(typ)
@@ -512,10 +526,11 @@ class CcpnModuleArea(ModuleArea, DropBase):
                     self._container = i
         return obj.container()
 
-    def apoptose(self, **kwargs):
+    def apoptose(self, propagate=True):
+        # remove top container if possible, close this area if it is temporary.
         if self.topContainer is None or self.topContainer.count() == 0:
             self.topContainer = None
-            if self.home:
+            if self.temporary and self.home:
                 self.home.removeTempArea(self)
 
     def _closeOthers(self, moduleToClose):

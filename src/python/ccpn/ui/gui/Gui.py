@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-02 12:55:33 +0000 (Wed, February 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-03 09:50:29 +0000 (Thu, February 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -69,14 +69,14 @@ class _MyAppProxyStyle(QtWidgets.QProxyStyle):
     def pixelMetric(self, QStyle_PixelMetric, option=None, widget=None):
         if QStyle_PixelMetric == QtWidgets.QStyle.PM_SmallIconSize:
             # change the size of the icons in menus - overrides checkBoxes in menus
-            return (getFontHeight(size='SMALL') or 15)
+            return (getFontHeight(size='SMALL') or 15) + 3
         elif QStyle_PixelMetric in (QtWidgets.QStyle.PM_IndicatorHeight,
                                     QtWidgets.QStyle.PM_IndicatorWidth,
                                     QtWidgets.QStyle.PM_ExclusiveIndicatorWidth,
                                     QtWidgets.QStyle.PM_ExclusiveIndicatorHeight,
                                     ):
             # change the size of checkBoxes and radioButtons
-            return (getFontHeight(size='SMALL') or 15)
+            return (getFontHeight(size='SMALL') or 15) - 2
         elif QStyle_PixelMetric == QtWidgets.QStyle.PM_MessageBoxIconSize:
             # change the icon size in messageDialog
             return getFontHeight(size='SMALL') or 15

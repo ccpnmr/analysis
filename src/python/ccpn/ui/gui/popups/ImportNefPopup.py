@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 15:30:08 +0000 (Tue, February 01, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-03 09:50:30 +0000 (Thu, February 03, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -228,15 +228,21 @@ class NefDictFrame(Frame):
     def _setWidgets(self):
         """Setup the unpopulated widgets for the frame
         """
-        self.headerFrame = Frame(self, setLayout=True, showBorder=False, grid=(0, 0))
-        self.headerLabel = Label(self.headerFrame, text='FRAMEFRAME', grid=(0, 0))
-        self.verifyButton = Button(self.headerFrame, text='Verify Now', grid=(0, 1), callback=self._verifyPopulate)
+        self._headerFrameOuter = Frame(self, setLayout=True, showBorder=False, grid=(0, 0),
+                                 hAlign='left', hPolicy='ignored', vPolicy='fixed')
+        self.headerFrame = Frame(self._headerFrameOuter, setLayout=True,
+                                    grid=(0, 0))
+
+        self.headerLabel = Label(self.headerFrame, text='FRAMEFRAME', grid=(0, 0), gridSpan=(1, 3))
+        self.verifyButton = Button(self.headerFrame, text='Verify Now', grid=(1, 0),
+                                   callback=self._verifyPopulate)
         self.verifyButton.setVisible(not self._primaryProject)
 
-        _verifyLabel = Label(self.headerFrame, 'always verify', grid=(0, 2), hPolicy='minimum', vPolicy='minimum')
-        self.verifyCheckBox = CheckBox(self.headerFrame, grid=(0, 3), checked=False, checkable=True)
+        _verifyLabel = Label(self.headerFrame, 'always verify', grid=(1, 1), hPolicy='minimum', vPolicy='minimum')
+        self.verifyCheckBox = CheckBox(self.headerFrame, grid=(1, 2), checked=False, checkable=True)
         _verifyLabel.setVisible(not self._primaryProject)
         self.verifyCheckBox.setVisible(not self._primaryProject)
+        self.headerFrame.getLayout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
 
         # add the pane for the treeview/tables
         self._paneSplitter = Splitter(self, setLayout=True, horizontal=True)
@@ -322,7 +328,6 @@ class NefDictFrame(Frame):
         # set the subframe to be ignored and minimum to stop the widgets overlapping - remember this for other places
         self._frameOptionsNested.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
         self.frameOptionsFrame.getLayout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
-        self.headerFrame.getLayout().setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
 
         # options frame
         pass
@@ -1167,22 +1172,22 @@ class NefDictFrame(Frame):
                                                                          tableColourFunc=None)
 
     handleSaveFrames['ccpn_rdc_restraint_violation_list'] = partial(handle_treeView_selection,
-                                                                         prefix='ccpn_rdc_restraint_violation_',
-                                                                         mappingCode='ccpn_rdc_restraint_violation_list',
-                                                                         errorCode='ccpn_rdc_restraint_violation_list',
-                                                                         tableColourFunc=None)
+                                                                    prefix='ccpn_rdc_restraint_violation_',
+                                                                    mappingCode='ccpn_rdc_restraint_violation_list',
+                                                                    errorCode='ccpn_rdc_restraint_violation_list',
+                                                                    tableColourFunc=None)
 
     handleSaveFrames['ccpn_datatable'] = partial(handle_treeView_selection,
-                                                          prefix='ccpn_datatable_data_',
-                                                          mappingCode='ccpn_datatable',
-                                                          errorCode='ccpn_datatable',
-                                                          tableColourFunc=None)
+                                                 prefix='ccpn_datatable_data_',
+                                                 mappingCode='ccpn_datatable',
+                                                 errorCode='ccpn_datatable',
+                                                 tableColourFunc=None)
 
     handleSaveFrames['ccpn_collection'] = partial(handle_treeView_selection,
-                                                                         prefix='ccpn_collection_',
-                                                                         mappingCode='ccpn_collections',
-                                                                         errorCode='ccpn_collections',
-                                                                         tableColourFunc=table_ccpn_collections)
+                                                  prefix='ccpn_collection_',
+                                                  mappingCode='ccpn_collections',
+                                                  errorCode='ccpn_collections',
+                                                  tableColourFunc=table_ccpn_collections)
 
     handleSaveFrames['ccpn_logging'] = partial(handle_treeView_selection,
                                                prefix='ccpn_history_',
@@ -1326,22 +1331,22 @@ class NefDictFrame(Frame):
                                                                           tableColourFunc=None)
 
     _setBadSaveFrames['ccpn_rdc_restraint_violation_list'] = partial(_set_bad_saveframe,
-                                                                          prefix='ccpn_rdc_restraint_violation_',
-                                                                          mappingCode='ccpn_rdc_restraint_violation_list',
-                                                                          errorCode='ccpn_rdc_restraint_violation_list',
-                                                                          tableColourFunc=None)
+                                                                     prefix='ccpn_rdc_restraint_violation_',
+                                                                     mappingCode='ccpn_rdc_restraint_violation_list',
+                                                                     errorCode='ccpn_rdc_restraint_violation_list',
+                                                                     tableColourFunc=None)
 
     _setBadSaveFrames['ccpn_datatable'] = partial(_set_bad_saveframe,
-                                                           prefix='ccpn_datatable_data_',
-                                                           mappingCode='ccpn_datatable',
-                                                           errorCode='ccpn_datatable',
-                                                           tableColourFunc=None)
+                                                  prefix='ccpn_datatable_data_',
+                                                  mappingCode='ccpn_datatable',
+                                                  errorCode='ccpn_datatable',
+                                                  tableColourFunc=None)
 
     _setBadSaveFrames['ccpn_collection'] = partial(_set_bad_saveframe,
-                                                                          prefix='ccpn_collection_',
-                                                                          mappingCode='ccpn_collections',
-                                                                          errorCode='ccpn_collections',
-                                                                          tableColourFunc=table_ccpn_collections)
+                                                   prefix='ccpn_collection_',
+                                                   mappingCode='ccpn_collections',
+                                                   errorCode='ccpn_collections',
+                                                   tableColourFunc=table_ccpn_collections)
     _setBadSaveFrames['ccpn_logging'] = partial(_set_bad_saveframe,
                                                 prefix='ccpn_history_',
                                                 mappingCode='ccpn_logging',
@@ -1471,19 +1476,19 @@ class NefDictFrame(Frame):
                                                                         )
 
     applyCheckBoxes['ccpn_rdc_restraint_violation_list'] = partial(apply_checkBox_item,
-                                                                        prefix='ccpn_rdc_restraint_violation_',
-                                                                        mappingCode='ccpn_rdc_restraint_violation_list',
-                                                                        )
+                                                                   prefix='ccpn_rdc_restraint_violation_',
+                                                                   mappingCode='ccpn_rdc_restraint_violation_list',
+                                                                   )
 
     applyCheckBoxes['ccpn_datatable'] = partial(apply_checkBox_item,
-                                                         prefix='ccpn_datatable_data_',
-                                                         mappingCode='ccpn_datatable',
-                                                         )
+                                                prefix='ccpn_datatable_data_',
+                                                mappingCode='ccpn_datatable',
+                                                )
 
     applyCheckBoxes['ccpn_collection'] = partial(apply_checkBox_item,
-                                                                        prefix='ccpn_collection_',
-                                                                        mappingCode='ccpn_collections',
-                                                                        )
+                                                 prefix='ccpn_collection_',
+                                                 mappingCode='ccpn_collections',
+                                                 )
 
     applyCheckBoxes['ccpn_logging'] = partial(apply_checkBox_item,
                                               prefix='ccpn_history_',

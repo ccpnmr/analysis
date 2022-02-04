@@ -5,19 +5,19 @@ Settings used in gui modules, widgets and popups
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 15:30:05 +0000 (Tue, February 01, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-02-04 14:27:40 +0000 (Fri, February 04, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -221,6 +221,7 @@ GUITABLE_ALT_BACKGROUND = 'GUITABLE_ALT_BACKGROUND'
 GUITABLE_ITEM_FOREGROUND = 'GUITABLE_ITEM_FOREGROUND'
 GUITABLE_SELECTED_FOREGROUND = 'GUITABLE_SELECTED_FOREGROUND'
 GUITABLE_SELECTED_BACKGROUND = 'GUITABLE_SELECTED_BACKGROUND'
+GUITABLE_DROP_BORDER = 'GUITABLE_DROP_BORDER'
 
 # strip header colours
 STRIPHEADER_FOREGROUND = 'STRIPHEADER_FOREGROUND'
@@ -248,6 +249,7 @@ TOOLTIP_BACKGROUND_COLOUR = [k for k, v in allColours.items() if v == 'lightgold
 BORDERNOFOCUS_COLOUR = '#A9A9A9'
 BORDERFOCUS_COLOUR = '#4E86F6'
 HIGHLIGHT_COLOUR = '#0063E1'
+GUITABLE_DROP_BORDER_COLOUR = GREEN1
 
 # Shades
 CCPNGLWIDGET_REGIONSHADE = 0.30
@@ -324,6 +326,8 @@ colourSchemes = {
         GUITABLE_ITEM_FOREGROUND         : TEXT_COLOUR,
         GUITABLE_SELECTED_FOREGROUND     : 'black',
         GUITABLE_SELECTED_BACKGROUND     : '#FFFCBA',
+        GUITABLE_DROP_BORDER             : GUITABLE_DROP_BORDER_COLOUR,
+
 
         STRIPHEADER_FOREGROUND           : TEXT_COLOUR,
         STRIPHEADER_BACKGROUND           : '#ebebeb',

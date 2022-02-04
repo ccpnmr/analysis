@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 13:08:57 +0000 (Fri, January 21, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-02-04 14:27:40 +0000 (Fri, February 04, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -67,7 +67,7 @@ from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight, TABLEFONT
 from ccpn.util.AttrDict import AttrDict
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.RowExpander import RowExpander
-from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, GREEN1
+from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, GREEN1, GUITABLE_DROP_BORDER
 from ccpn.ui.gui.widgets.SideBar import SideBar
 from ccpn.ui.gui.widgets.DropBase import DropBase
 import math
@@ -286,6 +286,7 @@ class GuiTable(TableWidget, Base):
             self.application = mainWindow.application
             self.project = mainWindow.application.project
             self.current = mainWindow.application.current
+            self.setCurrent()
         self.moduleParent = None
 
         # initialise the internal data storage
@@ -1138,15 +1139,36 @@ class GuiTable(TableWidget, Base):
         dataDict[DropBase.DFS] = dfs
         return dataDict
 
-    def _setDraggingStyleSheet(self, focusColour=None):
-        """Set the focus/noFocus colours for the widget
-        """
-        focusColour = focusColour or getColours()[BORDERFOCUS]
+    def setCurrent(self):
+        """Set self to current.guitTable """
+        self.current.guiTable = self
+        self._setCurrentStyleSheet()
+
+    def unsetCurrent(self):
+        """Set self to current.guitTable """
+        self.current.guiTable = None
+        self.setStyleSheet(self._defaultStyleSheet)
+
+
+    def _setCurrentStyleSheet(self):
+        focusColour = getColours()[BORDERFOCUS]
         styleSheet = "GuiTable { " \
                      "border: 2px solid;" \
                      "border-radius: 2px;" \
                      "border-color: %s;" \
                      "} " % focusColour
+        self.setStyleSheet(styleSheet)
+
+
+    def _setDraggingStyleSheet(self):
+        """Set the focus/noFocus colours for the widget
+        """
+        dropColour = getColours()[GUITABLE_DROP_BORDER]
+        styleSheet = "GuiTable { " \
+                     "border: 1px solid;" \
+                     "border-radius: 2px;" \
+                     "border-color: %s;" \
+                     "} " % dropColour
         self.setStyleSheet(styleSheet)
 
     ####################################################################################################################
@@ -1231,15 +1253,21 @@ class GuiTable(TableWidget, Base):
         pos = QtCore.QPoint(pos.x() + 10, pos.y() + 10)
         self.tableMenu.exec_(self.mapToGlobal(pos))
 
+    def initSearchWidget(self):
+        if self._enableSearch and self.searchWidget is None:
+            if not attachSearchWidget(self._parent, self):
+                getLogger().warning('Filter option not available')
+
+    def hideSearchWidget(self):
+        if self.searchWidget is not None:
+            self.searchWidget.hide()
+
     def _raiseHeaderContextMenu(self, pos):
 
         if not self._dataFrameObject:
             return
 
-        if self._enableSearch and self.searchWidget is None:
-            if not attachSearchWidget(self._parent, self):
-                getLogger().warning('Filter option not available')
-
+        self.initSearchWidget()
         pos = QtCore.QPoint(pos.x(), pos.y() + 10)  #move the popup a bit down. Otherwise can trigger an event if the pointer is just on top the first item
 
         self.headerContextMenumenu = QtWidgets.QMenu()
@@ -1264,8 +1292,12 @@ class GuiTable(TableWidget, Base):
             self.showSearchSettings()
 
     def showSearchSettings(self):
+        """ Display the search frame in the table"""
+
+        self.initSearchWidget()
         if self.searchWidget is not None:
             self.searchWidget.show()
+
 
     def _copySelectedCell(self):
         from ccpn.util.Common import copyToClipboard
@@ -1758,7 +1790,10 @@ class GuiTable(TableWidget, Base):
 
         # user can click in the blank area below the last row
         self._clickedInTable = True if self.itemAt(event.pos()) else False
+        self.setCurrent()
         super().mousePressEvent(event)
+
+
 
     def getRightMouseItem(self):
         if self._rightClickedTableItem:
@@ -2412,6 +2447,7 @@ class GuiTable(TableWidget, Base):
 
     def _close(self):
         self._clearTableNotifiers()
+        self.unsetCurrent()
 
     def _clearTableNotifiers(self):
         """Clean up the notifiers

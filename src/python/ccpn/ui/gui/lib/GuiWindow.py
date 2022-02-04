@@ -4,19 +4,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-25 12:27:41 +0000 (Tue, January 25, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-02-04 14:27:40 +0000 (Fri, February 04, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -89,6 +89,7 @@ class GuiWindow():
         addShortCut("c, z", self, self._clearCurrentPeaks, context=context)
         addShortCut("c, o", self, self.setContourLevels, context=context)
 
+        addShortCut("f, t", self, self.filterOnCurrentTable, context=context)
         addShortCut("t, u", self, partial(self.traceScaleUp, self), context=context)
         addShortCut("t, d", self, partial(self.traceScaleDown, self), context=context)
         addShortCut("t, h", self, partial(self.toggleHTrace, self), context=context)
@@ -555,6 +556,11 @@ class GuiWindow():
         """
         # self.application.current.peaks = []
         self.application.current.clearPeaks()
+
+    def filterOnCurrentTable(self):
+        currentGuiTable = self.current.guiTable
+        if currentGuiTable is not None:
+            currentGuiTable.showSearchSettings()
 
     def setContourLevels(self):
         """

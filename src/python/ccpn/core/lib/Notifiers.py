@@ -29,8 +29,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:23:25 +0000 (Thu, January 13, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-04 12:09:37 +0000 (Fri, February 04, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -76,6 +76,9 @@ class NotifierABC(object):
         # initialisations
         self._id = NotifierABC._currentIndex
         NotifierABC._currentIndex += 1
+
+        if theObject is None:
+            raise RuntimeError('NotifierABC: theObject is None')
 
         self._theObject = theObject  # The object we are monitoring
 
@@ -224,6 +227,9 @@ class Notifier(NotifierABC):
         """
         from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject  # local import to avoid cycles
         from ccpn.framework.Current import Current  # local import to avoid cycles
+
+        if theObject is None or not isinstance(theObject, (Current, AbstractWrapperObject)):
+            raise RuntimeError('Notifier: invalid object %r' % theObject)
 
         super().__init__(theObject=theObject, triggers=triggers, targetName=targetName, debug=debug,
                          callback=callback, **kwargs

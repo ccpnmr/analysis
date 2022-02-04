@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-02 19:07:11 +0000 (Wed, February 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-04 09:19:36 +0000 (Fri, February 04, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -27,27 +27,19 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 # Start of code
 #=========================================================================================
 
-from abc import ABC
-from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 
+############################################################################################
+##  SeriesDataTable common definitions. Used in I/O tables columns and throughtout modules
+############################################################################################
 
-class SeriesAnalysisABCTest(SeriesAnalysisABC):
+CHAIN_CODE      = 'chain_code'           # -> str   | Chain Code
+RESIDUE_CODE    = 'residue_code'         # -> str   | Residue Sequence Code (e.g.: '1', '1B')
+RESIDUE_TYPE    = 'residue_type'         # -> str   | Residue Type (e.g.: 'ALA')
+ATOM_NAME       = 'atom_name'            # -> str   | Atom name (e.g.: 'Hn')
 
-    def setUp(self):
-        """
-        Test the SeriesAnalysisABC class contains the right methods.
-        """
-        from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
-        with self.initialSetup():
-            self.seriesAnalysisABC = SeriesAnalysisABC()
+_ROW_UID         = '_ROW_UID'            # -> str   | Internal. Unique Identifier (e.g.: randomly generated 6 letters UUID)
 
-    def test_fittingModelsType(self):
-        from ccpn.util.OrderedSet import OrderedSet
-        message = "fittingModels class-variable is not of instance OrderedSet."
-        self.assertIsInstance(self.seriesAnalysisABC.fittingModels, OrderedSet, message)
-
-
-
+CONSTANT_TABLE_COLUMNS = [CHAIN_CODE, RESIDUE_CODE, RESIDUE_TYPE, ATOM_NAME]
 
 
 

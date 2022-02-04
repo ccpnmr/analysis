@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-02 19:07:11 +0000 (Wed, February 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-04 09:19:36 +0000 (Fri, February 04, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -33,6 +33,7 @@ from ccpn.framework import Framework
 from ccpn.util.Logging import getLogger
 from ccpnmodel.ccpncore.testing.CoreTesting import TEST_PROJECTS_PATH
 from ccpn.core.DataTable import TableFrame
+
 
 class ExperimentAnalysisTestingBC(unittest.TestCase):
     """Baseclass for testing the ExperimentAnalysis ABCs"""

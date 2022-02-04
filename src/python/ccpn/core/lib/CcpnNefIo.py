@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-02 23:55:21 +0000 (Wed, February 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-04 09:50:00 +0000 (Fri, February 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -524,7 +524,8 @@ class CcpnNefWriter:
             nmrChainSet = set(nmrChains)
             for chemicalShiftList in chemicalShiftLists:
                 for chemicalShift in chemicalShiftList.chemicalShifts:
-                    nmrChainSet.add(chemicalShift.nmrAtom.nmrResidue.nmrChain)
+                    if chemicalShift.nmrAtom:
+                        nmrChainSet.add(chemicalShift.nmrAtom.nmrResidue.nmrChain)
             nmrChains = sorted(nmrChainSet)
 
             # NmrChains and Chains
@@ -1025,6 +1026,7 @@ class CcpnNefWriter:
     def chemicalShiftList2Nef(self, chemicalShiftList: ChemicalShiftList) -> StarIo.NmrSaveFrame:
         """Convert ChemicalShiftList to CCPN NEF saveframe"""
 
+        from ccpn.core.ChemicalShiftList import CS_CHAINCODE, CS_SEQUENCECODE, CS_RESIDUETYPE, CS_ATOMNAME
         # Set up frame
         category = 'nef_chemical_shift_list'
         result = self._newNefSaveFrame(chemicalShiftList, category, chemicalShiftList.name)
@@ -1040,22 +1042,32 @@ class CcpnNefWriter:
         if shifts:
             for shift in shifts:
                 rowdata = self._loopRowData(loopName, shift)
-                nmrAtom = shift.nmrAtom
-                rowdata.update(zip(atomCols, nmrAtom._idTuple))
-                isotopeCode = nmrAtom.isotopeCode.upper()
-                isotope, element = commonUtil.splitIntFromChars(isotopeCode)
-                if isotope is not None:
-                    rowdata['element'] = element
-                    rowdata['isotope_number'] = isotope
-
-                # Correct for atom names starting with the isotopeCode (e.g. 2HA, 111CD)
+                _row = shift._getAsTuple()
+                rowdata.update(zip(atomCols, (getattr(_row, CS_CHAINCODE, None),
+                                              getattr(_row, CS_SEQUENCECODE, None),
+                                              getattr(_row, CS_RESIDUETYPE, None),
+                                              getattr(_row, CS_ATOMNAME, None))
+                                   )
+                               )
+                # rowdata.update(zip(atomCols, nmrAtom._idTuple))
+                rowdata['element'] = None
+                rowdata['isotope_number'] = None
                 name = rowdata['atom_name']
-                if name.startswith(isotopeCode):
-                    plainName = name[len(str(isotope)):]
-                    if chemicalShiftList.getChemicalShift(nmrAtom.nmrResidue.pid + Pid.IDSEP + plainName) is None:
-                        # There is no shift in this list that has the corresponding name without the
-                        # isotope number prefix. Remove the prefix for writing
-                        rowdata['atom_name'] = plainName
+                nmrAtom = shift.nmrAtom
+                if nmrAtom:
+                    isotopeCode = nmrAtom.isotopeCode.upper()
+                    isotope, element = commonUtil.splitIntFromChars(isotopeCode)
+                    if isotope is not None:
+                        rowdata['element'] = element
+                        rowdata['isotope_number'] = isotope
+
+                    # Correct for atom names starting with the isotopeCode (e.g. 2HA, 111CD)
+                    if name.startswith(isotopeCode):
+                        plainName = name[len(str(isotope)):]
+                        if chemicalShiftList.getChemicalShift(nmrAtom.nmrResidue.pid + Pid.IDSEP + plainName) is None:
+                            # There is no shift in this list that has the corresponding name without the
+                            # isotope number prefix. Remove the prefix for writing
+                            rowdata['atom_name'] = plainName
 
                 loop.newRow(rowdata)
         else:
@@ -6505,13 +6517,7 @@ class CcpnNefReader(CcpnNefContent):
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
         self._updateStringParameters(parameters)
 
-        try:
-            # check the list of items in the import dict
-            _frame = self._importDict[saveFrame.name]
-            importRows = _frame['_importRows']
-        except:
-            importRows = []
-        if parameters['name'] not in importRows:
+        if not self._checkImport(saveFrame, parameters['name']):
             # skip if not in the import list
             return
 
@@ -7126,18 +7132,11 @@ class CcpnNefReader(CcpnNefContent):
         mapping = nef2CcpnMap.get(loopName) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
 
-        try:
-            # check the list of items in the import dict
-            _frame = self._importDict[saveFrame.name]
-            importRows = _frame['_importRows']
-        except:
-            importRows = []
-
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
             self._updateStringParameters(parameters)
 
-            if parameters['name'] not in importRows:
+            if not self._checkImport(saveFrame, parameters['name']):
                 # skip if not in the import list
                 continue
 
@@ -7175,18 +7174,11 @@ class CcpnNefReader(CcpnNefContent):
         mapping = nef2CcpnMap.get(loopName) or {}
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
 
-        try:
-            # check the list of items in the import dict
-            _frame = self._importDict[saveFrame.name]
-            importRows = _frame['_importRows']
-        except:
-            importRows = []
-
         for row in loop.data:
             parameters = _parametersFromLoopRow(row, map2)
             self._updateStringParameters(parameters)
 
-            if parameters['name'] not in importRows:
+            if not self._checkImport(saveFrame, parameters['name']):
                 # skip if not in the import list
                 continue
 
@@ -7264,16 +7256,10 @@ class CcpnNefReader(CcpnNefContent):
         loopName = 'ccpn_internal_data'
         loop = saveFrame[loopName]
 
-        try:
-            # check the list of items in the import dict
-            _frame = self._importDict[saveFrame.name]
-            importRows = _frame['_importRows']
-        except:
-            importRows = []
-
         for row in loop.data:
             pid, data = row.values()
-            if pid not in importRows:
+
+            if not self._checkImport(saveFrame, pid):
                 # skip if not in the import list
                 continue
 

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-03 16:59:23 +0000 (Thu, February 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-04 12:05:44 +0000 (Fri, February 04, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1207,44 +1207,35 @@ class Framework(NotifierBase, GuiBase):
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
 
         _dataLoader = checkPathForDataLoader(path)
-        _loader = _dataLoader.readNefFile(path, errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
+        _nefImporter = _dataLoader.readNefFile(path, errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
 
         # verify popup here
         selection = None
 
         dialog = ImportNefPopup(parent=self.ui.mainWindow,
                                 mainWindow=self.ui.mainWindow,
-                                # nefImporterClass=CcpnNefImporter,
-                                nefObjects=({NEFFRAMEKEY_IMPORT: self.project,
-                                             },
-                                            {NEFFRAMEKEY_IMPORT           : _loader,
-                                             NEFFRAMEKEY_ENABLECHECKBOXES : True,
-                                             NEFFRAMEKEY_ENABLERENAME     : True,
-                                             NEFFRAMEKEY_ENABLEFILTERFRAME: True,
-                                             NEFFRAMEKEY_ENABLEMOUSEMENU  : True,
-                                             NEFFRAMEKEY_PATHNAME         : str(path),
-                                             })
+                                project=self.project,
+                                nefImporter=_nefImporter,
                                 )
-        with notificationEchoBlocking():
-            dialog.fillPopup()
-
-        dialog.setActiveNefWindow(1)
+        # with notificationEchoBlocking():
+        #     dialog.fillPopup()
+        #
+        # dialog.setActiveNefWindow(1)
         if dialog.exec_():
 
             selection = dialog._saveFrameSelection
             _nefReader = dialog.getActiveNefReader()
 
-            if makeNewProject:
-                self._closeProject()
-                self._project = self.newProject(_loader._nefDict.name)
+            # if makeNewProject:
+            #     self._closeProject()
+            #     self._project = self.newProject(_nefImporter._nefDict.name)
 
             # import from the loader into the current project
-            self.importFromLoader(_loader, reader=_nefReader)
+            self.importFromLoader(_nefImporter, reader=_nefReader)
 
             getLogger().info('==> Loaded NEF file: "%s"' % (path,))
             return self.project
 
-    @logCommand('application.')
     def importFromLoader(self, loader, reader=None):
         """Read the selection from the nefImporter object into the current.project
 

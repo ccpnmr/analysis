@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-03 16:59:24 +0000 (Thu, February 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-04 12:05:44 +0000 (Fri, February 04, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,7 +28,7 @@ __date__ = "$Date: 2020-05-04 17:15:05 +0000 (Mon, May 04, 2020) $"
 
 import os
 from functools import partial
-from collections import OrderedDict as OD
+from collections import OrderedDict
 from PyQt5 import QtGui, QtWidgets, QtCore
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -109,10 +109,11 @@ class NefDictFrame(Frame):
 
     DEFAULTMARGINS = (8, 8, 8, 8)  # l, t, r, b
 
-    def __init__(self, parent=None, mainWindow=None, nefImporterClass=None,
-                 nefObject=None, enableCheckBoxes=False, enableRename=False,
-                 enableFilterFrame=False, enableMouseMenu=False, pathName=None,
-                 showBorder=True, borderColour=None, _splitterMargins=DEFAULTMARGINS, **kwds):
+    def __init__(self, parent, mainWindow, nefLoader, pathName,
+                 enableCheckBoxes=False, enableRename=False,
+                 enableFilterFrame=False, enableMouseMenu=False,
+                 showBorder=True, borderColour=None, _splitterMargins=DEFAULTMARGINS,
+                 **kwds):
         """Initialise the widget"""
         super().__init__(parent, setLayout=True, spacing=DEFAULTSPACING, **kwds)
 
@@ -124,12 +125,13 @@ class NefDictFrame(Frame):
             self.project = mainWindow.project
             self._nefReader = CcpnNefIo.CcpnNefReader(self.application)
             self._nefWriter = CcpnNefIo.CcpnNefWriter(self.project)
-        else:
-            self.mainWindow = None
-            self.application = None
-            self.project = None
-            self._nefReader = None
-            self._nefWriter = None
+        # else:
+        #     # to @ED: do not write code that
+        #     self.mainWindow = None
+        #     self.application = None
+        #     self.project = None
+        #     self._nefReader = None
+        #     self._nefWriter = None
 
         self._primaryProject = True
         self.showBorder = showBorder
@@ -139,10 +141,13 @@ class NefDictFrame(Frame):
         self._enableFilterFrame = enableFilterFrame
         self._enableMouseMenu = enableMouseMenu
         self._pathName = pathName
-        self._nefImporterClass = nefImporterClass
 
+        # self._nefImporterClass = nefImporterClass
         # set the nef object - nefLoader/nefDict
-        self._initialiseNefLoader(nefObject, _ignoreError=True)
+        # self._initialiseNefLoader(nefObject, _ignoreError=True)
+        self._nefLoader = nefLoader
+        self._nefDict = nefLoader.data
+        self._primaryProject = False
 
         # set up the widgets
         self._setWidgets()
@@ -181,41 +186,41 @@ class NefDictFrame(Frame):
         p.drawRect(rgn)
         p.end()
 
-    def _initialiseProject(self, mainWindow, application, project):
-        """Intitialise the project setting - ONLY REQUIRED FOR TESTING when mainWindow doesn't exist
-        """
-        # set the project
-        self.mainWindow = mainWindow
-        self.application = application
-        self.project = project
-        if mainWindow is None:
-            self.mainWindow = AttrDict()
+    # def _initialiseProject(self, mainWindow, application, project):
+    #     """Intitialise the project setting - ONLY REQUIRED FOR TESTING when mainWindow doesn't exist
+    #     """
+    #     # set the project
+    #     self.mainWindow = mainWindow
+    #     self.application = application
+    #     self.project = project
+    #     if mainWindow is None:
+    #         self.mainWindow = AttrDict()
+    #
+    #     # set the new values for application and project
+    #     self.mainWindow.application = application
+    #     self.mainWindow.project = project
+    #
+    #     # initialise the base structure from the project
+    #     self.nefTreeView._populateTreeView(project)
+    #
+    #     self._nefReader = CcpnNefIo.CcpnNefReader(self.application)
+    #     self._nefWriter = CcpnNefIo.CcpnNefWriter(self.project)
 
-        # set the new values for application and project
-        self.mainWindow.application = application
-        self.mainWindow.project = project
-
-        # initialise the base structure from the project
-        self.nefTreeView._populateTreeView(project)
-
-        self._nefReader = CcpnNefIo.CcpnNefReader(self.application)
-        self._nefWriter = CcpnNefIo.CcpnNefWriter(self.project)
-
-    def _initialiseNefLoader(self, nefObject=None, _ignoreError=False):
-        if not (nefObject or _ignoreError):
-            raise TypeError('nefObject must be defined')
-
-        self._nefLoader = None
-        self._nefDict = None
-        if isinstance(nefObject, self._nefImporterClass):
-            self._nefLoader = nefObject
-            self._nefDict = nefObject._nefDict
-            self._primaryProject = False
-        elif isinstance(nefObject, Project):
-            self.project = nefObject
-            self._nefLoader = self._nefImporterClass(errorLogging=Nef.el.NEF_STANDARD, hidePrefix=True)
-            self._nefWriter = CcpnNefIo.CcpnNefWriter(self.project)
-            self._nefDict = self._nefLoader._nefDict = self._nefWriter.exportProject(expandSelection=True, pidList=None)
+    # def _initialiseNefLoader(self, nefObject=None, _ignoreError=False):
+    #     if not (nefObject or _ignoreError):
+    #         raise TypeError('nefObject must be defined')
+    #
+    #     self._nefLoader = None
+    #     self._nefDict = None
+    #     if isinstance(nefObject, self._nefImporterClass):
+    #         self._nefLoader = nefObject
+    #         self._nefDict = nefObject._nefDict
+    #         self._primaryProject = False
+    #     elif isinstance(nefObject, Project):
+    #         self.project = nefObject
+    #         self._nefLoader = self._nefImporterClass(errorLogging=Nef.el.NEF_STANDARD, hidePrefix=True)
+    #         self._nefWriter = CcpnNefIo.CcpnNefWriter(self.project)
+    #         self._nefDict = self._nefLoader._nefDict = self._nefWriter.exportProject(expandSelection=True, pidList=None)
 
     def _setCallbacks(self):
         """Set the mouse callback for the treeView
@@ -1708,44 +1713,54 @@ class ImportNefPopup(CcpnDialogMainWidget):
     FIXEDHEIGHT = False
     DEFAULTMARGINS = (5, 5, 5, 5)
 
-    def __init__(self, parent=None, mainWindow=None, size=(1000, 700), nefImporterClass=None, nefObjects=(), **kwds):
+    def __init__(self, parent, mainWindow, project, nefImporter, **kwds):
         """
         Initialise the main form
 
         :param parent: calling widget
         :param mainWindow: gui mainWindow class for the application
-        :param size: initial size of the window
-        :param nefObjects: a tuple of tuples of the form ((nefImporter | project, checkboxes visible),)
+        :param project: a Project instance
+        :param nefImporter: A (CcpNmr) NefImporter instance
         :param kwds: additional parameters to pass to the window
         """
+        size = (1000, 700)
         super().__init__(parent, setLayout=True, windowTitle='Import Nef', size=size, **kwds)
+        self._size = size  # GWV: this seems to fail if I make this a class attribute
 
-        if mainWindow:
-            self.mainWindow = mainWindow
-            self.application = mainWindow.application
-            self.project = mainWindow.project
-        else:
-            self.mainWindow = None
-            self.application = None
-            self.project = None
-        self._size = size
+        # nefObjects=({NEFFRAMEKEY_IMPORT: project,
+        #             },
+        #             {NEFFRAMEKEY_IMPORT           : nefImporter,
+        #              NEFFRAMEKEY_ENABLECHECKBOXES : True,
+        #              NEFFRAMEKEY_ENABLERENAME     : True,
+        #              NEFFRAMEKEY_ENABLEFILTERFRAME: True,
+        #              NEFFRAMEKEY_ENABLEMOUSEMENU  : True,
+        #              NEFFRAMEKEY_PATHNAME         : str(path),
+        #              }
+        #             )
 
-        if not isinstance(nefImporterClass, (type(Nef.NefImporter), type(None))):
-            raise RuntimeError(f'{nefImporterClass} must be of type {Nef.NefImporter}')
-        self._nefImporterClass = nefImporterClass if nefImporterClass else Nef.NefImporter
+        self.mainWindow = mainWindow
+        self.application = mainWindow.application
+        self.project = project
 
-        # create a list of nef dictionary objects
-        self.setNefObjects(nefObjects)
+        self._nefImporter = nefImporter
+        self._path = nefImporter.path
+
+
+        # if not isinstance(nefImporterClass, (type(Nef.NefImporter), type(None))):
+        #     raise RuntimeError(f'{nefImporterClass} must be of type {Nef.NefImporter}')
+        # self._nefImporterClass = nefImporterClass if nefImporterClass else Nef.NefImporter
+
+        # # create a list of nef dictionary objects
+        # self.setNefObjects(nefObjects)
+
+        # object to contain items that are to be imported
+        self._saveFrameSelection = None
+        self._activeImportWindow = None
 
         # set up the widgets
         self.setWidgets()
-
         # populate the widgets
         self._populate()
-
-        # object to contain items that ar to be imported
-        self._saveFrameSelection = None
-        self._activeImportWindow = None
 
         # enable the buttons
         self.setOkButton(callback=self._okClicked, text='Import', tipText='Import nef file over existing project')
@@ -1755,6 +1770,8 @@ class ImportNefPopup(CcpnDialogMainWidget):
 
         self._okButton = self.getButton(self.OKBUTTON)
 
+        self.fillPopup()
+
     def setWidgets(self):
         """Initialise the main widgets for the form
         """
@@ -1762,19 +1779,36 @@ class ImportNefPopup(CcpnDialogMainWidget):
         self.paneSplitter.setChildrenCollapsible(False)
         self.mainWidget.getLayout().addWidget(self.paneSplitter, 0, 0)
 
-        self._nefWindows = OD()
-        for nefObj in self.nefObjects:
-            # for obj, enableCheckBoxes, enableRename in self.nefObjects:
+        self._nefWindows = OrderedDict()
+        # for nefObj in self.nefObjects:
+        #     # for obj, enableCheckBoxes, enableRename in self.nefObjects:
+        #
+        #     # add a new nefDictFrame for each of the objects in the list (project or nefImporter)
+        #     newWindow = NefDictFrame(parent=self,
+        #                              mainWindow=self.mainWindow,
+        #                              nefLoader=self._nefImporter,
+        #                              pathName=self._path,
+        #                              grid=(0, 0), showBorder=True,
+        #                              **nefObj)
+        #
+        #     self._nefWindows[nefObj[NEFFRAMEKEY_IMPORT]] = newWindow
+        #     self.paneSplitter.addWidget(newWindow)
+        _options =  {NEFFRAMEKEY_ENABLECHECKBOXES : True,
+                     NEFFRAMEKEY_ENABLERENAME     : True,
+                     NEFFRAMEKEY_ENABLEFILTERFRAME: True,
+                     NEFFRAMEKEY_ENABLEMOUSEMENU  : True,
+                     }
+        newWindow = NefDictFrame(parent=self,
+                                 mainWindow=self.mainWindow,
+                                 nefLoader=self._nefImporter,
+                                 pathName=self._path,
+                                 grid=(0, 0), showBorder=True,
+                                 **_options
+                                 )
 
-            # add a new nefDictFrame for each of the objects in the list (project or nefImporter)
-            newWindow = NefDictFrame(self, mainWindow=self.mainWindow, grid=(0, 0), showBorder=True,
-                                     nefImporterClass=self._nefImporterClass,
-                                     # nefObject=obj,
-                                     # enableCheckBoxes=enableCheckBoxes,
-                                     # enableRename=enableRename,
-                                     **nefObj)
-            self._nefWindows[nefObj[NEFFRAMEKEY_IMPORT]] = newWindow
-            self.paneSplitter.addWidget(newWindow)
+        self._nefWindows[self._nefImporter.getName(prePend=True)] = newWindow
+        self.paneSplitter.addWidget(newWindow)
+        self.setActiveNefWindow(0)
 
     def _populate(self):
         """Populate all frames

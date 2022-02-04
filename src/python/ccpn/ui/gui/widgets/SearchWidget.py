@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-10 11:37:27 +0000 (Fri, December 10, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-02-04 18:24:20 +0000 (Fri, February 04, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -41,7 +41,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.util.Logging import getLogger
 import operator as op
-
+import numpy as np
 
 VISIBLESEARCH = '<Visible Table>'
 
@@ -51,6 +51,8 @@ GreaterThanInclude = '>='
 LessThanInclude = '<='
 Equal = 'Equal'
 Include = 'Include'
+Between = 'Between'
+NotBetween = 'Not-Between'
 
 SearchConditionsDict = {
     Equal             : op.eq,
@@ -59,8 +61,29 @@ SearchConditionsDict = {
     GreaterThanInclude: op.ge,
     LessThan          : op.lt,
     LessThanInclude   : op.le,
+    Between           : None,
+    NotBetween        : None,
     }
 
+CCTT = 'Filter and display only rows that '
+SearchConditionsToolTips = [
+    f'{CCTT} contain the exact match to the query.',
+    f'{CCTT} include at least a part of the query.',
+    f'{CCTT} contain values greater than the query. (Only numbers)',
+    f'{CCTT} contain values greater than the query, including limits. (Only numbers)',
+    f'{CCTT} contain values less than the query. (Only numbers)',
+    f'{CCTT} contain values less than the query, including limits. (Only numbers)',
+    f'{CCTT} contain values between the queries, including the limits. (Only numbers)',
+    f'{CCTT} contain values that are not between the queries, limits excluded. (Only numbers)',
+    ]
+
+RangeConditions = [Between, NotBetween]
+
+def strTofloat(value):
+  try:
+    return float(value)
+  except:
+    return None
 
 def _compareKeys(a, b, condition):
     """
@@ -82,6 +105,31 @@ def _compareKeys(a, b, condition):
     except Exception as ex:
         getLogger().debug2('Error in comparing values for GuiTable filters.', ex)
 
+def _compareKeysInRange(originValue, queryRange, condition):
+    value = strTofloat(originValue)
+    _cond1 = strTofloat(queryRange[0])
+    _cond2 = strTofloat(queryRange[1])
+    if not all([value, _cond1, _cond2]):
+        return False
+
+    conds = [abs(_cond1), abs(_cond2)]
+    cond1 = min(conds)
+    cond2 = max(conds)
+    a = np.array([value])
+
+    if condition == NotBetween:
+        result =  np.any((a < cond1)|(a > cond2))
+        # print(f' Checking if {value} is not between {cond1} and {cond2}. It is: {result}')
+        return result
+
+    if condition == Between:
+        result = np.all((a >= cond1) & (a <= cond2))
+        # print(f' Checking if {value} is between {cond1} and {cond2}. It is: {result}')
+        return result
+
+    return False
+
+
 
 class GuiTableFilter(ScrollArea):
     def __init__(self, table, parent=None, **kwds):
@@ -99,26 +147,31 @@ class GuiTableFilter(ScrollArea):
         self.setWidget(self._widget)
         self._widget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Expanding)
 
-        labelColumn = Label(self._widget, 'Filter in', grid=(1, 0), gridSpan=(1, 2))
-        self.columnOptions = PulldownList(self._widget, grid=(1, 2))
+        self.conditionWidget = PulldownList(self._widget, texts=list(SearchConditionsDict.keys()),
+                                            toolTips=SearchConditionsToolTips,
+                                            callback=self._conditionWidgetCallback,
+                                            grid=(0, 0))
+        self.condition1 = LineEdit(self._widget, grid=(0, 1),  backgroundText='Insert value')
+        self.condition2 = LineEdit(self._widget, grid=(0, 2),  backgroundText='Insert value 2')
+        self._conditionWidgetCallback(self.conditionWidget.getText())
 
+        #  second row
+        labelColumn = Label(self._widget, 'Filter in', grid=(1, 0))
+        self.columnOptions = PulldownList(self._widget, grid=(1, 1))
         self.columnOptions.setMinimumWidth(40)
 
-        self.conditionWidget = PulldownList(self._widget, texts=list(SearchConditionsDict.keys()), grid=(0, 0))
-        self.edit = LineEdit(self._widget, grid=(0, 1), gridSpan=(1, 5), backgroundText='Filter by Item')
-        self.searchLabel = Button(self._widget, grid=(0, 4), icon=Icon('icons/edit-find'),
-                                  callback=partial(self.findOnTable, self.table))
-        self.searchLabel.setFlat(True)
-
-        self.searchButtons = ButtonList(self._widget, texts=['Reset', 'Close'], tipTexts=['Restore Table', 'Close Filter'],
-                                        callbacks=[partial(self.restoreTable, self.table),
+        self.searchButtons = ButtonList(self._widget, texts=['Search ','Reset', 'Close'],
+                                        icons=[Icon('icons/edit-find'), None, None],
+                                        tipTexts=['Search in selected Columns', 'Restore Table', 'Close Filter'],
+                                        callbacks=[partial(self.findOnTable, self.table),
+                                                   partial(self.restoreTable, self.table),
                                                    self.hideSearch],
-                                        grid=(1, 3), gridSpan=(1, 2))
+                                        grid=(1, 2),)
 
         Spacer(self._widget, 5, 5, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
                grid=(0, 2), gridSpan=(1, 1))
 
-        self.edit.returnPressed.connect(partial(self.findOnTable, self.table))
+        # self.condition1.returnPressed.connect(partial(self.findOnTable, self.table))
 
         self.searchButtons.getButton('Reset').setEnabled(False)
 
@@ -126,7 +179,6 @@ class GuiTableFilter(ScrollArea):
         self.setFixedHeight(self.sizeHint().height() + 10)
 
         labelColumn.setFixedWidth(labelColumn.sizeHint().width())
-        self.searchLabel.setFixedWidth(self.searchLabel.sizeHint().width())
         self.searchButtons.setFixedWidth(self.searchButtons.sizeHint().width())
 
         self.setColumnOptions()
@@ -152,6 +204,14 @@ class GuiTableFilter(ScrollArea):
             self.columnOptions.addItem(text, objectsRange[i])
         self.columnOptions.setIndex(0)
 
+    def _conditionWidgetCallback(self, value):
+
+
+        if value not in RangeConditions:
+            self.condition2.hide()
+        else:
+            self.condition2.show()
+
     def updateSearchWidgets(self, table):
         self.table = table
         self.setColumnOptions()
@@ -164,64 +224,20 @@ class GuiTableFilter(ScrollArea):
 
     def restoreTable(self, table):
         self.table.refreshTable()
-        self.edit.clear()
+        # self.condition1.clear()
         self.searchButtons.getButton('Reset').setEnabled(False)
         self._listRows = None
 
     def findOnTable(self, table, matchExactly=False, ignoreNotFound=False):
-        if self.edit.text() == '' or None:
+        if self.condition1.text() == '' or None:
             self.restoreTable(table)
             return
 
         self.table = table
-        text = self.edit.text()
+        condition1Value = self.condition1.text()
+        condition2Value = self.condition2.text()
+        condition = self.conditionWidget.getText()
 
-        # testing = self.table.itemDelegateForColumn(5)
-        #
-        # def _test(test, x):
-        #
-        #     # index.model()->data(index, Qt::EditRole).toDouble
-        #
-        #     if test in str(x):
-        #         print('>>>', test, str(x))
-        #
-        #     return test in str(x)
-        #
-        # if matchExactly:
-        #     func = lambda x: text == str(x)
-        # else:
-        #     func = lambda x: text in str(x)
-        #
-        # columns = self.table._dataFrameObject.headings
-
-        # if self.columnOptions.currentObject() is None:
-        #
-        #     df = self.table._dataFrameObject.dataFrame
-        #     # idx = df[columns[0]].apply(func)
-        #
-        #     # for col in range(1, len(columns)):
-        #     #     idx = idx | df[columns[col]].apply(func)
-        #
-        #     visHeadings = self.table._dataFrameObject.visibleColumnHeadings
-        #     if visHeadings:
-        #
-        #         # add the first search column
-        #         idx = df[visHeadings[0]].apply(func)
-        #         # add the rest (if exist)
-        #         for colName in visHeadings[1:]:
-        #             idx = idx | df[colName].apply(func)
-        #
-        #         self._searchedDataFrame = df.loc[idx]
-        #
-        #     else:
-        #         # make an empty dataFrame
-        #         self._searchedDataFrame = df.loc[None]
-        #
-        # else:
-        #     objCol = columns[self.columnOptions.currentObject()]
-        #
-        #     df = self.table._dataFrameObject.dataFrame
-        #     self._searchedDataFrame = df.loc[df[objCol].apply(func)]
 
         # check using the actual table - not the underlying dataframe
         df = self.table._dataFrameObject.dataFrame
@@ -237,9 +253,12 @@ class GuiTableFilter(ScrollArea):
                 if self.table.horizontalHeaderItem(column).text() in visHeadings:
                     item = table.item(row, column)
                     cellText = item.data(QtCore.Qt.DisplayRole)
-                    condition = self.conditionWidget.getText()
-                    if (match := _compareKeys(cellText, text, condition)) is None:
-                        _compareErrorCount += 1
+                    if condition in RangeConditions:
+                        match = _compareKeysInRange(cellText, (condition1Value,condition2Value), condition)
+                    else:
+                        match = _compareKeys(cellText, condition1Value, condition)
+                        if match is None:
+                            _compareErrorCount += 1
 
                     if match:
                         if self._listRows is not None:
@@ -268,12 +287,13 @@ class GuiTableFilter(ScrollArea):
                 self.searchButtons.getButton('Reset').setEnabled(False)
                 self.restoreTable(table)
                 if not ignoreNotFound:
-                    MessageDialog.showWarning('Not found', text)
+                    MessageDialog.showWarning('Not found', 'Query value(s) not found in selected columns.'
+                                                           'Try by filtering in a specific column or double check your query.')
 
     def selectSearchOption(self, sourceTable, columnObject, value):
         try:
             self.columnOptions.setCurrentText(columnObject.__name__)
-            self.edit.setText(value)
+            self.condition1.setText(value)
             self.findOnTable(self.table, matchExactly=False, ignoreNotFound=True)
         except Exception as es:
             getLogger().debug('column not found in table')

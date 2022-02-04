@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-04 14:27:40 +0000 (Fri, February 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-04 18:24:19 +0000 (Fri, February 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -558,9 +558,10 @@ class GuiWindow():
         self.application.current.clearPeaks()
 
     def filterOnCurrentTable(self):
-        currentGuiTable = self.current.guiTable
-        if currentGuiTable is not None:
-            currentGuiTable.showSearchSettings()
+        if hasattr(self.current, 'guiTable'):
+            currentGuiTable = self.current.guiTable
+            if currentGuiTable is not None:
+                currentGuiTable.showSearchSettings()
 
     def setContourLevels(self):
         """

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-04 14:43:47 +0000 (Fri, February 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-04 19:28:01 +0000 (Fri, February 04, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1041,36 +1041,6 @@ class Framework(NotifierBase, GuiBase):
 
         return [project]
 
-    def _loadNefFile(self, path: str, makeNewProject=True) -> Project:
-        """Load Project from NEF file at path, and do necessary setup
-        :return Project instance
-        """
-
-        from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
-        from ccpn.core.lib import CcpnNefIo
-
-        from ccpn.util.nef.NefImporter import NefImporter
-
-        _nefReader = CcpnNefIo.CcpnNefReader(self)
-        # dataBlock = _nefReader.getNefData(path)
-
-        _nefImporter = NefImporter()
-        _nefImporter.loadFile(path)
-        _nefImporter._attachReader(_nefReader.importExistingProject)
-
-        if makeNewProject:
-            self._closeProject()
-            self._project = self.newProject(_nefImporter.getName())
-
-        with undoBlockWithoutSideBar():
-            with notificationEchoBlocking():
-                with catchExceptions(application=self, errorStringTemplate='Error loading Nef file: %s',
-                                     printTraceBack=True):
-                    _nefImporter._importNef(self.project, _nefImporter._nefDict)
-
-        getLogger().info('==> Loaded NEF file: "%s"' % (path,))
-        return self.project
-
     def _loadSparkyFile(self, path: str, createNewProject=True) -> Project:
         """Load Project from Sparky file at path, and do necessary setup
         :return Project-instance (either existing or newly created)
@@ -1176,65 +1146,86 @@ class Framework(NotifierBase, GuiBase):
     # NEF-related code
     #-----------------------------------------------------------------------------------------
 
-    def _importNef(self, path=None):
-        if not path:
-            filter = '*.nef'
-            dialog = NefFileDialog(parent=self.ui.mainWindow, acceptMode='import', fileFilter=filter)
-
-            dialog._show()
-            path = dialog.selectedFile()
-            if not path:
-                return
-
-        path = aPath(path)
-
-        with catchExceptions(application=self, errorStringTemplate='application._importNef: %s', printTraceBack=True):
-            with undoBlockWithoutSideBar():
-                self._importNefFile(path=path, makeNewProject=False)
-            # self.ui.mainWindow.sideBar.buildTree(self.project)
-
-    def _importNefFile(self, path: Union[str, Path], makeNewProject=True) -> Project:
-        """Load Project from NEF file at path, and do necessary setup
+    def _loadNefFile(self, dataLoader, nefReader=None, makeNewProject=True) -> Project:
+        """Load NEF file defined by dataLoader instance, and do necessary setup
+        :return Project instance
+        CCPNINTERNAL: called from dataLoader instance
         """
-
-        from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
-        from ccpn.ui.gui.popups.ImportNefPopup import ImportNefPopup, NEFFRAMEKEY_ENABLERENAME, \
-            NEFFRAMEKEY_IMPORT, NEFFRAMEKEY_ENABLEMOUSEMENU, NEFFRAMEKEY_PATHNAME, \
-            NEFFRAMEKEY_ENABLEFILTERFRAME, NEFFRAMEKEY_ENABLECHECKBOXES
-        from ccpn.util.nef import NefImporter as Nef
-
-        # create/read the nef file
-        from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
-
-        _dataLoader = checkPathForDataLoader(path)
-        _nefImporter = _dataLoader.readNefFile(path, errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
-
-        # verify popup here
-        selection = None
-
-        dialog = ImportNefPopup(parent=self.ui.mainWindow,
-                                mainWindow=self.ui.mainWindow,
-                                project=self.project,
-                                nefImporter=_nefImporter,
-                                )
-        # with notificationEchoBlocking():
-        #     dialog.fillPopup()
+        # from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
         #
-        # dialog.setActiveNefWindow(1)
-        if dialog.exec_():
+        # if dataLoader := NefDataLoader.checkPath(path) is None:
+        #     raise ValueError('Invalid Nef path %r' % path)
 
-            selection = dialog._saveFrameSelection
-            _nefReader = dialog.getActiveNefReader()
+        _nefImporter = dataLoader.nefImporter  # This will also populate the nefImporter if need be
+        if makeNewProject:
+            self._closeProject()
+            self._project = self.newProject(_nefImporter.getName())
 
-            # if makeNewProject:
-            #     self._closeProject()
-            #     self._project = self.newProject(_nefImporter._nefDict.name)
+        if nefReader is not None:
+            _nefImporter._attachReader(nefReader)
+        _nefImporter.importToProject(project=self.project)
 
-            # import from the loader into the current project
-            self.importFromLoader(_nefImporter, reader=_nefReader)
+        return self.project
 
-            getLogger().info('==> Loaded NEF file: "%s"' % (path,))
-            return self.project
+    # def _importNef(self, path=None):
+    #     if not path:
+    #         filter = '*.nef'
+    #         dialog = NefFileDialog(parent=self.ui.mainWindow, acceptMode='import', fileFilter=filter)
+    #
+    #         dialog._show()
+    #         path = dialog.selectedFile()
+    #         if not path:
+    #             return
+    #
+    #     path = aPath(path)
+    #
+    #     with catchExceptions(application=self, errorStringTemplate='application._importNef: %s', printTraceBack=True):
+    #         with undoBlockWithoutSideBar():
+    #             self._importNefFile(path=path, makeNewProject=False)
+    #         # self.ui.mainWindow.sideBar.buildTree(self.project)
+
+    # def _importNefFile(self, path: Union[str, Path], makeNewProject=True) -> Project:
+    #     """Load Project from NEF file at path, and do necessary setup
+    #     """
+    #
+    #     from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
+    #     from ccpn.ui.gui.popups.ImportNefPopup import ImportNefPopup, NEFFRAMEKEY_ENABLERENAME, \
+    #         NEFFRAMEKEY_IMPORT, NEFFRAMEKEY_ENABLEMOUSEMENU, NEFFRAMEKEY_PATHNAME, \
+    #         NEFFRAMEKEY_ENABLEFILTERFRAME, NEFFRAMEKEY_ENABLECHECKBOXES
+    #     from ccpn.util.nef import NefImporter as Nef
+    #
+    #     # create/read the nef file
+    #     from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
+    #
+    #     _dataLoader = checkPathForDataLoader(path)
+    #     _nefImporter = _dataLoader.readNefFile(path, errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
+    #
+    #     # verify popup here
+    #     selection = None
+    #
+    #     dialog = ImportNefPopup(parent=self.ui.mainWindow,
+    #                             mainWindow=self.ui.mainWindow,
+    #                             project=self.project,
+    #                             nefImporter=_nefImporter,
+    #                             )
+    #     # with notificationEchoBlocking():
+    #     #     dialog.fillPopup()
+    #     #
+    #     # dialog.setActiveNefWindow(1)
+    #     if dialog.exec_():
+    #
+    #         # selection = dialog._saveFrameSelection
+    #         _nefReader = dialog.getActiveNefReader()
+    #
+    #         # if makeNewProject:
+    #         #     self._closeProject()
+    #         #     self._project = self.newProject(_nefImporter._nefDict.name)
+    #
+    #         # import from the loader into the current project
+    #         self.importFromLoader(_nefImporter, reader=_nefReader)
+    #
+    #         getLogger().info('==> Loaded NEF file: "%s"' % (path,))
+    #         return self.project
 
     def importFromLoader(self, loader, reader=None):
         """Read the selection from the nefImporter object into the current.project

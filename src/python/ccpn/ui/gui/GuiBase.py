@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-02 14:03:36 +0000 (Wed, February 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-04 19:28:01 +0000 (Fri, February 04, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -187,7 +187,7 @@ class GuiBase(object):
             ("Save", self._saveCallback, [('shortcut', '⌃s')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Save As...", self._saveAsCallback, [('shortcut', 'sa')]),
             (),
-            ("Import", (("Nef File", self._importNef, [('shortcut', 'in'), ('enabled', True)]),
+            ("Import", (("Nef File", self._importNefCallback, [('shortcut', 'in'), ('enabled', True)]),
                         ("NmrStar File", self._loadNMRStarFileCallback, [('shortcut', 'bi')]),
                         )),
             ("Export", (("Nef File", self._exportNEF, [('shortcut', 'ex'), ('enabled', True)]),
@@ -417,6 +417,11 @@ class GuiBase(object):
         """Just a stub for the menu setup to pass on to mainWindow, to be moved later
         """
         return self.ui.mainWindow._openProjectCallback()
+
+    def _importNefCallback(self):
+        """Just a stub for the menu setup to pass on to mainWindow, to be moved later
+        """
+        return self.ui.mainWindow.showNefPopup()
 
     def _loadNMRStarFileCallback(self, path=None, makeNewProject=False) -> Optional[Project]:
         if not path:

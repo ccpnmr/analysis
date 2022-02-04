@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-04 16:28:41 +0000 (Fri, February 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-04 19:28:01 +0000 (Fri, February 04, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -531,75 +531,51 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             title = 'Detected invalid Spectrum file paths'
             showWarning(title=title, message=text, scrollableMessage=True)
 
-    # def _loadProjectSingleTry(self, projectDir):
-    #     """Load/Reload project after load dialog.
-    #     """
-    #     from ccpn.ui.gui.widgets.MessageDialog import showWarning
-    #
-    #     project = self.application.loadProject(projectDir)
-    #     if project is None:
-    #         showWarning('Load Project', 'Error loading project "%s"' % projectDir)
-    #
-    #     else:
-    #         project._mainWindow.sideBar.buildTree(project)
-    #         project._mainWindow.show()
-    #         QtWidgets.QApplication.setActiveWindow(project._mainWindow)
-    #
-    #         # if the new project contains invalid spectra then open the popup to see them
-    #         badSpectra = [str(spectrum) for spectrum in project.spectra if not spectrum.hasValidPath()]
-    #         if badSpectra:
-    #             text = 'Detected invalid Spectrum file path(s) for:\n\n'
-    #             for sp in badSpectra:
-    #                 text += '%s\n' % str(sp)
-    #             text += '\nUse menu "Spectrum --> Validate paths.." or "VP" shortcut to correct\n'
-    #             showWarning('Spectrum file paths', text)
-    #
-    #     return project
+    def _showNefPopup(self, dataLoader):
+        """Helper function; it allows the user to select the elements
+        and set the dataLoader._nefReader instance accordingly
 
-    # def _loadProjectLastValid(self, projectDir):
-    #     """Try and load a new project, if error try and load the last valid project.
-    #     """
-    #     lastValidProject = self.project.path
-    #     lastProjectisTemporary = self.project.isTemporary
-    #
-    #     # try and load the new project
-    #     # try:
-    #     project = self._loadProjectSingleTry(projectDir)
-    #     if project:
-    #         undo = self._project._undo
-    #         if undo is not None:
-    #             undo.markClean()
-    #         return project
+        :return False in case of 'cancel'
+        """
+        from ccpn.ui.gui.popups.ImportNefPopup import ImportNefPopup
+        _nefImporter = dataLoader.nefImporter
+        dialog = ImportNefPopup(parent=self,
+                                mainWindow=self,
+                                project=self.project,
+                                nefImporter=_nefImporter,
+                                )
+        if dialog.exec_():
+            _nefReader = dialog.getActiveNefReader()
+            dataLoader.createNewProject = False
+            dataLoader._nefReader = _nefReader
+            return True
 
-    # except Exception as es:
-    #     MessageDialog.showError('loadProject', 'Error loading project:\n%s\n\n%s\n\nReloading last saved position.' % (str(projectDir), str(es)))
-    #     Logging.getLogger().warning('Error loading project: %s - Reloading last saved position.' % str(projectDir))
-    #
-    #     if not lastProjectisTemporary:
-    #         # try and load the previous project (only one try)
-    #         try:
-    #             project = self._loadProjectSingleTry(lastValidProject)
-    #             return project
-    #
-    #         except Exception as es:
-    #             MessageDialog.showError('loadProject', 'Error loading last project:\n%s\n\n%s' % (str(lastValidProject), str(es)))
-    #             Logging.getLogger().warning('Error loading last project: %s' % str(lastValidProject))
-    #     else:
-    #         # open a new project again
-    #         project = self.application.newProject()
-    #         project._mainWindow.sideBar.buildTree(project)
-    #         project._mainWindow.show()
-    #         QtWidgets.QApplication.setActiveWindow(project._mainWindow)
-    #         return project
+        return False
 
     def showNefPopup(self, path=None):
         """
+        Query for a Nef file if path is None
         Opens the Nef import popup
         If path specified then opens popup to the file otherwise opens load dialog
         """
-        path = Path.aPath(path) if path else None
+        from ccpn.ui.gui.widgets.FileDialog import NefFileDialog
+        from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
 
-        self.application._importNef(path)
+        if path is None:
+            filter = '*.nef'
+            dialog = NefFileDialog(parent=self.ui.mainWindow, acceptMode='import', fileFilter=filter)
+            dialog._show()
+            path = dialog.selectedFile()
+
+        if path is None:
+            return
+
+        if dataLoader := NefDataLoader(path) is None:
+            return None
+
+        if self._showNefPopup(dataLoader):
+            with progressManager(self, 'Loading Nef file %s ... ' % dataLoader.path):
+                dataLoader.load()
 
     def _clearRecentProjects(self):
         self.application.preferences.recentFiles = []
@@ -1175,6 +1151,29 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
     #
     #     return (objs, None)
 
+    def _queryChoices(self, dataLoader):
+        """Query the user about his/her choice to import/new/cancel
+        """
+        choices = ('Import', 'New project', 'Cancel')
+        choice = showMulti('Load %s' % dataLoader.dataFormat,
+                           'How do you want to handle the file:',
+                           choices, parent=self)
+
+        if choice == choices[0]:  # import
+            dataLoader.createNewProject = False
+            createNewProject = False
+            ignore = False
+        elif choice == choices[1]:  # new project
+            dataLoader.createNewProject = True
+            createNewProject = True
+            ignore = False
+        else:  # cancel
+            dataLoader = None
+            createNewProject = False
+            ignore = True
+
+        return (dataLoader, createNewProject, ignore)
+
     def _getDataLoader(self, url):
         """Get dataLoader for the url (or None if not present)
         Allows for reporting or checking through popups
@@ -1200,22 +1199,14 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
         from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
 
-        if dataLoader.dataFormat == NefDataLoader.dataFormat or \
-                dataLoader.dataFormat == SparkyDataLoader.dataFormat:
-            choices = ['Import', 'New project', 'Cancel']
-            choice = showMulti('Load %s' % dataLoader.dataFormat,
-                               'How do you want to handle the file:',
-                               choices, parent=self)
-            if choice == choices[0]:  # import
-                dataLoader.createNewProject = False
-                createNewProject = False
-            elif choice == choices[1]:  # new project
-                dataLoader.createNewProject = True
-                createNewProject = True
-            else:  # cancel
-                dataLoader = None
-                createNewProject = False
-                ignore = True
+        if dataLoader.dataFormat == NefDataLoader.dataFormat:
+            (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
+            if dataLoader and not createNewProject and not ignore:
+                # we are importing; popup the import window
+                self._showNefPopup(dataLoader)
+
+        elif dataLoader.dataFormat == SparkyDataLoader.dataFormat:
+            (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
 
         elif dataLoader.dataFormat == SpectrumDataLoader.dataFormat and dataLoader.existsInProject():
             ok = MessageDialog.showYesNoWarning('Spectrum "%s"' % dataLoader.path,
@@ -1286,7 +1277,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 result = [self._loadProject(dataLoader=dLoader)]
             else:
                 with undoBlockWithSideBar():
-                    result = dLoader.load()
+                    with progressManager(self, 'Loading %s ... ' % dLoader.path):
+                        result = dLoader.load()
             return result
         #end def
 

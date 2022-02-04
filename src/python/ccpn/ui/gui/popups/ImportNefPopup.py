@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-03 09:50:30 +0000 (Thu, February 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-04 14:45:25 +0000 (Fri, February 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -25,10 +25,12 @@ __date__ = "$Date: 2020-05-04 17:15:05 +0000 (Mon, May 04, 2020) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-
+import numpy as np
 import os
 from functools import partial
 from collections import OrderedDict as OD
+
+import pandas as pd
 from PyQt5 import QtGui, QtWidgets, QtCore
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -53,7 +55,7 @@ from ccpn.util.nef import NefImporter as Nef
 from ccpn.util.Logging import getLogger
 from ccpn.util.PrintFormatter import PrintFormatter
 from ccpn.util.AttrDict import AttrDict
-from ccpn.ui.gui.widgets.Font import getFontHeight
+from ccpn.ui.gui.widgets.Font import getFontHeight, setWidgetFont, TABLEFONT
 from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
@@ -229,9 +231,9 @@ class NefDictFrame(Frame):
         """Setup the unpopulated widgets for the frame
         """
         self._headerFrameOuter = Frame(self, setLayout=True, showBorder=False, grid=(0, 0),
-                                 hAlign='left', hPolicy='ignored', vPolicy='fixed')
+                                       hAlign='left', hPolicy='ignored', vPolicy='fixed')
         self.headerFrame = Frame(self._headerFrameOuter, setLayout=True,
-                                    grid=(0, 0))
+                                 grid=(0, 0))
 
         self.headerLabel = Label(self.headerFrame, text='FRAMEFRAME', grid=(0, 0), gridSpan=(1, 3))
         self.verifyButton = Button(self.headerFrame, text='Verify Now', grid=(1, 0),
@@ -695,11 +697,11 @@ class NefDictFrame(Frame):
         else:
             _importList[checkID] += (itemName,)
 
-    def handle_treeView_selection(self, name=None, saveFrame=None, parentGroup=None, prefix=None, mappingCode=None,
-                                  errorCode=None, tableColourFunc=None, _handleAutoRename=False):
-
+    def _checkParentGroup(self, name, parentGroup, saveFrame):
+        """Search for the parentGroup in the treeView
+        :return: treeItem
+        """
         # check if the current saveFrame exists; i.e., category exists as row = [0]
-
         item = self.nefTreeView.findSection(name, parentGroup)
         if not item:
             getLogger().debug2('>>> not found {} {} {}'.format(name, saveFrame, parentGroup))
@@ -714,115 +716,219 @@ class NefDictFrame(Frame):
                 getLogger().debug2('>>> not found {} {} {}'.format(name, saveFrame, parentGroup))
                 return
 
+        return item
+
+    def handleTreeViewSelectionGeneral(self, name=None, saveFrame=None, parentGroup=None, prefix=None, mappingCode=None,
+                                       errorCode=None, tableColourFunc=None, _handleAutoRename=False):
+
+        # check if the current saveFrame exists; i.e., category exists as row = [0]
+        if not (item := self._checkParentGroup(name, parentGroup, saveFrame)):
+            return
+
         itemName = item.data(0, 0)
         saveFrame = item.data(1, 0)
 
-        # NOTE:ED - call autoRename
         if _handleAutoRename:
-            mappingCode = mappingCode or ''
-            # errorCode = errorCode or ''
-            mapping = self.nefTreeView.nefToTreeViewMapping.get(mappingCode)
-            if mapping:
-                plural, singular = mapping
-                _auto = partial(self._rename, item=item, parentName=plural, lineEdit=None, saveFrame=saveFrame, autoRename=True)
-                _auto()
+            self._handleItemRename(item, mappingCode, saveFrame)
             return
 
-        # cat = saveFrame.get('sf_category')
-        # prefix = prefix or ''
         mappingCode = mappingCode or ''
         errorCode = errorCode or ''
         mapping = self.nefTreeView.nefToTreeViewMapping.get(mappingCode)
 
         _content = getattr(saveFrame, '_content', None)
         _errors = getattr(saveFrame, '_rowErrors', {})
+        row = 0
         if _content and mapping:
             _fillColour = INVALIDBUTTONCHECKCOLOUR if item.checkState(0) else INVALIDBUTTONNOCHECKCOLOUR
-
             plural, singular = mapping
 
-            row = 0
-            if self._renameValid(item=item, saveFrame=saveFrame):
-                # editFrame = Frame(self.frameOptionsFrame, setLayout=True, grid=(row, 0), showBorder=False)
-                Label(self.frameOptionsFrame, text=singular, grid=(row, 0))
-                saveFrameData = LineEdit(self.frameOptionsFrame, text=str(itemName), grid=(row, 1))
+            row, saveFrameData = self._addRenameWidgets(item, itemName, plural, row, saveFrame, singular)
+            self._colourRenameWidgets(_errors, _fillColour, errorCode, itemName, saveFrameData)
 
-                texts = ('Rename', 'Auto Rename')
-                callbacks = (partial(self._rename, item=item, parentName=plural, lineEdit=saveFrameData, saveFrame=saveFrame),
-                             partial(self._rename, item=item, parentName=plural, lineEdit=saveFrameData, saveFrame=saveFrame, autoRename=True))
-                tipTexts = ('Rename', 'Automatically rename to the next available\n - dependent on saveframe type')
-                ButtonList(self.frameOptionsFrame, texts=texts, tipTexts=tipTexts, callbacks=callbacks,
-                           grid=(row, 2), gridSpan=(1, 1), direction='v',
-                           setLastButtonFocus=False)
-                saveFrameData.returnPressed.connect(callbacks[0])
-                row += 1
-
-            if saveFrame.get('sf_category') == 'ccpn_assignment':
-                # NOTE:ED - new buttons just for nmrChain/nmrResidue/nmrAtom to rename bad sequenceCodes
-                texts = ('Auto Rename SequenceCodes',)
-                callbacks = (partial(self._renameSequenceCode, item=item, parentName=plural, lineEdit=saveFrameData, saveFrame=saveFrame, autoRename=True),)
-                tipTexts = ('Automatically rename to the next available',)
-                ButtonList(self.frameOptionsFrame, texts=texts, tipTexts=tipTexts, callbacks=callbacks,
-                           grid=(row, 1), gridSpan=(1, 2), direction='v',
-                           setLastButtonFocus=False)
-                # _button = Button(self.frameOptionsFrame, text=texts[0], tipText=tipTexts[0], callback=callbacks[0],
-                #                  grid=(row, 1), gridSpan=(1, 2), direction='v',
-                #                  )
-                row += 1
-
-            if saveFrame.get('sf_category') in ['nef_rdc_restraint_list', 'nef_distance_restraint_list',
-                                                'nef_dihedral_restraint_list', 'ccpn_distance_restraint_violation_list',
-                                                'ccpn_rdc_restraint_violation_list', 'ccpn_dihedral_restraint_violation_list',
-                                                'ccpn_parameter']:
-
-                self._makeSetButton(item, plural, row, saveFrame, 'ccpn_dataset_id', self._editDataSetId)
-                row += 1
-                self._makeSetButton(item, plural, row, saveFrame, 'ccpn_dataset_serial', self._editDataSetSerial)
-                row += 1
-
-                if saveFrame.get('sf_category') in ['ccpn_parameter', ]:
-                    self._makeSetButton(item, plural, row, saveFrame, 'ccpn_parameter_name', self._editParameterName)
-                    row += 1
-
-            Label(self.frameOptionsFrame, text='Comment', grid=(row, 0), enabled=False)
-            self._commentData = TextEditor(self.frameOptionsFrame, grid=(row, 1), gridSpan=(1, 2), enabled=True, addWordWrap=True)
-
-            _comment = saveFrame.get('ccpn_comment')
-            if _comment:
-                self._commentData.set(_comment)
-            self._commentData.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
-            self._commentData.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
-            _height = getFontHeight()
-            self._commentData.setMinimumHeight(_height * 3)
-            row += 1
-
-            texts = ('Set Comment',)
-            callbacks = (partial(self._editComment, item=item, parentName=plural, lineEdit=self._commentData, saveFrame=saveFrame),)
-            tipTexts = ('Set the comment for the saveFrame',)
-            ButtonList(self.frameOptionsFrame, texts=texts, tipTexts=tipTexts, callbacks=callbacks,
-                       grid=(row, 2), gridSpan=(1, 1), direction='v',
-                       setLastButtonFocus=False)
-            row += 1
-
-            if errorCode in _errors and itemName in _errors[errorCode]:
-                try:
-                    palette = saveFrameData.palette()
-                    palette.setColor(QtGui.QPalette.Base, _fillColour)
-                    saveFrameData.setPalette(palette)
-                except Exception as es:
-                    pass
-
-            if tableColourFunc is not None:
-                tableColourFunc(self, saveFrame, item)
+            # add comment widgets
+            self._addCommentWidgets(item, plural, row, saveFrame)
+            self._colourTables(item, saveFrame, tableColourFunc)
 
         self.frameOptionsFrame.setVisible(self._enableRename)
+        self._finaliseSelection(_content, _errors)
 
+    def handleTreeViewSelectionAssignment(self, name=None, saveFrame=None, parentGroup=None, prefix=None, mappingCode=None,
+                                          errorCode=None, tableColourFunc=None, _handleAutoRename=False):
+
+        # check if the current saveFrame exists; i.e., category exists as row = [0]
+        if not (item := self._checkParentGroup(name, parentGroup, saveFrame)):
+            return
+
+        itemName = item.data(0, 0)
+        saveFrame = item.data(1, 0)
+
+        if _handleAutoRename:
+            self._handleItemRename(item, mappingCode, saveFrame)
+            return
+
+        mappingCode = mappingCode or ''
+        errorCode = errorCode or ''
+        mapping = self.nefTreeView.nefToTreeViewMapping.get(mappingCode)
+
+        _content = getattr(saveFrame, '_content', None)
+        _errors = getattr(saveFrame, '_rowErrors', {})
+        row = 0
+        if _content and mapping:
+            _fillColour = INVALIDBUTTONCHECKCOLOUR if item.checkState(0) else INVALIDBUTTONNOCHECKCOLOUR
+            plural, singular = mapping
+
+            row, saveFrameData = self._addRenameWidgets(item, itemName, plural, row, saveFrame, singular)
+            self._colourRenameWidgets(_errors, _fillColour, errorCode, itemName, saveFrameData)
+
+            # add widgets to handle assignments
+            row = self._addAssignmentWidgets(item, plural, row, saveFrame, saveFrameData)
+
+            # add comment widgets
+            self._addCommentWidgets(item, plural, row, saveFrame)
+            self._colourTables(item, saveFrame, tableColourFunc)
+
+        self.frameOptionsFrame.setVisible(self._enableRename)
+        self._finaliseSelection(_content, _errors)
+
+    def handleTreeViewSelectionStructureDataParent(self, name=None, saveFrame=None, parentGroup=None, prefix=None, mappingCode=None,
+                                                   errorCode=None, tableColourFunc=None, _handleAutoRename=False):
+
+        # check if the current saveFrame exists; i.e., category exists as row = [0]
+        if not (item := self._checkParentGroup(name, parentGroup, saveFrame)):
+            return
+
+        itemName = item.data(0, 0)
+        saveFrame = item.data(1, 0)
+
+        # NOTE:ED - call autoRename - small hack though
+        if _handleAutoRename:
+            self._handleItemRename(item, mappingCode, saveFrame)
+            return
+
+        # cat = saveFrame.get('sf_category')
+        mappingCode = mappingCode or ''
+        errorCode = errorCode or ''
+        mapping = self.nefTreeView.nefToTreeViewMapping.get(mappingCode)
+
+        _content = getattr(saveFrame, '_content', None)
+        _errors = getattr(saveFrame, '_rowErrors', {})
+        row = 0
+        if _content and mapping:
+            _fillColour = INVALIDBUTTONCHECKCOLOUR if item.checkState(0) else INVALIDBUTTONNOCHECKCOLOUR
+            plural, singular = mapping
+
+            row, saveFrameData = self._addRenameWidgets(item, itemName, plural, row, saveFrame, singular)
+            self._colourRenameWidgets(_errors, _fillColour, errorCode, itemName, saveFrameData)
+
+            # add widgets to handle linking to structureData parent
+            row = self._addStructureDataWidgets(item, plural, row, saveFrame)
+
+            # add comment widgets
+            self._addCommentWidgets(item, plural, row, saveFrame)
+            self._colourTables(item, saveFrame, tableColourFunc)
+
+        self.frameOptionsFrame.setVisible(self._enableRename)
+        self._finaliseSelection(_content, _errors)
+
+    def _addAssignmentWidgets(self, item, plural, row, saveFrame, saveFrameData):
+        # NOTE:ED - can remove this check later
+        if saveFrame.get('sf_category') == 'ccpn_assignment':
+            texts = ('Auto Rename SequenceCodes',)
+            callbacks = (partial(self._renameSequenceCode, item=item, parentName=plural, lineEdit=saveFrameData, saveFrame=saveFrame, autoRename=True),)
+            tipTexts = ('Automatically rename to the next available',)
+            ButtonList(self.frameOptionsFrame, texts=texts, tipTexts=tipTexts, callbacks=callbacks,
+                       grid=(row, 1), gridSpan=(1, 2), direction='v',
+                       setLastButtonFocus=False)
+            # _button = Button(self.frameOptionsFrame, text=texts[0], tipText=tipTexts[0], callback=callbacks[0],
+            #                  grid=(row, 1), gridSpan=(1, 2), direction='v',
+            #                  )
+            row += 1
+        return row
+
+    def _addStructureDataWidgets(self, item, plural, row, saveFrame):
+        # NOTE:ED - can remove this check later
+        if saveFrame.get('sf_category') in ['nef_rdc_restraint_list', 'nef_distance_restraint_list',
+                                            'nef_dihedral_restraint_list', 'ccpn_distance_restraint_violation_list',
+                                            'ccpn_rdc_restraint_violation_list', 'ccpn_dihedral_restraint_violation_list',
+                                            'ccpn_parameter']:
+
+            self._makeSetButton(item, plural, row, saveFrame, 'ccpn_dataset_id', self._editDataSetId)
+            row += 1
+            self._makeSetButton(item, plural, row, saveFrame, 'ccpn_dataset_serial', self._editDataSetSerial)
+            row += 1
+
+            if saveFrame.get('sf_category') in ['ccpn_parameter', ]:
+                self._makeSetButton(item, plural, row, saveFrame, 'ccpn_parameter_name', self._editParameterName)
+                row += 1
+        return row
+
+    def _finaliseSelection(self, _content, _errors):
         self.logData.clear()
         pretty = PrintFormatter()
         self.logData.append(('CONTENTS DICT'))
         self.logData.append(pretty(_content))
         self.logData.append(('ERROR DICT'))
         self.logData.append(pretty(_errors))
+
+    def _colourTables(self, item, saveFrame, tableColourFunc):
+        if tableColourFunc is not None:
+            tableColourFunc(self, saveFrame, item)
+
+    def _colourRenameWidgets(self, _errors, _fillColour, errorCode, itemName, saveFrameData):
+        if saveFrameData and errorCode in _errors and itemName in _errors[errorCode]:
+            try:
+                palette = saveFrameData.palette()
+                palette.setColor(QtGui.QPalette.Base, _fillColour)
+                saveFrameData.setPalette(palette)
+            except Exception as es:
+                getLogger().debug(f'error setting colours {es}')
+
+    def _addCommentWidgets(self, item, plural, row, saveFrame):
+        Label(self.frameOptionsFrame, text='Comment', grid=(row, 0), enabled=False)
+        self._commentData = TextEditor(self.frameOptionsFrame, grid=(row, 1), gridSpan=(1, 2), enabled=True, addWordWrap=True)
+        _comment = saveFrame.get('ccpn_comment')
+        if _comment:
+            self._commentData.set(_comment)
+        self._commentData.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        self._commentData.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
+        _height = getFontHeight()
+        self._commentData.setMinimumHeight(_height * 3)
+        row += 1
+        texts = ('Set Comment',)
+        callbacks = (partial(self._editComment, item=item, parentName=plural, lineEdit=self._commentData, saveFrame=saveFrame),)
+        tipTexts = ('Set the comment for the saveFrame',)
+        ButtonList(self.frameOptionsFrame, texts=texts, tipTexts=tipTexts, callbacks=callbacks,
+                   grid=(row, 2), gridSpan=(1, 1), direction='v',
+                   setLastButtonFocus=False)
+        row += 1
+
+    def _addRenameWidgets(self, item, itemName, plural, row, saveFrame, singular):
+        saveFrameData = None
+        if self._renameValid(item=item, saveFrame=saveFrame):
+            # editFrame = Frame(self.frameOptionsFrame, setLayout=True, grid=(row, 0), showBorder=False)
+            Label(self.frameOptionsFrame, text=singular, grid=(row, 0))
+            saveFrameData = LineEdit(self.frameOptionsFrame, text=str(itemName), grid=(row, 1))
+
+            texts = ('Rename', 'Auto Rename')
+            callbacks = (partial(self._rename, item=item, parentName=plural, lineEdit=saveFrameData, saveFrame=saveFrame),
+                         partial(self._rename, item=item, parentName=plural, lineEdit=saveFrameData, saveFrame=saveFrame, autoRename=True))
+            tipTexts = ('Rename', 'Automatically rename to the next available\n - dependent on saveframe type')
+            ButtonList(self.frameOptionsFrame, texts=texts, tipTexts=tipTexts, callbacks=callbacks,
+                       grid=(row, 2), gridSpan=(1, 1), direction='v',
+                       setLastButtonFocus=False)
+            saveFrameData.returnPressed.connect(callbacks[0])
+            row += 1
+
+        return row, saveFrameData
+
+    def _handleItemRename(self, item, mappingCode, saveFrame):
+        mappingCode = mappingCode or ''
+        mapping = self.nefTreeView.nefToTreeViewMapping.get(mappingCode)
+        if mapping:
+            plural, singular = mapping
+            _auto = partial(self._rename, item=item, parentName=plural, lineEdit=None, saveFrame=saveFrame, autoRename=True)
+            _auto()
 
     def _makeSetButton(self, item, plural, row, saveFrame, attribName, func):
         Label(self.frameOptionsFrame, text=attribName, grid=(row, 0))
@@ -1050,158 +1156,158 @@ class NefDictFrame(Frame):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    handleSaveFrames['nef_sequence'] = partial(handle_treeView_selection,
+    handleSaveFrames['nef_sequence'] = partial(handleTreeViewSelectionGeneral,
                                                prefix='nef_sequence_',
                                                mappingCode='nef_sequence_chain_code',
                                                errorCode='nef_sequence_chain_code',
                                                tableColourFunc=table_nef_molecular_system)
 
-    handleSaveFrames['nef_chemical_shift_list'] = partial(handle_treeView_selection,
+    handleSaveFrames['nef_chemical_shift_list'] = partial(handleTreeViewSelectionGeneral,
                                                           prefix='nef_chemical_shift_',
                                                           mappingCode='nef_chemical_shift_list',
                                                           errorCode='nef_chemical_shift_list',
                                                           tableColourFunc=None)
 
-    handleSaveFrames['nef_distance_restraint_list'] = partial(handle_treeView_selection,
+    handleSaveFrames['nef_distance_restraint_list'] = partial(handleTreeViewSelectionStructureDataParent,
                                                               prefix='nef_distance_restraint_',
                                                               mappingCode='nef_distance_restraint_list',
                                                               errorCode='nef_distance_restraint_list',
                                                               tableColourFunc=None)
 
-    handleSaveFrames['nef_dihedral_restraint_list'] = partial(handle_treeView_selection,
+    handleSaveFrames['nef_dihedral_restraint_list'] = partial(handleTreeViewSelectionStructureDataParent,
                                                               prefix='nef_dihedral_restraint_',
                                                               mappingCode='nef_dihedral_restraint_list',
                                                               errorCode='nef_dihedral_restraint_list',
                                                               tableColourFunc=None)
 
-    handleSaveFrames['nef_rdc_restraint_list'] = partial(handle_treeView_selection,
+    handleSaveFrames['nef_rdc_restraint_list'] = partial(handleTreeViewSelectionStructureDataParent,
                                                          prefix='nef_rdc_restraint_',
                                                          mappingCode='nef_rdc_restraint_list',
                                                          errorCode='nef_rdc_restraint_list',
                                                          tableColourFunc=None)
 
-    handleSaveFrames['ccpn_restraint_list'] = partial(handle_treeView_selection,
+    handleSaveFrames['ccpn_restraint_list'] = partial(handleTreeViewSelectionGeneral,
                                                       prefix='ccpn_restraint_',
                                                       mappingCode='ccpn_restraint_list',
                                                       errorCode='ccpn_restraint_list',
                                                       tableColourFunc=None)
 
-    handleSaveFrames['nef_peak_restraint_links'] = partial(handle_treeView_selection,
+    handleSaveFrames['nef_peak_restraint_links'] = partial(handleTreeViewSelectionGeneral,
                                                            prefix='nef_peak_restraint_',
                                                            mappingCode='nef_peak_restraint_links',
                                                            errorCode='nef_peak_restraint_links',
                                                            tableColourFunc=None)
 
-    handleSaveFrames['ccpn_sample'] = partial(handle_treeView_selection,
+    handleSaveFrames['ccpn_sample'] = partial(handleTreeViewSelectionGeneral,
                                               prefix='ccpn_sample_component_',
                                               mappingCode='ccpn_sample',
                                               errorCode='ccpn_sample',
                                               tableColourFunc=None)
 
-    handleSaveFrames['ccpn_complex'] = partial(handle_treeView_selection,
+    handleSaveFrames['ccpn_complex'] = partial(handleTreeViewSelectionGeneral,
                                                prefix='ccpn_complex_chain_',
                                                mappingCode='ccpn_complex',
                                                errorCode='ccpn_complex',
                                                tableColourFunc=None)
 
-    handleSaveFrames['ccpn_spectrum_group'] = partial(handle_treeView_selection,
+    handleSaveFrames['ccpn_spectrum_group'] = partial(handleTreeViewSelectionGeneral,
                                                       prefix='ccpn_group_spectrum_',
                                                       mappingCode='ccpn_spectrum_group',
                                                       errorCode='ccpn_spectrum_group',
                                                       tableColourFunc=None)
 
-    handleSaveFrames['ccpn_note'] = partial(handle_treeView_selection,
+    handleSaveFrames['ccpn_note'] = partial(handleTreeViewSelectionGeneral,
                                             prefix='ccpn_note_',
                                             mappingCode='ccpn_notes',
                                             errorCode='ccpn_notes',
                                             tableColourFunc=table_ccpn_notes)
 
-    handleSaveFrames['ccpn_peak_list'] = partial(handle_treeView_selection,
+    handleSaveFrames['ccpn_peak_list'] = partial(handleTreeViewSelectionGeneral,
                                                  prefix='nef_peak_',
                                                  mappingCode='nef_peak',
                                                  errorCode='ccpn_peak_list_serial',
                                                  tableColourFunc=table_peak_lists)
 
-    handleSaveFrames['ccpn_integral_list'] = partial(handle_treeView_selection,
+    handleSaveFrames['ccpn_integral_list'] = partial(handleTreeViewSelectionGeneral,
                                                      prefix='ccpn_integral_',
                                                      mappingCode='ccpn_integral_list',
                                                      errorCode='ccpn_integral_list_serial',
                                                      tableColourFunc=partial(table_lists, listName='ccpn_integral'))
 
-    handleSaveFrames['ccpn_multiplet_list'] = partial(handle_treeView_selection,
+    handleSaveFrames['ccpn_multiplet_list'] = partial(handleTreeViewSelectionGeneral,
                                                       prefix='ccpn_multiplet_',
                                                       mappingCode='ccpn_multiplet_list',
                                                       errorCode='ccpn_multiplet_list_serial',
                                                       tableColourFunc=partial(table_lists, listName='ccpn_multiplet'))
 
-    handleSaveFrames['ccpn_peak_cluster_list'] = partial(handle_treeView_selection,
+    handleSaveFrames['ccpn_peak_cluster_list'] = partial(handleTreeViewSelectionGeneral,
                                                          prefix='ccpn_peak_cluster_',
                                                          mappingCode='ccpn_peak_cluster',
                                                          errorCode='ccpn_peak_cluster_serial',
                                                          tableColourFunc=table_peak_clusters)
 
-    handleSaveFrames['nmr_chain'] = partial(handle_treeView_selection,
+    handleSaveFrames['nmr_chain'] = partial(handleTreeViewSelectionAssignment,
                                             prefix='nmr_chain_',
                                             mappingCode='nmr_chain',
                                             errorCode='nmr_chain_serial',
                                             tableColourFunc=table_ccpn_assignment)
 
-    handleSaveFrames['ccpn_substance'] = partial(handle_treeView_selection,
+    handleSaveFrames['ccpn_substance'] = partial(handleTreeViewSelectionGeneral,
                                                  prefix='ccpn_substance_synonym_',
                                                  mappingCode='ccpn_substance',
                                                  errorCode='ccpn_substance',
                                                  tableColourFunc=None)
 
-    handleSaveFrames['ccpn_internal_data'] = partial(handle_treeView_selection,
+    handleSaveFrames['ccpn_internal_data'] = partial(handleTreeViewSelectionGeneral,
                                                      prefix='ccpn_internal_data_',
                                                      mappingCode='ccpn_additional_data',
                                                      errorCode='ccpn_additional_data',
                                                      # tableColourFunc=table_ccpn_additional_data)
                                                      tableColourFunc=None)
 
-    handleSaveFrames['ccpn_distance_restraint_violation_list'] = partial(handle_treeView_selection,
+    handleSaveFrames['ccpn_distance_restraint_violation_list'] = partial(handleTreeViewSelectionStructureDataParent,
                                                                          prefix='ccpn_distance_restraint_violation_',
                                                                          mappingCode='ccpn_distance_restraint_violation_list',
                                                                          errorCode='ccpn_distance_restraint_violation_list',
                                                                          tableColourFunc=None)
 
-    handleSaveFrames['ccpn_dihedral_restraint_violation_list'] = partial(handle_treeView_selection,
+    handleSaveFrames['ccpn_dihedral_restraint_violation_list'] = partial(handleTreeViewSelectionStructureDataParent,
                                                                          prefix='ccpn_dihedral_restraint_violation_',
                                                                          mappingCode='ccpn_dihedral_restraint_violation_list',
                                                                          errorCode='ccpn_dihedral_restraint_violation_list',
                                                                          tableColourFunc=None)
 
-    handleSaveFrames['ccpn_rdc_restraint_violation_list'] = partial(handle_treeView_selection,
+    handleSaveFrames['ccpn_rdc_restraint_violation_list'] = partial(handleTreeViewSelectionStructureDataParent,
                                                                     prefix='ccpn_rdc_restraint_violation_',
                                                                     mappingCode='ccpn_rdc_restraint_violation_list',
                                                                     errorCode='ccpn_rdc_restraint_violation_list',
                                                                     tableColourFunc=None)
 
-    handleSaveFrames['ccpn_datatable'] = partial(handle_treeView_selection,
+    handleSaveFrames['ccpn_datatable'] = partial(handleTreeViewSelectionGeneral,
                                                  prefix='ccpn_datatable_data_',
                                                  mappingCode='ccpn_datatable',
                                                  errorCode='ccpn_datatable',
                                                  tableColourFunc=None)
 
-    handleSaveFrames['ccpn_collection'] = partial(handle_treeView_selection,
+    handleSaveFrames['ccpn_collection'] = partial(handleTreeViewSelectionGeneral,
                                                   prefix='ccpn_collection_',
                                                   mappingCode='ccpn_collections',
                                                   errorCode='ccpn_collections',
                                                   tableColourFunc=table_ccpn_collections)
 
-    handleSaveFrames['ccpn_logging'] = partial(handle_treeView_selection,
+    handleSaveFrames['ccpn_logging'] = partial(handleTreeViewSelectionGeneral,
                                                prefix='ccpn_history_',
                                                mappingCode='ccpn_logging',
                                                errorCode='ccpn_logging',
                                                tableColourFunc=None)
 
-    handleSaveFrames['ccpn_dataset'] = partial(handle_treeView_selection,
+    handleSaveFrames['ccpn_dataset'] = partial(handleTreeViewSelectionGeneral,
                                                prefix='ccpn_calculation_step_',
                                                mappingCode='ccpn_dataset',
                                                errorCode='ccpn_dataset',
                                                tableColourFunc=None)
 
-    handleSaveFrames['ccpn_parameter'] = partial(handle_treeView_selection,
+    handleSaveFrames['ccpn_parameter'] = partial(handleTreeViewSelectionStructureDataParent,
                                                  prefix='ccpn_dataframe_',
                                                  mappingCode='ccpn_parameter',
                                                  errorCode='ccpn_parameter',
@@ -1540,91 +1646,238 @@ class NefDictFrame(Frame):
         itemName = item.data(0, 0)
         saveFrame = item.data(1, 0)
         if saveFrame and hasattr(saveFrame, '_content'):
-            with self._tableSplitter.blockWidgetSignals(recursive=False):
-                self._tableSplitter.setVisible(False)
+            self._itemSelected(item, itemName, saveFrame)
 
-                for widg in self._nefWidgets:
-                    self._removeWidget(widg, removeTopWidget=True)
-                self._nefWidgets = []
-                self._removeWidget(self.frameOptionsFrame, removeTopWidget=False)
+        else:
+            self._parentSelected(item, itemName)
 
-                _fillColour = INVALIDTABLEFILLNOCHECKCOLOUR if item.checkState(0) else INVALIDTABLEFILLNOCHECKCOLOUR
+    def _itemSelected(self, item, itemName, saveFrame):
+        with self._tableSplitter.blockWidgetSignals(recursive=False):
+            self._tableSplitter.setVisible(False)
 
-                parentGroup = item.parent().data(0, 0) if item.parent() else repr(None)
+            # print(f' clicked item  {item}    {itemName}    {saveFrame}')
 
-                # add the first table from the saveframe attributes
-                loop = StarIo.NmrLoop(name=saveFrame.name, columns=('attribute', 'value'))
-                for k, v in saveFrame.items():
-                    if not (k.startswith('_') or isinstance(v, StarIo.NmrLoop)):
-                        loop.newRow((k, v))
-                _name, _data = saveFrame.name, loop.data
+            # reuse the widgets?
+            for widg in self._nefWidgets:
+                self._removeWidget(widg, removeTopWidget=True)
+            self._nefWidgets = []
+            self._removeWidget(self.frameOptionsFrame, removeTopWidget=False)
 
-                self._nefTables = {}
-                frame, table = self._addTableToFrame(_data, _name.upper())
+            _fillColour = INVALIDTABLEFILLNOCHECKCOLOUR if item.checkState(0) else INVALIDTABLEFILLNOCHECKCOLOUR
+
+            parentGroup = item.parent().data(0, 0) if item.parent() else repr(None)
+
+            # add the first table from the saveframe attributes
+            loop = StarIo.NmrLoop(name=saveFrame.name, columns=('attribute', 'value'))
+            for k, v in saveFrame.items():
+                if not (k.startswith('_') or isinstance(v, StarIo.NmrLoop)):
+                    loop.newRow((k, v))
+            _name, _data = saveFrame.name, loop.data
+
+            self._nefTables = {}
+            frame, table = self._addTableToFrame(_data, _name.upper())
+            self._tableSplitter.addWidget(frame)
+            self._nefWidgets = [frame, ]
+
+            # get the group name add fetch the correct mapping
+            mapping = self.nefTreeView.nefProjectToSaveFramesMapping.get(parentGroup)
+            primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(parentGroup) or saveFrame.get('sf_category')
+
+            # add tables from the loops in the saveframe
+            loops = self._nefReader._getLoops(self.project, saveFrame)
+            for loop in loops:
+
+                if mapping and loop.name not in mapping:
+                    continue
+
+                _name, _data = loop.name, loop.data
+                frame, table = self._addTableToFrame(_data, _name)
                 self._tableSplitter.addWidget(frame)
-                self._nefWidgets = [frame, ]
+                self._nefWidgets.append(frame)
 
-                # get the group name add fetch the correct mapping
-                mapping = self.nefTreeView.nefProjectToSaveFramesMapping.get(parentGroup)
-                primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(parentGroup) or saveFrame.get('sf_category')
+                if loop.name in saveFrame._content and \
+                        hasattr(saveFrame, '_rowErrors') and \
+                        loop.name in saveFrame._rowErrors:
+                    badRows = list(saveFrame._rowErrors[loop.name])
 
-                # add tables from the loops in the saveframe
-                loops = self._nefReader._getLoops(self.project, saveFrame)
-                for loop in loops:
+                    with self._tableColouring(table) as setRowBackgroundColour:
+                        for rowIndex in badRows:
+                            setRowBackgroundColour(rowIndex, _fillColour)
 
-                    if mapping and loop.name not in mapping:
-                        continue
+            if primaryHandler:
+                handler = self.handleSaveFrames.get(primaryHandler)
+                if handler is not None:
+                    # handler(self, saveFrame, item)
+                    handler(self, name=itemName, saveFrame=saveFrame, parentGroup=parentGroup)
 
-                    _name, _data = loop.name, loop.data
-                    frame, table = self._addTableToFrame(_data, _name)
-                    self._tableSplitter.addWidget(frame)
-                    self._nefWidgets.append(frame)
+            # clicking the checkbox also comes here - above loop may set item._badName
+            self._colourTreeView()
 
-                    if loop.name in saveFrame._content and \
-                            hasattr(saveFrame, '_rowErrors') and \
-                            loop.name in saveFrame._rowErrors:
-                        badRows = list(saveFrame._rowErrors[loop.name])
+            self._filterLogFrame.setVisible(self._enableFilterFrame)
+            self.nefTreeView.setCurrentItem(item)
+        self._tableSplitter.setVisible(True)
 
-                        with self._tableColouring(table) as setRowBackgroundColour:
-                            for rowIndex in badRows:
-                                setRowBackgroundColour(rowIndex, _fillColour)
+    def _parentSelected(self, parentItem, parentItemName):
 
-                if primaryHandler:
-                    handler = self.handleSaveFrames.get(primaryHandler)
-                    if handler is not None:
-                        # handler(self, saveFrame, item)
-                        handler(self, name=itemName, saveFrame=saveFrame, parentGroup=parentGroup)
+        def _depth(item):
+            depth = 0
+            while item:
+                item = item.parent()
+                depth += 1
+            return depth
 
-                # clicking the checkbox also comes here - above loop may set item._badName
-                self._colourTreeView()
+        with self._tableSplitter.blockWidgetSignals(recursive=False):
+            self._tableSplitter.setVisible(False)
 
-                self._filterLogFrame.setVisible(self._enableFilterFrame)
-                self.nefTreeView.setCurrentItem(item)
+            # print(f' clicked parent section  {parentItem}    {parentItemName}  {_depth(parentItem)}')
 
-            self._tableSplitter.setVisible(True)
+            # show items in listWidget
+            # add items to collection
+            # add actions from right-mouse menu
+            # add parent-specific actions
+            #   e.g. set all to same ccpn_structuredata_name
+
+            # depth = 1 -> project
+            # depth = 2 -> groups
+            # depth = 3 -> saveFrames - either item or object, e.g., restraintList, note
+
+            # reuse the widgets?
+            for widg in self._nefWidgets:
+                self._removeWidget(widg, removeTopWidget=True)
+            self._nefWidgets = []
+            self._removeWidget(self.frameOptionsFrame, removeTopWidget=False)
+
+            # this could be nested if you click on the project
+            _count = parentItem.childCount()
+            for i in range(_count):
+                itm = parentItem.child(i)
+
+                itemName = itm.data(0, 0)
+                saveFrame = itm.data(1, 0)
+
+                if saveFrame:
+                    print(f'     item  {itm}    {itemName}    {saveFrame}    {_depth(itm)}')
+
+        self._tableSplitter.setVisible(True)
 
     @contextmanager
     def _tableColouring(self, table):
-
+        # not sure this is needed now - handled by the pandasModel indexing
         def _setRowBackgroundColour(row, colour):
-            _rowIndex = _rowMapping.index(row)
+            # set the colour for the items in the model colour table
             for j in _cols:
-                table.item(_rowIndex, j).setBackground(colour)
+                model._colourData[row, j] = colour
 
-        _rowMapping = [table.item(xx, 0).index for xx in range(table.rowCount())]
-        _cols = range(table.columnCount())
+        model = table.model()
+        _cols = range(model.columnCount())
 
         yield _setRowBackgroundColour
+
+
+    class FastTableView(QtWidgets.QTableView):
+
+        styleSheet = """
+                        QTableView {
+                            background-color: %(GUITABLE_BACKGROUND)s;
+                            alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
+                            border: 1px solid %(BORDER_NOFOCUS)s;
+                            border-radius: 2px;
+                        }
+
+                        QTableView::item {
+                            padding: 2px;
+                            color: %(GUITABLE_ITEM_FOREGROUND)s;
+                        }
+
+                        QTableView::item:selected {
+                            background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
+                            color: %(GUITABLE_SELECTED_FOREGROUND)s;
+                        }
+                    """
+
+        def __init__(self, *args, **kwds):
+            super().__init__(*args, **kwds)
+
+            # set stylesheet
+            self.colours = getColours()
+            self._defaultStyleSheet = self.styleSheet % self.colours
+            self.setStyleSheet(self._defaultStyleSheet)
+            self.setAlternatingRowColors(True)
+
+            # set the preferred scrolling behaviour
+            self.setHorizontalScrollMode(self.ScrollPerPixel)
+            self.setVerticalScrollMode(self.ScrollPerItem)
+            self.setSelectionBehavior(self.SelectRows)
+
+            # enable sorting and sort on the first column
+            self.setSortingEnabled(True)
+            self.sortByColumn(0, QtCore.Qt.AscendingOrder)
+
+            # the resizeColumnsToContents is REALLY slow :|
+            _header = self.horizontalHeader()
+            # set Interactive and last column to expanding
+            _header.setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
+            _header.setStretchLastSection(True)
+            # only look at visible section
+            _header.setResizeContentsPrecision(0)
+            _header.setDefaultAlignment(QtCore.Qt.AlignLeft)
+            _header.setMinimumSectionSize(20)
+
+            _height = getFontHeight(name=TABLEFONT, size='LARGE')
+            self.setMinimumSize(2 * _height, _height + self.horizontalScrollBar().height())
+
+            _header.setHighlightSections(self.font().bold())
+            setWidgetFont(self, name=TABLEFONT)
+            setWidgetFont(_header, name=TABLEFONT)
+            setWidgetFont(self.verticalHeader(), name=TABLEFONT)
+
+
+    class pandasModel(QtCore.QAbstractTableModel):
+
+        def __init__(self, data):
+            QtCore.QAbstractTableModel.__init__(self)
+            self._data = data
+            self._colourData = np.zeros(self._data.shape, dtype=np.object)
+
+        def rowCount(self, parent=None):
+            return self._data.shape[0]
+
+        def columnCount(self, parent=None):
+            return self._data.shape[1]
+
+        def data(self, index, role=QtCore.Qt.DisplayRole):
+            if index.isValid():
+                if role == QtCore.Qt.DisplayRole:
+                    return str(self._data.iat[index.row(), index.column()])
+
+                if role == QtCore.Qt.BackgroundColorRole:
+                    # search if the colour has been set in the colour table
+                    if (_col := self._colourData[index.row(), index.column()]):
+                        return QtCore.QVariant(QtGui.QBrush(_col))
+
+            return None
+
+        def headerData(self, col, orientation, role=None):
+            if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
+                return self._data.columns[col]
+            return None
+
 
     def _addTableToFrame(self, _data, _name):
         """Add a new gui table into a moreLess frame to hold a nef loop
         """
         frame = MoreLessFrame(self, name=_name, showMore=True, grid=(0, 0))
-        table = GuiTable(frame.contentsFrame, grid=(0, 0), gridSpan=(1, 1), multiSelect=True)
-        table._hiddenColumns = []
+        # table = GuiTable(frame.contentsFrame, grid=(0, 0), gridSpan=(1, 1), multiSelect=True)
+        # table._hiddenColumns = []
 
-        with table.blockWidgetSignals(root=table, recursive=False):
-            table.setData(_data)
+        table = self.FastTableView(frame.contentsFrame)
+        frame.contentsFrame.getLayout().addWidget(table, 0, 0)
+        _model = self.pandasModel(pd.DataFrame(_data))
+
+        # with table.blockWidgetSignals(root=table, recursive=False):
+        #     table.setData(_data)
+        table.setModel(_model)
+
         # table.resizeColumnsToContents()  # these are fairly slow
         # table.resizeRowsToContents()
 

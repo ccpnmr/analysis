@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-04 14:43:47 +0000 (Fri, February 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-04 15:20:20 +0000 (Fri, February 04, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -336,8 +336,6 @@ class Notifier(NotifierABC):
         if not self.isRegistered():
             raise RuntimeWarning('Notifier.__init__: no notifiers initialised for theObject=%s, targetName=%r, triggers=%s ' % \
                                  (theObject, targetName, triggers))
-        if self.id == 34:
-            self._debug = True
 
         if self._debug:
             sys.stderr.write('>>> registered %s\n' % self)
@@ -382,7 +380,7 @@ class Notifier(NotifierABC):
 
         if self._debug:
             p2 = 'parameter2=%r ' % parameter2 if parameter2 else ''
-            sys.stderr.write('--> <:%s id=%d> %-25s obj=%-25s %s' % \
+            sys.stderr.write('--> <%s (%d)> %-25s obj=%-25s %s' % \
                              (self.__class__.__name__, self.id,
                               notifier, obj, p2)
                              )

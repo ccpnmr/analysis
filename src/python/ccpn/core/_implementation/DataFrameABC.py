@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 11:18:41 +0000 (Fri, January 21, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-02-04 09:19:36 +0000 (Fri, February 04, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -741,6 +741,12 @@ class DataFrameABC(pd.DataFrame):
                                 redo=partial(self.ccpnSort, *columns))
 
                 self._finaliseParent('change')
+
+    def clear(self):
+        """
+        :return: empty dataframe
+        """
+        self.drop(self.index, inplace=True)
 
     def reset_index(self, *args, inplace=False, **kwargs):
         """reset_index - overridden to generate index starting at one.

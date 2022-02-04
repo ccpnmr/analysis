@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-04 15:21:30 +0000 (Fri, February 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-04 16:28:41 +0000 (Fri, February 04, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -235,7 +235,7 @@ class Notifier(NotifierABC):
         :param theObject: valid V3 core object or current object to watch
         :param triggers: list of trigger keywords callback
         :param targetName: valid className, attributeName or ANY
-        :param callback: callback function with signature: callback(obj, parameter2 [, *args] [, **kwargs])
+        :param callback: callback function with signature: callback(callbackDict, **kwargs])
         :param debug: set debug
         :param **kwargs: optional keyword,value arguments to callback
         """

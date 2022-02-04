@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-04 14:43:47 +0000 (Fri, February 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-04 16:28:41 +0000 (Fri, February 04, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -304,7 +304,7 @@ class SidebarABC(NotifierBase):
             triggers = self.kwds['triggers'] if 'triggers' in self.kwds else DEFAULT_NOTIFIERS
             self.setNotifier(parent.obj, triggers, targetName=self.klass.className, callback=self._update)
 
-        # code like this needs to be in the sub-classes:
+        # code like this needs to be implemented in the sub-classed objects:
         # # make the widget
         # self.widget = self.givenName
         #

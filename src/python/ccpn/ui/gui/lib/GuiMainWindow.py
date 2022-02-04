@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 15:30:06 +0000 (Tue, February 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-04 16:28:41 +0000 (Fri, February 04, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -72,7 +72,7 @@ from ccpn.util import Logging
 from ccpn.util import Path
 from ccpn.util.Path import aPath
 from ccpn.util.Common import isIterable
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
+from ccpn.core.lib.ContextManagers import undoBlockWithSideBar, notificationEchoBlocking
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
 
@@ -1285,7 +1285,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             if createNew:
                 result = [self._loadProject(dataLoader=dLoader)]
             else:
-                with undoBlockWithoutSideBar():
+                with undoBlockWithSideBar():
                     result = dLoader.load()
             return result
         #end def

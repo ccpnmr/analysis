@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-04 12:05:44 +0000 (Fri, February 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-04 16:28:41 +0000 (Fri, February 04, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1754,7 +1754,7 @@ class ImportNefPopup(CcpnDialogMainWidget):
         # self.setNefObjects(nefObjects)
 
         # object to contain items that are to be imported
-        self._saveFrameSelection = None
+        self._saveFrameSelection = []
         self._activeImportWindow = None
 
         # set up the widgets

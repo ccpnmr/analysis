@@ -26,8 +26,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-17 16:14:14 +0000 (Mon, January 17, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-04 14:43:47 +0000 (Fri, February 04, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -181,6 +181,8 @@ class SidebarABC(NotifierBase):
         self._parent = None  # connection to parent node
         self.level = 0  # depth level of the sidebar tree; increased for every node down, except children of 'class' nodes
         self.isDraggable = isDraggable
+
+        self._expandedState = []
 
     @property
     def givenName(self):
@@ -1602,12 +1604,6 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
             self._resultsFrame.setVisible(True)
         else:
             self._resultsFrame.setVisible(False)
-        # TODO FIXME.  Speed issues when sidebar has more then 100 items. Also needs to deregister!
-        # # add notifiers to update the listview on create/change/delete notification
-        # if len(self._searchNotifiers) == 0:
-        #     for action in ('create', 'delete', 'rename'):
-        #         notifier = self._project.registerNotifier('AbstractWrapperObject', action, self._notify_pids_changed, onceOnly=True)
-        #         self._searchNotifiers.append(notifier)
 
         # self._resultsFrame.setMaximumHeight(self._resultsFrame.sizeHint().height())
         # self._resultsFrame.updateGeometry()

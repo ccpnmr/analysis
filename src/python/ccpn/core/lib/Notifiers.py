@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-04 12:09:37 +0000 (Fri, February 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-04 14:43:47 +0000 (Fri, February 04, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -117,23 +117,35 @@ class NotifierABC(object):
         return trigger in self._triggers
 
     def unRegister(self):
-        "Reset the attributes"
+        """Reset the attributes"""
         if self._debug:
             sys.stderr.write('>>> unRegister %s\n' % self)
+
         self._theObject = None
         self._callback = None
-        self._unregister = []
-        self._triggers = []
+        self._unregister = ()
+        self._triggers = ()
         self._isRegistered = False
 
-    def isRegistered(self):
-        "Return True if notifier is still registered; i.e. active"
+    def isRegistered(self) -> bool:
+        """:return True if notifier is still registered; i.e. active"""
         return self._isRegistered
 
     def __str__(self) -> str:
-        trigs = '%s' % [(t, self._targetName) for t in self._triggers]
-        return '<%s (%d): theObject:%s triggers:%s>' % \
-               (self.__class__.__name__, self.id, self._theObject, trigs[1:-1])
+        if self.isRegistered():
+            trigs = '%s' % [(t, self._targetName) for t in self._triggers]
+            return '<%s (%d): theObject:%s triggers:%s>' % \
+                   (self.__class__.__name__,
+                    self.id,
+                    self._theObject,
+                    trigs[1:-1])
+        else:
+            return '<%s (%d): not registered>' % \
+                   (self.__class__.__name__,
+                    self.id
+                    )
+
+    __repr__ = __str__
 
 
 class Notifier(NotifierABC):
@@ -192,9 +204,12 @@ class Notifier(NotifierABC):
     CHANGE = 'change'
     OBSERVE = 'observe'
     CURRENT = 'current'
+    _triggerKeywords = (CREATE, DELETE, RENAME, CHANGE, OBSERVE, CURRENT)
 
     ANY = '<Any>'
 
+
+    # callback dict keywords
     NOTIFIER = 'notifier'
     THEOBJECT = 'theObject'
     TRIGGER = 'trigger'
@@ -205,7 +220,6 @@ class Notifier(NotifierABC):
     PREVIOUSVALUE = 'previousValue'
     TARGETNAME = 'targetName'
 
-    _triggerKeywords = (CREATE, DELETE, RENAME, CHANGE, OBSERVE, CURRENT)
 
     def __init__(self, theObject: Any,
                  triggers: list,
@@ -226,9 +240,10 @@ class Notifier(NotifierABC):
         :param **kwargs: optional keyword,value arguments to callback
         """
         from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject  # local import to avoid cycles
+        from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC  # local import to avoid cycles
         from ccpn.framework.Current import Current  # local import to avoid cycles
 
-        if theObject is None or not isinstance(theObject, (Current, AbstractWrapperObject)):
+        if theObject is None or not isinstance(theObject, (Current, AbstractWrapperObject, V3CoreObjectABC)):
             raise RuntimeError('Notifier: invalid object %r' % theObject)
 
         super().__init__(theObject=theObject, triggers=triggers, targetName=targetName, debug=debug,
@@ -295,9 +310,9 @@ class Notifier(NotifierABC):
                     self._previousValue = getattr(theObject, targetName)
 
                 notifier = (trigger, targetName)
-                func = self._project.registerNotifier(theObject.className,
-                                                      Notifier.CHANGE,
-                                                      partial(self, notifier=notifier),
+                func = self._project.registerNotifier(className=theObject.className,
+                                                      target=Notifier.CHANGE,
+                                                      func=partial(self, notifier=notifier),
                                                       onceOnly=onceOnly)
                 self._unregister.append((theObject.className, Notifier.CHANGE, func))
                 self._isRegistered = True
@@ -311,9 +326,9 @@ class Notifier(NotifierABC):
                 #     raise RuntimeWarning('Notifier.__init__: invalid targetName "%s" for class "%s"' % (targetName, theObject.className))
 
                 notifier = (trigger, targetName)
-                func = self._project.registerNotifier(targetName,
-                                                      trigger,
-                                                      partial(self, notifier=notifier),
+                func = self._project.registerNotifier(className=targetName,
+                                                      target=trigger,
+                                                      func=partial(self, notifier=notifier),
                                                       onceOnly=onceOnly)
                 self._unregister.append((targetName, trigger, func))
                 self._isRegistered = True
@@ -321,6 +336,9 @@ class Notifier(NotifierABC):
         if not self.isRegistered():
             raise RuntimeWarning('Notifier.__init__: no notifiers initialised for theObject=%s, targetName=%r, triggers=%s ' % \
                                  (theObject, targetName, triggers))
+        if self.id == 34:
+            self._debug = True
+
         if self._debug:
             sys.stderr.write('>>> registered %s\n' % self)
 
@@ -343,10 +361,9 @@ class Notifier(NotifierABC):
         """
         wrapper, accommodating the different triggers before firing the callback
         """
-        logger = getLogger()
 
         if not self.isRegistered():
-            logger.warning('Triggering unregistered notifier %s' % self)
+            getLogger().warning('Triggering unregistered notifier %s' % self)
             return
 
         if self._isBlanked:
@@ -365,20 +382,23 @@ class Notifier(NotifierABC):
 
         if self._debug:
             p2 = 'parameter2=%r ' % parameter2 if parameter2 else ''
-            sys.stderr.write('--> %-25s obj=%-25s %s' % \
-                             (notifier, obj, p2)
+            sys.stderr.write('--> <:%s id=%d> %-25s obj=%-25s %s' % \
+                             (self.__class__.__name__, self.id,
+                              notifier, obj, p2)
                              )
 
         notifierFired = False
-        callbackDict = dict(
-                notifier=self,
-                trigger=trigger,
-                theObject=self._theObject,
-                object=obj,
-                targetName=targetName,
-                previousValue=None,
-                value=None,
-                )
+        callbackDict = {
+                self.NOTIFIER : self,
+                self.TRIGGER : trigger,
+                self.THEOBJECT : self._theObject,
+                self.OBJECT : obj,
+                self.TARGETNAME : targetName,
+                self.PREVIOUSVALUE : None,
+                self.VALUE : None,
+                self.OLDPID : None,
+                self.GETPID : None
+        }
 
         # CURRENT special case
         if trigger == Notifier.CURRENT:
@@ -387,8 +407,6 @@ class Notifier(NotifierABC):
                 callbackDict[self.OBJECT] = self._theObject
                 callbackDict[self.PREVIOUSVALUE] = self._previousValue
                 callbackDict[self.VALUE] = value
-                if self._debug:
-                    sys.stderr.write('%-9s *** %s func:%s\n' % ('FIRE', self, self._callback))
                 self._callback(callbackDict, **self._kwargs)
                 notifierFired = True
                 self._previousValue = value
@@ -397,8 +415,6 @@ class Notifier(NotifierABC):
         elif trigger == Notifier.OBSERVE and targetName == self.ANY:
             if obj.pid == self._theObject.pid:
                 callbackDict[self.OBJECT] = self._theObject
-                if self._debug:
-                    sys.stderr.write('%-9s *** %s func:%s\n' % ('FIRE', self, self._callback))
                 self._callback(callbackDict, **self._kwargs)
                 notifierFired = True
 
@@ -411,8 +427,6 @@ class Notifier(NotifierABC):
                 callbackDict[self.OBJECT] = self._theObject
                 callbackDict[self.PREVIOUSVALUE] = self._previousValue
                 callbackDict[self.VALUE] = value
-                if self._debug:
-                    sys.stderr.write('%-9s *** %s func:%s\n' % ('FIRE', self, self._callback))
                 self._callback(callbackDict, **self._kwargs)
                 notifierFired = True
                 self._previousValue = value
@@ -421,13 +435,12 @@ class Notifier(NotifierABC):
         elif self._isProject or obj._parent.pid == self._theObject.pid:
             if trigger == self.RENAME and parameter2 is not None:
                 callbackDict[self.OLDPID] = parameter2
-            if self._debug:
-                sys.stderr.write('%-9s *** %s func:%s\n' % ('FIRE', self, self._callback))
             self._callback(callbackDict, **self._kwargs)
             notifierFired = True
 
-        if self._debug and not notifierFired:
-            sys.stderr.write('%-9s *** %s func:%s\n' % ('not-FIRED', self, self._callback))
+        if self._debug:
+            _tmp = 'FIRED' if notifierFired else 'not-FIRED'
+            sys.stderr.write('%-9s func:%s\n' % (_tmp, self._callback))
 
         return
 

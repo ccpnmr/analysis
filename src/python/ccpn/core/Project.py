@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-02 16:25:59 +0000 (Wed, February 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-04 14:43:47 +0000 (Fri, February 04, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -877,15 +877,15 @@ class Project(AbstractWrapperObject):
           If target is a second className, the function is called with the project as the only
           parameter.
 
-        param: dict parameterDict: Parameters passed to the notifier function before execution.
+        :param dict parameterDict: Parameters passed to the notifier function before execution.
 
           This allows you to use the same function with different parameters in different contexts
 
-        param: bool onceOnly: If True, only one of multiple copies is executed
+        :param bool onceOnly: If True, only one of multiple copies is executed
 
           when notifiers are resumed after a suspension.
 
-        return: The registered notifier (which can be passed to removeNotifier or duplicateNotifier)
+        :return The registered notifier (which can be passed to removeNotifier or duplicateNotifier)
 
         """
 

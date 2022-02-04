@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-04 12:05:44 +0000 (Fri, February 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-04 14:43:47 +0000 (Fri, February 04, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1191,7 +1191,7 @@ class Framework(NotifierBase, GuiBase):
         with catchExceptions(application=self, errorStringTemplate='application._importNef: %s', printTraceBack=True):
             with undoBlockWithoutSideBar():
                 self._importNefFile(path=path, makeNewProject=False)
-            self.ui.mainWindow.sideBar.buildTree(self.project)
+            # self.ui.mainWindow.sideBar.buildTree(self.project)
 
     def _importNefFile(self, path: Union[str, Path], makeNewProject=True) -> Project:
         """Load Project from NEF file at path, and do necessary setup

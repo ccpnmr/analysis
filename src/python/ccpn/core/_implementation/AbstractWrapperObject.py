@@ -4,10 +4,10 @@
 # Licence, Reference and Credits
 #=========================================================================================
 
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:23:25 +0000 (Thu, January 13, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-02-04 09:50:55 +0000 (Fri, February 04, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -874,17 +874,16 @@ class AbstractWrapperObject(NotifierBase):
         """Return the versionString of the object; used in _updateObject
         to implement the update mechanism
         """
-        if not self._hasInternalParameter(self._OBJECT_VERSION):
-            version = str(self.project._saveHistory.lastSavedVersion)
-            self._setInternalParameter(self._OBJECT_VERSION, version)
-        return VersionString(self._getInternalParameter(self._OBJECT_VERSION))
+        if not self._wrappedData._objectVersion:
+            self._wrappedData._objectVersion = str(self.project._saveHistory.lastSavedVersion)
+        return VersionString(self._wrappedData._objectVersion)
 
     @_objectVersion.setter
     def _objectVersion(self, version):
         # call the VersionString class, as it checks for compliance
         # Value is stored as an actual str object, not VersionString object
         version = str(VersionString(version))
-        self._setInternalParameter(self._OBJECT_VERSION, version)
+        self._wrappedData._objectVersion = version
 
     def _updateObject(self, updateMethod):
         """Use post-object or post-project updateMethod (as defined in Updater)
@@ -907,7 +906,7 @@ class AbstractWrapperObject(NotifierBase):
             raise ValueError('_restoreObject: undefined apiObj')
 
         # # call any pre-initialisation updates
-        # cls._updater.update(UPDATE_PRE_OBJECT_INITIALISATION, apipObj, cls)
+        # cls._updater.update(UPDATE_PRE_OBJECT_INITIALISATION, apiObj, cls)
 
         if (factoryFunction := cls._factoryFunction) is None:
             obj = cls(project, apiObj)
@@ -915,6 +914,12 @@ class AbstractWrapperObject(NotifierBase):
             obj = factoryFunction(project, apiObj)
         if obj is None:
             raise RuntimeError('Error restoring object encoded by %s' % apiObj)
+
+        # update _objectVersion from internal parameter store to model (if exists)
+        if obj._hasInternalParameter(obj._OBJECT_VERSION):
+            _version = obj._getInternalParameter(obj._OBJECT_VERSION)
+            obj._deleteInternalParameter(obj._OBJECT_VERSION)
+            obj._objectVersion = _version
 
         # restore the children
         obj._restoreChildren()

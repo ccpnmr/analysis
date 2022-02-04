@@ -4,10 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-20 13:12:06 +0000 (Thu, January 20, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-02-04 09:50:55 +0000 (Fri, February 04, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -36,6 +36,8 @@ from ccpn.core.lib.ContextManagers import renameObject, ccpNmrV3CoreSetter, dele
 from ccpn.core.lib.Pid import Pid, altCharacter
 from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.util.decorators import logCommand
+from ccpn.framework.Version import VersionString
+from ccpn.util.Logging import getLogger
 
 
 _UNIQUEID = 'uniqueId'
@@ -466,6 +468,30 @@ class V3CoreObjectABC(NotifierBase):
         """get wrappedData - V3CoreObjectABC do not link to _wrappedData
         """
         return []
+
+    @property
+    def _objectVersion(self) -> Optional[VersionString]:
+        """Contains the current _objectVersion for V3CoreObjects
+        Not implemented here as _objectVersion is handled by the wrapperList
+        """
+        getLogger().debug2(f'{self.__class__.__name__}._objectVersion not implemented')
+        return None
+
+    @_objectVersion.setter
+    def _objectVersion(self, version):
+        getLogger().debug2(f'{self.__class__.__name__}._objectVersion not implemented')
+
+    @property
+    def _ccpnInternalData(self) -> Optional[dict]:
+        """get _ccpnInternalData - V3CoreObjectABC do not link to _wrappedData
+        Not implemented
+        """
+        getLogger().debug2(f'{self.__class__.__name__}._ccpnInternalData not implemented')
+        return None
+
+    @_ccpnInternalData.setter
+    def _ccpnInternalData(self, value):
+        getLogger().debug2(f'{self.__class__.__name__}._ccpnInternalData not implemented')
 
     #=========================================================================================
     # CCPN functions

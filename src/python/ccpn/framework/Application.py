@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-02 10:17:26 +0000 (Wed, February 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-05 15:09:56 +0000 (Sat, February 05, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -41,13 +41,6 @@ def getApplication():
     """Return the application instance"""
     container = ApplicationContainer()
     return container.application
-
-
-def getPreferences():
-    """Return the Preferences instance"""
-    if (app := getApplication()) is None:
-        raise RuntimeError('getPreferences: application has not registered itself!')
-    return app.preferences
 
 
 def getProject():

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-02 09:53:48 +0000 (Wed, February 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-05 15:09:56 +0000 (Sat, February 05, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -38,6 +38,8 @@ from ccpn.framework.PathsAndUrls import \
     userPreferencesDirectory, \
     defaultPreferencesPath
 
+from ccpn.framework.Application import getApplication
+
 ARIA_PATH ='externalPrograms.aria'
 CYANA_PATH ='externalPrograms.cyana'
 XPLOR_NIH_PATH = 'externalPrograms.xplor'
@@ -51,6 +53,15 @@ USER_PIPES_PATH = 'general.userPipesPath'
 USER_LAYOUTS_PATH = 'general.userLayoutsPath'
 
 PRINT_OPTIONS = 'printSettings.printOptions'
+
+USE_PROJECT_PATH = 'general.useProjectPath'
+
+
+def getPreferences():
+    """Return the Preferences instance"""
+    if (app := getApplication()) is None:
+        raise RuntimeError('getPreferences: application has not registered itself!')
+    return app.preferences
 
 
 @singleton

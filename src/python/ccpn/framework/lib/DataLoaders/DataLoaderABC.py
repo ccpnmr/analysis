@@ -9,7 +9,7 @@ work of loading the data into the project.
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -21,8 +21,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-24 18:52:43 +0000 (Wed, November 24, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-05 15:09:56 +0000 (Sat, February 05, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -35,7 +35,7 @@ __date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
 
 from collections import OrderedDict
 
-from ccpn.util.Path import aPath
+from ccpn.util.Path import Path, aPath
 from ccpn.util.traits.TraitBase import TraitBase
 from ccpn.util.traits.CcpNmrTraits import Unicode, Any, List, Bool, CPath, Odict
 from ccpn.util.Logging import getLogger
@@ -78,11 +78,18 @@ def getDataLoaders():
 
 def checkPathForDataLoader(path, exclude=()):
     """Check path if it corresponds to any defined data format.
-    Exclude any dataLoader defined in the exclude argument (a tuple/list
-    of datFormat strings)
+    Exclude any dataLoader defined in the exclude argument.
 
-    return: a DataLoader instance or None if there was no match
+    :param exclude: a tuple/list of dataFormat strings
+    :return a DataLoader instance or None if there was no match
     """
+    if not isinstance(path, (str, Path)):
+        raise ValueError('checkPathForDataLoader: invalid path %r' % path)
+
+    _path = aPath(path)
+    if not _path.exists():
+        raise ValueError('checkPathForDataLoader: path %r does not exist' % path)
+
     for fmt, cls in getDataLoaders().items():
         if cls.dataFormat not in exclude:
             instance = cls.checkForValidFormat(path)

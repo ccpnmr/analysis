@@ -4,7 +4,7 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-07 15:28:35 +0000 (Tue, December 07, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-05 15:09:56 +0000 (Sat, February 05, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -382,7 +382,8 @@ class ProjectFileDialog(FileDialogABC):
     def _updateCurrentPath(self):
         """Update the current path for here and the ProjectSaveFileDialog
         """
-        # accept the dialog and set the current selected folder for next time if directory not originally set
+        # accept the dialog and set the current selected folder for next time,
+        # if directory not originally set
         super()._updateCurrentPath()
 
         # copy the value to the ProjectSaveFileDialog
@@ -397,7 +398,8 @@ class ProjectSaveFileDialog(FileDialogABC):
     def _updateCurrentPath(self):
         """Update the current path for here and the ProjectFileDialog
         """
-        # accept the dialog and set the current selected folder for next time if directory not originally set
+        # accept the dialog and set the current selected folder for next time,
+        # if directory not originally set
         super()._updateCurrentPath()
 
         # copy the value to the ProjectFileDialog

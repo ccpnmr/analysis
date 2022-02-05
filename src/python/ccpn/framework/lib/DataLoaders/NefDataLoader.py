@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-04 19:28:01 +0000 (Fri, February 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-05 15:09:56 +0000 (Sat, February 05, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -64,10 +64,11 @@ class NefDataLoader(DataLoaderABC):
         :return: a list of [project]
         """
         try:
-            if self.createNewProject:
-                project = self.application._loadNefFile(dataLoader=self, makeNewProject=True)
-            else:
-                project = self.application._loadNefFile(dataLoader=self, nefReader=self._nefReader, makeNewProject=False)
+            if self._nefImporter is None:
+                self._getNefImporter()
+            if self._nefReader is not None:
+                self._nefImporter._attachReader(self._nefReader)
+            project = self.application._loadNefFile(dataLoader=self, makeNewProject=self.createNewProject)
 
         except (ValueError, RuntimeError) as es:
             raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))

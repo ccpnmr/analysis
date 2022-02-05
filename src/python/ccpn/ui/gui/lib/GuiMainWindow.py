@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-04 19:28:01 +0000 (Fri, February 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-05 15:09:56 +0000 (Sat, February 05, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,11 +37,12 @@ from functools import partial
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtCore import QSize
+
 from ccpn.core.Project import Project
 from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.ui.gui.widgets.MessageDialog import progressManager
 from ccpn.util.Logging import getLogger
-from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
+
 from ccpn.ui.gui.widgets.Icon import Icon
 
 from ccpn.util.Svg import Svg
@@ -72,9 +73,13 @@ from ccpn.util import Logging
 from ccpn.util import Path
 from ccpn.util.Path import aPath
 from ccpn.util.Common import isIterable
-from ccpn.core.lib.ContextManagers import undoBlockWithSideBar, notificationEchoBlocking
+from ccpn.core.lib.ContextManagers import \
+    undoBlockWithSideBar, \
+    undoBlockWithoutSideBar, \
+    notificationEchoBlocking
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
+from ccpn.framework.Preferences import getPreferences, USE_PROJECT_PATH
 
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.Peak import Peak
@@ -1156,7 +1161,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         """
         choices = ('Import', 'New project', 'Cancel')
         choice = showMulti('Load %s' % dataLoader.dataFormat,
-                           'How do you want to handle the file:',
+                           'How do you want to handle "%s":' % dataLoader.path,
                            choices, parent=self)
 
         if choice == choices[0]:  # import
@@ -1180,6 +1185,13 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         does not do the actual loading
         :returns a tuple (dataLoader, createNewProject, ignore)
         """
+        # local import here
+        from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
+        from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
+        from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
+        from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
+        from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
+        from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
 
         dataLoader = checkPathForDataLoader(url)
 
@@ -1190,14 +1202,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         createNewProject = dataLoader.createNewProject
         ignore = False
-
-        # local import here, as checkPathForDataLoaders needs to be called first to assure proper import orer
-        from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
-        from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
-        from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
-        from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
-        from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
-        from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
 
         if dataLoader.dataFormat == NefDataLoader.dataFormat:
             (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
@@ -1244,7 +1248,9 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         getLogger().info('Handling urls...')
 
-        # A list of (url, dataLoader, createsNewProject) tuples. (createsNew to modify behavior, eg. for NEF)
+        # dataLoaders: A list of (url, dataLoader, createsNewProject, ignore) tuples.
+        # createsNewProject: to call _loadProject; eg. for NEF
+        # ignore: user opted to skip this one; e.g. a spectrum already present
         dataLoaders = []
         # analyse the Urls
         for url in urls:
@@ -1258,46 +1264,87 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                                         'While examining %s:\n%s' % (url, str(es)),
                                         parent=self)
 
-        # analyse for potential errors
-        errorUrls = [url for url, dl, createNew, ignore in dataLoaders if (dl is None and not ignore)]
+        # All ignored urls
+        urlsToIgnore = [(url, dl, createNew) for url, dl, createNew, ignore in dataLoaders if
+                         (ignore)]
+        # All valid urls
+        allUrlsToLoad = [(url, dl, createNew) for url, dl, createNew, ignore in dataLoaders if
+                         (not ignore)]
+
+        # Error urls
+        errorUrls = [(url, dl, createNew) for url, dl, createNew in allUrlsToLoad if
+                         (dl is None)]
+        # Project url's
+        newProjectUrls = [(url, dl, createNew) for url, dl, createNew in allUrlsToLoad if
+                          (dl is not None and createNew)]
+        # Data url's
+        dataUrls = [(url, dl, createNew) for url, dl, createNew in allUrlsToLoad if
+                          (dl is not None and not createNew)]
+
+        if len(urlsToIgnore) == len(dataLoaders):
+            return []
+
+        if len(errorUrls) == len(allUrlsToLoad):
+            MessageDialog.showError('Load Data', 'No dropped items were not recognised (see log for details)', parent=self)
+            return []
+
         if len(errorUrls) == 1:
-            MessageDialog.showError('Load Data', 'Dropped item "%s" was not recognised' % errorUrls[0], parent=self)
+            MessageDialog.showError('Load Data', 'Dropped item "%s" was not recognised' % errorUrls[0][0], parent=self)
         elif len(errorUrls) > 1:
             MessageDialog.showError('Load Data', '%d dropped items were not recognised (see log for details)' % \
                                     len(errorUrls), parent=self)
 
-        # load the url's with valid handlers
-        urlsToLoad = [(url, dl, createNew) for url, dl, createNew, ignore in dataLoaders if
-                      (dl is not None and not ignore)]
-        doEchoBlocking = len(urlsToLoad) > MAXITEMLOGGING
+        if len(newProjectUrls) > 1:
+            MessageDialog.showError('Load Data', 'More than one (%d) dropped items create a new project' % \
+                                    len(newProjectUrls), parent=self)
+            return []
 
-        # just a helper function to avoid code duplication
-        def _getResult(dLoader, createNew):
-            if createNew:
-                result = [self._loadProject(dataLoader=dLoader)]
-            else:
-                with undoBlockWithSideBar():
-                    with progressManager(self, 'Loading %s ... ' % dLoader.path):
-                        result = dLoader.load()
-            return result
-        #end def
+        if len(newProjectUrls) + len(dataUrls) == 0:
+            MessageDialog.showError('Load Data', 'No dropped items can be loaded', parent=self)
+            return []
 
-        objs = []
-        for url, dataLoader, createNewProject in urlsToLoad:
-            try:
-                if doEchoBlocking:
-                    with notificationEchoBlocking():
-                        result = _getResult(dataLoader, createNewProject)
-                else:
-                    result = _getResult(dataLoader, createNewProject)
+        result = []
+        with catchExceptions(errorStringTemplate='Load data: %s'):
+            if len(newProjectUrls) == 1:
+                url, dl, createNew = newProjectUrls[0]
+                project = self._loadProject(dataLoader=dl)
+                result.append(project)
+            with undoBlockWithoutSideBar():
+                if len(dataUrls) > 0:
+                    _dLoaders = [dl for url, dl, createNew in dataUrls]
+                    objs = self.application._loadData(_dLoaders, maxItemLogging=MAXITEMLOGGING)
+                    result.extend(objs)
+        return result
 
-                if result is not None:
-                    objs.extend(result)
-
-            except RuntimeError as es:
-                showWarning("Load data", 'Error loading "%s" \n(%s)' % (url, str(es)), parent=self)
-
-        return objs
+        # doEchoBlocking = len(urlsToLoad) > MAXITEMLOGGING
+        #
+        # # just a helper function to avoid code duplication
+        # def _getResult(dLoader, createNew):
+        #     if createNew:
+        #         result = [self._loadProject(dataLoader=dLoader)]
+        #     else:
+        #         with undoBlockWithSideBar():
+        #             with progressManager(self, 'Loading %s ... ' % dLoader.path):
+        #                 result = dLoader.load()
+        #     return result
+        # #end def
+        #
+        # objs = []
+        # for url, dataLoader, createNewProject in urlsToLoad:
+        #     try:
+        #         if doEchoBlocking:
+        #             with notificationEchoBlocking():
+        #                 result = _getResult(dataLoader, createNewProject)
+        #         else:
+        #             result = _getResult(dataLoader, createNewProject)
+        #
+        #         if result is not None:
+        #             objs.extend(result)
+        #
+        #     except RuntimeError as es:
+        #         showWarning("Load data", 'Error loading "%s" \n(%s)' % (url, str(es)), parent=self)
+        #
+        # return objs
 
     def _processPids(self, data, position=None, relativeTo=None):
         """Handle the urls passed to the drop event
@@ -1335,12 +1382,13 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         Loads the selected project.
         :returns new project instance or None
         """
-
-        lastValidProject = self.project.path
         project = None
 
         if projectDir is None:
             dialog = ProjectFileDialog(parent=self, acceptMode='open')
+            # TODO: check if this should not be handled by the ProjectFileDialog class
+            if getPreferences().get(USE_PROJECT_PATH):
+                dialog.initialPath = Path.Path(self.project).parent
             dialog._show()
             projectDir = dialog.selectedFile()
 
@@ -1349,11 +1397,11 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             if (project := self._loadProject(path=projectDir)) is None:
                 return None
 
-            if self.application.preferences.general.useProjectPath:
-                Logging.getLogger().debug2('mainWindow - setting current path %s' % Path.Path(projectDir).parent)
-                # this dialog doesn't need to be seen, required to set initialPath
-                _dialog = ProjectFileDialog(parent=self, acceptMode='open')
-                _dialog.initialPath = Path.Path(projectDir).parent
+            # if self.application.preferences.general.useProjectPath:
+            #     Logging.getLogger().debug2('mainWindow - setting current path %s' % Path.Path(projectDir).parent)
+            #     # this dialog doesn't need to be seen, required to set initialPath
+            #     _dialog = ProjectFileDialog(parent=self, acceptMode='open')
+            #     _dialog.initialPath = Path.Path(projectDir).parent
 
         return project
 

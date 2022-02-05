@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-04 19:28:01 +0000 (Fri, February 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-05 15:09:56 +0000 (Sat, February 05, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -960,21 +960,37 @@ class Framework(NotifierBase, GuiBase):
     # Data loaders
     #-----------------------------------------------------------------------------------------
 
+    def _loadData(self, dataLoaders, maxItemLogging=0) -> list:
+        """Helper function; use dataLoader to load data; optionally suspend logging
+        :param dataLoaders: a list/tuple of dataLoader instances
+        :param maxItemLogging: flag to set maximum items to log (0 denotes logging all)
+        :return a list of loaded objects
+        """
+        objs = []
+        _echoBlocking = maxItemLogging > 0 and len(dataLoaders) > maxItemLogging
+
+        if _echoBlocking:
+            self._increaseNotificationBlocking()
+
+        for dataLoader in dataLoaders:
+            dataLoader.createNewObject = False  # The loadData() method was used; No project created
+            result = dataLoader.load()
+            if not isIterable(result):
+                result = [result]
+            objs.extend(result)
+
+        if _echoBlocking:
+            self._decreaseNotificationBlocking()
+
+        return objs
+
     @logCommand('application.')
     def loadData(self, *paths) -> list:
         """Loads data from paths.
         :returns list of loaded objects
         """
-        objs = []
+        dataLoaders = []
         for path in paths:
-            if not isinstance(path, (str, Path)):
-                raise ValueError('invalid path %r' % path)
-
-            _path = aPath(path)
-            if not _path.exists():
-                getLogger().warning('application.loadData: path %r does not exist' % path)
-                continue
-
             if (dataLoader := checkPathForDataLoader(path)) is None:
                 getLogger().warning('Unable to load "%s"' % path)
                 continue
@@ -983,14 +999,9 @@ class Framework(NotifierBase, GuiBase):
                 getLogger().warning('Loading of "%s" would create a new project; use application.loadProject() instead')
                 continue
 
-            else:
-                dataLoader.createNewObject = False  # The loadData() method was used; No project created
-                result = dataLoader.load()
-                if not isIterable(result):
-                    result = [result]
-                objs.extend(result)
+            dataLoaders.append(dataLoader)
 
-        return objs
+        return self._loadData(dataLoaders)
 
     def _loadV2Project(self, path) -> List[Project]:
         """Actual V2 project loader
@@ -1146,25 +1157,19 @@ class Framework(NotifierBase, GuiBase):
     # NEF-related code
     #-----------------------------------------------------------------------------------------
 
-    def _loadNefFile(self, dataLoader, nefReader=None, makeNewProject=True) -> Project:
-        """Load NEF file defined by dataLoader instance, and do necessary setup
+    def _loadNefFile(self, dataLoader, makeNewProject:bool=True) -> Project:
+        """Load NEF file defined by dataLoader instance
+        :param dataLoader: a NefDataLoader instance
+        :param makeNewProject: if True, create a new project first
         :return Project instance
         CCPNINTERNAL: called from dataLoader instance
         """
-        # from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
-        #
-        # if dataLoader := NefDataLoader.checkPath(path) is None:
-        #     raise ValueError('Invalid Nef path %r' % path)
-
         _nefImporter = dataLoader.nefImporter  # This will also populate the nefImporter if need be
         if makeNewProject:
             self._closeProject()
             self._project = self.newProject(_nefImporter.getName())
 
-        if nefReader is not None:
-            _nefImporter._attachReader(nefReader)
         _nefImporter.importToProject(project=self.project)
-
         return self.project
 
     # def _importNef(self, path=None):

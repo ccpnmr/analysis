@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-05 17:26:33 +0000 (Sat, February 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-05 18:27:20 +0000 (Sat, February 05, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1235,39 +1235,39 @@ class Framework(NotifierBase, GuiBase):
     #         getLogger().info('==> Loaded NEF file: "%s"' % (path,))
     #         return self.project
 
-    def importFromLoader(self, loader, reader=None):
-        """Read the selection from the nefImporter object into the current.project
-
-        To use without the nef import dialog, requires the creation of a reader object
-        If no reader is specified, then a default is created
-        Selection of objects is specified through the loader before import
-
-        :param loader: nef loader object created from a nef file
-        """
-
-        from ccpn.core.lib.ContextManagers import notificationEchoBlocking
-        from ccpn.core.lib import CcpnNefIo
-        from ccpn.util.nef import NefImporter as Nef
-
-        # set a default if not specified
-        reader = reader or CcpnNefIo.CcpnNefReader(self)
-
-        # check the parameters
-        if not isinstance(loader, Nef.NefImporter):
-            raise ValueError(f'loader {loader} not defined correctly')
-        if not isinstance(reader, CcpnNefIo.CcpnNefReader):
-            raise ValueError(f'reader {reader} not defined correctly')
-
-        self.project.shiftAveraging = False
-
-        with undoBlockWithoutSideBar():
-            with notificationEchoBlocking():
-                with catchExceptions(application=self, errorStringTemplate='Error importing Nef file: %s', printTraceBack=True):
-                    # need datablock selector here, with subset selection dependent on datablock type
-
-                    reader.importNewProject(self.project, loader._nefDict)
-
-        self.project.shiftAveraging = True
+    # def importFromLoader(self, loader, reader=None):
+    #     """Read the selection from the nefImporter object into the current.project
+    #
+    #     To use without the nef import dialog, requires the creation of a reader object
+    #     If no reader is specified, then a default is created
+    #     Selection of objects is specified through the loader before import
+    #
+    #     :param loader: nef loader object created from a nef file
+    #     """
+    #
+    #     from ccpn.core.lib.ContextManagers import notificationEchoBlocking
+    #     from ccpn.core.lib import CcpnNefIo
+    #     from ccpn.util.nef import NefImporter as Nef
+    #
+    #     # set a default if not specified
+    #     reader = reader or CcpnNefIo.CcpnNefReader(self)
+    #
+    #     # check the parameters
+    #     if not isinstance(loader, Nef.NefImporter):
+    #         raise ValueError(f'loader {loader} not defined correctly')
+    #     if not isinstance(reader, CcpnNefIo.CcpnNefReader):
+    #         raise ValueError(f'reader {reader} not defined correctly')
+    #
+    #     self.project.shiftAveraging = False
+    #
+    #     with undoBlockWithoutSideBar():
+    #         with notificationEchoBlocking():
+    #             with catchExceptions(application=self, errorStringTemplate='Error importing Nef file: %s', printTraceBack=True):
+    #                 # need datablock selector here, with subset selection dependent on datablock type
+    #
+    #                 reader.importNewProject(self.project, loader._nefDict)
+    #
+    #     self.project.shiftAveraging = True
 
     def _exportNEF(self):
         """

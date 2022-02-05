@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-04 14:43:47 +0000 (Fri, February 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-05 18:39:30 +0000 (Sat, February 05, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -33,7 +33,6 @@ from typing import Sequence, Union, Optional, List
 from collections import OrderedDict
 # from time import time
 from datetime import datetime
-import json
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.Updater import UPDATE_POST_PROJECT_INITIALISATION
@@ -48,13 +47,10 @@ from ccpn.core.lib.ContextManagers import notificationBlanking, undoBlock, undoB
 from ccpn.util import Logging
 from ccpn.util.ExcelReader import ExcelReader
 from ccpn.util.Path import aPath, Path
-from ccpn.util.Common import isIterable
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
 
-from ccpn.framework.Version import VersionString
 from ccpn.framework.PathsAndUrls import CCPN_EXTENSION
-from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpnmodel.ccpncore.memops import Notifiers
@@ -66,7 +62,6 @@ from ccpnmodel.ccpncore.api.ccp.nmr.NmrExpPrototype import RefExperiment
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 # from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.lib import ApiPath
-from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 from ccpnmodel.ccpncore.api.memops import Implementation
 
@@ -1257,7 +1252,7 @@ class Project(AbstractWrapperObject):
         :param expandSelection: expand the selection
         :param pidList: a list of pids
         """
-        from ccpn.core.lib import CcpnNefIo
+        from ccpn.framework.lib.ccpnNef import CcpnNefIo
 
         with undoBlock():
             with notificationBlanking():

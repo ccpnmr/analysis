@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-05 17:26:33 +0000 (Sat, February 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-05 18:39:31 +0000 (Sat, February 05, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -32,7 +32,7 @@ import platform
 
 from tqdm import tqdm
 from functools import partial
-from typing import Union, Optional, List, Tuple, Sequence
+from typing import Optional
 
 from PyQt5 import QtWidgets
 
@@ -42,23 +42,15 @@ from ccpn.framework.PathsAndUrls import \
     CCPN_EXTENSION, \
     CCPN_ARCHIVES_DIRECTORY
 
-from ccpn.core.IntegralList import IntegralList
-from ccpn.core.PeakList import PeakList
-from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Project import Project
-from ccpn.core.lib.Notifiers import NotifierBase, Notifier
-from ccpn.core.lib.Pid import Pid, PREFIXSEP
 from ccpn.core.lib.ContextManagers import \
     catchExceptions, \
     undoBlockWithoutSideBar, \
-    undoBlock, \
-    notificationEchoBlocking, \
-    logCommandManager
+    notificationEchoBlocking
 
 from ccpn.framework.Preferences import getPreferences, USE_PROJECT_PATH
 
-from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable
-from ccpn.util.decorators import logCommand
+from ccpn.util.Common import isWindowsOS
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import Path, aPath
 import ccpn.util.Layout as Layout
@@ -67,10 +59,7 @@ from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import \
     ProjectFileDialog, \
     DataFileDialog, \
-    NefFileDialog, \
     ArchivesFileDialog, \
-    MacrosFileDialog, \
-    CcpnMacrosFileDialog, \
     LayoutsFileDialog, \
     NMRStarFileDialog, \
     SpectrumFileDialog, \
@@ -454,7 +443,7 @@ class GuiBase(object):
                 return
 
         from ccpn.ui.gui.popups.ImportStarPopup import StarImporterPopup
-        from ccpn.core.lib import CcpnNefIo
+        from ccpn.framework.lib.ccpnNef import CcpnNefIo
 
         _nefReader = CcpnNefIo.CcpnNefReader(self)
         relativePath = os.path.dirname(os.path.realpath(path))

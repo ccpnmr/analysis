@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-05 18:27:20 +0000 (Sat, February 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-05 18:39:30 +0000 (Sat, February 05, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -29,19 +29,17 @@ __date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
 # Start of code
 #=========================================================================================
 
-from typing import Union, Optional, Sequence
-from contextlib import contextmanager
+from typing import Sequence
 from time import time
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
 
-from ccpn.util import Path
 from ccpn.util.Logging import getLogger
 from ccpn.util.nef.GenericStarParser import DataBlock
 
 from ccpn.core.lib.ContextManagers import undoStackBlocking, notificationBlanking
-from ccpn.core.lib import CcpnNefIo
-from ccpn.core.lib.CcpnNefImporter import CcpnNefImporter
+from ccpn.framework.lib.ccpnNef import CcpnNefIo
+from ccpn.framework.lib.ccpnNef.CcpnNefImporter import CcpnNefImporter
 
 
 class NefDataLoader(DataLoaderABC):

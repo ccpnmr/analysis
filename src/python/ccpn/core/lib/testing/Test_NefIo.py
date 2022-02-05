@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 11:22:10 +0000 (Fri, January 21, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-05 18:39:30 +0000 (Sat, February 05, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,9 +28,9 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import copy
 import os
-from ccpn.core.lib.CcpnNefCommon import nef2CcpnMap, saveFrameWritingOrder, _isALoop
+from ccpn.framework.lib.ccpnNef.CcpnNefCommon import nef2CcpnMap, saveFrameWritingOrder, _isALoop
 from ccpn.core.testing.WrapperTesting import WrapperTesting
-from ccpn.core.lib.CcpnNefIo import saveNefProject
+from ccpn.framework.lib.ccpnNef.CcpnNefIo import saveNefProject
 
 
 def test_nef_maps():

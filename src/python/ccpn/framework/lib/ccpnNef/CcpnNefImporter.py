@@ -1,10 +1,10 @@
 
 from ccpn.framework.Application import getApplication
-from ccpn.core.lib.CcpnNefIo import CcpnNefReader
+from ccpn.framework.lib.ccpnNef.CcpnNefIo import CcpnNefReader
 
 from ccpn.util.Logging import getLogger
 from ccpn.util.nef.NefImporter import NefImporter
-from ccpn.util.nef.ErrorLog import NEF_STANDARD, NEF_STRICT, NEF_SILENT
+from ccpn.util.nef.ErrorLog import NEF_STANDARD, NEF_STRICT
 from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideBar, notificationEchoBlocking
 
 

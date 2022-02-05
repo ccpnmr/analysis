@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-04 16:28:41 +0000 (Fri, February 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-05 18:39:31 +0000 (Sat, February 05, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -45,14 +45,13 @@ from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.core.lib import CcpnNefIo
+from ccpn.framework.lib.ccpnNef import CcpnNefIo
 from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.core.Project import Project
 from ccpn.util.nef import StarIo
 from ccpn.util.nef import NefImporter as Nef
 from ccpn.util.Logging import getLogger
 from ccpn.util.PrintFormatter import PrintFormatter
-from ccpn.util.AttrDict import AttrDict
 from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
@@ -2030,7 +2029,7 @@ if __name__ == '__main__':
     _loader._attachReader(nefReader.importExistingProject)
     _loader._attachContent(nefReader.contentNef)
 
-    from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
+    from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 
 
     with notificationEchoBlocking():

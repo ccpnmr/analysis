@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 11:22:07 +0000 (Fri, January 21, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-05 18:39:30 +0000 (Sat, February 05, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -33,7 +33,7 @@ import sys
 import math
 from collections import OrderedDict
 from ccpn.util.nef import StarIo
-from ccpn.core.lib import CcpnNefIo
+from ccpn.framework.lib.ccpnNef import CcpnNefIo
 from ccpn.core.lib import MoleculeLib
 
 

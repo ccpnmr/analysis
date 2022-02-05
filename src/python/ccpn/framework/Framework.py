@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-05 18:27:20 +0000 (Sat, February 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-05 18:39:30 +0000 (Sat, February 05, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -31,49 +31,41 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import json
 import logging
 import os
-import platform
 import sys
-import tarfile
-import tempfile
 import re
 import subprocess
 
 import faulthandler
 faulthandler.enable()
 
-from tqdm import tqdm
-
 from threading import Thread
 from time import time, sleep
 
-from typing import Union, Optional, List, Tuple, Sequence
+from typing import List
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QTimer
 
 from distutils.dir_util import copy_tree
-from functools import partial
 
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
 from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Project import Project
-from ccpn.core.lib.Notifiers import NotifierBase, Notifier
-from ccpn.core.lib.Pid import Pid, PREFIXSEP
+from ccpn.core.lib.Notifiers import NotifierBase
+from ccpn.core.lib.Pid import Pid
 
 from ccpn.framework.Application import getApplication, Arguments
 from ccpn.framework import Version
 from ccpn.framework.credits import printCreditsText
 from ccpn.framework.Current import Current
 from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
-from ccpn.framework.Translation import languages, defaultLanguage
+from ccpn.framework.Translation import defaultLanguage
 from ccpn.framework.Translation import translator
 from ccpn.framework.Preferences import Preferences
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
 from ccpn.framework.PathsAndUrls import \
-    userPreferencesPath,  \
-    userPreferencesDirectory, \
     userCcpnMacroPath, \
     CCPN_ARCHIVES_DIRECTORY, \
     CCPN_STATE_DIRECTORY, \
@@ -88,35 +80,21 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import \
-    ProjectFileDialog, \
-    DataFileDialog, \
-    NefFileDialog, \
-    ArchivesFileDialog, \
-    MacrosFileDialog, \
-    CcpnMacrosFileDialog, \
-    LayoutsFileDialog, \
-    NMRStarFileDialog, \
-    SpectrumFileDialog, \
-    ProjectSaveFileDialog
+    MacrosFileDialog
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
-from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_KEY_CONCEPTS
 
 from ccpn.util import Logging
-from ccpn.util.Path import Path, aPath, fetchDir, getPathToImport
+from ccpn.util.Path import Path, aPath, fetchDir
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable
 from ccpn.util.Logging import getLogger
 from ccpn.util import Layout
 from ccpn.util.decorators import logCommand
 
-from ccpnmodel.ccpncore.api.memops import Implementation
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
-from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 
-from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideBar, undoBlock, \
-    notificationEchoBlocking, logCommandManager
+from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideBar, notificationEchoBlocking, logCommandManager
 
-from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU, CCPNPLUGINSMENU, PLUGINSMENU
 from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_KEY_CONCEPTS
 
 #-----------------------------------------------------------------------------------------
@@ -1010,7 +988,6 @@ class Framework(NotifierBase, GuiBase):
         """Actual V2 project loader
         CCPNINTERNAL: called from CcpNmrV2ProjectDataLoader
         """
-        from ccpn.core._implementation.updates.update_v2 import updateProject_fromV2
         from ccpn.core.Project import _loadProject
 
         with logCommandManager('application.', 'loadProject', path):
@@ -1035,7 +1012,6 @@ class Framework(NotifierBase, GuiBase):
         """Actual V3 project loader
         CCPNINTERNAL: called from CcpNmrV3ProjectDataLoader
         """
-        from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory
         from ccpn.core.Project import _loadProject
 
         if not isinstance(path, (Path, str)):
@@ -1275,7 +1251,7 @@ class Framework(NotifierBase, GuiBase):
         Temporary routine because I don't know how else to do it yet
         """
         from ccpn.ui.gui.popups.ExportNefPopup import ExportNefPopup
-        from ccpn.core.lib.CcpnNefIo import NEFEXTENSION
+        from ccpn.framework.lib.ccpnNef.CcpnNefIo import NEFEXTENSION
 
         _path = aPath(self.preferences.general.userWorkingPath or '~').filepath / (self.project.name + NEFEXTENSION)
         dialog = ExportNefPopup(self.ui.mainWindow,

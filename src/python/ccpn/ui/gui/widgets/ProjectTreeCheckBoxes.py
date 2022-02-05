@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 16:12:15 +0000 (Fri, January 21, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-05 18:39:31 +0000 (Sat, February 05, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -26,8 +26,7 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 
 from PyQt5 import QtGui, QtWidgets, QtCore
 from functools import partial
-from typing import List, Union, Optional, Sequence, Tuple
-from collections import OrderedDict as OD
+from typing import Optional
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.core.Chain import Chain
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
@@ -48,11 +47,9 @@ from ccpn.core.Project import Project
 from ccpn.core.DataTable import DataTable
 from ccpn.core.Collection import Collection
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
-from ccpn.util.nef import Specification
 from ccpn.util.nef import StarIo
 from ccpn.util.OrderedSet import OrderedSet
-from ccpnmodel.ccpncore.lib import Constants as coreConstants
-from ccpn.core.lib.CcpnNefCommon import _traverse, nef2CcpnMap, _isALoop
+from ccpn.framework.lib.ccpnNef.CcpnNefCommon import _traverse, nef2CcpnMap, _isALoop
 from ccpn.ui.gui.widgets.Menu import Menu
 
 

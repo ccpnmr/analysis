@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-05 15:09:56 +0000 (Sat, February 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-05 17:26:33 +0000 (Sat, February 05, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -78,7 +78,7 @@ from ccpn.core.lib.ContextManagers import \
     undoBlockWithoutSideBar, \
     notificationEchoBlocking
 
-from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
+from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader, getDataLoaders
 from ccpn.framework.Preferences import getPreferences, USE_PROJECT_PATH
 
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
@@ -1121,41 +1121,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         """
         assert 0 == 1
 
-    # def _processUrl(self, url) -> list:
-    #     """Handle the dropped url
-    #     return a tuple ([objs], errorText)
-    #     """
-    #     # CCPNINTERNAL. Called also from module area and GuiStrip. They should have same behaviour
-    #
-    #     url = str(url)
-    #     getLogger().debug('>>> dropped: ' + url)
-    #
-    #     objs = []
-    #
-    #     dataLoader = checkPathForDataLoader(url)
-    #
-    #     if dataLoader is None:
-    #         txt = 'Loading "%s" failed; unrecognised type' % url
-    #         getLogger().warning(txt)
-    #         # MessageDialog.showError('Load Data', txt, parent=self)
-    #         return ([], txt)
-    #
-    #     if dataLoader.createsNewProject:
-    #         if not self._queryCloseProject(title='Load %s project' % dataLoader.dataFormat,
-    #                                        phrase='create a new'):
-    #             return ([], None)
-    #
-    #         newProject = self._loadProject(dataLoader=dataLoader)
-    #         if newProject is not None:
-    #             objs.append(newProject)
-    #
-    #     else:
-    #         with undoBlockWithoutSideBar():
-    #             result = dataLoader.load()
-    #             objs.extend(result)
-    #
-    #     return (objs, None)
-
     def _queryChoices(self, dataLoader):
         """Query the user about his/her choice to import/new/cancel
         """
@@ -1179,10 +1144,14 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
 
         return (dataLoader, createNewProject, ignore)
 
-    def _getDataLoader(self, url):
-        """Get dataLoader for the url (or None if not present)
-        Allows for reporting or checking through popups
-        does not do the actual loading
+    def _getDataLoader(self, path, include=None):
+        """Get dataLoader for path (or None if not present), optionally only testing for
+        dataFormats defined in include.
+        Allows for reporting or checking through popups.
+        Does not do the actual loading.
+
+        :param path: the path to get a dataLoader for
+        :param include: a list/tuple of optional dataFormat strings; (defaults to all dataFormats)
         :returns a tuple (dataLoader, createNewProject, ignore)
         """
         # local import here
@@ -1193,17 +1162,57 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
         from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
 
-        dataLoader = checkPathForDataLoader(url)
+        if include is None:
+            include =  tuple(getDataLoaders().keys())
+        dataLoader = checkPathForDataLoader(path, include=include)
 
         if dataLoader is None:
-            txt = 'Loading "%s" failed; unrecognised type' % url
+            txt = 'Loading "%s" unsuccessful; unrecognised type, should be one of %r' % \
+                  (path, include)
             getLogger().warning(txt)
             return (None, False, False)
 
         createNewProject = dataLoader.createNewProject
         ignore = False
 
-        if dataLoader.dataFormat == NefDataLoader.dataFormat:
+        if dataLoader.dataFormat == CcpNmrV2ProjectDataLoader.dataFormat:
+            createNewProject = True
+            dataLoader.createNewProject = True
+            ok = MessageDialog.showYesNoWarning('Load Project',
+                                                f'Project "{path}" was created with version-2 Analysis.\n'
+                                                '\n'
+                                                'CAUTION:\n'
+                                                '\tThe project will be converted to a version-3 project and saved '
+                                                '\tas a new directory with .cppn extension.\n'
+                                                '\n'
+                                                'Do you want to continue loading?')
+
+            if not ok:
+                # skip loading so that user can backup/copy project
+                getLogger().debug('==> Cancelled loading ccpn project "%s"' % path)
+                ignore = True
+
+        elif dataLoader.dataFormat == CcpNmrV3ProjectDataLoader.dataFormat and Project._needsUpgrading(path):
+            createNewProject = True
+            dataLoader.createNewProject = True
+            ok = MessageDialog.showYesNoWarning('Load Project',
+                                                f'Project "%s" was saved with an earlier version of AnalysisV3, '
+                                                'and will be converted to version %s.\n'
+                                                '\n'
+                                                'CAUTION:\n' 
+                                                '\tAfter saving, it can NO LONGER be loaded in earlier AnalysisV3 versions.\n'
+                                                '\t(If you are in any doubt, use "File --> Save As..)\n'
+                                                '\n'
+                                                'Do you want to continue loading?' % (
+                                                    path, self.application.applicationVersion.withoutRelease())
+                                                )
+
+            if not ok:
+                # skip loading so that user can backup/copy project
+                getLogger().info('==> Cancelled loading ccpn project "%s"' % path)
+                ignore = True
+
+        elif dataLoader.dataFormat == NefDataLoader.dataFormat:
             (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
             if dataLoader and not createNewProject and not ignore:
                 # we are importing; popup the import window
@@ -1316,36 +1325,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                     result.extend(objs)
         return result
 
-        # doEchoBlocking = len(urlsToLoad) > MAXITEMLOGGING
-        #
-        # # just a helper function to avoid code duplication
-        # def _getResult(dLoader, createNew):
-        #     if createNew:
-        #         result = [self._loadProject(dataLoader=dLoader)]
-        #     else:
-        #         with undoBlockWithSideBar():
-        #             with progressManager(self, 'Loading %s ... ' % dLoader.path):
-        #                 result = dLoader.load()
-        #     return result
-        # #end def
-        #
-        # objs = []
-        # for url, dataLoader, createNewProject in urlsToLoad:
-        #     try:
-        #         if doEchoBlocking:
-        #             with notificationEchoBlocking():
-        #                 result = _getResult(dataLoader, createNewProject)
-        #         else:
-        #             result = _getResult(dataLoader, createNewProject)
-        #
-        #         if result is not None:
-        #             objs.extend(result)
-        #
-        #     except RuntimeError as es:
-        #         showWarning("Load data", 'Error loading "%s" \n(%s)' % (url, str(es)), parent=self)
-        #
-        # return objs
-
     def _processPids(self, data, position=None, relativeTo=None):
         """Handle the urls passed to the drop event
         """
@@ -1375,35 +1354,6 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                   (phrase, (' and any changes will be lost' if self.project.isModified else ''))
         result = MessageDialog.showYesNo(title, message, parent=self)
         return bool(result)
-
-    def _openProjectCallback(self, projectDir=None):
-        """
-        Opens a OpenProject dialog box if project directory is not specified.
-        Loads the selected project.
-        :returns new project instance or None
-        """
-        project = None
-
-        if projectDir is None:
-            dialog = ProjectFileDialog(parent=self, acceptMode='open')
-            # TODO: check if this should not be handled by the ProjectFileDialog class
-            if getPreferences().get(USE_PROJECT_PATH):
-                dialog.initialPath = Path.Path(self.project).parent
-            dialog._show()
-            projectDir = dialog.selectedFile()
-
-        if projectDir:
-            # try and load the new project
-            if (project := self._loadProject(path=projectDir)) is None:
-                return None
-
-            # if self.application.preferences.general.useProjectPath:
-            #     Logging.getLogger().debug2('mainWindow - setting current path %s' % Path.Path(projectDir).parent)
-            #     # this dialog doesn't need to be seen, required to set initialPath
-            #     _dialog = ProjectFileDialog(parent=self, acceptMode='open')
-            #     _dialog.initialPath = Path.Path(projectDir).parent
-
-        return project
 
     def _loadProject(self, dataLoader=None, path=None):
         """Load a project either from a dataLoader instance or from path;
@@ -1437,39 +1387,41 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
         from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
 
-        path = dataLoader.path
-        if dataLoader.dataFormat == CcpNmrV2ProjectDataLoader.dataFormat:
-            ok = MessageDialog.showYesNoWarning('Load Project',
-                                                f'Project "{path}" was created with version-2 Analysis.\n'
-                                                '\n'
-                                                'CAUTION:\n'
-                                                '\tThe project will be converted to a version-3 project and saved '
-                                                '\tas a new directory with .cppn extension.\n'
-                                                '\n'
-                                                'Do you want to continue loading?')
+        #===> To ED: moved to _getDataLoader() method
 
-            if not ok:
-                # skip loading so that user can backup/copy project
-                getLogger().info('==> Cancelled loading ccpn project "%s"' % path)
-                return None
-
-        elif dataLoader.dataFormat == CcpNmrV3ProjectDataLoader.dataFormat and Project._needsUpgrading(path):
-            ok = MessageDialog.showYesNoWarning('Load Project',
-                                                f'Project "%s" was saved with an earlier version of AnalysisV3, '
-                                                'and will be converted to version %s.\n'
-                                                '\n'
-                                                'CAUTION:\n' 
-                                                '\tAfter saving, it can NO LONGER be loaded in earlier AnalysisV3 versions.\n'
-                                                '\t(If you are in any doubt, use "File --> Save As..)\n'
-                                                '\n'
-                                                'Do you want to continue loading?' % (
-                                                    path, self.application.applicationVersion.withoutRelease())
-                                                )
-
-            if not ok:
-                # skip loading so that user can backup/copy project
-                getLogger().info('==> Cancelled loading ccpn project "%s"' % path)
-                return None
+        # path = dataLoader.path
+        # if dataLoader.dataFormat == CcpNmrV2ProjectDataLoader.dataFormat:
+        #     ok = MessageDialog.showYesNoWarning('Load Project',
+        #                                         f'Project "{path}" was created with version-2 Analysis.\n'
+        #                                         '\n'
+        #                                         'CAUTION:\n'
+        #                                         '\tThe project will be converted to a version-3 project and saved '
+        #                                         '\tas a new directory with .cppn extension.\n'
+        #                                         '\n'
+        #                                         'Do you want to continue loading?')
+        #
+        #     if not ok:
+        #         # skip loading so that user can backup/copy project
+        #         getLogger().info('==> Cancelled loading ccpn project "%s"' % path)
+        #         return None
+        #
+        # elif dataLoader.dataFormat == CcpNmrV3ProjectDataLoader.dataFormat and Project._needsUpgrading(path):
+        #     ok = MessageDialog.showYesNoWarning('Load Project',
+        #                                         f'Project "%s" was saved with an earlier version of AnalysisV3, '
+        #                                         'and will be converted to version %s.\n'
+        #                                         '\n'
+        #                                         'CAUTION:\n'
+        #                                         '\tAfter saving, it can NO LONGER be loaded in earlier AnalysisV3 versions.\n'
+        #                                         '\t(If you are in any doubt, use "File --> Save As..)\n'
+        #                                         '\n'
+        #                                         'Do you want to continue loading?' % (
+        #                                             path, self.application.applicationVersion.withoutRelease())
+        #                                         )
+        #
+        #     if not ok:
+        #         # skip loading so that user can backup/copy project
+        #         getLogger().info('==> Cancelled loading ccpn project "%s"' % path)
+        #         return None
 
         if not self._queryCloseProject(title='Load Project', phrase='open another'):
             return None

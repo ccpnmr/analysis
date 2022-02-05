@@ -27,8 +27,8 @@ class CcpnNefImporter(NefImporter):
         self._reader = None
         self._application = _app
 
-    def importToProject(self, project):
-        """Import the data of self into the project, using a previously attached
+    def importIntoProject(self, project):
+        """Import the data of self into project, using a previously attached
         reader (auto-generated if None).
 
         :param project: a Project instance

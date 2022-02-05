@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-04 19:28:01 +0000 (Fri, February 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-05 17:26:33 +0000 (Sat, February 05, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -54,6 +54,8 @@ from ccpn.core.lib.ContextManagers import \
     undoBlock, \
     notificationEchoBlocking, \
     logCommandManager
+
+from ccpn.framework.Preferences import getPreferences, USE_PROJECT_PATH
 
 from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable
 from ccpn.util.decorators import logCommand
@@ -179,7 +181,7 @@ class GuiBase(object):
         ms.append(('File', [
             ("New", self._newProjectMenuCallback, [('shortcut', '⌃n')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             (),
-            ("Open...", self._openProjectMenuCallback, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+            ("Open...", self._openProjectCallback, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Open Recent", ()),
 
             ("Load Data...", lambda: self._loadDataFromMenu(text='Load Data'), [('shortcut', 'ld')]),
@@ -392,13 +394,15 @@ class GuiBase(object):
         if (path := dialog.selectedFile()) is None:
             return
 
-        try:
-            result = self.loadData(path)
+        dataLoader, createNewProject, ignore = self.mainWindow._getDataLoader(path)
+        if ignore or dataLoader is None:
+            return
 
-        except Exception as es:
-            MessageDialog.showWarning(str(self.mainWindow.windowTitle()), str(es))
-            if self._isInDebugMode:
-                raise es
+        with catchExceptions(errorStringTemplate='Load data: %s'):
+            if createNewProject:
+                self.mainWindow._loadProject(dataLoader=dataLoader)
+            else:
+                self._loadData([dataLoader])
 
     def _newProjectMenuCallback(self):
         """Callback for creating new project"""
@@ -413,10 +417,28 @@ class GuiBase(object):
                 newProject._mainWindow.show()
                 QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
 
-    def _openProjectMenuCallback(self):
-        """Just a stub for the menu setup to pass on to mainWindow, to be moved later
+    def _openProjectCallback(self):
         """
-        return self.ui.mainWindow._openProjectCallback()
+        Opens a OpenProject dialog box if project directory is not specified.
+        Loads the selected project.
+        :returns new project instance or None
+        """
+        dialog = ProjectFileDialog(parent=self.mainWindow, acceptMode='open')
+        # TODO: check if this should not be handled by the ProjectFileDialog class
+        if getPreferences().get(USE_PROJECT_PATH):
+            dialog.initialPath = Path.Path(self.project).parent
+        dialog._show()
+
+        if (projectDir := dialog.selectedFile()) is None:
+            return
+
+        dataLoader, createNewProject, ignore = self.mainWindow._getDataLoader(projectDir)
+        if ignore or dataLoader is None or not createNewProject:
+            return
+        # load the project using the dataLoader; as we are in a Gui state, use the
+        # gui call
+        project = self.mainWindow._loadProject(dataLoader=dataLoader)
+        return
 
     def _importNefCallback(self):
         """Just a stub for the menu setup to pass on to mainWindow, to be moved later

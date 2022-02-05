@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-05 15:09:56 +0000 (Sat, February 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-05 17:26:33 +0000 (Sat, February 05, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -880,7 +880,7 @@ class Framework(NotifierBase, GuiBase):
         """Load project defined by path
         :return a Project instance
         """
-        #Just a stub for now; calling MainWindow methods as it initialises the Gui
+        #if the ui is a Gui instance: calling MainWindow methods as it initialises the Gui
         return self.ui.loadProject(path)
 
     def _saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
@@ -973,7 +973,10 @@ class Framework(NotifierBase, GuiBase):
             self._increaseNotificationBlocking()
 
         for dataLoader in dataLoaders:
-            dataLoader.createNewObject = False  # The loadData() method was used; No project created
+            if dataLoader.createNewProject:
+                raise RuntimeError('_loadData: "%s" creates a new project; use loadProject() instead' %
+                                   dataLoader.path
+                                   )
             result = dataLoader.load()
             if not isIterable(result):
                 result = [result]
@@ -1169,7 +1172,7 @@ class Framework(NotifierBase, GuiBase):
             self._closeProject()
             self._project = self.newProject(_nefImporter.getName())
 
-        _nefImporter.importToProject(project=self.project)
+        _nefImporter.importIntoProject(project=self.project)
         return self.project
 
     # def _importNef(self, path=None):

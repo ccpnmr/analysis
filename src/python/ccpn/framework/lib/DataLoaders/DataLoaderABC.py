@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-05 15:09:56 +0000 (Sat, February 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-05 17:26:33 +0000 (Sat, February 05, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -76,11 +76,14 @@ def getDataLoaders():
     return DataLoaderABC._dataLoaders
 
 
-def checkPathForDataLoader(path, exclude=()):
+def checkPathForDataLoader(path, exclude=(), include=None):
     """Check path if it corresponds to any defined data format.
-    Exclude any dataLoader defined in the exclude argument.
+    Exclude any dataLoader with types defined in the exclude argument or
+    when using the include argument, only include those with types in the
+    include argument.
 
     :param exclude: a tuple/list of dataFormat strings
+    :param include: a tuple/list of dataFormat strings (defaults to all dataFormats)
     :return a DataLoader instance or None if there was no match
     """
     if not isinstance(path, (str, Path)):
@@ -90,8 +93,13 @@ def checkPathForDataLoader(path, exclude=()):
     if not _path.exists():
         raise ValueError('checkPathForDataLoader: path %r does not exist' % path)
 
+    if include is None:
+        include = list(getDataLoaders().keys())
+
     for fmt, cls in getDataLoaders().items():
-        if cls.dataFormat not in exclude:
+        _doEvaluate = cls.dataFormat not in exclude and \
+                      cls.dataFormat in include
+        if _doEvaluate:
             instance = cls.checkForValidFormat(path)
             if instance is None:
                 getLogger().debug('path "%s" is not valid for dataFormat "%s"' % (path, cls.dataFormat))

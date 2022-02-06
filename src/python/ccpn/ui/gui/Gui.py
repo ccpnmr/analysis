@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-06 15:02:49 +0000 (Sun, February 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-06 15:11:16 +0000 (Sun, February 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -401,6 +401,8 @@ class Gui(Ui):
 
         :returns project instance or None
         """
+        from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
+
         if not dataLoader.createNewProject:
             raise RuntimeError('DataLoader %s does not create a new project')
 
@@ -412,7 +414,7 @@ class Gui(Ui):
                 return
 
         # Some error recovery; store info to re-open the current project (or a new default)
-        oldProjectPath = self.project.path
+        oldProjectLoader = CcpNmrV3ProjectDataLoader(self.project.path)
         oldProjectIsTemporary = self.project.isTemporary
 
         try:
@@ -439,7 +441,7 @@ class Gui(Ui):
             if oldProjectIsTemporary:
                 self.application._newProject()
             else:
-                self.application.loadProject(oldProjectPath)
+                oldProjectLoader.load()
             newProject = None
 
         return newProject
@@ -488,6 +490,8 @@ class Gui(Ui):
                 continue
             dataLoaders.append(dataLoader)
 
+        # load the project using the dataLoaders;
+        # We'll ask framework, who will pass it back as ui._loadData calls
         return self.application._loadData(dataLoaders)
 
 #######################################################################################

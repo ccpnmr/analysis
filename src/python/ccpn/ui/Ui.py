@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 15:30:05 +0000 (Tue, February 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-06 12:36:29 +0000 (Sun, February 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -55,6 +55,10 @@ class Ui(NotifierBase):
         self.pluginModules = []
 
         self._setUpGraphicsDataClasses()
+
+    @property
+    def project(self):
+        return self.application.project
 
     @classmethod
     def _setUpGraphicsDataClasses(cls):
@@ -226,7 +230,7 @@ class Ui(NotifierBase):
 
             if _app:
                 # First get to a defined state
-                _app.newProject()
+                _app._newProject()
                 if not oldProjectIsTemporary:
                     _app.loadProject(oldProjectPath)
                 return None

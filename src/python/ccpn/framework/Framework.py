@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-05 18:39:30 +0000 (Sat, February 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-06 12:36:29 +0000 (Sun, February 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -437,7 +437,7 @@ class Framework(NotifierBase, GuiBase):
         if (projectPath := self.args.projectPath) is not None:
             project = self.loadProject(projectPath)
         else:
-            project = self.newProject()
+            project = self._newProject()
 
         if self.preferences.general.checkUpdatesAtStartup and not getattr(self.args, '_skipUpdates', False):
             self.ui._checkForUpdates()
@@ -834,24 +834,30 @@ class Framework(NotifierBase, GuiBase):
     # Project related methods
     #-----------------------------------------------------------------------------------------
 
-    #@logCommand('application.') #cannot do, as project is not there yet
-    def newProject(self, name='default') -> Project:
-        """Create new, empty project
+    def _newProject(self, name:str='default') -> Project:
+        """Create new, empty project with name
         :return a Project instance
         """
         # local import to avoid cycles
         from ccpn.core.Project import _newProject
 
         newName = re.sub('[^0-9a-zA-Z]+', '', name)
-        if newName != name:
-            getLogger().info('Removing whitespace from name: %s' % name)
-
         sys.stderr.write('==> Creating new, empty project\n')
         # NB _closeProject includes a gui cleanup call
         self._closeProject()
         project = _newProject(self, name=newName)
         self._initialiseProject(project)  # This also set the linkages
+        # defer the logging output until the project is fully initialised
+        if newName != name:
+            getLogger().info('Removed whitespace from name: %s' % name)
         return project
+
+    @logCommand('application.') #cannot do, as project is not there yet
+    def newProject(self, name:str='default') -> Project:
+        """Create new, empty project with name
+        :return a Project instance
+        """
+        return self.ui.newProject(name)
 
     @logCommand('application.')
     def loadProject(self, path) -> Project:
@@ -1057,7 +1063,7 @@ class Framework(NotifierBase, GuiBase):
         if createNewProject and (dataBlock.getDataValues('sparky', firstOnly=True) == 'project file'):
             with logCommandManager('application.', 'loadProject', path):
                 self._closeProject()
-                project = self.newProject(sparkyName)
+                project = self._newProject(sparkyName)
                 _importData(project)
                 self.project.shiftAveraging = True
             getLogger().info('==> Created project from Sparky file: "%s"' % (path,))
@@ -1146,7 +1152,7 @@ class Framework(NotifierBase, GuiBase):
         _nefImporter = dataLoader.nefImporter  # This will also populate the nefImporter if need be
         if makeNewProject:
             self._closeProject()
-            self._project = self.newProject(_nefImporter.getName())
+            self._project = self._newProject(_nefImporter.getName())
 
         _nefImporter.importIntoProject(project=self.project)
         return self.project

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-05 18:39:31 +0000 (Sat, February 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-06 12:36:30 +0000 (Sun, February 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -168,12 +168,12 @@ class GuiBase(object):
         self._menuSpec = ms = []
 
         ms.append(('File', [
-            ("New", self._newProjectMenuCallback, [('shortcut', '⌃n')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+            ("New", self._newProjectCallback, [('shortcut', '⌃n')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             (),
             ("Open...", self._openProjectCallback, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Open Recent", ()),
 
-            ("Load Data...", lambda: self._loadDataFromMenu(text='Load Data'), [('shortcut', 'ld')]),
+            ("Load Data...", lambda: self._loadDataCallback(text='Load Data'), [('shortcut', 'ld')]),
             (),
             ("Save", self._saveCallback, [('shortcut', '⌃s')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Save As...", self._saveAsCallback, [('shortcut', 'sa')]),
@@ -280,7 +280,7 @@ class GuiBase(object):
         ))
 
         ms.append(('Molecules', [
-            ("Chain from FASTA...", lambda: self._loadDataFromMenu(text='Load FASTA')),
+            ("Chain from FASTA...", lambda: self._loadDataCallback(text='Load FASTA')),
             (),
             ("New Chain...", self.showCreateChainPopup),
             ("Inspect...", self.inspectMolecule, [('enabled', False)]),
@@ -375,7 +375,7 @@ class GuiBase(object):
     #-----------------------------------------------------------------------------------------
     # File --> callback methods
     #-----------------------------------------------------------------------------------------
-    def _loadDataFromMenu(self, text='Load Data', filter=None):
+    def _loadDataCallback(self, text='Load Data', filter=None):
         """Call loadData from the menu and trap errors.
         """
         dialog = DataFileDialog(parent=self.mainWindow, acceptMode='load', fileFilter=filter)
@@ -393,18 +393,20 @@ class GuiBase(object):
             else:
                 self._loadData([dataLoader])
 
-    def _newProjectMenuCallback(self):
-        """Callback for creating new project"""
-        with catchExceptions(application=self, errorStringTemplate='Error creating new project:', printTraceBack=True):
-            okToContinue = self.ui.mainWindow._queryCloseProject(title='New Project',
-                                                                 phrase='create a new')
-            if okToContinue:
-                self.ui.mainWindow.moduleArea._closeAll()
-                newProject = self.newProject()
-                if newProject is None:
-                    raise RuntimeError('Unable to create new project')
-                newProject._mainWindow.show()
-                QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
+    def _newProjectCallback(self):
+        """Callback for creating new project
+        """
+        self.ui.newProject()
+        # with catchExceptions(application=self, errorStringTemplate='Error creating new project:', printTraceBack=True):
+        #     okToContinue = self.ui.mainWindow._queryCloseProject(title='New Project',
+        #                                                          phrase='create a new')
+        #     if okToContinue:
+        #         self.ui.mainWindow.moduleArea._closeAll()
+        #         newProject = self.newProject()
+        #         if newProject is None:
+        #             raise RuntimeError('Unable to create new project')
+        #         newProject._mainWindow.show()
+        #         QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
 
     def _openProjectCallback(self):
         """

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 15:30:05 +0000 (Tue, February 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-06 12:36:29 +0000 (Sun, February 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -35,12 +35,12 @@ from ccpn.core import _coreClassMap
 from ccpn.core.Project import Project
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.core.lib.ContextManagers import notificationEchoBlocking
+from ccpn.core.lib.ContextManagers import notificationEchoBlocking, catchExceptions
 
 from ccpn.ui.Ui import Ui
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPopup
 from ccpn.ui.gui.widgets.Application import Application
-from ccpn.ui.gui.widgets.MessageDialog import showError, showWarning
+from ccpn.ui.gui.widgets import MessageDialog
 
 from ccpn.ui.gui.guiSettings import FontSettings
 from ccpn.ui.gui.widgets.Font import getFontHeight, setWidgetFont
@@ -53,13 +53,11 @@ from ccpn.util import Register
 def qtMessageHandler(*errors):
     for err in errors:
         Logging.getLogger().warning('QT error: %s' % err)
-
+# un/suppress messages
+QtCore.qInstallMessageHandler(qtMessageHandler)
 
 # REMOVEDEBUG = r'\(\w+\.\w+:\d+\)$'
 REMOVEDEBUG = r'\(\S+\.\w+:\d+\)$'
-
-# un/suppress messages
-QtCore.qInstallMessageHandler(qtMessageHandler)
 
 
 class _MyAppProxyStyle(QtWidgets.QProxyStyle):
@@ -177,7 +175,7 @@ class Gui(Ui):
         if not Register.checkInternetConnection():
             msg = 'Could not connect to the registration server, please check your internet connection. ' \
                   'Register within %s day(s) to continue using the software' % str(days)
-            showError('Registration', msg)
+            MessageDialog.showError('Registration', msg)
 
         else:
             if registered and not acceptedTerms:
@@ -233,6 +231,36 @@ class Gui(Ui):
         """Use the Update popup to execute any updates
         """
         self.application._showUpdatePopup()
+
+    def _queryCloseProject(self, title, phrase):
+        """Query if project can be closed; always True for temporary projects
+        :returns True/False
+        """
+        if self.project.isTemporary:
+            return True
+
+        message = 'Do you really want to %s project (current project will be closed %s)?' % \
+                  (phrase, (' and any changes will be lost' if self.project.isModified else ''))
+        result = MessageDialog.showYesNo(title, message, parent=self)
+        return bool(result)
+
+    def newProject(self, name:str = 'default'):
+        """Create a new project instance with name
+        """
+        if not self.project.isTemporary:
+            message = 'Do you really want to create a new project (current project will be closed %s)?' % \
+                      (' and any changes will be lost' if self.project.isModified else '')
+            _ok = MessageDialog.showYesNo('New Project', message, parent=self.mainWindow)
+            if not _ok:
+                return
+
+        with catchExceptions(errorStringTemplate='Error creating new project: %s'):
+            self.mainWindow.moduleArea._closeAll()
+            newProject = self.application._newProject(name=name)
+            if newProject is None:
+                raise RuntimeError('Unable to create new project')
+            newProject._mainWindow.show()
+            QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
 
     def loadProject(self, path):
         """Just a stub for now; calling MainWindow methods as it initialises the Gui

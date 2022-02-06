@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-05 17:26:33 +0000 (Sat, February 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-06 12:36:30 +0000 (Sun, February 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -54,6 +54,7 @@ from ccpn.ui.gui.lib import GuiPeakListView
 from ccpn.ui.gui.lib.GuiWindow import GuiWindow
 
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
+
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.widgets.FileDialog import ProjectFileDialog
@@ -65,7 +66,6 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
-from ccpn.ui.gui.widgets.MessageDialog import showWarning, showMulti, showYesNo
 
 from ccpn.util.Common import uniquify, camelCaseToString
 from ccpn.util import Logging
@@ -534,7 +534,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             for sp in badSpectra: # these can be >1000 lines message. Added in a scrollable area.
                 text += '%s\n' % str(sp)
             title = 'Detected invalid Spectrum file paths'
-            showWarning(title=title, message=text, scrollableMessage=True)
+            MessageDialog.showWarning(title=title, message=text, scrollableMessage=True)
 
     def _showNefPopup(self, dataLoader):
         """Helper function; it allows the user to select the elements
@@ -1125,7 +1125,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         """Query the user about his/her choice to import/new/cancel
         """
         choices = ('Import', 'New project', 'Cancel')
-        choice = showMulti('Load %s' % dataLoader.dataFormat,
+        choice = MessageDialog.showMulti('Load %s' % dataLoader.dataFormat,
                            'How do you want to handle "%s":' % dataLoader.path,
                            choices, parent=self)
 
@@ -1451,7 +1451,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                                     )
 
             # First get to a defined state
-            self.application.newProject()
+            self.application._newProject()
             if not oldProjectIsTemporary:
                 self.application.loadProject(oldProjectPath)
             return None

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-06 18:36:44 +0000 (Sun, February 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-06 19:34:32 +0000 (Sun, February 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1057,7 +1057,6 @@ class Framework(NotifierBase, GuiBase):
 
         CCPNINTERNAL: called from StarDataLoader
         """
-
         dataBlock = dataLoader.dataBlock
 
         if dataLoader.createNewProject:
@@ -1066,7 +1065,7 @@ class Framework(NotifierBase, GuiBase):
         else:
             project = self.project
 
-        sparkyReader.importSparkyProject(project, dataBlock)
+        # sparkyReader.importSparkyProject(project, dataBlock)
         return project
 
     def _loadPythonFile(self, path):
@@ -1135,15 +1134,14 @@ class Framework(NotifierBase, GuiBase):
     # NEF-related code
     #-----------------------------------------------------------------------------------------
 
-    def _loadNefFile(self, dataLoader, makeNewProject:bool=True) -> Project:
+    def _loadNefFile(self, dataLoader) -> Project:
         """Load NEF file defined by dataLoader instance
         :param dataLoader: a NefDataLoader instance
-        :param makeNewProject: if True, create a new project first
         :return Project instance
         CCPNINTERNAL: called from NefDataLoader instance
         """
         _nefImporter = dataLoader.nefImporter  # This will also populate the nefImporter if need be
-        if makeNewProject:
+        if dataLoader.createNewProject:
             self._closeProject()
             self._project = self._newProject(_nefImporter.getName())
 

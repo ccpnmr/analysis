@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-06 18:36:44 +0000 (Sun, February 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-06 19:34:33 +0000 (Sun, February 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -63,19 +63,10 @@ class StarDataLoader(DataLoaderABC):
     def load(self):
         """The actual NMRStar loading method; subclassed to account for special
         circumstances
-        raises RunTimeError on error
         :return: a list of [project]
         """
-        try:
-            if self.createNewProject:
-                project = self.application._loadNMRStarFileCallback(self.path, makeNewProject=self.createNewProject)
-            else:
-                project = self.application._loadNMRStarFileCallback(self.path)
-
-        except (ValueError, RuntimeError) as es:
-            raise RuntimeError('Error loading "%s" (%s)' % (self.path, str(es)))
-
-        return [project]
+        result = self.application._loadStarFile(dataLoader=self)
+        return [result]
 
 
 StarDataLoader._registerFormat()

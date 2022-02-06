@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-06 12:36:29 +0000 (Sun, February 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-06 15:02:49 +0000 (Sun, February 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -864,7 +864,6 @@ class Framework(NotifierBase, GuiBase):
         """Load project defined by path
         :return a Project instance
         """
-        #if the ui is a Gui instance: calling MainWindow methods as it initialises the Gui
         return self.ui.loadProject(path)
 
     def _saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
@@ -958,10 +957,13 @@ class Framework(NotifierBase, GuiBase):
 
         for dataLoader in dataLoaders:
             if dataLoader.createNewProject:
-                raise RuntimeError('_loadData: "%s" creates a new project; use loadProject() instead' %
-                                   dataLoader.path
-                                   )
-            result = dataLoader.load()
+                with logCommandManager('application.', 'loadProject', dataLoader.path):
+                    result = self.ui._loadProject(dataLoader=dataLoader)
+                    getLogger().info("==> Loaded %s" % result)
+            else:
+                with logCommandManager('application.', 'loadData', dataLoader.path):
+                    result = self.ui._loadData(dataLoader=dataLoader)
+
             if not isIterable(result):
                 result = [result]
             objs.extend(result)
@@ -976,19 +978,7 @@ class Framework(NotifierBase, GuiBase):
         """Loads data from paths.
         :returns list of loaded objects
         """
-        dataLoaders = []
-        for path in paths:
-            if (dataLoader := checkPathForDataLoader(path)) is None:
-                getLogger().warning('Unable to load "%s"' % path)
-                continue
-
-            if dataLoader.alwaysCreateNewProject:
-                getLogger().warning('Loading of "%s" would create a new project; use application.loadProject() instead')
-                continue
-
-            dataLoaders.append(dataLoader)
-
-        return self._loadData(dataLoaders)
+        return self.ui.loadData(*paths)
 
     def _loadV2Project(self, path) -> List[Project]:
         """Actual V2 project loader
@@ -1147,7 +1137,7 @@ class Framework(NotifierBase, GuiBase):
         :param dataLoader: a NefDataLoader instance
         :param makeNewProject: if True, create a new project first
         :return Project instance
-        CCPNINTERNAL: called from dataLoader instance
+        CCPNINTERNAL: called from NefDataLoader instance
         """
         _nefImporter = dataLoader.nefImporter  # This will also populate the nefImporter if need be
         if makeNewProject:

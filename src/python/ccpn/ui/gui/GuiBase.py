@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-06 12:36:30 +0000 (Sun, February 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-06 15:02:49 +0000 (Sun, February 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -383,53 +383,23 @@ class GuiBase(object):
         if (path := dialog.selectedFile()) is None:
             return
 
-        dataLoader, createNewProject, ignore = self.mainWindow._getDataLoader(path)
+        dataLoader, createNewProject, ignore = self.ui._getDataLoader(path)
         if ignore or dataLoader is None:
             return
 
-        with catchExceptions(errorStringTemplate='Load data: %s'):
-            if createNewProject:
-                self.mainWindow._loadProject(dataLoader=dataLoader)
-            else:
-                self._loadData([dataLoader])
+        self._loadData([dataLoader])
 
     def _newProjectCallback(self):
         """Callback for creating new project
         """
         self.ui.newProject()
-        # with catchExceptions(application=self, errorStringTemplate='Error creating new project:', printTraceBack=True):
-        #     okToContinue = self.ui.mainWindow._queryCloseProject(title='New Project',
-        #                                                          phrase='create a new')
-        #     if okToContinue:
-        #         self.ui.mainWindow.moduleArea._closeAll()
-        #         newProject = self.newProject()
-        #         if newProject is None:
-        #             raise RuntimeError('Unable to create new project')
-        #         newProject._mainWindow.show()
-        #         QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
 
     def _openProjectCallback(self):
         """
         Opens a OpenProject dialog box if project directory is not specified.
         Loads the selected project.
-        :returns new project instance or None
         """
-        dialog = ProjectFileDialog(parent=self.mainWindow, acceptMode='open')
-        # TODO: check if this should not be handled by the ProjectFileDialog class
-        if getPreferences().get(USE_PROJECT_PATH):
-            dialog.initialPath = Path.Path(self.project).parent
-        dialog._show()
-
-        if (projectDir := dialog.selectedFile()) is None:
-            return
-
-        dataLoader, createNewProject, ignore = self.mainWindow._getDataLoader(projectDir)
-        if ignore or dataLoader is None or not createNewProject:
-            return
-        # load the project using the dataLoader; as we are in a Gui state, use the
-        # gui call
-        project = self.mainWindow._loadProject(dataLoader=dataLoader)
-        return
+        self.ui.loadProject()
 
     def _importNefCallback(self):
         """Just a stub for the menu setup to pass on to mainWindow, to be moved later
@@ -482,8 +452,7 @@ class GuiBase(object):
         oldPath = self.project.path
         newPath = _getSaveDirectory(self.mainWindow)
 
-        with catchExceptions(application=self,
-                             errorStringTemplate='Error saving project: %s',
+        with catchExceptions(errorStringTemplate='Error saving project: %s',
                              printTraceBack=True):
             if newPath:
                 # Next line unnecessary, but does not hurt

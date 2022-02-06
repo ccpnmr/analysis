@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-06 12:36:30 +0000 (Sun, February 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-06 15:02:50 +0000 (Sun, February 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,15 +37,14 @@ from functools import partial
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtCore import QSize
+from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtWidgets import QApplication
 
 from ccpn.core.Project import Project
 from ccpn.core.lib.ContextManagers import catchExceptions
-from ccpn.ui.gui.widgets.MessageDialog import progressManager
-from ccpn.util.Logging import getLogger
 
 from ccpn.ui.gui.widgets.Icon import Icon
 
-from ccpn.util.Svg import Svg
 from ccpn.ui.gui.lib.mouseEvents import SELECT, setCurrentMouseMode, getCurrentMouseMode
 from ccpn.ui.gui.lib import GuiSpectrumDisplay
 from ccpn.ui.gui.lib import GuiSpectrumView
@@ -68,9 +67,8 @@ from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
 
 from ccpn.util.Common import uniquify, camelCaseToString
-from ccpn.util import Logging
-#from ccpn.util.Logging import getLogger
-from ccpn.util import Path
+from ccpn.util.Logging import getLogger
+from ccpn.util.Svg import Svg
 from ccpn.util.Path import aPath
 from ccpn.util.Common import isIterable
 from ccpn.core.lib.ContextManagers import \
@@ -83,8 +81,7 @@ from ccpn.framework.Preferences import getPreferences, USE_PROJECT_PATH
 
 from ccpn.core.lib.Notifiers import NotifierBase, Notifier
 from ccpn.core.Peak import Peak
-from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QApplication
+
 from ccpn.ui.gui.widgets.PlotterWidget import PlotterWidget
 
 #from collections import OrderedDict
@@ -124,7 +121,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         # Layout
         layout = self.layout()
 
-        logger = Logging.getLogger()
+        logger = getLogger()
         logger.debug('GuiMainWindow: layout: %s' % layout)
 
         if layout is not None:
@@ -174,10 +171,16 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
         # self.setUnifiedTitleAndToolBarOnMac(True) #uncomment this to remove the extra title bar on osx 10.14+
 
+    @property
+    def ui(self):
+        """The application.ui instance; eg. the gui
+        """
+        return self.application.ui
 
     @property
-    def project(self):
+    def project(self) -> Project:
         """The current project"""
+        #NB this linkage is set by the model (for now)
         return self._project
 
     def makeDisabledFileIcon(self, icon):
@@ -579,7 +582,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             return None
 
         if self._showNefPopup(dataLoader):
-            with progressManager(self, 'Loading Nef file %s ... ' % dataLoader.path):
+            with MessageDialog.progressManager(self, 'Loading Nef file %s ... ' % dataLoader.path):
                 dataLoader.load()
 
     def _clearRecentProjects(self):
@@ -599,7 +602,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             #                callback=partial(self.application.loadProject, path=recentFile))
 
             action = Action(self, text=recentFile, translate=False,
-                            callback=partial(self._loadProject, path=recentFile))
+                            callback=partial(self.ui.loadProject, path=recentFile))
             recentFileMenu.addAction(action)
         recentFileMenu.addSeparator()
         recentFileMenu.addAction(Action(recentFileMenu, text='Clear',
@@ -730,7 +733,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                 module.setVisible(not module.isVisible())
 
         except Exception as es:
-            Logging.getLogger().warning('Error expanding module: %s', module.name())
+            getLogger().warning('Error expanding module: %s', module.name())
 
     def _fillCCPNMacrosMenu(self):
         modulesMenu = self.searchMenuAction(CCPNMACROSMENU)
@@ -779,7 +782,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             self.application.runMacro(filename)
 
         except Exception as es:
-            Logging.getLogger().warning('Error running CCPN Macro: %s' % str(filename))
+            getLogger().warning('Error running CCPN Macro: %s' % str(filename))
 
     def _runUserMacro(self, filename, modulesMenu):
         """Run a User macro from the populated menu
@@ -788,7 +791,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             self.application.runMacro(filename)
 
         except Exception as es:
-            Logging.getLogger().warning('Error running User Macro: %s' % str(filename))
+            getLogger().warning('Error running User Macro: %s' % str(filename))
 
     def _fillTutorialsMenu(self):
         modulesMenu = self.searchMenuAction(TUTORIALSMENU)
@@ -846,7 +849,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             self.application._systemOpen(filename)
 
         except Exception as es:
-            Logging.getLogger().warning('Error opening tutorial: %s' % str(filename))
+            getLogger().warning('Error opening tutorial: %s' % str(filename))
 
     def _showSideBarModule(self, module, modulesMenu, visible):
         try:
@@ -857,7 +860,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             else:
                 module.show()
         except Exception as es:
-            Logging.getLogger().warning('Error expanding module: sideBar')
+            getLogger().warning('Error expanding module: sideBar')
 
     def keyPressEvent(self, e):
 
@@ -1121,127 +1124,127 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         """
         assert 0 == 1
 
-    def _queryChoices(self, dataLoader):
-        """Query the user about his/her choice to import/new/cancel
-        """
-        choices = ('Import', 'New project', 'Cancel')
-        choice = MessageDialog.showMulti('Load %s' % dataLoader.dataFormat,
-                           'How do you want to handle "%s":' % dataLoader.path,
-                           choices, parent=self)
+    # def _queryChoices(self, dataLoader):
+    #     """Query the user about his/her choice to import/new/cancel
+    #     """
+    #     choices = ('Import', 'New project', 'Cancel')
+    #     choice = MessageDialog.showMulti('Load %s' % dataLoader.dataFormat,
+    #                        'How do you want to handle "%s":' % dataLoader.path,
+    #                        choices, parent=self)
+    #
+    #     if choice == choices[0]:  # import
+    #         dataLoader.createNewProject = False
+    #         createNewProject = False
+    #         ignore = False
+    #     elif choice == choices[1]:  # new project
+    #         dataLoader.createNewProject = True
+    #         createNewProject = True
+    #         ignore = False
+    #     else:  # cancel
+    #         dataLoader = None
+    #         createNewProject = False
+    #         ignore = True
+    #
+    #     return (dataLoader, createNewProject, ignore)
 
-        if choice == choices[0]:  # import
-            dataLoader.createNewProject = False
-            createNewProject = False
-            ignore = False
-        elif choice == choices[1]:  # new project
-            dataLoader.createNewProject = True
-            createNewProject = True
-            ignore = False
-        else:  # cancel
-            dataLoader = None
-            createNewProject = False
-            ignore = True
-
-        return (dataLoader, createNewProject, ignore)
-
-    def _getDataLoader(self, path, include=None):
-        """Get dataLoader for path (or None if not present), optionally only testing for
-        dataFormats defined in include.
-        Allows for reporting or checking through popups.
-        Does not do the actual loading.
-
-        :param path: the path to get a dataLoader for
-        :param include: a list/tuple of optional dataFormat strings; (defaults to all dataFormats)
-        :returns a tuple (dataLoader, createNewProject, ignore)
-        """
-        # local import here
-        from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
-        from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
-        from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
-        from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
-        from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
-        from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
-
-        if include is None:
-            include =  tuple(getDataLoaders().keys())
-        dataLoader = checkPathForDataLoader(path, include=include)
-
-        if dataLoader is None:
-            txt = 'Loading "%s" unsuccessful; unrecognised type, should be one of %r' % \
-                  (path, include)
-            getLogger().warning(txt)
-            return (None, False, False)
-
-        createNewProject = dataLoader.createNewProject
-        ignore = False
-
-        if dataLoader.dataFormat == CcpNmrV2ProjectDataLoader.dataFormat:
-            createNewProject = True
-            dataLoader.createNewProject = True
-            ok = MessageDialog.showYesNoWarning('Load Project',
-                                                f'Project "{path}" was created with version-2 Analysis.\n'
-                                                '\n'
-                                                'CAUTION:\n'
-                                                '\tThe project will be converted to a version-3 project and saved '
-                                                '\tas a new directory with .cppn extension.\n'
-                                                '\n'
-                                                'Do you want to continue loading?')
-
-            if not ok:
-                # skip loading so that user can backup/copy project
-                getLogger().debug('==> Cancelled loading ccpn project "%s"' % path)
-                ignore = True
-
-        elif dataLoader.dataFormat == CcpNmrV3ProjectDataLoader.dataFormat and Project._needsUpgrading(path):
-            createNewProject = True
-            dataLoader.createNewProject = True
-            ok = MessageDialog.showYesNoWarning('Load Project',
-                                                f'Project "%s" was saved with an earlier version of AnalysisV3, '
-                                                'and will be converted to version %s.\n'
-                                                '\n'
-                                                'CAUTION:\n' 
-                                                '\tAfter saving, it can NO LONGER be loaded in earlier AnalysisV3 versions.\n'
-                                                '\t(If you are in any doubt, use "File --> Save As..)\n'
-                                                '\n'
-                                                'Do you want to continue loading?' % (
-                                                    path, self.application.applicationVersion.withoutRelease())
-                                                )
-
-            if not ok:
-                # skip loading so that user can backup/copy project
-                getLogger().info('==> Cancelled loading ccpn project "%s"' % path)
-                ignore = True
-
-        elif dataLoader.dataFormat == NefDataLoader.dataFormat:
-            (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
-            if dataLoader and not createNewProject and not ignore:
-                # we are importing; popup the import window
-                self._showNefPopup(dataLoader)
-
-        elif dataLoader.dataFormat == SparkyDataLoader.dataFormat:
-            (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
-
-        elif dataLoader.dataFormat == SpectrumDataLoader.dataFormat and dataLoader.existsInProject():
-            ok = MessageDialog.showYesNoWarning('Spectrum "%s"' % dataLoader.path,
-                                                f'already exists in the project\n'
-                                                '\n'
-                                                'do you want to load?'
-                               )
-            if not ok:
-                ignore = True
-
-        elif dataLoader.dataFormat == DirectoryDataLoader.dataFormat and len(dataLoader) > MAXITEMLOGGING:
-            ok = MessageDialog.showYesNoWarning('Directory "%s"\n' %dataLoader.path,
-                                                f'\n'
-                                                'CAUTION: You are trying to load %d items\n'
-                                                '\n'
-                                                'Do you want to continue?' % (len(dataLoader,))
-                                                )
-
-            if not ok:
-                ignore = True
-
-        return (dataLoader, createNewProject, ignore)
+    # def _getDataLoader(self, path, include=None):
+    #     """Get dataLoader for path (or None if not present), optionally only testing for
+    #     dataFormats defined in include.
+    #     Allows for reporting or checking through popups.
+    #     Does not do the actual loading.
+    #
+    #     :param path: the path to get a dataLoader for
+    #     :param include: a list/tuple of optional dataFormat strings; (defaults to all dataFormats)
+    #     :returns a tuple (dataLoader, createNewProject, ignore)
+    #     """
+    #     # local import here
+    #     from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
+    #     from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
+    #     from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
+    #     from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
+    #     from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
+    #     from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
+    #
+    #     if include is None:
+    #         include =  tuple(getDataLoaders().keys())
+    #     dataLoader = checkPathForDataLoader(path, include=include)
+    #
+    #     if dataLoader is None:
+    #         txt = 'Loading "%s" unsuccessful; unrecognised type, should be one of %r' % \
+    #               (path, include)
+    #         getLogger().warning(txt)
+    #         return (None, False, False)
+    #
+    #     createNewProject = dataLoader.createNewProject
+    #     ignore = False
+    #
+    #     if dataLoader.dataFormat == CcpNmrV2ProjectDataLoader.dataFormat:
+    #         createNewProject = True
+    #         dataLoader.createNewProject = True
+    #         ok = MessageDialog.showYesNoWarning('Load Project',
+    #                                             f'Project "{path}" was created with version-2 Analysis.\n'
+    #                                             '\n'
+    #                                             'CAUTION:\n'
+    #                                             '\tThe project will be converted to a version-3 project and saved '
+    #                                             '\tas a new directory with .cppn extension.\n'
+    #                                             '\n'
+    #                                             'Do you want to continue loading?')
+    #
+    #         if not ok:
+    #             # skip loading so that user can backup/copy project
+    #             getLogger().debug('==> Cancelled loading ccpn project "%s"' % path)
+    #             ignore = True
+    #
+    #     elif dataLoader.dataFormat == CcpNmrV3ProjectDataLoader.dataFormat and Project._needsUpgrading(path):
+    #         createNewProject = True
+    #         dataLoader.createNewProject = True
+    #         ok = MessageDialog.showYesNoWarning('Load Project',
+    #                                             f'Project "%s" was saved with an earlier version of AnalysisV3, '
+    #                                             'and will be converted to version %s.\n'
+    #                                             '\n'
+    #                                             'CAUTION:\n'
+    #                                             '\tAfter saving, it can NO LONGER be loaded in earlier AnalysisV3 versions.\n'
+    #                                             '\t(If you are in any doubt, use "File --> Save As..)\n'
+    #                                             '\n'
+    #                                             'Do you want to continue loading?' % (
+    #                                                 path, self.application.applicationVersion.withoutRelease())
+    #                                             )
+    #
+    #         if not ok:
+    #             # skip loading so that user can backup/copy project
+    #             getLogger().info('==> Cancelled loading ccpn project "%s"' % path)
+    #             ignore = True
+    #
+    #     elif dataLoader.dataFormat == NefDataLoader.dataFormat:
+    #         (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
+    #         if dataLoader and not createNewProject and not ignore:
+    #             # we are importing; popup the import window
+    #             self._showNefPopup(dataLoader)
+    #
+    #     elif dataLoader.dataFormat == SparkyDataLoader.dataFormat:
+    #         (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
+    #
+    #     elif dataLoader.dataFormat == SpectrumDataLoader.dataFormat and dataLoader.existsInProject():
+    #         ok = MessageDialog.showYesNoWarning('Spectrum "%s"' % dataLoader.path,
+    #                                             f'already exists in the project\n'
+    #                                             '\n'
+    #                                             'do you want to load?'
+    #                            )
+    #         if not ok:
+    #             ignore = True
+    #
+    #     elif dataLoader.dataFormat == DirectoryDataLoader.dataFormat and len(dataLoader) > MAXITEMLOGGING:
+    #         ok = MessageDialog.showYesNoWarning('Directory "%s"\n' %dataLoader.path,
+    #                                             f'\n'
+    #                                             'CAUTION: You are trying to load %d items\n'
+    #                                             '\n'
+    #                                             'Do you want to continue?' % (len(dataLoader,))
+    #                                             )
+    #
+    #         if not ok:
+    #             ignore = True
+    #
+    #     return (dataLoader, createNewProject, ignore)
 
     def _processDroppedItems(self, data) -> list:
         """Handle the dropped urls
@@ -1258,7 +1261,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         getLogger().info('Handling urls...')
 
         # dataLoaders: A list of (url, dataLoader, createsNewProject, ignore) tuples.
-        # createsNewProject: to call _loadProject; eg. for NEF
+        # createsNewProject: to evaluate later call _loadProject; eg. for NEF
         # ignore: user opted to skip this one; e.g. a spectrum already present
         dataLoaders = []
         # analyse the Urls
@@ -1266,7 +1269,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             # try finding a data loader, catch any errors for recognised but
             # incomplete/invalid url's (i.e. incomplete spectral data)
             try:
-                dataLoader, createsNewProject, ignore = self._getDataLoader(url)
+                dataLoader, createsNewProject, ignore = self.ui._getDataLoader(url)
                 dataLoaders.append((url, dataLoader, createsNewProject, ignore))
             except (RuntimeError, ValueError) as es:
                 MessageDialog.showError('Load Data',
@@ -1312,18 +1315,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             MessageDialog.showError('Load Data', 'No dropped items can be loaded', parent=self)
             return []
 
-        result = []
-        with catchExceptions(errorStringTemplate='Load data: %s'):
-            if len(newProjectUrls) == 1:
-                url, dl, createNew = newProjectUrls[0]
-                project = self._loadProject(dataLoader=dl)
-                result.append(project)
-            with undoBlockWithoutSideBar():
-                if len(dataUrls) > 0:
-                    _dLoaders = [dl for url, dl, createNew in dataUrls]
-                    objs = self.application._loadData(_dLoaders, maxItemLogging=MAXITEMLOGGING)
-                    result.extend(objs)
-        return result
+        _dLoaders = [dl for url, dl, createNew in allUrlsToLoad]
+        return self.application._loadData(_dLoaders)
 
     def _processPids(self, data, position=None, relativeTo=None):
         """Handle the urls passed to the drop event
@@ -1343,51 +1336,53 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
             checkSpectraToOpen(self, objs)
             _openItemObject(self, objs, position=position, relativeTo=relativeTo)
 
-    def _queryCloseProject(self, title, phrase):
-        """Query if project can be closed; always True for temporary projects
-        :returns True/False
-        """
-        if self.project.isTemporary:
-            return True
+    # def _queryCloseProject(self, title, phrase):
+    #     """Query if project can be closed; always True for temporary projects
+    #     :returns True/False
+    #     """
+    #     if self.project.isTemporary:
+    #         return True
+    #
+    #     message = 'Do you really want to %s project (current project will be closed %s)?' % \
+    #               (phrase, (' and any changes will be lost' if self.project.isModified else ''))
+    #     result = MessageDialog.showYesNo(title, message, parent=self)
+    #     return bool(result)
 
-        message = 'Do you really want to %s project (current project will be closed %s)?' % \
-                  (phrase, (' and any changes will be lost' if self.project.isModified else ''))
-        result = MessageDialog.showYesNo(title, message, parent=self)
-        return bool(result)
+    # def _loadProject(self, dataLoader=None, path=None):
+    #     """Load a project either from a dataLoader instance or from path;
+    #     check and query for all load-project related issue
+    #     build the project Gui elements
+    #     :returns project instance or None
+    #     """
+    #     if path is None and dataLoader is None:
+    #         MessageDialog.showError('Load Project', 'Undefined path', parent=self)
+    #         return None
+    #
+    #     if dataLoader is None and path is not None:
+    #         # Try to get a dataLoader instance, checking for path first
+    #         _path = aPath(path)
+    #         if not _path.exists():
+    #             MessageDialog.showError('Load Project', 'Path "%s" does not exist\n(Has the project been moved?)' % path, parent=self)
+    #             return None
+    #         dataLoader, _tmp, _tmp2 = self._getDataLoader(path)
+    #
+    #     # By now, we should have a dataLoader instance
+    #     if dataLoader is None:
+    #         MessageDialog.showError('Load Project', 'No suitable dataLoader found', parent=self)
+    #         return None
+    #
+    #     if not dataLoader.createNewProject:
+    #         MessageDialog.showError('Load Project', '"%s" does not yield a new project' % dataLoader.path,
+    #                                 parent=self
+    #                                 )
+    #         return None
+    #
+    #     return self.ui._loadProject(dataLoader)
 
-    def _loadProject(self, dataLoader=None, path=None):
-        """Load a project either from a dataLoader instance or from path;
-        check and query for all load-project related issue
-        build the project Gui elements
-        :returns project instance or None
-        """
-        if path is None and dataLoader is None:
-            MessageDialog.showError('Load Project', 'Undefined path', parent=self)
-            return None
+        # from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
+        # from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
 
-        if dataLoader is None and path is not None:
-            # Try to get a dataLoader instance, checking for path first
-            _path = aPath(path)
-            if not _path.exists():
-                MessageDialog.showError('Load Project', 'Path "%s" does not exist\n(Has the project been moved?)' % path, parent=self)
-                return None
-            dataLoader, _tmp, _tmp2 = self._getDataLoader(path)
-
-        # By now, we should have a dataLoader instance
-        if dataLoader is None:
-            MessageDialog.showError('Load Project', 'No suitable dataLoader found', parent=self)
-            return None
-
-        if not dataLoader.createNewProject:
-            MessageDialog.showError('Load Project', '"%s" does not yield a new project' % dataLoader.path,
-                                    parent=self
-                                    )
-            return None
-
-        from ccpn.framework.lib.DataLoaders.CcpNmrV2ProjectDataLoader import CcpNmrV2ProjectDataLoader
-        from ccpn.framework.lib.DataLoaders.CcpNmrV3ProjectDataLoader import CcpNmrV3ProjectDataLoader
-
-        #===> To ED: moved to _getDataLoader() method
+        #===> To ED: moved to Gui._getDataLoader() method
 
         # path = dataLoader.path
         # if dataLoader.dataFormat == CcpNmrV2ProjectDataLoader.dataFormat:
@@ -1423,37 +1418,37 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         #         getLogger().info('==> Cancelled loading ccpn project "%s"' % path)
         #         return None
 
-        if not self._queryCloseProject(title='Load Project', phrase='open another'):
-            return None
-
-        # Some error recovery; store info to re-open the current project (or a new default)
-        oldProjectPath = self.project.path
-        oldProjectIsTemporary = self.project.isTemporary
-
-        try:
-            with progressManager(self, 'Loading project %s ... ' % dataLoader.path):
-                _loaded = dataLoader.load()
-                if not _loaded:
-                    return None
-
-                newProject = _loaded[0]
-                # Note that the newProject has its own MainWindow; i.e. it is not self
-                newProject._mainWindow.sideBar.buildTree(newProject)
-                newProject._mainWindow.show()
-                QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
-
-            # if the new project contains invalid spectra then open the popup to see them
-            self._checkForBadSpectra(newProject)
-
-        except RuntimeError as es:
-            MessageDialog.showError('Load Project', '"%s" did not yield a valid new project (%s)' % \
-                                    (dataLoader.path, str(es)), parent=self
-                                    )
-
-            # First get to a defined state
-            self.application._newProject()
-            if not oldProjectIsTemporary:
-                self.application.loadProject(oldProjectPath)
-            return None
-
-        return newProject
+        # if not self._queryCloseProject(title='Load Project', phrase='open another'):
+        #     return None
+        #
+        # # Some error recovery; store info to re-open the current project (or a new default)
+        # oldProjectPath = self.project.path
+        # oldProjectIsTemporary = self.project.isTemporary
+        #
+        # try:
+        #     with MessageDialog.progressManager(self, 'Loading project %s ... ' % dataLoader.path):
+        #         _loaded = dataLoader.load()
+        #         if not _loaded:
+        #             return None
+        #
+        #         newProject = _loaded[0]
+        #         # Note that the newProject has its own MainWindow; i.e. it is not self
+        #         newProject._mainWindow.sideBar.buildTree(newProject)
+        #         newProject._mainWindow.show()
+        #         QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
+        #
+        #     # if the new project contains invalid spectra then open the popup to see them
+        #     self._checkForBadSpectra(newProject)
+        #
+        # except RuntimeError as es:
+        #     MessageDialog.showError('Load Project', '"%s" did not yield a valid new project (%s)' % \
+        #                             (dataLoader.path, str(es)), parent=self
+        #                             )
+        #
+        #     # First get to a defined state
+        #     self.application._newProject()
+        #     if not oldProjectIsTemporary:
+        #         self.application.loadProject(oldProjectPath)
+        #     return None
+        #
+        # return newProject

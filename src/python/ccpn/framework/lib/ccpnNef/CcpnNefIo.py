@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-05 18:39:30 +0000 (Sat, February 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-06 19:35:05 +0000 (Sun, February 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -7853,11 +7853,11 @@ def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict
                                              transferData=transferData)
 
             # make new spectrum with default parameters
-            spectrum = project.newEmptySpectrum(isotopeCodes=dimensionData['isotopeCodes'],
-                                                spectralWidths=dimensionData['spectralWidths'],
-                                                spectrometerFrequencies=dimensionData['spectrometerFrequencies'],
-                                                name=spectrumName,
-                                                path=filePath)
+            kwds={}
+            for key in ('isotopeCodes', 'spectralWidths', 'spectrometerFrequencies'):
+                if key in dimensionData:
+                    kwds[key] = dimensionData[key]
+            spectrum = project.newEmptySpectrum(name=spectrumName, path=filePath, **kwds)
             if spectrumParameters.get('chemicalShiftList') is not None:
                 spectrum.chemicalShiftList = spectrumParameters.get('chemicalShiftList')
 

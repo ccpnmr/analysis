@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-06 15:11:16 +0000 (Sun, February 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-06 18:36:44 +0000 (Sun, February 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,6 @@ from PyQt5 import QtWidgets, QtCore
 from ccpn.core import _coreClassMap
 from ccpn.core.Project import Project
 
-from ccpn.util.Logging import getLogger
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders, checkPathForDataLoader
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -48,13 +47,16 @@ from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPo
 from ccpn.ui.gui.widgets.Application import Application
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets import FileDialog
+from ccpn.ui.gui.popups.ImportStarPopup import StarImporterPopup
 
+# This import initializes relative paths for QT style-sheets.  Do not remove! GWV ????
 from ccpn.ui.gui.guiSettings import FontSettings
 from ccpn.ui.gui.widgets.Font import getFontHeight, setWidgetFont
-# This import initializes relative paths for QT style-sheets.  Do not remove! GWV ????
-from ccpn.framework.PathsAndUrls import userPreferencesPath
+
+from ccpn.util.Logging import getLogger
 from ccpn.util import Logging
 from ccpn.util import Register
+from ccpn.util.Path import aPath, Path
 
 
 def qtMessageHandler(*errors):
@@ -285,6 +287,7 @@ class Gui(Ui):
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
         from ccpn.framework.lib.DataLoaders.SparkyDataLoader import SparkyDataLoader
         from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
+        from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
         from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
 
         if include is None:
@@ -354,6 +357,15 @@ class Gui(Ui):
                                )
             if not ok:
                 ignore = True
+
+        elif dataLoader.dataFormat == StarDataLoader.dataFormat and dataLoader:
+            (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
+            if dataLoader and not createNewProject and not ignore:
+                popup = StarImporterPopup(project=self.project,
+                                          bmrbFilePath=self.path,
+                                          directory=self.path.parent,
+                                          dataBlock=self.dataBlock)
+                popup.exec_()
 
         elif dataLoader.dataFormat == DirectoryDataLoader.dataFormat and len(dataLoader) > MAXITEMLOGGING:
             ok = MessageDialog.showYesNoWarning('Directory "%s"\n' %dataLoader.path,
@@ -433,7 +445,7 @@ class Gui(Ui):
             self.mainWindow._checkForBadSpectra(newProject)
 
         except RuntimeError as es:
-            MessageDialog.showError('Load Project', '"%s" did not yield a valid new project (%s)' % \
+            MessageDialog.showError('Load Project', '"%s" did not yield a valid new project: %s' % \
                                     (dataLoader.path, str(es)), parent=self
                                     )
 
@@ -477,9 +489,16 @@ class Gui(Ui):
         return result
 
     def loadData(self, *paths) -> list:
-        """Loads data from paths.
+        """Loads data from paths; query if none supplied
         :returns list of loaded objects
         """
+        if len(paths) == 0:
+            dialog = FileDialog.DataFileDialog(parent=self.mainWindow, acceptMode='load')
+            dialog._show()
+            if (path := dialog.selectedFile()) is None:
+                return []
+            paths = [path]
+
         dataLoaders = []
         for path in paths:
             dataLoader, createNewProject, ignore = self._getDataLoader(path)
@@ -493,6 +512,50 @@ class Gui(Ui):
         # load the project using the dataLoaders;
         # We'll ask framework, who will pass it back as ui._loadData calls
         return self.application._loadData(dataLoaders)
+
+    def loadSpectra(self, *paths) -> list:
+        """Load all the spectra found in paths.
+        Query in case path is empty.
+        Return a list of Spectra instances
+
+        :param paths: list of paths
+        """
+        from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
+        from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
+
+        if len(paths) == 0:
+            # This only works with non-native file dialog; override the default behavior
+            dialog = FileDialog.SpectrumFileDialog(parent=self.mainWindow, acceptMode='load',
+                                                   useNative=False)
+            dialog._show()
+            paths = dialog.selectedFiles()
+
+        if not paths:
+            return []
+
+        spectrumLoaders = []
+        count = 0
+        # Recursively search all paths
+        for path in paths:
+            _path = aPath(path)
+            if _path.is_dir():
+                dirLoader = DirectoryDataLoader(path, recursive=False,
+                                                filterForDataFormats=(SpectrumDataLoader.dataFormat,))
+                spectrumLoaders.append(dirLoader)
+                count += len(dirLoader)
+
+            elif (sLoader := SpectrumDataLoader.checkForValidFormat(path)) is not None:
+                spectrumLoaders.append(sLoader)
+                count += 1
+
+        if count > MAXITEMLOGGING:
+            okToOpenAll = MessageDialog.showYesNo('Load data', 'You selected %d items.'
+                                                               ' Do you want to open all?' % count)
+            if not okToOpenAll:
+                return []
+
+        return self.application._loadData(spectrumLoaders)
+
 
 #######################################################################################
 #

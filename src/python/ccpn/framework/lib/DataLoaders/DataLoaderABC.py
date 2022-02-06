@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-05 17:26:33 +0000 (Sat, February 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-06 18:36:44 +0000 (Sun, February 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -102,9 +102,9 @@ def checkPathForDataLoader(path, exclude=(), include=None):
         if _doEvaluate:
             instance = cls.checkForValidFormat(path)
             if instance is None:
-                getLogger().debug('path "%s" is not valid for dataFormat "%s"' % (path, cls.dataFormat))
+                getLogger().debug2('path "%s" is not valid for dataFormat "%s"' % (path, cls.dataFormat))
             else:
-                getLogger().debug('path "%s" is valid for dataFormat "%s"' % (path, cls.dataFormat))
+                getLogger().debug2('path "%s" is valid for dataFormat "%s"' % (path, cls.dataFormat))
                 return instance  # we found a valid format for path
     return None
 

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-06 15:02:49 +0000 (Sun, February 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-06 18:36:44 +0000 (Sun, February 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -173,7 +173,7 @@ class GuiBase(object):
             ("Open...", self._openProjectCallback, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Open Recent", ()),
 
-            ("Load Data...", lambda: self._loadDataCallback(text='Load Data'), [('shortcut', 'ld')]),
+            ("Load Data...", self._loadDataCallback, [('shortcut', 'ld')]),
             (),
             ("Save", self._saveCallback, [('shortcut', '⌃s')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Save As...", self._saveAsCallback, [('shortcut', 'sa')]),
@@ -280,7 +280,7 @@ class GuiBase(object):
         ))
 
         ms.append(('Molecules', [
-            ("Chain from FASTA...", lambda: self._loadDataCallback(text='Load FASTA')),
+            ("Chain from FASTA...", self._loadDataCallback),
             (),
             ("New Chain...", self.showCreateChainPopup),
             ("Inspect...", self.inspectMolecule, [('enabled', False)]),
@@ -375,19 +375,10 @@ class GuiBase(object):
     #-----------------------------------------------------------------------------------------
     # File --> callback methods
     #-----------------------------------------------------------------------------------------
-    def _loadDataCallback(self, text='Load Data', filter=None):
+    def _loadDataCallback(self):
         """Call loadData from the menu and trap errors.
         """
-        dialog = DataFileDialog(parent=self.mainWindow, acceptMode='load', fileFilter=filter)
-        dialog._show()
-        if (path := dialog.selectedFile()) is None:
-            return
-
-        dataLoader, createNewProject, ignore = self.ui._getDataLoader(path)
-        if ignore or dataLoader is None:
-            return
-
-        self._loadData([dataLoader])
+        self.ui.loadData()
 
     def _newProjectCallback(self):
         """Callback for creating new project
@@ -544,51 +535,10 @@ class GuiBase(object):
     #-----------------------------------------------------------------------------------------
     # Spectra --> callback methods
     #-----------------------------------------------------------------------------------------
-    def _loadSpectraCallback(self, paths=None, filter=None, askBeforeOpen_lenght=20):
+    def _loadSpectraCallback(self):
+        """Load all the spectra callback
         """
-        Load all the spectra found in paths
-
-        :param paths: list of str of paths
-        :param filter:
-        :param askBeforeOpen_lenght: how many spectra can open without asking first
-        """
-        from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
-        from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
-
-        if paths is None:
-            dialog = SpectrumFileDialog(parent=self.ui.mainWindow, acceptMode='load', fileFilter=filter, useNative=False)
-
-            dialog._show()
-            paths = dialog.selectedFiles()
-
-        if not paths:
-            return
-
-        spectrumLoaders = []
-        count = 0
-        # Recursively search all paths
-        for path in paths:
-            _path = aPath(path)
-            if _path.is_dir():
-                dirLoader = DirectoryDataLoader(path, recursive=False,
-                                                filterForDataFormats=(SpectrumDataLoader.dataFormat,))
-                spectrumLoaders.append(dirLoader)
-                count += len(dirLoader)
-
-            elif (sLoader := SpectrumDataLoader.checkForValidFormat(path)) is not None:
-                spectrumLoaders.append(sLoader)
-                count += 1
-
-        if count > askBeforeOpen_lenght:
-            okToOpenAll = MessageDialog.showYesNo('Load data', 'The directory contains multiple items (%d).'
-                                                               ' Do you want to open all?' % len(spectrumLoaders))
-            if not okToOpenAll:
-                return
-
-        with undoBlockWithoutSideBar():
-            with notificationEchoBlocking():
-                for sLoader in tqdm(spectrumLoaders):
-                    sLoader.load()
+        self.ui.loadSpectra()
 
     #-----------------------------------------------------------------------------------------
     # Help -->

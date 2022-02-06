@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-06 15:02:49 +0000 (Sun, February 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-06 18:36:44 +0000 (Sun, February 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -105,6 +105,7 @@ WAIT_LICENSE_DIALOG_CLOSE_TIME = 100
 _DEBUG = False
 
 interfaceNames = ('NoUi', 'Gui')
+MAXITEMLOGGING = 4
 
 #-----------------------------------------------------------------------------------------
 # Subclass the exception hook
@@ -943,7 +944,7 @@ class Framework(NotifierBase, GuiBase):
     # Data loaders
     #-----------------------------------------------------------------------------------------
 
-    def _loadData(self, dataLoaders, maxItemLogging=0) -> list:
+    def _loadData(self, dataLoaders, maxItemLogging=MAXITEMLOGGING) -> list:
         """Helper function; use dataLoader to load data; optionally suspend logging
         :param dataLoaders: a list/tuple of dataLoader instances
         :param maxItemLogging: flag to set maximum items to log (0 denotes logging all)
@@ -953,6 +954,8 @@ class Framework(NotifierBase, GuiBase):
         _echoBlocking = maxItemLogging > 0 and len(dataLoaders) > maxItemLogging
 
         if _echoBlocking:
+            getLogger().info('Loading %d objects, while suppressing command-logging' %
+                             len(dataLoaders))
             self._increaseNotificationBlocking()
 
         for dataLoader in dataLoaders:
@@ -1036,34 +1039,34 @@ class Framework(NotifierBase, GuiBase):
         from ccpn.core.lib.CcpnSparkyIo import SPARKY_NAME, CcpnSparkyReader
 
         sparkyReader = CcpnSparkyReader(self)
-
         dataBlock = sparkyReader.parseSparkyFile(str(path))
         sparkyName = dataBlock.getDataValues(SPARKY_NAME, firstOnly=True)
 
-        # Just a helper function for cleaner code below"
-        def _importData(project):
-            with undoBlockWithoutSideBar():
-                with notificationEchoBlocking():
-                    with catchExceptions(application=self, errorStringTemplate='Error loading Sparky file: %s',
-                                         printTraceBack=True):
-                        sparkyReader.importSparkyProject(project, dataBlock)
-
-        #end def
-
         if createNewProject and (dataBlock.getDataValues('sparky', firstOnly=True) == 'project file'):
-            with logCommandManager('application.', 'loadProject', path):
-                self._closeProject()
-                project = self._newProject(sparkyName)
-                _importData(project)
-                self.project.shiftAveraging = True
-            getLogger().info('==> Created project from Sparky file: "%s"' % (path,))
-
+            self._closeProject()
+            project = self._newProject(sparkyName)
         else:
             project = self.project
-            with logCommandManager('application.', 'loadData', path):
-                _importData(project)
-            getLogger().info('==> Imported Sparky file: "%s"' % (path,))
 
+        sparkyReader.importSparkyProject(project, dataBlock)
+        return project
+
+    def _loadStarFile(self, dataLoader) -> Project:
+        """Load a Starfile, and do necessary setup
+        :return Project-instance (either existing or newly created)
+
+        CCPNINTERNAL: called from StarDataLoader
+        """
+
+        dataBlock = dataLoader.dataBlock
+
+        if dataLoader.createNewProject:
+            self._closeProject()
+            project = self._newProject(dataBlock.getName())
+        else:
+            project = self.project
+
+        sparkyReader.importSparkyProject(project, dataBlock)
         return project
 
     def _loadPythonFile(self, path):

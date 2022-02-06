@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-01-24 19:33:13 +0000 (Mon, January 24, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-06 18:36:44 +0000 (Sun, February 06, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -93,7 +93,7 @@ AXIS_WIDTH = 30
 
 STRIPDIRECTIONS = ['Y', 'X', 'T']
 
-MAXITEMLOGGING = 4
+
 MAXTILEBOUND = 65536
 INCLUDE_AXIS_WIDGET = True
 
@@ -1068,9 +1068,10 @@ class GuiSpectrumDisplay(CcpnModule):
     def _processDroppedItems(self, data):
         """
         CallBack for Drop events
-
         CCPN INTERNAL: Also called from GuiStrip
         """
+        # local import to avoid cycles
+        from ccpn.framework.Framework import MAXITEMLOGGING
         theObject = data.get('theObject')
 
         if DropBase.URLS in data:

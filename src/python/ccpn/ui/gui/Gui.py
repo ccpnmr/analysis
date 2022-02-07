@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 10:17:34 +0000 (Mon, February 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-07 10:28:10 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -649,19 +649,6 @@ def _getSaveDirectory(mainWindow):
     # ignore if empty
     if not newPath:
         return None
-
-    # newPath = aPath(newPath).assureSuffix(CCPN_EXTENSION)
-    # if (  not overwrite and
-    #       newPath.exists() and
-    #      (newPath.is_file() or (newPath.is_dir() and newPath.listDirFiles() > 0))
-    #    ):
-    #     # should not really need to check the second and third condition above, only
-    #     # the Qt dialog stupidly insists a directory exists before you can select it
-    #     # so if it exists but is empty then don't bother asking the question
-    #     title = 'Overwrite path'
-    #     msg = 'Path "%s" already exists, continue?' % newPath
-    #     if not MessageDialog.showYesNo(title, msg):
-    #         return None
 
     return newPath
 

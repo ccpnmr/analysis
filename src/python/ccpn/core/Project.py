@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-02 23:55:21 +0000 (Wed, February 02, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-07 17:13:51 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -33,7 +33,6 @@ from typing import Sequence, Union, Optional, List
 from collections import OrderedDict
 # from time import time
 from datetime import datetime
-import json
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.Updater import UPDATE_POST_PROJECT_INITIALISATION
@@ -48,13 +47,10 @@ from ccpn.core.lib.ContextManagers import notificationBlanking, undoBlock, undoB
 from ccpn.util import Logging
 from ccpn.util.ExcelReader import ExcelReader
 from ccpn.util.Path import aPath, Path
-from ccpn.util.Common import isIterable
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
 
-from ccpn.framework.Version import VersionString
 from ccpn.framework.PathsAndUrls import CCPN_EXTENSION
-from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpnmodel.ccpncore.memops import Notifiers
@@ -66,7 +62,6 @@ from ccpnmodel.ccpncore.api.ccp.nmr.NmrExpPrototype import RefExperiment
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 # from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.lib import ApiPath
-from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 from ccpnmodel.ccpncore.api.memops import Implementation
 
@@ -877,15 +872,15 @@ class Project(AbstractWrapperObject):
           If target is a second className, the function is called with the project as the only
           parameter.
 
-        param: dict parameterDict: Parameters passed to the notifier function before execution.
+        :param dict parameterDict: Parameters passed to the notifier function before execution.
 
           This allows you to use the same function with different parameters in different contexts
 
-        param: bool onceOnly: If True, only one of multiple copies is executed
+        :param bool onceOnly: If True, only one of multiple copies is executed
 
           when notifiers are resumed after a suspension.
 
-        return: The registered notifier (which can be passed to removeNotifier or duplicateNotifier)
+        :return The registered notifier (which can be passed to removeNotifier or duplicateNotifier)
 
         """
 
@@ -1257,7 +1252,7 @@ class Project(AbstractWrapperObject):
         :param expandSelection: expand the selection
         :param pidList: a list of pids
         """
-        from ccpn.core.lib import CcpnNefIo
+        from ccpn.framework.lib.ccpnNef import CcpnNefIo
 
         with undoBlock():
             with notificationBlanking():
@@ -1983,7 +1978,7 @@ def _loadProject(application, path: str) -> Project:
             apiProject.touch()
             apiProject.save()
 
-    project._resetUndo(debug=application.level <= Logging.DEBUG2, application=application)
+    project._resetUndo(debug=application._debugLevel <= Logging.DEBUG2, application=application)
 
     # Do some admin
     # need project.path, as it may have have changed; e.g. for a V2 project
@@ -2011,7 +2006,7 @@ def _newProject(application, name: str = 'default', path: str = None, overwrite=
     project._isNew = True
     # NB: linkages are set in Framework._intialiseProject()
 
-    project._resetUndo(debug=application.level <= Logging.DEBUG2, application=application)
+    project._resetUndo(debug=application._debugLevel <= Logging.DEBUG2, application=application)
     project._saveHistory = newProjectSaveHistory(project.path)
 
     project._objectVersion = application.applicationVersion

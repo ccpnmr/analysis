@@ -1,10 +1,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-02 14:03:36 +0000 (Wed, February 02, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-02-07 17:13:52 +0000 (Mon, February 07, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,51 +29,41 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #     systime.clock = systime.process_time
 
 import json
-import logging
 import os
-import platform
 import sys
-import tarfile
-import tempfile
 import re
 import subprocess
 
 import faulthandler
 faulthandler.enable()
 
-from tqdm import tqdm
-
-from threading import Thread
-from time import time, sleep
-
-from typing import Union, Optional, List, Tuple, Sequence
+from typing import List
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QTimer
 
 from distutils.dir_util import copy_tree
-from functools import partial
 
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
 from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Project import Project
-from ccpn.core.lib.Notifiers import NotifierBase, Notifier
-from ccpn.core.lib.Pid import Pid, PREFIXSEP
+from ccpn.core.lib.Notifiers import NotifierBase
+from ccpn.core.lib.Pid import Pid
+from ccpn.core.lib.ContextManagers import \
+    logCommandManager
 
-from ccpn.framework.Application import getApplication, Arguments
+from ccpn.framework.Application import Arguments
 from ccpn.framework import Version
+from ccpn.framework.AutoBackup import AutoBackup
 from ccpn.framework.credits import printCreditsText
 from ccpn.framework.Current import Current
 from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
-from ccpn.framework.Translation import languages, defaultLanguage
+from ccpn.framework.Translation import defaultLanguage
 from ccpn.framework.Translation import translator
 from ccpn.framework.Preferences import Preferences
-from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
 from ccpn.framework.PathsAndUrls import \
-    userPreferencesPath,  \
-    userPreferencesDirectory, \
     userCcpnMacroPath, \
     CCPN_ARCHIVES_DIRECTORY, \
     CCPN_STATE_DIRECTORY, \
@@ -87,37 +77,19 @@ from ccpn.ui.gui.GuiBase import GuiBase
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.FileDialog import \
-    ProjectFileDialog, \
-    DataFileDialog, \
-    NefFileDialog, \
-    ArchivesFileDialog, \
-    MacrosFileDialog, \
-    CcpnMacrosFileDialog, \
-    LayoutsFileDialog, \
-    NMRStarFileDialog, \
-    SpectrumFileDialog, \
-    ProjectSaveFileDialog
-from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
+from ccpn.ui.gui.widgets.FileDialog import MacrosFileDialog
 from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_KEY_CONCEPTS
+from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
 
 from ccpn.util import Logging
-from ccpn.util.Path import Path, aPath, fetchDir, getPathToImport
+from ccpn.util.Path import Path, aPath, fetchDir
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable
 from ccpn.util.Logging import getLogger
-from ccpn.util import Layout
+from ccpn.ui.gui import Layout
 from ccpn.util.decorators import logCommand
 
-from ccpnmodel.ccpncore.api.memops import Implementation
-from ccpnmodel.ccpncore.lib.Io import Api as apiIo
-from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 
-from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideBar, undoBlock, \
-    notificationEchoBlocking, logCommandManager
-
-from ccpn.ui.gui.widgets.Menu import SHOWMODULESMENU, CCPNMACROSMENU, TUTORIALSMENU, CCPNPLUGINSMENU, PLUGINSMENU
-from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_KEY_CONCEPTS
 
 #-----------------------------------------------------------------------------------------
 # how frequently to check if license dialog has closed when waiting to show the tip of the day
@@ -127,58 +99,9 @@ WAIT_LICENSE_DIALOG_CLOSE_TIME = 100
 _DEBUG = False
 
 interfaceNames = ('NoUi', 'Gui')
+MAXITEMLOGGING = 4
 
-#-----------------------------------------------------------------------------------------
-# Subclass the exception hook
-#-----------------------------------------------------------------------------------------
-def _ccpnExceptionhook(ccpnType, value, tback):
-    """This because PyQT raises and catches exceptions,
-    but doesn't pass them along instead makes the program crashing miserably.
-    """
-    application = getApplication()
-    if application and application._isInDebugMode:
-        sys.stderr.write('_ccpnExceptionhook: type = %s\n' % ccpnType)
-        sys.stderr.write('_ccpnExceptionhook: value = %s\n' % value)
-        sys.stderr.write('_ccpnExceptionhook: tback = %s\n' % tback)
-
-    if application and application.hasGui:
-        title = str(ccpnType)[8:-2] + ':'
-        text = str(value)
-        MessageDialog.showError(title=title, message=text)
-
-    sys.__excepthook__(ccpnType, value, tback)
-
-sys.excepthook = _ccpnExceptionhook
-#-----------------------------------------------------------------------------------------
-
-
-class AutoBackup(Thread):
-
-    def __init__(self, q, backupFunction, sleepTime=1):
-        super().__init__()
-        self.sleepTime = sleepTime
-        self.q = q
-        self.backupProject = backupFunction
-        self.startTime = None
-
-    def run(self):
-        self.startTime = time()
-        while True:
-            waitTime = None
-            if not self.q.empty():
-                waitTime = self.q.get()
-            if waitTime is None:
-                sleep(self.sleepTime)
-            elif waitTime == 'kill':
-                return
-            elif (time() - self.startTime) < waitTime:
-                sleep(self.sleepTime)
-            else:
-                self.startTime = time()
-                try:
-                    self.backupProject()
-                except Exception as es:
-                    getLogger().warning('Project backup failed with error %s' % es)
+# For @Ed: sys.excepthook PyQT related code now in Gui.py
 
 
 class Framework(NotifierBase, GuiBase):
@@ -228,13 +151,13 @@ class Framework(NotifierBase, GuiBase):
 
         self.useFileLogger = not self.args.nologging
         if self.args.debug3:
-            self.level = Logging.DEBUG3
+            self._debugLevel = Logging.DEBUG3
         elif self.args.debug2:
-            self.level = Logging.DEBUG2
+            self._debugLevel = Logging.DEBUG2
         elif self.args.debug:
-            self.level = logging.DEBUG
+            self._debugLevel = Logging.DEBUG
         else:
-            self.level = logging.INFO
+            self._debugLevel = Logging.INFO
 
         self.preferences = Preferences(application=self)
         if not self.args.skipUserPreferences:
@@ -255,7 +178,7 @@ class Framework(NotifierBase, GuiBase):
         self._enableLoggingToConsole = True
 
         self._backupTimerQ = None
-        self.autoBackupThread = None
+        self._autoBackupThread = None
 
         self._tip_of_the_day = None
         self._initial_show_timer = None
@@ -317,9 +240,9 @@ class Framework(NotifierBase, GuiBase):
         """:return True if either of the debug flags has been set
         CCPNINTERNAL: used throughout to check
         """
-        if self.level == Logging.DEBUG1 or \
-           self.level == Logging.DEBUG2 or \
-           self.level == Logging.DEBUG3:
+        if self._debugLevel == Logging.DEBUG1 or \
+           self._debugLevel == Logging.DEBUG2 or \
+           self._debugLevel == Logging.DEBUG3:
             return True
         return False
 
@@ -459,7 +382,7 @@ class Framework(NotifierBase, GuiBase):
         if (projectPath := self.args.projectPath) is not None:
             project = self.loadProject(projectPath)
         else:
-            project = self.newProject()
+            project = self._newProject()
 
         if self.preferences.general.checkUpdatesAtStartup and not getattr(self.args, '_skipUpdates', False):
             self.ui._checkForUpdates()
@@ -473,7 +396,7 @@ class Framework(NotifierBase, GuiBase):
             return
 
         self._experimentClassifications = project.getExperimentClassifications()
-        self.updateAutoBackup()
+        self._updateAutoBackup()
 
         sys.stderr.write('==> Done, %s is starting\n' % self.applicationName)
         self.ui.startUi()
@@ -483,19 +406,20 @@ class Framework(NotifierBase, GuiBase):
         """Cleanup at the end of program execution; i.e. once the command loop
         has stopped
         """
-        self.setAutoBackupTime('kill')
+        self._setAutoBackupTime('kill')
 
     #-----------------------------------------------------------------------------------------
+    # Backup (TODO: need refactoring)
+    #-----------------------------------------------------------------------------------------
 
-    def updateAutoBackup(self):
-
+    def _updateAutoBackup(self):
+        # CCPNINTERNAL: also called from preferences popup
         if self.preferences.general.autoBackupEnabled:
-            self.setAutoBackupTime(self.preferences.general.autoBackupFrequency)
+            self._setAutoBackupTime(self.preferences.general.autoBackupFrequency)
         else:
-            self.setAutoBackupTime(None)
+            self._setAutoBackupTime(None)
 
-    def setAutoBackupTime(self, time):
-        # TODO: Need to add logging...
+    def _setAutoBackupTime(self, time):
         if self._backupTimerQ is None:
             from queue import Queue
 
@@ -506,12 +430,14 @@ class Framework(NotifierBase, GuiBase):
             self._backupTimerQ.put(time * 60)
         else:
             self._backupTimerQ.put(time)
-        if self.autoBackupThread is None:
-            self.autoBackupThread = AutoBackup(q=self._backupTimerQ,
-                                               backupFunction=self.backupProject)
-            self.autoBackupThread.start()
+        if self._autoBackupThread is None:
+            self._autoBackupThread = AutoBackup(q=self._backupTimerQ,
+                                                backupFunction=self._backupProject)
+            self._autoBackupThread.start()
 
-    def backupProject(self):
+    def _backupProject(self):
+        from ccpnmodel.ccpncore.lib.Io import Api as apiIo
+
         apiIo.backupProject(self.project._wrappedData.parent)
         backupPath = self.project.backupPath
 
@@ -537,7 +463,7 @@ class Framework(NotifierBase, GuiBase):
 
         # Logging
         logger = getLogger()
-        Logging.setLevel(logger, self.level)
+        Logging.setLevel(logger, self._debugLevel)
         logger.debug('Framework._initialiseProject>>>')
 
         # Set up current; we need it when restoring project graphics data below
@@ -856,34 +782,39 @@ class Framework(NotifierBase, GuiBase):
     # Project related methods
     #-----------------------------------------------------------------------------------------
 
-    #@logCommand('application.') #cannot do, as project is not there yet
-    def newProject(self, name='default') -> Project:
-        """Create new, empty project
+    def _newProject(self, name:str='default') -> Project:
+        """Create new, empty project with name
         :return a Project instance
         """
         # local import to avoid cycles
         from ccpn.core.Project import _newProject
 
         newName = re.sub('[^0-9a-zA-Z]+', '', name)
-        if newName != name:
-            getLogger().info('Removing whitespace from name: %s' % name)
-
         sys.stderr.write('==> Creating new, empty project\n')
         # NB _closeProject includes a gui cleanup call
         self._closeProject()
         project = _newProject(self, name=newName)
         self._initialiseProject(project)  # This also set the linkages
+        # defer the logging output until the project is fully initialised
+        if newName != name:
+            getLogger().info('Removed whitespace from name: %s' % name)
         return project
 
-    @logCommand('application.')
-    def loadProject(self, path) -> Project:
+    # @logCommand('application.')  # decorated in ui class
+    def newProject(self, name:str='default') -> Project:
+        """Create new, empty project with name
+        :return a Project instance
+        """
+        return self.ui.newProject(name)
+
+    # @logCommand('application.') # eventually decorated by  _loadData()
+    def loadProject(self, path=None) -> Project:
         """Load project defined by path
         :return a Project instance
         """
-        #Just a stub for now; calling MainWindow methods as it initialises the Gui
         return self.ui.loadProject(path)
 
-    def _saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
+    def _saveProject(self, newPath=None, createFallback=True, overwriteExisting=False) -> bool:
         """Save project to newPath and return True if successful
         """
         if self.preferences.general.keepSpectraInsideProject:
@@ -892,46 +823,37 @@ class Framework(NotifierBase, GuiBase):
         successful = self.project.save(newPath=newPath, createFallback=createFallback,
                                        overwriteExisting=overwriteExisting)
         if not successful:
-            failMessage = '==> Project save failed\n'
-            sys.stderr.write(failMessage)
+            failMessage = '==> Project save failed'
+            getLogger().warning(failMessage)
             self.ui.mainWindow.statusBar().showMessage(failMessage)
-            return successful
+            return False
 
-        successMessage = '==> Project successfully saved\n'
-        self.ui.mainWindow._updateWindowTitle()
-        self.ui.mainWindow.statusBar().showMessage(successMessage)
-        self.ui.mainWindow.getMenuAction('File->Archive').setEnabled(True)
-        self.ui.mainWindow._fillRecentProjectsMenu()
-        # self._createApplicationPaths()
-        self.current._dumpStateToFile(self.statePath)
+        self._getUndo().markSave()
+
         try:
-            if self.preferences.general.autoSaveLayoutOnQuit:
-                Layout.saveLayoutToJson(self.ui.mainWindow)
+            Layout.saveLayoutToJson(self.ui.mainWindow)
         except Exception as e:
             getLogger().warning('Unable to save Layout %s' % e)
 
-        # saveIconPath = os.path.join(getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
-        sys.stderr.write(successMessage)
-        self._getUndo().markSave()
-        return successful
+        self.current._dumpStateToFile(self.statePath)
 
-    @logCommand('application.')
-    def saveProjectAs(self, newPath, overwrite=False) -> bool:
+        return True
+
+    # @logCommand('application.')  # decorated in ui
+    def saveProjectAs(self, newPath, overwrite:bool=False) -> bool:
         """Save project to newPath
+        :param newPath: new path to save project (str | Path instance)
+        :param overwrite: flag to indicate overwriting of existing path
         :return True if successful
         """
-        return self._saveProject(newPath=newPath,
-                                 createFallback=False,
-                                 overwriteExisting=overwrite)
+        return self.ui.saveProjectAs(newPath=newPath, overwrite=overwrite)
 
-    @logCommand('application.')
+    # @logCommand('application.')  # decorated in ui
     def saveProject(self) -> bool:
-        """Save project
+        """Save project.
         :return True if successful
         """
-        return self._saveProject(newPath=None,
-                                 createFallback=True,
-                                 overwriteExisting=True)
+        return self.ui.saveProject()
 
     def _closeProject(self):
         """Close project and clean up - when opening another or quitting application
@@ -960,60 +882,77 @@ class Framework(NotifierBase, GuiBase):
     # Data loaders
     #-----------------------------------------------------------------------------------------
 
-    @logCommand('application.')
-    def loadData(self, *paths) -> list:
-        """Loads data from paths.
-        :returns list of loaded objects
+    def _loadData(self, dataLoaders, maxItemLogging=MAXITEMLOGGING) -> list:
+        """Helper function;
+        calls each dataLoader to load data;
+        optionally suspend command logging
+
+        :param dataLoaders: a list/tuple of dataLoader instances
+        :param maxItemLogging: flag to set maximum items to log (0 denotes logging all)
+        :return a list of loaded objects
         """
         objs = []
-        for path in paths:
-            if not isinstance(path, (str, Path)):
-                raise ValueError('invalid path %r' % path)
+        _echoBlocking = maxItemLogging > 0 and len(dataLoaders) > maxItemLogging
 
-            _path = aPath(path)
-            if not _path.exists():
-                getLogger().warning('application.loadData: path %r does not exist' % path)
-                continue
+        if _echoBlocking:
+            getLogger().info('Loading %d objects, while suppressing command-logging' %
+                             len(dataLoaders))
+            self._increaseNotificationBlocking()
 
-            if (dataLoader := checkPathForDataLoader(path)) is None:
-                getLogger().warning('Unable to load "%s"' % path)
-                continue
-
-            if dataLoader.alwaysCreateNewProject:
-                getLogger().warning('Loading of "%s" would create a new project; use application.loadProject() instead')
-                continue
-
+        for dataLoader in dataLoaders:
+            if dataLoader.createNewProject:
+                with logCommandManager('application.', 'loadProject', dataLoader.path):
+                    result = self.ui._loadProject(dataLoader=dataLoader)
+                    getLogger().info("==> Loaded project %s" % result)
             else:
-                dataLoader.createNewObject = False  # The loadData() method was used; No project created
-                result = dataLoader.load()
-                if not isIterable(result):
-                    result = [result]
-                objs.extend(result)
+                with logCommandManager('application.', 'loadData', dataLoader.path):
+                    result = self.ui._loadData(dataLoader=dataLoader)
+
+            if not isIterable(result):
+                result = [result]
+            objs.extend(result)
+
+        if _echoBlocking:
+            self._decreaseNotificationBlocking()
 
         return objs
+
+    # @logCommand('application.') # eventually decorated by  _loadData()
+    def loadData(self, *paths, filter=None) -> list:
+        """Loads data from paths.
+        Optionally filter for dataFormat(s)
+        :param *paths: argument list of path's (str or Path instances)
+        :param filter: keyword argument: list/tuple of dataFormat strings
+        :returns list of loaded objects
+        """
+        return self.ui.loadData(*paths)
+
+    # @logCommand('application.') # decorated by  ui
+    def loadSpectra(self, *paths) -> list:
+        """Load all the spectra found in paths.
+
+        :param paths: list of paths
+        :return a list of Spectra instances
+        """
+        return self.ui.loadSpectra(*paths)
 
     def _loadV2Project(self, path) -> List[Project]:
         """Actual V2 project loader
         CCPNINTERNAL: called from CcpNmrV2ProjectDataLoader
         """
-        from ccpn.core._implementation.updates.update_v2 import updateProject_fromV2
         from ccpn.core.Project import _loadProject
 
-        with logCommandManager('application.', 'loadProject', path):
-            logger = getLogger()
+        # always close first
+        self._closeProject()
+        project = _loadProject(application=self, path=str(path))
+        self._initialiseProject(project)  # This also sets the linkages
 
-            # always close first
-            self._closeProject()
-            project = _loadProject(application=self, path=str(path))
-            self._initialiseProject(project)  # This also sets the linkages
-            getLogger().info('==> Loaded ccpn project "%s"' % path)
-
-            # Save the result
-            try:
-                project.save()
-                logger.info('==> Saved %s as "%s"' % (project, project.path))
-            except Exception as es:
-                logger.warning('Failed saving %s (%s)' % (project, str(es)))
+        # Save the result
+        try:
+            project.save()
+            getLogger().info('==> Saved %s as "%s"' % (project, project.path))
+        except Exception as es:
+            getLogger().warning('Failed saving %s (%s)' % (project, str(es)))
 
         return [project]
 
@@ -1021,55 +960,13 @@ class Framework(NotifierBase, GuiBase):
         """Actual V3 project loader
         CCPNINTERNAL: called from CcpNmrV3ProjectDataLoader
         """
-        from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory
         from ccpn.core.Project import _loadProject
 
-        if not isinstance(path, (Path, str)):
-            raise ValueError('invalid path "%s"' % path)
-
-        with logCommandManager('application.', 'loadProject', path):
-
-            _path = aPath(path)
-            if not _path.exists():
-                raise ValueError('path "%s" does not exist' % path)
-
-            # always close first
-            self._closeProject()
-            project = _loadProject(application=self, path=path)
-            self._initialiseProject(project)  # This also set the linkages
-            getLogger().info('==> Loaded ccpn project "%s"' % path)
-
+        # always close first
+        self._closeProject()
+        project = _loadProject(application=self, path=path)
+        self._initialiseProject(project)  # This also set the linkages
         return [project]
-
-    def _loadNefFile(self, path: str, makeNewProject=True) -> Project:
-        """Load Project from NEF file at path, and do necessary setup
-        :return Project instance
-        """
-
-        from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
-        from ccpn.core.lib import CcpnNefIo
-
-        from ccpn.util.nef.NefImporter import NefImporter
-
-        _nefReader = CcpnNefIo.CcpnNefReader(self)
-        # dataBlock = _nefReader.getNefData(path)
-
-        _nefImporter = NefImporter()
-        _nefImporter.loadFile(path)
-        _nefImporter._attachReader(_nefReader.importExistingProject)
-
-        if makeNewProject:
-            self._closeProject()
-            self._project = self.newProject(_nefImporter.getName())
-
-        with undoBlockWithoutSideBar():
-            with notificationEchoBlocking():
-                with catchExceptions(application=self, errorStringTemplate='Error loading Nef file: %s',
-                                     printTraceBack=True):
-                    _nefImporter._importNef(self.project, _nefImporter._nefDict)
-
-        getLogger().info('==> Loaded NEF file: "%s"' % (path,))
-        return self.project
 
     def _loadSparkyFile(self, path: str, createNewProject=True) -> Project:
         """Load Project from Sparky file at path, and do necessary setup
@@ -1080,34 +977,33 @@ class Framework(NotifierBase, GuiBase):
         from ccpn.core.lib.CcpnSparkyIo import SPARKY_NAME, CcpnSparkyReader
 
         sparkyReader = CcpnSparkyReader(self)
-
         dataBlock = sparkyReader.parseSparkyFile(str(path))
         sparkyName = dataBlock.getDataValues(SPARKY_NAME, firstOnly=True)
 
-        # Just a helper function for cleaner code below"
-        def _importData(project):
-            with undoBlockWithoutSideBar():
-                with notificationEchoBlocking():
-                    with catchExceptions(application=self, errorStringTemplate='Error loading Sparky file: %s',
-                                         printTraceBack=True):
-                        sparkyReader.importSparkyProject(project, dataBlock)
-
-        #end def
-
         if createNewProject and (dataBlock.getDataValues('sparky', firstOnly=True) == 'project file'):
-            with logCommandManager('application.', 'loadProject', path):
-                self._closeProject()
-                project = self.newProject(sparkyName)
-                _importData(project)
-                self.project.shiftAveraging = True
-            getLogger().info('==> Created project from Sparky file: "%s"' % (path,))
-
+            self._closeProject()
+            project = self._newProject(sparkyName)
         else:
             project = self.project
-            with logCommandManager('application.', 'loadData', path):
-                _importData(project)
-            getLogger().info('==> Imported Sparky file: "%s"' % (path,))
 
+        sparkyReader.importSparkyProject(project, dataBlock)
+        return project
+
+    def _loadStarFile(self, dataLoader) -> Project:
+        """Load a Starfile, and do necessary setup
+        :return Project-instance (either existing or newly created)
+
+        CCPNINTERNAL: called from StarDataLoader
+        """
+        dataBlock = dataLoader.dataBlock
+
+        if dataLoader.createNewProject:
+            self._closeProject()
+            project = self._newProject(dataBlock.getName())
+        else:
+            project = self.project
+
+        # sparkyReader.importSparkyProject(project, dataBlock)
         return project
 
     def _loadPythonFile(self, path):
@@ -1115,9 +1011,8 @@ class Framework(NotifierBase, GuiBase):
         CCPNINTERNAL: called from PythonDataLoader
         """
         mainWindow = self.mainWindow
-        with logCommandManager('application.', 'loadData', path):
-            macroEditor = MacroEditor(mainWindow=mainWindow, filePath=str(path))
-            mainWindow.moduleArea.addModule(macroEditor, position='top', relativeTo=mainWindow.moduleArea)
+        macroEditor = MacroEditor(mainWindow=mainWindow, filePath=str(path))
+        mainWindow.moduleArea.addModule(macroEditor, position='top', relativeTo=mainWindow.moduleArea)
         return []
 
     def _loadHtmlFile(self, path):
@@ -1125,9 +1020,8 @@ class Framework(NotifierBase, GuiBase):
         CCPNINTERNAL: called from HtmlDataLoader
         """
         mainWindow = self.mainWindow
-        with logCommandManager('application.', 'loadData', path):
-            path = aPath(path)
-            mainWindow.newHtmlModule(urlPath=str(path), position='top', relativeTo=mainWindow.moduleArea)
+        path = aPath(path)
+        mainWindow.newHtmlModule(urlPath=str(path), position='top', relativeTo=mainWindow.moduleArea)
         return []
 
     def _cloneSpectraToProjectDir(self):
@@ -1176,118 +1070,19 @@ class Framework(NotifierBase, GuiBase):
     # NEF-related code
     #-----------------------------------------------------------------------------------------
 
-    def _importNef(self, path=None):
-        if not path:
-            filter = '*.nef'
-            dialog = NefFileDialog(parent=self.ui.mainWindow, acceptMode='import', fileFilter=filter)
-
-            dialog._show()
-            path = dialog.selectedFile()
-            if not path:
-                return
-
-        path = aPath(path)
-
-        with catchExceptions(application=self, errorStringTemplate='Error Importing Nef File: %s', printTraceBack=True):
-            with undoBlockWithoutSideBar():
-                self._importNefFile(path=path, makeNewProject=False)
-            self.ui.mainWindow.sideBar.buildTree(self.project)
-
-    def _importNefFile(self, path: Union[str, Path], makeNewProject=True) -> Project:
-        """Load Project from NEF file at path, and do necessary setup
+    def _loadNefFile(self, dataLoader) -> Project:
+        """Load NEF file defined by dataLoader instance
+        :param dataLoader: a NefDataLoader instance
+        :return Project instance
+        CCPNINTERNAL: called from NefDataLoader instance
         """
+        _nefImporter = dataLoader.nefImporter  # This will also populate the nefImporter if need be
+        if dataLoader.createNewProject:
+            self._closeProject()
+            self._project = self._newProject(_nefImporter.getName())
 
-        from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
-        from ccpn.ui.gui.popups.ImportNefPopup import ImportNefPopup, NEFFRAMEKEY_ENABLERENAME, \
-            NEFFRAMEKEY_IMPORT, NEFFRAMEKEY_ENABLEMOUSEMENU, NEFFRAMEKEY_PATHNAME, \
-            NEFFRAMEKEY_ENABLEFILTERFRAME, NEFFRAMEKEY_ENABLECHECKBOXES
-        from ccpn.util.nef import NefImporter as Nef
-        from ccpn.util.CcpnNefImporter import CcpnNefImporter
-        from ccpn.framework.PathsAndUrls import nefValidationPath
-
-        # dataBlock = self.nefReader.getNefData(path)
-
-        # the loader can be subclassed if required, and the type passed as nefImporterClass
-        # _loader = CcpnNefImporter(errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
-
-        # _loader = Nef.NefImporter(errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
-        # _loader.loadFile(path)
-        # _loader.loadValidateDictionary(nefValidationPath)
-
-        # create/read the nef file
-        from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
-
-        _dataLoader = checkPathForDataLoader(path)
-        _loader = _dataLoader.readNefFile(path, nefValidationPath=nefValidationPath, errorLogging=Nef.el.NEF_STRICT, hidePrefix=True)
-
-        # verify popup here
-        selection = None
-
-        dialog = ImportNefPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow,
-                                # nefImporterClass=CcpnNefImporter,
-                                nefObjects=({NEFFRAMEKEY_IMPORT: self.project,
-                                             },
-                                            {NEFFRAMEKEY_IMPORT           : _loader,
-                                             NEFFRAMEKEY_ENABLECHECKBOXES : True,
-                                             NEFFRAMEKEY_ENABLERENAME     : True,
-                                             NEFFRAMEKEY_ENABLEFILTERFRAME: True,
-                                             NEFFRAMEKEY_ENABLEMOUSEMENU  : True,
-                                             NEFFRAMEKEY_PATHNAME         : str(path),
-                                             })
-                                )
-        with notificationEchoBlocking():
-            dialog.fillPopup()
-
-        dialog.setActiveNefWindow(1)
-        if dialog.exec_():
-
-            selection = dialog._saveFrameSelection
-            _nefReader = dialog.getActiveNefReader()
-
-            if makeNewProject:
-                self._closeProject()
-                self._project = self.newProject(_loader._nefDict.name)
-
-            # import from the loader into the current project
-            self.importFromLoader(_loader, reader=_nefReader)
-
-            getLogger().info('==> Loaded NEF file: "%s"' % (path,))
-            return self.project
-
-    @logCommand('application.')
-    def importFromLoader(self, loader, reader=None):
-        """Read the selection from the nefImporter object into the current.project
-
-        To use without the nef import dialog, requires the creation of a reader object
-        If no reader is specified, then a default is created
-        Selection of objects is specified through the loader before import
-
-        :param loader: nef loader object created from a nef file
-        """
-
-        from ccpn.core.lib.ContextManagers import notificationEchoBlocking
-        from ccpn.core.lib import CcpnNefIo
-        from ccpn.util.nef import NefImporter as Nef
-
-        # set a default if not specified
-        reader = reader or CcpnNefIo.CcpnNefReader(self)
-
-        # check the parameters
-        if not isinstance(loader, Nef.NefImporter):
-            raise ValueError(f'loader {loader} not defined correctly')
-        if not isinstance(reader, CcpnNefIo.CcpnNefReader):
-            raise ValueError(f'reader {reader} not defined correctly')
-
-        self.project.shiftAveraging = False
-
-        with undoBlockWithoutSideBar():
-            with notificationEchoBlocking():
-                with catchExceptions(application=self, errorStringTemplate='Error importing Nef file: %s', printTraceBack=True):
-                    # need datablock selector here, with subset selection dependent on datablock type
-
-                    reader.importNewProject(self.project, loader._nefDict)
-
-        self.project.shiftAveraging = True
+        _nefImporter.importIntoProject(project=self.project)
+        return self.project
 
     def _exportNEF(self):
         """
@@ -1295,7 +1090,7 @@ class Framework(NotifierBase, GuiBase):
         Temporary routine because I don't know how else to do it yet
         """
         from ccpn.ui.gui.popups.ExportNefPopup import ExportNefPopup
-        from ccpn.core.lib.CcpnNefIo import NEFEXTENSION
+        from ccpn.framework.lib.ccpnNef.CcpnNefIo import NEFEXTENSION
 
         _path = aPath(self.preferences.general.userWorkingPath or '~').filepath / (self.project.name + NEFEXTENSION)
         dialog = ExportNefPopup(self.ui.mainWindow,

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-03 17:17:29 +0000 (Thu, February 03, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-07 17:13:52 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -129,7 +129,7 @@ def undoBlockWithSideBar(application=None):
 
     if application.ui and application.ui.mainWindow:
         sidebar = application.ui.mainWindow.sideBar
-        sidebar.increaseSidebarBlocking()
+        sidebar.increaseSidebarBlocking(withSideBarUpdate=True)
 
     application.project.suspendNotification()
 
@@ -142,7 +142,7 @@ def undoBlockWithSideBar(application=None):
 
         if application.ui and application.ui.mainWindow:
             sidebar = application.ui.mainWindow.sideBar
-            sidebar.decreaseSidebarBlocking()
+            sidebar.decreaseSidebarBlocking(withSideBarUpdate=True)
 
         if undo is not None:
             undo.decreaseWaypointBlocking()
@@ -218,14 +218,14 @@ def catchExceptions(application=None, errorStringTemplate='Error: "%s"', popupAs
             errorStringTemplate = f'%s\n[malformed template]'
 
         getLogger().warning(errorStringTemplate % str(es))
-        if printTraceBack:
+        if printTraceBack or application._isInDebugMode:
             traceback.print_exc()  # please give more info about the error!
         if application.hasGui and popupAsWarning:
             from ccpn.ui.gui.widgets import MessageDialog  # Local import: in case of no-gui, we never get here
 
             MessageDialog.showWarning('Warning', errorStringTemplate % str(es))
-        if application._isInDebugMode:
-            raise es
+        # if application._isInDebugMode:
+        #     raise es
 
 
 @contextmanager

@@ -5,10 +5,10 @@ A first step towards separating them from the Framework class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-02 14:03:36 +0000 (Wed, February 02, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-02-07 17:13:53 +0000 (Mon, February 07, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,49 +30,28 @@ __date__ = "$Date: 2022-01-18 10:28:48 +0000 (Tue, January 18, 2022) $"
 import os
 import platform
 
-from tqdm import tqdm
 from functools import partial
-from typing import Union, Optional, List, Tuple, Sequence
+from typing import Optional
 
 from PyQt5 import QtWidgets
 
 from ccpn.framework.PathsAndUrls import \
     macroPath, \
     widgetsPath, \
-    CCPN_EXTENSION, \
     CCPN_ARCHIVES_DIRECTORY
 
-from ccpn.core.IntegralList import IntegralList
-from ccpn.core.PeakList import PeakList
-from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Project import Project
-from ccpn.core.lib.Notifiers import NotifierBase, Notifier
-from ccpn.core.lib.Pid import Pid, PREFIXSEP
-from ccpn.core.lib.ContextManagers import \
-    catchExceptions, \
-    undoBlockWithoutSideBar, \
-    undoBlock, \
-    notificationEchoBlocking, \
-    logCommandManager
 
-from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable
-from ccpn.util.decorators import logCommand
+from ccpn.util.Common import isWindowsOS
 from ccpn.util.Logging import getLogger
-from ccpn.util.Path import Path, aPath
-import ccpn.util.Layout as Layout
+from ccpn.util.Path import aPath
+import ccpn.ui.gui.Layout as Layout
 
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import \
-    ProjectFileDialog, \
-    DataFileDialog, \
-    NefFileDialog, \
     ArchivesFileDialog, \
-    MacrosFileDialog, \
-    CcpnMacrosFileDialog, \
     LayoutsFileDialog, \
-    NMRStarFileDialog, \
-    SpectrumFileDialog, \
-    ProjectSaveFileDialog
+    NMRStarFileDialog
 
 from ccpn.ui.gui.widgets.Menu import \
     SHOWMODULESMENU, \
@@ -177,17 +156,17 @@ class GuiBase(object):
         self._menuSpec = ms = []
 
         ms.append(('File', [
-            ("New", self._newProjectMenuCallback, [('shortcut', '⌃n')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+            ("New", self._newProjectCallback, [('shortcut', '⌃n')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             (),
-            ("Open...", self._openProjectMenuCallback, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+            ("Open...", self._openProjectCallback, [('shortcut', '⌃o')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Open Recent", ()),
 
-            ("Load Data...", lambda: self._loadDataFromMenu(text='Load Data'), [('shortcut', 'ld')]),
+            ("Load Data...", self._loadDataCallback, [('shortcut', 'ld')]),
             (),
             ("Save", self._saveCallback, [('shortcut', '⌃s')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ("Save As...", self._saveAsCallback, [('shortcut', 'sa')]),
             (),
-            ("Import", (("Nef File", self._importNef, [('shortcut', 'in'), ('enabled', True)]),
+            ("Import", (("Nef File", self._importNefCallback, [('shortcut', 'in'), ('enabled', True)]),
                         ("NmrStar File", self._loadNMRStarFileCallback, [('shortcut', 'bi')]),
                         )),
             ("Export", (("Nef File", self._exportNEF, [('shortcut', 'ex'), ('enabled', True)]),
@@ -289,7 +268,7 @@ class GuiBase(object):
         ))
 
         ms.append(('Molecules', [
-            ("Chain from FASTA...", lambda: self._loadDataFromMenu(text='Load FASTA')),
+            ("Chain from FASTA...", self._loadDataCallback),
             (),
             ("New Chain...", self.showCreateChainPopup),
             ("Inspect...", self.inspectMolecule, [('enabled', False)]),
@@ -384,39 +363,27 @@ class GuiBase(object):
     #-----------------------------------------------------------------------------------------
     # File --> callback methods
     #-----------------------------------------------------------------------------------------
-    def _loadDataFromMenu(self, text='Load Data', filter=None):
+    def _loadDataCallback(self):
         """Call loadData from the menu and trap errors.
         """
-        dialog = DataFileDialog(parent=self.mainWindow, acceptMode='load', fileFilter=filter)
-        dialog._show()
-        if (path := dialog.selectedFile()) is None:
-            return
+        self.ui.loadData()
 
-        try:
-            result = self.loadData(path)
+    def _newProjectCallback(self):
+        """Callback for creating new project
+        """
+        self.ui.newProject()
 
-        except Exception as es:
-            MessageDialog.showWarning(str(self.mainWindow.windowTitle()), str(es))
-            if self._isInDebugMode:
-                raise es
+    def _openProjectCallback(self):
+        """
+        Opens a OpenProject dialog box if project directory is not specified.
+        Loads the selected project.
+        """
+        self.ui.loadProject()
 
-    def _newProjectMenuCallback(self):
-        """Callback for creating new project"""
-        with catchExceptions(application=self, errorStringTemplate='Error creating new project:', printTraceBack=True):
-            okToContinue = self.ui.mainWindow._queryCloseProject(title='New Project',
-                                                                 phrase='create a new')
-            if okToContinue:
-                self.ui.mainWindow.moduleArea._closeAll()
-                newProject = self.newProject()
-                if newProject is None:
-                    raise RuntimeError('Unable to create new project')
-                newProject._mainWindow.show()
-                QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
-
-    def _openProjectMenuCallback(self):
+    def _importNefCallback(self):
         """Just a stub for the menu setup to pass on to mainWindow, to be moved later
         """
-        return self.ui.mainWindow._openProjectCallback()
+        return self.ui.mainWindow.showNefPopup()
 
     def _loadNMRStarFileCallback(self, path=None, makeNewProject=False) -> Optional[Project]:
         if not path:
@@ -427,7 +394,7 @@ class GuiBase(object):
                 return
 
         from ccpn.ui.gui.popups.ImportStarPopup import StarImporterPopup
-        from ccpn.core.lib import CcpnNefIo
+        from ccpn.framework.lib.ccpnNef import CcpnNefIo
 
         _nefReader = CcpnNefIo.CcpnNefReader(self)
         relativePath = os.path.dirname(os.path.realpath(path))
@@ -461,23 +428,7 @@ class GuiBase(object):
         """Opens save Project as dialog box and saves project to path specified
         in the file dialog.
         """
-        oldPath = self.project.path
-        newPath = _getSaveDirectory(self.mainWindow)
-
-        with catchExceptions(application=self,
-                             errorStringTemplate='Error saving project: %s',
-                             printTraceBack=True):
-            if newPath:
-                # Next line unnecessary, but does not hurt
-                successful = self.saveProjectAs(newPath=newPath, overwrite=True)
-                if not successful:
-                    getLogger().warning("Saving project to %s aborted" % newPath)
-            else:
-                successful = False
-                getLogger().info("Project not saved - no valid destination selected")
-
-            self._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
-            self.ui.mainWindow._fillRecentProjectsMenu()  # Update the menu
+        self.ui.saveProjectAs()
 
     def _archiveProjectCallback(self):
 
@@ -557,51 +508,10 @@ class GuiBase(object):
     #-----------------------------------------------------------------------------------------
     # Spectra --> callback methods
     #-----------------------------------------------------------------------------------------
-    def _loadSpectraCallback(self, paths=None, filter=None, askBeforeOpen_lenght=20):
+    def _loadSpectraCallback(self):
+        """Load all the spectra callback
         """
-        Load all the spectra found in paths
-
-        :param paths: list of str of paths
-        :param filter:
-        :param askBeforeOpen_lenght: how many spectra can open without asking first
-        """
-        from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
-        from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
-
-        if paths is None:
-            dialog = SpectrumFileDialog(parent=self.ui.mainWindow, acceptMode='load', fileFilter=filter, useNative=False)
-
-            dialog._show()
-            paths = dialog.selectedFiles()
-
-        if not paths:
-            return
-
-        spectrumLoaders = []
-        count = 0
-        # Recursively search all paths
-        for path in paths:
-            _path = aPath(path)
-            if _path.is_dir():
-                dirLoader = DirectoryDataLoader(path, recursive=False,
-                                                filterForDataFormats=(SpectrumDataLoader.dataFormat,))
-                spectrumLoaders.append(dirLoader)
-                count += len(dirLoader)
-
-            elif (sLoader := SpectrumDataLoader.checkForValidFormat(path)) is not None:
-                spectrumLoaders.append(sLoader)
-                count += 1
-
-        if count > askBeforeOpen_lenght:
-            okToOpenAll = MessageDialog.showYesNo('Load data', 'The directory contains multiple items (%d).'
-                                                               ' Do you want to open all?' % len(spectrumLoaders))
-            if not okToOpenAll:
-                return
-
-        with undoBlockWithoutSideBar():
-            with notificationEchoBlocking():
-                for sLoader in tqdm(spectrumLoaders):
-                    sLoader.load()
+        self.ui.loadSpectra()
 
     #-----------------------------------------------------------------------------------------
     # Help -->
@@ -835,45 +745,6 @@ class GuiBase(object):
 #-----------------------------------------------------------------------------------------
 # Helper code
 #-----------------------------------------------------------------------------------------
-
-def _getSaveDirectory(mainWindow):
-    """Opens save Project as dialog box and gets directory specified in
-    the file dialog.
-    """
-
-    dialog = ProjectSaveFileDialog(parent=mainWindow, acceptMode='save')
-    dialog._show()
-    newPath = dialog.selectedFile()
-
-    # if not iterable then ignore - dialog may return string or tuple(<path>, <fileOptions>)
-    if isinstance(newPath, tuple) and len(newPath) > 0:
-        newPath = newPath[0]
-
-    # ignore if empty
-    if not newPath:
-        return None
-
-    if newPath:
-
-        # native dialog returns a tuple: (path, ''); ccpn returns a string
-        if isinstance(newPath, tuple):
-            newPath = newPath[0]
-            if not newPath:
-                return None
-
-        newPath = aPath(newPath).assureSuffix(CCPN_EXTENSION)
-        if ( newPath.exists() and
-             newPath.is_file() or (newPath.is_dir() and newPath.listDirFiles() > 0)
-           ):
-            # should not really need to check the second and third condition above, only
-            # the Qt dialog stupidly insists a directory exists before you can select it
-            # so if it exists but is empty then don't bother asking the question
-            title = 'Overwrite path'
-            msg = 'Path "%s" already exists, continue?' % newPath
-            if not MessageDialog.showYesNo(title, msg):
-                newPath = ''
-
-        return newPath
 
 def _getOpenLayoutPath(mainWindow):
     """Opens a saved Layout as dialog box and gets directory specified in the

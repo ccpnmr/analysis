@@ -1,5 +1,5 @@
-"""Module Documentation here
-
+"""
+This file contains AutoBackup class
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -20,42 +20,42 @@ __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: CCPN $"
-__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
+__author__ = "$Author: gvuister $"
+__date__ = "$Date: 2022-02-05 10:28:48 +0000 (Saturday, February 5, 2022) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
-import copy
-import os
-from ccpn.framework.lib.ccpnNef.CcpnNefCommon import nef2CcpnMap, saveFrameWritingOrder, _isALoop
-from ccpn.core.testing.WrapperTesting import WrapperTesting
-from ccpn.framework.lib.ccpnNef.CcpnNefIo import saveNefProject
+from threading import Thread
+from time import time, sleep
+
+from ccpn.util.Logging import getLogger
 
 
-def test_nef_maps():
-    # Validity check
-    # Check that elements in nef2CcpnMap match saveFrameOrder
-    # and that all contents are present and reached from saveframes in saveFrameOrder
-    copyMap = copy.deepcopy(nef2CcpnMap)
-    for category in saveFrameWritingOrder:
-        map1 = copyMap.pop(category)
-        for tag, val in map1.items():
-            if val == _isALoop:
-                copyMap.pop(tag)
-    if copyMap:
-        raise TypeError("Coding Error - Data in nef2CcpnMap not reached from saveFrameOrder:\n%s"
-                        % list(copyMap.keys()))
+class AutoBackup(Thread):
 
+    def __init__(self, q, backupFunction, sleepTime=1):
+        super().__init__()
+        self.sleepTime = sleepTime
+        self.q = q
+        self.backupFunction = backupFunction
+        self.startTime = None
 
-class NefIoTest(WrapperTesting):
-    # Path of project to load (None for new project
-    projectPath = 'CcpnCourse2b'
-
-    def test_nef_write_read(self):
-        nefPath = self.project.path + '.out.nef'
-        if os.path.exists(nefPath):
-            os.remove(nefPath)
-        saveNefProject(self.project, nefPath)
-        application = self.project.application
-        application.loadProject(nefPath)
+    def run(self):
+        self.startTime = time()
+        while True:
+            waitTime = None
+            if not self.q.empty():
+                waitTime = self.q.get()
+            if waitTime is None:
+                sleep(self.sleepTime)
+            elif waitTime == 'kill':
+                return
+            elif (time() - self.startTime) < waitTime:
+                sleep(self.sleepTime)
+            else:
+                self.startTime = time()
+                try:
+                    self.backupFunction()
+                except Exception as es:
+                    getLogger().warning('Project backup failed with error %s' % es)

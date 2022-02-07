@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-04 09:50:00 +0000 (Fri, February 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-07 17:13:52 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -34,18 +34,16 @@ import re
 import pandas as pd
 import json
 from functools import partial
-from datetime import datetime
 from collections import OrderedDict as OD, namedtuple
 # from collections import Counter
 from operator import attrgetter, itemgetter
 from typing import List, Union, Optional, Sequence, Tuple
 from ccpn.core.lib import Pid
 from ccpn.core import _coreImportOrder
-from ccpn.core.lib.CcpnNefCommon import nef2CcpnMap, saveFrameReadingOrder, _isALoop, \
+from ccpn.framework.lib.ccpnNef.CcpnNefCommon import nef2CcpnMap, saveFrameReadingOrder, _isALoop, \
     saveFrameWritingOrder, _parametersFromLoopRow, _traverse, _stripSpectrumName, _stripSpectrumSerial
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.util import Common as commonUtil
-from ccpn.util import Constants
 from ccpn.util import jsonIo
 from ccpn.util.nef import Specification
 from ccpn.util.nef import StarIo
@@ -87,7 +85,7 @@ from ccpn.core.lib import RestraintLib
 from ccpn.util.Logging import getLogger
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.AttrDict import AttrDict
-from ccpn.core.lib.CcpnNefContent import CcpnNefContent
+from ccpn.framework.lib.ccpnNef.CcpnNefContent import CcpnNefContent
 
 
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
@@ -1168,7 +1166,7 @@ class CcpnNefWriter:
     def ccpnLogging2Nef(self, project: Project):
         """Convert ccpn logging dataSet to CCPN NEF saveframe"""
 
-        from ccpn.core.lib.CcpnNefLogging import CCPNDEFAULT, getCcpnNefLogNames, getCcpnNefLog
+        from ccpn.framework.lib.ccpnNef.CcpnNefLogging import CCPNDEFAULT, getCcpnNefLogNames, getCcpnNefLog
 
         results = []
         category = 'ccpn_logging'
@@ -2945,7 +2943,7 @@ class CcpnNefReader(CcpnNefContent):
         getLogger().debug('Loaded NEF file, time = %.2fs' % (t2 - t0))
 
         for msg in self.warnings:
-            getLogger().warning(f'====> {msg}')
+            getLogger().warning(f'{msg}')
         self.project = None
 
     def importNewNMRStarProject(self, project: Project, dataBlock: StarIo.NmrDataBlock,
@@ -3027,7 +3025,7 @@ class CcpnNefReader(CcpnNefContent):
         getLogger().debug('Loaded NEF file, time = %.2fs' % (t2 - t0))
 
         for msg in self.warnings:
-            getLogger().warning(f'====> {msg}')
+            getLogger().warning(f'{msg}')
         self.project = None
 
     def _verifyLoops(self, project: Project, saveFrame: StarIo.NmrSaveFrame, addLoopAttribs=None,
@@ -3167,7 +3165,7 @@ class CcpnNefReader(CcpnNefContent):
 
     def verify_ccpn_logging(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
         """verify ccpn_logging saveFrame"""
-        from ccpn.core.lib.CcpnNefLogging import CCPNHISTORY, CCPNLOGGING
+        from ccpn.framework.lib.ccpnNef.CcpnNefLogging import CCPNLOGGING
 
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
@@ -3188,7 +3186,7 @@ class CcpnNefReader(CcpnNefContent):
     def load_ccpn_history(self, project: Project, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame,
                           name: str):
         """Serves to load ccpn_history loops"""
-        from ccpn.core.lib.CcpnNefLogging import setCcpnNefLog
+        from ccpn.framework.lib.ccpnNef.CcpnNefLogging import setCcpnNefLog
 
         if loop and loop.data:
             # if loop.data exists then load as a pandas dataFrame
@@ -7531,7 +7529,7 @@ class CcpnNefReader(CcpnNefContent):
         self.errors.append((template.format(self._saveFrameName, message), source, objects))
 
     def warning(self, message: str, loopName=None):
-        template = "Warning in saveFrame%s\n%s"
+        template = "in saveFrame %s:\n%s"
         self.warnings.append(template % (self._saveFrameName, message))
 
     def storeContent(self, source, objects: Optional[dict] = None):
@@ -7841,11 +7839,11 @@ def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict
                                              transferData=transferData)
 
             # make new spectrum with default parameters
-            spectrum = project.newEmptySpectrum(isotopeCodes=dimensionData['isotopeCodes'],
-                                                spectralWidths=dimensionData['spectralWidths'],
-                                                spectrometerFrequencies=dimensionData['spectrometerFrequencies'],
-                                                name=spectrumName,
-                                                path=filePath)
+            kwds={}
+            for key in ('isotopeCodes', 'spectralWidths', 'spectrometerFrequencies'):
+                if key in dimensionData:
+                    kwds[key] = dimensionData[key]
+            spectrum = project.newEmptySpectrum(name=spectrumName, path=filePath, **kwds)
             if spectrumParameters.get('chemicalShiftList') is not None:
                 spectrum.chemicalShiftList = spectrumParameters.get('chemicalShiftList')
 

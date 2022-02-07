@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-04 14:45:25 +0000 (Fri, February 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-07 17:13:52 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -46,7 +46,7 @@ from ccpn.core.RestraintTable import RestraintTable
 from ccpn.util.Logging import getLogger
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.AttrDict import AttrDict
-from ccpn.core.lib.CcpnNefCommon import nef2CcpnMap, _isALoop, _parametersFromLoopRow, _stripSpectrumName, _stripSpectrumSerial
+from ccpn.framework.lib.ccpnNef.CcpnNefCommon import nef2CcpnMap, _isALoop, _parametersFromLoopRow, _stripSpectrumName, _stripSpectrumSerial
 
 
 class CcpnNefContent:

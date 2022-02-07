@@ -1,5 +1,5 @@
-"""Module Documentation here
-
+"""
+This file contains CcpnNefImporter class
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -20,42 +20,50 @@ __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: CCPN $"
-__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
+__author__ = "$Author: gvuister $"
+__date__ = "$Date: 2022-02-05 10:28:48 +0000 (Saturday, February 5, 2022) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
-import copy
-import os
-from ccpn.framework.lib.ccpnNef.CcpnNefCommon import nef2CcpnMap, saveFrameWritingOrder, _isALoop
-from ccpn.core.testing.WrapperTesting import WrapperTesting
-from ccpn.framework.lib.ccpnNef.CcpnNefIo import saveNefProject
+from ccpn.framework.Application import getApplication
+from ccpn.framework.lib.ccpnNef.CcpnNefIo import CcpnNefReader
+
+from ccpn.util.Logging import getLogger
+from ccpn.util.nef.NefImporter import NefImporter
+from ccpn.util.nef.ErrorLog import NEF_STANDARD, NEF_STRICT
+from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideBar, notificationEchoBlocking
 
 
-def test_nef_maps():
-    # Validity check
-    # Check that elements in nef2CcpnMap match saveFrameOrder
-    # and that all contents are present and reached from saveframes in saveFrameOrder
-    copyMap = copy.deepcopy(nef2CcpnMap)
-    for category in saveFrameWritingOrder:
-        map1 = copyMap.pop(category)
-        for tag, val in map1.items():
-            if val == _isALoop:
-                copyMap.pop(tag)
-    if copyMap:
-        raise TypeError("Coding Error - Data in nef2CcpnMap not reached from saveFrameOrder:\n%s"
-                        % list(copyMap.keys()))
+class CcpnNefImporter(NefImporter):
+    """A class for custimization of the general NefImporter class
+    """
 
+    def __init__(self, errorLogging=NEF_STANDARD, hidePrefix = True):
 
-class NefIoTest(WrapperTesting):
-    # Path of project to load (None for new project
-    projectPath = 'CcpnCourse2b'
+        _app = getApplication()
+        super().__init__(programName=_app.applicationName,
+                         programVersion=_app.applicationVersion,
+                         errorLogging=errorLogging,
+                         hidePrefix=hidePrefix)
 
-    def test_nef_write_read(self):
-        nefPath = self.project.path + '.out.nef'
-        if os.path.exists(nefPath):
-            os.remove(nefPath)
-        saveNefProject(self.project, nefPath)
-        application = self.project.application
-        application.loadProject(nefPath)
+        # set the ccpn logger
+        _logger = getLogger().error if errorLogging == NEF_STRICT else getLogger().warning
+        self.logger = _logger
+
+        self._reader = None
+        self._application = _app
+
+    def importIntoProject(self, project):
+        """Import the data of self into project, using a previously attached
+        reader (auto-generated if None).
+
+        :param project: a Project instance
+        """
+        if self._reader is None:
+            _reader = CcpnNefReader(application=self._application)
+        else:
+            _reader = self._reader
+
+        _reader.importExistingProject(project, self.data)
+

@@ -7,11 +7,13 @@ The state is saved in a Json file.
 
 Original code by Luca Mureddu
 Fully refactored by Geerten Vuister; second version for 3.1.0 release
+
+IN_PROGRESS
 """
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -24,8 +26,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 15:30:05 +0000 (Tue, February 01, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-02-07 17:13:53 +0000 (Mon, February 07, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -255,7 +257,7 @@ class LayoutManager(CcpNmrJson):
             path = aPath(path)
         self.restore(path.asString())  # This restores the data from path
 
-        from ccpn.util.Layout import restoreLayout
+        from ccpn.ui.gui.Layout import restoreLayout
         restoreLayout(self.mainWindow, self.mainWindow.moduleLayouts, restoreSpectrumDisplay=False)
 
         # # restore the modules that were open before

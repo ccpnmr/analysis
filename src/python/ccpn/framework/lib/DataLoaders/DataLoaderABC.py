@@ -9,7 +9,7 @@ work of loading the data into the project.
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -21,9 +21,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-24 18:52:43 +0000 (Wed, November 24, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-07 17:13:52 +0000 (Mon, February 07, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -35,7 +35,7 @@ __date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
 
 from collections import OrderedDict
 
-from ccpn.util.Path import aPath
+from ccpn.util.Path import Path, aPath
 from ccpn.util.traits.TraitBase import TraitBase
 from ccpn.util.traits.CcpNmrTraits import Unicode, Any, List, Bool, CPath, Odict
 from ccpn.util.Logging import getLogger
@@ -76,21 +76,37 @@ def getDataLoaders():
     return DataLoaderABC._dataLoaders
 
 
-def checkPathForDataLoader(path, exclude=()):
+def checkPathForDataLoader(path, filter=None):
     """Check path if it corresponds to any defined data format.
-    Exclude any dataLoader defined in the exclude argument (a tuple/list
-    of datFormat strings)
+    Optionally exclude any dataLoader with types defined by filter
 
-    return: a DataLoader instance or None if there was no match
+    :param filter: a tuple/list of dataFormat strings
+    :return a DataLoader instance or None if there was no match
     """
+    if not isinstance(path, (str, Path)):
+        raise ValueError('checkPathForDataLoader: invalid path %r' % path)
+
+    _path = aPath(path)
+    if not _path.exists():
+        raise ValueError('checkPathForDataLoader: path %r does not exist' % path)
+
+    if filter is None:
+        filter = list(getDataLoaders().keys())
+
     for fmt, cls in getDataLoaders().items():
-        if cls.dataFormat not in exclude:
-            instance = cls.checkForValidFormat(path)
-            if instance is None:
-                getLogger().debug('path "%s" is not valid for dataFormat "%s"' % (path, cls.dataFormat))
-            else:
-                getLogger().debug('path "%s" is valid for dataFormat "%s"' % (path, cls.dataFormat))
-                return instance  # we found a valid format for path
+        instance = cls.checkForValidFormat(path)
+        if instance is None:
+            getLogger().debug2('%-20s %-20s: %s' % (cls.dataFormat, '(Not Valid)', path))
+            continue
+
+        # we found an instance
+        if cls.dataFormat not in filter:
+            getLogger().debug2('%-20s %-20s: %s' % (cls.dataFormat, '(Valid, not in filter)', path))
+            return None
+        else:
+            getLogger().debug2('%-20s %-20s: %s' % (cls.dataFormat, '(Valid, in filter)', path))
+            return instance  # we found a valid format for path
+
     return None
 
 #--------------------------------------------------------------------------------------------
@@ -149,7 +165,7 @@ class DataLoaderABC(TraitBase):
         self.createNewProject = self.alwaysCreateNewProject or self.canCreateNewProject
 
         # local import to avoid cycles
-        from ccpn.framework.Framework import getApplication
+        from ccpn.framework.Application import getApplication
         self.application = getApplication()
 
     @property

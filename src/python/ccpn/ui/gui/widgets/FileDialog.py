@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-07 15:28:35 +0000 (Tue, December 07, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-07 17:13:53 +0000 (Mon, February 07, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -382,7 +382,8 @@ class ProjectFileDialog(FileDialogABC):
     def _updateCurrentPath(self):
         """Update the current path for here and the ProjectSaveFileDialog
         """
-        # accept the dialog and set the current selected folder for next time if directory not originally set
+        # accept the dialog and set the current selected folder for next time,
+        # if directory not originally set
         super()._updateCurrentPath()
 
         # copy the value to the ProjectSaveFileDialog
@@ -397,7 +398,8 @@ class ProjectSaveFileDialog(FileDialogABC):
     def _updateCurrentPath(self):
         """Update the current path for here and the ProjectFileDialog
         """
-        # accept the dialog and set the current selected folder for next time if directory not originally set
+        # accept the dialog and set the current selected folder for next time,
+        # if directory not originally set
         super()._updateCurrentPath()
 
         # copy the value to the ProjectFileDialog

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-06 18:36:44 +0000 (Sun, February 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-07 10:17:34 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -34,13 +34,15 @@ from PyQt5 import QtWidgets, QtCore
 from ccpn.core import _coreClassMap
 from ccpn.core.Project import Project
 
+from ccpn.framework.PathsAndUrls import CCPN_EXTENSION
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders, checkPathForDataLoader
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib.ContextManagers import \
     notificationEchoBlocking, \
     catchExceptions, \
-    undoBlockWithoutSideBar
+    undoBlockWithoutSideBar, \
+    logCommandManager
 
 from ccpn.ui.Ui import Ui
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup, NewTermsConditionsPopup
@@ -57,6 +59,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.util import Logging
 from ccpn.util import Register
 from ccpn.util.Path import aPath, Path
+from ccpn.util.decorators import logCommand
 
 
 def qtMessageHandler(*errors):
@@ -384,6 +387,7 @@ class Gui(Ui):
     # Project and loading data related methods
     #-----------------------------------------------------------------------------------------
 
+    @logCommand('application.')
     def newProject(self, name:str = 'default') -> Project:
         """Create a new project instance with name.
         :return a Project instance or None
@@ -458,38 +462,106 @@ class Gui(Ui):
 
         return newProject
 
+    # @logCommand('application.') # eventually decorated by  _loadData()
     def loadProject(self, path=None) -> Project:
         """Loads project defined by path
-        :return a Project instance
+        :return a Project instance or None
         """
         if path is None:
             dialog = FileDialog.ProjectFileDialog(parent=self.mainWindow, acceptMode='open')
             dialog._show()
 
             if (path := dialog.selectedFile()) is None:
-                return
+                return None
 
         dataLoader, createNewProject, ignore = self._getDataLoader(path)
         if ignore or dataLoader is None or not createNewProject:
-            return
+            return None
 
         # load the project using the dataLoader;
         # We'll ask framework, who will pass it back to ui._loadProject
         newProject = self.application._loadData([dataLoader])
         return newProject
 
+    def saveProjectAs(self, newPath=None, overwrite:bool=False) -> bool:
+        """Opens save Project to newPath.
+        Optionally open file dialog.
+        :param newPath: new path to save project (str | Path instance)
+        :param overwrite: flag to indicate overwriting of existing path
+        :return True if successful
+        """
+        oldPath = self.project.path
+        if newPath is None:
+            if newPath := _getSaveDirectory(self.mainWindow) is None:
+                return False
+
+        newPath = aPath(newPath).assureSuffix(CCPN_EXTENSION)
+        if (  not overwrite and
+              newPath.exists() and
+             (newPath.is_file() or (newPath.is_dir() and len(newPath.listdir()) > 0))
+           ):
+            # should not really need to check the second and third condition above, only
+            # the Qt dialog stupidly insists a directory exists before you can select it
+            # so if it exists but is empty then don't bother asking the question
+            title = 'Project SaveAs'
+            msg = 'Path "%s" already exists; overwrite?' % newPath
+            if not MessageDialog.showYesNo(title, msg):
+                return False
+
+        with logCommandManager('application.', 'saveProjectAs', newPath, overwrite):
+            with catchExceptions(errorStringTemplate='Error saving project: %s'):
+                if not self.application._saveProject(newPath=newPath,
+                                                     createFallback=False,
+                                                     overwriteExisting=True):
+                    txt = "Saving project to %s aborted" % newPath
+                    getLogger().warning(txt)
+                    MessageDialog.showError("Project SaveAs", txt, parent=self.mainWindow)
+                    return False
+
+
+        self.mainWindow._updateWindowTitle()
+        self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
+        self.mainWindow._fillRecentProjectsMenu() # Update the menu
+
+        successMessage = '==> Project successfully saved to "%s"' % self.project.path
+        self.mainWindow.statusBar().showMessage(successMessage)
+        getLogger().info(successMessage)
+
+        return True
+
+    @logCommand('application.')
+    def saveProject(self) -> bool:
+        """Save project.
+        :return True if successful
+        """
+        success = self.application._saveProject(newPath=None,
+                                                createFallback=True,
+                                                overwriteExisting=True)
+        if not success:
+            return False
+
+        successMessage = '==> Project successfully saved to "%s"' % self.project.path
+        self.mainWindow.statusBar().showMessage(successMessage)
+        getLogger().info(successMessage)
+
+        return True
+
     def _loadData(self, dataLoader) -> list:
         """Load the data defined by dataLoader instance, catching errors
         and suspending sidebar.
         :return a list of loaded opjects
         """
-        with catchExceptions(errorStringTemplate='Loading "%s" failed:' % dataLoader.path):
-            with undoBlockWithoutSideBar():
+        with undoBlockWithoutSideBar():
+            with catchExceptions(errorStringTemplate='Loading "%s" failed:' % dataLoader.path):
                 result = dataLoader.load()
         return result
 
-    def loadData(self, *paths) -> list:
+    # @logCommand('application.') # eventually decorated by  _loadData()
+    def loadData(self, *paths, filter=None) -> list:
         """Loads data from paths; query if none supplied
+        Optionally filter for dataFormat(s)
+        :param *paths: argument list of path's (str or Path instances)
+        :param filter: keyword argument: list/tuple of dataFormat strings
         :returns list of loaded objects
         """
         if len(paths) == 0:
@@ -556,6 +628,42 @@ class Gui(Ui):
 
         return self.application._loadData(spectrumLoaders)
 
+#-----------------------------------------------------------------------------------------
+# Helper code
+#-----------------------------------------------------------------------------------------
+
+def _getSaveDirectory(mainWindow):
+    """Opens save Project as dialog box and gets directory specified in
+    the file dialog.
+    :return path instance or None
+    """
+
+    dialog = FileDialog.ProjectSaveFileDialog(parent=mainWindow, acceptMode='save')
+    dialog._show()
+    newPath = dialog.selectedFile()
+
+    # if not iterable then ignore - dialog may return string or tuple(<path>, <fileOptions>)
+    if isinstance(newPath, tuple) and len(newPath) > 0:
+        newPath = newPath[0]
+
+    # ignore if empty
+    if not newPath:
+        return None
+
+    # newPath = aPath(newPath).assureSuffix(CCPN_EXTENSION)
+    # if (  not overwrite and
+    #       newPath.exists() and
+    #      (newPath.is_file() or (newPath.is_dir() and newPath.listDirFiles() > 0))
+    #    ):
+    #     # should not really need to check the second and third condition above, only
+    #     # the Qt dialog stupidly insists a directory exists before you can select it
+    #     # so if it exists but is empty then don't bother asking the question
+    #     title = 'Overwrite path'
+    #     msg = 'Path "%s" already exists, continue?' % newPath
+    #     if not MessageDialog.showYesNo(title, msg):
+    #         return None
+
+    return newPath
 
 #######################################################################################
 #

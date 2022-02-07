@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-05 18:39:30 +0000 (Sat, February 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-07 11:41:13 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1978,7 +1978,7 @@ def _loadProject(application, path: str) -> Project:
             apiProject.touch()
             apiProject.save()
 
-    project._resetUndo(debug=application.level <= Logging.DEBUG2, application=application)
+    project._resetUndo(debug=application._debugLevel <= Logging.DEBUG2, application=application)
 
     # Do some admin
     # need project.path, as it may have have changed; e.g. for a V2 project
@@ -2006,7 +2006,7 @@ def _newProject(application, name: str = 'default', path: str = None, overwrite=
     project._isNew = True
     # NB: linkages are set in Framework._intialiseProject()
 
-    project._resetUndo(debug=application.level <= Logging.DEBUG2, application=application)
+    project._resetUndo(debug=application._debugLevel <= Logging.DEBUG2, application=application)
     project._saveHistory = newProjectSaveHistory(project.path)
 
     project._objectVersion = application.applicationVersion

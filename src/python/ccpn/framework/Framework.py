@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 11:33:07 +0000 (Mon, February 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-07 11:41:13 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -29,7 +29,6 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #     systime.clock = systime.process_time
 
 import json
-import logging
 import os
 import sys
 import re
@@ -207,13 +206,13 @@ class Framework(NotifierBase, GuiBase):
 
         self.useFileLogger = not self.args.nologging
         if self.args.debug3:
-            self.level = Logging.DEBUG3
+            self._debugLevel = Logging.DEBUG3
         elif self.args.debug2:
-            self.level = Logging.DEBUG2
+            self._debugLevel = Logging.DEBUG2
         elif self.args.debug:
-            self.level = logging.DEBUG
+            self._debugLevel = Logging.DEBUG
         else:
-            self.level = logging.INFO
+            self._debugLevel = Logging.INFO
 
         self.preferences = Preferences(application=self)
         if not self.args.skipUserPreferences:
@@ -296,9 +295,9 @@ class Framework(NotifierBase, GuiBase):
         """:return True if either of the debug flags has been set
         CCPNINTERNAL: used throughout to check
         """
-        if self.level == Logging.DEBUG1 or \
-           self.level == Logging.DEBUG2 or \
-           self.level == Logging.DEBUG3:
+        if self._debugLevel == Logging.DEBUG1 or \
+           self._debugLevel == Logging.DEBUG2 or \
+           self._debugLevel == Logging.DEBUG3:
             return True
         return False
 
@@ -516,7 +515,7 @@ class Framework(NotifierBase, GuiBase):
 
         # Logging
         logger = getLogger()
-        Logging.setLevel(logger, self.level)
+        Logging.setLevel(logger, self._debugLevel)
         logger.debug('Framework._initialiseProject>>>')
 
         # Set up current; we need it when restoring project graphics data below

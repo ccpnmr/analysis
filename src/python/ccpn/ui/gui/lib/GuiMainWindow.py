@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-06 15:02:50 +0000 (Sun, February 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-07 12:34:48 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -28,35 +28,25 @@ __date__ = "$Date: 2017-04-04 09:51:15 +0100 (Tue, April 04, 2017) $"
 # Start of code
 #=========================================================================================
 
-import json
 import os
-import sys
-import typing
 from functools import partial
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtGui import QKeySequence
-from PyQt5.QtCore import QSize
 from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QApplication
 
 from ccpn.core.Project import Project
-from ccpn.core.lib.ContextManagers import catchExceptions
 
 from ccpn.ui.gui.widgets.Icon import Icon
 
 from ccpn.ui.gui.lib.mouseEvents import SELECT, setCurrentMouseMode, getCurrentMouseMode
-from ccpn.ui.gui.lib import GuiSpectrumDisplay
-from ccpn.ui.gui.lib import GuiSpectrumView
 from ccpn.ui.gui.lib import GuiStrip
-from ccpn.ui.gui.lib import GuiPeakListView
 from ccpn.ui.gui.lib.GuiWindow import GuiWindow
 
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Action import Action
-from ccpn.ui.gui.widgets.FileDialog import ProjectFileDialog
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 from ccpn.ui.gui.widgets.Menu import Menu, MenuBar, SHOWMODULESMENU, CCPNMACROSMENU, \
     USERMACROSMENU, TUTORIALSMENU, PLUGINSMENU, CCPNPLUGINSMENU, HOWTOSMENU
@@ -64,23 +54,12 @@ from ccpn.ui.gui.widgets.SideBar import SideBar  #,SideBar
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
 from ccpn.ui.gui.widgets.Splitter import Splitter
-from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight
+from ccpn.ui.gui.widgets.Font import setWidgetFont
 
-from ccpn.util.Common import uniquify, camelCaseToString
+from ccpn.util.Common import camelCaseToString
 from ccpn.util.Logging import getLogger
-from ccpn.util.Svg import Svg
-from ccpn.util.Path import aPath
-from ccpn.util.Common import isIterable
-from ccpn.core.lib.ContextManagers import \
-    undoBlockWithSideBar, \
-    undoBlockWithoutSideBar, \
-    notificationEchoBlocking
 
-from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader, getDataLoaders
-from ccpn.framework.Preferences import getPreferences, USE_PROJECT_PATH
-
-from ccpn.core.lib.Notifiers import NotifierBase, Notifier
-from ccpn.core.Peak import Peak
+from ccpn.core.lib.Notifiers import Notifier
 
 from ccpn.ui.gui.widgets.PlotterWidget import PlotterWidget
 
@@ -612,7 +591,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         """
         Populates predefined Layouts
         """
-        from ccpn.util import Layout
+        from ccpn.ui.gui import Layout
         from ccpn.framework.PathsAndUrls import predefinedLayouts
 
         userDefinedLayoutDirPath = self.application.preferences.general.get('userLayoutsPath')

@@ -7,6 +7,8 @@ The state is saved in a Json file.
 
 Original code by Luca Mureddu
 Fully refactored by Geerten Vuister; second version for 3.1.0 release
+
+IN_PROGRESS
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -24,7 +26,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 15:30:05 +0000 (Tue, February 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-07 12:34:48 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -255,7 +257,7 @@ class LayoutManager(CcpNmrJson):
             path = aPath(path)
         self.restore(path.asString())  # This restores the data from path
 
-        from ccpn.util.Layout import restoreLayout
+        from ccpn.ui.gui.Layout import restoreLayout
         restoreLayout(self.mainWindow, self.mainWindow.moduleLayouts, restoreSpectrumDisplay=False)
 
         # # restore the modules that were open before

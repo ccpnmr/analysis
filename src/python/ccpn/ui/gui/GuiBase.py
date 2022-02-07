@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 10:28:10 +0000 (Mon, February 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-07 12:34:47 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,6 @@ __date__ = "$Date: 2022-01-18 10:28:48 +0000 (Tue, January 18, 2022) $"
 import os
 import platform
 
-from tqdm import tqdm
 from functools import partial
 from typing import Optional
 
@@ -39,31 +38,20 @@ from PyQt5 import QtWidgets
 from ccpn.framework.PathsAndUrls import \
     macroPath, \
     widgetsPath, \
-    CCPN_EXTENSION, \
     CCPN_ARCHIVES_DIRECTORY
 
 from ccpn.core.Project import Project
-from ccpn.core.lib.ContextManagers import \
-    catchExceptions, \
-    undoBlockWithoutSideBar, \
-    notificationEchoBlocking
-
-from ccpn.framework.Preferences import getPreferences, USE_PROJECT_PATH
 
 from ccpn.util.Common import isWindowsOS
 from ccpn.util.Logging import getLogger
-from ccpn.util.Path import Path, aPath
-import ccpn.util.Layout as Layout
+from ccpn.util.Path import aPath
+import ccpn.ui.gui.Layout as Layout
 
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import \
-    ProjectFileDialog, \
-    DataFileDialog, \
     ArchivesFileDialog, \
     LayoutsFileDialog, \
-    NMRStarFileDialog, \
-    SpectrumFileDialog, \
-    ProjectSaveFileDialog
+    NMRStarFileDialog
 
 from ccpn.ui.gui.widgets.Menu import \
     SHOWMODULESMENU, \

@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 11:33:07 +0000 (Mon, February 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-07 12:34:47 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -165,7 +165,7 @@ class DataLoaderABC(TraitBase):
         self.createNewProject = self.alwaysCreateNewProject or self.canCreateNewProject
 
         # local import to avoid cycles
-        from ccpn.framework.Framework import getApplication
+        from ccpn.framework.Application import getApplication
         self.application = getApplication()
 
     @property

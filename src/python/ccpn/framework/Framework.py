@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 12:22:59 +0000 (Mon, February 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-07 12:34:47 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -37,9 +37,6 @@ import subprocess
 import faulthandler
 faulthandler.enable()
 
-from threading import Thread
-from time import time, sleep
-
 from typing import List
 
 from PyQt5 import QtWidgets
@@ -48,8 +45,6 @@ from PyQt5.QtCore import QTimer
 
 from distutils.dir_util import copy_tree
 
-from ccpnmodel.ccpncore.lib.Io import Api as apiIo
-
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
 from ccpn.core.MultipletList import MultipletList
@@ -57,12 +52,9 @@ from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.core.lib.Pid import Pid
 from ccpn.core.lib.ContextManagers import \
-    catchExceptions, \
-    undoBlockWithoutSideBar, \
-    notificationEchoBlocking, \
     logCommandManager
 
-from ccpn.framework.Application import getApplication, Arguments
+from ccpn.framework.Application import Arguments
 from ccpn.framework import Version
 from ccpn.framework.AutoBackup import AutoBackup
 from ccpn.framework.credits import printCreditsText
@@ -71,7 +63,6 @@ from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
 from ccpn.framework.Translation import defaultLanguage
 from ccpn.framework.Translation import translator
 from ccpn.framework.Preferences import Preferences
-from ccpn.framework.lib.DataLoaders.DataLoaderABC import checkPathForDataLoader
 from ccpn.framework.PathsAndUrls import \
     userCcpnMacroPath, \
     CCPN_ARCHIVES_DIRECTORY, \
@@ -95,7 +86,7 @@ from ccpn.util.Path import Path, aPath, fetchDir
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Common import uniquify, isWindowsOS, isMacOS, isIterable
 from ccpn.util.Logging import getLogger
-from ccpn.util import Layout
+from ccpn.ui.gui import Layout
 from ccpn.util.decorators import logCommand
 
 
@@ -445,6 +436,8 @@ class Framework(NotifierBase, GuiBase):
             self._autoBackupThread.start()
 
     def _backupProject(self):
+        from ccpnmodel.ccpncore.lib.Io import Api as apiIo
+
         apiIo.backupProject(self.project._wrappedData.parent)
         backupPath = self.project.backupPath
 

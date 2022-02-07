@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 10:28:10 +0000 (Mon, February 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-07 11:33:07 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -274,14 +274,14 @@ class Gui(Ui):
 
         return (dataLoader, createNewProject, ignore)
 
-    def _getDataLoader(self, path, include=None):
+    def _getDataLoader(self, path, filter=None):
         """Get dataLoader for path (or None if not present), optionally only testing for
-        dataFormats defined in include.
+        dataFormats defined in filter.
         Allows for reporting or checking through popups.
         Does not do the actual loading.
 
         :param path: the path to get a dataLoader for
-        :param include: a list/tuple of optional dataFormat strings; (defaults to all dataFormats)
+        :param filter: a list/tuple of optional dataFormat strings; (defaults to all dataFormats)
         :returns a tuple (dataLoader, createNewProject, ignore)
         """
         # local import here
@@ -293,14 +293,14 @@ class Gui(Ui):
         from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
         from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
 
-        if include is None:
-            include =  tuple(getDataLoaders().keys())
-        dataLoader = checkPathForDataLoader(path, include=include)
+        if filter is None:
+            filter =  tuple(getDataLoaders().keys())
+        dataLoader = checkPathForDataLoader(path, filter=filter)
 
         if dataLoader is None:
-            txt = 'Loading "%s" unsuccessful; unrecognised type, should be one of %r' % \
-                  (path, include)
-            getLogger().warning(txt)
+            txt = '_getDataLoader: Loading "%s" unsuccessful; unrecognised type, should be one of %r' % \
+                  (path, filter)
+            getLogger().debug(txt)
             return (None, False, False)
 
         createNewProject = dataLoader.createNewProject
@@ -588,9 +588,9 @@ class Gui(Ui):
     def loadSpectra(self, *paths) -> list:
         """Load all the spectra found in paths.
         Query in case path is empty.
-        Return a list of Spectra instances
 
         :param paths: list of paths
+        :return a list of Spectra instances
         """
         from ccpn.framework.lib.DataLoaders.SpectrumDataLoader import SpectrumDataLoader
         from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
@@ -612,7 +612,7 @@ class Gui(Ui):
             _path = aPath(path)
             if _path.is_dir():
                 dirLoader = DirectoryDataLoader(path, recursive=False,
-                                                filterForDataFormats=(SpectrumDataLoader.dataFormat,))
+                                                filter=(SpectrumDataLoader.dataFormat,))
                 spectrumLoaders.append(dirLoader)
                 count += len(dirLoader)
 
@@ -626,7 +626,10 @@ class Gui(Ui):
             if not okToOpenAll:
                 return []
 
-        return self.application._loadData(spectrumLoaders)
+        with logCommandManager('application.', 'loadSpectra', *paths):
+            result = self.application._loadData(spectrumLoaders)
+
+        return result
 
 #-----------------------------------------------------------------------------------------
 # Helper code

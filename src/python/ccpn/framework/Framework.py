@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 10:24:46 +0000 (Mon, February 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-07 11:33:07 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -979,6 +979,15 @@ class Framework(NotifierBase, GuiBase):
         :returns list of loaded objects
         """
         return self.ui.loadData(*paths)
+
+    # @logCommand('application.') # decorated by  ui
+    def loadSpectra(self, *paths) -> list:
+        """Load all the spectra found in paths.
+
+        :param paths: list of paths
+        :return a list of Spectra instances
+        """
+        return self.ui.loadSpectra(*paths)
 
     def _loadV2Project(self, path) -> List[Project]:
         """Actual V2 project loader

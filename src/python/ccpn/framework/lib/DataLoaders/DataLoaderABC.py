@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-06 18:36:44 +0000 (Sun, February 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-07 11:33:07 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -76,14 +76,11 @@ def getDataLoaders():
     return DataLoaderABC._dataLoaders
 
 
-def checkPathForDataLoader(path, exclude=(), include=None):
+def checkPathForDataLoader(path, filter=None):
     """Check path if it corresponds to any defined data format.
-    Exclude any dataLoader with types defined in the exclude argument or
-    when using the include argument, only include those with types in the
-    include argument.
+    Optionally exclude any dataLoader with types defined by filter
 
-    :param exclude: a tuple/list of dataFormat strings
-    :param include: a tuple/list of dataFormat strings (defaults to all dataFormats)
+    :param filter: a tuple/list of dataFormat strings
     :return a DataLoader instance or None if there was no match
     """
     if not isinstance(path, (str, Path)):
@@ -93,19 +90,23 @@ def checkPathForDataLoader(path, exclude=(), include=None):
     if not _path.exists():
         raise ValueError('checkPathForDataLoader: path %r does not exist' % path)
 
-    if include is None:
-        include = list(getDataLoaders().keys())
+    if filter is None:
+        filter = list(getDataLoaders().keys())
 
     for fmt, cls in getDataLoaders().items():
-        _doEvaluate = cls.dataFormat not in exclude and \
-                      cls.dataFormat in include
-        if _doEvaluate:
-            instance = cls.checkForValidFormat(path)
-            if instance is None:
-                getLogger().debug2('path "%s" is not valid for dataFormat "%s"' % (path, cls.dataFormat))
-            else:
-                getLogger().debug2('path "%s" is valid for dataFormat "%s"' % (path, cls.dataFormat))
-                return instance  # we found a valid format for path
+        instance = cls.checkForValidFormat(path)
+        if instance is None:
+            getLogger().debug2('%-20s %-20s: %s' % (cls.dataFormat, '(Not Valid)', path))
+            continue
+
+        # we found an instance
+        if cls.dataFormat not in filter:
+            getLogger().debug2('%-20s %-20s: %s' % (cls.dataFormat, '(Valid, not in filter)', path))
+            return None
+        else:
+            getLogger().debug2('%-20s %-20s: %s' % (cls.dataFormat, '(Valid, in filter)', path))
+            return instance  # we found a valid format for path
+
     return None
 
 #--------------------------------------------------------------------------------------------

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 11:41:13 +0000 (Mon, February 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-07 12:09:57 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -57,6 +57,7 @@ from ccpn.core.lib.Pid import Pid
 
 from ccpn.framework.Application import getApplication, Arguments
 from ccpn.framework import Version
+from ccpn.framework.AutoBackup import AutoBackup
 from ccpn.framework.credits import printCreditsText
 from ccpn.framework.Current import Current
 from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
@@ -130,33 +131,33 @@ sys.excepthook = _ccpnExceptionhook
 #-----------------------------------------------------------------------------------------
 
 
-class AutoBackup(Thread):
-
-    def __init__(self, q, backupFunction, sleepTime=1):
-        super().__init__()
-        self.sleepTime = sleepTime
-        self.q = q
-        self.backupProject = backupFunction
-        self.startTime = None
-
-    def run(self):
-        self.startTime = time()
-        while True:
-            waitTime = None
-            if not self.q.empty():
-                waitTime = self.q.get()
-            if waitTime is None:
-                sleep(self.sleepTime)
-            elif waitTime == 'kill':
-                return
-            elif (time() - self.startTime) < waitTime:
-                sleep(self.sleepTime)
-            else:
-                self.startTime = time()
-                try:
-                    self.backupProject()
-                except Exception as es:
-                    getLogger().warning('Project backup failed with error %s' % es)
+# class AutoBackup(Thread):
+#
+#     def __init__(self, q, backupFunction, sleepTime=1):
+#         super().__init__()
+#         self.sleepTime = sleepTime
+#         self.q = q
+#         self.backupFunction = backupFunction
+#         self.startTime = None
+#
+#     def run(self):
+#         self.startTime = time()
+#         while True:
+#             waitTime = None
+#             if not self.q.empty():
+#                 waitTime = self.q.get()
+#             if waitTime is None:
+#                 sleep(self.sleepTime)
+#             elif waitTime == 'kill':
+#                 return
+#             elif (time() - self.startTime) < waitTime:
+#                 sleep(self.sleepTime)
+#             else:
+#                 self.startTime = time()
+#                 try:
+#                     self.backupFunction()
+#                 except Exception as es:
+#                     getLogger().warning('Project backup failed with error %s' % es)
 
 
 class Framework(NotifierBase, GuiBase):
@@ -233,7 +234,7 @@ class Framework(NotifierBase, GuiBase):
         self._enableLoggingToConsole = True
 
         self._backupTimerQ = None
-        self.autoBackupThread = None
+        self._autoBackupThread = None
 
         self._tip_of_the_day = None
         self._initial_show_timer = None
@@ -451,7 +452,7 @@ class Framework(NotifierBase, GuiBase):
             return
 
         self._experimentClassifications = project.getExperimentClassifications()
-        self.updateAutoBackup()
+        self._updateAutoBackup()
 
         sys.stderr.write('==> Done, %s is starting\n' % self.applicationName)
         self.ui.startUi()
@@ -461,19 +462,20 @@ class Framework(NotifierBase, GuiBase):
         """Cleanup at the end of program execution; i.e. once the command loop
         has stopped
         """
-        self.setAutoBackupTime('kill')
+        self._setAutoBackupTime('kill')
 
     #-----------------------------------------------------------------------------------------
+    # Backup (TODO: need refactoring)
+    #-----------------------------------------------------------------------------------------
 
-    def updateAutoBackup(self):
-
+    def _updateAutoBackup(self):
+        # CCPNINTERNAL: also called from preferences popup
         if self.preferences.general.autoBackupEnabled:
-            self.setAutoBackupTime(self.preferences.general.autoBackupFrequency)
+            self._setAutoBackupTime(self.preferences.general.autoBackupFrequency)
         else:
-            self.setAutoBackupTime(None)
+            self._setAutoBackupTime(None)
 
-    def setAutoBackupTime(self, time):
-        # TODO: Need to add logging...
+    def _setAutoBackupTime(self, time):
         if self._backupTimerQ is None:
             from queue import Queue
 
@@ -484,12 +486,12 @@ class Framework(NotifierBase, GuiBase):
             self._backupTimerQ.put(time * 60)
         else:
             self._backupTimerQ.put(time)
-        if self.autoBackupThread is None:
-            self.autoBackupThread = AutoBackup(q=self._backupTimerQ,
-                                               backupFunction=self.backupProject)
-            self.autoBackupThread.start()
+        if self._autoBackupThread is None:
+            self._autoBackupThread = AutoBackup(q=self._backupTimerQ,
+                                                backupFunction=self._backupProject)
+            self._autoBackupThread.start()
 
-    def backupProject(self):
+    def _backupProject(self):
         apiIo.backupProject(self.project._wrappedData.parent)
         backupPath = self.project.backupPath
 

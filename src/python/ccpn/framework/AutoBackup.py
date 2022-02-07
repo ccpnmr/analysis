@@ -1,5 +1,5 @@
 """
-This file contains CcpnNefImporter class
+This file contains AutoBackup class
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -26,49 +26,36 @@ __date__ = "$Date: 2022-02-05 10:28:48 +0000 (Saturday, February 5, 2022) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.framework.Application import getApplication
-from ccpn.framework.lib.ccpnNef.CcpnNefIo import CcpnNefReader
+from threading import Thread
+from time import time, sleep
 
 from ccpn.util.Logging import getLogger
-from ccpn.util.nef.NefImporter import NefImporter
-from ccpn.util.nef.ErrorLog import NEF_STANDARD, NEF_STRICT
-from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideBar, notificationEchoBlocking
 
 
-class CcpnNefImporter(NefImporter):
-    """A class for cutimization of the general NefImporter class
-    """
+class AutoBackup(Thread):
 
-    def __init__(self, errorLogging=NEF_STANDARD, hidePrefix = True):
+    def __init__(self, q, backupFunction, sleepTime=1):
+        super().__init__()
+        self.sleepTime = sleepTime
+        self.q = q
+        self.backupFunction = backupFunction
+        self.startTime = None
 
-        _app = getApplication()
-        super().__init__(programName=_app.applicationName,
-                         programVersion=_app.applicationVersion,
-                         errorLogging=errorLogging,
-                         hidePrefix=hidePrefix)
-
-        # set the ccpn logger
-        _logger = getLogger().error if errorLogging == NEF_STRICT else getLogger().warning
-        self.logger = _logger
-
-        self._reader = None
-        self._application = _app
-
-    def importIntoProject(self, project):
-        """Import the data of self into project, using a previously attached
-        reader (auto-generated if None).
-
-        :param project: a Project instance
-        """
-        if self._reader is None:
-            _reader = CcpnNefReader(application=self._application)
-        else:
-            _reader = self._reader
-
-        with catchExceptions(errorStringTemplate='Error importing Nef data: %s',
-                             printTraceBack=True):
-            with undoBlockWithoutSideBar():
-                with notificationEchoBlocking():
-                    _reader.importExistingProject(project, self.data)
-
-        getLogger().info('==> Imported Nef data %r into %s' % (self.getName(), project))
+    def run(self):
+        self.startTime = time()
+        while True:
+            waitTime = None
+            if not self.q.empty():
+                waitTime = self.q.get()
+            if waitTime is None:
+                sleep(self.sleepTime)
+            elif waitTime == 'kill':
+                return
+            elif (time() - self.startTime) < waitTime:
+                sleep(self.sleepTime)
+            else:
+                self.startTime = time()
+                try:
+                    self.backupFunction()
+                except Exception as es:
+                    getLogger().warning('Project backup failed with error %s' % es)

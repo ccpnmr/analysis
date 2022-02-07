@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-28 20:49:41 +0000 (Fri, January 28, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-07 12:09:57 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -1686,7 +1686,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.preferences.general[option] = checked
 
         if option == 'autoBackupEnabled':
-            self.application.updateAutoBackup()
+            self.application._updateAutoBackup()
 
     @queueStateChange(_verifyPopupApply)
     def _queueToggleAppearanceOptions(self, option, checked):
@@ -1764,7 +1764,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     def _setAutoBackupFrequency(self, value):
         self.preferences.general.autoBackupFrequency = value
-        self.application.updateAutoBackup()
+        self.application._updateAutoBackup()
 
     def _enableAutoBackupFrequency(self):
         value = self.autoBackupEnabledBox.get()

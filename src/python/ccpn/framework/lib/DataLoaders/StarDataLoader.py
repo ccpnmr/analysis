@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-06 19:34:33 +0000 (Sun, February 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-07 16:46:08 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -58,7 +58,7 @@ class StarDataLoader(DataLoaderABC):
         """
         if self._dataBlock is None:
             self._dataBlock = self._nefReader.getNMRStarData(str(self.path))
-        return self.dataBlock
+        return self._dataBlock
 
     def load(self):
         """The actual NMRStar loading method; subclassed to account for special

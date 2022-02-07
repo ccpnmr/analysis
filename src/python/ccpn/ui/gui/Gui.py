@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 12:22:59 +0000 (Mon, February 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-07 16:46:08 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -391,9 +391,10 @@ class Gui(Ui):
             (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
             if dataLoader and not createNewProject and not ignore:
                 popup = StarImporterPopup(project=self.project,
-                                          bmrbFilePath=self.path,
-                                          directory=self.path.parent,
-                                          dataBlock=self.dataBlock)
+                                          bmrbFilePath=dataLoader.path,
+                                          directory=dataLoader.path.parent,
+                                          dataBlock=dataLoader.dataBlock,
+                                          size=(700,1000))
                 popup.exec_()
 
         elif dataLoader.dataFormat == DirectoryDataLoader.dataFormat and len(dataLoader) > MAXITEMLOGGING:

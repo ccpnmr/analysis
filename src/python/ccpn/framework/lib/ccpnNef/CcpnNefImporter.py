@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 12:09:57 +0000 (Mon, February 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-07 16:46:08 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideB
 
 
 class CcpnNefImporter(NefImporter):
-    """A class for cutimization of the general NefImporter class
+    """A class for custimization of the general NefImporter class
     """
 
     def __init__(self, errorLogging=NEF_STANDARD, hidePrefix = True):
@@ -65,10 +65,5 @@ class CcpnNefImporter(NefImporter):
         else:
             _reader = self._reader
 
-        with catchExceptions(errorStringTemplate='Error importing Nef data: %s',
-                             printTraceBack=True):
-            with undoBlockWithoutSideBar():
-                with notificationEchoBlocking():
-                    _reader.importExistingProject(project, self.data)
+        _reader.importExistingProject(project, self.data)
 
-        getLogger().info('==> Imported Nef data %r into %s' % (self.getName(), project))

@@ -22,7 +22,7 @@ Usage:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
@@ -32,8 +32,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-08 15:36:30 +0000 (Wed, December 08, 2021) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-07 16:46:09 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -46,30 +46,36 @@ __date__ = "$Date: 2019-06-12 10:28:40 +0000 (Wed, Jun 12, 2019) $"
 
 _UI = True  # Default opens a popup for selecting the input and run the macro
 
-Warnings = "Warning: This is a beta version of the NMR-Star (BMRB) Importer. It might not work or work partially. Always inspect the results!"
+Warnings = "Warning: This is an alpha version of the NMR-Star (BMRB) Importer. It might not work or work partially. Always inspect the results!"
 
 InfoMessage = """
-        This popup will create a new chemical shift list from the NMR-STAR v3.1 file selected.
-        A new simulated Spectrum from the selected axesCodes and new simulated peakList from the selected BMRB Atom_ID. 
+        This popup will create a new chemical shift list from the selected NMR-STAR v3.1 file.
+        A new simulated Spectrum from the selected axesCodes and new simulated peakList from 
+        the selected BMRB Atom_ID. 
         Once the new assigned peaks are correctly imported, copy the new peakList to your target spectrum.
         
-        >>> BMRB Atom_ID: Insert the NmrAtom which you want to import as appears in the BMRB file, comma separated. 
-            You will find these on the "Assigned chemical shift lists" table in the BMRB 3.1 Star file as:
-             _Atom_chem_shift.Atom_ID e.g. CA or HA 
+        >>> BMRB Atom_ID: Insert the (comma separated) NmrAtoms which you want to import as they appear
+                          in the BMRB file. You will find these on the "Assigned chemical shift lists" 
+                          table in the BMRB 3.1 Star file as:
+                          
+                                _Atom_chem_shift.Atom_ID e.g. CA or HA 
 
         >>> Assign To Axis: Insert to which axis you want to assign the corresponding NmrAtom. 1:1
-            These axes will be used to create a Simulated Spectrum. Specifying the axes is important for V3 for creating a new assignment,
-             especially for ambiguous assignemnts: e.g   
-             NmrAtom    -->   Axis Code
-              HA        -->     H1
-              HB        -->     H2
+                            These axes will be used to create a simulated, empty Spectrum. Specifying 
+                            the axes is important for V3 for creating a new assignment, especially for 
+                            ambiguous assignemnts: e.g.
+                            
+                                 NmrAtom    -->   Axis Code
+                                  HA        -->     H1
+                                  HB        -->     H2
 
         
         Limitations: 
         - Import multiple combination of nmrAtoms for same axisCode. 
           Work-around: import twice.
           E.g. first H,N,CA after H,N,CB, copy the two peakList to the target spectrum
-        - Peaks and assignments will be created only if all the selected nmrAtoms are present for the nmrResidue in the BMRB.
+        - Peaks and assignments will be created only if all the selected nmrAtoms are present for the 
+          nmrResidue in the BMRB.
           E.g  if select Atom_ID: N,H for this BMRB entry:
           >>1 . 1 1   1   1 MET H  C 13  53.890 0.05 . 1 . . . . . . . . 5493 1 >> 
             4 . 1 1   2   2 ILE N  N 15 126.655 0.04 . 1 . . . . . . . . 5493 1
@@ -103,9 +109,9 @@ from ccpn.framework.PathsAndUrls import macroPath as mp
 from ccpn.core.lib.ContextManagers import undoBlock
 
 
-assigned_chem_shift_list = 'assigned_chem_shift_list'
-shift_set = 'shift_set'
-recognisedValues = [assigned_chem_shift_list, shift_set]
+ASSIGNED_CHEM_SHIFT_LIST = 'assigned_chem_shift_list'
+SHIFT_SET = 'shift_set'
+recognisedValues = [ASSIGNED_CHEM_SHIFT_LIST, SHIFT_SET]
 
 defaultAxesCodesMap = od([  #                   replace with the atom and axes of interest
     ("N", "N"),
@@ -114,7 +120,8 @@ defaultAxesCodesMap = od([  #                   replace with the atom and axes o
 
 
 class TreeCheckBoxes(QtWidgets.QTreeWidget, Base):
-    def __init__(self, parent=None, orderedDataDict=None, checkList=None, selectableItems=None, maxSize=(250, 300), **kwds):
+    def __init__(self, parent=None, orderedDataDict=None, checkList=None, selectableItems=None,
+                       maxSize=(250, 300), **kwds):
         """Initialise the widget
         """
         super().__init__(parent)
@@ -208,13 +215,16 @@ class StarImporterPopup(CcpnDialog):
 
     def __init__(self, parent=None, axesCodesMap=None, bmrbFilePath=None, project=None, directory=None,
                  dataBlock=None, title='Import From NMRSTAR', **kw):
+
         CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
+
         self.bmrbFilePath = bmrbFilePath or ''
         self._axesCodesMap = axesCodesMap or defaultAxesCodesMap  # Ordered dict as od([("HA","H")]) see info for more
         self.directory = directory or ''
         self.project = project
         self.dataBlock = dataBlock or {}
         self._deprecationMessageShown = False
+
         row = 0
         bmrbFileLabel = Label(self, text="BMRB File", grid=(row, 0))
         self.fileName = LineEdit(self, text=os.path.basename(self.bmrbFilePath), grid=(row, 1))
@@ -222,8 +232,12 @@ class StarImporterPopup(CcpnDialog):
         # self.inputDialog = LineEditButtonDialog(self,textLineEdit=self.bmrbFilePath, directory=self.directory, grid=(row, 1))
         row += 1
         tree = Label(self, text="Frames", grid=(row, 0))
-        self.treeView = TreeCheckBoxes(self, orderedDataDict=dataBlock, checkList=list(dataBlock.keys()), grid=(row, 1))
-        self._limititedFunctionalities()
+        selectableItems = [key for key in dataBlock.keys() if key in recognisedValues]
+        self.treeView = TreeCheckBoxes(self, orderedDataDict=dataBlock,
+                                       checkList=list(dataBlock.keys()),
+                                       selectableItems=selectableItems,
+                                       grid=(row, 1))
+        self._limitFunctionalities()
 
         row += 1
         self.dynamicsWidgets = []
@@ -243,13 +257,15 @@ class StarImporterPopup(CcpnDialog):
 
         self._showMapLabel(False, False)
 
-    def _limititedFunctionalities(self):
+    def _limitFunctionalities(self):
+        """Only check the boxes that current are supported
+        """
         self.treeView._uncheckAll()
         chemicalShiftListOnly = []
-        for i in list(self.dataBlock.keys()):
-            if assigned_chem_shift_list in i:
+        for key, value in self.dataBlocck.values():
+            if ASSIGNED_CHEM_SHIFT_LIST in i:
                 chemicalShiftListOnly.append(i)
-            if shift_set in i:
+            if SHIFT_SET in i:
                 chemicalShiftListOnly.append(i)
         self.treeView.selectObjects(chemicalShiftListOnly)
 

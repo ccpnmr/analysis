@@ -1,6 +1,5 @@
 """
-This module contains all definitions used in the various SeriesAnalysis modules.
-
+This module contains dateFrames examples used in the Series Analysis tools
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -16,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-07 19:53:31 +0000 (Mon, February 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-07 19:53:32 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,28 +26,37 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 # Start of code
 #=========================================================================================
 
-
-############################################################################################
-##  SeriesDataTable common definitions. Used in I/O tables columns and throughtout modules
-############################################################################################
-
-CHAIN_CODE      = 'chain_code'           # -> str   | Chain Code
-RESIDUE_CODE    = 'residue_code'         # -> str   | Residue Sequence Code (e.g.: '1', '1B')
-RESIDUE_TYPE    = 'residue_type'         # -> str   | Residue Type (e.g.: 'ALA')
-ATOM_NAME       = 'atom_name'            # -> str   | Atom name (e.g.: 'Hn')
-
-_ROW_UID         = '_ROW_UID'            # -> str   | Internal. Unique Identifier (e.g.: randomly generated 6 letters UUID)
-VALUE            = 'Value'               # -> str   | The column header  prefix in a SeriesTable. Used to store data after the CONSTANT_TABLE_COLUMNS
-TIME             = 'Time'                # -> str   | A general prefix in a SeriesTable.
-
-SEP              =  '_'                  # the prefix-name-suffix global separator. E.g., used in Value columns: Value_height_at_0
-VALUE_           = f'{VALUE}{SEP}'
-TIME_            = f'{TIME}{SEP}'
-
-CONSTANT_TABLE_COLUMNS = [CHAIN_CODE, RESIDUE_CODE, RESIDUE_TYPE, ATOM_NAME]
+import os
+import unittest
+import contextlib
+import pandas as pd
+from collections import OrderedDict as od
+from collections import defaultdict
+from ccpn.core.DataTable import TableFrame
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import SeriesFrameBC, RelaxationFrame
 
 
+class RelaxationFrameExample(RelaxationFrame):
+
+    SERIESSTEPS = [0, 5, 10, 15, 20, 25, 30]
+    SERIESUNITS = 's'
 
 
+    _assignmentValues   =  [
+                            ['A', '1', 'ALA', 'H'], # row 1
+                            ['A', '2', 'ALA', 'H']  # row 2
+                            ]
 
+    _seriesValues       =  [
+                            [1000, 550, 316, 180, 85, 56, 31], # row 1
+                            [1005, 553, 317, 182, 86, 55, 30],  # row 2
+                            ]
 
+def getRelaxationFrameExample():
+    df = RelaxationFrameExample()
+
+    df.rebuild()
+    return df
+
+print(getRelaxationFrameExample())

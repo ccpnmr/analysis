@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 11:33:07 +0000 (Mon, February 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-07 12:22:59 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -34,6 +34,7 @@ from PyQt5 import QtWidgets, QtCore
 from ccpn.core import _coreClassMap
 from ccpn.core.Project import Project
 
+from ccpn.framework.Application import getApplication
 from ccpn.framework.PathsAndUrls import CCPN_EXTENSION
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders, checkPathForDataLoader
 
@@ -60,6 +61,31 @@ from ccpn.util import Logging
 from ccpn.util import Register
 from ccpn.util.Path import aPath, Path
 from ccpn.util.decorators import logCommand
+
+
+#-----------------------------------------------------------------------------------------
+# Subclass the exception hook fpr PyQT
+#-----------------------------------------------------------------------------------------
+def _ccpnExceptionhook(ccpnType, value, tback):
+    """This because PyQT raises and catches exceptions,
+    but doesn't pass them along instead makes the program crashing miserably.
+    """
+    application = getApplication()
+    if application and application._isInDebugMode:
+        sys.stderr.write('_ccpnExceptionhook: type = %s\n' % ccpnType)
+        sys.stderr.write('_ccpnExceptionhook: value = %s\n' % value)
+        sys.stderr.write('_ccpnExceptionhook: tback = %s\n' % tback)
+
+    if application and application.hasGui:
+        title = str(ccpnType)[8:-2] + ':'
+        text = str(value)
+        MessageDialog.showError(title=title, message=text)
+
+    sys.__excepthook__(ccpnType, value, tback)
+
+sys.excepthook = _ccpnExceptionhook
+#-----------------------------------------------------------------------------------------
+
 
 
 def qtMessageHandler(*errors):

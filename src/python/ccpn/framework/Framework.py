@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 12:09:57 +0000 (Mon, February 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-07 12:22:59 +0000 (Mon, February 07, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -48,12 +48,19 @@ from PyQt5.QtCore import QTimer
 
 from distutils.dir_util import copy_tree
 
+from ccpnmodel.ccpncore.lib.Io import Api as apiIo
+
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.PeakList import PeakList
 from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.core.lib.Pid import Pid
+from ccpn.core.lib.ContextManagers import \
+    catchExceptions, \
+    undoBlockWithoutSideBar, \
+    notificationEchoBlocking, \
+    logCommandManager
 
 from ccpn.framework.Application import getApplication, Arguments
 from ccpn.framework import Version
@@ -79,8 +86,8 @@ from ccpn.ui.gui.GuiBase import GuiBase
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.FileDialog import \
-    MacrosFileDialog
+from ccpn.ui.gui.widgets.FileDialog import MacrosFileDialog
+from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_KEY_CONCEPTS
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
 
 from ccpn.util import Logging
@@ -91,11 +98,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.util import Layout
 from ccpn.util.decorators import logCommand
 
-from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 
-from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideBar, notificationEchoBlocking, logCommandManager
-
-from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_KEY_CONCEPTS
 
 #-----------------------------------------------------------------------------------------
 # how frequently to check if license dialog has closed when waiting to show the tip of the day
@@ -107,57 +110,7 @@ _DEBUG = False
 interfaceNames = ('NoUi', 'Gui')
 MAXITEMLOGGING = 4
 
-#-----------------------------------------------------------------------------------------
-# Subclass the exception hook
-#-----------------------------------------------------------------------------------------
-def _ccpnExceptionhook(ccpnType, value, tback):
-    """This because PyQT raises and catches exceptions,
-    but doesn't pass them along instead makes the program crashing miserably.
-    """
-    application = getApplication()
-    if application and application._isInDebugMode:
-        sys.stderr.write('_ccpnExceptionhook: type = %s\n' % ccpnType)
-        sys.stderr.write('_ccpnExceptionhook: value = %s\n' % value)
-        sys.stderr.write('_ccpnExceptionhook: tback = %s\n' % tback)
-
-    if application and application.hasGui:
-        title = str(ccpnType)[8:-2] + ':'
-        text = str(value)
-        MessageDialog.showError(title=title, message=text)
-
-    sys.__excepthook__(ccpnType, value, tback)
-
-sys.excepthook = _ccpnExceptionhook
-#-----------------------------------------------------------------------------------------
-
-
-# class AutoBackup(Thread):
-#
-#     def __init__(self, q, backupFunction, sleepTime=1):
-#         super().__init__()
-#         self.sleepTime = sleepTime
-#         self.q = q
-#         self.backupFunction = backupFunction
-#         self.startTime = None
-#
-#     def run(self):
-#         self.startTime = time()
-#         while True:
-#             waitTime = None
-#             if not self.q.empty():
-#                 waitTime = self.q.get()
-#             if waitTime is None:
-#                 sleep(self.sleepTime)
-#             elif waitTime == 'kill':
-#                 return
-#             elif (time() - self.startTime) < waitTime:
-#                 sleep(self.sleepTime)
-#             else:
-#                 self.startTime = time()
-#                 try:
-#                     self.backupFunction()
-#                 except Exception as es:
-#                     getLogger().warning('Project backup failed with error %s' % es)
+# For @Ed: sys.excepthook PyQT related code now in Gui.py
 
 
 class Framework(NotifierBase, GuiBase):

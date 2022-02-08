@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:53 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-08 10:37:02 +0000 (Tue, February 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -557,9 +557,14 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         if path is None:
             return
 
-        if dataLoader := NefDataLoader(path) is None:
-            return None
+        # try and open with the NefDataloader
+        dataLoader = NefDataLoader(path)
+        if dataLoader.checkForValidFormat(path) is None:
+            txt = f"_getDataLoader: Loading '{path}' unsuccessful; unrecognised type, should be '{NefDataLoader.dataFormat}'"
+            getLogger().debug(txt)
+            return
 
+        dataLoader.createNewProject = False
         if self._showNefPopup(dataLoader):
             with MessageDialog.progressManager(self, 'Loading Nef file %s ... ' % dataLoader.path):
                 dataLoader.load()

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-07 19:53:31 +0000 (Mon, February 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-08 13:10:32 +0000 (Tue, February 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -47,8 +47,9 @@ TIME_            = f'{TIME}{SEP}'
 
 CONSTANT_TABLE_COLUMNS = [CHAIN_CODE, RESIDUE_CODE, RESIDUE_TYPE, ATOM_NAME]
 
-
-
-
+RELAXATION_INPUT_FRAME  = 'RelaxationInputFrame'
+RELAXATION_OUTPUT_FRAME = 'RelaxationOutputFrame'
+CSM_INPUT_FRAME         = 'CSMInputFrame'
+CSM_OUTPUT_FRAME        = 'CSMOutputFrame'
 
 

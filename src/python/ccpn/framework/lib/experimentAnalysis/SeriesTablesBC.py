@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-07 19:53:31 +0000 (Mon, February 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-08 13:10:32 +0000 (Tue, February 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,8 +26,6 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 # Start of code
 #=========================================================================================
 
-
-
 import math
 import numbers
 import typing
@@ -35,8 +33,6 @@ import numpy
 import pandas as pd
 from collections import OrderedDict as od
 from collections import defaultdict
-from ccpn.util.Path import aPath
-from ccpn.util.OrderedSet import OrderedSet
 from ccpn.core._implementation.DataFrameABC import DataFrameABC
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.util.Logging import getLogger
@@ -45,17 +41,20 @@ class SeriesFrameBC(DataFrameABC):
     """
     A TableData used for the Series ExperimentsAnalysis, such as ChemicalShiftMapping or Relaxation I/O.
     Columns names are created using the _assignmentHeaders followed by the _valuesHeaders.
+    The table resembles an extended ChemicalShiftList table.
+    This table is usually generated from a SpectrumGroup Series, but can be subclassed for building plugins etc.
 
     :var SERIESUNITS: str,  E.g.: 's' (for seconds), 'g' (for grams) etc.
     :var SERIESSTEPS: list, E.g.: list of floats defining the various Series steps, (time, concentration, etc).
+                                    Must be of same length of _seriesValues.
 
     ### Columns definitions
     :var _assignmentHeaders: list of str,
                             Assignment header Columns, common to all SeriesTables. They are
-                            'chain_code'           # -> str   | Chain Code
-                            'residue_code'         # -> str   | Residue Sequence Code (e.g.: '1', '1B')
-                            'residue_type'         # -> str   | Residue Type (e.g.: 'ALA')
-                            'atom_name'            # -> str   | Atom name (e.g.: 'Hn')
+                            'chain_code'           
+                            'residue_code'        
+                            'residue_type'        
+                            'atom_name'       
                             See SeriesAnalysisVariables.py.
 
     :var _valuesHeaders: list of str,
@@ -66,35 +65,49 @@ class SeriesFrameBC(DataFrameABC):
                         the _valuesHeaders will be ['s_0', 's_5', 's_10', 's_15', 's_20', 's_25', 's_30']
 
     A common input SerieFrame will have the columns:
-    columns = ['_ROW_UID', 'chain_code', 'residue_code', 'residue_type', 'atom_name', 's_0', 's_5', 's_10', 's_15', 's_20', 's_25', 's_30']
+    columns = ['_ROW_UID', 'chain_code', 'residue_code', 'residue_type', 'atom_name',
+               's_0', 's_5', 's_10', 's_15', 's_20', 's_25', 's_30']
 
     ### Data
-    :var _assignmentValues: list of lists of floats, used to create the SeriesFrame rows
-    :var _seriesValues: list of lists of floats, used to create the SeriesFrame rows
+    :var _assignmentValues: list of lists of floats, used to create the SeriesFrame rows.
+                            Must be of same length of _assignmentHeaders.
+    :var _seriesValues: list of lists of floats, used to create the SeriesFrame rows.
+                        Must be of same length of _valuesHeaders and SERIESSTEPS.
+    
+    ### Example of as SeriesFrame table
+    
+     category      uid    ||            assignmentHeaders                         ||        valuesHeaders
+     headers    |_ROW_UID || chain_code | residue_code | residue_type | atom_name || prefix_x | prefix_y | prefix_... |
+                |=========||============|==============|==============|===========||==========|==========|============|
+     types      |   int   ||   str      |    str       |   str        |    str    ||   float  |   float  |   float    |
+                |---------||------------|--------------|--------------|-----------||----------|----------|------------|
+     values     |   0     ||     A      |      1       |   ALA        |     H     ||    180   |     85   |     ...    |
 
+    See examples in .../testing/E
 
     """
 
+    SERIESTABLETYPE     = ''
     SERIESUNITS         = 'u'
     SERIESSTEPS         = []
 
     _valuesHeaders      = []
-    _assignmentHeaders  = sv.CONSTANT_TABLE_COLUMNS # list of str, common assignment headers for all SeriesFrames
+    _assignmentHeaders  = sv.CONSTANT_TABLE_COLUMNS
 
     _assignmentValues   = []
     _seriesValues       = []
 
-    _reservedColumns    = [sv._ROW_UID] ## list of str,
+    _reservedColumns    = [sv._ROW_UID]
     _reservedColumns.extend(_assignmentHeaders)
 
     def __init__(self,  *args, **kwargs):
-        super().__init__( *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @property
     def seriesValues(self):
         """
         The raw data of seriesValues used in ExperimentAnalysis.
-        Return: list of lists. """
+        Return: list of lists of floats. """
         return self._seriesValues
 
     @property
@@ -106,6 +119,16 @@ class SeriesFrameBC(DataFrameABC):
         Return: list of lists. """
         return self._assignmentValues
 
+    @property
+    def valuesHeaders(self):
+        """
+        the list of column Headers for the series values.
+        Can be used to filter the Table to get a new table with only the series values and index.
+        e.g.:  df[df.valuesHeaders]
+        :return: list of str
+        """
+        return self._valuesHeaders
+
     def setSeriesValues(self, seriesValues, *args):
         """
         Set the raw data of seriesValues used in ExperimentAnalyses.
@@ -116,17 +139,24 @@ class SeriesFrameBC(DataFrameABC):
     def setAssignmentValues(self, assignmentValues, *args):
         """
         Set the assignment for seriesValues used in ExperimentAnalyses.
-        Use 'rebuild' after setting the seriesValues.
+        Use 'build' after setting the seriesValues.
         """
         self._assignmentValues = assignmentValues
 
-    def setValuesHeaders(self, valuesHeaders):
+    @valuesHeaders.setter
+    def valuesHeaders(self, valuesHeaders:list):
         """
         Set the column definition for the valueHeaders.
         """
         self._valuesHeaders = valuesHeaders
 
-    def rebuild(self):
+    def setSeriesSteps(self, seriesSteps:list):
+        self.SERIESSTEPS = seriesSteps
+
+    def setSeriesUnits(self, seriesUnits:str):
+        self.SERIESUNITS = seriesUnits
+
+    def build(self):
         """
         Set the dataFrame from the _assignmentValues and seriesValues
         :return:
@@ -176,12 +206,10 @@ class SeriesFrameBC(DataFrameABC):
         for ix, (_assignmentValueItems, _seriesValueItems) in enumerate(zip(assignmentValues, seriesValues)):
             data[sv._ROW_UID].append(str(ix))
             if not len(self._assignmentHeaders) == len(_assignmentValueItems):
-                getLogger().warn(f"""AssignmentValues and AssignmentHeaders Definitions need to be of same length.""")
-                return data
+                raise ValueError(f"""AssignmentValues and AssignmentHeaders Definitions need to be of same length.""")
 
             if not len(self._valuesHeaders) == len(_seriesValueItems):
-                getLogger().warn(f"""SeriesValues and AeriesHeaders Definitions need to be of same length.""")
-                return data
+                raise ValueError(f"""SeriesValues and SeriesHeaders Definitions need to be of same length.""")
 
             for a, b in zip(self._assignmentHeaders, _assignmentValueItems):
                 data[a].append(b)
@@ -190,13 +218,12 @@ class SeriesFrameBC(DataFrameABC):
         return data
 
     def setDataFromDict(self, dataDict):
-        self.clear()
+        # self.clear()
         for header in dataDict:
             self[header] = dataDict[header]
 
     def _setDefaultValueHeaders(self, prefix=None):
         """
-
         Set a default name for each series column.
         E.g. for a Relaxation Series with a SERIESUNITS = 's' and SERIESSTEPS of [0, 5, 10, 15, 20, 25, 30]
         the columns will be ['s_0', 's_5', 's_10', 's_15', 's_20', 's_25', 's_30']
@@ -215,53 +242,38 @@ class SeriesFrameBC(DataFrameABC):
         else:
             ## cannot proceed. Needs some minimal information on how to name the Series Columns
             raise RuntimeError('Impossible to set DefaultValueHeaders. Set first the SERIESSTEPS')
-        self.setValuesHeaders(valueHeaders)
+        self.valuesHeaders = valueHeaders
         return valueHeaders
-
 
     def loadFromFile(self, filePath, *args, **kwargs):
         pass
 
 
-class RelaxationFrame(SeriesFrameBC):
+########################################################################################################################
+################################           Relaxation I/O  Series Tables                ################################
+########################################################################################################################
+
+class RelaxationInputFrame(SeriesFrameBC):
 
     SERIESUNITS = 's'
-
-    def setSeriesValues(self, seriesValues, prefix=sv.TIME_):
-        """
-        Set the raw data of seriesValues used in ExperimentAnalyses.
-        Use 'rebuild' after setting the seriesValues.
-        """
-        self._seriesValues = seriesValues
-        # add placeholders as _assignmentValues if not available.
-        if self._seriesValues and not self._assignmentValues:
-            placeholders = ['']*len(self._seriesValues)
-            self._assignmentValues = placeholders
-
-    # def _setDefaultValueHeaders(self, prefix=sv.TIME_):
-    #     """ Set the default prefix to sv.TIME_ """
-    #     super()._setDefaultValueHeaders(prefix=prefix)
+    SERIESTABLETYPE = sv.RELAXATION_INPUT_FRAME
 
 
+class RelaxationOutputFrame(SeriesFrameBC):
+
+    SERIESTABLETYPE = sv.RELAXATION_OUTPUT_FRAME
+
+########################################################################################################################
+################################   Chemical Shift Mapping  I/O Series Tables            ################################
+########################################################################################################################
+
+class CSMInputFrame(SeriesFrameBC):
+
+    SERIESUNITS = 'g'
+    SERIESTABLETYPE = sv.CSM_INPUT_FRAME
 
 
+class CSMOutputFrame(SeriesFrameBC):
 
-class GenericXlsxSeriesFrame(SeriesFrameBC):
-    """
-    A Generic Series table used for the Series ExperimentsAnalysis, such as ChemicalShiftMapping or Relaxation I/O.
-    That can be created by loading a correctly formatted XLSX file.
-
-    # TESTING
-    """
-
-    def loadFromFile(self, filePath, fileType='xlsx',  *args, **kwargs):
-        """ Read an XLSX file and add to the existing Table contents.
-        File must have the mandatory (constant) Columns definitions. see docs"""
-        filePath = aPath(filePath)
-        df = pd.read_excel(filePath)
-        for existingColumn in self.columns:
-            self.pop(existingColumn)
-
-        for i, col in enumerate(df.columns):
-            self[col] = [i]
+    SERIESTABLETYPE = sv.CSM_OUTPUT_FRAME
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-07 19:53:32 +0000 (Mon, February 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-08 13:10:32 +0000 (Tue, February 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -34,29 +34,24 @@ from collections import OrderedDict as od
 from collections import defaultdict
 from ccpn.core.DataTable import TableFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import SeriesFrameBC, RelaxationFrame
+from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import SeriesFrameBC, RelaxationInputFrame
 
 
-class RelaxationFrameExample(RelaxationFrame):
-
-    SERIESSTEPS = [0, 5, 10, 15, 20, 25, 30]
-    SERIESUNITS = 's'
-
-
-    _assignmentValues   =  [
-                            ['A', '1', 'ALA', 'H'], # row 1
-                            ['A', '2', 'ALA', 'H']  # row 2
-                            ]
-
-    _seriesValues       =  [
-                            [1000, 550, 316, 180, 85, 56, 31], # row 1
-                            [1005, 553, 317, 182, 86, 55, 30],  # row 2
-                            ]
 
 def getRelaxationFrameExample():
-    df = RelaxationFrameExample()
+    SERIESSTEPS = [0, 5, 10, 15, 20, 25, 30]
+    SERIESUNITS = 's'
+    _assignmentValues = [['A', '1', 'ALA', 'H'], # row 1
+                        ['A', '2', 'ALA', 'H']]  # row 2
 
-    df.rebuild()
+    _seriesValues = [[1000, 550, 316, 180, 85, 56, 31], # row 1
+                    [1005, 553, 317, 182, 86, 55, 30]]  # row 2
+
+    df = RelaxationInputFrame()
+    df.setSeriesSteps(SERIESSTEPS)
+    df.setSeriesUnits(SERIESUNITS)
+    df.setAssignmentValues(_assignmentValues)
+    df.setSeriesValues(_seriesValues)
+    df.build()
     return df
 
-print(getRelaxationFrameExample())

@@ -8,19 +8,19 @@ To create a menu:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: VickyAH $"
-__dateModified__ = "$dateModified: 2022-01-25 11:39:40 +0000 (Tue, January 25, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-08 18:14:15 +0000 (Tue, February 08, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -361,7 +361,7 @@ def _deleteMultipletItem(strip):
 
 
 def _copyPeakItem():
-    from ccpn.framework.Framework import getApplication
+    from ccpn.framework.Application import getApplication
 
     _app = getApplication()
     return _SCMitem(name='Copy Peak(s)',
@@ -370,7 +370,7 @@ def _copyPeakItem():
 
 
 def _deletePeakItem():
-    from ccpn.framework.Framework import getApplication
+    from ccpn.framework.Application import getApplication
 
     _app = getApplication()
     return _SCMitem(name='Delete Peak(s)',
@@ -379,7 +379,7 @@ def _deletePeakItem():
 
 
 def _editPeakAssignmentItem():
-    from ccpn.framework.Framework import getApplication
+    from ccpn.framework.Application import getApplication
 
     _app = getApplication()
     return _SCMitem(name='Edit Peak Assignments',
@@ -392,7 +392,7 @@ def _editPeakAssignmentItem():
 #                     typeItem=ItemTypes.get(ITEM), toolTip='View current peak on a PeakList table', callback=strip._showPeakOnPLTable)
 
 def _deassignPeaksItem():
-    from ccpn.framework.Framework import getApplication
+    from ccpn.framework.Application import getApplication
 
     _app = getApplication()
     return _SCMitem(name='Deassign Peak(s)',
@@ -401,7 +401,7 @@ def _deassignPeaksItem():
 
 
 def _setPeakAliasingItem():
-    from ccpn.framework.Framework import getApplication
+    from ccpn.framework.Application import getApplication
 
     _app = getApplication()
     return _SCMitem(name='Set Aliasing...',
@@ -410,7 +410,7 @@ def _setPeakAliasingItem():
 
 
 def _refitPeakItem():
-    from ccpn.framework.Framework import getApplication
+    from ccpn.framework.Application import getApplication
 
     _app = getApplication()
     return _SCMitem(name='Refit Peak(s) Singular',
@@ -419,7 +419,7 @@ def _refitPeakItem():
 
 
 def _refitPeakGroupItem():
-    from ccpn.framework.Framework import getApplication
+    from ccpn.framework.Application import getApplication
 
     _app = getApplication()
     return _SCMitem(name='Refit Peak(s) Group',
@@ -428,7 +428,7 @@ def _refitPeakGroupItem():
 
 
 def _snapToExtremaItem():
-    from ccpn.framework.Framework import getApplication
+    from ccpn.framework.Application import getApplication
 
     _app = getApplication()
     return _SCMitem(name='Snap Peak(s) to Extrema',
@@ -437,7 +437,7 @@ def _snapToExtremaItem():
 
 
 def _estimateVolumesItem():
-    from ccpn.framework.Framework import getApplication
+    from ccpn.framework.Application import getApplication
 
     _app = getApplication()
     return _SCMitem(name='Estimate Volume(s)',
@@ -446,7 +446,7 @@ def _estimateVolumesItem():
 
 
 def _recalculatePeakHeightsItem():
-    from ccpn.framework.Framework import getApplication
+    from ccpn.framework.Application import getApplication
 
     _app = getApplication()
     return _SCMitem(name='Recalculate Height(s)',
@@ -456,7 +456,7 @@ def _recalculatePeakHeightsItem():
 
 
 def _reorderPeakListAxesItem():
-    from ccpn.framework.Framework import getApplication
+    from ccpn.framework.Application import getApplication
 
     _app = getApplication()
     return _SCMitem(name='Reorder PeakList Axes...',
@@ -465,7 +465,7 @@ def _reorderPeakListAxesItem():
 
 
 def _makeStripPlotItem(menuId):
-    from ccpn.framework.Framework import getApplication
+    from ccpn.framework.Application import getApplication
 
     _app = getApplication()
     return _SCMitem(name='Make Strip Plot...',
@@ -475,7 +475,7 @@ def _makeStripPlotItem(menuId):
 
 
 def _newMultipletItem():
-    from ccpn.framework.Framework import getApplication
+    from ccpn.framework.Application import getApplication
 
     _app = getApplication()
     return _SCMitem(name='New Multiplet',
@@ -484,7 +484,7 @@ def _newMultipletItem():
 
 
 def _integrate1DItem():
-    from ccpn.framework.Framework import getApplication
+    from ccpn.framework.Application import getApplication
 
     _app = getApplication()
     return _SCMitem(name='Integrate Peak',
@@ -550,7 +550,7 @@ def _markPeakPosMenuItem(strip):
 
 
 def _markPeaksItem():
-    from ccpn.framework.Framework import getApplication
+    from ccpn.framework.Application import getApplication
 
     _app = getApplication()
     return _SCMitem(name='Mark Peak(s)',
@@ -559,7 +559,7 @@ def _markPeaksItem():
 
 
 def _markMultipletsItem():
-    from ccpn.framework.Framework import getApplication
+    from ccpn.framework.Application import getApplication
 
     _app = getApplication()
     return _SCMitem(name='Mark Multiplet(s)',

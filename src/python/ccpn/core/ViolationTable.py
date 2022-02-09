@@ -4,10 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 11:18:41 +0000 (Fri, January 21, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-02-09 13:19:03 +0000 (Wed, February 09, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -111,13 +111,14 @@ class ViolationTable(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def data(self, value: ViolationFrame):
-        """Set the data for the violationTable, must be of type ViolationFrame or None.
+        """Set the data for the violationTable, must be of type ViolationFrame, pd.DataFrame or None.
         None will create a new empty dataFrame
+        pd.DataFrames will be converted to ViolationFrames
         """
         if not isinstance(value, (ViolationFrame, type(None))):
             if isinstance(value, pd.DataFrame):
                 value = ViolationFrame(value)
-                getLogger().warning(f'Data must be of type {ViolationFrame}. The value pd.DataFrame was converted to {ViolationFrame}.')
+                getLogger().debug(f'Data must be of type {ViolationFrame}. The value pd.DataFrame was converted to {ViolationFrame}.')
             else:
                 raise RuntimeError(f'Data must be of type {ViolationFrame}, pd.DataFrame or None')
 
@@ -261,8 +262,9 @@ def _newViolationTable(self: StructureData, name: str = None, data: Optional[Vio
 
     See the ViolationTable class for details.
 
-    data must be of type ViolationFrame or None.
+    data must be of type ViolationFrame, pd.DataFrame or None.
     If data is None, an empty dataFrame wll be created.
+    pd.DataFrames will be converted to ViolationFrame.
 
     :param name: name of the violationTable
     :param data: a ViolationFrame, Pandas DataFrame instance or None
@@ -272,7 +274,7 @@ def _newViolationTable(self: StructureData, name: str = None, data: Optional[Vio
     if not isinstance(data, (ViolationFrame, type(None))):
         if isinstance(data, pd.DataFrame):
             data = ViolationFrame(data)
-            getLogger().warning(f'Data must be of type {ViolationFrame}. The value pd.DataFrame was converted to {ViolationFrame}.')
+            getLogger().debug(f'Data must be of type {ViolationFrame}. The value pd.DataFrame was converted to {ViolationFrame}.')
         else:
             raise RuntimeError(f'Unable to generate new ViolationTable: data not of type {ViolationFrame}, pd.DataFrame or None')
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-08 13:10:32 +0000 (Tue, February 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-09 10:41:06 +0000 (Wed, February 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -34,11 +34,11 @@ from collections import OrderedDict as od
 from collections import defaultdict
 from ccpn.core.DataTable import TableFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import SeriesFrameBC, RelaxationInputFrame
+from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import RelaxationInputFrame
 
 
 
-def getRelaxationFrameExample():
+def getRelaxationInputFrameExample():
     SERIESSTEPS = [0, 5, 10, 15, 20, 25, 30]
     SERIESUNITS = 's'
     _assignmentValues = [['A', '1', 'ALA', 'H'], # row 1
@@ -55,3 +55,7 @@ def getRelaxationFrameExample():
     df.build()
     return df
 
+if __name__ == "__main__":
+
+    relaxationInputFrame = getRelaxationInputFrameExample()
+    print(relaxationInputFrame)

@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-09 15:26:01 +0000 (Tue, November 09, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-02-09 10:41:06 +0000 (Wed, February 09, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -51,7 +51,7 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.popups._GroupEditorPopupABC import _GroupEditorPopupABC
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import ColourTab, ContoursTab, Colour1dFrame, ColourNdFrame
 from ccpn.util.AttrDict import AttrDict
-from ccpn.util.Constants import ALL_UNITS
+from ccpn.util.Constants import ALL_SERIES_UNITS
 from ccpn.ui.gui.lib.ChangeStateHandler import changeState, ChangeDict
 import traceback
 import pandas as pd
@@ -779,7 +779,7 @@ class SeriesFrame(Frame):
                                                       editable=True, sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents)
         self.unitsEditor.pulldownList.pulldownTextEdited.connect(partial(self._queueChangeSeriesUnits, self.unitsEditor, self.defaultObject))
         self.unitsEditor.pulldownList.pulldownTextReady.connect(partial(self._updateSeriesUnitsPulldown, self.unitsEditor, self.defaultObject))
-        self._pulldownData = ALL_UNITS
+        self._pulldownData = ALL_SERIES_UNITS
 
         self._row += 1
         self._errorFrameSeriesValues = Frame(self._seriesOptionsFrame, setLayout=True, grid=(self._row, self._col), gridSpan=(1, 3), hAlign='l')

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-08 13:10:32 +0000 (Tue, February 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-09 10:41:06 +0000 (Wed, February 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -83,11 +83,11 @@ class SeriesFrameBC(DataFrameABC):
                 |---------||------------|--------------|--------------|-----------||----------|----------|------------|
      values     |   0     ||     A      |      1       |   ALA        |     H     ||    180   |     85   |     ...    |
 
-    See examples in .../testing/E
+    See examples in .../testing/ExampleSeriesTables.py
 
     """
 
-    SERIESTABLETYPE     = ''
+    SERIESFRAMETYPE     = ''
     SERIESUNITS         = 'u'
     SERIESSTEPS         = []
 
@@ -255,13 +255,13 @@ class SeriesFrameBC(DataFrameABC):
 
 class RelaxationInputFrame(SeriesFrameBC):
 
-    SERIESUNITS = 's'
-    SERIESTABLETYPE = sv.RELAXATION_INPUT_FRAME
+    SERIESUNITS = sv.SERIES_TIME_UNITS[0]
+    SERIESFRAMETYPE = sv.RELAXATION_INPUT_FRAME
 
 
 class RelaxationOutputFrame(SeriesFrameBC):
 
-    SERIESTABLETYPE = sv.RELAXATION_OUTPUT_FRAME
+    SERIESFRAMETYPE = sv.RELAXATION_OUTPUT_FRAME
 
 ########################################################################################################################
 ################################   Chemical Shift Mapping  I/O Series Tables            ################################
@@ -269,11 +269,11 @@ class RelaxationOutputFrame(SeriesFrameBC):
 
 class CSMInputFrame(SeriesFrameBC):
 
-    SERIESUNITS = 'g'
-    SERIESTABLETYPE = sv.CSM_INPUT_FRAME
+    SERIESUNITS = sv.SERIES_CONCENTRATION_UNITS[0]
+    SERIESFRAMETYPE = sv.CSM_INPUT_FRAME
 
 
 class CSMOutputFrame(SeriesFrameBC):
 
-    SERIESTABLETYPE = sv.CSM_OUTPUT_FRAME
+    SERIESFRAMETYPE = sv.CSM_OUTPUT_FRAME
 

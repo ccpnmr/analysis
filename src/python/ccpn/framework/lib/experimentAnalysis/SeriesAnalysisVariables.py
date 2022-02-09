@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-08 13:10:32 +0000 (Tue, February 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-09 10:41:06 +0000 (Wed, February 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -47,9 +47,36 @@ TIME_            = f'{TIME}{SEP}'
 
 CONSTANT_TABLE_COLUMNS = [CHAIN_CODE, RESIDUE_CODE, RESIDUE_TYPE, ATOM_NAME]
 
+############################################################################################
+### Used in SeriesFrame tables ABCs
+############################################################################################
+
 RELAXATION_INPUT_FRAME  = 'RelaxationInputFrame'
 RELAXATION_OUTPUT_FRAME = 'RelaxationOutputFrame'
 CSM_INPUT_FRAME         = 'CSMInputFrame'
 CSM_OUTPUT_FRAME        = 'CSMOutputFrame'
 
+INPUT_SERIESFRAME_TYPES = [
+                    CSM_INPUT_FRAME,
+                    RELAXATION_INPUT_FRAME,
+                    ]
 
+OUTPUT_SERIESFRAME_TYPES = [
+                    CSM_OUTPUT_FRAME,
+                    RELAXATION_OUTPUT_FRAME,
+                    ]
+
+SERIESFRAME_TYPES = INPUT_SERIESFRAME_TYPES + OUTPUT_SERIESFRAME_TYPES
+
+############################################################################################
+### Used in SeriesAnalyisBC
+############################################################################################
+ChemicalShiftMappingAnalysis = 'ChemicalShiftMappingAnalysis'  # used in SeriesName for the ChemicalShiftMappingAnalysis
+RelaxationAnalysis = 'RelaxationAnalysis'                      # used in SeriesName for the RelaxationAnalysisBC
+
+
+# Series Units
+import ccpn.util.Constants as constants
+SERIES_TIME_UNITS = constants.TIME_UNITS
+SERIES_CONCENTRATION_UNITS = constants.CONCENTRATION_UNITS
+SERIES_UNITS = constants.ALL_SERIES_UNITS

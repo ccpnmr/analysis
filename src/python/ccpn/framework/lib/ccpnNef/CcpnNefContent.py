@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:52 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-09 18:56:05 +0000 (Wed, February 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -320,7 +320,7 @@ class CcpnNefContent:
         _name = f"{parameters.get('dataSet')}.{parameters.get('name')}:{parameters.get('parameterName')}"
         result = {category: (_name,)}
 
-        self._contentLoops(project, saveFrame, addLoopAttribs=['ccpn_dataset_id', 'ccpn_data_id', 'ccpn_parameter_name'])
+        self._contentLoops(project, saveFrame, addLoopAttribs=[DATANAME, 'ccpn_data_id', 'ccpn_parameter_name'])
         self.updateContent(saveFrame, result)
 
     contents['ccpn_parameter'] = content_ccpn_parameter

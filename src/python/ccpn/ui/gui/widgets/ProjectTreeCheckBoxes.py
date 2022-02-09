@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:53 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-09 18:56:05 +0000 (Wed, February 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -130,6 +130,7 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         self._enableMouseMenu = enableMouseMenu
         self._pathName = pathName
         self._currentContextMenu = None
+        self._postMenuSetup = None
 
         self.multiSelect = multiSelect
         if self.multiSelect:
@@ -155,6 +156,9 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
             else:
                 if name in self._actionCallbacks:
                     del self._actionCallbacks[name]
+
+    def setPostMenuAction(self, func):
+        self._postMenuSetup = func
 
     def clearActionCallbacks(self):
         """Clear the action callback dict
@@ -800,6 +804,9 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         """Creates and raises a context menu enabling items to be deleted from the sidebar.
         """
         menu = self._getContextMenu(event)
+        if self._postMenuSetup:
+            self._postMenuSetup(menu)  # add options from the parent
+
         if menu:
             menu.move(event.globalPos().x(), event.globalPos().y() + 10)
             menu.exec()

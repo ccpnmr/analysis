@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:52 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-09 18:56:05 +0000 (Wed, February 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -36,8 +36,11 @@ from ccpn.core.lib.ContextManagers import catchExceptions, undoBlockWithoutSideB
 
 
 class CcpnNefImporter(NefImporter):
-    """A class for custimization of the general NefImporter class
+    """A class for customization of the general NefImporter class
     """
+    _DATANAME = 'ccpn_structuredata_name'
+    _DATANAME_DEFAULT = 'structureFromNef'
+    _DATANAME_DEPRECATED = 'ccpn_dataset_id'
 
     def __init__(self, errorLogging=NEF_STANDARD, hidePrefix = True):
 
@@ -53,6 +56,23 @@ class CcpnNefImporter(NefImporter):
 
         self._reader = None
         self._application = _app
+        self._collections = None
+
+    def loadFile(self, fileName=None, mode='standard'):
+        super(CcpnNefImporter, self).loadFile(fileName, mode)
+
+        # process the data to replace ccpn_dataset_id wth ccpn_structuredata_name
+        self.upgradeDataSetIds()
+
+        return self.data
+
+    def loadText(self, text, mode='standard'):
+        super(CcpnNefImporter, self).loadText(text, mode)
+
+        # process the data to replace ccpn_dataset_id wth ccpn_structuredata_name
+        self.upgradeDataSetIds()
+
+        return self.data
 
     def importIntoProject(self, project):
         """Import the data of self into project, using a previously attached
@@ -67,3 +87,43 @@ class CcpnNefImporter(NefImporter):
 
         _reader.importExistingProject(project, self.data)
 
+        # finalise the project
+        #   - add the collections from the importNefPopup to the project
+        if self._collections:
+            for col, itms in self._collections.items():
+                # ignore collections that haven't had items imported
+                _itms = [project.getByPid(itm) if isinstance(itm, str) else itm for itm in itms]
+                _itms = list(filter(lambda obj: obj is not None and project.isCoreObject(obj), _itms))
+                if _itms:
+                    project.newCollection(name=col, items=_itms)
+
+    @property
+    def collections(self):
+        return self._collections
+
+    @collections.setter
+    def collections(self, value):
+        """Set the collections to be created from the imortNefPopup
+        """
+        if not isinstance(value, (dict, type(None))):
+            raise ValueError('collections must be a dict or None')
+
+        self._collections = value
+
+    def upgradeDataSetIds(self):
+        """Update the saveFrames
+        Replace occurrences of DATANAME_DEPRECATED with DATANAME
+        """
+        getLogger().debug(f'>>> replacing tags {self._DATANAME_DEPRECATED} -> {self._DATANAME}')
+        # search through the saveframes for occurrences of DATANAME
+        _sfNames = self.getSaveFrameNames()
+        for sf in _sfNames:
+            sFrame = self.getSaveFrame(sf)
+            if sFrame is not None and sFrame._nefFrame:
+
+                sf = sFrame._nefFrame
+                # replace the deprecated tag with the new tag
+                if self._DATANAME_DEPRECATED in sf:
+                    if self._DATANAME not in sf:
+                        sf[self._DATANAME] = sf.get(self._DATANAME_DEPRECATED) or self._DATANAME_DEFAULT  # cannot be empty
+                    del sf[self._DATANAME_DEPRECATED]  # remove as new tag takes priority

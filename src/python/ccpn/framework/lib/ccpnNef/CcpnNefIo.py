@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-09 11:03:27 +0000 (Wed, February 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-09 18:56:05 +0000 (Wed, February 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -160,6 +160,9 @@ NAMETOOBJECTMAPPING = {'nef_chemical_shift_list'               : ChemicalShiftLi
                        'ccpn_notes'                            : Note,
                        }
 
+DATANAME = 'ccpn_structuredata_name'
+DATANAME_DEFAULT = 'structureFromNef'
+DATANAME_DEPRECATED = 'ccpn_dataset_id'
 
 # NEf to CCPN tag mapping (and tag order)
 #
@@ -1121,7 +1124,7 @@ class CcpnNefWriter:
 
                         # Set up frame - this is too hard-coded here
                         result = self._newNefSaveFrame(None, category, str(paramNum))
-                        result.addItem('ccpn_dataset_id', str(sData.id))
+                        result.addItem(DATANAME, str(sData.id))
                         # result.addItem('ccpn_dataset_serial', sData.serial)
                         result.addItem('ccpn_data_id', obj.name)
                         result.addItem('ccpn_parameter_name', k)
@@ -2894,7 +2897,7 @@ class CcpnNefReader(CcpnNefContent):
                                      ]:
                     # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
                     name = saveFrameName[len(sf_category) + 1:]
-                    dataSetId = saveFrame.get('ccpn_dataset_id')
+                    sDataName = saveFrame.get(DATANAME)
                     # dataSetSerial = saveFrame.get('ccpn_dataset_serial')
                     # if dataSetSerial is not None:
                     #     ss = '`%s`' % dataSetSerial
@@ -2903,7 +2906,7 @@ class CcpnNefReader(CcpnNefContent):
                     # else:
                     #     dataSetSerial = 1
                     name = re.sub(REGEXREMOVEENDQUOTES, '', name)  # substitute with ''
-                    self._frameCodeToSpectra[saveFrameName] = dataSetId  # or dataSetSerial or 1
+                    self._frameCodeToSpectra[saveFrameName] = sDataName  # or dataSetSerial or 1
 
                 # if selection and str(saveFrameName) not in selection:
                 #     getLogger().debug2('>>>  -- skip saveframe {}'.format(saveFrameName))
@@ -3859,7 +3862,7 @@ class CcpnNefReader(CcpnNefContent):
         :param itemName: name of the item to rename - dependent on saveFrame type
         :param newName: new item name or None to autorename to next available name
         
-        requires ccpn_dataset_id
+        requires ccpn_structuredata_name
         """
         # category = saveFrame['sf_category']
         # framecode = saveFrame['sf_framecode']
@@ -3921,14 +3924,14 @@ class CcpnNefReader(CcpnNefContent):
                 loopList = ('ccpn_internal_data',)
                 replaceList = ('ccpn_object_pid', 'internal_data_string',)
 
-                dataSetId = saveFrame.get('ccpn_dataset_id') or ''
+                sDataName = saveFrame.get(DATANAME)
                     
                 # rename the items in the additionalData saveFrame
-                _oldPid = Pid.Pid._join(obj.shortClassName, dataSetId, itemName)
-                _newPid = Pid.Pid._join(obj.shortClassName, dataSetId, newName)
+                _oldPid = Pid.Pid._join(obj.shortClassName, sDataName, itemName)
+                _newPid = Pid.Pid._join(obj.shortClassName, sDataName, newName)
                 # rename the items in the additionalData saveFrame
-                _oldLongPid = Pid.Pid._join(obj.className, dataSetId, itemName)
-                _newLongPid = Pid.Pid._join(obj.className, dataSetId, newName)
+                _oldLongPid = Pid.Pid._join(obj.className, sDataName, itemName)
+                _newLongPid = Pid.Pid._join(obj.className, sDataName, newName)
 
                 # need different search
                 self.searchReplaceDict(project, dataBlock, True, None,
@@ -4802,17 +4805,14 @@ class CcpnNefReader(CcpnNefContent):
 
         # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
         name = framecode[len(category) + 1:]
-        dataSetId = saveFrame.get('ccpn_dataset_id')
-        # dataSetSerial = saveFrame.get('ccpn_dataset_serial')
-
-        # get optional serial from the end of the name
-        _serials = re.findall(REGEXPOSTFIXQUOTEDNUMBER, name)
-        # _serialFromName = int(_serials[0]) if _serials else None
-
-        # if dataSetSerial is not None:
-        #     ss = '`%s`' % dataSetSerial
-        #     if name.startswith(ss):
-        #         name = name[len(ss):]
+        
+        # # replace the deprecated tag with the new tag
+        # if DATANAME_DEPRECATED in saveFrame:
+        #     if DATANAME not in saveFrame:
+        #         saveFrame[DATANAME] = saveFrame.get(DATANAME_DEPRECATED) or DATANAME_DEFAULT  # cannot be empty
+        #     del saveFrame[DATANAME_DEPRECATED]  # remove as new tag takes priority
+        #
+        sDataName = saveFrame.get(DATANAME)
 
         # ejb - need to remove the rogue `n` at the beginning of the name if it exists
         #       as it is passed into the namespace and gets added iteratively every save
@@ -4820,14 +4820,12 @@ class CcpnNefReader(CcpnNefContent):
         name = re.sub(REGEXREMOVEENDQUOTES, '', name)  # substitute with ''
 
         # Make main object
-        # dataSet = self.fetchStructureData(dataSetId, _serialFromName or dataSetSerial)
-        sData = self.fetchStructureData(dataSetId)
+        sData = self.fetchStructureData(sDataName)
 
         # need to fix the names here... cannot contain '.'
-
         previous = sData.getRestraintTable(name)
         if previous is not None:
-            # NEF but NOT CCPN has separate namespaces for different restraint types
+            # NEF but NOT CCPN has separate namespaces for different restraint types,
             # so we may get name clashes
             # We should preserve NEF names, but it cannot be helped.
             if not name.startswith(namePrefix):
@@ -4841,10 +4839,6 @@ class CcpnNefReader(CcpnNefContent):
         parameters['name'] = name
         parameters.pop('serial', 1)  # not required
         result = sData.newRestraintTable(**parameters)
-        # try:
-        #     result._resetSerial(serial)
-        # except Exception as es:
-        #     self.warning('Could not set serial for {} to {}'.format(result, serial), saveFrame)
 
         # Load loops, with object as parent
         for loopName in loopNames:
@@ -4852,19 +4846,15 @@ class CcpnNefReader(CcpnNefContent):
             if loop:
                 importer = self.importers[loopName]
                 if loopName.endswith('_restraint'):
-                    # NBNB HACK: the restrain loop reader needs an itemLength.
                     # There are no other loops currently, but if there ever is they will not need this
                     itemLength = saveFrame.get('restraint_item_length')
 
-                    # if loop and hasattr(loop, 'data'):
                     importer(self, result, loop, saveFrame, itemLength)
                 else:
-                    # if loop and hasattr(loop, 'data'):
                     importer(self, result, loop, saveFrame)
-        #
+
         return result
 
-    #
     importers['nef_distance_restraint_list'] = load_nef_restraint_list
     importers['nef_dihedral_restraint_list'] = load_nef_restraint_list
     importers['nef_rdc_restraint_list'] = load_nef_restraint_list
@@ -4898,31 +4888,30 @@ class CcpnNefReader(CcpnNefContent):
                              (framecode, restraintType), saveFrame)
                 return
         parameters['restraintType'] = restraintType
-        namePrefix = restraintType[:3].capitalize() + '-'
 
         # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
         name = framecode[len(category) + 1:]
-        dataSetId = saveFrame.get('ccpn_dataset_id')
-        # dataSetSerial = saveFrame.get('ccpn_dataset_serial')
-        # if dataSetSerial is not None:
-        #     ss = '`%s`' % dataSetSerial
-        #     if name.startswith(ss):
-        #         name = name[len(ss):]
+
+        # # replace the deprecated tag with the new tag
+        # if DATANAME_DEPRECATED in saveFrame:
+        #     if DATANAME not in saveFrame:
+        #         saveFrame[DATANAME] = saveFrame.get(DATANAME_DEPRECATED) or DATANAME_DEFAULT  # cannot be empty
+        #     del saveFrame[DATANAME_DEPRECATED]  # remove as new tag takes priority
+
+        sDataName = saveFrame.get(DATANAME)
 
         # ejb - need to remove the rogue `n` at the beginning of the name if it exists
         #       as it is passed into the namespace and gets added iteratively every save
         #       next three lines remove all occurrences of `n` from name
         name = re.sub(REGEXREMOVEENDQUOTES, '', name)  # substitute with ''
 
-        sData = self.project.getStructureData(dataSetId) if dataSetId else None
+        sData = self.project.getStructureData(sDataName) if sDataName else None
         # Make main object
-        # dataSet = dataSet or self.getStructureData(dataSetSerial)
         if sData is not None:
             # find the restraintList
             restraintList = sData.getRestraintTable(name)
             if restraintList is not None:
                 self.error('nef_restraint_list - RestraintTable {} already exists'.format(restraintList), saveFrame, (restraintList,))
-                # _rowErrors.add(name)
                 saveFrame._rowErrors[category] = (name,)
 
                 self._verifyLoops(restraintList, saveFrame, name=name)
@@ -5107,8 +5096,14 @@ class CcpnNefReader(CcpnNefContent):
 
         # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
         name = framecode[len(category) + 1:]
-        dataSetId = saveFrame.get('ccpn_dataset_id')
-        # _serial = saveFrame.get('serial')
+
+        # # replace the deprecated tag with the new tag
+        # if DATANAME_DEPRECATED in saveFrame:
+        #     if DATANAME not in saveFrame:
+        #         saveFrame[DATANAME] = saveFrame.get(DATANAME_DEPRECATED) or DATANAME_DEFAULT  # cannot be empty
+        #     del saveFrame[DATANAME_DEPRECATED]  # remove as new tag takes priority
+
+        sDataName = saveFrame.get(DATANAME)
         columns = saveFrame.get('ccpn_restraint_violation_list_columns')
         if columns:
             columns = json.loads(columns)
@@ -5120,26 +5115,19 @@ class CcpnNefReader(CcpnNefContent):
 
         run_id = parameters.get('runId')
 
-        restraintId = Pid.IDSEP.join(('' if x is None else str(x)) for x in (dataSetId, name))
+        restraintId = Pid.IDSEP.join(('' if x is None else str(x)) for x in (sDataName, name))
         previous = project.getObjectsByPartialId(className='RestraintTable', idStartsWith=restraintId)
 
         # need to fix the names here... cannot contain '.'
 
-        # previous = dataSet.getRestraintTable(name)
-        if previous and len(previous) == 1 and not dataSetId:
+        if previous and len(previous) == 1 and not sDataName:
             dataSet = previous[0].structureData
         else:
             # dataSet = project.newDataSet()
-            dataSet = self.fetchStructureData(dataSetId)
+            dataSet = self.fetchStructureData(sDataName)
 
         # read list
         parameters['name'] = name
-
-        # # create a data item with the same name as the restraintList
-        # result = dataSet.getData(name) or dataSet.newData(name)
-        #
-        # # get a unique parameter name if undefined
-        # run_id = run_id or self._uniqueParameterName(result, run_id)
 
         # create a new violationTable
         result = dataSet.getViolationTable(name) or dataSet.newViolationTable(name)
@@ -5150,17 +5138,12 @@ class CcpnNefReader(CcpnNefContent):
             if loop:
                 importer = self.importers[loopName]
                 if loopName.endswith('_restraint_violation'):
-                    # NBNB HACK: the restrain loop reader needs an itemLength.
                     # There are no other loops currently, but if there ever is they will not need this
                     # itemLength = saveFrame.get('restraint_item_length')
 
-                    # if loop and hasattr(loop, 'data'):
                     importer(self, result, loop, saveFrame, run_id, itemLength)
                 else:
-                    # if loop and hasattr(loop, 'data'):
                     importer(self, result, loop, saveFrame)
-        #
-        # result.setDataParameter(run_id, _df)
 
         # set columns back to the correct non-nef values
         if columns:
@@ -5194,23 +5177,27 @@ class CcpnNefReader(CcpnNefContent):
 
         # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
         name = framecode[len(category) + 1:]
-        dataSetId = saveFrame.get('ccpn_dataset_id')
-        # _serial = saveFrame.get('serial')
+
+        # # replace the deprecated tag with the new tag
+        # if DATANAME_DEPRECATED in saveFrame:
+        #     if DATANAME not in saveFrame:
+        #         saveFrame[DATANAME] = saveFrame.get(DATANAME_DEPRECATED) or DATANAME_DEFAULT  # cannot be empty
+        #     del saveFrame[DATANAME_DEPRECATED]  # remove as new tag takes priority
+
+        sDataName = saveFrame.get(DATANAME)
 
         # ejb - need to remove the rogue `n` at the beginning of the name if it exists
         #       as it is passed into the namespace and gets added iteratively every save
         #       next three lines remove all occurrences of `n` from name
         name = re.sub(REGEXREMOVEENDQUOTES, '', name)  # substitute with ''
 
-        dataSet = self.project.getStructureData(dataSetId) if dataSetId else None
+        dataSet = self.project.getStructureData(sDataName) if sDataName else None
         # Make main object
-        # dataSet = dataSet or self.getStructureData(_serial)
         if dataSet is not None:
             # find the restraintList
             violationTable = dataSet.getViolationTable(name)
             if violationTable is not None:
                 self.error(f'{category} - violationTable {violationTable} already exists', saveFrame, (violationTable,))
-                # _rowErrors.add(name)
 
                 # NOTE:ED - this causes an issue with same name violation tables in different structureData
                 saveFrame._rowErrors[category] = (name,)
@@ -7692,7 +7679,7 @@ class CcpnNefReader(CcpnNefContent):
         # Get the next class name using serial, this may already exist
         return '%s_%s' % (cls._defaultName(), serial)
 
-    def fetchStructureData(self, dataSetId: str = None, serial: int = None):
+    def fetchStructureData(self, sDataName: str = None, serial: int = None):
         """Fetch StructureData with given serial.
         If input is None, use self.defaultDataSetSerial
         If that too is None, create a new DataSet and use its serial as the default
@@ -7700,27 +7687,27 @@ class CcpnNefReader(CcpnNefContent):
         NB when reading, all StructureData with known serials should be instantiated BEFORE calling
         with input None"""
 
-        # if serial is None and dataSetId is None:
+        # if serial is None and sDataName is None:
         #     serial = self.defaultDataSetSerial
 
-        sData = self.project.getStructureData(dataSetId)  # if dataSetId else None
-        sData = sData or self.project.newStructureData(dataSetId)
+        sData = self.project.getStructureData(sDataName)  # if sDataName else None
+        sData = sData or self.project.newStructureData(sDataName)
 
         # if serial is None:
         #     # default not set - create one
-        #     dataSet = dataSet or self.project.newStructureData(dataSetId)
+        #     dataSet = dataSet or self.project.newStructureData(sDataName)
         #     self.defaultDataSetSerial = dataSet.serial
         # else:
         #     dataSet = dataSet or self.getStructureData(serial)
         #     if dataSet is None:
-        #         _name = dataSetId or self._defaultName(StructureData, serial)
+        #         _name = sDataName or self._defaultName(StructureData, serial)
         #         _name = StructureData._uniqueName(project=self.project, name=_name)
         #         dataSet = self.project.newStructureData(name=_name, )
 
             # # # take or create dataSet matching serial
             # # dataSet = dataSet or self.getStructureData(serial)
             # if dataSet is None:
-            #     _name = dataSetId or self._defaultName(DataSet, serial)
+            #     _name = sDataName or self._defaultName(DataSet, serial)
             #     dataSet = self.project.newDataSet(name=_name, )  #serial=serial)
 
             # try:

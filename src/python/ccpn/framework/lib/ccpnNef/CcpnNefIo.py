@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:52 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-09 11:03:27 +0000 (Wed, February 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1077,7 +1077,7 @@ class CcpnNefWriter:
         """Convert StructureData to CCPN NEF saveframes"""
 
         results = []
-        for dataSet in structureData:
+        for sData in structureData:
 
             # # skip the ccpnLogging
             # if dataSet.id == CCPNLOGGING:
@@ -1085,14 +1085,14 @@ class CcpnNefWriter:
 
             # Set up frame
             category = 'ccpn_dataset'
-            result = self._newNefSaveFrame(dataSet, category, str(dataSet.id))
+            result = self._newNefSaveFrame(sData, category, str(sData.id))
 
-            self.ccpn2SaveFrameName[dataSet] = result['sf_framecode']
+            self.ccpn2SaveFrameName[sData] = result['sf_framecode']
 
             # Fill in loops
             loopName = 'ccpn_calculation_step'
             loop = result[loopName]
-            calculationSteps = dataSet.calculationSteps
+            calculationSteps = sData.calculationSteps
             if calculationSteps:
                 for calculationStep in calculationSteps:
                     loop.newRow(self._loopRowData(loopName, calculationStep))
@@ -1101,7 +1101,7 @@ class CcpnNefWriter:
 
             loopName = 'ccpn_calculation_data'
             loop = result[loopName]
-            calculationData = dataSet.data
+            calculationData = sData.data
             if calculationData:
                 for obj in calculationData:
                     loop.newRow(self._loopRowData(loopName, obj))
@@ -1112,17 +1112,17 @@ class CcpnNefWriter:
 
         paramNum = 1
         category = 'ccpn_parameter'
-        for dataSet in structureData:
+        for sData in structureData:
 
-            calculationData = dataSet.data
+            calculationData = sData.data
             if calculationData:
                 for obj in calculationData:
                     for k, val in obj.dataParameters.items():
 
                         # Set up frame - this is too hard-coded here
                         result = self._newNefSaveFrame(None, category, str(paramNum))
-                        result.addItem('ccpn_dataset_id', str(dataSet.id))
-                        result.addItem('ccpn_dataset_serial', dataSet.serial)
+                        result.addItem('ccpn_dataset_id', str(sData.id))
+                        # result.addItem('ccpn_dataset_serial', sData.serial)
                         result.addItem('ccpn_data_id', obj.name)
                         result.addItem('ccpn_parameter_name', k)
 
@@ -2895,15 +2895,15 @@ class CcpnNefReader(CcpnNefContent):
                     # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
                     name = saveFrameName[len(sf_category) + 1:]
                     dataSetId = saveFrame.get('ccpn_dataset_id')
-                    dataSetSerial = saveFrame.get('ccpn_dataset_serial')
-                    if dataSetSerial is not None:
-                        ss = '`%s`' % dataSetSerial
-                        if name.startswith(ss):
-                            name = name[len(ss):]
+                    # dataSetSerial = saveFrame.get('ccpn_dataset_serial')
+                    # if dataSetSerial is not None:
+                    #     ss = '`%s`' % dataSetSerial
+                    #     if name.startswith(ss):
+                    #         name = name[len(ss):]
                     # else:
                     #     dataSetSerial = 1
-                    # name = re.sub(REGEXREMOVEENDQUOTES, '', name)  # substitute with ''
-                    self._frameCodeToSpectra[saveFrameName] = dataSetId or dataSetSerial or 1
+                    name = re.sub(REGEXREMOVEENDQUOTES, '', name)  # substitute with ''
+                    self._frameCodeToSpectra[saveFrameName] = dataSetId  # or dataSetSerial or 1
 
                 # if selection and str(saveFrameName) not in selection:
                 #     getLogger().debug2('>>>  -- skip saveframe {}'.format(saveFrameName))
@@ -3541,15 +3541,10 @@ class CcpnNefReader(CcpnNefContent):
         self._updateStringParameters(parameters)
 
         parameters['name'] = framecode[len(category) + 1:]
-        serial = parameters.pop('serial', 1)
+        parameters.pop('serial', 1)  # not required
 
         # Make main object
         result = project.newChemicalShiftList(**parameters)
-        try:
-            result._resetSerial(serial)
-        except Exception as es:
-            self.warning('Could not set serial for {} to {}'.format(result, serial), saveFrame)
-
         if self.defaultChemicalShiftList is None:
             # ChemicalShiftList should default to the unique ChemicalShIftList in the file
             # A file with multiple ChemicalShiftLists MUST have explicit chemical shift lists
@@ -4808,11 +4803,11 @@ class CcpnNefReader(CcpnNefContent):
         # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
         name = framecode[len(category) + 1:]
         dataSetId = saveFrame.get('ccpn_dataset_id')
-        dataSetSerial = saveFrame.get('ccpn_dataset_serial')
+        # dataSetSerial = saveFrame.get('ccpn_dataset_serial')
 
         # get optional serial from the end of the name
         _serials = re.findall(REGEXPOSTFIXQUOTEDNUMBER, name)
-        _serialFromName = int(_serials[0]) if _serials else None
+        # _serialFromName = int(_serials[0]) if _serials else None
 
         # if dataSetSerial is not None:
         #     ss = '`%s`' % dataSetSerial
@@ -4826,11 +4821,11 @@ class CcpnNefReader(CcpnNefContent):
 
         # Make main object
         # dataSet = self.fetchStructureData(dataSetId, _serialFromName or dataSetSerial)
-        dataSet = self.fetchStructureData(dataSetId, dataSetSerial)
+        sData = self.fetchStructureData(dataSetId)
 
         # need to fix the names here... cannot contain '.'
 
-        previous = dataSet.getRestraintTable(name)
+        previous = sData.getRestraintTable(name)
         if previous is not None:
             # NEF but NOT CCPN has separate namespaces for different restraint types
             # so we may get name clashes
@@ -4839,17 +4834,17 @@ class CcpnNefReader(CcpnNefContent):
                 # Add prefix for disambiguation since NEF but NOT CCPN has separate namespaces
                 # for different constraint types
                 name = namePrefix + name
-                while dataSet.getRestraintTable(name) is not None:
+                while sData.getRestraintTable(name) is not None:
                     # This way we get a unique name even in the most bizarre cases
                     name = '`%s`' % name
 
         parameters['name'] = name
-        serial = parameters.pop('serial', 1)
-        result = dataSet.newRestraintTable(**parameters)
-        try:
-            result._resetSerial(serial)
-        except Exception as es:
-            self.warning('Could not set serial for {} to {}'.format(result, serial), saveFrame)
+        parameters.pop('serial', 1)  # not required
+        result = sData.newRestraintTable(**parameters)
+        # try:
+        #     result._resetSerial(serial)
+        # except Exception as es:
+        #     self.warning('Could not set serial for {} to {}'.format(result, serial), saveFrame)
 
         # Load loops, with object as parent
         for loopName in loopNames:
@@ -4908,23 +4903,23 @@ class CcpnNefReader(CcpnNefContent):
         # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
         name = framecode[len(category) + 1:]
         dataSetId = saveFrame.get('ccpn_dataset_id')
-        dataSetSerial = saveFrame.get('ccpn_dataset_serial')
-        if dataSetSerial is not None:
-            ss = '`%s`' % dataSetSerial
-            if name.startswith(ss):
-                name = name[len(ss):]
+        # dataSetSerial = saveFrame.get('ccpn_dataset_serial')
+        # if dataSetSerial is not None:
+        #     ss = '`%s`' % dataSetSerial
+        #     if name.startswith(ss):
+        #         name = name[len(ss):]
 
         # ejb - need to remove the rogue `n` at the beginning of the name if it exists
         #       as it is passed into the namespace and gets added iteratively every save
         #       next three lines remove all occurrences of `n` from name
         name = re.sub(REGEXREMOVEENDQUOTES, '', name)  # substitute with ''
 
-        dataSet = self.project.getStructureData(dataSetId) if dataSetId else None
+        sData = self.project.getStructureData(dataSetId) if dataSetId else None
         # Make main object
-        dataSet = dataSet or self.getStructureData(dataSetSerial)
-        if dataSet is not None:
+        # dataSet = dataSet or self.getStructureData(dataSetSerial)
+        if sData is not None:
             # find the restraintList
-            restraintList = dataSet.getRestraintTable(name)
+            restraintList = sData.getRestraintTable(name)
             if restraintList is not None:
                 self.error('nef_restraint_list - RestraintTable {} already exists'.format(restraintList), saveFrame, (restraintList,))
                 # _rowErrors.add(name)
@@ -5113,7 +5108,7 @@ class CcpnNefReader(CcpnNefContent):
         # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
         name = framecode[len(category) + 1:]
         dataSetId = saveFrame.get('ccpn_dataset_id')
-        _serial = saveFrame.get('serial')
+        # _serial = saveFrame.get('serial')
         columns = saveFrame.get('ccpn_restraint_violation_list_columns')
         if columns:
             columns = json.loads(columns)
@@ -5200,7 +5195,7 @@ class CcpnNefReader(CcpnNefContent):
         # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
         name = framecode[len(category) + 1:]
         dataSetId = saveFrame.get('ccpn_dataset_id')
-        _serial = saveFrame.get('serial')
+        # _serial = saveFrame.get('serial')
 
         # ejb - need to remove the rogue `n` at the beginning of the name if it exists
         #       as it is passed into the namespace and gets added iteratively every save
@@ -5209,7 +5204,7 @@ class CcpnNefReader(CcpnNefContent):
 
         dataSet = self.project.getStructureData(dataSetId) if dataSetId else None
         # Make main object
-        dataSet = dataSet or self.getStructureData(_serial)
+        # dataSet = dataSet or self.getStructureData(_serial)
         if dataSet is not None:
             # find the restraintList
             violationTable = dataSet.getViolationTable(name)
@@ -7138,7 +7133,7 @@ class CcpnNefReader(CcpnNefContent):
                 # skip if not in the import list
                 continue
 
-            parameters.pop('serial', None)  # remove from parameters, although shouldn't be there
+            parameters.pop('serial', None)  # remove from parameters, not required
             obj = creatorFunc(**parameters)
             result.append(obj)
 
@@ -7149,16 +7144,9 @@ class CcpnNefReader(CcpnNefContent):
             lastModified = row.get('last_modified')
             if lastModified:
                 obj.lastModified = lastModified
-            serial = row.get('serial')
-            if serial is not None:
-                try:
-                    obj._resetSerial(serial)
-                except:
-                    pass
-        #
+
         return result
 
-    #
     importers['ccpn_notes'] = load_ccpn_notes
 
     def load_ccpn_collections(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
@@ -7184,22 +7172,14 @@ class CcpnNefReader(CcpnNefContent):
             obj = creatorFunc(**parameters)
             result.append(obj)
 
-            # load serial and items
-            uniqueId = row.get('uniqueId')
-            if uniqueId is not None:
-                try:
-                    obj._resetUniqueId(uniqueId)
-                except:
-                    getLogger().debug('cannot reset collections.uniqueId')
             itms = row.get('items')
             if itms:
                 itms = json.loads(itms)
                 _itms = [project.getByPid(itm) for itm in itms]
                 obj.items = list(filter(None, _itms))
-        #
+
         return result
 
-    #
     importers['ccpn_collections'] = load_ccpn_collections
 
     def verify_ccpn_notes(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
@@ -7304,18 +7284,12 @@ class CcpnNefReader(CcpnNefContent):
         parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
 
         # Make main object - remove blank parameters
-        serial = parameters.pop('serial', None)
+        parameters.pop('serial', None)  # serial not needed
         for k, v in list(parameters.items()):
             if not v:
                 parameters.pop(k, None)
         result = creatorFunc(**parameters)
         if result:
-            if serial:
-                try:
-                    result._resetSerial(serial)
-                except Exception as es:
-                    pass
-
             # Load loops, with object as parent
             for loopName in loopNames:
                 loop = saveFrame.get(loopName)
@@ -7726,20 +7700,22 @@ class CcpnNefReader(CcpnNefContent):
         NB when reading, all StructureData with known serials should be instantiated BEFORE calling
         with input None"""
 
-        if serial is None and dataSetId is None:
-            serial = self.defaultDataSetSerial
+        # if serial is None and dataSetId is None:
+        #     serial = self.defaultDataSetSerial
 
-        dataSet = self.project.getStructureData(dataSetId) if dataSetId else None
-        if serial is None:
-            # default not set - create one
-            dataSet = dataSet or self.project.newStructureData(dataSetId)
-            self.defaultDataSetSerial = dataSet.serial
-        else:
-            dataSet = dataSet or self.getStructureData(serial)
-            if dataSet is None:
-                _name = dataSetId or self._defaultName(StructureData, serial)
-                _name = StructureData._uniqueName(project=self.project, name=_name)
-                dataSet = self.project.newStructureData(name=_name, )
+        sData = self.project.getStructureData(dataSetId)  # if dataSetId else None
+        sData = sData or self.project.newStructureData(dataSetId)
+
+        # if serial is None:
+        #     # default not set - create one
+        #     dataSet = dataSet or self.project.newStructureData(dataSetId)
+        #     self.defaultDataSetSerial = dataSet.serial
+        # else:
+        #     dataSet = dataSet or self.getStructureData(serial)
+        #     if dataSet is None:
+        #         _name = dataSetId or self._defaultName(StructureData, serial)
+        #         _name = StructureData._uniqueName(project=self.project, name=_name)
+        #         dataSet = self.project.newStructureData(name=_name, )
 
             # # # take or create dataSet matching serial
             # # dataSet = dataSet or self.getStructureData(serial)
@@ -7747,13 +7723,14 @@ class CcpnNefReader(CcpnNefContent):
             #     _name = dataSetId or self._defaultName(DataSet, serial)
             #     dataSet = self.project.newDataSet(name=_name, )  #serial=serial)
 
-            try:
-                dataSet._resetSerial(serial)
-            except Exception as es:
-                self.warning(f'Cannot reset serial of dataSet {dataSet}')
+            # try:
+            #     dataSet._resetSerial(serial)
+            # except Exception as es:
+            #     self.warning(f'Cannot reset serial of dataSet {dataSet}')
         #
-        self._dataSet2ItemMap[dataSet] = dataSet._getTempItemMap()
-        return dataSet
+        self._dataSet2ItemMap[sData] = sData._getTempItemMap()
+
+        return sData
 
     def getStructureData(self, serial: int = None):
         """Get the required DataSet with given serial.

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-09 18:56:05 +0000 (Wed, February 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-10 23:06:56 +0000 (Thu, February 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -52,8 +52,10 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
+from ccpn.ui.gui.widgets.SpeechBalloon import SpeechBalloon
+from ccpn.ui.gui.lib.Validators import LineEditValidator
 from ccpn.framework.lib.ccpnNef import CcpnNefIo
-from ccpn.framework.lib.ccpnNef.CcpnNefIo import DATANAME, DATANAME_DEFAULT, DATANAME_DEPRECATED
+from ccpn.framework.lib.ccpnNef.CcpnNefIo import DATANAME
 from ccpn.framework.lib.ccpnNef.CcpnNefCommon import nef2CcpnClassNames
 from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.core.lib.Pid import Pid
@@ -67,7 +69,7 @@ from ccpn.util.AttrDict import AttrDict
 from ccpn.util.OrderedSet import OrderedSet
 
 from ccpn.ui.gui.widgets.Font import getFontHeight, setWidgetFont, TABLEFONT
-from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
+from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS, TOOLTIP_BACKGROUND
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 
@@ -109,6 +111,7 @@ NEFDICTFRAMEKEYS = {NEFFRAMEKEY_IMPORT           : (Nef.NefImporter, Project),
                     NEFFRAMEKEY_PATHNAME         : str,
                     }
 NEFDICTFRAMEKEYS_REQUIRED = (NEFFRAMEKEY_IMPORT,)
+REMOVEENTRY = '<Remove from Collections>'
 
 
 class NefDictFrame(Frame):
@@ -191,7 +194,7 @@ class NefDictFrame(Frame):
         self.nefTreeView.setActionCallback(BADITEMACTION, self._checkBadItem)
 
         # add the collection fill option to the bottom of the menu
-        self.nefTreeView.setPostMenuAction(self._addToCollectionsMenu)
+        self.nefTreeView.setPostMenuAction(partial(self._addToCollectionsMenu, selectionWidget=self.nefTreeView))
 
     def paintEvent(self, ev):
         """Paint the border to the screen
@@ -409,9 +412,7 @@ class NefDictFrame(Frame):
                     childColour = self.nefTreeView._foregroundColour
 
                     # get the saveFrame associated with this item
-                    itemName = childItem.data(0, 0)
-                    saveFrame = childItem.data(1, 0)
-                    parentGroup = childItem.parent().data(0, 0) if childItem.parent() else repr(None)
+                    itemName, saveFrame, parentGroup, pHandler, ccpnClassName = childItem.data(1, 0)
 
                     # NOTE:ED - need a final check on this
                     _errorName = getattr(saveFrame, '_rowErrors', None) and saveFrame._rowErrors.get(saveFrame['sf_category'])
@@ -669,7 +670,9 @@ class NefDictFrame(Frame):
         if isinstance(item, list):
             # find the correct one from the saveframe
             for itm in item:
-                if itm.data(1, 0) == saveFrame:
+                itemName, sFrame, parentGroup, pHandler, ccpnClassName = itm.data(1, 0)
+                # if itm.data(1, 0) == saveFrame:
+                if sFrame == saveFrame:
                     item = itm
                     break
             else:
@@ -701,7 +704,9 @@ class NefDictFrame(Frame):
         if isinstance(item, list):
             # find the correct one from the saveframe
             for itm in item:
-                if itm.data(1, 0) == saveFrame:
+                itemName, sFrame, parentGroup, pHandler, ccpnClassName = itm.data(1, 0)
+                # if itm.data(1, 0) == saveFrame:
+                if sFrame == saveFrame:
                     item = itm
                     break
             else:
@@ -731,7 +736,9 @@ class NefDictFrame(Frame):
         if isinstance(item, list):
             # find the correct one from the saveframe
             for itm in item:
-                if itm.data(1, 0) == saveFrame:
+                itemName, sFrame, parentGroup, pHandler, ccpnClassName = itm.data(1, 0)
+                # if itm.data(1, 0) == saveFrame:
+                if sFrame == saveFrame:
                     item = itm
                     break
             else:
@@ -773,13 +780,16 @@ class NefDictFrame(Frame):
 
         _handleValues = HandleValues()
         _handleValues.item = item
-        _handleValues.itemName = item.data(0, 0)
-        _handleValues.saveFrame = item.data(1, 0)
+
+        _data = item.data(1, 0)
+        itemName, sFrame, parentGroup, pHandler, ccpnClassName = _data
+        _handleValues.itemName = itemName
+        _handleValues.saveFrame = sFrame
 
         _handleValues.mappingCode = mappingCode or ''
         _handleValues.errorCode = errorCode or ''
         _handleValues.mapping = self.nefTreeView.nefToTreeViewMapping.get(mappingCode)
-        _handleValues.ccpnClassName = nef2CcpnClassNames.get(mappingCode)
+        _handleValues.ccpnClassName = ccpnClassName
 
         _handleValues._content = getattr(saveFrame, '_content', None)
         _handleValues._errors = getattr(saveFrame, '_rowErrors', {})
@@ -1009,6 +1019,10 @@ class NefDictFrame(Frame):
                    setLastButtonFocus=False)
         dataSetData.returnPressed.connect(callbacks[0])
 
+    @staticmethod
+    def _validItemInList(name, staticList) -> bool:
+        return True
+
     def _makeStructureDataPulldown(self, item, plural, row, saveFrame, attribName):
 
         Label(self.frameOptionsFrame, text='structureData', grid=(row, 0))
@@ -1029,15 +1043,17 @@ class NefDictFrame(Frame):
 
         funcSelect = self._selectStructureDataId
 
-        # also need list of all dataset_id in nef
-        dataSetData = PulldownList(self.frameOptionsFrame,
-                                   index=list(sdIds).index(_att) if _att in sdIds else 0,
-                                   texts=list(sdIds),
-                                   grid=(row, 1), editable=True)
-        _itmName = item.data(0, 0)
-        _itmParentName = item.parent().data(0, 0) if item.parent() else repr(None)
-        callbackSelect = partial(funcSelect, itemName=_itmName, itemParentName=_itmParentName, parentName=plural, pulldownList=dataSetData, saveFrame=saveFrame)
-        dataSetData.activated.connect(callbackSelect)
+        structureData = self._newPulldown(self.frameOptionsFrame, name='StructureData',
+                                          index=list(sdIds).index(_att) if _att in sdIds else 0,
+                                          texts=list(sdIds),
+                                          grid=(row, 1), allowEmpty=False)
+
+        if not (_data := item.data(1, 0)):
+            return
+        _itmName, _, _itmParentName, _, _ = _data
+
+        callbackSelect = partial(funcSelect, itemName=_itmName, itemParentName=_itmParentName, parentName=plural, pulldownList=structureData, saveFrame=saveFrame)
+        structureData.activated.connect(callbackSelect)
 
     def _makeCollectionPulldown(self, values):
 
@@ -1046,8 +1062,10 @@ class NefDictFrame(Frame):
         Label(self.frameOptionsFrame, text=attribName, grid=(values.row, 0))
         # extract the ccpn_parameter_name
         _att = str(values.saveFrame.get(attribName) or '')  # may be None
-        _itmName = values.item.data(0, 0)
-        _itmParentName = values.item.parent().data(0, 0) if values.item.parent() else repr(None)
+
+        if not (_data := values.item.data(1, 0)):
+            return
+        _itmName, _, _itmParentName, _, _ = _data
 
         colData = self.project.collections
         colNames = OrderedSet([''] + [co.name for co in colData])
@@ -1064,36 +1082,64 @@ class NefDictFrame(Frame):
             if _itmPid in v:
                 _indexing.add(list(colNames).index(k))
 
-        collectionPulldown = PulldownList(self.frameOptionsFrame,
-                                          index=list(_indexing)[0] if len(_indexing) == 1 else 0,
-                                          texts=list(colNames),
-                                          grid=(values.row, 1), editable=True)
+        collectionPulldown = self._newPulldown(self.frameOptionsFrame,
+                                               index=list(_indexing)[0] if len(_indexing) == 1 else 0,
+                                               texts=list(colNames),
+                                               grid=(values.row, 1))
+
         callbackSelect = partial(funcSelect, itemName=_itmName, itemPid=_itmPid, pulldownList=collectionPulldown, saveFrame=values.saveFrame)
         collectionPulldown.activated.connect(callbackSelect)
+
+
+    class CollectionsListWidget(ListWidget):
+
+        def __init__(self, parent, addToCollectionsFunc=None, *args, **kwds):
+            super().__init__(parent, *args, **kwds)
+
+            self._addToCollectionsFunc = addToCollectionsFunc
+
+        def getContextMenu(self):
+            from ccpn.ui.gui.widgets.Menu import Menu
+
+            contextMenu = Menu('', self, isFloatWidget=True)
+            self._addToCollectionsFunc(contextMenu, selectionWidget=self)
+
+            return contextMenu
+
+        def setItems(self, items: dict):
+            self.clear()
+            self.cleared.emit()
+
+            self.objects = {id(obj): obj for obj in items.values()}
+            for txt, obj in items.items():
+                item = QtWidgets.QListWidgetItem(str(txt))
+                item.setData(QtCore.Qt.UserRole, id(obj))
+                self.addItem(item)
+
 
     def _makeCollectionParentPulldown(self, values):
 
         frame = MoreLessFrame(self.frameOptionsFrame, name=values.parentItemName, showMore=True, grid=(values.row, 0), gridSpan=(1, 3))
         values.row += 1
-        # self._tableSplitter.addWidget(frame)
-        # self._nefWidgets = [frame, ]
 
         _count = values.parentItem.childCount()
         _children = []
         for i in range(_count):
             itm = values.parentItem.child(i)
-            itemName = itm.data(0, 0)
-            saveFrame = itm.data(1, 0)
-            _children.append((itm, itemName, saveFrame))
+            _children.append(itm.data(1, 0))
 
-        itemListWidget = ListWidget(frame.contentsFrame, grid=(1, 0), gridSpan=(5, 1))
-        itemListWidget.addItems([itemName for (_, itemName, _) in _children])
+        itemListWidget = self.CollectionsListWidget(frame.contentsFrame, addToCollectionsFunc=self._addToCollectionsMenu,
+                                                    grid=(1, 0), gridSpan=(5, 1))
+        # itemListWidget.addItems([itemName for (_, itemName, _) in _children])
+        itemListWidget.setItems({ch[0]: ch for ch in _children})
 
         attribName, funcSelect = 'collection', self._selectCollectionParentId
 
         Label(self.frameOptionsFrame, text=attribName, grid=(values.row, 0))
-        collectionPulldown = PulldownList(self.frameOptionsFrame,
-                                          grid=(values.row, 1), editable=True)
+
+        collectionPulldown = self._newPulldown(self.frameOptionsFrame,
+                                               grid=(values.row, 1))
+
         callbackSelect = partial(funcSelect, values=values, pulldownList=collectionPulldown, parent=itemListWidget)
         collectionPulldown.activated.connect(callbackSelect)
 
@@ -1101,9 +1147,8 @@ class NefDictFrame(Frame):
 
         # show the current collections
         frame, self._collectionsTable = self._addTableToFrame(pd.DataFrame({'Collection': self._collections.keys(),
-                                                       'Items'     : ['\n'.join(vv for vv in val) for val in self._collections.values()]}),
-                                         _name='Collections',
-                                         # table=self._collectionsTable
+                                                                            'Items'     : ['\n'.join(vv for vv in val) for val in self._collections.values()]}),
+                                                              _name='Collections',
                                                               )
         self._collectionsTable.resizeRowsToContents()
 
@@ -1117,7 +1162,7 @@ class NefDictFrame(Frame):
             itm = values.parentItem.child(i)
             itemName = itm.data(0, 0)
             if itemName in _selection:
-                saveFrame = itm.data(1, 0)
+                _, saveFrame, _, _, _ = itm.data(1, 0)
                 _children.append((itm, itemName, saveFrame))
         return _children, _selection
 
@@ -1181,7 +1226,7 @@ class NefDictFrame(Frame):
         # get the list of common collections for the selection, to set the pulldown
         _indexing = set()
         for (itm, itmName, saveFrame) in _children:
-            _itmStructureData = saveFrame.get(DATANAME)
+            _itmStructureData = saveFrame.get(DATANAME) or ''  # make sure isn't None
             _itmPid = Pid._join(values.ccpnClassName, _itmStructureData, itmName) if values.ccpnClassName else itmName
             _count = 0
             for k, v in self._collections.items():
@@ -1232,18 +1277,20 @@ class NefDictFrame(Frame):
         _children = []
         for i in range(_count):
             itm = values.parentItem.child(i)
-            itemName = itm.data(0, 0)
-            saveFrame = itm.data(1, 0)
-            _children.append((itm, itemName, saveFrame))
+            _children.append(itm.data(1, 0))
 
-        itemListWidget = ListWidget(frame.contentsFrame, grid=(1, 0), gridSpan=(5, 1))
-        itemListWidget.addItems([itemName for (_, itemName, _) in _children])
+        itemListWidget = self.CollectionsListWidget(frame.contentsFrame, addToCollectionsFunc=self._addToCollectionsMenu,
+                                                    grid=(1, 0), gridSpan=(5, 1))
+        # itemListWidget.addItems([(itemName, sf) for (_, itemName, sf) in _children])
+        itemListWidget.setItems({ch[0]: ch for ch in _children})
 
         attribName, funcSelect = 'structureData', self._selectStructureDataParentId
 
         Label(self.frameOptionsFrame, text='structureData', grid=(values.row, 0))
-        structurePulldown = PulldownList(self.frameOptionsFrame,
-                                         grid=(values.row, 1), editable=True)
+
+        structurePulldown = self._newPulldown(self.frameOptionsFrame, name='StructureData',
+                                              grid=(values.row, 1), allowEmpty=False)
+
         values.row += 1
         callbackSelect = partial(funcSelect, values=values, pulldownList=structurePulldown, parent=itemListWidget)
         structurePulldown.activated.connect(callbackSelect)
@@ -1251,8 +1298,10 @@ class NefDictFrame(Frame):
         attribName, funcSelect = 'collection', self._selectCollectionParentStructureId
 
         Label(self.frameOptionsFrame, text=attribName, grid=(values.row, 0))
-        collectionPulldown = PulldownList(self.frameOptionsFrame,
-                                          grid=(values.row, 1), editable=True)
+
+        collectionPulldown = self._newPulldown(self.frameOptionsFrame,
+                                               grid=(values.row, 1))
+
         callbackSelect = partial(funcSelect, values=values, pulldownList=collectionPulldown, parent=itemListWidget)
         collectionPulldown.activated.connect(callbackSelect)
 
@@ -1260,10 +1309,10 @@ class NefDictFrame(Frame):
                                                             collectionPulldown=collectionPulldown, structurePulldown=structurePulldown))
 
         frame, self._collectionsTable = self._addTableToFrame(pd.DataFrame({'Collection': self._collections.keys(),
-                                                       'Items'     : ['\n'.join(vv for vv in val) for val in self._collections.values()]}),
-                                         _name='Collections',
-                                         # table=self._collectionsTable
+                                                                            'Items'     : ['\n'.join(vv for vv in val) for val in self._collections.values()]}),
+                                                              _name='Collections',
                                                               )
+
         self._collectionsTable.resizeRowsToContents()
 
     def _makeCollectionStructurePulldown(self, values):
@@ -1274,8 +1323,10 @@ class NefDictFrame(Frame):
 
         # extract the ccpn_parameter_name
         _att = str(values.saveFrame.get(attribName) or '')  # may be None
-        _itmName = values.item.data(0, 0)
-        _itmParentName = values.item.parent().data(0, 0) if values.item.parent() else repr(None)
+
+        if not (_data := values.item.data(1, 0)):
+            return
+        _itmName, _, _itmParentName, _, _ = _data
 
         colData = self.project.collections
         colNames = OrderedSet([''] + [co.name for co in colData])
@@ -1285,7 +1336,7 @@ class NefDictFrame(Frame):
             colNames.add(col)
 
         # use the saveFrame loop to store?
-        _itmStructureData = values.saveFrame.get(DATANAME)
+        _itmStructureData = values.saveFrame.get(DATANAME) or ''  # make sure isn't None
         _itmPid = Pid._join(values.ccpnClassName, _itmStructureData, _itmName) if values.ccpnClassName else _itmName
 
         _indexing = set()
@@ -1295,10 +1346,11 @@ class NefDictFrame(Frame):
                 _indexing.add(list(colNames).index(k))
 
         # also need list of all dataset_id in nef
-        collectionPulldown = PulldownList(self.frameOptionsFrame,
-                                          index=list(_indexing)[0] if len(_indexing) == 1 else 0,
-                                          texts=list(colNames),
-                                          grid=(values.row, 1), editable=True)
+        collectionPulldown = self._newPulldown(self.frameOptionsFrame,
+                                               index=list(_indexing)[0] if len(_indexing) == 1 else 0,
+                                               texts=list(colNames),
+                                               grid=(values.row, 1))
+
         callbackSelect = partial(funcSelect, itemName=_itmName, itemPid=_itmPid, pulldownList=collectionPulldown, saveFrame=values.saveFrame)
         collectionPulldown.activated.connect(callbackSelect)
 
@@ -1306,10 +1358,10 @@ class NefDictFrame(Frame):
         if not item:
             return
 
-        parentGroup = item.parent().data(0, 0) if item.parent() else repr(None)
+        if not (_data := item.data(1, 0)):
+            return
+        itemName, sFrame, parentGroup, primaryHandler, ccpnClassName = _data
 
-        # find the primary handler class for the clicked item, .i.e. chains/peakLists etc.
-        primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(parentGroup) or saveFrame.get('sf_category')
         func = self._nefReader.renames.get(primaryHandler)
 
         return func
@@ -1320,28 +1372,21 @@ class NefDictFrame(Frame):
         if not item:
             return
 
-        itemName = item.data(0, 0)
-        parentGroup = item.parent().data(0, 0) if item.parent() else repr(None)
-        cat = saveFrame.get('sf_category')
+        if not (_data := item.data(1, 0)):
+            return
+        itemName, sFrame, parentGroup, primaryHandler, ccpnClassName = _data
 
-        # find the primary handler class for the clicked item, .i.e. chains/peakLists etc.
-        primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(parentGroup) or saveFrame.get('sf_category')
         func = self._nefReader.renames.get(primaryHandler)
         if func is not None:
 
-            # NOTE:ED - remember tree checkbox selection
-            _checks = [[_itm.data(0, 0), _itm.data(1, 0), _itm.parent().data(0, 0) if _itm.parent() else repr(None)]
-                       for _itm in self.nefTreeView.traverseTree()
-                       if _itm.checkState(0) == QtCore.Qt.Checked]
+            dd = {}
+            # grab the tree state
+            self._traverseTree(self.nefTreeView.headerItem, self._getTreeState, dd)
 
             # take from lineEdit if exists, otherwise assume autorename (for the minute)
             newName = lineEdit.get() if lineEdit else None
             try:
                 # call the correct rename function based on the item clicked
-
-                # TODO:ED make a new contentCompareDict that contains a merge of left and right windows
-                #       don't need to merge, just make a list of dicts to compare against :)
-
                 newName = func(self._nefReader, self.project,
                                self._nefDict, self._contentCompareDataBlocks,
                                saveFrame,
@@ -1351,7 +1396,10 @@ class NefDictFrame(Frame):
             else:
 
                 # everything okay - rebuild all for now, could make selective later
-                self._repopulateview(_checks, itemName, newName, parentGroup, parentName)
+                self._repopulateview(itemName, newName, parentName)
+
+                # restore the tree state
+                self._traverseTree(self.nefTreeView.headerItem, self._setTreeState, dd)
 
     def _renameSequenceCode(self, item=None, parentName=None, lineEdit=None, saveFrame=None, autoRename=False):
         """Handle clicking a rename button
@@ -1359,38 +1407,34 @@ class NefDictFrame(Frame):
         if not item:
             return
 
-        itemName = item.data(0, 0)
-        parentGroup = item.parent().data(0, 0) if item.parent() else repr(None)
-        cat = saveFrame.get('sf_category')
+        if not (_data := item.data(1, 0)):
+            return
+        itemName, sFrame, parentGroup, primaryHandler, ccpnClassName = _data
 
-        # find the primary handler class for the clicked item, .i.e. chains/peakLists etc.
-        primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(parentGroup) or saveFrame.get('sf_category')
         func = self._nefReader.renames.get('nmr_sequence_code')
         if func is not None:
 
-            # NOTE:ED - remember tree checkbox selection
-            _checks = [[_itm.data(0, 0), _itm.data(1, 0), _itm.parent().data(0, 0) if _itm.parent() else repr(None)]
-                       for _itm in self.nefTreeView.traverseTree()
-                       if _itm.checkState(0) == QtCore.Qt.Checked]
+            dd = {}
+            # grab the tree state
+            self._traverseTree(self.nefTreeView.headerItem, self._getTreeState, dd)
 
             # take from lineEdit if exists, otherwise assume autorename (for the minute)
             newName = lineEdit.get() if lineEdit else None
             try:
                 # call the correct rename function based on the item clicked
-
-                # TODO:ED make a new contentCompareDict that contains a merge of left and right windows
-                #       don't need to merge, just make a list of dicts to compare against :)
-
                 newName = func(self._nefReader, self.project,
                                self._nefDict, self._contentCompareDataBlocks,
                                saveFrame,
                                itemName=itemName, newName=newName if not autoRename else None)
             except Exception as es:
-                showWarning('Rename SaveFrame', str(es))
+                showWarning('Rename Sequence SaveFrame', str(es))
             else:
 
                 # everything okay - rebuild all for now, could make selective later
-                self._repopulateview(_checks, itemName, newName, parentGroup, parentName)
+                self._repopulateview(itemName, newName, parentName)
+
+                # restore the tree state
+                self._traverseTree(self.nefTreeView.headerItem, self._setTreeState, dd)
 
     @contextmanager
     def _editSaveFrameItem(self, item=None, parentName=None, lineEdit=None, saveFrame=None, autoRename=False, parameter=None):
@@ -1405,30 +1449,29 @@ class NefDictFrame(Frame):
         class _editValues:
             newVal: str = ''
             itemName: str = ''
+            parentGroup: str = ''
 
 
-        _data = _editValues()
-        _data.itemName = item.data(0, 0)
-        parentGroup = item.parent().data(0, 0) if item.parent() else repr(None)
+        _newEdit = _editValues()
+        _newEdit.itemName, _, _newEdit.parentGroup, _, _ = item.data(1, 0)
+        _newEdit.newVal = lineEdit.get() if lineEdit else None
 
-        # find the primary handler class for the clicked item, .i.e. chains/peakLists etc.
-        # primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(parentGroup) or saveFrame.get('sf_category')
-
-        _data.newVal = lineEdit.get() if lineEdit else None
-        # remember tree checkbox selection
-        _checks = [[_itm.data(0, 0), _itm.data(1, 0), _itm.parent().data(0, 0) if _itm.parent() else repr(None)]
-                   for _itm in self.nefTreeView.traverseTree()
-                   if _itm.checkState(0) == QtCore.Qt.Checked]
+        dd = {}
+        # grab the tree state
+        self._traverseTree(self.nefTreeView.headerItem, self._getTreeState, dd)
 
         # add item to saveframe
         try:
-            yield _data
+            yield _newEdit
 
         except Exception as es:
             showWarning(f'Error editing {parameter}', str(es))
         else:
             # everything okay - rebuild all for now, could make selective later
-            self._repopulateview(_checks, _data.itemName, None, parentGroup, parentName)
+            self._repopulateview(_newEdit.itemName, None, parentName)
+
+            # restore the tree state
+            self._traverseTree(self.nefTreeView.headerItem, self._setTreeState, dd)
 
     @contextmanager
     def _editSaveFramePulldown(self, itemName=None, itemParentName=None, parentName=None, pulldownList=None, saveFrame=None, autoRename=False, parameter=None):
@@ -1443,30 +1486,30 @@ class NefDictFrame(Frame):
         class _editValues:
             newVal: str = ''
             itemName: str = ''
+            parentGroup: str = ''
 
 
-        _data = _editValues()
-        _data.itemName = itemName  # item.data(0, 0)
-        parentGroup = itemParentName  # item.parent().data(0, 0) if item.parent() else repr(None)
+        _newEdit = _editValues()
+        _newEdit.itemName = itemName
+        _newEdit.parentGroup = itemParentName
+        _newEdit.newVal = pulldownList.getText() if pulldownList else None
 
-        # find the primary handler class for the clicked item, .i.e. chains/peakLists etc.
-        # primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(parentGroup) or saveFrame.get('sf_category')
-
-        _data.newVal = pulldownList.getText() if pulldownList else None
-        # remember tree checkbox selection
-        _checks = [[_itm.data(0, 0), _itm.data(1, 0), _itm.parent().data(0, 0) if _itm.parent() else repr(None)]
-                   for _itm in self.nefTreeView.traverseTree()
-                   if _itm.checkState(0) == QtCore.Qt.Checked]
+        dd = {}
+        # grab the tree state
+        self._traverseTree(self.nefTreeView.headerItem, self._getTreeState, dd)
 
         # add item to saveframe
         try:
-            yield _data
+            yield _newEdit
 
         except Exception as es:
             showWarning(f'Error editing {parameter}', str(es))
         else:
             # everything okay - rebuild all for now, could make selective later
-            self._repopulateview(_checks, _data.itemName, None, parentGroup, parentName)
+            self._repopulateview(_newEdit.itemName, None, parentName)
+
+            # restore the tree state
+            self._traverseTree(self.nefTreeView.headerItem, self._setTreeState, dd)
 
     def _selectStructureDataId(self, itemName=None, itemParentName=None, parentName=None, pulldownList=None, saveFrame=None, autoRename=False):
         """Handle clicking rename structureData button
@@ -1509,7 +1552,7 @@ class NefDictFrame(Frame):
             itm = values.parentItem.child(i)
             itemName = itm.data(0, 0)
             if itemName in _selection:
-                saveFrame = itm.data(1, 0)
+                _, saveFrame, _, _, _ = itm.data(1, 0)
                 _children.append((itm, itemName, saveFrame))
 
         for (itm, itmName, saveFrame) in _children:
@@ -1566,7 +1609,7 @@ class NefDictFrame(Frame):
             itm = values.parentItem.child(i)
             itemName = itm.data(0, 0)
             if itemName in _selection:
-                saveFrame = itm.data(1, 0)
+                _, saveFrame, _, _, _ = itm.data(1, 0)
                 _children.append((itm, itemName, saveFrame))
 
         for (itm, itmName, saveFrame) in _children:
@@ -1600,11 +1643,12 @@ class NefDictFrame(Frame):
             itm = values.parentItem.child(i)
             itemName = itm.data(0, 0)
             if itemName in _selection:
-                saveFrame = itm.data(1, 0)
+                _, saveFrame, _, _, _ = itm.data(1, 0)
+                # saveFrame = itm.data(1, 0)
                 _children.append((itm, itemName, saveFrame))
 
         for (itm, itmName, saveFrame) in _children:
-            _itmStructureData = saveFrame.get(DATANAME)
+            _itmStructureData = saveFrame.get(DATANAME) or ''  # make sure isn't None
             _itmPid = Pid._join(values.ccpnClassName, _itmStructureData, itmName) if values.ccpnClassName else itmName
 
             # remove from previous self._collections
@@ -1645,22 +1689,11 @@ class NefDictFrame(Frame):
                     if _edit.itemName and _oldName and _edit.itemName.endswith(_oldName):
                         _edit.itemName = _edit.itemName[:-len(_oldName)] + _edit.newVal
 
-    def _repopulateview(self, _checks, itemName, newName, parentGroup, parentName):
-        # everything okay - rebuild all for now, could make selective later
+    def _repopulateview(self, itemName, newName, parentName):
+
         self.nefTreeView._populateTreeView(self.project)
         self._fillPopup(self._nefDict)
-        for ii, (_name, _, _treeParent) in enumerate(_checks):
-            if _treeParent == parentGroup and _name == itemName and newName is not None:
-                _name = newName
 
-            _parent = self.nefTreeView.findSection(_treeParent)
-            if _parent:
-                # should be a single item
-                _checkItem = self.nefTreeView.findSection(_name, _parent)
-                if _checkItem:
-                    _checkItem = _checkItem[0] if isinstance(_checkItem, list) else _checkItem
-                    _checkItem.setCheckState(0, QtCore.Qt.Checked)
-        # _parent = self.nefTreeView._contentParent(self.project, saveFrame, cat)\
         _parent = self.nefTreeView.findSection(parentName)
         if _parent:
             # should be a single item
@@ -2154,39 +2187,30 @@ class NefDictFrame(Frame):
         if not saveFrame:
             return
 
-        mapping = self.nefTreeView.nefProjectToSaveFramesMapping.get(parentGroup)
         primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(parentGroup) or saveFrame.get('sf_category')
         if primaryHandler:
             handler = self.handleSaveFrames.get(primaryHandler)
             if handler is not None:
-                # handler(self, saveFrame, item)
                 handler(self, name=name, saveFrame=saveFrame, parentGroup=parentGroup, _handleAutoRename=True)  #, item)
 
     def _checkBadItem(self, name, saveFrame, parentGroup):
         if not saveFrame:
             return
 
-        mapping = self.nefTreeView.nefProjectToSaveFramesMapping.get(parentGroup)
         primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(parentGroup) or saveFrame.get('sf_category')
         if primaryHandler:
             handler = self._setBadSaveFrames.get(primaryHandler)
             if handler is not None:
-                # handler(self, saveFrame, item)
                 return handler(self, name=name, saveFrame=saveFrame, parentGroup=parentGroup, )  #, item)
 
-    # from ccpn.util.decorators import profile
-    #
-    # @profile()
-    def _nefTreeClickedCallback(self, item=None, column=0, *args):
+    def _nefTreeClickedCallback(self, item=None, column=0):
         """Handle clicking on an item in the nef tree
         """
-        # if not item:
-        #     pos = self.nefTreeView.mapFromGlobal(QtGui.QCursor.pos())
-        #     item = self.nefTreeView.itemAt(pos)
         itemName = item.data(0, 0)
-        saveFrame = item.data(1, 0)
-        if saveFrame and hasattr(saveFrame, '_content'):
-            self._itemSelected(item, itemName, saveFrame)
+        if item.data(1, 0):
+            _, saveFrame, _, _, _ = item.data(1, 0)
+            if saveFrame and hasattr(saveFrame, '_content'):
+                self._itemSelected(item, itemName, saveFrame)
 
         else:
             self._parentSelected(item, itemName)
@@ -2263,12 +2287,6 @@ class NefDictFrame(Frame):
 
         with self._tableSplitter.blockWidgetSignals(recursive=False):
             self._tableSplitter.setVisible(False)
-
-            # show items in listWidget
-            # add items to collection
-            # add actions from right-mouse menu
-            # add parent-specific actions
-            #   e.g. set all to same ccpn_structuredata_name
 
             # depth = 1 -> project
             # depth = 2 -> groups
@@ -2486,7 +2504,7 @@ class NefDictFrame(Frame):
             # store the expanded/checked state in the dict
             expandedState = item.isExpanded()
             checkedState = item.checkState(0)
-            data[prefix+item.data(0, 0)] = (expandedState, checkedState)
+            data[prefix + item.data(0, 0)] = (expandedState, checkedState)
 
     def _setTreeState(self, item, data: dict, prefix=''):
         """Set the expanded flag if item is in data
@@ -2494,7 +2512,7 @@ class NefDictFrame(Frame):
         if item:
             try:
                 # restore the expanded/checked state from the dict
-                expandedState, checkedState = data[prefix+item.data(0, 0)]
+                expandedState, checkedState = data[prefix + item.data(0, 0)]
                 item.setCheckState(0, checkedState)
                 item.setExpanded(expandedState)
             except Exception as es:
@@ -2506,7 +2524,7 @@ class NefDictFrame(Frame):
         :param func: function to perform on this element
         :param data: optional data storage to pass to <func>
         """
-        prefix = prefix+node.data(0, 0)  # concatenate the prefixes to give unique key
+        prefix = prefix + node.data(0, 0)  # concatenate the prefixes to give unique key
         _count = node.childCount()
         for i in range(_count):
             child = node.child(i)
@@ -2544,118 +2562,183 @@ class NefDictFrame(Frame):
     def getItemsToImport(self):
         self._nefReader.setImportAll(False)
         treeItems = [item for item in self.nefTreeView.traverseTree() if item.checkState(0) == QtCore.Qt.Checked]
-        selection = [item.data(1, 0) for item in treeItems] or [None]
+        # selection = [item.data(1, 0)[1] for item in treeItems if item.data(1, 0)] or [None]  # saveFrame
+        selection = []
+        for item in treeItems:
+            if (_data := item.data(1, 0)):
+                _, sFrame, _, _, _ = _data
+                selection.append(sFrame)
+        selection = selection or [None]
+        # NOTE:ED - should use a namedtuple
 
         self._nefReader._importDict = {}
         for item in treeItems:
 
-            itemName = item.data(0, 0)
-            saveFrame = item.data(1, 0)
-            parentGroup = item.parent().data(0, 0) if item.parent() else repr(None)
-
-            # mapping = self.nefTreeView.nefProjectToSaveFramesMapping.get(parentGroup)
+            itemName, saveFrame, parentGroup, _, _ = item.data(1, 0)
             handlerMapping = self.nefTreeView.nefProjectToHandlerMapping
+
             if handlerMapping and saveFrame:
                 primaryHandler = handlerMapping.get(parentGroup) or saveFrame.get('sf_category')
                 if primaryHandler:
                     handler = self.applyCheckBoxes.get(primaryHandler)
                     if handler is not None:
-                        # handler(self, saveFrame, item)
                         handler(self, name=itemName, saveFrame=saveFrame, parentGroup=parentGroup)  #, item)
 
         return selection
 
-    def _addToCollectionsMenu(self, contextMenu):
+    def _addToCollectionsMenu(self, contextMenu, selectionWidget):
         """Add options to the bottom of the menu
         """
-        from ccpn.ui.gui.widgets.Menu import Menu
-
         if contextMenu:
             contextMenu.addSeparator()
-            menu = contextMenu.addMenu('Add to Collection')
-            menu.addItem('<New Collection>', callback=self._makeNewCollection)
-            for col in self._collections.keys():
-                menu.addItem(col, callback=partial(self._addToCollection, col))
+            menu = contextMenu.addMenu('Add to Collection ...')
+            contextMenu.addItem('Remove from Collections', callback=partial(self._removeFromCollection, selectionWidget=selectionWidget))
 
-    def _makeNewCollection(self):
+            menu.addItem('<New Collection>', callback=partial(self._makeNewCollection, selectionWidget=selectionWidget))
+            colNames = OrderedSet([col.name for col in self.project.collections] + [col for col in self._collections.keys()])
+            for col in colNames:
+                menu.addItem(col, callback=partial(self._addToCollection, col, selectionWidget=selectionWidget))
+
+    def _removeFromCollection(self, selectionWidget):
+        """Remove the selected items from any collection
+        """
+        self._addToCollection(None, selectionWidget=selectionWidget)
+
+    def _newPulldown(self, parent, allowEmpty=True, name='Collection', **kwds):
+        combo = PulldownList(parent, editable=True, **kwds)
+        combo.setMinimumWidth(200)
+        _validator = LineEditValidator(parent=combo, allowSpace=False,
+                                       allowEmpty=allowEmpty)
+        combo.setValidator(_validator)
+        combo.lineEdit().setPlaceholderText(f'<{name} Name>')
+
+        if name == 'Collection':
+            combo.setToolTip(f'Select existing collection, or edit to create new collection.\n'
+                             f'Choose {REMOVEENTRY} to remove selection from all collections.')
+        else:
+            combo.setToolTip(f'Select existing structureData, or edit to create new structureData.')
+        combo.setCompleter(None)
+
+        return combo
+
+    def _makeNewCollection(self, selectionWidget):
         """Make a small popup to enter a new collection name
         """
-        from ccpn.ui.gui.widgets.SpeechBalloon import SpeechBalloon
 
+
+        # make a simple popup for editing collection
         class EditCollection(SpeechBalloon):
-            """Balloon to hold the pulldown lists for editing the nmrAtom
+            """Balloon to hold the pulldown list for editing/selecting the collection name
             """
 
-            def __init__(self, mainWindow=None, project=None, *args, **kwds):
+            def __init__(self, parent, newPulldown, selectionWidget, *args, **kwds):
+                """Initialise the class
+
+                :param parent: parent class from which popup is instanciated
+                :param newPulldown: func to create a new pulldown
+                :param args: values to pass on to SpeechBalloon
+                :param kwds: values to pass on to SpeechBalloon
+                """
                 super().__init__(*args, **kwds)
+
+                self._parent = parent
+                self._newPulldown = newPulldown
+                self._selectionWidget = selectionWidget
 
                 # simplest way to make the popup function as modal and disappear as required
                 self.setWindowFlags(int(self.windowFlags()) | QtCore.Qt.Popup)
+                self._metrics.corner_radius = 1
+                self._metrics.pointer_height = 0
 
+                # set the background/fontSize for the tooltips
+                _toolBG = getColours()[TOOLTIP_BACKGROUND]
+                self.setStyleSheet(f'QToolTip {{ background-color: {_toolBG}; font-size: {self.font().pointSize()}pt ; }}')
+
+                # add the widgets
+                _frame = Frame(self, setLayout=True, margins=(10, 10, 10, 10))
+                _label = Label(_frame, text='Collection', grid=(0, 0), gridSpan=(1, 2))
+                self._pulldownWidget = self._newPulldown(_frame, grid=(1, 0), gridSpan=(1, 2), )
+
+                # set to the class cenrtal widget
+                self.setCentralWidget(_frame)
+
+            # add methods for setting pulldown options
+            def setPulldownData(self, texts):
+                self._pulldownWidget.setData(texts=texts)
+
+            def setPulldownCallback(self, callback):
+                self._pulldownWidget.activated.connect(partial(callback, self._pulldownWidget, self, selectionWidget=self._selectionWidget))
+
+            @property
+            def centralWidgetSize(self):
+                """Return the sizeHint for the central widget
+                """
+                return self._central_widget_size()
+
+
+        # get the collection names from the project
         colData = self.project.collections
-        colNames = OrderedSet([''] + [co.name for co in colData])
+        colNames = OrderedSet(['', REMOVEENTRY] + [co.name for co in colData])
 
-        # read the collections not defined in the project
+        # get the collections in the importer - not defined in the project
         for col in self._collections.keys():
             colNames.add(col)
             self._collections.setdefault(col, [])
 
-        editPopup = EditCollection(on_top=True)
-        editPopup.hide()
-        collectionPulldown = PulldownList(self.frameOptionsFrame,
-                                          # index=list(_indexing)[0] if len(_indexing) == 1 else 0,
-                                          texts=list(colNames),
-                                          margins=(15, 15, 15, 15),
-                                          grid=(0, 0), editable=True)
-        collectionPulldown.setFixedWidth(200)
-        collectionPulldown.activated.connect(partial(self._createNewCollection, collectionPulldown, editPopup))
+        # create a small editor
+        editPopup = EditCollection(parent=self, newPulldown=self._newPulldown,
+                                   selectionWidget=selectionWidget,
+                                   on_top=True)
+        editPopup.setPulldownData(list(colNames))
+        editPopup.setPulldownCallback(self._createNewCollection)
 
+        # get the desired position of the popup
         pos = QtGui.QCursor().pos()
-        global_rect = pos
-        editPopup.pointerHeight = 0
+        _size = editPopup.centralWidgetSize / 2
+        popupPos = pos - QtCore.QPoint(_size.width(), _size.height())
 
-        mouse_screen = None
-        for screen in QtGui.QGuiApplication.screens():
-            if screen.geometry().contains(pos):
-                mouse_screen = screen
-                break
+        # show the editPopup near the mouse position
+        editPopup.showAt(popupPos)
 
-        editPopup.setCentralWidget(collectionPulldown)
-        editPopup.showAt(global_rect, target_screen=mouse_screen)
-
-    def _createNewCollection(self, pulldown, popup):
+    def _createNewCollection(self, pulldown, popup, selectionWidget):
+        """Creat a new collection, or remove from collections
+        and close the editPopup"""
         collection = pulldown.getText()
         popup.hide()
         popup.deleteLater()
-        self._addToCollection(collection)
+        self._addToCollection(collection, selectionWidget=selectionWidget)
 
-    def _addToCollection(self, collection):
-        from tabulate import tabulate
+    def _addToCollection(self, collection, selectionWidget):
 
-        selection = self.nefTreeView.selectedItems()
+        selection = selectionWidget.selectedItems()
         _table = []
-        print(tabulate(self._collections))
-        for item in selection:
+        for obj in selection:
 
-            itemName = item.data(0, 0)
-            saveFrame = item.data(1, 0)
+            if isinstance(obj, QtWidgets.QListWidgetItem):
+                if not (obj.data(QtCore.Qt.UserRole) and selectionWidget.objects[obj.data(QtCore.Qt.UserRole)]):
+                    continue
+
+                itemName, saveFrame, parentGroup, primaryHandler, ccpnClassName = selectionWidget.objects[obj.data(QtCore.Qt.UserRole)]
+
+            elif isinstance(obj, QtWidgets.QTreeWidgetItem):
+                if not obj.data(1, 0):
+                    # skip if not a child object
+                    continue
+
+                itemName, saveFrame, parentGroup, primaryHandler, ccpnClassName = obj.data(1, 0)
+            else:
+                continue
+
             if saveFrame:
-                parentGroup = item.parent().data(0, 0) if item.parent() else repr(None)
-                # get the group name add fetch the correct mapping
-                mapping = self.nefTreeView.nefProjectToSaveFramesMapping.get(parentGroup)
-                primaryHandler = self.nefTreeView.nefProjectToHandlerMapping.get(parentGroup) or saveFrame.get('sf_category')
                 category = saveFrame.get('sf_category')
 
                 if saveFrame and primaryHandler:
                     # add to collection
-
-                    ccpnClassName = nef2CcpnClassNames.get(primaryHandler)
                     if ccpnClassName:
                         # process pid
                         if DATANAME in saveFrame:
-                            # HACK - assumes that the item is a child of ccpn_structuredata_name
                             #   until saveFrames are subclassed from an ABC
-                            _itmStructureData = saveFrame.get(DATANAME)
+                            _itmStructureData = saveFrame.get(DATANAME) or ''  # make sure isn't None
                             _itmPid = Pid._join(ccpnClassName, _itmStructureData, itemName) if ccpnClassName else itemName
                         else:
                             _itmPid = Pid._join(ccpnClassName, itemName) if ccpnClassName else itemName
@@ -2670,11 +2753,9 @@ class NefDictFrame(Frame):
                             if not v:
                                 self._collections.pop(k)
 
-                        if collection:
+                        if collection and collection != REMOVEENTRY:
                             self._collections.setdefault(collection, [])
                             self._collections[collection].append(_itmPid)
-
-        print(tabulate(self._collections))
 
 
 class ImportNefPopup(CcpnDialogMainWidget):

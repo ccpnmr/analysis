@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-09 18:56:05 +0000 (Wed, February 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-10 23:06:56 +0000 (Thu, February 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -49,7 +49,7 @@ from ccpn.core.Collection import Collection
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
 from ccpn.util.nef import StarIo
 from ccpn.util.OrderedSet import OrderedSet
-from ccpn.framework.lib.ccpnNef.CcpnNefCommon import _traverse, nef2CcpnMap, _isALoop
+from ccpn.framework.lib.ccpnNef.CcpnNefCommon import _traverse, nef2CcpnMap, _isALoop, nef2CcpnClassNames
 from ccpn.ui.gui.widgets.Menu import Menu
 
 
@@ -307,17 +307,6 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         """
         return {val.text(0): val.checkState(0) for val in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive)
                 }
-
-        # selectedItems = {}
-        # for item in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
-        #     obj = item.data(1, 0)
-        #     # return checkstate of items in the tree that are group labels (bottom level should be objects with pids)
-        #     if not hasattr(obj, 'pid'):
-        #         if self.projectItem and item == self.projectItem and not includeRoot:
-        #             continue
-        #     selectedItems[item.text(0)] = item.checkState(0)
-        #
-        # return selectedItems
 
     def getSelectedObjectsPids(self, includeRoot=False):
         """Get the pids of the selected objects
@@ -634,7 +623,13 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
                             child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
                         else:
                             child.setFlags(child.flags() & ~QtCore.Qt.ItemIsUserCheckable)
-                        child.setData(1, 0, saveFrame)
+                        # child.setData(1, 0, saveFrame)
+
+                        parentGroup = child.parent().data(0, 0) if child.parent() else repr(None)
+                        pHandler = self.nefProjectToHandlerMapping.get(parentGroup) or saveFrame.get('sf_category')
+                        ccpnClassName = nef2CcpnClassNames.get(pHandler)
+
+                        child.setData(1, 0, (str(listItem), saveFrame, parentGroup, pHandler, ccpnClassName))
                         child.setText(0, str(listItem))
 
                         if self._enableCheckBoxes:
@@ -851,26 +846,44 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
     def _autoRenameSingle(self, treeItem):
         """Tree item autorename all conflicts in subtree
         """
-        children = [(child.data(0, 0), child.data(1, 0), child.parent().data(0, 0)) for child in (treeItem,)]
+        children = []
+        for child in (treeItem,):
+            if child.data(1, 0):
+                itemName, saveFrame, parentGroup, _, _ = child.data(1, 0)
+                children.append((itemName, saveFrame, parentGroup))
+
         self._autoRename(children)
 
     def _autoRenameAllConflicts(self, treeItem):
         """Tree item autorename all conflicts in subtree
         """
-        children = [(child.data(0, 0), child.data(1, 0), child.parent().data(0, 0)) for child in self.traverseTree(treeItem)]
+        children = []
+        for child in self.traverseTree(treeItem):
+            if child.data(1, 0):
+                itemName, saveFrame, parentGroup, _, _ = child.data(1, 0)
+                children.append((itemName, saveFrame, parentGroup))
+
         self._autoRename(children, conflictsOnly=True)
 
     def _autoRenameAll(self, treeItem):
         """Tree item autorename all in subtree
         """
-        children = [(child.data(0, 0), child.data(1, 0), child.parent().data(0, 0)) for child in self.traverseTree(treeItem)]
+        children = []
+        for child in self.traverseTree(treeItem):
+            if child.data(1, 0):
+                itemName, saveFrame, parentGroup, _, _ = child.data(1, 0)
+                children.append((itemName, saveFrame, parentGroup))
+
         self._autoRename(children)
 
     def _autoRenameSelected(self, treeItem):
         """Tree item autorename selected in subtree
         """
-        children = [(child.data(0, 0), child.data(1, 0), child.parent().data(0, 0)) for child in self.traverseTree(treeItem) if
-                    child.checkState(0) == QtCore.Qt.Checked]
+        children = []
+        for child in self.traverseTree(treeItem):
+            if child.data(1, 0) and child.checkState(0) == QtCore.Qt.Checked:
+                itemName, saveFrame, parentGroup, _, _ = child.data(1, 0)
+                children.append((itemName, saveFrame, parentGroup))
         self._autoRename(children)
 
     def _checkSelected(self, checked, conflictsOnly=False):
@@ -878,19 +891,13 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         """
         for item in self.selectedItems():
             conflictCheck = True
-            if conflictsOnly and BADITEMACTION in self._actionCallbacks:
-                name, saveFrame, treeParent = item.data(0, 0), item.data(1, 0), item.parent().data(0, 0) if item.parent() else repr(None)
-                conflictCheck = self._actionCallbacks[BADITEMACTION](name, saveFrame, treeParent)
+            if item.data(1, 0) and conflictsOnly and BADITEMACTION in self._actionCallbacks:
+                itemName, saveFrame, parentGroup, _, _ = item.data(1, 0)
+                # itemName, saveFrame, parentGroup = item.data(0, 0), item.data(1, 0), item.parent().data(0, 0) if item.parent() else repr(None)
+                conflictCheck = self._actionCallbacks[BADITEMACTION](itemName, saveFrame, parentGroup)
 
             if conflictCheck:
                 item.setCheckState(0, QtCore.Qt.Checked if checked else QtCore.Qt.Unchecked)
-
-    # def setContextMenu(self, menu):
-    #     if isinstance(menu, Menu):
-    #         self._currentContextMenu = menu
-    #         return menu
-    #     else:
-    #         raise TypeError('not a correct menu type')
 
 
 class PrintTreeCheckBoxes(ProjectTreeCheckBoxes):

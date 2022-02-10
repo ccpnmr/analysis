@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-09 18:56:05 +0000 (Wed, February 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-10 23:02:44 +0000 (Thu, February 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -42,7 +42,7 @@ class CcpnNefImporter(NefImporter):
     _DATANAME_DEFAULT = 'structureFromNef'
     _DATANAME_DEPRECATED = 'ccpn_dataset_id'
 
-    def __init__(self, errorLogging=NEF_STANDARD, hidePrefix = True):
+    def __init__(self, errorLogging=NEF_STANDARD, hidePrefix=True):
 
         _app = getApplication()
         super().__init__(programName=_app.applicationName,
@@ -95,7 +95,9 @@ class CcpnNefImporter(NefImporter):
                 _itms = [project.getByPid(itm) if isinstance(itm, str) else itm for itm in itms]
                 _itms = list(filter(lambda obj: obj is not None and project.isCoreObject(obj), _itms))
                 if _itms:
-                    project.newCollection(name=col, items=_itms)
+                    collection = project.fetchCollection(name=col)
+                    itms = set(_itms) - set(collection.items)
+                    collection.addItems(itms)
 
     @property
     def collections(self):

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:51 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-10 22:59:54 +0000 (Thu, February 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -249,18 +249,6 @@ class Project(AbstractWrapperObject):
         """Return the list of collections in the project
         """
         return self._collectionList.collections
-
-    def getCollection(self, relativeId: str) -> Optional['Collection']:
-        """Return the collection from the supplied relativeId
-        """
-        from ccpn.core.Collection import Collection
-
-        dd = self._pid2Obj.get(Collection.className)
-        if dd:
-            key = '{}'.format(relativeId)
-            return dd.get(key)
-        else:
-            return None
 
     @property
     def _collectionData(self):
@@ -1410,6 +1398,7 @@ class Project(AbstractWrapperObject):
         :return path to .tgz archive file as a Path object
         """
         from ccpn.core.lib.ProjectArchiver import ProjectArchiver
+
         archiver = ProjectArchiver(projectPath=self.path)
         archivePath = archiver.makeArchive()
         getLogger().info('==> Project archived to %s' % archivePath)
@@ -1420,6 +1409,7 @@ class Project(AbstractWrapperObject):
         CCPNINTERAL: used in GuiMainWindow
         """
         from ccpn.core.lib.ProjectArchiver import ProjectArchiver
+
         archiver = ProjectArchiver(projectPath=self.project.path)
         return archiver.archives
 
@@ -1428,6 +1418,7 @@ class Project(AbstractWrapperObject):
         """
         # NOTE:ED - better than being in spectrumLib but still needs moving
         from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import getExpClassificationDict
+
         return getExpClassificationDict(self._wrappedData)
 
     #===========================================================================================
@@ -1886,6 +1877,7 @@ class Project(AbstractWrapperObject):
         :return: new or existing Substance instance.
         """
         from ccpn.core.Substance import _fetchSubstance
+
         return _fetchSubstance(self, name=name, labelling=labelling)
 
     @logCommand('project.')
@@ -1899,6 +1891,7 @@ class Project(AbstractWrapperObject):
         :return: a new Complex instance.
         """
         from ccpn.core.Complex import _newComplex
+
         return _newComplex(self, name=name, chains=chains, **kwds)
 
     @logCommand('project.')
@@ -1911,6 +1904,7 @@ class Project(AbstractWrapperObject):
         :return: a new ChemicalShiftList instance.
         """
         from ccpn.core.ChemicalShiftList import _newChemicalShiftList
+
         return _newChemicalShiftList(self, name=name, spectra=spectra, **kwds)
 
     @logCommand('project.')
@@ -1919,11 +1913,30 @@ class Project(AbstractWrapperObject):
         See the ChemicalShiftList class for details.
 
         :param name:
-        :param spectra:
         :return: a new ChemicalShiftList instance.
         """
         from ccpn.core.ChemicalShiftList import _getChemicalShiftList
+
         return _getChemicalShiftList(self, name=name, **kwds)
+
+    def getCollection(self, name: str) -> Optional['Collection']:
+        """Return the collection from the supplied name
+        """
+        from ccpn.core.Collection import _getCollection
+
+        return _getCollection(self, name=name)
+
+    @logCommand('project.')
+    def fetchCollection(self, name: str = None) -> 'Collection':
+        """Get or create Collection.
+        See the Collection class for details.
+
+        :param name:
+        :return: a new Collection instance.
+        """
+        from ccpn.core.Collection import _fetchCollection
+
+        return _fetchCollection(self, name=name)
 
 
 #=========================================================================================

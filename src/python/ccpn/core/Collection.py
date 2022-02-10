@@ -4,10 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-19 17:14:27 +0000 (Wed, January 19, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-02-10 22:59:54 +0000 (Thu, February 10, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -563,3 +563,38 @@ def _getByTuple(collectionList,
     newRow = CollectionParameters(*newRow)
 
     return newRow
+
+
+def _getCollection(project: Project, name: str) -> Optional[Collection]:
+    """Return the collection from the supplied name
+    """
+    if not (name and isinstance(name, str)):
+        raise ValueError('name must be of type str')
+
+    dd = project._pid2Obj.get(Collection.className)
+    if dd:
+        key = '{}'.format(name)
+        return dd.get(key)
+    else:
+        return None
+
+
+def _fetchCollection(project: Project, name: Optional[str] = None) -> Collection:
+    """Get or create a new Collection instance
+    Supplying None for the name will return a new Collection with the next available name.
+
+    :param project: current project
+    :param name: str
+    :return: new or existing Collection instance.
+    """
+    if not isinstance(name, (str, type(None))):
+        raise ValueError('name must be of type str or None')
+
+    if name and (result := _getCollection(project, name)):
+        return result
+
+    else:
+        with undoBlock():
+            result = project.newCollection(name=name)
+
+    return result

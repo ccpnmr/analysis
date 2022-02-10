@@ -42,7 +42,7 @@ from ccpn.ui.gui.widgets import CheckBox
 import os
 import shutil
 
-import datetime
+from datetime import datetime
 from distutils.dir_util import copy_tree
 from ccpn.ui.gui.widgets.FileDialog import OtherFileDialog
 from ccpn.framework.Application import getApplication
@@ -59,13 +59,13 @@ import sys
 import pathlib
 import re
 
-#from pynmrstar import Entry, Saveframe, Loop
+from pynmrstar import Entry, Saveframe, Loop
 
 with undoBlockWithoutSideBar():
     with notificationEchoBlocking():
 
 
-        if applicationVersion == '3.1.0':
+        if '3.1.0' in applicationVersion:
             ccpnVersion310 = True
         else:
             ccpnVersion310 = False
@@ -79,10 +79,6 @@ with undoBlockWithoutSideBar():
 
 
         if application:
-            # Path for Xplor NIH executable. Those calculations are
-            # Local Mac:
-            #xplorPath='/Users/eliza/Projects/xplor-nih-3.2/bin/xplor'
-            xplorPath = application.preferences.externalPrograms.get('xplor')
 
             # This is an example folder from Xplor NIH distribution with scripts necessary for running calculations
             pathToXplorBinary = application.preferences.externalPrograms.get('xplor')
@@ -315,7 +311,7 @@ with undoBlockWithoutSideBar():
             return result
 
 
-        def viol_to_nef(file_handle, model, file_path, args):
+        def viol_to_nef(file_handle, model, file_path): #, args):
             in_data = False
             results = {}
 
@@ -417,7 +413,7 @@ with undoBlockWithoutSideBar():
                     #     line=fields[-1]
                     #     print(fields)
                     # return
-            args.next_index = index
+            #args.next_index = index
             return results
 
         def _get_id(line, current_id):
@@ -644,9 +640,10 @@ with undoBlockWithoutSideBar():
 
         def writeViolationsNEF(dirPath, fileList):
             overall_result = {}
+            fileDir = os.path.join(dirPath, 'fold', 'lowestEnergy')
 
             for name in fileList:
-                path = pathlib.Path(name)
+                path = pathlib.Path(os.path.join(fileDir,name))
 
                 try:
                     model_number = int(filename_matcher.match(path.parts[-1]).group(1))
@@ -657,7 +654,7 @@ with undoBlockWithoutSideBar():
                     exit_error(f'I need an input file, path was {path}')
 
                 with open(path) as fh:
-                    entries = viol_to_nef(fh, model_number, path, args)
+                    entries = viol_to_nef(fh, model_number, path)#, args)
 
                     entries = _collapse_pairs(entries)
 
@@ -669,8 +666,25 @@ with undoBlockWithoutSideBar():
 
             result = data_as_nef(overall_result)
 
+            dateTimeStr = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
+
             with open(os.path.join(dirPath,'violations.nef'),'w') as fh:
-                fh.write(result)
+
+                metaData = """data_default
+                
+                save_nef_nmr_meta_data
+                _nef_nmr_meta_data.sf_category     nef_nmr_meta_data
+                _nef_nmr_meta_data.sf_framecode    nef_nmr_meta_data
+                _nef_nmr_meta_data.format_name     nmr_exchange_format
+                _nef_nmr_meta_data.format_version  1.1
+                _nef_nmr_meta_data.program_name    CCPNprocessXplorNIHCalculation
+                _nef_nmr_meta_data.program_version 3.2
+                _nef_nmr_meta_data.creation_date   {0}
+                _nef_nmr_meta_data.uuid            CCPNprocessXplorNIHCalculation_{1}
+                save_
+                """.format(dateTimeStr, dateTimeStr)
+
+                fh.write(result.replace('data_default', metaData).replace('                ',''))
 
             return
 
@@ -748,6 +762,7 @@ with undoBlockWithoutSideBar():
                             fileExt = '.sa.viols'
                             fileDir = os.path.join(pathRun,'fold', 'lowestEnergy')
                             listOfLowEnergyFiles = [_ for _ in os.listdir(fileDir) if _.endswith(fileExt)]
+                            print(listOfLowEnergyFiles)
                             writeViolationsNEF(pathRun, listOfLowEnergyFiles)
 
 

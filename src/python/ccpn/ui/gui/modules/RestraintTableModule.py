@@ -270,7 +270,7 @@ class GuiRestraintTable(GuiTable):
             # raise ValueError('select: No RestraintTable selected')
             self.rtWidget.selectFirstItem()
         else:
-            if not isinstance(restraintTable, GuiRestraintTable):
+            if not isinstance(restraintTable, RestraintTable):
                 getLogger().warning(f'select: Object {restraintTable} is not of type RestraintTable')
                 return
             else:

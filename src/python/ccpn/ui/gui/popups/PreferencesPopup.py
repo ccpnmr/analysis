@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:53 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-10 23:05:09 +0000 (Thu, February 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -598,7 +598,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         row += 1
         self.runPyConsoleOnMacroEditor = _makeCheckBox(parent, row=row, text="Auto-open python console",
                                                        callback=self._queueSetAutoOpenPythonConsoleOnMacroEditor,
-                                                       toolTip="Open pyhton console when opening a macro editor module")
+                                                       toolTip="Open python console when opening a macro editor module")
 
         #====== Tip of the Day ======
         row += 1

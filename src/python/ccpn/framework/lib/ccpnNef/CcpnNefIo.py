@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-09 18:56:05 +0000 (Wed, February 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-10 23:04:52 +0000 (Thu, February 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -163,6 +163,7 @@ NAMETOOBJECTMAPPING = {'nef_chemical_shift_list'               : ChemicalShiftLi
 DATANAME = 'ccpn_structuredata_name'
 DATANAME_DEFAULT = 'structureFromNef'
 DATANAME_DEPRECATED = 'ccpn_dataset_id'
+
 
 # NEf to CCPN tag mapping (and tag order)
 #
@@ -1028,6 +1029,7 @@ class CcpnNefWriter:
         """Convert ChemicalShiftList to CCPN NEF saveframe"""
 
         from ccpn.core.ChemicalShiftList import CS_CHAINCODE, CS_SEQUENCECODE, CS_RESIDUETYPE, CS_ATOMNAME
+
         # Set up frame
         category = 'nef_chemical_shift_list'
         result = self._newNefSaveFrame(chemicalShiftList, category, chemicalShiftList.name)
@@ -3649,7 +3651,7 @@ class CcpnNefReader(CcpnNefContent):
     verifiers['ccpn_datatable'] = verify_ccpn_datatable
 
     def load_ccpn_datatable_metadata(self, data: Data, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame,
-                                      run_id: str = '', itemLength: int = None):
+                                     run_id: str = '', itemLength: int = None):
         """Serves to load ccpn_<type>_datatable_metadata loops"""
 
         if loop and loop.data:
@@ -3662,7 +3664,7 @@ class CcpnNefReader(CcpnNefContent):
     importers['ccpn_datatable_metadata'] = load_ccpn_datatable_metadata
 
     def load_ccpn_datatable_data(self, data: Data, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame,
-                                      run_id: str = '', itemLength: int = None):
+                                 run_id: str = '', itemLength: int = None):
         """Serves to load ccpn_<type>_datatable_data loop"""
 
         if loop and loop.data:
@@ -3855,9 +3857,9 @@ class CcpnNefReader(CcpnNefContent):
         return newName
 
     def rename_ccpn_table(self, project: Project,
-                         dataBlock: StarIo.NmrDataBlock, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...],
-                         saveFrame: StarIo.NmrSaveFrame,
-                         itemName=None, newName=None):
+                          dataBlock: StarIo.NmrDataBlock, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...],
+                          saveFrame: StarIo.NmrSaveFrame,
+                          itemName=None, newName=None):
         """Rename a saveFrame
         :param itemName: name of the item to rename - dependent on saveFrame type
         :param newName: new item name or None to autorename to next available name
@@ -3884,18 +3886,37 @@ class CcpnNefReader(CcpnNefContent):
                 # merge the frames dict
                 frames = self._mergeSaveFramesInOrder(frames, framesBlock)
 
-        frameList = frames.get(category) or []
-        frameNames = [_saveFrameNameFromCategory(frame).framecode for frame in frameList]
+        # frameList = frames.get(category) or []
 
+        frameList = []
+        # HACK to get the full list of restraint/violation_lists
+        if category.endswith('restraint_list'):
+            for k, v in frames.items():
+                if k.endswith('restraint_list'):
+                    frameList += (frames.get(k) or [])
+
+        elif category.endswith('violation_list'):
+            for k, v in frames.items():
+                if k.endswith('violation_list'):
+                    frameList += (frames.get(k) or [])
+
+        else:
+            return
+
+        frameNames = [_saveFrameNameFromCategory(frame).framecode for frame in frameList]
+        # get the list of just the subName from the saveFrame
+        _shortNames = [_saveFrameNameFromCategory(frame).subname for frame in frameList]
         if newName:
             newSaveFrameName = '_'.join([category, prefix + newName + postfix])
-            if newSaveFrameName in frameNames:
+            # if newSaveFrameName in frameNames:
+            if newName in _shortNames:
                 raise ValueError("{} name '{}' already exists".format(category, newName))
         else:
             # iterate through the names to find the first that is not taken yet
             newSaveFrameName = '_'.join([category, prefix + itemName + postfix])
             newName = itemName
-            while newSaveFrameName in frameNames:
+            while newName in _shortNames:
+                # while newSaveFrameName in frameNames:
                 # newSaveFrameName = commonUtil.incrementName(newSaveFrameName)
                 newName = commonUtil.incrementName(newName)
                 newSaveFrameName = '_'.join([category, prefix + newName + postfix])
@@ -3925,7 +3946,7 @@ class CcpnNefReader(CcpnNefContent):
                 replaceList = ('ccpn_object_pid', 'internal_data_string',)
 
                 sDataName = saveFrame.get(DATANAME)
-                    
+
                 # rename the items in the additionalData saveFrame
                 _oldPid = Pid.Pid._join(obj.shortClassName, sDataName, itemName)
                 _newPid = Pid.Pid._join(obj.shortClassName, sDataName, newName)
@@ -4229,9 +4250,9 @@ class CcpnNefReader(CcpnNefContent):
                                 row['items'] = _items
 
     def rename_ccpn_collection(self, project: Project,
-                         dataBlock: StarIo.NmrDataBlock, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...],
-                         saveFrame: StarIo.NmrSaveFrame,
-                         itemName=None, newName=None):
+                               dataBlock: StarIo.NmrDataBlock, contentDataBlocks: Tuple[StarIo.NmrDataBlock, ...],
+                               saveFrame: StarIo.NmrSaveFrame,
+                               itemName=None, newName=None):
         """Rename a ccpn_collection in ccpn_collections
         :param itemName: name of the item to rename - dependent on saveFrame type
         :param newName: new item name or None to autorename to next available name
@@ -4675,7 +4696,7 @@ class CcpnNefReader(CcpnNefContent):
 
             self._replaceInCollections(dataBlock, _oldPid, _newPid, _oldLongPid, _newLongPid)
 
-    renames['nef_chemical_shift_list'] = rename_ccpn_table
+    renames['nef_chemical_shift_list'] = rename_saveframe
     renames['nef_distance_restraint_list'] = rename_ccpn_table
     renames['nef_dihedral_restraint_list'] = rename_ccpn_table
     renames['nef_rdc_restraint_list'] = rename_ccpn_table
@@ -4805,7 +4826,7 @@ class CcpnNefReader(CcpnNefContent):
 
         # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
         name = framecode[len(category) + 1:]
-        
+
         # # replace the deprecated tag with the new tag
         # if DATANAME_DEPRECATED in saveFrame:
         #     if DATANAME not in saveFrame:
@@ -5209,7 +5230,7 @@ class CcpnNefReader(CcpnNefContent):
     verifiers['ccpn_rdc_restraint_violation_list'] = verify_ccpn_restraint_violation_list
 
     def load_ccpn_restraint_violation_list_metadata(self, data: Data, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame,
-                                      run_id: str = '', itemLength: int = None):
+                                                    run_id: str = '', itemLength: int = None):
         """Serves to load ccpn_<type>_restraint_violation loops"""
 
         if loop and loop.data:
@@ -7704,16 +7725,16 @@ class CcpnNefReader(CcpnNefContent):
         #         _name = StructureData._uniqueName(project=self.project, name=_name)
         #         dataSet = self.project.newStructureData(name=_name, )
 
-            # # # take or create dataSet matching serial
-            # # dataSet = dataSet or self.getStructureData(serial)
-            # if dataSet is None:
-            #     _name = sDataName or self._defaultName(DataSet, serial)
-            #     dataSet = self.project.newDataSet(name=_name, )  #serial=serial)
+        # # # take or create dataSet matching serial
+        # # dataSet = dataSet or self.getStructureData(serial)
+        # if dataSet is None:
+        #     _name = sDataName or self._defaultName(DataSet, serial)
+        #     dataSet = self.project.newDataSet(name=_name, )  #serial=serial)
 
-            # try:
-            #     dataSet._resetSerial(serial)
-            # except Exception as es:
-            #     self.warning(f'Cannot reset serial of dataSet {dataSet}')
+        # try:
+        #     dataSet._resetSerial(serial)
+        # except Exception as es:
+        #     self.warning(f'Cannot reset serial of dataSet {dataSet}')
         #
         self._dataSet2ItemMap[sData] = sData._getTempItemMap()
 
@@ -7803,7 +7824,7 @@ def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict
                                              transferData=transferData)
 
             # make new spectrum with default parameters
-            kwds={}
+            kwds = {}
             for key in ('isotopeCodes', 'spectralWidths', 'spectrometerFrequencies'):
                 if key in dimensionData:
                     kwds[key] = dimensionData[key]

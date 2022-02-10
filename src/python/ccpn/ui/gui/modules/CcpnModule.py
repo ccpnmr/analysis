@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-03 17:40:18 +0000 (Thu, February 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-10 23:01:37 +0000 (Thu, February 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -41,7 +41,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Menu import Menu
-from ccpn.ui.gui.guiSettings import getColours, CCPNMODULELABEL_BACKGROUND, CCPNMODULELABEL_FOREGROUND, \
+from ccpn.ui.gui.guiSettings import CCPNMODULELABEL_BACKGROUND, CCPNMODULELABEL_FOREGROUND, \
     CCPNMODULELABEL_BACKGROUND_ACTIVE, CCPNMODULELABEL_FOREGROUND_ACTIVE, CCPNMODULELABEL_BORDER, CCPNMODULELABEL_BORDER_ACTIVE, \
     BORDERNOFOCUS_COLOUR
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
@@ -69,10 +69,9 @@ from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, TextEditorCompoundWidget, \
     RadioButtonsCompoundWidget, ScientificSpinBoxCompoundWidget, SpinBoxCompoundWidget
 from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
-from ccpn.ui.gui.widgets.Entry import Entry
-from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight, getFont, DEFAULTFONT, CONSOLEFONT
+from ccpn.ui.gui.widgets.Font import setWidgetFont, getWidgetFontHeight, getFont, DEFAULTFONT
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.core.lib.Pid import Pid, PREFIXSEP, createPid
+from ccpn.core.lib.Pid import Pid, createPid
 from ccpn.ui.gui.widgets.Base import Base
 
 
@@ -175,10 +174,11 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     settingsMinimumSizes = (100, 50)
     _restored = False
     _onlySingleInstance = False
-    _includeInLastSeen = True # whether to restore or not after closing it (in the same project)
+    _includeInLastSeen = True  # whether to restore or not after closing it (in the same project)
     _allowRename = False
-    _defaultName = MODULENAME # used only when renaming is allowed, so that its original name is stored in the lastSeen widgetsState.
-                              # After closing a renamed module, any new instance will be named as default.
+    _defaultName = MODULENAME  # used only when renaming is allowed, so that its original name is stored in the lastSeen widgetsState.
+
+    # After closing a renamed module, any new instance will be named as default.
 
     # _instances = set()
 
@@ -427,13 +427,13 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                 widget = varObj
                 try:  # try because widgets can be dynamically deleted
                     value = widget._getSaveState()
-                    if value is not None: # Nones come from non-storable widgets: Splitters, tabs etc..
+                    if value is not None:  # Nones come from non-storable widgets: Splitters, tabs etc..
                         widgetsState[varName] = value
                 except Exception as es:
                     getLogger().warn(f'Error {es} - {varName}')
 
         # self._kwargs = collections.OrderedDict(sorted(widgetsState.items()))
-        return collections.OrderedDict(sorted(widgetsState.items(), key=lambda x:x[0]))
+        return collections.OrderedDict(sorted(widgetsState.items(), key=lambda x: x[0]))
 
     #=========================================================================================
     # Widget Methods
@@ -485,7 +485,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                     self.moduleName = self._name
                     return True
                 else:
-                    showWarning('Cannot rename module %s'%self.titleName, _messageState)
+                    showWarning('Cannot rename module %s' % self.titleName, _messageState)
                     self.label.nameEditor.set(self._name)  #reset the original name
             return False
 
@@ -736,8 +736,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         for widgetsGroup in groupednestedWidgets:
             for count, widget in enumerate(widgetsGroup):
                 if isinstance(widget.objectName(), str):
-                    name = widget.objectName().replace(' ','')
-                    setattr(self, DoubleUnderscore +name, widget)
+                    name = widget.objectName().replace(' ', '')
+                    setattr(self, DoubleUnderscore + name, widget)
                 else:
                     setattr(self, DoubleUnderscore + widget.__class__.__name__ + str(count), widget)
 
@@ -1140,7 +1140,7 @@ class CcpnModuleLabel(DockLabel):
         self.labelRadius = 3
 
         _fontSize = getWidgetFontHeight(size='MEDIUM') or 16
-        super().__init__(name, module, showCloseButton=showCloseButton, ) # fontSize=_fontSize)
+        super().__init__(name, module, showCloseButton=showCloseButton, )  # fontSize=_fontSize)
 
         self.module = module
         self.fixedWidth = True
@@ -1407,12 +1407,13 @@ class CcpnModuleLabel(DockLabel):
 
 INVALIDROWCOLOUR = QtGui.QColor('lightpink')
 
-EXTRA_CHARACTERS_ALLOWED = [' ', # extra characters allowed when renaming a Module (except spectrumDisplays)
+EXTRA_CHARACTERS_ALLOWED = [' ',  # extra characters allowed when renaming a Module (except spectrumDisplays)
                             '_',
                             '(',
                             ')',
                             ':'
                             ]
+
 
 class LabelNameValidator(QtGui.QValidator):
     """ Make sure the newly typed module name on a GUI is unique.
@@ -1430,20 +1431,20 @@ class LabelNameValidator(QtGui.QValidator):
 
     def _setNameValidFunc(self, func):
         """
-        set a custom validation function to perform during the built in validate method, like isNameAvailable...
+        set a custom validation function to perform during the built-in validate method, like isNameAvailable...
         """
         self._isNameAvailableFunc = func
 
     def _isValidInput(self, value):
         extras = ''.join(EXTRA_CHARACTERS_ALLOWED)
         notAllowedSequences = {
-                                'No_strings'            : '^\s*$'   ,
-                                'Space_At_Start'        : '^\s'     ,
-                                'Space_At_End'          : '\s$'     ,
-                                'Empty_Spaces'          : '\s'      ,
-                                'Non-Alphanumeric'      : '\W'      ,
-                                'Illegal_Characters'    :'[^A-Za-z0-9%s]+'%extras # exclude non-alpha but include the extras
-                              }
+            'No_strings'        : '^\s*$',
+            'Space_At_Start'    : '^\s',
+            'Space_At_End'      : '\s$',
+            'Empty_Spaces'      : '\s',
+            'Non-Alphanumeric'  : '\W',
+            'Illegal_Characters': '[^A-Za-z0-9%s]+' % extras  # exclude non-alpha but include the extras
+            }
         valids = [True]
         if value is None:
             valids.append(False)
@@ -1464,7 +1465,7 @@ class LabelNameValidator(QtGui.QValidator):
         self.parent().setPalette(palette)
         return state
 
-    def _setAccetableStatus(self):
+    def _setAcceptableStatus(self):
         palette = self.parent().palette()
         palette.setColor(QtGui.QPalette.Base, self.baseColour)
         state = QtGui.QValidator.Acceptable
@@ -1480,13 +1481,13 @@ class LabelNameValidator(QtGui.QValidator):
         state = QtGui.QValidator.Acceptable
 
         if startingName == name:
-            state = self._setAccetableStatus()
+            state = self._setAcceptableStatus()
             self._isValidState, self._messageState = True, 'Same name as original'
             return state, name, p_int
 
         if self._isNameAvailableFunc(name):
             self._isValidState, self._messageState = True, 'Name available'
-            state = self._setAccetableStatus()
+            state = self._setAcceptableStatus()
 
         if not self._isValidInput(name):
             state = self._setIntermediateStatus()

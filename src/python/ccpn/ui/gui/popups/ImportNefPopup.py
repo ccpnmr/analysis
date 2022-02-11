@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-11 19:07:25 +0000 (Fri, February 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-11 19:26:37 +0000 (Fri, February 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2579,18 +2579,20 @@ class NefDictFrame(Frame):
         selection = selection or [None]
         # NOTE:ED - should use a namedtuple
 
+        if not (handlerMapping := self.nefTreeView.nefProjectToHandlerMapping):
+            return
+
         self._nefReader._importDict = {}
         for item in treeItems:
 
-            itemName, saveFrame, parentGroup, _, _ = item.data(1, 0)
-            handlerMapping = self.nefTreeView.nefProjectToHandlerMapping
-
-            if handlerMapping and saveFrame:
-                primaryHandler = handlerMapping.get(parentGroup) or saveFrame.get('sf_category')
-                if primaryHandler:
-                    handler = self.applyCheckBoxes.get(primaryHandler)
-                    if handler is not None:
-                        handler(self, name=itemName, saveFrame=saveFrame, parentGroup=parentGroup)  #, item)
+            if (_data := item.data(1, 0)):
+                itemName, saveFrame, parentGroup, _, _ = _data
+                if saveFrame:
+                    primaryHandler = handlerMapping.get(parentGroup) or saveFrame.get('sf_category')
+                    if primaryHandler:
+                        handler = self.applyCheckBoxes.get(primaryHandler)
+                        if handler is not None:
+                            handler(self, name=itemName, saveFrame=saveFrame, parentGroup=parentGroup)  #, item)
 
         return selection
 

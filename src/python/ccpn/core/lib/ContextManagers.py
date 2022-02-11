@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-11 11:45:57 +0000 (Fri, February 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-11 11:59:04 +0000 (Fri, February 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -131,14 +131,14 @@ def undoBlockWithSideBar(application=None):
         sidebar = application.ui.mainWindow.sideBar
         sidebar.increaseSidebarBlocking(withSideBarUpdate=True)
 
-    # application.project.suspendNotification()
+    application.project.suspendNotification()
 
     try:
         # transfer control to the calling function
         yield
 
     finally:
-        # _resumeNotification(application)
+        _resumeNotification(application)
 
         if application.ui and application.ui.mainWindow:
             sidebar = application.ui.mainWindow.sideBar

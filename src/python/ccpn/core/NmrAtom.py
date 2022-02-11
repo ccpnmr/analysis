@@ -3,19 +3,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-26 16:50:48 +0000 (Wed, January 26, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-02-11 17:19:54 +0000 (Fri, February 11, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -40,7 +40,7 @@ from ccpn.util.decorators import logCommand
 from ccpn.util.isotopes import isotopeCode2Nucleus, getIsotopeRecords
 from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlock, ccpNmrV3CoreSetter
 from ccpn.util.Logging import getLogger
-
+from collections import defaultdict
 
 UnknownIsotopeCode = '?'
 
@@ -525,6 +525,50 @@ class NmrAtom(AbstractWrapperObject):
     #=========================================================================================
     # CCPN functions
     #=========================================================================================
+
+    def _getAssignedPeakValues(self, spectra, peakLists=None, theProperty='ppmPosition'):
+        """
+        CCPN internal. Used in ChemicalShift mapping and Relaxation Analysis tools.
+        Convenient routine to avoid nested "for-loops".
+        Given a set of spectra, get the value of a particular property for the assigned-peak-dimension.
+        Return a dictionary where the spectrum is the key and the value is the list of a given peak property.
+        :param spectra: list of CCPN spectra.
+        :param peakLists: list of CCPN peakLists to use as a sub-filter, otherwise use all available in spectra.
+        :param theProperty: one of (ppmPosition, pointPosition, lineWidth, height, volume). Notes:
+              height and volume are not a dim property but a peak property. Taken here to avoid code duplication.
+        :return: dictionary {obj:list}
+            E.g.: for <NA:A.53.ASN.N>  theProperty='ppmPosition' it returns
+                {<SP:Tstar-free>: [119.80854378483475], <SP:Tstar-2:0eq>: [119.93958073136751], ...}
+
+        """
+        from ccpn.core.lib.peakUtils import _POINTPOSITION, _PPMPOSITION, _LINEWIDTH, HEIGHT, VOLUME
+
+        if peakLists is None:
+            peakLists = [pl for sp in spectra for pl in sp.peakLists]
+
+        valuesDict = defaultdict(list)
+        for contrib in self._wrappedData.peakDimContribs:
+            if contrib.isDeleted:
+                continue
+            peakDim = contrib.peakDim
+            apiPeak = peakDim.peak
+            if apiPeak.isDeleted or peakDim.isDeleted and apiPeak.figOfMerit == 0.0: #figure of merit shouldn't be filtered here!?
+                continue
+            apiPeakList = apiPeak.peakList
+            peakList = self.project._data2Obj[apiPeakList]
+            spectrum = peakList.spectrum
+            if peakList not in peakLists:
+                continue
+            propertyDict = {
+                            _POINTPOSITION  :   peakDim.position,
+                            _PPMPOSITION    :   peakDim.realValue,
+                            _LINEWIDTH      :   peakDim.lineWidth,
+                            HEIGHT          :   apiPeak.height,
+                            VOLUME          :   apiPeak.volume,
+                            }
+            valuesDict[spectrum].append(propertyDict.get(theProperty, None))
+        return valuesDict
+
 
     def _recalculateShiftValue(self, spectra, simulatedPeakScale: float = 0.0001):
         """Get a new shift value from the assignedPeaks

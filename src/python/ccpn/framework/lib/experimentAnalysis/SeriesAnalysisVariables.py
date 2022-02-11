@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-09 10:41:06 +0000 (Wed, February 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-11 17:19:54 +0000 (Fri, February 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -75,8 +75,17 @@ ChemicalShiftMappingAnalysis = 'ChemicalShiftMappingAnalysis'  # used in SeriesN
 RelaxationAnalysis = 'RelaxationAnalysis'                      # used in SeriesName for the RelaxationAnalysisBC
 
 
-# Series Units
+## Series Units
 import ccpn.util.Constants as constants
 SERIES_TIME_UNITS = constants.TIME_UNITS
 SERIES_CONCENTRATION_UNITS = constants.CONCENTRATION_UNITS
 SERIES_UNITS = constants.ALL_SERIES_UNITS
+
+## Peak properties. Used to get nmrAtom assigned-peak by dimension and build tables.
+import ccpn.core.lib.peakUtils as pu
+_POINTPOSITION  = pu._POSITION
+_PPMPOSITION    = pu._PPMPOSITION
+_LINEWIDTH      = pu._LINEWIDTH
+_HEIGHT         = pu.HEIGHT
+_VOLUME         = pu.VOLUME
+

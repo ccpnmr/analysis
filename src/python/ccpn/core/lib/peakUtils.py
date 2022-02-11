@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-09 11:05:57 +0000 (Wed, February 09, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-02-11 17:19:54 +0000 (Fri, February 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -35,10 +35,17 @@ from pandas import MultiIndex as m_ix
 from ccpn.util.Common import makeIterableList, percentage
 
 
-POSITIONS = 'positions'
+# This variables will be moved to SeriesAnalysisVarialbles.py
+_POSITION = 'position'
+_POINTPOSITION  = 'pointPosition'
+_PPMPOSITION    = 'ppmPosition'
+_LINEWIDTH      = 'lineWidth'
 HEIGHT = 'height'
 VOLUME = 'volume'
-LINEWIDTHS = 'lineWidths'
+POSITIONS =  f'{_POSITION}s'
+LINEWIDTHS = f'{_LINEWIDTH}s'
+POINTPOSITIONS = f'{_POINTPOSITION}s'
+PPMPOSITIONS = f'{_PPMPOSITION}s'
 RAW = 'raw'
 DELTAS = 'deltas'
 DELTA = '\u0394'

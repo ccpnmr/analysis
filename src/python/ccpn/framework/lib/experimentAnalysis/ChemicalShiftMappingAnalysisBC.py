@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-09 10:41:06 +0000 (Wed, February 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-11 17:19:54 +0000 (Fri, February 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 from abc import ABC
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+from ccpn.core.SpectrumGroup import SpectrumGroup
 
 
 
@@ -41,8 +42,8 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
     seriesName = sv.ChemicalShiftMappingAnalysis
 
 
-
-    def newDataTableFromSpectrumGroup(self, spectrumGroup, seriesTableType=sv.CSM_INPUT_FRAME,
+    @staticmethod
+    def newDataTableFromSpectrumGroup(spectrumGroup, seriesTableType=sv.CSM_INPUT_FRAME,
                                       dataTableName=sv.CSM_INPUT_FRAME, **kwargs):
         """
         :param spectrumGroup: object of type SpectrumGroup
@@ -51,27 +52,16 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         :param kwargs: any key:value for creating the new DataTable object.
         :return:
         """
-        raise NotImplementedError('Under implementation. Do not use yet!')
-        project = self.project
-        seriesFrame = self._buildInputSeriesFrameFromSpectrumGroup(spectrumGroup)
-        dataTable = project.newDataTable(name=dataTableName, data=seriesFrame)
-
-
-    def _buildInputSeriesFrameFromSpectrumGroup(self, spectrumGroup):
         from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import CSMInputFrame
 
-        raise NotImplementedError('Under implementation. Do not use yet!')
-        seriesSteps = spectrumGroup.series
-        seriesUnits = spectrumGroup.seriesUnits
-        _assignmentValues = [[]]
-        _seriesValues = [[]]
-        df = CSMInputFrame()
-        df.setSeriesSteps(seriesSteps)
-        df.setSeriesUnits(seriesUnits)
-        df.setAssignmentValues(_assignmentValues)
-        df.setSeriesValues(_seriesValues)
-        df.build()
-        return df
+        # raise NotImplementedError('Under implementation. Do not use yet!')
+        if not isinstance(spectrumGroup, SpectrumGroup):
+            raise TypeError(f'spectrumGroup argument must be a SpectrumGroup Type. Given: {type(spectrumGroup)}')
+        project = spectrumGroup.project
+        seriesFrame = CSMInputFrame()
+        seriesFrame.buildFromSpectrumGroup(spectrumGroup)
+        dataTable = project.newDataTable(name=dataTableName, data=seriesFrame)
+
 
 
 

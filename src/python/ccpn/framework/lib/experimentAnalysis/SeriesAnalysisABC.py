@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-09 10:41:06 +0000 (Wed, February 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-11 17:19:54 +0000 (Fri, February 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 from abc import ABC, abstractmethod
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.core.DataTable import DataTable
-
+from ccpn.core.SpectrumGroup import SpectrumGroup
 
 class SeriesAnalysisABC(ABC):
     """
@@ -44,7 +44,9 @@ class SeriesAnalysisABC(ABC):
     def inputData(cls):
         """
         Get the attached input DataTable
-        Lists of DataTables?
+        Lists of DataTables.
+        Add decorator to ensure the input dataFrame is of the write type as in the subclass.
+        (especially when restoring a project)
         """
         pass
 
@@ -62,6 +64,8 @@ class SeriesAnalysisABC(ABC):
         ovveride on custom implementation
         :param data: TableFrame
         :return: TableFrame
+
+        Fit should create always a new output datatable or overwrite existing?
         """
         return data
 
@@ -93,7 +97,9 @@ class SeriesAnalysisABC(ABC):
             if fittingModel.ModelName == modelName:
                 return fittingModel
 
-    def newDataTableFromSpectrumGroup(self, spectrumGroup, seriesTableType: str, dataTableName: str = None, **kwargs):
+    @staticmethod
+    def newDataTableFromSpectrumGroup(spectrumGroup:SpectrumGroup, seriesTableType:str,
+                                      dataTableName:str=None, **kwargs):
         """
         :param spectrumGroup: object of type SpectrumGroup
         :param seriesTableType: str, One of sv.INPUT_SERIESFRAME_TYPES e.g.: sv.RELAXATION_INPUT_FRAME

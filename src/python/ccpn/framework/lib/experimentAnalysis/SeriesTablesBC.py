@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-09 10:41:06 +0000 (Wed, February 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-11 17:19:54 +0000 (Fri, February 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,13 +29,14 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 import math
 import numbers
 import typing
-import numpy
+import numpy as np
 import pandas as pd
 from collections import OrderedDict as od
 from collections import defaultdict
 from ccpn.core._implementation.DataFrameABC import DataFrameABC
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.util.Logging import getLogger
+from ccpn.util.Common import flattenLists
 
 class SeriesFrameBC(DataFrameABC):
     """
@@ -196,15 +197,15 @@ class SeriesFrameBC(DataFrameABC):
                  ...})
          """
 
-        data = defaultdict(list)
+        dataDict = defaultdict(list)
         if not len(assignmentValues) == len(seriesValues):
             getLogger().warn(f""" AssignmentValues and SeriesValues need to be of same length.""")
-            return data
+            return dataDict
         if not self._valuesHeaders:
             self._setDefaultValueHeaders()
 
         for ix, (_assignmentValueItems, _seriesValueItems) in enumerate(zip(assignmentValues, seriesValues)):
-            data[sv._ROW_UID].append(str(ix))
+            dataDict[sv._ROW_UID].append(str(ix))
             if not len(self._assignmentHeaders) == len(_assignmentValueItems):
                 raise ValueError(f"""AssignmentValues and AssignmentHeaders Definitions need to be of same length.""")
 
@@ -212,10 +213,10 @@ class SeriesFrameBC(DataFrameABC):
                 raise ValueError(f"""SeriesValues and SeriesHeaders Definitions need to be of same length.""")
 
             for a, b in zip(self._assignmentHeaders, _assignmentValueItems):
-                data[a].append(b)
+                dataDict[a].append(b)
             for c, d in zip(self._valuesHeaders, _seriesValueItems):
-                data[c].append(d)
-        return data
+                dataDict[c].append(d)
+        return dataDict
 
     def setDataFromDict(self, dataDict):
         # self.clear()
@@ -272,8 +273,54 @@ class CSMInputFrame(SeriesFrameBC):
     SERIESUNITS = sv.SERIES_CONCENTRATION_UNITS[0]
     SERIESFRAMETYPE = sv.CSM_INPUT_FRAME
 
+    def buildFromSpectrumGroup(self, spectrumGroup):
+        """ Build the SeriesFrame as needed for this subclass"""
+
+        self.setSeriesSteps(spectrumGroup.series)
+        self.setSeriesUnits(spectrumGroup.seriesUnits)
+        _assignmentValues, _seriesValues = _getValuesFromSpectrumGroup(spectrumGroup, thePeakProperty=sv._PPMPOSITION)
+        self.setAssignmentValues(_assignmentValues)
+        self.setSeriesValues(_seriesValues)
+        self.build()
+
+
 
 class CSMOutputFrame(SeriesFrameBC):
 
     SERIESFRAMETYPE = sv.CSM_OUTPUT_FRAME
 
+
+
+
+def _getValuesFromSpectrumGroup(spectrumGroup, thePeakProperty, peakListIndex=-1):
+    """
+    Internal
+    Get the assignmentValues and seriesValues from a spectrumGroup.
+    Values are used to build the  SeriesTable
+    :return assignmentValues and seriesValues, both are list of lists
+    """
+    _assignmentValues = []
+    _seriesValues = []
+    spectra = spectrumGroup.spectra
+    nmrAtoms = _getAssignedNmrAtoms4Spectra(spectra, peakListIndex=peakListIndex)
+    for nmrAtom in nmrAtoms:
+        ## get the assignmnt Values
+        _assignmentValues.append([nmrAtom.nmrResidue.nmrChain.name, nmrAtom.nmrResidue.sequenceCode,
+                                  nmrAtom.nmrResidue.residueType, nmrAtom.name])
+        ## get the series Peak-property values
+        spectraValuesDict = nmrAtom._getAssignedPeakValues(spectra, theProperty=thePeakProperty)
+        _seriesValues4Atom = []
+        for spectrum in spectra:
+            values = spectraValuesDict.get(spectrum, [])
+            if values:
+                _seriesValues4Atom.append(values[0] if len(values) == 1 else np.mean([v for v in values if v]))
+            else:
+                _seriesValues4Atom.append(None)
+        _seriesValues.append(_seriesValues4Atom)
+    return _assignmentValues, _seriesValues
+
+def _getAssignedNmrAtoms4Spectra(spectra, peakListIndex=-1):
+    """Get a set of assigned nmrAtoms that appear in a list of spectra. Use last peakList only as default."""
+    allPeaks = [pk for sp in spectra for pk in sp.peakLists[peakListIndex].peaks]
+    nmrAtoms = set(flattenLists([peak.assignedNmrAtoms for peak in allPeaks]))
+    return list(nmrAtoms)

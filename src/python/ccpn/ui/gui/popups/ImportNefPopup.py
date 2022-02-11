@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:53 +0000 (Mon, February 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-11 11:45:58 +0000 (Fri, February 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -114,7 +114,7 @@ class NefDictFrame(Frame):
 
     DEFAULTMARGINS = (8, 8, 8, 8)  # l, t, r, b
 
-    def __init__(self, parent, mainWindow, nefLoader, pathName,
+    def __init__(self, parent, mainWindow, nefLoader, dataBlock, pathName,
                  enableCheckBoxes=False, enableRename=False,
                  enableFilterFrame=False, enableMouseMenu=False,
                  showBorder=True, borderColour=None, _splitterMargins=DEFAULTMARGINS,
@@ -151,7 +151,7 @@ class NefDictFrame(Frame):
         # set the nef object - nefLoader/nefDict
         # self._initialiseNefLoader(nefObject, _ignoreError=True)
         self._nefLoader = nefLoader
-        self._nefDict = nefLoader.data
+        self._nefDict = dataBlock
         self._primaryProject = False
 
         # set up the widgets
@@ -1974,14 +1974,14 @@ class ImportNefPopup(CcpnDialogMainWidget):
     FIXEDHEIGHT = False
     DEFAULTMARGINS = (5, 5, 5, 5)
 
-    def __init__(self, parent, mainWindow, project, nefImporter, **kwds):
+    def __init__(self, parent, mainWindow, project, dataLoader, **kwds):
         """
         Initialise the main form
 
         :param parent: calling widget
         :param mainWindow: gui mainWindow class for the application
         :param project: a Project instance
-        :param nefImporter: A (CcpNmr) NefImporter instance
+        :param dataLoader: A NefDataLoader instance
         :param kwds: additional parameters to pass to the window
         """
         size = (1000, 700)
@@ -2003,8 +2003,9 @@ class ImportNefPopup(CcpnDialogMainWidget):
         self.application = mainWindow.application
         self.project = project
 
-        self._nefImporter = nefImporter
-        self._path = nefImporter.path
+        self._dataLoader = dataLoader
+        self._nefImporter = dataLoader.nefImporter
+        self._path = str(dataLoader.path)
 
 
         # if not isinstance(nefImporterClass, (type(Nef.NefImporter), type(None))):
@@ -2059,9 +2060,11 @@ class ImportNefPopup(CcpnDialogMainWidget):
                      NEFFRAMEKEY_ENABLEFILTERFRAME: True,
                      NEFFRAMEKEY_ENABLEMOUSEMENU  : True,
                      }
+        _dataBlock = self._dataLoader.dataBlock,  # This will also assure dat have been read
         newWindow = NefDictFrame(parent=self,
                                  mainWindow=self.mainWindow,
                                  nefLoader=self._nefImporter,
+                                 dataBlock=_dataBlock,
                                  pathName=self._path,
                                  grid=(0, 0), showBorder=True,
                                  **_options

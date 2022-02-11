@@ -8,7 +8,7 @@ CcpNmr version of the Trailets; all subclassed for added functionalities:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -20,9 +20,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-23 17:30:59 +0000 (Thu, December 23, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-11 11:45:58 +0000 (Fri, February 11, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -63,7 +63,9 @@ from ccpn.util.traits.TraitJsonHandlerBase import TraitJsonHandlerBase, Recursiv
     RecursiveListHandlerABC
 from ccpn.util.AttributeDict import AttributeDict
 from ccpn.util.Path import aPath, Path
+from ccpn.util.Logging import getLogger
 
+from ccpn.framework.Application import getApplication
 
 class _Ordered(object):
     """A class that maintains and sets trait-order
@@ -166,8 +168,6 @@ class CList(List, _Ordered):
 class RecursiveList(List):
     """A list trait that implements recursion of any of the values that are a CcpNmrJson (sub)type
     """
-
-
     # trait-specific json handler
     class jsonHandler(RecursiveListHandlerABC):
         klass = list
@@ -187,8 +187,6 @@ class Set(_Set, _Ordered):
 class RecursiveSet(Set):
     """A Set trait that implements recursion of any of the values that are a CcpNmrJson (sub)type
     """
-
-
     # trait-specific json handler
     class jsonHandler(RecursiveListHandlerABC):
         klass = set
@@ -209,8 +207,6 @@ class Tuple(_Tuple, _Ordered):
 class RecursiveTuple(Tuple):
     """A tuple trait that implements recursion of any of the values that are a CcpNmrJson (sub)type
     """
-
-
     # trait-specific json handler
     class jsonHandler(RecursiveListHandlerABC):
         klass = tuple
@@ -231,8 +227,6 @@ class RecursiveDict(Dict):
     """A dict trait that implements recursion of any of the values that are a CcpNmrJson (sub)type
     Recursion is active by default, unless tagged with .tag(recursion=False)
     """
-
-
     # trait-specific json handler
     class jsonHandler(RecursiveDictHandlerABC):
         klass = dict
@@ -264,13 +258,10 @@ class Adict(TraitType, _Ordered):
         else:
             self.error(obj, value)
 
-
     # trait-specific json handler
     class jsonHandler(RecursiveDictHandlerABC):
         klass = AttributeDict
         recursion = False
-
-
 # end class
 
 
@@ -279,14 +270,10 @@ class RecursiveAdict(Adict):
     dicts or (key,value) iterables are automatically cast into AttributeDict
     Recursion is active
     """
-
-
     # trait-specific json handler
     class jsonHandler(RecursiveDictHandlerABC):
         klass = AttributeDict
         recursion = True
-
-
 # end class
 
 
@@ -314,13 +301,10 @@ class Odict(TraitType, _Ordered):
         else:
             self.error(obj, value)
 
-
     # trait-specific json handler
     class jsonHandler(RecursiveDictHandlerABC):
         klass = OrderedDict
         recursion = False
-
-
 # end class
 
 
@@ -329,14 +313,10 @@ class RecursiveOdict(Odict):
     dicts are automatically cast into OrderedDict
     Recursion is active
     """
-
-
     # trait-specific json handler
     class jsonHandler(RecursiveDictHandlerABC):
         klass = OrderedDict
         recursion = True
-
-
 # end class
 
 
@@ -346,7 +326,6 @@ class Immutable(Any, _Ordered):
     def __init__(self, value):
         TraitType.__init__(self, default_value=value, read_only=True)
         _Ordered.__init__(self)
-
 
     # trait-specific json handler
     class jsonHandler(TraitJsonHandlerBase):
@@ -360,8 +339,6 @@ class Immutable(Any, _Ordered):
             # force set value
             obj.setTraitValue(trait, value, force=True)
     # end class
-
-
 #end class
 
 
@@ -391,7 +368,6 @@ class CPath(TraitType, _Ordered):
 
         return value
 
-
     # trait-specific json handler
     class jsonHandler(TraitJsonHandlerBase):
         """Serialise Path to be json compatible.
@@ -410,8 +386,6 @@ class CPath(TraitType, _Ordered):
                 value = Path(value)
             setattr(obj, trait, value)
     # end class
-
-
 # end class
 
 
@@ -462,7 +436,6 @@ class CString(TraitType, _Ordered):
 
         return value
 
-
     # trait-specific json handler
     class jsonHandler(TraitJsonHandlerBase):
         """json compatible;
@@ -477,5 +450,92 @@ class CString(TraitType, _Ordered):
         #     "uses value to generate and set the new (or modified) obj"
         #     value = CString.fromBytes
         #     setattr(obj, trait, value)
+# end class
 
+
+class V3Object(TraitType, _Ordered):
+    """A trait that defines a V3-object, json serialisable through its Pid
+    """
+    default_value = None
+    info_text = "A V3-Object"
+
+    def __init__(self, default_value = None, allow_none=True, **kwargs):
+        TraitType.__init__(self, default_value=default_value, allow_none=allow_none, **kwargs)
+        _Ordered.__init__(self)
+        if default_value is not None:
+            self.default_value = default_value
+
+    def validate(self, obj, value):
+        """Assure a str instance
+        """
+        from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+
+        if isinstance(value, AbstractWrapperObject):
+            pass
+        else:
+            self.error(obj, value)
+
+        return value
+
+    # trait-specific json handler
+    class jsonHandler(TraitJsonHandlerBase):
+        """json compatible;
+        """
+        def encode(self, obj, trait):
+            "returns a json serialisable object"
+            value = getattr(obj, trait)
+            return value.pid
+
+        def decode(self, obj, trait, value):
+            "uses value to generate and set the new (or modified) obj"
+            _app = getApplication()
+            if (result := _app.get(value)) is None:
+                getLogger().debug('Error decoding %r; set to None' % value)
+            setattr(obj, trait, result)
+# end class
+
+
+class V3ObjectList(List):
+    """A trait that defines a list of V3-objects, json serialisable through their Pid's
+    """
+    default_value = []
+    info_text = "A V3-ObjectList"
+
+    def __init__(self, default_value = [], **kwargs):
+        List.__init__(self, default_value=default_value, allow_none=False, **kwargs)
+        if default_value is not None:
+            self.default_value = default_value
+
+        def validate_elements(self, obj, value):
+            """Assure a str instance
+            """
+            from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+
+            for val in value:
+                if isinstance(val, AbstractWrapperObject):
+                    pass
+                else:
+                    self.error(obj, value)
+
+            return value
+
+    # trait-specific json handler
+    class jsonHandler(TraitJsonHandlerBase):
+        """json compatible;
+        """
+        def encode(self, obj, trait):
+            "returns a json serialisable object"
+            value = getattr(obj, trait)
+            # make a list of pids
+            pids = [val.pid for val in value]
+            return pids
+
+        def decode(self, obj, trait, value):
+            "uses value to generate and set the new (or modified) obj"
+            _app = getApplication()
+            # get obj's for the list of pids
+            result = [_app.get(val) for val in value]
+            if None in result:
+                getLogger().warning('Unable to decode some pid\'s to objects; %r' % value)
+            setattr(obj, trait, result)
 # end class

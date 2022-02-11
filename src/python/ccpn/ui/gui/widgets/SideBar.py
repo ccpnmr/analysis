@@ -1,8 +1,8 @@
 """
 SideBar setup
 
-This module is built on a definition of the sidebar tree that includes dynamic additions and deletions initiated by
-notifiers on the various project objects.
+This module is built on a definition of the sidebar tree that includes dynamic additions
+and deletions initiated by notifiers on the various project objects.
 
 The tree can be constructed using 4 item types:
 
@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:53 +0000 (Mon, February 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-11 11:45:58 +0000 (Fri, February 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -311,10 +311,10 @@ class SidebarABC(NotifierBase):
         # for itm in self.children:
         #     itm.buildTree(parent=self, sidebar=self.sidebar, obj=self.obj, level=self.level+1)
 
-    def rebuildTree(self):
+    def rebuildTree(self, deleteNotifiers=True):
         """Rebuilds the tree starting from self
         """
-        self.reset()
+        self.reset(deleteNotifiers=deleteNotifiers)
         self.buildTree(parent=self._parent, parentWidget=self._parentWidget, sidebar=self.sidebar, obj=self.obj, level=self.level)
 
     def printTree(self, string=None):
@@ -491,8 +491,9 @@ class SidebarABC(NotifierBase):
         """
         return classObjs
 
-    def reset(self):
-        """Resets the tree from self downward, deleting widget and notifiers
+    def reset(self, deleteNotifiers=True):
+        """Resets the tree from self downward, deleting widget and
+        optionally the notifiers; remove all children
         """
         if (self.children):
 
@@ -500,7 +501,7 @@ class SidebarABC(NotifierBase):
             for itm in self.children:
                 itm.reset()
 
-        self.deleteAllNotifiers()
+            self.deleteAllNotifiers()
 
         # remove the widgets associated with the sidebar items
         if self.widget and self.widget.parent():
@@ -510,7 +511,7 @@ class SidebarABC(NotifierBase):
         self._postBlockingAction = None
 
     def _update(self, cDict):
-        """Callback for updating the node
+        """Callback routine for updating the node
         """
 
         trigger = cDict[Notifier.TRIGGER]
@@ -523,41 +524,43 @@ class SidebarABC(NotifierBase):
             node = self.findChildNodeObject(obj)
             if not node:
                 return
-            rebuildOrRename = self.RENAME
+            _action = self.RENAME
 
         elif trigger == Notifier.RENAME:
             # Find the node to rebuild
             node = self._findParentNode(self.rebuildOnRename)
-            rebuildOrRename = self.REBUILD
+            _action = self.REBUILD
 
         elif trigger == Notifier.DELETE:
             # For now: we just rebuild from here on down the tree
             node = self
-            rebuildOrRename = self.REBUILD
+            _action = self.REBUILD
 
         elif trigger == Notifier.CREATE:
             # For now: we just rebuild from here on down the tree
             node = self
-            rebuildOrRename = self.REBUILD
+            _action = self.REBUILD
 
         elif trigger == Notifier.CHANGE:
             # For now: we just rebuild from here on down the tree
             node = self
-            rebuildOrRename = self.REBUILD
+            _action = self.REBUILD
 
         else:
             raise RuntimeError('Update callback: invalid trigger "%s"' % trigger)
 
         # do the action or tag the node for later
-        if self.sidebar.isBlocked:
-            node._postBlockingAction = rebuildOrRename
+        _isBlocked = self.sidebar.isBlocked  # explicit for debugging purpose
+        if _isBlocked:
+            node._postBlockingAction = _action
+            return
 
-        elif rebuildOrRename == self.REBUILD:
+        elif _action == self.REBUILD:
             # rebuild the tree starting from node
             with self.sidebar.sideBarBlocking(node):
-                node.rebuildTree()
+                node.rebuildTree(deleteNotifiers=True)
 
-        elif rebuildOrRename == self.RENAME:
+        elif _action == self.RENAME:
             # rename node
             with self.sidebar.sideBarBlocking(node):
                 node.rename()
@@ -568,15 +571,23 @@ class SidebarABC(NotifierBase):
 
         if self._postBlockingAction == self.REBUILD:
             self.rebuildTree()
+            self._postBlockingAction = None
             return  # all the children have been visited, reset and rebuild; we are done
+
         elif self._postBlockingAction == self.RENAME:
             self.rename()
             self._postBlockingAction = None
+
+        elif self._postBlockingAction is None:
+            pass
+
+        else:
+            raise RuntimeError('Invalid postBlockingAction %r' % self._postBlockingAction)
+
         # check the children
         for child in self.children:
             child._postBlockingUpdate()
-        # _postBlockingAction would already be None here; however, for clarity
-        self._postBlockingAction = None
+
         return
 
     @property
@@ -659,10 +670,10 @@ class SidebarClassABC(SidebarABC):
             # pass the parent widget down the tree
             itm.buildTree(parent=self, parentWidget=self._parentWidget, sidebar=self.sidebar, obj=classObj, level=level)  # class items get same level as parent
 
-    def reset(self):
+    def reset(self, deleteNotifiers=True):
         """Resets the tree from self downward
         """
-        super().reset()
+        super().reset(deleteNotifiers=deleteNotifiers)
         self.children = []
 
 
@@ -682,8 +693,8 @@ class SidebarClassItems(SidebarClassABC):
         super().__init__(name=name, klass=klass, addNotifier=addNotifier, closed=closed, rebuildOnRename=rebuildOnRename,
                          callback=callback, menuAction=menuAction, children=children, isDraggable=isDraggable, **kwds)
 
-    def reset(self):
-        super().reset()
+    # def reset(self, deleteNotifiers=True):
+    #     super().reset(deleteNotifiers=deleteNotifiers)
 
 
 class SidebarClassTreeItems(SidebarClassABC):
@@ -1008,22 +1019,22 @@ class SideBarStructure(object):
         self._project = None
         self._sidebar = None
 
-    def reset(self):
+    def reset(self, deleteNotifiers=True):
         """Resets all
         """
-        self._sidebarData.reset()
+        self._sidebarData.reset(deleteNotifiers=deleteNotifiers)
 
     def clearSideBar(self):
         """Clear the sideBar if widgets and notifiers.
         """
-        self._sidebarData.reset()
+        self._sidebarData.reset(deleteNotifiers=True)
 
     def buildTree(self, project, clear=True):
         """Builds the tree from project; returns self
         """
         self._project = project
         if clear:
-            self.reset()
+            self.clearSideBar()
         self._sidebarData.buildTree(parent=None, parentWidget=self._sidebar, sidebar=self._sidebar, obj=self._project)  # This is the root
 
         # set the tree name to the id (not pid)
@@ -1074,6 +1085,7 @@ class SideBarStructure(object):
     def increaseSidebarBlocking(self, node=None, withSideBarUpdate=True):
         """increase level of blocking
         """
+        # _tmp = self._sidebarBlockingLevel # just for debugging purpose
         if self._sidebarBlockingLevel == 0:
             self._blockSideBarEvents()
             if withSideBarUpdate:
@@ -1083,23 +1095,28 @@ class SideBarStructure(object):
                     self._sidebarData._storeExpandedStates()
 
         self._sidebarBlockingLevel += 1
+        # _tmp = self._sidebarBlockingLevel # just for debugging purpose
 
     def decreaseSidebarBlocking(self, node=None, withSideBarUpdate=True):
         """Reduce level of blocking - when level reaches zero, Sidebar is unblocked
         """
-        if self._sidebarBlockingLevel > 0:
-            self._sidebarBlockingLevel -= 1
-            # check if we arrived at level zero; if so call post-blocking update
-            if self._sidebarBlockingLevel == 0:
-                self._sidebarData._postBlockingUpdate()
-                if withSideBarUpdate:
-                    if node:
-                        node._restoreExpandedStates()
-                    else:
-                        self._sidebarData._restoreExpandedStates()
-                self._unblockSideBarEvents()
-        else:
+        # _tmp = self._sidebarBlockingLevel # just for debugging purpose
+
+        if self._sidebarBlockingLevel == 0:
             raise RuntimeError('Error: cannot decrease sidebar blocking below 0')
+
+        self._sidebarBlockingLevel -= 1
+        # check if we arrived at level zero; if so call post-blocking update
+        if self._sidebarBlockingLevel == 0:
+            self._sidebarData._postBlockingUpdate()
+            if withSideBarUpdate:
+                if node:
+                    node._restoreExpandedStates()
+                else:
+                    self._sidebarData._restoreExpandedStates()
+            self._unblockSideBarEvents()
+
+        # _tmp = self._sidebarBlockingLevel # just for debugging purpose
 
     def getSideBarItem(self, name):
         """Search for a named item in the tree
@@ -1257,7 +1274,7 @@ class SideBar(QtWidgets.QTreeWidget, SideBarStructure, Base, NotifierBase):
             self.clearSideBar()
         self.project = project
         self.setSidebar(sidebar=self)
-        super().buildTree(project)
+        super().buildTree(project, clear=False)  # We optionally already did a clear
 
     def _raiseObjectProperties(self, item):
         """Get object from Pid and dispatch call depending on type.

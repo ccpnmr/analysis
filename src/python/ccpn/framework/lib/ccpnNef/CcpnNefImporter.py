@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:52 +0000 (Mon, February 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-11 11:45:57 +0000 (Fri, February 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,14 @@ class CcpnNefImporter(NefImporter):
     """A class for custimization of the general NefImporter class
     """
 
-    def __init__(self, errorLogging=NEF_STANDARD, hidePrefix = True):
+    def __init__(self, errorLogging=NEF_STANDARD, validateDictPath=None, hidePrefix = True):
+        """
+        Initialise the CcpNefImporter instance. This will attach the logger and optionally a  Nef validation
+        dictionary.
+        :param errorLogging: Nef error logging level: one of (NEF_SILENT, NEF_STANDARD, NEF_STRICT)
+        :param validateDictPath: Path to a Nef validation dictory definition (in star format)
+        :param hidePrefix: hide nef prefixes
+        """
 
         _app = getApplication()
         super().__init__(programName=_app.applicationName,
@@ -54,16 +61,7 @@ class CcpnNefImporter(NefImporter):
         self._reader = None
         self._application = _app
 
-    def importIntoProject(self, project):
-        """Import the data of self into project, using a previously attached
-        reader (auto-generated if None).
+        if validateDictPath is not None:
+            self.loadValidateDictionary(validateDictPath)
 
-        :param project: a Project instance
-        """
-        if self._reader is None:
-            _reader = CcpnNefReader(application=self._application)
-        else:
-            _reader = self._reader
-
-        _reader.importExistingProject(project, self.data)
 

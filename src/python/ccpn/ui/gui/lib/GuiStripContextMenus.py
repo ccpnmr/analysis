@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-08 18:14:15 +0000 (Tue, February 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-11 11:45:57 +0000 (Fri, February 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -231,7 +231,7 @@ def _calibrateY(strip):
 
 
 def _calibrateFromPeaks():
-    from ccpn.framework.Framework import getApplication
+    from ccpn.framework.Application import getApplication
 
     _app = getApplication()
     return _SCMitem(name='Calibrate Spectra from Peaks...',

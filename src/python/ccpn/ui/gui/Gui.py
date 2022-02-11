@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:53 +0000 (Mon, February 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-11 11:45:57 +0000 (Fri, February 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -216,7 +216,7 @@ class Gui(Ui):
         # Set up mainWindow
 
         project = self.application.project
-        mainWindow.sideBar.buildTree(project, False)
+        mainWindow.sideBar.buildTree(project, clear=True)
 
         mainWindow.raise_()
         mainWindow.namespace['current'] = self.application.current
@@ -453,8 +453,10 @@ class Gui(Ui):
                     return None
 
                 newProject = _loaded[0]
-                # Note that the newProject has its own MainWindow; i.e. it is not self
-                newProject._mainWindow.sideBar.buildTree(newProject)
+                # # Note that the newProject has its own MainWindow; i.e. it is not self
+                # newProject._mainWindow.sideBar.buildTree(newProject)
+                # The next two lines are essential to have the QT main event loop associated
+                # with the new window; without these, the programs just terminates
                 newProject._mainWindow.show()
                 QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
 
@@ -564,9 +566,9 @@ class Gui(Ui):
         and suspending sidebar.
         :return a list of loaded opjects
         """
-        with undoBlockWithoutSideBar():
-            with catchExceptions(errorStringTemplate='Loading "%s" failed:' % dataLoader.path):
-                result = dataLoader.load()
+        result = []
+        with catchExceptions(errorStringTemplate='Loading "%s" failed:' % dataLoader.path):
+            result = dataLoader.load()
         return result
 
     # @logCommand('application.') # eventually decorated by  _loadData()

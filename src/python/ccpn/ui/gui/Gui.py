@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-11 12:24:50 +0000 (Fri, February 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-11 15:51:36 +0000 (Fri, February 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -116,7 +116,7 @@ class _MyAppProxyStyle(QtWidgets.QProxyStyle):
             return (getFontHeight(size='SMALL') or 15) - 2
         elif QStyle_PixelMetric == QtWidgets.QStyle.PM_MessageBoxIconSize:
             # change the icon size in messageDialog
-            return getFontHeight(size='SMALL') or 15
+            return getFontHeight(size='MAXIMUM') or 18
 
         return super().pixelMetric(QStyle_PixelMetric, option, widget)
 

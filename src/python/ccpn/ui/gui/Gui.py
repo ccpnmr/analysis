@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:53 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-11 12:24:50 +0000 (Fri, February 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -286,14 +286,14 @@ class Gui(Ui):
 
         return (dataLoader, createNewProject, ignore)
 
-    def _getDataLoader(self, path, filter=None):
+    def _getDataLoader(self, path, pathFilter=None):
         """Get dataLoader for path (or None if not present), optionally only testing for
         dataFormats defined in filter.
         Allows for reporting or checking through popups.
         Does not do the actual loading.
 
         :param path: the path to get a dataLoader for
-        :param filter: a list/tuple of optional dataFormat strings; (defaults to all dataFormats)
+        :param pathFilter: a list/tuple of optional dataFormat strings; (defaults to all dataFormats)
         :returns a tuple (dataLoader, createNewProject, ignore)
         """
         # local import here
@@ -305,55 +305,67 @@ class Gui(Ui):
         from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
         from ccpn.framework.lib.DataLoaders.DirectoryDataLoader import DirectoryDataLoader
 
-        if filter is None:
-            filter =  tuple(getDataLoaders().keys())
-        dataLoader = checkPathForDataLoader(path, filter=filter)
+        if pathFilter is None:
+            pathFilter =  tuple(getDataLoaders().keys())
+        dataLoader = checkPathForDataLoader(path, pathFilter=pathFilter)
 
         if dataLoader is None:
             txt = '_getDataLoader: Loading "%s" unsuccessful; unrecognised type, should be one of %r' % \
-                  (path, filter)
+                  (path, pathFilter)
             getLogger().debug(txt)
             return (None, False, False)
 
         createNewProject = dataLoader.createNewProject
         ignore = False
 
+        path = dataLoader.path
         if dataLoader.dataFormat == CcpNmrV2ProjectDataLoader.dataFormat:
             createNewProject = True
             dataLoader.createNewProject = True
-            ok = MessageDialog.showYesNoWarning('Load Project',
-                                                f'Project "{path}" was created with version-2 Analysis.\n'
-                                                '\n'
-                                                'CAUTION:\n'
-                                                '\tThe project will be converted to a version-3 project and saved '
-                                                '\tas a new directory with .cppn extension.\n'
-                                                '\n'
-                                                'Do you want to continue loading?')
-
-            if not ok:
-                # skip loading so that user can backup/copy project
-                getLogger().debug('==> Cancelled loading ccpn project "%s"' % path)
-                ignore = True
-
-        elif dataLoader.dataFormat == CcpNmrV3ProjectDataLoader.dataFormat and Project._needsUpgrading(path):
-            createNewProject = True
-            dataLoader.createNewProject = True
-            ok = MessageDialog.showYesNoWarning('Load Project',
-                                                f'Project "%s" was saved with an earlier version of AnalysisV3, '
-                                                'and will be converted to version %s.\n'
-                                                '\n'
-                                                'CAUTION:\n' 
-                                                '\tAfter saving, it can NO LONGER be loaded in earlier AnalysisV3 versions.\n'
-                                                '\t(If you are in any doubt, use "File --> Save As..)\n'
-                                                '\n'
-                                                'Do you want to continue loading?' % (
-                                                    path, self.application.applicationVersion.withoutRelease())
-                                                )
+            ok = MessageDialog.showYesNoWarning(f'Load Project',
+                                                f'Project "{path.name}" was created with version-2 Analysis.\n'
+                                                f'\n'
+                                                f'CAUTION:\n'
+                                                f'\tThe project will be converted to a version-3 project and saved '
+                                                f'\tas a new directory with .ccpn extension.\n'
+                                                f'\n'
+                                                f'Do you want to continue loading?')
 
             if not ok:
                 # skip loading so that user can backup/copy project
                 getLogger().info('==> Cancelled loading ccpn project "%s"' % path)
                 ignore = True
+
+        elif dataLoader.dataFormat == CcpNmrV3ProjectDataLoader.dataFormat and Project._needsUpgrading(path):
+            createNewProject = True
+            dataLoader.createNewProject = True
+
+            DONT_OPEN = "Don't Open"
+            CONTINUE = 'Continue'
+            MAKE_ARCHIVE = 'Make a backup archive (.tgz) of the project'
+
+            dataLoader.makeArchive = False
+            ok = MessageDialog.showMulti(f'Load Project',
+                                         f'You are opening an older project (version 3.0.x) - {path.name}\n'
+                                         f'\n'
+                                         f'When you save, it will be upgraded and will not be readable by version 3.0.4\n',
+                                         texts=[DONT_OPEN, CONTINUE],
+                                         checkbox=MAKE_ARCHIVE, checked=False,
+                                         )
+
+            if not any(ss in ok for ss in [DONT_OPEN, MAKE_ARCHIVE, CONTINUE]):
+                # there was an error from the dialog
+                getLogger().debug(f'==> Cancelled loading ccpn project "{path}" - error in dialog')
+                ignore = True
+
+            if DONT_OPEN in ok:
+                # user selection not to load
+                getLogger().info(f'==> Cancelled loading ccpn project "{path}"')
+                ignore = True
+
+            elif MAKE_ARCHIVE in ok:
+                # flag to make a backup archive
+                dataLoader.makeArchive = True
 
         elif dataLoader.dataFormat == NefDataLoader.dataFormat:
             (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
@@ -401,7 +413,7 @@ class Gui(Ui):
     #-----------------------------------------------------------------------------------------
 
     @logCommand('application.')
-    def newProject(self, name:str = 'default') -> Project:
+    def newProject(self, name:str = 'default') -> typing.Optional[Project]:
         """Create a new project instance with name.
         :return a Project instance or None
         """
@@ -422,7 +434,7 @@ class Gui(Ui):
 
         return newProject
 
-    def _loadProject(self, dataLoader) -> Project:
+    def _loadProject(self, dataLoader) -> typing.Optional[Project]:
         """Helper function, loading project from dataLoader instance
         check and query for closing current project
         build the project Gui elements
@@ -476,7 +488,7 @@ class Gui(Ui):
         return newProject
 
     # @logCommand('application.') # eventually decorated by  _loadData()
-    def loadProject(self, path=None) -> Project:
+    def loadProject(self, path=None) -> typing.Optional[Project]:
         """Loads project defined by path
         :return a Project instance or None
         """
@@ -625,7 +637,7 @@ class Gui(Ui):
             _path = aPath(path)
             if _path.is_dir():
                 dirLoader = DirectoryDataLoader(path, recursive=False,
-                                                filter=(SpectrumDataLoader.dataFormat,))
+                                                pathFilter=(SpectrumDataLoader.dataFormat,))
                 spectrumLoaders.append(dirLoader)
                 count += len(dirLoader)
 

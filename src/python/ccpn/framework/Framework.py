@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:52 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-11 12:24:50 +0000 (Fri, February 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -900,6 +900,21 @@ class Framework(NotifierBase, GuiBase):
             self._increaseNotificationBlocking()
 
         for dataLoader in dataLoaders:
+
+            # NOTE:ED - move inside ui._loadProject/ui._loadData?
+            if dataLoader.makeArchive:
+                # make an archive in the project specific archive folder before loading
+                from ccpn.core.lib.ProjectArchiver import ProjectArchiver
+
+                archiver = ProjectArchiver(projectPath=dataLoader.path)
+                archivePath = archiver.makeArchive()
+                getLogger().info('==> Project archived to %s' % archivePath)
+                if not archivePath:
+                    MessageDialog.showWarning('Archive Project',
+                                              f'There was a problem creating an archive for {dataLoader.path}',
+                                              parent=self.ui.mainWindow
+                                              )
+
             if dataLoader.createNewProject:
                 with logCommandManager('application.', 'loadProject', dataLoader.path):
                     result = self.ui._loadProject(dataLoader=dataLoader)

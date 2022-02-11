@@ -6,19 +6,19 @@ Includes extensions of sys.path functions and CCPN-specific functionality
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 16:20:44 +0000 (Tue, February 01, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-11 12:24:50 +0000 (Fri, February 11, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -129,7 +129,7 @@ class Path(_Path_):
         return Path(os.path.normpath(self.asString()))  # python <= 3.4; strings only
 
     def open(self, *args, **kwds):
-        """Subclassing to catch any long file name errors that allegedly can occur on windows
+        """Subclassing to catch any long file name errors that allegedly can occur on Windows
         """
         try:
             fp = super().open(*args, **kwds)
@@ -143,12 +143,12 @@ class Path(_Path_):
         return fp
 
     def globList(self, pattern='*'):
-        """Return a list rather then a generator
+        """Return a list rather than a generator
         """
         return [p for p in self.glob(pattern=pattern)]
 
     def removeDir(self):
-        """Recursively remove content of self and sub-directories
+        """Recursively remove content of self and subdirectories
         """
         if not self.is_dir():
             raise ValueError('%s is not a directory' % self)
@@ -241,11 +241,11 @@ class Path(_Path_):
         return (str(self.parent), str(self.name))
 
     def asString(self):
-        "Return self as a string"
+        """Return self as a string"""
         return str(self)
 
     def startswith(self, prefix):
-        "Return True if self starts with prefix"
+        """Return True if self starts with prefix"""
         path = self.asString()
         return path.startswith(prefix)
 
@@ -255,7 +255,7 @@ class Path(_Path_):
     def __eq__(self, other):
         return (str(self).strip() == str(other).strip())
 
-    # No longer needed in Pyhton 3.x
+    # No longer needed in Python 3.x
     # def __ne__(self, other):
     #     return not (str(self).strip() == str(other).strip())
 

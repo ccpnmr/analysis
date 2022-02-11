@@ -21,8 +21,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:52 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-11 12:24:50 +0000 (Fri, February 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -76,11 +76,11 @@ def getDataLoaders():
     return DataLoaderABC._dataLoaders
 
 
-def checkPathForDataLoader(path, filter=None):
+def checkPathForDataLoader(path, pathFilter=None):
     """Check path if it corresponds to any defined data format.
     Optionally exclude any dataLoader with types defined by filter
 
-    :param filter: a tuple/list of dataFormat strings
+    :param pathFilter: a tuple/list of dataFormat strings
     :return a DataLoader instance or None if there was no match
     """
     if not isinstance(path, (str, Path)):
@@ -90,8 +90,8 @@ def checkPathForDataLoader(path, filter=None):
     if not _path.exists():
         raise ValueError('checkPathForDataLoader: path %r does not exist' % path)
 
-    if filter is None:
-        filter = list(getDataLoaders().keys())
+    if pathFilter is None:
+        pathFilter = list(getDataLoaders().keys())
 
     for fmt, cls in getDataLoaders().items():
         instance = cls.checkForValidFormat(path)
@@ -100,7 +100,7 @@ def checkPathForDataLoader(path, filter=None):
             continue
 
         # we found an instance
-        if cls.dataFormat not in filter:
+        if cls.dataFormat not in pathFilter:
             getLogger().debug2('%-20s %-20s: %s' % (cls.dataFormat, '(Valid, not in filter)', path))
             return None
         else:
@@ -140,6 +140,7 @@ class DataLoaderABC(TraitBase):
     path = CPath().tag(info='a path to a file to be loaded')
     application = Any(default_value=None, allow_none=True)
     createNewProject = Bool().tag(info='flag to indicate if a new project will be created')
+    makeArchive = Bool().tag(info='flag to indicate if a project needs to be archived before loading')
 
     # A dict of registered DataLoaders: filled by _registerFormat classmethod, called
     # once after each definition of a new derived class (e.g. PdbDataLoader)
@@ -147,7 +148,7 @@ class DataLoaderABC(TraitBase):
 
     @classmethod
     def _registerFormat(cls):
-        "register cls.dataFormat"
+        """register cls.dataFormat"""
         if cls.dataFormat in DataLoaderABC._dataLoaders:
             raise RuntimeError('dataLoader "%s" was already registered' % cls.dataFormat)
         DataLoaderABC._dataLoaders[cls.dataFormat] = cls
@@ -163,6 +164,7 @@ class DataLoaderABC(TraitBase):
 
         # get default setting for project creation
         self.createNewProject = self.alwaysCreateNewProject or self.canCreateNewProject
+        self.makeArchive = False
 
         # local import to avoid cycles
         from ccpn.framework.Application import getApplication

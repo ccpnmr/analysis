@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-10 23:04:52 +0000 (Thu, February 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-11 19:20:17 +0000 (Fri, February 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -5365,8 +5365,14 @@ class CcpnNefReader(CcpnNefContent):
                 # transferData = []
                 raise ValueError("nef_spectrum_dimension_transfer is missing or empty")
 
+            if not self.defaultChemicalShiftList:
+                # no chemicalShiftLists have been loaded yet, so need to fetch/create one
+                if not project.chemicalShiftLists:
+                    project.newChemicalShiftList()
+                self.defaultChemicalShiftList = project.chemicalShiftLists[0]
+
             spectrum = createSpectrum(project, spectrumName, spectrumParameters, dimensionData,
-                                      transferData=transferData)
+                                      transferData=transferData, defaultChemicalShiftList=self.defaultChemicalShiftList)
 
             # Set experiment transfers at the API level
             if transferData and not spectrum.magnetisationTransfers:
@@ -6292,8 +6298,14 @@ class CcpnNefReader(CcpnNefContent):
 
         # finalise last peak
         if result and assignedNmrAtoms:
-            # There is a peak in result, and the peak has assignments to set
-            result[-1].assignedNmrAtoms = assignedNmrAtoms
+            try:
+                # There is a peak in result, and the peak has assignments to set
+                result[-1].assignedNmrAtoms = assignedNmrAtoms
+            except Exception as es:
+                # error settings assignments - maybe badly defined
+                self.warning("Error setting Peak assignment for peak %s: %s."
+                             % (peakLabel, assignedNmrAtoms),
+                             loop)
             assignedNmrAtoms.clear()
         #
         return result
@@ -7760,15 +7772,16 @@ class CcpnNefReader(CcpnNefContent):
 
 
 def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict,
-                   dimensionData: dict, transferData: Sequence[Tuple] = None):
+                   dimensionData: dict, transferData: Sequence[Tuple] = None,
+                   defaultChemicalShiftList: ChemicalShiftList = None):
     """Get or create spectrum using dictionaries of attributes, such as read in from NEF.
 
-    :param spectrumParameters keyword-value dictionary of attribute to set on resulting spectrum
-
-    :params Dictionary of keyword:list parameters, with per-dimension parameters.
     Either 'axisCodes' or 'isotopeCodes' must be present and fully populated.
-    A number of other dimensionData are
-    treated specially (see below)
+    A number of other dimensionData are treated specially (see below)
+
+    :param spectrumParameters keyword-value dictionary of attribute to set on resulting spectrum
+    :param Dictionary of keyword:list parameters, with per-dimension parameters.
+    :param defaultChemicalShiftList default chemicalShiftList if not defined by the parameters
     """
 
     spectrum = project.getSpectrum(spectrumName)
@@ -7831,6 +7844,12 @@ def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict
             spectrum = project.newEmptySpectrum(name=spectrumName, path=filePath, **kwds)
             if spectrumParameters.get('chemicalShiftList') is not None:
                 spectrum.chemicalShiftList = spectrumParameters.get('chemicalShiftList')
+
+            if not spectrum.chemicalShiftList:
+                spectrum.chemicalShiftList = defaultChemicalShiftList
+                if not spectrum.chemicalShiftList:
+                    # just create a new one
+                    spectrum.chemicalShiftList = project.newChemicalShiftList()
 
             if acquisitionAxisIndex is not None:
                 spectrum.isAquisition[acquisitionAxisIndex] = True
@@ -7920,6 +7939,8 @@ def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict
                 spectrum.referencePoints = points
                 spectrum.referenceValues = values
 
+        spectrumParameters.pop('chemicalShiftList', None)
+        # spectrumParameters.pop('filePath', None)  # remove this as well?
         # Then spectrum-level ones
         for tag, val in spectrumParameters.items():
             if tag != 'dimensionCount':

@@ -4,9 +4,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-02-04 12:07:39 +0000 (Thu, February 04, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2022-02-11 19:05:59 +0000 (Fri, February 11, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -50,6 +51,8 @@ class TextEditor(QtWidgets.QTextEdit, Base):
     receivedFocus = QtCore.pyqtSignal()
 
     _minimumHeight = 25
+    MINIMUM_CHARS_WIDTH = 8
+    MINIMUM_CHARS_HEIGHT = 3
 
     def __init__(self, parent=None, filename=None, callback=None,
                  listener=None, stripEndWhitespace=True, editable=True,
@@ -259,10 +262,10 @@ class TextEditor(QtWidgets.QTextEdit, Base):
     #         self.setMinimumSize(width, height)
 
     def sizeHint(self) -> QtCore.QSize:
-        return QtCore.QSize(self._height * 15, self._height * 3)
+        return QtCore.QSize(self._height * self.MINIMUM_CHARS_WIDTH, self._height * self.MINIMUM_CHARS_HEIGHT)
 
     def minimumSizeHint(self) -> QtCore.QSize:
-        return QtCore.QSize(self._height * 15, self._height * 3)
+        return QtCore.QSize(self._height * self.MINIMUM_CHARS_WIDTH, self._height * self.MINIMUM_CHARS_HEIGHT)
 
     def _getSaveState(self):
         """

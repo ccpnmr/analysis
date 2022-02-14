@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-11 11:45:57 +0000 (Fri, February 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-14 16:52:22 +0000 (Mon, February 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -422,7 +422,7 @@ class Gui(Ui):
 
         return newProject
 
-    def _loadProject(self, dataLoader) -> Project:
+    def _loadProject(self, dataLoader) -> typing.Union[Project, None]:
         """Helper function, loading project from dataLoader instance
         check and query for closing current project
         build the project Gui elements
@@ -440,7 +440,7 @@ class Gui(Ui):
                       (' and any changes will be lost' if self.project.isModified else '')
             _ok = MessageDialog.showYesNo('Load Project', message, parent=self.mainWindow)
             if not _ok:
-                return
+                return None
 
         # Some error recovery; store info to re-open the current project (or a new default)
         oldProjectLoader = CcpNmrV3ProjectDataLoader(self.project.path)
@@ -478,7 +478,7 @@ class Gui(Ui):
         return newProject
 
     # @logCommand('application.') # eventually decorated by  _loadData()
-    def loadProject(self, path=None) -> Project:
+    def loadProject(self, path=None) -> typing.Union[Project, None]:
         """Loads project defined by path
         :return a Project instance or None
         """
@@ -507,7 +507,7 @@ class Gui(Ui):
         """
         oldPath = self.project.path
         if newPath is None:
-            if newPath := _getSaveDirectory(self.mainWindow) is None:
+            if (newPath := _getSaveDirectory(self.mainWindow)) is None:
                 return False
 
         newPath = aPath(newPath).assureSuffix(CCPN_EXTENSION)
@@ -523,7 +523,7 @@ class Gui(Ui):
             if not MessageDialog.showYesNo(title, msg):
                 return False
 
-        with logCommandManager('application.', 'saveProjectAs', newPath, overwrite):
+        with logCommandManager('application.', 'saveProjectAs', newPath, overwrite=overwrite):
             with catchExceptions(errorStringTemplate='Error saving project: %s'):
                 if not self.application._saveProject(newPath=newPath,
                                                      createFallback=False,
@@ -538,7 +538,8 @@ class Gui(Ui):
         self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
         self.mainWindow._fillRecentProjectsMenu() # Update the menu
 
-        successMessage = '==> Project successfully saved to "%s"' % self.project.path
+        successMessage = 'Project successfully saved to "%s"' % self.project.path
+        MessageDialog.showInfo("Project SaveAs", successMessage, parent=self.mainWindow)
         self.mainWindow.statusBar().showMessage(successMessage)
         getLogger().info(successMessage)
 

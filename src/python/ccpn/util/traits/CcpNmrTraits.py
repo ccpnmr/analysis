@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-11 11:45:58 +0000 (Fri, February 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-15 15:12:12 +0000 (Tue, February 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -469,8 +469,9 @@ class V3Object(TraitType, _Ordered):
         """Assure a str instance
         """
         from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+        from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
 
-        if isinstance(value, AbstractWrapperObject):
+        if isinstance(value, (AbstractWrapperObject, V3CoreObjectABC)):
             pass
         else:
             self.error(obj, value)
@@ -484,13 +485,19 @@ class V3Object(TraitType, _Ordered):
         def encode(self, obj, trait):
             "returns a json serialisable object"
             value = getattr(obj, trait)
-            return value.pid
+            if value is None:
+                return None
+            else:
+                return value.pid
 
         def decode(self, obj, trait, value):
             "uses value to generate and set the new (or modified) obj"
-            _app = getApplication()
-            if (result := _app.get(value)) is None:
-                getLogger().debug('Error decoding %r; set to None' % value)
+            if value is None:
+                result = None
+            else:
+                _app = getApplication()
+                if (result := _app.get(value)) is None:
+                    getLogger().debug('Error decoding %r; set to None' % value)
             setattr(obj, trait, result)
 # end class
 
@@ -510,9 +517,10 @@ class V3ObjectList(List):
             """Assure a str instance
             """
             from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+            from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
 
             for val in value:
-                if isinstance(val, AbstractWrapperObject):
+                if isinstance(val, (AbstractWrapperObject, V3CoreObjectABC)):
                     pass
                 else:
                     self.error(obj, value)

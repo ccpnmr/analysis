@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 16:21:13 +0000 (Tue, February 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-15 16:22:27 +0000 (Tue, February 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -459,6 +459,7 @@ class Framework(NotifierBase, GuiBase):
     def _initialiseProject(self, project: Project):
         """Initialise a project and set up links and objects that involve it
         """
+        from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise, getDefaultSpectrumColours, _getDefaultOrdering
 
         # Linkages
         self._project = project
@@ -474,8 +475,24 @@ class Framework(NotifierBase, GuiBase):
 
         # This wraps the underlying data, including the wrapped graphics data
         project._initialiseProject()
+
+        if self.project._isUpgradedFromV2:
+            getLogger().debug(f'initialising v2 noise and contour levels')
+            for spectrum in project.spectra:
+                # calculate the new noise level
+                setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
+                                          setPositiveContours=True, setNegativeContours=True,
+                                          useSameMultiplier=True)
+
+                # set the initial contour colours
+                (spectrum.positiveContourColour, spectrum.negativeContourColour) = getDefaultSpectrumColours(spectrum)
+                spectrum.sliceColour = spectrum.positiveContourColour
+
+                # set the initial axis ordering
+                _getDefaultOrdering(spectrum)
+
         project._updateApiDataUrl(self.preferences.general.dataPath)
-        #  the project is now ready to use
+        # the project is now ready to use
 
         # Now that all objects, including the graphics are there, restore current
         self.current._restoreStateFromFile(self.statePath)

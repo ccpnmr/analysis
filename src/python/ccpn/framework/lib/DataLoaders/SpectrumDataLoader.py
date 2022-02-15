@@ -6,7 +6,7 @@ rotuines and info
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -19,8 +19,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 11:22:11 +0000 (Fri, January 21, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-02-15 16:22:27 +0000 (Tue, February 15, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,10 +31,10 @@ __date__ = "$Date: 2021-06-30 10:28:41 +0000 (Fri, June 30, 2021) $"
 #=========================================================================================
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
+from ccpn.core.Spectrum import _newSpectrumFromDataSource
 from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats, checkPathForSpectrumFormats, \
       DataSourceTrait
 from ccpn.core.lib.DataStore import DataStore, DataStoreTrait
-from ccpn.core.Spectrum import _newSpectrumFromDataSource
 from ccpn.core.lib.ContextManagers import logCommandManager
 
 

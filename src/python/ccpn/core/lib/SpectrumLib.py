@@ -3,10 +3,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 11:22:09 +0000 (Fri, January 21, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-02-15 16:22:27 +0000 (Tue, February 15, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1297,6 +1297,46 @@ def _getNoiseEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
     return value
 
 
+def _getDefaultOrdering(spectrum):
+    # axisOption = spectrum.project.application.preferences.general.axisOrderingOptions
+    axisOrder = None
+
+    preferredAxisOrder = spectrum._preferredAxisOrdering
+    if preferredAxisOrder is not None:
+
+        specAxisOrder = spectrum.axisCodes
+        axisOrder = [specAxisOrder[ii] for ii in preferredAxisOrder]
+
+    else:
+        # sets the Nd default to HCN (or possibly 2d to HC)
+        specAxisOrder = spectrum.axisCodes
+        pOrder = spectrum.searchAxisCodePermutations(('H', 'C', 'N'))
+        if pOrder:
+            spectrum._preferredAxisOrdering = pOrder
+            axisOrder = [specAxisOrder[ii] for ii in pOrder]
+            getLogger().debug('setting default axisOrdering: ', str(axisOrder))
+
+        else:
+
+            # just set to the normal ordering
+            spectrum._preferredAxisOrdering = tuple(ii for ii in range(spectrum.dimensionCount))
+            axisOrder = specAxisOrder
+
+            # try permutations of repeated codes
+            duplicates = [('H', 'H'), ('C', 'C'), ('N', 'N')]
+            for dCode in duplicates:
+                pOrder = spectrum.searchAxisCodePermutations(dCode)
+
+                # if permutation found and matches first axis
+                if pOrder and pOrder[0] == 0:
+                    spectrum._preferredAxisOrdering = pOrder
+                    axisOrder = [specAxisOrder[ii] for ii in pOrder]
+                    getLogger().debug('setting duplicate axisOrdering: ', str(axisOrder))
+                    break
+
+    return axisOrder
+
+
 def _getContourEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
     """
     Estimate the contour levels for a spectrum.
@@ -2168,7 +2208,7 @@ def _setDefaultAxisOrdering(spectrum):
     for dCode in dCodes:
         pOrder = _searchAxisCodePermutations(spectrum, dCode)
         if pOrder and pOrder[0] == X_DIM_INDEX:
-            spectrum.preferredAxisOrdering = pOrder
+            spectrum._preferredAxisOrdering = pOrder
             break
 
     if not pOrder:

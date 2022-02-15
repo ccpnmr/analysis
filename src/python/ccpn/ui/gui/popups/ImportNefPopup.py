@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 18:41:15 +0000 (Tue, February 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-15 19:58:25 +0000 (Tue, February 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ import numpy as np
 import os
 from functools import partial
 from collections import OrderedDict
-
+import json
 import pandas as pd
 
 from PyQt5 import QtGui, QtWidgets, QtCore
@@ -359,9 +359,9 @@ class NefDictFrame(Frame):
         self._treeSplitter.addWidget(self._filterLogFrame)
 
         _frame, self._collectionsTable = self._addTableToFrame(pd.DataFrame({COLLECTION: self._collections.keys(),
-                                                                            'Items'     : ['\n'.join(vv for vv in val) for val in self._collections.values()]}),
-                                                              _name=f'New {COLLECTION}s',
-                                                              ignoreFrame=True)
+                                                                             'Items'   : ['\n'.join(vv for vv in val) for val in self._collections.values()]}),
+                                                               _name=f'New {COLLECTION}s',
+                                                               ignoreFrame=True)
         self._frameOptionsNested.getLayout().addWidget(_frame, 0, 0)
 
         # self.tablesFrame = Frame(self._infoFrame, setLayout=True, showBorder=False, grid=(0, 0))
@@ -799,7 +799,6 @@ class NefDictFrame(Frame):
         if not (item := self._checkParentGroup(name, parentGroup, saveFrame)):
             return
 
-
         if _handleAutoRename:
             self._handleItemRename(item, mappingCode, saveFrame)
             return
@@ -1011,7 +1010,7 @@ class NefDictFrame(Frame):
             #            setLastButtonFocus=False)
 
             texts = ('Auto Rename')
-            _renameCallback =partial(self._rename, item=item, parentName=plural, lineEdit=saveFrameData, saveFrame=saveFrame)
+            _renameCallback = partial(self._rename, item=item, parentName=plural, lineEdit=saveFrameData, saveFrame=saveFrame)
             _autoRenameCallback = partial(self._rename, item=item, parentName=plural, lineEdit=saveFrameData, saveFrame=saveFrame, autoRename=True)
             tipText = 'Automatically rename to the next available\n - dependent on saveframe type'
             Button(self.frameOptionsFrame, text=texts, tipText=tipText, callback=_autoRenameCallback,
@@ -1136,6 +1135,7 @@ class NefDictFrame(Frame):
                 item = QtWidgets.QListWidgetItem(str(txt))
                 item.setData(QtCore.Qt.UserRole, id(obj))
                 self.addItem(item)
+
 
     def _makeCollectionParentPulldown(self, values):
 
@@ -1474,7 +1474,6 @@ class NefDictFrame(Frame):
         """
         if not itemName:
             return
-
 
         newEdit = _TreeValues()
         newEdit.itemName = itemName
@@ -2475,7 +2474,7 @@ class NefDictFrame(Frame):
     def _updateCollectionsTable(self):
         if self._collectionsTable:
             _df = pd.DataFrame({COLLECTION: self._collections.keys(),
-                                'Items'     : ['\n'.join(vv for vv in val) for val in self._collections.values()]})
+                                'Items'   : ['\n'.join(vv for vv in val) for val in self._collections.values()]})
             _model = self.pandasModel(_df)
             self._collectionsTable.setModel(_model)
             self._collectionsTable.resizeRowsToContents()
@@ -2513,7 +2512,7 @@ class NefDictFrame(Frame):
 
         self._populate()
 
-    def _removeParentTreeState(self, item, data = [], prefix=''):
+    def _removeParentTreeState(self, item, data=[], prefix=''):
         """Remove parents from the tree that have no children
         """
         if (self._depth(item) == 2) and item.childCount() == 0:
@@ -2782,6 +2781,55 @@ class NefDictFrame(Frame):
         for itemName, parentGroup in _updates:
             self._setCheckedItem(itemName, parentGroup)
 
+    def exitNefDictFrame(self):
+        """Finalise the state of the nefDictFrame ready for the actual loading
+        """
+        # remove content not to be imported
+        # possibly need new set of code :|
+
+        # add a new collections saveFrame
+        if self._collections:
+            category = 'ccpn_collections'
+
+            # get a new name
+            name = StarIo.string2FramecodeString('fromnefimporter')
+            if name != category:
+                name = '%s_%s' % (category, name)
+
+            # Set up new collections saveFrame
+            result = StarIo.NmrSaveFrame(name=name, category=category)
+            result.addItem('sf_category', category)
+            result.addItem('sf_framecode', name)
+
+            # find the loops
+            frameMap = CcpnNefIo.nef2CcpnMap.get(category) or {}
+            for tag, itemvalue in frameMap.items():
+                if not isinstance(itemvalue, (str, type(None))):  # a loop
+                    result.newLoop(tag, CcpnNefIo.nef2CcpnMap.get(tag) or {})
+
+            # make a new loop row mapping
+            loopName = 'ccpn_collection'
+            loop = result[loopName]
+            _mapping = CcpnNefIo.nef2CcpnMap.get(loopName) or {}
+            rowdata = {}
+            for neftag, attrstring in _mapping.items():
+                rowdata[neftag] = None
+
+            # fill the import dict so contents of saveframe is loaded
+            _importDict = self._nefReader._importDict.setdefault(name, {})
+            _importDict.setdefault('_importRows', tuple(col for col in self._collections.keys()))
+
+            # add rows for each new collection
+            for ii, (col, itms) in enumerate(self._collections.items()):
+                row = loop.newRow(rowdata)
+                row['uniqueId'] = ii
+                row['name'] = col
+                row['items'] = json.dumps(itms)
+                row['comment'] = 'from NefImporter'
+
+            # add to the datablock
+            self._nefDict.addItem(result['sf_framecode'], result)
+
 
 class ImportNefPopup(CcpnDialogMainWidget):
     """
@@ -2871,11 +2919,11 @@ class ImportNefPopup(CcpnDialogMainWidget):
         #
         #     self._nefWindows[nefObj[NEFFRAMEKEY_IMPORT]] = newWindow
         #     self.paneSplitter.addWidget(newWindow)
-        _options =  {NEFFRAMEKEY_ENABLECHECKBOXES : True,
-                     NEFFRAMEKEY_ENABLERENAME     : True,
-                     NEFFRAMEKEY_ENABLEFILTERFRAME: True,
-                     NEFFRAMEKEY_ENABLEMOUSEMENU  : True,
-                     }
+        _options = {NEFFRAMEKEY_ENABLECHECKBOXES : True,
+                    NEFFRAMEKEY_ENABLERENAME     : True,
+                    NEFFRAMEKEY_ENABLEFILTERFRAME: True,
+                    NEFFRAMEKEY_ENABLEMOUSEMENU  : True,
+                    }
         _dataBlock = self._dataLoader.dataBlock  # This will also assure data have been read
         newWindow = NefDictFrame(parent=self,
                                  mainWindow=self.mainWindow,
@@ -3002,6 +3050,10 @@ class ImportNefPopup(CcpnDialogMainWidget):
 
         # set the collections to import in the nefImporter
         self._nefImporter.collections = list(self._nefWindows.values())[self._activeImportWindow]._collections
+
+        for _window in self._nefWindows.values():
+            _window.exitNefDictFrame()
+
         self.accept()
 
 

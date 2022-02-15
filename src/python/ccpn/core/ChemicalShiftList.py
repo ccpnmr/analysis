@@ -3,10 +3,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-27 16:10:39 +0000 (Thu, January 27, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-02-15 11:11:24 +0000 (Tue, February 15, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -637,6 +637,7 @@ class ChemicalShiftList(AbstractWrapperObject):
 
     @logCommand(get='self')
     def newChemicalShift(self, value: float = None, valueError: float = None, figureOfMerit: float = 1.0,
+                         static: bool = False,
                          nmrAtom: Union[NmrAtom, str, Pid, None] = None,
                          chainCode: str = None, sequenceCode: str = None, residueType: str = None, atomName: str = None,
                          comment: str = None
@@ -647,12 +648,14 @@ class ChemicalShiftList(AbstractWrapperObject):
         nmrAtom can be core object, Pid or pid string
         If attached (chainCode, sequenceCode, residueType, atomName) will be derived from the nmrAtom.pid
         If nmrAtom is not specified, (chainCode, sequenceCode, residueType, atomName) can be set as string values.
+        A chemicalShift is not static by default (dynamic), i.e., its value will update when there are changes to the assigned peaks.
 
         See the ChemicalShift class for details.
 
         :param value: float shift value
         :param valueError: float
         :param figureOfMerit: float, default = 1.0
+        :param static: bool, default = False
         :param nmrAtom: nmrAtom as object or pid, or None if not required
         :param chainCode:
         :param sequenceCode:
@@ -672,13 +675,13 @@ class ChemicalShiftList(AbstractWrapperObject):
         if data is not None and nmrAtom and nmrAtom.pid in list(data[CS_NMRATOM]):
             raise ValueError(f'{self.className}.newChemicalShift: nmrAtom {nmrAtom} already exists')
 
-        shift = self._newChemicalShiftObject(data, value, valueError, figureOfMerit,
+        shift = self._newChemicalShiftObject(data, value, valueError, figureOfMerit, static,
                                              nmrAtom, chainCode, sequenceCode, residueType, atomName, comment)
 
         return shift
 
     @newV3Object()
-    def _newChemicalShiftObject(self, data, value, valueError, figureOfMerit,
+    def _newChemicalShiftObject(self, data, value, valueError, figureOfMerit, static,
                                 nmrAtom, chainCode, sequenceCode, residueType, atomName, comment):
         """Create a new pure V3 ChemicalShift object
         Method is wrapped with create/delete notifier
@@ -686,13 +689,15 @@ class ChemicalShiftList(AbstractWrapperObject):
         from ccpn.core.ChemicalShift import _getByTuple, _newChemicalShift as _newShift
 
         # make new tuple - verifies contents
-        _row = _getByTuple(self, False,
-                           value, valueError, figureOfMerit,
-                           None, chainCode, sequenceCode, residueType, atomName,
-                           comment)
+        _row = _getByTuple(self, static=static,
+                           value=value, valueError=valueError, figureOfMerit=figureOfMerit,
+                           nmrAtom=None,
+                           chainCode=chainCode, sequenceCode=sequenceCode, residueType=residueType, atomName=atomName,
+                           comment=comment)
         _nextUniqueId = self.project._getNextUniqueIdValue(CS_CLASSNAME)
         # add to dataframe - this is in undo stack and marked as modified
-        _dfRow = pd.DataFrame(((_nextUniqueId, False, value, valueError, figureOfMerit, None) + _row[6:],), columns=CS_COLUMNS)
+        _dfRow = pd.DataFrame([_row], columns=CS_COLUMNS)
+        _dfRow[CS_UNIQUEID] = int(_nextUniqueId)
 
         if data is None:
             # set as the new subclassed DataFrameABC

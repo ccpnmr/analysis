@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-11 19:20:17 +0000 (Fri, February 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-15 11:11:25 +0000 (Tue, February 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1055,6 +1055,8 @@ class CcpnNefWriter:
                 # rowdata.update(zip(atomCols, nmrAtom._idTuple))
                 rowdata['element'] = None
                 rowdata['isotope_number'] = None
+                rowdata['ccpn_static'] = shift.getStatic()  # get the local static state
+
                 name = rowdata['atom_name']
                 nmrAtom = shift.nmrAtom
                 if nmrAtom:
@@ -4753,10 +4755,12 @@ class CcpnNefReader(CcpnNefContent):
                 isotopeCode = '%s%s' % (isotope, element.title())
             else:
                 isotopeCode = None
+
             try:
                 nmrResidue = self.produceNmrResidue(*tt[:3])
                 nmrAtom = self.produceNmrAtom(nmrResidue, tt[3], isotopeCode=isotopeCode)
                 parameters['nmrAtom'] = nmrAtom
+                parameters['static'] = row.get('ccpn_static') or False  # may be undefined for older nef files
 
                 result.append(creatorFunc(**parameters))
 

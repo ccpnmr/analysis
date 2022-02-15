@@ -33,7 +33,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 11:19:42 +0000 (Tue, February 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-15 16:47:15 +0000 (Tue, February 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -109,9 +109,10 @@ from ccpn.framework.PathsAndUrls import macroPath as mp
 from ccpn.core.lib.ContextManagers import undoBlock
 
 
-ASSIGNED_CHEM_SHIFT_LIST = 'assigned_chem_shift_list'
-SHIFT_SET = 'shift_set'
-recognisedValues = [ASSIGNED_CHEM_SHIFT_LIST, SHIFT_SET]
+SF_CATEGORY = 'sf_category'
+CATEGORY = 'category'
+ASSIGNED_CHEMICAL_SHIFTS = 'assigned_chemical_shifts'
+sf_categories =  (ASSIGNED_CHEMICAL_SHIFTS,)
 
 defaultAxesCodesMap = od([  #                   replace with the atom and axes of interest
     ("N", "N"),
@@ -232,7 +233,7 @@ class StarImporterPopup(CcpnDialog):
         # self.inputDialog = LineEditButtonDialog(self,textLineEdit=self.bmrbFilePath, directory=self.directory, grid=(row, 1))
         row += 1
         tree = Label(self, text="Frames", grid=(row, 0))
-        selectableItems = [key for key in dataBlock.keys() if key in recognisedValues]
+        selectableItems = [key for key, value in dataBlock.items() if value.category in sf_categories]
         self.treeView = TreeCheckBoxes(self, orderedDataDict=dataBlock,
                                        checkList=list(dataBlock.keys()),
                                        selectableItems=selectableItems,
@@ -263,10 +264,9 @@ class StarImporterPopup(CcpnDialog):
         self.treeView._uncheckAll()
         chemicalShiftListOnly = []
         for key, value in self.dataBlock.items():
-            if ASSIGNED_CHEM_SHIFT_LIST in key:
+            if value.category == ASSIGNED_CHEMICAL_SHIFTS:
                 chemicalShiftListOnly.append(key)
-            if SHIFT_SET in key:
-                chemicalShiftListOnly.append(key)
+
         self.treeView.selectObjects(chemicalShiftListOnly)
 
     def _showMapLabel(self, value, _showWarning=True):

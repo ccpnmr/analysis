@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:52 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-15 16:47:14 +0000 (Tue, February 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -394,10 +394,12 @@ def logCommandManager(prefix, funcName, *args, **kwds):
 
 
 @contextmanager
-def inactivity(application=None):
+def inactivity(application=None, project=None):
     """
     Block all notifiers, apiNotifiers, undo and echo-ing
     re-enable at the end of the function block.
+    We allow passing in of application and project, as this is used in the
+    initialisation when not all is proper yet.
     """
 
     # get the application
@@ -406,12 +408,17 @@ def inactivity(application=None):
     if application is None:
         raise RuntimeError('Error getting application')
 
-    application.project.blankNotification()
+    if project is None:
+        project = application.project
+    if project is None:
+        raise RuntimeError('Error getting project')
+
+    project.blankNotification()
     application._increaseNotificationBlocking()
-    application.project._apiNotificationBlanking += 1
+    project._apiNotificationBlanking += 1
 
     try:
-        with undoStackBlocking(application=application):
+        with undoStackBlocking(project=project):
             # transfer control to the calling function
             yield
 
@@ -420,9 +427,9 @@ def inactivity(application=None):
 
     finally:
         # clean up after blocking notifications
-        application.project.unblankNotification()
+        project.unblankNotification()
         application._decreaseNotificationBlocking()
-        application.project._apiNotificationBlanking -= 1
+        project._apiNotificationBlanking -= 1
 
 
 @contextmanager
@@ -508,10 +515,9 @@ def undoStackRevert(application=None):
 
 
 @contextmanager
-def undoStackBlocking(application=None):
+def undoStackBlocking(application=None, project=None):
     """
     Block addition of items to the undo stack, re-enable at the end of the function block.
-
     New user items can be added to the undo stack after blocking is re-enabled.
 
     Example:
@@ -536,7 +542,12 @@ def undoStackBlocking(application=None):
     if application is None:
         raise RuntimeError('Error getting application')
 
-    undo = application._getUndo()
+    if project is None:
+        project = application.project
+    if project is None:
+        raise RuntimeError('Error getting project')
+
+    undo = project._undo
     if undo is None:
         raise RuntimeError("Unable to get the application's undo stack")
     _undoStack = []

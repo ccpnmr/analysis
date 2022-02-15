@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-10 23:02:44 +0000 (Thu, February 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-15 16:47:14 +0000 (Tue, February 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -42,7 +42,14 @@ class CcpnNefImporter(NefImporter):
     _DATANAME_DEFAULT = 'structureFromNef'
     _DATANAME_DEPRECATED = 'ccpn_dataset_id'
 
-    def __init__(self, errorLogging=NEF_STANDARD, hidePrefix=True):
+    def __init__(self, errorLogging=NEF_STANDARD, validateDictPath=None, hidePrefix=True):
+        """
+        Initialise the CcpNefImporter instance. This will attach the logger and optionally a  Nef validation
+        dictionary.
+        :param errorLogging: Nef error logging level: one of (NEF_SILENT, NEF_STANDARD, NEF_STRICT)
+        :param validateDictPath: Path to a Nef validation dictory definition (in star format)
+        :param hidePrefix: hide nef prefixes
+        """
 
         _app = getApplication()
         super().__init__(programName=_app.applicationName,
@@ -57,6 +64,9 @@ class CcpnNefImporter(NefImporter):
         self._reader = None
         self._application = _app
         self._collections = None
+
+        if validateDictPath is not None:
+            self.loadValidateDictionary(validateDictPath)
 
     def loadFile(self, fileName=None, mode='standard'):
         super(CcpnNefImporter, self).loadFile(fileName, mode)

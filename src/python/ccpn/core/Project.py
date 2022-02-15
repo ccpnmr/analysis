@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-10 22:59:54 +0000 (Thu, February 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-15 16:47:14 +0000 (Tue, February 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -401,8 +401,8 @@ class Project(AbstractWrapperObject):
         # Set up notifiers
         self._registerPresetApiNotifiers()
 
-        # initialise, creating the children
-        with inactivity():
+        # initialise, creating the children; pass in self as we are initialising
+        with inactivity(project=self):
             self._restoreChildren()
             # perform any required restoration of project not covered by children
             self._restoreObject(self, self._wrappedData)
@@ -447,6 +447,7 @@ class Project(AbstractWrapperObject):
 
         apiIo.cleanupProject(self)
         self._clearAllApiNotifiers()
+        self.deleteAllNotifiers()
         for tag in ('_data2Obj', '_pid2Obj'):
             getattr(self, tag).clear()
             # delattr(self,tag)

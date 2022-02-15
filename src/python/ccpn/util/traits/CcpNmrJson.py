@@ -1,7 +1,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -13,9 +13,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-01 15:30:10 +0000 (Tue, February 01, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-15 16:47:15 +0000 (Tue, February 15, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -531,9 +531,20 @@ class CcpNmrJson(TraitBase):
         """
 
         # get all traits that need saving to json
-        # Subtle but important implementation change relative to the previous one-liner (~2 commits ago)
+        # Subtle but important implementation change relative to the previous one-liner
+        # Allow trait-specific saveToJson metadata (i.e. 'tag'), to override object's saveAllToJson
         traits = [Constants.METADATA]
-        traits += self.keys() if self.saveAllTraitsToJson else self.keys(saveToJson=lambda i: i)
+        for trait in self.keys():
+            # check if saveToJson was defined for this trait
+            _saveTraitToJson = self.trait_metadata(traitname=trait, key='saveToJson', default=None)
+            # if saveToJson was not defined for this trait, check saveAllToJson flag
+            if _saveTraitToJson is None and self.saveAllTraitsToJson:
+                _saveTraitToJson = True
+            else:
+                _saveTraitToJson = False
+
+            if _saveTraitToJson:
+                traits.append(trait)
 
         # create a list of (trait, value) tuples
         dataList = []

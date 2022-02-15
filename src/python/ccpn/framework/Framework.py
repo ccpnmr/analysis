@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 16:22:27 +0000 (Tue, February 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-15 16:47:14 +0000 (Tue, February 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -52,7 +52,7 @@ from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.core.lib.Pid import Pid
 from ccpn.core.lib.ContextManagers import \
-    logCommandManager
+    logCommandManager, undoBlockWithSideBar
 
 from ccpn.framework.Application import Arguments
 from ccpn.framework import Version
@@ -456,14 +456,14 @@ class Framework(NotifierBase, GuiBase):
 
     #-----------------------------------------------------------------------------------------
 
-    def _initialiseProject(self, project: Project):
+    def _initialiseProject(self, newProject: Project):
         """Initialise a project and set up links and objects that involve it
         """
         from ccpn.core.lib.SpectrumLib import setContourLevelsFromNoise, getDefaultSpectrumColours, _getDefaultOrdering
 
-        # Linkages
-        self._project = project
-        project._application = self
+        # # Linkages; need to be here as downstream code depends on it
+        self._project = newProject
+        newProject._application = self
 
         # Logging
         logger = getLogger()
@@ -471,14 +471,14 @@ class Framework(NotifierBase, GuiBase):
         logger.debug('Framework._initialiseProject>>>')
 
         # Set up current; we need it when restoring project graphics data below
-        self._current = Current(project=project)
+        self._current = Current(project=newProject)
 
         # This wraps the underlying data, including the wrapped graphics data
-        project._initialiseProject()
+        newProject._initialiseProject()
 
-        if self.project._isUpgradedFromV2:
+        if newProject._isUpgradedFromV2:
             getLogger().debug(f'initialising v2 noise and contour levels')
-            for spectrum in project.spectra:
+            for spectrum in newProject.spectra:
                 # calculate the new noise level
                 setContourLevelsFromNoise(spectrum, setNoiseLevel=True,
                                           setPositiveContours=True, setNegativeContours=True,
@@ -491,7 +491,7 @@ class Framework(NotifierBase, GuiBase):
                 # set the initial axis ordering
                 _getDefaultOrdering(spectrum)
 
-        project._updateApiDataUrl(self.preferences.general.dataPath)
+        newProject._updateApiDataUrl(self.preferences.general.dataPath)
         # the project is now ready to use
 
         # Now that all objects, including the graphics are there, restore current
@@ -810,15 +810,14 @@ class Framework(NotifierBase, GuiBase):
         from ccpn.core.Project import _newProject
 
         newName = re.sub('[^0-9a-zA-Z]+', '', name)
-        sys.stderr.write('==> Creating new, empty project\n')
         # NB _closeProject includes a gui cleanup call
         self._closeProject()
-        project = _newProject(self, name=newName)
-        self._initialiseProject(project)  # This also set the linkages
+        newProject = _newProject(self, name=newName)
+        self._initialiseProject(newProject)  # This also set the linkages
         # defer the logging output until the project is fully initialised
         if newName != name:
             getLogger().info('Removed whitespace from name: %s' % name)
-        return project
+        return newProject
 
     # @logCommand('application.')  # decorated in ui class
     def newProject(self, name:str='default') -> Project:
@@ -883,8 +882,10 @@ class Framework(NotifierBase, GuiBase):
         self.deleteAllNotifiers()
         if self.ui.mainWindow:
             # ui/gui cleanup
+            self.ui.mainWindow.deleteAllNotifiers()
             self.ui.mainWindow._closeMainWindowModules()
             self.ui.mainWindow._closeExtraWindowModules()
+            self.ui.mainWindow.sideBar.clearSideBar()
             self.ui.mainWindow.sideBar.deleteLater()
             self.ui.mainWindow.deleteLater()
             self.ui.mainWindow = None
@@ -895,8 +896,10 @@ class Framework(NotifierBase, GuiBase):
 
         if self.project is not None:
             # Cleans up wrapper project, including graphics data objects (Window, Strip, etc.)
-            self.project._close()
+            _project = self.project
+            _project._close()
             self._project = None
+            del(_project)
 
     #-----------------------------------------------------------------------------------------
     # Data loaders
@@ -919,37 +922,49 @@ class Framework(NotifierBase, GuiBase):
                              len(dataLoaders))
             self._increaseNotificationBlocking()
 
-        for dataLoader in dataLoaders:
+        # Check if there is a dataLoader that creates a new project: in that case, we only want one
+        _createNew = [dl for dl in dataLoaders if dl.createNewProject]
+        if len(_createNew) > 1:
+            raise RuntimeError('Multiple dataLoaders create a new project; can\'t do that')
 
-            # NOTE:ED - move inside ui._loadProject/ui._loadData?
-            if dataLoader.makeArchive:
-                # make an archive in the project specific archive folder before loading
-                from ccpn.core.lib.ProjectArchiver import ProjectArchiver
+        elif len(_createNew) == 1:
+            dataLoader = _createNew[0]
+            with logCommandManager('application.', 'loadProject', dataLoader.path):
 
-                archiver = ProjectArchiver(projectPath=dataLoader.path)
-                archivePath = archiver.makeArchive()
-                getLogger().info('==> Project archived to %s' % archivePath)
-                if not archivePath:
-                    MessageDialog.showWarning('Archive Project',
-                                              f'There was a problem creating an archive for {dataLoader.path}',
-                                              parent=self.ui.mainWindow
-                                              )
+                # NOTE:ED - move inside ui._loadProject?
+                if dataLoader.makeArchive:
+                    # make an archive in the project specific archive folder before loading
+                    from ccpn.core.lib.ProjectArchiver import ProjectArchiver
 
-            if dataLoader.createNewProject:
-                with logCommandManager('application.', 'loadProject', dataLoader.path):
-                    result = self.ui._loadProject(dataLoader=dataLoader)
-                    getLogger().info("==> Loaded project %s" % result)
-            else:
+                    archiver = ProjectArchiver(projectPath=dataLoader.path)
+                    archivePath = archiver.makeArchive()
+                    getLogger().info('==> Project archived to %s' % archivePath)
+                    if not archivePath:
+                        MessageDialog.showWarning('Archive Project',
+                                                  f'There was a problem creating an archive for {dataLoader.path}',
+                                                  parent=self.ui.mainWindow
+                                                  )
+
+                result = self.ui._loadProject(dataLoader=dataLoader)
+                getLogger().info("==> Loaded project %s" % result)
+                if not isIterable(result):
+                    result = [result]
+                objs.extend(result)
+            dataLoaders.remove(dataLoader)
+
+        # Now do the remaining ones; put in one undo block
+        with undoBlockWithSideBar():
+            for dataLoader in dataLoaders:
                 with logCommandManager('application.', 'loadData', dataLoader.path):
                     result = self.ui._loadData(dataLoader=dataLoader)
-
-            if not isIterable(result):
-                result = [result]
-            objs.extend(result)
+                if not isIterable(result):
+                    result = [result]
+                objs.extend(result)
 
         if _echoBlocking:
             self._decreaseNotificationBlocking()
 
+        getLogger().debug('Loaded objects: %s' % objs)
         return objs
 
     # @logCommand('application.') # eventually decorated by  _loadData()
@@ -1109,15 +1124,13 @@ class Framework(NotifierBase, GuiBase):
         """Load NEF file defined by dataLoader instance
         :param dataLoader: a NefDataLoader instance
         :return Project instance
-        CCPNINTERNAL: called from NefDataLoader instance
+        CCPNINTERNAL: called from NefDataLoader.load()
         """
-        _nefImporter = dataLoader.nefImporter  # This will also populate the nefImporter if need be
         if dataLoader.createNewProject:
-            self._closeProject()
-            self._project = self._newProject(_nefImporter.getName())
+            newProject = self._newProject(dataLoader.nefImporter.getName())
 
-        _nefImporter.importIntoProject(project=self.project)
-        return self.project
+        dataLoader._importIntoProject(project=newProject)
+        return newProject
 
     def _exportNEF(self):
         """

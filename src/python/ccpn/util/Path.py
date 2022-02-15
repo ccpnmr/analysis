@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-11 12:24:50 +0000 (Fri, February 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-15 16:47:15 +0000 (Tue, February 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -81,7 +81,7 @@ class Path(_Path_):
         return self if self.is_dir() else self.parent
 
     def addTimeStamp(self):
-        """Return a Path instance with path.timeStamp.suffix profile
+        """Return a Path instance with path.timeStamp-suffix profile
         """
         now = datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')
         return self.parent / (self.stem + '-' + str(now) + self.suffix)

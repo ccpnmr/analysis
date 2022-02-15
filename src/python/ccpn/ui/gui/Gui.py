@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-11 15:51:36 +0000 (Fri, February 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-15 14:58:29 +0000 (Tue, February 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -326,8 +326,7 @@ class Gui(Ui):
                                                 f'Project "{path.name}" was created with version-2 Analysis.\n'
                                                 f'\n'
                                                 f'CAUTION:\n'
-                                                f'\tThe project will be converted to a version-3 project and saved '
-                                                f'\tas a new directory with .ccpn extension.\n'
+                                                f'The project will be converted to a version-3 project and saved as a new directory with .ccpn extension.\n'
                                                 f'\n'
                                                 f'Do you want to continue loading?')
 

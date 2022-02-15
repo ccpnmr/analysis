@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: varioustoxins $"
-__dateModified__ = "$dateModified: 2022-02-13 16:32:52 +0000 (Sun, February 13, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-15 14:58:29 +0000 (Tue, February 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -526,10 +526,10 @@ class Framework(NotifierBase, GuiBase):
             # change spectrum colours
             for spectrum in project.spectra:
                 if len(spectrum.axisCodes) > 1:
-                    if spectrum.positiveContourColour.startswith('#'):
+                    if spectrum.positiveContourColour and spectrum.positiveContourColour.startswith('#'):
                         spectrum.positiveContourColour = autoCorrectHexColour(spectrum.positiveContourColour,
                                                                               getColours()[CCPNGLWIDGET_HEXBACKGROUND])
-                    if spectrum.negativeContourColour.startswith('#'):
+                    if spectrum.negativeContourColour and spectrum.negativeContourColour.startswith('#'):
                         spectrum.negativeContourColour = autoCorrectHexColour(spectrum.negativeContourColour,
                                                                               getColours()[CCPNGLWIDGET_HEXBACKGROUND])
                 else:
@@ -608,8 +608,8 @@ class Framework(NotifierBase, GuiBase):
 
             # initialise any colour changes before generating gui strips
             self._correctColours()
-        except Exception as e:
-            getLogger().warning('Impossible to restore colours')
+        except Exception as es:
+            getLogger().warning(f'Impossible to restore colours - {es}')
 
         # Initialise Strips
         for spectrumDisplay in mainWindow.spectrumDisplays:

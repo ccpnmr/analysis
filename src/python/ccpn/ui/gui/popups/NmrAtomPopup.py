@@ -4,10 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-07 12:27:22 +0000 (Tue, December 07, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-02-15 12:03:57 +0000 (Tue, February 15, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -29,6 +29,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 from ccpn.ui.gui.popups.AttributeEditorPopupABC import AttributeEditorPopupABC
 from ccpn.util.Common import greekKey, getIsotopeListFromCode
 from ccpn.core.NmrAtom import NmrAtom, UnknownIsotopeCode
+from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning
 from ccpn.ui.gui.widgets.CompoundWidgets import EntryCompoundWidget, TextEditorCompoundWidget, \
     PulldownListCompoundWidget, CheckBoxCompoundWidget
 from ccpn.util.isotopes import DEFAULT_ISOTOPE_DICT
@@ -102,7 +103,6 @@ def _getNmrAtomName(popupinstance, nmrAtom, nmrResidue=None, isotopeCode=None):
     atomNameOptions = sorted(list(set(atomNameOptions)), key=greekKey)
 
     if isotopeCode in NEF_ATOM_NAMES:
-        # if False:
         atomsNameOptionsByIC = getIsotopeListFromCode(isotopeCode or nmrAtom.isotopeCode)
 
         atomNotOfSameIsotopeCode = [x for x in atomNameOptions if x not in atomsNameOptionsByIC]
@@ -268,12 +268,16 @@ class NmrAtomEditPopup(AttributeEditorPopupABC):
 
         elif destNmrAtom:
             # different name and/or different nmrResidue
+            _ok = True
             if not merge:
-                # raise error to notify popup
-                raise ValueError('Cannot re-assign NmrAtom to an existing NmrAtom of another NmrResidue without merging')
-            destNmrAtom.mergeNmrAtoms(self.obj)
-            newComment = ' - '.join(filter(None, [destNmrAtom.comment, comment]))
-            destNmrAtom.comment = newComment
+                # popup warning if merge not specified
+                _msg = 'Cannot re-assign NmrAtom to an existing NmrAtom of another NmrResidue without merging.\n\nDo you want to merge?'
+                _ok = showYesNoWarning(str(self.windowTitle()), _msg)
+
+            if _ok:
+                destNmrAtom.mergeNmrAtoms(self.obj)
+                newComment = ' - '.join(filter(None, [destNmrAtom.comment, comment]))
+                destNmrAtom.comment = newComment
 
         else:
             # assign to a new nmrAtom

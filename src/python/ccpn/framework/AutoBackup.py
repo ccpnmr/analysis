@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:52 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: varioustoxins $"
+__dateModified__ = "$dateModified: 2022-02-13 16:35:43 +0000 (Sun, February 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,10 +29,22 @@ __date__ = "$Date: 2022-02-05 10:28:48 +0000 (Saturday, February 5, 2022) $"
 from threading import Thread
 from time import time, sleep
 
+from PyQt5 import QtCore, QtWidgets
+
 from ccpn.util.Logging import getLogger
 
 
 class AutoBackup(Thread):
+    class MainThreadAccess(QtCore.QObject):
+
+        runOnMainThread = QtCore.pyqtSignal(object)
+
+        def __init__(self):
+            super().__init__()
+            self.runOnMainThread.connect(QtWidgets.QApplication.instance().runFunctionOnThreadAtIdle)
+
+        def emit(self, func):
+            self.runOnMainThread.emit(func)
 
     def __init__(self, q, backupFunction, sleepTime=1):
         super().__init__()
@@ -54,8 +66,8 @@ class AutoBackup(Thread):
             elif (time() - self.startTime) < waitTime:
                 sleep(self.sleepTime)
             else:
+                self._mainThreadAccess.emit(self.backupProject)
                 self.startTime = time()
-                try:
-                    self.backupFunction()
-                except Exception as es:
-                    getLogger().warning('Project backup failed with error %s' % es)
+
+
+

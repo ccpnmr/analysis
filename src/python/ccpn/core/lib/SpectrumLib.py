@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 16:22:27 +0000 (Tue, February 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-15 16:33:12 +0000 (Tue, February 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1299,7 +1299,6 @@ def _getNoiseEstimate(spectrum, nsamples=1000, nsubsets=10, fraction=0.1):
 
 def _getDefaultOrdering(spectrum):
     # axisOption = spectrum.project.application.preferences.general.axisOrderingOptions
-    axisOrder = None
 
     preferredAxisOrder = spectrum._preferredAxisOrdering
     if preferredAxisOrder is not None:

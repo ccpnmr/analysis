@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 16:47:14 +0000 (Tue, February 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-15 18:41:15 +0000 (Tue, February 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1129,8 +1129,11 @@ class Framework(NotifierBase, GuiBase):
         if dataLoader.createNewProject:
             newProject = self._newProject(dataLoader.nefImporter.getName())
 
-        dataLoader._importIntoProject(project=newProject)
-        return newProject
+            dataLoader._importIntoProject(project=newProject)
+            return newProject
+        else:
+            dataLoader._importIntoProject(project=self.project)
+            return self.project
 
     def _exportNEF(self):
         """

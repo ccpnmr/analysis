@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 16:47:15 +0000 (Tue, February 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-15 18:41:15 +0000 (Tue, February 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -419,7 +419,14 @@ class NefDictFrame(Frame):
                     self.headerLabel.setText(self.project.name)
                 else:
                     self.headerLabel.setText('')
+
                 self._colourTreeView()
+
+                # clean parentGroups that have no children
+                _dd = []
+                self._traverseTree(self.nefTreeView.headerItem, func=self._removeParentTreeState, data=_dd)
+                for itm in _dd:
+                    itm.parent() and itm.parent().removeChild(itm)
 
     def _colourTreeView(self):
         projectSections = self.nefTreeView.nefToTreeViewMapping
@@ -2281,14 +2288,15 @@ class NefDictFrame(Frame):
             self.frameOptionsFrame.getLayout().setColumnStretch(colInd, st)
         self._tableSplitter.setVisible(True)
 
-    def _parentSelected(self, parentItem, parentItemName):
+    @staticmethod
+    def _depth(item):
+        depth = 0
+        while item:
+            item = item.parent()
+            depth += 1
+        return depth
 
-        def _depth(item):
-            depth = 0
-            while item:
-                item = item.parent()
-                depth += 1
-            return depth
+    def _parentSelected(self, parentItem, parentItemName):
 
         with self._tableSplitter.blockWidgetSignals(recursive=False):
             self._tableSplitter.setVisible(False)
@@ -2303,7 +2311,7 @@ class NefDictFrame(Frame):
             self._nefWidgets = []
             self._removeWidget(self.frameOptionsFrame, removeTopWidget=False)
 
-            if _depth(parentItem) != 2:
+            if self._depth(parentItem) != 2:
                 return
 
             _count = parentItem.childCount()
@@ -2504,6 +2512,12 @@ class NefDictFrame(Frame):
             getLogger().warning(str(es))
 
         self._populate()
+
+    def _removeParentTreeState(self, item, data = [], prefix=''):
+        """Remove parents from the tree that have no children
+        """
+        if (self._depth(item) == 2) and item.childCount() == 0:
+            data.append(item)
 
     def _getTreeState(self, item, data: dict, prefix=''):
         """Add the name of expanded item to the data list
@@ -2824,8 +2838,6 @@ class ImportNefPopup(CcpnDialogMainWidget):
 
         # set up the widgets
         self.setWidgets()
-        # populate the widgets
-        self._populate()
 
         # enable the buttons
         self.setOkButton(callback=self._okClicked, text='Import', tipText='Import nef file over existing project')
@@ -2835,6 +2847,7 @@ class ImportNefPopup(CcpnDialogMainWidget):
 
         self._okButton = self.getButton(self.OKBUTTON)
 
+        # populate the widgets
         self.fillPopup()
 
     def setWidgets(self):
@@ -2863,7 +2876,7 @@ class ImportNefPopup(CcpnDialogMainWidget):
                      NEFFRAMEKEY_ENABLEFILTERFRAME: True,
                      NEFFRAMEKEY_ENABLEMOUSEMENU  : True,
                      }
-        _dataBlock = self._dataLoader.dataBlock,  # This will also assure dat have been read
+        _dataBlock = self._dataLoader.dataBlock  # This will also assure data have been read
         newWindow = NefDictFrame(parent=self,
                                  mainWindow=self.mainWindow,
                                  nefLoader=self._nefImporter,

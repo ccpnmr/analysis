@@ -54,13 +54,13 @@ class ImageExporter(Exporter):
   def export(self, fileName=None, toBytes=False, copy=False):
     if fileName is None and not toBytes and not copy:
 
-      filter = ["*." + bytes(f).decode('utf-8') for f in QtGui.QImageWriter.supportedImageFormats()]
+      _filter = ["*." + bytes(f).decode('utf-8') for f in QtGui.QImageWriter.supportedImageFormats()]
       preferred = ['*.png', '*.tif', '*.jpg']
       for p in preferred[::-1]:
-        if p in filter:
-          filter.remove(p)
-          filter.insert(0, p)
-      self.fileSaveDialog(filter=filter)
+        if p in _filter:
+          _filter.remove(p)
+          _filter.insert(0, p)
+      self.fileSaveDialog(fileFilter=_filter)
       return
 
     targetRect = QtCore.QRect(0, 0, self.params['width'], self.params['height'])

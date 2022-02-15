@@ -58,8 +58,8 @@ class TextExporter(Exporter):
             raise Exception("Must have a PlotItem selected for CSV export.")
 
         if fileName is None:
-            filter = self.params['separator']
-            self.fileSaveDialog(filter=filter)  #["*.csv", "*.tsv"])
+            _filter = self.params['separator']
+            self.fileSaveDialog(fileFilter=_filter)  #["*.csv", "*.tsv"])
             return
 
         data = self.getPlottedData()

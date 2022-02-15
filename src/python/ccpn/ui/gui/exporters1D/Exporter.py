@@ -41,18 +41,18 @@ class Exporter(object):
         """
         raise Exception("Abstract method must be overridden in subclass.")
 
-    def fileSaveDialog(self, filter=None, opts=None):
+    def fileSaveDialog(self, fileFilter=None, opts=None):
         ## Show a file dialog, call self.export(filename) when finished.
         if opts is None:
             opts = {}
         self.fileDialog = FileDialog()
         self.fileDialog.setFileMode(QtWidgets.QFileDialog.AnyFile)
         self.fileDialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
-        if filter is not None:
-            if isinstance(filter, str):
-                self.fileDialog.setNameFilter(filter)
-            elif isinstance(filter, list):
-                self.fileDialog.setNameFilters(filter)
+        if fileFilter is not None:
+            if isinstance(fileFilter, str):
+                self.fileDialog.setNameFilter(fileFilter)
+            elif isinstance(fileFilter, list):
+                self.fileDialog.setNameFilters(fileFilter)
         global LastExportDirectory
         exportDir = LastExportDirectory
         if exportDir is not None:

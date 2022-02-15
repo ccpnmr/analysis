@@ -49,7 +49,7 @@ class SVGExporter(Exporter):
 
   def export(self, fileName=None, toBytes=False, copy=False):
     if toBytes is False and copy is False and fileName is None:
-      self.fileSaveDialog(filter="Scalable Vector Graphics (*.svg)")
+      self.fileSaveDialog(fileFilter="Scalable Vector Graphics (*.svg)")
       return
       # self.svg = QtSvg.QSvgGenerator()
       # self.svg.setFileName(fileName)

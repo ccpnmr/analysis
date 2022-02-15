@@ -4,9 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2018-12-20 15:53:11 +0000 (Thu, December 20, 2018) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2022-02-15 16:20:03 +0000 (Tue, February 15, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -63,13 +64,13 @@ class OpenGLPDFExporter(Exporter):
   def export(self, filename=None, toBytes=False, copy=False):
     if filename is None and not toBytes and not copy:
 
-      filter = ['*.pdf',]
+      _filter = ['*.pdf',]
       preferred = ['*.pdf',]
       for p in preferred[::-1]:
-        if p in filter:
-          filter.remove(p)
-          filter.insert(0, p)
-      self.fileSaveDialog(filter=filter)
+        if p in _filter:
+          _filter.remove(p)
+          _filter.insert(0, p)
+      self.fileSaveDialog(fileFilter=_filter)
       return
 
     # TODO:ED finish writing code to export PDF using reportlab

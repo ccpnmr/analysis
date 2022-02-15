@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-08 10:37:02 +0000 (Tue, February 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-15 16:20:03 +0000 (Tue, February 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -549,8 +549,8 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
 
         if path is None:
-            filter = '*.nef'
-            dialog = NefFileDialog(parent=self.ui.mainWindow, acceptMode='import', fileFilter=filter)
+            _filter = '*.nef'
+            dialog = NefFileDialog(parent=self.ui.mainWindow, acceptMode='import', fileFilter=_filter)
             dialog._show()
             path = dialog.selectedFile()
 

@@ -32,8 +32,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:53 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-15 11:19:42 +0000 (Tue, February 15, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -262,21 +262,21 @@ class StarImporterPopup(CcpnDialog):
         """
         self.treeView._uncheckAll()
         chemicalShiftListOnly = []
-        for key, value in self.dataBlocck.values():
-            if ASSIGNED_CHEM_SHIFT_LIST in i:
-                chemicalShiftListOnly.append(i)
-            if SHIFT_SET in i:
-                chemicalShiftListOnly.append(i)
+        for key, value in self.dataBlock.items():
+            if ASSIGNED_CHEM_SHIFT_LIST in key:
+                chemicalShiftListOnly.append(key)
+            if SHIFT_SET in key:
+                chemicalShiftListOnly.append(key)
         self.treeView.selectObjects(chemicalShiftListOnly)
 
     def _showMapLabel(self, value, _showWarning=True):
-        self._togleVisibility(self.dynamicsWidgets, value)
+        self._toggleVisibility(self.dynamicsWidgets, value)
 
         if not self._deprecationMessageShown and _showWarning:
             showWarning(DeprecationWarningMessageTitle, DeprecationWarningMessage)
             self._deprecationMessageShown = True
 
-    def _togleVisibility(self, ll: list = [], value: bool = True):
+    def _toggleVisibility(self, ll: list = [], value: bool = True):
         for l in ll:
             l.setVisible(value)
 

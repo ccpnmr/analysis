@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:52 +0000 (Mon, February 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-16 08:42:10 +0000 (Wed, February 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -86,7 +86,7 @@ class DirectoryDataLoader(DataLoaderABC):
         # scan all the files in the directory,
         # skipping dotted files and only processing directories if recursion is True
         if filter is None:
-            filter = list(getDataLoaders.keys())
+            filter = list(getDataLoaders().keys())
 
         if _DIRECTORY_DATA in filter:
             filter.remove(_DIRECTORY_DATA)

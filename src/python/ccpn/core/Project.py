@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 16:47:14 +0000 (Tue, February 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-16 10:01:51 +0000 (Wed, February 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -411,8 +411,8 @@ class Project(AbstractWrapperObject):
             if len(self.chemicalShiftLists) == 0:
                 self.newChemicalShiftList(name='default')
 
-        # Call any updates
-        self._update()
+            # Call any updates
+            self._update()
 
     @classmethod
     def _restoreObject(cls, project, apiObj):
@@ -2018,12 +2018,12 @@ def _newProject(application, name: str = 'default', path: str = None, overwrite=
     apiNmrProject.initialiseGraphicsData()
     project = Project(apiNmrProject)
     project._isNew = True
-    # NB: linkages are set in Framework._intialiseProject()
+    # NB: linkages are set in Framework._initialiseProject()
+
+    project._objectVersion = application.applicationVersion
 
     project._resetUndo(debug=application._debugLevel <= Logging.DEBUG2, application=application)
     project._saveHistory = newProjectSaveHistory(project.path)
-
-    project._objectVersion = application.applicationVersion
 
     # the initialisation is completed by Framework when it has done its things
     # project._initialiseProject()

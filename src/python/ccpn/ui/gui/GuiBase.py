@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:53 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-16 09:47:39 +0000 (Wed, February 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -418,11 +418,16 @@ class GuiBase(object):
         return self.project
 
     def _saveCallback(self):
-        """The project callback"""
-        successful = self.saveProject()
-        if not successful:
-            getLogger().warning("Error saving project")
-            MessageDialog.showError('Save Project', 'Error saving %s', self.project)
+        """The project save callback"""
+        if self.project.isTemporary:
+            # if temporary then use the saveAs dialog
+            self.ui.saveProjectAs()
+
+        else:
+            successful = self.saveProject()
+            if not successful:
+                getLogger().warning("Error saving project")
+                MessageDialog.showError('Save Project', 'Error saving %s', self.project)
 
     def _saveAsCallback(self):
         """Opens save Project as dialog box and saves project to path specified

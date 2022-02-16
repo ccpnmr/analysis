@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-16 11:02:55 +0000 (Wed, February 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-16 11:55:11 +0000 (Wed, February 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -160,16 +160,6 @@ class SeriesAnalysisABC(ABC):
         seriesFrame = SeriesFrameBC()
         seriesFrame.buildFromSpectrumGroup(spectrumGroup, thePeakProperty)
         dataTable = project.newDataTable(name=dataTableName, data=seriesFrame)
-        return dataTable
-
-    def _fetchDataTable(self, project, dataTableName):
-        """
-        Move this to project
-        """
-        from ccpn.core.lib.Pid import createPid
-        dataTable = project.getByPid(createPid(DataTable.shortClassName, dataTableName))
-        if not dataTable:
-            dataTable = project.newDataTable(name=dataTableName)
         return dataTable
 
     @classmethod

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-09 13:19:03 +0000 (Wed, February 09, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-02-16 11:55:11 +0000 (Wed, February 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -293,3 +293,13 @@ def _newDataTable(self: Project, name: str = None, data: Optional[TableFrame] = 
         data._containingObject = result
 
     return result
+
+def _fetchDataTable(self:Project, name):
+    """
+    Get an existing dataTable by name or create a new one
+    """
+    from ccpn.core.lib.Pid import createPid
+    dataTable = self.getByPid(createPid(DataTable.shortClassName, name))
+    if not dataTable:
+        dataTable = self.newDataTable(name=name)
+    return dataTable

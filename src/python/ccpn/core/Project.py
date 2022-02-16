@@ -1622,6 +1622,16 @@ class Project(AbstractWrapperObject):
         return _newDataTable(self, name=name, data=data, comment=comment, **kwds)
 
     @logCommand('project.')
+    def fetchDataTable(self, name: str):
+        """Get or create new DataTable.
+        :param name: name for the DataTable.
+        """
+        from ccpn.core.DataTable import _fetchDataTable
+
+        return _fetchDataTable(self, name=name)
+
+
+    @logCommand('project.')
     def newPeakCluster(self, peaks: Sequence[Union['Peak', str]] = None, **kwds) -> Optional['PeakCluster']:
         """Create new PeakCluster.
 

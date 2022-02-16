@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-16 11:55:11 +0000 (Wed, February 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-16 15:46:57 +0000 (Wed, February 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -60,18 +60,18 @@ class SeriesAnalysisABC(ABC):
         self._inputDataTables.add(dataTable)
 
 
-    def getOutputDataTable(self, seriesFrameType:str=None):
+    def getOutputDataTables(self, seriesFrameType:str=None):
         """
         Get the attached Lists of DataTables using SeriesFrame with Output format.
         """
         dataTablesByDataType = defaultdict(list)
         for dataTable in self._outputDataTables:
             seriesFrame = dataTable.data
-            if dataTable.data:
+            if dataTable.data is not None:
                 if hasattr(seriesFrame, sv.SERIESFRAMETYPE):
                     dataTablesByDataType[seriesFrame.SERIESFRAMETYPE].append(dataTable)
         if seriesFrameType:
-            dataTablesByDataType.get(seriesFrameType)
+            return dataTablesByDataType.get(seriesFrameType)
         else:
             return list(dataTablesByDataType.values())
 
@@ -84,7 +84,7 @@ class SeriesAnalysisABC(ABC):
         """
         dataTable = None
         if overrideExisting:
-            dataTables = self.getOutputDataTable(seriesFrameType)
+            dataTables = self.getOutputDataTables(seriesFrameType)
             if dataTables:
                 dataTable = dataTables[-1]
         if not dataTable:
@@ -107,9 +107,9 @@ class SeriesAnalysisABC(ABC):
         :return: None
             kwargs
             =======================
-            fittingModels:  list of fittingModel classes (not initialised).
+            :key: fittingModels:  list of fittingModel classes (not initialised).
                             So to use only the specif given, rather that all available.
-            overrideOutputDataTables: bool, True to rewrite the output result in the last available dataTable.
+            :key: overrideOutputDataTables: bool, True to rewrite the output result in the last available dataTable.
                                     When multiple fittingModels are available, each will output in a different dataTable
                                     according to its definitions.
 

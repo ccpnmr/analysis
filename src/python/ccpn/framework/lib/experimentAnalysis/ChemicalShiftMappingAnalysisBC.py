@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-16 11:02:55 +0000 (Wed, February 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-16 15:46:57 +0000 (Wed, February 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,9 +26,7 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 # Start of code
 #=========================================================================================
 
-from collections import OrderedDict
 from ccpn.util.Logging import getLogger
-from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import _registerChemicalShiftMappingModels
@@ -44,7 +42,6 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
     def __init__(self, application):
         super().__init__(application)
 
-        # Register the available Fitting Models
         _registerChemicalShiftMappingModels()
 
     @staticmethod
@@ -58,11 +55,13 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         :param kwargs: any key:value for creating the new DataTable object.
         :return:
         """
-        from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import CSMInputFrame
+        from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import INPUT_CSM_SERIESFRAMES_DICT
         project = spectrumGroup.project
-        # TODO create series table by Type arg
-        seriesFrame = CSMInputFrame()
-        seriesFrame.buildFromSpectrumGroup(spectrumGroup, thePeakProperty=thePeakProperty)
+        seriesFrameCLS = INPUT_CSM_SERIESFRAMES_DICT.get(seriesTableType,)
+        if not seriesFrameCLS:
+            raise RuntimeError(f'Cannot find SeriesFrame for {seriesTableType}.')
+        seriesFrame = seriesFrameCLS()
+        seriesFrame.buildFromSpectrumGroup(spectrumGroup=spectrumGroup, thePeakProperty=thePeakProperty)
         dataTable = project.newDataTable(name=dataTableName, data=seriesFrame)
         return dataTable
 
@@ -73,8 +72,7 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
 
     def setAlphaFactor(self, **kwargs):
         """Set the Alpha Factor for the DeltaDeltas calculation.
-            E.g.: setAlphaFactor(H=1, N=0.14) or setAlphaFactor(**{'H':1, 'N':0.14})
-            Factors are values between 0.1-1
+            E.g.: setAlphaFactor(H=1, N=0.14) or setAlphaFactor(**{'H':1, 'N':0.14}). Factors are values between 0.1-1
         """
         dd = kwargs.copy()
         for k,v in kwargs.items():
@@ -87,39 +85,30 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
 
 
     def fit(self, *args, **kwargs):
+        """
+        Perform the registered FittingModels to the inputDataTables and add the outputs to a newDataTable or
+         override last available.
+        :param args:
+        :param kwargs:
+            :key: fittingModels:    list of fittingModel classes (not initialised).So to use only the specif given,
+                                    rather than all available.
+            :key: overrideOutputDataTables: bool, True to rewrite the output result in the last available dataTable.
+                                    When multiple fittingModels are available, each will output in a different dataTable
+                                    according to its definitions.
+        :return: None
+        """
 
         if not self.inputDataTables:
             raise RuntimeError('CSM. Cannot run any fitting models. Add a valid inputData first')
 
         fittingModels = self.fittingModels or kwargs.get(sv.FITTING_MODELS, [])
-        ov = kwargs.get(sv.OVERRIDE_OUTPUT_DATATABLE, True)
+        ovverideOutputDataTable = kwargs.get(sv.OVERRIDE_OUTPUT_DATATABLE, True)
         for model in fittingModels:
             fittingModel = model()
             inputDataTable = self.inputDataTables[-1]
             outputFrame = fittingModel.fit(inputDataTable.data)
             outputName = f'{inputDataTable.name}_output_{fittingModel.ModelName}'
-            dataTable = self._fetchOutputDataTable(name=outputName, seriesFrameType=sv.CSM_OUTPUT_FRAME, overrideExisting=ov)
-            dataTable.data = outputFrame
-            self.addOutputData(dataTable)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            outputDataTable = self._fetchOutputDataTable(name=outputName, seriesFrameType=sv.CSM_OUTPUT_FRAME,
+                                                   overrideExisting=ovverideOutputDataTable)
+            outputDataTable.data = outputFrame
+            self.addOutputData(outputDataTable)

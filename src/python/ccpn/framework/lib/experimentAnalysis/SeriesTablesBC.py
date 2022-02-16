@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-16 11:02:56 +0000 (Wed, February 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-16 15:46:57 +0000 (Wed, February 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -338,3 +338,8 @@ def _getAssignedNmrAtoms4Spectra(spectra, peakListIndex=-1):
     allPeaks = [pk for sp in spectra for pk in sp.peakLists[peakListIndex].peaks]
     nmrAtoms = set(flattenLists([peak.assignedNmrAtoms for peak in allPeaks]))
     return list(nmrAtoms)
+
+
+INPUT_CSM_SERIESFRAMES_DICT = {
+                          sv.CSM_INPUT_FRAME: CSMInputFrame
+                          }

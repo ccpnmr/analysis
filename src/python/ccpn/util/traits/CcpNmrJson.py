@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-15 15:12:12 +0000 (Tue, February 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-16 16:42:00 +0000 (Wed, February 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -533,22 +533,24 @@ class CcpNmrJson(TraitBase):
         # get all traits that need saving to json
         # Subtle but important implementation change relative to the previous one-liner
         # Allow trait-specific saveToJson metadata (i.e. 'tag'), to override object's saveAllToJson
-        traits = [Constants.METADATA]
+        traitsToEncode = [Constants.METADATA]
         for trait in self.keys():
             # check if saveToJson was defined for this trait
             _saveTraitToJson = self.trait_metadata(traitname=trait, key='saveToJson', default=None)
             # if saveToJson was not defined for this trait, check saveAllToJson flag
-            if _saveTraitToJson is None and self.saveAllTraitsToJson:
-                _saveTraitToJson = True
-            else:
-                _saveTraitToJson = False
+            if _saveTraitToJson is None:
+                # We didn't obtain a result
+                if self.saveAllTraitsToJson:
+                    _saveTraitToJson = True
+                else:
+                    _saveTraitToJson = False
 
             if _saveTraitToJson:
-                traits.append(trait)
+                traitsToEncode.append(trait)
 
         # create a list of (trait, value) tuples
         dataList = []
-        for trait in traits:
+        for trait in traitsToEncode:
             handler = self._getJsonHandler(trait)
             if handler is not None:
                 dataList.append((trait, handler().encode(self, trait)))

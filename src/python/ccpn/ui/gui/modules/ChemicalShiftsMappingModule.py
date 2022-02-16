@@ -58,19 +58,19 @@ Module Documentation
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 15:18:25 +0000 (Thu, December 23, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-02-16 11:43:13 +0000 (Wed, February 16, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -141,7 +141,7 @@ from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
 from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar
 from ccpn.ui.gui.widgets.Font import Font, getFont
-
+from ccpn.util.Path import Path, aPath, fetchDir, joinPath
 
 # Default values on init
 DefaultConcentration = 0.0
@@ -262,6 +262,8 @@ class ChemicalShiftsMapping(CcpnModule):
         self.project = self.mainWindow.project
         self.application = self.mainWindow.application
         self.current = self.application.current
+        self.scriptsPath = self.application.scriptsPath
+        self.pymolScriptsPath = fetchDir(self.scriptsPath, 'pymol')
 
         self.thresholdLinePos = DefaultThreshould
         self._bindingExportDialog = None
@@ -491,7 +493,7 @@ class ChemicalShiftsMapping(CcpnModule):
         scriptPath = None
         if self.mainWindow:
             # scriptPath = os.path.join(getScriptsDirectoryPath(self.project),'pymol')
-            scriptPath = self.application.pymolScriptsPath
+            scriptPath = self.pymolScriptsPath
         self.pathPDB = LineEditButtonDialog(self.mvWidgetContents, textDialog='Select PDB File',
                                             fileFilter="PDB files (*.pdb)", directory=scriptPath, grid=(0, 1))
         i += 1
@@ -1282,7 +1284,7 @@ class ChemicalShiftsMapping(CcpnModule):
         import json
         import subprocess
 
-        filePath = os.path.join(self.application.pymolScriptsPath, PymolScriptName)
+        filePath = joinPath(self.pymolScriptsPath, PymolScriptName)
 
         pymolPath = self.application.preferences.externalPrograms.pymol
         pdbPath = self.pathPDB.get()

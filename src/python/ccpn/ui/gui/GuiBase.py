@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-16 09:47:39 +0000 (Wed, February 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-16 12:24:33 +0000 (Wed, February 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -383,7 +383,9 @@ class GuiBase(object):
     def _importNefCallback(self):
         """Just a stub for the menu setup to pass on to mainWindow, to be moved later
         """
-        return self.ui.mainWindow.showNefPopup()
+        from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
+
+        return self.ui.loadData(filter=(NefDataLoader.dataFormat,))
 
     def _loadNMRStarFileCallback(self, path=None, makeNewProject=False) -> Optional[Project]:
         if not path:

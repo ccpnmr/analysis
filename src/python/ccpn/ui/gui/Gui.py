@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 16:47:14 +0000 (Tue, February 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-16 12:24:33 +0000 (Wed, February 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -600,7 +600,7 @@ class Gui(Ui):
 
         dataLoaders = []
         for path in paths:
-            dataLoader, createNewProject, ignore = self._getDataLoader(path)
+            dataLoader, createNewProject, ignore = self._getDataLoader(path, pathFilter=pathFilter)
             if ignore or dataLoader is None:
                 continue
             if dataLoader is None:
@@ -609,7 +609,7 @@ class Gui(Ui):
             dataLoaders.append(dataLoader)
 
         # load the project using the dataLoaders;
-        # We'll ask framework, who will pass it back as ui._loadData calls
+        # We'll ask framework who will pass it back as ui._loadData calls
         return self.application._loadData(dataLoaders)
 
     def loadSpectra(self, *paths) -> list:

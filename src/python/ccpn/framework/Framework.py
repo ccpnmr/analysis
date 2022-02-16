@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 18:41:15 +0000 (Tue, February 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-16 12:24:33 +0000 (Wed, February 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -52,7 +52,7 @@ from ccpn.core.Project import Project
 from ccpn.core.lib.Notifiers import NotifierBase
 from ccpn.core.lib.Pid import Pid
 from ccpn.core.lib.ContextManagers import \
-    logCommandManager, undoBlockWithSideBar
+    logCommandManager, undoBlockWithSideBar, rebuildSidebar
 
 from ccpn.framework.Application import Arguments
 from ccpn.framework import Version
@@ -1123,17 +1123,18 @@ class Framework(NotifierBase, GuiBase):
     def _loadNefFile(self, dataLoader) -> Project:
         """Load NEF file defined by dataLoader instance
         :param dataLoader: a NefDataLoader instance
-        :return Project instance
+        :return Project instance (either newly created or the existing)
         CCPNINTERNAL: called from NefDataLoader.load()
         """
         if dataLoader.createNewProject:
-            newProject = self._newProject(dataLoader.nefImporter.getName())
-
-            dataLoader._importIntoProject(project=newProject)
-            return newProject
+            project = self._newProject(dataLoader.nefImporter.getName())
         else:
-            dataLoader._importIntoProject(project=self.project)
-            return self.project
+            project = self.project
+
+        # TODO: find a different solution for this
+        with rebuildSidebar(application=self):
+            dataLoader._importIntoProject(project=project)
+        return project
 
     def _exportNEF(self):
         """

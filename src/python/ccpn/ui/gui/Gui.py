@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-14 16:52:22 +0000 (Mon, February 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-16 12:09:33 +0000 (Wed, February 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -589,7 +589,7 @@ class Gui(Ui):
 
         dataLoaders = []
         for path in paths:
-            dataLoader, createNewProject, ignore = self._getDataLoader(path)
+            dataLoader, createNewProject, ignore = self._getDataLoader(path, filter=filter)
             if ignore or dataLoader is None:
                 continue
             if dataLoader is None:

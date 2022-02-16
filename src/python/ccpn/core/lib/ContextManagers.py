@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-11 11:59:04 +0000 (Fri, February 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-16 08:40:08 +0000 (Wed, February 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -226,6 +226,38 @@ def catchExceptions(application=None, errorStringTemplate='Error: "%s"', popupAs
             MessageDialog.showWarning('Warning', errorStringTemplate % str(es))
         # if application._isInDebugMode:
         #     raise es
+
+@contextmanager
+def rebuildSidebar(application):
+    """
+    This context manager clears and blocks the sidebar and rebuilds it afterwards
+    """
+
+    # get the current application
+    if not application:
+        application = getApplication()
+    if application is None:
+        raise RuntimeError('Error getting application')
+
+    if application.hasGui:
+        sidebar = application.mainWindow.sideBar
+        sidebar.increaseSidebarBlocking(withSideBarUpdate=True)
+        sidebar.clearSideBar()
+    else:
+        sidebar = None
+
+    try:
+        # transfer control to the calling function
+        yield
+
+    except AttributeError as es:
+        raise
+
+    finally:
+        # clean up after suspending sidebar updates
+        if sidebar is not None:
+            sidebar.decreaseSidebarBlocking(withSideBarUpdate=True)
+            sidebar.buildTree(application.project, clear=False)
 
 
 @contextmanager

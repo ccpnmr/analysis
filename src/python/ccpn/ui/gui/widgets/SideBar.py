@@ -27,7 +27,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-11 11:45:58 +0000 (Fri, February 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-16 08:40:09 +0000 (Wed, February 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -113,8 +113,8 @@ from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, \
     undoBlockWithoutSideBar, undoStackBlocking
 
 
-ALL_NOTIFIERS = [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME, Notifier.CHANGE]
-DEFAULT_NOTIFIERS = [Notifier.DELETE, Notifier.CREATE, Notifier.RENAME]
+ALL_NOTIFIERS = (Notifier.DELETE, Notifier.CREATE, Notifier.RENAME, Notifier.CHANGE)
+DEFAULT_NOTIFIERS = (Notifier.DELETE, Notifier.CREATE, Notifier.RENAME)
 
 
 #===========================================================================================================
@@ -163,7 +163,7 @@ class SidebarABC(NotifierBase):
         self.usePidForName = usePidForName  # flag; if True show pid rather then name
 
         self.klass = klass
-        self.addNotifier = addNotifier  # add notifier for rename, delete, create of klass
+        self.addNotifier = addNotifier  # flag to indicate adding notifier for rename, delete, create of klass
         self.callback = callback  # callback for double click
         self.menuAction = menuAction  # action for raising rightClickMenu
         self.kwds = kwds  # kwd arguments passed to callback
@@ -722,7 +722,7 @@ class SidebarClassTreeItems(SidebarClassABC):
 
 
 class SidebarClassSpectrumTreeItems(SidebarClassABC):
-    """A Tree with a number of dynamically added items of type V3 core 'klass'
+    """A Tree with a number of dynamically added Spectrum instances'
     """
     itemType = 'SpectrumClassTreeItems'
 

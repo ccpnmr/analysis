@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-11 17:19:54 +0000 (Fri, February 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-16 11:02:56 +0000 (Wed, February 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,20 +30,20 @@ import os
 import unittest
 import contextlib
 import pandas as pd
+import numpy as np
 from collections import OrderedDict as od
 from collections import defaultdict
 from ccpn.core.DataTable import TableFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-
-
-
+from scipy.spatial import distance
+from math import dist
 
 def getRelaxationInputFrameExample():
     from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import RelaxationInputFrame
     SERIESSTEPS = [0, 5, 10, 15, 20, 25, 30]
     SERIESUNITS = 's'
     _assignmentValues = [['A', '1', 'ALA', 'H'], # row 1
-                        ['A', '2', 'ALA', 'H']]  # row 2
+                         ['A', '1', 'ALA', 'H']]  # row 2
 
     _seriesValues = [[1000, 550, 316, 180, 85, 56, 31], # row 1
                     [1005, 553, 317, 182, 86, 55, 30]]  # row 2
@@ -56,15 +56,91 @@ def getRelaxationInputFrameExample():
     df.build()
     return df
 
-def testCreateCSInputDataFromSpectrumGroup(spectrumGroup):
+def getCSMInputFrameExample():
+    from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import CSMInputFrame
+    SERIESSTEPS = [0, 1]
+    SERIESUNITS = 'eq'
+    _assignmentValues = [
+                        ['A', '3', 'VAL', 'H'],     # row 1
+                        ['A', '3', 'VAL', 'N'],     # row 2
+                        ['A', '4', 'ASP', 'H'],     # row 3
+                        ['A', '4', 'ASP', 'N'],     # row 4
+                        ['A', '9', 'ARG', 'H'],     # row 5
+                        ['A', '9', 'ARG', 'N']      # row 6
+                        ]
+
+
+    _seriesValues = [
+                    [8.15842,   8.17385],           # row 1
+                    [123.49895, 123.98413],         # row 2
+                    [8.26403,   8.26183],           # row 3
+                    [124.26134, 124.41618],         # row 4
+                    [8.31992,   7.90225],           # row 5
+                    [123.35951, 120.79318]          # row 6
+                    ]
+
+    df = CSMInputFrame()
+    df.setSeriesSteps(SERIESSTEPS)
+    df.setSeriesUnits(SERIESUNITS)
+    df.setAssignmentValues(_assignmentValues)
+    df.setSeriesValues(_seriesValues)
+    df.build()
+    return df
+
+def getCSMInputFrameExample2():
+    from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import CSMInputFrame
+    SERIESSTEPS = [0, 0.5, 1.0, 1.5, 2.0]
+    SERIESUNITS = 'eq'
+    _assignmentValues = [
+                        ['A', '73', 'VAL', 'H'],     # row 1
+                        ['A', '73', 'VAL', 'N'],     # row 2
+                        ]
+
+
+    _seriesValues = [
+                    [ 8.328, 8.244456, 8.190638, 8.164658, 8.147034],           # row 1
+                    [118.764, 118.444586, 118.239704, 118.135157, 118.069626],  # row 2
+                    ]
+    df = CSMInputFrame()
+    df.setSeriesSteps(SERIESSTEPS)
+    df.setSeriesUnits(SERIESUNITS)
+    df.setAssignmentValues(_assignmentValues)
+    df.setSeriesValues(_seriesValues)
+    df.build()
+    return df
+
+def _testCreateCSInputDataFromSpectrumGroup(spectrumGroup):
     # macro level run from a suitable project. Eg. "TstarCompleted" in example Data
     from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import CSMInputFrame
     df = CSMInputFrame()
-    df.buildFromSpectrumGroup(spectrumGroup)
+    df.buildFromSpectrumGroup(spectrumGroup, sv._PPMPOSITION)
     return df
+
+
+def _testCreateChemicalShiftMappingAnalysisObj():
+    from ccpn.framework.lib.experimentAnalysis.ChemicalShiftMappingAnalysisBC import ChemicalShiftMappingAnalysisBC
+    csm = ChemicalShiftMappingAnalysisBC(application)
+    da = csm.newDataTableFromSpectrumGroup(project.spectrumGroups[0],dataTableName='CSM')
+    csm.setAlphaFactor(N=0.143)
+    csm.addInputDataTable(da)
+
+
+def _testCSMCalcData():
+    """Test the DeltaDelta calculation in the CSM deltaDelta model """
+    df = getCSMInputFrameExample()
+    from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import DeltaDeltaCalculation
+    deltaDeltaModel = DeltaDeltaCalculation(alphaFactors=(1, 0.102))
+    outputFrame = deltaDeltaModel.fit(df)
+    print(outputFrame)
+
 
 
 if __name__ == "__main__":
 
-    relaxationInputFrame = getRelaxationInputFrameExample()
-    print(relaxationInputFrame)
+    # relaxationInputFrame = getRelaxationInputFrameExample()
+    # print(relaxationInputFrame)
+    _testCSMCalcData()
+
+
+
+

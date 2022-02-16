@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-11 17:19:54 +0000 (Fri, February 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-16 11:02:56 +0000 (Wed, February 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -33,12 +33,12 @@ import numpy as np
 import pandas as pd
 from collections import OrderedDict as od
 from collections import defaultdict
-from ccpn.core._implementation.DataFrameABC import DataFrameABC
+from ccpn.core.DataTable import TableFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import flattenLists
 
-class SeriesFrameBC(DataFrameABC):
+class SeriesFrameBC(TableFrame):
     """
     A TableData used for the Series ExperimentsAnalysis, such as ChemicalShiftMapping or Relaxation I/O.
     Columns names are created using the _assignmentHeaders followed by the _valuesHeaders.
@@ -80,14 +80,14 @@ class SeriesFrameBC(DataFrameABC):
      category      uid    ||            assignmentHeaders                         ||        valuesHeaders
      headers    |_ROW_UID || chain_code | residue_code | residue_type | atom_name || prefix_x | prefix_y | prefix_... |
                 |=========||============|==============|==============|===========||==========|==========|============|
-     types      |   int   ||   str      |    str       |   str        |    str    ||   float  |   float  |   float    |
+     types      |   str   ||   str      |    str       |   str        |    str    ||   float  |   float  |   float    |
                 |---------||------------|--------------|--------------|-----------||----------|----------|------------|
      values     |   0     ||     A      |      1       |   ALA        |     H     ||    180   |     85   |     ...    |
 
     See examples in .../testing/ExampleSeriesTables.py
 
     """
-
+    SERIESFRAMENAME     = ''
     SERIESFRAMETYPE     = ''
     SERIESUNITS         = 'u'
     SERIESSTEPS         = []
@@ -103,6 +103,7 @@ class SeriesFrameBC(DataFrameABC):
 
     def __init__(self,  *args, **kwargs):
         super().__init__(*args, **kwargs)
+
 
     @property
     def seriesValues(self):
@@ -129,6 +130,16 @@ class SeriesFrameBC(DataFrameABC):
         :return: list of str
         """
         return self._valuesHeaders
+
+    @property
+    def assignmentHeaders(self):
+        """
+        the list of column Headers for the assignment values.
+        Can be used to filter the Table to get a new table with only the series values and index.
+        e.g.:  df[df.assignmentHeaders]
+        :return: list of str
+        """
+        return self._assignmentHeaders
 
     def setSeriesValues(self, seriesValues, *args):
         """
@@ -166,8 +177,19 @@ class SeriesFrameBC(DataFrameABC):
         self.setDataFromDict(dataDict)
         return self
 
-    def buildFromSpectrumGroup(self, spectrumGroup):
-        pass
+    def buildFromSpectrumGroup(self, spectrumGroup, thePeakProperty:str):
+        """
+
+        :param spectrumGroup: Obj SpectrumGroup
+        :param thePeakProperty: any of ppmPosition, lineWidth, volume, height
+        :return:
+        """
+        self.setSeriesSteps(spectrumGroup.series)
+        self.setSeriesUnits(spectrumGroup.seriesUnits)
+        _assignmentValues, _seriesValues = _getValuesFromSpectrumGroup(spectrumGroup, thePeakProperty=thePeakProperty)
+        self.setAssignmentValues(_assignmentValues)
+        self.setSeriesValues(_seriesValues)
+        self.build()
 
     def buildFrameDictionary(self, assignmentValues, seriesValues) -> dict:
         """
@@ -255,13 +277,11 @@ class SeriesFrameBC(DataFrameABC):
 ########################################################################################################################
 
 class RelaxationInputFrame(SeriesFrameBC):
-
     SERIESUNITS = sv.SERIES_TIME_UNITS[0]
     SERIESFRAMETYPE = sv.RELAXATION_INPUT_FRAME
 
 
 class RelaxationOutputFrame(SeriesFrameBC):
-
     SERIESFRAMETYPE = sv.RELAXATION_OUTPUT_FRAME
 
 ########################################################################################################################
@@ -269,28 +289,22 @@ class RelaxationOutputFrame(SeriesFrameBC):
 ########################################################################################################################
 
 class CSMInputFrame(SeriesFrameBC):
-
     SERIESUNITS = sv.SERIES_CONCENTRATION_UNITS[0]
     SERIESFRAMETYPE = sv.CSM_INPUT_FRAME
 
-    def buildFromSpectrumGroup(self, spectrumGroup):
-        """ Build the SeriesFrame as needed for this subclass"""
-
-        self.setSeriesSteps(spectrumGroup.series)
-        self.setSeriesUnits(spectrumGroup.seriesUnits)
-        _assignmentValues, _seriesValues = _getValuesFromSpectrumGroup(spectrumGroup, thePeakProperty=sv._PPMPOSITION)
-        self.setAssignmentValues(_assignmentValues)
-        self.setSeriesValues(_seriesValues)
-        self.build()
-
-
 
 class CSMOutputFrame(SeriesFrameBC):
-
     SERIESFRAMETYPE = sv.CSM_OUTPUT_FRAME
+    SERIESUNITS = None
+    SERIESSTEPS = None
+    _assignmentHeaders = sv.CONSTANT_OUTPUT_TABLE_COLUMNS
+    _reservedColumns = [sv.DELTA_DELTA]
 
 
 
+########################################################################################################################
+################################                Library  functions                      ################################
+########################################################################################################################
 
 def _getValuesFromSpectrumGroup(spectrumGroup, thePeakProperty, peakListIndex=-1):
     """
@@ -305,14 +319,14 @@ def _getValuesFromSpectrumGroup(spectrumGroup, thePeakProperty, peakListIndex=-1
     nmrAtoms = _getAssignedNmrAtoms4Spectra(spectra, peakListIndex=peakListIndex)
     for nmrAtom in nmrAtoms:
         ## get the assignmnt Values
-        _assignmentValues.append([nmrAtom.nmrResidue.nmrChain.name, nmrAtom.nmrResidue.sequenceCode,
-                                  nmrAtom.nmrResidue.residueType, nmrAtom.name])
+        nmrRes = nmrAtom.nmrResidue
+        _assignmentValues.append([nmrRes.nmrChain.name, nmrRes.sequenceCode, nmrRes.residueType, nmrAtom.name])
         ## get the series Peak-property values
         spectraValuesDict = nmrAtom._getAssignedPeakValues(spectra, theProperty=thePeakProperty)
         _seriesValues4Atom = []
         for spectrum in spectra:
             values = spectraValuesDict.get(spectrum, [])
-            if values:
+            if values: ## in series should be only 1 or None. If multiple take the mean.
                 _seriesValues4Atom.append(values[0] if len(values) == 1 else np.mean([v for v in values if v]))
             else:
                 _seriesValues4Atom.append(None)

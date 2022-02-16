@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-11 17:19:54 +0000 (Fri, February 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-16 11:02:55 +0000 (Wed, February 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,6 +31,8 @@ from abc import ABC, abstractmethod
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.core.DataTable import DataTable
 from ccpn.core.SpectrumGroup import SpectrumGroup
+from collections import defaultdict
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 
 class SeriesAnalysisABC(ABC):
     """
@@ -40,34 +42,80 @@ class SeriesAnalysisABC(ABC):
     seriesAnalysisName = ''
     fittingModels = OrderedSet()
 
-    @classmethod
-    def inputData(cls):
+    @property
+    def inputDataTables(self, ) -> list:
         """
-        Get the attached input DataTable
+        Get the attached input DataTables
         Lists of DataTables.
         Add decorator to ensure the input dataFrame is of the write type as in the subclass.
         (especially when restoring a project)
         """
-        pass
+        return list(self._inputDataTables)
+
+
+    def addInputDataTable(self, dataTable):
+        """
+        Add a DataTable as inputData
+        """
+        self._inputDataTables.add(dataTable)
+
+
+    def getOutputDataTable(self, seriesFrameType:str=None):
+        """
+        Get the attached Lists of DataTables using SeriesFrame with Output format.
+        """
+        dataTablesByDataType = defaultdict(list)
+        for dataTable in self._outputDataTables:
+            seriesFrame = dataTable.data
+            if dataTable.data:
+                if hasattr(seriesFrame, sv.SERIESFRAMETYPE):
+                    dataTablesByDataType[seriesFrame.SERIESFRAMETYPE].append(dataTable)
+        if seriesFrameType:
+            dataTablesByDataType.get(seriesFrameType)
+        else:
+            return list(dataTablesByDataType.values())
+
+    def _fetchOutputDataTable(self, name=None, seriesFrameType=None, overrideExisting=True):
+        """
+        Interanl. Called after 'fit()' to get a valid Datatable to attach the fitting output SeriesFrame
+        :param seriesFrameType: str,  A filtering serieFrameType.
+        :param overrideExistingOutput: True, to get last available dataTable. False, to create always a new one
+        :return: DataTable
+        """
+        dataTable = None
+        if overrideExisting:
+            dataTables = self.getOutputDataTable(seriesFrameType)
+            if dataTables:
+                dataTable = dataTables[-1]
+        if not dataTable:
+            dataTable = self.project.newDataTable(name)
+        return dataTable
+
+    def addOutputData(self, dataTable):
+        self._outputDataTables.add(dataTable)
+
+    def removeOutputData(self, dataTable):
+        self._outputDataTables.discard(dataTable)
+
 
     @classmethod
-    def outputData(cls):
-        """
-        Get the attached output DataTable
-        Lists of DataTables?
-        """
-        pass
-
-    @classmethod
-    def fit(self, data) -> DataTable:
+    def fit(self, *args, **kwargs):
         """
         ovveride on custom implementation
-        :param data: TableFrame
-        :return: TableFrame
+        :param args:
+        :param kwargs:
+        :return: None
+            kwargs
+            =======================
+            fittingModels:  list of fittingModel classes (not initialised).
+                            So to use only the specif given, rather that all available.
+            overrideOutputDataTables: bool, True to rewrite the output result in the last available dataTable.
+                                    When multiple fittingModels are available, each will output in a different dataTable
+                                    according to its definitions.
 
-        Fit should create always a new output datatable or overwrite existing?
         """
-        return data
+        # TODO add logger system with params used in calculations
+        pass
 
     @classmethod
     def registerFittingModel(cls, fittingModel):
@@ -75,9 +123,6 @@ class SeriesAnalysisABC(ABC):
         A method to register a FittingModel object.
         See the FittingModelABC for more information
         """
-        from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC
-        if not isinstance(fittingModel, FittingModelABC):
-            raise ValueError(f'The provided {fittingModel} is not of instance {FittingModelABC}.')
         cls.fittingModels.add(fittingModel)
 
     @classmethod
@@ -93,13 +138,13 @@ class SeriesAnalysisABC(ABC):
         :param modelName: str
         :return:
         """
-        for fittingModel in self.fittingModels:
-            if fittingModel.ModelName == modelName:
-                return fittingModel
+        dd = {model.ModelName:model for model in self.fittingModels}
+        return dd.get(modelName, None)
+
 
     @staticmethod
     def newDataTableFromSpectrumGroup(spectrumGroup:SpectrumGroup, seriesTableType:str,
-                                      dataTableName:str=None, **kwargs):
+                                      thePeakProperty:str, dataTableName:str=None, **kwargs):
         """
         :param spectrumGroup: object of type SpectrumGroup
         :param seriesTableType: str, One of sv.INPUT_SERIESFRAME_TYPES e.g.: sv.RELAXATION_INPUT_FRAME
@@ -107,7 +152,25 @@ class SeriesAnalysisABC(ABC):
         :param kwargs:
         :return:
         """
-        pass
+        from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import SeriesFrameBC
+        if not isinstance(spectrumGroup, SpectrumGroup):
+            raise TypeError(f'spectrumGroup argument must be a SpectrumGroup Type. Given: {type(spectrumGroup)}')
+
+        project = spectrumGroup.project
+        seriesFrame = SeriesFrameBC()
+        seriesFrame.buildFromSpectrumGroup(spectrumGroup, thePeakProperty)
+        dataTable = project.newDataTable(name=dataTableName, data=seriesFrame)
+        return dataTable
+
+    def _fetchDataTable(self, project, dataTableName):
+        """
+        Move this to project
+        """
+        from ccpn.core.lib.Pid import createPid
+        dataTable = project.getByPid(createPid(DataTable.shortClassName, dataTableName))
+        if not dataTable:
+            dataTable = project.newDataTable(name=dataTableName)
+        return dataTable
 
     @classmethod
     def exportToFile(cls, path, fileType, *args, **kwargs):
@@ -120,6 +183,9 @@ class SeriesAnalysisABC(ABC):
 
         self.application = application
         self.project = self.application.project
+        self._inputDataTables = OrderedSet()
+        self._outputDataTables = OrderedSet()
+
 
 
     def __str__(self):

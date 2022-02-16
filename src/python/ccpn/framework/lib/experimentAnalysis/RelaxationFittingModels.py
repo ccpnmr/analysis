@@ -26,48 +26,30 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 # Start of code
 #=========================================================================================
 
-from typing import List, Union, Sequence
-from abc import ABC, abstractmethod
-from ccpn.util.OrderedSet import OrderedSet
+
 from ccpn.core.DataTable import TableFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC
 import numpy as np
 
-class FittingModelABC(ABC):
-    """
-    The top level class for the FittingModel Object.
-    """
 
-    ModelName = ''      # The Model name.
-    Info = ''           # A brief description of the fitting model.
-    Description = ''    # A simplified representation of the used equation(s).
-    References = ''     # A list of journal article references. E.g.: DOIs or title/authors/year/journal; web-pages.
 
-    @abstractmethod
+
+class T1FittingModel(FittingModelABC):
+    """
+    T1 model class containing fitting equations
+    """
+    ModelName = 'T1'
+
     def fit(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
-        """
-        :param inputData: a TableFrame containing all necessary data for the fitting calculations
-        :return: an output TableFrame with fitted data
-        """
         pass
 
-    def __init__(self):
-        pass
-
-    def __str__(self):
-        return f'<{self.__class__.__name__}: {self.ModelName}>'
-
-    __repr__ = __str__
 
 
-def _registerModels(cls, fittingModels):
-    """
-    INTERNAL
-    Register the FittingModel class (not-initialised) in the respective Experiment Analysis BaseClass
-    :param cls: Experiment Analysis BaseClass e.g.: ChemicalShiftMappingAnalysisBC
-    :param fittingModels: list of FittingModels to add to the cls
-    :return: None
-    """
-    for model in fittingModels:
-        cls.registerFittingModel(model)
 
+
+def _registerChemicalShiftMappingModels():
+    from ccpn.framework.lib.experimentAnalysis.RelaxationAnalysisBC import RelaxationAnalysisBC
+    models = [T1FittingModel]
+    for model in models:
+        RelaxationAnalysisBC.registerFittingModel(model)

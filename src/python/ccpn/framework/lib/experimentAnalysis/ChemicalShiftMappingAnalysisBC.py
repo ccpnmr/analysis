@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-11 17:19:54 +0000 (Fri, February 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-16 11:02:55 +0000 (Wed, February 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,24 +26,30 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 # Start of code
 #=========================================================================================
 
-
-from abc import ABC
+from collections import OrderedDict
+from ccpn.util.Logging import getLogger
+from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-from ccpn.core.SpectrumGroup import SpectrumGroup
-
-
+from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import _registerChemicalShiftMappingModels
 
 class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
     """
     Chemical Shift Mapping Analysis Non-Gui module.
-
+    # needed settings:
     """
-    seriesName = sv.ChemicalShiftMappingAnalysis
+    seriesAnalysisName = sv.ChemicalShiftMappingAnalysis
+    _AlphaFactors = sv.DEFAULT_ALPHA_FACTORS
 
+    def __init__(self, application):
+        super().__init__(application)
+
+        # Register the available Fitting Models
+        _registerChemicalShiftMappingModels()
 
     @staticmethod
     def newDataTableFromSpectrumGroup(spectrumGroup, seriesTableType=sv.CSM_INPUT_FRAME,
+                                      thePeakProperty=sv._PPMPOSITION,
                                       dataTableName=sv.CSM_INPUT_FRAME, **kwargs):
         """
         :param spectrumGroup: object of type SpectrumGroup
@@ -53,14 +59,58 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         :return:
         """
         from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import CSMInputFrame
-
-        # raise NotImplementedError('Under implementation. Do not use yet!')
-        if not isinstance(spectrumGroup, SpectrumGroup):
-            raise TypeError(f'spectrumGroup argument must be a SpectrumGroup Type. Given: {type(spectrumGroup)}')
         project = spectrumGroup.project
+        # TODO create series table by Type arg
         seriesFrame = CSMInputFrame()
-        seriesFrame.buildFromSpectrumGroup(spectrumGroup)
+        seriesFrame.buildFromSpectrumGroup(spectrumGroup, thePeakProperty=thePeakProperty)
         dataTable = project.newDataTable(name=dataTableName, data=seriesFrame)
+        return dataTable
+
+
+    def getAlphaFactor(self, atomName):
+        """Get the Alpha Factor for the DeltaDeltas calculation """
+        return self._AlphaFactors.get(atomName, None)
+
+    def setAlphaFactor(self, **kwargs):
+        """Set the Alpha Factor for the DeltaDeltas calculation.
+            E.g.: setAlphaFactor(H=1, N=0.14) or setAlphaFactor(**{'H':1, 'N':0.14})
+            Factors are values between 0.1-1
+        """
+        dd = kwargs.copy()
+        for k,v in kwargs.items():
+            if v > 1:
+                getLogger().warning(f'ChemicalShiftMapping. Setting an unusual AlphaFactor value:{v} for the Atom:{k}.')
+            if v == 0:
+                getLogger().warning(f'ChemicalShiftMapping. Cannot set the AlphaFactor value:{v} for the Atom:{k}.')
+                dd.pop(k)
+        self._AlphaFactors.update(dd)
+
+
+    def fit(self, *args, **kwargs):
+
+        if not self.inputDataTables:
+            raise RuntimeError('CSM. Cannot run any fitting models. Add a valid inputData first')
+
+        fittingModels = self.fittingModels or kwargs.get(sv.FITTING_MODELS, [])
+        ov = kwargs.get(sv.OVERRIDE_OUTPUT_DATATABLE, True)
+        for model in fittingModels:
+            fittingModel = model()
+            inputDataTable = self.inputDataTables[-1]
+            outputFrame = fittingModel.fit(inputDataTable.data)
+            outputName = f'{inputDataTable.name}_output_{fittingModel.ModelName}'
+            dataTable = self._fetchOutputDataTable(name=outputName, seriesFrameType=sv.CSM_OUTPUT_FRAME, overrideExisting=ov)
+            dataTable.data = outputFrame
+            self.addOutputData(dataTable)
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-17 14:01:01 +0000 (Thu, February 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-17 17:26:56 +0000 (Thu, February 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -848,31 +848,49 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
         """
         contextMenu = Menu('', self, isFloatWidget=True)
 
+        selection = self.selectionModel().selectedIndexes()
+        newItms = [self.itemFromIndex(itm) for itm in selection]
+        items = [itm.data(1, 0) for itm in newItms if itm.data(1, 0)]
+
         _itemPressed = self.itemAt(event.pos())
-        if _itemPressed.childCount() != 0 and len(self.selectedItems()) == 1:
-            contextMenu.addItem("Autorename All Conflicts in Group", callback=partial(self._autoRenameAllConflicts, _itemPressed), enabled=True)
+        if len(items) > 1:
+            contextMenu.addItem("Autorename All Conflicts in Selection", callback=self._autoRenameAllConflicts, enabled=True)
             contextMenu.addSeparator()
-            contextMenu.addItem("Autorename All in Group", callback=partial(self._autoRenameAll, _itemPressed))
-            contextMenu.addItem("Autorename Checked in Group", callback=partial(self._autoRenameSelected, _itemPressed))
+            contextMenu.addItem("Autorename All in Selection", callback=self._autoRenameAll)
+            contextMenu.addItem("Autorename Checked in Selection", callback=self._autoRenameSelected)
             contextMenu.addSeparator()
-        elif _itemPressed.childCount() == 0 and len(self.selectedItems()) == 1:
-            contextMenu.addItem("Autorename", callback=partial(self._autoRenameSingle, _itemPressed), enabled=True)
+        elif len(items) == 1:
+            contextMenu.addItem("Autorename", callback=self._autoRenameSingle, enabled=True)
             contextMenu.addSeparator()
 
-        contextMenu.addItem("Check All Conflicts in Selection", callback=partial(self._checkSelected, True, conflictsOnly=True), enabled=True)
-        contextMenu.addItem("Uncheck All Conflicts in Selection", callback=partial(self._checkSelected, False, conflictsOnly=True), enabled=True)
-        contextMenu.addSeparator()
-        contextMenu.addItem("Check Selected", callback=partial(self._checkSelected, True))
-        contextMenu.addItem("Uncheck Selected", callback=partial(self._checkSelected, False))
+        if len(items) > 1:
+            contextMenu.addItem("Check All Conflicts in Selection", callback=partial(self._checkSelected, True, conflictsOnly=True), enabled=True)
+            contextMenu.addItem("Uncheck All Conflicts in Selection", callback=partial(self._checkSelected, False, conflictsOnly=True), enabled=True)
+            contextMenu.addSeparator()
+            contextMenu.addItem("Check Selected", callback=partial(self._checkSelected, True))
+            contextMenu.addItem("Uncheck Selected", callback=partial(self._checkSelected, False))
 
         return contextMenu
+
+    def _getSelectedItems(self, checked=None):
+        """Get the selectedItems
+        """
+        selection = self.selectionModel().selectedIndexes()
+        newItms = [self.itemFromIndex(itm) for itm in selection]
+        if checked is None:
+            items = [itm.data(1, 0) for itm in newItms if itm.data(1, 0)]
+        else:
+            items = [itm.data(1, 0) for itm in newItms if itm.data(1, 0) and
+                     itm.checkState(0) == (QtCore.Qt.Checked if checked else QtCore.Qt.Unchecked)]
+
+        return items
 
     def _autoRename(self, groupItems, conflictsOnly=False):
         """Call the rename action on the child nodes
         """
         if RENAMEACTION in self._actionCallbacks:
             for childItem in groupItems:
-                name, saveFrame, treeParent = childItem
+                name, saveFrame, treeParent, _, _ = childItem
                 conflictCheck = True
                 if conflictsOnly and BADITEMACTION in self._actionCallbacks:
                     conflictCheck = self._actionCallbacks[BADITEMACTION](name, saveFrame, treeParent)
@@ -880,61 +898,45 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
                 if conflictCheck:
                     self._actionCallbacks[RENAMEACTION](name, saveFrame, treeParent)
 
-    def _autoRenameSingle(self, treeItem):
+    def _autoRenameSingle(self):
         """Tree item autorename all conflicts in subtree
         """
-        children = []
-        for child in (treeItem,):
-            if child.data(1, 0):
-                itemName, saveFrame, parentGroup, _, _ = child.data(1, 0)
-                children.append((itemName, saveFrame, parentGroup))
-
+        children = self._getSelectedItems()
         self._autoRename(children)
 
-    def _autoRenameAllConflicts(self, treeItem):
+    def _autoRenameAllConflicts(self):
         """Tree item autorename all conflicts in subtree
         """
-        children = []
-        for child in self.traverseTree(treeItem):
-            if child.data(1, 0):
-                itemName, saveFrame, parentGroup, _, _ = child.data(1, 0)
-                children.append((itemName, saveFrame, parentGroup))
-
+        children = self._getSelectedItems()
         self._autoRename(children, conflictsOnly=True)
 
-    def _autoRenameAll(self, treeItem):
+    def _autoRenameAll(self):
         """Tree item autorename all in subtree
         """
-        children = []
-        for child in self.traverseTree(treeItem):
-            if child.data(1, 0):
-                itemName, saveFrame, parentGroup, _, _ = child.data(1, 0)
-                children.append((itemName, saveFrame, parentGroup))
-
+        children = self._getSelectedItems()
         self._autoRename(children)
 
-    def _autoRenameSelected(self, treeItem):
+    def _autoRenameSelected(self):
         """Tree item autorename selected in subtree
         """
-        children = []
-        for child in self.traverseTree(treeItem):
-            if child.data(1, 0) and child.checkState(0) == QtCore.Qt.Checked:
-                itemName, saveFrame, parentGroup, _, _ = child.data(1, 0)
-                children.append((itemName, saveFrame, parentGroup))
+        children = self._getSelectedItems(checked=True)
         self._autoRename(children)
 
     def _checkSelected(self, checked, conflictsOnly=False):
         """Tree item check/uncheck selected
         """
-        for item in self.selectedItems():
+        children = self._getSelectedItems()
+
+        # for item in self.selectedItems():
+        for _data in children:
             conflictCheck = True
-            if item.data(1, 0) and conflictsOnly and BADITEMACTION in self._actionCallbacks:
-                itemName, saveFrame, parentGroup, _, _ = item.data(1, 0)
-                # itemName, saveFrame, parentGroup = item.data(0, 0), item.data(1, 0), item.parent().data(0, 0) if item.parent() else repr(None)
+            itemName, saveFrame, parentGroup, _, _ = _data
+            if conflictsOnly and BADITEMACTION in self._actionCallbacks:
                 conflictCheck = self._actionCallbacks[BADITEMACTION](itemName, saveFrame, parentGroup)
 
             if conflictCheck:
-                item.setCheckState(0, QtCore.Qt.Checked if checked else QtCore.Qt.Unchecked)
+                if (item := self.findSection(itemName, parentGroup)):
+                    item.setCheckState(0, QtCore.Qt.Checked if checked else QtCore.Qt.Unchecked)
 
     def _selectChildren(self, item, state=True):
         # select the children

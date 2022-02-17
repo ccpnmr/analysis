@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-17 14:01:01 +0000 (Thu, February 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-17 17:26:56 +0000 (Thu, February 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -40,7 +40,6 @@ from dataclasses import dataclass
 from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ImportTreeCheckBoxes, RENAMEACTION, BADITEMACTION
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.Frame import Frame
-# from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Icon import Icon
@@ -51,7 +50,6 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.SpeechBalloon import SpeechBalloon
 from ccpn.ui.gui.lib.Validators import LineEditValidator
 from ccpn.framework.lib.ccpnNef import CcpnNefIo
@@ -69,7 +67,7 @@ from ccpn.util.AttrDict import AttrDict
 from ccpn.util.OrderedSet import OrderedSet
 
 from ccpn.ui.gui.widgets.Font import getFontHeight, setWidgetFont, TABLEFONT
-from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS, TOOLTIP_BACKGROUND
+from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS, TOOLTIP_BACKGROUND, GUITABLE_ITEM_FOREGROUND
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
 
@@ -140,6 +138,176 @@ class _TreeValues:
     newVal = None
 
 
+class PandasDataFrameTableView(QtWidgets.QTableView):
+    styleSheet = """
+                    QTableView {
+                        background-color: %(GUITABLE_BACKGROUND)s;
+                        alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
+                        border: 1px solid %(BORDER_NOFOCUS)s;
+                        border-radius: 2px;
+                    }
+
+                    QTableView::item {
+                        padding: 2px;
+                    }
+
+                    QTableView::item:selected {
+                        background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
+                    }
+                """
+
+    # overrides QtCore.Qt.ForegroundRole
+    # QTableView::item - color: %(GUITABLE_ITEM_FOREGROUND)s;
+    # QTableView::item:selected - color: %(GUITABLE_SELECTED_FOREGROUND)s;
+
+    def __init__(self, *args, **kwds):
+        super().__init__(*args, **kwds)
+
+        # set stylesheet
+        self.colours = getColours()
+        self._defaultStyleSheet = self.styleSheet % self.colours
+        self.setStyleSheet(self._defaultStyleSheet)
+        self.setAlternatingRowColors(True)
+
+        # set the preferred scrolling behaviour
+        self.setHorizontalScrollMode(self.ScrollPerPixel)
+        self.setVerticalScrollMode(self.ScrollPerPixel)
+        self.setSelectionBehavior(self.SelectRows)
+
+        # enable sorting and sort on the first column
+        self.setSortingEnabled(True)
+        self.sortByColumn(0, QtCore.Qt.AscendingOrder)
+
+        # the resizeColumnsToContents is REALLY slow :|
+        _header = self.horizontalHeader()
+        # set Interactive and last column to expanding
+        _header.setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
+        _header.setStretchLastSection(True)
+        # only look at visible section
+        _header.setResizeContentsPrecision(5)
+        _header.setDefaultAlignment(QtCore.Qt.AlignLeft)
+        _header.setMinimumSectionSize(16)
+        _header.setHighlightSections(self.font().bold())
+        setWidgetFont(self, name=TABLEFONT)
+        setWidgetFont(_header, name=TABLEFONT)
+        setWidgetFont(self.verticalHeader(), name=TABLEFONT)
+
+        _header = self.verticalHeader()
+        # set Interactive and last column to expanding
+        _header.setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
+        _header.setStretchLastSection(False)
+        # only look at visible section
+        _header.setResizeContentsPrecision(5)
+        _header.setDefaultAlignment(QtCore.Qt.AlignLeft)
+        _header.setMinimumSectionSize(16)
+        _header.setVisible(True)
+        _header.setFixedWidth(10)  # gives enough of a handle to resize
+
+        _header.setHighlightSections(self.font().bold())
+        setWidgetFont(self, name=TABLEFONT)
+        setWidgetFont(_header, name=TABLEFONT)
+        setWidgetFont(self.verticalHeader(), name=TABLEFONT)
+
+        _height = getFontHeight(name=TABLEFONT, size='MEDIUM')
+        self.setMinimumSize(3 * _height, 3 * _height + self.horizontalScrollBar().height())
+
+
+class PandasDataFrameModel(QtCore.QAbstractTableModel):
+    """A simple table model to view pandas DataFrames
+    """
+    _defaultForegroundColour = QtGui.QColor(getColours()[GUITABLE_ITEM_FOREGROUND])
+
+    def __init__(self, data):
+        """Initialise the pandas model
+        Allocates space for foreground/background colours
+
+        :param data: pandas DataFrame
+        """
+        if not isinstance(data, pd.DataFrame):
+            raise ValueError('data must be of type pd.DataFrame')
+
+        QtCore.QAbstractTableModel.__init__(self)
+        self._data = data
+        # create numpy arrays to match the data that will hold background colour
+        self._colour = np.zeros(self._data.shape, dtype=np.object)
+
+    def rowCount(self, parent=None):
+        """Return the row count for the dataFrame
+        """
+        return self._data.shape[0]
+
+    def columnCount(self, parent=None):
+        """Return the column count for the dataFrame
+        """
+        return self._data.shape[1]
+
+    def data(self, index, role=QtCore.Qt.DisplayRole):
+        """Process the data callback for the model
+        """
+        if index.isValid():
+            if role == QtCore.Qt.DisplayRole:
+                return str(self._data.iat[index.row(), index.column()])
+
+            if role == QtCore.Qt.BackgroundRole:
+                if (_col := self._colour[index.row(), index.column()]):
+                    # get the colour from the dict
+                    return _col.get(role)
+
+            if role == QtCore.Qt.ForegroundRole:
+                if (_col := self._colour[index.row(), index.column()]):
+                    # get the colour from the dict
+                    if (_foreground := _col.get(role)):
+                        return _foreground
+
+                # return the default foreground colour
+                return self._defaultForegroundColour
+
+        return None
+
+    def headerData(self, col, orientation, role=None):
+        """Return the column headers
+        """
+        if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
+            return self._data.columns[col]
+        return None
+
+    def setForeground(self, row, column, colour):
+        """Set the foreground colour for cell at position (row, column).
+
+        :param row: row as integer
+        :param column: column as integer
+        :param colour: colour compatible with QtGui.QColor
+        :return:
+        """
+        if not (0 <= row < self.rowCount() and 0 <= column < self.columnCount()):
+            raise ValueError(f'({row}, {column}) must be less than ({self.rowCount()}, {self.columnCount()})')
+
+        if not (_cols := self._colour[row, column]):
+            _cols = self._colour[row, column] = {}
+        if colour:
+            _cols[QtCore.Qt.ForegroundRole] = QtGui.QColor(colour)
+        else:
+            _cols.pop(QtCore.Qt.ForegroundRole, None)
+
+    def setBackground(self, row, column, colour):
+        """Set the background colour for cell at position (row, column).
+
+        :param row: row as integer
+        :param column: column as integer
+        :param colour: colour compatible with QtGui.QColor
+        :return:
+        """
+        if not (0 <= row < self.rowCount() and 0 <= column < self.columnCount()):
+            raise ValueError(f'({row}, {column}) must be less than ({self.rowCount()}, {self.columnCount()})')
+
+        if not (_cols := self._colour[row, column]):
+            _cols = self._colour[row, column] = {}
+        if colour:
+            _cols[QtCore.Qt.BackgroundRole] = QtGui.QColor(colour)
+        else:
+            _cols.pop(QtCore.Qt.BackgroundRole, None)
+
+
 class NefDictFrame(Frame):
     """
     Class to handle a nef dictionary editor
@@ -185,7 +353,7 @@ class NefDictFrame(Frame):
         self._enableMouseMenu = enableMouseMenu
         self._pathName = pathName
         self._collections = {}
-        self._collectionsTable = None  # self.FastTableView(self)
+        self._collectionsTable = None  # PandasDataFrameTableView(self)
         # self._collectionsTable.setVisible(False)
 
         # self._nefImporterClass = nefImporterClass
@@ -315,27 +483,13 @@ class NefDictFrame(Frame):
         self._paneSplitter.addWidget(self._treeSplitter)
         self._paneSplitter.addWidget(self._infoFrame)
         self._paneSplitter.setChildrenCollapsible(False)
-        # self._paneSplitter.setStretchFactor(0, 1)
-        # self._paneSplitter.setStretchFactor(1, 2)
-        # # self._paneSplitter.setStyleSheet("QSplitter::handle { background-color: gray }")
-        # self._paneSplitter.setSizes([10000, 15000])
 
         self._treeSplitter.addWidget(self._treeFrame)
-        # self._treeSplitter.addWidget(self._infoFrame)
         self._treeSplitter.setChildrenCollapsible(False)
         self._treeSplitter.setStretchFactor(0, 1)
         self._treeSplitter.setStretchFactor(1, 2)
         # self._treeSplitter.setStyleSheet("QSplitter::handle { background-color: gray }")
         self._treeSplitter.setSizes([10000, 15000])
-
-        # # treeFrame (left frame)
-        # self._treeOptionsFrame = Frame(self._treeFrame, setLayout=True, showBorder=False, grid=(0, 0))
-        # self.buttonCCPN = CheckBox(self._treeOptionsFrame, checked=True,
-        #                            text='include CCPN tags',
-        #                            grid=(0, 0), hAlign='l')
-        # self.buttonExpand = CheckBox(self._treeOptionsFrame, checked=False,
-        #                              text='expand selection',
-        #                              grid=(1, 0), hAlign='l')
 
         self.nefTreeView = ImportTreeCheckBoxes(self._treeFrame, project=self.project, grid=(1, 0),
                                                 includeProject=True, enableCheckBoxes=self._enableCheckBoxes,
@@ -366,13 +520,6 @@ class NefDictFrame(Frame):
                                                                _name=f'New {COLLECTION}s',
                                                                ignoreFrame=True)
         self._frameOptionsNested.getLayout().addWidget(_frame, 0, 0)
-
-        # self.tablesFrame = Frame(self._infoFrame, setLayout=True, showBorder=False, grid=(0, 0))
-        # self._frameOptionsNested = Frame(self._infoFrame, setLayout=True, showBorder=False, grid=(1, 0))
-        # self.frameOptionsFrame = Frame(self._frameOptionsNested, setLayout=True, showBorder=False, grid=(1, 0))
-        # self.fileFrame = Frame(self._infoFrame, setLayout=True, showBorder=False, grid=(2, 0))
-        # self._filterLogFrame = MoreLessFrame(self._infoFrame, name='Filter Log', showMore=False, grid=(3, 0), gridSpan=(1, 1))
-        # self._treeSplitter.addWidget(self._filterLogFrame)
 
         _row = 0
         self.logData = TextEditor(self._filterLogFrame.contentsFrame, grid=(_row, 0), gridSpan=(1, 3), addWordWrap=True)
@@ -1056,31 +1203,13 @@ class NefDictFrame(Frame):
 
     def _makeStructureDataPulldown(self, item, plural, row, saveFrame, attribName):
 
-        Label(self.frameOptionsFrame, text=STRUCTUREDATA, grid=(row, 0))
-
-        # # extract the ccpn_parameter_name
-        # _att = str(saveFrame.get(attribName) or '')
-        #
-        # sData = self.project.structureData
-        # sdIds = OrderedSet([''] + [sd.id for sd in sData])
-        # sdIds.add(_att)
-        #
-        # # search through the saveframes for occurrences of DATANAME
-        # _sfNames = self._nefLoader.getSaveFrameNames()
-        # for sf in _sfNames:
-        #     sFrame = self._nefLoader.getSaveFrame(sf)
-        #     if sFrame and sFrame._nefFrame:
-        #         _id = sFrame._nefFrame.get(DATANAME)
-        #         sdIds.add(_id)
-
-        structurePulldown = self._newPulldown(self.frameOptionsFrame, name=STRUCTUREDATA,
-                                          # index=list(sdIds).index(_att) if _att in sdIds else 0,
-                                          # texts=list(sdIds),
-                                          grid=(row, 1), gridSpan=(1, 2), allowEmpty=False)
-
         if not (_data := item.data(1, 0)):
             return
         _itmName, _, _itmParentName, _, _ = _data
+        Label(self.frameOptionsFrame, text=STRUCTUREDATA, grid=(row, 0))
+
+        structurePulldown = self._newPulldown(self.frameOptionsFrame, name=STRUCTUREDATA,
+                                              grid=(row, 1), gridSpan=(1, 2), allowEmpty=False)
 
         callbackSelect = partial(self._selectStructureDataId, item=item, itemName=_itmName, itemParentName=_itmParentName, parentName=plural,
                                  pulldownList=structurePulldown, saveFrame=saveFrame)
@@ -1090,35 +1219,16 @@ class NefDictFrame(Frame):
 
     def _makeCollectionPulldown(self, values):
 
-        Label(self.frameOptionsFrame, text=COLLECTION, grid=(values.row, 0))
-        # extract the ccpn_parameter_name
-        # _att = str(values.saveFrame.get(COLLECTION_ATTRIB) or '')
-
         if not (_data := values.item.data(1, 0)):
             return
         _itmName, _, _itmParentName, _, _ = _data
-
-        # colData = self.project.collections
-        # colNames = OrderedSet([''] + [co.name for co in colData])
-        #
-        # # read the collections not defined in the project
-        # for col in self._collections.keys():
-        #     colNames.add(col)
-        #     self._collections.setdefault(col, [])
-        #
+        Label(self.frameOptionsFrame, text=COLLECTION, grid=(values.row, 0))
 
         # map the className to a pid for the collection
         _itmPid = Pid._join(values.ccpnClassName, _itmName) if values.ccpnClassName else _itmName
         values.itemPid = _itmPid
 
-        # _indexing = set()
-        # for k, v in self._collections.items():
-        #     if _itmPid in v:
-        #         _indexing.add(list(colNames).index(k))
-
         collectionPulldown = self._newPulldown(self.frameOptionsFrame,
-                                               # index=list(_indexing)[0] if len(_indexing) == 1 else 0,
-                                               # texts=list(colNames),
                                                grid=(values.row, 1), gridSpan=(1, 2))
 
         callbackSelect = partial(self._selectCollectionId, values=values, pulldownList=collectionPulldown, saveFrame=values.saveFrame)
@@ -1126,59 +1236,14 @@ class NefDictFrame(Frame):
 
         self._populateCollectionStructurePulldown([_data], collectionPulldown)
 
-    class CollectionsListWidget(ListWidget):
-
-        def __init__(self, parent, addToCollectionsFunc=None, *args, **kwds):
-            super().__init__(parent, *args, **kwds)
-
-            self._addToCollectionsFunc = addToCollectionsFunc
-
-        def getContextMenu(self):
-            from ccpn.ui.gui.widgets.Menu import Menu
-
-            contextMenu = Menu('', self, isFloatWidget=True)
-            self._addToCollectionsFunc(contextMenu, selectionWidget=self)
-
-            return contextMenu
-
-        def setItems(self, items: dict):
-            self.clear()
-            self.cleared.emit()
-
-            self.objects = {id(obj): obj for obj in items.values()}
-            for txt, obj in items.items():
-                item = QtWidgets.QListWidgetItem(str(txt))
-                item.setData(QtCore.Qt.UserRole, id(obj))
-                self.addItem(item)
-
-
     def _makeCollectionParentPulldown(self, values):
-
-        # print(f'    CALL _makeCollectionParentPulldown')
-
-        # frame = MoreLessFrame(self.frameOptionsFrame, name=values.parentItemName, showMore=True, grid=(values.row, 0), gridSpan=(1, 3))
-        values.row += 1
-
-        # _count = values.parentItem.childCount()
-        # _children = []
-        # for i in range(_count):
-        #     itm = values.parentItem.child(i)
-        #     _children.append(itm.data(1, 0))
-
-        # itemListWidget = self.CollectionsListWidget(frame.contentsFrame, addToCollectionsFunc=self._addToCollectionsMenu,
-        #                                             grid=(1, 0), gridSpan=(5, 1))
-        # itemListWidget.setItems({ch[0]: ch for ch in _children})
 
         Label(self.frameOptionsFrame, text=COLLECTION_ATTRIB, grid=(values.row, 0))
         collectionPulldown = self._newPulldown(self.frameOptionsFrame,
                                                grid=(values.row, 1), gridSpan=(1, 2))
 
-        # callbackSelect = partial(self._selectCollectionParentId, values=values, pulldownList=collectionPulldown, parent=itemListWidget)
         callbackSelect = partial(self._selectCollectionParentId, values=values, pulldownList=collectionPulldown, parent=self.nefTreeView)
         collectionPulldown.activated.connect(callbackSelect)
-
-        # itemListWidget.itemSelectionChanged.connect(partial(self._itemListWidgetCallback, values=values,
-        #                                                     parent=itemListWidget, collectionPulldown=collectionPulldown))
 
         _children = self._getSelectedChildren(self.nefTreeView)
         self._populateCollectionStructurePulldown(_children, collectionPulldown)
@@ -1187,42 +1252,11 @@ class NefDictFrame(Frame):
 
     @staticmethod
     def _getSelectedChildren(parent):
-        # get the selection from the widget
-        # _selection = parent.getSelectedTexts()
-        # _count = values.parentItem.childCount()
-        # _children = []
-        # for i in range(_count):
-        #     itm = values.parentItem.child(i)
-        #     itemName = itm.data(0, 0)
-        #     if itemName in _selection:
-        #         _, saveFrame, _, _, _ = itm.data(1, 0)
-        #         _children.append((itm, itemName, saveFrame))
-        # return _children, _selection
-
         selection = parent.selectionModel().selectedIndexes()
         newItms = [parent.itemFromIndex(itm) for itm in selection]
         values = [itm.data(1, 0) for itm in newItms if itm.data(1, 0)]
 
         return values
-
-    # def _itemListWidgetCallback(self, values=None, parent=None, collectionPulldown=None):
-    #     """Handle user selection of items in the parent group listWidget
-    #     This is children in each bottom branch of the tree
-    #     Populates collection widget
-    #     """
-    #     _children, _selection = self._getSelectedChildren(parent, values)
-    #
-    #     self._populateCollectionPulldown(_children, _selection, collectionPulldown, values)
-    #
-    # def _itemListWidgetStructureCallback(self, values=None, parent=None, collectionPulldown=None, structurePulldown=None):
-    #     """Handle user selection of items in the parent group listWidget
-    #     This is children in each bottom branch of the tree
-    #     Populates collection and structureData widgets
-    #     """
-    #     _children, _selection = self._getSelectedChildren(parent, values)
-    #
-    #     self._populateCollectionStructurePulldown(_children, _selection, collectionPulldown, values)
-    #     self._populateStructureDataPulldown(_children, _selection, structurePulldown, values)
 
     def _populateCollectionPulldown(self, _children, collectionPulldown):
 
@@ -1314,29 +1348,11 @@ class NefDictFrame(Frame):
 
     def _makeCollectionParentStructureDataPulldown(self, values):
 
-        # print(f'    CALL _makeCollectionParentStructureDataPulldown')
-
-        # frame = MoreLessFrame(self.frameOptionsFrame, name=values.parentItemName, showMore=True, grid=(values.row, 0), gridSpan=(1, 3))
-        # values.row += 1
-        #
-        # _count = values.parentItem.childCount()
-        # _children = []
-        # for i in range(_count):
-        #     itm = values.parentItem.child(i)
-        #     _children.append(itm.data(1, 0))
-
-        # itemListWidget = self.CollectionsListWidget(frame.contentsFrame, addToCollectionsFunc=self._addToCollectionsMenu,
-        #                                             grid=(1, 0), gridSpan=(5, 1))
-        # itemListWidget.setItems({ch[0]: ch for ch in _children})
-
-        #~~~~~~~~~~~~~~~~~
-
         Label(self.frameOptionsFrame, text=STRUCTUREDATA, grid=(values.row, 0))
         structurePulldown = self._newPulldown(self.frameOptionsFrame, name=STRUCTUREDATA,
                                               grid=(values.row, 1), gridSpan=(1, 2), allowEmpty=False)
 
         values.row += 1
-        # callbackSelect = partial(self._selectStructureDataParentId, values=values, pulldownList=structurePulldown, parent=itemListWidget)
         callbackSelect = partial(self._selectStructureDataParentId, values=values, pulldownList=structurePulldown, parent=self.nefTreeView)
         structurePulldown.activated.connect(callbackSelect)
 
@@ -1346,12 +1362,8 @@ class NefDictFrame(Frame):
         collectionPulldown = self._newPulldown(self.frameOptionsFrame,
                                                grid=(values.row, 1), gridSpan=(1, 2))
 
-        # callbackSelect = partial(self._selectCollectionParentStructureId, values=values, pulldownList=collectionPulldown, parent=itemListWidget)
         callbackSelect = partial(self._selectCollectionParentStructureId, values=values, pulldownList=collectionPulldown, parent=self.nefTreeView)
         collectionPulldown.activated.connect(callbackSelect)
-
-        # itemListWidget.itemSelectionChanged.connect(partial(self._itemListWidgetStructureCallback, values=values, parent=itemListWidget,
-        #                                                     collectionPulldown=collectionPulldown, structurePulldown=structurePulldown))
 
         _children = self._getSelectedChildren(self.nefTreeView)
         self._populateStructureDataPulldown(_children, structurePulldown)
@@ -1544,7 +1556,6 @@ class NefDictFrame(Frame):
                                pulldownList=None, saveFrame=None, autoRename=False):
         """Handle clicking rename structureData button
         """
-        # print(f'   CALL   _selectStructureDataId')
 
         with self._editSaveFramePulldown(itemName, itemParentName, parentName, pulldownList, saveFrame, autoRename, DATANAME) as _edit:
             # reads a non-empty string for a value
@@ -1574,7 +1585,6 @@ class NefDictFrame(Frame):
     def _selectStructureDataParentId(self, values=None, pulldownList=None, parent=None):
         """Handle clicking rename structureData button
         """
-        # print(f'   CALL    _selectStructureDataParentId')
 
         if not (pulldownList and pulldownList.hasFocus()):
             return
@@ -1583,46 +1593,32 @@ class NefDictFrame(Frame):
         if not newName:
             return
 
-        # # get the selection from the listWidget
-        # _selection = parent.getSelectedTexts()
-        # _count = values.parentItem.childCount()
-        # _children = []
-        # for i in range(_count):
-        #     itm = values.parentItem.child(i)
-        #     itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName = itm.data(1, 0)
-        #     if itmName in _selection and saveFrame:
-        #         _children.append((itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName))
+        _children = self._getSelectedChildren(parent)
+        for (itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName) in _children:
+            _oldName = saveFrame.get(DATANAME)
+            if DATANAME in saveFrame:
+                saveFrame[DATANAME] = newName
 
-        selection = parent.selectionModel().selectedIndexes()
-        if (newItms := [parent.itemFromIndex(itm) for itm in selection]):
-            if (_children := [itm.data(1, 0) for itm in newItms if itm.data(1, 0)]):
+                # TODO:ED - check this
 
-                for (itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName) in _children:
-                    _oldName = saveFrame.get(DATANAME)
-                    if DATANAME in saveFrame:
-                        saveFrame[DATANAME] = newName
+                # if saveFrame.get('sf_category') in ['ccpn_parameter', ]:
+                #     if _edit.itemName and _oldName and _edit.itemName.startswith(_oldName):
+                #         _edit.itemName = _edit.newVal + _edit.itemName[len(_oldName):]
 
-                        # TODO:ED - check this
+                for k, v in self._collections.items():
+                    if v:
+                        ll = []
+                        for val in v:
+                            ll.append(val.replace(':' + _oldName + '.', ':' + newName + '.'))
+                        self._collections[k] = ll
 
-                        # if saveFrame.get('sf_category') in ['ccpn_parameter', ]:
-                        #     if _edit.itemName and _oldName and _edit.itemName.startswith(_oldName):
-                        #         _edit.itemName = _edit.newVal + _edit.itemName[len(_oldName):]
+            self._setCheckedItem(itmName, parentGroup)
 
-                        for k, v in self._collections.items():
-                            if v:
-                                ll = []
-                                for val in v:
-                                    ll.append(val.replace(':' + _oldName + '.', ':' + newName + '.'))
-                                self._collections[k] = ll
-
-                    self._setCheckedItem(itmName, parentGroup)
-
-                self._updateCollectionsTable()
+        self._updateCollectionsTable()
 
     def _selectStructureDataGroup(self, values=None, pulldownList=None, parent=None):
         """Handle clicking rename structureData button
         """
-        # print(f'   CALL    _selectStructureDataGroup')
 
         if not (pulldownList and pulldownList.hasFocus()):
             return
@@ -1631,41 +1627,28 @@ class NefDictFrame(Frame):
         if not newName:
             return
 
-        # # get the selection from the listWidget
-        # _selection = parent.getSelectedTexts()
-        # _count = values.parentItem.childCount()
-        # _children = []
-        # for i in range(_count):
-        #     itm = values.parentItem.child(i)
-        #     itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName = itm.data(1, 0)
-        #     if itmName in _selection and saveFrame:
-        #         _children.append((itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName))
+        _children = self._getSelectedChildren(parent)
+        for (itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName) in _children:
+            _oldName = saveFrame.get(DATANAME)
+            if DATANAME in saveFrame:
+                saveFrame[DATANAME] = newName
 
-        selection = parent.selectionModel().selectedIndexes()
-        if (newItms := [parent.itemFromIndex(itm) for itm in selection]):
-            if (_children := [itm.data(1, 0) for itm in newItms if itm.data(1, 0)]):
+                # TODO:ED - check this
 
-                for (itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName) in _children:
-                    _oldName = saveFrame.get(DATANAME)
-                    if DATANAME in saveFrame:
-                        saveFrame[DATANAME] = newName
+                # if saveFrame.get('sf_category') in ['ccpn_parameter', ]:
+                #     if _edit.itemName and _oldName and _edit.itemName.startswith(_oldName):
+                #         _edit.itemName = _edit.newVal + _edit.itemName[len(_oldName):]
 
-                        # TODO:ED - check this
+                for k, v in self._collections.items():
+                    if v:
+                        ll = []
+                        for val in v:
+                            ll.append(val.replace(':' + _oldName + '.', ':' + newName + '.'))
+                        self._collections[k] = ll
 
-                        # if saveFrame.get('sf_category') in ['ccpn_parameter', ]:
-                        #     if _edit.itemName and _oldName and _edit.itemName.startswith(_oldName):
-                        #         _edit.itemName = _edit.newVal + _edit.itemName[len(_oldName):]
+            self._setCheckedItem(itmName, parentGroup)
 
-                        for k, v in self._collections.items():
-                            if v:
-                                ll = []
-                                for val in v:
-                                    ll.append(val.replace(':' + _oldName + '.', ':' + newName + '.'))
-                                self._collections[k] = ll
-
-                    self._setCheckedItem(itmName, parentGroup)
-
-                self._updateCollectionsTable()
+        self._updateCollectionsTable()
 
     def _selectCollectionId(self, values=None, pulldownList=None, saveFrame=None):
         """Handle collection pulldown
@@ -1694,131 +1677,92 @@ class NefDictFrame(Frame):
     def _selectCollectionParentId(self, values=None, pulldownList=None, parent=None):
         """Handle collection pulldown
         """
-        # print(f'   CALL    _selectCollectionParentId')
 
         if not (pulldownList and pulldownList.hasFocus()):
             return
 
         newCol = pulldownList.getText()
 
-        # _selection = parent.getSelectedTexts()
-        # _count = values.parentItem.childCount()
-        # _children = []
-        # for i in range(_count):
-        #     itm = values.parentItem.child(i)
-        #     itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName = itm.data(1, 0)
-        #     if itmName in _selection and saveFrame:
-        #         _children.append((itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName))
+        _children = self._getSelectedChildren(parent)
+        for (itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName) in _children:
+            _itmPid = Pid._join(_ccpnClassName, itmName) if _ccpnClassName else itmName
 
-        selection = parent.selectionModel().selectedIndexes()
-        if (newItms := [parent.itemFromIndex(itm) for itm in selection]):
-            if (values := [itm.data(1, 0) for itm in newItms if itm.data(1, 0)]):
+            # remove from previous self._collections
+            for k, v in list(self._collections.items()):
+                if _itmPid in v:
+                    v.remove(_itmPid)
+                if not v:
+                    self._collections.pop(k)
 
-                for (itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName) in values:
-                    _itmPid = Pid._join(_ccpnClassName, itmName) if _ccpnClassName else itmName
+            if newCol:
+                self._collections.setdefault(newCol, [])
+                self._collections[newCol].append(_itmPid)
 
-                    # remove from previous self._collections
-                    for k, v in list(self._collections.items()):
-                        if _itmPid in v:
-                            v.remove(_itmPid)
-                        if not v:
-                            self._collections.pop(k)
+            self._setCheckedItem(itmName, parentGroup)
 
-                    if newCol:
-                        self._collections.setdefault(newCol, [])
-                        self._collections[newCol].append(_itmPid)
-
-                    self._setCheckedItem(itmName, parentGroup)
-
-                self._updateCollectionsTable()
+        self._updateCollectionsTable()
 
     def _selectCollectionParentStructureId(self, values=None, pulldownList=None, parent=None):
         """Handle collection pulldown
         """
-        # print(f'   CALL    _selectCollectionParentStructureId')
 
         if not (pulldownList and pulldownList.hasFocus()):
             return
 
         newCol = pulldownList.getText()
 
-        # _selection = parent.getSelectedTexts()
-        # _count = values.parentItem.childCount()
-        # _children = []
-        # for i in range(_count):
-        #     itm = values.parentItem.child(i)
-        #     itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName = itm.data(1, 0)
-        #     if itmName in _selection and saveFrame:
-        #         _children.append((itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName))
+        _children = self._getSelectedChildren(parent)
+        for (itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName) in _children:
+            _itmStructureData = saveFrame.get(DATANAME) or ''  # make sure isn't None
+            _itmPid = Pid._join(_ccpnClassName, _itmStructureData, itmName) if _ccpnClassName else itmName
 
-        selection = parent.selectionModel().selectedIndexes()
-        if (newItms := [parent.itemFromIndex(itm) for itm in selection]):
-            if (_children := [itm.data(1, 0) for itm in newItms if itm.data(1, 0)]):
+            # remove from previous self._collections
+            for k, v in list(self._collections.items()):
+                if _itmPid in v:
+                    v.remove(_itmPid)
+                if not v:
+                    self._collections.pop(k)
 
-                for (itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName) in _children:
-                    _itmStructureData = saveFrame.get(DATANAME) or ''  # make sure isn't None
-                    _itmPid = Pid._join(_ccpnClassName, _itmStructureData, itmName) if _ccpnClassName else itmName
+            if newCol:
+                self._collections.setdefault(newCol, [])
+                self._collections[newCol].append(_itmPid)
 
-                    # remove from previous self._collections
-                    for k, v in list(self._collections.items()):
-                        if _itmPid in v:
-                            v.remove(_itmPid)
-                        if not v:
-                            self._collections.pop(k)
+            self._setCheckedItem(itmName, parentGroup)
 
-                    if newCol:
-                        self._collections.setdefault(newCol, [])
-                        self._collections[newCol].append(_itmPid)
-
-                    self._setCheckedItem(itmName, parentGroup)
-
-                self._updateCollectionsTable()
+        self._updateCollectionsTable()
 
     def _selectCollectionStructureGroup(self, values=None, pulldownList=None, parent=None):
         """Handle collection pulldown
         """
-        # print(f'   CALL    _selectCollectionStructureGroup')
 
         if not (pulldownList and pulldownList.hasFocus()):
             return
 
         newCol = pulldownList.getText()
 
-        # _selection = parent.getSelectedTexts()
-        # _count = values.parentItem.childCount()
-        # _children = []
-        # for i in range(_count):
-        #     itm = values.parentItem.child(i)
-        #     itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName = itm.data(1, 0)
-        #     if itmName in _selection and saveFrame:
-        #         _children.append((itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName))
+        _children = self._getSelectedChildren(parent)
+        for (itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName) in _children:
 
-        selection = parent.selectionModel().selectedIndexes()
-        if (newItms := [parent.itemFromIndex(itm) for itm in selection]):
-            if (_children := [itm.data(1, 0) for itm in newItms if itm.data(1, 0)]):
+            if parentGroup in ['restraintTables', 'violationTables']:
+                _itmStructureData = saveFrame.get(DATANAME) or ''  # make sure isn't None
+                _itmPid = Pid._join(_ccpnClassName, _itmStructureData, itmName) if _ccpnClassName else itmName
+            else:
+                _itmPid = Pid._join(_ccpnClassName, itmName) if _ccpnClassName else itmName
 
-                for (itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName) in _children:
+            # remove from previous self._collections
+            for k, v in list(self._collections.items()):
+                if _itmPid in v:
+                    v.remove(_itmPid)
+                if not v:
+                    self._collections.pop(k)
 
-                    if parentGroup in ['restraintTables', 'violationTables']:
-                        _itmStructureData = saveFrame.get(DATANAME) or ''  # make sure isn't None
-                        _itmPid = Pid._join(_ccpnClassName, _itmStructureData, itmName) if _ccpnClassName else itmName
-                    else:
-                        _itmPid = Pid._join(_ccpnClassName, itmName) if _ccpnClassName else itmName
+            if newCol:
+                self._collections.setdefault(newCol, [])
+                self._collections[newCol].append(_itmPid)
 
-                    # remove from previous self._collections
-                    for k, v in list(self._collections.items()):
-                        if _itmPid in v:
-                            v.remove(_itmPid)
-                        if not v:
-                            self._collections.pop(k)
+            self._setCheckedItem(itmName, parentGroup)
 
-                    if newCol:
-                        self._collections.setdefault(newCol, [])
-                        self._collections[newCol].append(_itmPid)
-
-                    self._setCheckedItem(itmName, parentGroup)
-
-                self._updateCollectionsTable()
+        self._updateCollectionsTable()
 
     def _editComment(self, item=None, parentName=None, lineEdit=None, saveFrame=None, autoRename=False):
         """Handle clicking Set Comment button
@@ -2508,18 +2452,6 @@ class NefDictFrame(Frame):
                 _frame = MoreLessFrame(self.frameOptionsFrame, name=_names, showMore=True, grid=(row, 0), gridSpan=(1, 3))
                 row += 1
 
-                # _count = values.parentItem.childCount()
-                # _children = []
-                # for i in range(_count):
-                #     itm = values.parentItem.child(i)
-                #     _children.append(itm.data(1, 0))
-                #
-                # # itemListWidget = self.CollectionsListWidget(frame.contentsFrame, addToCollectionsFunc=self._addToCollectionsMenu,
-                # #                                             grid=(1, 0), gridSpan=(5, 1))
-                # # itemListWidget.setItems({ch[0]: ch for ch in _children})
-                #
-                # #~~~~~~~~~~~~~~~~~
-
                 _iRow = 0
                 Label(_frame.contentsFrame, text=STRUCTUREDATA, grid=(_iRow, 0))
                 structurePulldown = self._newPulldown(_frame.contentsFrame, name=STRUCTUREDATA,
@@ -2559,122 +2491,16 @@ class NefDictFrame(Frame):
 
     @contextmanager
     def _tableColouring(self, table):
-        # not sure this is needed now - handled by the pandasModel indexing
+        # not sure this is needed now - handled by the PandasDataFrameModel indexing
         def _setRowBackgroundColour(row, colour):
             # set the colour for the items in the model colour table
             for j in _cols:
-                model._colourData[row, j] = QtCore.QVariant(QtGui.QBrush(colour))
+                model.setBackground(row, j, colour)
 
         model = table.model()
         _cols = range(model.columnCount())
 
         yield _setRowBackgroundColour
-
-
-    class FastTableView(QtWidgets.QTableView):
-
-        styleSheet = """
-                        QTableView {
-                            background-color: %(GUITABLE_BACKGROUND)s;
-                            alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
-                            border: 1px solid %(BORDER_NOFOCUS)s;
-                            border-radius: 2px;
-                        }
-
-                        QTableView::item {
-                            padding: 2px;
-                            color: %(GUITABLE_ITEM_FOREGROUND)s;
-                        }
-
-                        QTableView::item:selected {
-                            background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
-                            color: %(GUITABLE_SELECTED_FOREGROUND)s;
-                        }
-                    """
-
-        def __init__(self, *args, **kwds):
-            super().__init__(*args, **kwds)
-
-            # set stylesheet
-            self.colours = getColours()
-            self._defaultStyleSheet = self.styleSheet % self.colours
-            self.setStyleSheet(self._defaultStyleSheet)
-            self.setAlternatingRowColors(True)
-
-            # set the preferred scrolling behaviour
-            self.setHorizontalScrollMode(self.ScrollPerPixel)
-            self.setVerticalScrollMode(self.ScrollPerPixel)
-            self.setSelectionBehavior(self.SelectRows)
-
-            # enable sorting and sort on the first column
-            self.setSortingEnabled(True)
-            self.sortByColumn(0, QtCore.Qt.AscendingOrder)
-
-            # the resizeColumnsToContents is REALLY slow :|
-            _header = self.horizontalHeader()
-            # set Interactive and last column to expanding
-            _header.setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
-            _header.setStretchLastSection(True)
-            # only look at visible section
-            _header.setResizeContentsPrecision(10)
-            _header.setDefaultAlignment(QtCore.Qt.AlignLeft)
-            _header.setMinimumSectionSize(16)
-            _header.setHighlightSections(self.font().bold())
-            setWidgetFont(self, name=TABLEFONT)
-            setWidgetFont(_header, name=TABLEFONT)
-            setWidgetFont(self.verticalHeader(), name=TABLEFONT)
-
-            _header = self.verticalHeader()
-            # set Interactive and last column to expanding
-            _header.setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
-            _header.setStretchLastSection(False)
-            # only look at visible section
-            _header.setResizeContentsPrecision(10)
-            _header.setDefaultAlignment(QtCore.Qt.AlignLeft)
-            _header.setMinimumSectionSize(16)
-            _header.setVisible(True)
-            _header.setFixedWidth(10)  # gives enough of a handle to resize
-
-            _header.setHighlightSections(self.font().bold())
-            setWidgetFont(self, name=TABLEFONT)
-            setWidgetFont(_header, name=TABLEFONT)
-            setWidgetFont(self.verticalHeader(), name=TABLEFONT)
-
-            _height = getFontHeight(name=TABLEFONT, size='MEDIUM')
-            self.setMinimumSize(3 * _height, 3 * _height + self.horizontalScrollBar().height())
-
-
-    class pandasModel(QtCore.QAbstractTableModel):
-
-        def __init__(self, data):
-            QtCore.QAbstractTableModel.__init__(self)
-            self._data = data
-            # create a numpy array to match the data that will hold background colour
-            self._colourData = np.zeros(self._data.shape, dtype=np.object)
-
-        def rowCount(self, parent=None):
-            return self._data.shape[0]
-
-        def columnCount(self, parent=None):
-            return self._data.shape[1]
-
-        def data(self, index, role=QtCore.Qt.DisplayRole):
-            if index.isValid():
-                if role == QtCore.Qt.DisplayRole:
-                    return str(self._data.iat[index.row(), index.column()])
-
-                if role == QtCore.Qt.BackgroundColorRole:
-                    # search if the colour has been set in the colour table
-                    if (_col := self._colourData[index.row(), index.column()]):
-                        return _col
-
-            return None
-
-        def headerData(self, col, orientation, role=None):
-            if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
-                return self._data.columns[col]
-            return None
-
 
     def _addTableToFrame(self, _data, _name, newWidgets=False, table=None, ignoreFrame=False):
         """Add a new gui table into a moreLess frame to hold a nef loop
@@ -2682,11 +2508,11 @@ class NefDictFrame(Frame):
         frame = MoreLessFrame(self, name=_name, showMore=True, grid=(0, 0))
 
         if not table:
-            table = self.FastTableView(frame.contentsFrame)
+            table = PandasDataFrameTableView(frame.contentsFrame)
         frame.contentsFrame.getLayout().addWidget(table, 0, 0)
         table.setVisible(True)
 
-        _model = self.pandasModel(pd.DataFrame(_data))
+        _model = PandasDataFrameModel(pd.DataFrame(_data))
         table.setModel(_model)
 
         # table.resizeColumnsToContents()  # these are REALLY slow
@@ -2708,7 +2534,7 @@ class NefDictFrame(Frame):
         if self._collectionsTable and self._collections:
             _df = pd.DataFrame({COLLECTION: self._collections.keys(),
                                 'Items'   : ['\n'.join(vv for vv in val) for val in self._collections.values()]})
-            _model = self.pandasModel(_df)
+            _model = PandasDataFrameModel(_df)
             self._collectionsTable.setModel(_model)
             self._collectionsTable.resizeRowsToContents()
 
@@ -3076,7 +2902,7 @@ class NefDictFrame(Frame):
                             # print('\n'.join([k+'-'+itm[0] for k, val in groups.items() for itm in val]))
 
                             structureGroups = OrderedDict([(k, val) for k, val in groups.items()
-                                                               if k in ['restraintTables', 'violationTables']])
+                                                           if k in ['restraintTables', 'violationTables']])
                             # print(f' SDgroups')
                             # print('\n'.join(['sd-'+k+'-'+itm[0] for k, val in structureGroups.items() for itm in val]))
 

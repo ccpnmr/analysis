@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-16 12:09:33 +0000 (Wed, February 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-17 19:09:52 +0000 (Thu, February 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -376,10 +376,11 @@ class Gui(Ui):
         elif dataLoader.dataFormat == StarDataLoader.dataFormat and dataLoader:
             (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
             if dataLoader and not createNewProject and not ignore:
+                dataBlock = dataLoader.dataBlock  # this will also read and parse the file
                 popup = StarImporterPopup(project=self.project,
                                           bmrbFilePath=dataLoader.path,
                                           directory=dataLoader.path.parent,
-                                          dataBlock=dataLoader.dataBlock,
+                                          dataBlock=dataBlock,
                                           size=(700,1000))
                 popup.exec_()
 

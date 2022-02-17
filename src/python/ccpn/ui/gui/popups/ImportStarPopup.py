@@ -33,7 +33,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-11 11:45:58 +0000 (Fri, February 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-17 19:09:52 +0000 (Thu, February 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -49,40 +49,43 @@ _UI = True  # Default opens a popup for selecting the input and run the macro
 Warnings = "Warning: This is an alpha version of the NMR-Star (BMRB) Importer. It might not work or work partially. Always inspect the results!"
 
 InfoMessage = """
-        This popup will create a new chemical shift list from the selected NMR-STAR v3.1 file.
-        A new simulated Spectrum from the selected axesCodes and new simulated peakList from 
-        the selected BMRB Atom_ID. 
-        Once the new assigned peaks are correctly imported, copy the new peakList to your target spectrum.
-        
-        >>> BMRB Atom_ID: Insert the (comma separated) NmrAtoms which you want to import as they appear
-                          in the BMRB file. You will find these on the "Assigned chemical shift lists" 
-                          table in the BMRB 3.1 Star file as:
-                          
-                                _Atom_chem_shift.Atom_ID e.g. CA or HA 
+This popup will create a new chemical shift list from the selected NMR-STAR v3.1 file.
+"""
 
-        >>> Assign To Axis: Insert to which axis you want to assign the corresponding NmrAtom. 1:1
-                            These axes will be used to create a simulated, empty Spectrum. Specifying 
-                            the axes is important for V3 for creating a new assignment, especially for 
-                            ambiguous assignemnts: e.g.
-                            
-                                 NmrAtom    -->   Axis Code
-                                  HA        -->     H1
-                                  HB        -->     H2
+_InfoMessageOld = """
+This popup will create a new chemical shift list from the selected NMR-STAR v3.1 file.
+A new simulated Spectrum from the selected axesCodes and new simulated peakList from 
+the selected BMRB Atom_ID. 
+Once the new assigned peaks are correctly imported, copy the new peakList to your target spectrum.
 
-        
-        Limitations: 
-        - Import multiple combination of nmrAtoms for same axisCode. 
-          Work-around: import twice.
-          E.g. first H,N,CA after H,N,CB, copy the two peakList to the target spectrum
-        - Peaks and assignments will be created only if all the selected nmrAtoms are present for the 
-          nmrResidue in the BMRB.
-          E.g  if select Atom_ID: N,H for this BMRB entry:
-          >>1 . 1 1   1   1 MET H  C 13  53.890 0.05 . 1 . . . . . . . . 5493 1 >> 
-            4 . 1 1   2   2 ILE N  N 15 126.655 0.04 . 1 . . . . . . . . 5493 1
-            5 . 1 1   2   2 ILE H  H  1  10.051 0.02 . 1 . . . . . . . . 5493 1
-           The residue 1 MET will be skipped as only the Atom_ID H is found.  
-            
-    """
+>>> BMRB Atom_ID: Insert the (comma separated) NmrAtoms which you want to import as they appear
+                  in the BMRB file. You will find these on the "Assigned chemical shift lists" 
+                  table in the BMRB 3.1 Star file as:
+                  
+                        _Atom_chem_shift.Atom_ID e.g. CA or HA 
+
+>>> Assign To Axis: Insert to which axis you want to assign the corresponding NmrAtom. 1:1
+                    These axes will be used to create a simulated, empty Spectrum. Specifying 
+                    the axes is important for V3 for creating a new assignment, especially for 
+                    ambiguous assignemnts: e.g.
+                    
+                         NmrAtom    -->   Axis Code
+                          HA        -->     H1
+                          HB        -->     H2
+
+
+Limitations: 
+- Import multiple combination of nmrAtoms for same axisCode. 
+  Work-around: import twice.
+  E.g. first H,N,CA after H,N,CB, copy the two peakList to the target spectrum
+- Peaks and assignments will be created only if all the selected nmrAtoms are present for the 
+  nmrResidue in the BMRB.
+  E.g  if select Atom_ID: N,H for this BMRB entry:
+  >>1 . 1 1   1   1 MET H  C 13  53.890 0.05 . 1 . . . . . . . . 5493 1 >> 
+    4 . 1 1   2   2 ILE N  N 15 126.655 0.04 . 1 . . . . . . . . 5493 1
+    5 . 1 1   2   2 ILE H  H  1  10.051 0.02 . 1 . . . . . . . . 5493 1
+   The residue 1 MET will be skipped as only the Atom_ID H is found.    
+"""
 DeprecationWarningMessageTitle = 'Simulate Peaks Warning'
 DeprecationWarningMessage = 'This is currently an experimental feature and it will be deprecated in a future release.' \
                             '\nA fully dedicated module will be available instead.'
@@ -231,6 +234,7 @@ class StarImporterPopup(CcpnDialog):
         self.fileName = LineEdit(self, text=os.path.basename(self.bmrbFilePath), grid=(row, 1))
         self.fileName.setEnabled(False)
         # self.inputDialog = LineEditButtonDialog(self,textLineEdit=self.bmrbFilePath, directory=self.directory, grid=(row, 1))
+
         row += 1
         tree = Label(self, text="Frames", grid=(row, 0))
         selectableItems = [key for key, value in dataBlock.items() if value.category in sf_categories]
@@ -253,6 +257,7 @@ class StarImporterPopup(CcpnDialog):
         self.assignToSpectumCodes = LineEdit(self, text=','.join(self._axesCodesMap.values()), grid=(row, 1))
         self.dynamicsWidgets.extend([self.bmrbCodes, self.bmrbCodesEntry,
                                      self.assignToSpectumCodesLabel, self.assignToSpectumCodes])
+
         row += 1
         self.buttonList = ButtonList(self, ['Info', 'Cancel', 'Import'], [self._showInfo, self.reject, self._okButton], grid=(row, 1))
 
@@ -284,18 +289,26 @@ class StarImporterPopup(CcpnDialog):
         showWarning(Warnings, InfoMessage)
 
     def _okButton(self):
-        from ccpn.core.lib.CcpnStarIo import _importAndCreateV3Objs
+        """Finishing after clicking ok
+        """
+        # we are done, just retain the selected items in the dataBlock
+        selectedItems = self.treeView.getSelectedItems()
+        keysToDelete = [key for key in self.dataBlock.keys() if key not in selectedItems]
+        for key in keysToDelete:
+            del(self.dataBlock[key])
 
-        self._axesCodesMap.clear()
-        bmrbFile = self.bmrbFilePath
-        simulateSpectra = self.simulatePLCheckBox.get()
-        bmrbCodes = self.bmrbCodesEntry.get().replace(" ", "").split(',')
-        assignToSpectumCodes = self.assignToSpectumCodes.get().replace(" ", "").split(',')
-        for bmrbCode, sac in zip(bmrbCodes, assignToSpectumCodes):
-            self._axesCodesMap[bmrbCode] = sac
-        success = _importAndCreateV3Objs(self.project, bmrbFile, self._axesCodesMap, simulateSpectra=simulateSpectra)
-        if not success:
-            showWarning('Import Failed', 'Check the log file/outputs for more info')
+        # from ccpn.core.lib.CcpnStarIo import _importAndCreateV3Objs
+        # self._axesCodesMap.clear()
+        # bmrbFile = self.bmrbFilePath
+        # simulateSpectra = self.simulatePLCheckBox.get()
+        # bmrbCodes = self.bmrbCodesEntry.get().replace(" ", "").split(',')
+        # assignToSpectumCodes = self.assignToSpectumCodes.get().replace(" ", "").split(',')
+        # for bmrbCode, sac in zip(bmrbCodes, assignToSpectumCodes):
+        #     self._axesCodesMap[bmrbCode] = sac
+
+        # success = _importAndCreateV3Objs(self.project, self.bmrbFile, self._axesCodesMap, simulateSpectra=False)
+        # if not success:
+        #     showWarning('Import Failed', 'Check the log file/outputs for more info')
         self.accept()
 
 

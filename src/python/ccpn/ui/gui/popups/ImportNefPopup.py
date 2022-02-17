@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-17 19:46:07 +0000 (Thu, February 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-17 20:02:42 +0000 (Thu, February 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2592,6 +2592,9 @@ class NefDictFrame(Frame):
             for row, col in enumerate(self._collections.keys()):
                 if self.project.getByPid(Pid._join(Collection.shortClassName, col)):
                     _model.setForeground(row, 0, INVALIDTEXTROWNOCHECKCOLOUR)
+        else:
+            _model = PandasDataFrameModel(pd.DataFrame({COLLECTION: [], 'Items'   : []}))
+            self._collectionsTable.setModel(_model)
 
         # rebuild the list of structureData
         _itms = self._getAllChildren()
@@ -2626,6 +2629,9 @@ class NefDictFrame(Frame):
             for row, sd in enumerate(self._structureData.keys()):
                 if self.project.getByPid(Pid._join(StructureData.shortClassName, sd)):
                     _model.setForeground(row, 0, INVALIDTEXTROWNOCHECKCOLOUR)
+        else:
+            _model = PandasDataFrameModel(pd.DataFrame({STRUCTUREDATA: [], 'Items'   : []}))
+            self._structureDataTable.setModel(_model)
 
 
     def _fillPopup(self, nefObject=None):

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-10 23:06:56 +0000 (Thu, February 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-17 14:01:01 +0000 (Thu, February 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -112,6 +112,8 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         # Note._pluralLinkName         : QtCore.Qt.Checked
         }
 
+    mouseRelease = QtCore.pyqtSignal()
+
     def __init__(self, parent=None, project=None, maxSize=(250, 300),
                  includeProject=False, enableCheckBoxes=True, multiSelect=False,
                  enableMouseMenu=False, pathName=None,
@@ -140,12 +142,21 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         self.populate(self.project)
 
         self.itemClicked.connect(self._clicked)
+        self.itemChanged.connect(self._itemChanged)
 
         self._actionCallbacks = {}
 
         self._setFocusColour()
         self._backgroundColour = self.invisibleRootItem().background(0)
         self._foregroundColour = self.invisibleRootItem().foreground(0)
+
+    @staticmethod
+    def _depth(item):
+        depth = 0
+        while item:
+            item = item.parent()
+            depth += 1
+        return depth
 
     def setActionCallback(self, name, func=None):
         """Add an action to the callback dict
@@ -325,11 +336,17 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
                 if item.text(0) in pids:
                     item.setCheckState(0, QtCore.Qt.Checked)
 
-    def _clicked(self, *args):
+    def _clicked(self, item, *args):
         if self._enableCheckBoxes:
-            for item in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
-                if item.text(0) in self.lockedItems:
-                    item.setCheckState(0, self.lockedItems[item.text(0)])
+            for _item in self.findItems('', QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive):
+                if _item.text(0) in self.lockedItems:
+                    _item.setCheckState(0, self.lockedItems[_item.text(0)])
+
+    def _itemChanged(self, item, column: int) -> None:
+        if column == 0:
+            # remember the state of the checkbox for the next click
+            if item.storedCheckedState != item.checkState(0):
+                item.storedCheckedState = item.checkState(0)
 
     def _uncheckAll(self, includeRoot=False):
         """Clear all selection
@@ -376,6 +393,8 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         else:
             super().mouseReleaseEvent(event)
 
+            self.mouseRelease.emit()
+
     def raiseContextMenu(self, ev):
         """Handle raising  context menu for a treeview object
         """
@@ -387,6 +406,22 @@ class ExportTreeCheckBoxes(ProjectTreeCheckBoxes):
     """Class to handle exporting peaks/integrals/multiplets to nef files
     """
     pass
+
+
+class _StoredTreeWidgetItem(QtWidgets.QTreeWidgetItem):
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        # Assuming, that an element has only one checkbox
+        #
+        self.storedCheckedState: QtCore.Qt.CheckState = self.checkState(0)
+        # Otherwise, we need more stored variables here
+
+    def setCheckState(self, column: int, state: QtCore.Qt.CheckState) -> None:
+        # The checkbox in the first column:
+        if column == 0:
+            self.storedCheckedState = state
+        return super().setCheckState(column, state)
 
 
 class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
@@ -526,7 +561,8 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
 
         if self.includeProject:
             # add the project as the top of the tree - allows to un/select all
-            self.projectItem = QtWidgets.QTreeWidgetItem(self.invisibleRootItem())
+            self.projectItem = _StoredTreeWidgetItem(self.invisibleRootItem())
+
             if self._pathName:
                 self.projectItem.setText(0, self._pathName)
             else:
@@ -541,7 +577,8 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
 
         for name in self.checkList:
             if hasattr(self.project, name) or True:  # just to be safe
-                item = QtWidgets.QTreeWidgetItem(self.headerItem)
+                item = _StoredTreeWidgetItem(self.headerItem)
+
                 item.setText(0, name)
                 if self._enableCheckBoxes:
                     item.setFlags(item.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
@@ -551,7 +588,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
 
                 # # keep for future reference
                 # for obj in getattr(self.project, name):
-                #     child = QtWidgets.QTreeWidgetItem(item)
+                #     child = _StoredTreeWidgetItem(item)
                 #     child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
                 #     child.setData(1, 0, obj)
                 #     child.setText(0, obj.pid)
@@ -618,7 +655,7 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
                 #           i.e. Chains = saveFrame._content['chain_code'] from nefToTreeViewMapping
                 if thisList:
                     for listItem in thisList:
-                        child = QtWidgets.QTreeWidgetItem(found[0])
+                        child = _StoredTreeWidgetItem(found[0])
                         if self._enableCheckBoxes:
                             child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
                         else:
@@ -898,6 +935,19 @@ class ImportTreeCheckBoxes(ProjectTreeCheckBoxes):
 
             if conflictCheck:
                 item.setCheckState(0, QtCore.Qt.Checked if checked else QtCore.Qt.Unchecked)
+
+    def _selectChildren(self, item, state=True):
+        # select the children
+        _children = [item.child(ii) for ii in range(item.childCount())]
+        for child in _children:
+            self._selectChildren(child, state)
+            child.setSelected(state)
+
+    def _clicked(self, item, *args):
+        super(ImportTreeCheckBoxes, self)._clicked(item, *args)
+
+        # select all the children of the clicked item
+        self._selectChildren(item, True)
 
 
 class PrintTreeCheckBoxes(ProjectTreeCheckBoxes):

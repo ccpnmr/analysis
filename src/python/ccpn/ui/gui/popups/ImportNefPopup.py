@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-17 17:26:56 +0000 (Thu, February 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-17 19:46:07 +0000 (Thu, February 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -58,7 +58,8 @@ from ccpn.framework.lib.ccpnNef.CcpnNefCommon import nef2CcpnClassNames
 from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.core.lib.Pid import Pid
 from ccpn.core.Project import Project
-
+from ccpn.core.StructureData import StructureData
+from ccpn.core.Collection import Collection
 from ccpn.util.nef import StarIo
 from ccpn.util.nef import NefImporter as Nef
 from ccpn.util.Logging import getLogger
@@ -356,6 +357,9 @@ class NefDictFrame(Frame):
         self._collectionsTable = None  # PandasDataFrameTableView(self)
         # self._collectionsTable.setVisible(False)
 
+        self._structureData = {}
+        self._structureDataTable = None  # PandasDataFrameTableView(self)
+
         # self._nefImporterClass = nefImporterClass
         # set the nef object - nefLoader/nefDict
         # self._initialiseNefLoader(nefObject, _ignoreError=True)
@@ -509,17 +513,22 @@ class NefDictFrame(Frame):
         self._paneSplitter.addWidget(self._optionsFrame)
 
         self._frameOptionsNested = Frame(self._optionsFrame, setLayout=True, showBorder=False, grid=(1, 0))
-        self.frameOptionsFrame = Frame(self._frameOptionsNested, setLayout=True, showBorder=False, grid=(1, 0))
+        self.frameOptionsFrame = Frame(self._frameOptionsNested, setLayout=True, showBorder=False, grid=(2, 0))
         self.fileFrame = Frame(self._optionsFrame, setLayout=True, showBorder=False, grid=(2, 0))
 
         self._filterLogFrame = MoreLessFrame(self._optionsFrame, name='Filter Log', showMore=False, grid=(3, 0), gridSpan=(1, 1))
         self._treeSplitter.addWidget(self._filterLogFrame)
 
+        _frame, self._structureDataTable = self._addTableToFrame(pd.DataFrame({STRUCTUREDATA: self._structureData.keys(),
+                                                                             'Items'   : ['\n'.join(vv for vv in val) for val in self._structureData.values()]}),
+                                                               _name=f'{STRUCTUREDATA}',
+                                                               ignoreFrame=True, showMore=True)
+        self._frameOptionsNested.getLayout().addWidget(_frame, 0, 0)
         _frame, self._collectionsTable = self._addTableToFrame(pd.DataFrame({COLLECTION: self._collections.keys(),
                                                                              'Items'   : ['\n'.join(vv for vv in val) for val in self._collections.values()]}),
-                                                               _name=f'New {COLLECTION}s',
-                                                               ignoreFrame=True)
-        self._frameOptionsNested.getLayout().addWidget(_frame, 0, 0)
+                                                               _name=f'{COLLECTION}s',
+                                                               ignoreFrame=True, showMore=True)
+        self._frameOptionsNested.getLayout().addWidget(_frame, 1, 0)
 
         _row = 0
         self.logData = TextEditor(self._filterLogFrame.contentsFrame, grid=(_row, 0), gridSpan=(1, 3), addWordWrap=True)
@@ -553,7 +562,7 @@ class NefDictFrame(Frame):
         self._paneSplitter.setStretchFactor(1, 2)
         self._paneSplitter.setStretchFactor(2, 2)
         # self._paneSplitter.setStyleSheet("QSplitter::handle { background-color: gray }")
-        self._paneSplitter.setSizes([10000, 12000, 16000])
+        self._paneSplitter.setSizes([10000, 12000, 18000])
 
     def _populate(self):
         """Fill the treeView from the nef dictionary
@@ -1248,7 +1257,7 @@ class NefDictFrame(Frame):
         _children = self._getSelectedChildren(self.nefTreeView)
         self._populateCollectionStructurePulldown(_children, collectionPulldown)
 
-        self._updateCollectionsTable()
+        self._updateTables()
 
     @staticmethod
     def _getSelectedChildren(parent):
@@ -1257,6 +1266,13 @@ class NefDictFrame(Frame):
         values = [itm.data(1, 0) for itm in newItms if itm.data(1, 0)]
 
         return values
+
+    def _getAllChildren(self):
+        # grab the tree state
+        items = []
+        self._traverseTree(self.nefTreeView.headerItem, self._getAllItemState, items)
+
+        return items
 
     def _populateCollectionPulldown(self, _children, collectionPulldown):
 
@@ -1369,7 +1385,7 @@ class NefDictFrame(Frame):
         self._populateStructureDataPulldown(_children, structurePulldown)
         self._populateCollectionStructurePulldown(_children, collectionPulldown)
 
-        self._updateCollectionsTable()
+        self._updateTables()
 
     def _makeCollectionStructurePulldown(self, values):
 
@@ -1408,6 +1424,27 @@ class NefDictFrame(Frame):
 
         callbackSelect = partial(self._selectCollectionId, values=values, pulldownList=collectionPulldown, saveFrame=values.saveFrame)
         collectionPulldown.activated.connect(callbackSelect)
+
+    def _renameInCollections(self, item, data, newName):
+        """rename items in the collections for import
+        """
+        itmName, sFrame, parentGroup, primaryHandler, ccpnClassName = data
+
+        if parentGroup in ['restraintTables', 'violationTables']:
+            _itmStructureData = sFrame.get(DATANAME) or ''  # make sure isn't None
+            _itmPid = Pid._join(ccpnClassName, _itmStructureData, itmName) if ccpnClassName else itmName
+            _newPid = Pid._join(ccpnClassName, _itmStructureData, newName) if ccpnClassName else newName
+        else:
+            _itmPid = Pid._join(ccpnClassName, itmName) if ccpnClassName else itmName
+            _newPid = Pid._join(ccpnClassName, newName) if ccpnClassName else newName
+
+        # remove from previous self._collections
+        for k, v in list(self._collections.items()):
+            if _itmPid in v:
+                v.remove(_itmPid)
+                v.append(_newPid)
+            if not v:
+                self._collections.pop(k)
 
     def _renameValid(self, item=None, saveFrame=None):
         if not item:
@@ -1449,6 +1486,9 @@ class NefDictFrame(Frame):
             except Exception as es:
                 showWarning('Rename SaveFrame', str(es))
             else:
+
+                # rename in the nef collections
+                self._renameInCollections(item, _data, newName)
 
                 # everything okay - rebuild all for now, could make selective later
                 self._repopulateview(itemName, newName, parentName)
@@ -1580,7 +1620,7 @@ class NefDictFrame(Frame):
                         self._collections[k] = ll
 
         self._setCheckedItem(itemName, itemParentName)
-        self._updateCollectionsTable()
+        self._updateTables()
 
     def _selectStructureDataParentId(self, values=None, pulldownList=None, parent=None):
         """Handle clicking rename structureData button
@@ -1614,7 +1654,7 @@ class NefDictFrame(Frame):
 
             self._setCheckedItem(itmName, parentGroup)
 
-        self._updateCollectionsTable()
+        self._updateTables()
 
     def _selectStructureDataGroup(self, values=None, pulldownList=None, parent=None):
         """Handle clicking rename structureData button
@@ -1648,7 +1688,7 @@ class NefDictFrame(Frame):
 
             self._setCheckedItem(itmName, parentGroup)
 
-        self._updateCollectionsTable()
+        self._updateTables()
 
     def _selectCollectionId(self, values=None, pulldownList=None, saveFrame=None):
         """Handle collection pulldown
@@ -1671,7 +1711,7 @@ class NefDictFrame(Frame):
             self._collections.setdefault(newCol, [])
             self._collections[newCol].append(values.itemPid)
 
-        self._updateCollectionsTable()
+        self._updateTables()
         self._setCheckedItem(values.itemName, values.parentGroup)
 
     def _selectCollectionParentId(self, values=None, pulldownList=None, parent=None):
@@ -1700,7 +1740,7 @@ class NefDictFrame(Frame):
 
             self._setCheckedItem(itmName, parentGroup)
 
-        self._updateCollectionsTable()
+        self._updateTables()
 
     def _selectCollectionParentStructureId(self, values=None, pulldownList=None, parent=None):
         """Handle collection pulldown
@@ -1729,7 +1769,7 @@ class NefDictFrame(Frame):
 
             self._setCheckedItem(itmName, parentGroup)
 
-        self._updateCollectionsTable()
+        self._updateTables()
 
     def _selectCollectionStructureGroup(self, values=None, pulldownList=None, parent=None):
         """Handle collection pulldown
@@ -1762,7 +1802,7 @@ class NefDictFrame(Frame):
 
             self._setCheckedItem(itmName, parentGroup)
 
-        self._updateCollectionsTable()
+        self._updateTables()
 
     def _editComment(self, item=None, parentName=None, lineEdit=None, saveFrame=None, autoRename=False):
         """Handle clicking Set Comment button
@@ -2327,6 +2367,8 @@ class NefDictFrame(Frame):
             # parent item selected
             self._parentSelected(item, itemName)
 
+        self._updateTables()
+
     def _itemSelected(self, item, itemName, saveFrame):
         with self._tableSplitter.blockWidgetSignals(recursive=False):
             self._tableSplitter.setVisible(False)
@@ -2349,7 +2391,7 @@ class NefDictFrame(Frame):
             _name, _data = saveFrame.name, loop.data
 
             self._nefTables = {}
-            frame, table = self._addTableToFrame(_data, _name.upper(), newWidgets=True)
+            frame, table = self._addTableToFrame(_data, _name.upper(), newWidgets=True, showMore=False)
             table.resizeColumnsToContents()
 
             # get the group name add fetch the correct mapping
@@ -2364,7 +2406,7 @@ class NefDictFrame(Frame):
                     continue
 
                 _name, _data = loop.name, loop.data
-                frame, table = self._addTableToFrame(_data, _name)
+                frame, table = self._addTableToFrame(_data, _name, showMore=False)
 
                 if loop.name in saveFrame._content and \
                         hasattr(saveFrame, '_rowErrors') and \
@@ -2466,7 +2508,12 @@ class NefDictFrame(Frame):
 
             # collections
             if groups:
-                _names = '\n'.join([nn for nn in groups.keys()])
+                if len(groups) > 5:
+                    # restrict the number shown for clarity
+                    _subset = list(groups.keys())[:2] + ['...'] + list(groups.keys())[-2:]
+                    _names = '\n'.join(_subset)
+                else:
+                    _names = '\n'.join([nn for nn in groups.keys()])
                 _frame = MoreLessFrame(self.frameOptionsFrame, name=_names, showMore=True, grid=(row, 0), gridSpan=(1, 3))
                 row += 1
 
@@ -2482,7 +2529,7 @@ class NefDictFrame(Frame):
 
                 self._populateCollectionStructurePulldown(values, collectionPulldown)
 
-            self._updateCollectionsTable()
+            self._updateTables()
             self.frameOptionsFrame.setVisible(self._enableRename)
 
         for colInd, st in enumerate([1, 100, 1]):
@@ -2502,10 +2549,10 @@ class NefDictFrame(Frame):
 
         yield _setRowBackgroundColour
 
-    def _addTableToFrame(self, _data, _name, newWidgets=False, table=None, ignoreFrame=False):
+    def _addTableToFrame(self, _data, _name, newWidgets=False, table=None, ignoreFrame=False, showMore=False):
         """Add a new gui table into a moreLess frame to hold a nef loop
         """
-        frame = MoreLessFrame(self, name=_name, showMore=True, grid=(0, 0))
+        frame = MoreLessFrame(self, name=_name, showMore=showMore, grid=(0, 0))
 
         if not table:
             table = PandasDataFrameTableView(frame.contentsFrame)
@@ -2530,13 +2577,56 @@ class NefDictFrame(Frame):
 
         return frame, table
 
-    def _updateCollectionsTable(self):
+    def _updateTables(self):
+
+        # update the collections table
         if self._collectionsTable and self._collections:
             _df = pd.DataFrame({COLLECTION: self._collections.keys(),
                                 'Items'   : ['\n'.join(vv for vv in val) for val in self._collections.values()]})
             _model = PandasDataFrameModel(_df)
             self._collectionsTable.setModel(_model)
+            self._collectionsTable.resizeColumnToContents(0)
             self._collectionsTable.resizeRowsToContents()
+
+            # colour the structureData if exist in the project
+            for row, col in enumerate(self._collections.keys()):
+                if self.project.getByPid(Pid._join(Collection.shortClassName, col)):
+                    _model.setForeground(row, 0, INVALIDTEXTROWNOCHECKCOLOUR)
+
+        # rebuild the list of structureData
+        _itms = self._getAllChildren()
+        # self._structureData = OrderedDict((sd.id, []) for sd in self.project.structureData)
+        self._structureData = {}
+        for itm in _itms:
+            itmName, sFrame, parentGroup, primaryHandler, _ccpnClassName = itm
+
+            if parentGroup in ['restraintTables', 'violationTables']:
+                _itmStructureData = sFrame.get(DATANAME) or ''  # make sure isn't None
+                _itmPid = Pid._join(_ccpnClassName, _itmStructureData, itmName) if _ccpnClassName else itmName
+                # _sdPid = Pid._join(StructureData.shortClassName, _itmStructureData)
+
+                # add the structure to the dict by shortClassName
+                self._structureData.setdefault(_itmStructureData, [])
+                self._structureData[_itmStructureData].append(_itmPid)
+
+            elif parentGroup in ['structureData']:
+                # _itmPid = Pid._join(_ccpnClassName, itmName) if _ccpnClassName else itmName
+                self._structureData.setdefault(itmName, [])
+
+        # update the structureData table
+        if self._structureDataTable and self._structureData:
+            _df = pd.DataFrame({STRUCTUREDATA: self._structureData.keys(),
+                                'Items'   : ['\n'.join(vv for vv in val) for val in self._structureData.values()]})
+            _model = PandasDataFrameModel(_df)
+            self._structureDataTable.setModel(_model)
+            self._structureDataTable.resizeColumnToContents(0)
+            self._structureDataTable.resizeRowsToContents()
+
+            # colour the structureData if exist in the project
+            for row, sd in enumerate(self._structureData.keys()):
+                if self.project.getByPid(Pid._join(StructureData.shortClassName, sd)):
+                    _model.setForeground(row, 0, INVALIDTEXTROWNOCHECKCOLOUR)
+
 
     def _fillPopup(self, nefObject=None):
         """Initialise the project setting - only required for testing
@@ -2585,6 +2675,13 @@ class NefDictFrame(Frame):
             expandedState = item.isExpanded()
             checkedState = item.checkState(0)
             data[prefix + item.data(0, 0)] = (expandedState, checkedState)
+
+    def _getAllItemState(self, item, data: [], prefix=''):
+        """Add the name of expanded item to the data list
+        """
+        if item:
+            if (_data := item.data(1, 0)):
+                data.append(_data)
 
     def _setTreeState(self, item, data: dict, prefix=''):
         """Set the expanded flag if item is in data
@@ -2691,6 +2788,7 @@ class NefDictFrame(Frame):
     def _removeFromCollection(self, selectionWidget):
         """Remove the selected items from any collection
         """
+        # pass None to remove from collections
         self._addToCollection(None, selectionWidget=selectionWidget)
 
     def _newPulldown(self, parent, allowEmpty=True, name=COLLECTION, **kwds):
@@ -2843,7 +2941,7 @@ class NefDictFrame(Frame):
 
                         _updates.append((itemName, parentGroup))
 
-        self._updateCollectionsTable()
+        self._updateTables()
         for itemName, parentGroup in _updates:
             self._setCheckedItem(itemName, parentGroup)
 
@@ -2907,6 +3005,8 @@ class NefDictFrame(Frame):
                             # print('\n'.join(['sd-'+k+'-'+itm[0] for k, val in structureGroups.items() for itm in val]))
 
                             self._multiParentSelected(groups=groups, structureGroups=structureGroups)
+
+                            self._updateTables()
 
     def exitNefDictFrame(self):
         """Finalise the state of the nefDictFrame ready for the actual loading

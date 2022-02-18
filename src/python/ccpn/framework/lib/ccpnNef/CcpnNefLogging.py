@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:52 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-18 15:45:11 +0000 (Fri, February 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -49,7 +49,7 @@ def getCcpnNefLogNames(project: 'Project'):
     """
     try:
         # get the correct parameters from data
-        data = project._wrappedData.data
+        data = project._data
         ccpnLogging = data.get(CCPNLOGGING)
         keys = tuple(ccpnLogging.keys())
 
@@ -81,7 +81,7 @@ def getCcpnNefLog(project: 'Project', name: str):
 
     try:
         # get the correct parameters from data
-        data = project._wrappedData.data
+        data = project._data
         ccpnLogging = data.get(CCPNLOGGING)
         val = ccpnLogging[name].copy()
         if isinstance(val, pd.DataFrame):
@@ -124,9 +124,9 @@ def setCcpnNefLog(project: 'Project', name: str, dataFrame: Optional[pd.DataFram
         raise ValueError(f'ccpnLogging.value {repr(dataFrame)} must be a pandas dataFrame or None')
 
     # set the empty data
-    data = project._wrappedData.data
+    data = project._data
     if data is None:
-        data = project._wrappedData.data = {}
+        data = project._data = {}
 
     ccpnLogging = data.setdefault(CCPNLOGGING, {})
     param = ccpnLogging.get(name)
@@ -179,9 +179,9 @@ def resetCcpnNefLog(project: 'Project', name: str, overwrite=False):
 
     try:
         # set the empty data
-        data = project._wrappedData.data
+        data = project._data
         if data is None:
-            data = project._wrappedData.data = {}
+            data = project._data = {}
 
         ccpnLogging = data.setdefault(CCPNLOGGING, {})
         param = ccpnLogging.get(name)

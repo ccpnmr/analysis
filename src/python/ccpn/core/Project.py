@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-16 10:01:51 +0000 (Wed, February 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-18 15:45:11 +0000 (Fri, February 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -378,6 +378,23 @@ class Project(AbstractWrapperObject):
 
         projectHistory = getProjectSaveHistory(dataloader.path)
         return projectHistory.lastSavedVersion <= '3.0.4'
+
+    @property
+    def _data(self):
+        """Get the contents of the data property from the model
+        CCPNInternal only
+        """
+        return self._wrappedData.data
+
+    @_data.setter
+    def _data(self, value):
+        """Set the contents of the data property from the model
+        CCPNInternal only
+        """
+        if not isinstance(value, dict):
+            raise ValueError('value must be a dict')
+
+        self._wrappedData.data = value
 
     def _checkProjectSubDirectories(self):
         """if need be, create all project subdirectories"""

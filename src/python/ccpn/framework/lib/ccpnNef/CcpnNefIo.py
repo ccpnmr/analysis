@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-18 10:15:25 +0000 (Fri, February 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-18 15:45:11 +0000 (Fri, February 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -3183,7 +3183,7 @@ class CcpnNefReader(CcpnNefContent):
 
         # Verify main object
         # result = project.getCcpnNefLogging(name)
-        data = project._wrappedData.data or {}
+        data = project._data or {}
         result = data.get(CCPNLOGGING)
         if result is not None:
             self.error('ccpn_logging - ccpnLogging {} already exists'.format(result), saveFrame, (result,))

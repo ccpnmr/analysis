@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 11:11:25 +0000 (Tue, February 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-18 10:15:25 +0000 (Fri, February 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -82,6 +82,7 @@ from ccpn.core.Collection import Collection
 from ccpn.core.lib import SpectrumLib
 from ccpn.core.lib.MoleculeLib import extraBoundAtomPairs
 from ccpn.core.lib import RestraintLib
+from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 from ccpn.util.Logging import getLogger
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.AttrDict import AttrDict
@@ -2380,9 +2381,10 @@ class CcpnNefReader(CcpnNefContent):
         self.defaultChainCode = None
         dataBlock._rowErrors = {}
 
-        self.traverseDataBlock(project, dataBlock, traverseFunc=partial(self._verifySaveFrame,
-                                                                        projectIsEmpty=projectIsEmpty,
-                                                                        selection=selection))
+        with notificationEchoBlocking():
+            self.traverseDataBlock(project, dataBlock, traverseFunc=partial(self._verifySaveFrame,
+                                                                            projectIsEmpty=projectIsEmpty,
+                                                                            selection=selection))
 
         return (tuple(self.warnings or ()), tuple(self.errors or ()))
 
@@ -2901,7 +2903,7 @@ class CcpnNefReader(CcpnNefContent):
                                      ]:
                     # Get name from framecode, add type disambiguation, and correct for ccpn dataSetSerial addition
                     name = saveFrameName[len(sf_category) + 1:]
-                    sDataName = saveFrame.get(DATANAME)
+                    sDataName = saveFrame.get(DATANAME) or DATANAME_DEFAULT
                     # dataSetSerial = saveFrame.get('ccpn_dataset_serial')
                     # if dataSetSerial is not None:
                     #     ss = '`%s`' % dataSetSerial
@@ -3947,7 +3949,7 @@ class CcpnNefReader(CcpnNefContent):
                 loopList = ('ccpn_internal_data',)
                 replaceList = ('ccpn_object_pid', 'internal_data_string',)
 
-                sDataName = saveFrame.get(DATANAME)
+                sDataName = saveFrame.get(DATANAME) or DATANAME_DEFAULT
 
                 # rename the items in the additionalData saveFrame
                 _oldPid = Pid.Pid._join(obj.shortClassName, sDataName, itemName)
@@ -4837,7 +4839,7 @@ class CcpnNefReader(CcpnNefContent):
         #         saveFrame[DATANAME] = saveFrame.get(DATANAME_DEPRECATED) or DATANAME_DEFAULT  # cannot be empty
         #     del saveFrame[DATANAME_DEPRECATED]  # remove as new tag takes priority
         #
-        sDataName = saveFrame.get(DATANAME)
+        sDataName = saveFrame.get(DATANAME) or DATANAME_DEFAULT
 
         # ejb - need to remove the rogue `n` at the beginning of the name if it exists
         #       as it is passed into the namespace and gets added iteratively every save
@@ -4923,7 +4925,7 @@ class CcpnNefReader(CcpnNefContent):
         #         saveFrame[DATANAME] = saveFrame.get(DATANAME_DEPRECATED) or DATANAME_DEFAULT  # cannot be empty
         #     del saveFrame[DATANAME_DEPRECATED]  # remove as new tag takes priority
 
-        sDataName = saveFrame.get(DATANAME)
+        sDataName = saveFrame.get(DATANAME) or DATANAME_DEFAULT
 
         # ejb - need to remove the rogue `n` at the beginning of the name if it exists
         #       as it is passed into the namespace and gets added iteratively every save
@@ -5128,7 +5130,7 @@ class CcpnNefReader(CcpnNefContent):
         #         saveFrame[DATANAME] = saveFrame.get(DATANAME_DEPRECATED) or DATANAME_DEFAULT  # cannot be empty
         #     del saveFrame[DATANAME_DEPRECATED]  # remove as new tag takes priority
 
-        sDataName = saveFrame.get(DATANAME)
+        sDataName = saveFrame.get(DATANAME) or DATANAME_DEFAULT
         columns = saveFrame.get('ccpn_restraint_violation_list_columns')
         if columns:
             columns = json.loads(columns)
@@ -5209,7 +5211,7 @@ class CcpnNefReader(CcpnNefContent):
         #         saveFrame[DATANAME] = saveFrame.get(DATANAME_DEPRECATED) or DATANAME_DEFAULT  # cannot be empty
         #     del saveFrame[DATANAME_DEPRECATED]  # remove as new tag takes priority
 
-        sDataName = saveFrame.get(DATANAME)
+        sDataName = saveFrame.get(DATANAME) or DATANAME_DEFAULT
 
         # ejb - need to remove the rogue `n` at the beginning of the name if it exists
         #       as it is passed into the namespace and gets added iteratively every save

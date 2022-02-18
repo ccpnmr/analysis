@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-17 20:02:42 +0000 (Thu, February 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-18 10:15:25 +0000 (Fri, February 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -154,6 +154,7 @@ class PandasDataFrameTableView(QtWidgets.QTableView):
 
                     QTableView::item:selected {
                         background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
+                        color: %(GUITABLE_SELECTED_FOREGROUND)s;
                     }
                 """
 
@@ -471,6 +472,7 @@ class NefDictFrame(Frame):
         _verifyLabel.setVisible(not self._primaryProject)
         self.verifyCheckBox.setVisible(not self._primaryProject)
         self.headerFrame.getLayout().setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
+        self.verifyCheckBox.clicked.connect(self._verifyChecked)
 
         # add the pane for the treeview/tables
         self._paneSplitter = Splitter(self, setLayout=True, horizontal=True)
@@ -2666,6 +2668,12 @@ class NefDictFrame(Frame):
             getLogger().warning(str(es))
 
         self._populate()
+
+    def _verifyChecked(self, state=False):
+        """Respond to clicking the verify checkbox
+        """
+        if state:
+            self._verifyPopulate()
 
     def _removeParentTreeState(self, item, data=[], prefix=''):
         """Remove parents from the tree that have no children

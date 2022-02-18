@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-04 14:27:40 +0000 (Fri, February 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-18 10:15:25 +0000 (Fri, February 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -324,7 +324,7 @@ colourSchemes = {
         GUITABLE_BACKGROUND              : 'white',
         GUITABLE_ALT_BACKGROUND          : LIGHT_GREY,
         GUITABLE_ITEM_FOREGROUND         : TEXT_COLOUR,
-        GUITABLE_SELECTED_FOREGROUND     : 'black',
+        GUITABLE_SELECTED_FOREGROUND     : '#0F0F0F',
         GUITABLE_SELECTED_BACKGROUND     : '#FFFCBA',
         GUITABLE_DROP_BORDER             : GUITABLE_DROP_BORDER_COLOUR,
 

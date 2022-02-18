@@ -50,8 +50,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-02 23:55:21 +0000 (Wed, February 02, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-18 17:17:16 +0000 (Fri, February 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2014,10 +2014,16 @@ class Spectrum(AbstractWrapperObject):
         if self.dataSource is None:
             getLogger().warning('No proper (filePath, dataFormat) set for %s' % self)
             return
-        bufferIsTemporary = (path is None)
-        if path is not None:
-            path = aPath(path).uniqueVersion()
-        self.dataSource.setBuffering(isBuffered, bufferIsTemporary=bufferIsTemporary, bufferPath=path)
+
+        if isBuffered:
+            bufferIsTemporary = (path is None)
+            if path is not None:
+                path = aPath(path).uniqueVersion()
+            self.dataSource.setBuffering(isBuffered=True, bufferIsTemporary=bufferIsTemporary, bufferPath=path)
+        else:
+            if self.dataSource.isBuffered:
+                self.dataSource.closeHdf5Buffer()
+            self.dataSource.setBuffering(isBuffered=False)
 
     @logCommand(get='self')
     def getIntensity(self, ppmPositions) -> float:

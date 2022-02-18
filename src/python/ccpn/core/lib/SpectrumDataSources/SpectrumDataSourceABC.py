@@ -82,19 +82,19 @@ Example 3 (using Spectrum instance to make a hdf5 duplicate):
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-25 12:09:20 +0000 (Tue, January 25, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-18 17:17:16 +0000 (Fri, February 18, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -1192,7 +1192,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         return None
 
     def _checkFilePath(self, newFile, mode):
-        "Helper function to do checks on path"
+        """Helper function to do checks on path"""
 
         _path = self.path
         if _path is None:
@@ -1771,14 +1771,14 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
         def _nextPosition(currentPosition):
             """Return a (done, position) tuple derived from currentPosition"""
-            for dim, sliceTuple, idx in iterData:
-                start = sliceTuple[0]
-                stop = sliceTuple[1]
-                if currentPosition[idx] + 1 <= stop:  # still an increment to make in this dimension
-                    currentPosition[idx] += 1
+            for _dim, _sliceTuple, _idx in iterData:
+                start = _sliceTuple[0]
+                stop = _sliceTuple[1]
+                if currentPosition[_idx] + 1 <= stop:  # still an increment to make in this dimension
+                    currentPosition[_idx] += 1
                     return (False, currentPosition)
                 else:  # reset this dimension
-                    currentPosition[idx] = start
+                    currentPosition[_idx] = start
             return (True, None)  # reached the end
 
         # loop over selected slices
@@ -1834,7 +1834,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
 
     @property
     def isBuffered(self):
-        "ReturnTrue if file is buffered"
+        """ReturnTrue if file is buffered"""
         return self._isBuffered
 
     def setBuffering(self, isBuffered:bool, bufferIsTemporary:bool=True, bufferPath=None):
@@ -1926,10 +1926,17 @@ class SpectrumDataSourceABC(CcpNmrJson):
         self._isBuffered = True
         self._bufferFilled = True
 
+        # close the source, as all data are now in the buffer
+        if self.hasOpenFile():
+            self.fp.close()
+            self.fp = None
+            self.mode = None
+
     def closeHdf5Buffer(self):
         """Close the hdf5Buffer"""
         if not self.isBuffered:
             raise RuntimeError('closeHdf5Buffer: no hdf5Buffer defined')
+
         if self.hdf5buffer is not None:
             getLogger().debug('Closing buffer %s' % self.hdf5buffer)
             self.hdf5buffer.closeFile()
@@ -1978,19 +1985,23 @@ class SpectrumDataSourceABC(CcpNmrJson):
         else:
             if self.isBuffered:
                 fpStatus = '%r' % 'buffered'
-                path = self.hdf5buffer.path
-            elif self.hasOpenFile():
-                fpStatus = '%r' % self.mode
-                path = self.path
+                if self.hdf5buffer is not None:
+                    pathName = self.hdf5buffer.path.name
+                else:
+                    pathName = 'closed'
             else:
-                fpStatus = '%r' % 'closed'
-                path = self.path
+                if self.hasOpenFile():
+                    fpStatus = '%r' % self.mode
+                    pathName = self.path.name
+                else:
+                    fpStatus = '%r' % 'closed'
+                    pathName = self.path.name
 
             return '<%s: %dD (%s), (%s,%r)>' % (self.__class__.__name__,
                                                     self.dimensionCount,
                                                     'x'.join([str(p) for p in self.pointCounts]),
                                                     fpStatus,
-                                                    path.name
+                                                    pathName
                                                     )
 #end class
 

@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-18 12:05:35 +0000 (Fri, February 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-18 12:43:30 +0000 (Fri, February 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -39,15 +39,22 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
     """A class to manage chemicalShift saveFrame
     """
     _sf_category = 'assigned_chemical_shifts'
+
+    # this key contains the NmrLoop with the chemical-shift data
     _LOOP_KEY = 'atom_chem_shift'
 
+    # These keys map the row onto the V3 ChemicalShift object
     _SEQUENCE_CODE_TAG = 'seq_id'
     _RESIDUE_TYPE_TAG = 'comp_id'
     _ATOM_NAME_TAG = 'atom_id'
     _AMBIGUITY_CODE = 'ambiguity_code'
 
+    _ISOTOPE_TAG_1 = 'atom_isotope_number'
+    _ISOTOPE_TAG_2 = 'atom_type'
+
     _VALUE_TAG = 'val'
     _VALUE_ERROR_TAG = 'val_err'
+    _FIGURE_OF_MERIT_TAG = 'assign_fig_of_merit'
 
     _COMMENT_TAG = 'details'
 
@@ -70,19 +77,22 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
         residueType = chemShift.get(self._RESIDUE_TYPE_TAG)
         nmrResidue = nmrChain.fetchNmrResidue(residueType=residueType, sequenceCode=sequenceCode)
 
+        isotopeCode = '%s%s' % (chemShift.get(self._ISOTOPE_TAG_1), chemShift.get(self._ISOTOPE_TAG_2))
         atomName = str(chemShift.get(self._ATOM_NAME_TAG))
         ambiguityCode = chemShift.get(self._AMBIGUITY_CODE)
         # TODO: handle ambiguity codes
-        nmrAtom = nmrResidue.newNmrAtom(name=atomName)
+        nmrAtom = nmrResidue.newNmrAtom(name=atomName, isotopeCode=isotopeCode)
 
         value = chemShift.get(self._VALUE_TAG)
         valueError = chemShift.get(self._VALUE_ERROR_TAG)
+        figureOfMerit = chemShift.get(self._FIGURE_OF_MERIT_TAG)
+        if figureOfMerit is None:
+            figureOfMerit = 1.0
 
         comment = chemShift.get(self._COMMENT_TAG)
 
-        chemShiftList.newChemicalShift(nmrAtom=nmrAtom, value=value, valueError=valueError,
-                                       # chainCode=chainCode, sequenceCode=sequenceCode,
-                                       # residueType=residueType, atomName=atomName,
+        chemShiftList.newChemicalShift(nmrAtom=nmrAtom,
+                                       value=value, valueError=valueError, figureOfMerit=figureOfMerit,
                                        comment=comment)
 
     def importIntoProject(self, project) -> list:

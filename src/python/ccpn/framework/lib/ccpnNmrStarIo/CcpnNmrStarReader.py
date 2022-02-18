@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-17 19:09:52 +0000 (Thu, February 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-18 12:43:30 +0000 (Fri, February 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -40,25 +40,23 @@ class CcpnNmrStarReader():
     """Class to read/parse and import (bmrb) NmrStar files
     """
 
-    def __init__(self, project):
+    def __init__(self):
         """Initialise CcpnStarReader instance
-        :param project: a Project instance
         """
-        self.project = project
         self.path = None  # Absolute path to star file used to fill self
         self._dataBlock = None
 
     @property
     def dataBlock(self):
-        """:return the NmrDataBlock or None, depending of a file has been parsed
+        """:return the NmrDataBlock or None, depending if a file has been parsed
         """
         return self._dataBlock
 
-    def parse(self, path, mode=PARSER_MODE_STANDARD):
+    def parse(self, path, mode=PARSER_MODE_STANDARD) -> NmrDataBlock:
         """
         :param path: path of the star-file to parse
         :param mode: parsing mode: any of ('lenient', 'strict', 'standard', 'IUCr')
-        :return self, i.e. an NmrDataBlock instance
+        :return The parsed data as an NmrDataBlock instance
         """
         if path is None:
             raise ValueError('Undefined path')
@@ -87,10 +85,11 @@ class CcpnNmrStarReader():
         self._dataBlock = _dataBlock
         self.path = path
 
-        return self
+        return _dataBlock
 
-    def importIntoProject(self) -> list:
+    def importIntoProject(self, project) -> list:
         """Import the data of the saveFrame's of self into project
+        :param project: A Project instance
         :return A list of imported V3 objects
         """
         result = []
@@ -98,7 +97,7 @@ class CcpnNmrStarReader():
             if not isinstance(saveFrame, SaveFrameABC):
                 getLogger().warning(f'CcpNmrStarReader.importIntoProject: cannot import "{key}" (category {saveFrame.category})')
             else:
-                objs = saveFrame.importIntoProject(project=self.project)
+                objs = saveFrame.importIntoProject(project=project)
                 result.extend(objs)
         return result
 

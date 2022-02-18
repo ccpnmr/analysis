@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-17 19:09:52 +0000 (Thu, February 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-18 12:43:30 +0000 (Fri, February 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -33,12 +33,11 @@ from typing import Union, Optional
 from contextlib import contextmanager
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
-from ccpn.framework.lib.ccpnNef import CcpnNefIo
+from ccpn.framework.lib.ccpnNmrStarIo.CcpnNmrStarReader import CcpnNmrStarReader
 from ccpn.util import Path
 from ccpn.core.Project import Project
 
 from ccpn.util.Logging import getLogger
-
 
 
 class StarDataLoader(DataLoaderABC):
@@ -51,7 +50,7 @@ class StarDataLoader(DataLoaderABC):
 
     def __init__(self, path):
         super(StarDataLoader, self).__init__(path)
-        self._nefReader = CcpnNefIo.CcpnNefReader(application=self.application)
+        self._starReader = CcpnNmrStarReader()
         self._dataBlock = None
 
     @property
@@ -59,8 +58,8 @@ class StarDataLoader(DataLoaderABC):
         """Get the NmrdataBlock from the file define by self.path
         """
         if self._dataBlock is None:
-            self._dataBlock = self._nefReader.getNMRStarData(str(self.path))
-            getLogger().debug(f'StarDataLoader: Read {self.path} into dataBlock')
+            self._dataBlock = self._starReader.parse(path=self.path)
+            getLogger().debug(f'StarDataLoader: Read "{self.path}" into dataBlock')
         return self._dataBlock
 
     def load(self):
@@ -77,9 +76,7 @@ class StarDataLoader(DataLoaderABC):
 
         CCPNINTERNAL: used in Framework._loadStarFile
         """
-        pass
-        # for key, value in self.dataBlock.items():
-        #     # print('StarDataLoader>>>', key)
+        self._starReader.importIntoProject(project=project)
 
 
 StarDataLoader._registerFormat()

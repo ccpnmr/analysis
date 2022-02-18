@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-16 12:24:33 +0000 (Wed, February 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-18 13:16:26 +0000 (Fri, February 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -370,7 +370,9 @@ class Gui(Ui):
             (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
             if dataLoader and not createNewProject and not ignore:
                 # we are importing; popup the import window
-                self.mainWindow._showNefPopup(dataLoader)
+                ok = self.mainWindow._showNefPopup(dataLoader)
+                if not ok:
+                    ignore = True
 
         elif dataLoader.dataFormat == SparkyDataLoader.dataFormat:
             (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)

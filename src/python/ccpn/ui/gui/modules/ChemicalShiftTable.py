@@ -6,10 +6,10 @@ tertiary version by Ejb 9/5/17
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-26 16:52:20 +0000 (Wed, January 26, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-02-18 12:36:33 +0000 (Fri, February 18, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -38,6 +38,7 @@ from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.ChemicalShiftList import CS_UNIQUEID, CS_ISDELETED, CS_PID, \
     CS_STATIC, CS_STATE, CS_ORPHAN, CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT, CS_ATOMNAME, \
+    CS_NMRATOM, CS_CHAINCODE, CS_SEQUENCECODE, CS_RESIDUETYPE, \
     CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT, \
     CS_COMMENT, CS_OBJECT, \
     CS_TABLECOLUMNS, ChemicalShiftState
@@ -109,7 +110,8 @@ class ChemicalShiftTableModule(CcpnModule):
                     )
 
         # main window
-        _hidden = ['isDeleted', 'figureOfMerit', 'allPeaks', 'chainCode', 'sequenceCode', 'residueType', 'state', 'orphan']
+        _hidden = [CS_UNIQUEID, CS_ISDELETED, CS_FIGUREOFMERIT, CS_ALLPEAKS, CS_CHAINCODE,
+                   CS_SEQUENCECODE, CS_RESIDUETYPE, CS_STATE, CS_ORPHAN]
         self.chemicalShiftTable = ChemicalShiftTable(parent=self.mainWidget,
                                                      mainWindow=self.mainWindow,
                                                      moduleParent=self,
@@ -153,6 +155,30 @@ class ChemicalShiftTable(GuiTable):
     attributeName = 'chemicalShiftLists'
 
     PRIMARYCOLUMN = CS_OBJECT  # column holding active objects (uniqueId/ChemicalShift for this table?)
+    defaultHidden = [CS_UNIQUEID, CS_ISDELETED, CS_FIGUREOFMERIT, CS_ALLPEAKS, CS_CHAINCODE,
+                     CS_SEQUENCECODE, CS_RESIDUETYPE, CS_STATE, CS_ORPHAN]
+
+    # define self._columns here
+    columnHeaders = {CS_UNIQUEID           : 'Unique ID',
+                     CS_ISDELETED          : 'isDeleted',  # should never be visible
+                     # XXX:'Static state of chemicalShift',
+                     CS_PID                : 'ChemicalShift',
+                     CS_VALUE              : 'ChemicalShift Value (ppm)',
+                     CS_VALUEERROR         : 'Value Error',
+                     CS_FIGUREOFMERIT      : 'Figure of Merit',
+                     CS_NMRATOM            : 'NmrAtom',
+                     CS_CHAINCODE          : 'ChainCode',
+                     CS_SEQUENCECODE       : 'SequenceCode',
+                     CS_RESIDUETYPE        : 'ResidueType',
+                     CS_ATOMNAME           : 'AtomName',
+                     CS_STATE              : 'Active State',
+                     CS_ORPHAN             : 'Orphaned State',
+                     CS_ALLPEAKS           : 'Assigned Peaks',
+                     CS_SHIFTLISTPEAKSCOUNT: 'Local Peak Count',
+                     CS_ALLPEAKSCOUNT      : 'Total Peak Count',
+                     CS_COMMENT            : 'Comment',
+                     CS_OBJECT             : '_object'
+                     }
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None,
                  actionCallback=None, selectionCallback=None,
@@ -180,7 +206,10 @@ class ChemicalShiftTable(GuiTable):
         # self.chemicalShiftList = None
 
         # initialise the currently attached dataFrame
-        self._hiddenColumns = hiddenColumns or []
+        # self._hiddenColumns = hiddenColumns or []
+        self._hiddenColumns = [self.columnHeaders[col] for col in hiddenColumns] if hiddenColumns else \
+            [self.columnHeaders[col] for col in self.defaultHidden]
+
         self.dataFrameObject = None
         selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
         actionCallback = self._actionCallback if actionCallback is None else actionCallback
@@ -760,11 +789,13 @@ class ChemicalShiftTable(GuiTable):
                      'Number of assigned peaks attached to a chemicalShift\nbelonging to spectra associated with parent chemicalShiftList',
                      'Total number of assigned peaks attached to a chemicalShift\nbelonging to any spectra',
                      'Optional comment for each chemicalShift',
-                     '1',
+                     'None',
                      )
+
         # create the column objects
         _cols = [
-            (col, lambda row: _getValueByHeader(row, col), _tipTexts[ii], None, None)
+            # (col, lambda row: _getValueByHeader(row, col), _tipTexts[ii], None, None)
+            (self.columnHeaders[col], lambda row: _getValueByHeader(row, col), _tipTexts[ii], None, None)
             for ii, col in enumerate(CS_TABLECOLUMNS)
             ]
         # NOTE:ED - hack to add the comment editor to the comment column, decimal places to value/valueError/figureOfMerit
@@ -808,7 +839,8 @@ class ChemicalShiftTable(GuiTable):
                 _table[CS_COMMENT].fillna('', inplace=True)
                 _table.fillna('None', inplace=True)
         else:
-            _table = pd.DataFrame(columns=CS_TABLECOLUMNS)
+            # _table = pd.DataFrame(columns=CS_TABLECOLUMNS)
+            _table = pd.DataFrame(columns=[self.columnHeaders[val] for val in CS_TABLECOLUMNS])
 
         # set the table from the dataFrame
         _dataFrame = DataFrameObject(dataFrame=_table,

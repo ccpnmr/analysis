@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-18 10:15:25 +0000 (Fri, February 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-18 11:18:52 +0000 (Fri, February 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1343,6 +1343,7 @@ class NefDictFrame(Frame):
         # get the structureData names from the project
         sData = self.project.structureData
         sdIds = OrderedSet([''] + [sd.id for sd in sData])
+
         # search through the saveframes for occurrences of DATANAME - add to choices
         _sfNames = self._nefLoader.getSaveFrameNames()
         for sf in _sfNames:
@@ -1606,9 +1607,11 @@ class NefDictFrame(Frame):
                     raise ValueError(f'{DATANAME} cannot be empty')
                 else:
                     del saveFrame[DATANAME]
+
             else:
-                _oldName = saveFrame.get(DATANAME)
+                _oldName = saveFrame.get(DATANAME) or ''
                 saveFrame[DATANAME] = str(_edit.newVal)
+
                 # rename itemName if a ccpn_parameter
                 if saveFrame.get('sf_category') in ['ccpn_parameter', ]:
                     if _edit.itemName and _oldName and _edit.itemName.startswith(_oldName):
@@ -1637,8 +1640,9 @@ class NefDictFrame(Frame):
 
         _children = self._getSelectedChildren(parent)
         for (itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName) in _children:
-            _oldName = saveFrame.get(DATANAME)
-            if DATANAME in saveFrame:
+
+            if parentGroup in ['restraintTables', 'violationTables']:
+                _oldName = saveFrame.get(DATANAME) or ''
                 saveFrame[DATANAME] = newName
 
                 # TODO:ED - check this
@@ -1654,7 +1658,7 @@ class NefDictFrame(Frame):
                             ll.append(val.replace(':' + _oldName + '.', ':' + newName + '.'))
                         self._collections[k] = ll
 
-            self._setCheckedItem(itmName, parentGroup)
+                self._setCheckedItem(itmName, parentGroup)
 
         self._updateTables()
 
@@ -1671,8 +1675,9 @@ class NefDictFrame(Frame):
 
         _children = self._getSelectedChildren(parent)
         for (itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName) in _children:
-            _oldName = saveFrame.get(DATANAME)
-            if DATANAME in saveFrame:
+
+            if parentGroup in ['restraintTables', 'violationTables']:
+                _oldName = saveFrame.get(DATANAME) or ''
                 saveFrame[DATANAME] = newName
 
                 # TODO:ED - check this
@@ -1688,7 +1693,7 @@ class NefDictFrame(Frame):
                             ll.append(val.replace(':' + _oldName + '.', ':' + newName + '.'))
                         self._collections[k] = ll
 
-            self._setCheckedItem(itmName, parentGroup)
+                self._setCheckedItem(itmName, parentGroup)
 
         self._updateTables()
 
@@ -1755,6 +1760,7 @@ class NefDictFrame(Frame):
 
         _children = self._getSelectedChildren(parent)
         for (itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName) in _children:
+
             _itmStructureData = saveFrame.get(DATANAME) or ''  # make sure isn't None
             _itmPid = Pid._join(_ccpnClassName, _itmStructureData, itmName) if _ccpnClassName else itmName
 
@@ -2935,7 +2941,8 @@ class NefDictFrame(Frame):
                     # add to collection
                     if ccpnClassName:
                         # process pid
-                        if DATANAME in saveFrame:
+                        # if DATANAME in saveFrame:
+                        if parentGroup in ['restraintTables', 'violationTables']:
                             #   until saveFrames are subclassed from an ABC
                             _itmStructureData = saveFrame.get(DATANAME) or ''  # make sure isn't None
                             _itmPid = Pid._join(ccpnClassName, _itmStructureData, itemName) if ccpnClassName else itemName

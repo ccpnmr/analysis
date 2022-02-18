@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-18 11:18:52 +0000 (Fri, February 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-18 12:35:29 +0000 (Fri, February 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -140,23 +140,26 @@ class _TreeValues:
 
 
 class PandasDataFrameTableView(QtWidgets.QTableView):
-    styleSheet = """
-                    QTableView {
+    styleSheet = """QTableView {
                         background-color: %(GUITABLE_BACKGROUND)s;
                         alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
                         border: 1px solid %(BORDER_NOFOCUS)s;
                         border-radius: 2px;
                     }
-
+                    QTableView::focus {
+                        background-color: %(GUITABLE_BACKGROUND)s;
+                        alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
+                        border: 1px solid %(BORDER_FOCUS)s;
+                        border-radius: 2px;
+                    }
                     QTableView::item {
                         padding: 2px;
                     }
-
-                    QTableView::item:selected {
+                    QTableView::item::selected {
                         background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
                         color: %(GUITABLE_SELECTED_FOREGROUND)s;
                     }
-                """
+                    """
 
     # overrides QtCore.Qt.ForegroundRole
     # QTableView::item - color: %(GUITABLE_ITEM_FOREGROUND)s;

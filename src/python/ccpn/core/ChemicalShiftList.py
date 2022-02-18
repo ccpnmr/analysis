@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-17 19:09:52 +0000 (Thu, February 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-18 12:05:35 +0000 (Fri, February 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -664,17 +664,20 @@ class ChemicalShiftList(AbstractWrapperObject):
         """
 
         data = self._wrappedData.data
-        if nmrAtom:
+        if nmrAtom is not None:
             _nmrAtom = self.project.getByPid(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom
-            if not _nmrAtom:
+            if _nmrAtom is None:
                 raise ValueError(f'{self.className}.newChemicalShift: nmrAtom {_nmrAtom} not found')
             nmrAtom = _nmrAtom
 
         if data is not None and nmrAtom and nmrAtom.pid in list(data[CS_NMRATOM]):
             raise ValueError(f'{self.className}.newChemicalShift: nmrAtom {nmrAtom} already exists')
 
-        shift = self._newChemicalShiftObject(data, value, valueError, figureOfMerit,
-                                             nmrAtom, chainCode, sequenceCode, residueType, atomName, comment)
+        shift = self._newChemicalShiftObject(data=data,
+                                             value=value, valueError=valueError, figureOfMerit=figureOfMerit,
+                                             nmrAtom=nmrAtom, chainCode=chainCode, sequenceCode=sequenceCode,
+                                             residueType=residueType, atomName=atomName,
+                                             comment=comment)
 
         return shift
 
@@ -687,13 +690,20 @@ class ChemicalShiftList(AbstractWrapperObject):
         from ccpn.core.ChemicalShift import _getByTuple, _newChemicalShift as _newShift
 
         # make new tuple - verifies contents
-        _row = _getByTuple(self, False,
-                           value, valueError, figureOfMerit,
-                           None, chainCode, sequenceCode, residueType, atomName,
-                           comment)
+        static = False
         _nextUniqueId = self.project._getNextUniqueIdValue(CS_CLASSNAME)
+        _row = _getByTuple(chemicalShiftList=self,
+                           uniqueId=_nextUniqueId,
+                           isDeleted=False,
+                           static=static,
+                           value=value, valueError=valueError, figureOfMerit=figureOfMerit,
+                           nmrAtom=nmrAtom,
+                           chainCode=chainCode, sequenceCode=sequenceCode,
+                           residueType=residueType, atomName=atomName,
+                           comment=comment)
         # add to dataframe - this is in undo stack and marked as modified
-        _dfRow = pd.DataFrame(((_nextUniqueId, False, value, valueError, figureOfMerit, None) + _row[6:],), columns=CS_COLUMNS)
+        # Note the "additional" tuple around _row; needed to match the shape as one row, 12 columns
+        _dfRow = pd.DataFrame(data=(_row,), columns=CS_COLUMNS)
 
         if data is None:
             # set as the new subclassed DataFrameABC

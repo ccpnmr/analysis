@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-26 16:50:48 +0000 (Wed, January 26, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-18 12:05:35 +0000 (Fri, February 18, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -609,6 +609,8 @@ def _newChemicalShift(project: Project, chemicalShiftList, _uniqueId: Optional[i
 
 
 def _getByTuple(chemicalShiftList,
+                uniqueId: int = None,
+                isDeleted: bool = False,
                 static: bool = False,
                 value: float = None, valueError: float = None, figureOfMerit: float = 1.0,
                 nmrAtom: Union[NmrAtom, str, None] = None,
@@ -637,8 +639,12 @@ def _getByTuple(chemicalShiftList,
     if figureOfMerit is not None and not (MINFOM <= figureOfMerit <= MAXFOM):
         raise ValueError(f'figureOfMerit must be in range [{MINFOM} - {MAXFOM}]')
 
-    newRow = (None,
-              None,
+# ShiftParameters = namedtuple('ShiftParameters', f'{CS_UNIQUEID} {CS_ISDELETED} {CS_STATIC} '
+#                                                 f'{CS_VALUE} {CS_VALUEERROR} {CS_FIGUREOFMERIT} '
+#                                                 f'{CS_NMRATOM} {CS_CHAINCODE} {CS_SEQUENCECODE} {CS_RESIDUETYPE} {CS_ATOMNAME} '
+#                                                 f'{CS_COMMENT} ')
+    newRow = (uniqueId,
+              isDeleted,
               static,
               value,
               valueError,

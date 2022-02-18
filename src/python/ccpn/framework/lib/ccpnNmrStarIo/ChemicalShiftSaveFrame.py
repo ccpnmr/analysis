@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-17 19:09:52 +0000 (Thu, February 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-18 12:05:35 +0000 (Fri, February 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -63,13 +63,14 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
         """Use chemShift to make a new (v3) chemicalShift in chemShiftList
         """
         project = chemShiftList.project
-        nmrChain = project.fetchNmrChain(chemShiftList.name)
+        chainCode = chemShiftList.name
+        nmrChain = project.fetchNmrChain(chainCode)
 
         sequenceCode = str(chemShift.get(self._SEQUENCE_CODE_TAG))
         residueType = chemShift.get(self._RESIDUE_TYPE_TAG)
         nmrResidue = nmrChain.fetchNmrResidue(residueType=residueType, sequenceCode=sequenceCode)
 
-        atomName = chemShift.get(self._ATOM_NAME_TAG)
+        atomName = str(chemShift.get(self._ATOM_NAME_TAG))
         ambiguityCode = chemShift.get(self._AMBIGUITY_CODE)
         # TODO: handle ambiguity codes
         nmrAtom = nmrResidue.newNmrAtom(name=atomName)
@@ -80,6 +81,8 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
         comment = chemShift.get(self._COMMENT_TAG)
 
         chemShiftList.newChemicalShift(nmrAtom=nmrAtom, value=value, valueError=valueError,
+                                       # chainCode=chainCode, sequenceCode=sequenceCode,
+                                       # residueType=residueType, atomName=atomName,
                                        comment=comment)
 
     def importIntoProject(self, project) -> list:

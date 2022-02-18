@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-16 11:43:13 +0000 (Wed, February 16, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-18 15:18:06 +0000 (Fri, February 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -898,40 +898,70 @@ class RestraintAnalysisTableWidget(GuiTable):
                                 for viols in self._dataTables if resList.pid == viols.getMetadata('restraintTable')
                                 }
 
-            # print(f'violation results  {violationResults.keys()}   {[val.size for val in violationResults.values()]}')
+            if violationResults:
 
-            # rename the columns to match the order in visible list - number must match the position in the selected restraintTables
-            for ii, (k, resViol) in enumerate(violationResults.items()):
-                ind = resLists.index(k)
-                resViol.columns = [vv + f'_{ind + 1}' for vv in resViol.columns]
+                # rename the columns to match the order in visible list - number must match the position in the selected restraintTables
+                for ii, (k, resViol) in enumerate(violationResults.items()):
+                    ind = resLists.index(k)
+                    resViol.columns = [vv + f'_{ind + 1}' for vv in resViol.columns]
 
-                # print(f'columns  {resViol.columns}')
+                    # print(f'columns  {resViol.columns}')
 
-            # merge all the tables for each restraintTable
-            _out = {}
-            zeroCols = []
-            for ii, resList in enumerate(resLists):
-                # print(f'      resList {ii}   {resList}')
+                # merge all the tables for each restraintTable
+                _out = [index, allPks]
+                zeroCols = []
+                for ii, resList in enumerate(resLists):
+                    # print(f'      resList {ii}   {resList}')
 
-                if resList in violationResults:
-                    # print(f'       in')
+                    if resList in violationResults:
+                        # print(f'       in')
 
-                    _left = dfs[resList]
-                    _right = violationResults[resList]
-                    if (f'{HeaderRestraint}_{ii + 1}' in _left.columns and f'Atoms_{ii + 1}' in _left.columns) and \
-                            (f'{HeaderRestraint}_{ii + 1}' in _right.columns and f'Atoms_{ii + 1}' in _right.columns):
-                        _out[resList] = pd.merge(_left, _right, on=[f'{HeaderRestraint}_{ii + 1}', f'Atoms_{ii + 1}'], how='left').drop(columns=['PeakSerial']).fillna(0.0)
-                        zeroCols.append(f'{HeaderMean}_{ii + 1}')
+                        _left = dfs[resList]
+                        _right = violationResults[resList]
+                        if (f'{HeaderRestraint}_{ii + 1}' in _left.columns and f'Atoms_{ii + 1}' in _left.columns) and \
+                                (f'{HeaderRestraint}_{ii + 1}' in _right.columns and f'Atoms_{ii + 1}' in _right.columns):
+                            _new = pd.merge(_left, _right, on=[f'{HeaderRestraint}_{ii + 1}', f'Atoms_{ii + 1}'], how='left').drop(columns=['PeakSerial']).fillna(0.0)
+                            _out.append(_new)
+                            zeroCols.append(f'{HeaderMean}_{ii + 1}')
 
-                    for _colID in (HeaderRestraint, HeaderAtoms, HeaderMin, HeaderMax, HeaderMean, HeaderStd, HeaderCount1, HeaderCount2):
+                        for _colID in (HeaderRestraint, HeaderAtoms, HeaderMin, HeaderMax, HeaderMean, HeaderStd, HeaderCount1, HeaderCount2):
+                            _cols.append((f'{_colID}_{ii + 1}', lambda row: _getValueByHeader(row, f'{_colID}_{ii + 1}'), f'{_colID}_Tip{ii + 1}', None, None))
+
+                    else:
+                        # lose the PeakSerial column for each
+                        _new = dfs[resList].drop(columns=['PeakSerial']).fillna(0.0)
+                        _out.append(_new)
+
+                        # creat new column headings
+                        for _colID in (HeaderRestraint, HeaderAtoms):
+                            _cols.append((f'{_colID}_{ii + 1}', lambda row: _getValueByHeader(row, f'{_colID}_{ii + 1}'), f'{_colID}_Tip{ii + 1}', None, None))
+
+                # concatenate the final dataFrame
+                # _table = pd.concat([index, allPks, *_out.values()], axis=1)
+                _table = pd.concat(_out, axis=1)
+                # # purge all rows that contain all means == 0, fastest method
+                # _table = _table[np.count_nonzero(_table[zeroCols].values, axis=1) > 0]
+                # process all row that have means > 0.3, keep only rows that contain at least one valid mean
+                _table = _table[(_table[zeroCols] >= self._meanLowerLimit).sum(axis=1) > 0]
+
+            else:
+                # only show the restraints
+
+                _out = [index, allPks]
+                # no results - just show the table
+                for ii, resList in enumerate(resLists):
+                    # print(f'      resList {ii}   {resList}')
+
+                    # lose the PeakSerial column for each
+                    _new = dfs[resList].drop(columns=['PeakSerial']).fillna(0.0)
+                    _out.append(_new)
+
+                    # creat new column headings
+                    for _colID in (HeaderRestraint, HeaderAtoms):
                         _cols.append((f'{_colID}_{ii + 1}', lambda row: _getValueByHeader(row, f'{_colID}_{ii + 1}'), f'{_colID}_Tip{ii + 1}', None, None))
 
-            # concatenate the final dataFrame
-            _table = pd.concat([index, allPks, *_out.values()], axis=1)
-            # # purge all rows that contain all means == 0, fastest method
-            # _table = _table[np.count_nonzero(_table[zeroCols].values, axis=1) > 0]
-            # process all row that have means > 0.3, keep only rows that contain at least one valid mean
-            _table = _table[(_table[zeroCols] >= self._meanLowerLimit).sum(axis=1) > 0]
+                # concatenate to give the final table
+                _table = pd.concat(_out, axis=1)
 
         else:
             # make a table that only has peaks

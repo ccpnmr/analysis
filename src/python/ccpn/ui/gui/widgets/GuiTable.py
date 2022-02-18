@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-18 11:50:22 +0000 (Fri, February 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-18 12:35:06 +0000 (Fri, February 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -209,24 +209,27 @@ class GuiTable(TableWidget, Base):
 
     ICON_FILE = os.path.join(os.path.dirname(__file__), 'icons', 'editable.png')
 
-    styleSheet = """
-                    GuiTable {
+    styleSheet = """GuiTable {
                         background-color: %(GUITABLE_BACKGROUND)s;
                         alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
                         border: 2px solid %(BORDER_NOFOCUS)s;
                         border-radius: 2px;
                     }
-                    
+                    GuiTable::focus {
+                        background-color: %(GUITABLE_BACKGROUND)s;
+                        alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
+                        border: 2px solid %(BORDER_FOCUS)s;
+                        border-radius: 2px;
+                    }
                     GuiTable::item {
                         padding: 2px;
                         color: %(GUITABLE_ITEM_FOREGROUND)s;
                     }
-                    
                     GuiTable::item::selected {
                         background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
                         color: %(GUITABLE_SELECTED_FOREGROUND)s;
                     }
-                """
+                    """
 
     # define the class for the table widget items
     ITEMKLASS = CcpnTableWidgetItem
@@ -1149,27 +1152,55 @@ class GuiTable(TableWidget, Base):
         self.current.guiTable = None
         self.setStyleSheet(self._defaultStyleSheet)
 
-
     def _setCurrentStyleSheet(self):
-        focusColour = getColours()[BORDERFOCUS]
-        styleSheet = "GuiTable { " \
-                     "border: 2px solid;" \
-                     "border-radius: 2px;" \
-                     "border-color: %s;" \
-                     "} " % focusColour
-        self.setStyleSheet(styleSheet)
-
+        styleSheet = """GuiTable {
+                            background-color: %(GUITABLE_BACKGROUND)s;
+                            alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
+                            border: 2px solid %(BORDER_FOCUS)s;
+                            border-radius: 2px;
+                        }
+                        GuiTable::focus {
+                            background-color: %(GUITABLE_BACKGROUND)s;
+                            alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
+                            border: 2px solid %(BORDER_FOCUS)s;
+                            border-radius: 2px;
+                        }
+                        GuiTable::item {
+                            padding: 2px;
+                            color: %(GUITABLE_ITEM_FOREGROUND)s;
+                        }
+                        GuiTable::item::selected {
+                            background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
+                            color: %(GUITABLE_SELECTED_FOREGROUND)s;
+                        }
+                        """
+        self.setStyleSheet(styleSheet % getColours())
 
     def _setDraggingStyleSheet(self):
         """Set the focus/noFocus colours for the widget
         """
-        dropColour = getColours()[GUITABLE_DROP_BORDER]
-        styleSheet = "GuiTable { " \
-                     "border: 2px solid;" \
-                     "border-radius: 2px;" \
-                     "border-color: %s;" \
-                     "} " % dropColour
-        self.setStyleSheet(styleSheet)
+        styleSheet = """GuiTable {
+                            background-color: %(GUITABLE_BACKGROUND)s;
+                            alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
+                            border: 2px solid %(BORDER_NOFOCUS)s;
+                            border-radius: 2px;
+                        }
+                        GuiTable::focus {
+                            background-color: %(GUITABLE_BACKGROUND)s;
+                            alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
+                            border: 2px solid %(BORDER_FOCUS)s;
+                            border-radius: 2px;
+                        }
+                        GuiTable::item {
+                            padding: 2px;
+                            color: %(GUITABLE_ITEM_FOREGROUND)s;
+                        }
+                        GuiTable::item::selected {
+                            background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
+                            color: %(GUITABLE_SELECTED_FOREGROUND)s;
+                        }
+                        """
+        self.setStyleSheet(styleSheet % getColours())
 
     ####################################################################################################################
     ####################################################################################################################
@@ -1297,7 +1328,6 @@ class GuiTable(TableWidget, Base):
         self.initSearchWidget()
         if self.searchWidget is not None:
             self.searchWidget.show()
-
 
     def _copySelectedCell(self):
         from ccpn.util.Common import copyToClipboard
@@ -1792,8 +1822,6 @@ class GuiTable(TableWidget, Base):
         self._clickedInTable = True if self.itemAt(event.pos()) else False
         self.setCurrent()
         super().mousePressEvent(event)
-
-
 
     def getRightMouseItem(self):
         if self._rightClickedTableItem:

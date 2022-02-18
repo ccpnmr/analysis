@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-04 14:27:40 +0000 (Fri, February 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-18 11:50:22 +0000 (Fri, February 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -213,7 +213,7 @@ class GuiTable(TableWidget, Base):
                     GuiTable {
                         background-color: %(GUITABLE_BACKGROUND)s;
                         alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
-                        border: 1px solid %(BORDER_NOFOCUS)s;
+                        border: 2px solid %(BORDER_NOFOCUS)s;
                         border-radius: 2px;
                     }
                     
@@ -1165,7 +1165,7 @@ class GuiTable(TableWidget, Base):
         """
         dropColour = getColours()[GUITABLE_DROP_BORDER]
         styleSheet = "GuiTable { " \
-                     "border: 1px solid;" \
+                     "border: 2px solid;" \
                      "border-radius: 2px;" \
                      "border-color: %s;" \
                      "} " % dropColour

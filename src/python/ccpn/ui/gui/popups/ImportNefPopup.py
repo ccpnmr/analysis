@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-18 12:35:29 +0000 (Fri, February 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-18 13:16:58 +0000 (Fri, February 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -380,6 +380,7 @@ class NefDictFrame(Frame):
         self._plusIcon = Icon('icons/plus.png')
         self._nefWidgets = []
         self.valid = None
+        self._nefImporterOpenFirstTable = self.application.preferences.appearance.nefImporterOpenFirstTable
 
         # needs to be done this way otherwise _splitterMargins is 'empty' or clashes with frame stylesheet
         self.setContentsMargins(*_splitterMargins)
@@ -2402,7 +2403,8 @@ class NefDictFrame(Frame):
             _name, _data = saveFrame.name, loop.data
 
             self._nefTables = {}
-            frame, table = self._addTableToFrame(_data, _name.upper(), newWidgets=True, showMore=False)
+
+            frame, table = self._addTableToFrame(_data, _name.upper(), newWidgets=True, showMore=self._nefImporterOpenFirstTable)
             table.resizeColumnsToContents()
 
             # get the group name add fetch the correct mapping
@@ -2568,6 +2570,8 @@ class NefDictFrame(Frame):
         if not table:
             table = PandasDataFrameTableView(frame.contentsFrame)
         frame.contentsFrame.getLayout().addWidget(table, 0, 0)
+        frame.contentsFrame.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        frame.contentsFrame.setMinimumSize(100, 100)
         table.setVisible(True)
 
         _model = PandasDataFrameModel(pd.DataFrame(_data))

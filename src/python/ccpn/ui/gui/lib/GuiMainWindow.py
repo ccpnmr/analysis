@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 16:47:15 +0000 (Tue, February 15, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-02-21 17:00:31 +0000 (Mon, February 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -61,7 +61,7 @@ from ccpn.util.Logging import getLogger
 
 from ccpn.core.lib.Notifiers import Notifier
 
-from ccpn.ui.gui.widgets.PlotterWidget import PlotterWidget
+from ccpn.ui.gui.widgets.PlotterWidget import plotter
 
 #from collections import OrderedDict
 
@@ -350,7 +350,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                           # 'newProject' : self.application.newProject,
                           'info'       : getLogger().info,
                           'warning'    : getLogger().warning,
-                          'plot'       : PlotterWidget()
+                          'plotter'    : plotter
                           }
         self.pythonConsole = IpythonConsole(self)
 

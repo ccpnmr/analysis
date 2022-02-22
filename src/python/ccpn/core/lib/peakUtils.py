@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-11 17:19:54 +0000 (Fri, February 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-22 16:06:26 +0000 (Tue, February 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -590,6 +590,7 @@ def _fit1SiteBindCurve(bindingCurves, aFunc=oneSiteBindingCurve, xfStep=0.01, xf
     ys = data.values.flatten(order='F')  #puts all y values in a single 1d array.
     xss = np.array([data.columns] * data.shape[0])
     xs = xss.flatten(order='F')  # #puts all x values in a 1d array preserving the original y positions (order='F').
+    print(( xs, ys), '$$$')
     if len(xs) <= 1:
         return errorValue  #not enough datapoints
     try:
@@ -597,7 +598,6 @@ def _fit1SiteBindCurve(bindingCurves, aFunc=oneSiteBindingCurve, xfStep=0.01, xf
         xhalfUnscaled, bMaxUnscaled = param[0]
         yScaled = ys / bMaxUnscaled  #scales y to have values 0-1
         paramScaled = curve_fit(aFunc, xs, yScaled)
-
         xfRange = np.max(xs) - np.min(xs)
         xfPerc = percentage(xfPercent, xfRange)
         xfMax = np.max(xs) + xfPerc

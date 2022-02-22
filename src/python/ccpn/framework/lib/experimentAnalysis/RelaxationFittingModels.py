@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-16 11:02:55 +0000 (Wed, February 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-22 16:06:27 +0000 (Tue, February 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,19 +29,53 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 
 from ccpn.core.DataTable import TableFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC
+from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel
 import numpy as np
+import lmfit.lineshapes as func
+from lmfit.models import update_param_vals
 
 
+class ExponentialModel(MinimiserModel):
+    """A model based on an exponential decay function.
+    The model has two Parameters: `amplitude` (:math:`A`) and `decay`
+    (:math:`\tau`) and is defined as:
+        f(x; A, \tau) = A e^{-x/\tau}
+    """
+
+    FITTING_FUNC = func.exponential
+
+    def __init__(self, independent_vars=['x'], prefix='', nan_policy='raise', **kwargs):
+        kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
+        super().__init__(ExponentialModel.FITTING_FUNC, **kwargs)
+
+    def guess(self, data, x, **kwargs):
+        """Estimate initial model parameter values from data."""
+        try:
+            sval, oval = np.polyfit(x, np.log(abs(data) + 1.e-15), 1)
+        except TypeError:
+            sval, oval = 1., np.log(abs(max(data) + 1.e-9))
+        pars = self.make_params(amplitude=np.exp(oval), decay=-1.0 / sval)
+        return update_param_vals(pars, self.prefix, **kwargs)
 
 
 class T1FittingModel(FittingModelABC):
     """
     T1 model class containing fitting equations
     """
-    ModelName = 'T1'
+    ModelName   = 'T1'
 
-    def fit(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
+    Info        = '''
+                    A model based on an exponential decay function.
+                    The model has two Parameters: `amplitude` (`A`) and `decay` (`\ tau`)
+                    '''
+    Description = ''' A e^{ -x / \ tau }'''
+    References = '''
+                    1) https://en.wikipedia.org/wiki/Exponential_decay
+                 '''
+
+    Minimiser = ExponentialModel
+
+    def fitSeries(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
         pass
 
 
@@ -53,3 +87,5 @@ def _registerChemicalShiftMappingModels():
     models = [T1FittingModel]
     for model in models:
         RelaxationAnalysisBC.registerFittingModel(model)
+
+

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-18 13:16:58 +0000 (Fri, February 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-22 01:36:09 +0000 (Tue, February 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -215,6 +215,68 @@ class PandasDataFrameTableView(QtWidgets.QTableView):
 
         _height = getFontHeight(name=TABLEFONT, size='MEDIUM')
         self.setMinimumSize(3 * _height, 3 * _height + self.horizontalScrollBar().height())
+
+
+class NewHeaderModel(QtCore.QAbstractTableModel):
+    """A simple table model to view pandas DataFrames
+    """
+    _defaultForegroundColour = QtGui.QColor(getColours()[GUITABLE_ITEM_FOREGROUND])
+
+    def __init__(self, row, column):
+        """Initialise the pandas model
+        Allocates space for foreground/background colours
+        """
+        QtCore.QAbstractTableModel.__init__(self)
+        # create numpy arrays to match the data that will hold background colour
+        self._colour = np.zeros((row, column), dtype=np.object)
+        self._data = np.zeros((row, column), dtype=np.object)
+
+    def rowCount(self, parent=None):
+        """Return the row count for the dataFrame
+        """
+        return self._data.shape[0]
+
+    def columnCount(self, parent=None):
+        """Return the column count for the dataFrame
+        """
+        return self._data.shape[1]
+
+    def data(self, index, role=QtCore.Qt.DisplayRole):
+        """Process the data callback for the model
+        """
+        if index.isValid():
+            if role == QtCore.Qt.DisplayRole:
+                return str(self._data.iat[index.row(), index.column()])
+
+            if role == QtCore.Qt.BackgroundRole:
+                if (_col := self._colour[index.row(), index.column()]):
+                    # get the colour from the dict
+                    return _col.get(role)
+
+            if role == QtCore.Qt.ForegroundRole:
+                if (_col := self._colour[index.row(), index.column()]):
+                    # get the colour from the dict
+                    if (_foreground := _col.get(role)):
+                        return _foreground
+
+                # return the default foreground colour
+                return self._defaultForegroundColour
+
+        return None
+
+    # def setData(self, index, value, role) -> bool:
+    #     """Set the data for the index
+    #     """
+    #     if index.isValid():
+    #         if role == QtCore.Qt.UserRole + 1:
+    #             col = index.column()
+    #             span = int(value)
+    #             if int(value) > 0:
+    #                 if (col + span - 1>= _columnCount()):
+    #                     span = columnCount() - col
+    #                 self._data[span, ]
+    #         elif role == QtCore.Qt.UserRole + 2:
+    #             pass
 
 
 class PandasDataFrameModel(QtCore.QAbstractTableModel):

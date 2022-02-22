@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-18 15:45:11 +0000 (Fri, February 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-22 19:58:03 +0000 (Tue, February 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -38,6 +38,7 @@ from collections import OrderedDict as OD, namedtuple
 # from collections import Counter
 from operator import attrgetter, itemgetter
 from typing import List, Union, Optional, Sequence, Tuple
+
 from ccpn.core.lib import Pid
 from ccpn.core import _coreImportOrder
 from ccpn.framework.lib.ccpnNef.CcpnNefCommon import nef2CcpnMap, saveFrameReadingOrder, _isALoop, \
@@ -48,6 +49,7 @@ from ccpn.util import jsonIo
 from ccpn.util.nef import Specification
 from ccpn.util.nef import StarIo
 from ccpn.util.isotopes import isotopeCode2Nucleus
+
 from ccpnmodel.ccpncore.lib import Constants as coreConstants
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -83,9 +85,12 @@ from ccpn.core.lib import SpectrumLib
 from ccpn.core.lib.MoleculeLib import extraBoundAtomPairs
 from ccpn.core.lib import RestraintLib
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
+
 from ccpn.util.Logging import getLogger
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.util.AttrDict import AttrDict
+from ccpn.util.nef.GenericStarParser import PARSER_MODE_STANDARD
+
 from ccpn.framework.lib.ccpnNef.CcpnNefContent import CcpnNefContent
 
 
@@ -2207,7 +2212,7 @@ class CcpnNefReader(CcpnNefContent):
     verifiers = {}
     renames = {}
 
-    def __init__(self, application, specificationFile: str = None, mode: str = 'standard',
+    def __init__(self, application, specificationFile:str = None, mode:str = PARSER_MODE_STANDARD,
                  testing: bool = False):
 
         self.application = application

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 11:11:24 +0000 (Tue, February 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-22 19:58:03 +0000 (Tue, February 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -636,11 +636,12 @@ class ChemicalShiftList(AbstractWrapperObject):
     #===========================================================================================
 
     @logCommand(get='self')
-    def newChemicalShift(self, value: float = None, valueError: float = None, figureOfMerit: float = 1.0,
+    def newChemicalShift(self,
+                         value:float = None, valueError:float = None, figureOfMerit:float = 1.0,
                          static: bool = False,
-                         nmrAtom: Union[NmrAtom, str, Pid, None] = None,
-                         chainCode: str = None, sequenceCode: str = None, residueType: str = None, atomName: str = None,
-                         comment: str = None
+                         nmrAtom:Union[NmrAtom, str, Pid, None] = None,
+                         chainCode:str = None, sequenceCode:str = None, residueType:str = None, atomName:str = None,
+                         comment:str = None
                          ):
         """Create new ChemicalShift within ChemicalShiftList.
 
@@ -666,17 +667,21 @@ class ChemicalShiftList(AbstractWrapperObject):
         """
 
         data = self._wrappedData.data
-        if nmrAtom:
+        if nmrAtom is not None:
             _nmrAtom = self.project.getByPid(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom
-            if not _nmrAtom:
+            if _nmrAtom is None:
                 raise ValueError(f'{self.className}.newChemicalShift: nmrAtom {_nmrAtom} not found')
             nmrAtom = _nmrAtom
 
         if data is not None and nmrAtom and nmrAtom.pid in list(data[CS_NMRATOM]):
             raise ValueError(f'{self.className}.newChemicalShift: nmrAtom {nmrAtom} already exists')
 
-        shift = self._newChemicalShiftObject(data, value, valueError, figureOfMerit, static,
-                                             nmrAtom, chainCode, sequenceCode, residueType, atomName, comment)
+        shift = self._newChemicalShiftObject(data=data,
+                                             value=value, valueError=valueError, figureOfMerit=figureOfMerit,
+                                             static=static,
+                                             nmrAtom=nmrAtom, chainCode=chainCode, sequenceCode=sequenceCode,
+                                             residueType=residueType, atomName=atomName,
+                                             comment=comment)
 
         return shift
 
@@ -689,15 +694,19 @@ class ChemicalShiftList(AbstractWrapperObject):
         from ccpn.core.ChemicalShift import _getByTuple, _newChemicalShift as _newShift
 
         # make new tuple - verifies contents
-        _row = _getByTuple(self, static=static,
-                           value=value, valueError=valueError, figureOfMerit=figureOfMerit,
-                           nmrAtom=None,
-                           chainCode=chainCode, sequenceCode=sequenceCode, residueType=residueType, atomName=atomName,
-                           comment=comment)
         _nextUniqueId = self.project._getNextUniqueIdValue(CS_CLASSNAME)
+        _row = _getByTuple(chemicalShiftList=self,
+                           uniqueId=_nextUniqueId,
+                           isDeleted=False,
+                           static=static,
+                           value=value, valueError=valueError, figureOfMerit=figureOfMerit,
+                           nmrAtom=nmrAtom,
+                           chainCode=chainCode, sequenceCode=sequenceCode,
+                           residueType=residueType, atomName=atomName,
+                           comment=comment)
         # add to dataframe - this is in undo stack and marked as modified
-        _dfRow = pd.DataFrame([_row], columns=CS_COLUMNS)
-        _dfRow[CS_UNIQUEID] = int(_nextUniqueId)
+        # Note the "additional" tuple around _row; needed to match the shape as one row, 12 columns
+        _dfRow = pd.DataFrame(data=(_row,), columns=CS_COLUMNS)
 
         if data is None:
             # set as the new subclassed DataFrameABC

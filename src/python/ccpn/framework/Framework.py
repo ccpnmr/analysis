@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-16 12:24:33 +0000 (Wed, February 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-22 19:58:03 +0000 (Tue, February 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1045,7 +1045,7 @@ class Framework(NotifierBase, GuiBase):
 
         CCPNINTERNAL: called from StarDataLoader
         """
-        dataBlock = dataLoader.dataBlock
+        dataBlock = dataLoader.dataBlock  # this will (if required) also read and parse the file
 
         if dataLoader.createNewProject:
             self._closeProject()
@@ -1053,7 +1053,9 @@ class Framework(NotifierBase, GuiBase):
         else:
             project = self.project
 
-        # sparkyReader.importSparkyProject(project, dataBlock)
+        with rebuildSidebar(application=self):
+            dataLoader._importIntoProject(project)
+
         return project
 
     def _loadPythonFile(self, path):

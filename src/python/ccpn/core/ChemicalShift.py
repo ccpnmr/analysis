@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 11:11:24 +0000 (Tue, February 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-22 19:58:03 +0000 (Tue, February 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -609,6 +609,8 @@ def _newChemicalShift(project: Project, chemicalShiftList, _uniqueId: Optional[i
 
 
 def _getByTuple(chemicalShiftList,
+                uniqueId: int = None,
+                isDeleted: bool = False,
                 static: bool = False,
                 value: float = None, valueError: float = None, figureOfMerit: float = 1.0,
                 nmrAtom: Union[NmrAtom, str, None] = None,
@@ -638,8 +640,8 @@ def _getByTuple(chemicalShiftList,
         raise ValueError(f'figureOfMerit must be in range [{MINFOM} - {MAXFOM}]')
 
     # create the row as defined in the pandas dataFrame
-    newRow = (None,  # as yet undefined uniqueId
-              None,  # isDeleted
+    newRow = (uniqueId,
+              isDeleted,
               static,
               value,
               valueError,

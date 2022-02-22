@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:52 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-22 19:58:03 +0000 (Tue, February 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -33,10 +33,11 @@ from typing import Union, Optional
 from contextlib import contextmanager
 
 from ccpn.framework.lib.DataLoaders.DataLoaderABC import DataLoaderABC
-from ccpn.framework.lib.ccpnNef import CcpnNefIo
+from ccpn.framework.lib.ccpnNmrStarIo.CcpnNmrStarReader import CcpnNmrStarReader
 from ccpn.util import Path
 from ccpn.core.Project import Project
 
+from ccpn.util.Logging import getLogger
 
 
 class StarDataLoader(DataLoaderABC):
@@ -49,7 +50,7 @@ class StarDataLoader(DataLoaderABC):
 
     def __init__(self, path):
         super(StarDataLoader, self).__init__(path)
-        self._nefReader = CcpnNefIo.CcpnNefReader(application=self.application)
+        self._starReader = CcpnNmrStarReader()
         self._dataBlock = None
 
     @property
@@ -57,7 +58,8 @@ class StarDataLoader(DataLoaderABC):
         """Get the NmrdataBlock from the file define by self.path
         """
         if self._dataBlock is None:
-            self._dataBlock = self._nefReader.getNMRStarData(str(self.path))
+            self._dataBlock = self._starReader.parse(path=self.path)
+            getLogger().debug(f'StarDataLoader: Read "{self.path}" into dataBlock')
         return self._dataBlock
 
     def load(self):
@@ -67,6 +69,14 @@ class StarDataLoader(DataLoaderABC):
         """
         result = self.application._loadStarFile(dataLoader=self)
         return [result]
+
+    def _importIntoProject(self, project):
+        """Import the dataBlock, i.e. the data of self into project
+        :param project: a Project instance
+
+        CCPNINTERNAL: used in Framework._loadStarFile
+        """
+        self._starReader.importIntoProject(project=project)
 
 
 StarDataLoader._registerFormat()

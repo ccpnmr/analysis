@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-22 19:58:03 +0000 (Tue, February 22, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-02-23 11:59:04 +0000 (Wed, February 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1066,19 +1066,20 @@ class CcpnNefWriter:
                 name = rowdata['atom_name']
                 nmrAtom = shift.nmrAtom
                 if nmrAtom:
-                    isotopeCode = nmrAtom.isotopeCode.upper()
-                    isotope, element = commonUtil.splitIntFromChars(isotopeCode)
-                    if isotope is not None:
-                        rowdata['element'] = element
-                        rowdata['isotope_number'] = isotope
+                    if nmrAtom.isotopeCode is not None:
+                        isotopeCode = nmrAtom.isotopeCode.upper()
+                        isotope, element = commonUtil.splitIntFromChars(isotopeCode)
+                        if isotope is not None:
+                            rowdata['element'] = element
+                            rowdata['isotope_number'] = isotope
 
-                    # Correct for atom names starting with the isotopeCode (e.g. 2HA, 111CD)
-                    if name.startswith(isotopeCode):
-                        plainName = name[len(str(isotope)):]
-                        if chemicalShiftList.getChemicalShift(nmrAtom.nmrResidue.pid + Pid.IDSEP + plainName) is None:
-                            # There is no shift in this list that has the corresponding name without the
-                            # isotope number prefix. Remove the prefix for writing
-                            rowdata['atom_name'] = plainName
+                        # Correct for atom names starting with the isotopeCode (e.g. 2HA, 111CD)
+                        if name.startswith(isotopeCode):
+                            plainName = name[len(str(isotope)):]
+                            if chemicalShiftList.getChemicalShift(nmrAtom.nmrResidue.pid + Pid.IDSEP + plainName) is None:
+                                # There is no shift in this list that has the corresponding name without the
+                                # isotope number prefix. Remove the prefix for writing
+                                rowdata['atom_name'] = plainName
 
                 loop.newRow(rowdata)
         else:

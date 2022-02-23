@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-23 11:59:04 +0000 (Wed, February 23, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-23 17:01:56 +0000 (Wed, February 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -131,7 +131,9 @@ DEFAULTRESTRAINTLINKLOAD = False
 REGEXREMOVEENDQUOTES = u'\`\d*`+?'
 REGEXPREFIXQUOTEDNUMBER = u'^\`(\d+)\`'
 REGEXPOSTFIXQUOTEDNUMBER = u'\`(\d+)\`$'
-REGEXCHECKNMRATOM = u'^\?\@\d+$|^\w+\@\d+$'
+# REGEXCHECKNMRATOM = u'^\?\@\d+$|^\w+\@\d+$'
+REGEXCHECKNMRATOM = u'^\?\@\d+$|^\w+\%?\*?\%?\@\d+$'
+
 
 NEFEXTENSION = '.nef'
 

@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-18 12:36:33 +0000 (Fri, February 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-23 13:03:56 +0000 (Wed, February 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -924,7 +924,7 @@ class ChemicalShiftTable(GuiTable):
                 elif trigger == Notifier.CREATE:
                     # uniqueIds in the visible table
                     if uniqueId in (set(_df[CS_UNIQUEID]) - set(tableIds)):
-                        newRow = _newRowFromUniqueId(_df, obj, uniqueId)
+                        newRow = list(_newRowFromUniqueId(_df, obj, uniqueId))
                         # visible table dataframe update
                         self._dataFrameObject._dataFrame.loc[uniqueId] = newRow
                         # update the table widgets - really need to change to QTableView (think it was actually this before)
@@ -933,7 +933,7 @@ class ChemicalShiftTable(GuiTable):
                 elif trigger == Notifier.CHANGE:
                     # uniqueIds in the visible table
                     if uniqueId in (set(_df[CS_UNIQUEID]) & set(tableIds)):
-                        newRow = _newRowFromUniqueId(_df, obj, uniqueId)
+                        newRow = list(_newRowFromUniqueId(_df, obj, uniqueId))
                         # visible table dataframe update
                         self._dataFrameObject._dataFrame.loc[uniqueId] = newRow
                         # update the table widgets - really need to change to QTableView (think it was actually this before)

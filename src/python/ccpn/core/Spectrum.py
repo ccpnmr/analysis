@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-18 17:17:16 +0000 (Fri, February 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-23 08:21:01 +0000 (Wed, February 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -71,6 +71,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core._implementation.SpectrumTraits import SpectrumTraits
+from ccpn.core._implementation.SpectrumData import SliceData, PlaneData, RegionData
 
 from ccpn.core.Project import Project
 from ccpn.core.lib import Pid
@@ -1398,12 +1399,12 @@ class Spectrum(AbstractWrapperObject):
                   Use axisCodes to set magnetisation transfers instead.""")
 
     @property
-    def intensities(self) -> numpy.array:
-        """ spectral intensities as NumPy array for 1D spectra
+    def intensities(self) -> SliceData:
+        """ spectral intensities as a SliceData (i.e. NumPy array) for 1D spectra
         """
         if self.dimensionCount != 1:
             getLogger().warning('Currently this method only works for 1D spectra')
-            return numpy.zeros((self.pointCounts[0],), dtype=numpy.float32)
+            return SliceData((self.pointCounts[0],))
 
         if self._intensities is None:
             # Assignment is Redundant as getSliceData does that;
@@ -2074,20 +2075,21 @@ class Spectrum(AbstractWrapperObject):
         return value * self.scale
 
     @logCommand(get='self')
-    def getSliceData(self, position=None, sliceDim: int = 1) -> numpy.array:
-        """Get a slice defined by sliceDim and a position vector as numpy array.
+    def getSliceData(self, position=None, sliceDim: int = 1) -> SliceData:
+        """Get a slice defined by sliceDim and a position vector as a SliceData object
+        (i.e. a numpy array).
 
         :param position: An optional list/tuple of point positions (1-based);
                          defaults to [1,1,1,1]
         :param sliceDim: Dimension of the slice axis (1-based); defaults to 1
 
-        :return: numpy 1D data array
+        :return: SliceData 1D data array
 
         NB: use getSlice() method for axisCode based access
         """
         if self.dataSource is None:
             getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zeros only' % self)
-            data = numpy.zeros((self.pointCounts[sliceDim - 1],), dtype=numpy.float32)
+            data = SliceData((self.pointCounts[sliceDim - 1],))
 
         else:
             try:
@@ -2104,14 +2106,15 @@ class Spectrum(AbstractWrapperObject):
         return data
 
     @logCommand(get='self')
-    def getSlice(self, axisCode, position) -> numpy.array:
-        """Get a slice defined by axisCode and a position vector s numpy array
+    def getSlice(self, axisCode, position) -> SliceData:
+        """Get a slice defined by axisCode and a position vector a SliceData object
+        (i.e. a numpy array)
 
         :param axisCode: valid axisCode of the slice axis
         :param position: An optional list/tuple of point positions (1-based);
                          defaults to [1,1,1,1]
 
-        :return: numpy 1D data array
+        :return: SliceData 1D data array
 
         NB: use getSliceData() method for dimension based access
         """
@@ -2168,16 +2171,15 @@ class Spectrum(AbstractWrapperObject):
         return newSpectrum
 
     @logCommand(get='self')
-    def getPlaneData(self, position=None, xDim: int = 1, yDim: int = 2) -> numpy.ndarray:
+    def getPlaneData(self, position=None, xDim: int = 1, yDim: int = 2) -> PlaneData:
         """Get a plane defined by by xDim and yDim ('1'-based), and a position vector ('1'-based)
-        as an numpy ndarray.
-        Dimensionality must be >= 2
+        as a PlaneData object (i.e. a 2D numpy.ndarray). Dimensionality must be >= 2
 
         :param position: A list/tuple of point-positions (1-based)
         :param xDim: Dimension of the first axis (1-based)
         :param yDim: Dimension of the second axis (1-based)
 
-        :return: 2D float32 NumPy array in order (yDim, xDim)
+        :return: a PlaneData object (i.e. a 2D numpy.ndarray in order (yDim, xDim))
 
         NB: use getPlane() method for axisCode based access
         """
@@ -2186,7 +2188,7 @@ class Spectrum(AbstractWrapperObject):
 
         if self.dataSource is None:
             getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zeros only' % self)
-            return numpy.zeros((self.pointCounts[yDim - 1], self.pointCounts[xDim - 1]), dtype=numpy.float32)
+            return PlaneData(shape=(self.pointCounts[yDim - 1], self.pointCounts[xDim - 1]))
 
         try:
             position = self.dataSource.checkForValidPlane(position, xDim=xDim, yDim=yDim)
@@ -2208,15 +2210,15 @@ class Spectrum(AbstractWrapperObject):
         return data
 
     @logCommand(get='self')
-    def getPlane(self, axisCodes, position=None) -> numpy.ndarray:
-        """Get a plane defined by axisCodes and position as a numpy ndarray.
-        Dimensionality must be >= 2
+    def getPlane(self, axisCodes, position=None) -> PlaneData:
+        """Get a plane defined by axisCodes and position as a a PlaneData object
+        (i.e. a 2D numpy.ndarray in order (yDim, xDim)). Dimensionality must be >= 2
 
         :param axisCodes: tuple/list of two axisCodes; expand if exactMatch=False
         :param position: A list/tuple of point-positions (1-based)
         :param axisCodes: A list/tuple of axisCodes that define the plane dimensions
 
-        :return: A 2-dimensional float32 numpy array in order (yDim, xDim)
+        :return: a PlaneData object (i.e. a 2D numpy.ndarray in order (yDim, xDim))
 
         NB: use getPlaneData method for dimension based access
         """
@@ -2282,7 +2284,7 @@ class Spectrum(AbstractWrapperObject):
         return newSpectrum
 
     @logCommand(get='self')
-    def getProjection(self, axisCodes: (tuple, list), method: str = 'max', threshold=None) -> numpy.ndarray:
+    def getProjection(self, axisCodes: (tuple, list), method: str = 'max', threshold=None) -> PlaneData:
         """Get projected plane defined by two axisCodes, using method and an optional threshold
 
         :param axisCodes: tuple/list of two axisCodes; expand if exactMatch=False
@@ -2290,7 +2292,7 @@ class Spectrum(AbstractWrapperObject):
                        'sum', 'sum above threshold', 'sum below threshold'
         :param threshold: threshold value for relevant method
 
-        :return: projected spectrum data as 2D float32 NumPy array in order (yDim, xDim)
+        :return: projected spectrum data as a PlaneData object (i.e. a 2D numpy.ndarray in order (yDim, xDim))
         """
         projectedData = _getProjection(self, axisCodes=axisCodes, method=method, threshold=threshold)
         return projectedData
@@ -2451,10 +2453,10 @@ class Spectrum(AbstractWrapperObject):
         return sliceTuples
 
     @logCommand(get='self')
-    def getRegion(self, **axisDict) -> numpy.ndarray:
+    def getRegion(self, **axisDict) -> RegionData:
         """
-        Return the region of the spectrum data defined by the axis limits in ppm as numpy ndarray
-        of the same dimensionality as defined by the Spectrum instance.
+        Return the region of the spectrum data defined by the axis limits in ppm as a RegionData object,
+        i.e. a numpy.ndarray of the same dimensionality as defined by the Spectrum instance.
 
         Axis limits  are passed in as a dict of (axisCode, tupleLimit) key, value pairs
         with the tupleLimit supplied as (startPpm,stopPpm) axis limits in ppm (lower ppm value first).
@@ -2471,18 +2473,12 @@ class Spectrum(AbstractWrapperObject):
             regionData = spectrum.getRegion(Hn=(7.0, 9.0), Nh=(110, 130))
 
         :param axisDict: dict of (axisCode, (startPpm,stopPpm)) key,value pairs
-        :return: numpy array
+        :return: RegionData object
         """
         if not self.hasValidPath():
             raise RuntimeError('Not valid path for %s ' % self)
         sliceTuples = self._axisDictToSliceTuples(axisDict)
         return self.dataSource.getRegionData(sliceTuples, aliasingFlags=[1] * self.dimensionCount)
-
-    # def getRegionData(self, exclusionBuffer: Optional[Sequence] = None, minimumDimensionSize: int = 3, **axisDict):
-    #     """Return the region of the spectrum data defined by the axis limits.
-    #     GWV: Old routine replaced by getRegion
-    #     """
-    #     raise NotImplementedError('replace by getRegion')
 
     @logCommand(get='self')
     def createPeak(self, peakList=None, **ppmPositions) -> Optional['Peak']:
@@ -2530,7 +2526,7 @@ class Spectrum(AbstractWrapperObject):
         :param negativeThreshold: float or None specifying the negative threshold below which to find peaks.
                                   if None, negative peak picking is disabled.
         :param ppmRegions: dict of (axisCode, tupleValue) key, value pairs
-        :return: tuple of new peaks
+        :return: tuple of new Peak instances
         """
         from ccpn.core.lib.SpectrumLib import _pickPeaksByRegion
 

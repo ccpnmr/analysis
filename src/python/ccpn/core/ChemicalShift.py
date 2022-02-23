@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-22 19:58:03 +0000 (Tue, February 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-23 17:20:31 +0000 (Wed, February 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -230,7 +230,7 @@ class ChemicalShift(V3CoreObjectABC):
             raise ValueError(f'{self.className}.valueError must be of type float, int or None')
         _nmrAtomPid = self._wrapperList._getAttribute(self._uniqueId, CS_NMRATOM, str)
         if _nmrAtomPid:
-            raise ValueError(f'{self.className}.value cannot be changed with attached nmrAtom')
+            raise ValueError(f'{self.className}.valueError cannot be changed with attached nmrAtom')
         self._wrapperList._setAttribute(self._uniqueId, CS_VALUEERROR, value)
 
     #~~~~~~~~~~~~~~~~

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-17 17:26:56 +0000 (Thu, February 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-23 15:21:02 +0000 (Wed, February 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -210,7 +210,8 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
         checkable = QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable
         if self.includeProject:
             # add the project as the top of the tree - allows to un/select all
-            self.projectItem = QtWidgets.QTreeWidgetItem(self.invisibleRootItem())
+
+            self.projectItem = _StoredTreeWidgetItem(self.invisibleRootItem())
             self.projectItem.setText(0, self.project.name)
             if self._enableCheckBoxes:
                 self.projectItem.setFlags(self.projectItem.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
@@ -221,12 +222,14 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
 
         for name in self.checkList:
             if hasattr(self.project, name):  # just to be safe
-                item = QtWidgets.QTreeWidgetItem(self.headerItem)
+
+                item = _StoredTreeWidgetItem(self.headerItem)
                 item.setText(0, name)
                 item.setFlags(item.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
 
                 for obj in getattr(self.project, name):
-                    child = QtWidgets.QTreeWidgetItem(item)
+
+                    child = _StoredTreeWidgetItem(item)
                     if self._enableCheckBoxes:
                         child.setFlags(child.flags() | QtCore.Qt.ItemIsUserCheckable)
                     else:
@@ -343,7 +346,7 @@ class ProjectTreeCheckBoxes(QtWidgets.QTreeWidget, Base):
                     _item.setCheckState(0, self.lockedItems[_item.text(0)])
 
     def _itemChanged(self, item, column: int) -> None:
-        if column == 0:
+        if column == 0 and hasattr(item, 'storedCheckedState'):
             # remember the state of the checkbox for the next click
             if item.storedCheckedState != item.checkState(0):
                 item.storedCheckedState = item.checkState(0)
@@ -412,10 +415,7 @@ class _StoredTreeWidgetItem(QtWidgets.QTreeWidgetItem):
 
     def __init__(self, parent):
         super().__init__(parent)
-        # Assuming, that an element has only one checkbox
-        #
         self.storedCheckedState: QtCore.Qt.CheckState = self.checkState(0)
-        # Otherwise, we need more stored variables here
 
     def setCheckState(self, column: int, state: QtCore.Qt.CheckState) -> None:
         # The checkbox in the first column:

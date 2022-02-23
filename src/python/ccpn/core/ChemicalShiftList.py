@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-22 19:58:03 +0000 (Tue, February 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-23 17:32:16 +0000 (Wed, February 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -625,8 +625,6 @@ class ChemicalShiftList(AbstractWrapperObject):
                 # ensure that all shifts have the correct value/valueError when first loaded
                 if sh.value is None:
                     sh._recalculateShiftValue()
-                    if sh.value is None:
-                        sh.valueError = None
 
         return chemicalShiftList
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-23 17:01:56 +0000 (Wed, February 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-24 17:00:34 +0000 (Thu, February 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -215,7 +215,9 @@ DATANAME_DEPRECATED = 'ccpn_dataset_id'
 def saveNefProject(project: Project,
                    path: str,
                    overwriteExisting: bool = False,
-                   skipPrefixes=()):
+                   skipPrefixes: typing.Sequence = (),
+                   expandSelection: bool = True,
+                   includeOrphans: bool = False):
     """Save project NEF file to path"""
 
     dirPath, fileName = os.path.split(path)
@@ -228,7 +230,9 @@ def saveNefProject(project: Project,
     if os.path.exists(filePath) and not overwriteExisting:
         raise IOError("%s already exists" % filePath)
 
-    text = convert2NefString(project, skipPrefixes=skipPrefixes)
+    text = convert2NefString(project, skipPrefixes=skipPrefixes,
+                             expandSelection=expandSelection,
+                             includeOrphans=includeOrphans)
 
     if dirPath and not os.path.isdir(dirPath):
         os.makedirs(dirPath)
@@ -241,6 +245,7 @@ def exportNef(project: Project,
               overwriteExisting: bool = False,
               skipPrefixes: typing.Sequence = (),
               expandSelection: bool = True,
+              includeOrphans: bool = False,
               # exclusionDict={},
               pidList: typing.Sequence = None):
     """export NEF file to path"""
@@ -254,7 +259,9 @@ def exportNef(project: Project,
     if os.path.exists(path) and not overwriteExisting:
         raise IOError("%s already exists" % path)
 
-    text = convert2NefString(project, skipPrefixes=skipPrefixes, expandSelection=expandSelection,
+    text = convert2NefString(project, skipPrefixes=skipPrefixes,
+                             expandSelection=expandSelection,
+                             includeOrphans=includeOrphans,
                              pidList=pidList)  #, exclusionDict=exclusionDict)
 
     dirPath, fileName = os.path.split(path)
@@ -270,12 +277,15 @@ def convertToDataBlock(project: Project,
                        # overwriteExisting:bool=False,
                        skipPrefixes: typing.Sequence = (),
                        expandSelection: bool = True,
+                       includeOrphans: bool = False,
                        # exclusionDict={},
                        pidList: typing.Sequence = None):
     """export NEF file to path"""
     # ejb - dialog added to allow the changing of the name from the current project name.
 
-    dataBlock = convertToCcpnDataBlock(project, skipPrefixes=skipPrefixes, expandSelection=expandSelection,
+    dataBlock = convertToCcpnDataBlock(project, skipPrefixes=skipPrefixes,
+                                       expandSelection=expandSelection,
+                                       includeOrphans=includeOrphans,
                                        pidList=pidList)  #, exclusionDict=exclusionDict)
 
     return dataBlock
@@ -297,13 +307,13 @@ def writeDataBlock(dataBlock, path: str, overwriteExisting: bool = False):
         f.write(dataBlock.toString())
 
 
-def convert2NefString(project: Project, skipPrefixes: typing.Sequence = (), expandSelection: bool = True,
+def convert2NefString(project: Project, skipPrefixes: typing.Sequence = (), expandSelection: bool = True, includeOrphans: bool = False,
                       pidList: list = None):  #, exclusionDict:dict={}):
     """Convert project to NEF string"""
 
     converter = CcpnNefWriter(project)
 
-    dataBlock = converter.exportProject(expandSelection=expandSelection, pidList=pidList)  #, exclusionDict=exclusionDict)
+    dataBlock = converter.exportProject(expandSelection=expandSelection, includeOrphans=includeOrphans, pidList=pidList)  #, exclusionDict=exclusionDict)
 
     # Delete tags starting with certain prefixes.
     # NB designed to strip out 'ccpn' tags to make output comparison easier
@@ -329,13 +339,13 @@ def convert2NefString(project: Project, skipPrefixes: typing.Sequence = (), expa
     return dataBlock.toString()
 
 
-def convertToCcpnDataBlock(project: Project, skipPrefixes: typing.Sequence = (), expandSelection: bool = True,
+def convertToCcpnDataBlock(project: Project, skipPrefixes: typing.Sequence = (), expandSelection: bool = True, includeOrphans: bool = False,
                            pidList: list = None):  #, exclusionDict:dict={}):
     """Convert project to NEF string"""
 
     converter = CcpnNefWriter(project)
 
-    dataBlock = converter.exportProject(expandSelection=expandSelection, pidList=pidList)  #, exclusionDict=exclusionDict)
+    dataBlock = converter.exportProject(expandSelection=expandSelection, includeOrphans=includeOrphans, pidList=pidList)  #, exclusionDict=exclusionDict)
 
     # Delete tags starting with certain prefixes.
     # NB designed to strip out 'ccpn' tags to make output comparison easier
@@ -422,7 +432,9 @@ class CcpnNefWriter:
         self.programVersion = programVersion
         self.ccpn2SaveFrameName = {}
 
-    def exportObjects(self, expandSelection: bool = True,
+    def exportObjects(self,
+                      expandSelection: bool = True,
+                      includeOrphans: bool = False,
                       chains: typing.Sequence[Chain] = (),
                       chemicalShiftLists: typing.Sequence[ChemicalShiftList] = (),
                       restraintTables: typing.Sequence[RestraintTable] = (),
@@ -584,7 +596,7 @@ class CcpnNefWriter:
 
         # ChemicalShiftLists
         for obj in sorted(chemicalShiftLists):
-            saveFrames.append(self.chemicalShiftList2Nef(obj))
+            saveFrames.append(self.chemicalShiftList2Nef(obj, includeOrphans))
 
         # RestraintLists and
         restraintTables = sorted(restraintTables, key=attrgetter('restraintType', 'serial'))
@@ -735,7 +747,7 @@ class CcpnNefWriter:
     # def exportProject(self, expandSelection:bool=False,
     #                   pidList:list=None,
     #                   exclusionDict:dict=None) -> typing.Optional[StarIo.NmrDataBlock]:
-    def exportProject(self, expandSelection: bool = False,
+    def exportProject(self, expandSelection: bool = False, includeOrphans: bool = False,
                       pidList: list = None) -> typing.Optional[StarIo.NmrDataBlock]:
         """
         Get project and all contents as NEF object tree for export
@@ -752,6 +764,7 @@ class CcpnNefWriter:
             # use as a flag to export everything
 
             return self.exportObjects(expandSelection=expandSelection,
+                                      includeOrphans=includeOrphans,
                                       chains=project.chains, chemicalShiftLists=project.chemicalShiftLists,
                                       restraintTables=project.restraintTables, peakLists=project.peakLists,
                                       integralLists=project.integralLists, multipletLists=project.multipletLists,
@@ -809,6 +822,7 @@ class CcpnNefWriter:
                 #       attrib.remove(obj)            # treat as exclusion list
 
             return self.exportObjects(expandSelection=expandSelection,
+                                      includeOrphans=includeOrphans,
                                       chains=self.chains, chemicalShiftLists=self.chemicalShiftLists,
                                       restraintTables=self.restraintTables, peakLists=self.peakLists,
                                       integralLists=self.integralLists, multipletLists=self.multipletLists,
@@ -1033,7 +1047,7 @@ class CcpnNefWriter:
         #
         return result
 
-    def chemicalShiftList2Nef(self, chemicalShiftList: ChemicalShiftList) -> StarIo.NmrSaveFrame:
+    def chemicalShiftList2Nef(self, chemicalShiftList: ChemicalShiftList, includeOrphans: bool = False) -> StarIo.NmrSaveFrame:
         """Convert ChemicalShiftList to CCPN NEF saveframe"""
 
         from ccpn.core.ChemicalShiftList import CS_CHAINCODE, CS_SEQUENCECODE, CS_RESIDUETYPE, CS_ATOMNAME
@@ -1052,6 +1066,10 @@ class CcpnNefWriter:
         shifts = sorted(chemicalShiftList.chemicalShifts)
         if shifts:
             for shift in shifts:
+                if shift.orphan and not includeOrphans:
+                    # skip orphans if not required
+                    continue
+
                 rowdata = self._loopRowData(loopName, shift)
                 _row = shift._getAsTuple()
                 rowdata.update(zip(atomCols, (getattr(_row, CS_CHAINCODE, None),
@@ -8094,22 +8112,26 @@ def _exportToNef(path: str, skipPrefixes: Sequence[str] = ()):
 #
 # def _convertToDataBlock(self: Project, skipPrefixes: typing.Sequence = (),
 #                         expandSelection: bool = True,
+#                         includeOrphans: bool = False,
 #                         pidList: list = None):
 #     """
 #   Export selected contents of the project to a Nef file.
 #
 #     skipPrefixes: ( 'ccpn', ..., <str> )
-#     expandSelection: <bool> }
+#     expandSelection: <bool>
+#     includeOrphans: <bool>
 #
 #     Include 'ccpn' in the skipPrefixes list will exclude ccpn specific items from the file
 #     expandSelection = True  will include all data from the project, this may not be data that
 #                             is not defined in the Nef standard.
+#     includeOrphans = True   will include chemicalShifts that have no peak assignments(orphans)
 #
 #   PidList is a list of <str>, e.g. 'NC:@-', obtained from the objects to be included.
 #   The Nef file may also contain further dependent items associated with the pidList.
 #
 #   :param skipPrefixes: items to skip
 #   :param expandSelection: expand the selection
+#   :param includeOrphans: include chemicalShift orphans
 #   :param pidList: a list of pids
 #   """
 #     from ccpn.core.lib.ContextManagers import undoBlockManager

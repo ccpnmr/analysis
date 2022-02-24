@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-18 15:45:11 +0000 (Fri, February 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-24 17:00:34 +0000 (Thu, February 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1240,15 +1240,19 @@ class Project(AbstractWrapperObject):
                   overwriteExisting: bool = False,
                   skipPrefixes: typing.Sequence[str] = (),
                   expandSelection: bool = True,
+                  includeOrphans: bool = False,
                   pidList: typing.Sequence[str] = None):
         """
         Export selected contents of the project to a Nef file.
 
         skipPrefixes: ( 'ccpn', ..., <str> )
         expandSelection: <bool>
+        includeOrphans: <bool>
 
         Include 'ccpn' in the skipPrefixes list will exclude ccpn specific items from the file
-        expandSelection = True; will include all data from the project, this may not be data that is not defined in the Nef standard.
+        expandSelection = True      will include all data from the project, this may not be data that
+                                    is not defined in the Nef standard.
+        includeOrphans = True       will include chemicalShifts that have no peak assignments (orphans)
 
         PidList is a list of <str>, e.g. 'NC:@-', obtained from the objects to be included.
         The Nef file may also contain further dependent items associated with the pidList.
@@ -1256,6 +1260,7 @@ class Project(AbstractWrapperObject):
         :param path: output path and filename
         :param skipPrefixes: items to skip
         :param expandSelection: expand the selection
+        :param includeOrphans: include chemicalShift orphans
         :param pidList: a list of pids
         """
         from ccpn.framework.lib.ccpnNef import CcpnNefIo
@@ -1266,6 +1271,7 @@ class Project(AbstractWrapperObject):
                                     overwriteExisting=overwriteExisting,
                                     skipPrefixes=skipPrefixes,
                                     expandSelection=expandSelection,
+                                    includeOrphans=includeOrphans,
                                     pidList=pidList)
 
     @staticmethod

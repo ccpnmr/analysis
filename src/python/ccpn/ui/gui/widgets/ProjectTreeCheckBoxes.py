@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-23 15:21:02 +0000 (Wed, February 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-24 17:00:35 +0000 (Thu, February 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -61,6 +61,7 @@ RESTRAINTTABLES = 'restraintTables'
 CCPNTAG = 'ccpn'
 SKIPPREFIXES = 'skipPrefixes'
 EXPANDSELECTION = 'expandSelection'
+INCLUDEORPHANS = 'includeOrphans'
 SPECTRA = 'spectra'
 RENAMEACTION = 'rename'
 BADITEMACTION = 'badItem'

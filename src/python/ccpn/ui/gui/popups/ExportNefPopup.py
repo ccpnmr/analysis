@@ -4,10 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-04 20:15:04 +0000 (Thu, November 04, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-02-24 17:00:34 +0000 (Thu, February 24, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,8 +39,9 @@ CHAINS = 'chains'
 NMRCHAINS = 'nmrChains'
 RESTRAINTTABLES = 'restraintTables'
 CCPNTAG = 'ccpn'
-SKIPPREFIXES = 'skipPrefixes'
-EXPANDSELECTION = 'expandSelection'
+_SKIPPREFIXES = 'skipPrefixes'
+_EXPANDSELECTION = 'expandSelection'
+_INCLUDEORPHANS = 'includeOrphans'
 
 
 class ExportNefPopup(ExportDialogABC):
@@ -68,16 +69,24 @@ class ExportNefPopup(ExportDialogABC):
         self.getButton(self.CANCELBUTTON).setToolTip('Cancel')
 
     def initialise(self, userFrame):
+        row = 0
         self.buttonCCPN = CheckBox(userFrame, checked=True,
                                    text='include CCPN tags',
-                                   grid=(0, 0), hAlign='l')
+                                   grid=(row, 0), hAlign='l')
+        row += 1
         self.buttonExpand = CheckBox(userFrame, checked=False,
                                      text='expand selection',
-                                     grid=(1, 0), hAlign='l')
+                                     grid=(row, 0), hAlign='l')
+        row += 1
+        self.buttonOrphans = CheckBox(userFrame, checked=False,
+                                      text='include chemicalShift orphans',
+                                      grid=(row, 0), hAlign='l')
+        row += 1
         self.spacer = Spacer(userFrame, 3, 3,
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
-                             grid=(2, 0), gridSpan=(1, 1))
-        self.treeView = ProjectTreeCheckBoxes(userFrame, project=None, grid=(3, 0), includeProject=True)
+                             grid=(row, 0), gridSpan=(1, 1))
+        row += 1
+        self.treeView = ProjectTreeCheckBoxes(userFrame, project=None, grid=(row, 0), includeProject=True)
 
     def populate(self, userframe):
         """Populate the widgets with project
@@ -94,10 +103,11 @@ class ExportNefPopup(ExportDialogABC):
 
         # build the export dict and flags
         self.flags = {}
-        self.flags[SKIPPREFIXES] = []
+        self.flags[_SKIPPREFIXES] = []
         if self.buttonCCPN.isChecked() is False:  # these are negated as they are skipped flags
-            self.flags[SKIPPREFIXES].append(CCPNTAG)
-        self.flags[EXPANDSELECTION] = self.buttonExpand.isChecked()
+            self.flags[_SKIPPREFIXES].append(CCPNTAG)
+        self.flags[_EXPANDSELECTION] = self.buttonExpand.isChecked()
+        self.flags[_INCLUDEORPHANS] = self.buttonOrphans.isChecked()
 
         # new bit to read all the checked pids (contain ':') from the checkboxtreewidget - don't include project name
         self.newList = self.treeView.getSelectedPids(includeRoot=False)
@@ -124,11 +134,11 @@ class ExportNefPopup(ExportDialogABC):
         :param params: dict - user defined parameters for export
         """
 
-        # this is empty because the writing is down after
+        # this is empty because the writing is done after
         pass
 
 
-if __name__ == '__main__':
+def main():
     # from sandbox.Geerten.Refactored.framework import Framework
     # from sandbox.Geerten.Refactored.programArguments import Arguments
 
@@ -174,10 +184,13 @@ if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import newTestApplication
     from ccpn.framework.Application import getApplication
 
-
-    app = newTestApplication(interface='NoUi')
+    # need to keep a handle to the app, otherwise garbage collection removes it causing thread crash
+    _app = newTestApplication(interface='NoUi')
     application = getApplication()
 
     dialog = ExportNefPopup(parent=application.ui.mainWindow if application else None)
+    dialog.exec_()
 
-    result = dialog.exec_()
+
+if __name__ == '__main__':
+    main()

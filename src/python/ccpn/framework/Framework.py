@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-24 11:13:17 +0000 (Thu, February 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-24 17:00:34 +0000 (Thu, February 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1173,11 +1173,13 @@ class Framework(NotifierBase, GuiBase):
         # flags are skipPrefixes, expandSelection
         skipPrefixes = flags['skipPrefixes']
         expandSelection = flags['expandSelection']
+        includeOrphans = flags['includeOrphans']
 
         self.project.exportNef(nefPath,
                                overwriteExisting=True,
                                skipPrefixes=skipPrefixes,
                                expandSelection=expandSelection,
+                               includeOrphans=includeOrphans,
                                pidList=pidList)
 
     def _getRecentProjectFiles(self, oldPath=None) -> list:

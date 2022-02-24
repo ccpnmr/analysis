@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-22 01:36:09 +0000 (Tue, February 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-24 17:00:34 +0000 (Thu, February 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -86,6 +86,7 @@ RESTRAINTTABLES = 'restraintTables'
 CCPNTAG = 'ccpn'
 SKIPPREFIXES = 'skipPrefixes'
 EXPANDSELECTION = 'expandSelection'
+INCLUDEORPHANS = 'includeOrphans'
 
 PulldownListsMinimumWidth = 200
 LineEditsMinimumWidth = 195
@@ -510,7 +511,7 @@ class NefDictFrame(Frame):
     #         self.project = nefObject
     #         self._nefLoader = self._nefImporterClass(errorLogging=Nef.el.NEF_STANDARD, hidePrefix=True)
     #         self._nefWriter = CcpnNefIo.CcpnNefWriter(self.project)
-    #         self._nefDict = self._nefLoader._nefDict = self._nefWriter.exportProject(expandSelection=True, pidList=None)
+    #         self._nefDict = self._nefLoader._nefDict = self._nefWriter.exportProject(expandSelection=True, includeOrphans=False, pidList=None)
 
     def _setCallbacks(self):
         """Set the mouse callback for the treeView
@@ -2721,7 +2722,7 @@ class NefDictFrame(Frame):
             if not self.project:
                 raise TypeError('Project is not defined')
             self._nefWriter = CcpnNefIo.CcpnNefWriter(self.project)
-            self._nefDict = self._nefLoader._nefDict = self._nefWriter.exportProject(expandSelection=True, pidList=None)
+            self._nefDict = self._nefLoader._nefDict = self._nefWriter.exportProject(expandSelection=True, includeOrphans=False, pidList=None)
 
         # attach the import/verify/content methods
         self._nefLoader._attachVerifier(self._nefReader.verifyProject)
@@ -3573,7 +3574,7 @@ def main():
     options.places = 8
 
     nefWriter = CcpnNefIo.CcpnNefWriter(project)
-    localNefDict = nefWriter.exportProject(expandSelection=True, pidList=None)
+    localNefDict = nefWriter.exportProject(expandSelection=True, includeOrphans=False, pidList=None)
     result = NefModule.compareDataBlocks(_loader._nefDict, localNefDict, options)
     # NefModule.printCompareList(result, 'LOADED', 'local', options)
 

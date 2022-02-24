@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-22 19:58:03 +0000 (Tue, February 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-24 11:13:17 +0000 (Thu, February 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -615,6 +615,13 @@ class Framework(NotifierBase, GuiBase):
         #
         # except Exception as es:
         #     getLogger().warning('Error restoring layout: %s' % es)
+
+        # check that the top moduleArea is correctly formed - strange special case when all modules have
+        #   been moved to tempAreas
+        mArea = self.ui.mainWindow.moduleArea
+        if mArea.topContainer is not None and mArea.topContainer._container is None:
+            getLogger().debug('Correcting empty topContainer')
+            mArea.topContainer = None
 
         try:
             # Initialise colours

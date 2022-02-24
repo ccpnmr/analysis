@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-18 12:43:30 +0000 (Fri, February 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-24 12:37:10 +0000 (Thu, February 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -891,7 +891,7 @@ class Framework(NotifierBase, GuiBase):
 
     def _loadData(self, dataLoaders, maxItemLogging=MAXITEMLOGGING) -> list:
         """Helper function;
-        calls each dataLoader to load data;
+        calls ui._loadData or ui._loadProject for each dataLoader to load data;
         optionally suspend command logging
 
         :param dataLoaders: a list/tuple of dataLoader instances

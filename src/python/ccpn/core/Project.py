@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-11 11:45:57 +0000 (Fri, February 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-24 12:37:10 +0000 (Thu, February 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1939,7 +1939,7 @@ def _loadProject(application, path: str) -> Project:
 
     _path = aPath(path)
     if not _path.exists():
-        raise ValueError('Path {_path} does not exist')
+        raise ValueError(f'Path {_path} does not exist')
 
     if (apiProject := apiIo.loadProject(str(path), useFileLogger=True)) is None:
         raise RuntimeError("No valid project loaded from %s" % path)

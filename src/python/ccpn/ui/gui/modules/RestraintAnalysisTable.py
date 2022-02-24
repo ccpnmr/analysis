@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-18 15:18:06 +0000 (Fri, February 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-24 16:43:43 +0000 (Thu, February 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -869,8 +869,8 @@ class RestraintAnalysisTableWidget(GuiTable):
 
             # make matching length tables for each of the restraintTables for each peak so the rows match up in the table
             dfs = {}
-            ll = [(None, None)] * sum(maxCount)
             for lCount, rl in enumerate(resLists):
+                ll = [(None, None)] * sum(maxCount)
                 head = 0
                 for pk, cc, maxcc in zip(pks, counts[lCount], maxCount):
                     _res = [(res.pid, _atom) for res in (pkRestraints.get(pk.serial) or ()) if res.restraintTable == rl

@@ -93,7 +93,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-22 19:58:03 +0000 (Tue, February 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-24 19:40:43 +0000 (Thu, February 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1850,6 +1850,10 @@ class SpectrumDataSourceABC(CcpNmrJson):
         self._bufferFilled = False
         self._bufferIsTemporary = bufferIsTemporary
         self._bufferPath = bufferPath
+
+        # close the current file as all will go from the buffer (once filled)
+        if self.hasOpenFile():
+            self.closeFile()
 
     def _checkBuffer(self):
         """Create (if needed) and fill Hdf5 buffer

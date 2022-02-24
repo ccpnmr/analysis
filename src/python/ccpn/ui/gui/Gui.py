@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-24 17:06:13 +0000 (Thu, February 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-24 19:40:44 +0000 (Thu, February 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -485,7 +485,7 @@ class Gui(Ui):
                 newProject = self.application._newProject()
             else:
                 newProject = oldProjectLoader.load()[0]  # dataLoaders return a list
-            # newProject = self.application._newProject()
+
             # The next two lines are essential to have the QT main event loop associated
             # with the new window; without these, the programs just terminates
             newProject._mainWindow.show()

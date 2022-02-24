@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-24 17:06:13 +0000 (Thu, February 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-24 19:38:23 +0000 (Thu, February 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1754,13 +1754,15 @@ class Framework(NotifierBase, GuiBase):
                       dataTable=None, selectFirstItem=False):
         """Displays DataTable Table
         """
-        from ccpn.ui.gui.modules.DataTableModuleABC import DataTableModuleBC
+        # from ccpn.ui.gui.modules.DataTableModuleABC import DataTableModuleBC as _module
+        from ccpn.ui.gui.modules.DataTableModule import DataTableModule as _module
 
         mainWindow = self.ui.mainWindow
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
         if dataTable:
-            _dataTableModule = DataTableModuleBC(dataTable, name=dataTable.name, mainWindow=mainWindow)
+            # _dataTableModule = DataTableModuleBC(dataTable, name=dataTable.name, mainWindow=mainWindow)
+            _dataTableModule = _module(mainWindow=mainWindow, dataTable=dataTable)
             mainWindow.moduleArea.addModule(_dataTableModule, position=position, relativeTo=relativeTo)
             return _dataTableModule
 
@@ -1769,17 +1771,15 @@ class Framework(NotifierBase, GuiBase):
                            violationTable: PeakList = None, selectFirstItem=False):
         """Displays Peak table on left of main window with specified list selected.
         """
-        getLogger().debug('No ViolationTable module')
-        # from ccpn.ui.gui.modules.ViolationTableModule import ViolationTableModule
-        #
-        # mainWindow = self.ui.mainWindow
-        # if not relativeTo:
-        #     relativeTo = mainWindow.moduleArea
-        # violationTableModule = ViolationTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
-        # mainWindow.moduleArea.addModule(violationTableModule, position=position, relativeTo=relativeTo)
-        # if violationTable:
-        #     violationTableModule.selectViolationTable(violationTable)
-        # return violationTableModule
+        from ccpn.ui.gui.modules.ViolationTableModule import ViolationTableModule as _module
+
+        mainWindow = self.ui.mainWindow
+        if not relativeTo:
+            relativeTo = mainWindow.moduleArea
+        if violationTable:
+            _violationTableModule = _module(mainWindow=mainWindow, violationTable=violationTable)
+            mainWindow.moduleArea.addModule(_violationTableModule, position=position, relativeTo=relativeTo)
+            return _violationTableModule
 
     @logCommand('application.')
     def showCollectionModule(self, position='bottom', relativeTo=None,

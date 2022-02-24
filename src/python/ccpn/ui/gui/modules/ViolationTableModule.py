@@ -27,7 +27,7 @@ __date__ = "$Date: 2021-10-29 16:38:09 +0100 (Fri, October 29, 2021) $"
 #=========================================================================================
 
 from PyQt5 import QtWidgets
-from ccpn.core.DataTable import DataTable
+from ccpn.core.ViolationTable import ViolationTable
 from ccpn.core.lib.Notifiers import Notifier
 
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -36,7 +36,7 @@ from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
-from ccpn.ui.gui.widgets.PulldownListsForObjects import DataTablePulldown, RestraintTablePulldown
+from ccpn.ui.gui.widgets.PulldownListsForObjects import ViolationTablePulldown, RestraintTablePulldown
 from ccpn.ui.gui.widgets.GuiTable import GuiTable, _getValueByHeader
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
@@ -50,9 +50,9 @@ ALL = '<all>'
 _RESTRAINTTABLE = 'restraintTable'
 
 
-class DataTableModule(CcpnModule):
+class ViolationTableModule(CcpnModule):
     """
-    This class implements the module by wrapping a DataTable instance
+    This class implements the module by wrapping a ViolationTable instance
     """
     includeSettingsWidget = False
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
@@ -62,13 +62,13 @@ class DataTableModule(CcpnModule):
     includeNmrChains = False
     includeSpectrumTable = False
 
-    className = 'DataTableModule'
+    className = 'ViolationTableModule'
     _allowRename = True
 
     activePulldownClass = None
 
-    def __init__(self, mainWindow=None, name='DataTable Module',
-                 dataTable=None, selectFirstItem=False):
+    def __init__(self, mainWindow=None, name='ViolationTable Module',
+                 violationTable=None, selectFirstItem=False):
         """
         Initialise the Module widgets
         """
@@ -86,45 +86,45 @@ class DataTableModule(CcpnModule):
             self.current = None
 
         # guiTable
-        self.dataTableWidget = DataTableWidget(parent=self.mainWidget,
-                                               mainWindow=self.mainWindow,
-                                               moduleParent=self,
-                                               setLayout=True,
-                                               grid=(0, 0))
+        self.violationTableWidget = ViolationTableWidget(parent=self.mainWidget,
+                                                         mainWindow=self.mainWindow,
+                                                         moduleParent=self,
+                                                         setLayout=True,
+                                                         grid=(0, 0))
 
-        if dataTable is not None:
-            self.selectDataTable(dataTable)
+        if violationTable is not None:
+            self.selectViolationTable(violationTable)
         elif selectFirstItem:
-            self.dataTableWidget.dtWidget.selectFirstItem()
+            self.violationTableWidget.vtWidget.selectFirstItem()
 
     def _maximise(self):
         """
         Maximise the attached table
         """
-        self.dataTableWidget._maximise()
+        self.violationTableWidget._maximise()
 
-    def selectDataTable(self, dataTable=None):
+    def selectViolationTable(self, violationTable=None):
         """
-        Manually select a dataTable from the pullDown
+        Manually select a violationTable from the pullDown
         """
-        self.dataTableWidget._selectDataTable(dataTable)
+        self.violationTableWidget._selectViolationTable(violationTable)
 
     def _closeModule(self):
         """
         CCPN-INTERNAL: used to close the module
         """
-        self.dataTableWidget._close()
+        self.violationTableWidget._close()
         super()._closeModule()
 
 
-class DataTableWidget(GuiTable):
+class ViolationTableWidget(GuiTable):
     """
-    Class to present a DataTable
+    Class to present a ViolationTable
     """
-    className = 'DataTableWidget'
-    attributeName = 'dataTables'
+    className = 'ViolationTableWidget'
+    attributeName = 'violationTables'
 
-    def __init__(self, parent=None, mainWindow=None, moduleParent=None, dataTable=None, **kwds):
+    def __init__(self, parent=None, mainWindow=None, moduleParent=None, violationTable=None, **kwds):
         """
         Initialise the widgets for the module.
         """
@@ -140,7 +140,7 @@ class DataTableWidget(GuiTable):
             self.current = None
 
         kwds['setLayout'] = True
-        self._dataTable = None
+        self._violationTable = None
 
         # Initialise the scroll widget and common settings
         self._initTableCommonWidgets(parent, **kwds)
@@ -149,15 +149,15 @@ class DataTableWidget(GuiTable):
         row = 0
         Spacer(self._widget, 5, 5,
                QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
-               grid=(0, 0), gridSpan=(1, 1))
+               grid=(row, 0), gridSpan=(1, 1))
         row += 1
-        self.dtWidget = DataTablePulldown(parent=self._widget,
-                                          mainWindow=self.mainWindow, default=None,
-                                          grid=(row, 0), gridSpan=(1, 2), minimumWidths=(0, 100),
-                                          showSelectName=True,
-                                          sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
-                                          callback=self._selectionPulldownCallback,
-                                          )
+        self.vtWidget = ViolationTablePulldown(parent=self._widget,
+                                               mainWindow=self.mainWindow, default=None,
+                                               grid=(row, 0), gridSpan=(1, 2), minimumWidths=(0, 100),
+                                               showSelectName=True,
+                                               sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
+                                               callback=self._selectionPulldownCallback,
+                                               )
         row += 1
         HLine(parent=self._widget, grid=(row, 0), gridSpan=(1, 4), height=16, colour=getColours()[DIVIDER])
 
@@ -201,8 +201,8 @@ class DataTableWidget(GuiTable):
                          grid=(3, 0), gridSpan=(1, 6))
         self.moduleParent = moduleParent
 
-        if dataTable is not None:
-            self._selectDataTable(dataTable)
+        if violationTable is not None:
+            self._selectViolationTable(violationTable)
 
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
@@ -212,23 +212,23 @@ class DataTableWidget(GuiTable):
         CallBack for Drop events
         """
         pids = data.get('pids', [])
-        self._handleDroppedItems(pids, DataTable, self.dtWidget)
+        self._handleDroppedItems(pids, ViolationTable, self.vtWidget)
 
-    def _selectDataTable(self, dataTable=None):
+    def _selectViolationTable(self, violationTable=None):
         """
-        Manually select a DataTable from the pullDown
+        Manually select a ViolationTable from the pullDown
         """
-        if dataTable is None:
+        if violationTable is None:
             self.idWidget.selectFirstItem()
         else:
-            if not isinstance(dataTable, DataTable):
-                getLogger().warning(f'select: Object {dataTable} is not of type DataTable')
+            if not isinstance(violationTable, ViolationTable):
+                getLogger().warning(f'select: Object {violationTable} is not of type ViolationTable')
                 return
             else:
-                for widgetObj in self.dtWidget.textList:
-                    if dataTable.pid == widgetObj:
-                        self._dataTable = dataTable
-                        self.dtWidget.select(self._dataTable.pid)
+                for widgetObj in self.vtWidget.textList:
+                    if violationTable.pid == widgetObj:
+                        self._violationTable = violationTable
+                        self.vtWidget.select(self._violationTable.pid)
 
     def _getPullDownSelection(self):
         return self.itWidget.getText()
@@ -236,20 +236,20 @@ class DataTableWidget(GuiTable):
     def _selectPullDown(self, value):
         self.itWidget.select(value)
 
-    def displayTableForDataTable(self, dataTable):
+    def displayTableForViolationTable(self, violationTable):
         """
-        Display the table for the DataTable
+        Display the table for the ViolationTable
         """
-        self.dtWidget.select(dataTable.pid)
-        self._update(dataTable)
+        self.vtWidget.select(violationTable.pid)
+        self._update(violationTable)
 
     def _updateCallback(self, data):
         """
         Notifier callback for updating the table
         """
-        thisDataTable = getattr(data[Notifier.THEOBJECT], self.attributeName)  # get the dataTable
-        if self._dataTable in thisDataTable:
-            self.displayTableForDataTable(self._dataTable)
+        thisViolationTable = getattr(data[Notifier.THEOBJECT], self.attributeName)  # get the violationTable
+        if self._violationTable in thisViolationTable:
+            self.displayTableForViolationTable(self._violationTable)
         else:
             self.clearTable()
 
@@ -257,36 +257,36 @@ class DataTableWidget(GuiTable):
         """
         Redraw the table on a maximise event
         """
-        if self._dataTable:
-            self.displayTableForDataTable(self._dataTable)
+        if self._violationTable:
+            self.displayTableForViolationTable(self._violationTable)
         else:
             self.clear()
 
-    def _update(self, dataTable):
+    def _update(self, violationTable):
         """
         Update the table
         """
-        df = dataTable.data
-        if len(dataTable.data) > 0:
+        df = violationTable.data
+        if len(violationTable.data) > 0:
             colDefs = ColumnClass([(x, lambda row: _getValueByHeader(row, x), None, None, None) for x in df.columns])
             columnsMap = {x: x for x in df.columns}
             dfo = self.getDataFromFrame(self, df, colDefs, columnsMap)
             self.setTableFromDataFrameObject(dataFrameObject=dfo, columnDefs=colDefs)
             self.selectIndex(0)
 
-        _rTablePid = dataTable.getMetadata(_RESTRAINTTABLE)
+        _rTablePid = violationTable.getMetadata(_RESTRAINTTABLE)
         self.rtWidget.select(_rTablePid)
-        self.textBox.setText(str(dataTable.metadata))
-        self.lineEditComment.setText(dataTable.comment if dataTable.comment else '')
+        self.textBox.setText(str(violationTable.metadata))
+        self.lineEditComment.setText(violationTable.comment if violationTable.comment else '')
 
     def _selectionPulldownCallback(self, item):
         """
-        Notifier Callback for selecting dataTable from the pull down menu
+        Notifier Callback for selecting violationTable from the pull down menu
         """
         if item is not None:
-            self._dataTable = self.project.getByPid(item)
-            if self._dataTable is not None:
-                self.displayTableForDataTable(self._dataTable)
+            self._violationTable = self.project.getByPid(item)
+            if self._violationTable is not None:
+                self.displayTableForViolationTable(self._violationTable)
             else:
                 self.clearTable()
 
@@ -297,28 +297,28 @@ class DataTableWidget(GuiTable):
         try:
             with undoBlockWithoutSideBar():
                 if (_rTable := self.project.getByPid(item)):
-                    self._dataTable.setMetadata(_RESTRAINTTABLE, item)
+                    self._violationTable.setMetadata(_RESTRAINTTABLE, item)
                 else:
-                    self._dataTable.setMetadata(_RESTRAINTTABLE, None)
+                    self._violationTable.setMetadata(_RESTRAINTTABLE, None)
 
         except Exception as es:
             # need to immediately set back to stop error on loseFocus which also fires editingFinished
-            showWarning('Data Table', str(es))
+            showWarning('Violation Table', str(es))
 
-        self.textBox.setText(str(self._dataTable.metadata))
+        self.textBox.setText(str(self._violationTable.metadata))
 
     def _applyComment(self):
-        """Set the values in the dataTable
+        """Set the values in the violationTable
         """
-        if self._dataTable:
+        if self._violationTable:
             comment = self.lineEditComment.text()
             try:
                 with undoBlockWithoutSideBar():
-                    self._dataTable.comment = comment
+                    self._violationTable.comment = comment
 
             except Exception as es:
                 # need to immediately set back to stop error on loseFocus which also fires editingFinished
-                showWarning('Data Table', str(es))
+                showWarning('Violation Table', str(es))
 
     def _close(self):
         """

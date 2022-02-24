@@ -25,7 +25,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:52 +0000 (Mon, February 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-24 18:38:42 +0000 (Thu, February 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -48,6 +48,12 @@ from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumData
 from ccpn.core._implementation.SpectrumData import SliceData, PlaneData, RegionData
 
 
+# hdf5 metadata keys, as stored in the 'top' object and copied into the Hdf5Metadata object
+# NB:
+# this is different from the metadata of the SpectrumDataSouceABC, i.e. CcpNmrJson object
+# from which the Hdf5DataSource class is derived.
+# It is also different from the Traits metadata (as defined by the tag() method)
+#
 HDF5_VERSION_KEY = 'HDF5_Version'
 HDF5_TYPE_KEY = 'HDF5_DataType'
 HDF5_DATASET_KEY = 'HDF5_DatasetName'
@@ -89,7 +95,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
     suffixes = ['.ndf5', '.hdf5']
     openMethod = h5py.File
-    defaultOpenReadMode = 'r+'   # read/write, file must exists
+    defaultOpenReadMode = 'r'   # read/write, file must exists
     defaultOpenReadWriteMode = 'r+'
     defaultOpenWriteMode = 'w'  # creates, truncates if exists
     defaultAppendMode = 'a'
@@ -107,6 +113,17 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
     #=========================================================================================
 
+    def __init__(self, path=None, spectrum=None, dimensionCount=None):
+        """initialise instance; optionally set path or associate with and import from
+        a Spectrum instance or set dimensionCount
+
+        :param path: optional, path of the (binary) spectral data
+        :param spectrum: associate instance with spectrum and import spectrum's parameters
+        :param dimensionCount: limit instance to dimensionCount dimensions
+        """
+        super().__init__(path=path, spectrum=spectrum, dimensionCount=dimensionCount)
+        self._hdf5Metadata = Hdf5Metadata()
+
     @property
     def spectrumData(self):
         if not self.hasOpenFile():
@@ -119,26 +136,15 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         dataset = self.spectrumData
         return dataset.attrs
 
-    def _setHdf5Metadata(self):
-        """Set the hdf5 metadata attr field to their default values.
-        """
-        if not self.hasOpenFile():
-            getLogger().debug('File not open: hdf5 metadata setting skipped')
-            return
-        _metadata = self.fp.attrs
-        _metadata.clear()
-        _metadata[HDF5_TYPE_KEY] = self._HDF5dataType
-        _metadata[HDF5_DATASET_KEY] = self._HDF5dataSetName
-        _metadata[HDF5_VERSION_KEY] = str(self._HDF5version)
-
     def _checkHdf5Metadata(self):
-        """Check the file metadata for versioning, updates etc
+        """Check the hdf5 metadata for versioning, updates etc
         """
         if not self.hasOpenFile():
             getLogger().debug('File not open: hdf5 metadata check and update skipped')
             return
+
         try:
-            _metadata = self.fp.attrs
+            _metadata = self._hdf5Metadata
             _params = self.spectrumParameters
         except:
             getLogger().debug('Error finding params and hdf5 metadata: check and update skipped')
@@ -149,39 +155,27 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
         elif 'version' in _params:
             del _params['version']
-            self._setHdf5Metadata()
 
-        elif HDF5_VERSION_KEY not in self.fp.attrs and 'version' not in _params:
+        elif HDF5_VERSION_KEY not in _metadata and 'version' not in _params:
             # Earlier (Luca) hdf5 files, in which spectralWidth (sometimes)
             # denoted the width in Hz
             if 'spectralWidths' in _params:
                 sw = _params['spectralWidths']
                 _params['spectralWidthsHz'] = sw
                 del (_params['spectralWidths'])
-            self._setHdf5Metadata()
 
         else:
             # This should not happen
             getLogger().warning('Undetermined hdf5 version; skipping checks/upgrades')
 
         # we are now up-to-date to the current hdf5 version
-        _metadata[HDF5_VERSION_KEY] = str(self._HDF5version)
-
-    @property
-    def _hdf5metadata(self) -> dict:
-        """:return the hdf5 metadata as a dict or None if file is not open
-        """
-        if not self.hasOpenFile():
-            getLogger().debug('File not open: hdf5metadata dict is None')
-            return None
-        _metadata = self.fp.attrs
-        return dict((key, _metadata[key]) for key in HDF5_KEYS)
+        _metadata.initCurrentValues()
 
     @property
     def _hdf5version(self)-> VersionString:
         """:return the hdf5 version as stored in the hdf5 metadata
         """
-        return VersionString(self._hdf5metadata[HDF5_VERSION_KEY])
+        return VersionString(self._hdf5Metadata[HDF5_VERSION_KEY])
 
     def openFile(self, mode, **kwds):
         """open self.path, set self.fp, return self.fp
@@ -223,12 +217,14 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
         if not newFile:
             # old file
+            self._hdf5Metadata.restoreFromHdf5(self.fp)
             self._checkHdf5Metadata()
             self.readParameters()
 
         else:
-            # New file
-            self._setHdf5Metadata()
+            # New file; set the hdf5 metadata
+            self._hdf5Metadata.initCurrentValues()
+            self._hdf5Metadata.saveToHdf5(self.fp)
 
             # create the spectrum dataset
             dataSetKwds = {}
@@ -252,13 +248,6 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
                           (self, self._totalBlocks, self._totalBlockSize, tuple(self.blockSizes)))
 
         return self.fp
-
-    # def closeFile(self):
-    #     """Close the File"""
-    #     if self.hasOpenFile():
-    #         self.fp.attrs.clear()
-    #         self.fp.attrs.update(self.metadata)
-    #     super().closeFile()
 
     def readParameters(self):
         """Read the parameter values from the hdf5 data structure
@@ -306,16 +295,6 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
             params = self.spectrumParameters
             #pDict = [(k, _decode(k, params[k])) for k in params.keys()]
-
-            # if VERSION in params:
-            #     self.version = params[VERSION]
-            # else:
-            #     # To discriminate from earlier files, in which spectralWidth (sometimes) denoted the width in Hz
-            #     self.version = 0.0
-            #     if 'spectralWidths' in params:
-            #         sw = params['spectralWidths']
-            #         params['spectralWidthsHz'] = sw
-            #         del (params['spectralWidths'])
 
             # loop over all parameters that are defined for the Spectrum class and present in the hdf5 parameters
             for parName, values in [(p, params[p]) for p in self.keys(spectrumAttribute=lambda i: i is not None) if p in params]:
@@ -619,6 +598,41 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
 
         return regionData
 
-
 # Register this format
 Hdf5SpectrumDataSource._registerFormat()
+
+
+class Hdf5Metadata(dict):
+    """A class to store/manage the Hdf5 metadata
+    """
+    # def __init__(self):
+    #     super().__init__()
+
+    def initCurrentValues(self):
+        """Initialise with default values"""
+        self[HDF5_TYPE_KEY] = Hdf5SpectrumDataSource._HDF5dataType
+        self[HDF5_DATASET_KEY] = Hdf5SpectrumDataSource._HDF5dataSetName
+        self[HDF5_VERSION_KEY] = str(Hdf5SpectrumDataSource._HDF5version)
+
+    def restoreFromHdf5(self, fp):
+        """Update self from the Hdf5 file
+        """
+        if fp is None:
+            raise ValueError('Undefined Hdf5 file')
+
+        _metadata = fp.attrs
+        # the _metadata object is unfortunately not a real dict
+        for key in HDF5_KEYS:
+            if key in _metadata:
+                self[key] = _metadata[key]
+
+    def saveToHdf5(self, fp):
+        """Update the Hdf5 file with self
+        """
+        if fp is None:
+            raise ValueError('Undefined Hdf5 file')
+
+        _metadata = fp.attrs
+        # the _metadata object is unfortunately not a real dict
+        for key, value in self.items():
+           _metadata[key] = value

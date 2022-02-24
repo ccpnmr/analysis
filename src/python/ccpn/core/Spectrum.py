@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-23 08:21:01 +0000 (Wed, February 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-24 18:38:42 +0000 (Thu, February 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2008,7 +2008,10 @@ class Spectrum(AbstractWrapperObject):
         return self.dataSource.isBuffered
 
     def setBuffering(self, isBuffered:bool, path:str = None):
-        """Set temporary Hdf5-buffering.
+        """Set Hdf5-buffering.
+        Buffering status is retained (upon exit/save) if path is None; i.e. autobuffering, until
+        buffering is disabled by isBuffered=False
+
         :param isBuffered: set the buffering status
         :param path: store hdf5buffer file at path; implies non-temporary buffer
         """
@@ -2020,11 +2023,20 @@ class Spectrum(AbstractWrapperObject):
             bufferIsTemporary = (path is None)
             if path is not None:
                 path = aPath(path).uniqueVersion()
+                self._dataStore.useBuffer = False  # Explicit path, no autobuffering
+            else:
+                self._dataStore.useBuffer = True
+
             self.dataSource.setBuffering(isBuffered=True, bufferIsTemporary=bufferIsTemporary, bufferPath=path)
+
         else:
+            # Turn off buffering
             if self.dataSource.isBuffered:
                 self.dataSource.closeHdf5Buffer()
             self.dataSource.setBuffering(isBuffered=False)
+            self._dataStore.useBuffer = False
+
+        self._dataStore._saveInternal()
 
     @logCommand(get='self')
     def getIntensity(self, ppmPositions) -> float:
@@ -2728,6 +2740,9 @@ class Spectrum(AbstractWrapperObject):
             if dataSource is None:
                 raise RuntimeError('Spectrum._getDataSource: dataStore path "%s" is incompatible with dataFormat "%s"' %
                                    (dataStore.aPath(), dataStore.dataFormat))
+
+            if dataStore.useBuffer:
+                dataSource.setBuffering(isBuffered=True, bufferIsTemporary=True)
 
         if checkParameters:
             # check some fundamental parameters

@@ -13,10 +13,10 @@ Replaced:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -24,8 +24,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:16 +0000 (Thu, December 23, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-02-24 18:38:42 +0000 (Thu, February 24, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -208,6 +208,9 @@ class DataStore(CcpNmrJson):
 
     _path = CPath(allow_none=True, default_value=None).tag(saveToJson=True)
     dataFormat = CString(allow_none=True, default_value=None).tag(saveToJson=True)
+    useBuffer = Bool(default_value=False).tag(saveToJson=True,
+                info="""Flag to indicate if spectrum should be opened in buffered mode"""
+    )
 
     spectrum = Any(allow_none=True, default_value=None).tag(saveToJson=False)
     autoVersioning = Bool(default_value=True).tag(saveToJson=False)
@@ -446,7 +449,8 @@ class DataStore(CcpNmrJson):
         return not self.__eq__(other)
 
     def __str__(self):
-        return '<%s: %s (%s)>' % (self.__class__.__name__, self.path, self.dataFormat)
+        return '<%s: %s (%r, useBuffer=%s)>' % \
+               (self.__class__.__name__, self.path, self.dataFormat, self.useBuffer)
 
     __repr__ = __str__
 

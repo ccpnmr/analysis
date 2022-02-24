@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-28 20:37:06 +0000 (Fri, January 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-24 10:35:32 +0000 (Thu, February 24, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -815,6 +815,12 @@ class Framework(NotifierBase):
                 Layout.restoreLayout(self._mainWindow, self.ui.mainWindow.moduleLayouts, restoreSpectrumDisplay=False)
         except Exception as e:
             getLogger().warning('Impossible to restore Layout %s' % e)
+
+        # check that the top moduleArea is correctly formed - strange special case when all modules have
+        #   been moved to tempAreas
+        mArea = self.ui.mainWindow.moduleArea
+        if mArea.topContainer is not None and mArea.topContainer._container is None:
+            mArea.topContainer = None
 
         try:
             # Initialise displays

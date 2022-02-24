@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-03 16:24:48 +0000 (Thu, February 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-24 10:35:32 +0000 (Thu, February 24, 2022) $"
 __version__ = "$Revision: 3.0.4 $"
 #=========================================================================================
 # Created
@@ -46,6 +46,7 @@ from ccpn.ui.gui.lib.mouseEvents import SELECT
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.PlaneToolbar import _StripLabel
 from ccpn.ui.gui.widgets.Font import getFont
+from ccpn.ui.gui.widgets.Icon import Icon
 from functools import partial
 from ccpn.framework.Application import getApplication
 
@@ -75,6 +76,15 @@ class TempAreaWindow(GuiWindow, MainWindow):
 
         # install handler to resize when moving between displays
         self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
+
+        _height = 5
+        _vName = Icon('icons/vertical-split')
+        _hName = Icon('icons/horizontal-split')
+
+        self.setStyleSheet("""QSplitter {background-color: transparent; }
+                            QSplitter::handle:vertical {background-color: transparent; height: %dpx; image: url(%s); }
+                            QSplitter::handle:horizontal {background-color: transparent; height: %dpx; image: url(%s); }
+                            """ % (_height, _vName._filePath, _height, _hName._filePath))
 
     @pyqtSlot()
     def _screenChangedEvent(self, *args):
@@ -415,7 +425,6 @@ class CcpnModuleArea(ModuleArea, DropBase):
         if old is not None:
             old.apoptose()
 
-
         # self.movePythonConsole()
         if self.mainWindow is not None:
             self.mainWindow.application.ccpnModules = self.ccpnModules
@@ -425,14 +434,16 @@ class CcpnModuleArea(ModuleArea, DropBase):
             module.toggleMaximised()
         return module
 
-    def moveDock(self, dock, position, neighbor):
+    def moveModule(self, dock, position, neighbor):
         """
-        Move an existing Dock to a new location.
+        Move an existing Module to a new location.
         """
         ## Moving to the edge of a tabbed dock causes a drop outside the tab box
         if position in ['left', 'right', 'top', 'bottom'] and neighbor is not None and neighbor.container() is not None and neighbor.container().type() == 'tab':
             neighbor = neighbor.container()
         self.addModule(dock, position, neighbor)
+
+    moveDock = moveModule
 
     def makeContainer(self, typ):
         # stop the child containers from collapsing

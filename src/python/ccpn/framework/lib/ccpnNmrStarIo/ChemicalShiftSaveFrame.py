@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-18 14:11:32 +0000 (Fri, February 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-24 12:37:36 +0000 (Thu, February 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -100,7 +100,7 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
         :param project: a Project instance
         :return list of imported V3 objects
         """
-        name = f'bmrb_{self.entry_id}'
+        name = f'entry{self.entry_id}'
         chemShiftList = project.newChemicalShiftList(name = name,
                                                      autoUpdate = False,
                                                      comment = f'from BMRB entry {self.entry_id}; {self.name}'

@@ -51,10 +51,10 @@ def assignNmrAtom(seqCode, atomName, offset):
     if offset == -1:
         newsc = ''.join((seqCode, '-1'))
         newnr = peakNmrChain.fetchNmrResidue(sequenceCode=newsc, residueType=None)
-        newna = newnr.fetchNmrAtom(name=atomName)
+        newna = newnr.fetchNmrAtom(name=atomName, isotopeCode=assignIsotope)
         peak.assignDimension(axisCode=assignAxCde, value=newna)
     elif offset == 0:
-        newna = peakNmrRes.fetchNmrAtom(name=atomName)
+        newna = peakNmrRes.fetchNmrAtom(name=atomName, isotopeCode=assignIsotope)
         peak.assignDimension(axisCode=assignAxCde, value=newna)
 
 
@@ -72,24 +72,24 @@ def checkForGly(glyDict):
             # this is an i Glycine
             for pk in glyDict['CB0']['peaks']:
                 nr = pk.assignmentsByDimensions[assignDim][0].nmrResidue.getOffsetNmrResidue(-1)
-                na = nr.fetchNmrAtom(name='CB')
+                na = nr.fetchNmrAtom(name='CB', isotopeCode=assignIsotope)
                 pk.assignDimension(axisCode=assignAxCde, value=na)
     else:
         if len(cas_1) == 0 and 48.5 > mean(cbs_1) > 40.0:
             # this is an i-1 Glycine
             for pk in glyDict['CB-1']['peaks']:
                 nr = pk.assignmentsByDimensions[assignDim][0].nmrResidue.mainNmrResidue
-                na = nr.fetchNmrAtom(name='CA')
+                na = nr.fetchNmrAtom(name='CA', isotopeCode=assignIsotope)
                 pk.assignDimension(axisCode=assignAxCde, value=na)
         elif len(cas_1) == 0 and 48.5 > mean(cbs0) > 40.0:
             # this is an i Glycine
             for pk in glyDict['CB0']['peaks']:
                 nr = pk.assignmentsByDimensions[assignDim][0].nmrResidue
-                na = nr.fetchNmrAtom(name='CA')
+                na = nr.fetchNmrAtom(name='CA', isotopeCode=assignIsotope)
                 pk.assignDimension(axisCode=assignAxCde, value=na)
             for pk in glyDict['CA0']['peaks']:
                 nr = pk.assignmentsByDimensions[assignDim][0].nmrResidue.getOffsetNmrResidue(-1)
-                na = nr.fetchNmrAtom(name='CA')
+                na = nr.fetchNmrAtom(name='CA', isotopeCode=assignIsotope)
                 pk.assignDimension(axisCode=assignAxCde, value=na)
 
 
@@ -112,7 +112,7 @@ def checkForGST(gstDict):
         for pk in peaks:
             if pk.ppmPositions[assignDim] > mean(cas):
                 nr = pk.assignmentsByDimensions[assignDim][0].nmrResidue
-                na = nr.fetchNmrAtom(name='CB')
+                na = nr.fetchNmrAtom(name='CB', isotopeCode=assignIsotope)
                 pk.assignDimension(axisCode=assignAxCde, value=na)
 
 

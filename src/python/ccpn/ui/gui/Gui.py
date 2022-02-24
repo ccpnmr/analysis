@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-22 19:58:04 +0000 (Tue, February 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-24 17:06:13 +0000 (Thu, February 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -463,7 +463,7 @@ class Gui(Ui):
         try:
             with MessageDialog.progressManager(self.mainWindow, 'Loading project %s ... ' % dataLoader.path):
                 _loaded = dataLoader.load()
-                if not _loaded:
+                if _loaded is None or len(_loaded) == 0:
                     return None
 
                 newProject = _loaded[0]
@@ -478,16 +478,19 @@ class Gui(Ui):
             self.mainWindow._checkForBadSpectra(newProject)
 
         except RuntimeError as es:
-            MessageDialog.showError('Load Project', '"%s" did not yield a valid new project: %s' % \
-                                    (dataLoader.path, str(es)), parent=self
-                                    )
+            MessageDialog.showError('Error loading Project:', f'{es}', parent=self)
 
             # Try to restore the state
             if oldProjectIsTemporary:
-                self.application._newProject()
+                newProject = self.application._newProject()
             else:
-                oldProjectLoader.load()
-            newProject = None
+                newProject = oldProjectLoader.load()[0]  # dataLoaders return a list
+            # newProject = self.application._newProject()
+            # The next two lines are essential to have the QT main event loop associated
+            # with the new window; without these, the programs just terminates
+            newProject._mainWindow.show()
+            QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
+
 
         return newProject
 

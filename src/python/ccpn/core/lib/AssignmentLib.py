@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-25 16:33:37 +0000 (Fri, February 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-25 18:55:30 +0000 (Fri, February 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1136,7 +1136,7 @@ def _finaliseAssignment(peak, axisCode4NmrAtomsDict, overwrite=False):
             newNmrAtoms = list(set(list(_nmrAtoms) + oldNmrAtoms))
             peak.assignDimension(_axisCode, newNmrAtoms)
             ## set the IsotopeCode if was not already set.
-            isotopeCode = peak.peakList.spectrum.getByAxisCodes('isotopeCodes', [_axisCode], exactMatch=True)[0]
+            isotopeCode = peak.peakList.spectrum.getByAxisCodes('isotopeCodes', [_axisCode], exactMatch=True)[-1]
             for na in newNmrAtoms:
                 if na.isotopeCode in [UnknownIsotopeCode, None]:
                     na._setIsotopeCode(isotopeCode)

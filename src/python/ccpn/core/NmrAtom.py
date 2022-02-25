@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-11 17:19:54 +0000 (Fri, February 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-25 16:33:37 +0000 (Fri, February 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -54,8 +54,7 @@ class NmrAtom(AbstractWrapperObject):
     NmrChain) automatically updates peak assignments and ChemicalShifts that use the NmrAtom,
     preserving the link.
 
-    NmrAtom names must start with the atom type, ('H' for proton, 'D' for deuterium, 'C' for
-    carbon, etc.), with '?' for 'unknown."""
+    """
 
     #: Short class name, for PID.
     shortClassName = 'NA'
@@ -164,13 +163,13 @@ class NmrAtom(AbstractWrapperObject):
     def isotopeCode(self) -> str:
         """isotopeCode of NmrAtom. Used to facilitate the nmrAtom assignment."""
         value = self._wrappedData.isotopeCode
-        if value == self._UNKNOWN_VALUE_STRING:
+        if value in [UnknownIsotopeCode, self._UNKNOWN_VALUE_STRING]:
             value = None
         return value
 
     def _setIsotopeCode(self, value):
         """
-        :param value:  value must be defined, if not set then can set to arbitrary value '?'
+        :param value:  value must be defined, if not set then can set to arbitrary value see UnknownIsotopeCode definition
         this means it can still be set at any isotopeCode later, otherwise
         need to undo or create new nmrAtom
 
@@ -178,9 +177,9 @@ class NmrAtom(AbstractWrapperObject):
         """
         if not isinstance(value, (str, type(None))):
             raise ValueError('isotopeCode must be of type string (or None); got {}'.format(value))
-        if value is not None and value not in getIsotopeRecords().keys():
+        if value is not None and value not in list(getIsotopeRecords().keys())+[UnknownIsotopeCode]:
             raise ValueError('Invalid isotopeCode {}'.format(value))
-        self._wrappedData.isotopeCode = value if value else self._UNKNOWN_VALUE_STRING
+        self._wrappedData.isotopeCode = value if value else UnknownIsotopeCode
 
     @property
     def boundNmrAtoms(self) -> 'NmrAtom':
@@ -296,11 +295,6 @@ class NmrAtom(AbstractWrapperObject):
                     raise ValueError("Character %s not allowed in ccpn.NmrAtom id : %s.%s.%s.%s"
                                      % (Pid.altCharacter, chainCode, sequenceCode, residueType, name))
 
-            # isotopeCode = self.isotopeCode
-            # if name and isotopeCode not in (None, '?'):
-            #     # Check for isotope match
-            #     if name2IsotopeCode(name) not in (isotopeCode, None):
-            #         raise ValueError("Cannot reassign %s type NmrAtom to %s" % (isotopeCode, name))  Why? Yes you can!
 
             oldNmrResidue = self.nmrResidue
             nmrChain = self._project.fetchNmrChain(chainCode)

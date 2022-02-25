@@ -3,10 +3,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-01-26 11:23:15 +0000 (Wed, January 26, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-02-25 16:33:37 +0000 (Fri, February 25, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -45,7 +45,7 @@ from ccpn.core.lib.ContextManagers import newObject, ccpNmrV3CoreSetter, \
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import makeIterableList, isIterable
 from ccpn.util.Constants import SCALETOLERANCE
-
+from ccpn.core.NmrAtom import UnknownIsotopeCode
 
 class Peak(AbstractWrapperObject):
     """Peak object, holding position, intensity, and assignment information
@@ -517,13 +517,13 @@ class Peak(AbstractWrapperObject):
 
                 atoms = tuple(self.getByPid(x) if isinstance(x, str) else x for x in atoms)
                 resonances = tuple(x._wrappedData for x in atoms if x is not None)
-                if isotopeCode and isotopeCode != '?':
+                if isotopeCode and isotopeCode != UnknownIsotopeCode:
                     # check for isotope match
                     for x in resonances:
-                        if x.isotopeCode not in (isotopeCode, '?'):
-                            msg = "IsotopeCodes mismatch between NmrAtom %s and Spectrum. " \
-                                  "Consider changing NmrAtom isotopeCode from %s to %s, None, or '?'" \
-                                  " to avoid future warnings." % (x.name, x.isotopeCode, isotopeCode)
+                        if x.isotopeCode not in (isotopeCode, UnknownIsotopeCode, None):
+                            msg = f"""IsotopeCodes mismatch between NmrAtom {x.name} and Spectrum. 
+                                  Consider changing NmrAtom isotopeCode from {x.isotopeCode} to {isotopeCode}, None, or {UnknownIsotopeCode}
+                                  to avoid future warnings."""
                             getLogger().warning(msg)  # don't raise errors. NmrAtoms are just labels and can be assigned to anything if user wants so.
 
                 dimResonances.append(resonances)
@@ -640,7 +640,7 @@ class Peak(AbstractWrapperObject):
         if not isinstance(value, Sequence):
             raise ValueError("assignedNmrAtoms must be set to a sequence of list/tuples")
 
-        isotopeCodes = tuple(None if x == '?' else x for x in self.peakList.spectrum.isotopeCodes)
+        isotopeCodes = tuple(None if x == UnknownIsotopeCode else x for x in self.peakList.spectrum.isotopeCodes)
 
         apiPeak = self._wrappedData
         peakDims = apiPeak.sortedPeakDims()
@@ -655,9 +655,9 @@ class Peak(AbstractWrapperObject):
                 atom = self.getByPid(atom) if isinstance(atom, str) else atom
                 if isinstance(atom, NmrAtom):
                     resonance = atom._wrappedData
-                    if isotopeCodes[ii] and resonance.isotopeCode not in (isotopeCodes[ii], '?'):
-                        raise ValueError("NmrAtom %s, isotope %s, assigned to dimension %s must have isotope %s or '?'"
-                                         % (atom, resonance.isotopeCode, ii + 1, isotopeCodes[ii]))
+                    if isotopeCodes[ii] and resonance.isotopeCode not in (isotopeCodes[ii], UnknownIsotopeCode, None):
+                        raise ValueError("NmrAtom %s, isotope %s, assigned to dimension %s must have isotope %s or %s"
+                                         % (atom, resonance.isotopeCode, ii + 1, isotopeCodes[ii], UnknownIsotopeCode))
 
                     ll[ii] = resonance
 

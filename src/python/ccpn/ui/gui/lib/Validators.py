@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-10 23:00:44 +0000 (Thu, February 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-25 19:08:07 +0000 (Fri, February 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -55,6 +55,69 @@ class LineEditValidator(QtGui.QValidator):
             notAllowedSequences.pop('Empty_Spaces')
         for key, seq in notAllowedSequences.items():
             if re.findall(seq, value):
+                return False
+
+        return True
+
+    def validate(self, p_str, p_int):
+        palette = self.parent().palette()
+
+        if self._isValidInput(p_str):
+            palette.setColor(QtGui.QPalette.Base, self.baseColour)
+            state = QtGui.QValidator.Acceptable  # entry is valid
+        else:
+            palette.setColor(QtGui.QPalette.Base, INVALIDROWCOLOUR)
+            state = QtGui.QValidator.Intermediate  # entry is NOT valid, but can continue editing
+        self.parent().setPalette(palette)
+
+        return state, p_str, p_int
+
+    def clearValidCheck(self):
+        palette = self.parent().palette()
+        palette.setColor(QtGui.QPalette.Base, self.baseColour)
+        self.parent().setPalette(palette)
+
+    def resetCheck(self):
+        self.validate(self.parent().text(), 0)
+
+    @property
+    def checkState(self):
+        state, _, _ = self.validate(self.parent().text(), 0)
+        return state
+
+
+class LineEditValidatorCoreObject(QtGui.QValidator):
+    """Validator to restrict input to non-whitespace characters
+    and restrict input to names not already in the core object klass
+    """
+
+    def __init__(self, parent=None, project=None, klass=None, allowSpace=True, allowEmpty=True):
+        super().__init__(parent=parent)
+
+        self.baseColour = self.parent().palette().color(QtGui.QPalette.Base)
+        self._parent = parent
+        self._allowSpace = allowSpace
+        self._allowEmpty = allowEmpty
+        self._pluralLinkName = klass._pluralLinkName
+        self._project = project
+
+    def _isValidInput(self, value):
+        notAllowedSequences = {'Illegal_Characters': '[^A-Za-z0-9_ ]+',
+                               'Empty_Spaces'      : '\s',
+                               }
+
+        if not value and not self._allowEmpty:
+            return False
+        if self._allowSpace:
+            notAllowedSequences.pop('Empty_Spaces')
+        for key, seq in notAllowedSequences.items():
+            if re.findall(seq, value):
+                return False
+
+        # check klass
+        if self._pluralLinkName and self._project:
+            _found = [obj.name for obj in getattr(self._project, self._pluralLinkName, ())]
+            if value in _found:
                 return False
 
         return True

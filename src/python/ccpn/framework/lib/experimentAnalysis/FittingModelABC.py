@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-22 16:06:27 +0000 (Tue, February 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-25 15:14:19 +0000 (Fri, February 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,28 +26,10 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 # Start of code
 #=========================================================================================
 
-from typing import List, Union, Sequence
 from abc import ABC, abstractmethod
-from ccpn.util.OrderedSet import OrderedSet
 from ccpn.core.DataTable import TableFrame
-import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-import numpy as np
 from lmfit import Model
-from lmfit.models import update_param_vals
-import lmfit.lineshapes as func
-
-gaussian_func    = func.gaussian
-lorentzian_func  = func.lorentzian
-linear_func      = func.linear
-parabolic_func   = func.parabolic
-exponential_func = func.exponential
-lognormal_func   = func.lognormal
-pearson7_func    = func.pearson7
-students_t_func  = func.students_t
-powerlaw_func    = func.powerlaw
-
-
-
+import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 
 class FittingModelABC(ABC):
     """
@@ -68,7 +50,6 @@ class FittingModelABC(ABC):
         """
         pass
     
- 
 
     def __str__(self):
         return f'<{self.__class__.__name__}: {self.ModelName}>'
@@ -120,7 +101,20 @@ class MinimiserModel(Model):
     """
     FITTING_FUNC = None
 
+    def fit(self, data, params=None, weights=None, method='leastsq', iter_cb=None, scale_covar=True, verbose=False,
+            fit_kws=None, nan_policy=None, calc_covar=True, max_nfev=None, **kwargs):
 
+        result = super().fit(data, params=params, weights=weights, method=method,
+            iter_cb=iter_cb, scale_covar=scale_covar, verbose=verbose, fit_kws=fit_kws,
+            nan_policy=nan_policy, calc_covar=calc_covar, max_nfev=max_nfev, **kwargs)
+
+        # insert the r2 definition. Might be better to subclass the output model and add it implicitly.
+        result.r2 = lf.r2_func(redchi=result.redchi, y=data)
+        return result
+
+
+    def guess(self, data, x, **kws):
+        pass
 
 
 

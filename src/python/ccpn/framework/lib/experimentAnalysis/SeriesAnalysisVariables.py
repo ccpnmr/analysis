@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-22 16:06:27 +0000 (Tue, February 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-25 15:14:19 +0000 (Fri, February 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -51,8 +51,17 @@ SEP              =  '_'                  # the prefix-name-suffix global separat
 VALUE_           = f'{VALUE}{SEP}'
 TIME_            = f'{TIME}{SEP}'
 
+# fitting output Stat variables
+R2               = 'R2'                  # -> float |
+CHISQUARE        = 'Chi-square'
+REDUCEDCHISQUARE = f'Reduced-{CHISQUARE}'
+AKAIKE           = 'Akaike'
+BAYESIAN         = 'Bayesian'
+MINIMISER_METHOD = 'Minimiser-Method'
+
 CONSTANT_TABLE_COLUMNS = [CHAIN_CODE, RESIDUE_CODE, RESIDUE_TYPE, ATOM_NAME]
 CONSTANT_OUTPUT_TABLE_COLUMNS = [CHAIN_CODE, RESIDUE_CODE, RESIDUE_TYPE, ATOM_NAMES]
+CONSTANT_STATS_OUTPUT_TABLE_COLUMNS = [MINIMISER_METHOD, R2, CHISQUARE, REDUCEDCHISQUARE, AKAIKE, BAYESIAN]
 
 ############################################################################################
 ### Used in SeriesFrame tables ABCs
@@ -130,3 +139,6 @@ OUTPUT_DATATABLE_NAME = 'outputDataTableName'
 
 ## OneSiteBindingModel
 ONE_BINDING_SITE_MODEL = 'OneSiteBindingModel'
+
+########
+

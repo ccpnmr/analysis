@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-22 16:06:26 +0000 (Tue, February 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-25 15:14:19 +0000 (Fri, February 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -38,6 +38,7 @@ from ccpn.core.DataTable import TableFrame
 from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel,  _registerModels
 from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import CSMInputFrame, CSMOutputFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 
 class DeltaDeltaCalculation(FittingModelABC):
     """
@@ -97,23 +98,6 @@ class DeltaDeltaCalculation(FittingModelABC):
         outputFrame.setDataFromDict(outputDataDict)
         return outputFrame
 
-    @staticmethod
-    def _calculateEuclideanDistance(array1, array2, alphaFactors):
-        """
-        Calculate the  Euclidean Distance of two set of coordinates using scaling factors.
-        :param array1: (1d array), coordinate 1
-        :param array2: (1d array), coordinate 2 of same shape of array1
-        :param alphaFactors: the scaling factors.  same shape of array1 and 2.
-        :return: float
-        Ref.: Eq.(9) from: M.P. Williamson Progress in Nuclear Magnetic Resonance Spectroscopy 73 (2013) 1–16
-        """
-        deltas = []
-        for a, b, factor in zip(array1, array2, alphaFactors):
-            delta = a - b
-            delta *= factor
-            delta **= 2
-            deltas.append(delta)
-        return np.sqrt(np.sum(np.array(deltas)))
 
     def _calculateDeltaDelta(self, data):
         """
@@ -124,11 +108,10 @@ class DeltaDeltaCalculation(FittingModelABC):
         deltaDeltas = []
         origin = data[0] # first set of positions (any dimensionality)
         for coord in data[1:]:# the other set of positions (same dim as origin)
-            dd = DeltaDeltaCalculation._calculateEuclideanDistance(origin, coord, self._alphaFactors)
+            dd = lf.euclideanDistance_func(origin, coord, self._alphaFactors)
             deltaDeltas.append(dd)
         deltaDelta = np.mean(deltaDeltas) # mean but could be an option to be a sum
         return deltaDelta
-
 
 
 class OneSiteBindingModel(FittingModelABC):
@@ -151,37 +134,12 @@ class OneSiteBindingModel(FittingModelABC):
 
 
 
-def _registerChemicalShiftMappingModels():
-    """
-    Register the ChemicalShiftMapping specific Models
-    """
-    from ccpn.framework.lib.experimentAnalysis.ChemicalShiftMappingAnalysisBC import ChemicalShiftMappingAnalysisBC
-    models = [DeltaDeltaCalculation]
-    _registerModels(ChemicalShiftMappingAnalysisBC, models)
-
-
-
-
-
 class FractionBindingModel(MinimiserModel):
     """A model based on the fraction bound Fitting equation.
       Eq. 6 from  M.P. Williamson. Progress in Nuclear Magnetic Resonance Spectroscopy 73, 1–16 (2013).
     """
 
-    @staticmethod
-    def fractionBound_func(p, l, kd):
-        """
-        Eq. 6 from  M.P. Williamson. Progress in Nuclear Magnetic Resonance Spectroscopy 73, 1–16 (2013).
-        :param p:
-        :param l:
-        :param kd:
-        :return:
-        """
-        qd = np.sqrt(((p + l + kd) ** 2) - 4 * p * l)
-        return ((p + l + kd - qd) / 2)
-
-
-    FITTING_FUNC = fractionBound_func
+    FITTING_FUNC = lf.fractionBound_func
 
     def __init__(self, independent_vars=['x'], prefix='', nan_policy='raise', **kwargs):
         kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
@@ -191,29 +149,12 @@ class FractionBindingModel(MinimiserModel):
         """Estimate initial model parameter values from data."""
         raise NotImplementedError()
 
-        try:
-            sval, oval = np.fractionBound_func(x, np.log(abs(data) + 1.e-15), 1)
-        except TypeError:
-            sval, oval = 1., np.log(abs(max(data) + 1.e-9))
-        pars = self.make_params(l=np.exp(oval), kd=-1.0 / sval)
-        return update_param_vals(pars, self.prefix, **kwargs)
-
 
 class Simple1SiteModel(MinimiserModel):
     """A model based on the oneSiteBindingCurve Fitting equation.
     """
 
-    @staticmethod
-    def oneSiteBindingCurve(x, kd, bmax):
-        """
-        :param x: 1d array
-        :param kd: the initial kd value
-        :param bmax:
-        :return:
-        """
-        return (bmax * x) / (x + kd)
-
-    FITTING_FUNC = oneSiteBindingCurve
+    FITTING_FUNC = lf.oneSiteBinding_func
 
     def __init__(self, independent_vars=['x'], prefix='', nan_policy='raise', **kwargs):
         kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
@@ -223,3 +164,13 @@ class Simple1SiteModel(MinimiserModel):
         """Estimate initial model parameter values from data."""
         raise NotImplementedError()
 
+
+
+
+def _registerChemicalShiftMappingModels():
+    """
+    Register the ChemicalShiftMapping specific Models
+    """
+    from ccpn.framework.lib.experimentAnalysis.ChemicalShiftMappingAnalysisBC import ChemicalShiftMappingAnalysisBC
+    models = [DeltaDeltaCalculation]
+    _registerModels(ChemicalShiftMappingAnalysisBC, models)

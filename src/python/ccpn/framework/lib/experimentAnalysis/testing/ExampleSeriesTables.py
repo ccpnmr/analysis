@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-16 11:02:56 +0000 (Wed, February 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-25 15:14:19 +0000 (Fri, February 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -130,7 +130,7 @@ def _testCSMCalcData():
     df = getCSMInputFrameExample()
     from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import DeltaDeltaCalculation
     deltaDeltaModel = DeltaDeltaCalculation(alphaFactors=(1, 0.102))
-    outputFrame = deltaDeltaModel.fit(df)
+    outputFrame = deltaDeltaModel.fitSeries(df)
     print(outputFrame)
 
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-16 15:46:57 +0000 (Wed, February 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-25 15:14:19 +0000 (Fri, February 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -84,7 +84,7 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         self._AlphaFactors.update(dd)
 
 
-    def fit(self, *args, **kwargs):
+    def fitInputData(self, *args, **kwargs):
         """
         Perform the registered FittingModels to the inputDataTables and add the outputs to a newDataTable or
          override last available.
@@ -106,7 +106,7 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         for model in fittingModels:
             fittingModel = model()
             inputDataTable = self.inputDataTables[-1]
-            outputFrame = fittingModel.fit(inputDataTable.data)
+            outputFrame = fittingModel.fitSeries(inputDataTable.data)
             outputName = f'{inputDataTable.name}_output_{fittingModel.ModelName}'
             outputDataTable = self._fetchOutputDataTable(name=outputName, seriesFrameType=sv.CSM_OUTPUT_FRAME,
                                                    overrideExisting=ovverideOutputDataTable)

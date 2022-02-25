@@ -5,10 +5,10 @@ Alpha version of a popup for setting up a structure calculation using Xplor-NIH 
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -17,9 +17,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$Author: Luca Mureddu $"
 __dateModified__ = "$Date: 2021-04-27 16:04:57 +0100 (Tue, April 27, 2021) $"
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-05-06 14:04:49 +0100 (Thu, May 06, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-02-25 12:45:04 +0000 (Fri, February 25, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -45,130 +45,130 @@ from ccpn.ui.gui.widgets.FileDialog import OtherFileDialog
 from ccpn.framework.Application import getApplication
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
-if (application.preferences.externalPrograms.get('xplor') is None) or (len(application.preferences.externalPrograms.get('xplor')) <2):
-    showWarning('XPLOR PATH NOT SET UP', 'Please make sure you have set the path in preferences.')
-    sys.exit()
-if (application.preferences.externalPrograms.get('talos') is None) or (len(application.preferences.externalPrograms.get('talos')) <2):
-    showWarning('TALOS PATH NOT SET UP', 'Please make sure you have set the path in preferences.')
-    sys.exit()
-
-
-
-application = getApplication()
-
-
-if application:
-    # Path for Xplor NIH executable. Those calculations are
-    # Local Mac:
-    #xplorPath='/Users/eliza/Projects/xplor-nih-3.2/bin/xplor'
-    xplorPath = application.preferences.externalPrograms.get('xplor')
-
-    # This is an example folder from Xplor NIH distribution with scripts necessary for running calculations
-    pathToXplorBinary = application.preferences.externalPrograms.get('xplor')
-    xplorRootDirectory = os.path.dirname(os.path.dirname(pathToXplorBinary))
-    pathToXplorFiles = os.path.join(xplorRootDirectory, 'eginput','pasd','nef')
-
-    # Path for TalosN executable (depending where the calculation is run).
-    #talosnPath='/home/eapa2/applications/talos-n/talosn'
-    talosnPath=application.preferences.externalPrograms.get('talos')
-
-
-def setupDirForXplorRun(project, path, name, peakLists, chemShiftList):
-    dir = os.path.join(path, name+'_'+str(datetime.date.today()))
-
-    if os.path.isdir(dir) == False:
-        os.mkdir(dir)
-
-    # generate a list of the necessary nef pids needed for xplor
-    pidList = []
-    for item in project.chains:
-        pidList.append(item.pid)
-
-    for item in project.chemicalShiftLists:
-        if item.pid in chemShiftList:
-            pidList.append(item.pid)
-
-
-    for item in project.peakLists:
-        if item.pid in peakLists:
-            pidList.append(item.pid)
-
-    project.exportNef(path=os.path.join(dir, name+'.nef'), overwriteExisting=True,
-                      skipPrefixes=['ccpn'], expandSelection=False,
-                      pidList=pidList)
-
-    # copy xplor run files into the working directory
-    copy_tree(pathToXplorFiles, dir)
-
-    return dir, pidList
-
-
-def writeXplorReadme( projectName, projectSpectra, dir, xplorRunName):
-
-    with open(os.path.join(dir, 'README'), 'r') as file:
-        # read a list of lines into data
-        readmeFile = file.readlines()
-
-    talosn = "alias talosn='" + talosnPath + "'\n"
-    xplor = "alias xplor='" + xplorPath + "'\n"
-
-    # and write everything back
-    with open(os.path.join(dir, xplorRunName), 'w') as file:
-        for i, line in enumerate(readmeFile):
-            if i == 1:
-                file.write(talosn)
-                file.write(xplor)
-            if "name=CCPN_H1GI_clean" in line:
-                line = line.replace('CCPN_H1GI_clean', projectName)
-            if 'CNOESY-173`3` 3dNOESY-182`3`' in line:
-                line = line.replace('CNOESY-173`3` 3dNOESY-182`3`', projectSpectra)
-            file.write(line)
-
-    file.close()
-    return
-
-
-def editTalosSH(pathDir):
-
-    with open(os.path.join(pathDir, 'runTalos.sh'), 'r') as file:
-        data = file.read()
-        file.close()
-
-    data = data.replace('TALOSN=talosn',"TALOSN="+talosnPath)
-
-    with open(os.path.join(pathDir, 'runTalos.sh'), 'w') as file:
-        file.write(data)
-        file.close()
-
-def xplorRunDirectorySetUp(project, pathToXplorRunDirectory, peakLists, chemShiftList):
-    name = project.name
-    dir, pidList = setupDirForXplorRun(project, pathToXplorRunDirectory, name, peakLists, chemShiftList)
-
-    spectra = ''
-    for i, p in enumerate(peakLists):
-        if i>0: spectra = spectra + ' '
-        p = p.replace('PL:','')
-        p = p.split('.')
-        spectra = spectra + p[0]+'`'+p[1]+'`'
-    #print(spectra)
-    xplorRunName = 'runxplor_'+name+'_'+str(datetime.date.today())+'.sh'
-    writeXplorReadme(projectName=name,
-                     projectSpectra=spectra,
-                     dir=dir, xplorRunName=xplorRunName)
-    editTalosSH(dir)
-
-    os.system('chmod 777 '+os.path.join(dir, xplorRunName))
-    print('Setup complete in directory: ', dir)
-    print('To run Xplor NIH got to the folder and execute in terminal: \n./'+xplorRunName)
-
-    return dir
-
-# print('Paths for Xplor NIH and TalosN executables loaded.\nTo prepare Xplor NIH run directory type in Python Console with updated names (EXAMPLE): \nxplorRunDirectorySetUp(pathToXplorRunDirectory = \'/Users/user1/Documents/xplorNIH/protein1\', peakLists=[\'PL:N-NOESY.1\',\'PL:C-NOESY.1\'], chemShiftList=[\'CL:list1\'])')
-
+# if (application.preferences.externalPrograms.get('xplor') is None) or (len(application.preferences.externalPrograms.get('xplor')) <2):
+#     showWarning('XPLOR PATH NOT SET UP', 'Please make sure you have set the path in preferences.')
+#     sys.exit()
+# if (application.preferences.externalPrograms.get('talos') is None) or (len(application.preferences.externalPrograms.get('talos')) <2):
+#     showWarning('TALOS PATH NOT SET UP', 'Please make sure you have set the path in preferences.')
+#     sys.exit()
+#
+#
+#
+# application = getApplication()
+#
+#
+# if application:
+#     # Path for Xplor NIH executable. Those calculations are
+#     # Local Mac:
+#     #xplorPath='/Users/eliza/Projects/xplor-nih-3.2/bin/xplor'
+#     xplorPath = application.preferences.externalPrograms.get('xplor')
+#
+#     # This is an example folder from Xplor NIH distribution with scripts necessary for running calculations
+#     pathToXplorBinary = application.preferences.externalPrograms.get('xplor')
+#     xplorRootDirectory = os.path.dirname(os.path.dirname(pathToXplorBinary))
+#     pathToXplorFiles = os.path.join(xplorRootDirectory, 'eginput','pasd','nef')
+#
+#     # Path for TalosN executable (depending where the calculation is run).
+#     #talosnPath='/home/eapa2/applications/talos-n/talosn'
+#     talosnPath=application.preferences.externalPrograms.get('talos')
+#
+#
+# def setupDirForXplorRun(project, path, name, peakLists, chemShiftList):
+#     dir = os.path.join(path, name+'_'+str(datetime.date.today()))
+#
+#     if os.path.isdir(dir) == False:
+#         os.mkdir(dir)
+#
+#     # generate a list of the necessary nef pids needed for xplor
+#     pidList = []
+#     for item in project.chains:
+#         pidList.append(item.pid)
+#
+#     for item in project.chemicalShiftLists:
+#         if item.pid in chemShiftList:
+#             pidList.append(item.pid)
+#
+#
+#     for item in project.peakLists:
+#         if item.pid in peakLists:
+#             pidList.append(item.pid)
+#
+#     project.exportNef(path=os.path.join(dir, name+'.nef'), overwriteExisting=True,
+#                       skipPrefixes=['ccpn'], expandSelection=False,
+#                       pidList=pidList)
+#
+#     # copy xplor run files into the working directory
+#     copy_tree(pathToXplorFiles, dir)
+#
+#     return dir, pidList
+#
+#
+# def writeXplorReadme( projectName, projectSpectra, dir, xplorRunName):
+#
+#     with open(os.path.join(dir, 'README'), 'r') as file:
+#         # read a list of lines into data
+#         readmeFile = file.readlines()
+#
+#     talosn = "alias talosn='" + talosnPath + "'\n"
+#     xplor = "alias xplor='" + xplorPath + "'\n"
+#
+#     # and write everything back
+#     with open(os.path.join(dir, xplorRunName), 'w') as file:
+#         for i, line in enumerate(readmeFile):
+#             if i == 1:
+#                 file.write(talosn)
+#                 file.write(xplor)
+#             if "name=CCPN_H1GI_clean" in line:
+#                 line = line.replace('CCPN_H1GI_clean', projectName)
+#             if 'CNOESY-173`3` 3dNOESY-182`3`' in line:
+#                 line = line.replace('CNOESY-173`3` 3dNOESY-182`3`', projectSpectra)
+#             file.write(line)
+#
+#     file.close()
+#     return
+#
+#
+# def editTalosSH(pathDir):
+#
+#     with open(os.path.join(pathDir, 'runTalos.sh'), 'r') as file:
+#         data = file.read()
+#         file.close()
+#
+#     data = data.replace('TALOSN=talosn',"TALOSN="+talosnPath)
+#
+#     with open(os.path.join(pathDir, 'runTalos.sh'), 'w') as file:
+#         file.write(data)
+#         file.close()
+#
+# def xplorRunDirectorySetUp(project, pathToXplorRunDirectory, peakLists, chemShiftList):
+#     name = project.name
+#     dir, pidList = setupDirForXplorRun(project, pathToXplorRunDirectory, name, peakLists, chemShiftList)
+#
+#     spectra = ''
+#     for i, p in enumerate(peakLists):
+#         if i>0: spectra = spectra + ' '
+#         p = p.replace('PL:','')
+#         p = p.split('.')
+#         spectra = spectra + p[0]+'`'+p[1]+'`'
+#     #print(spectra)
+#     xplorRunName = 'runxplor_'+name+'_'+str(datetime.date.today())+'.sh'
+#     writeXplorReadme(projectName=name,
+#                      projectSpectra=spectra,
+#                      dir=dir, xplorRunName=xplorRunName)
+#     editTalosSH(dir)
+#
+#     os.system('chmod 777 '+os.path.join(dir, xplorRunName))
+#     print('Setup complete in directory: ', dir)
+#     print('To run Xplor NIH got to the folder and execute in terminal: \n./'+xplorRunName)
+#
+#     return dir
+#
+# # print('Paths for Xplor NIH and TalosN executables loaded.\nTo prepare Xplor NIH run directory type in Python Console with updated names (EXAMPLE): \nxplorRunDirectorySetUp(pathToXplorRunDirectory = \'/Users/user1/Documents/xplorNIH/protein1\', peakLists=[\'PL:N-NOESY.1\',\'PL:C-NOESY.1\'], chemShiftList=[\'CL:list1\'])')
+#
 
 class SetupXplorStructureCalculationPopup(CcpnDialogMainWidget):
     """
-
+    Setup the Xplor calculation
     """
     FIXEDWIDTH = True
     FIXEDHEIGHT = False
@@ -244,26 +244,40 @@ class SetupXplorStructureCalculationPopup(CcpnDialogMainWidget):
             self.pathData.setText(str(path))
 
     def _okCallback(self):
+        """Clicked ok: setup the calculation
+        """
+        from  ccpn.AnalysisStructure.lib.runManagers.XplorNihRunManager import XplorNihRunManager
+
         if self.project:
-            csl = self.cslWidget.getSelectedObject()
+            csList = self.cslWidget.getSelectedObject()
             chain = self.mcWidget.getSelectedObject()
             plsPids = self.plsWidget.rightList.getTexts()
             pathRun = self.pathData.get()
-            if not csl:
-                MessageDialog.showWarning('', 'Select a ChemicalShift List')
+            if not csList:
+                MessageDialog.showWarning('', 'Please select a ChemicalShift List first')
                 return
             if not chain:
-                MessageDialog.showWarning('', 'Select a ChemicalShift List')
+                MessageDialog.showWarning('', 'Please select a ChemicalShift List first')
                 return
             if not plsPids:
-                MessageDialog.showWarning('', 'Include at list a PeakList')
+                MessageDialog.showWarning('', 'Please include at least one PeakList')
                 return
+
             # run the calculation
-            print('Running with peakLists: %s, chain: %s, CSL: %s. Run Dir: %s' %(plsPids, chain.pid, csl.pid, pathRun))
-            xplorRunDirectorySetUp(self.project,
-                                   pathToXplorRunDirectory = pathRun,
-                                   peakLists = plsPids,
-                                   chemShiftList = csl.pid)
+            project = self.project
+            myRun = XplorNihRunManager(project = project,
+                                       runName = 'run', runId =1
+                                       )
+            myRun.chemicalShiftList = csList
+            myRun.chain = chain
+            myRun.peakLists = [project.getByPid(pl) for pl in plsPids]
+            _runDir = myRun.setupCalculation()
+            myRun.saveState()
+
+            MessageDialog.showInfo('Setup Xplor_nih calculation',
+                                   f'created directory {_runDir}\n\nplease run "{myRun.scriptPath}" in there'
+                                   )
+
         self.accept()
 
 if __name__ == '__main__':

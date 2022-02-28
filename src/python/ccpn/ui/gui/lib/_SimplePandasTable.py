@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-28 13:46:33 +0000 (Mon, February 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-28 17:36:56 +0000 (Mon, February 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -32,19 +32,21 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 
 from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND
 from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT, getFontHeight
+from ccpn.ui.gui.widgets.Frame import ScrollableFrame
+from ccpn.ui.gui.widgets.Base import Base
 
 
-class _SimplePandasTableView(QtWidgets.QTableView):
+class _SimplePandasTableView(QtWidgets.QTableView, Base):
     styleSheet = """QTableView {
                         background-color: %(GUITABLE_BACKGROUND)s;
                         alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
-                        border: 1px solid %(BORDER_NOFOCUS)s;
+                        border: 2px solid %(BORDER_NOFOCUS)s;
                         border-radius: 2px;
                     }
                     QTableView::focus {
                         background-color: %(GUITABLE_BACKGROUND)s;
                         alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
-                        border: 1px solid %(BORDER_FOCUS)s;
+                        border: 2px solid %(BORDER_FOCUS)s;
                         border-radius: 2px;
                     }
                     QTableView::item {
@@ -60,8 +62,16 @@ class _SimplePandasTableView(QtWidgets.QTableView):
     # QTableView::item - color: %(GUITABLE_ITEM_FOREGROUND)s;
     # QTableView::item:selected - color: %(GUITABLE_SELECTED_FOREGROUND)s;
 
-    def __init__(self, *args, **kwds):
-        super().__init__(*args, **kwds)
+    def __init__(self, parent=None, mainWindow=None, showHorizontalHeader=True, showVerticalHeader=True, **kwds):
+        super().__init__(parent)
+        Base._init(self, **kwds)
+
+        self._parent = parent
+        if mainWindow:
+            self.mainWindow = mainWindow
+            self.application = mainWindow.application
+            self.project = mainWindow.application.project
+            self.current = mainWindow.application.current
 
         # set stylesheet
         self.colours = getColours()
@@ -99,9 +109,9 @@ class _SimplePandasTableView(QtWidgets.QTableView):
         # only look at visible section
         _header.setResizeContentsPrecision(5)
         _header.setDefaultAlignment(QtCore.Qt.AlignLeft)
-        _header.setMinimumSectionSize(16)
-        _header.setVisible(True)
-        _header.setFixedWidth(10)  # gives enough of a handle to resize
+        _header.setFixedWidth(10)  # gives enough of a handle to resize if required
+
+        _header.setVisible(showVerticalHeader)
 
         _header.setHighlightSections(self.font().bold())
         setWidgetFont(self, name=TABLEFONT)
@@ -109,7 +119,41 @@ class _SimplePandasTableView(QtWidgets.QTableView):
         setWidgetFont(self.verticalHeader(), name=TABLEFONT)
 
         _height = getFontHeight(name=TABLEFONT, size='MEDIUM')
+        _header.setDefaultSectionSize(_height)
+        _header.setMinimumSectionSize(_height)
         self.setMinimumSize(3 * _height, 3 * _height + self.horizontalScrollBar().height())
+
+    def _initTableCommonWidgets(self, parent, height=35, setGuiNotifier=None, **kwds):
+        """Initialise the common table elements
+        """
+        # strange, need to do this when using scrollArea, but not a widget
+        parent.getLayout().setHorizontalSpacing(0)
+
+        self._widget = ScrollableFrame(parent=parent, scrollBarPolicies=('never', 'never'), **kwds)
+        self._widgetScrollArea = self._widget._scrollArea
+        self._widgetScrollArea.setStyleSheet('''
+                    margin-left : 2px;
+                    margin-right : 2px;''')
+
+    def _postInitTableCommonWidgets(self):
+        from ccpn.ui.gui.widgets.DropBase import DropBase
+        from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+        from ccpn.ui.gui.widgets.ScrollBarVisibilityWatcher import ScrollBarVisibilityWatcher
+
+        # add a dropped notifier to all tables
+        if self.moduleParent is not None:
+            # set the dropEvent to the mainWidget of the module, otherwise the event gets stolen by Frames
+            self.moduleParent.mainWidget._dropEventCallback = self._processDroppedItems
+
+        self.droppedNotifier = GuiNotifier(self,
+                                           [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                                           self._processDroppedItems)
+
+        # add a widget handler to give a clean corner widget for the scroll area
+        self._cornerDisplay = ScrollBarVisibilityWatcher(self)
+
+        self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
+
 
 
 class _SimplePandasTableModel(QtCore.QAbstractTableModel):
@@ -167,7 +211,7 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         """Return the column headers
         """
         if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
-            return self._data.columns[col]
+            return self._data.columns[col] if not self._data.empty else None
         return None
 
     def setForeground(self, row, column, colour):

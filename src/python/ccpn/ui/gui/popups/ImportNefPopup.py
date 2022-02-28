@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-24 17:00:34 +0000 (Thu, February 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-28 13:46:33 +0000 (Mon, February 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,6 @@ __date__ = "$Date: 2020-05-04 17:15:05 +0000 (Mon, May 04, 2020) $"
 # Start of code
 #=========================================================================================
 
-import numpy as np
 import os
 from functools import partial
 from collections import OrderedDict
@@ -37,8 +36,8 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 from contextlib import contextmanager
 from dataclasses import dataclass
 
-from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ImportTreeCheckBoxes, RENAMEACTION, BADITEMACTION
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
+from ccpn.ui.gui.widgets.ProjectTreeCheckBoxes import ImportTreeCheckBoxes, RENAMEACTION, BADITEMACTION
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Label import Label
@@ -51,10 +50,17 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.SpeechBalloon import SpeechBalloon
+from ccpn.ui.gui.widgets.Font import getFontHeight
+from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
+from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.ui.gui.lib.Validators import LineEditValidator
+from ccpn.ui.gui.lib._SimplePandasTable import _newSimplePandasTable, _updateSimplePandasTable
+from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS, TOOLTIP_BACKGROUND
+
 from ccpn.framework.lib.ccpnNef import CcpnNefIo
 from ccpn.framework.lib.ccpnNef.CcpnNefIo import DATANAME
 from ccpn.framework.lib.ccpnNef.CcpnNefCommon import nef2CcpnClassNames
+
 from ccpn.core.lib.ContextManagers import catchExceptions
 from ccpn.core.lib.Pid import Pid
 from ccpn.core.Project import Project
@@ -66,11 +72,6 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.PrintFormatter import PrintFormatter
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.OrderedSet import OrderedSet
-
-from ccpn.ui.gui.widgets.Font import getFontHeight, setWidgetFont, TABLEFONT
-from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS, TOOLTIP_BACKGROUND, GUITABLE_ITEM_FOREGROUND
-from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
-from ccpn.ui.gui.widgets.TextEditor import TextEditor
 
 
 INVALIDTEXTROWCHECKCOLOUR = QtGui.QColor('crimson')
@@ -140,242 +141,6 @@ class _TreeValues:
     newVal = None
 
 
-class PandasDataFrameTableView(QtWidgets.QTableView):
-    styleSheet = """QTableView {
-                        background-color: %(GUITABLE_BACKGROUND)s;
-                        alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
-                        border: 1px solid %(BORDER_NOFOCUS)s;
-                        border-radius: 2px;
-                    }
-                    QTableView::focus {
-                        background-color: %(GUITABLE_BACKGROUND)s;
-                        alternate-background-color: %(GUITABLE_ALT_BACKGROUND)s;
-                        border: 1px solid %(BORDER_FOCUS)s;
-                        border-radius: 2px;
-                    }
-                    QTableView::item {
-                        padding: 2px;
-                    }
-                    QTableView::item::selected {
-                        background-color: %(GUITABLE_SELECTED_BACKGROUND)s;
-                        color: %(GUITABLE_SELECTED_FOREGROUND)s;
-                    }
-                    """
-
-    # overrides QtCore.Qt.ForegroundRole
-    # QTableView::item - color: %(GUITABLE_ITEM_FOREGROUND)s;
-    # QTableView::item:selected - color: %(GUITABLE_SELECTED_FOREGROUND)s;
-
-    def __init__(self, *args, **kwds):
-        super().__init__(*args, **kwds)
-
-        # set stylesheet
-        self.colours = getColours()
-        self._defaultStyleSheet = self.styleSheet % self.colours
-        self.setStyleSheet(self._defaultStyleSheet)
-        self.setAlternatingRowColors(True)
-
-        # set the preferred scrolling behaviour
-        self.setHorizontalScrollMode(self.ScrollPerPixel)
-        self.setVerticalScrollMode(self.ScrollPerPixel)
-        self.setSelectionBehavior(self.SelectRows)
-
-        # enable sorting and sort on the first column
-        self.setSortingEnabled(True)
-        self.sortByColumn(0, QtCore.Qt.AscendingOrder)
-
-        # the resizeColumnsToContents is REALLY slow :|
-        _header = self.horizontalHeader()
-        # set Interactive and last column to expanding
-        _header.setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
-        _header.setStretchLastSection(True)
-        # only look at visible section
-        _header.setResizeContentsPrecision(5)
-        _header.setDefaultAlignment(QtCore.Qt.AlignLeft)
-        _header.setMinimumSectionSize(16)
-        _header.setHighlightSections(self.font().bold())
-        setWidgetFont(self, name=TABLEFONT)
-        setWidgetFont(_header, name=TABLEFONT)
-        setWidgetFont(self.verticalHeader(), name=TABLEFONT)
-
-        _header = self.verticalHeader()
-        # set Interactive and last column to expanding
-        _header.setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
-        _header.setStretchLastSection(False)
-        # only look at visible section
-        _header.setResizeContentsPrecision(5)
-        _header.setDefaultAlignment(QtCore.Qt.AlignLeft)
-        _header.setMinimumSectionSize(16)
-        _header.setVisible(True)
-        _header.setFixedWidth(10)  # gives enough of a handle to resize
-
-        _header.setHighlightSections(self.font().bold())
-        setWidgetFont(self, name=TABLEFONT)
-        setWidgetFont(_header, name=TABLEFONT)
-        setWidgetFont(self.verticalHeader(), name=TABLEFONT)
-
-        _height = getFontHeight(name=TABLEFONT, size='MEDIUM')
-        self.setMinimumSize(3 * _height, 3 * _height + self.horizontalScrollBar().height())
-
-
-class NewHeaderModel(QtCore.QAbstractTableModel):
-    """A simple table model to view pandas DataFrames
-    """
-    _defaultForegroundColour = QtGui.QColor(getColours()[GUITABLE_ITEM_FOREGROUND])
-
-    def __init__(self, row, column):
-        """Initialise the pandas model
-        Allocates space for foreground/background colours
-        """
-        QtCore.QAbstractTableModel.__init__(self)
-        # create numpy arrays to match the data that will hold background colour
-        self._colour = np.zeros((row, column), dtype=np.object)
-        self._data = np.zeros((row, column), dtype=np.object)
-
-    def rowCount(self, parent=None):
-        """Return the row count for the dataFrame
-        """
-        return self._data.shape[0]
-
-    def columnCount(self, parent=None):
-        """Return the column count for the dataFrame
-        """
-        return self._data.shape[1]
-
-    def data(self, index, role=QtCore.Qt.DisplayRole):
-        """Process the data callback for the model
-        """
-        if index.isValid():
-            if role == QtCore.Qt.DisplayRole:
-                return str(self._data.iat[index.row(), index.column()])
-
-            if role == QtCore.Qt.BackgroundRole:
-                if (_col := self._colour[index.row(), index.column()]):
-                    # get the colour from the dict
-                    return _col.get(role)
-
-            if role == QtCore.Qt.ForegroundRole:
-                if (_col := self._colour[index.row(), index.column()]):
-                    # get the colour from the dict
-                    if (_foreground := _col.get(role)):
-                        return _foreground
-
-                # return the default foreground colour
-                return self._defaultForegroundColour
-
-        return None
-
-    # def setData(self, index, value, role) -> bool:
-    #     """Set the data for the index
-    #     """
-    #     if index.isValid():
-    #         if role == QtCore.Qt.UserRole + 1:
-    #             col = index.column()
-    #             span = int(value)
-    #             if int(value) > 0:
-    #                 if (col + span - 1>= _columnCount()):
-    #                     span = columnCount() - col
-    #                 self._data[span, ]
-    #         elif role == QtCore.Qt.UserRole + 2:
-    #             pass
-
-
-class PandasDataFrameModel(QtCore.QAbstractTableModel):
-    """A simple table model to view pandas DataFrames
-    """
-    _defaultForegroundColour = QtGui.QColor(getColours()[GUITABLE_ITEM_FOREGROUND])
-
-    def __init__(self, data):
-        """Initialise the pandas model
-        Allocates space for foreground/background colours
-
-        :param data: pandas DataFrame
-        """
-        if not isinstance(data, pd.DataFrame):
-            raise ValueError('data must be of type pd.DataFrame')
-
-        QtCore.QAbstractTableModel.__init__(self)
-        self._data = data
-        # create numpy arrays to match the data that will hold background colour
-        self._colour = np.zeros(self._data.shape, dtype=np.object)
-
-    def rowCount(self, parent=None):
-        """Return the row count for the dataFrame
-        """
-        return self._data.shape[0]
-
-    def columnCount(self, parent=None):
-        """Return the column count for the dataFrame
-        """
-        return self._data.shape[1]
-
-    def data(self, index, role=QtCore.Qt.DisplayRole):
-        """Process the data callback for the model
-        """
-        if index.isValid():
-            if role == QtCore.Qt.DisplayRole:
-                return str(self._data.iat[index.row(), index.column()])
-
-            if role == QtCore.Qt.BackgroundRole:
-                if (_col := self._colour[index.row(), index.column()]):
-                    # get the colour from the dict
-                    return _col.get(role)
-
-            if role == QtCore.Qt.ForegroundRole:
-                if (_col := self._colour[index.row(), index.column()]):
-                    # get the colour from the dict
-                    if (_foreground := _col.get(role)):
-                        return _foreground
-
-                # return the default foreground colour
-                return self._defaultForegroundColour
-
-        return None
-
-    def headerData(self, col, orientation, role=None):
-        """Return the column headers
-        """
-        if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
-            return self._data.columns[col]
-        return None
-
-    def setForeground(self, row, column, colour):
-        """Set the foreground colour for cell at position (row, column).
-
-        :param row: row as integer
-        :param column: column as integer
-        :param colour: colour compatible with QtGui.QColor
-        :return:
-        """
-        if not (0 <= row < self.rowCount() and 0 <= column < self.columnCount()):
-            raise ValueError(f'({row}, {column}) must be less than ({self.rowCount()}, {self.columnCount()})')
-
-        if not (_cols := self._colour[row, column]):
-            _cols = self._colour[row, column] = {}
-        if colour:
-            _cols[QtCore.Qt.ForegroundRole] = QtGui.QColor(colour)
-        else:
-            _cols.pop(QtCore.Qt.ForegroundRole, None)
-
-    def setBackground(self, row, column, colour):
-        """Set the background colour for cell at position (row, column).
-
-        :param row: row as integer
-        :param column: column as integer
-        :param colour: colour compatible with QtGui.QColor
-        :return:
-        """
-        if not (0 <= row < self.rowCount() and 0 <= column < self.columnCount()):
-            raise ValueError(f'({row}, {column}) must be less than ({self.rowCount()}, {self.columnCount()})')
-
-        if not (_cols := self._colour[row, column]):
-            _cols = self._colour[row, column] = {}
-        if colour:
-            _cols[QtCore.Qt.BackgroundRole] = QtGui.QColor(colour)
-        else:
-            _cols.pop(QtCore.Qt.BackgroundRole, None)
-
-
 class NefDictFrame(Frame):
     """
     Class to handle a nef dictionary editor
@@ -421,11 +186,10 @@ class NefDictFrame(Frame):
         self._enableMouseMenu = enableMouseMenu
         self._pathName = pathName
         self._collections = {}
-        self._collectionsTable = None  # PandasDataFrameTableView(self)
-        # self._collectionsTable.setVisible(False)
+        self._collectionsTable = None
 
         self._structureData = {}
-        self._structureDataTable = None  # PandasDataFrameTableView(self)
+        self._structureDataTable = None
 
         # self._nefImporterClass = nefImporterClass
         # set the nef object - nefLoader/nefDict
@@ -589,9 +353,9 @@ class NefDictFrame(Frame):
         self._treeSplitter.addWidget(self._filterLogFrame)
 
         _frame, self._structureDataTable = self._addTableToFrame(pd.DataFrame({STRUCTUREDATA: self._structureData.keys(),
-                                                                             'Items'   : ['\n'.join(vv for vv in val) for val in self._structureData.values()]}),
-                                                               _name=f'{STRUCTUREDATA}',
-                                                               ignoreFrame=True, showMore=True)
+                                                                               'Items'      : ['\n'.join(vv for vv in val) for val in self._structureData.values()]}),
+                                                                 _name=f'{STRUCTUREDATA}',
+                                                                 ignoreFrame=True, showMore=True)
         self._frameOptionsNested.getLayout().addWidget(_frame, 0, 0)
         _frame, self._collectionsTable = self._addTableToFrame(pd.DataFrame({COLLECTION: self._collections.keys(),
                                                                              'Items'   : ['\n'.join(vv for vv in val) for val in self._collections.values()]}),
@@ -2614,7 +2378,7 @@ class NefDictFrame(Frame):
 
     @contextmanager
     def _tableColouring(self, table):
-        # not sure this is needed now - handled by the PandasDataFrameModel indexing
+        # not sure this is needed now - handled by the _SimplePandasTableModel indexing
         def _setRowBackgroundColour(row, colour):
             # set the colour for the items in the model colour table
             for j in _cols:
@@ -2625,23 +2389,16 @@ class NefDictFrame(Frame):
 
         yield _setRowBackgroundColour
 
-    def _addTableToFrame(self, _data, _name, newWidgets=False, table=None, ignoreFrame=False, showMore=False):
+    def _addTableToFrame(self, _data, _name, newWidgets=False, _table=None, ignoreFrame=False, showMore=False):
         """Add a new gui table into a moreLess frame to hold a nef loop
         """
         frame = MoreLessFrame(self, name=_name, showMore=showMore, grid=(0, 0))
 
-        if not table:
-            table = PandasDataFrameTableView(frame.contentsFrame)
+        table = _newSimplePandasTable(frame.contentsFrame, pd.DataFrame(_data))
         frame.contentsFrame.getLayout().addWidget(table, 0, 0)
         frame.contentsFrame.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         frame.contentsFrame.setMinimumSize(100, 100)
         table.setVisible(True)
-
-        _model = PandasDataFrameModel(pd.DataFrame(_data))
-        table.setModel(_model)
-
-        # table.resizeColumnsToContents()  # these are REALLY slow
-        # table.resizeRowsToContents()
 
         if not ignoreFrame:
             self._nefTables[_name] = table
@@ -2661,18 +2418,16 @@ class NefDictFrame(Frame):
         if self._collectionsTable and self._collections:
             _df = pd.DataFrame({COLLECTION: self._collections.keys(),
                                 'Items'   : ['\n'.join(vv for vv in val) for val in self._collections.values()]})
-            _model = PandasDataFrameModel(_df)
-            self._collectionsTable.setModel(_model)
-            self._collectionsTable.resizeColumnToContents(0)
-            self._collectionsTable.resizeRowsToContents()
+            _updateSimplePandasTable(self._collectionsTable, _df, _resize=True)
 
+            _model = self._collectionsTable.model()
             # colour the structureData if exist in the project
             for row, col in enumerate(self._collections.keys()):
                 if self.project.getByPid(Pid._join(Collection.shortClassName, col)):
                     _model.setForeground(row, 0, INVALIDTEXTROWNOCHECKCOLOUR)
         else:
-            _model = PandasDataFrameModel(pd.DataFrame({COLLECTION: [], 'Items'   : []}))
-            self._collectionsTable.setModel(_model)
+            _df = pd.DataFrame({COLLECTION: [], 'Items': []})
+            _updateSimplePandasTable(self._collectionsTable, _df)
 
         # rebuild the list of structureData
         _itms = self._getAllChildren()
@@ -2697,20 +2452,17 @@ class NefDictFrame(Frame):
         # update the structureData table
         if self._structureDataTable and self._structureData:
             _df = pd.DataFrame({STRUCTUREDATA: self._structureData.keys(),
-                                'Items'   : ['\n'.join(vv for vv in val) for val in self._structureData.values()]})
-            _model = PandasDataFrameModel(_df)
-            self._structureDataTable.setModel(_model)
-            self._structureDataTable.resizeColumnToContents(0)
-            self._structureDataTable.resizeRowsToContents()
+                                'Items'      : ['\n'.join(vv for vv in val) for val in self._structureData.values()]})
+            _updateSimplePandasTable(self._structureDataTable, _df, _resize=True)
 
+            _model = self._structureDataTable.model()
             # colour the structureData if exist in the project
             for row, sd in enumerate(self._structureData.keys()):
                 if self.project.getByPid(Pid._join(StructureData.shortClassName, sd)):
                     _model.setForeground(row, 0, INVALIDTEXTROWNOCHECKCOLOUR)
         else:
-            _model = PandasDataFrameModel(pd.DataFrame({STRUCTUREDATA: [], 'Items'   : []}))
-            self._structureDataTable.setModel(_model)
-
+            _df = pd.DataFrame({STRUCTUREDATA: [], 'Items': []})
+            _updateSimplePandasTable(self._structureDataTable, _df)
 
     def _fillPopup(self, nefObject=None):
         """Initialise the project setting - only required for testing

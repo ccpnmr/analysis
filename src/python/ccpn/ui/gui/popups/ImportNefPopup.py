@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-28 13:46:33 +0000 (Mon, February 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-28 15:20:19 +0000 (Mon, February 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2195,6 +2195,7 @@ class NefDictFrame(Frame):
     def _nefTreeClickedCallback(self, item=None, column=0):
         """Handle clicking on an item in the nef tree
         """
+        print(f'   CLICKED  {item}')
         itemName = item.data(0, 0)
         if item.data(1, 0):
             # item at bottom of the tree selected
@@ -2820,6 +2821,12 @@ class NefDictFrame(Frame):
                 # clicked multiple - need to handle differently
                 if (parents := list(set(itm.data(1, 0)[2] for itm in newItms if itm.data(1, 0)))):
                     if (parentItm := self.nefTreeView.findSection(parents[0])):
+
+                        if isinstance(parentItm, (list, tuple)):
+                            # make sure that only one parent has been found - common names may cause duplicates
+                            parentItm = [itm for itm in parentItm if not itm.data(1, 0)]
+                            parentItm = parentItm[0]
+
                         if len(parents) == 1:
                             # print(f'   MULTI-SELECT  SINGLE GROUP {parents}')
 

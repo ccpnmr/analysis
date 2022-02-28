@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-28 18:56:19 +0000 (Mon, February 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-28 20:53:34 +0000 (Mon, February 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ import pandas as pd
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND
-from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT, getFontHeight
+from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT, getFontHeight, getFont
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame
 from ccpn.ui.gui.widgets.Base import Base
 
@@ -159,8 +159,13 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
     """A simple table model to view pandas DataFrames
     """
     _defaultForegroundColour = QtGui.QColor(getColours()[GUITABLE_ITEM_FOREGROUND])
+    _CHECKROWS = 5
+    _MINCHARS = 4
+    _MAXCHARS = 100
+    _chrWidth = 12
+    _chrHeight = 12
 
-    def __init__(self, data):
+    def __init__(self, data, view=None):
         """Initialise the pandas model
         Allocates space for foreground/background colours
         :param data: pandas DataFrame
@@ -172,6 +177,12 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         self._data = data
         # create numpy arrays to match the data that will hold background colour
         self._colour = np.zeros(self._data.shape, dtype=np.object)
+
+        if view:
+            self.fontMetric = QtGui.QFontMetricsF(view.font())
+            self.bbox = self.fontMetric.boundingRect
+            self._chrWidth = 1 + self.bbox('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789').width() / 36
+            self._chrHeight = self.bbox('A').height() + 8
 
     def rowCount(self, parent=None):
         """Return the row count for the dataFrame
@@ -197,7 +208,7 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
                 if pd.isnull(_cell):
                     return ''
 
-                # Float formatting
+                # float/np.float - round to 3 decimal places
                 if isinstance(_cell, (float, np.floating)):
                     return f'{_cell:.3f}'
 
@@ -233,8 +244,48 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         """
         if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
             return self._data.columns[col] if not self._data.empty else None
-        if orientation == QtCore.Qt.Vertical and role == QtCore.Qt.DisplayRole:
-            return self._data.index[col] if not self._data.empty else None
+        # if orientation == QtCore.Qt.Vertical and role == QtCore.Qt.DisplayRole:
+        #     return self._data.index[col] if not self._data.empty else None
+
+        if role == QtCore.Qt.SizeHintRole:
+            # process the heights/widths of the headers
+
+            if orientation == QtCore.Qt.Horizontal:
+                # estimate the column widths
+                try:
+
+                    # get the width of the header
+                    _colName = self._data.columns[col] if not self._data.empty else None
+                    _len = max(len(_colName) if _colName else 0, self._MINCHARS)  # never smaller than 4 characters
+
+                    # iterate over a few rows to get an estimate
+                    for _row in range(min(self.rowCount(), self._CHECKROWS)):
+                        _cell = self._data.iat[_row, col]
+
+                        # float/np.float - round to 3 decimal places
+                        if isinstance(_cell, (float, np.floating)):
+                            _newLen = len(f'{_cell:.3f}')
+                        else:
+                            _cell = str(_cell)
+                            if '\n' in _cell:
+                                # get the longest row from the cell
+                                _cells = _cell.split('\n')
+                                _newLen = max([len(_chrs) for _chrs in _cells])
+                            else:
+                                _newLen = len(_cell)
+
+                        # update the current maximum
+                        _len = max(_newLen, _len)
+
+                    # return the required QSize
+                    return QtCore.QSize(min(self._MAXCHARS, _len) * self._chrWidth, self._chrHeight)
+
+                except Exception:
+                    # return the default QSize
+                    return QtCore.QSize(self._chrWidth, self._chrHeight)
+
+            # NOTE:ED - resize the last column
+
         return None
 
     def setForeground(self, row, column, colour):
@@ -336,7 +387,7 @@ class _SimplePandasTableHeaderModel(QtCore.QAbstractTableModel):
     #             pass
 
 
-def _newSimplePandasTable(parent, data):
+def _newSimplePandasTable(parent, data, _resize=False):
     """Create a new _SimplePandasTable from a pd.DataFrame
     """
     if not parent:
@@ -348,7 +399,7 @@ def _newSimplePandasTable(parent, data):
     table = _SimplePandasTableView(parent)
 
     # set the model
-    _model = _SimplePandasTableModel(pd.DataFrame(data))
+    _model = _SimplePandasTableModel(pd.DataFrame(data), view=table)
     table.setModel(_model)
 
     # # put a proxy in between view and model - REALLY SLOW for big tables
@@ -356,8 +407,10 @@ def _newSimplePandasTable(parent, data):
     # table._proxy.setSourceModel(_model)
     # table.setModel(table._proxy)
 
-    # table.resizeColumnsToContents()  # these are REALLY slow
-    # table.resizeRowsToContents()
+    table.resizeColumnsToContents()
+    if _resize:
+        # resize if required
+        table.resizeRowsToContents()
 
     return table
 
@@ -371,10 +424,10 @@ def _updateSimplePandasTable(table, data, _resize=False):
         raise ValueError(f'data is not of type pd.DataFrame - {type(data)}')
 
     # create new model and set in table
-    _model = _SimplePandasTableModel(data)
+    _model = _SimplePandasTableModel(data, view=table)
     table.setModel(_model)
 
+    table.resizeColumnsToContents()  # crude but very quick
     if _resize:
         # resize if required
-        table.resizeColumnToContents(0)
         table.resizeRowsToContents()

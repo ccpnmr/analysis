@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-28 10:04:42 +0000 (Mon, February 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-28 11:48:34 +0000 (Mon, February 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -309,7 +309,7 @@ class GuiRestraintTable(GuiTable):
             pymolScriptPath = joinPath(self.moduleParent.pymolScriptsPath, PymolScriptName)
             pdbPath = restraintTable.structureData.moleculeFilePath
             if pdbPath is None:
-                MessageDialog.showWarning('No Molecule File found', 'Add a molecule file path to the RestraintTable from SideBar.')
+                MessageDialog.showWarning('No Molecule File found', 'Add a molecule file path to the StructureData from SideBar.')
                 return
             pymolScriptPath = pyMolUtil._restraintsSelection2PyMolFile(pymolScriptPath, pdbPath, restraints)
             pyMolUtil.runPymolWithScript(self.application, pymolScriptPath)

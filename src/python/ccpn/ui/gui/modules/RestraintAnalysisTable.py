@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-24 16:43:43 +0000 (Thu, February 24, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-02-28 11:43:53 +0000 (Mon, February 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1102,8 +1102,8 @@ class RestraintAnalysisTableWidget(GuiTable):
         restraints = flattenLists([pk.restraints for pk in selectedPeaks])
         ## get the PDB file from the parent restraintTable.
         for rs in restraints:
-            if rs.restraintTable.moleculeFilePath:
-                pdbPath = rs.restraintTable.moleculeFilePath
+            if rs.restraintTable.structureData.moleculeFilePath:
+                pdbPath = rs.restraintTable.structureData.moleculeFilePath
                 getLogger().info('Using pdb file %s for displaying violation on Molecular viewer.' % pdbPath)
                 break
         ## run Pymol

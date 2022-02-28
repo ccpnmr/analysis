@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-24 17:06:12 +0000 (Thu, February 24, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-02-28 11:43:53 +0000 (Mon, February 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1714,7 +1714,7 @@ class Project(AbstractWrapperObject):
     @logCommand('project.')
     def newStructureData(self, name: str = None, title: str = None, programName: str = None, programVersion: str = None,
                          dataPath: str = None, creationDate: datetime = None, uuid: str = None,
-                         comment: str = None, **kwds):
+                         comment: str = None, moleculeFilePath: str = None, **kwds):
         """Create new StructureData
 
         See the StructureData class for details.
@@ -1734,7 +1734,8 @@ class Project(AbstractWrapperObject):
         from ccpn.core.StructureData import _newStructureData
 
         return _newStructureData(self, name=name, title=title, programName=programName, programVersion=programVersion,
-                                 dataPath=dataPath, creationDate=creationDate, uuid=uuid, comment=comment, **kwds)
+                                 dataPath=dataPath, creationDate=creationDate, uuid=uuid, comment=comment,
+                                 moleculeFilePath=moleculeFilePath, **kwds)
 
     @logCommand('project.')
     def newSpectrumGroup(self, name: str, spectra=(), **kwds):

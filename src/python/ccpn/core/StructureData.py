@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-25 16:33:37 +0000 (Fri, February 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-28 11:43:53 +0000 (Mon, February 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -60,6 +60,10 @@ class StructureData(AbstractWrapperObject):
 
     # Qualified name of matching API class
     _apiClassQualifiedName = ApiNmrConstraintStore._metaclass.qualifiedName()
+
+    # Internal NameSpace
+    _MoleculeFilePath = '_MoleculeFilePath'
+    _MOLECULEFILEPATH = 'moleculeFilePath'
 
     # CCPN properties
     @property
@@ -161,6 +165,24 @@ class StructureData(AbstractWrapperObject):
     def uuid(self, value: str):
         self._wrappedData.uuid = self._str2none(value)
 
+    @property
+    def moleculeFilePath(self):
+        """
+        :return: a filePath for corresponding molecule.
+        E.g., PDB file path for displaying molecules in a molecular viewer
+        """
+        path = self._getInternalParameter(self._MOLECULEFILEPATH)
+
+        return path
+
+    @moleculeFilePath.setter
+    def moleculeFilePath(self, filePath: str = None):
+        """
+        :param filePath: a filePath for corresponding molecule
+        :return: None
+        """
+        self._setInternalParameter(self._MOLECULEFILEPATH, filePath)
+
     def _fetchFixedResonance(self, assignment: str, checkUniqueness: bool = True) -> ApiFixedResonance:
         """Fetch FixedResonance matching assignment string, creating anew if needed.
 
@@ -233,6 +255,19 @@ class StructureData(AbstractWrapperObject):
         NB, the serial remains immutable.
         """
         return self._rename(value)
+
+    @classmethod
+    def _restoreObject(cls, project, apiObj):
+        """Subclassed to allow for initialisations on restore
+        """
+        resList = super()._restoreObject(project, apiObj)
+
+        # update the list of substances
+        if resList._MoleculeFilePath in resList._ccpnInternalData:
+            value = resList._ccpnInternalData.get(resList._MoleculeFilePath)
+            if value:
+                resList._setInternalParameter(resList._MOLECULEFILEPATH, value)
+            del resList._ccpnInternalData[resList._MoleculeFilePath]
 
     # @classmethod
     # def _restoreObject(cls, project, apiObj):
@@ -380,7 +415,7 @@ class StructureData(AbstractWrapperObject):
 
 @newObject(StructureData)
 def _newStructureData(self: Project, name: str = None, title: str = None, programName: str = None, programVersion: str = None,
-                      dataPath: str = None, creationDate: datetime.datetime = None, uuid: str = None,
+                      dataPath: str = None, creationDate: datetime.datetime = None, uuid: str = None,  moleculeFilePath: str = None,
                       comment: str = None) -> StructureData:
     """Create new StructureData
 
@@ -420,7 +455,9 @@ def _newStructureData(self: Project, name: str = None, title: str = None, progra
                                                                   uuid=uuid,
                                                                   details=comment)
     result = self._data2Obj.get(apiNmrConstraintStore)
+
     if result is None:
         raise RuntimeError('Unable to generate new StructureData item')
-
+    if moleculeFilePath:
+        result.moleculeFilePath = moleculeFilePath
     return result

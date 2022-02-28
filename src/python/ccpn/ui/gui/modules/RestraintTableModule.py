@@ -307,7 +307,7 @@ class GuiRestraintTable(GuiTable):
 
         if restraintTable is not None:
             pymolScriptPath = joinPath(self.moduleParent.pymolScriptsPath, PymolScriptName)
-            pdbPath = restraintTable.moleculeFilePath
+            pdbPath = restraintTable.structureData.moleculeFilePath
             if pdbPath is None:
                 MessageDialog.showWarning('No Molecule File found', 'Add a molecule file path to the RestraintTable from SideBar.')
                 return

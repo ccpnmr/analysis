@@ -3,19 +3,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-24 17:59:36 +0000 (Wed, November 24, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-02-28 11:43:53 +0000 (Mon, February 28, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -36,6 +36,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraintList 
 from ccpn.util.Tensor import Tensor
 from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, renameObject
+from ccpn.util.Logging import getLogger
 
 
 class RestraintTable(AbstractWrapperObject):
@@ -66,9 +67,6 @@ class RestraintTable(AbstractWrapperObject):
     #TODO: this needs to be explicit here
     restraintTypes = tuple(coreConstants.constraintListType2ItemLength.keys())
 
-    # Internal NameSpace
-    _MoleculeFilePath = '_MoleculeFilePath'
-    _MOLECULEFILEPATH = 'moleculeFilePath'
 
     def __init__(self, project, wrappedData):
 
@@ -247,12 +245,10 @@ class RestraintTable(AbstractWrapperObject):
     @property
     def moleculeFilePath(self):
         """
-        :return: a filePath for corresponding molecule.
+        :return: a filePath for corresponding molecule. Saved in the parent Class StructureData
         E.g., PDB file path for displaying molecules in a molecular viewer
         """
-        path = self._getInternalParameter(self._MOLECULEFILEPATH)
-
-        return path
+        return self._parent.moleculeFilePath
 
     @moleculeFilePath.setter
     def moleculeFilePath(self, filePath: str = None):
@@ -260,7 +256,8 @@ class RestraintTable(AbstractWrapperObject):
         :param filePath: a filePath for corresponding molecule
         :return: None
         """
-        self._setInternalParameter(self._MOLECULEFILEPATH, filePath)
+        getLogger().warning('Deprecated. Please set the Molecule File Path from the StructureData object.')
+        self._parent.moleculeFilePath = filePath
 
     #=========================================================================================
     # Implementation functions
@@ -278,18 +275,6 @@ class RestraintTable(AbstractWrapperObject):
         """
         return self._rename(value)
 
-    @classmethod
-    def _restoreObject(cls, project, apiObj):
-        """Subclassed to allow for initialisations on restore
-        """
-        resList = super()._restoreObject(project, apiObj)
-
-        # update the list of substances
-        if resList._MoleculeFilePath in resList._ccpnInternalData:
-            value = resList._ccpnInternalData.get(resList._MoleculeFilePath)
-            if value:
-                resList._setInternalParameter(resList._MOLECULEFILEPATH, value)
-            del resList._ccpnInternalData[resList._MoleculeFilePath]
 
     #=========================================================================================
     # CCPN functions

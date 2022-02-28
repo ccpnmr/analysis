@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-16 11:55:11 +0000 (Wed, February 16, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-28 11:47:09 +0000 (Mon, February 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,8 +29,9 @@ __date__ = "$Date: 2021-10-27 20:54:49 +0100 (Wed, October 27, 2021) $"
 from typing import Optional
 import pandas as pd
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataTable as ApiDataTable
-from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.Project import Project
+from ccpn.core.RestraintTable import RestraintTable
 from ccpn.core.lib import Pid
 from ccpn.core.lib.ContextManagers import newObject, renameObject, ccpNmrV3CoreSetter, ccpNmrV3CoreUndoBlock
 from ccpn.core._implementation.DataFrameABC import DataFrameABC
@@ -40,6 +41,7 @@ from ccpn.util.Logging import getLogger
 
 logger = getLogger()
 ALLOWED_METADATA_TYPES = (dict, list, str, int, float, bool, type(None))
+_RESTRAINTTABLE = 'restraintTable'
 
 
 class TableFrame(DataFrameABC):
@@ -210,6 +212,24 @@ class DataTable(AbstractWrapperObject):
         """
         return self.data.nefCompatibleColumns()
 
+    @property
+    def _restraintTableLink(self) -> Optional[RestraintTable]:
+        """Return the link to a reference restraintTable from the metadata
+        """
+        _pid = self.getMetadata(_RESTRAINTTABLE)
+        return self.project.getByPid(_pid)
+
+    @_restraintTableLink.setter
+    def _restraintTableLink(self, value):
+        """Set the link to a reference restraintTable from the metadata
+        :param value: RestraintTable or str
+        """
+        _rTable = self.project.getByPid(value) if isinstance(value, str) else value
+        if not isinstance(_rTable, RestraintTable):
+            raise ValueError(f'{self.className}.restraintTableLink is not a RestraintTable')
+
+        self.setMetadata(_RESTRAINTTABLE, value)
+
     #=========================================================================================
     # Implementation functions
     #=========================================================================================
@@ -294,11 +314,12 @@ def _newDataTable(self: Project, name: str = None, data: Optional[TableFrame] = 
 
     return result
 
-def _fetchDataTable(self:Project, name):
-    """
-    Get an existing dataTable by name or create a new one
+
+def _fetchDataTable(self: Project, name):
+    """Get an existing dataTable by name or create a new one
     """
     from ccpn.core.lib.Pid import createPid
+
     dataTable = self.getByPid(createPid(DataTable.shortClassName, name))
     if not dataTable:
         dataTable = self.newDataTable(name=name)

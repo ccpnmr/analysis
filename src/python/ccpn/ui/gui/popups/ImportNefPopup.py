@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-28 16:28:35 +0000 (Mon, February 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-28 17:35:34 +0000 (Mon, February 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -53,6 +53,7 @@ from ccpn.ui.gui.widgets.SpeechBalloon import SpeechBalloon
 from ccpn.ui.gui.widgets.Font import getFontHeight
 from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
+from ccpn.ui.gui.widgets.VLine import VLine
 from ccpn.ui.gui.lib.Validators import LineEditValidator
 from ccpn.ui.gui.lib._SimplePandasTable import _newSimplePandasTable, _updateSimplePandasTable
 from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS, TOOLTIP_BACKGROUND
@@ -337,6 +338,7 @@ class NefDictFrame(Frame):
         # info frame (right frame)
         self._optionsSplitter = Splitter(self._infoFrame, setLayout=True, horizontal=False)
         self._infoFrame.getLayout().addWidget(self._optionsSplitter, 0, 0)
+        VLine(self._infoFrame, grid=(0, 1), width=16)
 
         self.tablesFrame = Frame(self._optionsSplitter, setLayout=True, showBorder=False, grid=(0, 0))
         self._optionsFrame = Frame(self._optionsSplitter, setLayout=True, showBorder=False, grid=(1, 0))

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-28 11:43:53 +0000 (Mon, February 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-28 11:49:01 +0000 (Mon, February 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -59,7 +59,6 @@ class StructureDataPopup(AttributeEditorPopupABC):
             #     self.obj.title = _name
 
             # create the new StructureData from project
-            print('gggggg,', self.obj)
             self.project.newStructureData(**self.obj)
 
     # def _populateInitialValues(self):

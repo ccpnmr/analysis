@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-28 15:20:19 +0000 (Mon, February 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-28 16:28:35 +0000 (Mon, February 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2195,7 +2195,6 @@ class NefDictFrame(Frame):
     def _nefTreeClickedCallback(self, item=None, column=0):
         """Handle clicking on an item in the nef tree
         """
-        print(f'   CLICKED  {item}')
         itemName = item.data(0, 0)
         if item.data(1, 0):
             # item at bottom of the tree selected

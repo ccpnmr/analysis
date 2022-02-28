@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-28 17:36:56 +0000 (Mon, February 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-28 18:28:42 +0000 (Mon, February 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -155,7 +155,6 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
         self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
 
 
-
 class _SimplePandasTableModel(QtCore.QAbstractTableModel):
     """A simple table model to view pandas DataFrames
     """
@@ -188,22 +187,44 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         """Process the data callback for the model
         """
         if index.isValid():
+            _row = index.row()
+            _column = index.column()
+
             if role == QtCore.Qt.DisplayRole:
-                return str(self._data.iat[index.row(), index.column()])
+                _cell = self._data.iat[_row, _column]
 
-            if role == QtCore.Qt.BackgroundRole:
-                if (_col := self._colour[index.row(), index.column()]):
-                    # get the colour from the dict
-                    return _col.get(role)
+                # nan
+                if pd.isnull(_cell):
+                    return ''
 
-            if role == QtCore.Qt.ForegroundRole:
-                if (_col := self._colour[index.row(), index.column()]):
+                # Float formatting
+                if isinstance(_cell, (float, np.floating)):
+                    return f'{_cell:.3f}'
+
+                return str(_cell)
+
+            elif role == QtCore.Qt.BackgroundRole:
+                if (_colour := self._colour[_row, _column]):
                     # get the colour from the dict
-                    if (_foreground := _col.get(role)):
+                    return _colour.get(role)
+
+            elif role == QtCore.Qt.ForegroundRole:
+                if (_colour := self._colour[_row, _column]):
+                    # get the colour from the dict
+                    if (_foreground := _colour.get(role)):
                         return _foreground
 
                 # return the default foreground colour
                 return self._defaultForegroundColour
+
+            elif role == QtCore.Qt.ToolTipRole:
+                _cell = self._data.iat[_row, _column]
+
+                # nan
+                if pd.isnull(_cell):
+                    return 'nan'
+
+                return str(_cell)
 
         return None
 

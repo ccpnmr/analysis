@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-24 19:38:24 +0000 (Thu, February 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-02-28 18:28:42 +0000 (Mon, February 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,7 @@ __date__ = "$Date: 2021-10-29 16:38:09 +0100 (Fri, October 29, 2021) $"
 #=========================================================================================
 
 from PyQt5 import QtWidgets
+import pandas as pd
 from ccpn.core.DataTable import DataTable
 from ccpn.core.lib.Notifiers import Notifier
 
@@ -41,6 +42,7 @@ from ccpn.ui.gui.widgets.GuiTable import GuiTable, _getValueByHeader
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.lib._SimplePandasTable import _SimplePandasTableView, _updateSimplePandasTable
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 
 from ccpn.util.Logging import getLogger
@@ -117,7 +119,7 @@ class DataTableModule(CcpnModule):
         super()._closeModule()
 
 
-class DataTableWidget(GuiTable):
+class DataTableWidget(_SimplePandasTableView):
     """
     Class to present a DataTable
     """
@@ -192,12 +194,14 @@ class DataTableWidget(GuiTable):
         # initialise the table
         super().__init__(parent=parent,
                          mainWindow=self.mainWindow,
-                         dataFrameObject=None,
-                         setLayout=True,
-                         autoResize=True,
-                         # selectionCallback=self._selectionCallback,
-                         # actionCallback=self._actionCallback,
-                         multiSelect=True,
+                         # dataFrameObject=None,
+                         # setLayout=True,
+                         # autoResize=True,
+                         # # selectionCallback=self._selectionCallback,
+                         # # actionCallback=self._actionCallback,
+                         # multiSelect=True,
+                         showHorizontalHeader=True,
+                         showVerticalHeader=False,
                          grid=(3, 0), gridSpan=(1, 6))
         self.moduleParent = moduleParent
 
@@ -268,11 +272,14 @@ class DataTableWidget(GuiTable):
         """
         df = dataTable.data
         if len(dataTable.data) > 0:
-            colDefs = ColumnClass([(x, lambda row: _getValueByHeader(row, x), None, None, None) for x in df.columns])
-            columnsMap = {x: x for x in df.columns}
-            dfo = self.getDataFromFrame(self, df, colDefs, columnsMap)
-            self.setTableFromDataFrameObject(dataFrameObject=dfo, columnDefs=colDefs)
-            self.selectIndex(0)
+            # colDefs = ColumnClass([(x, lambda row: _getValueByHeader(row, x), None, None, None) for x in df.columns])
+            # columnsMap = {x: x for x in df.columns}
+            # dfo = self.getDataFromFrame(self, df, colDefs, columnsMap)
+            # self.setTableFromDataFrameObject(dataFrameObject=dfo, columnDefs=colDefs)
+            # self.selectIndex(0)
+            _updateSimplePandasTable(self, df, _resize=False)
+        else:
+            _updateSimplePandasTable(self, pd.DataFrame({}))
 
         _rTablePid = dataTable.getMetadata(_RESTRAINTTABLE)
         self.rtWidget.select(_rTablePid)
@@ -288,7 +295,8 @@ class DataTableWidget(GuiTable):
             if self._dataTable is not None:
                 self.displayTableForDataTable(self._dataTable)
             else:
-                self.clearTable()
+                # self.clearTable()
+                _updateSimplePandasTable(self, pd.DataFrame({}))
 
     def _rtPulldownCallback(self, item):
         """
@@ -324,4 +332,35 @@ class DataTableWidget(GuiTable):
         """
         Cleanup the notifiers when the window is closed
         """
-        super()._close()
+        pass
+
+    def _handleDroppedItems(self, pids, objType, pulldown):
+        """
+        :param pids: the selected objects pids
+        :param objType: the instance of the obj to handle. Eg. PeakList
+        :param pulldown: the pulldown of the module wich updates the table
+        :return: Actions: Select the dropped item on the table or/and open a new modules if multiple drops.
+        If multiple different obj instances, then asks first.
+        """
+        from ccpn.ui.gui.lib.MenuActions import _openItemObject
+
+        objs = [self.project.getByPid(pid) for pid in pids]
+
+        selectableObjects = [obj for obj in objs if isinstance(obj, objType)]
+        others = [obj for obj in objs if not isinstance(obj, objType)]
+        if len(selectableObjects) > 0:
+            _openItemObject(self.mainWindow, selectableObjects[1:])
+            pulldown.select(selectableObjects[0].pid)
+
+        else:
+            from ccpn.ui.gui.widgets.MessageDialog import showYesNo
+
+            othersClassNames = list(set([obj.className for obj in others if hasattr(obj, 'className')]))
+            if len(othersClassNames) > 0:
+                if len(othersClassNames) == 1:
+                    title, msg = 'Dropped wrong item.', 'Do you want to open the %s in a new module?' % ''.join(othersClassNames)
+                else:
+                    title, msg = 'Dropped wrong items.', 'Do you want to open items in new modules?'
+                openNew = showYesNo(title, msg)
+                if openNew:
+                    _openItemObject(self.mainWindow, others)

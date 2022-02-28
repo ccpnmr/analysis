@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-25 16:33:37 +0000 (Fri, February 25, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-02-28 14:13:33 +0000 (Mon, February 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -46,6 +46,7 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.Common import makeIterableList, isIterable
 from ccpn.util.Constants import SCALETOLERANCE
 from ccpn.core.NmrAtom import UnknownIsotopeCode
+
 
 class Peak(AbstractWrapperObject):
     """Peak object, holding position, intensity, and assignment information
@@ -411,7 +412,7 @@ class Peak(AbstractWrapperObject):
     @logCommand(get='self', isProperty=True)
     @ccpNmrV3CoreSetter()
     def pointLineWidths(self, value: Sequence):
-         for val, peakDim, valuePerPoint in zip(value,
+        for val, peakDim, valuePerPoint in zip(value,
                                                self._wrappedData.sortedPeakDims(),
                                                self.spectrum._valuePerPoints):
             peakDim.lineWidth = val * valuePerPoint if val is not None else None
@@ -530,12 +531,6 @@ class Peak(AbstractWrapperObject):
 
         apiPeak.assignByDimensions(dimResonances)
 
-    # def _tempFunc(self, nmrResidues, shifts):
-    #     # update the assigned nmrAtom chemical shift values - notify the nmrResidues and chemicalShifts
-    #     self._childActions.extend(sh._recalculateShiftValue for sh in shifts)
-    #     self._finaliseChildren.extend((nmr, 'change') for nmr in nmrResidues)
-    #     self._finaliseChildren.extend((sh, 'change') for sh in shifts)
-
     def _recalculatePeakShifts(self, nmrResidues, shifts):
         # update the assigned nmrAtom chemical shift values - notify the nmrResidues and chemicalShifts
         for sh in shifts:
@@ -553,12 +548,8 @@ class Peak(AbstractWrapperObject):
         _post = set(makeIterableList(value))
         nmrResidues = set(nmr.nmrResidue for nmr in (_pre | _post))
         shifts = list(set(cs for nmrAt in (_pre | _post) for cs in nmrAt.chemicalShifts))
+        newShifts = shifts.copy()
         _thisNmr = self.spectrum.chemicalShiftList._getNmrAtoms()
-
-        # # NOTE:ED - need this check as nmrAtoms must be unique in chemicalShiftList
-        # for nmrAtom in (_post - _pre - _thisNmr):
-        #     if self.spectrum.chemicalShiftList.getChemicalShift(nmrAtom=nmrAtom):
-        #         raise RuntimeError(f'Peak.dimensionNmrAtoms: {nmrAtom} already in list')
 
         with undoBlock():
             with undoStackBlocking() as addUndoItem:
@@ -569,17 +560,12 @@ class Peak(AbstractWrapperObject):
 
             # add those that are not already in the list - otherwise recalculate
             for nmrAtom in (_post - _pre - _thisNmr):
-                self.spectrum.chemicalShiftList.newChemicalShift(nmrAtom=nmrAtom)
+                newShifts.append(self.spectrum.chemicalShiftList.newChemicalShift(nmrAtom=nmrAtom))
 
-            # # NOTE:ED - do I need to do this? works here, need to check the number of local assignments before removing
-            # for _sh in shifts:
-            #     if not _sh.assignedPeaks:
-            #         # set the nmrAtom to None if there are no assignedPeaks for the chemicalShiftList
-            #         _sh.nmrAtom = None
-
-            self._recalculatePeakShifts(nmrResidues, shifts)
+            # update the chemicalShift value/valueError
+            self._recalculatePeakShifts(nmrResidues, newShifts)
             with undoStackBlocking() as addUndoItem:
-                addUndoItem(redo=partial(self._recalculatePeakShifts, nmrResidues, shifts))
+                addUndoItem(redo=partial(self._recalculatePeakShifts, nmrResidues, newShifts))
 
     @property
     def assignedNmrAtoms(self) -> Tuple[Tuple[Optional['NmrAtom'], ...], ...]:
@@ -678,12 +664,8 @@ class Peak(AbstractWrapperObject):
         _post = set(makeIterableList(value))
         nmrResidues = set(nmr.nmrResidue for nmr in (_pre | _post))
         shifts = list(set(cs for nmrAt in (_pre | _post) for cs in nmrAt.chemicalShifts))
+        newShifts = shifts.copy()
         _thisNmr = self.spectrum.chemicalShiftList._getNmrAtoms()
-
-        # # NOTE:ED - need this check as nmrAtoms must be unique in chemicalShiftList
-        # for nmrAtom in (_post - _pre - _thisNmr):
-        #     if self.spectrum.chemicalShiftList.getChemicalShift(nmrAtom=nmrAtom):
-        #         raise RuntimeError(f'Peak.assignedNmrAtoms: {nmrAtom} already in list')
 
         with undoBlock():
             with undoStackBlocking() as addUndoItem:
@@ -694,11 +676,12 @@ class Peak(AbstractWrapperObject):
 
             # add those that are not already in the list - otherwise recalculate
             for nmrAtom in (_post - _pre - _thisNmr):
-                self.spectrum.chemicalShiftList.newChemicalShift(nmrAtom=nmrAtom)
+                newShifts.append(self.spectrum.chemicalShiftList.newChemicalShift(nmrAtom=nmrAtom))
 
-            self._recalculatePeakShifts(nmrResidues, shifts)
+            # update the chemicalShift value/valueError
+            self._recalculatePeakShifts(nmrResidues, newShifts)
             with undoStackBlocking() as addUndoItem:
-                addUndoItem(redo=partial(self._recalculatePeakShifts, nmrResidues, shifts))
+                addUndoItem(redo=partial(self._recalculatePeakShifts, nmrResidues, newShifts))
 
     # alternativeNames
     assignments = assignedNmrAtoms
@@ -792,7 +775,7 @@ class Peak(AbstractWrapperObject):
 
         return newValues
 
-    def setByAxisCodes(self, parameterName:str, values:Sequence, axisCodes:Sequence[str] = None, exactMatch: bool = False) -> list:
+    def setByAxisCodes(self, parameterName: str, values: Sequence, axisCodes: Sequence[str] = None, exactMatch: bool = False) -> list:
         """Set attributeName to values in order defined by axisCodes (default order if None)
         Perform a mapping if exactMatch=False (eg. 'H' to 'Hn')
 
@@ -821,7 +804,7 @@ class Peak(AbstractWrapperObject):
 
         return newValues
 
-    def getByDimensions(self, parameterName:str, dimensions:Sequence[int] = None) -> list:
+    def getByDimensions(self, parameterName: str, dimensions: Sequence[int] = None) -> list:
         """Return a list of values of Peak dimensional attribute parameterName in order defined
         by dimensions (default order if None).
 
@@ -845,7 +828,7 @@ class Peak(AbstractWrapperObject):
 
         return newValues
 
-    def setByDimensions(self, parameterName:str, values:Sequence, dimensions:Sequence[int] = None) -> list:
+    def setByDimensions(self, parameterName: str, values: Sequence, dimensions: Sequence[int] = None) -> list:
         """Set Spectrum dimensional attribute parameterName to values in the order as defined by
         dimensions (1..dimensionCount)(default order if None)
 
@@ -916,11 +899,12 @@ class Peak(AbstractWrapperObject):
     def __str__(self):
         """Readable string representation;
         """
-        _digits = {'1H':3, '15N':2, '13C':2, '19F':3}
+        _digits = {'1H': 3, '15N': 2, '13C': 2, '19F': 3}
         # _digits.get(iCode,2)
-        ppms = tuple(round(p, _digits.get(iCode,2))
+        ppms = tuple(round(p, _digits.get(iCode, 2))
                      for p, iCode in zip(self.ppmPositions, self.spectrum.isotopeCodes))
         return "<%s: @%r>" % (self.pid, ppms)
+
     #=========================================================================================
     # CCPN functions
     #=========================================================================================
@@ -934,7 +918,7 @@ class Peak(AbstractWrapperObject):
         return all(self.dimensionNmrAtoms)
 
     @logCommand(get='self')
-    def copyTo(self, targetPeakList: PeakList, includeAllProperties: bool=True) -> 'Peak':
+    def copyTo(self, targetPeakList: PeakList, includeAllProperties: bool = True) -> 'Peak':
         """Make (and return) a copy of the Peak in targetPeakList.
         IncludeAll, True to copy all properties from origin to target Peak. False will copy
         only position and assignments (if available)"""
@@ -952,8 +936,8 @@ class Peak(AbstractWrapperObject):
 
         if dimensionCount < targetPeakList.spectrum.dimensionCount:
             raise ValueError("Cannot copy %sD %s to %sD %s. Incompatible dimensionality."
-                         % (dimensionCount, self.longPid,
-                            targetPeakList.spectrum.dimensionCount, targetPeakList.longPid))
+                             % (dimensionCount, self.longPid,
+                                targetPeakList.spectrum.dimensionCount, targetPeakList.longPid))
 
         destinationAxisCodes = targetPeakList.spectrum.axisCodes
         dimensionMapping = peakList.spectrum.getByAxisCodes('dimensions', destinationAxisCodes, exactMatch=False)

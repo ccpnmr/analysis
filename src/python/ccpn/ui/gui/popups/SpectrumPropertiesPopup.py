@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-03 17:17:29 +0000 (Thu, February 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-01 10:56:18 +0000 (Tue, March 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1407,8 +1407,16 @@ class DimensionsTab(Widget):
         self._fillPreferredWidgetFromAxisTexts()
 
     def _setAxisCodes(self, spectrum, value):
-        showWarning('Change Axis Code', 'Caution is advised when changing axis codes\n'
-                                        'It can adversely affect spectrumDisplays and peak/integral/multiplet lists.')
+        for sd in self.mainWindow.spectrumDisplays:
+            if sd.strips and spectrum in sd.strips[0].spectra:
+                # set the border to red
+                sd.mainWidget.setStyleSheet('Frame { border: 3px solid #FF1234; }')
+                sd.mainWidget.setEnabled(False)
+                for strp in sd.strips:
+                    strp.setEnabled(False)
+
+        showWarning('Change Axis Code', 'Changing Axis Codes can result in incorrect handling of axes in open Spectrum Displays.\n'
+                                        'Please close and reopen any Spectrum Displays outlined in red.')
         spectrum.axisCodes = value
 
     @queueStateChange(_verifyPopupApply)

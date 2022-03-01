@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-28 11:43:53 +0000 (Mon, February 28, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-03-01 18:06:36 +0000 (Tue, March 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -40,7 +40,7 @@ from ccpn.core._implementation.V3CoreObjectABC import V3CoreObjectABC
 
 from ccpn.core.lib import Pid
 from ccpn.core.lib import Undo
-from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory, newProjectSaveHistory
+from ccpn.core.lib.ProjectSaveHistory import getProjectSaveHistory, fetchProjectSaveHistory, newProjectSaveHistory
 from ccpn.core.lib.ContextManagers import notificationBlanking, undoBlock, undoBlockWithoutSideBar, \
     inactivity, logCommandManager
 
@@ -376,8 +376,11 @@ class Project(AbstractWrapperObject):
         if (dataloader := CcpNmrV3ProjectDataLoader.checkForValidFormat(path)) is None:
             raise ValueError('Path "%s" does not define a valid ccpn project' % path)
 
-        projectHistory = getProjectSaveHistory(dataloader.path)
-        return projectHistory.lastSavedVersion <= '3.0.4'
+        if (projectHistory := getProjectSaveHistory(dataloader.path)):
+            # check whether the history exists
+            return projectHistory.lastSavedVersion <= '3.0.4'
+
+        return True
 
     @property
     def _data(self):
@@ -2030,7 +2033,7 @@ def _loadProject(application, path: str) -> Project:
 
     # Do some admin
     # need project.path, as it may have have changed; e.g. for a V2 project
-    project._saveHistory = getProjectSaveHistory(project.path)
+    project._saveHistory = fetchProjectSaveHistory(project.path)
 
     # the initialisation is completed by Framework when it has done its things
     # project._initialiseProject()

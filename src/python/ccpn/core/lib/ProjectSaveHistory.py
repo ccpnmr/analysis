@@ -4,10 +4,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 11:22:08 +0000 (Fri, January 21, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-03-01 18:06:36 +0000 (Tue, March 01, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -35,12 +35,19 @@ from ccpn.util.Path import aPath
 from ccpn.framework.PathsAndUrls import CCPN_STATE_DIRECTORY, ccpnVersionHistory
 from ccpn.framework.Version import VersionString, applicationVersion
 from ccpn.util.Time import now
-from ccpn.util.Common import isIterable
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson, TraitJsonHandlerBase
 from ccpn.util.traits.CcpNmrTraits import List, Path
 
 
 def getProjectSaveHistory(projectPath):
+    """Return a ProjectSaveHistory instance from a project path, or None if it doesn't exist
+    """
+    sv = ProjectSaveHistory(projectPath)
+    if sv.exists():
+        return sv
+
+
+def fetchProjectSaveHistory(projectPath):
     """Return a ProjectSaveHistory instance from a project path
     """
     sv = ProjectSaveHistory(projectPath)
@@ -76,9 +83,9 @@ class ProjectSaveHistory(CcpNmrJson):
     path = Path()
 
     class RecordListHandler(TraitJsonHandlerBase):
-        "Record-list handling by Json"
+        """Record-list handling by Json"""
         def decode(self, obj, trait, value):
-            "uses value to generate and set the new (or modified) obj"
+            """uses value to generate and set the new (or modified) obj"""
             newValue = []
             for item in value:
                 record = obj._newRecord(*item)

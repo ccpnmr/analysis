@@ -38,6 +38,8 @@ from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.lib.GuiPath import PathEdit
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets import MessageDialog
+from ccpn.ui.gui.widgets import CheckBox
+from ccpn.ui.gui.widgets import Entry
 import os
 import datetime
 from distutils.dir_util import copy_tree
@@ -203,11 +205,11 @@ class SetupXplorStructureCalculationPopup(CcpnDialogMainWidget):
     def _createWidgets(self):
 
         row = 0
-        self.pathLabel = Label(self.mainWidget, text="Xplor Run Directory", grid=(row, 0))
-        self.pathData = PathEdit(self.mainWidget, grid=(row, 1), vAlign='t', )
-        self.pathDataButton = Button(self.mainWidget, grid=(row, 2), callback=self._getPathFromDialog,
-                                           icon='icons/directory', hPolicy='fixed')
-        row += 1
+        # self.pathLabel = Label(self.mainWidget, text="Xplor Run Directory", grid=(row, 0))
+        # self.pathData = PathEdit(self.mainWidget, grid=(row, 1), vAlign='t', )
+        # self.pathDataButton = Button(self.mainWidget, grid=(row, 2), callback=self._getPathFromDialog,
+        #                                    icon='icons/directory', hPolicy='fixed')
+        # row += 1
         self.plsLabel = Label(self.mainWidget, text='Select PeakLists', grid=(row, 0),  vAlign='l')
         self.plsWidget = ListWidgetPair(self.mainWidget, grid=(row, 1), gridSpan=(1,3), hAlign='l')
 
@@ -227,7 +229,14 @@ class SetupXplorStructureCalculationPopup(CcpnDialogMainWidget):
                                          minimumWidths=(0, 100),
                                          sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
                                          callback=None)
+        row += 1
+        self.checkLabel = Label(self.mainWidget, text="Use parallel?", grid=(row, 0))
 
+        self.checkBox = CheckBox.CheckBox(self.mainWidget, grid=(row, 1))
+        self.entryLabel = Label(self.mainWidget, text="#Cores", grid=(row, 3))
+
+        self.Entry = Entry.IntEntry(self.mainWidget, grid=(row, 4))
+        self.Entry.set(os.cpu_count())
         self._populateWsFromProjectInfo()
 
     def _populateWsFromProjectInfo(self):
@@ -252,7 +261,7 @@ class SetupXplorStructureCalculationPopup(CcpnDialogMainWidget):
             csList = self.cslWidget.getSelectedObject()
             chain = self.mcWidget.getSelectedObject()
             plsPids = self.plsWidget.rightList.getTexts()
-            pathRun = self.pathData.get()
+            # pathRun = self.pathData.get()
             if not csList:
                 MessageDialog.showWarning('', 'Please select a ChemicalShift List first')
                 return
@@ -271,7 +280,13 @@ class SetupXplorStructureCalculationPopup(CcpnDialogMainWidget):
             myRun.chemicalShiftList = csList
             myRun.chain = chain
             myRun.peakLists = [project.getByPid(pl) for pl in plsPids]
+
+            myRun.parallel = self.checkBox.isChecked()
+            myRun.parallelNumber = self.Entry.get()
+
             _runDir = myRun.setupCalculation()
+
+
             myRun.saveState()
 
             MessageDialog.showInfo('Setup Xplor_nih calculation',

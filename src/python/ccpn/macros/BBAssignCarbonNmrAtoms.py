@@ -214,7 +214,7 @@ with undoBlock():
                         assignNmrAtom(peakSeqCode, atomName='CA', offset=-1)
                         storeDataForGlyCheck(peakShift, peak, atomType='CA-1')
                 GlyCheck = True
-            elif expt == 'H[N[co[{CA|ca[C]}]]]':
+            elif expt == 'H[N[co[{CA|ca[C]}]]]' or expt == 'h{CA|Cca}coNH':
                 if peakShift >= 47.0:
                     assignNmrAtom(peakSeqCode, atomName='CA', offset=-1)
                     storeDataForGSTCheck(peakShift, peak, atomType='CA-1')

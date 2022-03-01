@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-01 11:38:50 +0000 (Tue, March 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-01 19:36:33 +0000 (Tue, March 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -248,8 +248,7 @@ class GuiSpectrumDisplay(CcpnModule):
         """Set the widgets for the spectrumDisplay
         """
         # get the settings from preferences
-        baseAspectRatioCode = self.application.preferences.general._baseAspectRatioAxisCode,
-        aspectCodes = self.application.preferences.general.aspectRatios
+        _general = self.application.preferences.general
 
         # create settings widget
         if self.is1D:
@@ -263,8 +262,22 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                     xTexts=AXISUNITS, xAxisUnits=xAxisUnits,
                                                                     yTexts=[''],
                                                                     showYAxis=False,
-                                                                    _baseAspectRatioAxisCode=baseAspectRatioCode,
-                                                                    _aspectRatios=aspectCodes,
+                                                                    _baseAspectRatioAxisCode=_general._baseAspectRatioAxisCode,
+                                                                    _aspectRatios=_general.aspectRatios,
+                                                                    yAxisUnits=_general.yAxisUnits,
+                                                                    symbolType=_general.symbolType,
+                                                                    annotationType=_general.annotationType,
+                                                                    symbolSize=_general.symbolSizePixel,
+                                                                    symbolThickness=_general.symbolThickness,
+                                                                    aliasEnabled=_general.aliasEnabled,
+                                                                    aliasShade=_general.aliasShade,
+                                                                    aliasLabelsEnabled=_general.aliasLabelsEnabled,
+                                                                    peakLabelsEnabled=_general.peakLabelsEnabled,
+                                                                    multipletLabelsEnabled=_general.multipletLabelsEnabled,
+                                                                    stripArrangement=_general.stripArrangement,
+                                                                    _aspectRatioMode=_general.aspectRatioMode,
+                                                                    contourThickness=_general.contourThickness,
+                                                                    zPlaneNavigationMode=_general.zPlaneNavigationMode,
                                                                     )
         else:
             # Can't do for now; Axes do not yet exist
@@ -276,8 +289,21 @@ class GuiSpectrumDisplay(CcpnModule):
                                                                     grid=(0, 0),
                                                                     xTexts=AXISUNITS, xAxisUnits=xAxisUnits,
                                                                     yTexts=AXISUNITS, yAxisUnits=yAxisUnits,
-                                                                    _baseAspectRatioAxisCode=baseAspectRatioCode,
-                                                                    _aspectRatios=aspectCodes,
+                                                                    _baseAspectRatioAxisCode=_general._baseAspectRatioAxisCode,
+                                                                    _aspectRatios=_general.aspectRatios,
+                                                                    symbolType=_general.symbolType,
+                                                                    annotationType=_general.annotationType,
+                                                                    symbolSize=_general.symbolSizePixel,
+                                                                    symbolThickness=_general.symbolThickness,
+                                                                    aliasEnabled=_general.aliasEnabled,
+                                                                    aliasShade=_general.aliasShade,
+                                                                    aliasLabelsEnabled=_general.aliasLabelsEnabled,
+                                                                    peakLabelsEnabled=_general.peakLabelsEnabled,
+                                                                    multipletLabelsEnabled=_general.multipletLabelsEnabled,
+                                                                    stripArrangement=_general.stripArrangement,
+                                                                    _aspectRatioMode=_general.aspectRatioMode,
+                                                                    contourThickness=_general.contourThickness,
+                                                                    zPlaneNavigationMode=_general.zPlaneNavigationMode,
                                                                     )
         self._spectrumDisplaySettings.settingsChanged.connect(self._settingsChanged)
         self.settingsWidget.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-28 20:53:34 +0000 (Mon, February 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-01 14:14:49 +0000 (Tue, March 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -123,6 +123,15 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
         _header.setMinimumSectionSize(_height)
         self.setMinimumSize(3 * _height, 3 * _height + self.horizontalScrollBar().height())
 
+    def setModel(self, model: QtCore.QAbstractItemModel) -> None:
+        """Set the model for the view
+        """
+        super(_SimplePandasTableView, self).setModel(model)
+
+        # attach a handler for updating the selection on sorting
+        self.model().layoutAboutToBeChanged.connect(self._preChangeSelectionOrderCallback)
+        self.model().layoutChanged.connect(self._postChangeSelectionOrderCallback)
+
     def _initTableCommonWidgets(self, parent, height=35, setGuiNotifier=None, **kwds):
         """Initialise the common table elements
         """
@@ -154,6 +163,40 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
 
         self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
 
+    def _preChangeSelectionOrderCallback(self, *args):
+        """Handle updating the selection when the table is about to change, i.e., before sorting
+        """
+        pass
+
+    def _postChangeSelectionOrderCallback(self, *args):
+        """Handle updating the selection when the table has been sorted
+        """
+        _model = self.model()
+        _selModel = self.selectionModel()
+        _selection = self.selectionModel().selectedIndexes()
+
+        if _model._sortOrder and _model._oldSortOrder:
+            # get the pre-sorted mapping
+            _rows = set(_model._oldSortOrder[itm.row()] for itm in _selection)
+            if _rows:
+                self.blockSignals(True)
+                _selModel.blockSignals(True)
+
+                try:
+                    _newSel = QtCore.QItemSelection()
+                    for row in _rows:
+                        # map to the new sort-order
+                        _idx = _model.index(_model._sortOrder.index(row), 0)
+                        _newSel.merge(QtCore.QItemSelection(_idx, _idx), QtCore.QItemSelectionModel.Select)
+
+                    # Select the cells in the data view - spawns single change event
+                    self.selectionModel().select(_newSel, QtCore.QItemSelectionModel.Rows | QtCore.QItemSelectionModel.ClearAndSelect)
+
+                finally:
+                    # unblock so nothing responds
+                    _selModel.blockSignals(False)
+                    self.blockSignals(False)
+
 
 class _SimplePandasTableModel(QtCore.QAbstractTableModel):
     """A simple table model to view pandas DataFrames
@@ -175,6 +218,11 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
 
         QtCore.QAbstractTableModel.__init__(self)
         self._data = data
+
+        # set the initial sort-order
+        self._oldSortOrder = [row for row in range(data.shape[0])]
+        self._sortOrder = [row for row in range(data.shape[0])]
+
         # create numpy arrays to match the data that will hold background colour
         self._colour = np.zeros(self._data.shape, dtype=np.object)
 
@@ -198,7 +246,8 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         """Process the data callback for the model
         """
         if index.isValid():
-            _row = index.row()
+            # get the source cell
+            _row = self._sortOrder[index.row()]
             _column = index.column()
 
             if role == QtCore.Qt.DisplayRole:
@@ -324,6 +373,37 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         else:
             _cols.pop(QtCore.Qt.BackgroundRole, None)
 
+    def sort(self, column: int, order: QtCore.Qt.SortOrder = ...) -> None:
+        """Sort the underlying pandas DataFrame
+        Required as there is no poxy model to handle the sorting
+        """
+        self.layoutAboutToBeChanged.emit()
+
+        col = self._data.columns[column]
+
+        _newData = self._data.copy()
+        # create temporary column to facilitate the new ordering after pandas sorting
+        _newData['_sortOrder'] = range(_newData.shape[0])
+
+        # perform the sort on the specified column
+        _newData.sort_values(by=col, ascending=True if order else False, inplace=True)
+        self._oldSortOrder = self._sortOrder
+        self._sortOrder = list(_newData['_sortOrder'])
+
+        # # store the new ordering and remove from the dataFrame
+        # self._sortOrder = list(self._data['_sortOrder'])
+        # self._data.drop(['_sortOrder'], axis=1, inplace=True)
+
+        # emit a signal to spawn an update of the table and notify headers to update
+        self.layoutChanged.emit()
+
+    def mapToSource(self, indexes):
+        """Map the cell index to the co-ordinates in the pandas dataFrame
+        Return list of tuples of dataFrame positions
+        """
+        idxs = [(self._sortOrder[idx.row()], idx.column()) if idx.isValid() else (None, None) for idx in indexes]
+        return idxs
+
 
 class _SimplePandasTableHeaderModel(QtCore.QAbstractTableModel):
     """A simple table model to view pandas DataFrames
@@ -426,6 +506,9 @@ def _updateSimplePandasTable(table, data, _resize=False):
     # create new model and set in table
     _model = _SimplePandasTableModel(data, view=table)
     table.setModel(_model)
+
+    # # put a proxy in between view and model - REALLY SLOW for big tables
+    # table._proxy.setSourceModel(_model)
 
     table.resizeColumnsToContents()  # crude but very quick
     if _resize:

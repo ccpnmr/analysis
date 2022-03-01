@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:53 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-03-01 11:38:50 +0000 (Tue, March 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1072,20 +1072,23 @@ class GuiSpectrumDisplay(CcpnModule):
         """
         # local import to avoid cycles
         from ccpn.framework.Framework import MAXITEMLOGGING
+        from ccpn.core.Project import Project
+
         theObject = data.get('theObject')
+        objs = []
 
         if DropBase.URLS in data:
             # process dropped items but don't open any spectra
             objs = self.mainWindow._processDroppedItems(data)
 
+            # discard any further loads if project loaded (may be inconsistent)
+            if list(filter(lambda obj: isinstance(obj, Project), objs)):
+                return
+
         elif DropBase.PIDS in data:
             # handle Pids
             pids = data.get(DropBase.PIDS, [])
-            objs = []
-            for pid in pids:
-                obj = self.project.getByPid(pid)
-                if obj is not None:
-                    objs.append(obj)
+            objs = self.project.getObjectsByPids(pids)
 
         if len(objs) > 0:
 

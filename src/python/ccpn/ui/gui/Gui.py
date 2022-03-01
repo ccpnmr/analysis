@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-24 19:40:44 +0000 (Thu, February 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-01 11:38:50 +0000 (Tue, March 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -378,7 +378,8 @@ class Gui(Ui):
             (dataLoader, createNewProject, ignore) = self._queryChoices(dataLoader)
 
         elif dataLoader.dataFormat == SpectrumDataLoader.dataFormat and dataLoader.existsInProject():
-            ok = MessageDialog.showYesNoWarning('Spectrum "%s"' % dataLoader.path,
+            ok = MessageDialog.showYesNoWarning('Loading Spectrum',
+                                                f'"{dataLoader.path}"\n' 
                                                 f'already exists in the project\n'
                                                 '\n'
                                                 'do you want to load?'

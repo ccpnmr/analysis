@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-01 09:23:44 +0000 (Tue, March 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-01 19:04:25 +0000 (Tue, March 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -331,6 +331,12 @@ class CSMOutputFrame(SeriesFrameBC):
     _assignmentHeaders = sv.CONSTANT_OUTPUT_TABLE_COLUMNS
     _reservedColumns = [sv.DELTA_DELTA_MEAN, sv.DELTA_DELTA_SUM]
 
+class CSMBindingOutputFrame(SeriesFrameBC):
+    SERIESFRAMETYPE = sv.CSM_OUTPUT_FRAME
+    SERIESUNITS = None
+    SERIESSTEPS = None
+    _assignmentHeaders = sv.CONSTANT_OUTPUT_TABLE_COLUMNS
+    _reservedColumns =  [sv.KD, sv.BMAX] + sv.CONSTANT_STATS_OUTPUT_TABLE_COLUMNS
 
 
 ########################################################################################################################

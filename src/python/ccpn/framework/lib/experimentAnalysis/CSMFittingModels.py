@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-01 14:47:16 +0000 (Tue, March 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-01 19:04:25 +0000 (Tue, March 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ from collections import defaultdict
 from ccpn.util.Logging import getLogger
 from ccpn.core.DataTable import TableFrame
 from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel,  _registerModels
-from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import CSMInputFrame, CSMOutputFrame
+from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import CSMInputFrame, CSMOutputFrame, CSMBindingOutputFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 
@@ -67,10 +67,12 @@ class Binding1SiteMinimiser(MinimiserModel):
     """
 
     FITTING_FUNC = lf.oneSiteBinding_func
+    MODELNAME = 'Binding_1_Site_Model'
 
     def __init__(self, independent_vars=['x'], prefix='', nan_policy='raise', **kwargs):
         kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
         super().__init__(Binding1SiteMinimiser.FITTING_FUNC, **kwargs)
+        self.name = self.MODELNAME
 
     def guess(self, data, x, **kwargs):
         """Estimate initial model parameter values from data."""
@@ -157,7 +159,6 @@ class DeltaDeltaShiftsCalculation():
             Defaults if not given
         :return: outputFrame
         """
-        outputFrame = CSMOutputFrame()
         outputDataDict = defaultdict(list)
         grouppingHeaders = [sv.CHAIN_CODE, sv.RESIDUE_CODE, sv.RESIDUE_TYPE]
         _filteringAtoms = kwargs.get(sv.FILTERINGATOMS, DeltaDeltaShiftsCalculation._filteringAtoms)
@@ -169,19 +170,22 @@ class DeltaDeltaShiftsCalculation():
             atomFiltered = grouppedDF[grouppedDF[sv.ATOM_NAME].isin(_filteringAtoms)]   ## filter by the specific atoms of interest
             seriesValues4residue = atomFiltered[inputData.valuesHeaders].values.T       ## take the series values in axis 1 and create a 2D array. e.g.:[[8.15 123.49][8.17 123.98]]
             deltaDeltas = DeltaDeltaShiftsCalculation._calculateDeltaDeltas(seriesValues4residue, _alphaFactors)  ## get the deltaDeltas
+            outputDataDict[sv._ROW_UID].append(grouppedDF[sv._ROW_UID])
             for i, assignmentHeader in enumerate(grouppingHeaders):                     ## build new row for the output dataFrame as DefaultDict.
                 outputDataDict[assignmentHeader].append(list(assignmentValues)[i])      ## add common assignments definitions
             outputDataDict[sv.ATOM_NAMES].append(','.join(_filteringAtoms))             ## add atom names
-            for colnam, oper in zip([sv.DELTA_DELTA_MEAN, sv.DELTA_DELTA_SUM, sv.DELTA_DELTA_STD],[np.mean, np.sum, np.std]):  ## add calculated values from Dd
+            for colnam, oper in zip([sv.DELTA_DELTA_MEAN, sv.DELTA_DELTA_SUM, sv.DELTA_DELTA_STD],[np.mean, np.sum, np.std]):  ## add calculated values from Deltadeltas
                 outputDataDict[colnam].append(oper(deltaDeltas[1:]))                    ## first item is excluded from as it is always 0 by definition.
-            for _dd, valueHeaderName in zip(deltaDeltas,inputData.valuesHeaders):       ## add single Dd
+            for _dd, valueHeaderName in zip(deltaDeltas,inputData.valuesHeaders):       ## add single steps Deltadelta value
                 outputDataDict[valueHeaderName].append(_dd)
-        outputFrame.setDataFromDict(outputDataDict)                                     ## build Frame
-        DeltaDeltaShiftsCalculation._finaliseOutputFrame(grouppingHeaders, inputData, outputFrame) ## define properties on output Frame as the input frame
+        outputFrame = CSMOutputFrame()
+        DeltaDeltaShiftsCalculation._finaliseOutputFrame(grouppingHeaders, inputData, outputFrame, outputDataDict)
         return outputFrame
 
     @staticmethod
-    def _finaliseOutputFrame(grouppingHeaders, inputData, outputFrame):
+    def _finaliseOutputFrame(grouppingHeaders, inputData, outputFrame, outputDataDict):
+        """private completion method """
+        outputFrame.setDataFromDict(outputDataDict)
         outputFrame.setSeriesUnits(inputData.SERIESUNITS)
         outputFrame.setSeriesSteps(inputData.SERIESSTEPS)
         outputFrame._assignmentHeaders = grouppingHeaders + [sv.ATOM_NAMES]
@@ -202,15 +206,53 @@ class OneSiteBindingModel(FittingModelABC):
 
     Minimiser = Binding1SiteMinimiser
 
-
-    def fitSeries(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
+    def fitSeries(self, inputData:TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
 
         ddc = DeltaDeltaShiftsCalculation()
         frame = ddc.calculateDeltaDeltaShift(inputData, **kwargs)
-        for ix, seriesValues in frame[frame.valuesHeaders].iterrows():
-            print('EEE', seriesValues)
+        xArray = np.array(inputData.SERIESSTEPS)
+        #TODO  rescale option
+        outputDataDict = defaultdict(list)
+        for ix, row in frame.iterrows():
+            seriesValues = row[frame.valuesHeaders]
+            yArray = seriesValues.values
+            model = self.Minimiser()
+            params = model.make_params(kd=1, bmax=0.5)
+            params['kd'].min = 0.1
+            params['kd'].max = 10
+            params['bmax'].min = 0.001
+            params['bmax'].max = 1
+            result = None #replace with class obj?
+            try:
+                result = model.fit(yArray, params, x=xArray)
+            except:
+                print('Failed:', ix)
+            outputDataDict[sv._ROW_UID].append(row[sv._ROW_UID])
+            for i, assignmentHeader in enumerate(inputData.assignmentHeaders[:-1]):  ## build new row for the output dataFrame as DefaultDict.
+                outputDataDict[assignmentHeader].append(row[assignmentHeader])  ## add common assignments definitions
+            outputDataDict['ModelName'].append(model.name)
+            for nn, vv in zip([sv.MINIMISER_METHOD, sv.R2, sv.CHISQUARE, sv.REDUCEDCHISQUARE, sv.AKAIKE, sv.BAYESIAN],
+                          ['method', 'r2', 'chisqr','redchi', 'aic', 'bic']):
+                outputDataDict[nn].append(getattr(result, vv, None))
+            vv = ['kd', 'bmax']
+            if result is not None:
+                for j in vv:
+                    param = result.params.get(j)
+                    outputDataDict[j].append(param.value)
+                    outputDataDict[f'{j}_err'].append(param.stderr)
+            else:
+                for j in vv :
+                    outputDataDict[j].append(None)
+                    outputDataDict[f'{j}_err'].append(None)
 
-
+            outputDataDict['minimiser'].append(result)
+        outputFrame = CSMBindingOutputFrame()
+        outputFrame.setDataFromDict(outputDataDict)
+        outputFrame.setSeriesUnits(inputData.SERIESUNITS)
+        outputFrame.setSeriesSteps(inputData.SERIESSTEPS)
+        outputFrame._assignmentHeaders = inputData.assignmentHeaders
+        outputFrame._valuesHeaders = inputData.valuesHeaders
+        return outputFrame
 
 
 

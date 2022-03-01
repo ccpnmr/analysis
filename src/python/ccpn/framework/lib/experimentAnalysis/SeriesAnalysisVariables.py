@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-01 14:47:16 +0000 (Tue, March 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-01 19:04:25 +0000 (Tue, March 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -58,11 +58,14 @@ CHISQUARE        = 'Chi-square'
 REDUCEDCHISQUARE = f'Reduced-{CHISQUARE}'
 AKAIKE           = 'Akaike'
 BAYESIAN         = 'Bayesian'
-MINIMISER_METHOD = 'Minimiser-Method'
+MINIMISER_METHOD = 'Method'
 
 CONSTANT_TABLE_COLUMNS = [CHAIN_CODE, RESIDUE_CODE, RESIDUE_TYPE, ATOM_NAME]
 CONSTANT_OUTPUT_TABLE_COLUMNS = [CHAIN_CODE, RESIDUE_CODE, RESIDUE_TYPE, ATOM_NAMES]
 CONSTANT_STATS_OUTPUT_TABLE_COLUMNS = [MINIMISER_METHOD, R2, CHISQUARE, REDUCEDCHISQUARE, AKAIKE, BAYESIAN]
+
+KD = 'Kd'
+BMAX = 'BMax'
 
 ############################################################################################
 ### Used in SeriesFrame tables ABCs

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-01 09:23:44 +0000 (Tue, March 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-01 19:04:25 +0000 (Tue, March 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -100,9 +100,10 @@ class MinimiserModel(Model):
 
     """
     FITTING_FUNC = None
+    MODELNAME = 'Minimiser'
 
     def fit(self, data, params=None, weights=None, method='leastsq', iter_cb=None, scale_covar=True, verbose=False,
-            fit_kws=None, nan_policy=None, calc_covar=True, max_nfev=None, **kwargs):
+            fit_kws=None, nan_policy='omit', calc_covar=True, max_nfev=None, **kwargs):
 
         result = super().fit(data, params=params, weights=weights, method=method,
             iter_cb=iter_cb, scale_covar=scale_covar, verbose=verbose, fit_kws=fit_kws,

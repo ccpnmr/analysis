@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-01 17:37:45 +0000 (Tue, March 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-01 18:50:59 +0000 (Tue, March 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -252,9 +252,9 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
             if role == QtCore.Qt.DisplayRole:
                 _cell = self._data.iat[_row, _column]
 
-                # nan
-                if pd.isnull(_cell):
-                    return ''
+                # # nan
+                # if pd.isnull(_cell):
+                #     return ''
 
                 # float/np.float - round to 3 decimal places
                 if isinstance(_cell, (float, np.floating)):
@@ -279,9 +279,9 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
             elif role == QtCore.Qt.ToolTipRole:
                 _cell = self._data.iat[_row, _column]
 
-                # nan
-                if pd.isnull(_cell):
-                    return 'nan'
+                # # nan
+                # if pd.isnull(_cell):
+                #     return 'nan'
 
                 return str(_cell)
 

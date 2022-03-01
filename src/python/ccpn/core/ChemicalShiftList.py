@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-23 17:32:16 +0000 (Wed, February 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-01 16:23:33 +0000 (Tue, March 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -400,6 +400,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         df = self._wrappedData.data.copy()
         df = df[df[CS_ISDELETED] == False]
         ncsl._wrappedData.data = df
+        ncsl.static = True
 
         # make a new list of uniqueIds
         _newIds = [self.project._getNextUniqueIdValue(CS_CLASSNAME) for _ in range(len(df))]
@@ -412,6 +413,7 @@ class ChemicalShiftList(AbstractWrapperObject):
 
             # create a new shift with the uniqueId from the dataframe
             shift = _newShift(self.project, ncsl, _uniqueId=int(_row[CS_UNIQUEID]))
+            shift._static = True
             ncsl._shifts.append(shift)
 
             # add the new object to the _pid2Obj dict

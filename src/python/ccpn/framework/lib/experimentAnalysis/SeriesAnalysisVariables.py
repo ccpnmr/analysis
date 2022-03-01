@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-25 15:14:19 +0000 (Fri, February 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-01 09:23:44 +0000 (Tue, March 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -116,7 +116,9 @@ _OTHER = pu.OTHER
 
 DELTA = 'Delta'
 DELTA_DELTA = f'{DELTA*2}'
-
+DELTA_DELTA_MEAN = f'{DELTA*2}(Mean)'
+DELTA_DELTA_SUM = f'{DELTA*2}(Sum)'
+DELTA_DELTA_STD = f'{DELTA*2}(STD)'
 DEFAULT_H_ALPHAFACTOR = 1
 DEFAULT_N_ALPHAFACTOR = 0.142
 DEFAULT_C_ALPHAFACTOR = 0.25
@@ -128,6 +130,8 @@ DEFAULT_ALPHA_FACTORS = OrderedDict((
                             (_OTHER, DEFAULT_OTHER_ALPHAFACTOR)
                             ))
 
+FILTERINGATOMS  = 'FilteringAtoms'
+ALPHAFACTORS    = 'AlphaFactors'
 
 ## Fitting models
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-16 15:46:57 +0000 (Wed, February 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-01 09:23:44 +0000 (Tue, March 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -95,6 +95,7 @@ class SeriesFrameBC(TableFrame):
     _valuesHeaders      = []
     _assignmentHeaders  = sv.CONSTANT_TABLE_COLUMNS
 
+    _ROW_UIDs           = []
     _assignmentValues   = []
     _seriesValues       = []
 
@@ -120,6 +121,10 @@ class SeriesFrameBC(TableFrame):
         Together with seriesValues form the rows in the SeriesFrame.
         Return: list of lists. """
         return self._assignmentValues
+
+    @property
+    def UIDs(self):
+        return self._ROW_UIDs
 
     @property
     def valuesHeaders(self):
@@ -155,6 +160,13 @@ class SeriesFrameBC(TableFrame):
         """
         self._assignmentValues = assignmentValues
 
+    def _setUIDs(self, UIDs):
+        """
+        Set a list of Unique Identifiers for the Table
+        :param UIDs:
+        """
+        self._ROW_UIDs = UIDs
+
     @valuesHeaders.setter
     def valuesHeaders(self, valuesHeaders:list):
         """
@@ -168,12 +180,27 @@ class SeriesFrameBC(TableFrame):
     def setSeriesUnits(self, seriesUnits:str):
         self.SERIESUNITS = seriesUnits
 
+    def getRowByUID(self, uid):
+        self.set_index(sv._ROW_UID, inplace=True, drop=False)
+        if uid in self.index:
+            return self.loc[uid]
+
+    def getSeriesValuesByUID(self, uid):
+        values = []
+        row = self.getRowByUID(uid)
+        if row is not None:
+            if self.valuesHeaders:
+                values = row[self.valuesHeaders]
+            else:
+                getLogger().warning('Values Headers not defined.')
+        return values
+
     def build(self):
         """
         Set the dataFrame from the _assignmentValues and seriesValues
         :return:
         """
-        dataDict = self.buildFrameDictionary(self.assignmentValues, self.seriesValues)
+        dataDict = self.buildFrameDictionary(self.assignmentValues, self.seriesValues, UIDs=self.UIDs)
         self.setDataFromDict(dataDict)
         return self
 
@@ -186,12 +213,13 @@ class SeriesFrameBC(TableFrame):
         """
         self.setSeriesSteps(spectrumGroup.series)
         self.setSeriesUnits(spectrumGroup.seriesUnits)
-        _assignmentValues, _seriesValues = _getValuesFromSpectrumGroup(spectrumGroup, thePeakProperty=thePeakProperty)
+        _ROW_UIDs, _assignmentValues, _seriesValues = _getValuesFromSpectrumGroup(spectrumGroup, thePeakProperty=thePeakProperty)
         self.setAssignmentValues(_assignmentValues)
         self.setSeriesValues(_seriesValues)
+        self._setUIDs(_ROW_UIDs)
         self.build()
 
-    def buildFrameDictionary(self, assignmentValues, seriesValues) -> dict:
+    def buildFrameDictionary(self, assignmentValues, seriesValues, UIDs=None) -> dict:
         """
         Create a ordered Dict from a list of lists of assignmentValues and SeriesValues.
         Each set of Items of assignmentValues, seriesValues constitutes a row in the dataframe.
@@ -226,8 +254,11 @@ class SeriesFrameBC(TableFrame):
         if not self._valuesHeaders:
             self._setDefaultValueHeaders()
 
-        for ix, (_assignmentValueItems, _seriesValueItems) in enumerate(zip(assignmentValues, seriesValues)):
-            dataDict[sv._ROW_UID].append(str(ix))
+        if UIDs is None or not len(assignmentValues) == len(UIDs):
+            UIDs = [str(i) for i in range(len(assignmentValues))]
+
+        for uid, _assignmentValueItems, _seriesValueItems in (zip(UIDs, assignmentValues, seriesValues)):
+            dataDict[sv._ROW_UID].append(str(uid))
             if not len(self._assignmentHeaders) == len(_assignmentValueItems):
                 raise ValueError(f"""AssignmentValues and AssignmentHeaders Definitions need to be of same length.""")
 
@@ -298,7 +329,7 @@ class CSMOutputFrame(SeriesFrameBC):
     SERIESUNITS = None
     SERIESSTEPS = None
     _assignmentHeaders = sv.CONSTANT_OUTPUT_TABLE_COLUMNS
-    _reservedColumns = [sv.DELTA_DELTA]
+    _reservedColumns = [sv.DELTA_DELTA_MEAN, sv.DELTA_DELTA_SUM]
 
 
 
@@ -313,6 +344,7 @@ def _getValuesFromSpectrumGroup(spectrumGroup, thePeakProperty, peakListIndex=-1
     Values are used to build the  SeriesTable
     :return assignmentValues and seriesValues, both are list of lists
     """
+    _ROW_UIDs = []
     _assignmentValues = []
     _seriesValues = []
     spectra = spectrumGroup.spectra
@@ -331,7 +363,8 @@ def _getValuesFromSpectrumGroup(spectrumGroup, thePeakProperty, peakListIndex=-1
             else:
                 _seriesValues4Atom.append(None)
         _seriesValues.append(_seriesValues4Atom)
-    return _assignmentValues, _seriesValues
+        _ROW_UIDs.append(nmrAtom.pid)
+    return _ROW_UIDs, _assignmentValues, _seriesValues
 
 def _getAssignedNmrAtoms4Spectra(spectra, peakListIndex=-1):
     """Get a set of assigned nmrAtoms that appear in a list of spectra. Use last peakList only as default."""

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-25 15:14:19 +0000 (Fri, February 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-01 09:23:44 +0000 (Tue, March 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -109,7 +109,9 @@ class MinimiserModel(Model):
             nan_policy=nan_policy, calc_covar=calc_covar, max_nfev=max_nfev, **kwargs)
 
         # insert the r2 definition. Might be better to subclass the output model and add it implicitly.
-        result.r2 = lf.r2_func(redchi=result.redchi, y=data)
+        result.r2 = None
+        if result.redchi is not None:
+            result.r2 = lf.r2_func(redchi=result.redchi, y=data)
         return result
 
 

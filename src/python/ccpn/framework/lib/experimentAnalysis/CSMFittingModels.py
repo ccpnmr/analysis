@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-25 15:14:19 +0000 (Fri, February 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-01 09:23:44 +0000 (Tue, March 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -40,14 +40,56 @@ from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import CSMInputFrame, 
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 
-class DeltaDeltaCalculation(FittingModelABC):
+
+########################################################################################################################
+####################################       Minimisers     ##############################################################
+########################################################################################################################
+
+
+class FractionBindingMinimiser(MinimiserModel):
+    """A model based on the fraction bound Fitting equation.
+      Eq. 6 from  M.P. Williamson. Progress in Nuclear Magnetic Resonance Spectroscopy 73, 1–16 (2013).
     """
-    #TODO: Inspect --> not sure if this should be a Fitting model. As is not really fitting anything. It only contains math.
-    ChemicalShift Analysis DeltaDelta calculation model
+
+    FITTING_FUNC = lf.fractionBound_func
+
+    def __init__(self, independent_vars=['x'], prefix='', nan_policy='raise', **kwargs):
+        kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
+        super().__init__(FractionBindingMinimiser.FITTING_FUNC, **kwargs)
+
+    def guess(self, data, x, **kwargs):
+        """Estimate initial model parameter values from data."""
+        raise NotImplementedError()
+
+
+class Binding1SiteMinimiser(MinimiserModel):
+    """A model based on the oneSiteBindingCurve Fitting equation.
+    """
+
+    FITTING_FUNC = lf.oneSiteBinding_func
+
+    def __init__(self, independent_vars=['x'], prefix='', nan_policy='raise', **kwargs):
+        kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
+        super().__init__(Binding1SiteMinimiser.FITTING_FUNC, **kwargs)
+
+    def guess(self, data, x, **kwargs):
+        """Estimate initial model parameter values from data."""
+        raise NotImplementedError()
+
+
+
+########################################################################################################################
+####################################    DataSeries Models    ###########################################################
+########################################################################################################################
+
+
+class DeltaDeltaShiftsCalculation():
+    """
+    ChemicalShift Analysis DeltaDeltas shift distance calculation
     """
     ModelName = sv.DELTA_DELTA
     Info = 'Calculate The DeltaDelta shifts for a series.'
-    Description = ' CSP = √∑𝛂(𝛿i)^ '
+    Description = ' CSP = √∑𝛂(𝛿i)^2 '
     References = '''
                     1) Eq. (9) M.P. Williamson. Progress in Nuclear Magnetic Resonance Spectroscopy 73, 1–16 (2013).
                     2) Mureddu, L. & Vuister, G. W. Simple high-resolution NMR spectroscopy as a tool in molecular biology.
@@ -72,34 +114,56 @@ class DeltaDeltaCalculation(FittingModelABC):
     def setFilteringAtoms(self, values):
         self._filteringAtoms = values
 
-    def fitSeries(self, inputData:CSMInputFrame, *args, **kwargs) -> CSMOutputFrame:
+    def calculateDeltaDeltaShift(self, inputData:TableFrame, **kwargs) -> TableFrame:
         """
         Calculate the DeltaDeltas for an input SeriesTable.
-        :param inputData:
+        :param inputData: CSMInputFrame
         :param args:
-        :param kwargs:
-        :return:
+        :param kwargs: FilteringAtoms=('H','N'), AlphaFactors=(1, 0.142), defaults if not given
+        :return: CSMOutputFrame
         """
+        outputFrame = DeltaDeltaShiftsCalculation._getDeltaDeltasOutputFrame(inputData, **kwargs)
+        return outputFrame
+
+    @staticmethod
+    def _getDeltaDeltasOutputFrame(inputData, **kwargs):
+        """
+        Calculate the DeltaDeltas for an input SeriesTable.
+        :param inputData: CSMInputFrame
+        :param args:
+        :param kwargs: FilteringAtoms=('H','N'), AlphaFactors=(1, 0.142), defaults if not given
+        :return: dict
+        """
+        outputFrame = CSMOutputFrame()
         outputDataDict = defaultdict(list)
         grouppingHeaders = [sv.CHAIN_CODE, sv.RESIDUE_CODE, sv.RESIDUE_TYPE]
+        _filteringAtoms = kwargs.get(sv.FILTERINGATOMS, DeltaDeltaShiftsCalculation._filteringAtoms)
+        _alphaFactors =  kwargs.get(sv.ALPHAFACTORS, DeltaDeltaShiftsCalculation._alphaFactors)
         for assignmentValues, grouppedDF in inputData.groupby(grouppingHeaders):
             ## filter by the specific atoms of interest
-            atomFiltered = grouppedDF[grouppedDF[sv.ATOM_NAME].isin(self._filteringAtoms)]
+            atomFiltered = grouppedDF[grouppedDF[sv.ATOM_NAME].isin(_filteringAtoms)]
             ## take the series values in axis 1 and create a 2D array. e.g.:[[8.15 123.49][8.17 123.98]]
             seriesValues4residue = atomFiltered[inputData.valuesHeaders].values.T
             ## get the deltaDeltas
-            deltaDelta = self._calculateDeltaDelta(data=seriesValues4residue)
+            deltaDeltas = DeltaDeltaShiftsCalculation._calculateDeltaDeltas(seriesValues4residue, _alphaFactors)
             ## build new row for the output dataFrame.
             for i, assignmentHeader in enumerate(grouppingHeaders):
                 outputDataDict[assignmentHeader].append(list(assignmentValues)[i])
-            outputDataDict[sv.ATOM_NAMES].append(','.join(self._filteringAtoms))
-            outputDataDict[sv.DELTA_DELTA].append(deltaDelta)
-        outputFrame = CSMOutputFrame()
+            outputDataDict[sv.ATOM_NAMES].append(','.join(_filteringAtoms))
+            outputDataDict[sv.DELTA_DELTA_MEAN].append(np.mean(deltaDeltas[1:])) #first is excluded from mean as it is 0.
+            outputDataDict[sv.DELTA_DELTA_SUM].append(np.sum(deltaDeltas))
+            outputDataDict[sv.DELTA_DELTA_STD].append(np.std(deltaDeltas[1:]))
+            for _dd, valueHeaderName in zip(deltaDeltas,inputData.valuesHeaders):
+                outputDataDict[valueHeaderName].append(_dd)
         outputFrame.setDataFromDict(outputDataDict)
+        outputFrame.setSeriesUnits(inputData.SERIESUNITS)
+        outputFrame.setSeriesSteps(inputData.SERIESSTEPS)
+        outputFrame._assignmentHeaders = grouppingHeaders + [sv.ATOM_NAMES]
+        outputFrame._valuesHeaders = inputData.valuesHeaders
         return outputFrame
 
-
-    def _calculateDeltaDelta(self, data):
+    @staticmethod
+    def _calculateDeltaDeltas(data, alphaFactors):
         """
         :param data: 2D array containing A and B coordinates to measure.
         e.g.: for two HN peaks data will be array [[  8.15842 123.49895][  8.17385 123.98413]]
@@ -107,11 +171,10 @@ class DeltaDeltaCalculation(FittingModelABC):
         """
         deltaDeltas = []
         origin = data[0] # first set of positions (any dimensionality)
-        for coord in data[1:]:# the other set of positions (same dim as origin)
-            dd = lf.euclideanDistance_func(origin, coord, self._alphaFactors)
+        for coord in data:# the other set of positions (same dim as origin)
+            dd = lf.euclideanDistance_func(origin, coord, alphaFactors)
             deltaDeltas.append(dd)
-        deltaDelta = np.mean(deltaDeltas) # mean but could be an option to be a sum
-        return deltaDelta
+        return deltaDeltas
 
 
 class OneSiteBindingModel(FittingModelABC):
@@ -123,46 +186,23 @@ class OneSiteBindingModel(FittingModelABC):
     Description = ' ... '
     References = '''
                     1) Eq. (x) M.P. Williamson. Progress in Nuclear Magnetic Resonance Spectroscopy 73, 1–16 (2013).
-                    2) ....
                     
                   '''
 
+    Minimiser = Binding1SiteMinimiser
+
 
     def fitSeries(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
-        pass
+
+        ddc = DeltaDeltaShiftsCalculation()
+        frame = ddc.calculateDeltaDeltaShift(inputData, **kwargs)
+        for ix, seriesValues in frame[frame.valuesHeaders].iterrows():
+            print('EEE', seriesValues)
 
 
 
 
-class FractionBindingModel(MinimiserModel):
-    """A model based on the fraction bound Fitting equation.
-      Eq. 6 from  M.P. Williamson. Progress in Nuclear Magnetic Resonance Spectroscopy 73, 1–16 (2013).
-    """
 
-    FITTING_FUNC = lf.fractionBound_func
-
-    def __init__(self, independent_vars=['x'], prefix='', nan_policy='raise', **kwargs):
-        kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
-        super().__init__(FractionBindingModel.FITTING_FUNC, **kwargs)
-
-    def guess(self, data, x, **kwargs):
-        """Estimate initial model parameter values from data."""
-        raise NotImplementedError()
-
-
-class Simple1SiteModel(MinimiserModel):
-    """A model based on the oneSiteBindingCurve Fitting equation.
-    """
-
-    FITTING_FUNC = lf.oneSiteBinding_func
-
-    def __init__(self, independent_vars=['x'], prefix='', nan_policy='raise', **kwargs):
-        kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
-        super().__init__(Simple1SiteModel.FITTING_FUNC, **kwargs)
-
-    def guess(self, data, x, **kwargs):
-        """Estimate initial model parameter values from data."""
-        raise NotImplementedError()
 
 
 
@@ -172,5 +212,5 @@ def _registerChemicalShiftMappingModels():
     Register the ChemicalShiftMapping specific Models
     """
     from ccpn.framework.lib.experimentAnalysis.ChemicalShiftMappingAnalysisBC import ChemicalShiftMappingAnalysisBC
-    models = [DeltaDeltaCalculation]
+    models = [OneSiteBindingModel]
     _registerModels(ChemicalShiftMappingAnalysisBC, models)

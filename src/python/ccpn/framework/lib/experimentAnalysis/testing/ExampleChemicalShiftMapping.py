@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-22 16:06:27 +0000 (Tue, February 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-01 09:23:44 +0000 (Tue, March 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -108,8 +108,8 @@ def _testCreateChemicalShiftMappingAnalysisObj():
 def _testCSMCalcData():
     """Test the DeltaDelta calculation in the CSM deltaDelta model """
     df = getCSMInputFrameExample()
-    from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import DeltaDeltaCalculation
-    deltaDeltaModel = DeltaDeltaCalculation(alphaFactors=(1, 0.102))
+    from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import DeltaDeltaShiftsCalculation
+    deltaDeltaModel = DeltaDeltaShiftsCalculation(alphaFactors=(1, 0.102))
     outputFrame = deltaDeltaModel.fit(df)
     print(outputFrame)
 

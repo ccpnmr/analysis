@@ -69,7 +69,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-16 11:43:13 +0000 (Wed, February 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-01 09:23:44 +0000 (Tue, March 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -776,6 +776,7 @@ class ChemicalShiftsMapping(CcpnModule):
                         if len(deltas) < len(concentrationsValues):
                             deltas = _fillListToLenght(deltas, len(concentrationsValues), np.nan)
                         df = pd.DataFrame([deltas], index=[nmrResidue], columns=concentrationsValues)
+                        print('DF',df, '')
                         if len(peaksPids) < len(concentrationsValues):
                             peaksPids = _fillListToLenght(peaksPids, len(concentrationsValues), '')
                         dfPeaks = pd.DataFrame([peaksPids], index=[nmrResidue], columns=concentrationsValues)

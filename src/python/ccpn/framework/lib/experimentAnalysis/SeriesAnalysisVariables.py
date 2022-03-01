@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-01 09:23:44 +0000 (Tue, March 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-01 14:47:16 +0000 (Tue, March 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 from collections import OrderedDict
 import ccpn.util.Constants as constants
 import ccpn.core.lib.peakUtils as pu
+from ccpn.core.lib.AssignmentLib import CCP_CODES_SORTED
 
 
 
@@ -144,5 +145,7 @@ OUTPUT_DATATABLE_NAME = 'outputDataTableName'
 ## OneSiteBindingModel
 ONE_BINDING_SITE_MODEL = 'OneSiteBindingModel'
 
-########
+#### residues names
+CCP_3LETTER_CODES = CCP_CODES_SORTED
+EXCLUDEDRESIDUETYPES = 'ExcludedResidueTypes'
 

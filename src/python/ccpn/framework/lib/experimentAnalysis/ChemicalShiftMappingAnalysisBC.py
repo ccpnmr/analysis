@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-01 09:23:44 +0000 (Tue, March 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-01 14:47:16 +0000 (Tue, March 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -85,6 +85,18 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
 
 
     def calculateDeltaDeltaShifts(self, inputData, **kwargs):
+        """
+        Calculate the DeltaDeltas Chemical shift distances for an input SeriesTable.
+        :param inputData: CSMInputFrame
+        :param args:
+        :param kwargs:
+                    FilteringAtoms   = ['H','N'],
+                    AlphaFactors     = [1, 0.142],
+                    ExcludedResidues = ['PRO'] # The string type as it appears in the NmrResidue type. These residues
+                    will be removed from the table.
+                    - Use default values if kwargs not given -
+        :return: outputFrame
+        """
         from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import DeltaDeltaShiftsCalculation
         ddc = DeltaDeltaShiftsCalculation()
         frame = ddc.calculateDeltaDeltaShift(inputData, **kwargs)

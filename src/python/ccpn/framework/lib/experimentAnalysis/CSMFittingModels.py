@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-01 09:23:44 +0000 (Tue, March 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-01 14:47:16 +0000 (Tue, March 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -96,17 +96,15 @@ class DeltaDeltaShiftsCalculation():
                        FEBS J. 286, 2035–2042 (2019).
                   '''
 
-    _alphaFactors = (sv.DEFAULT_H_ALPHAFACTOR, sv.DEFAULT_N_ALPHAFACTOR)
-    _filteringAtoms = (sv._H, sv._N)
+    _alphaFactors = [sv.DEFAULT_H_ALPHAFACTOR, sv.DEFAULT_N_ALPHAFACTOR]
+    _filteringAtoms = [sv._H, sv._N]
+    _excludedResidueTypes = []
 
-    def __init__(self, alphaFactors=None, filteringAtoms=None):
+    def __init__(self, alphaFactors=None, filteringAtoms=None, excludedResidues=None,):
         super().__init__()
-
-        if alphaFactors:
-            self.setAlphaFactors(alphaFactors)
-
-        if filteringAtoms:
-            self.setFilteringAtoms(filteringAtoms)
+        self._alphaFactors = alphaFactors or DeltaDeltaShiftsCalculation._alphaFactors
+        self._filteringAtoms = filteringAtoms or DeltaDeltaShiftsCalculation._filteringAtoms
+        self._excludedResidueTypes = excludedResidues or DeltaDeltaShiftsCalculation._excludedResidueTypes
 
     def setAlphaFactors(self, values):
         self._alphaFactors = values
@@ -114,52 +112,22 @@ class DeltaDeltaShiftsCalculation():
     def setFilteringAtoms(self, values):
         self._filteringAtoms = values
 
+    def setExcludedResidueTypes(self, values):
+        self._excludedResidueTypes = values
+
     def calculateDeltaDeltaShift(self, inputData:TableFrame, **kwargs) -> TableFrame:
         """
         Calculate the DeltaDeltas for an input SeriesTable.
         :param inputData: CSMInputFrame
         :param args:
-        :param kwargs: FilteringAtoms=('H','N'), AlphaFactors=(1, 0.142), defaults if not given
-        :return: CSMOutputFrame
+        :param kwargs:
+            FilteringAtoms   = ['H','N'],
+            AlphaFactors     = [1, 0.142],
+            ExcludedResidues = ['PRO'] # The string type as it appears in the NmrResidue type. These will be removed.
+            Defaults if not given
+        :return: outputFrame
         """
         outputFrame = DeltaDeltaShiftsCalculation._getDeltaDeltasOutputFrame(inputData, **kwargs)
-        return outputFrame
-
-    @staticmethod
-    def _getDeltaDeltasOutputFrame(inputData, **kwargs):
-        """
-        Calculate the DeltaDeltas for an input SeriesTable.
-        :param inputData: CSMInputFrame
-        :param args:
-        :param kwargs: FilteringAtoms=('H','N'), AlphaFactors=(1, 0.142), defaults if not given
-        :return: dict
-        """
-        outputFrame = CSMOutputFrame()
-        outputDataDict = defaultdict(list)
-        grouppingHeaders = [sv.CHAIN_CODE, sv.RESIDUE_CODE, sv.RESIDUE_TYPE]
-        _filteringAtoms = kwargs.get(sv.FILTERINGATOMS, DeltaDeltaShiftsCalculation._filteringAtoms)
-        _alphaFactors =  kwargs.get(sv.ALPHAFACTORS, DeltaDeltaShiftsCalculation._alphaFactors)
-        for assignmentValues, grouppedDF in inputData.groupby(grouppingHeaders):
-            ## filter by the specific atoms of interest
-            atomFiltered = grouppedDF[grouppedDF[sv.ATOM_NAME].isin(_filteringAtoms)]
-            ## take the series values in axis 1 and create a 2D array. e.g.:[[8.15 123.49][8.17 123.98]]
-            seriesValues4residue = atomFiltered[inputData.valuesHeaders].values.T
-            ## get the deltaDeltas
-            deltaDeltas = DeltaDeltaShiftsCalculation._calculateDeltaDeltas(seriesValues4residue, _alphaFactors)
-            ## build new row for the output dataFrame.
-            for i, assignmentHeader in enumerate(grouppingHeaders):
-                outputDataDict[assignmentHeader].append(list(assignmentValues)[i])
-            outputDataDict[sv.ATOM_NAMES].append(','.join(_filteringAtoms))
-            outputDataDict[sv.DELTA_DELTA_MEAN].append(np.mean(deltaDeltas[1:])) #first is excluded from mean as it is 0.
-            outputDataDict[sv.DELTA_DELTA_SUM].append(np.sum(deltaDeltas))
-            outputDataDict[sv.DELTA_DELTA_STD].append(np.std(deltaDeltas[1:]))
-            for _dd, valueHeaderName in zip(deltaDeltas,inputData.valuesHeaders):
-                outputDataDict[valueHeaderName].append(_dd)
-        outputFrame.setDataFromDict(outputDataDict)
-        outputFrame.setSeriesUnits(inputData.SERIESUNITS)
-        outputFrame.setSeriesSteps(inputData.SERIESSTEPS)
-        outputFrame._assignmentHeaders = grouppingHeaders + [sv.ATOM_NAMES]
-        outputFrame._valuesHeaders = inputData.valuesHeaders
         return outputFrame
 
     @staticmethod
@@ -175,6 +143,49 @@ class DeltaDeltaShiftsCalculation():
             dd = lf.euclideanDistance_func(origin, coord, alphaFactors)
             deltaDeltas.append(dd)
         return deltaDeltas
+
+    @staticmethod
+    def _getDeltaDeltasOutputFrame(inputData, **kwargs):
+        """
+        Calculate the DeltaDeltas for an input SeriesTable.
+        :param inputData: CSMInputFrame
+        :param args:
+        :param kwargs:
+            FilteringAtoms   = ['H','N'],
+            AlphaFactors     = [1, 0.142],
+            ExcludedResidues = ['PRO'] # The string type as it appears in the NmrResidue type. These will be removed.
+            Defaults if not given
+        :return: outputFrame
+        """
+        outputFrame = CSMOutputFrame()
+        outputDataDict = defaultdict(list)
+        grouppingHeaders = [sv.CHAIN_CODE, sv.RESIDUE_CODE, sv.RESIDUE_TYPE]
+        _filteringAtoms = kwargs.get(sv.FILTERINGATOMS, DeltaDeltaShiftsCalculation._filteringAtoms)
+        _alphaFactors =  kwargs.get(sv.ALPHAFACTORS, DeltaDeltaShiftsCalculation._alphaFactors)
+        _excludedResidues = kwargs.get(sv.EXCLUDEDRESIDUETYPES, DeltaDeltaShiftsCalculation._excludedResidueTypes)
+        tobeDropped = inputData[inputData[sv.RESIDUE_TYPE].isin(_excludedResidues)]     ## drop rows with excluded ResidueTypes. Should just be set to NaN but keep in?.
+        inputData.drop(tobeDropped.index, axis=0, inplace=True)
+        for assignmentValues, grouppedDF in inputData.groupby(grouppingHeaders):        ## Group by Assignments except the atomName
+            atomFiltered = grouppedDF[grouppedDF[sv.ATOM_NAME].isin(_filteringAtoms)]   ## filter by the specific atoms of interest
+            seriesValues4residue = atomFiltered[inputData.valuesHeaders].values.T       ## take the series values in axis 1 and create a 2D array. e.g.:[[8.15 123.49][8.17 123.98]]
+            deltaDeltas = DeltaDeltaShiftsCalculation._calculateDeltaDeltas(seriesValues4residue, _alphaFactors)  ## get the deltaDeltas
+            for i, assignmentHeader in enumerate(grouppingHeaders):                     ## build new row for the output dataFrame as DefaultDict.
+                outputDataDict[assignmentHeader].append(list(assignmentValues)[i])      ## add common assignments definitions
+            outputDataDict[sv.ATOM_NAMES].append(','.join(_filteringAtoms))             ## add atom names
+            for colnam, oper in zip([sv.DELTA_DELTA_MEAN, sv.DELTA_DELTA_SUM, sv.DELTA_DELTA_STD],[np.mean, np.sum, np.std]):  ## add calculated values from Dd
+                outputDataDict[colnam].append(oper(deltaDeltas[1:]))                    ## first item is excluded from as it is always 0 by definition.
+            for _dd, valueHeaderName in zip(deltaDeltas,inputData.valuesHeaders):       ## add single Dd
+                outputDataDict[valueHeaderName].append(_dd)
+        outputFrame.setDataFromDict(outputDataDict)                                     ## build Frame
+        DeltaDeltaShiftsCalculation._finaliseOutputFrame(grouppingHeaders, inputData, outputFrame) ## define properties on output Frame as the input frame
+        return outputFrame
+
+    @staticmethod
+    def _finaliseOutputFrame(grouppingHeaders, inputData, outputFrame):
+        outputFrame.setSeriesUnits(inputData.SERIESUNITS)
+        outputFrame.setSeriesSteps(inputData.SERIESSTEPS)
+        outputFrame._assignmentHeaders = grouppingHeaders + [sv.ATOM_NAMES]
+        outputFrame._valuesHeaders = inputData.valuesHeaders
 
 
 class OneSiteBindingModel(FittingModelABC):

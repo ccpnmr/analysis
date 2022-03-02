@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-02 16:15:06 +0000 (Wed, March 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-02 16:24:47 +0000 (Wed, March 02, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -300,51 +300,53 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
             # process the heights/widths of the headers
 
             if orientation == QtCore.Qt.Horizontal:
-                # estimate the column width
                 try:
-
-                    # get the width of the header
-                    _colName = self._data.columns[col] if not self._data.empty else None
-                    _len = max(len(_colName) if _colName else 0, self._MINCHARS)  # never smaller than 4 characters
-
-                    # iterate over a few rows to get an estimate
-                    for _row in range(min(self.rowCount(), self._CHECKROWS)):
-                        _cell = self._data.iat[_row, col]
-
-                        # float/np.float - round to 3 decimal places
-                        if isinstance(_cell, (float, np.floating)):
-                            _newLen = len(f'{_cell:.3f}')
-                        else:
-                            _cell = str(_cell)
-                            if '\n' in _cell:
-                                # get the longest row from the cell
-                                _cells = _cell.split('\n')
-                                _newLen = max([len(_chrs) for _chrs in _cells])
-                            else:
-                                _newLen = len(_cell)
-
-                        # update the current maximum
-                        _len = max(_newLen, _len)
-
-                    # return the required minimum width
-                    _width = min(self._MAXCHARS, _len) * self._chrWidth
+                    # get the estimated width of the column
+                    _width = self._estimateColumnWidth(col)
 
                     if col == self.columnCount() - 1 and self._view is not None:
                         # stretch the last column to fit the table - sum the previous columns
-                        _colWidths = sum([self.headerData(cc, orientation, role).width()
+                        _colWidths = sum([self._estimateColumnWidth(cc)
                                           for cc in range(self.columnCount() - 1)])
                         _viewWidth = self._view.viewport().size().width()
                         _width = max(_width, _viewWidth - _colWidths)
 
+                    # return the size
                     return QtCore.QSize(_width, self._chrHeight)
 
                 except Exception:
                     # return the default QSize
                     return QtCore.QSize(self._chrWidth, self._chrHeight)
 
-            # NOTE:ED - resize the last column
-
         return None
+
+    def _estimateColumnWidth(self, col):
+        """Estimate the width for the column from the header and fixed number of rows
+        """
+        # get the width of the header
+        _colName = self._data.columns[col] if not self._data.empty else None
+        _len = max(len(_colName) if _colName else 0, self._MINCHARS)  # never smaller than 4 characters
+        # iterate over a few rows to get an estimate
+        for _row in range(min(self.rowCount(), self._CHECKROWS)):
+            _cell = self._data.iat[_row, col]
+
+            # float/np.float - round to 3 decimal places
+            if isinstance(_cell, (float, np.floating)):
+                _newLen = len(f'{_cell:.3f}')
+            else:
+                _cell = str(_cell)
+                if '\n' in _cell:
+                    # get the longest row from the cell
+                    _cells = _cell.split('\n')
+                    _newLen = max([len(_chrs) for _chrs in _cells])
+                else:
+                    _newLen = len(_cell)
+
+            # update the current maximum
+            _len = max(_newLen, _len)
+        # return the required minimum width
+        _width = min(self._MAXCHARS, _len) * self._chrWidth
+        return _width
 
     def setForeground(self, row, column, colour):
         """Set the foreground colour for cell at position (row, column).

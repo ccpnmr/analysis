@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-02 16:24:47 +0000 (Wed, March 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-02 16:28:57 +0000 (Wed, March 02, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -326,6 +326,7 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         # get the width of the header
         _colName = self._data.columns[col] if not self._data.empty else None
         _len = max(len(_colName) if _colName else 0, self._MINCHARS)  # never smaller than 4 characters
+
         # iterate over a few rows to get an estimate
         for _row in range(min(self.rowCount(), self._CHECKROWS)):
             _cell = self._data.iat[_row, col]
@@ -344,6 +345,7 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
 
             # update the current maximum
             _len = max(_newLen, _len)
+
         # return the required minimum width
         _width = min(self._MAXCHARS, _len) * self._chrWidth
         return _width

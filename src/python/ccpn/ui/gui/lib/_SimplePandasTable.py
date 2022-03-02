@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-01 18:50:59 +0000 (Tue, March 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-02 16:15:06 +0000 (Wed, March 02, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -225,6 +225,7 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         # create numpy arrays to match the data that will hold background colour
         self._colour = np.zeros(self._data.shape, dtype=np.object)
 
+        self._view = view
         if view:
             self.fontMetric = QtGui.QFontMetricsF(view.font())
             self.bbox = self.fontMetric.boundingRect
@@ -299,7 +300,7 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
             # process the heights/widths of the headers
 
             if orientation == QtCore.Qt.Horizontal:
-                # estimate the column widths
+                # estimate the column width
                 try:
 
                     # get the width of the header
@@ -325,8 +326,17 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
                         # update the current maximum
                         _len = max(_newLen, _len)
 
-                    # return the required QSize
-                    return QtCore.QSize(min(self._MAXCHARS, _len) * self._chrWidth, self._chrHeight)
+                    # return the required minimum width
+                    _width = min(self._MAXCHARS, _len) * self._chrWidth
+
+                    if col == self.columnCount() - 1 and self._view is not None:
+                        # stretch the last column to fit the table - sum the previous columns
+                        _colWidths = sum([self.headerData(cc, orientation, role).width()
+                                          for cc in range(self.columnCount() - 1)])
+                        _viewWidth = self._view.viewport().size().width()
+                        _width = max(_width, _viewWidth - _colWidths)
+
+                    return QtCore.QSize(_width, self._chrHeight)
 
                 except Exception:
                     # return the default QSize

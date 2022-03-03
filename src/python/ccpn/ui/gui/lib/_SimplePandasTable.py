@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-02 16:28:57 +0000 (Wed, March 02, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-03 16:50:05 +0000 (Thu, March 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -34,6 +34,7 @@ from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND
 from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT, getFontHeight, getFont
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame
 from ccpn.ui.gui.widgets.Base import Base
+from ccpn.core.lib.CcpnSorting import universalSortKey
 
 
 class _SimplePandasTableView(QtWidgets.QTableView, Base):
@@ -399,7 +400,13 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         _newData['_sortOrder'] = range(_newData.shape[0])
 
         # perform the sort on the specified column
-        _newData.sort_values(by=col, ascending=True if order else False, inplace=True)
+        def _universalSort(values):
+            # generate the universal sort key values for the column
+            _series = pd.Series([universalSortKey(val) for val in list(values)])
+            return _series
+
+        _newData.sort_values(by=col, ascending=True if order else False, inplace=True,
+                             key=lambda values: _universalSort(values))
         self._oldSortOrder = self._sortOrder
         self._sortOrder = list(_newData['_sortOrder'])
 

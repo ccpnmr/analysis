@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-24 17:00:34 +0000 (Thu, February 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-03 13:48:41 +0000 (Thu, March 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -5298,6 +5298,11 @@ class CcpnNefReader(CcpnNefContent):
 
             atomCols = None
             for ii in range(itemLength):
+
+                # skip if there are no atoms defined in the columns - it is a results violationTable
+                if not f'chain_code_{ii + 1}' in _df:
+                    break
+
                 # add new columns - concatenate to give atom IDs to compare with restraintItems
                 atomCol = _df[f'chain_code_{ii + 1}'].map(str) + '.' + \
                           _df[f'sequence_code_{ii + 1}'].map(str) + '.' + \
@@ -5307,6 +5312,7 @@ class CcpnNefReader(CcpnNefContent):
                 # insert into the dataFrame
                 _df[f'atom{ii + 1}'] = atomCol
 
+                # build a set of pd.Series to add to the dataFrame
                 if atomCols is None:
                     atomCols = atomCol
                 else:
@@ -5317,8 +5323,8 @@ class CcpnNefReader(CcpnNefContent):
 
             # vset3 = [v for k, v in p1.groupby(['model_id'])]
             # pd.concat([v.reset_index()['violation'] for v in vset3], axis=1).agg(['sum', 'mean', 'min', 'max', lambda x : sum(x > 0.3), lambda x : sum(x > 0.3)], axis=1)
-
             # data.setDataParameter(run_id, _df)
+
             data.data = _df
 
     importers['ccpn_distance_restraint_violation'] = load_ccpn_restraint_violation

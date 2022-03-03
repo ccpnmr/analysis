@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-28 11:48:34 +0000 (Mon, February 28, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-03-03 13:48:41 +0000 (Thu, March 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -40,7 +40,7 @@ from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Restraint import Restraint
 from ccpn.core.RestraintTable import RestraintTable
-from ccpn.core.DataTable import DataTable
+from ccpn.core.ViolationTable import ViolationTable
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.DataFrameObject import DataFrameObject
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -54,7 +54,7 @@ from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.TableSorting import MultiColumnTableWidgetItem
 from ccpn.ui.gui.widgets.SettingsWidgets import ModuleSettingsWidget, \
-    RestraintTableSelectionWidget, SpectrumDisplaySelectionWidget, DataTableSelectionWidget
+    RestraintTableSelectionWidget, SpectrumDisplaySelectionWidget, ViolationTableSelectionWidget
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import makeIterableList
 import ccpn.ui.gui.modules.PyMolUtil as pyMolUtil
@@ -85,6 +85,11 @@ Headers = [HeaderRestraint, HeaderAtoms, HeaderMin, HeaderMax, HeaderMean, Heade
 
 ALL = '<Use all>'
 PymolScriptName = 'Restraint_Pymol_Template.py'
+_SPECTRUMDISPLAYS = 'SpectrumDisplays'
+_RESTRAINTTABLES = 'RestraintTables'
+_VIOLATIONTABLES = 'ViolationTables'
+_RESTRAINTTABLE = 'restraintTable'
+_VIOLATIONRESULT = 'violationResult'
 
 
 class RestraintAnalysisTableModule(CcpnModule):
@@ -125,7 +130,7 @@ class RestraintAnalysisTableModule(CcpnModule):
             self.current = None
 
         # add the settings widgets defined from the following orderedDict - test for refactored
-        settingsDict = OrderedDict((('SpectrumDisplays', {'label'   : '',
+        settingsDict = OrderedDict(((_SPECTRUMDISPLAYS, {'label'   : '',
                                                           'tipText' : '',
                                                           'callBack': None,  #self.restraintTablePulldown,
                                                           'enabled' : True,
@@ -134,9 +139,10 @@ class RestraintAnalysisTableModule(CcpnModule):
                                                           'kwds'    : {'texts'      : [],
                                                                        'displayText': [],
                                                                        'defaults'   : [],
-                                                                       'objectName' : 'SpectrumDisplaysSelection'},
+                                                                       'objectName' : 'SpectrumDisplaysSelection',
+                                                                       'minimumWidths':(180, 100, 100)},
                                                           }),
-                                    ('RestraintTables', {'label'   : '',
+                                    (_RESTRAINTTABLES, {'label'   : '',
                                                         'tipText' : '',
                                                         'callBack': None,  #self.restraintTablePulldown,
                                                         'enabled' : True,
@@ -145,18 +151,20 @@ class RestraintAnalysisTableModule(CcpnModule):
                                                         'kwds'    : {'texts'      : [],
                                                                      'displayText': [],
                                                                      'defaults'   : [],
-                                                                     'objectName' : 'RestraintTablesSelection'},
+                                                                     'objectName' : 'RestraintTablesSelection',
+                                                                       'minimumWidths':(180, 100, 100)},
                                                         }),
-                                    ('DataTables', {'label'   : '',
+                                    (_VIOLATIONTABLES, {'label'   : '',
                                                         'tipText' : '',
                                                         'callBack': None,
                                                         'enabled' : True,
                                                         '_init'   : None,
-                                                        'type'    : DataTableSelectionWidget,
+                                                        'type'    : ViolationTableSelectionWidget,
                                                         'kwds'    : {'texts'      : [],
                                                                      'displayText': [],
                                                                      'defaults'   : [],
-                                                                     'objectName' : 'RestraintTablesSelection'},
+                                                                     'objectName' : 'RestraintTablesSelection',
+                                                                       'minimumWidths':(180, 100, 100)},
                                                         }),
                                     # ('autoExpand', {'label'   : '',
                                     #                 'tipText' : '',
@@ -181,7 +189,8 @@ class RestraintAnalysisTableModule(CcpnModule):
                                                                      'range'    : (0.0, 1.0),
                                                                      'decimals' : 2,
                                                                      'step'     : 0.05,
-                                                                     'value'    : 0.3},
+                                                                     'value'    : 0.3,
+                                                                     'minimumWidths':(180, 100, 100)},
                                                         }),
                                     ('autoExpand', {'label'   : 'Auto-expand Groups',
                                                     'tipText' : 'Automatically expand/collapse groups on\nadding new restraintTable, or sorting.',
@@ -225,14 +234,12 @@ class RestraintAnalysisTableModule(CcpnModule):
         self._RATwidget = ModuleSettingsWidget(parent=self.settingsWidget, mainWindow=self.mainWindow,
                                                settingsDict=settingsDict,
                                                grid=(0, 0))
-        # self._displayListWidget = self._RATwidget.checkBoxes['SpectrumDisplays']['widget']
-        # self._restraintTable = self._RATwidget.checkBoxes['RestraintTables']['widget']
-        self._displayListWidget = self._RATwidget.getWidget('SpectrumDisplays')
-        self._restraintTable = self._RATwidget.getWidget('RestraintTables')
+
+        self._displayListWidget = self._RATwidget.getWidget(_SPECTRUMDISPLAYS)
+        self._restraintTable = self._RATwidget.getWidget(_RESTRAINTTABLES)
         self._restraintTable.listWidget.changed.connect(self._updateRestraintTables)
-        self._dataTable = self._RATwidget.getWidget('DataTables')
-        self._dataTable.listWidget.changed.connect(self._updateDataTables)
-        # self._expandSelector = self._RATwidget.checkBoxes['autoExpand']['widget']
+        self._outputTable = self._RATwidget.getWidget(_VIOLATIONTABLES)
+        self._outputTable.listWidget.changed.connect(self._updateOutputTables)
 
         self._meanLowerLimitSpinBox = self._RATwidget.checkBoxes['meanLowerLimit']['widget']
         self._autoExpandCheckBox = self._RATwidget.checkBoxes['autoExpand']['widget']
@@ -286,8 +293,8 @@ class RestraintAnalysisTableModule(CcpnModule):
         return self.restraintAnalysisTable.dataFrame
 
     @dataFrame.setter
-    def dataFrame(self, dataFrame):
-        self.restraintAnalysisTable.dataFrame = dataFrame
+    def dataFrame(self, value):
+        self.restraintAnalysisTable.dataFrame = value
 
     def _updateRestraintTables(self, *args):
         """Update the selected restraintTables
@@ -301,17 +308,17 @@ class RestraintAnalysisTableModule(CcpnModule):
 
         self.restraintAnalysisTable.updateRestraintTables(restraintTables)
 
-    def _updateDataTables(self, *args):
-        """Update the selected dataTables
+    def _updateOutputTables(self, *args):
+        """Update the selected outputTables
         """
-        dataTables = self._dataTable.getTexts()
-        if ALL in dataTables:
-            dataTables = self.project.dataTables
+        outputTables = self._outputTable.getTexts()
+        if ALL in outputTables:
+            outputTables = self.project.violationTables
         else:
-            dataTables = [self.project.getByPid(rList) for rList in dataTables]
-            dataTables = list(filter(None, dataTables))
+            outputTables = [self.project.getByPid(rList) for rList in outputTables]
+            outputTables = list(filter(None, outputTables))
 
-        self.restraintAnalysisTable.updateDataTables(dataTables)
+        self.restraintAnalysisTable.updateOutputTables(outputTables)
 
     def _updateAutoExpand(self, expand):
         # index = self._expandSelector.getIndex()
@@ -366,7 +373,7 @@ class RestraintAnalysisTableWidget(GuiTable):
         self._selectedPeakList = None
         kwds['setLayout'] = True  # Assure we have a layout with the widget
         self._restraintTables = []
-        self._dataTables = []
+        self._outputTables = []
 
         self._autoExpand = False
         self._meanLowerLimit = 0.0
@@ -468,10 +475,10 @@ class RestraintAnalysisTableWidget(GuiTable):
         self._restraintTables = restraintTables
         self._updateTable()
 
-    def updateDataTables(self, dataTables):
+    def updateOutputTables(self, outputTables):
         """Update the selected data lists from the parent module
         """
-        self._dataTables = dataTables
+        self._outputTables = outputTables
         self._updateTable()
 
     def _updateTable(self, useSelectedPeakList=True, peaks=None, peakList=None):
@@ -873,7 +880,9 @@ class RestraintAnalysisTableWidget(GuiTable):
                 ll = [(None, None)] * sum(maxCount)
                 head = 0
                 for pk, cc, maxcc in zip(pks, counts[lCount], maxCount):
-                    _res = [(res.pid, _atom) for res in (pkRestraints.get(pk.serial) or ()) if res.restraintTable == rl
+                    # ensure that the atoms are sorted so that they are matched correctly
+                    _res = [(res.pid, ' - '.join(sorted(_atom.split(' - '), key=universalSortKey)) if _atom else None)
+                            for res in (pkRestraints.get(pk.serial) or ()) if res.restraintTable == rl
                             for _atom in contribs[res]]
                     if _res:
                         ll[head:head + len(_res)] = _res
@@ -891,11 +900,12 @@ class RestraintAnalysisTableWidget(GuiTable):
             #                     for data in resList.structureData.data if resList.name == data.name
             #                     for k, viols in data.dataParameters.items() if k == 'results'}
 
-            # print(f'  {self._dataTables}')
+            # print(f'  {self._outputTables}')
             # get the dataSets that contain data with a matching 'result' name - should be violations
             violationResults = {resList: viols.data.copy() if viols is not None else None
                                 for resList in resLists
-                                for viols in self._dataTables if resList.pid == viols.getMetadata('restraintTable')
+                                for viols in self._outputTables
+                                if resList.pid == viols.getMetadata(_RESTRAINTTABLE) and viols.getMetadata(_VIOLATIONRESULT) is True
                                 }
 
             if violationResults:

@@ -29,19 +29,19 @@ Modify as you need and share your macros on the forum: https://www.ccpn.ac.uk/fo
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-28 11:41:02 +0100 (Mon, June 28, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-03-03 16:36:15 +0000 (Thu, March 03, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -76,6 +76,8 @@ CA = 'CA'
 CB = 'CB'
 C  = 'C'
 CH = 'CH'
+
+IsotopeCodes = {H:'1H', N:'15N',C:'13C'}
 #_________________________________________________________________________________________________
 
 nmrChainName = '@-' # use the default. Change this name to create a different one
@@ -121,7 +123,7 @@ Correct_CBCACONH_assignments = True      # Guess missing NmrAtom. eg. if CA and 
 # imports
 from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.ui.gui.widgets.MessageDialog import _stoppableProgressBar, showWarning
-from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks, assignAlphas,assignBetas
+from ccpn.core.lib.AssignmentLib import _assignNmrAtomsToPeaks as n2p
 from ccpn.util.Common import makeIterableList
 from collections import defaultdict
 import numpy as np
@@ -150,7 +152,14 @@ if setContours:
     if cbcaconh: cbcaconh.positiveContourBase, cbcaconh.negativeContourBase = cbcaconhContours[0],  cbcaconhContours[1]
 
 
-def _pickPeaks(peakList, doPos=True, doNeg=True, minDropFactor=0.1, estimateLineWidths=True, **regionToPick):
+def _assignNmrAtomsToPeaks(peaks, nmrAtoms):
+    with undoBlockWithoutSideBar():
+        with notificationEchoBlocking():
+            for na in nmrAtoms:
+                na._setIsotopeCode(IsotopeCodes.get(na.name[0], None))
+                n2p(peaks, [na])
+
+def _pickPeaks(peakList, regionToPick, doPos=True, doNeg=True, minDropFactor=0.1, estimateLineWidths=True, ):
     spectrum = peakList.spectrum
     # may create a peakPicker instance if not defined, subject to settings in preferences
     _peakPicker = spectrum.peakPicker
@@ -176,8 +185,6 @@ def pickPeaksHSQC():
         peaks = _pickPeaks(peakList=peakList,
                            regionToPick=HSQC_limits, doPos=True, doNeg=False,
                            minDropFactor=minDropFactor, estimateLineWidths=True)
-        # peaks = peakList.pickPeaksRegion(regionToPick=HSQC_limits, doPos=True, doNeg=False,
-        #                                  minDropFactor=minDropFactor,estimateLineWidths=True)
         return peaks
 
 
@@ -192,8 +199,8 @@ def addLabelsHSQC():
                 nmrResidue = nmrChain.fetchNmrResidue()
                 hNmrAtom = nmrResidue.fetchNmrAtom(name=H)
                 nNmrAtom = nmrResidue.fetchNmrAtom(name=N)
-                _assignNmrAtomsToPeaks([peak], [hNmrAtom, nNmrAtom])
-
+                peak.assignDimension(H, [hNmrAtom])
+                peak.assignDimension(N, [nNmrAtom])
 
 def _orderPeaksByHeight(peaks):
     """
@@ -263,8 +270,6 @@ def _pickAndAssign_HNCA(hnca,hsqcPosition, hsqc_nmrAtoms,nmrResidue, expectedPea
 
     hncaPeaks = _pickPeaks(peakList=hnca.peakLists[-1], regionToPick=regions, doPos=True, doNeg=False,
                            minDropFactor=minDropFactor)
-    # hncaPeaks = hnca.peakLists[-1].pickPeaksRegion(regionToPick=regions, doPos=True, doNeg=False,
-    #                                      minDropFactor=minDropFactor)
 
     _assignNmrAtomsToPeaks(hncaPeaks, hsqc_nmrAtoms)
     peaks = _orderPeaksByHeight(hncaPeaks)
@@ -276,8 +281,6 @@ def _pickAndAssign_HNCOCA(hncoca,hsqcPosition, hsqc_nmrAtoms, m1nmrResidue, expe
 
     hncocaPeaks = _pickPeaks(peakList=hncoca.peakLists[-1], regionToPick=regions, doPos=True, doNeg=False,
                              minDropFactor=minDropFactor)
-    # hncocaPeaks = hncoca.peakLists[-1].pickPeaksRegion(regionToPick=regions, doPos=True, doNeg=False,
-    #                                                    minDropFactor=minDropFactor)
 
     peaks = _orderPeaksByHeight(hncocaPeaks)
     m1nmrAtomCA = m1nmrResidue.fetchNmrAtom(CA)
@@ -289,8 +292,6 @@ def _pickAndAssign_CBCACONH(cbcaconh, hsqcPosition, hsqc_nmrAtoms, m1nmrResidue,
 
     cbcaconhPeaks = _pickPeaks(peakList=cbcaconh.peakLists[-1], regionToPick=regions, doPos=True, doNeg=False,
                                minDropFactor=minDropFactor)
-    # cbcaconhPeaks = cbcaconh.peakLists[-1].pickPeaksRegion(regionToPick=regions, doPos=True, doNeg=False,
-    #                                                    minDropFactor=minDropFactor)
 
     peaks = _orderPeaksByHeight(cbcaconhPeaks)
      # cannot guess yet which one is CA or CB  so give it a C !
@@ -302,7 +303,6 @@ def _pickAndAssign_HNCACB(hncacb, hsqcPosition, hsqc_nmrAtoms, nmrResidue , expe
     regions = getRegions(hsqcPosition, HNCACB_limits)
 
     hncacbPeaks = _pickPeaks(peakList=hncacb.peakLists[-1], regionToPick=regions, doPos=True, doNeg=True, minDropFactor=minDropFactor)
-    # hncacbPeaks = hncacb.peakLists[-1].pickPeaksRegion(regionToPick=regions, doPos=True, doNeg=True, minDropFactor=minDropFactor)
 
     _assignNmrAtomsToPeaks(hncacbPeaks, hsqc_nmrAtoms)
     posPeaks = [p for p in hncacbPeaks if p.height > 0]

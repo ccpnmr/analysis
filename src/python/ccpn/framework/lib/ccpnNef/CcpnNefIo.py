@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-03 13:48:41 +0000 (Thu, March 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-03 19:09:31 +0000 (Thu, March 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -3933,6 +3933,9 @@ class CcpnNefReader(CcpnNefContent):
         else:
             return
 
+        # restrict the search to the names in the current structureData
+        frameList = [fr for fr in frameList if fr.get('ccpn_structuredata_name') == saveFrame.get('ccpn_structuredata_name')]
+
         frameNames = [_saveFrameNameFromCategory(frame).framecode for frame in frameList]
         # get the list of just the subName from the saveFrame
         _shortNames = [_saveFrameNameFromCategory(frame).subname for frame in frameList]
@@ -4875,20 +4878,21 @@ class CcpnNefReader(CcpnNefContent):
         # Make main object
         sData = self.fetchStructureData(sDataName)
 
-        # need to fix the names here... cannot contain '.'
-        previous = sData.getRestraintTable(name)
-        if previous is not None:
-            # NEF but NOT CCPN has separate namespaces for different restraint types,
-            # so we may get name clashes
-            # We should preserve NEF names, but it cannot be helped.
-            if not name.startswith(namePrefix):
-                # Add prefix for disambiguation since NEF but NOT CCPN has separate namespaces
-                # for different constraint types
-                name = namePrefix + name
-                while sData.getRestraintTable(name) is not None:
-                    # This way we get a unique name even in the most bizarre cases
-                    name = '`%s`' % name
+        # # need to fix the names here... cannot contain '.'
+        # previous = sData.getRestraintTable(name)
+        # if previous is not None:
+        #     # NEF but NOT CCPN has separate namespaces for different restraint types,
+        #     # so we may get name clashes
+        #     # We should preserve NEF names, but it cannot be helped.
+        #     if not name.startswith(namePrefix):
+        #         # Add prefix for disambiguation since NEF but NOT CCPN has separate namespaces
+        #         # for different constraint types
+        #         name = namePrefix + name
+        #         while sData.getRestraintTable(name) is not None:
+        #             # This way we get a unique name even in the most bizarre cases
+        #             name = '`%s`' % name
 
+        # create a new restraintTable
         parameters['name'] = name
         parameters.pop('serial', 1)  # not required
         result = sData.newRestraintTable(**parameters)
@@ -5179,11 +5183,12 @@ class CcpnNefReader(CcpnNefContent):
             # dataSet = project.newDataSet()
             dataSet = self.fetchStructureData(sDataName)
 
-        # read list
-        parameters['name'] = name
-
         # create a new violationTable
-        result = dataSet.getViolationTable(name) or dataSet.newViolationTable(name)
+        parameters['name'] = name
+        parameters.pop('serial', 1)  # not required
+        result = dataSet.newViolationTable(name)
+        # # create a new violationTable
+        # result = dataSet.getViolationTable(name) or dataSet.newViolationTable(name)
 
         # Load loops, with object as parent
         for loopName in loopNames:

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-28 17:35:34 +0000 (Mon, February 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-03 19:09:32 +0000 (Thu, March 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -285,6 +285,7 @@ class NefDictFrame(Frame):
         """
         # self.nefTreeView.itemClicked.connect(self._nefTreeClickedCallback)
         self.nefTreeView.mouseRelease.connect(self._mouseReleaseCallback)
+        self.nefTreeView.itemChanged.connect(self._mouseChecked)
 
     def _setWidgets(self):
         """Set up the unpopulated widgets for the frame
@@ -1102,6 +1103,13 @@ class NefDictFrame(Frame):
 
         return values
 
+    @staticmethod
+    def _getSelectedChildItems(parent):
+        selection = parent.selectionModel().selectedIndexes()
+        newItms = [parent.itemFromIndex(itm) for itm in selection]
+        values = [(itm, itm.data(1, 0)) for itm in newItms if itm.data(1, 0)]
+
+        return values
     def _getAllChildren(self):
         # grab the tree state
         items = []
@@ -1439,10 +1447,15 @@ class NefDictFrame(Frame):
                 if saveFrame.get('sf_category') in ['ccpn_parameter', ]:
                     raise ValueError(f'{DATANAME} cannot be empty')
                 else:
+                    if self._checkAlreadyInStructureData(None, item, itemName):
+                        return
                     del saveFrame[DATANAME]
 
             else:
                 _oldName = saveFrame.get(DATANAME) or ''
+                _newName = str(_edit.newVal)
+                if self._checkAlreadyInStructureData(_newName, item, itemName):
+                    return
                 saveFrame[DATANAME] = str(_edit.newVal)
 
                 # rename itemName if a ccpn_parameter
@@ -1460,6 +1473,14 @@ class NefDictFrame(Frame):
         self._setCheckedItem(itemName, itemParentName)
         self._updateTables()
 
+    def _checkAlreadyInStructureData(self, _newName, item, itemName):
+        if _newName in self._structureData:
+            _, _, _, _, ccpnClassName = item.data(1, 0)
+            _itmPid = Pid._join(ccpnClassName, _newName or '', itemName)
+            if (_itmPid in self._structureData[_newName]):
+                showWarning('Selecting StructureData', f"'{itemName}' already exists in '{_newName}'")
+                return True
+
     def _selectStructureDataParentId(self, values=None, pulldownList=None, parent=None):
         """Handle clicking rename structureData button
         """
@@ -1471,15 +1492,16 @@ class NefDictFrame(Frame):
         if not newName:
             return
 
-        _children = self._getSelectedChildren(parent)
-        for (itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName) in _children:
+        _children = self._getSelectedChildItems(parent)
+        for itm, (itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName) in _children:
 
             if parentGroup in ['restraintTables', 'violationTables']:
                 _oldName = saveFrame.get(DATANAME) or ''
+                if self._checkAlreadyInStructureData(newName, itm, itmName):
+                    continue
                 saveFrame[DATANAME] = newName
 
                 # TODO:ED - check this
-
                 # if saveFrame.get('sf_category') in ['ccpn_parameter', ]:
                 #     if _edit.itemName and _oldName and _edit.itemName.startswith(_oldName):
                 #         _edit.itemName = _edit.newVal + _edit.itemName[len(_oldName):]
@@ -1506,11 +1528,13 @@ class NefDictFrame(Frame):
         if not newName:
             return
 
-        _children = self._getSelectedChildren(parent)
-        for (itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName) in _children:
+        _children = self._getSelectedChildItems(parent)
+        for itm, (itmName, saveFrame, parentGroup, _pHandler, _ccpnClassName) in _children:
 
             if parentGroup in ['restraintTables', 'violationTables']:
                 _oldName = saveFrame.get(DATANAME) or ''
+                if self._checkAlreadyInStructureData(newName, itm, itmName):
+                    continue
                 saveFrame[DATANAME] = newName
 
                 # TODO:ED - check this
@@ -1678,15 +1702,15 @@ class NefDictFrame(Frame):
         _parent = self.nefTreeView.findSection(parentName)
         if _parent:
             # should be a single item
-            newItem = self.nefTreeView.findSection(newName or itemName, _parent)
-            if newItem:
+            if (newItem := self.nefTreeView.findSection(newName or itemName, _parent)):
                 newItem = newItem[0] if isinstance(newItem, list) else newItem
                 self._nefTreeClickedCallback(newItem, 0)
 
     def _setCheckedItem(self, itemName, parentName):
 
-        _parent = self.nefTreeView.findSection(parentName)
-        if _parent:
+        if (_parent := self.nefTreeView.findSection(parentName)):
+            _parent = _parent[0] if isinstance(_parent, list) else _parent
+
             # should be a single item
             itm = self.nefTreeView.findSection(itemName, _parent)
             if itm:
@@ -2804,6 +2828,16 @@ class NefDictFrame(Frame):
     #     oldItms = [self.nefTreeView.itemFromIndex(itm).data(0, 0) for ind in [ii for ii in deselected] for itm in ind.indexes()]
     #     print(f'selected    - {newItms}')
     #     print(f'deselected  - {oldItms}')
+
+    def _mouseChecked(self, item, column: int) -> None:
+        """Check what has been checked and update other check boxes as required
+        """
+        if item.checkState(0) == QtCore.Qt.Checked:
+            if (_data := item.data(1, 0)):
+                itemName, saveFrame, parentGroup, pHandler, ccpnClassName = _data
+                if parentGroup in ['restraintTables']:
+                    # automatically check the restraintLinks group
+                    self._setCheckedItem('restraintLinks', 'restraintLinks')
 
     def _mouseReleaseCallback(self):
         """Handle multi-selection when releasing the mouse

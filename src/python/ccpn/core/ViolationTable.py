@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-28 11:47:09 +0000 (Mon, February 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-03 19:09:31 +0000 (Thu, March 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -249,6 +249,21 @@ class ViolationTable(AbstractWrapperObject):
         """Rename ViolationTable, changing its name and Pid."""
         return self._rename(value)
 
+    def _rename(self, value: str):
+        """Generic rename method that individual classes can use for implementation
+        of their rename method to minimises code duplication
+        """
+        # validate the name from the parent structureData
+        name = self._uniqueName(project=self.structureData, name=value)
+
+        # rename functions from here
+        oldName = self.name
+        self._oldPid = self.pid
+
+        self._wrappedData.name = name
+
+        return (oldName,)
+
     @classmethod
     def _restoreObject(cls, project, apiObj):
         """Restore the object and update ccpnInternalData as required
@@ -299,6 +314,7 @@ def _newViolationTable(self: StructureData, name: str = None, data: Optional[Vio
         else:
             raise RuntimeError(f'Unable to generate new ViolationTable: data not of type {ViolationFrame}, pd.DataFrame or None')
 
+    # get unique name from the parent structureData
     name = ViolationTable._uniqueName(project=self, name=name)
 
     apiParent = self._wrappedData

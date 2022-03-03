@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-01 19:04:25 +0000 (Tue, March 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-03 16:41:37 +0000 (Thu, March 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,7 @@ from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelAB
 from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import CSMInputFrame, CSMOutputFrame, CSMBindingOutputFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
-
+from ccpn.core.lib.Pid import createPid
 
 ########################################################################################################################
 ####################################       Minimisers     ##############################################################
@@ -67,7 +67,7 @@ class Binding1SiteMinimiser(MinimiserModel):
     """
 
     FITTING_FUNC = lf.oneSiteBinding_func
-    MODELNAME = 'Binding_1_Site_Model'
+    MODELNAME = '1_Site_Binding_Model'
 
     def __init__(self, independent_vars=['x'], prefix='', nan_policy='raise', **kwargs):
         kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
@@ -170,7 +170,9 @@ class DeltaDeltaShiftsCalculation():
             atomFiltered = grouppedDF[grouppedDF[sv.ATOM_NAME].isin(_filteringAtoms)]   ## filter by the specific atoms of interest
             seriesValues4residue = atomFiltered[inputData.valuesHeaders].values.T       ## take the series values in axis 1 and create a 2D array. e.g.:[[8.15 123.49][8.17 123.98]]
             deltaDeltas = DeltaDeltaShiftsCalculation._calculateDeltaDeltas(seriesValues4residue, _alphaFactors)  ## get the deltaDeltas
-            outputDataDict[sv._ROW_UID].append(grouppedDF[sv._ROW_UID])
+            newUid = grouppedDF[grouppingHeaders].values[0].astype('str')
+            newUid = createPid('NR', *newUid)
+            outputDataDict[sv._ROW_UID].append(newUid)
             for i, assignmentHeader in enumerate(grouppingHeaders):                     ## build new row for the output dataFrame as DefaultDict.
                 outputDataDict[assignmentHeader].append(list(assignmentValues)[i])      ## add common assignments definitions
             outputDataDict[sv.ATOM_NAMES].append(','.join(_filteringAtoms))             ## add atom names
@@ -201,7 +203,6 @@ class OneSiteBindingModel(FittingModelABC):
     Description = ' ... '
     References = '''
                     1) Eq. (x) M.P. Williamson. Progress in Nuclear Magnetic Resonance Spectroscopy 73, 1–16 (2013).
-                    
                   '''
 
     Minimiser = Binding1SiteMinimiser
@@ -226,11 +227,11 @@ class OneSiteBindingModel(FittingModelABC):
             try:
                 result = model.fit(yArray, params, x=xArray)
             except:
-                print('Failed:', ix)
+                getLogger().warning(f'Fitting Failed for: {row[sv._ROW_UID]} data.')
             outputDataDict[sv._ROW_UID].append(row[sv._ROW_UID])
             for i, assignmentHeader in enumerate(inputData.assignmentHeaders[:-1]):  ## build new row for the output dataFrame as DefaultDict.
                 outputDataDict[assignmentHeader].append(row[assignmentHeader])  ## add common assignments definitions
-            outputDataDict['ModelName'].append(model.name)
+            outputDataDict['ModelName'].append(model.MODELNAME)
             for nn, vv in zip([sv.MINIMISER_METHOD, sv.R2, sv.CHISQUARE, sv.REDUCEDCHISQUARE, sv.AKAIKE, sv.BAYESIAN],
                           ['method', 'r2', 'chisqr','redchi', 'aic', 'bic']):
                 outputDataDict[nn].append(getattr(result, vv, None))

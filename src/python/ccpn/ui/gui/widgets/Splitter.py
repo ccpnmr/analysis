@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-03 16:50:20 +0000 (Thu, March 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-03 23:42:05 +0000 (Thu, March 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ from PyQt5 import QtCore, QtWidgets
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Font import getFontHeight
+from ccpn.util.Path import aPath
 
 
 class Splitter(QtWidgets.QSplitter, Base):
@@ -49,14 +50,16 @@ class Splitter(QtWidgets.QSplitter, Base):
         self.setChildrenCollapsible(collapsible)
         self.doResize = False
 
-        _height = 5         #(getFontHeight(size='MEDIUM') or 16) // 3
+        _height = min(5, (getFontHeight(size='SMALL') or 15) // 3)
         _vName = Icon('icons/vertical-split')
         _hName = Icon('icons/horizontal-split')
+        path1 = aPath(_vName._filePath).as_posix()
+        path2 = aPath(_hName._filePath).as_posix()
 
         self.setStyleSheet("""QSplitter {background-color: transparent; }
                             QSplitter::handle:vertical {background-color: transparent; height: %dpx; image: url(%s); }
-                            QSplitter::handle:horizontal {background-color: transparent; height: %dpx; image: url(%s); }
-                            """ % (_height, _vName._filePath, _height, _hName._filePath))
+                            QSplitter::handle:horizontal {background-color: transparent; width: %dpx; image: url(%s); }
+                            """ % (_height, path1, _height, path2))
 
     def createHandle(self):
 

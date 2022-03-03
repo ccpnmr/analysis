@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-10 23:01:37 +0000 (Thu, February 10, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-03-03 16:41:10 +0000 (Thu, March 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -879,8 +879,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     def enterEvent(self, event):
         if self.mainWindow:
             if self.mainWindow.application.preferences.general.focusFollowsMouse:
-                if not self.area._isNameEditing():
-                    self.setFocus()
+                if self.area is not None:
+                    if not self.area._isNameEditing():
+                        self.setFocus()
                 self.label.setModuleHighlight(True)
         super().enterEvent(event)
 

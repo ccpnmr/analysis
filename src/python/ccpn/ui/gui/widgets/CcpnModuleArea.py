@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-03 23:42:05 +0000 (Thu, March 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-03 23:47:27 +0000 (Thu, March 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -77,7 +77,7 @@ class TempAreaWindow(GuiWindow, MainWindow):
         # install handler to resize when moving between displays
         self.window().windowHandle().screenChanged.connect(self._screenChangedEvent)
 
-        _height = min(5, (getFontHeight(size='SMALL') or 15) // 3)
+        _height = max(5, (getFontHeight(size='SMALL') or 15) // 3)
         _vName = Icon('icons/vertical-split')
         _hName = Icon('icons/horizontal-split')
         path1 = aPath(_vName._filePath).as_posix()

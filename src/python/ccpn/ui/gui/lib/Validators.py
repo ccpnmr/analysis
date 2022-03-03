@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-25 19:08:07 +0000 (Fri, February 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-03 13:47:41 +0000 (Thu, March 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -88,18 +88,19 @@ class LineEditValidator(QtGui.QValidator):
 
 class LineEditValidatorCoreObject(QtGui.QValidator):
     """Validator to restrict input to non-whitespace characters
-    and restrict input to names not already in the core object klass
+    and restrict input to the names not already in the core object klass
     """
 
-    def __init__(self, parent=None, project=None, klass=None, allowSpace=True, allowEmpty=True):
+    def __init__(self, parent=None, target=None, klass=None, allowSpace=True, allowEmpty=True):
         super().__init__(parent=parent)
 
-        self.baseColour = self.parent().palette().color(QtGui.QPalette.Base)
+        # self.baseColour = self.parent().palette().color(QtGui.QPalette.Base)
+        self.baseColour = QtGui.QColor('#ffffff')  # why the wrong colour?
         self._parent = parent
         self._allowSpace = allowSpace
         self._allowEmpty = allowEmpty
         self._pluralLinkName = klass._pluralLinkName
-        self._project = project
+        self._target = target
 
     def _isValidInput(self, value):
         notAllowedSequences = {'Illegal_Characters': '[^A-Za-z0-9_ ]+',
@@ -115,8 +116,8 @@ class LineEditValidatorCoreObject(QtGui.QValidator):
                 return False
 
         # check klass
-        if self._pluralLinkName and self._project:
-            _found = [obj.name for obj in getattr(self._project, self._pluralLinkName, ())]
+        if self._pluralLinkName and self._target:
+            _found = [obj.name for obj in getattr(self._target, self._pluralLinkName, ())]
             if value in _found:
                 return False
 

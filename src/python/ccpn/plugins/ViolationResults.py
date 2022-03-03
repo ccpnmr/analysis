@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-25 19:08:07 +0000 (Fri, February 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-03 13:47:41 +0000 (Thu, March 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,8 +29,9 @@ __date__ = "$Date: 2022-02-25 16:03:34 +0100 (Fri, February 25, 2022) $"
 import pandas as pd
 from PyQt5 import QtWidgets
 
-from ccpn.core.DataTable import DataTable
+from ccpn.core.ViolationTable import ViolationTable
 from ccpn.core.lib import Pid
+from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame
@@ -50,11 +51,15 @@ from ccpn.util.AttrDict import AttrDict
 LineEditsMinimumWidth = 195
 DEFAULTSPACING = 3
 DEFAULTMARGINS = (14, 14, 14, 14)
-DEFAULT_RUNNAME = 'run'
+DEFAULT_RUNNAME = 'output'
 
 # Set some tooltip texts
 RUNBUTTON = 'Run'
 _help = {RUNBUTTON: 'Run the plugin', }
+_RESTRAINTTABLE = 'restraintTable'
+_VIOLATIONTABLE = 'violationTable'
+_VIOLATIONRESULT = 'violationResult'
+_RUNNAME = 'runName'
 
 
 class ViolationResultsGuiPlugin(PluginModule):
@@ -102,39 +107,37 @@ class ViolationResultsGuiPlugin(PluginModule):
         # add contents to the scroll frame
         parent = self._scrollFrame
         row = 0
-        Label(parent, text='Calculate Violation Results dataTable', bold=True, grid=(row, 0))
+        Label(parent, text='Calculate Violation Results', bold=True, grid=(row, 0))
 
         row += 1
         self._rTable = RestraintTablePulldown(parent=parent,
                                               mainWindow=self.mainWindow,
+                                              labelText='Restraint Table',
                                               grid=(row, 0), gridSpan=(1, 2),
                                               showSelectName=True,
-                                              minimumWidths=(150, 100),
+                                              minimumWidths=(250, 100),
                                               sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
                                               callback=self._selectRTableCallback)
 
         row += 1
         self._vTable = PulldownListCompoundWidget(parent=parent,
                                                   mainWindow=self.mainWindow,
-                                                  labelText="Violation Tables",
+                                                  labelText="Source Violation Tables",
                                                   grid=(row, 0), gridSpan=(1, 2),
-                                                  minimumWidths=(150, 100),
+                                                  minimumWidths=(250, 100),
                                                   sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
                                                   callback=None)
 
         row += 1
-        self._dTable = EntryCompoundWidget(parent=parent,
+        self._outputName = EntryCompoundWidget(parent=parent,
                                            mainWindow=self.mainWindow,
-                                           labelText="Results Name",
+                                           labelText="Output Violation Table Name",
                                            grid=(row, 0), gridSpan=(1, 2),
-                                           minimumWidths=(150, 100),
+                                           minimumWidths=(250, 100),
                                            sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
                                            callback=None,
                                            compoundKwds={'backgroundText': '> Enter name <'},
                                            )
-        _validator = LineEditValidatorCoreObject(parent=self._dTable.entry, project=self.project, klass=DataTable,
-                                                 allowSpace=False, allowEmpty=False)
-        self._dTable.entry.setValidator(_validator)
 
         row += 1
         texts = [RUNBUTTON]
@@ -158,7 +161,7 @@ class ViolationResultsGuiPlugin(PluginModule):
         """
         _rTable = self.project.getByPid(self._rTable.getText())
         _vTable = self.project.getByPid(self._vTable.getText())
-        _runName = self._dTable.getText()
+        _runName = self._outputName.getText()
 
         if not (_rTable and _vTable):
             showWarning('Violation Plugin', 'Please select from the pulldowns')
@@ -166,9 +169,9 @@ class ViolationResultsGuiPlugin(PluginModule):
             showWarning('Violation Plugin', 'Please select output dataTable name')
 
         else:
-            self.obj.restraintTable = _rTable
-            self.obj.violationTable = _vTable
-            self.obj.runName = _runName
+            self.obj[_RESTRAINTTABLE] = _rTable
+            self.obj[_VIOLATIONTABLE] = _vTable
+            self.obj[_RUNNAME] = _runName
 
             if (result := self.plugin.run(**self.obj)):
                 self._populate(name=result.name)
@@ -180,15 +183,22 @@ class ViolationResultsGuiPlugin(PluginModule):
         if firstItemName:
             # set the item in the pulldown
             self._rTable.select(firstItemName)
-        self._dTable.setText(name or DEFAULT_RUNNAME)
-        self._dTable.entry.validator().resetCheck()
+        self._outputName.setText(name or DEFAULT_RUNNAME)
+        self._selectRTableCallback(firstItemName)
 
     def _selectRTableCallback(self, pid):
         """Handle the callback from the restraintTable selection
         """
-        if self.project.getByPid(pid):
-            _texts = [''] + [vt.pid for vt in self.project.violationTables if vt.getMetadata('restraintTable') == pid]
+        if (resTable := self.project.getByPid(pid)):
+            _texts = [''] + [vt.pid for vt in self.project.violationTables
+                             if vt.getMetadata(_RESTRAINTTABLE) == pid and vt.getMetadata(_VIOLATIONRESULT) is not True]
             self._vTable.modifyTexts(texts=_texts)
+
+            # set validator to check names in the parent structureData
+            _validator = LineEditValidatorCoreObject(parent=self._outputName.entry, target=resTable.structureData, klass=ViolationTable,
+                                                     allowSpace=False, allowEmpty=False)
+            self._outputName.entry.setValidator(_validator)
+            self._outputName.entry.validator().resetCheck()
 
 
 class ViolationResultsPlugin(Plugin):
@@ -218,10 +228,10 @@ class ViolationResultsPlugin(Plugin):
         self._logger('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 
         # check the parameters
-        if not (restraintTable := kwargs.get('restraintTable')):
+        if not (restraintTable := kwargs.get(_RESTRAINTTABLE)):
             self._logger('ERROR:   RestraintTable not specified')
             return
-        if not (violationTable := kwargs.get('violationTable')):
+        if not (violationTable := kwargs.get(_VIOLATIONTABLE)):
             self._logger('ERROR:   ViolationTable not specified')
             return
         _df = violationTable.data
@@ -275,8 +285,11 @@ class ViolationResultsPlugin(Plugin):
             # atoms = models[0]['atom1'].map(str) + ' - ' + models[0]['atom2'].map(str)
 
             # remove the indexing for the next concat
-            atoms = models[0]['atoms'].reset_index(drop=True)
+            _atoms = models[0]['atoms'].reset_index(drop=True)
             average.reset_index(drop=True)
+
+            # ensure that the atoms in each cell
+            atoms = pd.Series([' - '.join(sorted(st.split(' - '), key=universalSortKey)) if st else None for st in list(_atoms)])
 
             self._logger('**** atoms *****')
             self._logger(str(atoms))
@@ -291,16 +304,16 @@ class ViolationResultsPlugin(Plugin):
             result.columns = ('RestraintPid', 'Atoms', 'Min', 'Max', 'Mean', 'STD', 'Count>0.3', 'Count>0.5')
 
             # put into a new dataTable
-            _data = self.project.newDataTable(name=kwargs.get('runName'))
-            _data.setMetadata('restraintTable', restraintTable.pid)
-            _data.setMetadata('violationResult', True)
-            _data.data = result
+            output = restraintTable.structureData.newViolationTable(name=kwargs.get(_RUNNAME))
+            output.setMetadata(_RESTRAINTTABLE, restraintTable.pid)
+            output.setMetadata(_VIOLATIONRESULT, True)
+            output.data = result
 
             self._logger(f'\n input restraintTable:    {restraintTable.pid}')
             self._logger(f' input violationTable:    {violationTable.pid}\n')
-            self._logger(f' output dataTable:        {_data.name}\n')
+            self._logger(f' output violationTable:   {output.name}\n')
 
-            return _data
+            return output
 
         else:
             self._logger('ERROR:   violationTable contains no models')

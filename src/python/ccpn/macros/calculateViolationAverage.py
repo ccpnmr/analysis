@@ -7,6 +7,13 @@ import numpy as np
 from ccpn.core.Restraint import Restraint
 from ccpn.core.lib import Pid
 
+
+_RESTRAINTTABLE = 'restraintTable'
+_VIOLATIONTABLE = 'violationTable'
+_VIOLATIONRESULT = 'violationResult'
+_RUNNAME = 'runName'
+DEFAULT_RUNNAME = 'output'
+
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', 7)
 
@@ -24,7 +31,7 @@ _results = {}
 
 violationDataItems = [(restraintTable, vTable.data) for restraintTable in project.restraintTables
                       for vTable in project.violationTables
-                      if restraintTable.pid == vTable.getMetadata('restraintTable')]
+                      if restraintTable.pid == vTable.getMetadata(_RESTRAINTTABLE)]
 
 print(f'Available data containing violationLists:')
 for (restraintTable, _df) in violationDataItems:
@@ -93,10 +100,10 @@ for (restraintTable, _df) in violationDataItems:
         result.columns = ('RestraintPid', 'Atoms', 'Min', 'Max', 'Mean', 'STD', 'Count>0.3', 'Count>0.5')
 
         # put into a new dataTable
-        _data = project.newDataTable(name=restraintTable.name)
-        _data.setMetadata('restraintTable', restraintTable.pid)
-        _data.setMetadata('violationResult', True)
-        _data.data = result
+        output = restraintTable.structureData.newDataTable(name=DEFAULT_RUNNAME)
+        output.setMetadata(_RESTRAINTTABLE, restraintTable.pid)
+        output.setMetadata(_VIOLATIONRESULT, True)
+        output.data = result
 
         if restraintTable in _results:
             print('   Already found')

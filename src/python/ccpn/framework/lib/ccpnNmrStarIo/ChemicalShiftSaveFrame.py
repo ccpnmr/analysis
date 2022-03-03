@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-01 18:02:32 +0000 (Tue, March 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-03 16:36:26 +0000 (Thu, March 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,8 @@ from ccpn.util.nef.StarIo import NmrDataBlock, NmrSaveFrame, NmrLoop, parseNmrSt
 from ccpn.util.nef.GenericStarParser import PARSER_MODE_STANDARD, LoopRow
 from ccpn.framework.lib.ccpnNmrStarIo.SaveFrameABC import SaveFrameABC
 
-from sandbox.Geerten.NTdb.NTdbLib import ISMETHYL, ISMETHYLENE, getNefMappingDict
+from sandbox.Geerten.NTdb.NTdbLib import ISMETHYL, ISMETHYLENE, ISAROMATIC, getNefMappingDict
+from sandbox.Geerten.NTdb.NTdbDefs import getNTdbDefs
 
 
 class ChemicalShiftSaveFrame(SaveFrameABC):
@@ -61,6 +62,7 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
     _COMMENT_TAG = 'details'
 
     _nefMappingDict = getNefMappingDict()
+    _ntDefs = getNTdbDefs()
 
     @property
     def chemicalShifts(self) ->list :
@@ -70,63 +72,124 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
             return []
         return _loop.data
 
-    def _newChemicalShift(self, rowIndx, chemShiftList):
-        """Use chemShift to make a new (v3) chemicalShift in chemShiftList
+    def _parseChemicalShiftRow(self, csRow:LoopRow):
         """
+        Parse the chemical shift row and assign attributes for subsequent processing
+        :param csRow: a LoopRow instance
+        """
+        csRow.value = float(csRow.get(self._VALUE_TAG))
+        csRow.valueError = float(csRow.get(self._VALUE_ERROR_TAG))
+        figureOfMerit = csRow.get(self._FIGURE_OF_MERIT_TAG)
+        csRow.figureOfMerit = float(figureOfMerit) if figureOfMerit is not None else 1.0
+
+        csRow.sequenceCode = str(csRow.get(self._SEQUENCE_CODE_TAG))
+        csRow.residueType = str(csRow.get(self._RESIDUE_TYPE_TAG))
+        csRow.isotopeCode = '%s%s' % (csRow.get(self._ISOTOPE_TAG_1), csRow.get(self._ISOTOPE_TAG_2))
+        csRow.atomName = str(csRow.get(self._ATOM_NAME_TAG))
+        csRow.ambiguityCode = int(csRow.get(self._AMBIGUITY_CODE))
+
+        # convert atomName to NEF;
+        csRow.nefResidueName, csRow.nefAtomName, csRow.specialType = self._nefMappingDict.get((csRow.residueType, csRow.atomName), (None, None, None))
+
+        csRow.comment = csRow.get(self._COMMENT_TAG)
+
+        # (try to) get the NTdb definition for this residue, atom
+        csRow.ntDef = self._ntDefs.getDef((self.residueType, self.atomName))
+
+    def _isSameResidue(self, row1, row2) -> bool:
+        """
+        :param row1:
+        :param row2:
+        :return: True if row1 and row2 relate to the same residue
+        """
+        return row1.residueType == row2.residueType and \
+               row1.sequenceCode == row2.sequenceCode
+
+    def _newChemicalShift(self, rowIndx, chemShiftList) -> int:
+        """Use chemShift to make a new (v3) chemicalShift in chemShiftList
+        If need be: look back or look ahead
+        :param rowIndx: index of row to process
+        :param chemShiftList: ChemicalShifList instance to generate new ChemicalShift
+        :return index of next row to process
+        """
+        _previousRow = self.chemicalShifts[rowIndx-1] if rowIndx > 0 else None
+
         _row = self.chemicalShifts[rowIndx]
-        rowIndx += 1 # Now points to next row; in some case incremented further, i.e. skipping a row
-        _nextRow = self.chemicalShifts[rowIndx] if rowIndx < len(self.chemicalShifts) else None
+
+        nextRowIndx = rowIndx + 1 # Now points to next row; in some case incremented further, i.e. skipping a row
+        _nextRow = self.chemicalShifts[nextRowIndx] if nextRowIndx < len(self.chemicalShifts) else None
 
         project = chemShiftList.project
 
-        value = float(_row.get(self._VALUE_TAG))
-        valueError = float(_row.get(self._VALUE_ERROR_TAG))
-        figureOfMerit = _row.get(self._FIGURE_OF_MERIT_TAG)
-        figureOfMerit = float(figureOfMerit) if figureOfMerit is not None else 1.0
-
         chainCode = chemShiftList.name
-        sequenceCode = str(_row.get(self._SEQUENCE_CODE_TAG))
-        residueType = str(_row.get(self._RESIDUE_TYPE_TAG))
-        isotopeCode = '%s%s' % (_row.get(self._ISOTOPE_TAG_1), _row.get(self._ISOTOPE_TAG_2))
-        atomName = str(_row.get(self._ATOM_NAME_TAG))
-        ambiguityCode = int(_row.get(self._AMBIGUITY_CODE))
+        atomName = _row.atomName
 
-        # convert atomName to NEF; handle ambiguity code
-        residueName, nefName, specialType = self._nefMappingDict.get((residueType, atomName), (None, None, None))
-        if specialType is None and ambiguityCode > 1:
-            getLogger().warning(f'No provisions for ({sequenceCode},{atomName}) with ambiguity code {ambiguityCode}')
+        # process the ambiguityCode and see if atomName needs changing
+        if _row.specialType is None and _row.ambiguityCode > 1:
+            getLogger().warning(f'No provisions for ({_row.residueType},{_row.atomName}) with ambiguity code {_row.ambiguityCode}')
 
-        elif specialType == ISMETHYL:
-            if nefName is None:
-                return rowIndx
-            atomName = nefName
+        elif _row.specialType == ISMETHYL:
+            if _row.nefAtomName is None:
+                # This is the second or third proton of a methyl; just skip as we handled it for the first one
+                return nextRowIndx  # already pointing to the next row
+            atomName = _row.nefAtomName
 
-        elif specialType == ISMETHYLENE:
-            if ambiguityCode == 1:
-                # unfortunately, methylenes with identical chemical shifts have ambiguity code 1
-                if _nextRow is not None:
-                    nextValue = float(_nextRow.get(self._VALUE_TAG))
-                    if nextValue == value:
-                        atomName = nefName.replace('x','%').replace('y','%')
-                        rowIndx += 1
-            elif ambiguityCode == 2 and nefName is not None:
-                atomName = nefName
+        elif _row.specialType == ISMETHYLENE:
+            if _row.ambiguityCode == 1:
+                # unfortunately:
+                # - methylenes with identical chemical shifts have ambiguity code 1
+                if _nextRow is not None and \
+                        self._isSameResidue(_row, _nextRow) and \
+                        _nextRow.specialType == ISMETHYLENE and \
+                        _nextRow.value == _row.value:
+                    atomName = _row.nefAtomName.replace('x','%').replace('y','%')
+                    nextRowIndx += 1  # We skip the next row
+
+                # # - methylenes with only one chemical shift listed can have ambiguity code 1
+                # elif _nextRow is not None and \
+                #          self._isSameResidue(_row, _nextRow) and \
+                #          _nextRow.specialType != ISMETHYLENE and \
+                #     _previousRow is not None and \
+                #          self._isSameResidue(_row, _previousRow) and \
+                #          _previousRow.specialType != ISMETHYLENE:
+                #     atomName = _row.nefAtomName.replace('x','%').replace('y','%')
+
+            elif _row.ambiguityCode == 2:
+                atomName = _row.nefAtomName
+
             else:
-                getLogger().warning(f'No provisions for methylenes ({sequenceCode},{atomName}) with ambiguity code {ambiguityCode}')
+                getLogger().warning(f'No provisions for methylenes ({_row.residueType},{_row.atomName}) with ambiguity code {_row.ambiguityCode}')
 
-        comment = _row.get(self._COMMENT_TAG)
+        elif _row.specialType == ISAROMATIC:
+            if _row.ambiguityCode == 1:
+            # TODO: implement this, as the aromatic protons do not appear on successive lines
+            #
+            #     # unfortunately:
+            #     # - aromatic ring protons with identical chemical shifts have ambiguity code 1
+            #     if _nextRow is not None and \
+            #             self._isSameResidue(_row, _nextRow) and \
+            #             _nextRow.specialType == ISMETHYLENE and \
+            #             _nextRow.value == _row.value:
+            #         atomName = _row.nefAtomName.replace('x','%').replace('y','%')
+            #         nextRowIndx += 1  # We skip the next row
+                pass
+
+            elif _row.ambiguityCode == 3:
+                atomName = _row.nefAtomName
+            else:
+                getLogger().warning(f'No provisions for aromatic sidechain ({_row.residueType},{_row.atomName}) with ambiguity code {_row.ambiguityCode}')
 
         # get the NmrAtom object
         nmrChain = project.fetchNmrChain(chainCode)
-        nmrResidue = nmrChain.fetchNmrResidue(residueType=residueType, sequenceCode=sequenceCode)
-        nmrAtom = nmrResidue.newNmrAtom(name=atomName, isotopeCode=isotopeCode)
+        nmrResidue = nmrChain.fetchNmrResidue(residueType=_row.residueType, sequenceCode=_row.sequenceCode)
+        nmrAtom = nmrResidue.newNmrAtom(name=atomName, isotopeCode=_row.isotopeCode)
 
         # create the ChemicalShift
         chemShiftList.newChemicalShift(nmrAtom=nmrAtom,
-                                       value=value, valueError=valueError, figureOfMerit=figureOfMerit,
-                                       comment=comment)
+                                       value=_row.value, valueError=_row.valueError, figureOfMerit=_row.figureOfMerit,
+                                       comment=_row.comment)
 
-        return rowIndx
+        return nextRowIndx
 
     def importIntoProject(self, project) -> list:
         """Import the data of self into project.
@@ -138,7 +201,13 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
                                                      autoUpdate = False,
                                                      comment = f'from BMRB entry {self.entry_id}; {self.name}'
                                                      )
-        # We need to do a 'dynamic' row indexing, as sometimes we will skip a row; e.g for methyls and degenerate
+        # A two-stage conversion, as sometimes we need to look back or forward
+        # 'parse'/convert the rows, assigning the attributes
+        for csRow in self.chemicalShifts:
+            self._parseChemicalShiftRow(csRow)
+
+        # Loop again to create the V3 chemcialShift objects
+        # We need a 'dynamic' row indexing, as sometimes we will skip a row; e.g for methyls and degenerate
         # methylenes
         rowIndx = 0
         while rowIndx < len(self.chemicalShifts):

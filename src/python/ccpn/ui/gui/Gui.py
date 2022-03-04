@@ -586,7 +586,8 @@ class Gui(Ui):
         :return a list of loaded opjects
         """
         result = []
-        with catchExceptions(errorStringTemplate=f'Loading "{dataLoader.path}"\nfailed: %s'):
+        errorStringTemplate = 'Loading "%s" failed:' % dataLoader.path + '\n%s'
+        with catchExceptions(errorStringTemplate=errorStringTemplate):
             result = dataLoader.load()
         return result
 

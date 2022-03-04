@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-16 12:24:33 +0000 (Wed, February 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-04 15:09:09 +0000 (Fri, March 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -214,7 +214,7 @@ def catchExceptions(application=None, errorStringTemplate='Error: "%s"', popupAs
         yield
 
     except Exception as es:
-        if not (errorStringTemplate and errorStringTemplate.count('%s') == 1):
+        if errorStringTemplate is None or errorStringTemplate.count('%s') != 1:
             errorStringTemplate = f'%s\n[malformed template]'
 
         getLogger().warning(errorStringTemplate % str(es))

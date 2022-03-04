@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-28 14:13:33 +0000 (Mon, February 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-04 18:49:46 +0000 (Fri, March 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -549,7 +549,10 @@ class Peak(AbstractWrapperObject):
         nmrResidues = set(nmr.nmrResidue for nmr in (_pre | _post))
         shifts = list(set(cs for nmrAt in (_pre | _post) for cs in nmrAt.chemicalShifts))
         newShifts = shifts.copy()
-        _thisNmr = self.spectrum.chemicalShiftList._getNmrAtoms()
+
+        _thisNmrPids = self.spectrum.chemicalShiftList._getNmrAtomPids()
+        _pre = set(atm.pid for atm in _pre)
+        _post = set(atm.pid for atm in _post)
 
         with undoBlock():
             with undoStackBlocking() as addUndoItem:
@@ -559,7 +562,7 @@ class Peak(AbstractWrapperObject):
             self._dimensionNmrAtoms = value
 
             # add those that are not already in the list - otherwise recalculate
-            for nmrAtom in (_post - _pre - _thisNmr):
+            for nmrAtom in (_post - _pre - _thisNmrPids):
                 newShifts.append(self.spectrum.chemicalShiftList.newChemicalShift(nmrAtom=nmrAtom))
 
             # update the chemicalShift value/valueError
@@ -665,7 +668,10 @@ class Peak(AbstractWrapperObject):
         nmrResidues = set(nmr.nmrResidue for nmr in (_pre | _post))
         shifts = list(set(cs for nmrAt in (_pre | _post) for cs in nmrAt.chemicalShifts))
         newShifts = shifts.copy()
-        _thisNmr = self.spectrum.chemicalShiftList._getNmrAtoms()
+
+        _thisNmrPids = self.spectrum.chemicalShiftList._getNmrAtomPids()
+        _pre = set(atm.pid for atm in _pre)
+        _post = set(atm.pid for atm in _post)
 
         with undoBlock():
             with undoStackBlocking() as addUndoItem:
@@ -675,7 +681,7 @@ class Peak(AbstractWrapperObject):
             self._assignedNmrAtoms = value
 
             # add those that are not already in the list - otherwise recalculate
-            for nmrAtom in (_post - _pre - _thisNmr):
+            for nmrAtom in (_post - _pre - _thisNmrPids):
                 newShifts.append(self.spectrum.chemicalShiftList.newChemicalShift(nmrAtom=nmrAtom))
 
             # update the chemicalShift value/valueError

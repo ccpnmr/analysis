@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-24 18:38:59 +0000 (Thu, February 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-04 11:00:00 +0000 (Fri, March 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -572,7 +572,8 @@ class Gui(Ui):
         :return a list of loaded opjects
         """
         result = []
-        with catchExceptions(errorStringTemplate='Loading "%s" failed:' % dataLoader.path):
+        errorStringTemplate = 'Loading "%s" failed:' % dataLoader.path + '\n%s'
+        with catchExceptions(errorStringTemplate=errorStringTemplate):
             result = dataLoader.load()
         return result
 

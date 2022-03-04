@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-16 08:40:08 +0000 (Wed, February 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-04 11:00:00 +0000 (Fri, March 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -214,15 +214,15 @@ def catchExceptions(application=None, errorStringTemplate='Error: "%s"', popupAs
         yield
 
     except Exception as es:
-        if not (errorStringTemplate and errorStringTemplate.count('%s') == 1):
+        if errorStringTemplate is None or errorStringTemplate.count('%s') != 1:
             errorStringTemplate = f'%s\n[malformed template]'
 
         getLogger().warning(errorStringTemplate % str(es))
         if printTraceBack or application._isInDebugMode:
             traceback.print_exc()  # please give more info about the error!
+
         if application.hasGui and popupAsWarning:
             from ccpn.ui.gui.widgets import MessageDialog  # Local import: in case of no-gui, we never get here
-
             MessageDialog.showWarning('Warning', errorStringTemplate % str(es))
         # if application._isInDebugMode:
         #     raise es

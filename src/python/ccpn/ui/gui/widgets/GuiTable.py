@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-18 12:35:06 +0000 (Fri, February 18, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-03-04 18:50:46 +0000 (Fri, March 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -561,6 +561,18 @@ class GuiTable(TableWidget, Base):
         CCPN-INTERNAL: Insert an annotation into object
         """
         obj.annotation = value if value else None
+
+    @staticmethod
+    def _setClusterId(obj, value):
+        """
+        CCPN-INTERNAL: Set clusterId from table
+        Must be a positive integer
+        """
+        try:
+            v = int(value)
+            obj.clusterId = v
+        except Exception as err:
+            getLogger().warning('Could not set clusterID.', err)
 
     def setActionCallback(self, actionCallback):
         # enable callbacks

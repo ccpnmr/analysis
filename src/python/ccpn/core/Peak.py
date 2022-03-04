@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-04 18:49:46 +0000 (Fri, March 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-03-04 18:50:46 +0000 (Fri, March 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -861,6 +861,15 @@ class Peak(AbstractWrapperObject):
     def clusterId(self):
         """Get/set the clusterId for the peak
         """
+        return self._wrappedData.clusterId
+
+    @clusterId.getter
+    def clusterId(self):
+        """Get the clusterId for the peak
+        """
+        if self._wrappedData.clusterId is None:
+            cid = int(self.pid.fields[-1])
+            self.clusterId = cid
         return self._wrappedData.clusterId
 
     @clusterId.setter

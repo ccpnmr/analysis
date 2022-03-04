@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-03 16:40:35 +0000 (Thu, March 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-04 18:50:46 +0000 (Fri, March 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2553,7 +2553,7 @@ class Spectrum(AbstractWrapperObject):
             positiveThreshold={self.positiveContourBase:.{3}}, negativeThreshold={self.negativeContourBase:.{3}}''')
             positiveThreshold, negativeThreshold = self.positiveContourBase, self.negativeContourBase
 
-        if ppmRegions is None:
+        if ppmRegions is None or len(ppmRegions) != self.dimensionCount:
             ppmRegions = dict(zip(self.axisCodes, self.spectrumLimits))
             getLogger().warning(f'''ppmRegions not given. Using whole regions: ppmRegions=**{ppmRegions}''')
 

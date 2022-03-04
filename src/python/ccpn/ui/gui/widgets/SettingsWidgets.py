@@ -291,8 +291,8 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
         if self._spectrumDisplay.MAXPEAKLABELTYPES:
             row += 1
-            _texts = ['Short', 'Full', 'Pid', 'Minimal', 'Id', 'Annotation']
-            _names = ['annSDS_Short', 'annSDS_Full', 'annSDS_Pid', 'annSDS_Minimal', 'annSDS_Id', 'annSDS_Annotation']
+            _texts = ['Short', 'Full', 'Pid', 'Minimal', 'Id', 'ClusterId','Annotation']
+            _names = ['annSDS_Short', 'annSDS_Full', 'annSDS_Pid', 'annSDS_Minimal', 'annSDS_Id','annSDS_ClusterId', 'annSDS_Annotation']
             _texts = _texts[:self._spectrumDisplay.MAXPEAKLABELTYPES]
             _names = _names[:self._spectrumDisplay.MAXPEAKLABELTYPES]
 

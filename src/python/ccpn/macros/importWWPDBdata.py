@@ -247,7 +247,7 @@ with undoBlockWithoutSideBar():
 
                 self.checkBox1 = CheckBox.CheckBox(self.mainWidget, grid=(row, 1))
                 self.ramaName = LineEdit.LineEdit(self.mainWidget,grid=(row,2))
-                self.ramaName.setText('PDBRamachandran')
+                self.ramaName.setText('Ramachandran_full')
 
             def _getPathFromDialog(self):
                 dialog = OtherFileDialog(parent=self.mainWindow, _useDirectoryOnly=False,)
@@ -274,9 +274,9 @@ with undoBlockWithoutSideBar():
 
                     if self.checkBox.isChecked():
                         _dataA = TableFrame(getViolationTable(xroot))
-                        _dataB = TableFrame(getSimpleViolationTable(xroot))
+                        # _dataB = TableFrame(getSimpleViolationTable(xroot))
                         self.project.newDataTable(name=self.violName.text(), data=_dataA, comment='violated restraints from PDB')
-                        self.project.newDataTable(name=self.violName.text()+'_simple', data=_dataB, comment='simplified violations from PDB')
+                        # self.project.newDataTable(name=self.violName.text()+'_simple', data=_dataB, comment='simplified violations from PDB')
 
                     if self.checkBox1.isChecked():
                         tempRama1 = getRamachandranTable(xroot)
@@ -286,7 +286,7 @@ with undoBlockWithoutSideBar():
                         # tempGrp = TableFrame(tempRama.groupby(by = ['chain','resnum','said','ent', 'seq','resname'])['rama'].value_counts())
 
                         self.project.newDataTable(name=self.ramaName.text(), data=_data1, comment='ramachandran data from PDB')
-                        self.project.newDataTable(name=self.ramaName.text()+'_simple', data=_data2, comment='Simplified Ramachandran Data')
+                        self.project.newDataTable(name=self.ramaName.text()+'_short', data=_data2, comment='Simplified Ramachandran Data')
 
                     MessageDialog.showWarning('', 'Complete!')
                 self.accept()

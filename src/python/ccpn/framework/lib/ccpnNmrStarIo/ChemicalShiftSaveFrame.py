@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-04 15:42:47 +0000 (Fri, March 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-04 17:51:45 +0000 (Fri, March 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,7 @@ from ccpn.util.nef.StarIo import NmrDataBlock, NmrSaveFrame, NmrLoop, parseNmrSt
 from ccpn.util.nef.GenericStarParser import PARSER_MODE_STANDARD, LoopRow
 from ccpn.framework.lib.ccpnNmrStarIo.SaveFrameABC import SaveFrameABC
 
-from sandbox.Geerten.NTdb.NTdbLib import getNefName
+# from sandbox.Geerten.NTdb.NTdbLib import getNefName
 from sandbox.Geerten.NTdb.NTdbDefs import getNTdbDefs
 
 
@@ -71,6 +71,38 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
             return []
         return _loop.data
 
+    def _getNefName(self, aDef) -> str:
+        """Construct the nefName from aDef.name; account for the different possibilities
+        """
+        # all methyls
+        if aDef.isMethyl and aDef.isProton:
+            _nefName = aDef.name[:-1] + '%'
+
+        # Asn, Gln amine groups
+        elif aDef.parent.name in ('ASN','GLN') and aDef.name in 'HD21 HD22 HE21 HE22'.split():
+            _nefName = aDef.name[:-1] + aDef.name[-1:].replace('1','x').replace('2','y')
+
+        # Ade, Gua amine groups
+        elif aDef.parent.name in ('A','DA','G','DG') and aDef.name in 'H61 H62 H21 H22'.split():
+            _nefName = aDef.name[:-1] + aDef.name[-1:].replace('1','x').replace('2','y') \
+
+        # amino acids methylenes
+        elif aDef.parent.isAminoAcid and aDef.isMethylene and aDef.isProton:
+            _nefName = aDef.name[:-1] + aDef.name[-1:].replace('2','x').replace('3','y')
+
+        # nucleic acids methylenes
+        elif aDef.parent.isNucleicAcid and aDef.isMethylene and aDef.isProton:
+            _nefName = aDef.name.replace("''",'x').replace("'",'y')
+
+        # Phe, Tyr aromatic sidechains
+        elif aDef.parent.name in ('PHE','TYR') and aDef.name in 'HD1 CD1 HD2 CD2  HE1 CE1 HE2 CE2'.split():
+            _nefName = aDef.name.replace('1','x').replace('2','y')
+
+        else:
+            _nefName = aDef.name
+
+        return _nefName
+
     def _parseChemicalShiftRow(self, csRow:LoopRow):
         """
         Parse the chemical shift row and assign attributes for subsequent processing
@@ -93,35 +125,21 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
         csRow.ntDef = self._ntDefs.getDef((csRow.residueType, csRow.atomName))
 
         # convert atomName to NEF;
-        csRow.nefAtomName = getNefName(csRow.ntDef)
+        csRow.nefAtomName = self._getNefName(csRow.ntDef)
 
         csRow.skip = False
 
-    def _isSameResidue(self, row1, row2) -> bool:
-        """
-        :param row1:
-        :param row2:
-        :return: True if row1 and row2 relate to the same residue
-        """
-        return row1.residueType == row2.residueType and \
-               row1.sequenceCode == row2.sequenceCode
-
-    def _newChemicalShift(self, rowIndx, chemShiftList) -> int:
+    def _newChemicalShift(self, csRow:LoopRow, chemShiftList):
         """Use chemShift to make a new (v3) chemicalShift in chemShiftList
         If need be: look back or look ahead into other rows
-        :param rowIndx: index of row to process
+        :param csRow: the row to process
         :param chemShiftList: ChemicalShifList instance to generate new ChemicalShift
-        :return index of next row to process
+        :return a ChemicalShift instance or None
         """
-        # _previousRow = self.chemicalShifts[rowIndx-1] if rowIndx > 0 else None
-
-        _row = self.chemicalShifts[rowIndx]
-        nextRowIndx = rowIndx + 1 # Now points to next row
-
-        # _nextRow = self.chemicalShifts[nextRowIndx] if nextRowIndx < len(self.chemicalShifts) else None
+        _row = csRow
 
         if _row.skip:
-            return nextRowIndx
+            return None
 
         project = chemShiftList.project
         chainCode = chemShiftList.name
@@ -196,11 +214,13 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
         nmrAtom = nmrResidue.newNmrAtom(name=atomName, isotopeCode=_row.isotopeCode)
 
         # create the ChemicalShift
-        chemShiftList.newChemicalShift(nmrAtom=nmrAtom,
-                                       value=_row.value, valueError=_row.valueError, figureOfMerit=_row.figureOfMerit,
-                                       comment=_row.comment)
+        chemShift = chemShiftList.newChemicalShift(nmrAtom=nmrAtom,
+                                                   value=_row.value,
+                                                   valueError=_row.valueError,
+                                                   figureOfMerit=_row.figureOfMerit,
+                                                   comment=_row.comment)
 
-        return nextRowIndx
+        return chemShift
 
     def importIntoProject(self, project) -> list:
         """Import the data of self into project.
@@ -220,9 +240,8 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
             self._lookupDict[(_row.residueType, _row.sequenceCode, _row.atomName)] = _row
 
         # Loop again to create the V3 chemcialShift objects
-        rowIndx = 0
-        while rowIndx < len(self.chemicalShifts):
-            rowIndx = self._newChemicalShift(rowIndx, chemShiftList)
+        for _row in self.chemicalShifts:
+            self._newChemicalShift(_row, chemShiftList)
 
         return [chemShiftList]
 

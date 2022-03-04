@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-01 18:20:26 +0000 (Tue, March 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-04 18:52:30 +0000 (Fri, March 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -111,7 +111,7 @@ class ChemicalShiftTableModule(CcpnModule):
 
         # main window
         _hidden = [CS_UNIQUEID, CS_ISDELETED, CS_FIGUREOFMERIT, CS_ALLPEAKS, CS_CHAINCODE,
-                   CS_SEQUENCECODE, CS_RESIDUETYPE, CS_STATE, CS_ORPHAN]
+                   CS_SEQUENCECODE, CS_STATE, CS_ORPHAN]
         self.chemicalShiftTable = ChemicalShiftTable(parent=self.mainWidget,
                                                      mainWindow=self.mainWindow,
                                                      moduleParent=self,
@@ -156,12 +156,11 @@ class ChemicalShiftTable(GuiTable):
 
     PRIMARYCOLUMN = CS_OBJECT  # column holding active objects (uniqueId/ChemicalShift for this table?)
     defaultHidden = [CS_UNIQUEID, CS_ISDELETED, CS_FIGUREOFMERIT, CS_ALLPEAKS, CS_CHAINCODE,
-                     CS_SEQUENCECODE, CS_RESIDUETYPE, CS_STATE, CS_ORPHAN]
+                     CS_SEQUENCECODE, CS_STATE, CS_ORPHAN]
 
     # define self._columns here
     columnHeaders = {CS_UNIQUEID           : 'Unique ID',
                      CS_ISDELETED          : 'isDeleted',  # should never be visible
-                     # XXX:'Static state of chemicalShift',
                      CS_PID                : 'ChemicalShift',
                      CS_VALUE              : 'ChemicalShift Value (ppm)',
                      CS_VALUEERROR         : 'Value Error',
@@ -171,10 +170,10 @@ class ChemicalShiftTable(GuiTable):
                      CS_SEQUENCECODE       : 'SequenceCode',
                      CS_RESIDUETYPE        : 'ResidueType',
                      CS_ATOMNAME           : 'AtomName',
-                     CS_STATE              : 'Active State',
-                     CS_ORPHAN             : 'Orphaned State',
+                     CS_STATE              : 'State',
+                     CS_ORPHAN             : 'Orphaned',
                      CS_ALLPEAKS           : 'Assigned Peaks',
-                     CS_SHIFTLISTPEAKSCOUNT: 'Local Peak Count',
+                     CS_SHIFTLISTPEAKSCOUNT: 'Peak Count',
                      CS_ALLPEAKSCOUNT      : 'Total Peak Count',
                      CS_COMMENT            : 'Comment',
                      CS_OBJECT             : '_object'
@@ -865,33 +864,33 @@ class ChemicalShiftTable(GuiTable):
         # self._updateGroups(dataFrame)
         # self.updateTableExpanders()
 
+    def _newRowFromUniqueId(self, df, obj, uniqueId):
+        # NOTE:ED - this needs to go elsewhere?
+        #   need to define a row handler rather than a column handler
+        _row = df.loc[uniqueId]
+        # make the new row
+        newRow = _row[:CS_ISDELETED].copy()
+        _midRow = _row[CS_VALUE:CS_ATOMNAME]  # CS_STATIC
+        _comment = _row[CS_COMMENT:]
+        _pidCol = pd.Series(obj.pid, index=[CS_PID, ])
+        _extraCols = pd.Series(self._derivedFromObject(obj), index=[CS_STATE, CS_ORPHAN, CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT])  # if state required
+
+        newRow = newRow.append([_pidCol, _midRow, _extraCols, _comment])
+
+        # append the actual object to the end - not sure whether this is required - check _highlightObjs
+        newRow[CS_OBJECT] = obj
+
+        # replace the visible nans with '' for comment column and string 'None' elsewhere
+        newRow[CS_COMMENT:CS_COMMENT].fillna('', inplace=True)
+        newRow.fillna('None', inplace=True)
+
+        return list(newRow)
+
     def _updateRowCallback(self, data):
         """
         Notifier callback for updating the table for change in nmrRows
         :param data:
         """
-
-        def _newRowFromUniqueId(data, obj, uniqueId):
-            # NOTE:ED - this needs to go elsewhere
-            #   need to define a row handler rather than a column handler
-            _row = data.loc[uniqueId]
-            # make the new row
-            newRow = _row[:CS_ISDELETED].copy()
-            _midRow = _row[CS_VALUE:CS_ATOMNAME]  # CS_STATIC
-            _comment = _row[CS_COMMENT:]
-            _pidCol = pd.Series(obj.pid, index=[CS_PID, ])
-            # _extraCols = pd.Series(self._derivedFromObject(obj), index=[CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT])
-            _extraCols = pd.Series(self._derivedFromObject(obj), index=[CS_STATE, CS_ORPHAN, CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT])  # if state required
-
-            newRow = newRow.append([_pidCol, _midRow, _extraCols, _comment])
-
-            # append the actual object to the end - not sure whether this is required - check _highlightObjs
-            newRow[CS_OBJECT] = obj
-
-            # replace the visible nans with '' for comment column and string 'None' elsewhere
-            newRow[CS_COMMENT:CS_COMMENT].fillna('', inplace=True)
-            newRow.fillna('None', inplace=True)
-            return newRow
 
         with self._tableBlockSignals('_updateRowCallback'):
             obj = data[Notifier.OBJECT]
@@ -915,7 +914,6 @@ class ChemicalShiftTable(GuiTable):
 
                 if trigger == Notifier.DELETE:
                     # uniqueIds in the visible table
-                    # tableIds = [(rr, self.item(rr, col).value) for rr in range(self.rowCount())]
                     if uniqueId in (set(tableIds) - set(_df[CS_UNIQUEID])):
                         # remove from the table
                         self._dataFrameObject._dataFrame.drop([uniqueId], inplace=True)
@@ -924,7 +922,7 @@ class ChemicalShiftTable(GuiTable):
                 elif trigger == Notifier.CREATE:
                     # uniqueIds in the visible table
                     if uniqueId in (set(_df[CS_UNIQUEID]) - set(tableIds)):
-                        newRow = list(_newRowFromUniqueId(_df, obj, uniqueId))
+                        newRow = self._newRowFromUniqueId(_df, obj, uniqueId)
                         # visible table dataframe update
                         self._dataFrameObject._dataFrame.loc[uniqueId] = newRow
                         # update the table widgets - really need to change to QTableView (think it was actually this before)
@@ -933,7 +931,7 @@ class ChemicalShiftTable(GuiTable):
                 elif trigger == Notifier.CHANGE:
                     # uniqueIds in the visible table
                     if uniqueId in (set(_df[CS_UNIQUEID]) & set(tableIds)):
-                        newRow = list(_newRowFromUniqueId(_df, obj, uniqueId))
+                        newRow = self._newRowFromUniqueId(_df, obj, uniqueId)
                         # visible table dataframe update
                         self._dataFrameObject._dataFrame.loc[uniqueId] = newRow
                         # update the table widgets - really need to change to QTableView (think it was actually this before)

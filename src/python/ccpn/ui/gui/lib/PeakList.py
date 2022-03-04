@@ -4,10 +4,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-30 13:09:55 +0100 (Thu, September 30, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-03-04 14:36:10 +0000 (Fri, March 04, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,6 +27,8 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from ccpn.util.isotopes import name2IsotopeCode
+from collections import defaultdict
+from itertools import product
 
 
 def restrictedPick(peakListView, axisCodes, peak=None, nmrResidue=None):
@@ -42,31 +44,35 @@ def restrictedPick(peakListView, axisCodes, peak=None, nmrResidue=None):
     doNeg = peakListView.spectrumView.displayNegativeContours
 
     if peak and nmrResidue:
+        # cannot do both at the same time
         return
 
     if not peak and not nmrResidue:
+        # nothing selected
         return
 
-    positionCodeDict = None
     if peak:
-        positionCodeDict = {peak.peakList.axisCodes[ii]: peak.position[ii] for ii in range(len(peak.position))}
+        if (positionCodeDict := {peak.peakList.axisCodes[ii]: peak.position[ii] for ii in range(len(peak.position))}):
+            peaks = peakList.restrictedPick(positionCodeDict, doPos, doNeg)
+            return peakList, peaks
 
+    allPeaks = []
     if nmrResidue:
-        nmrResidueIsotopeCodes = [atom.isotopeCode for atom in nmrResidue.nmrAtoms]
+        allShifts = defaultdict(list, {})
         shiftList = spectrum.chemicalShiftList
-        nmrResidueShifts = [shiftList.getChemicalShift(nmrAtom).value
-                            for nmrAtom in nmrResidue.nmrAtoms
-                            if shiftList.getChemicalShift(nmrAtom)]
-        shiftDict = dict(zip(nmrResidueIsotopeCodes, nmrResidueShifts))
+
+        _mapping = [(atm.isotopeCode, shiftList.getChemicalShift(atm).value) for atm in nmrResidue.nmrAtoms if shiftList.getChemicalShift(atm)]
+        for isoCode, shift in _mapping:
+            allShifts[isoCode].append(shift)
+
         shiftIsotopeCodes = [name2IsotopeCode(code) for code in axisCodes]
-        positionCodeDict = {axisCodes[ii]: shiftDict[shiftIsotopeCode]
-                            for ii, shiftIsotopeCode in enumerate(shiftIsotopeCodes) if shiftIsotopeCode in shiftDict}
 
-        # sometimes get an error when using spectrum projections - but modification for the future
-        # if ii in axisCodes and shiftIsotopeCode in shiftDict}
+        # make all combinations of position dicts for the shift found for each shift
+        _combis = [{axisCodes[shiftIsotopeCodes.index(iso)]: sh for ii, (iso, sh) in enumerate(zip(allShifts.keys(), val)) if iso in shiftIsotopeCodes}
+                   for val in product(*allShifts.values())]
 
-    if positionCodeDict:
-        peaks = peakList.restrictedPick(positionCodeDict, doPos, doNeg)
-        return peakList, peaks
+        for _posCodeDict in _combis:
+            peaks = peakList.restrictedPick(_posCodeDict, doPos, doNeg)
+            allPeaks += peaks
 
-    return peakList, []
+    return peakList, allPeaks

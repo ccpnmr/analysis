@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-01 19:04:25 +0000 (Tue, March 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-04 18:51:50 +0000 (Fri, March 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -379,6 +379,30 @@ def _getAssignedNmrAtoms4Spectra(spectra, peakListIndex=-1):
     return list(nmrAtoms)
 
 
+def _mergeRowsByHeaders(inputData, grouppingHeaders, dropColumnNames=[sv.ATOM_NAME],
+                        rebuildUID=True, pidShortClass='NR', keep="first", ):
+    """
+    Merge rows by common columns.
+    grouppingHeaders:  sequence of columnNames to consider for identifying duplicate rows.
+
+    """
+    from ccpn.core.lib.Pid import createPid
+
+    newIDs =[]
+    if rebuildUID:
+        for assignmentValues, grouppedDF in inputData.groupby(grouppingHeaders):        ## Group by grouppingHeaders
+            newUid = grouppedDF[grouppingHeaders].values[0].astype('str')
+            newIDs.append(createPid(pidShortClass, *newUid))                            ## Recreate the UID
+    inputData.drop_duplicates(subset=grouppingHeaders, keep=keep, inplace=True)
+    inputData.drop(columns=dropColumnNames, inplace=True)
+    if rebuildUID and len(inputData.index) == len(newIDs):
+        inputData[sv._ROW_UID] = newIDs
+    return inputData
+
+
 INPUT_CSM_SERIESFRAMES_DICT = {
                           sv.CSM_INPUT_FRAME: CSMInputFrame
+                          }
+INPUT_RELAXATION_SERIESFRAMES_DICT = {
+                          sv.RELAXATION_INPUT_FRAME: RelaxationInputFrame
                           }

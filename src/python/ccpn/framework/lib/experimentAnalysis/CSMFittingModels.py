@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-03 16:41:37 +0000 (Thu, March 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-04 18:51:50 +0000 (Fri, March 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,11 +27,8 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 #=========================================================================================
 
 
-import pandas as pd
 import numpy as np
-import lmfit.lineshapes as func
 from lmfit.models import update_param_vals
-from scipy.optimize import curve_fit
 from collections import defaultdict
 from ccpn.util.Logging import getLogger
 from ccpn.core.DataTable import TableFrame

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-22 16:06:27 +0000 (Tue, February 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-04 18:51:50 +0000 (Fri, March 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,10 +30,12 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 from ccpn.core.DataTable import TableFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel
+from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import RelaxationOutputFrame
+from ccpn.util.Logging import getLogger
 import numpy as np
-import lmfit.lineshapes as func
+from collections import defaultdict
 from lmfit.models import update_param_vals
-
+import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 
 class ExponentialModel(MinimiserModel):
     """A model based on an exponential decay function.
@@ -42,20 +44,20 @@ class ExponentialModel(MinimiserModel):
         f(x; A, \tau) = A e^{-x/\tau}
     """
 
-    FITTING_FUNC = func.exponential
+    FITTING_FUNC = lf.exponential_func
 
     def __init__(self, independent_vars=['x'], prefix='', nan_policy='raise', **kwargs):
         kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
         super().__init__(ExponentialModel.FITTING_FUNC, **kwargs)
 
-    def guess(self, data, x, **kwargs):
-        """Estimate initial model parameter values from data."""
-        try:
-            sval, oval = np.polyfit(x, np.log(abs(data) + 1.e-15), 1)
-        except TypeError:
-            sval, oval = 1., np.log(abs(max(data) + 1.e-9))
-        pars = self.make_params(amplitude=np.exp(oval), decay=-1.0 / sval)
-        return update_param_vals(pars, self.prefix, **kwargs)
+    # def guess(self, data, x, **kwargs):
+    #     """Estimate initial model parameter values from data."""
+    #     try:
+    #         sval, oval = np.polyfit(x, np.log(abs(data) + 1.e-15), 1)
+    #     except TypeError:
+    #         sval, oval = 1., np.log(abs(max(data) + 1.e-9))
+    #     pars = self.make_params(amplitude=np.exp(oval), decay=-1.0 / sval)
+    #     return update_param_vals(pars, self.prefix, **kwargs)
 
 
 class T1FittingModel(FittingModelABC):
@@ -75,14 +77,61 @@ class T1FittingModel(FittingModelABC):
 
     Minimiser = ExponentialModel
 
-    def fitSeries(self, inputData:TableFrame, *args, **kwargs) -> TableFrame:
-        pass
+    def fitSeries(self, inputData: TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
+
+
+        xArray = np.array(inputData.SERIESSTEPS)
+        # TODO  rescale option
+        outputDataDict = defaultdict(list)
+        for ix, row in inputData.iterrows():
+            seriesValues = row[inputData.valuesHeaders]
+            yArray = seriesValues.values
+            model = self.Minimiser()
+            params = model.make_params(amplitude=max(yArray), decay=np.mean(xArray))
+
+            params['amplitude'].min = min(yArray)
+            params['amplitude'].max = max(yArray) + max(yArray) * 0.5
+
+            params['decay'].min = min(xArray)
+            params['decay'].max = max(xArray) + max(xArray) * 0.5
+            result = None  # replace with class obj?
+            try:
+                result = model.fit(yArray, params, x=xArray)
+            except:
+                getLogger().warning(f'Fitting Failed for: {row[sv._ROW_UID]} data.')
+            outputDataDict[sv._ROW_UID].append(row[sv._ROW_UID])
+            for i, assignmentHeader in enumerate(
+                    inputData.assignmentHeaders[:-1]):  ## build new row for the output dataFrame as DefaultDict.
+                outputDataDict[assignmentHeader].append(row[assignmentHeader])  ## add common assignments definitions
+            outputDataDict['ModelName'].append(model.MODELNAME)
+            for nn, vv in zip([sv.MINIMISER_METHOD, sv.R2, sv.CHISQUARE, sv.REDUCEDCHISQUARE, sv.AKAIKE, sv.BAYESIAN],
+                              ['method', 'r2', 'chisqr', 'redchi', 'aic', 'bic']):
+                outputDataDict[nn].append(getattr(result, vv, None))
+            vv = ['amplitude', 'decay']
+            if result is not None:
+                for j in vv:
+                    param = result.params.get(j)
+                    outputDataDict[j].append(param.value)
+                    outputDataDict[f'{j}_err'].append(param.stderr)
+            else:
+                for j in vv:
+                    outputDataDict[j].append(None)
+                    outputDataDict[f'{j}_err'].append(None)
+
+            outputDataDict[sv.MINIMISER].append(result)
+        outputFrame = RelaxationOutputFrame()
+        outputFrame.setDataFromDict(outputDataDict)
+        outputFrame.setSeriesUnits(inputData.SERIESUNITS)
+        outputFrame.setSeriesSteps(inputData.SERIESSTEPS)
+        outputFrame._assignmentHeaders = inputData.assignmentHeaders
+        outputFrame._valuesHeaders = inputData.valuesHeaders
+        return outputFrame
 
 
 
 
 
-def _registerChemicalShiftMappingModels():
+def _registerRelaxationModels():
     from ccpn.framework.lib.experimentAnalysis.RelaxationAnalysisBC import RelaxationAnalysisBC
     models = [T1FittingModel]
     for model in models:

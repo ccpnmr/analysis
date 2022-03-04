@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-01 19:04:25 +0000 (Tue, March 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-04 18:51:50 +0000 (Fri, March 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -62,6 +62,10 @@ def oneSiteBinding_func(x, kd, bmax):
     :return:
     """
     return (bmax * x) / (x + kd)
+
+
+# def exponential_func(x, amplitude, decay):
+#     return amplitude * np.exp(decay * x)
 
 ########################################################################################################################
 ########################                     Various Calculation Functions                   ###########################

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-25 15:14:19 +0000 (Fri, February 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-04 18:51:50 +0000 (Fri, March 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -168,6 +168,26 @@ class SeriesAnalysisABC(ABC):
         A method to export to an external File
         """
         pass
+
+    def _reportFittingPlots(self, outputData, path ):
+        from matplotlib.backends.backend_pdf import PdfPages
+        import matplotlib.pyplot as plt
+
+        pdf = PdfPages(path)
+        for ix, row in outputData.iterrows():
+            minimiser = row.get(sv.MINIMISER)
+            title = row[sv._ROW_UID]
+            fig = minimiser.plot(title=title)
+            columns = ('amplitude', 'decay', 'r2', 'method')
+            rows = ['result']
+            cell_text = [[row[i] for i in columns]]
+            table = plt.table(cellText=cell_text,
+                                  rowLabels=rows,
+                                  colLabels=columns,
+                                  loc='bottom')
+            pdf.savefig(fig)  # saves the current figure into a pdf page
+            plt.close()
+
 
     def __init__(self, application):
 

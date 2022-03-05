@@ -725,7 +725,13 @@ class Framework(NotifierBase, GuiBase):
                 self._displayKeyConcepts()
                 self.preferences['general']['firstTimeShowKeyConcepts'] = False
             else:
-                self._displayTipOfTheDay()
+                try:
+                    self._displayTipOfTheDay()
+                except Exception as e:
+                    self._initial_show_timer.stop()
+                    self._initial_show_timer.deleteLater()
+                    self._initial_show_timer = None
+                    raise e
 
             if self._initial_show_timer:
                 self._initial_show_timer.stop()

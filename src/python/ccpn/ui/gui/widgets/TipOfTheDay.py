@@ -635,8 +635,8 @@ class TipOfTheDayWindow(QWizard):
             self.seen_tips.emit(self._get_seen_tips_perma_ids())
 
     def showEvent(self, event: QtGui.QShowEvent) -> None:
-        self._centre_window()
         self.adjustSize()
+        self._centre_window()
         super(TipOfTheDayWindow, self).showEvent(event)
 
 

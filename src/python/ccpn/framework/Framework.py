@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-24 19:38:23 +0000 (Thu, February 24, 2022) $"
+__modifiedBy__ = "$modifiedBy: varioustoxins $"
+__dateModified__ = "$dateModified: 2022-03-05 22:22:21 +0000 (Sat, March 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -70,7 +70,9 @@ from ccpn.framework.PathsAndUrls import \
     CCPN_DATA_DIRECTORY, \
     CCPN_SPECTRA_DIRECTORY, \
     CCPN_PLUGINS_DIRECTORY, \
-    CCPN_SCRIPTS_DIRECTORY
+    CCPN_SCRIPTS_DIRECTORY, \
+    tipOfTheDayConfig, \
+    ccpnCodePath
 
 from ccpn.ui.gui.Gui import Gui
 from ccpn.ui.gui.GuiBase import GuiBase
@@ -78,7 +80,7 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import MacrosFileDialog
-from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_KEY_CONCEPTS
+from ccpn.ui.gui.widgets.TipOfTheDay import TipOfTheDayWindow, MODE_KEY_CONCEPTS, loadTipsSetup
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
 
 from ccpn.util import Logging
@@ -708,8 +710,9 @@ class Framework(NotifierBase, GuiBase):
         except Exception as e:
             getLogger().warning('Error restoring current.strip: %s' % e)
 
-        # GST slightly complicated as we have to wait for anay license or other
+        # GST slightly complicated as we have to wait for any license or other
         # startup dialogs to close before we display tip of the day
+        loadTipsSetup(tipOfTheDayConfig, [ccpnCodePath])
         self._tip_of_the_day_wait_dialogs = (RegisterPopup,)
         self._startupShowTipofTheDay()
 

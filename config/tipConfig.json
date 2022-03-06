@@ -26,7 +26,7 @@
         ],
         "EMPTY_TEXT"    : "All tips viewed. To reset go to Project / Preferences -> Tips and click 'reset tips'",
         "DIRECTORIES"   : [
-            "/Users/vad5/PycharmProjects/Git/AnalysisV3/doc/tipOfTheDay"
+            "doc/tipOfTheDay"
         ],
         "USE_DOTS"      : false,
         "HAS_DIVIDER"   : false,
@@ -56,7 +56,7 @@
         ],
         "EMPTY_TEXT"  : "<DOCTYPE html>\n    <html>\n        <head>\n        <style>\n            body { background-color: blue; }\n            p    { color: white;\n                  font-size: large;\n                  font-family: courier;\n            }\n            table {\n                margin: auto;\n            }\n        </style>\n        </head>\n        <body>\n            <table>\n                <tr>\n                    <td>\n                        <p>Key Concepts files missing please correct your setup or contact the developers...</p>\n                    </td>\n                </tr>\n            </table>\n        </body>\n    </html>",
         "DIRECTORIES" : [
-            "/Users/vad5/PycharmProjects/Git/AnalysisV3/doc/keyConcepts"
+            "doc/keyConcepts"
         ],
         "USE_DOTS"    : true,
         "HAS_DIVIDER" : false

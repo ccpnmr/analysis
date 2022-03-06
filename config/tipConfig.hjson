@@ -1,6 +1,6 @@
 # This is the configuration file for the tip of the day dialog
 {
-    # there are two modes overview and tip
+    # there are two modes key concepts and tip
     TIP_OF_THE_DAY: {
 
         # the buttons shown in the bottom and their labels
@@ -16,7 +16,7 @@
         TITLE: Tip of the Day
 
         # the minimum size of the tip panel
-        MIN_SIZE: [550, 385]
+        MIN_SIZE: [498, 300]
 
         # order of the buttons in the button bar
         LAYOUT: [
@@ -28,18 +28,18 @@
                 CancelButton
         ]
 
-        # patterns for tip filenames
+        # patterns for tip filenames, not quoted as hjson has problems with *s
         IDENTIFIERS: [
             "tip_*.json",
             "*/tip_*.json"
         ],
 
         # what to display if there are  no more tips
-        EMPTY_TEXT: All tips viewed to reset goto preferences->tips and click 'reset tips'
+        EMPTY_TEXT: All tips viewed to reset goto Project / Preferences->tips and click 'reset tips'
 
         # directories to search for tips
         DIRECTORIES: [
-            /Users/garythompson/Dropbox/git/ccpnmr/ccpnmr_3.0.3.edge_gwv6/src/python/ccpn/ui/gui/widgets/tips
+            doc/tipOfTheDay
         ],
 
         # whether to show dots indicating the current position in the sequence at the bottom of the tip pane
@@ -52,7 +52,7 @@
         DIVIDER_WIDTH: 1px
     }
 
-    OVERVIEW: {
+    KEY_CONCEPTS: {
         BUTTONS: {
             CancelButton: Close
             NextButton: Next
@@ -60,16 +60,17 @@
         },
 
         TITLE: Overview
-        MIN_SIZE: [800, 400],
+        MIN_SIZE: [725, 550],
         LAYOUT: [
                 Stretch
                 BackButton
                 NextButton
                 CancelButton
         ],
+        # patterns for tip filenames, not quoted as hjson has problems with *s
         IDENTIFIERS: [
-            overview_*.json
-            */overview_*.json
+            "keyConcepts*.json",
+            "*/keyConcepts*.json"
         ],
         EMPTY_TEXT: '''<DOCTYPE html>
                         <html>
@@ -89,7 +90,7 @@
                                 <table>
                                     <tr>
                                         <td>
-                                            <p>Overview files missing please correct your setup or contact the developers...</p>
+                                            <p>Key concepts files missing please correct your setup or contact the developers...</p>
                                         </td>
                                     </tr>
                                 </table>
@@ -98,7 +99,7 @@
         '''
 
         DIRECTORIES: [
-            /Users/garythompson/Dropbox/git/ccpnmr/ccpnmr_3.0.3.edge_gwv6/src/python/ccpn/ui/gui/widgets/overviews
+            doc/keyConcepts
         ],
         USE_DOTS: true
 

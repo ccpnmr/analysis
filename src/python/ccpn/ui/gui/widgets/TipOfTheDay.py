@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: varioustoxins $"
-__dateModified__ = "$dateModified: 2022-03-06 10:11:25 +0000 (Sun, March 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-06 11:05:17 +0000 (Sun, March 06, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -44,8 +44,7 @@ from PyQt5.QtWidgets import QApplication, QWizard, QWizardPage, QCheckBox, QPush
 from ccpn.framework.PathsAndUrls import tipOfTheDayConfig
 
 
-# HJSON_ERROR = hjson.HjsonDecodeError
-HJSON_ERROR = hjson.JSONDecodeError
+HJSON_ERROR = hjson.HjsonDecodeError
 
 RANDOM_TIP_BUTTON = QWizard.CustomButton1
 DONT_SHOW_TIPS_BUTTON = QWizard.CustomButton2
@@ -84,7 +83,7 @@ MAX_ORDER = sys.maxsize
 STYLE_FILE = 'style_file'
 
 TIPS_SETUP = None
-DEFAULT_CONFIG_PATH = 'tipConfig.json'
+DEFAULT_CONFIG_PATH = 'tipConfig.hjson'
 
 
 def loadTipsSetup(path: Path, tip_paths: Optional[List[Path]] = None):

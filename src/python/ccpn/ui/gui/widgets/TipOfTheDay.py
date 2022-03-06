@@ -595,12 +595,14 @@ class TipOfTheDayWindow(QWizard):
         return seen_tips
 
     def _page_visited(self, page_id):
+        self.adjustSize()
         if page_id != -1:
             self._visited_pages.add(page_id)
             self.seen_tips.emit(self._get_seen_tips_perma_ids())
 
     def showEvent(self, event: QtGui.QShowEvent) -> None:
         self._centre_window()
+        self.adjustSize()
         super(TipOfTheDayWindow, self).showEvent(event)
 
 

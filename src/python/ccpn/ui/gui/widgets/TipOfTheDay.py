@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: VickyAH $"
-__dateModified__ = "$dateModified: 2021-10-19 12:27:13 +0100 (Tue, October 19, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: varioustoxins $"
+__dateModified__ = "$dateModified: 2022-03-06 11:05:17 +0000 (Sun, March 06, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,14 +26,14 @@ __date__ = "$Date: 2021-05-06 18:21:23 +0100 (Thu, May 6, 2021) $"
 # Start of code
 #=========================================================================================
 
-# import hjson
-import json as hjson
+import hjson
 import os
-import pathlib
+from pathlib import Path
 import sys
 from glob import glob
 from operator import itemgetter
 import random
+from typing import Optional, List
 
 from PyQt5 import QtGui
 from PyQt5.QtCore import pyqtSignal, Qt, QRectF, QPointF
@@ -44,8 +44,7 @@ from PyQt5.QtWidgets import QApplication, QWizard, QWizardPage, QCheckBox, QPush
 from ccpn.framework.PathsAndUrls import tipOfTheDayConfig
 
 
-# HJSON_ERROR = hjson.HjsonDecodeError
-HJSON_ERROR = hjson.JSONDecodeError
+HJSON_ERROR = hjson.HjsonDecodeError
 
 RANDOM_TIP_BUTTON = QWizard.CustomButton1
 DONT_SHOW_TIPS_BUTTON = QWizard.CustomButton2
@@ -83,9 +82,40 @@ MAX_ORDER = sys.maxsize
 
 STYLE_FILE = 'style_file'
 
-# tip_defaults_file = pathlib.Path(__file__).parent.absolute() / "tip_config.json"
-tip_defaults_file = tipOfTheDayConfig
-DEFAULTS = hjson.loads(open(tip_defaults_file, 'r').read())
+TIPS_SETUP = None
+DEFAULT_CONFIG_PATH = 'tipConfig.hjson'
+
+
+def loadTipsSetup(path: Path, tip_paths: Optional[List[Path]] = None):
+    global TIPS_SETUP
+    setup = hjson.loads(open(path, 'r').read())
+    if tip_paths is None:
+        tip_paths = [QApplication.applicationDirPath()]
+
+    for instance in setup.values():
+        if not isinstance(instance, dict):
+            continue
+
+        new_directories = []
+        if DIRECTORIES in instance:
+            for path in instance[DIRECTORIES]:
+                path = Path(path)
+                if not path.is_absolute():
+                   for tip_path in tip_paths:
+                    new_directories.append(str(Path(tip_path) / path))
+                else:
+                    new_directories.append(str(path))
+            instance[DIRECTORIES]= new_directories
+
+    TIPS_SETUP = setup
+
+
+def _load_default_setup_if_required():
+    global TIPS_SETUP
+    if TIPS_SETUP is None:
+        TIPS_SETUP = loadTipsSetup(DEFAULT_CONFIG_PATH)
+
+
 
 BUTTON_IDS = {
     'Random'      : RANDOM_TIP_BUTTON,
@@ -295,6 +325,9 @@ class TipOfTheDayWindow(QWizard):
     seen_tips = pyqtSignal(list)
 
     def __init__(self, parent=None, seen_perma_ids=(), dont_show_tips=False, standalone=False, mode=MODE_TIP_OF_THE_DAY):
+
+        _load_default_setup_if_required()
+
         super(TipOfTheDayWindow, self).__init__(parent=parent)
 
         self._page_list = []
@@ -326,15 +359,15 @@ class TipOfTheDayWindow(QWizard):
 
         self.setButton(RANDOM_TIP_BUTTON, self._random_tip_button)
 
-        self.button(BUTTON_IDS[DEFAULTS[DEFAULT]]).setAutoDefault(True)
+        self.button(BUTTON_IDS[TIPS_SETUP[DEFAULT]]).setAutoDefault(True)
 
         self.setOption(QWizard.NoCancelButton, False)
 
-        for button, text in DEFAULTS[self._mode][BUTTONS].items():
+        for button, text in TIPS_SETUP[self._mode][BUTTONS].items():
             button = BUTTON_IDS[button]
             self.setButtonText(button, text)
 
-        layout = [BUTTON_IDS[button] for button in DEFAULTS[self._mode][LAYOUT]]
+        layout = [BUTTON_IDS[button] for button in TIPS_SETUP[self._mode][LAYOUT]]
 
         if standalone:
             position = layout.index(DONT_SHOW_TIPS_BUTTON)
@@ -343,7 +376,7 @@ class TipOfTheDayWindow(QWizard):
 
         self.setButtonLayout(layout)
 
-        self.setWindowTitle(DEFAULTS[self._mode][TITLE])
+        self.setWindowTitle(TIPS_SETUP[self._mode][TITLE])
 
         self.customButtonClicked.connect(self._button_clicked)
         self.currentIdChanged.connect(self._page_visited)
@@ -381,15 +414,14 @@ class TipOfTheDayWindow(QWizard):
 
     def _load_tip_file_data(self):
         files = []
-        for directory_name in DEFAULTS[self._mode][DIRECTORIES]:
-
-            identifiers = [identifier.split('/') for identifier in DEFAULTS[self._mode][IDENTIFIERS]]
+        for directory_name in TIPS_SETUP[self._mode][DIRECTORIES]:
+            identifiers = [identifier.split('/') for identifier in TIPS_SETUP[self._mode][IDENTIFIERS]]
             for identifier_parts in identifiers:
                 identifier_pattern = os.path.join(directory_name, *identifier_parts)
 
                 tip_file_list = glob(identifier_pattern)
 
-                file_parts = dict([(pathlib.Path(file_path), file_path[len(directory_name) + 1:]) for file_path in tip_file_list])
+                file_parts = dict([(Path(file_path), file_path[len(directory_name) + 1:]) for file_path in tip_file_list])
 
                 file_parts = self._filter_dict_by_values(file_parts, self._seen_perma_ids)
 
@@ -398,6 +430,7 @@ class TipOfTheDayWindow(QWizard):
                 files.extend(file_parts.keys())
 
         results = []
+
         for file in files:
             tip_data = self._load_tip_dict(file)
             if ORDER not in tip_data:
@@ -427,11 +460,11 @@ class TipOfTheDayWindow(QWizard):
         copy_attributes = HAS_DIVIDER, DIVIDER_WIDTH, DIVIDER_COLOR
 
         for attribute in copy_attributes:
-            if attribute in DEFAULTS[self._mode]:
-                tip_file[attribute] = DEFAULTS[self._mode][attribute]
+            if attribute in TIPS_SETUP[self._mode]:
+                tip_file[attribute] = TIPS_SETUP[self._mode][attribute]
 
         if USE_DOTS not in tip_file:
-            tip_file[USE_DOTS] = DEFAULTS[self._mode][USE_DOTS]
+            tip_file[USE_DOTS] = TIPS_SETUP[self._mode][USE_DOTS]
 
         if handler is not None:
 
@@ -458,7 +491,7 @@ class TipOfTheDayWindow(QWizard):
 
             page.setTitle(title)
 
-            page.setMinimumSize(*DEFAULTS[self._mode][MIN_SIZE])
+            page.setMinimumSize(*TIPS_SETUP[self._mode][MIN_SIZE])
 
             return page
 
@@ -498,8 +531,8 @@ class TipOfTheDayWindow(QWizard):
             info_page = {
                 HEADER  : header,
                 TYPE    : "simple-html",
-                CONTENTS: DEFAULTS[self._mode][EMPTY_TEXT],
-                PATH    : pathlib.Path(os.path.realpath(__file__)),
+                CONTENTS: TIPS_SETUP[self._mode][EMPTY_TEXT],
+                PATH    : Path(os.path.realpath(__file__)),
                 USE_DOTS: False
                 }
 
@@ -595,11 +628,13 @@ class TipOfTheDayWindow(QWizard):
         return seen_tips
 
     def _page_visited(self, page_id):
+        self.adjustSize()
         if page_id != -1:
             self._visited_pages.add(page_id)
             self.seen_tips.emit(self._get_seen_tips_perma_ids())
 
     def showEvent(self, event: QtGui.QShowEvent) -> None:
+        self.adjustSize()
         self._centre_window()
         super(TipOfTheDayWindow, self).showEvent(event)
 

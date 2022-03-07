@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-04 18:50:46 +0000 (Fri, March 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-07 10:00:55 +0000 (Mon, March 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2522,14 +2522,13 @@ class Spectrum(AbstractWrapperObject):
         Ppm regions are passed in as a dict containing the axis codes and the required limits.
         Each limit is defined as a key, value pair: (str, tuple), with the tuple supplied as (min, max) axis limits in ppm.
         Axis codes supplied are mapped to the closest matching axis.
-        Illegal or non-matching axisCodes will raise Value Errors.
+        Illegal or non-matching axisCodes will return None.
 
         Example ppmRegions dict:
             {'Hn': (7.0, 9.0), 'Nh': (110, 130)}
 
         Example calling function:
-        >>> peaks = spectrum.pickPeaks(positiveThreshold=1000, **ppmRegions) # to pick only positive peaks on defined ppmRegions.
-        >>> peaks = spectrum.pickPeaks(**ppmRegions)                         # to pick positive and negative peaks on defined ppmRegions.
+        >>> peaks = spectrum.pickPeaks(**ppmRegions)
         >>> peaks = spectrum.pickPeaks(peakList, **ppmRegions)
         >>> peaks = spectrum.pickPeaks(peakList=peakList, Hn=(7.0, 9.0), Nh=(110, 130))
 
@@ -2545,17 +2544,6 @@ class Spectrum(AbstractWrapperObject):
 
         if peakList is None:
             peakList = self.peakLists[-1]
-            getLogger().warning(f'''peakList not given. Using default: {peakList} ''')
-
-        if positiveThreshold is None and negativeThreshold is None:
-            getLogger().warning(f'''Both Positive and Negative threshold cannot be None. 
-            Picking positive and negative peaks using spectrum.positiveContourBase and spectrum.negativeContourBase:
-            positiveThreshold={self.positiveContourBase:.{3}}, negativeThreshold={self.negativeContourBase:.{3}}''')
-            positiveThreshold, negativeThreshold = self.positiveContourBase, self.negativeContourBase
-
-        if ppmRegions is None or len(ppmRegions) != self.dimensionCount:
-            ppmRegions = dict(zip(self.axisCodes, self.spectrumLimits))
-            getLogger().warning(f'''ppmRegions not given. Using whole regions: ppmRegions=**{ppmRegions}''')
 
         # get the dimensions by mapping the keys of the ppmRegions dict
         _axisCodes = tuple([a for a in ppmRegions.keys()])

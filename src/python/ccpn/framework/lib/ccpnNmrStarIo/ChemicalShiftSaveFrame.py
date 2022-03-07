@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-24 17:06:13 +0000 (Thu, February 24, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-03-04 17:51:45 +0000 (Fri, March 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -33,6 +33,9 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.nef.StarIo import NmrDataBlock, NmrSaveFrame, NmrLoop, parseNmrStarFile
 from ccpn.util.nef.GenericStarParser import PARSER_MODE_STANDARD, LoopRow
 from ccpn.framework.lib.ccpnNmrStarIo.SaveFrameABC import SaveFrameABC
+
+# from sandbox.Geerten.NTdb.NTdbLib import getNefName
+from sandbox.Geerten.NTdb.NTdbDefs import getNTdbDefs
 
 
 class ChemicalShiftSaveFrame(SaveFrameABC):
@@ -58,42 +61,166 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
 
     _COMMENT_TAG = 'details'
 
+    _ntDefs = getNTdbDefs()
+
     @property
     def chemicalShifts(self) ->list :
-        """:return a list of chemical shift """
+        """:return a list of chemical shift LoopRow's
+        """
         if (_loop := self.get(self._LOOP_KEY)) is None:
             return []
-
         return _loop.data
 
-    def _newChemicalShift(self, chemShift:LoopRow, chemShiftList):
-        """Use chemShift to make a new (v3) chemicalShift in chemShiftList
+    def _getNefName(self, aDef) -> str:
+        """Construct the nefName from aDef.name; account for the different possibilities
         """
+        # all methyls
+        if aDef.isMethyl and aDef.isProton:
+            _nefName = aDef.name[:-1] + '%'
+
+        # Asn, Gln amine groups
+        elif aDef.parent.name in ('ASN','GLN') and aDef.name in 'HD21 HD22 HE21 HE22'.split():
+            _nefName = aDef.name[:-1] + aDef.name[-1:].replace('1','x').replace('2','y')
+
+        # Ade, Gua amine groups
+        elif aDef.parent.name in ('A','DA','G','DG') and aDef.name in 'H61 H62 H21 H22'.split():
+            _nefName = aDef.name[:-1] + aDef.name[-1:].replace('1','x').replace('2','y') \
+
+        # amino acids methylenes
+        elif aDef.parent.isAminoAcid and aDef.isMethylene and aDef.isProton:
+            _nefName = aDef.name[:-1] + aDef.name[-1:].replace('2','x').replace('3','y')
+
+        # nucleic acids methylenes
+        elif aDef.parent.isNucleicAcid and aDef.isMethylene and aDef.isProton:
+            _nefName = aDef.name.replace("''",'x').replace("'",'y')
+
+        # Phe, Tyr aromatic sidechains
+        elif aDef.parent.name in ('PHE','TYR') and aDef.name in 'HD1 CD1 HD2 CD2  HE1 CE1 HE2 CE2'.split():
+            _nefName = aDef.name.replace('1','x').replace('2','y')
+
+        else:
+            _nefName = aDef.name
+
+        return _nefName
+
+    def _parseChemicalShiftRow(self, csRow:LoopRow):
+        """
+        Parse the chemical shift row and assign attributes for subsequent processing
+        :param csRow: a LoopRow instance
+        """
+        csRow.value = float(csRow.get(self._VALUE_TAG))
+        csRow.valueError = float(csRow.get(self._VALUE_ERROR_TAG))
+        figureOfMerit = csRow.get(self._FIGURE_OF_MERIT_TAG)
+        csRow.figureOfMerit = float(figureOfMerit) if figureOfMerit is not None else 1.0
+
+        csRow.sequenceCode = str(csRow.get(self._SEQUENCE_CODE_TAG))
+        csRow.residueType = str(csRow.get(self._RESIDUE_TYPE_TAG))
+        csRow.isotopeCode = '%s%s' % (csRow.get(self._ISOTOPE_TAG_1), csRow.get(self._ISOTOPE_TAG_2))
+        csRow.atomName = str(csRow.get(self._ATOM_NAME_TAG))
+        csRow.ambiguityCode = int(csRow.get(self._AMBIGUITY_CODE))
+
+        csRow.comment = csRow.get(self._COMMENT_TAG)
+
+        # (try to) get the NTdb definition for this residue, atom
+        csRow.ntDef = self._ntDefs.getDef((csRow.residueType, csRow.atomName))
+
+        # convert atomName to NEF;
+        csRow.nefAtomName = self._getNefName(csRow.ntDef)
+
+        csRow.skip = False
+
+    def _newChemicalShift(self, csRow:LoopRow, chemShiftList):
+        """Use chemShift to make a new (v3) chemicalShift in chemShiftList
+        If need be: look back or look ahead into other rows
+        :param csRow: the row to process
+        :param chemShiftList: ChemicalShifList instance to generate new ChemicalShift
+        :return a ChemicalShift instance or None
+        """
+        _row = csRow
+
+        if _row.skip:
+            return None
+
         project = chemShiftList.project
         chainCode = chemShiftList.name
+        atomName = _row.atomName
+
+        if _row.ambiguityCode == 1:
+            # unfortunately:
+
+            # - methyl protons have identical chemical shifts with ambiguity code 1
+            if _row.ntDef.isMethyl and _row.ntDef.isProton:
+                atomName = _row.nefAtomName
+                # We can skip all other methyl protons
+                for _aDef in _row.ntDef.otherAttachedProtons:
+                    _aRow = self._lookupDict.get( (_row.residueType, _row.sequenceCode, _aDef.name) )
+                    _aRow.skip = True
+
+            # - methylene protons with identical chemical shifts have ambiguity code 1
+            elif _row.ntDef.isMethylene and _row.ntDef.isProton:
+                _aDef = _row.ntDef.otherAttachedProtons[0]
+                _aRow = self._lookupDict.get( (_row.residueType, _row.sequenceCode, _aDef.name) )
+                if _row.value == _aRow.value:
+                    _aRow.skip = True
+                    atomName = _row.atomName.replace('2','%').replace('3','%')
+
+            # - Phe, Tyr aromatic protons/carbons (e.g. HD1/HD2) with identical chemical shifts have ambiguity code 1
+            # these occur on non-sequential rows;
+            elif _row.ntDef.parent.name in ('PHE', 'TYR') and _row.atomName in 'HD1 CD1 HD2 CD2 HE1 CE1 HE2 CE2'.split():
+                if atomName.endswith('1'):
+                    _aName = _row.atomName.replace('1','2')
+                elif atomName.endswith('2'):
+                    _aName = _row.atomName.replace('2','1')
+                _aRow = self._lookupDict.get( (_row.residueType, _row.sequenceCode, _aName) )
+                if _row.value == _aRow.value:
+                    _aRow.skip = True
+                    atomName = _row.atomName.replace('1','%').replace('2','%')
+
+        elif _row.ambiguityCode == 2:
+            #  (Val, Leu NEF xy rules propagation; i.e. HDx% connected to CDx)
+            if _row.ntDef.parent.name in ('VAL', 'LEU') and _row.ntDef.isMethyl and _row.ntDef.isProton:
+                atomName = _row.nefAtomName.replace('1','x').replace('2','y')
+                # We can skip all other methyl protons
+                for _aDef in _row.ntDef.otherAttachedProtons:
+                    _aRow = self._lookupDict.get( (_row.residueType, _row.sequenceCode, _aDef.name) )
+                    _aRow.skip = True
+                # propagate xy to carbon; fortunately, these rows appear follow the proton ones so we
+                # can adjust the attributes
+                _cName = _row.ntDef.attachedHeavyAtom.name
+                _cRow = self._lookupDict.get( (_row.residueType, _row.sequenceCode, _cName) )
+                _cRow.nefAtomName = _cRow.atomName.replace('1','x').replace('2','y')
+                _cRow.ambiguityCode = 2
+            else:
+                atomName = _row.nefAtomName
+
+        elif _row.ambiguityCode == 3:
+            #  (Phe, Tyr NEF xy rules propagation; i.e. HDx connected to CDx)
+            if _row.ntDef.parent.name in ('PHE', 'TYR') and _row.atomName in 'HD1 HD2 HE1 HE2'.split():
+                atomName = _row.nefAtomName
+                # propagate to Carbon
+                _cName = _row.ntDef.attachedHeavyAtom.name
+                _cRow = self._lookupDict.get( (_row.residueType, _row.sequenceCode, _cName) )
+                _cRow.nefAtomName = _cRow.atomName.replace('1','x').replace('2','y')
+                _cRow.ambiguityCode = 3
+            else:
+                atomName = _row.nefAtomName
+
+        else:
+            getLogger().warning(f'No provisions for ({_row.residueType},{_row.atomName}) with ambiguity code {_row.ambiguityCode}')
+
+        # get the NmrAtom object
         nmrChain = project.fetchNmrChain(chainCode)
+        nmrResidue = nmrChain.fetchNmrResidue(residueType=_row.residueType, sequenceCode=_row.sequenceCode)
+        nmrAtom = nmrResidue.newNmrAtom(name=atomName, isotopeCode=_row.isotopeCode)
 
-        sequenceCode = str(chemShift.get(self._SEQUENCE_CODE_TAG))
-        residueType = chemShift.get(self._RESIDUE_TYPE_TAG)
-        nmrResidue = nmrChain.fetchNmrResidue(residueType=residueType, sequenceCode=sequenceCode)
+        # create the ChemicalShift
+        chemShift = chemShiftList.newChemicalShift(nmrAtom=nmrAtom,
+                                                   value=_row.value,
+                                                   valueError=_row.valueError,
+                                                   figureOfMerit=_row.figureOfMerit,
+                                                   comment=_row.comment)
 
-        isotopeCode = '%s%s' % (chemShift.get(self._ISOTOPE_TAG_1), chemShift.get(self._ISOTOPE_TAG_2))
-        atomName = str(chemShift.get(self._ATOM_NAME_TAG))
-        ambiguityCode = chemShift.get(self._AMBIGUITY_CODE)
-        # TODO: handle ambiguity codes
-        nmrAtom = nmrResidue.newNmrAtom(name=atomName, isotopeCode=isotopeCode)
-
-        value = chemShift.get(self._VALUE_TAG)
-        valueError = chemShift.get(self._VALUE_ERROR_TAG)
-        figureOfMerit = chemShift.get(self._FIGURE_OF_MERIT_TAG)
-        if figureOfMerit is None:
-            figureOfMerit = 1.0
-
-        comment = chemShift.get(self._COMMENT_TAG)
-
-        chemShiftList.newChemicalShift(nmrAtom=nmrAtom,
-                                       value=value, valueError=valueError, figureOfMerit=figureOfMerit,
-                                       comment=comment)
+        return chemShift
 
     def importIntoProject(self, project) -> list:
         """Import the data of self into project.
@@ -105,8 +232,16 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
                                                      autoUpdate = False,
                                                      comment = f'from BMRB entry {self.entry_id}; {self.name}'
                                                      )
-        for chemShift in self.chemicalShifts:
-            self._newChemicalShift(chemShift, chemShiftList)
+        # A two-stage conversion, as sometimes we need to look back or forward
+        # 'parse'/convert the rows, assigning the attributes; create a lookupDict
+        self._lookupDict = {}
+        for _row in self.chemicalShifts:
+            self._parseChemicalShiftRow(_row)
+            self._lookupDict[(_row.residueType, _row.sequenceCode, _row.atomName)] = _row
+
+        # Loop again to create the V3 chemcialShift objects
+        for _row in self.chemicalShifts:
+            self._newChemicalShift(_row, chemShiftList)
 
         return [chemShiftList]
 

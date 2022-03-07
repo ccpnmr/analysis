@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-03 13:47:41 +0000 (Thu, March 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-07 10:52:17 +0000 (Mon, March 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -107,7 +107,7 @@ class ViolationResultsGuiPlugin(PluginModule):
         # add contents to the scroll frame
         parent = self._scrollFrame
         row = 0
-        Label(parent, text='Calculate Violation Results', bold=True, grid=(row, 0))
+        Label(parent, text='Create Restraint Analysis Data', bold=True, grid=(row, 0))
 
         row += 1
         self._rTable = RestraintTablePulldown(parent=parent,
@@ -204,7 +204,7 @@ class ViolationResultsGuiPlugin(PluginModule):
 class ViolationResultsPlugin(Plugin):
     """Plugin to create violation results from restraintTables and processed violationTables
     """
-    PLUGINNAME = 'Violation Results'
+    PLUGINNAME = 'Create Restraint Analysis Data'
     guiModule = ViolationResultsGuiPlugin
 
     def __init__(self, *args, **kwds):
@@ -320,3 +320,27 @@ class ViolationResultsPlugin(Plugin):
 
 
 ViolationResultsPlugin.register()  # Registers the plugin
+
+
+def main():
+    """Show the violationResults plugin in a test app
+    """
+    from ccpn.ui.gui.widgets.Application import newTestApplication
+    from ccpn.framework.Application import getApplication
+
+    # create a new test application
+    app = newTestApplication(interface='Gui')
+    application = getApplication()
+    mainWindow = application.ui.mainWindow
+
+    # add the module to mainWindow
+    mainWindow.startPlugin(ViolationResultsPlugin)
+
+    # show the mainWindow
+    app.start()
+
+
+if __name__ == '__main__':
+    """Call the test function
+    """
+    main()

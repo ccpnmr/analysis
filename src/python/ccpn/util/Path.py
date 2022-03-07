@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 16:47:15 +0000 (Tue, February 15, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-03-07 22:03:03 +0000 (Mon, March 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -217,7 +217,7 @@ class Path(_Path_):
         else:
             return list(self.glob(f'*.{extension}'))
 
-    def listdir(self, suffix:str=None) -> list:
+    def listdir(self, suffix:str=None, excludeDotFiles=False) -> list:
         """
         If self is a directory path, return a list of its files as Path instance.
         If the suffix is given (e.g.: .pdf, .jpeg...), returns only files of that pattern.
@@ -225,10 +225,16 @@ class Path(_Path_):
         """
         if not self.is_dir():
             raise RuntimeError('listdir: %s: not a directory')
+
         if not suffix:
-            return [Path(f) for f in self.glob('*')]
+            result = [Path(f) for f in self.glob('*')]
         else:
-            return [Path(f) for f in self.glob(f'*{suffix}')]
+            result = [Path(f) for f in self.glob(f'*{suffix}')]
+
+        if excludeDotFiles:
+            return [f for f in result if not str(f).startswith('.')]
+        else:
+            return result
 
     def split3(self):
         """Return a tuple of (.parent, .stem, .suffix) strings

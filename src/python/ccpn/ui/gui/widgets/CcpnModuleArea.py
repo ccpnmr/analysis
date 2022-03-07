@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-03 23:47:27 +0000 (Thu, March 03, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-03-07 15:33:28 +0000 (Mon, March 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -595,8 +595,9 @@ class CcpnModuleArea(ModuleArea, DropBase):
                     try:
                         widg = obj.widget(i)
                         if not docksOnly or (docksOnly and isinstance(widg, (Dock, Container))):
-                            childList = self.childState(widg, docksOnly)
-                            childs.append(childList)
+                            if not widg.isHidden():
+                                childList = self.childState(widg, docksOnly)
+                                childs.append(childList)
                     except Exception as es:
                         getLogger().warning('Error accessing widget: %s - %s - %s' % (str(es), widg, obj))
 

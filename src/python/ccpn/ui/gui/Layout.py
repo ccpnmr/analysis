@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:53 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-03-07 15:33:28 +0000 (Mon, March 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -150,7 +150,8 @@ def _updateGuiModules(mainWindow, layout):
     classNames_ModuleNames = []  #list of tuples [(className, ModuleName), (className, ModuleName)]
     for module in guiModules:
         # if not isinstance(module, GuiSpectrumDisplay): # Displays are not stored here but in the DataModel
-        classNames_ModuleNames.append((module.name(), module.className))
+        if not module.isHidden():
+            classNames_ModuleNames.append((module.name(), module.className))
 
     if GuiModules in layout:
         # if ClassNameModuleName in layout.guiModules:

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-04 18:51:50 +0000 (Fri, March 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-07 10:19:03 +0000 (Mon, March 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -50,15 +50,6 @@ class ExponentialModel(MinimiserModel):
         kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
         super().__init__(ExponentialModel.FITTING_FUNC, **kwargs)
 
-    # def guess(self, data, x, **kwargs):
-    #     """Estimate initial model parameter values from data."""
-    #     try:
-    #         sval, oval = np.polyfit(x, np.log(abs(data) + 1.e-15), 1)
-    #     except TypeError:
-    #         sval, oval = 1., np.log(abs(max(data) + 1.e-9))
-    #     pars = self.make_params(amplitude=np.exp(oval), decay=-1.0 / sval)
-    #     return update_param_vals(pars, self.prefix, **kwargs)
-
 
 class T1FittingModel(FittingModelABC):
     """
@@ -79,7 +70,7 @@ class T1FittingModel(FittingModelABC):
 
     def fitSeries(self, inputData: TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
 
-
+        getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
         xArray = np.array(inputData.SERIESSTEPS)
         # TODO  rescale option
         outputDataDict = defaultdict(list)

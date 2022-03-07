@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-04 18:51:50 +0000 (Fri, March 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-07 10:19:03 +0000 (Mon, March 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,10 +27,10 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 #=========================================================================================
 
 
-from abc import ABC
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.framework.lib.experimentAnalysis.RelaxationFittingModels import _registerRelaxationModels
+from ccpn.util.Logging import getLogger
 
 
 class RelaxationAnalysisBC(SeriesAnalysisABC):
@@ -80,6 +80,7 @@ class RelaxationAnalysisBC(SeriesAnalysisABC):
                                     according to its definitions.
         :return: None
         """
+        getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
 
         if not self.inputDataTables:
             raise RuntimeError('Cannot run any fitting models. Add a valid inputData first')

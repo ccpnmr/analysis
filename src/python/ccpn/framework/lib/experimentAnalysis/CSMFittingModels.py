@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-04 18:51:50 +0000 (Fri, March 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-07 10:19:03 +0000 (Mon, March 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -205,7 +205,7 @@ class OneSiteBindingModel(FittingModelABC):
     Minimiser = Binding1SiteMinimiser
 
     def fitSeries(self, inputData:TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
-
+        getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
         ddc = DeltaDeltaShiftsCalculation()
         frame = ddc.calculateDeltaDeltaShift(inputData, **kwargs)
         xArray = np.array(inputData.SERIESSTEPS)

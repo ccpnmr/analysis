@@ -38,6 +38,8 @@ from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.lib.GuiPath import PathEdit
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets import MessageDialog
+from ccpn.ui.gui.widgets import CheckBox
+from ccpn.ui.gui.widgets import Entry
 import os
 import datetime
 from distutils.dir_util import copy_tree
@@ -203,10 +205,22 @@ class SetupXplorStructureCalculationPopup(CcpnDialogMainWidget):
     def _createWidgets(self):
 
         row = 0
-        self.pathLabel = Label(self.mainWidget, text="Xplor Run Directory", grid=(row, 0))
-        self.pathData = PathEdit(self.mainWidget, grid=(row, 1), vAlign='t', )
-        self.pathDataButton = Button(self.mainWidget, grid=(row, 2), callback=self._getPathFromDialog,
-                                           icon='icons/directory', hPolicy='fixed')
+        # self.pathLabel = Label(self.mainWidget, text="Xplor Run Directory", grid=(row, 0))
+        # self.pathData = PathEdit(self.mainWidget, grid=(row, 1), vAlign='t', )
+        # self.pathDataButton = Button(self.mainWidget, grid=(row, 2), callback=self._getPathFromDialog,
+        #                                    icon='icons/directory', hPolicy='fixed')
+
+        # row += 1
+        # self.runName = Label(self.mainWidget, text="Run name", grid=(row, 0))
+        # self.runNameInput = Entry.IntEntry(self.mainWidget, grid=(row, 1))
+        # self.runNameInput.set('run')
+        #
+        #
+        # row += 1
+        self.runLabel = Label(self.mainWidget, text="Run number", grid=(row, 0))
+        self.runEntry = Entry.IntEntry(self.mainWidget, grid=(row, 1))
+        self.runEntry.set(1)
+
         row += 1
         self.plsLabel = Label(self.mainWidget, text='Select PeakLists', grid=(row, 0),  vAlign='l')
         self.plsWidget = ListWidgetPair(self.mainWidget, grid=(row, 1), gridSpan=(1,3), hAlign='l')
@@ -227,7 +241,14 @@ class SetupXplorStructureCalculationPopup(CcpnDialogMainWidget):
                                          minimumWidths=(0, 100),
                                          sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
                                          callback=None)
+        row += 1
+        self.checkLabel = Label(self.mainWidget, text="Use multicore CPU?", grid=(row, 0))
 
+        self.checkBox = CheckBox.CheckBox(self.mainWidget, grid=(row, 1))
+        self.entryLabel = Label(self.mainWidget, text="CPU Cores", grid=(row, 3))
+
+        self.Entry = Entry.IntEntry(self.mainWidget, grid=(row, 4))
+        self.Entry.set(os.cpu_count())
         self._populateWsFromProjectInfo()
 
     def _populateWsFromProjectInfo(self):
@@ -249,10 +270,12 @@ class SetupXplorStructureCalculationPopup(CcpnDialogMainWidget):
         from  ccpn.AnalysisStructure.lib.runManagers.XplorNihRunManager import XplorNihRunManager
 
         if self.project:
+            runID = self.runEntry.get()
+            # runName = self.runNameInput.get()
             csList = self.cslWidget.getSelectedObject()
             chain = self.mcWidget.getSelectedObject()
             plsPids = self.plsWidget.rightList.getTexts()
-            pathRun = self.pathData.get()
+            # pathRun = self.pathData.get()
             if not csList:
                 MessageDialog.showWarning('', 'Please select a ChemicalShift List first')
                 return
@@ -265,13 +288,20 @@ class SetupXplorStructureCalculationPopup(CcpnDialogMainWidget):
 
             # run the calculation
             project = self.project
+
             myRun = XplorNihRunManager(project = project,
-                                       runName = 'run', runId =1
+                                       runName = 'run', runId =runID
                                        )
             myRun.chemicalShiftList = csList
             myRun.chain = chain
             myRun.peakLists = [project.getByPid(pl) for pl in plsPids]
+
+            myRun.parallel = self.checkBox.isChecked()
+            myRun.parallelNumber = self.Entry.get()
+
             _runDir = myRun.setupCalculation()
+
+
             myRun.saveState()
 
             MessageDialog.showInfo('Setup Xplor_nih calculation',

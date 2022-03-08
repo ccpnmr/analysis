@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-28 11:48:34 +0000 (Mon, February 28, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-03-08 16:17:41 +0000 (Tue, March 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -168,7 +168,7 @@ class GuiRestraintTable(GuiTable):
                                       ('_object', lambda restraint: restraint, 'Object', None, None),
                                       ('Atoms', lambda restraint: GuiRestraintTable._getContributions(restraint),
                                        'Atoms involved in the restraint', None, None),
-                                      ('Target Value.', 'targetValue', 'Target value for the restraint', None, None),
+                                      ('Target Value', 'targetValue', 'Target value for the restraint', None, None),
                                       ('Upper Limit', 'upperLimit', 'Upper limit for the restraint', None, None),
                                       ('Lower Limit', 'lowerLimit', 'Lower limit or the restraint', None, None),
                                       ('Error', 'error', 'Error on the restraint', None, None),

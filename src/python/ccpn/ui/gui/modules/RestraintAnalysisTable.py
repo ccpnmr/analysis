@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-08 17:58:39 +0000 (Tue, March 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-08 18:22:25 +0000 (Tue, March 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -369,9 +369,19 @@ class RestraintAnalysisTableWidget(GuiTable):
     applySortToGroups = False
 
     PRIMARYCOLUMN = '_object'  # column holding active objects (pids for this table)
+    # not the cleanest way for the minute
+    defaultHidden = ['Min_1', 'Min_2', 'Min_3', 'Min_4', 'Min_5',
+                     'Min_6', 'Min_7', 'Min_8', 'Min_9',
+                     'Max_1', 'Max_2', 'Max_3', 'Max_4', 'Max_5',
+                     'Max_6', 'Max_7', 'Max_8', 'Max_9',
+                     'Mean_1', 'Mean_2', 'Mean_3', 'Mean_4', 'Mean_5',
+                     'Mean_6', 'Mean_7', 'Mean_8', 'Mean_9',
+                     'STD_1', 'STD_2', 'STD_3', 'STD_4', 'STD_5',
+                     'STD_6', 'STD_7', 'STD_8', 'STD_9',
+                     ]
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, peakList=None, multiSelect=True,
-                 actionCallback=None, selectionCallback=None, **kwds):
+                 actionCallback=None, selectionCallback=None, hiddenColumns=None, **kwds):
         """
         Initialise the table
         """
@@ -432,9 +442,7 @@ class RestraintAnalysisTableWidget(GuiTable):
                              grid=(row, gridHPos + 1), gridSpan=(1, 1))
         self._widget.getLayout().setColumnStretch(gridHPos + 1, 2)
 
-        # not the cleanest way for the minute
-        self._hiddenColumns = ['Restraint_1', 'Restraint_2', 'Restraint_3', 'Restraint_4', 'Restraint_5',
-                               'Restraint_6', 'Restraint_7', 'Restraint_8', 'Restraint_9']
+        self._hiddenColumns = hiddenColumns or self.defaultHidden
 
         self.dataFrameObject = None
         selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback

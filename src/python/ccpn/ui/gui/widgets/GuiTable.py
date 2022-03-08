@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-04 18:50:46 +0000 (Fri, March 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-03-08 11:09:47 +0000 (Tue, March 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1155,14 +1155,16 @@ class GuiTable(TableWidget, Base):
         return dataDict
 
     def setCurrent(self):
-        """Set self to current.guitTable """
-        self.current.guiTable = self
-        self._setCurrentStyleSheet()
+        """Set self to current.guiTable"""
+        if self.current is not None:
+            self.current.guiTable = self
+            self._setCurrentStyleSheet()
 
     def unsetCurrent(self):
-        """Set self to current.guitTable """
-        self.current.guiTable = None
-        self.setStyleSheet(self._defaultStyleSheet)
+        """Set self to current.guiTable"""
+        if self.current is not None:
+            self.current.guiTable = None
+            self.setStyleSheet(self._defaultStyleSheet)
 
     def _setCurrentStyleSheet(self):
         styleSheet = """GuiTable {

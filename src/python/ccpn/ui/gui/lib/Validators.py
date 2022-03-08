@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-03 13:47:41 +0000 (Thu, March 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-08 16:20:26 +0000 (Tue, March 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -103,7 +103,7 @@ class LineEditValidatorCoreObject(QtGui.QValidator):
         self._target = target
 
     def _isValidInput(self, value):
-        notAllowedSequences = {'Illegal_Characters': '[^A-Za-z0-9_ ]+',
+        notAllowedSequences = {'Illegal_Characters': '[^A-Za-z0-9_ \#\!\@\£\$\%\&\*\(\)\-\=\_\+\[\]\{\}\;]+',
                                'Empty_Spaces'      : '\s',
                                }
 
@@ -148,3 +148,8 @@ class LineEditValidatorCoreObject(QtGui.QValidator):
     def checkState(self):
         state, _, _ = self.validate(self.parent().text(), 0)
         return state
+
+    @property
+    def isValid(self):
+        state, _, _ = self.validate(self.parent().text(), 0)
+        return state == QtGui.QValidator.Acceptable

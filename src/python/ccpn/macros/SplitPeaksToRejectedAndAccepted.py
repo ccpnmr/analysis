@@ -5,10 +5,10 @@ Alpha version of a popup for setting up a structure calculation using Xplor-NIH 
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -17,9 +17,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 __modifiedBy__ = "$Author: Eliza $"
 __dateModified__ = "$Date: 2021-04-27 16:04:57 +0100 (Tue, April 27, 2021) $"
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-29 12:32:54 +0100 (Sun, August 29, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-03-08 22:20:58 +0000 (Tue, March 08, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -30,39 +30,46 @@ __date__ = "$Date: 2021-04-27 16:04:57 +0100 (Tue, April 27, 2021) $"
 #=========================================================================================
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-import ccpn.ui.gui.widgets.CompoundWidgets as cw
+
 from ccpn.ui.gui.widgets.PulldownListsForObjects import PeakListPulldown, ChemicalShiftListPulldown, ChainPulldown
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.ListWidget import ListWidgetPair
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
 
-with undoBlockWithoutSideBar():
-    with notificationEchoBlocking():
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking, \
+    catchExceptions
+from ccpn.util.Logging import getLogger
 
-        def splitRejectedAccept(peaklistPid ,
-                                rejectedcomment = 'rejected',
-                                rejectedcolour = '#FF0000'):
 
-            pkList = get(peaklistPid)
+def splitRejectedAccept(peakList):
+    """Move rejected peaks, i.e. those without a retraint, to a new peakList
+    :return the new PeakList instance
+    """
 
-            pkList.comment = 'Accepted Peak List'
-            pkList.textColour = '#000000'
-            pkList.symbolColour = '#000000'
+    red = '#FF0000'
 
-            #backUpList = get(peaklistPid).copyTo(targetSpectrum=peaklistPid.spectra)
+    getLogger().info(f'{peakList}: {len(peakList.peaks)}')
 
-            rejectedPeakList = get(pkList.spectrum.pid).newPeakList(comment=rejectedcomment,
-                                                            symbolColour=rejectedcolour,
-                                                            textColour=rejectedcolour)
+    acceptedPeaks = [pk for restraint in peakList.project.restraints for pk in restraint.peaks
+                     if pk.peakList == peakList]
+    getLogger().info(f'acceptedPeaks: {len(acceptedPeaks)}')
 
-            for peak in pkList.peaks:
-                if len(peak.restraints) == 0:
-                    peak.copyTo(rejectedPeakList)
-                    peak.delete()
+    rejectedPeaks = [pk for pk in peakList.peaks if pk not in acceptedPeaks]
+    getLogger().info(f'rejectedPeaks: {len(rejectedPeaks)}')
 
-            return
+    with undoBlockWithoutSideBar():
+        with notificationEchoBlocking():
+
+            newPl = peakList.spectrum.newPeakList(comment = 'Rejected Peaks',
+                                                  textColour = red,
+                                                  symbolColour = red)
+            for pk in rejectedPeaks:
+                pk.copyTo(newPl)
+                pk.delete()
+
+    return newPl
+
 
 class SetupSplitPeakListPopup(CcpnDialogMainWidget):
     """
@@ -118,17 +125,20 @@ class SetupSplitPeakListPopup(CcpnDialogMainWidget):
 
     def _okCallback(self):
         if self.project:
-            pkLst = self.pkWidget.getSelectedObject()
+            peakList = self.pkWidget.getSelectedObject()
 
-            if not pkLst:
+            if not peakList:
                 MessageDialog.showWarning('', 'Select a PeakList List')
                 return
-            # run the splting
-            print('Running with peakList: %s' %(pkLst.pid))
 
-            splitRejectedAccept(peaklistPid=pkLst.pid,
-                                rejectedcomment = 'rejected',
-                                rejectedcolour = '#FF0000')
+            # run the splitting
+            with catchExceptions(errorStringTemplate='Split PeakList\n%s'):
+                with MessageDialog.progressManager(parent=self,
+                                                   title=f'Splitting PeakList {peakList}'):
+                    newPeakList = splitRejectedAccept(peakList)
+
+            if len(newPeakList.peaks) > 0:
+                MessageDialog.showInfo('Split PeakList', f'Created {newPeakList} with {len(newPeakList.peaks)} rejected peaks')
 
         self.accept()
 

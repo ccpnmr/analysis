@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-07 10:52:17 +0000 (Mon, March 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-08 17:58:39 +0000 (Tue, March 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -122,7 +122,7 @@ class ViolationResultsGuiPlugin(PluginModule):
         row += 1
         self._vTable = PulldownListCompoundWidget(parent=parent,
                                                   mainWindow=self.mainWindow,
-                                                  labelText="Source Violation Tables",
+                                                  labelText="Source Violation Table",
                                                   grid=(row, 0), gridSpan=(1, 2),
                                                   minimumWidths=(250, 100),
                                                   sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
@@ -130,14 +130,15 @@ class ViolationResultsGuiPlugin(PluginModule):
 
         row += 1
         self._outputName = EntryCompoundWidget(parent=parent,
-                                           mainWindow=self.mainWindow,
-                                           labelText="Output Violation Table Name",
-                                           grid=(row, 0), gridSpan=(1, 2),
-                                           minimumWidths=(250, 100),
-                                           sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
-                                           callback=None,
-                                           compoundKwds={'backgroundText': '> Enter name <'},
-                                           )
+                                               mainWindow=self.mainWindow,
+                                               labelText="Output Violation Table Name",
+                                               grid=(row, 0), gridSpan=(1, 2),
+                                               minimumWidths=(250, 100),
+                                               sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
+                                               callback=None,
+                                               compoundKwds={'backgroundText': '> Enter name <'},
+                                               )
+        self._outputName.entry.returnPressed.connect(self.runGui)
 
         row += 1
         texts = [RUNBUTTON]
@@ -163,12 +164,17 @@ class ViolationResultsGuiPlugin(PluginModule):
         _vTable = self.project.getByPid(self._vTable.getText())
         _runName = self._outputName.getText()
 
+        _title = 'Create Restraint Analysis Data'
         if not (_rTable and _vTable):
-            showWarning('Violation Plugin', 'Please select from the pulldowns')
-        if not _runName:
-            showWarning('Violation Plugin', 'Please select output dataTable name')
+            showWarning(_title, 'Please select from the pulldowns')
+        elif not _runName:
+            showWarning(_title, 'Please select output violationTable name')
+        elif not self._outputName.entry.validator().isValid:
+            showWarning(_title, f'Output violationTable name contains bad characters, or name already exists.\n\n'
+                                f'Check the existing violationTables in structureData {_rTable.structureData}')
 
         else:
+            # create the data
             self.obj[_RESTRAINTTABLE] = _rTable
             self.obj[_VIOLATIONTABLE] = _vTable
             self.obj[_RUNNAME] = _runName
@@ -255,15 +261,22 @@ class ViolationResultsPlugin(Plugin):
             self._logger(f'{models[0].columns}')
 
             restraintsFromModels = []
+            targetsFromModels = []
 
             # use the serial to get the restraint from the peak - make list for each model just to check is actually working
             for mm, _mod in enumerate(models):
                 restraintsFromModel = []
                 restraintsFromModels.append(restraintsFromModel)
+                targetsFromModel = []
+                targetsFromModels.append(targetsFromModel)
+
                 for serial in _mod['restraint_id']:
                     restraintId = Pid.IDSEP.join(('' if x is None else str(x)) for x in (restraintTable.structureData.name, restraintTable.name, serial))
                     modelRestraint = self.project.getObjectsByPartialId(className='Restraint', idStartsWith=restraintId)
                     restraintsFromModel.append(modelRestraint[0].pid if modelRestraint else None)
+                    targetsFromModel.append((modelRestraint[0].targetValue,
+                                             modelRestraint[0].lowerLimit,
+                                             modelRestraint[0].upperLimit) if modelRestraint else None)
 
             # check all the same
             self._logger(str(all(restraintsFromModels[0] == resMod for resMod in restraintsFromModels)))
@@ -294,26 +307,30 @@ class ViolationResultsPlugin(Plugin):
             self._logger('**** atoms *****')
             self._logger(str(atoms))
             pids = pd.DataFrame(restraintsFromModels[0], columns=['pid'])
+            targets = pd.DataFrame(targetsFromModels[0], columns=['targetValue', 'lowerLimit', 'upperLimit'])
+
             # ids = models[0]['restraint_id']
             # subIds = models[0]['restraint_sub_id']
 
             # build the result dataFrame
-            result = pd.concat([pids, atoms, average], ignore_index=True, axis=1)
+            result = pd.concat([pids, atoms, targets, average], ignore_index=True, axis=1)
 
             # rename the columns (lambda just gives the name 'lambda') - try multiLevel?
-            result.columns = ('RestraintPid', 'Atoms', 'Min', 'Max', 'Mean', 'STD', 'Count>0.3', 'Count>0.5')
+            # result.columns = ('RestraintPid', 'Atoms', 'Min', 'Max', 'Mean', 'STD', 'Count>0.3', 'Count>0.5')
+            result.columns = ('Restraint Pid', 'Atoms', 'Target Value', 'Lower Limit', 'Upper Limit', 'Min', 'Max', 'Mean', 'STD', 'Count > 0.3', 'Count > 0.5')
 
             # put into a new dataTable
-            output = restraintTable.structureData.newViolationTable(name=kwargs.get(_RUNNAME))
-            output.setMetadata(_RESTRAINTTABLE, restraintTable.pid)
-            output.setMetadata(_VIOLATIONRESULT, True)
-            output.data = result
+            if (output := restraintTable.structureData.newViolationTable(name=kwargs.get(_RUNNAME))):
+                output.setMetadata(_RESTRAINTTABLE, restraintTable.pid)
+                output.setMetadata(_VIOLATIONRESULT, True)
+                output.data = result
 
-            self._logger(f'\n input restraintTable:    {restraintTable.pid}')
-            self._logger(f' input violationTable:    {violationTable.pid}\n')
-            self._logger(f' output violationTable:   {output.name}\n')
+                self._logger(f'\n Results in structureData:  {restraintTable.structureData.pid}')
+                self._logger(f' input restraintTable:      {restraintTable.pid}')
+                self._logger(f' input violationTable:      {violationTable.pid}\n')
+                self._logger(f' output violationTable:     {output.pid}\n')
 
-            return output
+                return output
 
         else:
             self._logger('ERROR:   violationTable contains no models')

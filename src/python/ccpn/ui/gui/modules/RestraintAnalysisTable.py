@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-03 13:48:41 +0000 (Thu, March 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-08 17:58:39 +0000 (Tue, March 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -72,16 +72,35 @@ HeaderIndex = '#'
 HeaderPeak = 'Peak Serial'
 HeaderObject = '_object'
 HeaderExpand = 'Expand'
-HeaderRestraint = 'RestraintPid'
+HeaderRestraint = 'Restraint Pid'
 HeaderAtoms = 'Atoms'
+HeaderTarget = 'Target Value'
+HeaderLowerLimit = 'Lower Limit'
+HeaderUpperLimit = 'Upper Limit'
 HeaderMin = 'Min'
 HeaderMax = 'Max'
 HeaderMean = 'Mean'
 HeaderStd = 'STD'
-HeaderCount1 = 'Count>0.3'
-HeaderCount2 = 'Count>0.5'
-nefHeaders = ['restraintpid', 'atoms', 'min', 'max', 'mean', 'std', 'count_0_3', 'count_0_5']
-Headers = [HeaderRestraint, HeaderAtoms, HeaderMin, HeaderMax, HeaderMean, HeaderStd, HeaderCount1, HeaderCount2]
+HeaderCount1 = 'Count > 0.3'
+HeaderCount2 = 'Count > 0.5'
+nefHeaders = ['restraintpid', 'atoms',
+              'target_value', 'lower_limit', 'upper_limit',
+              'min', 'max', 'mean', 'std',
+              'count_0_3', 'count_0_5']
+Headers = [HeaderRestraint,
+           HeaderAtoms,
+           HeaderTarget,
+           HeaderLowerLimit,
+           HeaderUpperLimit,
+           HeaderMin,
+           HeaderMax,
+           HeaderMean,
+           HeaderStd,
+           HeaderCount1,
+           HeaderCount2]
+_OLDHEADERS = {'RestraintPid': HeaderRestraint,
+               'Count>0.3'   : HeaderCount1,
+               'Count>0.5'   : HeaderCount2}
 
 ALL = '<Use all>'
 PymolScriptName = 'Restraint_Pymol_Template.py'
@@ -131,28 +150,28 @@ class RestraintAnalysisTableModule(CcpnModule):
 
         # add the settings widgets defined from the following orderedDict - test for refactored
         settingsDict = OrderedDict(((_SPECTRUMDISPLAYS, {'label'   : '',
-                                                          'tipText' : '',
-                                                          'callBack': None,  #self.restraintTablePulldown,
-                                                          'enabled' : True,
-                                                          '_init'   : None,
-                                                          'type'    : SpectrumDisplaySelectionWidget,
-                                                          'kwds'    : {'texts'      : [],
-                                                                       'displayText': [],
-                                                                       'defaults'   : [],
-                                                                       'objectName' : 'SpectrumDisplaysSelection',
-                                                                       'minimumWidths':(180, 100, 100)},
-                                                          }),
+                                                         'tipText' : '',
+                                                         'callBack': None,  #self.restraintTablePulldown,
+                                                         'enabled' : True,
+                                                         '_init'   : None,
+                                                         'type'    : SpectrumDisplaySelectionWidget,
+                                                         'kwds'    : {'texts'        : [],
+                                                                      'displayText'  : [],
+                                                                      'defaults'     : [],
+                                                                      'objectName'   : 'SpectrumDisplaysSelection',
+                                                                      'minimumWidths': (180, 100, 100)},
+                                                         }),
                                     (_RESTRAINTTABLES, {'label'   : '',
                                                         'tipText' : '',
                                                         'callBack': None,  #self.restraintTablePulldown,
                                                         'enabled' : True,
                                                         '_init'   : None,
                                                         'type'    : RestraintTableSelectionWidget,
-                                                        'kwds'    : {'texts'      : [],
-                                                                     'displayText': [],
-                                                                     'defaults'   : [],
-                                                                     'objectName' : 'RestraintTablesSelection',
-                                                                       'minimumWidths':(180, 100, 100)},
+                                                        'kwds'    : {'texts'        : [],
+                                                                     'displayText'  : [],
+                                                                     'defaults'     : [],
+                                                                     'objectName'   : 'RestraintTablesSelection',
+                                                                     'minimumWidths': (180, 100, 100)},
                                                         }),
                                     (_VIOLATIONTABLES, {'label'   : '',
                                                         'tipText' : '',
@@ -160,11 +179,11 @@ class RestraintAnalysisTableModule(CcpnModule):
                                                         'enabled' : True,
                                                         '_init'   : None,
                                                         'type'    : ViolationTableSelectionWidget,
-                                                        'kwds'    : {'texts'      : [],
-                                                                     'displayText': [],
-                                                                     'defaults'   : [],
-                                                                     'objectName' : 'RestraintTablesSelection',
-                                                                       'minimumWidths':(180, 100, 100)},
+                                                        'kwds'    : {'texts'        : [],
+                                                                     'displayText'  : [],
+                                                                     'defaults'     : [],
+                                                                     'objectName'   : 'RestraintTablesSelection',
+                                                                     'minimumWidths': (180, 100, 100)},
                                                         }),
                                     # ('autoExpand', {'label'   : '',
                                     #                 'tipText' : '',
@@ -184,13 +203,13 @@ class RestraintAnalysisTableModule(CcpnModule):
                                                         'enabled' : True,
                                                         '_init'   : None,
                                                         'type'    : DoubleSpinBoxCompoundWidget,
-                                                        'kwds'    : {'labelText': 'Mean Value Lower Limit',
-                                                                     'tipText'  : 'Lower threshold for mean value of restraints',
-                                                                     'range'    : (0.0, 1.0),
-                                                                     'decimals' : 2,
-                                                                     'step'     : 0.05,
-                                                                     'value'    : 0.3,
-                                                                     'minimumWidths':(180, 100, 100)},
+                                                        'kwds'    : {'labelText'    : 'Mean Value Lower Limit',
+                                                                     'tipText'      : 'Lower threshold for mean value of restraints',
+                                                                     'range'        : (0.0, 1.0),
+                                                                     'decimals'     : 2,
+                                                                     'step'         : 0.05,
+                                                                     'value'        : 0.3,
+                                                                     'minimumWidths': (180, 100, 100)},
                                                         }),
                                     ('autoExpand', {'label'   : 'Auto-expand Groups',
                                                     'tipText' : 'Automatically expand/collapse groups on\nadding new restraintTable, or sorting.',
@@ -739,12 +758,15 @@ class RestraintAnalysisTableWidget(GuiTable):
         allItems = []
 
         # building...
-        _buildColumns = [(HeaderIndex, lambda pk, rt: pk.serial),
-                         (HeaderPeak, lambda pk, rt: pk.pid),
-                         (HeaderObject, lambda pk, rt: (pk, rt)),
-                         ]
+        # _buildColumns = [(HeaderIndex, lambda pk, rt: pk.serial),
+        #                  (HeaderPeak, lambda pk, rt: pk.pid),
+        #                  (HeaderObject, lambda pk, rt: (pk, rt)),
+        #                  ]
         _restraintColumns = [(HeaderRestraint, lambda rt: ''),
                              (HeaderAtoms, lambda rt: ''),
+                             (HeaderTarget, lambda rt: 0.0),
+                             (HeaderLowerLimit, lambda rt: 0.0),
+                             (HeaderUpperLimit, lambda rt: 0.0),
                              (HeaderMin, lambda rt: 0.0),
                              (HeaderMax, lambda rt: 0.0),
                              (HeaderMean, lambda rt: 0.0),
@@ -762,7 +784,7 @@ class RestraintAnalysisTableWidget(GuiTable):
             ]
 
         if len(self._restraintTables) > 0:
-            _buildColumns.append((HeaderExpand, lambda pk, rt: self._downIcon))
+            # _buildColumns.append((HeaderExpand, lambda pk, rt: self._downIcon))
             _cols.append((HeaderExpand, lambda row: None, 'TipTex4', None, None))
 
         # for col in range(len(self._restraintTables)):
@@ -913,9 +935,11 @@ class RestraintAnalysisTableWidget(GuiTable):
                 # rename the columns to match the order in visible list - number must match the position in the selected restraintTables
                 for ii, (k, resViol) in enumerate(violationResults.items()):
                     ind = resLists.index(k)
-                    resViol.columns = [vv + f'_{ind + 1}' for vv in resViol.columns]
 
-                    # print(f'columns  {resViol.columns}')
+                    # change old columns to new columns
+                    newCols = [_OLDHEADERS.get(cc, None) or cc for cc in resViol.columns]
+                    # resViol.columns = [vv + f'_{ind + 1}' for vv in resViol.columns]
+                    resViol.columns = [vv + f'_{ind + 1}' for vv in newCols]
 
                 # merge all the tables for each restraintTable
                 _out = [index, allPks]
@@ -924,8 +948,6 @@ class RestraintAnalysisTableWidget(GuiTable):
                     # print(f'      resList {ii}   {resList}')
 
                     if resList in violationResults:
-                        # print(f'       in')
-
                         _left = dfs[resList]
                         _right = violationResults[resList]
                         if (f'{HeaderRestraint}_{ii + 1}' in _left.columns and f'Atoms_{ii + 1}' in _left.columns) and \
@@ -934,8 +956,14 @@ class RestraintAnalysisTableWidget(GuiTable):
                             _out.append(_new)
                             zeroCols.append(f'{HeaderMean}_{ii + 1}')
 
-                        for _colID in (HeaderRestraint, HeaderAtoms, HeaderMin, HeaderMax, HeaderMean, HeaderStd, HeaderCount1, HeaderCount2):
-                            _cols.append((f'{_colID}_{ii + 1}', lambda row: _getValueByHeader(row, f'{_colID}_{ii + 1}'), f'{_colID}_Tip{ii + 1}', None, None))
+                        for _colID in (HeaderRestraint, HeaderAtoms,
+                                       HeaderTarget, HeaderLowerLimit, HeaderUpperLimit,
+                                       HeaderMin, HeaderMax, HeaderMean, HeaderStd,
+                                       HeaderCount1, HeaderCount2):
+                            if f'{_colID}_{ii + 1}' in list(_right.columns):
+                                # check whether all the columns exist - discard otherwise
+                                # columns should have been renamed and post-fixed with _<num>. above
+                                _cols.append((f'{_colID}_{ii + 1}', lambda row: _getValueByHeader(row, f'{_colID}_{ii + 1}'), f'{_colID}_Tip{ii + 1}', None, None))
 
                     else:
                         # lose the PeakSerial column for each
@@ -1127,11 +1155,10 @@ class RestraintAnalysisTableWidget(GuiTable):
         pyMolUtil.runPymolWithScript(self.application, pymolScriptPath)
 
 
-if __name__ == '__main__':
+def main():
     # show the empty module
     from ccpn.ui.gui.widgets.Application import newTestApplication
     from ccpn.framework.Application import getApplication
-
 
     # create a new test application
     app = newTestApplication(interface='Gui')
@@ -1144,3 +1171,7 @@ if __name__ == '__main__':
 
     # show the mainWindow
     app.start()
+
+
+if __name__ == '__main__':
+    main()

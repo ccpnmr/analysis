@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-04 17:51:45 +0000 (Fri, March 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-08 08:29:46 +0000 (Tue, March 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,14 +28,12 @@ __date__ = "$Date: 2020-02-17 10:28:41 +0000 (Thu, February 17, 2022) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.util.Path import aPath, Path
 from ccpn.util.Logging import getLogger
-from ccpn.util.nef.StarIo import NmrDataBlock, NmrSaveFrame, NmrLoop, parseNmrStarFile
-from ccpn.util.nef.GenericStarParser import PARSER_MODE_STANDARD, LoopRow
+from ccpn.util.nef.GenericStarParser import LoopRow
 from ccpn.framework.lib.ccpnNmrStarIo.SaveFrameABC import SaveFrameABC
 
 # from sandbox.Geerten.NTdb.NTdbLib import getNefName
-from sandbox.Geerten.NTdb.NTdbDefs import getNTdbDefs
+from ccpn.framework.lib.NTdb.NTdbDefs import getNTdbDefs
 
 
 class ChemicalShiftSaveFrame(SaveFrameABC):

@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-07 22:03:03 +0000 (Mon, March 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-08 16:35:02 +0000 (Tue, March 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -174,6 +174,14 @@ class Path(_Path_):
         if self.is_dir():
             raise RuntimeError('%s is a directory' % self)
         self.unlink()
+
+    def copyfile(self, destination):
+        """Copy file represented by self to destination.
+        """
+        import shutil
+        if self.is_dir():
+            raise RuntimeError('%s is a directory' % self)
+        shutil.copy2(self, destination)
 
     def assureSuffix(self, suffix):
         """Return Path instance with an assured suffix; adds suffix if not present.

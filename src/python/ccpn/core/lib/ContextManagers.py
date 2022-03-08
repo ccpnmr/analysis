@@ -220,9 +220,9 @@ def catchExceptions(application=None, errorStringTemplate='Error: "%s"', popupAs
         getLogger().warning(errorStringTemplate % str(es))
         if printTraceBack or application._isInDebugMode:
             traceback.print_exc()  # please give more info about the error!
+
         if application.hasGui and popupAsWarning:
             from ccpn.ui.gui.widgets import MessageDialog  # Local import: in case of no-gui, we never get here
-
             MessageDialog.showWarning('Warning', errorStringTemplate % str(es))
         # if application._isInDebugMode:
         #     raise es

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-03 19:09:31 +0000 (Thu, March 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-08 16:17:10 +0000 (Tue, March 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -3635,18 +3635,17 @@ class CcpnNefReader(CcpnNefContent):
         self._updateStringParameters(parameters)
 
         parameters['name'] = framecode[len(category) + 1:]
-        serial = parameters.pop('serial', 1)
-        # columns = parameters.pop('columns', None)
-        columns = saveFrame['ccpn_datatable_columns']
+        parameters.pop('serial', 1)  # not required
+        columns = saveFrame.get('ccpn_datatable_columns')
         if columns:
             columns = json.loads(columns)
 
         # Make main object
         result = project.newDataTable(**parameters)
-        try:
-            result._resetSerial(serial)
-        except Exception as es:
-            self.warning('Could not set serial for {} to {}'.format(result, serial), saveFrame)
+        # try:
+        #     result._resetSerial(serial)
+        # except Exception as es:
+        #     self.warning('Could not set serial for {} to {}'.format(result, serial), saveFrame)
 
         # Load loops, with object as parent
         for loopName in loopNames:

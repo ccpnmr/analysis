@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-01 18:06:36 +0000 (Tue, March 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-09 10:01:33 +0000 (Wed, March 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1208,7 +1208,7 @@ class Project(AbstractWrapperObject):
         dataUrl = memopsRoot.findFirstDataLocationStore(name='standard').findFirstDataUrl(
                 name='remoteData'
                 )
-        dataUrl.url = Implementation.Url(path=str(path))
+        dataUrl.url = Implementation.Url(path=str(path.as_posix()))
 
     def _getAPIObjectsStatus(self, completeScan=False, includeDefaultChildren=False):
         """

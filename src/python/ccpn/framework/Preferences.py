@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:52 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-03-09 17:07:32 +0000 (Wed, March 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ import json
 
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.decorators import singleton
-from ccpn.util.Path import Path, aPath
+from ccpn.util.Path import aPath
 from ccpn.util.Common import uniquify
 
 from ccpn.framework.PathsAndUrls import \
@@ -40,10 +40,11 @@ from ccpn.framework.PathsAndUrls import \
 
 from ccpn.framework.Application import getApplication
 
-ARIA_PATH ='externalPrograms.aria'
-CYANA_PATH ='externalPrograms.cyana'
+
+ARIA_PATH = 'externalPrograms.aria'
+CYANA_PATH = 'externalPrograms.cyana'
 XPLOR_NIH_PATH = 'externalPrograms.xplor'
-TALOS_PATH ='externalPrograms.talos'
+TALOS_PATH = 'externalPrograms.talos'
 PYMOL_PATH = 'externalPrograms.pymol'
 
 USER_DATA_PATH = 'general.dataPath'
@@ -67,7 +68,7 @@ def getPreferences():
 @singleton
 class Preferences(AttrDict):
     """A singleton class to hold the preferences,
-    implemented as a AttrDict of AttrDict of AttrDict
+    implemented as a AttrDict-of-AttrDict-of-AttrDict
     """
 
     def __init__(self, application):
@@ -76,12 +77,14 @@ class Preferences(AttrDict):
         self._applicationVersion = str(application.applicationVersion)
         self._lastPath = None
 
-        if not userPreferencesPath.exists():
+        if not userPreferencesDirectory.exists():
             userPreferencesDirectory.mkdir()
 
         # read the default preference and populate self so all valid keys
         # are defined
-        _prefs = self._readPreferencesFile(defaultPreferencesPath)
+        if not (_prefs := self._readPreferencesFile(defaultPreferencesPath)):
+            raise ValueError(f'Preferences._readPreferences: path {defaultPreferencesPath} does not exist')
+
         self.update(_prefs)
 
     def _readPreferencesFile(self, path):
@@ -90,18 +93,20 @@ class Preferences(AttrDict):
         """
         path = aPath(path)
         if not path.exists():
-            raise ValueError('Preferences._readPreferences: path %s does not exist' % path)
+            return None
 
         with path.open(mode='r') as fp:
             _prefs = json.load(fp, object_hook=AttrDict)
+
         self._lastPath = str(path)
         return _prefs
 
     def _getUserPreferences(self):
         """Read the user preferences file, updating the current values
         """
-        _prefs = self._readPreferencesFile(userPreferencesPath)
-        self._recursiveUpdate(theDict=self, updateDict=_prefs)
+        if (_prefs := self._readPreferencesFile(userPreferencesPath)):
+            self._recursiveUpdate(theDict=self, updateDict=_prefs)
+
         # just some patches to the data
         self.recentMacros = uniquify(self.recentMacros)
 
@@ -116,10 +121,10 @@ class Preferences(AttrDict):
         Recursively update, by expanding any dict-like value first
         """
         if not isinstance(theDict, (dict, AttrDict)):
-            raise ValueError('Preferences._recursiveUpdate: invalid dict  %s' % theDict )
+            raise ValueError(f'Preferences._recursiveUpdate: invalid dict  {theDict}')
 
         if not isinstance(updateDict, (dict, AttrDict)):
-            raise ValueError('Preferences._recursiveUpdate: invalid updateDict  %s' % updateDict )
+            raise ValueError(f'Preferences._recursiveUpdate: invalid updateDict  {updateDict}')
 
         for key, value in theDict.items():
             # check and update for any keys in theDict that are in updateDict
@@ -132,7 +137,8 @@ class Preferences(AttrDict):
                 else:
                     theDict[key] = updateValue
 
-    dashes = '-'*5
+    dashes = '-' * 5
+
     def _recursivePrint(self, theDict, keys=None):
         """print (key, value) of theDict, recursively expanding key for dict-like value's
         """
@@ -143,11 +149,11 @@ class Preferences(AttrDict):
             _keys = keys[:] + [key]
 
             if isinstance(value, AttrDict) and len(_keys) < 2:
-                self._recursivePrint(value, keys=_keys )
+                self._recursivePrint(value, keys=_keys)
 
             else:
                 _keyStr = '.'.join(_keys)
-                print('%-40s : %r' % (_keyStr, value))  \
+                print(f'{_keyStr:40} : {repr(value)}')
 
     def get(self, key, default=None):
         """Return the value for key if key is in the dictionary, else default.
@@ -155,14 +161,14 @@ class Preferences(AttrDict):
         decent.
         """
         if key is None or not isinstance(key, str) or len(key) == 0:
-            raise KeyError('invalid key %r' % key)
+            raise KeyError(f'invalid key {repr(key)}')
 
         _keys = key.split('.')
         _value = AttrDict.get(self, _keys[0], default)
 
         if _value is None or \
-           len(_keys) == 1 or \
-           len(_keys) > 1 and len(_keys[1]) == 0:
+                len(_keys) == 1 or \
+                len(_keys) > 1 and len(_keys[1]) == 0:
             return _value
 
         elif isinstance(_value, (dict, AttrDict)):
@@ -170,7 +176,7 @@ class Preferences(AttrDict):
             return Preferences.get(_value, '.'.join(_keys[1:]), default=default)
 
         else:
-            raise KeyError('invalid key %r; unable to decode' % key)
+            raise KeyError(f'invalid key {repr(key)}; unable to decode')
 
     def print(self):
         """Print items of self
@@ -179,7 +185,4 @@ class Preferences(AttrDict):
         self._recursivePrint(self)
 
     def __str__(self):
-        return '<Preferences: %r>' % self._lastPath
-
-
-
+        return f'<Preferences: {repr(self._lastPath)}>'

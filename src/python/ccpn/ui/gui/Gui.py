@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-04 15:09:09 +0000 (Fri, March 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-03-08 22:14:25 +0000 (Tue, March 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -543,14 +543,14 @@ class Gui(Ui):
 
         with logCommandManager('application.', 'saveProjectAs', newPath, overwrite=overwrite):
             with catchExceptions(errorStringTemplate='Error saving project: %s'):
-                if not self.application._saveProject(newPath=newPath,
-                                                     createFallback=False,
-                                                     overwriteExisting=True):
-                    txt = "Saving project to %s aborted" % newPath
-                    getLogger().warning(txt)
-                    MessageDialog.showError("Project SaveAs", txt, parent=self.mainWindow)
-                    return False
-
+                with MessageDialog.progressManager(self.mainWindow, f'Saving project {newPath} ... '):
+                    if not self.application._saveProject(newPath=newPath,
+                                                         createFallback=False,
+                                                         overwriteExisting=True):
+                        txt = "Saving project to %s aborted" % newPath
+                        getLogger().warning(txt)
+                        MessageDialog.showError("Project SaveAs", txt, parent=self.mainWindow)
+                        return False
 
         self.mainWindow._updateWindowTitle()
         self.application._getRecentProjectFiles(oldPath=oldPath)  # this will also update the list
@@ -568,11 +568,12 @@ class Gui(Ui):
         """Save project.
         :return True if successful
         """
-        success = self.application._saveProject(newPath=None,
-                                                createFallback=True,
-                                                overwriteExisting=True)
-        if not success:
-            return False
+        with catchExceptions(errorStringTemplate='Error saving project: %s'):
+            with MessageDialog.progressManager(self.mainWindow, f'Saving project ... '):
+                if not self.application._saveProject(newPath=None,
+                                                     createFallback=True,
+                                                     overwriteExisting=True):
+                    return False
 
         successMessage = '==> Project successfully saved to "%s"' % self.project.path
         self.mainWindow.statusBar().showMessage(successMessage)

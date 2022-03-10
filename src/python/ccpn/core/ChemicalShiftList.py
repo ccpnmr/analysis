@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-04 18:49:12 +0000 (Fri, March 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-10 21:43:22 +0000 (Thu, March 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -391,6 +391,21 @@ class ChemicalShiftList(AbstractWrapperObject):
 
                     raise ValueError(f'{self.className}.getChemicalShift: shift not found')
 
+                # # this is marginally quicker
+                # _s, _e = 0, len(self._shifts) - 1
+                # _sh = None
+                # while _s <= _e:
+                #     _m = (_s + _e) // 2
+                #     _sh = self._shifts[_m]
+                #     if _sh._uniqueId == uniqueId:
+                #         return _sh
+                #     if _sh._uniqueId > uniqueId:
+                #         _e = _m - 1
+                #     else:
+                #         _s = _m + 1
+                #
+                # raise ValueError(f'{self.className}.getChemicalShift: shift not found')
+
     #=========================================================================================
     # Implementation functions
     #=========================================================================================
@@ -649,11 +664,11 @@ class ChemicalShiftList(AbstractWrapperObject):
 
     @logCommand(get='self')
     def newChemicalShift(self,
-                         value:float = None, valueError:float = None, figureOfMerit:float = 1.0,
+                         value: float = None, valueError: float = None, figureOfMerit: float = 1.0,
                          static: bool = False,
-                         nmrAtom:Union[NmrAtom, str, Pid, None] = None,
-                         chainCode:str = None, sequenceCode:str = None, residueType:str = None, atomName:str = None,
-                         comment:str = None
+                         nmrAtom: Union[NmrAtom, str, Pid, None] = None,
+                         chainCode: str = None, sequenceCode: str = None, residueType: str = None, atomName: str = None,
+                         comment: str = None
                          ):
         """Create new ChemicalShift within ChemicalShiftList.
 

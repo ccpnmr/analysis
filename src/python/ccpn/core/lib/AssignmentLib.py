@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-25 18:55:30 +0000 (Fri, February 25, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-03-10 21:43:22 +0000 (Thu, March 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -209,7 +209,7 @@ def getNmrResiduePrediction(nmrResidue: NmrResidue, chemicalShiftList: ChemicalS
     if not chemicalShifts:
         # get the non-empty shifts of the nmrAtoms
         chemicalShifts = [(nmrAtom._wrappedData, shift) for nmrAtom in nmrResidue.nmrAtoms
-                     for shift in nmrAtom.chemicalShifts if shift.chemicalShiftList == chemicalShiftList and shift.value is not None]
+                          for shift in nmrAtom.chemicalShifts if shift.chemicalShiftList == chemicalShiftList and shift.value is not None]
 
     for code in CCP_CODES:
         predictions[code] = float(getSpinSystemResidueProbability(spinSystem, chemicalShiftList._wrappedData, code,
@@ -415,11 +415,11 @@ def getAllSpinSystems(project: Project, nmrResidues: typing.List[NmrResidue],
         apiChains = [chain._wrappedData for chain in chains]
 
         shifts = [[(nmrResidue._wrappedData, [(nmrAtom._wrappedData, shift)
-                                       for nmrAtom in nmrResidue.nmrAtoms
-                                       for shift in nmrAtom.chemicalShifts if shift.chemicalShiftList == shiftList and shift.value is not None])
-                      for nmrResidue in nmrResidues
-                      ]
-                     for shiftList in shiftLists]
+                                              for nmrAtom in nmrResidue.nmrAtoms
+                                              for shift in nmrAtom.chemicalShifts if shift.chemicalShiftList == shiftList and shift.value is not None])
+                   for nmrResidue in nmrResidues
+                   ]
+                  for shiftList in shiftLists]
 
         chainCodes = [[('Cyss' if (residue.ccpCode == 'Cys' and residue.descriptor == 'link:SG') else residue.ccpCode, residue.molType)
                        for residue in apiChain.residues] for apiChain in apiChains]
@@ -857,12 +857,20 @@ def matchingNmrAtomsForPeaks(peaks: typing.List[Peak],
     N_dims = dimensionCounts[0]
     matchingNmrAtomsPerDimension = []
 
+    _shifts = {}
+    if (csls := set(pk.peakList.chemicalShiftList for pk in peaks)):
+        for csl in csls:
+            _data = csl._data
+            _vals = {_data.iloc[ii]['nmrAtom']: _data.iloc[ii]['value'] for ii in range(_data.shape[0])}
+            _shifts[csl] = _vals
+
     for dim in range(N_dims):
         # Find and add the NmrAtoms that dimension dim in all peaks
         common = set(nmrAtoms)  # ejb - was empty?
         for peak in peaks:
             matchingNmrAtoms = matchingNmrAtomsForPeakDimension(peak, dim, nmrAtoms,
-                                                                doubleTolerance=doubleTolerance)
+                                                                doubleTolerance=doubleTolerance,
+                                                                shifts=_shifts)
             # '&=' is set intersection update
             common &= matchingNmrAtoms
         matchingNmrAtomsPerDimension.append(common)
@@ -871,7 +879,8 @@ def matchingNmrAtomsForPeaks(peaks: typing.List[Peak],
 
 
 def matchingNmrAtomsForPeakDimension(peak: Peak, dim: int, nmrAtoms: typing.List[NmrAtom],
-                                     doubleTolerance: bool = False) -> typing.Set[NmrAtom]:
+                                     doubleTolerance: bool = False,
+                                     shifts: dict = None) -> typing.Set[NmrAtom]:
     """Find the nmrAtoms that match a dimension of one peak, both with respect to isotopeCode
     and tolerance setting.
 
@@ -895,26 +904,30 @@ def matchingNmrAtomsForPeakDimension(peak: Peak, dim: int, nmrAtoms: typing.List
 
     for nmrAtom in nmrAtoms:
         if nmrAtom.isotopeCode == isotopeCode and \
-                withinTolerance(nmrAtom, position, shiftList, tolerance):
+                withinTolerance(nmrAtom, position, shiftList, tolerance, shifts):
             matchingNmrAtoms.add(nmrAtom)
 
     return matchingNmrAtoms
 
 
-def withinTolerance(nmrAtom: NmrAtom, position: float, shiftList: ChemicalShiftList, tolerance: float):
+def withinTolerance(nmrAtom: NmrAtom, position: float, shiftList: ChemicalShiftList, tolerance: float, shifts):
     """Decides whether the shift of the nmrAtom is
        within the tolerance to be assigned to the
        peak dimension.
-
     """
-    shift = shiftList.getChemicalShift(nmrAtom)
-    if shift:
-        _value = shift.value
-        # if _value is None or position is None or tolerance is None:
-        #     print('>>>', _value, position, tolerance)
+    if shiftList in shifts:
+        _value = shifts[shiftList].get(nmrAtom.pid) if nmrAtom else None
         if _value is not None and abs(position - _value) <= tolerance:
             return True
-    return False
+
+    # shift = shiftList.getChemicalShift(nmrAtom)
+    # if shift:
+    #     _value = shift.value
+    #     # if _value is None or position is None or tolerance is None:
+    #     #     print('>>>', _value, position, tolerance)
+    #     if _value is not None and abs(position - _value) <= tolerance:
+    #         return True
+    # return False
 
 
 def peaksAreOnLine(peaks: typing.List[Peak], dimIndex: int):

@@ -283,7 +283,12 @@ def _getApplicationSpecificModules(mainWindow, applicationName) -> list:
      :return a list of modules
      """
     modules = []
-    from ccpn.framework.Application import ANALYSIS_ASSIGN, ANALYSIS_METABOLOMICS, ANALYSIS_STRUCTURE, ANALYSIS_SCREEN
+    from ccpn.framework.Application import  ANALYSIS_METABOLOMICS, ANALYSIS_STRUCTURE, ANALYSIS_SCREEN
+    try:
+        from ccpn.AnalysisAssign import modules as aA
+        modules.append(aA)
+    except Exception as e:
+        getLogger().debug("Import Error for AnalysisAssign, %s" % e)
 
     if applicationName == ANALYSIS_SCREEN:
         try:
@@ -293,13 +298,6 @@ def _getApplicationSpecificModules(mainWindow, applicationName) -> list:
         except Exception as e:
             getLogger().debug("Import Error for AnalysisScreen, %s" % e)
 
-    if applicationName == ANALYSIS_ASSIGN:
-        try:
-            from ccpn.AnalysisAssign import modules as aA
-
-            modules.append(aA)
-        except Exception as e:
-            getLogger().debug("Import Error for AnalysisAssign, %s" % e)
 
     if applicationName == ANALYSIS_METABOLOMICS:
         try:

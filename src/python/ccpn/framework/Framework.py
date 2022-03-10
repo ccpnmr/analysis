@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: varioustoxins $"
-__dateModified__ = "$dateModified: 2022-03-06 11:29:48 +0000 (Sun, March 06, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-03-10 21:10:22 +0000 (Thu, March 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -248,13 +248,17 @@ class Framework(NotifierBase, GuiBase):
             return True
         return False
 
+    #-----------------------------------------------------------------------------------------
+    # Useful (?) directories as Path instances
+    #-----------------------------------------------------------------------------------------
+
     @property
     def statePath(self) -> Path:
         """
         :return: the absolute path to the state sub-directory of the current project
                  as a Path instance
         """
-        return aPath(self.project.path) / CCPN_STATE_DIRECTORY
+        return self.project.statePath
 
     @property
     def pipelinePath(self) -> Path:
@@ -262,7 +266,7 @@ class Framework(NotifierBase, GuiBase):
         :return: the absolute path to the state/pipeline sub-directory of
                  the current project as a Path instance
         """
-        return self.statePath / Pipeline.className
+        return self.project.pipelinePath
 
     @property
     def dataPath(self) -> Path:
@@ -270,7 +274,7 @@ class Framework(NotifierBase, GuiBase):
         :return: the absolute path to the data sub-directory of the current project
                  as a Path instance
         """
-        return aPath(self.project.path) / CCPN_DATA_DIRECTORY
+        return self.project.dataPath
 
     @property
     def spectraPath(self):
@@ -278,7 +282,7 @@ class Framework(NotifierBase, GuiBase):
         :return: the absolute path to the data sub-directory of the current project
                  as a Path instance
         """
-        return aPath(self.project.path) / CCPN_SPECTRA_DIRECTORY
+        return self.project.spectraPath
 
     @property
     def pluginDataPath(self) -> Path:
@@ -286,7 +290,7 @@ class Framework(NotifierBase, GuiBase):
         :return: the absolute path to the data/plugins sub-directory of the
                  current project as a Path instance
         """
-        return aPath(self.project.path) / CCPN_PLUGINS_DIRECTORY
+        return self.project.pluginDataPath
 
     @property
     def scriptsPath(self) -> Path:
@@ -294,7 +298,7 @@ class Framework(NotifierBase, GuiBase):
         :return: the absolute path to the script sub-directory of the current project
                  as a Path instance
         """
-        return aPath(self.project.path) / CCPN_SCRIPTS_DIRECTORY
+        return self.project.scriptsPath
 
     @property
     def archivesPath(self) -> Path:
@@ -302,10 +306,10 @@ class Framework(NotifierBase, GuiBase):
         :return: the absolute path to the archives sub-directory of the current project
                  as a Path instance
         """
-        return aPath(self.project.path) / CCPN_ARCHIVES_DIRECTORY\
+        return self.project.archivesPath
 
     @property
-    def tempMacrosPath(self):
+    def tempMacrosPath(self) -> Path:
         """
         :return: the absolute path to the ~/.ccpn/macros directory
                  as a Path instance

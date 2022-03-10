@@ -1,10 +1,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -12,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:29:57 +0100 (Mon, September 13, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-03-10 21:10:22 +0000 (Thu, March 10, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -95,19 +95,41 @@ class LabeledHLine(Frame):
     """A class to make a Frame with an Hline - Label - Hline
     """
 
-    def __init__(self, parent=None, height=30, text=None, bold=False,
-                 style=HLine.SOLID_LINE, colour=QtCore.Qt.black, lineWidth=2, **kwds):
+    def __init__(self, parent=None, height=30, text=None, bold=False, sides='both',
+                 style=HLine.SOLID_LINE, colour=QtCore.Qt.black, lineWidth=2,
+                 **kwds):
+        """
+        Draw a horizontal line and a label
+        :param parent:
+        :param height:
+        :param text:
+        :param bold:
+        :param sides: either of 'both', 'left', 'right'
+        :param style:
+        :param colour:
+        :param lineWidth:
+        :param kwds:
+        """
+
         super(LabeledHLine, self).__init__(parent=parent, setLayout=True, showBorder=False, **kwds)
         self.setFixedHeight(height)
 
         # first line
-        self._line1 = Frame(parent=self, grid=(0, 0), setLayout=True, showBorder=False, hPolicy='expanding')
-        HLine(self._line1, grid=(0, 0), style=style, colour=colour, lineWidth=lineWidth, height=height, divisor=2)
+        if sides == 'left' or sides == 'both':
+            self._line1 = Frame(parent=self, grid=(0, 0), setLayout=True, showBorder=False, hPolicy='expanding')
+            HLine(self._line1, grid=(0, 0), style=style, colour=colour, lineWidth=lineWidth, height=height, divisor=2)
+        else:
+            self._line1 = None
+
         # the label with text
         self._label = Label(parent=self, grid=(0, 1), text=text, bold=bold, hAlign='centre')
-        # the second line
-        self._line2 = Frame(parent=self, grid=(0, 2), setLayout=True, showBorder=False, hPolicy='expanding')
-        HLine(self._line2, grid=(0, 0), style=style, colour=colour, lineWidth=lineWidth, height=height, divisor=2)
+
+        if sides == 'right' or sides == 'both':
+            # the second line
+            self._line2 = Frame(parent=self, grid=(0, 2), setLayout=True, showBorder=False, hPolicy='expanding')
+            HLine(self._line2, grid=(0, 0), style=style, colour=colour, lineWidth=lineWidth, height=height, divisor=2)
+        else:
+            self._line2 = None
 
     def setText(self, text):
         """Set the text of the widget"""

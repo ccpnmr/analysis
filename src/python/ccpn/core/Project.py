@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-01 18:06:36 +0000 (Tue, March 01, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-03-10 11:20:43 +0000 (Thu, March 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -50,7 +50,16 @@ from ccpn.util.Path import aPath, Path
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import logCommand
 
+from ccpn.framework.lib.pipeline.PipelineBase import Pipeline
 from ccpn.framework.PathsAndUrls import CCPN_EXTENSION
+from ccpn.framework.PathsAndUrls import \
+    CCPN_ARCHIVES_DIRECTORY, \
+    CCPN_STATE_DIRECTORY, \
+    CCPN_DATA_DIRECTORY, \
+    CCPN_SPECTRA_DIRECTORY, \
+    CCPN_PLUGINS_DIRECTORY, \
+    CCPN_SCRIPTS_DIRECTORY, \
+    CCPN_SUB_DIRECTORIES
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpnmodel.ccpncore.memops import Notifiers
@@ -259,8 +268,91 @@ class Project(AbstractWrapperObject):
         self._wrappedData.collectionData = value
 
     #-----------------------------------------------------------------------------------------
+    # (Sub-)directories of the project
+    #-----------------------------------------------------------------------------------------
+    @property
+    def projectPath(self) -> Path:
+        """
+        Convenience, as project.path (currently) does not yield a Path instance
+        :return: the absolute path to the project as a Path instance
+        """
+        return aPath(self.path)
 
+    @property
+    def statePath(self) -> Path:
+        """
+        :return: the absolute path to the state sub-directory of the current project
+                 as a Path instance
+        """
+        return self.projectPath / CCPN_STATE_DIRECTORY
+
+    @property
+    def pipelinePath(self) -> Path:
+        """
+        :return: the absolute path to the state/pipeline sub-directory of
+                 the current project as a Path instance
+        """
+        return self.statePath / Pipeline.className
+
+    @property
+    def dataPath(self) -> Path:
+        """
+        :return: the absolute path to the data sub-directory of the current project
+                 as a Path instance
+        """
+        return self.projectPath / CCPN_DATA_DIRECTORY
+
+    @property
+    def spectraPath(self):
+        """
+        :return: the absolute path to the data sub-directory of the current project
+                 as a Path instance
+        """
+        return self.projectPath / CCPN_SPECTRA_DIRECTORY
+
+    @property
+    def pluginDataPath(self) -> Path:
+        """
+        :return: the absolute path to the data/plugins sub-directory of the
+                 current project as a Path instance
+        """
+        return self.projectPath / CCPN_PLUGINS_DIRECTORY
+
+    @property
+    def scriptsPath(self) -> Path:
+        """
+        :return: the absolute path to the script sub-directory of the current project
+                 as a Path instance
+        """
+        return self.projectPath / CCPN_SCRIPTS_DIRECTORY
+
+    @property
+    def archivesPath(self) -> Path:
+        """
+        :return: the absolute path to the archives sub-directory of the current project
+                 as a Path instance
+        """
+        return aPath(self.project.path) / CCPN_ARCHIVES_DIRECTORY
+
+    # TODO: define not using API
+    @property
+    def backupPath(self):
+        """path to directory containing  backup Project"""
+        backupRepository = self._wrappedData.parent.findFirstRepository(name="backup")
+
+        if not backupRepository:
+            self._logger.warning('Warning: no backup path set, so no backup done')
+            return
+
+        backupUrl = backupRepository.url
+        backupPath = backupUrl.path
+        return backupPath
+
+
+    #-----------------------------------------------------------------------------------------
     # Implementation methods
+    #-----------------------------------------------------------------------------------------
+
     def __init__(self, wrappedData: ApiNmrProject):
         """ Special init for root (Project) object
 
@@ -400,12 +492,10 @@ class Project(AbstractWrapperObject):
         self._wrappedData.data = value
 
     def _checkProjectSubDirectories(self):
-        """if need be, create all project subdirectories"""
-        from ccpn.framework.PathsAndUrls import CCPN_SUB_DIRECTORIES
-
-        _path = aPath(self.path)
+        """if need be, create all project subdirectories
+        """
         for dir in CCPN_SUB_DIRECTORIES:
-            _path.fetchDir((dir))
+            self.projectPath.fetchDir(dir)
 
     def _initialiseProject(self):
         """Complete initialisation of project,
@@ -596,19 +686,6 @@ class Project(AbstractWrapperObject):
         """return absolute path to directory containing Project
         """
         return apiIo.getRepositoryPath(self._wrappedData.root, 'userData')
-
-    @property
-    def backupPath(self):
-        """path to directory containing  backup Project"""
-        backupRepository = self._wrappedData.parent.findFirstRepository(name="backup")
-
-        if not backupRepository:
-            self._logger.warning('Warning: no backup path set, so no backup done')
-            return
-
-        backupUrl = backupRepository.url
-        backupPath = backupUrl.path
-        return backupPath
 
     @logCommand('project.')
     def deleteObjects(self, *objs: typing.Sequence[typing.Union[str, Pid.Pid, AbstractWrapperObject]]):

@@ -16,8 +16,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-07 15:33:28 +0000 (Mon, March 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-03-10 21:07:05 +0000 (Thu, March 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -283,9 +283,11 @@ def _getApplicationSpecificModules(mainWindow, applicationName) -> list:
      :return a list of modules
      """
     modules = []
-    from ccpn.framework.Application import  ANALYSIS_METABOLOMICS, ANALYSIS_STRUCTURE, ANALYSIS_SCREEN
+    from ccpn.framework.Application import ANALYSIS_METABOLOMICS, ANALYSIS_STRUCTURE, ANALYSIS_SCREEN
+
     try:
         from ccpn.AnalysisAssign import modules as aA
+
         modules.append(aA)
     except Exception as e:
         getLogger().debug("Import Error for AnalysisAssign, %s" % e)
@@ -297,7 +299,6 @@ def _getApplicationSpecificModules(mainWindow, applicationName) -> list:
             modules.append(aS)
         except Exception as e:
             getLogger().debug("Import Error for AnalysisScreen, %s" % e)
-
 
     if applicationName == ANALYSIS_METABOLOMICS:
         try:

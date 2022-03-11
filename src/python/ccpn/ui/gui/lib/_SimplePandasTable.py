@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-03 16:50:05 +0000 (Thu, March 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-11 15:25:57 +0000 (Fri, March 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ import pandas as pd
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND
-from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT, getFontHeight, getFont
+from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT, getFontHeight
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.core.lib.CcpnSorting import universalSortKey
@@ -197,6 +197,10 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
                     _selModel.blockSignals(False)
                     self.blockSignals(False)
 
+
+#=========================================================================================
+# _SimplePandasTableModel
+#=========================================================================================
 
 class _SimplePandasTableModel(QtCore.QAbstractTableModel):
     """A simple table model to view pandas DataFrames
@@ -387,6 +391,12 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         else:
             _cols.pop(QtCore.Qt.BackgroundRole, None)
 
+    @staticmethod
+    def _universalSort(values):
+        # generate the universal sort key values for the column
+        _series = pd.Series([universalSortKey(val) for val in list(values)])
+        return _series
+
     def sort(self, column: int, order: QtCore.Qt.SortOrder = ...) -> None:
         """Sort the underlying pandas DataFrame
         Required as there is no poxy model to handle the sorting
@@ -394,25 +404,16 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         self.layoutAboutToBeChanged.emit()
 
         col = self._data.columns[column]
-
         _newData = self._data.copy()
+
         # create temporary column to facilitate the new ordering after pandas sorting
         _newData['_sortOrder'] = range(_newData.shape[0])
 
         # perform the sort on the specified column
-        def _universalSort(values):
-            # generate the universal sort key values for the column
-            _series = pd.Series([universalSortKey(val) for val in list(values)])
-            return _series
-
         _newData.sort_values(by=col, ascending=True if order else False, inplace=True,
-                             key=lambda values: _universalSort(values))
+                             key=lambda values: self._universalSort(values))
         self._oldSortOrder = self._sortOrder
         self._sortOrder = list(_newData['_sortOrder'])
-
-        # # store the new ordering and remove from the dataFrame
-        # self._sortOrder = list(self._data['_sortOrder'])
-        # self._data.drop(['_sortOrder'], axis=1, inplace=True)
 
         # emit a signal to spawn an update of the table and notify headers to update
         self.layoutChanged.emit()
@@ -424,6 +425,10 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         idxs = [(self._sortOrder[idx.row()], idx.column()) if idx.isValid() else (None, None) for idx in indexes]
         return idxs
 
+
+#=========================================================================================
+# _SimplePandasTableHeaderModel
+#=========================================================================================
 
 class _SimplePandasTableHeaderModel(QtCore.QAbstractTableModel):
     """A simple table model to view pandas DataFrames

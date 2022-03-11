@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-10 21:43:22 +0000 (Thu, March 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-11 10:30:22 +0000 (Fri, March 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -851,22 +851,26 @@ def matchingNmrAtomsForPeaks(peaks: typing.List[Peak],
     """
 
     dimensionCounts = [peak.spectrum.dimensionCount for peak in peaks]
-    #All peaks should have the same number of dimensions.
+    # All peaks should have the same number of dimensions.
     if not len(set(dimensionCounts)) == 1:
         return []
     N_dims = dimensionCounts[0]
     matchingNmrAtomsPerDimension = []
 
+    # make dicts from the chemicalShiftLists containing the nmrAtom.pid -> shift value
+    #   very quick from the dataFrame
     _shifts = {}
     if (csls := set(pk.peakList.chemicalShiftList for pk in peaks)):
         for csl in csls:
             _data = csl._data
+
+            # get the values from the dataFrame
             _vals = {_data.iloc[ii]['nmrAtom']: _data.iloc[ii]['value'] for ii in range(_data.shape[0])}
             _shifts[csl] = _vals
 
     for dim in range(N_dims):
         # Find and add the NmrAtoms that dimension dim in all peaks
-        common = set(nmrAtoms)  # ejb - was empty?
+        common = set(nmrAtoms)
         for peak in peaks:
             matchingNmrAtoms = matchingNmrAtomsForPeakDimension(peak, dim, nmrAtoms,
                                                                 doubleTolerance=doubleTolerance,
@@ -888,7 +892,6 @@ def matchingNmrAtomsForPeakDimension(peak: Peak, dim: int, nmrAtoms: typing.List
     """
 
     matchingNmrAtoms = set()
-    # shiftList = getShiftlistForPeak(peak)
     spectrum = peak.peakList.spectrum
     shiftList = peak.peakList.chemicalShiftList
     position = peak.position[dim]
@@ -903,6 +906,7 @@ def matchingNmrAtomsForPeakDimension(peak: Peak, dim: int, nmrAtoms: typing.List
         tolerance *= 2.0
 
     for nmrAtom in nmrAtoms:
+        # find the nmrAtoms with tolerances of the specified position - use the shifts for reference
         if nmrAtom.isotopeCode == isotopeCode and \
                 withinTolerance(nmrAtom, position, shiftList, tolerance, shifts):
             matchingNmrAtoms.add(nmrAtom)
@@ -910,24 +914,24 @@ def matchingNmrAtomsForPeakDimension(peak: Peak, dim: int, nmrAtoms: typing.List
     return matchingNmrAtoms
 
 
-def withinTolerance(nmrAtom: NmrAtom, position: float, shiftList: ChemicalShiftList, tolerance: float, shifts):
+def withinTolerance(nmrAtom: NmrAtom, position: float, shiftList: ChemicalShiftList, tolerance: float, shifts: dict = None):
     """Decides whether the shift of the nmrAtom is
        within the tolerance to be assigned to the
        peak dimension.
     """
-    if shiftList in shifts:
+    if shifts is not None and shiftList in shifts:
         _value = shifts[shiftList].get(nmrAtom.pid) if nmrAtom else None
         if _value is not None and abs(position - _value) <= tolerance:
             return True
 
-    # shift = shiftList.getChemicalShift(nmrAtom)
-    # if shift:
-    #     _value = shift.value
-    #     # if _value is None or position is None or tolerance is None:
-    #     #     print('>>>', _value, position, tolerance)
-    #     if _value is not None and abs(position - _value) <= tolerance:
-    #         return True
-    # return False
+    else:
+        # calculate manually, much slower
+        shift = shiftList.getChemicalShift(nmrAtom)
+        if shift:
+            _value = shift.value
+            if _value is not None and abs(position - _value) <= tolerance:
+                return True
+        return False
 
 
 def peaksAreOnLine(peaks: typing.List[Peak], dimIndex: int):

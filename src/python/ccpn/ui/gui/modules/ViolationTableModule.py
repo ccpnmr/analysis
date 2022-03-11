@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-07 14:10:12 +0000 (Mon, March 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-11 15:52:47 +0000 (Fri, March 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,14 +28,14 @@ __date__ = "$Date: 2021-10-29 16:38:09 +0100 (Fri, October 29, 2021) $"
 
 from PyQt5 import QtWidgets
 import pandas as pd
-from ccpn.core.ViolationTable import ViolationTable
+from ccpn.core.ViolationTable import ViolationTable as KlassTable
 
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.PulldownListsForObjects import ViolationTablePulldown, RestraintTablePulldown
+from ccpn.ui.gui.widgets.PulldownListsForObjects import ViolationTablePulldown as KlassPulldown, RestraintTablePulldown
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Splitter import Splitter
@@ -50,6 +50,10 @@ ALL = '<all>'
 _RESTRAINTTABLE = 'restraintTable'
 
 
+#=========================================================================================
+# ViolationTableModule
+#=========================================================================================
+
 class ViolationTableModule(CcpnModule):
     """
     This class implements the module by wrapping a ViolationTable instance
@@ -62,14 +66,14 @@ class ViolationTableModule(CcpnModule):
     includeNmrChains = False
     includeSpectrumTable = False
 
-    className = 'ViolationTableModule'
+    className = f'{KlassTable.className}Module'
     _allowRename = True
 
     activePulldownClass = None
     _includeInLastSeen = False
 
-    def __init__(self, mainWindow=None, name='ViolationTable Module',
-                 violationTable=None, selectFirstItem=False):
+    def __init__(self, mainWindow=None, name=f'{KlassTable.className} Module',
+                 table=None, selectFirstItem=False):
         """
         Initialise the Module widgets
         """
@@ -82,16 +86,14 @@ class ViolationTableModule(CcpnModule):
             self.project = mainWindow.application.project
             self.current = mainWindow.application.current
         else:
-            self.application = None
-            self.project = None
-            self.current = None
+            self.application = self.project = self.current = None
         self._table = None
 
         # add the widgets
         self._setWidgets()
 
-        if violationTable is not None:
-            self._selectTable(violationTable)
+        if table is not None:
+            self._selectTable(table)
         elif selectFirstItem:
             self._modulePulldown.selectFirstItem()
 
@@ -125,13 +127,13 @@ class ViolationTableModule(CcpnModule):
                QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
                grid=(0, 0), gridSpan=(1, 1))
         row += 1
-        self._modulePulldown = ViolationTablePulldown(parent=_topWidget,
-                                                      mainWindow=self.mainWindow, default=None,
-                                                      grid=(row, 0), gridSpan=(1, 2), minimumWidths=(0, 100),
-                                                      showSelectName=True,
-                                                      sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
-                                                      callback=self._selectionPulldownCallback,
-                                                      )
+        self._modulePulldown = KlassPulldown(parent=_topWidget,
+                                             mainWindow=self.mainWindow, default=None,
+                                             grid=(row, 0), gridSpan=(1, 2), minimumWidths=(0, 100),
+                                             showSelectName=True,
+                                             sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
+                                             callback=self._selectionPulldownCallback,
+                                             )
         # fixed height
         self._modulePulldown.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
 
@@ -186,8 +188,8 @@ class ViolationTableModule(CcpnModule):
         """
         Manually select a ViolationTable from the pullDown
         """
-        if not isinstance(table, ViolationTable):
-            getLogger().warning(f'select: Object {table} is not of type ViolationTable')
+        if not isinstance(table, KlassTable):
+            getLogger().warning(f'select: Object {table} is not of type {KlassTable.className}')
             return
         else:
             for widgetObj in self._modulePulldown.textList:
@@ -262,12 +264,16 @@ class ViolationTableModule(CcpnModule):
                 showWarning('Data Table', str(es))
 
 
+#=========================================================================================
+# _tableWidget
+#=========================================================================================
+
 class _tableWidget(_SimplePandasTableView):
     """
     Class to present a ViolationTable
     """
     className = '_tableWidget'
-    attributeName = 'violationTables'
+    attributeName = KlassTable._pluralLinkName
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, **kwds):
         """
@@ -309,7 +315,7 @@ class _tableWidget(_SimplePandasTableView):
         CallBack for Drop events
         """
         pids = data.get('pids', [])
-        self._handleDroppedItems(pids, ViolationTable, self.moduleParent._modulePulldown)
+        self._handleDroppedItems(pids, KlassTable, self.moduleParent._modulePulldown)
 
     def _close(self):
         """
@@ -347,3 +353,32 @@ class _tableWidget(_SimplePandasTableView):
                 openNew = showYesNo(title, msg)
                 if openNew:
                     _openItemObject(self.mainWindow, others)
+
+
+#=========================================================================================
+# main
+#=========================================================================================
+
+def main():
+    """Show the dataTableModule
+    """
+    from ccpn.ui.gui.widgets.Application import newTestApplication
+    from ccpn.framework.Application import getApplication
+
+    # create a new test application
+    app = newTestApplication(interface='Gui')
+    application = getApplication()
+    mainWindow = application.ui.mainWindow
+
+    # add a module
+    _module = ViolationTableModule(mainWindow=mainWindow)
+    mainWindow.moduleArea.addModule(_module)
+
+    # show the mainWindow
+    app.start()
+
+
+if __name__ == '__main__':
+    """Call the test function
+    """
+    main()

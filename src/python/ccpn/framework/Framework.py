@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-10 21:10:22 +0000 (Thu, March 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-11 15:52:47 +0000 (Fri, March 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1775,7 +1775,7 @@ class Framework(NotifierBase, GuiBase):
             relativeTo = mainWindow.moduleArea
         if dataTable:
             # _dataTableModule = DataTableModuleBC(dataTable, name=dataTable.name, mainWindow=mainWindow)
-            _dataTableModule = _module(mainWindow=mainWindow, dataTable=dataTable)
+            _dataTableModule = _module(mainWindow=mainWindow, table=dataTable)
             mainWindow.moduleArea.addModule(_dataTableModule, position=position, relativeTo=relativeTo)
             return _dataTableModule
 
@@ -1790,7 +1790,7 @@ class Framework(NotifierBase, GuiBase):
         if not relativeTo:
             relativeTo = mainWindow.moduleArea
         if violationTable:
-            _violationTableModule = _module(mainWindow=mainWindow, violationTable=violationTable)
+            _violationTableModule = _module(mainWindow=mainWindow, table=violationTable)
             mainWindow.moduleArea.addModule(_violationTableModule, position=position, relativeTo=relativeTo)
             return _violationTableModule
 

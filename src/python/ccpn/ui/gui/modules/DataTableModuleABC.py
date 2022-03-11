@@ -1,5 +1,3 @@
-
-
 import pandas as pd
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.GuiTable import GuiTable, _getValueByHeader, _setValueByHeader
@@ -9,6 +7,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+
 
 ALL = '<all>'
 
@@ -29,16 +28,16 @@ class GuiDataTableBC(GuiTable):
         self.dataTable = dataTable
 
         super().__init__(parent=parent,
-                        mainWindow=self.mainWindow,
-                        dataFrameObject=None,
-                        setLayout=True,
-                        autoResize=True, multiSelect=True,
-                        selectionCallback=self.selection,
-                        actionCallback=self.action,
-                        checkBoxCallback=self.actionCheckBox,
-                        allowRowDragAndDrop=allowRowDragAndDrop,
-                        grid=(0, 0)
-                        )
+                         mainWindow=self.mainWindow,
+                         dataFrameObject=None,
+                         setLayout=True,
+                         autoResize=True, multiSelect=True,
+                         selectionCallback=self.selection,
+                         actionCallback=self.action,
+                         checkBoxCallback=self.actionCheckBox,
+                         allowRowDragAndDrop=allowRowDragAndDrop,
+                         grid=(0, 0)
+                         )
         self.moduleParent = moduleParent
 
     def selection(self, *args):
@@ -52,7 +51,7 @@ class GuiDataTableBC(GuiTable):
 
     def setDataTable(self, dataTable):
         df = dataTable.data
-        if len(dataTable.data)>0:
+        if len(dataTable.data) > 0:
             colDefs = ColumnClass([(x, lambda row: _getValueByHeader(row, x), None, None, None) for x in df.columns])
             columnsMap = {x: x for x in df.columns}
             dfo = self.getDataFromFrame(self, df, colDefs, columnsMap)
@@ -67,7 +66,6 @@ class DataTableModuleBC(CcpnModule):
     includeSettingsWidget = True
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
     settingsPosition = 'left'
-
 
     className = 'DataTableModule'
 
@@ -97,7 +95,6 @@ class DataTableModuleBC(CcpnModule):
         if dataTable:
             self.guiTable.setDataTable(dataTable)
 
-
     def _handleDroppedItems(self, dd):
         print('DROPPED: ', dd)
 
@@ -105,10 +102,10 @@ class DataTableModuleBC(CcpnModule):
         print('_handleEnteredtems', dd)
 
 
-
-if __name__ == '__main__':
+def main():
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
+
     app = TestApplication()
     win = QtWidgets.QMainWindow()
     moduleArea = CcpnModuleArea(mainWindow=None, )
@@ -120,3 +117,7 @@ if __name__ == '__main__':
     win.resize(1000, 2000)
     win.show()
     app.start()
+
+
+if __name__ == '__main__':
+    main()

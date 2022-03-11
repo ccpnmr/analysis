@@ -4,10 +4,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-21 09:57:10 +0100 (Tue, September 21, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-03-11 18:38:07 +0000 (Fri, March 11, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -91,12 +91,12 @@ def hexToRgba(hx, transparency=1.0):
     cols.append(transparency)
     return tuple(cols)
 
+
 def hexToRgbaArray(array, transparency=1.0):
     cc = []
     for hx in array:
         cc.append(hexToRgba(hx, transparency))
     return np.array(cc)
-
 
 
 # sRGB luminance(Y) values
@@ -1077,9 +1077,10 @@ if __name__ == '__main__':
                     horizontalalignment='left',
                     verticalalignment='center')
 
-            ax.hlines(y + h * 0.1, xi_line, xf_line,
-                      color=colors[name] if name in colors else name,
-                      linewidth=(h * 0.6))
+            if name in colors:
+                ax.hlines(y + h * 0.1, xi_line, xf_line,
+                          color=colors[name] if name in colors else name,
+                          linewidth=(h * 0.6))
 
         ax.set_xlim(0, X)
         ax.set_ylim(0, Y)

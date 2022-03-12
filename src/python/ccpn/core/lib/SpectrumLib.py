@@ -1477,12 +1477,10 @@ def estimateNoiseLevel1D(y, f=10, stdFactor=0.5) -> Tuple[float, float]:
         return eMax, eMin
     percent = percentage(f, int(len(y)))
     fy = y[:int(percent)]
-
     stdValue = np.std(fy) * stdFactor
-
     eMax = np.max(fy) + stdValue
     eMin = np.min(fy) - stdValue
-    return eMax, eMin
+    return float(eMax), float(eMin)
 
 
 def _filterROI1Darray(x, y, roi):
@@ -2120,7 +2118,7 @@ def fetchPeakPicker(spectrum):
     """
     from ccpn.util.traits.CcpNmrJson import CcpNmrJson
     from ccpn.core.Spectrum import Spectrum
-    from ccpn.core.lib.PeakPickers.Simple1DPeakPicker import Simple1DPeakPicker
+    from ccpn.core.lib.PeakPickers.PeakPicker1D import PeakPicker1D
     from ccpn.core.lib.PeakPickers.PeakPickerNd import PeakPickerNd
     from ccpn.core.lib.PeakPickers.PeakPickerABC import getPeakPickerTypes, PEAKPICKERPARAMETERS
 
@@ -2136,7 +2134,7 @@ def fetchPeakPicker(spectrum):
     peakPickers = getPeakPickerTypes()
     default1DPickerType = preferences.general.peakPicker1d
     if default1DPickerType is None or len(default1DPickerType) == 0 or default1DPickerType not in peakPickers:
-        default1DPickerType = Simple1DPeakPicker.peakPickerType
+        default1DPickerType = PeakPicker1D.peakPickerType
 
     defaultNDPickerType = preferences.general.peakPickerNd
     if defaultNDPickerType is None or len(defaultNDPickerType) == 0 or defaultNDPickerType not in peakPickers:

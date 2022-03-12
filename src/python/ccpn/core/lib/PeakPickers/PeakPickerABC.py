@@ -30,7 +30,7 @@ __date__ = "$Date: 2021-01-13 10:28:41 +0000 (Wed, Jan 13, 2021) $"
 
 from json import loads
 from collections import OrderedDict
-
+import numpy as np
 from ccpn.util.traits.CcpNmrJson import CcpNmrJson
 from ccpn.util.traits.CcpNmrTraits import CFloat, CInt, CBool, CString
 from ccpn.util.Logging import getLogger
@@ -191,6 +191,8 @@ class PeakPickerABC(CcpNmrJson):
         # attributes not required to be persistent between load/save
         self.lastPickedPeaks = None
         self.sliceTuples = None
+        # attribute needed for 1D when manually picking within a SpectrumDisplay box
+        self._intensityLimits = (np.inf, -np.inf)
 
     def setDefaultParameters(self):
         """Set default values for all parameters

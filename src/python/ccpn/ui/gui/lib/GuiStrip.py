@@ -2502,6 +2502,9 @@ class GuiStrip(Frame):
                 _sliceTuples = _displayedSpectrum.getSliceTuples(regions)
                 positiveThreshold = spectrum.positiveContourBase if spectrum.includePositiveContours else None
                 negativeThreshold = spectrum.negativeContourBase if spectrum.includeNegativeContours else None
+                if spectrum.dimensionCount == 1:
+                    spectrum.peakPicker._intensityLimits = regions[1] #needed to make sure it peaks only inside the selected box.
+                    positiveThreshold, negativeThreshold = None, None # get automatically
 
                 for thisPeakListView in validPeakListViews:
                     peakList = thisPeakListView.peakList

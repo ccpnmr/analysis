@@ -44,7 +44,8 @@ from ccpn.ui.gui.widgets.SpectraSelectionWidget import SpectraSelectionWidget
 from ccpn.ui.gui.widgets.MessageDialog import _stoppableProgressBar
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 from ccpn.ui.gui.widgets.Spacer import Spacer
-
+import numpy as np
+from ccpn.core.lib.SpectrumLib import estimateNoiseLevel1D
 
 Estimated = 'Estimated'
 Manual = 'Manual'
@@ -242,20 +243,11 @@ class PickPeak1DPopup(CcpnDialog):
                                                    tipTexts=None)
 
         self.noiseLevelFactorLabel = Label(self, text='Noise Level Factor')
-        self.noiseLevelFactorSpinbox = DoubleSpinbox(self, value=10.0, min=0.01, step=0.1)
-
+        self.noiseLevelFactorSpinbox = DoubleSpinbox(self, value=0.1, min=0.01, step=0.1)
         self.noiseLevelSpinbox = DoubleSpinbox(self)
         self.noiseLevelSpinbox.hide()
         self.noiseLevelSpinbox.setValue(10000)
-        self.noiseLevelSpinbox.setMaximum(10000000)
-
-        self.maximumFilterSize = Label(self, text="Select Maximum Filter Size")
-        self.maximumFilterSizeSpinbox = Spinbox(self, value=5.0, min=0, max=100)
-
-        modes = ['wrap', 'reflect', 'constant', 'nearest', 'mirror']
-        self.maximumFilterMode = Label(self, text="Select Maximum Filter Mode")
-        self.maximumFilterModePulldownList = PulldownList(self, texts=modes)
-
+        self.noiseLevelSpinbox.setMaximum(np.inf)
         self.pickCancelButtons = ButtonList(self,
                                             texts=['Cancel', 'Find Peaks'],
                                             callbacks=[self.reject, self._pickFromSelectedSpectra],
@@ -272,11 +264,6 @@ class PickPeak1DPopup(CcpnDialog):
         self.tabGeneralSetupLayout.addWidget(self.noiseLevelFactorLabel, 3, 0)
         self.tabGeneralSetupLayout.addWidget(self.noiseLevelFactorSpinbox, 3, 1)
         self.tabGeneralSetupLayout.addWidget(self.noiseLevelSpinbox, 3, 1)
-
-        self.tabGeneralSetupLayout.addWidget(self.maximumFilterSize, 4, 0)
-        self.tabGeneralSetupLayout.addWidget(self.maximumFilterSizeSpinbox, 4, 1)
-        self.tabGeneralSetupLayout.addWidget(self.maximumFilterMode, 5, 0)
-        self.tabGeneralSetupLayout.addWidget(self.maximumFilterModePulldownList, 5, 1)
         self.tabGeneralSetupLayout.addWidget(self.pickNegativeLabel, 6, 0)
         self.tabGeneralSetupLayout.addWidget(self.pickNegativeCheckBox, 6, 1)
         self.mainLayout.addWidget(self.pickCancelButtons, 10, 1)
@@ -302,17 +289,22 @@ class PickPeak1DPopup(CcpnDialog):
     def _pickFromSelectedSpectra(self):
 
         spectra = list(set(self.spectraSelectionWidget._getSelectedSpectra() + self.spectraSelectionWidget._getSpectrumGroupsSpectra()))
-        negativePeaks = self.pickNegativeCheckBox.get()
-        size = self.maximumFilterSizeSpinbox.value()
-        mode = self.maximumFilterModePulldownList.getText()
+        pickNegativePeaks = self.pickNegativeCheckBox.get()
         ignoredRegions = self.excludedRegionsTab._getExcludedRegions()
         noiseThreshold = self._getNoiseThreshold()
         noiseThresholdFactor = self.noiseLevelFactorSpinbox.value()
         with notificationEchoBlocking():
             for spectrum in _stoppableProgressBar(spectra):
-                spectrum.peakLists[0].pickPeaks1dFiltered(size=size, mode=mode, excludeRegions=ignoredRegions,
-                                                          factor=noiseThresholdFactor,
-                                                          positiveNoiseThreshold=noiseThreshold, negativePeaks=negativePeaks)
+                if noiseThreshold == 0:
+                    pNoiseT, nNoiseT = estimateNoiseLevel1D(spectrum.intensities, stdFactor=noiseThresholdFactor)
+                else:
+                    pNoiseT, nNoiseT = noiseThreshold, -noiseThreshold
+                ppmRegions = dict(zip(spectrum.axisCodes, spectrum.spectrumLimits))
+                spectrum.pickPeaks( peakList=None,
+                                    positiveThreshold=pNoiseT,
+                                    negativeThreshold=nNoiseT if pickNegativePeaks else None,
+                                    **ppmRegions)
+
         self.accept()
 
 

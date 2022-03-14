@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-14 13:19:38 +0000 (Mon, March 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-14 15:42:17 +0000 (Mon, March 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -179,6 +179,7 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
         if _model._sortOrder and _model._oldSortOrder:
             # get the pre-sorted mapping
             if (_rows := set(_model._oldSortOrder[itm.row()] for itm in _selection)):
+                # block so no signals emitted
                 self.blockSignals(True)
                 _selModel.blockSignals(True)
 
@@ -193,7 +194,7 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
                     self.selectionModel().select(_newSel, QtCore.QItemSelectionModel.Rows | QtCore.QItemSelectionModel.ClearAndSelect)
 
                 finally:
-                    # unblock so nothing responds
+                    # unblock to enable again
                     _selModel.blockSignals(False)
                     self.blockSignals(False)
 
@@ -356,7 +357,7 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         return _width
 
     def setForeground(self, row, column, colour):
-        """Set the foreground colour for cell at position (row, column).
+        """Set the foreground colour for dataFrame cell at position (row, column).
 
         :param row: row as integer
         :param column: column as integer
@@ -374,7 +375,7 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
             _cols.pop(QtCore.Qt.ForegroundRole, None)
 
     def setBackground(self, row, column, colour):
-        """Set the background colour for cell at position (row, column).
+        """Set the background colour for dataFrame cell at position (row, column).
 
         :param row: row as integer
         :param column: column as integer
@@ -393,13 +394,15 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
 
     @staticmethod
     def _universalSort(values):
+        """Method to apply sorting
+        """
         # generate the universal sort key values for the column
         _series = pd.Series([universalSortKey(val) for val in list(values)])
         return _series
 
     def sort(self, column: int, order: QtCore.Qt.SortOrder = ...) -> None:
         """Sort the underlying pandas DataFrame
-        Required as there is no poxy model to handle the sorting
+        Required as there is no proxy model to handle the sorting
         """
         self.layoutAboutToBeChanged.emit()
 

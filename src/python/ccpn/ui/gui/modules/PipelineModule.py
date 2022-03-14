@@ -79,6 +79,7 @@ PipelinePath = 'PipelinePath'
 
 class GuiPipeline(CcpnModule, Pipeline):
     includeSettingsWidget = True
+    _includeInLastSeen = False
     maxSettingsState = 2
     settingsPosition = 'top'
     className = 'GuiPipeline'

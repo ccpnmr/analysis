@@ -106,11 +106,13 @@ class PeakPicker1DPipe(SpectraPipe):
                             noiseThresholds = self.pipeline._kwargs[NoiseThreshold]
                             spectrum.noiseLevel = max(noiseThresholds) or None
                             spectrum.negativeNoiseLevel = min(noiseThresholds) or None
-
-                        spectrum.peakLists[DefaultPeakListIndex].peakFinder1D(maxNoiseLevel=spectrum.noiseLevel,
-                                                                              minNoiseLevel=spectrum.negativeNoiseLevel,
-                                                                              ignoredRegions=excludeRegions, negativePeaks=False,
-                                                                              )
+                        pl = spectrum.peakLists[DefaultPeakListIndex]
+                        spectrum.pickPeaks(peakList=pl, positiveThreshold=spectrum.noiseLevel,
+                                                        minNoiseLevel=spectrum.negativeNoiseLevel,)
+                        # spectrum.peakLists[DefaultPeakListIndex].peakFinder1D(maxNoiseLevel=spectrum.noiseLevel,
+                        #                                                       minNoiseLevel=spectrum.negativeNoiseLevel,
+                        #                                                       ignoredRegions=excludeRegions, negativePeaks=False,
+                        #                                                       )
                     else:
                         getLogger().warning('Error: PeakList not found for Spectrum: %s. Add a new PeakList first' % spectrum.pid)
         getLogger().info(self._finishedInfo)

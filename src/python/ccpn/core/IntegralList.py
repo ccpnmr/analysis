@@ -164,8 +164,8 @@ class IntegralList(PMIListABC):
         noiseThreshold: value used to calculate the intersectingLine to get the peak limits
         """
         # TODO: add excludeRegions option. Calculate Negative peak integral.
-        # self._project.suspendNotification()
-        from ccpn.core.lib.peakUtils import simple1DPeakPicker
+        # self._project.suspendNotification
+        from ccpn.core.lib.PeakPickers.PeakPicker1D import _find1DMaxima
         from ccpn.core.PeakList import estimateNoiseLevel1D
 
         try:
@@ -203,7 +203,7 @@ class IntegralList(PMIListABC):
                     filteredX =  filteredX[0].flatten()
                     # filteredY = filteredY[1].compressed()
                     if findPeak:  # pick peaks and link to integral
-                        maxValues, minValues = simple1DPeakPicker(y=filteredY, x=filteredX, negDelta=0, delta=noiseThreshold)
+                        maxValues, minValues = _find1DMaxima(y=filteredY, x=filteredX, negDelta=0, delta=noiseThreshold)
                         if len(maxValues) > 1:  #calculate centre of mass or     #   add to multiplet ??
 
                             positions = []

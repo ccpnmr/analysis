@@ -159,102 +159,6 @@ def getPeakLinewidth(peak, dim):
     return 'None'
 
 
-def _get1DPeaksPosAndHeightAsArray(peakList):
-    import numpy as np
-
-    positions = np.array([peak.position[0] for peak in peakList.peaks])
-    heights = np.array([peak.height for peak in peakList.peaks])
-    return [positions, heights]
-
-
-import sys
-from numpy import NaN, Inf, arange
-from numba import jit
-
-
-@jit(nopython=True, nogil=True)
-def simple1DPeakPicker(y, x, delta, negDelta=None, negative=False):
-    """
-    from https://gist.github.com/endolith/250860#file-readme-md which was translated from
-    http://billauer.co.il/peakdet.html Eli Billauer, 3.4.05.
-    Explicitly not copyrighted and any uses allowed.
-    """
-
-    maxtab = []
-    mintab = []
-    mn, mx = Inf, -Inf
-    mnpos, mxpos = NaN, NaN
-    lookformax = True
-    if negDelta is None: negDelta = 0
-
-    for i in arange(len(y)):
-        this = y[i]
-        if this > mx:
-            mx = this
-            mxpos = x[i]
-        if this < mn:
-            mn = this
-            mnpos = x[i]
-        if lookformax:
-            if not negative:  # just positives
-                this = abs(this)
-            if this < mx - delta:
-                maxtab.append((float(mxpos), float(mx)))
-                mn = this
-                mnpos = x[i]
-                lookformax = False
-        else:
-            if this > mn + delta:
-                mintab.append((float(mnpos), float(mn)))
-                mx = this
-                mxpos = x[i]
-                lookformax = True
-
-    filteredNeg = []
-    for p in mintab:
-        pos, height = p
-        if height <= negDelta:
-            filteredNeg.append(p)
-    filtered = []
-    for p in maxtab:
-        pos, height = p
-        if height >= delta:
-            filtered.append(p)
-
-    return filtered, filteredNeg
-
-
-def _estimateDeltaPeakDetect(y, xPercent=10):
-    import numpy as np
-
-    deltas = y[1:] - y[:-1]
-    delta = np.std(np.absolute(deltas))
-    # just on the noisy part of spectrum
-    partialYpercent = (len(y) * xPercent) / 100
-    partialY = y[:int(partialYpercent)]
-    partialDeltas = partialY[1:] - partialY[:-1]
-    partialDelta = np.std(np.absolute(partialDeltas))
-    diff = abs(partialDelta + delta) / 2
-    return delta
-
-
-def _estimateDeltaPeakDetectSTD(y, xPercent=10):
-    """
-    :param y: intensities of spectrum
-    :param xPercent: the percentage of the spectra points to use as training to calculate delta.
-    :return: a delta intesities of the required percentage of the spectra
-    """
-
-    import numpy as np
-
-    # just on the noisy part of spectrum
-    partialYpercent = (len(y) * xPercent) / 100
-    partialY = y[:int(partialYpercent)]
-    partialDeltas = partialY[1:] - partialY[:-1]
-    partialDelta = np.amax(np.absolute(partialDeltas))
-
-    return partialDelta
-
 
 def _pairIntersectionPoints(intersectionPoints):
     """ Yield successive pair chunks from list of intersectionPoints """
@@ -1018,7 +922,7 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
 
     """
     from ccpn.core.lib.SpectrumLib import estimateNoiseLevel1D
-
+    from ccpn.core.lib.PeakPickers.PeakPicker1D import _find1DMaxima
     spectrum = peak.peakList.spectrum
     x = spectrum.positions
     y = spectrum.intensities
@@ -1053,7 +957,7 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
         spectrum.negativeNoiseLevel = negativeNoiseLevel
 
     x_filtered, y_filtered = _1DregionsFromLimits(x, y, [a, b])
-    maxValues, minValues = simple1DPeakPicker(y_filtered, x_filtered, noiseLevel, negDelta=negativeNoiseLevel,
+    maxValues, minValues = _find1DMaxima(y_filtered, x_filtered, noiseLevel, negDelta=negativeNoiseLevel,
                                               negative=doNeg)
     allValues = maxValues + minValues
 
@@ -1244,8 +1148,10 @@ def _getPeakSNRatio(peak, factor=2.5):
             spectrum.noiseLevel, spectrum.negativeNoiseLevel = noiseLevel, negativeNoiseLevel
             getLogger().warning('Spectrum noise level(s) not defined for %s. Estimated default' % spectrum.pid)
         else:
-            getLogger().warning('Not implemented yet')
-            return None
+            noiseLevel = spectrum.estimateNoise()
+            negativeNoiseLevel = -noiseLevel
+            spectrum.noiseLevel, spectrum.negativeNoiseLevel = noiseLevel, negativeNoiseLevel
+            getLogger().warning('Spectrum noise level(s) not defined for %s. Estimated default' % spectrum.pid)
     if peak.height is None:
         updateHeight(peak)
         _getPeakSNRatio(peak)

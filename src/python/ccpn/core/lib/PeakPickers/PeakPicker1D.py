@@ -33,7 +33,7 @@ from numba import jit
 import numpy as np
 
 @jit(nopython=True, nogil=True)
-def _findMaxima(y, x, positiveThreshold, negativeThreshold=None, findNegative=False):
+def _find1DMaxima(y, x, positiveThreshold, negativeThreshold=None, findNegative=False):
     """
     from https://gist.github.com/endolith/250860#file-readme-md which was translated from
     http://billauer.co.il/peakdet.html Eli Billauer, 3.4.05.
@@ -121,10 +121,10 @@ class PeakPicker1D(PeakPickerABC):
         peaks = []
         x = np.arange(int(self.spectrum.referencePoints[0]),len(data))
         self._setThresholds()
-        maxValues, minValues = _findMaxima(y=data, x=x,
-                                           positiveThreshold=self.positiveThreshold,
-                                           negativeThreshold=self.negativeThreshold,
-                                           findNegative=self._doNegativePeaks)
+        maxValues, minValues = _find1DMaxima(y=data, x=x,
+                                             positiveThreshold=self.positiveThreshold,
+                                             negativeThreshold=self.negativeThreshold,
+                                             findNegative=self._doNegativePeaks)
         for position, height in maxValues:
             if self._isHeightWithinIntesityLimits(height):
                 pk = SimplePeak(points=(float(position),), height=float(height))

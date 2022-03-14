@@ -131,9 +131,8 @@ class PeakList(PMIListABC):
                     fitMethod: str = GAUSSIANMETHOD, excludedRegions=None,
                     excludedDiagonalDims=None, excludedDiagonalTransform=None,
                     minDropFactor: float = 0.1):
-
+        getLogger().warning('Deprecated method. Use spectrum.pickPeaks instead')
         from ccpn.core.lib.PeakListLib import _pickPeaksNd
-
         return _pickPeaksNd(self, regionToPick=regionToPick,
                             doPos=doPos, doNeg=doNeg,
                             fitMethod=fitMethod,
@@ -142,52 +141,6 @@ class PeakList(PMIListABC):
                             excludedDiagonalTransform=excludedDiagonalTransform,
                             minDropFactor=minDropFactor)
 
-    def pickPeaks1d(self, dataRange, intensityRange, peakFactor1D=1) -> List['Peak']:
-        """
-        Pick 1D peaks from a dataRange
-        """
-        from ccpn.core.lib.PeakListLib import _pickPeaks1d
-
-        return _pickPeaks1d(self, dataRange, intensityRange, peakFactor1D=peakFactor1D)
-
-    def pickPeaks1d_(self, dataRange, intensityRange=None, size: int = 3, mode: str = 'wrap') -> List['Peak']:
-        """
-        Pick 1D peaks from a dataRange
-        """
-        from ccpn.core.lib.PeakListLib import _pickPeaks1d_
-
-        return _pickPeaks1d_(self, dataRange, intensityRange=intensityRange, size=size, mode=mode)
-
-    @logCommand(get='self')
-    def pickPeaks1dFiltered(self, size: int = 9, mode: str = 'wrap', factor=10, excludeRegions=None,
-                            positiveNoiseThreshold=None, negativeNoiseThreshold=None, negativePeaks=True, stdFactor=0.5):
-        """
-        Pick 1D peaks from data in self.spectrum.
-        """
-        from ccpn.core.lib.PeakListLib import _pickPeaks1dFiltered
-
-        return _pickPeaks1dFiltered(self, size=size,
-                                    mode=mode,
-                                    factor=factor,
-                                    excludeRegions=excludeRegions,
-                                    positiveNoiseThreshold=positiveNoiseThreshold,
-                                    negativeNoiseThreshold=negativeNoiseThreshold,
-                                    negativePeaks=negativePeaks,
-                                    stdFactor=stdFactor)
-
-    def _noiseLineWidth(self):
-        from ccpn.core.IntegralList import _getPeaksLimits
-
-        x, y = np.array(self.spectrum.positions), np.array(self.spectrum.intensities)
-        x, y = x[:int(len(x) / 20)], y[:int(len(x) / 20)],
-        noiseMean = np.mean(y)
-        intersectingLine = [noiseMean] * len(x)
-        limitsPairs = _getPeaksLimits(x, y, intersectingLine)
-        widths = [0]
-        for i in limitsPairs:
-            lineWidth = abs(i[0] - i[1])
-            widths.append(lineWidth)
-        return np.std(widths)
 
     @logCommand(get='self')
     def estimateVolumes(self, volumeIntegralLimit=2.0):
@@ -206,52 +159,6 @@ class PeakList(PMIListABC):
                 else:
                     getLogger().warning('Peak %s contains undefined height/lineWidths' % str(pp))
 
-    def _pick1DsingleMaximum(self, maxNoiseLevel=None,
-                             minNoiseLevel=None,
-                             ignoredRegions=[[20, 19]],
-                             eNoiseThresholdFactor=1.5,
-                             useXRange=10):
-        """
-        :param maxNoiseLevel:
-        :param minNoiseLevel:
-        :param ignoredRegions:
-        :param eNoiseThresholdFactor:
-        :param useXRange:
-        :return: Used for spectra where only one observable is expected. E.g. 19F reference spectra for screening.
-        """
-        peaks = []
-        spectrum = self.spectrum
-        x, y = spectrum.positions, spectrum.intensities
-        masked = _filtered1DArray(np.array([x, y]), ignoredRegions)
-        filteredX, filteredY = masked[0].compressed(), masked[1].compressed()
-        if maxNoiseLevel is None and minNoiseLevel is None:
-            maxNoiseLevel, minNoiseLevel = estimateNoiseLevel1D(y, f=useXRange, stdFactor=eNoiseThresholdFactor)
-        maxValue = np.argmax(filteredY)
-        spectrum.noiseLevel = float(maxNoiseLevel)
-        spectrum.negativeNoiseLevel = float(minNoiseLevel)
-        if maxValue:
-            peak = self.newPeak(ppmPositions=[float(x[maxValue]), ], height=float(y[maxValue]))
-            snr = peak.signalToNoiseRatio
-            peaks.append(peak)
-        return peaks
-
-    def peakFinder1D(self, maxNoiseLevel=None, minNoiseLevel=None,
-                     ignoredRegions=[[20, 19]], negativePeaks=False,
-                     eNoiseThresholdFactor=1.5,
-                     recalculateSNR=True,
-                     deltaPercent=10,
-                     useXRange=1):
-
-        from ccpn.core.lib.PeakListLib import _peakFinder1D
-
-        return _peakFinder1D(self, maxNoiseLevel=maxNoiseLevel,
-                             minNoiseLevel=minNoiseLevel,
-                             ignoredRegions=ignoredRegions,
-                             negativePeaks=negativePeaks,
-                             eNoiseThresholdFactor=eNoiseThresholdFactor,
-                             recalculateSNR=recalculateSNR,
-                             deltaPercent=deltaPercent,
-                             useXRange=useXRange)
 
     @logCommand(get='self')
     def copyTo(self, targetSpectrum: Spectrum, targetPeakList=None, includeAllPeakProperties=True,

@@ -2493,7 +2493,7 @@ class Spectrum(AbstractWrapperObject):
         return self.dataSource.getRegionData(sliceTuples, aliasingFlags=[1] * self.dimensionCount)
 
     @logCommand(get='self')
-    def createPeak(self, peakList=None, **ppmPositions) -> Optional['Peak']:
+    def createPeak(self, peakList=None, height=None, **ppmPositions) -> Optional['Peak']:
         """Create and return peak at position specified by the ppmPositions dict.
 
         Ppm positions are passed in as a dict of (axisCode, ppmValue) key, value pairs
@@ -2513,7 +2513,7 @@ class Spectrum(AbstractWrapperObject):
         :return: new peak or None
         """
         from ccpn.core.lib.SpectrumLib import _createPeak
-        return _createPeak(self, peakList, **ppmPositions)
+        return _createPeak(self, peakList, height=height, **ppmPositions)
 
     @logCommand(get='self')
     def pickPeaks(self, peakList=None, positiveThreshold=None, negativeThreshold=None, **ppmRegions) -> Tuple['Peak', ...]:

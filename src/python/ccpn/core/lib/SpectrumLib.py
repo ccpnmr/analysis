@@ -1880,7 +1880,7 @@ def _setApiRefExperiment(experiment, refExperiment):
 # Peak-related stuff
 #===========================================================================================================
 
-def _createPeak(spectrum, peakList=None, **ppmPositions) -> Optional['Peak']:
+def _createPeak(spectrum, peakList=None, height=None, **ppmPositions) -> Optional['Peak']:
     """Create peak at position specified by the ppmPositions dict.
 
     Return the peak created at this ppm position or None.
@@ -1933,7 +1933,8 @@ def _createPeak(spectrum, peakList=None, **ppmPositions) -> Optional['Peak']:
 
         # should get all ppm's from the reference - shouldn't really be any Nones now though
         _ppmPositions = [_ppmPositions[ii] for ii in indices]
-        height = spectrum.getHeight(_ppmPositions)
+        if height is None:
+            height = spectrum.getHeight(_ppmPositions)
         specLimits = spectrum.spectrumLimits
         aliasInds = spectrum.aliasingIndexes
 

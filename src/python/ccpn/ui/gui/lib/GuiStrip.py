@@ -2442,6 +2442,8 @@ class GuiStrip(Frame):
         with undoBlockWithoutSideBar():
             # create the axisDict for this spectrum
             axisDict = {axis: ppm for axis, ppm in zip(self.axisCodes, ppmPositions)}
+            height = axisDict.get('intensity', None) # needed for 1D
+            axisDict.pop('intensity', None) # need to be removed otherwise it cannot pick 1D
 
             # loop through the visible spectra
             for spectrumView in (v for v in self.spectrumViews if v.isDisplayed):
@@ -2456,7 +2458,7 @@ class GuiStrip(Frame):
                     peakList = thisPeakListView.peakList
 
                     # pick the peak in this peakList
-                    pk = spectrum.createPeak(peakList, **axisDict)
+                    pk = spectrum.createPeak(peakList, height=height, **axisDict)
                     if pk:
                         result.append(pk)
                         peakLists.append(peakList)

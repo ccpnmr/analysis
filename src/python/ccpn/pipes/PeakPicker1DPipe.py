@@ -107,8 +107,13 @@ class PeakPicker1DPipe(SpectraPipe):
                             spectrum.noiseLevel = max(noiseThresholds) or None
                             spectrum.negativeNoiseLevel = min(noiseThresholds) or None
                         pl = spectrum.peakLists[DefaultPeakListIndex]
-                        spectrum.pickPeaks(peakList=pl, positiveThreshold=spectrum.noiseLevel,
-                                                        minNoiseLevel=spectrum.negativeNoiseLevel,)
+                        ppmRegions = dict(zip(spectrum.axisCodes, spectrum.spectrumLimits))
+                        print(excludeRegions, '====:', ppmRegions)
+
+                        spectrum.pickPeaks(peakList=pl,
+                                           positiveThreshold=spectrum.noiseLevel,
+                                           negativeThreshold=spectrum.negativeNoiseLevel,
+                                           **ppmRegions)
                         # spectrum.peakLists[DefaultPeakListIndex].peakFinder1D(maxNoiseLevel=spectrum.noiseLevel,
                         #                                                       minNoiseLevel=spectrum.negativeNoiseLevel,
                         #                                                       ignoredRegions=excludeRegions, negativePeaks=False,

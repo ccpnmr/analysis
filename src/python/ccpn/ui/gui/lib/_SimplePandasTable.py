@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-11 15:25:57 +0000 (Fri, March 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-14 13:19:38 +0000 (Mon, March 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -491,6 +491,10 @@ class _SimplePandasTableHeaderModel(QtCore.QAbstractTableModel):
     #         elif role == QtCore.Qt.UserRole + 2:
     #             pass
 
+
+#=========================================================================================
+# New/Update objects
+#=========================================================================================
 
 def _newSimplePandasTable(parent, data, _resize=False):
     """Create a new _SimplePandasTable from a pd.DataFrame

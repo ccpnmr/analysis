@@ -199,11 +199,11 @@ class IntegralList(PMIListABC):
                     newIntegral = self.newIntegral(value=None, limits=[[minI, maxI], ])
                     newIntegral.baseline = noiseThreshold
                     filteredX = np.where((x <= i[0]) & (x >= i[1]))
-                    filteredY = spectrum.intensities[filteredX]
-                    filteredX =  filteredX[0].flatten()
+                    y_filtered = spectrum.intensities[filteredX]
+                    x_filtered =  filteredX[0].flatten()
                     # filteredY = filteredY[1].compressed()
                     if findPeak:  # pick peaks and link to integral
-                        maxValues, minValues = _find1DMaxima(y=filteredY, x=filteredX, negDelta=0, delta=noiseThreshold)
+                        maxValues, minValues = _find1DMaxima(y_filtered, x_filtered, positiveThreshold=noiseThreshold, findNegative=False)
                         if len(maxValues) > 1:  #calculate centre of mass or     #   add to multiplet ??
 
                             positions = []

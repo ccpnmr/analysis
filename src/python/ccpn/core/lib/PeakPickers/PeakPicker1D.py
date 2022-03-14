@@ -117,6 +117,18 @@ class PeakPicker1D(PeakPickerABC):
         value = min(self._intensityLimits) < height < max(self._intensityLimits)
         return value
 
+    def _isPositionWithinLimits(self, pointValue):
+        withinLimits = []
+        ppmValue = self.spectrum.point2ppm(pointValue, axisCode=self.spectrum.axisCodes[0])
+        excludePpmRegions = self._excludePpmRegions.get(self.spectrum.axisCodes[0], [[0,0],]) # Default ER [0,0]
+
+        for limits in excludePpmRegions:
+            if len(limits)>0:
+                value = min(limits) < ppmValue < max(limits)
+                withinLimits.append(not value)
+        return all(withinLimits)
+
+
     def findPeaks(self, data):
         peaks = []
         x = np.arange(int(self.spectrum.referencePoints[0]),len(data))
@@ -126,12 +138,12 @@ class PeakPicker1D(PeakPickerABC):
                                              negativeThreshold=self.negativeThreshold,
                                              findNegative=self._doNegativePeaks)
         for position, height in maxValues:
-            if self._isHeightWithinIntesityLimits(height):
+            if self._isHeightWithinIntesityLimits(height) and self._isPositionWithinLimits(position):
                 pk = SimplePeak(points=(float(position),), height=float(height))
                 peaks.append(pk)
         if self._doNegativePeaks:
             for position, height in minValues:
-                if self._isHeightWithinIntesityLimits(height):
+                if self._isHeightWithinIntesityLimits(height) and self._isPositionWithinLimits(position):
                     pk = SimplePeak(points=(float(position),), height=float(height))
                     peaks.append(pk)
 

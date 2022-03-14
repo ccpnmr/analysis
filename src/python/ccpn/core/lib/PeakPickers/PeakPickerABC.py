@@ -36,7 +36,7 @@ from ccpn.util.traits.CcpNmrTraits import CFloat, CInt, CBool, CString
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import loadModules
 from ccpn.framework.PathsAndUrls import peakPickerPath
-
+from collections import defaultdict
 
 PEAKPICKERPARAMETERS = '_peakPickerParameters'
 
@@ -191,6 +191,7 @@ class PeakPickerABC(CcpNmrJson):
         # attributes not required to be persistent between load/save
         self.lastPickedPeaks = None
         self.sliceTuples = None
+        self._excludePpmRegions = defaultdict(list) # {axisCode:[[start,stop],...]]} regions to be excluded when picking, e.g.: solvents
         # attribute needed for 1D when manually picking within a SpectrumDisplay box
         self._intensityLimits = (np.inf, -np.inf)
 

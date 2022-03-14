@@ -957,8 +957,7 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
         spectrum.negativeNoiseLevel = negativeNoiseLevel
 
     x_filtered, y_filtered = _1DregionsFromLimits(x, y, [a, b])
-    maxValues, minValues = _find1DMaxima(y_filtered, x_filtered, noiseLevel, negDelta=negativeNoiseLevel,
-                                              negative=doNeg)
+    maxValues, minValues = _find1DMaxima(y_filtered, x_filtered, positiveThreshold=noiseLevel, negativeThreshold=negativeNoiseLevel, findNegative=doNeg)
     allValues = maxValues + minValues
 
     if len(allValues) > 0:

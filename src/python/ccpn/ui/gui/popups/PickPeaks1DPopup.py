@@ -53,7 +53,7 @@ Manual = 'Manual'
 
 class ExcludeRegions(Widget):
     """This creates a widget group to exclude Regions from the Spectrum when automatically peak picking """
-    selectionLabelDefault = "Select Regions or \nsolvents to exclude"
+    selectionLabelDefault = "Select Regions (ppm) or \nsolvents to exclude"
 
     solvents = {'Acetic Acid-d4'               : [0, 0, 2.14, 2.0, 11.75, 11.65],
                 'Acetone-d6 & Water'           : [0, 0, 2.15, 2.0, 2.90, 2.80],
@@ -132,8 +132,8 @@ class ExcludeRegions(Widget):
                     self.regioncount += valueCount
                     self.spin = DoubleSpinbox(self.scrollAreaWidgetContents, grid=(self.position), )  # hAlign='c')
                     self.spin.setSingleStep(0.01)
-                    self.spin.setMinimum(-20)
-                    self.spin.setPrefix('ppm')
+                    self.spin.setMinimum(-np.inf)
+                    self.spin.setMaximum(np.inf)
                     self.spin.setValue(values)
                     widgetList.append(self.spin)
                     solventValues[1] += (self.spin,)
@@ -290,7 +290,7 @@ class PickPeak1DPopup(CcpnDialog):
 
         spectra = list(set(self.spectraSelectionWidget._getSelectedSpectra() + self.spectraSelectionWidget._getSpectrumGroupsSpectra()))
         pickNegativePeaks = self.pickNegativeCheckBox.get()
-        ignoredRegions = self.excludedRegionsTab._getExcludedRegions()
+        excludeRegions = self.excludedRegionsTab._getExcludedRegions()
         noiseThreshold = self._getNoiseThreshold()
         noiseThresholdFactor = self.noiseLevelFactorSpinbox.value()
         with notificationEchoBlocking():
@@ -300,9 +300,12 @@ class PickPeak1DPopup(CcpnDialog):
                 else:
                     pNoiseT, nNoiseT = noiseThreshold, -noiseThreshold
                 ppmRegions = dict(zip(spectrum.axisCodes, spectrum.spectrumLimits))
+                peakPicker = spectrum._getPeakPicker()
+                peakPicker._excludePpmRegions[self.spectrum.axisCodes[0]] = excludeRegions
+                peakPicker._doNegativePeaks = pickNegativePeaks
                 spectrum.pickPeaks( peakList=None,
                                     positiveThreshold=pNoiseT,
-                                    negativeThreshold=nNoiseT if pickNegativePeaks else None,
+                                    negativeThreshold=nNoiseT,
                                     **ppmRegions)
 
         self.accept()

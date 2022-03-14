@@ -96,8 +96,7 @@ class PeakPicker1DPipe(SpectraPipe):
         else:
             self._kwargs.update({ExcludeRegions: DefaultExcludeRegions})
             excludeRegions = self._kwargs[ExcludeRegions]
-        # simple1DPeakPicker([1], [1], 1)# just compile
-        from ccpn.core.lib.ContextManagers import  undoBlockWithoutSideBar, notificationEchoBlocking
+        from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
         with undoBlockWithoutSideBar():
             with notificationEchoBlocking():
                 for spectrum in tqdm(self.inputData):
@@ -108,16 +107,12 @@ class PeakPicker1DPipe(SpectraPipe):
                             spectrum.negativeNoiseLevel = min(noiseThresholds) or None
                         pl = spectrum.peakLists[DefaultPeakListIndex]
                         ppmRegions = dict(zip(spectrum.axisCodes, spectrum.spectrumLimits))
-                        print(excludeRegions, '====:', ppmRegions)
-
+                        peakPicker = spectrum._getPeakPicker()
+                        peakPicker._excludePpmRegions[spectrum.axisCodes[0]] = excludeRegions
                         spectrum.pickPeaks(peakList=pl,
                                            positiveThreshold=spectrum.noiseLevel,
                                            negativeThreshold=spectrum.negativeNoiseLevel,
                                            **ppmRegions)
-                        # spectrum.peakLists[DefaultPeakListIndex].peakFinder1D(maxNoiseLevel=spectrum.noiseLevel,
-                        #                                                       minNoiseLevel=spectrum.negativeNoiseLevel,
-                        #                                                       ignoredRegions=excludeRegions, negativePeaks=False,
-                        #                                                       )
                     else:
                         getLogger().warning('Error: PeakList not found for Spectrum: %s. Add a new PeakList first' % spectrum.pid)
         getLogger().info(self._finishedInfo)

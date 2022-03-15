@@ -306,6 +306,7 @@ class PeakListTableWidget(GuiTable):
         heightTipText = 'Magnitude of spectrum intensity at peak center (interpolated), unless user edited'
         columnDefs.append(('Height', lambda pk: pk.height if pk.height else 'None', heightTipText, None, None))
         columnDefs.append(('HeightError', lambda pk: pk.heightError, 'Error of the height', None, None))
+        columnDefs.append(('S/N', lambda pk: pk.signalToNoiseRatio, 'Signal to Noise Ratio', None, None))
 
         # volume column
         volumeTipText = 'Integral of spectrum intensity around peak location, according to chosen volume method'

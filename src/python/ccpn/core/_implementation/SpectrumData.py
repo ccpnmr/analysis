@@ -4,19 +4,19 @@ This file contains the ABC and specfic classes for the numpy.ndarray-based data 
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-21 11:22:07 +0000 (Fri, January 21, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-03-16 17:21:44 +0000 (Wed, March 16, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -55,7 +55,7 @@ class SpectrumDataABC(np.ndarray):
         # local import to avoid cycles
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
 
-        if dataSource is None or not isinstance(dataSource, SpectrumDataSourceABC):
+        if dataSource is not None and not isinstance(dataSource, SpectrumDataSourceABC):
             raise ValueError('Invalid dataSource; got %s' % dataSource)
 
         if dimensions is None or not isIterable(dimensions):
@@ -173,7 +173,10 @@ class SpectrumDataABC(np.ndarray):
         """Conveniance:
         :return dataSource.isComplex in self.dimension's order
         """
-        result  = [self.dataSource.isComplex[dimIdx] for dimIdx in self.dimensionIndices]
+        if self.dataSource is not None:
+            result  = [self.dataSource.isComplex[dimIdx] for dimIdx in self.dimensionIndices]
+        else:
+            result = [False]*self.ndim
         return tuple(result)
 
     @property

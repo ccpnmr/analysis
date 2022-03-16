@@ -50,8 +50,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-07 10:00:55 +0000 (Mon, March 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-03-16 17:21:44 +0000 (Wed, March 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2101,7 +2101,10 @@ class Spectrum(AbstractWrapperObject):
         """
         if self.dataSource is None:
             getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zeros only' % self)
-            data = SliceData((self.pointCounts[sliceDim - 1],))
+            data = SliceData(shape=(self.pointCounts[sliceDim - 1],),
+                             dimensions=(sliceDim,),
+                             position=[1]*self.dimensionCount
+                             )
 
         else:
             try:
@@ -2200,7 +2203,10 @@ class Spectrum(AbstractWrapperObject):
 
         if self.dataSource is None:
             getLogger().warning('No proper (filePath, dataFormat) set for %s; Returning zeros only' % self)
-            return PlaneData(shape=(self.pointCounts[yDim - 1], self.pointCounts[xDim - 1]))
+            return PlaneData(shape=(self.pointCounts[yDim - 1], self.pointCounts[xDim - 1]),
+                             dimensions=(xDim, yDim),
+                             position=[1]*self.dimensionCount
+                            )
 
         try:
             position = self.dataSource.checkForValidPlane(position, xDim=xDim, yDim=yDim)

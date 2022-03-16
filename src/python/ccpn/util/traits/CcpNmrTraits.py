@@ -20,8 +20,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 16:47:15 +0000 (Tue, February 15, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-03-16 16:19:26 +0000 (Wed, March 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -155,7 +155,8 @@ class CList(List, _Ordered):
     """Casting list, any iterable"""
 
     def validate(self, obj, values):
-        from ccpn.util.Common import isIterable  # local import, because isotopeRecords in Common cause circular imports £%%$$GRr
+        # local import, because isotopeRecords in Common cause circular imports £%%$$GRr
+        from ccpn.util.Common import isIterable
 
         if isinstance(values, list):
             pass
@@ -194,7 +195,8 @@ class RecursiveSet(Set):
 
 
 class Tuple(_Tuple, _Ordered):
-    """Fixing default_value problem"""
+    """Fixing default_value problem
+    """
 
     def __init__(self, *traits, **kwargs):
         default_value = kwargs.setdefault('default_value', None)
@@ -202,6 +204,22 @@ class Tuple(_Tuple, _Ordered):
         _Ordered.__init__(self)
         if default_value is not None:
             self.default_value = default_value
+
+
+class CTuple(Tuple):
+    """Casting tuple, any iterable
+    """
+
+    def validate(self, obj, values):
+        # local import, because isotopeRecords in Common cause circular imports £%%$$GRr
+        from ccpn.util.Common import isIterable
+
+        if isinstance(values, (tuple, list)):
+            pass
+        elif isIterable(values):
+            values = [val for val in values]
+        values = self.validate_elements(obj, values)
+        return tuple(values)
 
 
 class RecursiveTuple(Tuple):

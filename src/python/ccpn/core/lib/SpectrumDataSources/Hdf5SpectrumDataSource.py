@@ -24,8 +24,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-24 19:40:43 +0000 (Thu, February 24, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-03-16 18:11:00 +0000 (Wed, March 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -144,32 +144,56 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             return
 
         try:
-            _metadata = self._hdf5Metadata
             _params = self.spectrumParameters
-        except:
-            getLogger().debug('Error finding params and hdf5 metadata: check and update skipped')
+        except Exception:
+            getLogger().debug('Error finding parameters: check and update skipped')
             return
 
-        if HDF5_VERSION_KEY in _metadata:
-            pass  # latest implementation
+        if HDF5_VERSION_KEY in self._hdf5Metadata:
+            # we are up-to-date to the current hdf5 version
+            self._hdf5Metadata.initCurrentValues()
 
         elif 'version' in _params:
+            _mode = self.mode
+            if self.mode == self.defaultOpenReadMode:
+                self.closeFile()
+                self.openFile(mode=self.defaultOpenReadWriteMode, check=False)
+                _params = self.spectrumParameters
             del _params['version']
 
-        elif HDF5_VERSION_KEY not in _metadata and 'version' not in _params:
+            self.writeParameters()
+            # we are now up-to-date to the current hdf5 version
+            self._hdf5Metadata.initCurrentValues()
+            self._hdf5Metadata.saveToHdf5(self.fp)
+            self.closeFile()
+            self.openFile(mode=_mode)
+
+        elif HDF5_VERSION_KEY not in self._hdf5Metadata and 'version' not in _params:
             # Earlier (Luca) hdf5 files, in which spectralWidth (sometimes)
             # denoted the width in Hz
+
+            # for this, we need the file to open read/write
+            _mode = self.mode
+            if self.mode == self.defaultOpenReadMode:
+                self.closeFile()
+                self.openFile(mode=self.defaultOpenReadWriteMode, check=False)
+                _params = self.spectrumParameters
+
             if 'spectralWidths' in _params:
                 sw = _params['spectralWidths']
                 _params['spectralWidthsHz'] = sw
                 del (_params['spectralWidths'])
 
+            self.writeParameters()
+            # we are now up-to-date to the current hdf5 version
+            self._hdf5Metadata.initCurrentValues()
+            self._hdf5Metadata.saveToHdf5(self.fp)
+            self.closeFile()
+            self.openFile(mode=_mode)
+
         else:
             # This should not happen
             getLogger().warning('Undetermined hdf5 version; skipping checks/upgrades')
-
-        # we are now up-to-date to the current hdf5 version
-        _metadata.initCurrentValues()
 
     @property
     def _hdf5version(self)-> VersionString:
@@ -177,7 +201,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         """
         return VersionString(self._hdf5Metadata[HDF5_VERSION_KEY])
 
-    def openFile(self, mode, **kwds):
+    def openFile(self, mode, check=True, **kwds):
         """open self.path, set self.fp, return self.fp
 
         :param mode: open file mode;
@@ -187,6 +211,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
                         w	Create file, truncate if exists
                         w- or x	Create file, fail if exists
                         a	Read/write if exists, create otherwise
+        :param check: check for metadata and old parameter definitions
         :return self.fp
         """
 
@@ -218,7 +243,8 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         if not newFile:
             # old file
             self._hdf5Metadata.restoreFromHdf5(self.fp)
-            self._checkHdf5Metadata()
+            if check:
+                self._checkHdf5Metadata()
             self.readParameters()
 
         else:

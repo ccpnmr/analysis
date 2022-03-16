@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-11 17:06:31 +0000 (Fri, March 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-16 20:48:02 +0000 (Wed, March 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -34,7 +34,7 @@ import pandas as pd
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.DataFrameObject import DataFrameObject
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
-from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
+from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT, DATAFRAME_ISDELETED
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.ChemicalShiftList import CS_UNIQUEID, CS_ISDELETED, CS_PID, \
     CS_STATIC, CS_STATE, CS_ORPHAN, CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT, CS_ATOMNAME, \
@@ -153,12 +153,13 @@ class ChemicalShiftTableModule(CcpnModule):
         # main window
         _hidden = [CS_UNIQUEID, CS_ISDELETED, CS_FIGUREOFMERIT, CS_ALLPEAKS, CS_CHAINCODE,
                    CS_SEQUENCECODE, CS_STATE, CS_ORPHAN]
-        self._tableWidget = ChemicalShiftTable(parent=_topWidget,
-                                               mainWindow=self.mainWindow,
-                                               moduleParent=self,
-                                               setLayout=True,
-                                               grid=(0, 0),
-                                               hiddenColumns=_hidden)
+
+        row += 1
+        self._tableWidget = _NewChemicalShiftTable(parent=_topWidget,
+                                                   mainWindow=self.mainWindow,
+                                                   moduleParent=self,
+                                                   grid=(row, 0), gridSpan=(1, 6),
+                                                   hiddenColumns=_hidden)
 
     def _maximise(self):
         """Maximise the attached table
@@ -175,7 +176,7 @@ class ChemicalShiftTableModule(CcpnModule):
                 logger.warning('select: Object is not of type ChemicalShiftList')
                 raise TypeError('select: Object is not of type ChemicalShiftList')
             else:
-                self._modulePulldown.select(self.chemicalShiftList.pid)
+                self._modulePulldown.select(chemicalShiftList.pid)
 
     def _closeModule(self):
         """CCPN-INTERNAL: used to close the module
@@ -194,7 +195,7 @@ class ChemicalShiftTableModule(CcpnModule):
             self._tableWidget.populateTable(rowObjects=self._table.chemicalShifts,
                                             selectedObjects=self.current.chemicalShifts)
         else:
-            self._tableWidget.clearTable()
+            self._tableWidget.populateEmptyTable()
 
 
 #=========================================================================================
@@ -887,6 +888,611 @@ class ChemicalShiftTable(GuiTable):
 
             self._lastSelection = [None]
         self._tableSelectionChanged.emit([])
+
+
+#=========================================================================================
+# New ChemicalShiftTable
+#=========================================================================================
+
+from types import SimpleNamespace
+from time import time_ns
+from PyQt5 import QtCore
+from contextlib import contextmanager
+from collections import defaultdict
+from ccpn.util.AttrDict import AttrDict
+from ccpn.ui.gui.lib._SimplePandasTable import _SimplePandasTableViewProjectSpecific, _SimplePandasTableModel, \
+    _SimplePandasTableHeaderModel, _clearSimplePandasTable, _updateSimplePandasTable, _newSimplePandasTable
+from ccpn.ui.gui.widgets.Menu import Menu
+from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight, TABLEFONT
+from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
+
+
+# define a simple class that can contains a simple id
+blankId = SimpleNamespace(className='notDefined', serial=0)
+
+OBJECT_CLASS = 0
+OBJECT_PARENT = 1
+MODULEIDS = {}
+
+
+class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
+    """New chemicalShiftTable based on faster QTableView
+    Actually more like the original table but with pandas dataFrame
+    """
+    className = 'ChemicalShiftListTable'
+    attributeName = 'chemicalShiftLists'
+
+    PRIMARYCOLUMN = CS_OBJECT  # column holding active objects (uniqueId/ChemicalShift for this table?)
+    defaultHidden = [CS_UNIQUEID, CS_ISDELETED, CS_FIGUREOFMERIT, CS_ALLPEAKS, CS_CHAINCODE,
+                     CS_SEQUENCECODE, CS_STATE, CS_ORPHAN]
+    _internalColumns = [CS_ISDELETED, CS_OBJECT]  # columns that are always hidden
+
+    # define self._columns here
+    columnHeaders = {CS_UNIQUEID           : 'Unique ID',
+                     CS_ISDELETED          : 'isDeleted',  # should never be visible
+                     CS_PID                : 'ChemicalShift',
+                     CS_VALUE              : 'ChemicalShift Value (ppm)',
+                     CS_VALUEERROR         : 'Value Error',
+                     CS_FIGUREOFMERIT      : 'Figure of Merit',
+                     CS_NMRATOM            : 'NmrAtom',
+                     CS_CHAINCODE          : 'ChainCode',
+                     CS_SEQUENCECODE       : 'SequenceCode',
+                     CS_RESIDUETYPE        : 'ResidueType',
+                     CS_ATOMNAME           : 'AtomName',
+                     CS_STATE              : 'State',
+                     CS_ORPHAN             : 'Orphaned',
+                     CS_ALLPEAKS           : 'Assigned Peaks',
+                     CS_SHIFTLISTPEAKSCOUNT: 'Peak Count',
+                     CS_ALLPEAKSCOUNT      : 'Total Peak Count',
+                     CS_COMMENT            : 'Comment',
+                     CS_OBJECT             : '_object'
+                     }
+
+    tipTexts = ('Unique identifier for the chemicalShift',
+                'isDeleted',  # should never be visible
+                'ChemicalShift.pid',
+                'ChemicalShift value in ppm',
+                'Error in the chemicalShift value in ppm',
+                'Figure of merit, between 0 and 1',
+                'Pid of nmrAtom if attached, or None',
+                'ChainCode of attached nmrAtom, or None',
+                'SequenceCode of attached nmrAtom, or None',
+                'ResidueType of attached nmrAtom, or None',
+                'AtomName of attached nmrAtom, or None',
+                'Active state of chemicalShift',
+                'Orphaned state of chemicalShift',
+                'List of assigned peaks associated with this chemicalShift',
+                'Number of assigned peaks attached to a chemicalShift\nbelonging to spectra associated with parent chemicalShiftList',
+                'Total number of assigned peaks attached to a chemicalShift\nbelonging to any spectra',
+                'Optional comment for each chemicalShift',
+                'None',
+                )
+
+    # define the notifiers that are required for the specific table-type
+    tableClass = ChemicalShiftList
+    rowClass = ChemicalShift
+    cellClass = None
+    tableName = tableClass.className
+    rowName = tableClass.className
+    cellName = None
+    cellClassNames = None
+
+    selectCurrent = True
+    callBackClass = ChemicalShift
+    search = False
+
+    def __init__(self, parent=None, mainWindow=None, moduleParent=None,
+                 actionCallback=None, selectionCallback=None,
+                 chemicalShiftList=None, hiddenColumns=None,
+                 enableExport=True, enableDelete=True, enableSearch=False,
+                 **kwds):
+        """Initialise the widgets for the module.
+        """
+        # # Derive application, project, and current from mainWindow
+        # self.mainWindow = mainWindow
+        # if mainWindow:
+        #     self.application = mainWindow.application
+        #     self.project = mainWindow.application.project
+        #     self.current = mainWindow.application.current
+        # self._table = None
+
+        # self._widget = Widget(parent=parent, **kwds)
+        # self._selectedChemicalShiftList = None
+
+        # # Initialise the scroll widget and common settings
+        # self._initTableCommonWidgets(parent, **kwds)
+
+        # initialise the currently attached dataFrame
+        self._hiddenColumns = [self.columnHeaders[col] for col in hiddenColumns] if hiddenColumns else \
+            [self.columnHeaders[col] for col in self.defaultHidden]
+        self._internalColumns = [self.columnHeaders[col] for col in self._internalColumns]
+
+        # create the table; objects are added later via the displayTableForNmrChain method
+        # initialise the table
+        super().__init__(parent=parent,
+                         mainWindow=mainWindow,
+                         moduleParent=moduleParent,
+                         multiSelect=True,
+                         showVerticalHeader=False,
+                         setLayout=True,
+                         **kwds
+                         )
+
+        # self.setTableNotifiers(tableClass=ChemicalShiftList,
+        #                        rowClass=ChemicalShift,
+        #                        # cellClassNames=(NmrAtom, '_chemicalShifts'), # not required
+        #                        tableName='chemicalShiftList', rowName='chemicalShift',
+        #                        changeFunc=self._tableChangeNotifierCallback,
+        #                        className=self.attributeName,
+        #                        # updateFunc=self._update,
+        #                        tableSelection='_table',
+        #                        callBackClass=ChemicalShift,
+        #                        selectCurrentCallBack=self._selectOnTableCurrentChemicalShiftNotifierCallback,
+        #                        moduleParent=moduleParent)
+
+        # Initialise the notifier for processing dropped items
+        self._postInitTableCommonWidgets()
+        # self.selectionChanged.connect(self._itemSelectionChanged)
+
+        # self._setTableNotifiers()
+
+        # self._lastMouseItem = None
+        # self._mousePressed = False
+        # self._lastTimeClicked = time_ns()
+        # self._clickInterval = QtWidgets.QApplication.instance().doubleClickInterval() * 1e6
+        # self._tableSelectionBlockingLevel = 0
+        # self._currentRow = None
+        # self._clickedInTable = False
+        # self._lastSelection = [None]
+        #
+        # # set internal flags
+        # self._mousePressedPos = None
+        # self._userKeyPressed = False
+        # self._selectOverride = False
+        # self._scrollOverride = False
+        #
+        # # enable the right click menu
+        # self.searchWidget = None
+        # self._setHeaderContextMenu()
+        # self._enableExport = enableExport
+        # self._enableDelete = enableDelete
+        # self._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
+        # self._enableSearch = enableSearch
+        # self._rightClickedTableIndex = None  # last selected item in a table before raising the context menu. Enabled with mousePress event filter
+
+    def _postInitTableCommonWidgets(self):
+        from ccpn.ui.gui.widgets.DropBase import DropBase
+        from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
+        from ccpn.ui.gui.widgets.ScrollBarVisibilityWatcher import ScrollBarVisibilityWatcher
+
+        # add a dropped notifier to all tables
+        if self.moduleParent is not None:
+            # set the dropEvent to the mainWidget of the module, otherwise the event gets stolen by Frames
+            self.moduleParent.mainWidget._dropEventCallback = self._processDroppedItems
+
+        self.droppedNotifier = GuiNotifier(self,
+                                           [GuiNotifier.DROPEVENT], [DropBase.PIDS],
+                                           self._processDroppedItems)
+
+        # add a widget handler to give a clean corner widget for the scroll area
+        self._cornerDisplay = ScrollBarVisibilityWatcher(self)
+
+        # self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
+
+    #=========================================================================================
+    # Widgets callbacks
+    #=========================================================================================
+
+    def _getValidChemicalShift4Callback(self, objs):
+        if not objs or not all(objs):
+            return
+        if isinstance(objs, (tuple, list)):
+            cShift = objs[-1]
+        else:
+            cShift = objs
+        if not cShift:
+            showWarning('Cannot perform action', 'No selected ChemicalShift')
+            return
+
+        return cShift
+
+    def actionCallback(self, data):
+        """Notifier DoubleClick action on item in table. Mark a chemicalShift based on attached nmrAtom
+        """
+        from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import markNmrAtoms
+
+        cShift = self._getValidChemicalShift4Callback(data.get(CallBack.OBJECT, []))
+        if len(self.mainWindow.marks):
+            if self.moduleParent.autoClearMarksWidget.checkBox.isChecked():
+                self.mainWindow.clearMarks()
+        if cShift and cShift.nmrAtom:
+            markNmrAtoms(self.mainWindow, [cShift.nmrAtom])
+
+    def selectionCallback(self, data):
+        """Notifier Callback for selecting rows in the table
+        """
+        objs = data[CallBack.OBJECT]
+        self.current.chemicalShifts = objs or []
+
+        if objs:
+            nmrResidues = tuple(set(cs.nmrAtom.nmrResidue for cs in objs if cs.nmrAtom))
+        else:
+            nmrResidues = []
+
+        if nmrResidues:
+            # set the associated nmrResidue and nmrAtoms
+            nmrAtoms = tuple(set(nmrAtom for nmrRes in nmrResidues for nmrAtom in nmrRes.nmrAtoms))
+            self.current.nmrAtoms = nmrAtoms
+            self.current.nmrResidues = nmrResidues
+
+    #=========================================================================================
+    # Create table and row methods
+    #=========================================================================================
+
+    def _newRowFromUniqueId(self, df, obj, uniqueId):
+        """Create a new row to insert into the dataFrame or replace row
+        """
+        _row = df.loc[uniqueId]
+        # make the new row
+        newRow = _row[:CS_ISDELETED].copy()
+        _midRow = _row[CS_VALUE:CS_ATOMNAME]  # CS_STATIC
+        _comment = _row[CS_COMMENT:]
+        _pidCol = pd.Series(obj.pid, index=[CS_PID, ])
+        _extraCols = pd.Series(self._derivedFromObject(obj), index=[CS_STATE, CS_ORPHAN, CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT])  # if state required
+
+        newRow = newRow.append([_pidCol, _midRow, _extraCols, _comment])
+
+        # append the actual object to the end - not sure whether this is required - check _highlightObjs
+        newRow[CS_OBJECT] = obj
+
+        # replace the visible nans with '' for comment column and string 'None' elsewhere
+        newRow[CS_COMMENT:CS_COMMENT].fillna('', inplace=True)
+        newRow.fillna('None', inplace=True)
+
+        return list(newRow)
+
+    def _derivedFromObject(self, obj):
+        """Get a tuple of derived values from obj
+        Not very generic yet - column class now seems redundant
+        """
+        _peaks = obj.assignedPeaks or []
+        allPeaks = str([pp.pid for pp in _peaks])
+        try:
+            shiftPeakCount = len([pp for pp in _peaks if pp.spectrum.chemicalShiftList == obj.chemicalShiftList])
+        except Exception as es:
+            shiftPeakCount = 0
+        peakCount = len(_peaks) if _peaks else 0
+
+        state = obj.state
+        if state == ChemicalShiftState.ORPHAN:
+            state = ChemicalShiftState.DYNAMIC
+        state = state.description  # if state needed
+        orphan = u'\u2713' if obj.orphan else ''  # unicode tick character
+
+        return (state, orphan, allPeaks, shiftPeakCount, peakCount)
+
+    def buildTableDataFrame(self):
+        """Return a Pandas dataFrame from an internal list of objects.
+        The columns are based on the 'func' functions in the columnDefinitions.
+        :return pandas dataFrame
+        """
+        # create the column objects
+        _cols = [
+            # (col, lambda row: _getValueByHeader(row, col), _tipTexts[ii], None, None)
+            (self.columnHeaders[col], lambda row: _getValueByHeader(row, col), self.tipTexts[ii], None, None)
+            for ii, col in enumerate(CS_TABLECOLUMNS)
+            ]
+
+        # NOTE:ED - hack to add the comment editor to the comment column, decimal places to value/valueError/figureOfMerit
+        _temp = list(_cols[CS_TABLECOLUMNS.index(CS_COMMENT)])
+        _temp[COLUMN_COLDEFS.index(COLUMN_SETEDITVALUE)] = lambda obj, value: self._setComment(obj, value)
+        _cols[CS_TABLECOLUMNS.index(CS_COMMENT)] = tuple(_temp)
+        for col in [CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT]:
+            _temp = list(_cols[CS_TABLECOLUMNS.index(col)])
+            _temp[COLUMN_COLDEFS.index(COLUMN_FORMAT)] = '%0.3f'
+            _cols[CS_TABLECOLUMNS.index(col)] = tuple(_temp)
+
+        # set the table _columns
+        self._columns = ColumnClass(_cols)
+
+        _csl = self._table
+
+        if _csl._data is not None:
+            # is of type _ChemicalShiftListFrame - should move functionality to there
+            df = _csl._data.copy()
+            df = df[df[CS_ISDELETED] == False]
+            df.drop(columns=[CS_STATIC], inplace=True)  # static not required
+
+            df.set_index(df[CS_UNIQUEID], inplace=True, )  # drop=False)
+
+            df.insert(CS_TABLECOLUMNS.index(CS_PID), CS_PID, None)
+            df.insert(CS_TABLECOLUMNS.index(CS_STATE), CS_STATE, None)  # if state require
+            df.insert(CS_TABLECOLUMNS.index(CS_ORPHAN), CS_ORPHAN, None)  # if state require
+            df.insert(CS_TABLECOLUMNS.index(CS_ALLPEAKS), CS_ALLPEAKS, None)
+            df.insert(CS_TABLECOLUMNS.index(CS_SHIFTLISTPEAKSCOUNT), CS_SHIFTLISTPEAKSCOUNT, None)
+            df.insert(CS_TABLECOLUMNS.index(CS_ALLPEAKSCOUNT), CS_ALLPEAKSCOUNT, None)
+
+            _objs = [_csl.getChemicalShift(uniqueId=unq) for unq in df[CS_UNIQUEID]]
+            if _objs:
+                # append the actual objects as the last column - not sure whether this is required - check _highlightObjs
+                df[CS_OBJECT] = _objs
+
+                df[CS_PID] = [_shift.pid for _shift in _objs]
+                _stats = [self._derivedFromObject(obj) for obj in _objs]
+                # df[[CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT]] = _stats
+                df[[CS_STATE, CS_ORPHAN, CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT]] = _stats
+
+                # replace the visible nans with '' for comment column and string 'None' elsewhere
+                df[CS_COMMENT].fillna('', inplace=True)
+                df.fillna('None', inplace=True)
+            else:
+                df[CS_OBJECT] = []
+
+        else:
+            # df = pd.DataFrame(columns=CS_TABLECOLUMNS)
+            df = pd.DataFrame(columns=[self.columnHeaders[val] for val in CS_TABLECOLUMNS])
+
+        # extract the row objects from the dataFrame
+        _objects = [row for row in df.itertuples()]
+        self._objects = _objects
+
+        # update the columns to the visible headings
+        df.columns = [self.columnHeaders[val] for val in CS_TABLECOLUMNS]
+
+        return df
+
+    def refreshTable(self):
+        # subclass to refresh the groups
+        self.setTableFromDataFrameObject(self._df)
+        # self.updateTableExpanders()
+
+    def setDataFromSearchWidget(self, dataFrame):
+        """Set the data for the table from the search widget
+        """
+        self.setData(dataFrame.values)
+        # self._updateGroups(dataFrame)
+        # self.updateTableExpanders()
+
+    def _updateTableCallback(self, data):
+        # print(f'>>> _updateTableCallback')
+        pass
+
+    def _updateCellCallback(self, data):
+        # print(f'>>> _updateCellCallback')
+        pass
+
+    def _searchCallBack(self, data):
+        # print(f'>>> _searchCallBack')
+        pass
+
+    def _updateRowCallback(self, data):
+        """Notifier callback for updating the table for change in chemicalShifts
+        :param data: notifier content
+        """
+        # print(f'>>> _updateRowCallback')
+
+        with self._blockTableSignals('_updateRowCallback'):
+            obj = data[Notifier.OBJECT]
+            uniqueId = obj.uniqueId
+
+            # check that the object belongs to the list that is being displayed
+            if self._df is None or self._df.empty or obj is None:
+                return
+            if obj.chemicalShiftList != self._table:
+                return
+
+            _update = False  # from original row update - need to check
+
+            trigger = data[Notifier.TRIGGER]
+            try:
+                _data = self._table._data
+                _data = _data[_data[CS_ISDELETED] == False]  # not deleted - should be the only visible ones
+                dataIds = set(_data[CS_UNIQUEID])
+                tableIds = set(self._df['Unique ID'])  # must be table column name, not reference name
+
+                if trigger == Notifier.DELETE:
+                    # uniqueIds in the visible table
+                    if uniqueId in (tableIds - dataIds):
+                        # remove from the table
+                        self.model()._deleteRow(uniqueId)
+
+                elif trigger == Notifier.CREATE:
+                    # uniqueIds in the visible table
+                    if uniqueId in (dataIds - tableIds):
+                        newRow = self._newRowFromUniqueId(_data, obj, uniqueId)
+
+                        # insert into the table
+                        self.model()._insertRow(uniqueId, newRow)
+
+                elif trigger == Notifier.CHANGE:
+                    # uniqueIds in the visible table
+                    if uniqueId in (dataIds & tableIds):
+                        newRow = self._newRowFromUniqueId(_data, obj, uniqueId)
+
+                        # visible table dataframe update
+                        self.model()._updateRow(uniqueId, newRow)
+
+                elif trigger == Notifier.RENAME:
+                    # not sure that I need this yet - should be the same as .CHANGE
+                    pass
+
+            except Exception as es:
+                getLogger().debug2(f'Error updating row in table {es}')
+
+        if _update:
+            getLogger().debug2('<updateRowCallback>', data['notifier'],
+                               self._tableData['tableSelection'],
+                               data['trigger'], data['object'])
+            _val = self.getSelectedObjects() or []
+            self._tableSelectionChanged.emit(_val)
+
+        return _update
+
+    def _selectCurrentCallBack(self, data):
+        """Callback from a notifier to highlight the chemical shifts
+        :param data:
+        """
+        if self._tableBlockingLevel:
+            return
+
+        # print(f'>>> selectCallBack   {self}')
+        currentShifts = data['value']
+        self._selectOnTableCurrentChemicalShifts(currentShifts)
+
+    def _selectionChangedCallback(self, selected, deselected):
+        """Handle item selection as changed in table - call user callback
+        Includes checking for clicking below last row
+        """
+        # print(f'>>> _selectionChangedCallback   {self}')
+        self._changeTableSelection(None)
+
+    def _selectOnTableCurrentChemicalShifts(self, currentShifts):
+        """Highlight the list of currentShifts on the table
+        :param currentShifts:
+        """
+        self.highlightObjects(currentShifts)
+
+    #=========================================================================================
+    # Table context menu
+    #=========================================================================================
+
+    def _setContextMenu(self, enableExport=True, enableDelete=True):
+        """Subclass guiTable to insert new merge items to top of context menu
+        """
+        super()._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
+        _actions = self.tableMenu.actions()
+        if _actions:
+            _topMenuItem = _actions[0]
+            _topSeparator = self.tableMenu.insertSeparator(_topMenuItem)
+            self._navigateMenu = self.tableMenu.addMenu('Navigate to:')
+            self._mergeMenuAction = self.tableMenu.addAction('Merge NmrAtoms', self._mergeNmrAtoms)
+            self._editMenuAction = self.tableMenu.addAction('Edit NmrAtom', self._editNmrAtom)
+
+            # move new actions to the top of the list
+            self.tableMenu.insertAction(_topSeparator, self._mergeMenuAction)
+            self.tableMenu.insertAction(self._mergeMenuAction, self._editMenuAction)
+
+    def _raiseTableContextMenu(self, pos):
+        """Create a new menu and popup at cursor position
+        Add merge item
+        """
+        selection = self.getSelectedObjects()
+        data = self.getRightMouseItem()
+        if (data is not None and not data.empty):
+            cShift = data.get(DATAFRAME_OBJECT)
+            currentNmrAtom = cShift.nmrAtom if cShift else None
+
+            selection = [ch.nmrAtom for ch in selection or [] if ch.nmrAtom]
+            _check = (currentNmrAtom and 1 < len(selection) and currentNmrAtom in selection) or False
+            _option = 'into {}'.format(currentNmrAtom.id if currentNmrAtom else '') if _check else ''
+            self._mergeMenuAction.setText('Merge NmrAtoms {}'.format(_option))
+            self._mergeMenuAction.setEnabled(_check)
+
+            self._editMenuAction.setText('Edit NmrAtom {}'.format(currentNmrAtom.id if currentNmrAtom else ''))
+            self._editMenuAction.setEnabled(True if currentNmrAtom else False)
+            self._addNavigationStripsToContextMenu()
+
+        else:
+            # disabled but visible lets user know that menu items exist
+            self._mergeMenuAction.setText('Merge NmrAtoms')
+            self._mergeMenuAction.setEnabled(False)
+            self._editMenuAction.setText('Edit NmrAtom')
+            self._editMenuAction.setEnabled(False)
+
+        super()._raiseTableContextMenu(pos)
+
+    #=========================================================================================
+    # Table functions
+    #=========================================================================================
+
+    def _mergeNmrAtoms(self):
+        """Merge the nmrAtoms in the selection into the nmrAtom that has ben right-clicked
+        """
+        selection = self.getSelectedObjects()
+        data = self.getRightMouseItem()
+        if (data is not None and not data.empty) and selection:
+            cShift = data.get(DATAFRAME_OBJECT)
+            currentNmrAtom = cShift.nmrAtom if cShift else None
+
+            matching = [ch.nmrAtom for ch in selection if ch and ch.nmrAtom and ch.nmrAtom != currentNmrAtom and
+                        ch.nmrAtom.isotopeCode == currentNmrAtom.isotopeCode]
+            nonMatching = [ch.nmrAtom for ch in selection if ch and ch.nmrAtom and ch.nmrAtom != currentNmrAtom and
+                           ch.nmrAtom.isotopeCode != currentNmrAtom.isotopeCode]
+
+            if len(matching) < 1:
+                showWarning('Merge NmrAtoms', 'No matching isotope codes')
+            else:
+                ss = 's' if (len(nonMatching) > 1) else ''
+                nonMatchingList = '\n\n\n({} nmrAtom{} with non-matching isotopeCode{})'.format(len(nonMatching), ss, ss) if nonMatching else ''
+                yesNo = showYesNo('Merge NmrAtoms', "Do you want to merge\n\n"
+                                                    "{}   into   {}{}".format('\n'.join([ss.id for ss in matching]),
+                                                                              currentNmrAtom.id,
+                                                                              nonMatchingList))
+                if yesNo:
+                    currentNmrAtom.mergeNmrAtoms(matching)
+
+    def _editNmrAtom(self):
+        """Show the edit nmrAtom popup for the clicked nmrAtom
+        """
+        data = self.getRightMouseItem()
+        if data is not None and not data.empty:
+            cShift = data.get(DATAFRAME_OBJECT)
+            currentNmrAtom = cShift.nmrAtom if cShift else None
+
+            if currentNmrAtom:
+                from ccpn.ui.gui.popups.NmrAtomPopup import NmrAtomEditPopup
+
+                popup = NmrAtomEditPopup(parent=self.mainWindow, mainWindow=self.mainWindow, obj=currentNmrAtom)
+                popup.exec_()
+
+    def _addNavigationStripsToContextMenu(self):
+        cShift = self._getValidChemicalShift4Callback(self.getSelectedObjects())
+        self._navigateMenu.clear()
+        if cShift and cShift.nmrAtom:
+            name = cShift.nmrAtom.name
+            if cShift.value is None:
+                return
+            value = round(cShift.value, 3)
+            if self._navigateMenu is not None:
+                self._navigateMenu.addItem(f'All ({name}:{value})',
+                                           callback=partial(self._navigateToChemicalShift,
+                                                            chemicalShift=cShift,
+                                                            stripPid=ALL))
+                self._navigateMenu.addSeparator()
+                for spectrumDisplay in self.mainWindow.spectrumDisplays:
+                    for strip in spectrumDisplay.strips:
+                        self._navigateMenu.addItem(f'{strip.pid} ({name}:{value})',
+                                                   callback=partial(self._navigateToChemicalShift,
+                                                                    chemicalShift=cShift,
+                                                                    stripPid=strip.pid))
+                    self._navigateMenu.addSeparator()
+
+    def _navigateToChemicalShift(self, chemicalShift, stripPid):
+        strips = []
+        if stripPid == ALL:
+            strips = self.mainWindow.strips
+        else:
+            strip = self.application.getByGid(stripPid)
+            if strip:
+                strips.append(strip)
+        if strips:
+            failedStripPids = []
+            for strip in strips:
+
+                try:
+                    navigateToPositionInStrip(strip,
+                                              positions=[chemicalShift.value],
+                                              axisCodes=[chemicalShift.nmrAtom.name],
+                                              widths=[])
+                except:
+                    failedStripPids.append(strip.pid)
+            if len(failedStripPids) > 0:
+                stripStr = 'strip' if len(failedStripPids) == 1 else 'strips'
+                strips = ', '.join(failedStripPids)
+                getLogger().warn(
+                        f'Cannot navigate to position {round(chemicalShift.value, 3)} '
+                        f'in {stripStr}: {strips} '
+                        f'for nmrAtom {chemicalShift.nmrAtom.name}.')
 
 
 #=========================================================================================

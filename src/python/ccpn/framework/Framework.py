@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-11 15:52:47 +0000 (Fri, March 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-16 20:48:02 +0000 (Wed, March 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -35,6 +35,8 @@ import re
 import subprocess
 
 import faulthandler
+
+
 faulthandler.enable()
 
 from typing import List
@@ -92,7 +94,6 @@ from ccpn.ui.gui import Layout
 from ccpn.util.decorators import logCommand
 
 
-
 #-----------------------------------------------------------------------------------------
 # how frequently to check if license dialog has closed when waiting to show the tip of the day
 WAIT_EVENT_LOOP_EMPTY = 0
@@ -102,6 +103,7 @@ _DEBUG = False
 
 interfaceNames = ('NoUi', 'Gui')
 MAXITEMLOGGING = 4
+
 
 # For @Ed: sys.excepthook PyQT related code now in Gui.py
 
@@ -114,6 +116,7 @@ class Framework(NotifierBase, GuiBase):
     # to be sub-classed
     applicationName = None
     applicationVersion = None
+
     #-----------------------------------------------------------------------------------------
 
     def __init__(self, args=Arguments()):
@@ -127,6 +130,7 @@ class Framework(NotifierBase, GuiBase):
         # register the programme for later with the getApplication() call
         #-----------------------------------------------------------------------------------------
         from ccpn.framework.Application import ApplicationContainer
+
         container = ApplicationContainer()
         container.register(self)
 
@@ -141,7 +145,7 @@ class Framework(NotifierBase, GuiBase):
         self._current = None
 
         self._plugins = []  # Hack for now, how should we store these?
-                            # used in GuiMainWindow by startPlugin()
+        # used in GuiMainWindow by startPlugin()
 
         #-----------------------------------------------------------------------------------------
         # Initialisations
@@ -197,10 +201,12 @@ class Framework(NotifierBase, GuiBase):
 
         # register dataLoaders for the first and only time
         from ccpn.framework.lib.DataLoaders.DataLoaderABC import getDataLoaders
+
         self._dataLoaders = getDataLoaders()
 
         # register SpectrumDataSource formats for the first and only time
         from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import getDataFormats
+
         self._spectrumDataSourceFormats = getDataFormats()
 
         # get a user interface; nb. ui.start() is called by the application
@@ -243,8 +249,8 @@ class Framework(NotifierBase, GuiBase):
         CCPNINTERNAL: used throughout to check
         """
         if self._debugLevel == Logging.DEBUG1 or \
-           self._debugLevel == Logging.DEBUG2 or \
-           self._debugLevel == Logging.DEBUG3:
+                self._debugLevel == Logging.DEBUG2 or \
+                self._debugLevel == Logging.DEBUG3:
             return True
         return False
 
@@ -366,10 +372,12 @@ class Framework(NotifierBase, GuiBase):
         """
         if self.args.interface == 'Gui':
             from ccpn.ui.gui.Gui import Gui
+
             ui = Gui(application=self)
 
         else:
             from ccpn.ui.Ui import NoUi
+
             ui = NoUi(application=self)
 
         return ui
@@ -822,7 +830,7 @@ class Framework(NotifierBase, GuiBase):
     # Project related methods
     #-----------------------------------------------------------------------------------------
 
-    def _newProject(self, name:str='default') -> Project:
+    def _newProject(self, name: str = 'default') -> Project:
         """Create new, empty project with name
         :return a Project instance
         """
@@ -840,7 +848,7 @@ class Framework(NotifierBase, GuiBase):
         return newProject
 
     # @logCommand('application.')  # decorated in ui class
-    def newProject(self, name:str='default') -> Project:
+    def newProject(self, name: str = 'default') -> Project:
         """Create new, empty project with name
         :return a Project instance
         """
@@ -879,7 +887,7 @@ class Framework(NotifierBase, GuiBase):
         return True
 
     # @logCommand('application.')  # decorated in ui
-    def saveProjectAs(self, newPath, overwrite:bool=False) -> bool:
+    def saveProjectAs(self, newPath, overwrite: bool = False) -> bool:
         """Save project to newPath
         :param newPath: new path to save project (str | Path instance)
         :param overwrite: flag to indicate overwriting of existing path
@@ -919,7 +927,7 @@ class Framework(NotifierBase, GuiBase):
             _project = self.project
             _project._close()
             self._project = None
-            del(_project)
+            del (_project)
 
     #-----------------------------------------------------------------------------------------
     # Data loaders
@@ -1273,10 +1281,11 @@ class Framework(NotifierBase, GuiBase):
         :return the restored project or None on error
         """
         from ccpn.core.lib.ProjectArchiver import ProjectArchiver
+
         archiver = ProjectArchiver(projectPath=self.project.path)
 
         if (_newProjectPath := archiver.restoreArchive(archivePath=archivePath)) is not None and \
-           (_newProject := self.loadProject(_newProjectPath)) is not None:
+                (_newProject := self.loadProject(_newProjectPath)) is not None:
 
             getLogger().info('==> Restored archive %s as %s' % (archivePath, _newProject))
 
@@ -1647,7 +1656,7 @@ class Framework(NotifierBase, GuiBase):
         chemicalShiftTableModule = ChemicalShiftTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(chemicalShiftTableModule, position=position, relativeTo=relativeTo)
         if chemicalShiftList:
-            chemicalShiftTableModule.selectChemicalShiftList(chemicalShiftList)
+            chemicalShiftTableModule._selectTable(chemicalShiftList)
         return chemicalShiftTableModule
 
     @logCommand('application.')
@@ -2030,6 +2039,7 @@ class Framework(NotifierBase, GuiBase):
 
     __repr__ = __str__
 
+
 #-----------------------------------------------------------------------------------------
 #end class
 #-----------------------------------------------------------------------------------------
@@ -2054,7 +2064,6 @@ def createFramework(projectPath=None, **kwds):
 
 
 def testMain():
-
     _makeMainWindowVisible = False
 
     myArgs = Arguments()

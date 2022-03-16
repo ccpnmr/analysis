@@ -25,7 +25,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-16 18:11:00 +0000 (Wed, March 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-16 21:35:12 +0000 (Wed, March 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -159,9 +159,9 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
                 self.closeFile()
                 self.openFile(mode=self.defaultOpenReadWriteMode, check=False)
                 _params = self.spectrumParameters
+
             del _params['version']
 
-            self.writeParameters()
             # we are now up-to-date to the current hdf5 version
             self._hdf5Metadata.initCurrentValues()
             self._hdf5Metadata.saveToHdf5(self.fp)
@@ -184,7 +184,6 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
                 _params['spectralWidthsHz'] = sw
                 del (_params['spectralWidths'])
 
-            self.writeParameters()
             # we are now up-to-date to the current hdf5 version
             self._hdf5Metadata.initCurrentValues()
             self._hdf5Metadata.saveToHdf5(self.fp)

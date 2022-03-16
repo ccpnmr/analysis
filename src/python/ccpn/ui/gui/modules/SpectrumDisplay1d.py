@@ -35,7 +35,7 @@ from ccpn.util.Logging import getLogger
 
 
 class SpectrumDisplay1d(GuiSpectrumDisplay):
-    MAXPEAKLABELTYPES = 6
+    MAXPEAKLABELTYPES = 7
     MAXPEAKSYMBOLTYPES = 4
 
     def __init__(self, mainWindow):

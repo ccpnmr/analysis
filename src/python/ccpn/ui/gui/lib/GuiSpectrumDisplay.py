@@ -832,8 +832,15 @@ class GuiSpectrumDisplay(CcpnModule):
     def getVisibleSpectra(self) -> list:
         """Return a list of spectra currently visible in the spectrumDisplay
         """
+        spectra = set()
         if self.strips:
-            return [spectrum for spectrum in self.strips[0].getSpectra() if spectrum.isDisplayed]
+            for spectrum in self.strips[0].getSpectra():
+                for spectrumView in spectrum.spectrumViews:
+                    if spectrumView.isDisplayed:
+                        spectra.add(spectrum)
+                        break
+        return list(spectra)
+
 
     # GWV 07/01/2022: replace by getVisibleSpectra() fro naming consistency
     # @property

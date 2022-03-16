@@ -1318,7 +1318,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         self.annotationsLabel = _makeLabel(parent, text="Annotation", grid=(row, 0))
-        self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal', 'Id', 'Annotation'],
+        self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal', 'Id', 'ClusterId', 'Annotation'],
                                             callback=self._queueSetAnnotations,
                                             direction='h',
                                             grid=(row, 1), hAlign='l', gridSpan=(1, 2),

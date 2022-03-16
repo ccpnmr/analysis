@@ -292,7 +292,7 @@ class Project(AbstractWrapperObject):
         :return: the absolute path to the state/pipeline sub-directory of
                  the current project as a Path instance
         """
-        return self.statePath / Pipeline.className
+        return self.statePath.fetchDir(Pipeline.className)
 
     @property
     def dataPath(self) -> Path:

@@ -922,10 +922,15 @@ class Gui1dWidget(CcpnGLWidget):
         """
         xPositions = [xPosition - self.symbolX, xPosition + self.symbolX]
         yPositions = [yPosition - self.symbolY, yPosition + self.symbolY]
+        originalxPositions = xPositions
+        originalyPositions = yPositions
 
         peaks = []
         for spectrumView in self.strip.spectrumViews:
             for peakListView in spectrumView.peakListViews:
+                xOffset, yOffset = self._spectrumSettings[spectrumView].get(GLDefs.SPECTRUM_STACKEDMATRIXOFFSET)
+                xPositions = np.array(originalxPositions) - xOffset
+                yPositions = np.array(originalyPositions) - yOffset
                 if spectrumView.isDisplayed and peakListView.isDisplayed:
 
                     peakList = peakListView.peakList

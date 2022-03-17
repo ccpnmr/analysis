@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-16 20:48:02 +0000 (Wed, March 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-17 14:03:20 +0000 (Thu, March 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1239,17 +1239,24 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
         # update the columns to the visible headings
         df.columns = [self.columnHeaders[val] for val in CS_TABLECOLUMNS]
 
-        return df
+        # set the table from the dataFrame
+        _dfObject = DataFrameObject(dataFrame=df,
+                                    columnDefs=self._columns or [],
+                                    table=self,
+                                    )
+        _dfObject._objects = _objects
+
+        return _dfObject
 
     def refreshTable(self):
         # subclass to refresh the groups
-        self.setTableFromDataFrameObject(self._df)
+        _updateSimplePandasTable(self, self._df)
         # self.updateTableExpanders()
 
     def setDataFromSearchWidget(self, dataFrame):
         """Set the data for the table from the search widget
         """
-        self.setData(dataFrame.values)
+        _updateSimplePandasTable(self, dataFrame)
         # self._updateGroups(dataFrame)
         # self.updateTableExpanders()
 
@@ -1360,6 +1367,8 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
         """Subclass guiTable to insert new merge items to top of context menu
         """
         super()._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
+
+        # add extra items to the menu
         _actions = self.tableMenu.actions()
         if _actions:
             _topMenuItem = _actions[0]
@@ -1399,6 +1408,7 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
             self._editMenuAction.setText('Edit NmrAtom')
             self._editMenuAction.setEnabled(False)
 
+        # raise the menu
         super()._raiseTableContextMenu(pos)
 
     #=========================================================================================

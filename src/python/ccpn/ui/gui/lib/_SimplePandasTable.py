@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-16 20:48:02 +0000 (Wed, March 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-17 14:03:20 +0000 (Thu, March 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -43,6 +43,7 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
 from ccpn.ui.gui.widgets import MessageDialog
+from ccpn.ui.gui.widgets.SearchWidget import attachDFSearchWidget
 from ccpn.ui.gui.lib.MenuActions import _openItemObject
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.CcpnSorting import universalSortKey
@@ -462,25 +463,29 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
 
         if role == QtCore.Qt.SizeHintRole:
             # process the heights/widths of the headers
-
             if orientation == QtCore.Qt.Horizontal:
                 try:
-                    # get the estimated width of the column
-                    _width = self._estimateColumnWidth(col)
+                    # get the estimated width of the column, also for the last visible column
+                    width = self._estimateColumnWidth(col)
 
-                    if col == self.columnCount() - 1 and self._view is not None:
-                        # stretch the last column to fit the table - sum the previous columns
-                        _colWidths = sum([self._estimateColumnWidth(cc)
-                                          for cc in range(self.columnCount() - 1)])
-                        _viewWidth = self._view.viewport().size().width()
-                        _width = max(_width, _viewWidth - _colWidths)
+                    _header = self._view.horizontalHeader()
+                    _visibleCols = [col for col in range(self.columnCount()) if not _header.isSectionHidden(col)]
+                    if _visibleCols:
+                        # get the width of all the previous visible columns
+                        _lastCol = _visibleCols[-1]
+                        if col == _lastCol and self._view is not None:
+                            # stretch the last column to fit the table - sum the previous columns
+                            _colWidths = sum([self._estimateColumnWidth(cc)
+                                              for cc in _visibleCols[:-1]])
+                            _viewWidth = self._view.viewport().size().width()
+                            width = max(width, _viewWidth - _colWidths)
 
                     # return the size
-                    return QtCore.QSize(_width, self._chrHeight)
+                    return QtCore.QSize(width, int(self._chrHeight))
 
-                except Exception:
+                except:
                     # return the default QSize
-                    return QtCore.QSize(self._chrWidth, self._chrHeight)
+                    return QtCore.QSize(int(self._chrWidth), int(self._chrHeight))
 
         return None
 
@@ -516,7 +521,7 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
             _len = max(_newLen, _len)
 
         # return the required minimum width
-        _width = min(self._MAXCHARS, _len) * self._chrWidth
+        _width = int(min(self._MAXCHARS, _len) * self._chrWidth)
         return _width
 
     def setForeground(self, row, column, colour):
@@ -792,7 +797,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
                  allowRowDragAndDrop=False,
                  hiddenColumns=None,
                  multiSelect=False, selectRows=True, numberRows=False, autoResize=False,
-                 enableExport=True, enableDelete=True, enableSearch=False,
+                 enableExport=True, enableDelete=True, enableSearch=True,
                  hideIndex=True, stretchLastSection=True,
                  showHorizontalHeader=True, showVerticalHeader=True,
                  enableDoubleClick=True,
@@ -813,6 +818,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
 
         self.moduleParent = moduleParent
         self._table = None
+        self._dataFrameObject = None
 
         self._setTableNotifiers()
 
@@ -836,8 +842,9 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         self._setHeaderContextMenu()
         self._enableExport = enableExport
         self._enableDelete = enableDelete
-        self._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
         self._enableSearch = enableSearch
+
+        self._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
         self._rightClickedTableIndex = None  # last selected item in a table before raising the context menu. Enabled with mousePress event filter
 
         self._enableDoubleClick = enableDoubleClick
@@ -994,17 +1001,17 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         """
         self.tableMenu = Menu('', self, isFloatWidget=True)
         setWidgetFont(self.tableMenu, )
-        self.tableMenu.addAction("Copy clicked cell value", self._copySelectedCell)
+        self.tableMenu.addAction('Copy clicked cell value', self._copySelectedCell)
         if enableExport:
-            self.tableMenu.addAction("Export Visible Table", partial(self.exportTableDialog, exportAll=False))
-            self.tableMenu.addAction("Export All Columns", partial(self.exportTableDialog, exportAll=True))
+            self.tableMenu.addAction('Export Visible Table', partial(self.exportTableDialog, exportAll=False))
+            self.tableMenu.addAction('Export All Columns', partial(self.exportTableDialog, exportAll=True))
 
         self.tableMenu.addSeparator()
 
         if enableDelete:
-            self.tableMenu.addAction("Delete Selection", self.deleteObjFromTable)
+            self.tableMenu.addAction('Delete Selection', self.deleteObjFromTable)
 
-        self.tableMenu.addAction("Clear Selection", self._clearSelectionCallback)
+        self.tableMenu.addAction('Clear Selection', self._clearSelectionCallback)
 
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self._raiseTableContextMenu)
@@ -1120,6 +1127,26 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
             self.showSearchSettings()
 
     #=========================================================================================
+    # Search methods
+    #=========================================================================================
+
+    def initSearchWidget(self):
+        if self._enableSearch and self.searchWidget is None:
+            if not attachDFSearchWidget(self._parent, self):
+                getLogger().warning('Filter option not available')
+
+    def hideSearchWidget(self):
+        if self.searchWidget is not None:
+            self.searchWidget.hide()
+
+    def showSearchSettings(self):
+        """ Display the search frame in the table"""
+
+        self.initSearchWidget()
+        if self.searchWidget is not None:
+            self.searchWidget.show()
+
+    #=========================================================================================
     # Handle dropped items
     #=========================================================================================
 
@@ -1178,7 +1205,8 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         objs = selectedObjects if selectedObjects is not None else self.getSelectedObjects()
 
         try:
-            self._df = self.buildTableDataFrame()
+            self._dataFrameObject = self.buildTableDataFrame()
+            self._df = self._dataFrameObject.dataFrame
 
             # create new model and set in table
             _model = _SimplePandasTableModel(self._df, view=self)
@@ -1198,6 +1226,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
     def populateEmptyTable(self):
         """Populate with an empty dataFrame containing the correct column headers.
         """
+        self._dataFrameObject = None
         self._df = pd.DataFrame({val: [] for val in self.columnHeaders.keys()})
         self._objects = []
         _updateSimplePandasTable(self, self._df, _resize=True)

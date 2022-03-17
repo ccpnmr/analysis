@@ -756,6 +756,14 @@ def snap1DPeaksToExtrema(peaks, maximumLimit=0.1, figOfMeritLimit=1, ):
                         _snap1DPeakToClosestExtremum(peak, maximumLimit=maximumLimit,
                                                      figOfMeritLimit=figOfMeritLimit)
 
+def recalculatePeaksHeightAtPosition(peaks):
+    with undoBlockWithoutSideBar():
+        with notificationEchoBlocking():
+            if len(peaks) > 0:
+                for peak in peaks:  # peaks can be from diff peakLists
+                    if peak is not None:
+                        height = peak.peakList.spectrum.getHeight(peak.position)
+                        peak.height = height
 
 def _fitBins(y, bins):
     # fit a gauss curve over the bins

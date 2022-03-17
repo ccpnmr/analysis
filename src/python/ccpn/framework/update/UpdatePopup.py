@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-08 18:42:56 +0000 (Tue, March 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-17 10:25:32 +0000 (Thu, March 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -64,7 +64,7 @@ class UpdatePopup(CcpnDialogMainWidget, UpdateAgent):
             self.preferences = None
 
         # version = QtCore.QCoreApplication.applicationVersion()
-        version = applicationVersion.withoutRelease()
+        version = applicationVersion  # .withoutRelease()
         UpdateAgent.__init__(self, version, dryRun=False,
                              showInfo=self._showInfo, showError=self._showError,
                              _updateProgressHandler=self._refreshQT)

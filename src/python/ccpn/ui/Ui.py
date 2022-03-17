@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:53 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-03-17 10:25:32 +0000 (Thu, March 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -137,7 +137,7 @@ class Ui(NotifierBase):
         """Check for updates
         """
         # applicationVersion = __version__.split()[1]  # ejb - read from the header
-        _version = applicationVersion.withoutRelease()
+        _version = applicationVersion  # .withoutRelease()
         updateAgent = UpdateAgent(_version, dryRun=False)
         numUpdates = updateAgent.checkNumberUpdates()
         getLogger().debug('_checkUpdates: %s updates available' % numUpdates)
@@ -341,7 +341,7 @@ class NoUi(Ui):
 
         from ccpn.framework.Version import applicationVersion
         # applicationVersion = __version__.split()[1]  # ejb - read from the header
-        installUpdates(applicationVersion.withoutRelease(), dryRun=False)
+        installUpdates(applicationVersion)  # .withoutRelease(), dryRun=False)
 
         sys.stderr.write('Please restart the program to apply the updates\n')
         sys.exit(1)

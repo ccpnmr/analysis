@@ -914,15 +914,13 @@ def _getAdjacentPeakPositions1D(peak):
 
 
 def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=False, doNeg=True,
-                          figOfMeritLimit=1, minPercent = 15):
+                          figOfMeritLimit=1):
     """
     :param peak:
-    :param maximumLimit:
-    :param useAdjacientPeaksAsLimits:
-    :param doNeg:
-    :param figOfMeritLimit:
-    :param minPercent: the minimum xPercent extra height that the nearest maximum has to have more than the
-     current peak or noiseLevel (to be considered as a valid new extremum)
+    :param maximumLimit: don't snap peaks over this threshold in ppm
+    :param useAdjacientPeaksAsLimits: stop a peak to go over pre-existing peaks (to the left/right)
+    :param doNeg: include negative peaks as solutions
+    :param figOfMeritLimit: skip if below this threshold and give only height at position
     :return: position, height : position is a list of length 1,  height is a float
 
     search  maxima close to a given peak based on the maximumLimit (left/right) or using the adjacent peaks position as limits.
@@ -935,7 +933,6 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
     x = spectrum.positions
     y = spectrum.intensities
     position, height = peak.position, peak.height
-
     if peak.figureOfMerit < figOfMeritLimit:
         height = peak.peakList.spectrum.getHeight(peak.position)
         return position, height
@@ -965,6 +962,7 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
         spectrum.negativeNoiseLevel = negativeNoiseLevel
 
     x_filtered, y_filtered = _1DregionsFromLimits(x, y, [a, b])
+
     maxValues, minValues = _find1DMaxima(y_filtered, x_filtered, positiveThreshold=noiseLevel, negativeThreshold=negativeNoiseLevel, findNegative=doNeg)
     allValues = maxValues + minValues
 
@@ -972,26 +970,9 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
         allValues = np.array(allValues)
         positions = allValues[:, 0]
         heights = allValues[:, 1]
-        # nearestPosition = find_nearest(positions, peak.position[0])
-        # take the nearest if is at least x% higher than the noise level
-        thePeakHeight = peak.height
-        thePeakPos = nearestPosition = peak.position[0]
-        # take the nearest if is at least x% higher than the noise level or the initial height
-        initialHeight = nearestHeight = thePeakHeight if thePeakHeight > noiseLevel else noiseLevel
-        heightAdjustmentPerc = percentage(minPercent, initialHeight)
-        minAcceptableHeight = initialHeight + heightAdjustmentPerc
-        #find closest to thePos
-        # nearestPosition = find_nearest(positions, thePeakPos)
-        diffs = np.absolute(positions - thePeakPos)
-        diff_ind = np.argsort(diffs)
-        for ind in diff_ind:
-            _height = heights[ind]
-            if _height >= minAcceptableHeight:
-                nearestHeight = heights[ind]
-                nearestPosition = positions[ind]
-                break
+        nearestPosition = find_nearest(positions, peak.position[0])
+        nearestHeight = heights[positions == nearestPosition]
 
-        # nearestHeight = heights[positions == nearestPosition]
         if useAdjacientPeaksAsLimits:
             if a == nearestPosition or b == nearestPosition:  # avoid snapping to an existing peak, as it might be a wrong snap.
                 height = peak.peakList.spectrum.getHeight(peak.position)
@@ -1012,7 +993,7 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
     else:
         height = peak.peakList.spectrum.getHeight(peak.position)
 
-    return position, height
+    return position, float(height)
 
 
 def _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1, doNeg=True, figOfMeritLimit=1):
@@ -1024,6 +1005,7 @@ def _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1, doNeg=True, figOfMeritL
     :param maximumLimit: maximum tolerance left or right from the peak position (ppm)
     """
     position, height = _get1DClosestExtremum(peak, maximumLimit, doNeg=doNeg, figOfMeritLimit=figOfMeritLimit)
+    print(f'{peak}, originalPosition:{peak.position}; originalHeight:{peak.height}, newPos:{position}, newHeight:{height}')
     with undoBlockWithoutSideBar():
         with notificationEchoBlocking():
             peak.position = position

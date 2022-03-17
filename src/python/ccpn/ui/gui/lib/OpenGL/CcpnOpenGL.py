@@ -6271,8 +6271,8 @@ class CcpnGLWidget(QOpenGLWidget):
         currentPeaks = set(self.current.peaks)
 
         peaks = set()
+        originalxPositions = xPositions
         for spectrumView in self._ordering:  # strip.spectrumViews:
-
             if spectrumView.isDeleted:
                 continue
 
@@ -6285,10 +6285,13 @@ class CcpnGLWidget(QOpenGLWidget):
                     continue
 
                 if len(spectrumView.spectrum.axisCodes) == 1:
-
                     y0 = self._startCoordinate[1]
                     y1 = self._endCoordinate[1]
                     y0, y1 = min(y0, y1), max(y0, y1)
+                    # add offsets for when is stackmode
+                    xOffset, yOffset = self._spectrumSettings[spectrumView].get(GLDefs.SPECTRUM_STACKEDMATRIXOFFSET)
+                    y0, y1 = np.array([y0, y1]) - yOffset
+                    xPositions = np.array(originalxPositions) - xOffset
                     xAxis = 0
 
                     for peak in peakList.peaks:

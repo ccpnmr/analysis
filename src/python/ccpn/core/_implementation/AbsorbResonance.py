@@ -4,10 +4,10 @@ Additional methods for Resonance class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-27 16:25:37 +0000 (Thu, January 27, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-03-17 18:41:30 +0000 (Thu, March 17, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -93,7 +93,9 @@ def absorbResonance(self: 'NmrAtom', nmrAtom) -> 'NmrAtom':
                                 'Attempt to merge nmrAtoms with different isotope codes')
             return
 
-    shifts = list(set(cs for nmrAt in [self, nmrAtom] for cs in nmrAt.chemicalShifts))
+    _dynamicShifts = set(self.chemicalShifts)
+    shifts = set(cs for nmrAt in [self, nmrAtom] for cs in nmrAt.chemicalShifts)
+    _delShifts = shifts - _dynamicShifts
     pks = list(set(pk for pk in nmrAtom.assignedPeaks))
 
     with undoStackBlocking() as addUndoItem:
@@ -153,13 +155,16 @@ def absorbResonance(self: 'NmrAtom', nmrAtom) -> 'NmrAtom':
 
     mergeObjects(project, resonanceB, selfApi, _useV3Delete=True, )  #_mergeFunc=_mergeResonances)
 
+    for sh in _dynamicShifts:
+        # updated shifts are now dynamic (unless parent list is static)
+        sh._static = False
+
     # Must be after resonance merge, so that links to peaks are properly set
     _recalculateChemShifts([self], pks, shifts)
 
-    for sh in shifts:
-        # remove the orphaned shifts (no assignments in this chemicalShiftList)
-        if sh.orphan:
-            sh.delete()
+    for sh in _delShifts:
+        # remove the merged shifts (no assignments in this chemicalShiftList)
+        sh.delete()
 
     with undoStackBlocking() as addUndoItem:
         # recalculate shifts in undo stack

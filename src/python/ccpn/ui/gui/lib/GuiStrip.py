@@ -29,35 +29,28 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 from typing import List, Tuple, Sequence
 from copy import deepcopy
 from functools import partial
-
+import numpy as np
 from PyQt5 import QtWidgets, QtCore, QtGui
-
-from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
-
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, \
     notificationBlanking, undoBlockWithoutSideBar
 from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXHIGHLIGHT, CCPNGLWIDGET_HEXFOREGROUND
-
 from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME, DOUBLEAXIS_FULLATOMNAME
 from ccpn.util.decorators import logCommand
 from ccpn.util.Colour import colorSchemeTable
-
 from ccpn.ui.gui.guiSettings import GUISTRIP_PIVOT, ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.widgets import MessageDialog
-
 from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
     SYMBOLTYPES, ANNOTATIONTYPES, SYMBOLSIZE, SYMBOLTHICKNESS, AXISASPECTRATIOS, AXISASPECTRATIOMODE, \
     BOTTOMAXIS, RIGHTAXIS, ALIASENABLED, ALIASSHADE, ALIASLABELSENABLED, CONTOURTHICKNESS, \
-    PEAKLABELSENABLED, MULTIPLETLABELSENABLED
-
+    PEAKLABELSENABLED, MULTIPLETLABELSENABLED, SPECTRUM_STACKEDMATRIXOFFSET
 from ccpn.util.Constants import AXISUNIT_PPM, AXISUNIT_HZ, AXISUNIT_POINT
 
 
@@ -2491,8 +2484,8 @@ class GuiStrip(Frame):
 
                 _checkOutside = _displayedSpectrum.checkForRegionsOutsideLimits(regions)
                 _skip = any(_checkOutside)
-                if _skip:
-                    getLogger().debug('Strip.pickPeaks: skipping %s; outside region %r' % (spectrum, regions))
+                if _skip and not self._CcpnGLWidget._stackingMode:
+                    getLogger().warning('Strip.pickPeaks: skipping %s; outside region %r' % (spectrum, regions))
                     continue
 
                 # get the list of visible peakLists
@@ -2505,7 +2498,11 @@ class GuiStrip(Frame):
                 positiveThreshold = spectrum.positiveContourBase if spectrum.includePositiveContours else None
                 negativeThreshold = spectrum.negativeContourBase if spectrum.includeNegativeContours else None
                 if spectrum.dimensionCount == 1:
-                    spectrum.peakPicker._intensityLimits = regions[1] #needed to make sure it peaks only inside the selected box.
+                    xOffset, yOffset = self._CcpnGLWidget._spectrumSettings[spectrumView].get(SPECTRUM_STACKEDMATRIXOFFSET)
+                    _intensityLimits = np.array(regions[1]) - yOffset
+                    _xArray = np.array(regions[0]) - xOffset
+                    _sliceTuples = _displayedSpectrum.getSliceTuples([_xArray])
+                    spectrum.peakPicker._intensityLimits = _intensityLimits #needed to make sure it peaks only inside the selected box.
                     positiveThreshold, negativeThreshold = None, None # get automatically
 
                 for thisPeakListView in validPeakListViews:

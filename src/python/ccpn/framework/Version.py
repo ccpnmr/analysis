@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-17 10:07:38 +0000 (Thu, March 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-17 10:09:24 +0000 (Thu, March 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -203,5 +203,5 @@ class VersionString(str):
         return self.__gt__(other) or self.__eq__(other)
 
 
-applicationVersion = VersionString('3.1.beta1')
+applicationVersion = VersionString('3.1.0.beta1')
 revision = '3'

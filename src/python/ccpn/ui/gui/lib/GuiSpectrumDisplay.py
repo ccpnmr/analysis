@@ -1202,7 +1202,7 @@ class GuiSpectrumDisplay(CcpnModule):
                 self._handleStrip(obj, strip)
 
             else:
-                showWarning('Dropped item "%s"' % obj.pid, 'Wrong kind; drop Spectrum, SpectrumGroup, Peak, PeakList,'
+                showWarning('Dropped item "%s"' % obj, 'Wrong kind; drop Spectrum, SpectrumGroup, Peak, PeakList,'
                                                            ' NmrChain, NmrResidue, NmrAtom or Strip')
         if nmrChains:
             with undoBlockWithoutSideBar():

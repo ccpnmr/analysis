@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-17 16:18:45 +0000 (Thu, March 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-17 18:11:59 +0000 (Thu, March 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -5412,7 +5412,17 @@ class CcpnNefReader(CcpnNefContent):
                                                                                    )
                 _params.update(ccpnDimensionParameters)
 
-            spectrum = project.newEmptySpectrum(name=spectrumName, **_params)
+            # create a new spectrum; first empty but change dataFormat if known
+            filePath = _params.pop('filePath', None)
+            dataFormat = _params.pop('dataFormat', None)
+            spectrum = project.newEmptySpectrum(name=spectrumName, path=filePath, **_params)
+            # Optionally change the dataFormat
+            if filePath is not None and dataFormat is not None:
+                try:
+                    spectrum.dataFormat = dataFormat
+                    spectrum._openFile(path=filePath, dataFormat=dataFormat, checkParameters=True)
+                except (RuntimeError, ValueError) as es:
+                    getLogger().warning(f'Unable to initialise {filePath} ({dataFormat}): {es}')
 
             # to still implement
             #             framecode = saveFrame.get('chemical_shift_list')
@@ -7950,252 +7960,252 @@ class CcpnNefReader(CcpnNefContent):
             return dataSets[0]
 
 
-def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict,
-                   dimensionData: dict, transferData: Sequence[Tuple] = None,
-                   defaultChemicalShiftList: ChemicalShiftList = None):
-    """Get or create spectrum using dictionaries of attributes, such as read in from NEF.
+# def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict,
+#                    dimensionData: dict, transferData: Sequence[Tuple] = None,
+#                    defaultChemicalShiftList: ChemicalShiftList = None):
+#     """Get or create spectrum using dictionaries of attributes, such as read in from NEF.
+#
+#     Either 'axisCodes' or 'isotopeCodes' must be present and fully populated.
+#     A number of other dimensionData are treated specially (see below)
+#
+#     :param spectrumParameters keyword-value dictionary of attribute to set on resulting spectrum
+#     :param Dictionary of keyword:list parameters, with per-dimension parameters.
+#     :param defaultChemicalShiftList default chemicalShiftList if not defined by the parameters
+#     """
+#
+#     spectrum = project.getSpectrum(spectrumName)
+#     if spectrum is None:
+#         # Spectrum did not already exist
+#
+#         dimTags = list(dimensionData.keys())
+#
+#         # First try to load it - we override the loaded attribute values below
+#         # but loading gives a more complete parameter set.
+#         spectrum = None
+#         filePath = spectrumParameters.get('filePath')
+#         if filePath and os.path.exists(filePath):
+#             try:
+#                 spectra = project.application.loadData(filePath)
+#                 if spectra and isinstance(spectra[0], Spectrum):
+#                     spectrum = spectra[0]
+#             except Exception as es:
+#                 # Deliberate - any error should be skipped
+#                 getLogger().warning(str(es))
+#
+#             if spectrum is None:
+#                 getLogger().warning("Failed to load spectrum from spectrum path %s" % filePath)
+#             elif 'axisCodes' in dimensionData:
+#                 # set axisCodes
+#                 spectrum.axisCodes = dimensionData['axisCodes']
+#
+#         acquisitionAxisIndex = None
+#         if 'is_acquisition' in dimensionData:
+#             dimTags.remove('is_acquisition')
+#             values = dimensionData['is_acquisition']
+#             if values.count(True) == 1:
+#                 acquisitionAxisIndex = values.index(True)
+#
+#         if spectrum is None:
+#             # Spectrum could not be loaded - now create a dummy spectrum
+#
+#             if 'axisCodes' in dimTags:
+#                 # We have the axisCodes, from ccpn
+#                 dimTags.remove('axisCodes')
+#                 axisCodes = dimensionData['axisCodes']
+#
+#             else:
+#                 if transferData is None:
+#                     raise ValueError("Function needs either axisCodes or transferData")
+#
+#                 dimensionIds = dimensionData['dimension_id']
+#
+#                 # axisCodes were not set - produce a serviceable set
+#                 axisCodes = makeNefAxisCodes(isotopeCodes=dimensionData['isotopeCodes'],
+#                                              dimensionIds=dimensionIds,
+#                                              acquisitionAxisIndex=acquisitionAxisIndex,
+#                                              transferData=transferData)
+#
+#             # make new spectrum with default parameters
+#             kwds = {}
+#             for key in ('isotopeCodes', 'spectralWidths', 'spectrometerFrequencies'):
+#                 if key in dimensionData:
+#                     kwds[key] = dimensionData[key]
+#             spectrum = project.newEmptySpectrum(name=spectrumName, path=filePath, **kwds)
+#             if spectrumParameters.get('chemicalShiftList') is not None:
+#                 spectrum.chemicalShiftList = spectrumParameters.get('chemicalShiftList')
+#
+#             if not spectrum.chemicalShiftList:
+#                 spectrum.chemicalShiftList = defaultChemicalShiftList
+#                 if not spectrum.chemicalShiftList:
+#                     # just create a new one
+#                     spectrum.chemicalShiftList = project.newChemicalShiftList()
+#
+#             if acquisitionAxisIndex is not None:
+#                 spectrum.isAquisition[acquisitionAxisIndex] = True
+#
+#         # Delete autocreated peaklist  and reset - we want any read-in peakList to be the first
+#         # If necessary an empty PeakList is added downstream
+#         spectrum._resetPeakLists()
+#
+#         # (Re)set all spectrum attributes
+#
+#         # First per-dimension ones
+#         dimTags.remove('dimension_id')
+#         if 'absolute_peak_positions' in dimensionData:
+#             # NB We are not using these. What could we do with them?
+#             dimTags.remove('absolute_peak_positions')
+#         if 'folding' in dimensionData:
+#             dimTags.remove('folding')
+#             values = [None if x == 'none' else x for x in dimensionData['folding']]
+#             spectrum.foldingModes = values
+#         if 'pointCounts' in dimensionData:
+#             dimTags.remove('pointCounts')
+#             spectrum.pointCounts = pointCounts = dimensionData['pointCounts']
+#             # if 'totalPointCounts' in dimensionData:
+#             #     dimTags.remove('totalPointCounts')
+#             #     spectrum.totalPointCounts = dimensionData['totalPointCounts']
+#             # else:
+#             #     spectrum.totalPointCounts = pointCounts
+#         # Needed below:
+#         if 'value_first_point' in dimensionData:
+#             dimTags.remove('value_first_point')
+#         if 'referencePoints' in dimensionData:
+#             dimTags.remove('referencePoints')
+#         # value_first_point = dimensionData.get('value_first_point')
+#         # if value_first_point is not None:
+#         #   dimensionData.pop('value_first_point')
+#         # referencePoints = dimensionData.get('referencePoints')
+#         # if referencePoints is not None:
+#         #   dimensionData.pop('referencePoints')
+#
+#         # Remaining per-dimension values match the spectrum. Set them.
+#         # NB we use the old (default) values where the new value is None
+#         # - some attributes like spectralWidths do not accept None.
+#         if 'spectrometerFrequencies' in dimTags:
+#             # spectrometerFrequencies MUST be set before spectralWidths,
+#             # as the spectralWidths are otherwise modified
+#             dimTags.remove('spectrometerFrequencies')
+#             dimTags.insert(0, 'spectrometerFrequencies')
+#         for tag in dimTags:
+#             vals = dimensionData[tag]
+#             # Use old values where new ones are None
+#             oldVals = getattr(spectrum, tag)
+#             vals = [x if x is not None else oldVals[ii] for ii, x in enumerate(vals)]
+#             setattr(spectrum, tag, vals)
+#
+#         # Set referencing.
+#         value_first_point = dimensionData.get('value_first_point')
+#         referencePoints = dimensionData.get('referencePoints')
+#         if value_first_point is None:
+#             # If reading NEF we must get value_first_point,
+#             #  but in other uses we might be getting referencePoints, referenceValues directly
+#             referenceValues = dimensionData.get('referenceValues')
+#             if referenceValues and referencePoints:
+#                 spectrum.referencePoints = referencePoints
+#                 spectrum.referenceValues = referenceValues
+#         else:
+#             if referencePoints is None:
+#                 # not CCPN data
+#                 referenceValues = spectrum.referenceValues
+#                 for ii, val in enumerate(value_first_point):
+#                     if val is None:
+#                         value_first_point[ii] = referenceValues[ii]
+#                 spectrum.referenceValues = value_first_point
+#                 spectrum.referencePoints = [1] * len(referenceValues)
+#             else:
+#                 points = list(spectrum.referencePoints)
+#                 values = list(spectrum.referenceValues)
+#                 sw = spectrum.spectralWidths
+#                 pointCounts = spectrum.pointCounts
+#                 for ii, refVal in enumerate(value_first_point):
+#                     refPoint = referencePoints[ii]
+#                     if refVal is not None and refPoint is not None:
+#                         # if we are here refPoint should never be None, but OK, ...
+#                         # Set reference to use refPoint
+#                         points[ii] = refPoint
+#                         refVal -= ((refPoint - 1) * sw[ii] / pointCounts[ii])
+#                         values[ii] = refVal
+#                 spectrum.referencePoints = points
+#                 spectrum.referenceValues = values
+#
+#         spectrumParameters.pop('chemicalShiftList', None)
+#         # spectrumParameters.pop('filePath', None)  # remove this as well?
+#         # Then spectrum-level ones
+#         for tag, val in spectrumParameters.items():
+#             if tag != 'dimensionCount':
+#                 try:
+#                     # dimensionCount is handled already and not settable
+#                     setattr(spectrum, tag, val)
+#                 except Exception as es:
+#                     pass
+#         #
+#         return spectrum
+#
+#     else:
+#         raise ValueError("Spectrum named %s already exists" % spectrumName)
 
-    Either 'axisCodes' or 'isotopeCodes' must be present and fully populated.
-    A number of other dimensionData are treated specially (see below)
 
-    :param spectrumParameters keyword-value dictionary of attribute to set on resulting spectrum
-    :param Dictionary of keyword:list parameters, with per-dimension parameters.
-    :param defaultChemicalShiftList default chemicalShiftList if not defined by the parameters
-    """
-
-    spectrum = project.getSpectrum(spectrumName)
-    if spectrum is None:
-        # Spectrum did not already exist
-
-        dimTags = list(dimensionData.keys())
-
-        # First try to load it - we override the loaded attribute values below
-        # but loading gives a more complete parameter set.
-        spectrum = None
-        filePath = spectrumParameters.get('filePath')
-        if filePath and os.path.exists(filePath):
-            try:
-                spectra = project.application.loadData(filePath)
-                if spectra and isinstance(spectra[0], Spectrum):
-                    spectrum = spectra[0]
-            except Exception as es:
-                # Deliberate - any error should be skipped
-                getLogger().warning(str(es))
-
-            if spectrum is None:
-                getLogger().warning("Failed to load spectrum from spectrum path %s" % filePath)
-            elif 'axisCodes' in dimensionData:
-                # set axisCodes
-                spectrum.axisCodes = dimensionData['axisCodes']
-
-        acquisitionAxisIndex = None
-        if 'is_acquisition' in dimensionData:
-            dimTags.remove('is_acquisition')
-            values = dimensionData['is_acquisition']
-            if values.count(True) == 1:
-                acquisitionAxisIndex = values.index(True)
-
-        if spectrum is None:
-            # Spectrum could not be loaded - now create a dummy spectrum
-
-            if 'axisCodes' in dimTags:
-                # We have the axisCodes, from ccpn
-                dimTags.remove('axisCodes')
-                axisCodes = dimensionData['axisCodes']
-
-            else:
-                if transferData is None:
-                    raise ValueError("Function needs either axisCodes or transferData")
-
-                dimensionIds = dimensionData['dimension_id']
-
-                # axisCodes were not set - produce a serviceable set
-                axisCodes = makeNefAxisCodes(isotopeCodes=dimensionData['isotopeCodes'],
-                                             dimensionIds=dimensionIds,
-                                             acquisitionAxisIndex=acquisitionAxisIndex,
-                                             transferData=transferData)
-
-            # make new spectrum with default parameters
-            kwds = {}
-            for key in ('isotopeCodes', 'spectralWidths', 'spectrometerFrequencies'):
-                if key in dimensionData:
-                    kwds[key] = dimensionData[key]
-            spectrum = project.newEmptySpectrum(name=spectrumName, path=filePath, **kwds)
-            if spectrumParameters.get('chemicalShiftList') is not None:
-                spectrum.chemicalShiftList = spectrumParameters.get('chemicalShiftList')
-
-            if not spectrum.chemicalShiftList:
-                spectrum.chemicalShiftList = defaultChemicalShiftList
-                if not spectrum.chemicalShiftList:
-                    # just create a new one
-                    spectrum.chemicalShiftList = project.newChemicalShiftList()
-
-            if acquisitionAxisIndex is not None:
-                spectrum.isAquisition[acquisitionAxisIndex] = True
-
-        # Delete autocreated peaklist  and reset - we want any read-in peakList to be the first
-        # If necessary an empty PeakList is added downstream
-        spectrum._resetPeakLists()
-
-        # (Re)set all spectrum attributes
-
-        # First per-dimension ones
-        dimTags.remove('dimension_id')
-        if 'absolute_peak_positions' in dimensionData:
-            # NB We are not using these. What could we do with them?
-            dimTags.remove('absolute_peak_positions')
-        if 'folding' in dimensionData:
-            dimTags.remove('folding')
-            values = [None if x == 'none' else x for x in dimensionData['folding']]
-            spectrum.foldingModes = values
-        if 'pointCounts' in dimensionData:
-            dimTags.remove('pointCounts')
-            spectrum.pointCounts = pointCounts = dimensionData['pointCounts']
-            # if 'totalPointCounts' in dimensionData:
-            #     dimTags.remove('totalPointCounts')
-            #     spectrum.totalPointCounts = dimensionData['totalPointCounts']
-            # else:
-            #     spectrum.totalPointCounts = pointCounts
-        # Needed below:
-        if 'value_first_point' in dimensionData:
-            dimTags.remove('value_first_point')
-        if 'referencePoints' in dimensionData:
-            dimTags.remove('referencePoints')
-        # value_first_point = dimensionData.get('value_first_point')
-        # if value_first_point is not None:
-        #   dimensionData.pop('value_first_point')
-        # referencePoints = dimensionData.get('referencePoints')
-        # if referencePoints is not None:
-        #   dimensionData.pop('referencePoints')
-
-        # Remaining per-dimension values match the spectrum. Set them.
-        # NB we use the old (default) values where the new value is None
-        # - some attributes like spectralWidths do not accept None.
-        if 'spectrometerFrequencies' in dimTags:
-            # spectrometerFrequencies MUST be set before spectralWidths,
-            # as the spectralWidths are otherwise modified
-            dimTags.remove('spectrometerFrequencies')
-            dimTags.insert(0, 'spectrometerFrequencies')
-        for tag in dimTags:
-            vals = dimensionData[tag]
-            # Use old values where new ones are None
-            oldVals = getattr(spectrum, tag)
-            vals = [x if x is not None else oldVals[ii] for ii, x in enumerate(vals)]
-            setattr(spectrum, tag, vals)
-
-        # Set referencing.
-        value_first_point = dimensionData.get('value_first_point')
-        referencePoints = dimensionData.get('referencePoints')
-        if value_first_point is None:
-            # If reading NEF we must get value_first_point,
-            #  but in other uses we might be getting referencePoints, referenceValues directly
-            referenceValues = dimensionData.get('referenceValues')
-            if referenceValues and referencePoints:
-                spectrum.referencePoints = referencePoints
-                spectrum.referenceValues = referenceValues
-        else:
-            if referencePoints is None:
-                # not CCPN data
-                referenceValues = spectrum.referenceValues
-                for ii, val in enumerate(value_first_point):
-                    if val is None:
-                        value_first_point[ii] = referenceValues[ii]
-                spectrum.referenceValues = value_first_point
-                spectrum.referencePoints = [1] * len(referenceValues)
-            else:
-                points = list(spectrum.referencePoints)
-                values = list(spectrum.referenceValues)
-                sw = spectrum.spectralWidths
-                pointCounts = spectrum.pointCounts
-                for ii, refVal in enumerate(value_first_point):
-                    refPoint = referencePoints[ii]
-                    if refVal is not None and refPoint is not None:
-                        # if we are here refPoint should never be None, but OK, ...
-                        # Set reference to use refPoint
-                        points[ii] = refPoint
-                        refVal -= ((refPoint - 1) * sw[ii] / pointCounts[ii])
-                        values[ii] = refVal
-                spectrum.referencePoints = points
-                spectrum.referenceValues = values
-
-        spectrumParameters.pop('chemicalShiftList', None)
-        # spectrumParameters.pop('filePath', None)  # remove this as well?
-        # Then spectrum-level ones
-        for tag, val in spectrumParameters.items():
-            if tag != 'dimensionCount':
-                try:
-                    # dimensionCount is handled already and not settable
-                    setattr(spectrum, tag, val)
-                except Exception as es:
-                    pass
-        #
-        return spectrum
-
-    else:
-        raise ValueError("Spectrum named %s already exists" % spectrumName)
-
-
-def makeNefAxisCodes(isotopeCodes: Sequence[str], dimensionIds: List[int],
-                     acquisitionAxisIndex: int, transferData: Sequence[Tuple]):
-    nuclei = [commonUtil.splitIntFromChars(x)[1] for x in isotopeCodes]
-    dimensionToNucleus = dict((zip(dimensionIds, nuclei)))
-    dimensionToAxisCode = dimensionToNucleus.copy()
-
-    oneBondConnections = {}
-    for startNuc in 'FH':
-        # look for onebond to F or H, the latter taking priority
-        for dim1, dim2, transferType, isIndirect in transferData:
-            if transferType == 'onebond':
-                nuc1, nuc2 = dimensionToNucleus[dim1], dimensionToNucleus[dim2]
-                if startNuc in (nuc1, nuc2):
-                    if startNuc == nuc1:
-                        oneBondConnections[dim1] = dim2
-                    else:
-                        oneBondConnections[dim2] = dim1
-                    dimensionToAxisCode[dim1] = nuc1 + nuc2.lower()
-                    dimensionToAxisCode[dim2] = nuc2 + nuc1.lower()
-
-    resultMap = {}
-    acquisitionAtEnd = False
-    if acquisitionAxisIndex is not None:
-        acquisitionAtEnd = acquisitionAxisIndex >= 0.5 * len(isotopeCodes)
-        # if acquisitionAtEnd:
-        #   # reverse, because acquisition end of dimensions should
-        #   # be the one WITHOUT number suffixes
-        #   dimensionIds.reverse()
-
-        # Put acquisition axis first, to make sure it gets the lowest number
-        # even if it is not teh first to start with.
-        acquisitionAxisId = dimensionIds[acquisitionAxisIndex]
-        dimensionIds.remove(acquisitionAxisId)
-        dimensionIds.insert(0, acquisitionAxisId)
-    for dim in dimensionIds:
-        axisCode = dimensionToAxisCode[dim]
-        if axisCode in resultMap.values():
-            ii = 0
-            ss = axisCode
-            while ss in resultMap.values():
-                ii += 1
-                ss = '%s%s' % (axisCode, ii)
-            otherDim = oneBondConnections.get(dim)
-            if otherDim is not None:
-                # We are adding a suffix to e.g. Hc. Add the same suffix to equivalent Ch
-                # NB this should only happen for certain 4D experiments.
-                # NB not well tested, but better than leaving in a known error.
-                ss = '%s%s' % (dimensionToAxisCode[otherDim], ii)
-                if otherDim < dim:
-                    resultMap[otherDim] = ss
-                dimensionToAxisCode[otherDim] = ss
-
-        resultMap[dim] = axisCode
-    dimensionIds.sort()
-    # NBNB new attempt - may not work
-    # if acquisitionAtEnd:
-    #   # put result back in dimension order
-    #   dimensionIds.reverse()
-    result = list(resultMap[ii] for ii in dimensionIds)
-    #
-    return result
+# def makeNefAxisCodes(isotopeCodes: Sequence[str], dimensionIds: List[int],
+#                      acquisitionAxisIndex: int, transferData: Sequence[Tuple]):
+#     nuclei = [commonUtil.splitIntFromChars(x)[1] for x in isotopeCodes]
+#     dimensionToNucleus = dict((zip(dimensionIds, nuclei)))
+#     dimensionToAxisCode = dimensionToNucleus.copy()
+#
+#     oneBondConnections = {}
+#     for startNuc in 'FH':
+#         # look for onebond to F or H, the latter taking priority
+#         for dim1, dim2, transferType, isIndirect in transferData:
+#             if transferType == 'onebond':
+#                 nuc1, nuc2 = dimensionToNucleus[dim1], dimensionToNucleus[dim2]
+#                 if startNuc in (nuc1, nuc2):
+#                     if startNuc == nuc1:
+#                         oneBondConnections[dim1] = dim2
+#                     else:
+#                         oneBondConnections[dim2] = dim1
+#                     dimensionToAxisCode[dim1] = nuc1 + nuc2.lower()
+#                     dimensionToAxisCode[dim2] = nuc2 + nuc1.lower()
+#
+#     resultMap = {}
+#     acquisitionAtEnd = False
+#     if acquisitionAxisIndex is not None:
+#         acquisitionAtEnd = acquisitionAxisIndex >= 0.5 * len(isotopeCodes)
+#         # if acquisitionAtEnd:
+#         #   # reverse, because acquisition end of dimensions should
+#         #   # be the one WITHOUT number suffixes
+#         #   dimensionIds.reverse()
+#
+#         # Put acquisition axis first, to make sure it gets the lowest number
+#         # even if it is not teh first to start with.
+#         acquisitionAxisId = dimensionIds[acquisitionAxisIndex]
+#         dimensionIds.remove(acquisitionAxisId)
+#         dimensionIds.insert(0, acquisitionAxisId)
+#     for dim in dimensionIds:
+#         axisCode = dimensionToAxisCode[dim]
+#         if axisCode in resultMap.values():
+#             ii = 0
+#             ss = axisCode
+#             while ss in resultMap.values():
+#                 ii += 1
+#                 ss = '%s%s' % (axisCode, ii)
+#             otherDim = oneBondConnections.get(dim)
+#             if otherDim is not None:
+#                 # We are adding a suffix to e.g. Hc. Add the same suffix to equivalent Ch
+#                 # NB this should only happen for certain 4D experiments.
+#                 # NB not well tested, but better than leaving in a known error.
+#                 ss = '%s%s' % (dimensionToAxisCode[otherDim], ii)
+#                 if otherDim < dim:
+#                     resultMap[otherDim] = ss
+#                 dimensionToAxisCode[otherDim] = ss
+#
+#         resultMap[dim] = axisCode
+#     dimensionIds.sort()
+#     # NBNB new attempt - may not work
+#     # if acquisitionAtEnd:
+#     #   # put result back in dimension order
+#     #   dimensionIds.reverse()
+#     result = list(resultMap[ii] for ii in dimensionIds)
+#     #
+#     return result
 
 
 def _printOutMappingDict(mappingDict: dict):

@@ -62,6 +62,8 @@ class SpectrumDimensionAttributes(object):
             self._dataDim.numPointsValid = value
         else:
             self._dataDim.numPoints = value
+            self._dataDim.numPointsOrig = value
+
         self.spectralWidthHz = oldSw
 
     @property

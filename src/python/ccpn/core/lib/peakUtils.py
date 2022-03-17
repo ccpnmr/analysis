@@ -1005,7 +1005,6 @@ def _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1, doNeg=True, figOfMeritL
     :param maximumLimit: maximum tolerance left or right from the peak position (ppm)
     """
     position, height = _get1DClosestExtremum(peak, maximumLimit, doNeg=doNeg, figOfMeritLimit=figOfMeritLimit)
-    print(f'{peak}, originalPosition:{peak.position}; originalHeight:{peak.height}, newPos:{position}, newHeight:{height}')
     with undoBlockWithoutSideBar():
         with notificationEchoBlocking():
             peak.position = position

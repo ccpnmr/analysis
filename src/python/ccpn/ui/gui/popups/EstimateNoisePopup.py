@@ -229,7 +229,8 @@ class EstimateNoisePopup(CcpnDialogMainWidget):
         # calculate an estimate for each of the tabs
         if self.autoCalculate.isChecked():
             for tab in self._noiseTab:
-                tab._estimateNoise()
+                if not tab._noiseFromCurrentCursorPosition:
+                    tab._estimateNoise()
 
     def storeWidgetState(self):
         """Store the state of the checkBoxes between popups
@@ -292,6 +293,7 @@ class NoiseTab(Widget):
 
         # create the list of widgets and set the callbacks for each
         self._setWidgets()
+        self._noiseFromCurrentCursorPosition = False
         self._setFromCurrentCursor()
 
     def _setWidgets(self):
@@ -358,6 +360,7 @@ class NoiseTab(Widget):
             if self.spectrum.dimensionCount == 1:
                 if self.current.cursorPosition:
                     self.noiseLevelSpinBox.set(float(self.current.cursorPosition[-1]))
+                    self._noiseFromCurrentCursorPosition = True
 
     def _estimateNoise(self):
         # get the current mode and call the relevant estimate routine

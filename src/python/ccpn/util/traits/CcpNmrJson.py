@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-16 17:13:09 +0000 (Wed, February 16, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-03-16 16:19:26 +0000 (Wed, March 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -213,6 +213,27 @@ def update(updateHandler, push=False):
 #--------------------------------------------------------------------------------------------
 
 
+#--------------------------------------------------------------------------------------------
+# Some info regarding the call hiarchy on restoring
+#
+# restoreObject(path)
+#   fromJson(string) -> data
+#   dataDict = dict(data)
+#   dataDict = _update(dataDict)
+#   _decode(dataDict)
+#       _getJsonHandler() -> handler
+#       handler.handle(obj, dataDict)
+#           for key,value in dataDict.items():
+#               if recursion and _isEncodedObject(value):
+#                   obj.key = _newObjectFromDict(value)
+#               else:
+#                   obj.key = value
+#   return obj
+#
+#--------------------------------------------------------------------------------------------
+
+
+
 @fileHandler('.json', 'toJson', 'fromJson')
 class CcpNmrJson(TraitBase):
     """
@@ -328,7 +349,7 @@ class CcpNmrJson(TraitBase):
             raise ValueError('metadata does not contain the classname of a CcpNmrJson (sub-)type')
 
         if not className in CcpNmrJson._registeredClasses:
-            raise RuntimeError('Cannot decode class "%s"' % className)
+            raise RuntimeError(f'Unregistered class "{className}"; Cannot decode the data')
         cls = CcpNmrJson._registeredClasses[className]
         return cls
 
@@ -353,6 +374,7 @@ class CcpNmrJson(TraitBase):
         """
         cls = CcpNmrJson._getClassFromDict(theDict)
         obj = cls(**kwds)
+        theDict = obj._update(theDict)
         obj._decode(theDict)
         return obj
 

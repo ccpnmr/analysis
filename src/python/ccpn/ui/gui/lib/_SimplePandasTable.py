@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-17 14:03:20 +0000 (Thu, March 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-17 15:25:24 +0000 (Thu, March 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -35,6 +35,7 @@ import pandas as pd
 from PyQt5 import QtWidgets, QtCore, QtGui
 from time import time_ns
 from types import SimpleNamespace
+from queue import Queue
 
 from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND
 from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT, getFontHeight
@@ -851,6 +852,16 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         if enableDoubleClick:
             self.doubleClicked.connect(self._doubleClickCallback)
 
+        # notifier queue
+        self._queuePending = Queue()
+        self._queueActive = Queue()
+        self._qTimer = _qTimer = QtCore.QTimer()
+        _qTimer.timeout.connect(self._queueProcess)
+        _qTimer.setSingleShot(True)
+        _qTimer._busy = False
+        _qTimer._restart = False
+        self._lock = QtCore.QMutex()
+
     def setModel(self, model: QtCore.QAbstractItemModel) -> None:
         """Set the model for the view
         """
@@ -1332,7 +1343,8 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
             self._tableNotifier = Notifier(self.project,
                                            [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
                                            self.tableClass.__name__,
-                                           self._updateTableCallback,
+                                           # self._updateTableCallback,
+                                           partial(self._queueGeneralNotifier, self._updateTableCallback),
                                            onceOnly=True)
 
         if self.rowClass:
@@ -1340,7 +1352,8 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
             self._rowNotifier = Notifier(self.project,
                                          [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME, Notifier.CHANGE],
                                          self.rowClass.__name__,
-                                         self._updateRowCallback,
+                                         # self._updateRowCallback,
+                                         partial(self._queueGeneralNotifier, self._updateRowCallback),
                                          onceOnly=True)  # should be True, but doesn't work
 
         if isinstance(self.cellClassNames, list):
@@ -1362,16 +1375,23 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
             self._selectCurrentNotifier = Notifier(self.current,
                                                    [Notifier.CURRENT],
                                                    self.callBackClass._pluralLinkName,
-                                                   self._selectCurrentCallBack)
+                                                   self._selectCurrentCallBack
+                                                   )
 
         if self.search:
             self._searchNotifier = Notifier(self.current,
                                             [Notifier.CURRENT],
                                             self.search._pluralLinkName,
-                                            self._searchCallBack)
+                                            self._searchCallBack
+                                            )
 
         # add a cleaner id to the opened guiTable list
         MODULEIDS[id(self.moduleParent)] = len(MODULEIDS)
+
+    def _queueGeneralNotifier(self, func, data):
+        """Add the notifier to the queue handler
+        """
+        self._queueAppend([func, data, data[Notifier.TRIGGER]])
 
     def _clearTableNotifiers(self):
         """Clean up the notifiers
@@ -1726,3 +1746,51 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         else:
             self.clearSelection()
 
+    #=========================================================================================
+    # Notifier queue handling
+    #=========================================================================================
+
+    def _queueProcess(self):
+        """Process current items in the queue
+        """
+        # set busy flag
+        self._qTimer._busy = True
+
+        try:
+            with QtCore.QMutexLocker(self._lock):
+                # protect the queue switching
+                self._queueActive = self._queuePending
+                self._queuePending = Queue()
+
+            _lastItm = None
+            while not self._queueActive.empty():
+                itm = self._queueActive.get()
+                # process item if different from previous
+                try:
+                    func, data, trigger = itm
+                    func(data)
+                except Exception as es:
+                    getLogger().debug(f'Error in {self.__class__.__name__} update: {es}')
+
+                finally:
+                    _lastItm = itm
+
+        finally:
+            # release busy flag and restart if required
+            self._qTimer._busy = False
+            if self._qTimer._restart:
+                print(f'   restart  {self}')
+                self._qTimer._restart = False
+                self._qTimer.start(0)
+
+    def _queueAppend(self, itm):
+        """Append a new item to the queue
+        """
+        self._queuePending.put(itm)
+        if not self._qTimer.isActive() and not self._qTimer._busy:
+            self._qTimer._restart = False
+            self._qTimer.start(0)
+
+        elif self._qTimer._busy:
+            # caught during the queue processing, need to restart
+            self._qTimer._restart = True

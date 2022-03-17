@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-16 17:21:44 +0000 (Wed, March 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-17 16:18:44 +0000 (Thu, March 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -3341,7 +3341,10 @@ def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], name: str =
     if len(parameters) > 0:
         for param, value in parameters.items():
             if hasattr(spectrum, param):
-                setattr(spectrum, param, value)
+                try:
+                    setattr(spectrum, param, value)
+                except AttributeError:
+                    getLogger().warning(f'{spectrum}: can not set parameter "{param}" to {value}')
         dataSource.importFromSpectrum(spectrum, includePath=False)
 
     return spectrum

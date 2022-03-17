@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 11:11:25 +0000 (Tue, February 15, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-03-17 16:18:44 +0000 (Thu, March 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -416,8 +416,8 @@ nef2CcpnMap = {
     'nef_nmr_spectrum'                      : OrderedDict((
         ('num_dimensions', 'dimensionCount'),
         ('chemical_shift_list', None),
-        ('experiment_classification', 'experimentType'),
-        ('experiment_type', 'experimentName'),
+        ('experiment_classification', None),
+        ('experiment_type', None),
         ('ccpn_positive_contour_count', 'positiveContourCount'),
         ('ccpn_positive_contour_base', 'positiveContourBase'),
         ('ccpn_positive_contour_factor', 'positiveContourFactor'),
@@ -430,7 +430,9 @@ nef2CcpnMap = {
         ('ccpn_spectrum_scale', 'scale'),
         ('ccpn_spinning_rate', 'spinningRate'),
         ('ccpn_spectrum_comment', 'comment'),
-        ('ccpn_spectrum_file_path', 'filePath'),
+        ('ccpn_spectrum_file_path', 'path'),
+        ('ccpn_file_type', 'dataFormat'),
+        ('ccpn_file_scale_factor', 'scale'),
         ('ccpn_sample', None),
 
         # NOTE:ED - testing again
@@ -468,7 +470,7 @@ nef2CcpnMap = {
         ('axis_code', 'isotopeCodes'),
         ('spectrometer_frequency', 'spectrometerFrequencies'),
         ('spectral_width', 'spectralWidths'),
-        ('value_first_point', None),
+        ('value_first_point', 'referenceValues'),
         ('folding', None),
         ('absolute_peak_positions', None),
         ('is_acquisition', None),

@@ -64,7 +64,7 @@ from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.widgets.PlotterWidget import plotter
 
 #from collections import OrderedDict
-
+from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.MenuActions import _openItemObject
 
@@ -341,15 +341,19 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                           'preferences': self.application.preferences,
                           'redo'       : self.application.redo,
                           'undo'       : self.application.undo,
+
                           'get'        : self.application.get,
 
                           'ui'         : self.application.ui,
                           'mainWindow' : self,
                           'project'    : self.application.project,
                           'loadProject': self.application.loadProject,
-                          # 'newProject' : self.application.newProject,
+                          # 'newProject' : self.application.newProject, this is a crash!
                           'info'       : getLogger().info,
                           'warning'    : getLogger().warning,
+                          #### context managers
+                          'undoBlock': undoBlockWithoutSideBar,
+                          'notificationEchoBlocking': notificationEchoBlocking,
                           'plotter'    : plotter
                           }
         self.pythonConsole = IpythonConsole(self)

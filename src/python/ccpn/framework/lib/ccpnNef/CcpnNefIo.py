@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-08 16:17:10 +0000 (Tue, March 08, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-03-17 18:11:59 +0000 (Thu, March 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -41,6 +41,8 @@ from typing import List, Union, Optional, Sequence, Tuple
 
 from ccpn.core.lib import Pid
 from ccpn.core import _coreImportOrder
+from ccpn.core.Spectrum import Spectrum
+
 from ccpn.framework.lib.ccpnNef.CcpnNefCommon import nef2CcpnMap, saveFrameReadingOrder, _isALoop, \
     saveFrameWritingOrder, _parametersFromLoopRow, _traverse, _stripSpectrumName, _stripSpectrumSerial
 from ccpn.core.lib.CcpnSorting import universalSortKey
@@ -5346,151 +5348,290 @@ class CcpnNefReader(CcpnNefContent):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def load_nef_nmr_spectrum(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+    def _parametersFromSpectrumDimensionLoop(self, loop: StarIo.NmrLoop, mapping) -> dict:
+        """Parse a spectrum dimension loop (either ned or ccpn) and convert data to a dictionary
+        """
+        if mapping is None:
+            raise ValueError('Undefined spectrum dimension mapping dict')
 
-        dimensionTransferTags = ('dimension_1', 'dimension_2', 'transfer_type', 'is_indirect')
+        result = {}
 
+        # sort the rows on dimension_id; (just to be sure they are in order??)
+        rows = sorted(loop.data, key=itemgetter('dimension_id'))
+        if not rows:
+            raise RuntimeError("Spectrum dimension loop data is missing or empty")
+
+        # Get dimension attributes
+        for nefTag, ccpnTag in mapping.items():
+            if nefTag in rows[0] and ccpnTag is not None:
+                result[ccpnTag] = list(row.get(nefTag) for row in rows)
+        #
+        return result
+
+    def _load_spectrum(self, saveFrame: StarIo.NmrSaveFrame, project: Project) -> Spectrum:
+        """Create or get a spectrum corresponding to the saveFrame data
+        :return: the Spectrum instance
+        """
         # Get ccpn-to-nef mapping for saveframe
         category = saveFrame['sf_category']
         framecode = saveFrame['sf_framecode']
-        mapping = nef2CcpnMap.get(category) or {}
 
-        # separate the peak list attributes for clarity
-        mappingNoPeakList = nef2CcpnMap.get('ccpn_no_peak_list') or {}
+        # Get name from the framecode
+        _name = framecode[len(category) + 1:]
+        spectrumName = _stripSpectrumName(_name)
+
+        # see if the spectrum is already in the project
+        _pid = Pid.Pid.new(Spectrum.shortClassName, spectrumName)
+        if (spectrum := project.getByPid(_pid)) is None:
+            # Spectrum did not exist, create a new one
+
+            _params = dict()
+
+            # Get nef- and ccpn-defined spectrum parameters
+            spectrumParams, _tmp = self._parametersFromSaveFrame(saveFrame,
+                                                                 mapping=nef2CcpnMap.get(category, {}),
+                                                                 ccpnPrefix=None)
+            self._updateStringParameters(spectrumParams)
+
+            dimensionCount = spectrumParams['dimensionCount']  # we need this later
+            _params.update(spectrumParams)
+
+            # get dimension parameters
+            if (_loop := saveFrame.get('nef_spectrum_dimension')) is not None:
+                nefDimensionParameters = self._parametersFromSpectrumDimensionLoop( _loop,
+                                                                                    mapping=nef2CcpnMap.get('nef_spectrum_dimension')
+                                                                                  )
+                _params.update(nefDimensionParameters)
+                # nef dimension parameters do not have the reference point as a parameter
+                # assume 1.0 as default; maybe overridden later by the ccpn dimension parameters
+                _params['referencePoints'] = [1.0]*dimensionCount
+
+            if (_loop := saveFrame.get('ccpn_spectrum_dimension')) is not None:
+                ccpnDimensionParameters = self._parametersFromSpectrumDimensionLoop( _loop,
+                                                                                    mapping=nef2CcpnMap.get('ccpn_spectrum_dimension')
+                                                                                   )
+                _params.update(ccpnDimensionParameters)
+
+            # create a new spectrum; first empty but change dataFormat if known
+            filePath = _params.pop('filePath', None)
+            dataFormat = _params.pop('dataFormat', None)
+            spectrum = project.newEmptySpectrum(name=spectrumName, path=filePath, **_params)
+            # Optionally change the dataFormat
+            if filePath is not None and dataFormat is not None:
+                try:
+                    spectrum.dataFormat = dataFormat
+                    spectrum._openFile(path=filePath, dataFormat=dataFormat, checkParameters=True)
+                except (RuntimeError, ValueError) as es:
+                    getLogger().warning(f'Unable to initialise {filePath} ({dataFormat}): {es}')
+
+            # to still implement
+            #             framecode = saveFrame.get('chemical_shift_list')
+            #             # Defaults to first (there should be only one, but we want the read to work) ShiftList
+            #             spectrumParameters['chemicalShiftList'] = self.frameCode2Object.get(framecode) or self.defaultChemicalShiftList
+            #
+            #             framecode = saveFrame.get('ccpn_sample')
+            #             if framecode and framecode in self.frameCode2Object:
+            #                 spectrumParameters['sample'] = self.frameCode2Object[framecode]
+            # # read dimension transfer data
+            # loopName = 'nef_spectrum_dimension_transfer'
+            # # Those are treated elsewhere
+            # loop = saveFrame.get(loopName)
+            # if loop:
+            #     data = loop.data
+            #     transferData = [
+            #         SpectrumLib.MagnetisationTransferTuple(*(row.get(tag) for tag in dimensionTransferTags))
+            #         for row in data
+            #         ]
+            # else:
+            #     # transferData = []
+            #     raise ValueError("nef_spectrum_dimension_transfer is missing or empty")
+            #
+            # if not self.defaultChemicalShiftList:
+            #     # no chemicalShiftLists have been loaded yet, so need to fetch/create one
+            #     if not project.chemicalShiftLists:
+            #         project.newChemicalShiftList()
+            #     self.defaultChemicalShiftList = project.chemicalShiftLists[0]
+
+        return spectrum
+
+    def _load_peaks(self, saveFrame: StarIo.NmrSaveFrame, spectrum: Spectrum):
+        """Load the peaks defined in saveframe; add to a peaklist of spectrum
+        :return a PeakList instance with the peaks
+        """
+        # Get ccpn-to-nef mapping for saveframe
+        category = saveFrame['sf_category']
+        framecode = saveFrame['sf_framecode']
+
+        # Get name from the framecode
+        _name = framecode[len(category) + 1:]
 
         # Get peakList parameters
-        # peakListParameters, dummy = self._parametersFromSaveFrame(saveFrame, mapping)
-        peakListParameters, dummy = self._parametersFromSaveFrame(saveFrame, mappingNoPeakList)
-        self._updateStringParameters(peakListParameters)
+        peakListParameters, dummy = self._parametersFromSaveFrame(saveFrame,
+                                                                  mapping=nef2CcpnMap.get('ccpn_no_peak_list', {})
+                                                                 )
+        # self._updateStringParameters(peakListParameters)
+        peakListId = _stripSpectrumSerial(_name) or peakListParameters.get('serial') or 1
+        # peakListParameters.pop('serial', None)
 
-        # Get spectrum parameters
-        spectrumParameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping,
-                                                                      ccpnPrefix=None)
-        self._updateStringParameters(spectrumParameters)
-        # ccpnPrefix='spectrum')
-
-        # Get name from spectrum parameters, or from the framecode
-        spectrumName = framecode[len(category) + 1:]
-
-        peakListSerial = _stripSpectrumSerial(spectrumName) or peakListParameters.get('serial') or 1
-        # peakListParameters['serial'] = peakListSerial
-        peakListParameters.pop('serial', None)
-        spectrumName = _stripSpectrumName(spectrumName)
-
-        spectrum = project.getSpectrum(spectrumName)
-        if spectrum is None:
-            # Spectrum does not already exist - create it.
-            # NB For CCPN-exported projects spectra with multiple peakLists are handled this way
-
-            framecode = saveFrame.get('chemical_shift_list')
-            # Defaults to first (there should be only one, but we want the read to work) ShiftList
-            spectrumParameters['chemicalShiftList'] = self.frameCode2Object.get(framecode) or self.defaultChemicalShiftList
-
-            framecode = saveFrame.get('ccpn_sample')
-            if framecode and framecode in self.frameCode2Object:
-                spectrumParameters['sample'] = self.frameCode2Object[framecode]
-
-            # get per-dimension data - NB these are mandatory and cannot be worked around
-            dimensionData = self.read_nef_spectrum_dimension(project,
-                                                             saveFrame['nef_spectrum_dimension'])
-            # read dimension transfer data
-            loopName = 'nef_spectrum_dimension_transfer'
-            # Those are treated elsewhere
-            loop = saveFrame.get(loopName)
-            if loop:
-                data = loop.data
-                transferData = [
-                    SpectrumLib.MagnetisationTransferTuple(*(row.get(tag) for tag in dimensionTransferTags))
-                    for row in data
-                    ]
-            else:
-                # transferData = []
-                raise ValueError("nef_spectrum_dimension_transfer is missing or empty")
-
-            if not self.defaultChemicalShiftList:
-                # no chemicalShiftLists have been loaded yet, so need to fetch/create one
-                if not project.chemicalShiftLists:
-                    project.newChemicalShiftList()
-                self.defaultChemicalShiftList = project.chemicalShiftLists[0]
-
-            spectrum = createSpectrum(project, spectrumName, spectrumParameters, dimensionData,
-                                      transferData=transferData, defaultChemicalShiftList=self.defaultChemicalShiftList)
-
-            # Set experiment transfers at the API level
-            if transferData and not spectrum.magnetisationTransfers:
-                try:
-                    spectrum._setMagnetisationTransfers(transferData)
-                except Exception as es:
-                    self.warning("nef_spectrum_dimension_transfer is ill-defined: %s" % transferData, loop)
-
-            # Make data storage object
-            filePath = saveFrame.get('ccpn_spectrum_file_path')
-            if filePath:
-                storageParameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping, ccpnPrefix='_dataSource')
-                storageParameters['numPoints'] = spectrum.pointCounts
-                # spectrum._addDataStore(filePath, **storageParameters)
-                try:
-                    spectrum.filePath = filePath
-                except Exception as es:
-                    pass
-
-            # Load CCPN dimensions before peaks
-            loopName = 'ccpn_spectrum_dimension'
-            # Those are treated elsewhere
-            loop = saveFrame.get(loopName)
-            if loop:
-                self.load_ccpn_spectrum_dimension(spectrum, loop, saveFrame)
-
-        # Make PeakList if old nef parameters exist
-        # if len(peakListParameters):
-
-        try:
-            # check the list of items in the import dict
-            _frame = self._importDict[saveFrame.name]
-            importRows = _frame['_importPeaks']
-        except:
-            importRows = []
-
-        peakListId = Pid.IDSEP.join(('' if x is None else str(x)) for x in (spectrumName, peakListSerial))
-        peakList = project.getObjectsByPartialId(className='PeakList', idStartsWith=peakListId)
-
-        if self._checkImport(saveFrame, peakListId, checkID='_importPeaks'):
-            if peakList:
-                self.warning('PeakList %s already exists. Skipping' % peakListId)
-                return peakList
-
-            else:
-                peakList = spectrum.newPeakList(**peakListParameters)
-                peakList._resetSerial(peakListSerial)
-
-                # Load 'nef_peak' loop, with spectrum as parent - load the peaks
-                for loopName in loopNames:
-                    if loopName in ('nef_peak',):
-                        # Those are treated elsewhere
-                        loop = saveFrame.get(loopName)
-                        if loop:
-                            importer = self.importers[loopName]
-                            importer(self, spectrum, loop, saveFrame, peakListId=peakListSerial)
-
-                # # Load peaks (if exist)
-                # loop = saveFrame.get('nef_peak')
-                # if loop:
-                #     self.load_nef_peak(peakList, loop)
-
-        # Load remaining loops, with spectrum as parent - ccpn multiplets/integrals
-        for loopName in loopNames:
-            if loopName not in ('nef_spectrum_dimension', 'ccpn_spectrum_dimension', 'nef_peak',
-                                'nef_spectrum_dimension_transfer',
-                                ):
-                # Those are treated elsewhere
-                loop = saveFrame.get(loopName)
-                if loop:
-                    importer = self.importers[loopName]
-                    importer(self, spectrum, loop, saveFrame, peakListId=peakListSerial)
-                    # importer(self, spectrum, loop, peakListId=oldSerial)
-        #
-        # if len(peakListParameters):
+        peakList = None
+        if (_loop := saveFrame.get('nef_peak')) is not None:
+            peakList = self.load_nef_peak(spectrum=spectrum,
+                                          loop = _loop,
+                                          saveFrame = saveFrame,
+                                          peakListId = peakListId)
         return peakList
+
+    def load_nef_nmr_spectrum(self, project: Project, saveFrame: StarIo.NmrSaveFrame):
+        """Load an nmr spectrum, peaks and all associated things from the safeframe
+        """
+
+        spectrum = self._load_spectrum(saveFrame, project)
+        peakList = self._load_peaks(saveFrame, spectrum)
+
+        return peakList
+
+        # dimensionTransferTags = ('dimension_1', 'dimension_2', 'transfer_type', 'is_indirect')
+        #
+        # # Get ccpn-to-nef mapping for saveframe
+        # category = saveFrame['sf_category']
+        # framecode = saveFrame['sf_framecode']
+        # mapping = nef2CcpnMap.get(category) or {}
+        #
+        # # separate the peak list attributes for clarity
+        # mappingNoPeakList = nef2CcpnMap.get('ccpn_no_peak_list') or {}
+        #
+        # # Get peakList parameters
+        # # peakListParameters, dummy = self._parametersFromSaveFrame(saveFrame, mapping)
+        # peakListParameters, dummy = self._parametersFromSaveFrame(saveFrame, mappingNoPeakList)
+        # self._updateStringParameters(peakListParameters)
+        #
+        # # # Get spectrum parameters
+        # # spectrumParameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping,
+        # #                                                               ccpnPrefix=None)
+        # # self._updateStringParameters(spectrumParameters)
+        # #
+        # # # Get name from spectrum parameters, or from the framecode
+        # # spectrumName = framecode[len(category) + 1:]
+        # # spectrumName = _stripSpectrumName(spectrumName)
+        #
+        # peakListSerial = _stripSpectrumSerial(spectrum.name) or peakListParameters.get('serial') or 1
+        # # peakListParameters['serial'] = peakListSerial
+        # peakListParameters.pop('serial', None)
+        #
+        # # # spectrum = project.getSpectrum(spectrumName)
+        # # if spectrum is None:
+        # #     # Spectrum does not already exist - create it.
+        # #     # NB For CCPN-exported projects spectra with multiple peakLists are handled this way
+        # #
+        # #     framecode = saveFrame.get('chemical_shift_list')
+        # #     # Defaults to first (there should be only one, but we want the read to work) ShiftList
+        # #     spectrumParameters['chemicalShiftList'] = self.frameCode2Object.get(framecode) or self.defaultChemicalShiftList
+        # #
+        # #     framecode = saveFrame.get('ccpn_sample')
+        # #     if framecode and framecode in self.frameCode2Object:
+        # #         spectrumParameters['sample'] = self.frameCode2Object[framecode]
+        # #
+        # #     # get per-dimension data - NB these are mandatory and cannot be worked around
+        # #     dimensionData = self.read_nef_spectrum_dimension(project,
+        # #                                                      saveFrame['nef_spectrum_dimension'])
+        # #     # # read dimension transfer data
+        # #     # loopName = 'nef_spectrum_dimension_transfer'
+        # #     # # Those are treated elsewhere
+        # #     # loop = saveFrame.get(loopName)
+        # #     # if loop:
+        # #     #     data = loop.data
+        # #     #     transferData = [
+        # #     #         SpectrumLib.MagnetisationTransferTuple(*(row.get(tag) for tag in dimensionTransferTags))
+        # #     #         for row in data
+        # #     #         ]
+        # #     # else:
+        # #     #     # transferData = []
+        # #     #     raise ValueError("nef_spectrum_dimension_transfer is missing or empty")
+        # #     #
+        # #     # if not self.defaultChemicalShiftList:
+        # #     #     # no chemicalShiftLists have been loaded yet, so need to fetch/create one
+        # #     #     if not project.chemicalShiftLists:
+        # #     #         project.newChemicalShiftList()
+        # #     #     self.defaultChemicalShiftList = project.chemicalShiftLists[0]
+        # #
+        # #     spectrum = createSpectrum(project, spectrumName, spectrumParameters, dimensionData,
+        # #                               transferData=transferData, defaultChemicalShiftList=self.defaultChemicalShiftList)
+        # #
+        # #     # Set experiment transfers at the API level
+        # #     if transferData and not spectrum.magnetisationTransfers:
+        # #         try:
+        # #             spectrum._setMagnetisationTransfers(transferData)
+        # #         except Exception as es:
+        # #             self.warning("nef_spectrum_dimension_transfer is ill-defined: %s" % transferData, loop)
+        # #
+        # #     # Make data storage object
+        # #     filePath = saveFrame.get('ccpn_spectrum_file_path')
+        # #     if filePath:
+        # #         storageParameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping, ccpnPrefix='_dataSource')
+        # #         storageParameters['numPoints'] = spectrum.pointCounts
+        # #         # spectrum._addDataStore(filePath, **storageParameters)
+        # #         try:
+        # #             spectrum.filePath = filePath
+        # #         except Exception as es:
+        # #             pass
+        # #
+        # #     # Load CCPN dimensions before peaks
+        # #     loopName = 'ccpn_spectrum_dimension'
+        # #     # Those are treated elsewhere
+        # #     loop = saveFrame.get(loopName)
+        # #     if loop:
+        # #         self.load_ccpn_spectrum_dimension(spectrum, loop, saveFrame)
+        #
+        # # Make PeakList if old nef parameters exist
+        # # if len(peakListParameters):
+        #
+        # try:
+        #     # check the list of items in the import dict
+        #     _frame = self._importDict[saveFrame.name]
+        #     importRows = _frame['_importPeaks']
+        # except:
+        #     importRows = []
+        #
+        # peakListId = Pid.IDSEP.join(('' if x is None else str(x)) for x in (spectrumName, peakListSerial))
+        # peakList = project.getObjectsByPartialId(className='PeakList', idStartsWith=peakListId)
+        #
+        # if self._checkImport(saveFrame, peakListId, checkID='_importPeaks'):
+        #     if peakList:
+        #         self.warning('PeakList %s already exists. Skipping' % peakListId)
+        #         return peakList
+        #
+        #     else:
+        #         peakList = spectrum.newPeakList(**peakListParameters)
+        #         peakList._resetSerial(peakListSerial)
+        #
+        #         # Load 'nef_peak' loop, with spectrum as parent - load the peaks
+        #         for loopName in loopNames:
+        #             if loopName in ('nef_peak',):
+        #                 # Those are treated elsewhere
+        #                 loop = saveFrame.get(loopName)
+        #                 if loop:
+        #                     importer = self.importers[loopName]
+        #                     importer(self, spectrum, loop, saveFrame, peakListId=peakListSerial)
+        #
+        #         # # Load peaks (if exist)
+        #         # loop = saveFrame.get('nef_peak')
+        #         # if loop:
+        #         #     self.load_nef_peak(peakList, loop)
+        #
+        # # Load remaining loops, with spectrum as parent - ccpn multiplets/integrals
+        # for loopName in loopNames:
+        #     if loopName not in ('nef_spectrum_dimension', 'ccpn_spectrum_dimension', 'nef_peak',
+        #                         'nef_spectrum_dimension_transfer',
+        #                         ):
+        #         # Those are treated elsewhere
+        #         loop = saveFrame.get(loopName)
+        #         if loop:
+        #             importer = self.importers[loopName]
+        #             importer(self, spectrum, loop, saveFrame, peakListId=peakListSerial)
+        #             # importer(self, spectrum, loop, peakListId=oldSerial)
+        # #
+        # # if len(peakListParameters):
+        # return peakList
 
     #
     importers['nef_nmr_spectrum'] = load_nef_nmr_spectrum
@@ -6231,9 +6372,11 @@ class CcpnNefReader(CcpnNefContent):
     verifiers['ccpn_peak_cluster_peaks'] = verify_ccpn_peak_cluster_peaks
 
     # def load_nef_peak(self, peakList: PeakList, loop: StarIo.NmrLoop) -> List[Peak]:
-    def load_nef_peak(self, spectrum: Spectrum, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame, peakListId=None) -> List[
-        Peak]:  # NOTE:ED - new calling parameter
-        """Serves to load nef_peak loop"""
+    def load_nef_peak(self, spectrum: Spectrum, loop: StarIo.NmrLoop, saveFrame: StarIo.NmrSaveFrame,
+                      peakListId=None) -> List[Peak]:
+        """Serves to load nef_peak loop
+        """
+        # NOTE:ED - new calling parameter
 
         result = []
 
@@ -6244,16 +6387,18 @@ class CcpnNefReader(CcpnNefContent):
         map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
 
         # Get name map for per-dimension attributes
-        max = dimensionCount + 1
         multipleAttributes = {
-            'position'     : tuple('position_%s' % ii for ii in range(1, max)),
-            'positionError': tuple('position_uncertainty_%s' % ii for ii in range(1, max)),
-            'chainCodes'   : tuple('chain_code_%s' % ii for ii in range(1, max)),
-            'sequenceCodes': tuple('sequence_code_%s' % ii for ii in range(1, max)),
-            'residueTypes' : tuple('residue_name_%s' % ii for ii in range(1, max)),
-            'atomNames'    : tuple('atom_name_%s' % ii for ii in range(1, max)),
+            'position'     : tuple('position_%s' % ii for ii in range(1, dimensionCount+1)),
+            'positionError': tuple('position_uncertainty_%s' % ii for ii in range(1, dimensionCount+1)),
+            'chainCodes'   : tuple('chain_code_%s' % ii for ii in range(1, dimensionCount+1)),
+            'sequenceCodes': tuple('sequence_code_%s' % ii for ii in range(1, dimensionCount+1)),
+            'residueTypes' : tuple('residue_name_%s' % ii for ii in range(1, dimensionCount+1)),
+            'atomNames'    : tuple('atom_name_%s' % ii for ii in range(1, dimensionCount+1)),
             }
 
+        # Peaks assignment can extend over multiple rows (?)
+        # keep a dict of the peaks (by peakListSerial.peakSerial)
+        # create and build the assignment(s) by row
         peaks = {}
         assignedNmrAtoms = []
 
@@ -6270,6 +6415,7 @@ class CcpnNefReader(CcpnNefContent):
             peakListSerial = peakListId or row.get('ccpn_peak_list_serial') or 1
             peakLabel = Pid.IDSEP.join(('' if x is None else str(x)) for x in (peakListSerial, serial))
             peak = peaks.get(peakLabel)
+
             # TODO check if peak parameters are the same for all rows, and do something about it
             # For now we simply use the first row that appears
             if peak is None:
@@ -6353,7 +6499,7 @@ class CcpnNefReader(CcpnNefContent):
         return result
 
     #
-    importers['nef_peak'] = load_nef_peak
+    # importers['nef_peak'] = load_nef_peak
 
     # def verify_nef_peak(self, peakList: PeakList, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame, dimensionCount: int = None):
     def verify_nef_peak(self, spectrum: Spectrum, loop: StarIo.NmrLoop, parentFrame: StarIo.NmrSaveFrame, dimensionCount: int = None,
@@ -7525,7 +7671,8 @@ class CcpnNefReader(CcpnNefContent):
     The mapping gives the map from NEF tags to ccpn tags.
     If the ccpn tag is of the form <ccpnPrefix.tag> it is ignored unless
     the first part of the tag matches the passed-in ccpnPrefix
-    (NB the ccpnPrefix may contain '.')."""
+    (NB the ccpnPrefix may contain '.').
+    """
 
         # Get attributes that have a simple tag mapping, and make a separate loop list
         parameters = {}
@@ -7813,252 +7960,252 @@ class CcpnNefReader(CcpnNefContent):
             return dataSets[0]
 
 
-def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict,
-                   dimensionData: dict, transferData: Sequence[Tuple] = None,
-                   defaultChemicalShiftList: ChemicalShiftList = None):
-    """Get or create spectrum using dictionaries of attributes, such as read in from NEF.
+# def createSpectrum(project: Project, spectrumName: str, spectrumParameters: dict,
+#                    dimensionData: dict, transferData: Sequence[Tuple] = None,
+#                    defaultChemicalShiftList: ChemicalShiftList = None):
+#     """Get or create spectrum using dictionaries of attributes, such as read in from NEF.
+#
+#     Either 'axisCodes' or 'isotopeCodes' must be present and fully populated.
+#     A number of other dimensionData are treated specially (see below)
+#
+#     :param spectrumParameters keyword-value dictionary of attribute to set on resulting spectrum
+#     :param Dictionary of keyword:list parameters, with per-dimension parameters.
+#     :param defaultChemicalShiftList default chemicalShiftList if not defined by the parameters
+#     """
+#
+#     spectrum = project.getSpectrum(spectrumName)
+#     if spectrum is None:
+#         # Spectrum did not already exist
+#
+#         dimTags = list(dimensionData.keys())
+#
+#         # First try to load it - we override the loaded attribute values below
+#         # but loading gives a more complete parameter set.
+#         spectrum = None
+#         filePath = spectrumParameters.get('filePath')
+#         if filePath and os.path.exists(filePath):
+#             try:
+#                 spectra = project.application.loadData(filePath)
+#                 if spectra and isinstance(spectra[0], Spectrum):
+#                     spectrum = spectra[0]
+#             except Exception as es:
+#                 # Deliberate - any error should be skipped
+#                 getLogger().warning(str(es))
+#
+#             if spectrum is None:
+#                 getLogger().warning("Failed to load spectrum from spectrum path %s" % filePath)
+#             elif 'axisCodes' in dimensionData:
+#                 # set axisCodes
+#                 spectrum.axisCodes = dimensionData['axisCodes']
+#
+#         acquisitionAxisIndex = None
+#         if 'is_acquisition' in dimensionData:
+#             dimTags.remove('is_acquisition')
+#             values = dimensionData['is_acquisition']
+#             if values.count(True) == 1:
+#                 acquisitionAxisIndex = values.index(True)
+#
+#         if spectrum is None:
+#             # Spectrum could not be loaded - now create a dummy spectrum
+#
+#             if 'axisCodes' in dimTags:
+#                 # We have the axisCodes, from ccpn
+#                 dimTags.remove('axisCodes')
+#                 axisCodes = dimensionData['axisCodes']
+#
+#             else:
+#                 if transferData is None:
+#                     raise ValueError("Function needs either axisCodes or transferData")
+#
+#                 dimensionIds = dimensionData['dimension_id']
+#
+#                 # axisCodes were not set - produce a serviceable set
+#                 axisCodes = makeNefAxisCodes(isotopeCodes=dimensionData['isotopeCodes'],
+#                                              dimensionIds=dimensionIds,
+#                                              acquisitionAxisIndex=acquisitionAxisIndex,
+#                                              transferData=transferData)
+#
+#             # make new spectrum with default parameters
+#             kwds = {}
+#             for key in ('isotopeCodes', 'spectralWidths', 'spectrometerFrequencies'):
+#                 if key in dimensionData:
+#                     kwds[key] = dimensionData[key]
+#             spectrum = project.newEmptySpectrum(name=spectrumName, path=filePath, **kwds)
+#             if spectrumParameters.get('chemicalShiftList') is not None:
+#                 spectrum.chemicalShiftList = spectrumParameters.get('chemicalShiftList')
+#
+#             if not spectrum.chemicalShiftList:
+#                 spectrum.chemicalShiftList = defaultChemicalShiftList
+#                 if not spectrum.chemicalShiftList:
+#                     # just create a new one
+#                     spectrum.chemicalShiftList = project.newChemicalShiftList()
+#
+#             if acquisitionAxisIndex is not None:
+#                 spectrum.isAquisition[acquisitionAxisIndex] = True
+#
+#         # Delete autocreated peaklist  and reset - we want any read-in peakList to be the first
+#         # If necessary an empty PeakList is added downstream
+#         spectrum._resetPeakLists()
+#
+#         # (Re)set all spectrum attributes
+#
+#         # First per-dimension ones
+#         dimTags.remove('dimension_id')
+#         if 'absolute_peak_positions' in dimensionData:
+#             # NB We are not using these. What could we do with them?
+#             dimTags.remove('absolute_peak_positions')
+#         if 'folding' in dimensionData:
+#             dimTags.remove('folding')
+#             values = [None if x == 'none' else x for x in dimensionData['folding']]
+#             spectrum.foldingModes = values
+#         if 'pointCounts' in dimensionData:
+#             dimTags.remove('pointCounts')
+#             spectrum.pointCounts = pointCounts = dimensionData['pointCounts']
+#             # if 'totalPointCounts' in dimensionData:
+#             #     dimTags.remove('totalPointCounts')
+#             #     spectrum.totalPointCounts = dimensionData['totalPointCounts']
+#             # else:
+#             #     spectrum.totalPointCounts = pointCounts
+#         # Needed below:
+#         if 'value_first_point' in dimensionData:
+#             dimTags.remove('value_first_point')
+#         if 'referencePoints' in dimensionData:
+#             dimTags.remove('referencePoints')
+#         # value_first_point = dimensionData.get('value_first_point')
+#         # if value_first_point is not None:
+#         #   dimensionData.pop('value_first_point')
+#         # referencePoints = dimensionData.get('referencePoints')
+#         # if referencePoints is not None:
+#         #   dimensionData.pop('referencePoints')
+#
+#         # Remaining per-dimension values match the spectrum. Set them.
+#         # NB we use the old (default) values where the new value is None
+#         # - some attributes like spectralWidths do not accept None.
+#         if 'spectrometerFrequencies' in dimTags:
+#             # spectrometerFrequencies MUST be set before spectralWidths,
+#             # as the spectralWidths are otherwise modified
+#             dimTags.remove('spectrometerFrequencies')
+#             dimTags.insert(0, 'spectrometerFrequencies')
+#         for tag in dimTags:
+#             vals = dimensionData[tag]
+#             # Use old values where new ones are None
+#             oldVals = getattr(spectrum, tag)
+#             vals = [x if x is not None else oldVals[ii] for ii, x in enumerate(vals)]
+#             setattr(spectrum, tag, vals)
+#
+#         # Set referencing.
+#         value_first_point = dimensionData.get('value_first_point')
+#         referencePoints = dimensionData.get('referencePoints')
+#         if value_first_point is None:
+#             # If reading NEF we must get value_first_point,
+#             #  but in other uses we might be getting referencePoints, referenceValues directly
+#             referenceValues = dimensionData.get('referenceValues')
+#             if referenceValues and referencePoints:
+#                 spectrum.referencePoints = referencePoints
+#                 spectrum.referenceValues = referenceValues
+#         else:
+#             if referencePoints is None:
+#                 # not CCPN data
+#                 referenceValues = spectrum.referenceValues
+#                 for ii, val in enumerate(value_first_point):
+#                     if val is None:
+#                         value_first_point[ii] = referenceValues[ii]
+#                 spectrum.referenceValues = value_first_point
+#                 spectrum.referencePoints = [1] * len(referenceValues)
+#             else:
+#                 points = list(spectrum.referencePoints)
+#                 values = list(spectrum.referenceValues)
+#                 sw = spectrum.spectralWidths
+#                 pointCounts = spectrum.pointCounts
+#                 for ii, refVal in enumerate(value_first_point):
+#                     refPoint = referencePoints[ii]
+#                     if refVal is not None and refPoint is not None:
+#                         # if we are here refPoint should never be None, but OK, ...
+#                         # Set reference to use refPoint
+#                         points[ii] = refPoint
+#                         refVal -= ((refPoint - 1) * sw[ii] / pointCounts[ii])
+#                         values[ii] = refVal
+#                 spectrum.referencePoints = points
+#                 spectrum.referenceValues = values
+#
+#         spectrumParameters.pop('chemicalShiftList', None)
+#         # spectrumParameters.pop('filePath', None)  # remove this as well?
+#         # Then spectrum-level ones
+#         for tag, val in spectrumParameters.items():
+#             if tag != 'dimensionCount':
+#                 try:
+#                     # dimensionCount is handled already and not settable
+#                     setattr(spectrum, tag, val)
+#                 except Exception as es:
+#                     pass
+#         #
+#         return spectrum
+#
+#     else:
+#         raise ValueError("Spectrum named %s already exists" % spectrumName)
 
-    Either 'axisCodes' or 'isotopeCodes' must be present and fully populated.
-    A number of other dimensionData are treated specially (see below)
 
-    :param spectrumParameters keyword-value dictionary of attribute to set on resulting spectrum
-    :param Dictionary of keyword:list parameters, with per-dimension parameters.
-    :param defaultChemicalShiftList default chemicalShiftList if not defined by the parameters
-    """
-
-    spectrum = project.getSpectrum(spectrumName)
-    if spectrum is None:
-        # Spectrum did not already exist
-
-        dimTags = list(dimensionData.keys())
-
-        # First try to load it - we override the loaded attribute values below
-        # but loading gives a more complete parameter set.
-        spectrum = None
-        filePath = spectrumParameters.get('filePath')
-        if filePath and os.path.exists(filePath):
-            try:
-                spectra = project.application.loadData(filePath)
-                if spectra and isinstance(spectra[0], Spectrum):
-                    spectrum = spectra[0]
-            except Exception as es:
-                # Deliberate - any error should be skipped
-                getLogger().warning(str(es))
-
-            if spectrum is None:
-                getLogger().warning("Failed to load spectrum from spectrum path %s" % filePath)
-            elif 'axisCodes' in dimensionData:
-                # set axisCodes
-                spectrum.axisCodes = dimensionData['axisCodes']
-
-        acquisitionAxisIndex = None
-        if 'is_acquisition' in dimensionData:
-            dimTags.remove('is_acquisition')
-            values = dimensionData['is_acquisition']
-            if values.count(True) == 1:
-                acquisitionAxisIndex = values.index(True)
-
-        if spectrum is None:
-            # Spectrum could not be loaded - now create a dummy spectrum
-
-            if 'axisCodes' in dimTags:
-                # We have the axisCodes, from ccpn
-                dimTags.remove('axisCodes')
-                axisCodes = dimensionData['axisCodes']
-
-            else:
-                if transferData is None:
-                    raise ValueError("Function needs either axisCodes or transferData")
-
-                dimensionIds = dimensionData['dimension_id']
-
-                # axisCodes were not set - produce a serviceable set
-                axisCodes = makeNefAxisCodes(isotopeCodes=dimensionData['isotopeCodes'],
-                                             dimensionIds=dimensionIds,
-                                             acquisitionAxisIndex=acquisitionAxisIndex,
-                                             transferData=transferData)
-
-            # make new spectrum with default parameters
-            kwds = {}
-            for key in ('isotopeCodes', 'spectralWidths', 'spectrometerFrequencies'):
-                if key in dimensionData:
-                    kwds[key] = dimensionData[key]
-            spectrum = project.newEmptySpectrum(name=spectrumName, path=filePath, **kwds)
-            if spectrumParameters.get('chemicalShiftList') is not None:
-                spectrum.chemicalShiftList = spectrumParameters.get('chemicalShiftList')
-
-            if not spectrum.chemicalShiftList:
-                spectrum.chemicalShiftList = defaultChemicalShiftList
-                if not spectrum.chemicalShiftList:
-                    # just create a new one
-                    spectrum.chemicalShiftList = project.newChemicalShiftList()
-
-            if acquisitionAxisIndex is not None:
-                spectrum.isAquisition[acquisitionAxisIndex] = True
-
-        # Delete autocreated peaklist  and reset - we want any read-in peakList to be the first
-        # If necessary an empty PeakList is added downstream
-        spectrum._resetPeakLists()
-
-        # (Re)set all spectrum attributes
-
-        # First per-dimension ones
-        dimTags.remove('dimension_id')
-        if 'absolute_peak_positions' in dimensionData:
-            # NB We are not using these. What could we do with them?
-            dimTags.remove('absolute_peak_positions')
-        if 'folding' in dimensionData:
-            dimTags.remove('folding')
-            values = [None if x == 'none' else x for x in dimensionData['folding']]
-            spectrum.foldingModes = values
-        if 'pointCounts' in dimensionData:
-            dimTags.remove('pointCounts')
-            spectrum.pointCounts = pointCounts = dimensionData['pointCounts']
-            # if 'totalPointCounts' in dimensionData:
-            #     dimTags.remove('totalPointCounts')
-            #     spectrum.totalPointCounts = dimensionData['totalPointCounts']
-            # else:
-            #     spectrum.totalPointCounts = pointCounts
-        # Needed below:
-        if 'value_first_point' in dimensionData:
-            dimTags.remove('value_first_point')
-        if 'referencePoints' in dimensionData:
-            dimTags.remove('referencePoints')
-        # value_first_point = dimensionData.get('value_first_point')
-        # if value_first_point is not None:
-        #   dimensionData.pop('value_first_point')
-        # referencePoints = dimensionData.get('referencePoints')
-        # if referencePoints is not None:
-        #   dimensionData.pop('referencePoints')
-
-        # Remaining per-dimension values match the spectrum. Set them.
-        # NB we use the old (default) values where the new value is None
-        # - some attributes like spectralWidths do not accept None.
-        if 'spectrometerFrequencies' in dimTags:
-            # spectrometerFrequencies MUST be set before spectralWidths,
-            # as the spectralWidths are otherwise modified
-            dimTags.remove('spectrometerFrequencies')
-            dimTags.insert(0, 'spectrometerFrequencies')
-        for tag in dimTags:
-            vals = dimensionData[tag]
-            # Use old values where new ones are None
-            oldVals = getattr(spectrum, tag)
-            vals = [x if x is not None else oldVals[ii] for ii, x in enumerate(vals)]
-            setattr(spectrum, tag, vals)
-
-        # Set referencing.
-        value_first_point = dimensionData.get('value_first_point')
-        referencePoints = dimensionData.get('referencePoints')
-        if value_first_point is None:
-            # If reading NEF we must get value_first_point,
-            #  but in other uses we might be getting referencePoints, referenceValues directly
-            referenceValues = dimensionData.get('referenceValues')
-            if referenceValues and referencePoints:
-                spectrum.referencePoints = referencePoints
-                spectrum.referenceValues = referenceValues
-        else:
-            if referencePoints is None:
-                # not CCPN data
-                referenceValues = spectrum.referenceValues
-                for ii, val in enumerate(value_first_point):
-                    if val is None:
-                        value_first_point[ii] = referenceValues[ii]
-                spectrum.referenceValues = value_first_point
-                spectrum.referencePoints = [1] * len(referenceValues)
-            else:
-                points = list(spectrum.referencePoints)
-                values = list(spectrum.referenceValues)
-                sw = spectrum.spectralWidths
-                pointCounts = spectrum.pointCounts
-                for ii, refVal in enumerate(value_first_point):
-                    refPoint = referencePoints[ii]
-                    if refVal is not None and refPoint is not None:
-                        # if we are here refPoint should never be None, but OK, ...
-                        # Set reference to use refPoint
-                        points[ii] = refPoint
-                        refVal -= ((refPoint - 1) * sw[ii] / pointCounts[ii])
-                        values[ii] = refVal
-                spectrum.referencePoints = points
-                spectrum.referenceValues = values
-
-        spectrumParameters.pop('chemicalShiftList', None)
-        # spectrumParameters.pop('filePath', None)  # remove this as well?
-        # Then spectrum-level ones
-        for tag, val in spectrumParameters.items():
-            if tag != 'dimensionCount':
-                try:
-                    # dimensionCount is handled already and not settable
-                    setattr(spectrum, tag, val)
-                except Exception as es:
-                    pass
-        #
-        return spectrum
-
-    else:
-        raise ValueError("Spectrum named %s already exists" % spectrumName)
-
-
-def makeNefAxisCodes(isotopeCodes: Sequence[str], dimensionIds: List[int],
-                     acquisitionAxisIndex: int, transferData: Sequence[Tuple]):
-    nuclei = [commonUtil.splitIntFromChars(x)[1] for x in isotopeCodes]
-    dimensionToNucleus = dict((zip(dimensionIds, nuclei)))
-    dimensionToAxisCode = dimensionToNucleus.copy()
-
-    oneBondConnections = {}
-    for startNuc in 'FH':
-        # look for onebond to F or H, the latter taking priority
-        for dim1, dim2, transferType, isIndirect in transferData:
-            if transferType == 'onebond':
-                nuc1, nuc2 = dimensionToNucleus[dim1], dimensionToNucleus[dim2]
-                if startNuc in (nuc1, nuc2):
-                    if startNuc == nuc1:
-                        oneBondConnections[dim1] = dim2
-                    else:
-                        oneBondConnections[dim2] = dim1
-                    dimensionToAxisCode[dim1] = nuc1 + nuc2.lower()
-                    dimensionToAxisCode[dim2] = nuc2 + nuc1.lower()
-
-    resultMap = {}
-    acquisitionAtEnd = False
-    if acquisitionAxisIndex is not None:
-        acquisitionAtEnd = acquisitionAxisIndex >= 0.5 * len(isotopeCodes)
-        # if acquisitionAtEnd:
-        #   # reverse, because acquisition end of dimensions should
-        #   # be the one WITHOUT number suffixes
-        #   dimensionIds.reverse()
-
-        # Put acquisition axis first, to make sure it gets the lowest number
-        # even if it is not teh first to start with.
-        acquisitionAxisId = dimensionIds[acquisitionAxisIndex]
-        dimensionIds.remove(acquisitionAxisId)
-        dimensionIds.insert(0, acquisitionAxisId)
-    for dim in dimensionIds:
-        axisCode = dimensionToAxisCode[dim]
-        if axisCode in resultMap.values():
-            ii = 0
-            ss = axisCode
-            while ss in resultMap.values():
-                ii += 1
-                ss = '%s%s' % (axisCode, ii)
-            otherDim = oneBondConnections.get(dim)
-            if otherDim is not None:
-                # We are adding a suffix to e.g. Hc. Add the same suffix to equivalent Ch
-                # NB this should only happen for certain 4D experiments.
-                # NB not well tested, but better than leaving in a known error.
-                ss = '%s%s' % (dimensionToAxisCode[otherDim], ii)
-                if otherDim < dim:
-                    resultMap[otherDim] = ss
-                dimensionToAxisCode[otherDim] = ss
-
-        resultMap[dim] = axisCode
-    dimensionIds.sort()
-    # NBNB new attempt - may not work
-    # if acquisitionAtEnd:
-    #   # put result back in dimension order
-    #   dimensionIds.reverse()
-    result = list(resultMap[ii] for ii in dimensionIds)
-    #
-    return result
+# def makeNefAxisCodes(isotopeCodes: Sequence[str], dimensionIds: List[int],
+#                      acquisitionAxisIndex: int, transferData: Sequence[Tuple]):
+#     nuclei = [commonUtil.splitIntFromChars(x)[1] for x in isotopeCodes]
+#     dimensionToNucleus = dict((zip(dimensionIds, nuclei)))
+#     dimensionToAxisCode = dimensionToNucleus.copy()
+#
+#     oneBondConnections = {}
+#     for startNuc in 'FH':
+#         # look for onebond to F or H, the latter taking priority
+#         for dim1, dim2, transferType, isIndirect in transferData:
+#             if transferType == 'onebond':
+#                 nuc1, nuc2 = dimensionToNucleus[dim1], dimensionToNucleus[dim2]
+#                 if startNuc in (nuc1, nuc2):
+#                     if startNuc == nuc1:
+#                         oneBondConnections[dim1] = dim2
+#                     else:
+#                         oneBondConnections[dim2] = dim1
+#                     dimensionToAxisCode[dim1] = nuc1 + nuc2.lower()
+#                     dimensionToAxisCode[dim2] = nuc2 + nuc1.lower()
+#
+#     resultMap = {}
+#     acquisitionAtEnd = False
+#     if acquisitionAxisIndex is not None:
+#         acquisitionAtEnd = acquisitionAxisIndex >= 0.5 * len(isotopeCodes)
+#         # if acquisitionAtEnd:
+#         #   # reverse, because acquisition end of dimensions should
+#         #   # be the one WITHOUT number suffixes
+#         #   dimensionIds.reverse()
+#
+#         # Put acquisition axis first, to make sure it gets the lowest number
+#         # even if it is not teh first to start with.
+#         acquisitionAxisId = dimensionIds[acquisitionAxisIndex]
+#         dimensionIds.remove(acquisitionAxisId)
+#         dimensionIds.insert(0, acquisitionAxisId)
+#     for dim in dimensionIds:
+#         axisCode = dimensionToAxisCode[dim]
+#         if axisCode in resultMap.values():
+#             ii = 0
+#             ss = axisCode
+#             while ss in resultMap.values():
+#                 ii += 1
+#                 ss = '%s%s' % (axisCode, ii)
+#             otherDim = oneBondConnections.get(dim)
+#             if otherDim is not None:
+#                 # We are adding a suffix to e.g. Hc. Add the same suffix to equivalent Ch
+#                 # NB this should only happen for certain 4D experiments.
+#                 # NB not well tested, but better than leaving in a known error.
+#                 ss = '%s%s' % (dimensionToAxisCode[otherDim], ii)
+#                 if otherDim < dim:
+#                     resultMap[otherDim] = ss
+#                 dimensionToAxisCode[otherDim] = ss
+#
+#         resultMap[dim] = axisCode
+#     dimensionIds.sort()
+#     # NBNB new attempt - may not work
+#     # if acquisitionAtEnd:
+#     #   # put result back in dimension order
+#     #   dimensionIds.reverse()
+#     result = list(resultMap[ii] for ii in dimensionIds)
+#     #
+#     return result
 
 
 def _printOutMappingDict(mappingDict: dict):

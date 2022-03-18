@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-24 19:40:43 +0000 (Thu, February 24, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-03-17 18:11:59 +0000 (Thu, March 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -83,7 +83,7 @@ class SpectrumTraits(CcpNmrJson):
         # Get a dataSource object
         dataSource = None
         try:
-            dataSource = spectrum._getDataSource(dataStore)
+            dataSource = spectrum._getDataSource(dataStore, checkParameters=False)
         except (ValueError, RuntimeError) as es:
             getLogger().warning('Error restoring valid data source for %s (%s)' % (spectrum, es))
         finally:

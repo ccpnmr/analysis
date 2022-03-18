@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-16 17:21:44 +0000 (Wed, March 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-17 18:11:59 +0000 (Thu, March 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -702,6 +702,28 @@ class Spectrum(AbstractWrapperObject):
         self._dataStore._saveInternal()
         self._saveSpectrumMetaData()
 
+    def _openFile(self, path:str, dataFormat, checkParameters=True):
+        """Open the spectrum as defined by path, creating a dataSource object
+        :param path: a path to the spectrum; may contain redirections (e.g. $DATA)
+
+        CCPNMRINTERNAL: also used in nef loader
+        """
+        if path is None:
+            raise ValueError(f'Undefined path')
+
+        newDataStore, newDataSource = self._getDataSourceFromPath(path,
+                                                                  dataFormat=dataFormat,
+                                                                  checkParameters=checkParameters)
+        if newDataStore is None or newDataSource is None:
+            raise ValueError('Spectrum._openFile: unable to load "%s"' % path)
+
+        # we found a (valid?) new file
+        self._close()
+        self._spectrumTraits.dataSource = newDataSource
+        self._spectrumTraits.dataStore = newDataStore
+        self._dataStore._saveInternal()
+        self._saveSpectrumMetaData()
+
     @logCommand(get='self')
     def reload(self, path:str = None):
         """Reload the spectrum as defined by path;
@@ -714,20 +736,8 @@ class Spectrum(AbstractWrapperObject):
         if path is None:
             path = self.filePath
 
-        newDataStore, newDataSource = self._getDataSourceFromPath(path, dataFormat=self.dataFormat, checkParameters=False)
-        if newDataStore is None or newDataSource is None:
-            raise ValueError('Spectrum.reload: unable to load "%s"' % path)
-        if newDataSource.dimensionCount != self.dimensionCount:
-            raise ValueError('Spectrum.reload: dimensionCount "%s" (%d) incompatble with %s' %
-                             (path, newDataSource.dimensionCount, self))
-
-        # we found a valid new file
-        self._close()
-        self._spectrumTraits.dataSource = newDataSource
-        self._spectrumTraits.dataStore = newDataStore
+        self._openFile(path=path, dataFormat=self.dataFormat, checkParameters=False)
         self.dataSource.exportToSpectrum(self, includePath=False)
-        self._dataStore._saveInternal()
-        self._saveSpectrumMetaData()
 
     @property
     def path(self) -> Path:
@@ -2701,7 +2711,7 @@ class Spectrum(AbstractWrapperObject):
 
         :param path: path to check, may contain redirections
         :param dataFormat: dataFormat string (default to self.dataFormat if None)
-        :param checkParameters: Flag to invoke checking of parameters
+        :param checkParameters: Flag to invoke checking of parameters of dataSource to match those of the self
         """
         if dataFormat is None:
             dataFormat = self.dataFormat
@@ -3341,7 +3351,10 @@ def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], name: str =
     if len(parameters) > 0:
         for param, value in parameters.items():
             if hasattr(spectrum, param):
-                setattr(spectrum, param, value)
+                try:
+                    setattr(spectrum, param, value)
+                except AttributeError:
+                    getLogger().warning(f'{spectrum}: can not set parameter "{param}" to {value}')
         dataSource.importFromSpectrum(spectrum, includePath=False)
 
     return spectrum

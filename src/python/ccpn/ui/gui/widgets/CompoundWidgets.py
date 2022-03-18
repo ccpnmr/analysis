@@ -516,9 +516,12 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
         CompoundBaseWidget.__init__(self, parent=parent, layoutDict=self.layoutDict, orientation=orientation,
                                     showBorder=showBorder, **kwds)
 
+        self.label = Label(parent=self, vAlign='center') #this attribute needs to be set.
+        self._addWidget(self.label)
         if labelText is not None and len(labelText) > 0:
-            self.label = Label(parent=self, text=labelText, vAlign='center')
-            self._addWidget(self.label)
+            self.label.setText(labelText)
+        else:
+            self.label.hide()
 
         # pulldown text
         if texts is not None:

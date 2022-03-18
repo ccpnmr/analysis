@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-17 14:03:20 +0000 (Thu, March 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-18 14:11:09 +0000 (Fri, March 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1155,13 +1155,10 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
         """Get a tuple of derived values from obj
         Not very generic yet - column class now seems redundant
         """
-        _peaks = obj.assignedPeaks or []
-        allPeaks = str([pp.pid for pp in _peaks])
-        try:
-            shiftPeakCount = len([pp for pp in _peaks if pp.spectrum.chemicalShiftList == obj.chemicalShiftList])
-        except Exception as es:
-            shiftPeakCount = 0
-        peakCount = len(_peaks) if _peaks else 0
+        _allPeaks = obj.allAssignedPeaks
+        totalPeakCount = len(_allPeaks)
+        peaks = [pp.pid for pp in _allPeaks if pp.spectrum.chemicalShiftList == obj.chemicalShiftList]
+        peakCount = len(peaks)
 
         state = obj.state
         if state == ChemicalShiftState.ORPHAN:
@@ -1169,7 +1166,7 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
         state = state.description  # if state needed
         orphan = u'\u2713' if obj.orphan else ''  # unicode tick character
 
-        return (state, orphan, allPeaks, shiftPeakCount, peakCount)
+        return (state, orphan, str(peaks), peakCount, totalPeakCount)
 
     def buildTableDataFrame(self):
         """Return a Pandas dataFrame from an internal list of objects.
@@ -1212,14 +1209,13 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
             df.insert(CS_TABLECOLUMNS.index(CS_SHIFTLISTPEAKSCOUNT), CS_SHIFTLISTPEAKSCOUNT, None)
             df.insert(CS_TABLECOLUMNS.index(CS_ALLPEAKSCOUNT), CS_ALLPEAKSCOUNT, None)
 
-            _objs = [_csl.getChemicalShift(uniqueId=unq) for unq in df[CS_UNIQUEID]]
+            _objs = _csl._shifts
             if _objs:
                 # append the actual objects as the last column - not sure whether this is required - check _highlightObjs
                 df[CS_OBJECT] = _objs
-
                 df[CS_PID] = [_shift.pid for _shift in _objs]
+
                 _stats = [self._derivedFromObject(obj) for obj in _objs]
-                # df[[CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT]] = _stats
                 df[[CS_STATE, CS_ORPHAN, CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT]] = _stats
 
                 # replace the visible nans with '' for comment column and string 'None' elsewhere

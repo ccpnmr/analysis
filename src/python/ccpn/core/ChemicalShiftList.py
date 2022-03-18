@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-10 21:43:22 +0000 (Thu, March 10, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-18 14:11:09 +0000 (Fri, March 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -460,7 +460,8 @@ class ChemicalShiftList(AbstractWrapperObject):
 
     @classmethod
     def _getAllWrappedData(cls, parent: Project) -> List[Nmr.ShiftList]:
-        """get wrappedData (ShiftLists) for all ShiftList children of parent Project"""
+        """get wrappedData (ShiftLists) for all ShiftList children of parent Project
+        """
         return list(x for x in parent._apiNmrProject.sortedMeasurementLists()
                     if x.className == 'ShiftList')
 
@@ -485,50 +486,40 @@ class ChemicalShiftList(AbstractWrapperObject):
         Check the attribute for None, nan, inf, etc., and cast to attribType
         CCPN Internal - Pandas dataframe changes values after saving through api
         """
-        row = self._getByUniqueId(uniqueId)
-        if name in row:
-            # get the value and cast to the correct type
-            _val = row[name]
+        try:
+            _val = self._data.at[uniqueId, name]
             return None if (_val is None or (_val != _val)) else attribType(_val)
-        else:
+        except:
             raise ValueError(f'{self.className}._getAttribute: attribute {name} not found in chemicalShift')
 
     def _setAttribute(self, uniqueId, name, value):
         """Set the attribute of the chemicalShift with the supplied uniqueId
         """
-        row = self._getByUniqueId(uniqueId)
-        if name in row:
-            try:
-                self._data.loc[uniqueId, name] = value
-            except Exception as es:
-                raise ValueError(f'{self.className}._setAttribute: error setting attribute {name} in chemicalShift {self}')
-
-        else:
+        try:
+            self._data.at[uniqueId, name] = value
+        except:
             raise ValueError(f'{self.className}._setAttribute: attribute {name} not found in chemicalShift {self}')
 
     def _getAttributes(self, uniqueId, startName, endName, attribTypes):
         """Get the named attributes from the chemicalShift with supplied uniqueId
+
+        Check the attributes for None, nan, inf, etc., and cast to attribType
+        CCPN Internal - Pandas dataframe changes values after saving through api
         """
-        row = self._getByUniqueId(uniqueId)
-        if startName in row and endName in row:
-            _val = row[startName:endName]
+        try:
+            _val = self._data.loc[uniqueId, startName:endName]
             _val = tuple(None if (val is None or (val != val)) else attribType(val) for val, attribType in zip(_val, attribTypes))
             return _val
-        else:
-            raise ValueError(f'{self.className}._getAttributes: attribute {startName}|{endName} not found in chemicalShift')
+        except:
+            raise ValueError(f'{self.className}._getAttributes: attributes {startName}|{endName} not found in chemicalShift')
 
     def _setAttributes(self, uniqueId, startName, endName, value):
         """Set the attributes of the chemicalShift with the supplied uniqueId
         """
-        row = self._getByUniqueId(uniqueId)
-        if startName in row and endName in row:
-            try:
-                self._data.loc[uniqueId, startName:endName] = value
-            except Exception as es:
-                raise ValueError(f'{self.className}._setAttributes: error setting attribute {startName}|{endName} in chemicalShift {self}')
-
-        else:
-            raise ValueError(f'{self.className}._setAttributes: attribute {startName}|{endName} not found in chemicalShift {self}')
+        try:
+            self._data.loc[uniqueId, startName:endName] = value
+        except:
+            raise ValueError(f'{self.className}._setAttributes: attributes {startName}|{endName} not found in chemicalShift {self}')
 
     def _undoRedoShifts(self, shifts):
         """update to shifts after undo/redo

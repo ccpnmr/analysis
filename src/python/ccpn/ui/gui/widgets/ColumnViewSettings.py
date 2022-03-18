@@ -4,10 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-12 19:30:59 +0100 (Thu, August 12, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-03-17 13:59:51 +0000 (Thu, March 17, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -26,16 +26,17 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 # Start of code
 #=========================================================================================
 
+import pandas as pd
+
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-# from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
+from ccpn.core.lib.DataFrameObject import DataFrameObject
 
 
 class ColumnViewSettingsPopup(CcpnDialogMainWidget):
-
     FIXEDHEIGHT = False
     FIXEDWIDTH = True
     USESCROLLWIDGET = True
@@ -44,9 +45,9 @@ class ColumnViewSettingsPopup(CcpnDialogMainWidget):
         super().__init__(parent, setLayout=True, windowTitle=title, minimumSize=(250, 250), **kwds)
 
         self.table = table
-        self.dataFrameObject = dataFrameObject
+        # self.dataFrameObject = dataFrameObject
         self.widgetColumnViewSettings = ColumnViewSettings(self.mainWidget, table=table,
-                                                           dataFrameObject=dataFrameObject,
+                                                           dfObject=dataFrameObject,
                                                            hiddenColumns=hiddenColumns, grid=(0, 0))
 
         self.setCloseButton(callback=self._close, tipText='Close')
@@ -76,23 +77,32 @@ CheckboxTipText = 'Select column to be visible on the table.'
 class ColumnViewSettings(Frame):
     """ hide show check boxes corresponding to the table columns """
 
-    def __init__(self, parent=None, table=None, dataFrameObject=None, direction='v', hiddenColumns=None, **kwds):
+    def __init__(self, parent=None, table=None, dfObject=None, direction='v', hiddenColumns=None, **kwds):
         super().__init__(parent, setLayout=True, **kwds)
 
         self.direction = direction
-        self.dataFrameObject = dataFrameObject
+
+        # only need the pd.DataFrame
+        if isinstance(dfObject, DataFrameObject):
+            self._df = dfObject.dataFrame
+        elif isinstance(dfObject, pd.DataFrame):
+            self._df = dfObject
+        else:
+            raise ValueError('dfObject is the wrong type')
+
         self.table = table
         self.checkBoxes = []
         self._hideColumnWidths = {}
         self.filterLabel = Label(self, text='Display Columns', grid=(0, 0))
-        self.widgetFrame = Frame(self, setLayout=True, margins=(5,5,5,5), grid=(1, 0))
+        self.widgetFrame = Frame(self, setLayout=True, margins=(5, 5, 5, 5), grid=(1, 0))
         Spacer(self, 5, 5, 'fixed', 'expanding', grid=(2, 0))
         self._hiddenColumns = hiddenColumns or []
         self.initCheckBoxes()
 
     def initCheckBoxes(self):
 
-        columns = self.dataFrameObject.headings  #   self.table._columns
+        # columns = self._dfObject.headings  #   self.table._columns
+        columns = list(self._df.columns)
         hiddenColumns = self._hiddenColumns or []
 
         if columns:
@@ -118,7 +128,8 @@ class ColumnViewSettings(Frame):
     def checkBoxCallBack(self):
         currentCheckBox = self.sender()
         name = currentCheckBox.text()
-        i = self.dataFrameObject.headings.index(name)
+        # i = self._dfObject.headings.index(name)
+        i = list(self._df.columns).index(name)
 
         checkedBoxes = []
 
@@ -148,7 +159,6 @@ class ColumnViewSettings(Frame):
         self.table.hideColumn(i)
         if not name in self._hiddenColumns:
             self._hiddenColumns.append(name)
-
 
     def _showColumn(self, i, name):
         self.table.showColumn(i)

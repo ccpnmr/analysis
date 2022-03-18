@@ -4,10 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-22 12:39:43 +0000 (Mon, November 22, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-03-17 13:58:16 +0000 (Thu, March 17, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -44,7 +44,7 @@ DATAFRAME_ISDELETED = 'isDeleted'
 class DataFrameObject(object):
     # class to handle pandas dataframe and matching object pid list
     def __init__(self, table=None, dataFrame=None, objectList=None, columnDefs=None):
-        self._dataFrame = dataFrame
+        self._df = dataFrame
         # self._objectList = objectList
         self._objects = objectList.copy() if objectList else []
         # self._indexList = indexList
@@ -53,11 +53,11 @@ class DataFrameObject(object):
 
     @property
     def dataFrame(self):
-        return self._dataFrame
+        return self._df
 
     @dataFrame.setter
-    def dataFrame(self, dataFrame=None):
-        self._dataFrame = dataFrame
+    def dataFrame(self, value=None):
+        self._df = value
 
     @property
     def objects(self):
@@ -72,8 +72,8 @@ class DataFrameObject(object):
         return self._columnDefinitions
 
     @columnDefinitions.setter
-    def columnDefinitions(self, columnDefinitions=None):
-        self._columnDefinitions = columnDefinitions
+    def columnDefinitions(self, value=None):
+        self._columnDefinitions = value
 
     @property
     def columns(self):
@@ -100,8 +100,8 @@ class DataFrameObject(object):
         return self._table
 
     @table.setter
-    def table(self, table=None):
-        self._table = table
+    def table(self, value=None):
+        self._table = value
 
     def find(self, table, text, column=DATAFRAME_PID, multiRow=False):
         model = table.model()
@@ -162,8 +162,8 @@ class DataFrameObject(object):
                 self._objects.remove(obj)
 
                 # remove from dataFrame by obj
-                # self._dataFrame = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] != obj]
-                self._dataFrame = self._dataFrame.loc[self._dataFrame[DATAFRAME_OBJECT] != obj]
+                # self._df = self._df.ix[self._df[DATAFRAME_OBJECT] != obj]
+                self._df = self._df.loc[self._df[DATAFRAME_OBJECT] != obj]
 
                 # remove from table
                 # # row = self.find(self._table, str(obj.pid), column=DATAFRAME_PID)
@@ -195,30 +195,30 @@ class DataFrameObject(object):
                         getLogger().debug(f'Error creating table information {es}')
                         listDict[header.headerText] = None
 
-                if self._dataFrame.empty:
+                if self._df.empty:
                     # need to create a new dataFrame, table with index of 0
                     # set the table and column headings
 
                     # set the initial objects; dataFrame needed to populate the first table
                     self._objects = [obj]
-                    self._dataFrame = pd.DataFrame([listDict], columns=self.headings)
+                    self._df = pd.DataFrame([listDict], columns=self.headings)
 
                     with self._table._guiTableUpdate(self):
-                        self._table.setData(self._dataFrame.values)
+                        self._table.setData(self._df.values)
 
                 else:
                     # append a new line to the end
 
                     # set Index to next available - will change later
-                    if not self._dataFrame.empty and DATAFRAME_INDEX in self._dataFrame:
-                        newIndex = self._dataFrame[DATAFRAME_INDEX].max() + 1
+                    if not self._df.empty and DATAFRAME_INDEX in self._df:
+                        newIndex = self._df[DATAFRAME_INDEX].max() + 1
                         if DATAFRAME_INDEX in listDict.keys():
                             listDict[DATAFRAME_INDEX] = newIndex
 
                     # update internal list
                     self._objects.append(obj)
                     appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
-                    self._dataFrame = self._dataFrame.append(appendDataFrame)
+                    self._df = self._df.append(appendDataFrame)
 
                     with self._table._guiTableUpdate(self):  # keep the column widths
                         self._table.appendRow(list(listDict.values()))
@@ -265,14 +265,14 @@ class DataFrameObject(object):
                 for header in self._columnDefinitions.columns:
                     listDict[header.headerText] = header.getValue(obj)
 
-                # self._dataFrame_foundPid = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] == obj]
-                # self._dataFrame = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] != obj]
-                self._dataFrame_foundPid = self._dataFrame.loc[self._dataFrame[DATAFRAME_OBJECT] == obj]
-                self._dataFrame = self._dataFrame.loc[self._dataFrame[DATAFRAME_OBJECT] != obj]
+                # self._df_foundPid = self._df.ix[self._df[DATAFRAME_OBJECT] == obj]
+                # self._df = self._df.ix[self._df[DATAFRAME_OBJECT] != obj]
+                self._df_foundPid = self._df.loc[self._df[DATAFRAME_OBJECT] == obj]
+                self._df = self._df.loc[self._df[DATAFRAME_OBJECT] != obj]
 
                 # keep the Index if it exists
-                if not self._dataFrame_foundPid.empty and DATAFRAME_INDEX in self._dataFrame_foundPid:
-                    newIndex = self._dataFrame_foundPid[DATAFRAME_INDEX].iloc[0]
+                if not self._df_foundPid.empty and DATAFRAME_INDEX in self._df_foundPid:
+                    newIndex = self._df_foundPid[DATAFRAME_INDEX].iloc[0]
                     if DATAFRAME_INDEX in listDict.keys():
                         listDict[DATAFRAME_INDEX] = newIndex
 
@@ -283,7 +283,7 @@ class DataFrameObject(object):
                 # if DATAFRAME_PID in listDict.keys():
                 #   listDict[DATAFRAME_PID] = obj
                 appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
-                self._dataFrame = self._dataFrame.append(appendDataFrame)
+                self._df = self._df.append(appendDataFrame)
 
             except Exception as es:
                 getLogger().warning(str(es))
@@ -315,21 +315,21 @@ class DataFrameObject(object):
             for header in self._columnDefinitions.columns:
                 listDict[header.headerText] = header.getValue(obj)
 
-            # self._dataFrame_foundPid = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] == obj]
-            # self._dataFrame = self._dataFrame.ix[self._dataFrame[DATAFRAME_OBJECT] != obj]
-            self._dataFrame_foundPid = self._dataFrame.loc[self._dataFrame[DATAFRAME_OBJECT] == obj]
-            self._dataFrame = self._dataFrame.loc[self._dataFrame[DATAFRAME_OBJECT] != obj]
+            # self._df_foundPid = self._df.ix[self._df[DATAFRAME_OBJECT] == obj]
+            # self._df = self._df.ix[self._df[DATAFRAME_OBJECT] != obj]
+            self._df_foundPid = self._df.loc[self._df[DATAFRAME_OBJECT] == obj]
+            self._df = self._df.loc[self._df[DATAFRAME_OBJECT] != obj]
 
             # keep the Index if it exists
-            if not self._dataFrame_foundPid.empty and DATAFRAME_INDEX in self._dataFrame_foundPid:
-                newIndex = self._dataFrame_foundPid[DATAFRAME_INDEX].iloc[0]
+            if not self._df_foundPid.empty and DATAFRAME_INDEX in self._df_foundPid:
+                newIndex = self._df_foundPid[DATAFRAME_INDEX].iloc[0]
                 if DATAFRAME_INDEX in listDict.keys():
                     listDict[DATAFRAME_INDEX] = newIndex
 
             # store to the table
             with self._table._guiTableUpdate(self):
                 appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
-                self._dataFrame = self._dataFrame.append(appendDataFrame)
+                self._df = self._df.append(appendDataFrame)
                 self._table.setRow(row, list(listDict.values()))
 
             # except Exception as es:

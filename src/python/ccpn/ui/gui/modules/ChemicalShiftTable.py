@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-18 14:11:09 +0000 (Fri, March 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-18 18:32:58 +0000 (Fri, March 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -988,14 +988,6 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
                  **kwds):
         """Initialise the widgets for the module.
         """
-        # # Derive application, project, and current from mainWindow
-        # self.mainWindow = mainWindow
-        # if mainWindow:
-        #     self.application = mainWindow.application
-        #     self.project = mainWindow.application.project
-        #     self.current = mainWindow.application.current
-        # self._table = None
-
         # self._widget = Widget(parent=parent, **kwds)
         # self._selectedChemicalShiftList = None
 
@@ -1018,47 +1010,12 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
                          **kwds
                          )
 
-        # self.setTableNotifiers(tableClass=ChemicalShiftList,
-        #                        rowClass=ChemicalShift,
-        #                        # cellClassNames=(NmrAtom, '_chemicalShifts'), # not required
-        #                        tableName='chemicalShiftList', rowName='chemicalShift',
-        #                        changeFunc=self._tableChangeNotifierCallback,
-        #                        className=self.attributeName,
-        #                        # updateFunc=self._update,
-        #                        tableSelection='_table',
-        #                        callBackClass=ChemicalShift,
-        #                        selectCurrentCallBack=self._selectOnTableCurrentChemicalShiftNotifierCallback,
-        #                        moduleParent=moduleParent)
-
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
-        # self.selectionChanged.connect(self._itemSelectionChanged)
 
-        # self._setTableNotifiers()
-
-        # self._lastMouseItem = None
-        # self._mousePressed = False
-        # self._lastTimeClicked = time_ns()
-        # self._clickInterval = QtWidgets.QApplication.instance().doubleClickInterval() * 1e6
-        # self._tableSelectionBlockingLevel = 0
-        # self._currentRow = None
-        # self._clickedInTable = False
-        # self._lastSelection = [None]
-        #
-        # # set internal flags
-        # self._mousePressedPos = None
-        # self._userKeyPressed = False
-        # self._selectOverride = False
-        # self._scrollOverride = False
-        #
-        # # enable the right click menu
-        # self.searchWidget = None
-        # self._setHeaderContextMenu()
-        # self._enableExport = enableExport
-        # self._enableDelete = enableDelete
-        # self._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
-        # self._enableSearch = enableSearch
-        # self._rightClickedTableIndex = None  # last selected item in a table before raising the context menu. Enabled with mousePress event filter
+        # set the delegate for editing
+        delegate = _CSLTableDelegate(self)
+        self.setItemDelegate(delegate)
 
     def _postInitTableCommonWidgets(self):
         from ccpn.ui.gui.widgets.DropBase import DropBase
@@ -1076,8 +1033,6 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
 
         # add a widget handler to give a clean corner widget for the scroll area
         self._cornerDisplay = ScrollBarVisibilityWatcher(self)
-
-        # self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
 
     #=========================================================================================
     # Widgets callbacks
@@ -1167,6 +1122,12 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
         orphan = u'\u2713' if obj.orphan else ''  # unicode tick character
 
         return (state, orphan, str(peaks), peakCount, totalPeakCount)
+
+    @staticmethod
+    def _setComment(obj, value):
+        """CCPN-INTERNAL: Insert a comment into object
+        """
+        obj.comment = value if value else None
 
     def buildTableDataFrame(self):
         """Return a Pandas dataFrame from an internal list of objects.
@@ -1499,6 +1460,100 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
                         f'Cannot navigate to position {round(chemicalShift.value, 3)} '
                         f'in {stripStr}: {strips} '
                         f'for nmrAtom {chemicalShift.nmrAtom.name}.')
+
+
+#=========================================================================================
+# main
+#=========================================================================================
+
+EDIT_ROLE = QtCore.Qt.EditRole
+
+
+class _CSLTableDelegate(QtWidgets.QStyledItemDelegate):
+    """handle the setting of data when editing the table
+    """
+
+    def __init__(self, parent):
+        """Initialise the delegate
+        :param parent - link to the handling table:
+        """
+        QtWidgets.QStyledItemDelegate.__init__(self, parent)
+        self.customWidget = False
+        self._parent = parent
+
+    def setEditorData(self, widget, index) -> None:
+        """populate the editor widget when the cell is edited
+        """
+        model = index.model()
+        value = model.data(index, EDIT_ROLE)
+
+        if not isinstance(value, (list, tuple)):
+            value = (value,)
+
+        if hasattr(widget, 'setColor'):
+            widget.setColor(*value)
+
+        elif hasattr(widget, 'setData'):
+            widget.setData(*value)
+
+        elif hasattr(widget, 'set'):
+            widget.set(*value)
+
+        elif hasattr(widget, 'setValue'):
+            widget.setValue(*value)
+
+        elif hasattr(widget, 'setText'):
+            widget.setText(*value)
+
+        elif hasattr(widget, 'setFile'):
+            widget.setFile(*value)
+
+        else:
+            msg = 'Widget %s does not expose "setData", "set" or "setValue" method; ' % widget
+            msg += 'required for table proxy editing'
+            raise Exception(msg)
+
+    def setModelData(self, widget, mode, index):
+        """Set the object to the new value
+        :param widget - typically a lineedit handling the editing of the cell
+        :param mode - editing mode:
+        :param index - QModelIndex of the cell
+        """
+        if hasattr(widget, 'get'):
+            value = widget.get()
+
+        elif hasattr(widget, 'value'):
+            value = widget.value()
+
+        elif hasattr(widget, 'text'):
+            value = widget.text()
+
+        elif hasattr(widget, 'getFile'):
+            files = widget.selectedFiles()
+            if not files:
+                return
+            value = files[0]
+
+        else:
+            msg = f'Widget {widget} does not expose "get", "value" or "text" method; required for table editing'
+            raise Exception(msg)
+
+        row = index.row()
+        col = index.column()
+
+        try:
+            # get the sorted element from the dataFrame
+            df = self._parent._df
+            _iRow = self._parent.model()._sortOrder[row]
+            obj = df.iloc[_iRow]['_object']
+
+            # set the data which will fire notifiers to populate all tables (including this)
+            func = self._parent._dataFrameObject.setEditValues[col]
+            if func and obj:
+                func(obj, value)
+
+        except Exception as es:
+            getLogger().debug('Error handling cell editing: %i %i - %s    %s    %s' % (row, col, str(es), self._parent.model()._sortOrder, value))
 
 
 #=========================================================================================

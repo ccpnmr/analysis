@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-17 15:25:24 +0000 (Thu, March 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-18 18:32:58 +0000 (Fri, March 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -45,6 +45,7 @@ from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.SearchWidget import attachDFSearchWidget
+from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.lib.MenuActions import _openItemObject
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.CcpnSorting import universalSortKey
@@ -53,6 +54,7 @@ from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import copyToClipboard
 from ccpn.util.OrderedSet import OrderedSet
+
 
 class _SimplePandasTableView(QtWidgets.QTableView, Base):
     styleSheet = """QTableView {
@@ -234,12 +236,16 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
 class _SimplePandasTableModel(QtCore.QAbstractTableModel):
     """A simple table model to view pandas DataFrames
     """
+
     _defaultForegroundColour = QtGui.QColor(getColours()[GUITABLE_ITEM_FOREGROUND])
     _CHECKROWS = 5
     _MINCHARS = 4
     _MAXCHARS = 100
     _chrWidth = 12
     _chrHeight = 12
+
+    showEditIcon = False
+    defaultFlags = QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
     def __init__(self, data, view=None):
         """Initialise the pandas model
@@ -261,6 +267,9 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
 
         self._sortColumn = 0
         self._sortDirection = QtCore.Qt.AscendingOrder
+
+        # create a pixmap for the editable icon (currently a pencil)
+        self._editableIcon = Icon('icons/editable').pixmap(self._chrHeight, self._chrHeight)
 
     @property
     def df(self):
@@ -414,10 +423,6 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
             if role == QtCore.Qt.DisplayRole:
                 _cell = self._df.iat[_row, _column]
 
-                # # nan
-                # if pd.isnull(_cell):
-                #     return ''
-
                 # float/np.float - round to 3 decimal places
                 if isinstance(_cell, (float, np.floating)):
                     return f'{_cell:.3f}'
@@ -441,11 +446,24 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
             elif role == QtCore.Qt.ToolTipRole:
                 _cell = self._df.iat[_row, _column]
 
-                # # nan
-                # if pd.isnull(_cell):
-                #     return 'nan'
-
                 return str(_cell)
+
+            elif role == QtCore.Qt.EditRole:
+                _cell = self._df.iat[_row, _column]
+
+                # float/np.float - return float
+                if isinstance(_cell, (float, np.floating)):
+                    return float(_cell)
+
+                # int/np.integer - return int
+                elif isinstance(_cell, (int, np.integer)):
+                    return int(_cell)
+
+                return _cell
+
+            # elif role == QtCore.Qt.DecorationRole:
+            #     # return the pixmap - this works, transfer to _MultiHeader
+            #     return self._editableIcon
 
         return None
 
@@ -487,6 +505,10 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
                 except:
                     # return the default QSize
                     return QtCore.QSize(int(self._chrWidth), int(self._chrHeight))
+
+        elif role == QtCore.Qt.DecorationRole and self._isColumnEditable(col) and self.showEditIcon:
+            # return the pixmap
+            return self._editableIcon
 
         return None
 
@@ -584,19 +606,6 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         _newData = self._universalSort(self._df[col])
         self._sortOrder = list(_newData.sort_values(ascending=True if order == QtCore.Qt.AscendingOrder else False).index)
 
-        # _newData = self._df[col]  # .copy()
-        #
-        # # create temporary column to facilitate the new ordering after pandas sorting
-        # _newData['_sortOrder'] = range(_newData.shape[0])
-        # _newData.index.name = None
-        #
-        # # perform the sort on the specified column
-        # _newData.sort_values(by=col, ascending=True if order == QtCore.Qt.AscendingOrder else False,
-        #                      inplace=True,
-        #                      key=lambda values: self._universalSort(values))
-        # self._oldSortOrder = self._sortOrder
-        # self._sortOrder = list(_newData['_sortOrder'])
-
         # emit a signal to spawn an update of the table and notify headers to update
         self.layoutChanged.emit()
 
@@ -613,6 +622,22 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         """
         idxs = [(self._sortOrder[idx.row()], idx.column()) if idx.isValid() else (None, None) for idx in indexes]
         return idxs
+
+    def flags(self, index):
+        # Set the table to be editable - need the editable columns here
+        if self._isColumnEditable(index.column()):
+            return QtCore.Qt.ItemIsEditable | self.defaultFlags
+        else:
+            return self.defaultFlags
+
+    def _isColumnEditable(self, col):
+        """Return whether the column number is editable
+        """
+        try:
+            # return True if the column contains an edit function
+            return self._view._dataFrameObject.setEditValues[col] is not None
+        except:
+            return False
 
 
 #=========================================================================================
@@ -765,7 +790,6 @@ class _BlockingContent:
 
 
 class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
-
     _tableSelectionChanged = QtCore.pyqtSignal(list)
 
     className = '_SimplePandasTableViewProjectSpecific'
@@ -869,6 +893,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
 
         # attach a handler for to respond to the selection changing
         self.selectionModel().selectionChanged.connect(self._selectionChangedCallback)
+        model.showEditIcon = True
 
     #=========================================================================================
     # Block table signals
@@ -1480,6 +1505,10 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
 
     def _doubleClickCallback(self, itemSelection):
 
+        if bool(itemSelection.flags() & QtCore.Qt.ItemIsEditable):
+            # item is editable so skip the action
+            return
+
         # if not a _dataFrameObject is a normal guiTable.
         if self._df is None or self._df.empty:
             item = self.currentItem()
@@ -1494,6 +1523,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
                                 col=item.column(),
                                 rowItem=item)
                 self.actionCallback(data)
+
             return
 
         self._lastClick = 'doubleClick'
@@ -1509,28 +1539,10 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
             if idx:
                 row = self.model()._sortOrder[idx.row()]
                 col = idx.column()
-
                 _data = self._df.iloc[row]
                 obj = _data.get(self._OBJECT)
 
-                # # get the row data corresponding to the row clicked
-                # model = self.selectionModel()
-                # selection = [iSelect for iSelect in model.selectedIndexes() if iSelect.row() == row]
-                # obj = self.getSelectedObjects(selection)
-                # obj = obj[0] if obj else None
-
-                # if objList:
-                #     # return the highlight to the previous selection
-                #     self._highLightObjs(objList)
-
                 if obj is not None and objList:
-                    # # store the data for the clicked row
-                    # data = {}
-                    # for cc in range(self.columnCount()):
-                    #     colName = self.horizontalHeaderItem(cc).text()
-                    #     data[colName] = self.item(row, cc).value
-                    # targetName = None
-
                     if hasattr(obj, 'className'):
                         targetName = obj.className
 
@@ -1545,24 +1557,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
                                     rowItem=_data,
                                     rowObject=obj)
 
-                    # if self.actionCallback and self._df is not None and not \
-                    #         self._df.columnDefinitions.setEditValues[col]:  # ejb - editable fields don't actionCallback
-                    #     self.actionCallback(data)
-                    #
-                    # elif self._df is not None and not self._df.empty and self._df.columnDefinitions.setEditValues[col]:  # ejb - editable fields don't actionCallback:
-                    #     # item = self.item(row, col)
-                    #     # item.setEditable(True)
-                    #     item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
-                    #     # self.itemDelegate().closeEditor.connect(partial(self._changeMe, row, col))
-                    #     # item.textChanged.connect(partial(self._changeMe, item))
-                    #     # self.editItem(item)  # enter the editing mode
-                    #
-                    #     # editItem entry is handled by the delegate
-                    # else:
-                    #     self.actionCallback(data)
-
-                    if self._df is not None and not self._df.empty:
-                        self.actionCallback(data)
+                    self.actionCallback(data)
 
     #=========================================================================================
     # Table methods

@@ -1200,7 +1200,7 @@ class Spectrum(AbstractWrapperObject):
         self._setDimensionalAttributes('referenceValue', value)
 
     @property
-    @cached(_REFERENCESUBSTANCESCACHE, maxItems=5000, debug=False)
+    # @cached(_REFERENCESUBSTANCESCACHE, maxItems=5000, debug=False)
     def referenceSubstances(self):
         """
         :return: a list of substances

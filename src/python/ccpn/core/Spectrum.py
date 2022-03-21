@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-17 18:11:59 +0000 (Thu, March 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-21 11:46:44 +0000 (Mon, March 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2032,7 +2032,11 @@ class Spectrum(AbstractWrapperObject):
         if isBuffered:
             bufferIsTemporary = (path is None)
             if path is not None:
-                path = aPath(path).uniqueVersion()
+                _bufferStore = DataStore.newFromPath(path=path,
+                                              autoVersioning=True,
+                                              dataFormat=Hdf5SpectrumDataSource.dataFormat
+                                              )
+                path = _bufferStore.aPath()
                 self._dataStore.useBuffer = False  # Explicit path, no autobuffering
             else:
                 self._dataStore.useBuffer = True
@@ -2853,13 +2857,23 @@ class Spectrum(AbstractWrapperObject):
     def _metaDataPath(self):
         """Return the path to the metadata file
         """
-        _tmpPath = aPath(self.project.path).fetchDir(CCPN_STATE_DIRECTORY, self._pluralLinkName)
+        _tmpPath = self.project.statePath.fetchDir(self._pluralLinkName)
         return _tmpPath / self.name + '.json'
 
     def _saveSpectrumMetaData(self):
         """Save the spectrum metadata in the project/state/spectra in json file for optional future reference
         """
-        self._spectrumTraits.save(self._metaDataPath)
+        try:
+            _path = self._metaDataPath
+        except Exception:
+            getLogger().warning(f'{self}: Unable to save metadata; undefined path')
+            return
+
+        if not _path.parent.exists():
+            getLogger().warning(f'{self}: Unable to save metadata to {_path.parent}')
+            return
+
+        self._spectrumTraits.save(_path)
 
     def _restoreFromSpectrumMetaData(self):
         """Retore the spectrum metadata from the project/state/spectra json file
@@ -2883,7 +2897,9 @@ class Spectrum(AbstractWrapperObject):
             return
 
         if action == 'create':
-            self._saveSpectrumMetaData()
+            # No need; done by _newSpectrum
+            # self._saveSpectrumMetaData()
+            pass
 
         if action == 'delete':
             self._deleteSpectrumMetaData()

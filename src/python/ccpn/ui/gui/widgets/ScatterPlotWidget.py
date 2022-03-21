@@ -677,9 +677,26 @@ class ScatterPlot(Widget):
         """
         pass
 
+    def _createMenu(self, items):
+        """
+        :param items:  a list of _SCMitem obj :
+        :return: Creates and returns a context menu for the guiStrip from a list of items
+        """
+        menu = self.contextMenu = Menu('', self, isFloatWidget=True)  # generate new menu
+
+        for i in items:
+            try:
+                ff = getattr(menu, i.typeItem)
+                if ff:
+                    action = ff(i.name, **vars(i))
+                    setattr(self, i.stripMethodName, action)
+            except Exception as e:
+                getLogger().warning('Menu error: %s' % str(e))
+        return menu
+
     def _raiseScatterContextMenu(self, ev):
         """ Creates all the menu items for the scatter context menu. """
-        mainMenu = cm._createMenu(self, self.setupContextMenu())
+        mainMenu = self._createMenu(self.setupContextMenu())
         self._addSubMenus(mainMenu)
         self.contextMenu.exec_(ev.screenPos().toPoint())
 

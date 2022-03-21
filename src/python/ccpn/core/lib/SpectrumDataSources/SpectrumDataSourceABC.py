@@ -92,8 +92,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-24 19:40:43 +0000 (Thu, February 24, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-03-21 12:16:51 +0000 (Mon, March 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1207,7 +1207,9 @@ class SpectrumDataSourceABC(CcpNmrJson):
             raise FileExistsError('path "%s" exists (mode=%s)' % (_path, mode))
 
     def openFile(self, mode, **kwds):
-        """open self.path, set self.fp, return self.fp
+        """open self.path, set self.fp,
+        Raise RunTimeError on opening errors
+        :return self.fp
         """
         if mode is None:
             raise ValueError('%s.openFile: Undefined open mode' % self.__class__.__name__)
@@ -1226,7 +1228,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             self.closeFile()
             text = '%s.openFile: %s' % (self.__class__.__name__, str(es))
             getLogger().error(text)
-            raise es
+            raise RuntimeError(text)
 
         if not newFile:
             # cache will be defined after parameters are read

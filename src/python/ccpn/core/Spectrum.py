@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-21 11:46:44 +0000 (Mon, March 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-21 12:16:51 +0000 (Mon, March 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2033,9 +2033,10 @@ class Spectrum(AbstractWrapperObject):
             bufferIsTemporary = (path is None)
             if path is not None:
                 _bufferStore = DataStore.newFromPath(path=path,
-                                              autoVersioning=True,
-                                              dataFormat=Hdf5SpectrumDataSource.dataFormat
-                                              )
+                                                     autoVersioning=True,
+                                                     dataFormat=Hdf5SpectrumDataSource.dataFormat,
+                                                     withSuffix=Hdf5SpectrumDataSource.suffixes[0]
+                                                   )
                 path = _bufferStore.aPath()
                 self._dataStore.useBuffer = False  # Explicit path, no autobuffering
             else:

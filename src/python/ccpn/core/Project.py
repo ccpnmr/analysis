@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-10 21:10:22 +0000 (Thu, March 10, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-03-21 16:23:17 +0000 (Mon, March 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -627,6 +627,10 @@ class Project(AbstractWrapperObject):
         Return True if save succeeded otherwise return False (or throw error)
         """
         # self._flushCachedData()
+
+        # Update the spectrum internal settings
+        for spectrum in self.spectra:
+            spectrum._saveObject()
 
         # path is empty for save under the same name
         if newPath:

@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-21 12:16:51 +0000 (Mon, March 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-21 16:23:17 +0000 (Mon, March 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -449,7 +449,7 @@ class DataStore(CcpNmrJson):
         return not self.__eq__(other)
 
     def __str__(self):
-        return '<%s: %s (%r, useBuffer=%s)>' % \
+        return '<%s: %s (dataFormat=%r, useBuffer=%s)>' % \
                (self.__class__.__name__, self.path, self.dataFormat, self.useBuffer)
 
     __repr__ = __str__

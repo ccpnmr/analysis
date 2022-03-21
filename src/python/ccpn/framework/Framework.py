@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-16 20:48:02 +0000 (Wed, March 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-21 17:47:40 +0000 (Mon, March 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -33,9 +33,32 @@ import os
 import sys
 import re
 import subprocess
+import platform
 
 import faulthandler
 
+
+try:
+    # set the soft limits for the maximum number of open files
+    if platform.system() == 'Windows':
+        import win32file
+
+
+        # set soft limit for Windows
+        win32file._setmaxstdio(2048)
+
+    else:
+        import resource
+
+
+        # soft limit imposed by the current configuration, hard limit imposed by the operating system.
+        soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+
+        # For the following line to run, you need to execute the Python script as root?
+        resource.setrlimit(resource.RLIMIT_NOFILE, (2048, hard))
+
+except Exception:
+    sys.stderr.write(f'Error setting maximum number of files the can be open')
 
 faulthandler.enable()
 

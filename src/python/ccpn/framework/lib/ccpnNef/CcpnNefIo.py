@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-17 18:11:59 +0000 (Thu, March 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-21 16:23:17 +0000 (Mon, March 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -5419,7 +5419,6 @@ class CcpnNefReader(CcpnNefContent):
             # Optionally change the dataFormat
             if filePath is not None and dataFormat is not None:
                 try:
-                    spectrum.dataFormat = dataFormat
                     spectrum._openFile(path=filePath, dataFormat=dataFormat, checkParameters=True)
                 except (RuntimeError, ValueError) as es:
                     getLogger().warning(f'Unable to initialise {filePath} ({dataFormat}): {es}')

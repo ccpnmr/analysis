@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-10 21:10:22 +0000 (Thu, March 10, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-03-21 17:40:07 +0000 (Mon, March 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -628,6 +628,10 @@ class Project(AbstractWrapperObject):
         """
         # self._flushCachedData()
 
+        # Update the spectrum internal settings
+        for spectrum in self.spectra:
+            spectrum._saveObject()
+
         # path is empty for save under the same name
         if newPath:
             # check validity of the newPath
@@ -635,9 +639,9 @@ class Project(AbstractWrapperObject):
             newPath.assureSuffix(CCPN_EXTENSION)
             if newPath.exists() and not overwriteExisting:
                 raise ValueError('Cannot overwrite existing file "%s"' % newPath)
-            if len(newPath.basename) > 32:
-                raise ValueError('Unfortunately, we currently have limited (32) length of the filename (%s)' % newPath.basename)
             path = str(newPath)
+            if len(path) > 1024:
+                raise ValueError('There is a limit (1024) to the length of the path (%s)' % path)
             _saveAs = True
         else:
             path = str(self.path)

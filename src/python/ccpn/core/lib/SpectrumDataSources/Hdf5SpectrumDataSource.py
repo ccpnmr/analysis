@@ -25,7 +25,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-17 16:18:18 +0000 (Thu, March 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-21 12:16:51 +0000 (Mon, March 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -201,7 +201,8 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
         return VersionString(self._hdf5Metadata[HDF5_VERSION_KEY])
 
     def openFile(self, mode, check=True, **kwds):
-        """open self.path, set self.fp, return self.fp
+        """open self.path, set self.fp,
+        Raise Runtime error on opening errors
 
         :param mode: open file mode;
                     from hdf5 documentation:
@@ -237,7 +238,7 @@ class Hdf5SpectrumDataSource(SpectrumDataSourceABC):
             self.closeFile()
             text = '%s.openFile(mode=%r): %s' % (self.__class__.__name__, mode, str(es))
             getLogger().warning(text)
-            raise es
+            raise RuntimeError(text)
 
         if not newFile:
             # old file

@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-17 18:11:59 +0000 (Thu, March 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-21 16:23:17 +0000 (Mon, March 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -689,22 +689,26 @@ class Spectrum(AbstractWrapperObject):
             self._dataStore.path = None
             return
 
-        newDataStore, newDataSource = self._getDataSourceFromPath(path=value, dataFormat=self.dataFormat, checkParameters=True)
-        if newDataStore is None:
-            raise ValueError('Spectrum.filePath: %s invalid filePath "%s"' % (self, value))
-        if newDataSource is None:
-            raise ValueError('Spectrum.filePath: %s incompatible dataSource "%s"' % (self, value))
-
-        # we found a valid new file
         self._close()
-        self._spectrumTraits.dataSource = newDataSource
-        self._spectrumTraits.dataStore =  newDataStore
-        self._dataStore._saveInternal()
-        self._saveSpectrumMetaData()
+        self._openFile(path=value, dataFormat=self.dataFormat, checkParameters=True)
+
+        # newDataStore, newDataSource = self._getDataSourceFromPath(path=value, dataFormat=self.dataFormat, checkParameters=True)
+        # if newDataStore is None:
+        #     raise ValueError('Spectrum.filePath: %s invalid filePath "%s"' % (self, value))
+        # if newDataSource is None:
+        #     raise ValueError('Spectrum.filePath: %s incompatible dataSource "%s"' % (self, value))
+        #
+        # # we found a valid new file
+        # self._close()
+        # self._spectrumTraits.dataSource = newDataSource
+        # self._spectrumTraits.dataStore =  newDataStore
+        # self._dataStore._saveInternal()
+        # self._saveSpectrumMetaData()
 
     def _openFile(self, path:str, dataFormat, checkParameters=True):
         """Open the spectrum as defined by path, creating a dataSource object
         :param path: a path to the spectrum; may contain redirections (e.g. $DATA)
+        :param dataFormat: a dataFormat defined by one of the SpectrumDataSource types
 
         CCPNMRINTERNAL: also used in nef loader
         """
@@ -715,7 +719,7 @@ class Spectrum(AbstractWrapperObject):
                                                                   dataFormat=dataFormat,
                                                                   checkParameters=checkParameters)
         if newDataStore is None or newDataSource is None:
-            raise ValueError('Spectrum._openFile: unable to load "%s"' % path)
+            raise ValueError('Spectrum._openFile: unable to open "%s"' % path)
 
         # we found a (valid?) new file
         self._close()
@@ -736,6 +740,7 @@ class Spectrum(AbstractWrapperObject):
         if path is None:
             path = self.filePath
 
+        self._close()
         self._openFile(path=path, dataFormat=self.dataFormat, checkParameters=False)
         self.dataSource.exportToSpectrum(self, includePath=False)
 
@@ -768,7 +773,6 @@ class Spectrum(AbstractWrapperObject):
         """
         if self._dataStore is None:
             raise RuntimeError('dataStore not defined')
-
         return self._dataStore.dataFormat
 
     @dataFormat.setter
@@ -778,8 +782,7 @@ class Spectrum(AbstractWrapperObject):
             raise ValueError('invalid dataFormat %r; should be one of %r' % (value, validFormats))
 
         self._close()
-        ds = DataStore.newFromPath(path=self.filePath, dataFormat=value)
-        self._spectrumTraits.dataStore = ds
+        self._openFile(path=self.filePath, dataFormat=value, checkParameters=True)
 
     #-----------------------------------------------------------------------------------------
     # Dimensional Attributes
@@ -2032,7 +2035,12 @@ class Spectrum(AbstractWrapperObject):
         if isBuffered:
             bufferIsTemporary = (path is None)
             if path is not None:
-                path = aPath(path).uniqueVersion()
+                _bufferStore = DataStore.newFromPath(path=path,
+                                                     autoVersioning=True,
+                                                     dataFormat=Hdf5SpectrumDataSource.dataFormat,
+                                                     withSuffix=Hdf5SpectrumDataSource.suffixes[0]
+                                                   )
+                path = _bufferStore.aPath()
                 self._dataStore.useBuffer = False  # Explicit path, no autobuffering
             else:
                 self._dataStore.useBuffer = True
@@ -2807,6 +2815,14 @@ class Spectrum(AbstractWrapperObject):
             if not self.sliceColour:
                 self.sliceColour = self.positiveContourColour
 
+    def _saveObject(self):
+        """Update any setting before saving to API XML
+        #CCPNINTERNAL: called in Project.save()
+        """
+        # The is needed as nef-initiated loading may have scuppered the
+        # references to the internal data
+        self._spectrumTraits._storeToSpectrum()
+
     @classmethod
     def _restoreObject(cls, project, apiObj):
         """Subclassed to allow for initialisations on restore, not on creation via newSpectrum
@@ -2853,13 +2869,23 @@ class Spectrum(AbstractWrapperObject):
     def _metaDataPath(self):
         """Return the path to the metadata file
         """
-        _tmpPath = aPath(self.project.path).fetchDir(CCPN_STATE_DIRECTORY, self._pluralLinkName)
+        _tmpPath = self.project.statePath.fetchDir(self._pluralLinkName)
         return _tmpPath / self.name + '.json'
 
     def _saveSpectrumMetaData(self):
         """Save the spectrum metadata in the project/state/spectra in json file for optional future reference
         """
-        self._spectrumTraits.save(self._metaDataPath)
+        try:
+            _path = self._metaDataPath
+        except Exception:
+            getLogger().warning(f'{self}: Unable to save metadata; undefined path')
+            return
+
+        if not _path.parent.exists():
+            getLogger().warning(f'{self}: Unable to save metadata to {_path.parent}')
+            return
+
+        self._spectrumTraits.save(_path)
 
     def _restoreFromSpectrumMetaData(self):
         """Retore the spectrum metadata from the project/state/spectra json file
@@ -2883,7 +2909,9 @@ class Spectrum(AbstractWrapperObject):
             return
 
         if action == 'create':
-            self._saveSpectrumMetaData()
+            # No need; done by _newSpectrum
+            # self._saveSpectrumMetaData()
+            pass
 
         if action == 'delete':
             self._deleteSpectrumMetaData()
@@ -2939,7 +2967,7 @@ class Spectrum(AbstractWrapperObject):
         """
         self._clearCache()
         if self.dataSource is not None:
-            self.dataSource.closeFile()
+            self._spectrumTraits.dataSource.closeFile()
             self._spectrumTraits.dataSource = None
 
     @logCommand(get='self')

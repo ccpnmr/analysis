@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-17 18:11:59 +0000 (Thu, March 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-21 16:23:17 +0000 (Mon, March 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -63,6 +63,24 @@ class SpectrumTraits(CcpNmrJson):
     def __init__(self, spectrum):
         super().__init__()
         self.spectrum = spectrum
+
+    def _storeToSpectrum(self):
+        """Store the various traits to the spectrum internal data
+        """
+        if (spectrum := self.spectrum) is None:
+            getLogger().warning(f'SpectrumTraits: undefined spectrum, cannot store values')
+
+        # Store the dataStore info
+        if (dataStore := self.dataStore) is None:
+            getLogger().warning(f'{self}: undefined dataStore: cannot store values')
+        else:
+            dataStore._saveInternal()
+
+        # Store the peakPicker info
+        if (peakPicker := self.peakPicker) is None:
+            getLogger().warning(f'{self}: undefined peakPicker: cannot store values')
+        else:
+            peakPicker._storeAttributes()
 
     def _restoreFromSpectrum(self):
         """Restore the various traits from the spectrum internal data

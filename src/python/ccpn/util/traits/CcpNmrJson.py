@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-16 16:19:26 +0000 (Wed, March 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-21 11:46:44 +0000 (Mon, March 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -313,6 +313,7 @@ class CcpNmrJson(TraitBase):
 
     saveAllTraitsToJson = False  # This flag effectively sets saveToJson to True/False for all traits
     classVersion = None  # The version identifier for the specific class (usefull when upgrading is required)
+    objectInfo = None  # Any information about the class
 
     #--------------------------------------------------------------------------------------------
     # end to be subclassed
@@ -407,7 +408,7 @@ class CcpNmrJson(TraitBase):
     #--------------------------------------------------------------------------------------------
     # _metadata(should be in-sinc with Constants.METADATA)
     #--------------------------------------------------------------------------------------------
-    _metadata = Dict().tag(saveToJson=True)
+    _metadata = Dict().tag(saveToJson=True, info='The metadata that define the class, and the versioning of the data')
 
     @default(Constants.METADATA)
     def _metadata_default(self) -> dict:

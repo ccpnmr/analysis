@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-03 17:17:29 +0000 (Thu, February 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-22 13:43:07 +0000 (Tue, March 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -4961,8 +4961,8 @@ class CcpnGLWidget(QOpenGLWidget):
     #                 ii += 1
     #         break
 
-    def sizeHint(self):
-        return QSize(self.w, self.h)
+    # def sizeHint(self):
+    #     return QSize(self.w, self.h)
 
     def set3DProjection(self):
         GL.glMatrixMode(GL.GL_PROJECTION)

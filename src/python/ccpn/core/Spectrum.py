@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-22 15:32:54 +0000 (Tue, March 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-22 17:45:06 +0000 (Tue, March 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -728,7 +728,6 @@ class Spectrum(AbstractWrapperObject):
 
         if (newDataSource := self._getDataSource(dataStore=newDataStore, checkParameters=checkParameters)) is None:
             getLogger().warning('Spectrum._openFile: unable to open "%s"' % path)
-            self._spectrumTraits.dataSource = None
         else:
             # we defined a new file
             self._spectrumTraits.dataSource = newDataSource
@@ -3334,7 +3333,8 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
     return spectrum
 
 
-def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], name: str = 'emptySpectrum', path=None,
+def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], dimensionCount=None,
+                      name: str = 'emptySpectrum', path=None,
                       **parameters) -> Spectrum:
     """Creation of new Empty Spectrum;
     :return: Spectrum instance or None on error
@@ -3353,7 +3353,9 @@ def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], name: str =
     if dataSource is None:
         raise RuntimeError('Error creating empty DataSource')
     # Fill in some of the parameters
-    dataSource.dimensionCount = len(isotopeCodes)
+    if dimensionCount is None:
+        dimensionCount = len(isotopeCodes)
+    dataSource.dimensionCount = dimensionCount
     dataSource.isotopeCodes = isotopeCodes
     dataSource._setSpectralParametersFromIsotopeCodes()
     dataSource._assureProperDimensionality()

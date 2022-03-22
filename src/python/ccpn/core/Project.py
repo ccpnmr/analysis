@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-21 17:40:07 +0000 (Mon, March 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-22 17:45:06 +0000 (Tue, March 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1565,19 +1565,23 @@ class Project(AbstractWrapperObject):
     #     raise NotImplementedError('Use Project.newEmptySpectrum')
 
     @logCommand('project.')
-    def newEmptySpectrum(self, isotopeCodes: Sequence[str], name='emptySpectrum', **parameters):
+    def newEmptySpectrum(self, isotopeCodes: Sequence[str], dimensionCount=None, name='emptySpectrum', path=None,
+                         **parameters):
         """
         Make new Empty spectrum from isotopeCodes list - without data and with default parameters.
         default parameters are defined in: SpectrumDataSourceABC.isotopeDefaultDataDict
 
-        :param isotopeCodes:
-        :param name:
+        :param isotopeCodes: a tuple/list of isotope codes that define the dimensions; e.g. ('1H', '13C')
+        :dimensionCount: an optional dimensionCount parameter; default derived from len(isotopeCodes)
+        :param name: the name of the resulting spectrum
+        :param path: an optional path to be stored with the Spectrum instance
         :param **parameters: optional spectrum (parameter, value) pairs
         :return: a new Spectrum instance.
         """
         from ccpn.core.Spectrum import _newEmptySpectrum
 
-        return _newEmptySpectrum(self, isotopeCodes=isotopeCodes, name=name, **parameters)
+        return _newEmptySpectrum(self, isotopeCodes=isotopeCodes, dimensionCount=dimensionCount,
+                                 name=name, path=path, **parameters)
 
     @logCommand('project.')
     def newHdf5Spectrum(self, isotopeCodes: Sequence[str], name='hdf5Spectrum', path=None, **parameters):

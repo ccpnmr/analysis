@@ -1,19 +1,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-01-25 17:38:20 +0000 (Tue, January 25, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-03-23 20:18:59 +0000 (Wed, March 23, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -23,13 +23,14 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtGui, QtWidgets, QtCore
+from functools import partial
+from PyQt5 import QtWidgets, QtCore
+
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.RadioButton import RadioButton, EditableRadioButton, RadioButtonWithSubSelection
 from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets.Font import setWidgetFont
-from functools import partial
 from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.util.Logging import getLogger
 
 
 CHECKED = QtCore.Qt.Checked
@@ -145,10 +146,16 @@ class RadioButtons(QtWidgets.QWidget, Base):
 
         self.texts = texts
         if selectedInd is not None:
-            self.radioButtons[selectedInd].setChecked(True)
-        elif selected and selected in self.texts:
-            self.set(selected, silent=silent)
-        else:
+            try:
+                self.radioButtons[selectedInd].setChecked(True)
+            except:
+                getLogger().debug(f'setButtons: could not set selectedInd {selectedInd}')
+        elif selected:
+            if selected in self.texts:
+                self.set(selected, silent=silent)
+            else:
+                getLogger().debug(f'setButtons: could not set selected {selected}')
+        elif self.radioButtons:
             self.radioButtons[0].setChecked(True)
 
     def getRadioButton(self, text):
@@ -202,7 +209,12 @@ class RadioButtons(QtWidgets.QWidget, Base):
                     return name
 
     def setIndex(self, i):
-        self.radioButtons[i].setChecked(True)
+        if self.isExclusive:
+            self.deselectAll()
+        try:
+            self.radioButtons[i].setChecked(True)
+        except:
+            getLogger().debug(f'setIndex: could not set index {i}')
 
     def deselectAll(self):
         self.buttonGroup.setExclusive(False)
@@ -427,12 +439,19 @@ class EditableRadioButtons(Widget, Base):
                             if isinstance(iconSize, (list, tuple)) and len(iconSize) == 2 and \
                                     all(isinstance(iconVal, int) for iconVal in iconSize):
                                 button.setIconSize(QtCore.QSize(*iconSize))
+
         self.texts = texts
         if selectedInd is not None:
-            self.radioButtons[selectedInd].setChecked(True)
-        elif selected and selected in self.texts:
-            self.set(selected, silent=silent)
-        else:
+            try:
+                self.radioButtons[selectedInd].setChecked(True)
+            except:
+                getLogger().debug(f'setButtons: could not set selectedInd {selectedInd}')
+        elif selected:
+            if selected in self.texts:
+                self.set(selected, silent=silent)
+            else:
+                getLogger().debug(f'setButtons: could not set selected {selected}')
+        elif self.radioButtons:
             self.radioButtons[0].setChecked(True)
 
     def getRadioButton(self, text):
@@ -448,7 +467,7 @@ class EditableRadioButtons(Widget, Base):
             if i.isChecked():
                 texts.append(i.text())
         if self.isExclusive:
-            return texts[-1]
+            return texts[-1] if texts else None
         else:
             return texts
 
@@ -486,7 +505,10 @@ class EditableRadioButtons(Widget, Base):
     def setIndex(self, i):
         if self.isExclusive:
             self.deselectAll()
-        self.radioButtons[i].setChecked(True)
+        try:
+            self.radioButtons[i].setChecked(True)
+        except:
+            getLogger().debug(f'setIndex: could not set index {i}')
 
     def _buttonClicked(self, button, index):
         if not self.isExclusive:
@@ -526,22 +548,17 @@ class EditableRadioButtons(Widget, Base):
 
 
 
-if __name__ == '__main__':
+def main():
     from ccpn.ui.gui.widgets.Application import TestApplication
-    from ccpn.ui.gui.widgets.BasePopup import BasePopup
-
     from ccpn.ui.gui.popups.Dialog import CcpnDialog
-
 
     def _testCallback(self, *args):
         print('GET:', self.get())
         print('INDEX', self.getIndex())
         print('SELECTED:', self.getSelectedText())
 
-
     def _testCall(*args):
         print('ddd', args)
-
 
     app = TestApplication()
     popup = CcpnDialog(windowTitle='Test radioButtons', setLayout=True)
@@ -572,3 +589,7 @@ if __name__ == '__main__':
     popup.exec()
 
     app.start()
+
+
+if __name__ == '__main__':
+    main()

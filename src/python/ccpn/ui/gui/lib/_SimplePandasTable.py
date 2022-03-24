@@ -53,6 +53,8 @@ from ccpn.core.lib.Notifiers import Notifier
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import copyToClipboard
 from ccpn.util.OrderedSet import OrderedSet
+from ccpn.util.UpdateScheduler import UpdateScheduler
+from ccpn.util.UpdateQueue import UpdateQueue
 
 
 #=========================================================================================
@@ -343,8 +345,8 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
             self.layoutAboutToBeChanged.emit()
 
             self._df.loc[row] = newRow  # dependent on the index
-            loc = self._df.index.get_loc(row)
-            self._colour = np.insert(self._colour, loc, np.empty((self.columnCount()), dtype=np.object), axis=0)
+            iloc = self._df.index.get_loc(row)
+            self._colour = np.insert(self._colour, iloc, np.empty((self.columnCount()), dtype=np.object), axis=0)
             self._setSortOrder()
 
             # emit a signal to spawn an update of the table and notify headers to update
@@ -354,11 +356,11 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
             # not checked
             pass
             # self._df.loc[row] = newRow
-            # loc = self._df.index.get_loc(row)
+            # iloc = self._df.index.get_loc(row)
             #
-            # self.beginInsertRows(QtCore.QModelIndex(), loc, loc)
+            # self.beginInsertRows(QtCore.QModelIndex(), iloc, iloc)
             #
-            # self._colour = np.insert(self._colour, loc, np.empty((self.columnCount()), dtype=np.object), axis=0)
+            # self._colour = np.insert(self._colour, iloc, np.empty((self.columnCount()), dtype=np.object), axis=0)
             #
             # self.endInsertRows()
 
@@ -367,7 +369,7 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         """
         # print(f'>>>   _updateRow    {newRow}')
         try:
-            loc = self._df.index.get_loc(row)  # will give a keyError if the row is not found
+            iloc = self._df.index.get_loc(row)  # will give a keyError if the row is not found
 
         except KeyError:
             getLogger().debug(f'row {row} not found')
@@ -387,8 +389,8 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
                 # not checked
                 pass
                 # # print(f'>>>   _updateRow    {newRow}')
-                # loc = self._df.index.get_loc(row)
-                # if loc >= 0:
+                # iloc = self._df.index.get_loc(row)
+                # if iloc >= 0:
                 #     # self.beginResetModel()
                 #
                 #     # notify that the table is about to be changed
@@ -402,11 +404,11 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
                 #
                 #     # self.endResetModel()
                 #
-                #     # # print(f'>>>      _updateRow    {loc}')
+                #     # # print(f'>>>      _updateRow    {iloc}')
                 #     # self._df.loc[row] = newRow
                 #     #
                 #     # # notify change to cells
-                #     # _sortedLoc = self._sortOrder.index(loc)
+                #     # _sortedLoc = self._sortOrder.index(iloc)
                 #     # startIdx, endIdx = self.index(_sortedLoc, 0), self.index(_sortedLoc, self.columnCount() - 1)
                 #     # self.dataChanged.emit(startIdx, endIdx)
 
@@ -415,7 +417,7 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         """
         # print(f'>>>   _deleteRow')
         try:
-            loc = self._df.index.get_loc(row)
+            iloc = self._df.index.get_loc(row)
 
         except KeyError:
             getLogger().debug(f'row {row} not found')
@@ -423,22 +425,22 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         else:
             if self._view.isSortingEnabled():
                 # notify rows are going to be inserted
-                _sortedLoc = self._sortOrder.index(loc)
+                _sortedLoc = self._sortOrder.index(iloc)
                 self.beginRemoveRows(QtCore.QModelIndex(), _sortedLoc, _sortedLoc)
 
                 self._df.drop([row], inplace=True)
-                self._sortOrder[:] = [(val if val < loc else val - 1) for val in self._sortOrder if val != loc]
-                self._colour = np.delete(self._colour, loc, axis=0)
+                self._sortOrder[:] = [(val if val < iloc else val - 1) for val in self._sortOrder if val != iloc]
+                self._colour = np.delete(self._colour, iloc, axis=0)
 
                 self.endRemoveRows()
 
             else:
                 # not checked
                 # notify rows are going to be inserted
-                self.beginRemoveRows(QtCore.QModelIndex(), loc, loc)
+                self.beginRemoveRows(QtCore.QModelIndex(), iloc, iloc)
 
                 self._df.drop([row], inplace=True)
-                self._colour = np.delete(self._colour, loc, axis=0)
+                self._colour = np.delete(self._colour, iloc, axis=0)
 
                 self.endRemoveRows()
 
@@ -814,10 +816,6 @@ def _clearSimplePandasTable(table):
 # _SimplePandasTableViewProjectSpecific project specific
 #=========================================================================================
 
-from ccpn.util.UpdateScheduler import UpdateScheduler
-from ccpn.util.UpdateQueue import UpdateQueue
-
-
 # define a simple class that can contains a simple id
 blankId = SimpleNamespace(className='notDefined', serial=0)
 
@@ -840,9 +838,12 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
     attributeName = '_SimplePandasTableViewProjectSpecific'
 
     _OBJECT = '_object'
-    PRIMARYCOLUMN = 'Pid'
-    defaultHidden = []
+    _ISDELETED = 'isDeleted'
     _internalColumns = []
+
+    OBJECTCOLUMN = '_object'
+    INDEXCOLUMN = 'index'
+    defaultHidden = []
 
     columnHeaders = {}
     tipTexts = ()
@@ -853,12 +854,12 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
     cellClass = None
     tableName = None
     rowName = None
-    cellName = None
     cellClassNames = None
 
     selectCurrent = True
     callBackClass = None
     search = False
+    enableEditDelegate = True
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None,
                  actionCallback=None, selectionCallback=None, checkBoxCallback=None,
@@ -895,7 +896,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         self._mousePressed = False
         self._lastTimeClicked = time_ns()
         self._clickInterval = QtWidgets.QApplication.instance().doubleClickInterval() * 1e6
-        self._tableSelectionBlockingLevel = 0
+        self._tableSelectionBlockingTime = 0
         self._currentRow = None
         self._lastSelection = [None]
 
@@ -925,6 +926,11 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         self._queuePending = UpdateQueue()
         self._queueActive = None
         self._lock = QtCore.QMutex()
+
+        if self.enableEditDelegate:
+            # set the delegate for editing
+            delegate = _SimpleTableDelegate(self, objectColumn=self.OBJECTCOLUMN)
+            self.setItemDelegate(delegate)
 
     def setModel(self, model: QtCore.QAbstractItemModel) -> None:
         """Set the model for the view
@@ -1010,6 +1016,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
             self._rightClickedTableIndex = self.indexAt(event.pos())
 
         self.setCurrent()
+
         super().mousePressEvent(event)
 
     def getRightMouseItem(self):
@@ -1302,7 +1309,11 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         """
         self._dataFrameObject = None
         self._df = pd.DataFrame({val: [] for val in self.columnHeaders.keys()})
-        self._objects = []
+
+        if self.OBJECTCOLUMN in self._df.columns:
+            # use the object as the index, object always exists even if isDeleted
+            self._df.set_index(self._df[self.OBJECTCOLUMN], inplace=True, )
+
         _updateSimplePandasTable(self, self._df, _resize=True)
         self.showColumns(None)
 
@@ -1419,26 +1430,20 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
                                          partial(self._queueGeneralNotifier, self._updateRowCallback),
                                          onceOnly=True)  # should be True, but doesn't work
 
-        if isinstance(self.cellClassNames, list):
-            for cellClass in self.cellClassNames:
+        if self.cellClassNames:
+            for cellClass, attr in self.cellClassNames.items():
                 self._cellNotifiers.append(Notifier(self.project,
                                                     [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-                                                    cellClass[OBJECT_CLASS].__name__,
-                                                    partial(self._updateCellCallback, cellClass[OBJECT_PARENT]),
-                                                    onceOnly=True))
-        else:
-            if self.cellClassNames:
-                self._cellNotifiers.append(Notifier(self.project,
-                                                    [Notifier.CHANGE, Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-                                                    self.cellClassNames[OBJECT_CLASS].__name__,
-                                                    partial(self._updateCellCallback, self.cellClassNames[OBJECT_PARENT]),
+                                                    cellClass.__name__,
+                                                    partial(self._queueGeneralNotifier, self._updateCellCallback),
                                                     onceOnly=True))
 
         if self.selectCurrent:
             self._selectCurrentNotifier = Notifier(self.current,
                                                    [Notifier.CURRENT],
                                                    self.callBackClass._pluralLinkName,
-                                                   self._selectCurrentCallBack
+                                                   self._selectCurrentCallBack,
+                                                   # partial(self._queueGeneralNotifier, self._selectCurrentCallBack),
                                                    )
 
         if self.search:
@@ -1617,27 +1622,29 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         """
 
         model = self.selectionModel()
-        # selects all the items in the row
+        # selects all the items in the row - may need to check selectionMode
         selection = fromSelection if fromSelection else model.selectedRows()
 
         if selection:
             selectedObjects = []
             valuesDict = defaultdict(list)
+            col = self._df.columns.get_loc(self.OBJECTCOLUMN)
+            _sortOrder = self.model()._sortOrder
             for idx in selection:
-                row = self.model()._sortOrder[idx.row()]  # map to sorted rows?
-                col = idx.column()
+                row = _sortOrder[idx.row()]  # map to sorted rows?
 
-                if self._objects and len(self._objects) > 0:
-                    if isinstance(self._objects[0], pd.Series):
-                        h = self.horizontalHeaderItem(col).text()
-                        v = self.item(row, col).text()
-                        valuesDict[h].append(v)
+                # col = idx.column()
+                # if self._objects and len(self._objects) > 0:
+                #     if isinstance(self._objects[0], pd.Series):
+                #         h = self.horizontalHeaderItem(col).text()
+                #         v = self.item(row, col).text()
+                #         valuesDict[h].append(v)
+                #
+                #     else:
 
-                    else:
-                        _data = self._df.iloc[row]
-                        objIndex = _data[self.PRIMARYCOLUMN]
-                        if (obj := self.project.getByPid(objIndex.strip('<>')) if isinstance(objIndex, str) else objIndex):
-                            selectedObjects.append(obj)
+                objIndex = self._df.iat[row, col]
+                if (obj := self.project.getByPid(objIndex.strip('<>')) if isinstance(objIndex, str) else objIndex):
+                    selectedObjects.append(obj)
 
             if valuesDict:
                 selectedObjects = [row for i, row in pd.DataFrame(valuesDict).iterrows()]
@@ -1685,10 +1692,11 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
                                 col=idx.column(),
                                 rowItem=idx)
 
-                delta = time_ns() - self._tableSelectionBlockingLevel
+                delta = time_ns() - self._lastTimeClicked
                 # if interval large enough then reset timer and return True
                 if delta > self._clickInterval:
                     self.selectionCallback(data)
+
             return
 
         objList = self.getSelectedObjects()
@@ -1723,7 +1731,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
                                 col=0,
                                 rowItem=None)
 
-                delta = time_ns() - self._tableSelectionBlockingLevel
+                delta = time_ns() - self._lastTimeClicked
                 # if interval large enough then reset timer and return True
                 if delta > self._clickInterval:
                     self.selectionCallback(data)
@@ -1752,7 +1760,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
                 uniqObjs = set(selection)
 
                 _sOrder = self.model()._sortOrder
-                _dfTemp = self._df.reset_index()
+                _dfTemp = self._df.reset_index(drop=True)
                 data = [_dfTemp[_dfTemp[self._OBJECT] == obj] for obj in uniqObjs]
                 rows = [_sOrder.index(_dt.index[0]) for _dt in data if not _dt.empty]
                 if rows:
@@ -1815,6 +1823,101 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         elif self._scheduler.isBusy:
             # caught during the queue processing event, need to restart
             self._scheduler.restart = True
+
+
+#=========================================================================================
+# Table delegate to handle editing
+#=========================================================================================
+
+EDIT_ROLE = QtCore.Qt.EditRole
+
+
+class _SimpleTableDelegate(QtWidgets.QStyledItemDelegate):
+    """handle the setting of data when editing the table
+    """
+
+    def __init__(self, parent, objectColumn=None):
+        """Initialise the delegate
+        :param parent - link to the handling table
+        """
+        QtWidgets.QStyledItemDelegate.__init__(self, parent)
+        self.customWidget = False
+        self._parent = parent
+        self._objectColumn = objectColumn
+
+    def setEditorData(self, widget, index) -> None:
+        """populate the editor widget when the cell is edited
+        """
+        model = index.model()
+        value = model.data(index, EDIT_ROLE)
+
+        if not isinstance(value, (list, tuple)):
+            value = (value,)
+
+        if hasattr(widget, 'setColor'):
+            widget.setColor(*value)
+
+        elif hasattr(widget, 'setData'):
+            widget.setData(*value)
+
+        elif hasattr(widget, 'set'):
+            widget.set(*value)
+
+        elif hasattr(widget, 'setValue'):
+            widget.setValue(*value)
+
+        elif hasattr(widget, 'setText'):
+            widget.setText(*value)
+
+        elif hasattr(widget, 'setFile'):
+            widget.setFile(*value)
+
+        else:
+            msg = 'Widget %s does not expose "setData", "set" or "setValue" method; ' % widget
+            msg += 'required for table proxy editing'
+            raise Exception(msg)
+
+    def setModelData(self, widget, mode, index):
+        """Set the object to the new value
+        :param widget - typically a lineedit handling the editing of the cell
+        :param mode - editing mode:
+        :param index - QModelIndex of the cell
+        """
+        if hasattr(widget, 'get'):
+            value = widget.get()
+
+        elif hasattr(widget, 'value'):
+            value = widget.value()
+
+        elif hasattr(widget, 'text'):
+            value = widget.text()
+
+        elif hasattr(widget, 'getFile'):
+            files = widget.selectedFiles()
+            if not files:
+                return
+            value = files[0]
+
+        else:
+            msg = f'Widget {widget} does not expose "get", "value" or "text" method; required for table editing'
+            raise Exception(msg)
+
+        row = index.row()
+        col = index.column()
+        try:
+            # get the sorted element from the dataFrame
+            df = self._parent._df
+            _iRow = self._parent.model()._sortOrder[row]
+            _iCol = df.columns.get_loc(self._objectColumn)
+            obj = df.iat[_iRow, _iCol]
+
+            # set the data which will fire notifiers to populate all tables (including this)
+            func = self._parent._dataFrameObject.setEditValues[col]
+            if func and obj:
+                func(obj, value)
+
+        except Exception as es:
+            getLogger().debug('Error handling cell editing: %i %i - %s    %s    %s' % (row, col, str(es), self._parent.model()._sortOrder, value))
 
 
 #=========================================================================================

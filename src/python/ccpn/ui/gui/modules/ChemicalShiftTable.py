@@ -34,10 +34,10 @@ from types import SimpleNamespace
 import pandas as pd
 
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.core.lib.DataFrameObject import DataFrameObject
-from ccpn.core.ChemicalShiftList import ChemicalShiftList
-from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
+from ccpn.core.lib.DataFrameObject import DataFrameObject, DATAFRAME_OBJECT
 from ccpn.core.lib.CallBack import CallBack
+from ccpn.core.ChemicalShift import ChemicalShift
+from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.core.ChemicalShiftList import CS_UNIQUEID, CS_ISDELETED, CS_PID, \
     CS_STATIC, CS_STATE, CS_ORPHAN, CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT, CS_ATOMNAME, \
@@ -45,7 +45,6 @@ from ccpn.core.ChemicalShiftList import CS_UNIQUEID, CS_ISDELETED, CS_PID, \
     CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT, \
     CS_COMMENT, CS_OBJECT, \
     CS_TABLECOLUMNS, ChemicalShiftState
-from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import makeIterableList
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -105,7 +104,7 @@ class ChemicalShiftTableModule(CcpnModule):
         elif selectFirstItem:
             self._modulePulldown.selectFirstItem()
 
-        self.installMaximiseEventHandler(self._maximise, self._closeModule)
+        # self.installMaximiseEventHandler(self._maximise, self._closeModule)
 
     def _setWidgets(self):
         """Set up the widgets for the module
@@ -260,7 +259,7 @@ class ChemicalShiftTable(GuiTable):
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None,
                  actionCallback=None, selectionCallback=None,
-                 chemicalShiftList=None, hiddenColumns=None, **kwds):
+                 hiddenColumns=None, **kwds):
         """Initialise the widgets for the module.
         """
         # Derive application, project, and current from mainWindow
@@ -917,7 +916,9 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
     className = 'ChemicalShiftListTable'
     attributeName = 'chemicalShiftLists'
 
-    PRIMARYCOLUMN = CS_OBJECT  # column holding active objects (uniqueId/ChemicalShift for this table?)
+    OBJECTCOLUMN = CS_OBJECT  # column holding active objects (uniqueId/ChemicalShift for this table?)
+    INDEXCOLUMN = CS_UNIQUEID  # column holding the index
+
     defaultHidden = [CS_UNIQUEID, CS_ISDELETED, CS_FIGUREOFMERIT, CS_ALLPEAKS, CS_CHAINCODE,
                      CS_SEQUENCECODE, CS_STATE, CS_ORPHAN]
     _internalColumns = [CS_ISDELETED, CS_OBJECT]  # columns that are always hidden
@@ -969,7 +970,6 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
     cellClass = None
     tableName = tableClass.className
     rowName = tableClass.className
-    cellName = None
     cellClassNames = None
 
     selectCurrent = True
@@ -1003,10 +1003,6 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
 
-        # set the delegate for editing
-        delegate = _CSLTableDelegate(self)
-        self.setItemDelegate(delegate)
-
     def _postInitTableCommonWidgets(self):
         from ccpn.ui.gui.widgets.DropBase import DropBase
         from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
@@ -1025,7 +1021,7 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
         self._cornerDisplay = ScrollBarVisibilityWatcher(self)
 
     #=========================================================================================
-    # Widgets callbacks
+    # Widget callbacks
     #=========================================================================================
 
     def _getValidChemicalShift4Callback(self, objs):
@@ -1131,7 +1127,6 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
         """
         # create the column objects
         _cols = [
-            # (col, lambda row: _getValueByHeader(row, col), _tipTexts[ii], None, None)
             (self.columnHeaders[col], lambda row: _getValueByHeader(row, col), self.tipTexts[ii], None, None)
             for ii, col in enumerate(CS_TABLECOLUMNS)
             ]
@@ -1183,10 +1178,6 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
         else:
             df = pd.DataFrame(columns=[self.columnHeaders[val] for val in CS_TABLECOLUMNS])
 
-        # extract the row objects from the dataFrame
-        _objects = [row for row in df.itertuples()]
-        self._objects = _objects
-
         # update the columns to the visible headings
         df.columns = [self.columnHeaders[val] for val in CS_TABLECOLUMNS]
 
@@ -1195,7 +1186,6 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
                                     columnDefs=self._columns or [],
                                     table=self,
                                     )
-        _dfObject._objects = _objects
 
         return _dfObject
 
@@ -1224,11 +1214,10 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
             self.populateTable(selectedObjects=self.current.chemicalShifts)
 
     def _updateCellCallback(self, data):
+        """Notifier callback for updating the table
+        :param data:
+        """
         # print(f'>>> _updateCellCallback')
-        pass
-
-    def _searchCallBack(self, data):
-        # print(f'>>> _searchCallBack')
         pass
 
     def _updateRowCallback(self, data):
@@ -1300,15 +1289,19 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
 
         return _update
 
+    def _searchCallBack(self, data):
+        # print(f'>>> _searchCallBack')
+        pass
+
     def _selectCurrentCallBack(self, data):
-        """Callback from a notifier to highlight the chemical shifts
+        """Callback from a notifier to highlight the current objects
         :param data:
         """
         if self._tableBlockingLevel:
             return
 
-        currentShifts = data['value']
-        self._selectOnTableCurrentChemicalShifts(currentShifts)
+        objs = data['value']
+        self._selectOnTableCurrent(objs)
 
     def _selectionChangedCallback(self, selected, deselected):
         """Handle item selection as changed in table - call user callback
@@ -1316,11 +1309,11 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
         """
         self._changeTableSelection(None)
 
-    def _selectOnTableCurrentChemicalShifts(self, currentShifts):
-        """Highlight the list of currentShifts on the table
-        :param currentShifts:
+    def _selectOnTableCurrent(self, objs):
+        """Highlight the list of objects on the table
+        :param objs:
         """
-        self.highlightObjects(currentShifts)
+        self.highlightObjects(objs)
 
     #=========================================================================================
     # Table context menu

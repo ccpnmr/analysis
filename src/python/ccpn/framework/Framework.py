@@ -1742,7 +1742,7 @@ class Framework(NotifierBase, GuiBase):
             relativeTo = mainWindow.moduleArea
         peakTableModule = PeakTableModule(mainWindow, selectFirstItem=selectFirstItem)
         if peakList:
-            peakTableModule.selectPeakList(peakList)
+            peakTableModule._selectTable(peakList)
         mainWindow.moduleArea.addModule(peakTableModule, position=position, relativeTo=relativeTo)
         return peakTableModule
 
@@ -2097,13 +2097,17 @@ class Framework(NotifierBase, GuiBase):
 # code for testing purposes
 #-----------------------------------------------------------------------------------------
 
-class MyProgramme(Framework):
-    """My first app"""
-    applicationName = 'CcpNmr'
-    applicationVersion = Version.applicationVersion
-
-
 def createFramework(projectPath=None, **kwds):
+    # stop circular import when run from main entry point
+    from ccpn.AnalysisAssign.AnalysisAssign import Assign
+
+    class MyProgramme(Assign):
+        """My first app
+        """
+        applicationName = 'CcpNmr'
+        applicationVersion = Version.applicationVersion
+
+
     args = Arguments(projectPath=projectPath, **kwds)
     result = MyProgramme(args)
     result._startApplication()
@@ -2111,7 +2115,17 @@ def createFramework(projectPath=None, **kwds):
     return result
 
 
-def testMain():
+def main():
+    # stop circular import when run from main entry point
+    from ccpn.AnalysisAssign.AnalysisAssign import Assign
+
+    class MyProgramme(Assign):
+        """My first app
+        """
+        applicationName = 'CcpNmr'
+        applicationVersion = Version.applicationVersion
+
+
     _makeMainWindowVisible = False
 
     myArgs = Arguments()
@@ -2134,6 +2148,9 @@ def testMain():
     container.register(application)
     application.useFileLogger = True
 
+    # show the mainWindow
+    application.start()
+
 
 if __name__ == '__main__':
-    testMain()
+    main()

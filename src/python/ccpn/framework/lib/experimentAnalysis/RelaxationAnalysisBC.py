@@ -29,7 +29,7 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-from ccpn.framework.lib.experimentAnalysis.RelaxationFittingModels import _registerRelaxationModels
+from ccpn.framework.lib.experimentAnalysis.RelaxationFittingModels import _registerRelaxationModels, RELAXATION_MODELS_DICT
 from ccpn.util.Logging import getLogger
 
 
@@ -73,19 +73,24 @@ class RelaxationAnalysisBC(SeriesAnalysisABC):
          override last available.
         :param args:
         :param kwargs:
-            :key: fittingModels:    list of fittingModel classes (not initialised).So to use only the specif given,
+            :key: modelName:        If given, find and use only this model. E.g.: T1
+            :key: fittingModels:    Alternatively to a specific model name,
+                                    provide a list of fittingModel classes (not initialised). Use only the specif given,
                                     rather than all available.
             :key: overrideOutputDataTables: bool, True to rewrite the output result in the last available dataTable.
                                     When multiple fittingModels are available, each will output in a different dataTable
                                     according to its definitions.
-        :return: None
+        :return: None. Creates a new output dataTable in outputDataTables
         """
         getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
 
         if not self.inputDataTables:
             raise RuntimeError('Cannot run any fitting models. Add a valid inputData first')
-
-        fittingModels = self.fittingModels or kwargs.get(sv.FITTING_MODELS, [])
+        fittingModel = RELAXATION_MODELS_DICT.get(kwargs.get(sv.MODEL_NAME))
+        if fittingModel is not None:
+            fittingModels = [fittingModel]
+        else:
+            fittingModels = self.fittingModels or kwargs.get(sv.FITTING_MODELS, [])
         ovverideOutputDataTable = kwargs.get(sv.OVERRIDE_OUTPUT_DATATABLE, True)
         for model in fittingModels:
             fittingModel = model()
@@ -96,8 +101,6 @@ class RelaxationAnalysisBC(SeriesAnalysisABC):
                                                    overrideExisting=ovverideOutputDataTable)
             outputDataTable.data = outputFrame
             self.addOutputData(outputDataTable)
-
-
 
 
 

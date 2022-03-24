@@ -28,15 +28,14 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 
 
 import numpy as np
-from lmfit.models import update_param_vals
 from collections import defaultdict
 from ccpn.util.Logging import getLogger
+from ccpn.core.lib.Pid import createPid
 from ccpn.core.DataTable import TableFrame
-from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel,  _registerModels
+from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel, MinimiserResult, _registerModels
 from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import CSMInputFrame, CSMOutputFrame, CSMBindingOutputFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
-from ccpn.core.lib.Pid import createPid
 
 ########################################################################################################################
 ####################################       Minimisers     ##############################################################
@@ -50,7 +49,7 @@ class FractionBindingMinimiser(MinimiserModel):
 
     FITTING_FUNC = lf.fractionBound_func
 
-    def __init__(self, independent_vars=['x'], prefix='', nan_policy='raise', **kwargs):
+    def __init__(self, independent_vars=['x'], prefix='', nan_policy=sv.OMIT_MODE, **kwargs):
         kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
         super().__init__(FractionBindingMinimiser.FITTING_FUNC, **kwargs)
 
@@ -66,14 +65,24 @@ class Binding1SiteMinimiser(MinimiserModel):
     FITTING_FUNC = lf.oneSiteBinding_func
     MODELNAME = '1_Site_Binding_Model'
 
-    def __init__(self, independent_vars=['x'], prefix='', nan_policy='raise', **kwargs):
+    def __init__(self, independent_vars=['x'], prefix='', nan_policy=sv.OMIT_MODE, **kwargs):
         kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
         super().__init__(Binding1SiteMinimiser.FITTING_FUNC, **kwargs)
         self.name = self.MODELNAME
 
-    def guess(self, data, x, **kwargs):
-        """Estimate initial model parameter values from data."""
-        raise NotImplementedError()
+    def guess(self, data, x, **kws):
+        """
+        :param data: y values 1D array
+        :param x: the x axis values. 1D array
+        :param kws:
+        :return: dict of params needed for the fitting
+        """
+        params = self.make_params(kd=1, bmax=0.5)
+        params['kd'].min = 0.1
+        params['kd'].max = 10
+        params['bmax'].min = 0.001
+        params['bmax'].max = 1
+        return params
 
 
 
@@ -211,20 +220,20 @@ class OneSiteBindingModel(FittingModelABC):
         xArray = np.array(inputData.SERIESSTEPS)
         #TODO  rescale option
         outputDataDict = defaultdict(list)
+        fittingResults = []
         for ix, row in frame.iterrows():
             seriesValues = row[frame.valuesHeaders]
             yArray = seriesValues.values
             model = self.Minimiser()
-            params = model.make_params(kd=1, bmax=0.5)
-            params['kd'].min = 0.1
-            params['kd'].max = 10
-            params['bmax'].min = 0.001
-            params['bmax'].max = 1
-            result = None #replace with class obj?
+            params = model.guess(yArray, xArray)
+
             try:
                 result = model.fit(yArray, params, x=xArray)
             except:
                 getLogger().warning(f'Fitting Failed for: {row[sv._ROW_UID]} data.')
+                result = MinimiserResult(model, params)
+            fittingResults.append(result)
+
             outputDataDict[sv._ROW_UID].append(row[sv._ROW_UID])
             for i, assignmentHeader in enumerate(inputData.assignmentHeaders[:-1]):  ## build new row for the output dataFrame as DefaultDict.
                 outputDataDict[assignmentHeader].append(row[assignmentHeader])  ## add common assignments definitions

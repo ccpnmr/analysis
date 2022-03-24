@@ -29,8 +29,8 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 
 from ccpn.core.DataTable import TableFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
-from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel
-from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import RelaxationOutputFrame
+from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel, MinimiserResult
+from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import RelaxationOutputFrame, _getOutputFrameFromInputFrame
 from ccpn.util.Logging import getLogger
 import numpy as np
 from collections import defaultdict
@@ -38,88 +38,102 @@ from lmfit.models import update_param_vals
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 
 class ExponentialModel(MinimiserModel):
-    """A model based on an exponential decay function.
-    The model has two Parameters: `amplitude` (:math:`A`) and `decay`
-    (:math:`\tau`) and is defined as:
-        f(x; A, \tau) = A e^{-x/\tau}
+    """
+    A model based on an exponential decay function.
     """
 
     FITTING_FUNC = lf.exponential_func
 
-    def __init__(self, independent_vars=['x'], prefix='', nan_policy='raise', **kwargs):
+    def __init__(self, independent_vars=['x'], prefix='', nan_policy=sv.OMIT_MODE, **kwargs):
         kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
         super().__init__(ExponentialModel.FITTING_FUNC, **kwargs)
+
+
+    def guess(self, data, x, **kws):
+        """
+        :param data: y values 1D array
+        :param x: the x axis values. 1D array
+        :param kws:
+        :return: dict of params needed for the fitting
+        """
+        params = self.make_params(amplitude=max(data), decay=np.mean(x))
+        params['amplitude'].min = min(data)
+        params['amplitude'].max = max(data) + max(data) * 0.5
+        params['decay'].min = min(x)
+        params['decay'].max = max(x) + max(x) * 0.5
+        return params
 
 
 class T1FittingModel(FittingModelABC):
     """
     T1 model class containing fitting equations
     """
-    ModelName   = 'T1'
+    ModelName   = sv.T1
 
     Info        = '''
-                    A model based on an exponential decay function.
-                    The model has two Parameters: `amplitude` (`A`) and `decay` (`\ tau`)
-                    '''
-    Description = ''' A e^{ -x / \ tau }'''
-    References = '''
-                    1) https://en.wikipedia.org/wiki/Exponential_decay
-                 '''
+                  A model based on an exponential decay function.
+                  The model has two Parameters: `amplitude` (`A`) and `decay` (`tau`)
+                  '''
+    Description = ''' A * e^{ -x / tau }'''
+    References  = '''
+                  1) https://en.wikipedia.org/wiki/Exponential_decay
+                  '''
 
     Minimiser = ExponentialModel
+
+    def _popuplateResultInOutputData(self, outputFrame):
+        outputDict = defaultdict(list)
+        minimisers = outputFrame.get(sv.MINIMISER)
+        for minimiser in minimisers:
+            for key, value in minimiser.getParametersResult().items():
+                outputDict[key].append(value)
+            for key, value in minimiser.getStatisticalResult().items():
+                outputDict[key].append(value)
+        ## updateDataFrame
+        for key in outputDict:
+            outputFrame[key] = outputDict[key]
 
     def fitSeries(self, inputData: TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
 
         getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
         xArray = np.array(inputData.SERIESSTEPS)
         # TODO  rescale option
-        outputDataDict = defaultdict(list)
+        minimiserResults = []
+        outputFrame = _getOutputFrameFromInputFrame(inputData, outputFrameType=RelaxationOutputFrame)
         for ix, row in inputData.iterrows():
             seriesValues = row[inputData.valuesHeaders]
             yArray = seriesValues.values
-            model = self.Minimiser()
-            params = model.make_params(amplitude=max(yArray), decay=np.mean(xArray))
-
-            params['amplitude'].min = min(yArray)
-            params['amplitude'].max = max(yArray) + max(yArray) * 0.5
-
-            params['decay'].min = min(xArray)
-            params['decay'].max = max(xArray) + max(xArray) * 0.5
-            result = None  # replace with class obj?
+            modelMinimiser = self.Minimiser()
+            modelMinimiser.label = row[sv._ROW_UID]
+            params = modelMinimiser.guess(yArray, xArray)
             try:
-                result = model.fit(yArray, params, x=xArray)
+                minimiserResult = modelMinimiser.fit(yArray, params, x=xArray)
             except:
                 getLogger().warning(f'Fitting Failed for: {row[sv._ROW_UID]} data.')
-            outputDataDict[sv._ROW_UID].append(row[sv._ROW_UID])
-            for i, assignmentHeader in enumerate(
-                    inputData.assignmentHeaders[:-1]):  ## build new row for the output dataFrame as DefaultDict.
-                outputDataDict[assignmentHeader].append(row[assignmentHeader])  ## add common assignments definitions
-            outputDataDict['ModelName'].append(model.MODELNAME)
-            for nn, vv in zip([sv.MINIMISER_METHOD, sv.R2, sv.CHISQUARE, sv.REDUCEDCHISQUARE, sv.AKAIKE, sv.BAYESIAN],
-                              ['method', 'r2', 'chisqr', 'redchi', 'aic', 'bic']):
-                outputDataDict[nn].append(getattr(result, vv, None))
-            vv = ['amplitude', 'decay']
-            if result is not None:
-                for j in vv:
-                    param = result.params.get(j)
-                    outputDataDict[j].append(param.value)
-                    outputDataDict[f'{j}_err'].append(param.stderr)
-            else:
-                for j in vv:
-                    outputDataDict[j].append(None)
-                    outputDataDict[f'{j}_err'].append(None)
+                minimiserResult = MinimiserResult(modelMinimiser, params, method=modelMinimiser.method)
+            minimiserResults.append(minimiserResult)
+        outputFrame[sv.MINIMISER] = minimiserResults #save the minimisers temporarly in dataFrame, but this should not be necessesary and it is also bad idea.
+        self._popuplateResultInOutputData(outputFrame)
 
-            outputDataDict[sv.MINIMISER].append(result)
-        outputFrame = RelaxationOutputFrame()
-        outputFrame.setDataFromDict(outputDataDict)
-        outputFrame.setSeriesUnits(inputData.SERIESUNITS)
-        outputFrame.setSeriesSteps(inputData.SERIESSTEPS)
-        outputFrame._assignmentHeaders = inputData.assignmentHeaders
-        outputFrame._valuesHeaders = inputData.valuesHeaders
         return outputFrame
 
 
+class T2FittingModel(FittingModelABC):
+    """
+    T2 model class containing fitting equations
+    """
+    ModelName   = sv.T2
 
+
+
+#####################################################
+###########      Register models    #################
+#####################################################
+
+RELAXATION_MODELS_DICT = {
+    sv.T1 : T1FittingModel,
+    sv.T2 : T2FittingModel,
+    }
 
 
 def _registerRelaxationModels():

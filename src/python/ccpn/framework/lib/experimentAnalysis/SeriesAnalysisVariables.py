@@ -142,6 +142,7 @@ ALPHAFACTORS    = 'AlphaFactors'
 ## Fitting models
 
 FITTING_MODEL = 'fittingModel'
+MODEL_NAME = 'modelName'
 FITTING_MODELS = f'{FITTING_MODEL}s'
 OVERRIDE_OUTPUT_DATATABLE = 'overrideOutputDataTables'
 OUTPUT_DATATABLE_NAME = 'outputDataTableName'
@@ -156,6 +157,11 @@ EXCLUDEDRESIDUETYPES = 'ExcludedResidueTypes'
 
 LEASTSQ = 'leastsq'
 
+T1 = 'T1'
+T2 = 'T2'
 
 ## Warnings
-UNDER_DEVELOPMENT_WARNING = f'''Pre-alpha. This functionality is currently under active development. Do not use.'''
+UNDER_DEVELOPMENT_WARNING = f'''This functionality is currently under active development. Use it at your own risk.'''
+# Errors
+OMIT_MODE = 'omit'
+RAISE_MODE = 'raise'

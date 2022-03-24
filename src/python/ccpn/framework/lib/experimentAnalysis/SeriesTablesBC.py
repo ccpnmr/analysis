@@ -400,6 +400,27 @@ def _mergeRowsByHeaders(inputData, grouppingHeaders, dropColumnNames=[sv.ATOM_NA
     return inputData
 
 
+def _getOutputFrameFromInputFrame(inputFrame, outputFrameType=RelaxationOutputFrame):
+    """
+    :param inputFrame: a populated input Frame with columns definition and all other class properties
+    :return: outputFrame
+    """
+    outputFrame = outputFrameType()
+    ## clone the existing values from columns
+    for column in inputFrame:
+        outputFrame[column] = inputFrame[column].values
+    ## the parameters fitting Columns are added on the fly as may differ by Model (e.g.: amplitude, decay etc)
+    ## add the statistical fitting output Columns
+    fittingColumns = sv.CONSTANT_STATS_OUTPUT_TABLE_COLUMNS + [sv.MINIMISER]
+    for fittingColumn in fittingColumns:
+        outputFrame[fittingColumn] = [None] * len(inputFrame)
+    # #clone the other properties
+    outputFrame.setSeriesUnits(inputFrame.SERIESUNITS)
+    outputFrame.setSeriesSteps(inputFrame.SERIESSTEPS)
+    outputFrame._assignmentHeaders = inputFrame.assignmentHeaders
+    outputFrame._valuesHeaders = inputFrame.valuesHeaders
+    return outputFrame
+
 INPUT_CSM_SERIESFRAMES_DICT = {
                           sv.CSM_INPUT_FRAME: CSMInputFrame
                           }

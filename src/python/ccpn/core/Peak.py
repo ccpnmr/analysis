@@ -277,6 +277,7 @@ class Peak(AbstractWrapperObject):
 
     @annotation.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def annotation(self, value: Optional[str]):
         if not isinstance(value, (str, type(None))):
             raise ValueError("annotation must be a string or None")

@@ -4,7 +4,7 @@ Nmrglue-based PeakPicker;
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
 __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
@@ -17,8 +17,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-22 09:51:59 +0100 (Tue, June 22, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-03-25 12:20:57 +0000 (Fri, March 25, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,7 +31,6 @@ __date__ = "$Date: 2021-01-13 10:28:41 +0000 (Wed, Jan 13, 2021) $"
 from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC, SimplePeak
 from ccpn.util.Logging import getLogger
 
-from nmrglue.analysis.peakpick import pick as nmrgluePeakPick
 #FIXME: code fix required in peakpick line 398 of extract_1d(data, location, axis) function
 #
 # tuple required:
@@ -65,6 +64,8 @@ class NmrgluePeakPicker(PeakPickerABC):
         :param data: numpy nD array
         :return list with SimplePeak instances
         """
+        from nmrglue.analysis.peakpick import pick as nmrgluePeakPick
+
         table = nmrgluePeakPick(data=data, pthres=self.positiveThreshold, nthres=self.negativeThreshold,
                                 cluster=True, table=True)
         peaks = []

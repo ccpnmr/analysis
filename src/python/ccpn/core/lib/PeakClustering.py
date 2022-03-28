@@ -34,6 +34,8 @@ from typing import Tuple
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.util.Logging import getLogger
 
+DFS_PeakClusterer = 'DFS_PeakClusterer'
+
 class PeakClustererABC(object):
     """
     Base class for peak clustering
@@ -99,10 +101,15 @@ class PeakClustererABC(object):
 
 class DFSPeakClusterer(PeakClustererABC):
 
-    name = 'DFSPeakClusterer '
+    name = DFS_PeakClusterer
     info = 'Depth-first search (DFS) algorithm for peak clustering by pointPositions'
 
     def findClusters(self, *args, **kwargs):
+        """
+        Find clusters using a cluster-graph approach.
+        - Ref 1) https://en.wikipedia.org/wiki/Graph_theory
+        - Ref 2) https://en.wikipedia.org/wiki/Cluster_graph
+        """
         overlappedPeaks = self._getOverlapPairsByPositions()
         positions = [pk.pointPositions for pk in self.peaks]
         overlappedPositions = [(pair[0].pointPositions, pair[1].pointPositions) for pair in overlappedPeaks]
@@ -120,8 +127,8 @@ class DFSPeakClusterer(PeakClustererABC):
     @staticmethod
     def _getClusterOverlaps(nodes, adjacents):
         """
-        Ref: https://stackoverflow.com/questions/14607317/
-        """
+        A cluster graph algorithm.
+        Code seen in: https://stackoverflow.com/questions/14607317/ """
         clusters = []
         nodes = list(nodes)
         while len(nodes):
@@ -135,7 +142,8 @@ class DFSPeakClusterer(PeakClustererABC):
     @staticmethod
     def _getPathByDFS(start, adjacents, nodes):
         """
-        Ref: https://stackoverflow.com/questions/14607317/"""
+        A cluster graph algorithm.
+        Code seen in: https://stackoverflow.com/questions/14607317/ """
         path = []
         q = [start]
         while q:
@@ -149,3 +157,6 @@ class DFSPeakClusterer(PeakClustererABC):
 
 
 
+PeakClusterers = {
+                 DFSPeakClusterer.name: DFSPeakClusterer
+                 }

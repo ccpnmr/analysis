@@ -360,14 +360,16 @@ class PeakList(PMIListABC):
                                  halfBoxFitWidth=halfBoxFitWidth)
 
     @logCommand(get='self')
-    def calculateClusterIds(self, tolerances=None):
+    def calculateClusterIds(self, tolerances=None, clustererName=None):
         """
         Calculate clusterIDs for peaks using the in Depth-First-Search (DFS) algorithm.
         """
-        from ccpn.core.lib.PeakClustering import DFSPeakClusterer
+        from ccpn.core.lib.PeakClustering import PeakClusterers, DFSPeakClusterer
         if tolerances is None:
-            tolerances = [8]*self.spectrum.dimensionCount
-        peakClusterer = DFSPeakClusterer(self.peaks, tolerances)
+            defaultTolerancePoints = 8
+            tolerances = [defaultTolerancePoints]*self.spectrum.dimensionCount
+        clusterer = PeakClusterers.get(clustererName, DFSPeakClusterer)
+        peakClusterer = clusterer(self.peaks, tolerances)
         clusters = peakClusterer.findClusters()
         peakClusterer.setClusterIdToPeaks(clusters)
         return clusters

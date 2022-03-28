@@ -106,7 +106,7 @@ class DuplicateSpectrumPipe(SpectraPipe):
         '''
         newSpectra = set()
         for spectrum in spectra:
-            newspectrum = spectrum._clone1D()
+            newspectrum = spectrum.cloneAsHdf5()
             newSpectra.update([newspectrum])
             newspectrum.spectrumGroups = ()
 

@@ -2409,29 +2409,6 @@ class Spectrum(AbstractWrapperObject):
         newSpectrum.appendComment('Cloned from %s' % self.name)
         return newSpectrum
 
-    def _clone1D(self):
-        """Clone 1D spectrum to a new spectrum."""
-        #FIXME Crude approach / hack
-
-        newSpectrum = self.project.newEmptySpectrum(isotopeCodes=self.isotopeCodes, name=self.name)
-        newSpectrum._positions = self.positions
-        newSpectrum._intensities = self.intensities
-        for peakList in self.peakLists:
-            peakList.copyTo(newSpectrum)
-
-        import inspect
-
-        attr = inspect.getmembers(self, lambda a: not (inspect.isroutine(a)))
-        filteredAttr = [a for a in attr if not (a[0].startswith('__') and a[0].endswith('__')) and not a[0].startswith('_')]
-        for i in filteredAttr:
-            att, val = i
-            try:
-                setattr(newSpectrum, att, val)
-            except AttributeError:
-                # print(e, att)
-                pass
-        return newSpectrum
-
     def _axisDictToSliceTuples(self, axisDict) -> list:
         """Convert dict of (key,value) = (axisCode, (startPpm, stopPpm)) pairs
         to a list of (startPoint,stopPoint) sliceTuples (1-based) for each dimension

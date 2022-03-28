@@ -83,39 +83,46 @@ class GLmultipletListMethods():
             return multiplet in self.current.multiplets
         return False
 
-    def objects(self, obj):
+    @staticmethod
+    def objects(obj):
         """return the multiplets attached to the object
         """
         return obj.multiplets
 
-    def objectList(self, obj):
+    @staticmethod
+    def objectList(obj):
         """return the multipletList attached to the multiplet
         """
         if not obj.isDeleted:
             return obj.multipletList
 
-    def listViews(self, multipletList):
+    @staticmethod
+    def listViews(multipletList):
         """Return the multipletListViews attached to the multipletList
         """
         return multipletList.multipletListViews
 
-    def getLabelling(self, obj, labelType):
+    @staticmethod
+    def getLabelling(obj, labelType):
         """get the object label based on the current labelling method
         """
         return obj.pid
 
-    def extraIndicesCount(self, multiplet):
+    @staticmethod
+    def extraIndicesCount(multiplet):
         """Calculate how many indices to add
         Returns the size of array needed to hold the indices, see insertExtraIndices
         """
         return 2 * len(multiplet.peaks) if multiplet.peaks else 0
 
-    def extraVerticesCount(self, multiplet):
+    @staticmethod
+    def extraVerticesCount(multiplet):
         """Calculate how many vertices to add
         """
         return (len(multiplet.peaks) + 1) if multiplet.peaks else 0
 
-    def appendExtraIndices(self, drawList, index, multiplet):
+    @staticmethod
+    def appendExtraIndices(drawList, index, multiplet):
         """Add extra indices to the index list
         Returns the number of unique indices NOT the length of the appended list
         """
@@ -127,7 +134,8 @@ class GLmultipletListMethods():
                                                                       for val in (index, 1 + index + ii)), dtype=np.uint32))
         return 2 * insertNum, insertNum + 1
 
-    def insertExtraIndices(self, drawList, indexPtr, index, multiplet):
+    @staticmethod
+    def insertExtraIndices(drawList, indexPtr, index, multiplet):
         """insert extra indices into the index list
         Returns (len, ind)
             len: length of the inserted array
@@ -554,7 +562,7 @@ class GLmultiplet1dLabelling(GL1dLabelling, GLmultipletNdLabelling):
 
         return numVertices
 
-    def objIsInVisiblePlanes(self, spectrumView, obj):
+    def objIsInVisiblePlanes(self, spectrumView, obj, viewOutOfPlanePeaks=True):
         """Get the current object is in visible planes settings
         """
         return True, False, 0, 1.0

@@ -844,6 +844,10 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
     search = False
     enableEditDelegate = True
 
+    # set the queue handling parameters
+    maximumQueueLength = 0
+    _logQueueTime = False
+
     def __init__(self, parent=None, mainWindow=None, moduleParent=None,
                  actionCallback=None, selectionCallback=None, checkBoxCallback=None,
                  enableMouseMoveEvent=True,
@@ -1272,10 +1276,22 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
             self._dataFrameObject = self.buildTableDataFrame()
             self._df = self._dataFrameObject.dataFrame
 
+            # remember the old values
+            sortColumn, sortOrder = 0, 0
+            if (oldModel := self.model()):
+                sortColumn = oldModel._sortColumn
+                sortOrder = oldModel._sortOrder
+
             # create new model and set in table
-            _model = _SimplePandasTableModel(self._df, view=self)
-            self.setModel(_model)
+            model = _SimplePandasTableModel(self._df, view=self)
+            self.setModel(model)
             self.resizeColumnsToContents()
+
+            # re-sort the table
+            if oldModel and (0 <= sortColumn < model.columnCount()) and self.isSortingEnabled():
+                model._sortColumn = sortColumn
+                model._sortOrder = sortOrder
+                self.sortByColumn(sortColumn, sortOrder)
 
             self.showColumns(None)
             self._highLightObjs(objs)
@@ -1778,6 +1794,13 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
     # Notifier queue handling
     #=========================================================================================
 
+    def queueFull(self):
+        """Method that is called when the queue is deemed to be too big.
+        Apply overall operation instead of all individual notifiers.
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError(f'Code error: {self.__class__.__name__}._updateTableCallback not implemented')
+
     def _queueProcess(self):
         """Process current items in the queue
         """
@@ -1786,12 +1809,32 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
             self._queueActive = self._queuePending
             self._queuePending = UpdateQueue()
 
-        for itm in self._queueActive.items():
+        _startTime = time_ns()
+        _useQueueFull = (self.maximumQueueLength is not None and len(self._queueActive.queue) > self.maximumQueueLength)
+        if self._logQueueTime:
+            # log the queue-time if required
+            getLogger().debug(f'_queueProcess  {self}  len: {len(self._queueActive.queue)}  useQueueFull: {_useQueueFull}')
+
+        if _useQueueFull:
+            # rebuild from scratch if th queue is too big
             try:
-                func, data, trigger = itm
-                func(data)
+                self._queueActive = Queue()
+                result = self.queueFull()
             except Exception as es:
-                getLogger().debug(f'Error in {self.__class__.__name__} update: {es}')
+                getLogger().debug(f'Error in {self.__class__.__name__} update queueFull: {es}')
+
+        else:
+            # apply queue filtering here?
+            for itm in self._queueActive.items():
+                # process each item in the queue
+                try:
+                    func, data, trigger = itm
+                    func(data)
+                except Exception as es:
+                    getLogger().debug(f'Error in {self.__class__.__name__} update: {es}')
+
+        if self._logQueueTime:
+            getLogger().debug(f'elapsed time {(time_ns() - _startTime) / 1e9}')
 
     def _queueAppend(self, itm):
         """Append a new item to the queue

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-24 20:05:10 +0000 (Thu, March 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-28 17:59:47 +0100 (Mon, March 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -575,10 +575,12 @@ class _NewPeakListTableWidget(_SimplePandasTableViewProjectSpecific):
     tableName = tableClass.className
     rowName = tableClass.className
     cellClassNames = {NmrAtom: 'assignedPeaks'}
-
     selectCurrent = True
     callBackClass = Peak
     search = False
+
+    # set the queue handling parameters
+    maximumQueueLength = 25
 
     positionsUnit = UNITS[0]  # default
 
@@ -1050,6 +1052,12 @@ class _NewPeakListTableWidget(_SimplePandasTableViewProjectSpecific):
                     if peakList.pid == widgetObj:
                         self._selectedPeakList = peakList
                         self.pLwidget.select(self._selectedPeakList.pid)
+
+    def queueFull(self):
+        """Method that is called when the queue is deemed to be too big.
+        Apply overall operation instead of all individual notifiers.
+        """
+        self._updateTable()
 
     #=========================================================================================
     # Widgets callbacks

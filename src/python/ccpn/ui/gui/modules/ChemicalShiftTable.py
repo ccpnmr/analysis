@@ -976,6 +976,9 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
     callBackClass = ChemicalShift
     search = False
 
+    # set the queue handling parameters
+    maximumQueueLength = 25
+
     def __init__(self, parent=None, mainWindow=None, moduleParent=None,
                  actionCallback=None, selectionCallback=None,
                  chemicalShiftList=None, hiddenColumns=None,
@@ -1314,6 +1317,17 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
         :param objs:
         """
         self.highlightObjects(objs)
+
+    def queueFull(self):
+        """Method that is called when the queue is deemed to be too big.
+        Apply overall operation instead of all individual notifiers.
+        """
+        _selectedList = self.project.getByPid(self.moduleParent._modulePulldown.getText())
+
+        if _selectedList:
+            self.populateTable(selectedObjects=self.current.chemicalShifts)
+        else:
+            self.populateEmptyTable()
 
     #=========================================================================================
     # Table context menu

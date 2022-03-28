@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-21 17:40:07 +0000 (Mon, March 21, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-03-28 12:00:39 +0100 (Mon, March 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1479,6 +1479,12 @@ class Project(AbstractWrapperObject):
         """Optimise method to get all found objects from a list of pids. Remove any None.
          Warning: do not use with zip"""
         return list(filter(None, map(lambda x: self.getByPid(x) if isinstance(x, str) else str(x), pids)))
+
+    def getByPids(self, pids: list):
+        """Optimise method to get all found objects from a list of pids. Remove any None.
+        """
+        objs = [self.getByPid(pid) if isinstance(pid, str) else pid for pid in pids]
+        return list(filter(lambda obj: self.isCoreObject(obj), objs))
 
     def getPidsByObjects(self, objs: list):
         """Optimise method to get all found pids from a list of objects. Remove any None.

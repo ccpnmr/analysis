@@ -91,7 +91,8 @@ class GLmultipletListMethods():
     def objectList(self, obj):
         """return the multipletList attached to the multiplet
         """
-        return obj.multipletList
+        if not obj.isDeleted:
+            return obj.multipletList
 
     def listViews(self, multipletList):
         """Return the multipletListViews attached to the multipletList

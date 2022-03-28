@@ -50,8 +50,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-21 16:23:17 +0000 (Mon, March 21, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-03-28 15:14:57 +0100 (Mon, March 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -689,21 +689,21 @@ class Spectrum(AbstractWrapperObject):
             self._dataStore.path = None
             return
 
-        self._close()
         self._openFile(path=value, dataFormat=self.dataFormat, checkParameters=True)
 
-        # newDataStore, newDataSource = self._getDataSourceFromPath(path=value, dataFormat=self.dataFormat, checkParameters=True)
-        # if newDataStore is None:
-        #     raise ValueError('Spectrum.filePath: %s invalid filePath "%s"' % (self, value))
-        # if newDataSource is None:
-        #     raise ValueError('Spectrum.filePath: %s incompatible dataSource "%s"' % (self, value))
-        #
-        # # we found a valid new file
-        # self._close()
-        # self._spectrumTraits.dataSource = newDataSource
-        # self._spectrumTraits.dataStore =  newDataStore
-        # self._dataStore._saveInternal()
-        # self._saveSpectrumMetaData()
+    @property
+    def dataFormat(self) -> str:
+        """The spectrum data-format identifier (e.g. Hdf5, NMRPipe);
+        Automatically determined upon creating newSpectrum from a path containing spectral data.
+        (change at your own peril!)
+        """
+        if self._dataStore is None:
+            raise RuntimeError('dataStore not defined')
+        return self._dataStore.dataFormat
+
+    @dataFormat.setter
+    def dataFormat(self, value):
+        self._openFile(path=self.filePath, dataFormat=value, checkParameters=True)
 
     def _openFile(self, path:str, dataFormat, checkParameters=True):
         """Open the spectrum as defined by path, creating a dataSource object
@@ -715,18 +715,23 @@ class Spectrum(AbstractWrapperObject):
         if path is None:
             raise ValueError(f'Undefined path')
 
-        newDataStore, newDataSource = self._getDataSourceFromPath(path,
-                                                                  dataFormat=dataFormat,
-                                                                  checkParameters=checkParameters)
-        if newDataStore is None or newDataSource is None:
-            raise ValueError('Spectrum._openFile: unable to open "%s"' % path)
+        validFormats = tuple(getDataFormats().keys())
+        if not isinstance(dataFormat, str) or dataFormat not in validFormats:
+            raise ValueError('invalid dataFormat %r; should be one of %r' % (dataFormat, validFormats))
 
-        # we found a (valid?) new file
         self._close()
-        self._spectrumTraits.dataSource = newDataSource
+
+        newDataStore = DataStore.newFromPath(path=path, dataFormat=dataFormat)
+        newDataStore.spectrum = self
         self._spectrumTraits.dataStore = newDataStore
         self._dataStore._saveInternal()
-        self._saveSpectrumMetaData()
+
+        if (newDataSource := self._getDataSource(dataStore=newDataStore, checkParameters=checkParameters)) is None:
+            getLogger().warning('Spectrum._openFile: unable to open "%s"' % path)
+        else:
+            # we defined a new file
+            self._spectrumTraits.dataSource = newDataSource
+            self._saveSpectrumMetaData()
 
     @logCommand(get='self')
     def reload(self, path:str = None):
@@ -742,7 +747,8 @@ class Spectrum(AbstractWrapperObject):
 
         self._close()
         self._openFile(path=path, dataFormat=self.dataFormat, checkParameters=False)
-        self.dataSource.exportToSpectrum(self, includePath=False)
+        if self.dataSource is not None:
+            self.dataSource.exportToSpectrum(self, includePath=False)
 
     @property
     def path(self) -> Path:
@@ -764,25 +770,6 @@ class Spectrum(AbstractWrapperObject):
         if self._dataStore is None:
             raise RuntimeError('dataStore not defined')
         return self._dataStore.dataFormat == EmptySpectrumDataSource.dataFormat
-
-    @property
-    def dataFormat(self) -> str:
-        """The spectrum data-format identifier (e.g. Hdf5, NMRPipe);
-        Automatically determined upon creating newSpectrum from a path containing spectral data.
-        (change at your own peril!)
-        """
-        if self._dataStore is None:
-            raise RuntimeError('dataStore not defined')
-        return self._dataStore.dataFormat
-
-    @dataFormat.setter
-    def dataFormat(self, value):
-        validFormats = tuple(getDataFormats().keys())
-        if not isinstance(value, str) or value not in validFormats:
-            raise ValueError('invalid dataFormat %r; should be one of %r' % (value, validFormats))
-
-        self._close()
-        self._openFile(path=self.filePath, dataFormat=value, checkParameters=True)
 
     #-----------------------------------------------------------------------------------------
     # Dimensional Attributes
@@ -3347,7 +3334,8 @@ def _newSpectrumFromDataSource(project, dataStore, dataSource, name=None) -> Spe
     return spectrum
 
 
-def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], name: str = 'emptySpectrum', path=None,
+def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], dimensionCount=None,
+                      name: str = 'emptySpectrum', path=None,
                       **parameters) -> Spectrum:
     """Creation of new Empty Spectrum;
     :return: Spectrum instance or None on error
@@ -3366,7 +3354,9 @@ def _newEmptySpectrum(project: Project, isotopeCodes: Sequence[str], name: str =
     if dataSource is None:
         raise RuntimeError('Error creating empty DataSource')
     # Fill in some of the parameters
-    dataSource.dimensionCount = len(isotopeCodes)
+    if dimensionCount is None:
+        dimensionCount = len(isotopeCodes)
+    dataSource.dimensionCount = dimensionCount
     dataSource.isotopeCodes = isotopeCodes
     dataSource._setSpectralParametersFromIsotopeCodes()
     dataSource._assureProperDimensionality()

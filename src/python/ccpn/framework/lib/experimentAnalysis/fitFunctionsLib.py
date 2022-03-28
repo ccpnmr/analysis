@@ -41,6 +41,16 @@ students_t_func  = ls.students_t
 powerlaw_func    = ls.powerlaw
 
 
+def T1_func(x, amplitude=1, decay=1):
+    """Return an exponential function.
+
+    exponential(x, amplitude, decay) = amplitude * (1-exp(-x/decay))
+
+    """
+    decay = ls.not_zero(decay)
+    return amplitude * (1-np.exp(-x/decay))
+
+
 def fractionBound_func(p, l, kd):
     """
     #FittingFunc. Called recursively with from the  Minimiser

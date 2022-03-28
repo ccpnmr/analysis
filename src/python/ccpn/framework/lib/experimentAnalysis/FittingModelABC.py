@@ -39,13 +39,13 @@ from ccpn.util.Logging import getLogger
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 
-def _formatValue(value, maxInt=3, floatPrecision=4, expDigits=1):
+def _formatValue(value, maxInt=3, floatPrecision=3, expDigits=1):
     try:
         if isinstance(value, (float, int)):
             if len(str(int(value))) > maxInt:
                 value = np.format_float_scientific(value, precision=floatPrecision, exp_digits=expDigits)
             else:
-                value = round(value, floatPrecision)
+                value = round(value, 4)
     except Exception as ex:
         getLogger().debug2(f'Impossible to format {value}. Error:{ex}')
     return value
@@ -368,7 +368,7 @@ class MinimiserResult(ModelResult):
         """
         dd = {}
         for paramName, paramObj in self.params.items():
-            error = f'{paramName}_error'
+            error = f'{paramName}_err'
             dd[paramName] = None
             dd[error] = None
             if paramObj is not None:
@@ -520,9 +520,13 @@ class MinimiserResult(ModelResult):
         ax_table.axis('tight')
 
         df = self.getAllResultsAsDataFrame()
-        table = ax_table.table(cellText=df.values, colLabels=df.columns,  loc='center')
+        columns = df.columns
+        columns = list(map(lambda x: x.replace(sv.CHISQUARE, sv.UNICODE_CHISQUARE), columns))
+        columns = list(map(lambda x: x.replace(sv.REDUCEDCHISQUARE, sv.UNICODE_RED_CHISQUARE), columns))
+        columns = list(map(lambda x: x.replace(sv.R2, sv.UNICODE_R2), columns))
+        table = ax_table.table(cellText=df.values, colLabels=columns,  loc='center')
         table.auto_set_font_size(False) #or plots very tiny
-        table.set_fontsize(8)
+        table.set_fontsize(5)
         fig.tight_layout()
 
         if showPlot:

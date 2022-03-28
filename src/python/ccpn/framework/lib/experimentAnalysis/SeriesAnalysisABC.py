@@ -28,10 +28,11 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 
 
 from abc import ABC, abstractmethod
+from collections import defaultdict
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.core.DataTable import DataTable
 from ccpn.core.SpectrumGroup import SpectrumGroup
-from collections import defaultdict
+from ccpn.util.Common import flattenLists
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 
 class SeriesAnalysisABC(ABC):
@@ -71,9 +72,9 @@ class SeriesAnalysisABC(ABC):
                 if hasattr(seriesFrame, sv.SERIESFRAMETYPE):
                     dataTablesByDataType[seriesFrame.SERIESFRAMETYPE].append(dataTable)
         if seriesFrameType:
-            return dataTablesByDataType.get(seriesFrameType)
+            return flattenLists(dataTablesByDataType.get(seriesFrameType))
         else:
-            return list(dataTablesByDataType.values())
+            return flattenLists(list(dataTablesByDataType.values()))
 
     def _fetchOutputDataTable(self, name=None, seriesFrameType=None, overrideExisting=True):
         """
@@ -179,9 +180,11 @@ class SeriesAnalysisABC(ABC):
         for ix, row in outputData.iterrows():
             minimiser = row.get(sv.MINIMISER)
             title = row[sv._ROW_UID]
-            fig = minimiser.plot(title=title)
-            pdf.savefig(fig)  # saves the current figure into a pdf page
-            plt.close()
+            if minimiser is not None:
+                fig = minimiser.plot(title=title, showPlot=False)
+                pdf.savefig(fig)  # saves the current figure into a pdf page
+                plt.close()
+        pdf.close()
 
 
     def __init__(self, application):

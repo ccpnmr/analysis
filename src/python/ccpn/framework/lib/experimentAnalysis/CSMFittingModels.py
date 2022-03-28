@@ -31,6 +31,7 @@ import numpy as np
 from collections import defaultdict
 from ccpn.util.Logging import getLogger
 from ccpn.core.lib.Pid import createPid
+from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.DataTable import TableFrame
 from ccpn.framework.lib.experimentAnalysis.FittingModelABC import FittingModelABC, MinimiserModel, MinimiserResult, _registerModels
 from ccpn.framework.lib.experimentAnalysis.SeriesTablesBC import CSMInputFrame, CSMOutputFrame, CSMBindingOutputFrame
@@ -177,7 +178,7 @@ class DeltaDeltaShiftsCalculation():
             seriesValues4residue = atomFiltered[inputData.valuesHeaders].values.T       ## take the series values in axis 1 and create a 2D array. e.g.:[[8.15 123.49][8.17 123.98]]
             deltaDeltas = DeltaDeltaShiftsCalculation._calculateDeltaDeltas(seriesValues4residue, _alphaFactors)  ## get the deltaDeltas
             newUid = grouppedDF[grouppingHeaders].values[0].astype('str')
-            newUid = createPid('NR', *newUid)
+            newUid = createPid(NmrResidue.shortClassName, *newUid)
             outputDataDict[sv._ROW_UID].append(newUid)
             for i, assignmentHeader in enumerate(grouppingHeaders):                     ## build new row for the output dataFrame as DefaultDict.
                 outputDataDict[assignmentHeader].append(list(assignmentValues)[i])      ## add common assignments definitions

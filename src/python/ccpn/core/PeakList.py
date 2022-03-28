@@ -26,19 +26,16 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import numpy as np
-from typing import Sequence, List, Optional
+from typing import Sequence, Optional
 
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices, _axisCodeMapIndices
-
-from ccpn.util.Common import percentage
 
 from ccpn.util import Common as commonUtil
 from ccpn.core.Spectrum import Spectrum
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
-from ccpn.core.lib.SpectrumLib import estimateNoiseLevel1D, _filtered1DArray
 # from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import pickNewPeaks
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
+from ccpn.core.lib.ContextManagers import newObject, undoBlockWithoutSideBar
 from ccpn.util.Logging import getLogger
 from ccpn.core._implementation.PMIListABC import PMIListABC
 
@@ -367,10 +364,13 @@ class PeakList(PMIListABC):
         """
         Calculate clusterIDs for peaks using the in Depth-First-Search (DFS) algorithm.
         """
-        from ccpn.framework.lib.experimentAnalysis.PeakClustering import setClusterIDs
+        from ccpn.core.lib.PeakClustering import DFSPeakClusterer
         if tolerances is None:
             tolerances = [8]*self.spectrum.dimensionCount
-        return setClusterIDs(self.peaks, tolerances)
+        peakClusterer = DFSPeakClusterer(self.peaks, tolerances)
+        clusters = peakClusterer.findClusters()
+        peakClusterer.setClusterIdToPeaks(clusters)
+        return clusters
 
     @logCommand(get='self')
     def resetClusterIds(self):

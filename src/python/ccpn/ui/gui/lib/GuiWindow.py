@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-04 18:24:19 +0000 (Fri, February 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-03-28 12:01:01 +0100 (Mon, March 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -218,7 +218,7 @@ class GuiWindow():
             attachedIntegrals = list(attachedIntegrals - set(self.current.integrals))
 
             if attachedIntegrals:
-                deleteItems.append(('Integrals attached to Peaks', attachedIntegrals))
+                deleteItems.append(('Additional Peak-Integrals', attachedIntegrals))
 
             # add peaks attached multiplets
             attachedPeaks = set()
@@ -228,7 +228,7 @@ class GuiWindow():
             attachedPeaks = list(attachedPeaks - set(self.current.peaks))
 
             if attachedPeaks:
-                deleteItems.append(('Peaks attached to Multiplets', attachedPeaks))
+                deleteItems.append(('Additional Multiplet-Peaks', attachedPeaks))
 
             popup = DeleteItemsPopup(parent=self, mainWindow=self, items=deleteItems)
             popup.exec_()

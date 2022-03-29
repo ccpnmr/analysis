@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-22 17:45:06 +0000 (Tue, March 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-29 10:03:40 +0100 (Tue, March 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -715,12 +715,7 @@ class Spectrum(AbstractWrapperObject):
         if path is None:
             raise ValueError(f'Undefined path')
 
-        validFormats = tuple(getDataFormats().keys())
-        if not isinstance(dataFormat, str) or dataFormat not in validFormats:
-            raise ValueError('invalid dataFormat %r; should be one of %r' % (dataFormat, validFormats))
-
         self._close()
-
         newDataStore = DataStore.newFromPath(path=path, dataFormat=dataFormat)
         newDataStore.spectrum = self
         self._spectrumTraits.dataStore = newDataStore
@@ -2726,14 +2721,15 @@ class Spectrum(AbstractWrapperObject):
 
     def _getDataSource(self, dataStore, checkParameters=True):
         """Check the validity and access the file defined by dataStore;
-        returns: SpectrumDataSource instance when filePath and/or dataFormat of the
-        dataStore instance are incorrect
+        :param dataStore: A dataStore instance, defining a path, dataFormat and optional buffering
+        :param checkParameters: flag to check essential parameters of the dataSource with the parameters of self (a Spectrum)
+        :return SpectrumDataSource instance when path and/or dataFormat of the dataStore instance define something valid
         """
 
         if dataStore is None:
-            raise ValueError('dataStore not defined')
+            raise ValueError('dataStore is not defined')
         if not isinstance(dataStore, DataStore):
-            raise ValueError('dataStore has invalid type')
+            raise ValueError(f'dataStore has invalid type; got: {dataStore}')
 
         if dataStore.dataFormat == EmptySpectrumDataSource.dataFormat:
             # Special case, empty spectrum
@@ -2741,18 +2737,37 @@ class Spectrum(AbstractWrapperObject):
             dataSource.importFromSpectrum(self, includePath=False)
             checkParameters = False
 
+        elif dataStore.dataFormat is None:
+            # Special case, we do not (yet) know the dataFormat; this may occur due to Nef import
+            # Attempt to get a dataSource from path alone
+            _path = dataStore.aPath()
+            if not _path.exists():
+                raise RuntimeError(f'Spectrum._getDataSource: dataStore path "{_path}" does not exist')
+
+            if (dataSource := checkPathForSpectrumFormats(_path)) is None:
+                raise RuntimeError(f'Spectrum._getDataSource: error for path "{_path}" with undefined dataFormat')
+
+            # found a valid dataSource
+            dataStore.dataFormat = dataSource.dataFormat
+            dataStore._saveInternal()
+
         else:
-            if not dataStore.exists():
-                raise RuntimeError('Spectrum._getDataSource: dataStore path "%s" does not exist' %
-                                   dataStore.aPath())
+            # Regular case: We have a dataStore with a path and dataFormat
 
-            dataSource = getSpectrumDataSource(dataStore.aPath(), dataStore.dataFormat)
-            if dataSource is None:
-                raise RuntimeError('Spectrum._getDataSource: dataStore path "%s" is incompatible with dataFormat "%s"' %
-                                   (dataStore.aPath(), dataStore.dataFormat))
+            # Check the dataFormat
+            validFormats = tuple(getDataFormats().keys())
+            if not isinstance(dataStore.dataFormat, str) or dataStore.dataFormat not in validFormats:
+                raise ValueError('invalid dataFormat %r; should be one of %r' % (dataStore.dataFormat, validFormats))
 
-            if dataStore.useBuffer:
-                dataSource.setBuffering(isBuffered=True, bufferIsTemporary=True)
+            _path = dataStore.aPath()
+            if not _path.exists():
+                raise RuntimeError(f'Spectrum._getDataSource: dataStore path "{_path}" does not exist')
+
+            if (dataSource := getSpectrumDataSource(_path, dataStore.dataFormat)) is None:
+                raise RuntimeError(f'Spectrum._getDataSource: error for path "{_path}" with dataFormat "{dataStore.dataFormat}"')
+
+        if dataStore.useBuffer:
+            dataSource.setBuffering(isBuffered=True, bufferIsTemporary=True)
 
         if checkParameters:
             # check some fundamental parameters

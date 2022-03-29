@@ -24,7 +24,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-21 16:23:17 +0000 (Mon, March 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-29 10:03:40 +0100 (Tue, March 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -394,6 +394,9 @@ class DataStore(CcpNmrJson):
         """This routine implements the extraction from the old storage mechanism (using api DataStores).
         Returns self
         """
+        from ccpn.core.lib.SpectrumDataSources.SpectrumDataSourceABC import SpectrumDataSourceABC
+        from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
+
         if apiSpectrum is None:
             raise ValueError('Invalid spectrum "%s"' % apiSpectrum)
 
@@ -411,11 +414,14 @@ class DataStore(CcpNmrJson):
             else:
                 self._path = os.path.join(self.apiDataStoreDir, self.apiDataStorePath)
 
-            self.dataFormat = self.apiDataStore.fileType
+            # Convert the (potentially old) dataFormat specifier
+            _tmp = self.apiDataStore.fileType
+            if (_dataFormat := SpectrumDataSourceABC._dataFormatDict.get(_tmp)) is None:
+                getLogger().warning(f'Restore dataFormat from older definitions: dataFormat "{_tmp}": not recognised')
+            self.dataFormat = _dataFormat
 
         else:
             # This happens for dummy spectra
-            from ccpn.core.lib.SpectrumDataSources.EmptySpectrumDataSource import EmptySpectrumDataSource
             self._path = None
             self.dataFormat = EmptySpectrumDataSource.dataFormat
 

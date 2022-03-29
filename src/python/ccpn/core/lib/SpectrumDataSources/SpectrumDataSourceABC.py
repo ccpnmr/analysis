@@ -92,8 +92,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-21 12:16:51 +0000 (Mon, March 21, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-03-29 10:55:51 +0100 (Tue, March 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -156,11 +156,18 @@ def getDataFormats() -> OrderedDict:
 
 
 def getSpectrumDataSource(path, dataFormat):
-    """Get a SpectrumDataSource instance of type format for path or None if incorrect
+    """Get a SpectrumDataSource instance of type dataFormat for path
+    :param path: a Path instance
+    :param dataFormat: a valid dataFormat indentifier
+    :return The SpectrumDataSource instance or None if incorrect
     """
     dataFormats = getDataFormats()
-    cls = dataFormats.get(dataFormat)
-    if cls is None:
+
+    # Test for optional mapping of the dataFormat name (e.g. for the 'NmrView') issue
+    dataFormatDict = SpectrumDataSourceABC._dataFormatDict
+    _dataFormat = dataFormatDict.get(dataFormat)
+    #
+    if _dataFormat is None or (cls := dataFormats.get(_dataFormat)) is None:
         raise ValueError('getSpectrumDataSource: invalid format "%s"; must be one of %s' %
                          (dataFormat, [k for k in dataFormats.keys()])
                          )
@@ -170,9 +177,7 @@ def getSpectrumDataSource(path, dataFormat):
 
 def checkPathForSpectrumFormats(path):
     """Check path if it corresponds to any spectrum data format
-
-    return a SpectrumDataSource instance with parameters read
-           or None if there was no match
+    :return a SpectrumDataSource instance with parameters read or None if there was no match
     """
     for fmt, cls in getDataFormats().items():
         instance = cls.checkForValidFormat(path)
@@ -195,6 +200,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
     # to be subclassed
     #=========================================================================================
     dataFormat = None  # string defining format type
+    alternateDataFormatNames = []  # list with optional alternate names; e.g. for NmrView->NMRView
 
     isBlocked = False  # flag defining if data are blocked
     hasBlockCached = True  # Flag indicating if block data are cached
@@ -222,13 +228,20 @@ class SpectrumDataSourceABC(CcpNmrJson):
     # A dict of registered spectrum data formats: filled by _registerFormat classmethod, called
     # once after each definition of a new derived class (e.g. Hdf5SpectrumDataSource)
     _spectrumDataFormats = OrderedDict()
+    # dict with dataFormat name mappings; for older, alternative definitions
+    _dataFormatDict = {}
 
     @classmethod
     def _registerFormat(cls):
-        """register cls.dataFormat"""
+        """register cls.dataFormat
+        """
         if cls.dataFormat in cls._spectrumDataFormats:
             raise RuntimeError('dataFormat "%s" was already registered' % cls.dataFormat)
         cls._spectrumDataFormats[cls.dataFormat] = cls
+        # add dataFormat names to the _dataFormatDict
+        for name in [cls.dataFormat] + cls.alternateDataFormatNames:
+            cls._dataFormatDict[name] = cls.dataFormat
+
         # Also register the class for json restoring
         cls.register()
 

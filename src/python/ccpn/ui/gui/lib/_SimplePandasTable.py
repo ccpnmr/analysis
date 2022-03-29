@@ -1816,7 +1816,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
             getLogger().debug(f'_queueProcess  {self}  len: {len(self._queueActive.queue)}  useQueueFull: {_useQueueFull}')
 
         if _useQueueFull:
-            # rebuild from scratch if th queue is too big
+            # rebuild from scratch if the queue is too big
             try:
                 self._queueActive = Queue()
                 result = self.queueFull()

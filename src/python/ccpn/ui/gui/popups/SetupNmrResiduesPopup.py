@@ -30,7 +30,7 @@ from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
-from ccpn.core.lib.ContextManagers import undoBlock
+from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking
 from ccpn.core.lib.AssignmentLib import _fetchNewPeakAssignments
 
 
@@ -106,7 +106,8 @@ class SetupNmrResiduesPopup(CcpnDialogMainWidget):
             nmrChain = self.project.getByPid(self.nmrChainPulldown.currentText())
             keepAssignments = self.assignmentCheckBox.isChecked()
 
-            _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments)
+            with notificationEchoBlocking():
+                _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments)
 
         # remove if popup does not need to close
         self.accept()

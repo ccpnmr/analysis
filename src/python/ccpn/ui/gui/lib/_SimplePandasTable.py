@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-18 18:32:58 +0000 (Fri, March 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-03-30 10:08:36 +0100 (Wed, March 30, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1449,6 +1449,14 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
 
     def _close(self):
         self._clearTableNotifiers()
+
+    def clearCurrentCallback(self):
+        """Clear the callback function for current object/list change
+        """
+        self.selectCurrent = False
+        if self._selectCurrentNotifier is not None:
+            self._selectCurrentNotifier.unRegister()
+            self._selectCurrentNotifier = None
 
     #=========================================================================================
     # Notifier callbacks

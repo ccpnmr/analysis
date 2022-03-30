@@ -2357,7 +2357,7 @@ class Spectrum(AbstractWrapperObject):
         return newSpectrum
 
     @logCommand(get='self')
-    def cloneAsHdf5(self):
+    def cloneAsHdf5(self, path=None, suffix='_cloned'):
         """Clone self and all peakLists as an Hdf5 type file
         :return: a Spectrum instance of the cloned spectrum
         """
@@ -2366,13 +2366,13 @@ class Spectrum(AbstractWrapperObject):
         if not self.hasValidPath():
             raise RuntimeError('Not valid path for %s ' % self)
 
-        name = self.name + '_cloned'
-
-        _path = self.dataSource.parentPath / name
+        name = self.name + suffix
+        if not path:
+            path = self.dataSource.parentPath / name
         suffix = Hdf5SpectrumDataSource.suffixes[0]
         dataFormat = Hdf5SpectrumDataSource.dataFormat
 
-        dataStore = DataStore.newFromPath(path=_path,
+        dataStore = DataStore.newFromPath(path=path,
                                           autoVersioning=True, withSuffix=suffix,
                                           dataFormat=dataFormat)
 

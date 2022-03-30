@@ -776,7 +776,6 @@ class ChemicalShiftsMapping(CcpnModule):
                         if len(deltas) < len(concentrationsValues):
                             deltas = _fillListToLenght(deltas, len(concentrationsValues), np.nan)
                         df = pd.DataFrame([deltas], index=[nmrResidue], columns=concentrationsValues)
-                        print('DF',df, '')
                         if len(peaksPids) < len(concentrationsValues):
                             peaksPids = _fillListToLenght(peaksPids, len(concentrationsValues), '')
                         dfPeaks = pd.DataFrame([peaksPids], index=[nmrResidue], columns=concentrationsValues)

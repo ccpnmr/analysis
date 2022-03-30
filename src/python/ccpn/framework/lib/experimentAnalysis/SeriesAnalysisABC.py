@@ -170,6 +170,9 @@ class SeriesAnalysisABC(ABC):
         """
         pass
 
+    def plotResults(self, *args, **kwargs):
+        pass
+
     def _reportFittingPlots(self, outputData, path):
         from matplotlib.backends.backend_pdf import PdfPages
         import matplotlib.pyplot as plt

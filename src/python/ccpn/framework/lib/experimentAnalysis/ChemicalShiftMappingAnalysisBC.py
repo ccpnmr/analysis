@@ -130,3 +130,52 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
                                                    overrideExisting=ovverideOutputDataTable)
             outputDataTable.data = outputFrame
             self.addOutputData(outputDataTable)
+
+
+    def plotResults(self, *args, **kwargs):
+        getLogger().warning('Not implemented yet. Available: plotDeltaDeltas')
+
+    def plotDeltaDeltas(self, deltaDeltaShiftsFrame,
+                        yColumnName=sv.DELTA_DELTA_SUM,
+                        unitLabels = 'minimal',
+                        unitLabelRotation=45,
+                        majorTick=5,
+                        minorTicks=1,
+                        orientation='v',
+                        *args, **kwargs):
+        """
+        Plot a bargraph of the deltaDeltas
+
+        :param deltaDeltaShiftsFrame:
+        :param yColumnName:
+        :param unitLabels:
+                        - minimal: only RESIDUE_CODE
+                        - full: RESIDUE_TYPE + RESIDUE_CODE
+        :param unitLabelRotation: degree of the text rotation
+        :param unitLabelsInterval:
+                        - None: default show all labels as in the original data
+                        - int: e.g.: 5 show a scale at 5 numbers gaps. [0,5,10,15,20...]
+        :param orientation : v or h
+        :param args:
+        :param kwargs:
+        :return:
+        """
+
+        from ccpn.ui.gui.widgets.PlotterWidget import plotter
+        from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
+        with plotter() as plt:
+            resCodes = deltaDeltaShiftsFrame[sv.RESIDUE_CODE]
+            resTypes = deltaDeltaShiftsFrame[sv.RESIDUE_TYPE]
+            if yColumnName not in deltaDeltaShiftsFrame.columns:
+                getLogger().warning(f'Given ColumnName not present in data. Used default {sv.DELTA_DELTA_SUM}')
+                yColumnName = sv.DELTA_DELTA_SUM
+            y = deltaDeltaShiftsFrame[yColumnName]
+            labels = resCodes
+            if unitLabels == 'full':
+                labels = ['-'.join(x) for x in zip(resCodes, resTypes)]
+            ax = plt.currentPlot
+            ax.xaxis.set_major_locator(MultipleLocator(majorTick))
+            ax.xaxis.set_major_formatter('{x:.0f}')
+            ax.xaxis.set_minor_locator(MultipleLocator(minorTicks))
+            plt.plotBar(values=resCodes, heights=y, unitLabels=labels, orientation=orientation)
+            # plt.currentPlot.set_xticklabels(labels, rotation=unitLabelRotation)

@@ -432,7 +432,7 @@ class BrukerSpectrumDataSource(SpectrumDataSourceABC):
                 self.spectrometerFrequencies[i] = float(dimDict.get('SFO1', dimDict.get('SF', 1.0)))
 
                 self.referenceValues[i] = float(dimDict.get('OFFSET', 0.0))
-                self.referencePoints[i] = float(dimDict.get('refPoint', 0.0))
+                self.referencePoints[i] = float(dimDict.get('refPoint', 1.0)) # CCPN first point is defined as 1
                 # origNumPoints[i] = int(dimDict.get('$FTSIZE', 0))
                 # pointOffsets[i] = int(dimDict.get('$STSR', 0))
                 self.phases0[i] = float(dimDict.get('PHC0', 0.0))

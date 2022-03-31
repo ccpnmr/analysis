@@ -5404,7 +5404,7 @@ class CcpnNefReader(CcpnNefContent):
                 _params.update(nefDimensionParameters)
                 # nef dimension parameters do not have the reference point as a parameter
                 # assume 1.0 as default; maybe overridden later by the ccpn dimension parameters
-                _params['referencePoints'] = [1.0]*dimensionCount
+
 
             if (_loop := saveFrame.get('ccpn_spectrum_dimension')) is not None:
                 ccpnDimensionParameters = self._parametersFromSpectrumDimensionLoop( _loop,
@@ -5412,6 +5412,7 @@ class CcpnNefReader(CcpnNefContent):
                                                                                    )
                 _params.update(ccpnDimensionParameters)
 
+            _params['referencePoints'] = [1.0] * dimensionCount
             # create a new spectrum; first empty but change dataFormat if known
             filePath = _params.pop('filePath', None)
             dataFormat = _params.pop('dataFormat', None)

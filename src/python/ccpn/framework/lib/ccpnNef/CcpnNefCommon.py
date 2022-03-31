@@ -481,7 +481,7 @@ nef2CcpnMap = {
     'ccpn_spectrum_dimension'               : OrderedDict((
         ('dimension_id', None),
         ('point_count', 'pointCounts'),
-        ('reference_point', 'referencePoints'),
+        ('reference_point', None),
         ('total_point_count', None),
         ('assignment_tolerance', 'assignmentTolerances'),
         ('lower_aliasing_limit', None),

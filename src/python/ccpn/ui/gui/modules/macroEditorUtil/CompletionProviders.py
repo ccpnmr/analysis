@@ -15,9 +15,9 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$Author: Luca Mureddu $"
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
 __dateModified__ = "$Date: 2021-07-31 19:34:45 +0000 (,  31, 2021) $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:53 +0000 (Mon, February 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-04-04 17:25:23 +0100 (Mon, April 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -58,6 +58,7 @@ def _getCcpnNamespaceFromImports():
 
     from ccpn.core.Project import Project
     from ccpn.framework.Framework import Framework
+    from ccpn.framework.Application import getApplication
     from ccpn.framework.Preferences import getPreferences
     from ccpn.ui.gui.lib.GuiMainWindow import GuiMainWindow
     from ccpn.framework.Current import Current

@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-22 19:58:04 +0000 (Tue, February 22, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-04-04 17:25:22 +0100 (Mon, April 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -280,7 +280,7 @@ class GuiBase(object):
         ))
 
         ms.append(('Macro', [
-            ("New Macro Editor", self._showMacroEditorCallback),
+            ("New Macro Editor", self._showMacroEditorCallback, [('shortcut', 'nm')]),
             (),
             ("Open User Macro...", self._openMacroCallback),
             ("Open CCPN Macro...", partial(self._openMacroCallback, directory=macroPath)),

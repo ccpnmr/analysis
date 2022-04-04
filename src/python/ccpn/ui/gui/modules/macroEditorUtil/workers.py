@@ -4,20 +4,22 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
 __modifiedBy__ = "$Author: Luca Mureddu $"
 __dateModified__ = "$Date: 2021-08-05 15:53:24 +0000 (,  05, 2021) $"
-__version__ = "$Revision$"
+__dateModified__ = "$dateModified: 2022-04-04 17:25:23 +0100 (Mon, April 04, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
-# Created:
+# Created
 #=========================================================================================
 __author__ = "$Author: Luca Mureddu $"
 __date__ = "$Date: 2021-08-05 15:53:24 +0000 (,  05, 2021) $"
@@ -195,12 +197,15 @@ class CcpnCalltipsMode(CalltipsMode):
             QtWidgets.QToolTip.hideText()
 
     def _request_calltip(self, source, line, col, fn, encoding):
-        if self.__requestCnt == 0:
-            self.__requestCnt += 1
-            self.editor.backend.send_request(
-                _getCalltips,
-                {'code': source, 'line': line, 'column': col, 'path': None,
-                 'encoding': encoding}, on_receive=self._on_results_available)
+        pass
+        # TODO:Add tootltips when opening a function call. Problems: Preferences and imports, speed
+        getLogger().debug3('MacroEditor. Request tooltip on opening function not yet available. See todo')
+        # if self.__requestCnt == 0:
+        #     self.__requestCnt += 1
+        #     self.editor.backend.send_request(
+        #         _getCalltips,
+        #         {'code': source, 'line': line, 'column': col, 'path': None,
+        #          'encoding': encoding}, on_receive=self._on_results_available)
 
     def _on_results_available(self, results):
         if results:

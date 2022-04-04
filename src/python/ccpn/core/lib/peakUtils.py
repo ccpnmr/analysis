@@ -796,7 +796,7 @@ def _getBins(y, binCount=None):
 
 
 def snap1DPeaksAndRereferenceSpectrum(peaks, maximumLimit=0.1, useAdjacientPeaksAsLimits=False,
-                                    doNeg=True, figOfMeritLimit=1, spectrum=None, autoRereferenceSpectrum=False):
+                                    doNeg=False, figOfMeritLimit=1, spectrum=None, autoRereferenceSpectrum=False):
     """
     Snap all peaks to closest maxima
 

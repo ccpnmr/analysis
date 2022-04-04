@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-22 16:06:26 +0000 (Tue, February 22, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-04-04 11:31:49 +0100 (Mon, April 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -494,7 +494,7 @@ def _fit1SiteBindCurve(bindingCurves, aFunc=oneSiteBindingCurve, xfStep=0.01, xf
     ys = data.values.flatten(order='F')  #puts all y values in a single 1d array.
     xss = np.array([data.columns] * data.shape[0])
     xs = xss.flatten(order='F')  # #puts all x values in a 1d array preserving the original y positions (order='F').
-    print(( xs, ys), '$$$')
+    # print(( xs, ys), '$$$')
     if len(xs) <= 1:
         return errorValue  #not enough datapoints
     try:

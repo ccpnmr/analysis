@@ -26,6 +26,7 @@
         "stripRegionPadding"                   : 0.0,
         "peakDropFactor"                       : 0.1,
         "peakFactor1D"                         : 0.15,
+        "negativePeakPick1D"                   : false,
         "peakFittingMethod"                    : "parabolic",
         "annotationType"                       : 0,
         "symbolSizePixel"                      : 9,

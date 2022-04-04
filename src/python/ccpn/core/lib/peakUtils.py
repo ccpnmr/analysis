@@ -562,19 +562,19 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
     """Snap the position of the peak the nearest extremum.
     Assumes called with an existing peak, will fit within a box ±halfBoxSearchWidth about the current peak position.
     """
+    from ccpn.framework.Application import getApplication
 
     spectrum = peak.spectrum
     numDim = spectrum.dimensionCount
+    getApp = getApplication()
+
     if numDim == 1:
         # do the fit for 1D here
-        _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1)
+        doNeg = getApp.preferences.general.negativePeakPick1D
+        _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1, doNeg=doNeg)
 
     else:
         from ccpn.core.lib.PeakPickers.PeakPickerNd import PeakPickerNd
-        from ccpn.framework.Application import getApplication
-
-        getApp = getApplication()
-
         spectrum = peak.spectrum
         myPeakPicker = PeakPickerNd(spectrum=spectrum)
         myPeakPicker.setParameters(dropFactor=minDropFactor,
@@ -746,7 +746,7 @@ def find_nearest(array, value):
     return array[idx]
 
 
-def snap1DPeaksToExtrema(peaks, maximumLimit=0.1, figOfMeritLimit=1, ):
+def snap1DPeaksToExtrema(peaks, maximumLimit=0.1, figOfMeritLimit=1, doNeg=True):
     with undoBlockWithoutSideBar():
         with notificationEchoBlocking():
             if len(peaks) > 0:
@@ -754,7 +754,8 @@ def snap1DPeaksToExtrema(peaks, maximumLimit=0.1, figOfMeritLimit=1, ):
                 for peak in peaks:  # peaks can be from diff peakLists
                     if peak is not None:
                         _snap1DPeakToClosestExtremum(peak, maximumLimit=maximumLimit,
-                                                     figOfMeritLimit=figOfMeritLimit)
+                                                     figOfMeritLimit=figOfMeritLimit,
+                                                     doNeg=doNeg)
 
 def recalculatePeaksHeightAtPosition(peaks):
     with undoBlockWithoutSideBar():
@@ -913,7 +914,7 @@ def _getAdjacentPeakPositions1D(peak):
     return previousPeakPosition, nextPeakPosition
 
 
-def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=False, doNeg=True,
+def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=False, doNeg=False,
                           figOfMeritLimit=1):
     """
     :param peak:
@@ -996,7 +997,7 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
     return position, float(height)
 
 
-def _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1, doNeg=True, figOfMeritLimit=1):
+def _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1, doNeg=False, figOfMeritLimit=1):
     """
     It snaps a peak to its closest extremum, that can be considered as a peak.
     it uses adjacent peak positions as boundaries. However if no adjacent peaks then uses the maximumlimits.

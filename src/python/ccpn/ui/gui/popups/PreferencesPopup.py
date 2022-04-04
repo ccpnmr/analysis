@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-10 23:05:09 +0000 (Thu, February 10, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-04-04 15:06:12 +0100 (Mon, April 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -869,6 +869,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         self.useSearchBoxModeBox.setChecked(self.preferences.general.searchBoxMode)
         self.useSearchBoxDoFitBox.setChecked(self.preferences.general.searchBoxDoFit)
+        self.doNegPeak1DBox.setChecked(self.preferences.general.negativePeakPick1D)
 
         for key, value in self.preferences.general.searchBoxWidths1d.items():
             if key in self.searchBox1dData:
@@ -1280,6 +1281,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.useSearchBoxDoFitBox.setToolTip(_toolTip)
 
         row += 1
+        self.doNegPeak1DLabel = _makeLabel(parent, text="Include negative peaks 1D", grid=(row, 0))
+        self.doNegPeak1DBox = CheckBox(parent, grid=(row, 1))
+        self.doNegPeak1DBox.toggled.connect(self._queueSetdoNegPeak1D)
+        _toolTip = 'Pick and snap to negative regions of the spectra'
+        self.doNegPeak1DLabel.setToolTip(_toolTip)
+        self.doNegPeak1DBox.setToolTip(_toolTip)
+        row += 1
+
         self.useSearchBoxModeLabel = _makeLabel(parent, text="Use search box", grid=(row, 0))
         self.useSearchBoxModeBox = CheckBox(parent, grid=(row, 1))
         self.useSearchBoxModeBox.toggled.connect(self._queueSetUseSearchBoxMode)
@@ -2065,6 +2074,15 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     def _setUseSearchBoxDoFit(self, value):
         self.preferences.general.searchBoxDoFit = value
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetdoNegPeak1D(self, _value):
+        value = self.doNegPeak1DBox.get()
+        if value != self.preferences.general.negativePeakPick1D:
+            return partial(self._setUseSearchBoxDoFit, value)
+
+    def _setdoNegPeak1D(self, value):
+        self.preferences.general.negativePeakPick1D = value
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetSearchBox1d(self, searchBox1d, dim, _value):

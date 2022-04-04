@@ -55,8 +55,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-22 13:43:07 +0000 (Tue, March 22, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-04-04 14:35:52 +0100 (Mon, April 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -3543,6 +3543,8 @@ class CcpnGLWidget(QOpenGLWidget):
                 brush = self.highlightColour
             else:
                 brush = REGION_COLOURS[colour]
+        else:
+            brush = colour
 
         if orientation == 'h':
             axisCode = self._axisCodes[1]

@@ -4,19 +4,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-13 17:30:50 +0000 (Thu, January 13, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-04-04 14:35:52 +0100 (Mon, April 04, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -171,6 +171,7 @@ class GuiStrip1d(GuiStrip):
 
         self.spectrumDisplay.phasingFrame.applyCallback = self._applyPhasing
         self.spectrumDisplay.phasingFrame.applyButton.setEnabled(True)
+        self._noiseThresholdLines = set()
 
     @property
     def symbolType(self):
@@ -305,6 +306,45 @@ class GuiStrip1d(GuiStrip):
         self.widgetIndex += 1
         self.calibrateY1DWidgets = CalibrateY1DWidgets(sdWid, mainWindow=self.mainWindow, strip=self,
                                                        grid=(self.widgetIndex, 0), gridSpan=(1, 7))
+
+    def _removeNoiseThresholdLines(self):
+        for line in self._noiseThresholdLines:
+            if line is not None:
+                self._CcpnGLWidget.removeInfiniteLine(line)
+
+    def _updateNoiseThresholdLines(self):
+        """Re-draw the lines """
+        self._removeNoiseThresholdLines()
+        self._initNoiseThresholdLines()
+
+
+    def _initNoiseThresholdLines(self):
+        from ccpn.util.Colour import hexToRgbRatio
+        from functools import partial
+        spectrumViews = self.spectrumViews
+        for spectrum in [sv.spectrum for sv in spectrumViews if sv.isDisplayed]:
+            posValue = spectrum.noiseLevel or spectrum.getNoiseLevel()
+            negValue = spectrum.negativeNoiseLevel or -posValue
+            brush = hexToRgbRatio(spectrum.sliceColour) + (0.3,) # sliceCol plus an offset
+            positiveLine = self._CcpnGLWidget.addInfiniteLine(values=posValue, colour=brush, movable=True, lineStyle='dashed',
+                                                              lineWidth=2.0, obj=spectrum, orientation='h',)
+            negativeLine = self._CcpnGLWidget.addInfiniteLine(values=negValue, colour=brush, movable=True,
+                                                              lineStyle='dashed', obj=spectrum, orientation='h',lineWidth=2.0)
+            positiveLine.valuesChanged.connect(partial(self._lineThresholdChanged, positiveLine, spectrum, setPositiveThreshold=True))
+            negativeLine.valuesChanged.connect(partial(self._lineThresholdChanged, negativeLine, spectrum, setPositiveThreshold=False))
+            self._noiseThresholdLines.add(positiveLine)
+            self._noiseThresholdLines.add(negativeLine)
+
+    def _lineThresholdChanged(self, line, spectrum, setPositiveThreshold):
+        """ set the noise threshold to the spectrum based on the line move.
+        TODO add notifier when editing is finished (so to set the noiseLevel once only)."""
+        value = line.values
+        if spectrum is not None:
+            if setPositiveThreshold:
+                spectrum.noiseLevel = value
+            else:
+                spectrum.negativeNoiseLevel = value
+
 
     def toggleCalibrateY(self):
         if self.calibrateYAction.isChecked():

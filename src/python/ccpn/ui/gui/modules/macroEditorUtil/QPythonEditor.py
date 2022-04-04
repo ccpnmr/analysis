@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-04-04 18:41:17 +0100 (Mon, April 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-04-04 23:12:56 +0100 (Mon, April 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -66,6 +66,7 @@ class PyCodeEditor(PyCodeEdit, Base):
 
         self.application = application
         self.completionMode = self.modes.get(CodeCompletionMode.__name__)
+        self.maxCompletionWaiting = 1 # seconds before aborting a completion request (avoid long waiting)
         if self.application and not self.useNativeCompletion:
             self.backend.stop()
             self.completionMode.request_completion = self._requestCompletion
@@ -79,7 +80,7 @@ class PyCodeEditor(PyCodeEdit, Base):
         # self.docPanel.setVisible(True)
 
     def _init_style(self):
-        """ Inits style options """
+        """ Refactor to keep consistent with Ccpn style """
         self._background = QtGui.QColor('white')
         self._foreground = QtGui.QColor('black')
         self._whitespaces_foreground = QtGui.QColor('light gray')
@@ -94,6 +95,7 @@ class PyCodeEditor(PyCodeEdit, Base):
         re-implemetation of completion to insert ccpn Namespaces from application
         without sending requests to threads.
         """
+        from ccpn.core.lib.ContextManagers import Timeout as timeout
         completionMode = self.completionMode
         line = completionMode._helper.current_line_nbr()
         column = completionMode._helper.current_column_nbr() - len(completionMode.completion_prefix)
@@ -114,9 +116,12 @@ class PyCodeEditor(PyCodeEdit, Base):
                 encoding = completionMode.editor.file.encoding
                 prefix = completionMode.completion_prefix
                 request_id = completionMode._request_id
-                cw = CcpnNameSpacesProvider()
-                completions = cw.complete(code, line, column, path, encoding, prefix)
-                results = [(line, column, request_id), completions]
+                with timeout(seconds=self.maxCompletionWaiting,
+                             timeoutMessage='MacroEditor: Completion aborted',
+                             loggingType='debug3'):
+                    cw = CcpnNameSpacesProvider()
+                    completions = cw.complete(code, line, column, path, encoding, prefix)
+                    results = [(line, column, request_id), completions]
             except Exception as ex:
                 return False
             else:

@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-04 15:09:09 +0000 (Fri, March 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-04-04 23:12:56 +0100 (Mon, April 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -661,12 +661,16 @@ class Timeout:
 
     """
 
-    def __init__(self, seconds: int = 60, timeoutMessage: str = ""):
+    def __init__(self, seconds: int = 60, timeoutMessage: str = "", loggingType='warning'):
         self.seconds = int(seconds)
         self.timeoutMessage = timeoutMessage
+        allowedLoggers = ['warning', 'debug','debug1','debug2','debug3', 'critical']
+        loggingType = loggingType if loggingType in allowedLoggers else 'warning'
+        self.loggingType = loggingType
 
     def _timeout_handler(self, signum, frame):
-        getLogger().warning(self.timeoutMessage)
+        doLogger = getattr(getLogger(), self.loggingType)
+        doLogger(self.timeoutMessage)
         raise TimeoutError(self.timeoutMessage)
 
     def __enter__(self):

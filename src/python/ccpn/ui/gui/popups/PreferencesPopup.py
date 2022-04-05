@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-04-04 15:06:12 +0100 (Mon, April 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-04-05 15:42:20 +0100 (Tue, April 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -600,6 +600,11 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                                        callback=self._queueSetAutoOpenPythonConsoleOnMacroEditor,
                                                        toolTip="Open python console when opening a macro editor module")
 
+        row += 1
+        self.useOnlineDocumentation = _makeCheckBox(parent, row=row, text="Use online api-documentation",
+                                                       callback=self._queueSetUseOnlineDocumentation,
+                                                       toolTip="Use the online api-documentation instead of the local folder")
+
         #====== Tip of the Day ======
         row += 1
         _makeLine(parent, grid=(row, 0), text="Tip of the Day")
@@ -693,6 +698,15 @@ class PreferencesPopup(CcpnDialogMainWidget):
     #     if result:
     #         self.preferences.general.seenTipsOfTheDay.clear()
 
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetUseOnlineDocumentation(self, _value):
+        value = self.useOnlineDocumentation.isChecked()
+        if value != self.preferences.appearance.useOnlineDocumentation:
+            return partial(self._setUseOnlineDocumentation, value)
+
+    def _setUseOnlineDocumentation(self, state):
+        self.preferences.appearance.useOnlineDocumentation = state
+
     def _populateAppearanceTab(self):
         """Populate the widgets in the appearanceTab
         """
@@ -717,6 +731,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self._shownTips = copy(self.preferences.general.seenTipsOfTheDay)
         self.rememberLastClosedModule.setChecked(self.preferences.appearance.rememberLastClosedModuleState)
         self.runPyConsoleOnMacroEditor.setChecked(self.preferences.appearance.autoOpenPythonConsoleOnMacroEditor)
+        self.useOnlineDocumentation.setChecked(self.preferences.appearance.useOnlineDocumentation)
 
     def _populate(self):
         """Populate the widgets in the tabs

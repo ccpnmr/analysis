@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: varioustoxins $"
-__dateModified__ = "$dateModified: 2022-03-06 11:05:17 +0000 (Sun, March 06, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-04-05 15:42:20 +0100 (Tue, April 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -36,6 +36,7 @@ ccpnForum                       = 'https://forum.ccpn.ac.uk'
 ccpnVideos                      = 'https://www.ccpn.ac.uk/v3-software/v3-video-tutorials'
 oldCcpnIssuesUrl                = 'https://sourceforge.net/p/ccpn/bugs/'
 ccpnIssuesUrl                   = 'https://bitbucket.org/ccpnmr/issue-tracker/issues?status=new&status=open'
+ccpnDocumentationUrl            = 'https://www.ccpn.ac.uk/api-documentation/v3/html'
 
 # CCPN code
 ccpnCodePath                    = Path.aPath(Path.getTopDirectory())

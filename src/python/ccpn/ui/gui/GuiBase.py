@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-04-04 17:25:22 +0100 (Mon, April 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-04-05 15:42:20 +0100 (Tue, April 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -516,8 +516,12 @@ class GuiBase(object):
     def _showVersion3Documentation(self):
         """Displays CCPN wrapper documentation in a module.
         """
-        from ccpn.framework.PathsAndUrls import documentationPath
-        self._showHtmlFile("Analysis Version-3 Documentation", documentationPath)
+        from ccpn.framework.PathsAndUrls import ccpnDocumentationUrl, documentationPath
+
+        if self.preferences.appearance.useOnlineDocumentation:
+            self._showHtmlFile("Analysis Version-3 Documentation", ccpnDocumentationUrl)
+        else:
+            self._showHtmlFile("Analysis Version-3 Documentation", documentationPath)
 
     def _showForum(self):
         """Displays Forum in a module.

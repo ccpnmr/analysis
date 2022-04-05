@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-04-04 14:35:52 +0100 (Mon, April 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-04-05 09:57:48 +0100 (Tue, April 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -323,7 +323,7 @@ class GuiStrip1d(GuiStrip):
         from functools import partial
         spectrumViews = self.spectrumViews
         for spectrum in [sv.spectrum for sv in spectrumViews if sv.isDisplayed]:
-            posValue = spectrum.noiseLevel or spectrum.getNoiseLevel()
+            posValue = spectrum.noiseLevel or spectrum.estimateNoise()
             negValue = spectrum.negativeNoiseLevel or -posValue
             brush = hexToRgbRatio(spectrum.sliceColour) + (0.3,) # sliceCol plus an offset
             positiveLine = self._CcpnGLWidget.addInfiniteLine(values=posValue, colour=brush, movable=True, lineStyle='dashed',

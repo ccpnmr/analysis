@@ -50,8 +50,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-04-04 14:35:52 +0100 (Mon, April 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-04-05 14:41:57 +0100 (Tue, April 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -434,6 +434,7 @@ class Spectrum(AbstractWrapperObject):
 
     @includePositiveContours.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def includePositiveContours(self, value: bool):
         """Include flag for the positive contours
         """
@@ -499,6 +500,7 @@ class Spectrum(AbstractWrapperObject):
 
     @includeNegativeContours.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def includeNegativeContours(self, value: bool):
         """Include flag for the negative contours
         """

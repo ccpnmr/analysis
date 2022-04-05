@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-18 18:32:58 +0000 (Fri, March 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-04-05 12:05:16 +0100 (Tue, April 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,13 +28,15 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 from functools import partial
+from types import SimpleNamespace
 import pandas as pd
+
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.DataFrameObject import DataFrameObject
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
-from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT, DATAFRAME_ISDELETED
+from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.ChemicalShiftList import CS_UNIQUEID, CS_ISDELETED, CS_PID, \
     CS_STATIC, CS_STATE, CS_ORPHAN, CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT, CS_ATOMNAME, \
@@ -54,8 +56,9 @@ from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.MessageDialog import showYesNo, showWarning
 from ccpn.ui.gui.widgets.SettingsWidgets import ALL
-from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip
 from ccpn.ui.gui.widgets.Column import COLUMN_COLDEFS, COLUMN_SETEDITVALUE, COLUMN_FORMAT
+from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip
+from ccpn.ui.gui.lib._SimplePandasTable import _SimplePandasTableViewProjectSpecific, _updateSimplePandasTable
 
 
 logger = getLogger()
@@ -343,9 +346,9 @@ class ChemicalShiftTable(GuiTable):
         else:
             self.clearTable()
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #=========================================================================================
     # Widgets callbacks
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #=========================================================================================
 
     def _actionCallback(self, data):
         """Notifier DoubleClick action on item in table. Mark a chemicalShift based on attached nmrAtom
@@ -376,9 +379,13 @@ class ChemicalShiftTable(GuiTable):
             self.current.nmrAtoms = nmrAtoms
             self.current.nmrResidues = nmrResidues
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        else:
+            self.current.nmrAtoms = []
+            self.current.nmrResidues = []
+
+    #=========================================================================================
     # Menus
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #=========================================================================================
 
     def _setContextMenu(self, enableExport=True, enableDelete=True):
         """Subclass guiTable to insert new merge items to top of context menu
@@ -591,9 +598,9 @@ class ChemicalShiftTable(GuiTable):
         except:
             return None
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #=========================================================================================
     # Subclass GuiTable
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #=========================================================================================
 
     def populateTable(self, rowObjects=None, columnDefs=None,
                       selectedObjects=None):
@@ -894,19 +901,6 @@ class ChemicalShiftTable(GuiTable):
 # New ChemicalShiftTable
 #=========================================================================================
 
-from types import SimpleNamespace
-from time import time_ns
-from PyQt5 import QtCore
-from contextlib import contextmanager
-from collections import defaultdict
-from ccpn.util.AttrDict import AttrDict
-from ccpn.ui.gui.lib._SimplePandasTable import _SimplePandasTableViewProjectSpecific, _SimplePandasTableModel, \
-    _SimplePandasTableHeaderModel, _clearSimplePandasTable, _updateSimplePandasTable, _newSimplePandasTable
-from ccpn.ui.gui.widgets.Menu import Menu
-from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight, TABLEFONT
-from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
-
-
 # define a simple class that can contains a simple id
 blankId = SimpleNamespace(className='notDefined', serial=0)
 
@@ -988,11 +982,6 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
                  **kwds):
         """Initialise the widgets for the module.
         """
-        # self._widget = Widget(parent=parent, **kwds)
-        # self._selectedChemicalShiftList = None
-
-        # # Initialise the scroll widget and common settings
-        # self._initTableCommonWidgets(parent, **kwds)
 
         # initialise the currently attached dataFrame
         self._hiddenColumns = [self.columnHeaders[col] for col in hiddenColumns] if hiddenColumns else \
@@ -1079,6 +1068,10 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
             nmrAtoms = tuple(set(nmrAtom for nmrRes in nmrResidues for nmrAtom in nmrRes.nmrAtoms))
             self.current.nmrAtoms = nmrAtoms
             self.current.nmrResidues = nmrResidues
+
+        else:
+            self.current.nmrAtoms = []
+            self.current.nmrResidues = []
 
     #=========================================================================================
     # Create table and row methods
@@ -1186,7 +1179,6 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
                 df[CS_OBJECT] = []
 
         else:
-            # df = pd.DataFrame(columns=CS_TABLECOLUMNS)
             df = pd.DataFrame(columns=[self.columnHeaders[val] for val in CS_TABLECOLUMNS])
 
         # extract the row objects from the dataFrame
@@ -1233,8 +1225,6 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
         """Notifier callback for updating the table for change in chemicalShifts
         :param data: notifier content
         """
-        # print(f'>>> _updateRowCallback')
-
         with self._blockTableSignals('_updateRowCallback'):
             obj = data[Notifier.OBJECT]
             uniqueId = obj.uniqueId
@@ -1299,7 +1289,6 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
         if self._tableBlockingLevel:
             return
 
-        # print(f'>>> selectCallBack   {self}')
         currentShifts = data['value']
         self._selectOnTableCurrentChemicalShifts(currentShifts)
 
@@ -1307,7 +1296,6 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
         """Handle item selection as changed in table - call user callback
         Includes checking for clicking below last row
         """
-        # print(f'>>> _selectionChangedCallback   {self}')
         self._changeTableSelection(None)
 
     def _selectOnTableCurrentChemicalShifts(self, currentShifts):
@@ -1373,7 +1361,7 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
     #=========================================================================================
 
     def _mergeNmrAtoms(self):
-        """Merge the nmrAtoms in the selection into the nmrAtom that has ben right-clicked
+        """Merge the nmrAtoms in the selection into the nmrAtom that has been right-clicked
         """
         selection = self.getSelectedObjects()
         data = self.getRightMouseItem()
@@ -1463,7 +1451,7 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
 
 
 #=========================================================================================
-# main
+# _CSLTableDelegate - handle editing the table, needs moving
 #=========================================================================================
 
 EDIT_ROLE = QtCore.Qt.EditRole

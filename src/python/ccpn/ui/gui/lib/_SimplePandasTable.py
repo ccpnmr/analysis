@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-30 10:08:36 +0100 (Wed, March 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-04-05 12:05:16 +0100 (Tue, April 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -55,6 +55,10 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.Common import copyToClipboard
 from ccpn.util.OrderedSet import OrderedSet
 
+
+#=========================================================================================
+# _SimplePandasTableView
+#=========================================================================================
 
 class _SimplePandasTableView(QtWidgets.QTableView, Base):
     styleSheet = """QTableView {
@@ -110,9 +114,14 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
         # define the multi-selection behaviour
         self.multiSelect = multiSelect
         if multiSelect:
-            self.setSelectionMode(self.ExtendedSelection)
+            self._selectionMode = self.ExtendedSelection
         else:
-            self.setSelectionMode(self.SingleSelection)
+            self._selectionMode = self.SingleSelection
+        self.setSelectionMode(self._selectionMode)
+        self._clickInterval = QtWidgets.QApplication.instance().doubleClickInterval()
+        self._lastSelectionMode = None
+        self._clickedInTable = False
+        self._currentIndex = None
 
         # enable sorting and sort on the first column
         self.setSortingEnabled(True)
@@ -227,6 +236,55 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
                     # unblock to enable again
                     _selModel.blockSignals(False)
                     self.blockSignals(False)
+
+    #=========================================================================================
+    # keyboard and mouse handling - modified to allow double-click to keep current selection
+    #=========================================================================================
+
+    @staticmethod
+    def _keyModifierPressed():
+        """Is the user clicking while holding a modifier
+        """
+        allKeyModifers = [QtCore.Qt.ShiftModifier, QtCore.Qt.ControlModifier, QtCore.Qt.AltModifier, QtCore.Qt.MetaModifier]
+        keyMod = QtWidgets.QApplication.keyboardModifiers()
+
+        return keyMod in allKeyModifers
+
+    def mousePressEvent(self, e: QtGui.QMouseEvent) -> None:
+        """Handle mouse-press event so that double-click keeps any multi-selection
+        """
+        # doesn't respond in double-click interval - minor behaviour change to ExtendedSelection
+        self._currentIndex = self.indexAt(e.pos())
+
+        # user can click in the blank space under the table
+        self._clickedInTable = True if self._currentIndex else False
+
+        if self._currentIndex in self.selectedIndexes() and not self._keyModifierPressed():
+            # temporarily disable selection to wait for potential double-click
+            self._lastSelectionMode = self.selectionMode()
+            self.setSelectionMode(QtWidgets.QAbstractItemView.NoSelection)
+            self._selectionPaused = True
+
+        super().mousePressEvent(e)
+
+    def mouseReleaseEvent(self, e: QtGui.QMouseEvent) -> None:
+        """Restore correct selection-mode after mouse-press
+        """
+        super().mouseReleaseEvent(e)
+
+        if self._lastSelectionMode:
+            self.setSelectionMode(self._lastSelectionMode)
+            self._lastSelectionMode = None
+
+    def keyPressEvent(self, event):
+        """Handle keyPress events on the table
+        """
+        super().keyPressEvent(event)
+
+        key = event.key()
+        if key in [QtCore.Qt.Key_Escape]:
+            # press the escape-key to clear the selection
+            self.clearSelection()
 
 
 #=========================================================================================
@@ -853,7 +911,6 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         self._clickInterval = QtWidgets.QApplication.instance().doubleClickInterval() * 1e6
         self._tableSelectionBlockingLevel = 0
         self._currentRow = None
-        self._clickedInTable = False
         self._lastSelection = [None]
 
         # set internal flags
@@ -969,8 +1026,6 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
             # stops the selection from the table when the right button is clicked
             self._rightClickedTableIndex = self.indexAt(event.pos())
 
-        # user can click in the blank area below the last row
-        self._clickedInTable = True if self.indexAt(event.pos()) else False
         self.setCurrent()
         super().mousePressEvent(event)
 
@@ -1612,7 +1667,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         """
         with self._blockTableSignals('clearSelection'):
             # get the selected objects from the table
-            objList = self.getSelectedObjects()
+            objList = self.getSelectedObjects() or []
             self.selectionModel().clearSelection()
 
             # remove from the current list
@@ -1628,7 +1683,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         self._tableSelectionChanged.emit([])
 
     def _changeTableSelection(self, itemSelection):
-        """Manually change the selection on the able and call the necessary callbacks
+        """Manually change the selection on the table and call the necessary callbacks
         """
         # print(f'>>>     _selectionTableCallback  {self} ')
         # if not a _dataFrameObject is a normal guiTable.
@@ -1654,14 +1709,14 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
             return
 
         objList = self.getSelectedObjects()
-        if objList and isinstance(objList[0], pd.Series):
-            pass
-        else:
-            if self._clickedInTable:
-                if not objList:
-                    return
-                if set(objList or []) == set(self._lastSelection or []):  # pd.Series should never reach here or will crash here. Cannot use set([series])== because Series are mutable, thus they cannot be hashed
-                    return
+        # if objList and isinstance(objList[0], pd.Series):
+        #     pass
+        # else:
+        #     if self._clickedInTable:
+        #         if not objList:
+        #             return
+        #         if set(objList or []) == set(self._lastSelection or []):  # pd.Series should never reach here or will crash here. Cannot use set([series])== because Series are mutable, thus they cannot be hashed
+        #             return
 
         self._lastSelection = objList
 
@@ -1704,7 +1759,6 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
 
             selectionModel = self.selectionModel()
             model = self.model()
-            idx = self.currentIndex()
             selectionModel.clearSelection()
 
             if selection:
@@ -1782,7 +1836,6 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
             # release busy flag and restart if required
             self._qTimer._busy = False
             if self._qTimer._restart:
-                print(f'   restart  {self}')
                 self._qTimer._restart = False
                 self._qTimer.start(0)
 

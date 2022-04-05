@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 16:47:15 +0000 (Tue, February 15, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-04-05 12:14:15 +0100 (Tue, April 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -283,6 +283,11 @@ def _estimateNoise(strip):
                     typeItem=ItemTypes.get(ITEM), toolTip='Estimate spectral noise in the visible region', shortcut='EN',
                     callback=strip.estimateNoise)
 
+def _showNoise(strip):
+    return _SCMitem(name='Show Noise thresholds',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Show the spectral noise thresholds as dotted lines', shortcut='SL',
+                    checkable=True, checked=strip._noiseThresholdLinesActive,
+                    callback=strip.toggleNoiseThresholdLines)
 
 def _makeStripPlot(strip):
     return _SCMitem(name='Make Strip Plot...',
@@ -797,6 +802,7 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
         _separator(),
 
         _estimateNoise(guiStrip1d),
+        _showNoise(guiStrip1d),
         _separator(),
 
         _selectedPeaksMenuItem(guiStrip1d),

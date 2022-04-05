@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-28 13:45:53 +0000 (Mon, February 28, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-04-05 12:14:15 +0100 (Tue, April 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -254,6 +254,7 @@ class GuiStrip(Frame):
         self._hTraceActive = False
         self._vTraceActive = False
         self._newConsoleDirection = None
+        self._noiseThresholdLinesActive = False
 
         # initialise the notifiers
         self.setStripNotifiers()
@@ -532,6 +533,9 @@ class GuiStrip(Frame):
                                    orderedSpectrumViews=self.getSpectrumViews())
         popup.exec_()
         popup._cleanupWidget()
+
+    def toggleNoiseThresholdLines(self):
+        pass
 
     def makeStripPlot(self, includePeakLists=True, includeNmrChains=True, includeSpectrumTable=False):
         """Make a strip plot in the current spectrumDisplay

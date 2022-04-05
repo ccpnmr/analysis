@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-04-05 09:57:48 +0100 (Tue, April 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-04-05 12:14:15 +0100 (Tue, April 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -317,12 +317,24 @@ class GuiStrip1d(GuiStrip):
         self._removeNoiseThresholdLines()
         self._initNoiseThresholdLines()
 
+    def toggleNoiseThresholdLines(self, *args):
+        value = self.sender().isChecked()
+        self._noiseThresholdLinesActive = value
+        self._updateNoiseThresholdLines()
+
+    def _updateVisibility(self):
+        """Update visibility list in the OpenGL
+        """
+        self._CcpnGLWidget.updateVisibleSpectrumViews()
+        self._updateNoiseThresholdLines()
 
     def _initNoiseThresholdLines(self):
         from ccpn.util.Colour import hexToRgbRatio
         from functools import partial
-        spectrumViews = self.spectrumViews
-        for spectrum in [sv.spectrum for sv in spectrumViews if sv.isDisplayed]:
+        if not self._noiseThresholdLinesActive:
+            return
+        visibleSpectrumViews = [sv.spectrum for sv in self.spectrumViews if sv.isDisplayed]
+        for spectrum in visibleSpectrumViews:
             posValue = spectrum.noiseLevel or spectrum.estimateNoise()
             negValue = spectrum.negativeNoiseLevel or -posValue
             brush = hexToRgbRatio(spectrum.sliceColour) + (0.3,) # sliceCol plus an offset

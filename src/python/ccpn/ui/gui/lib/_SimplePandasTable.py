@@ -163,10 +163,12 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
         _header.setMinimumSectionSize(_height)
         self.setMinimumSize(3 * _height, 3 * _height + self.horizontalScrollBar().height())
 
+        _clearSimplePandasTable(self)
+
     def setModel(self, model: QtCore.QAbstractItemModel) -> None:
         """Set the model for the view
         """
-        super(_SimplePandasTableView, self).setModel(model)
+        super().setModel(model)
 
         # attach a handler for updating the selection on sorting
         self.model().layoutAboutToBeChanged.connect(self._preChangeSelectionOrderCallback)

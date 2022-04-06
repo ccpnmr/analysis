@@ -848,7 +848,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
     enableEditDelegate = True
 
     # set the queue handling parameters
-    maximumQueueLength = 0
+    _maximumQueueLength = 0
     _logQueueTime = False
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None,
@@ -1813,8 +1813,9 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
             self._queueActive = self._queuePending
             self._queuePending = UpdateQueue()
 
+        lastItm = None
         _startTime = time_ns()
-        _useQueueFull = (self.maximumQueueLength is not None and len(self._queueActive.queue) > self.maximumQueueLength)
+        _useQueueFull = (self._maximumQueueLength is not None and len(self._queueActive.queue) > self._maximumQueueLength)
         if self._logQueueTime:
             # log the queue-time if required
             getLogger().debug(f'_queueProcess  {self}  len: {len(self._queueActive.queue)}  useQueueFull: {_useQueueFull}')
@@ -1836,6 +1837,8 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
                     func(data)
                 except Exception as es:
                     getLogger().debug(f'Error in {self.__class__.__name__} update: {es}')
+                finally:
+                    lastItm = itm
 
         if self._logQueueTime:
             getLogger().debug(f'elapsed time {(time_ns() - _startTime) / 1e9}')

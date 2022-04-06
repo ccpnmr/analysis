@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-06 13:44:27 +0100 (Wed, April 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-04-06 18:52:08 +0100 (Wed, April 06, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ __date__ = "$Date: 2020-12-11 17:51:14 +0000 (Fri, December 11, 2020) $"
 
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.Peak import Peak
+from ccpn.core.PeakList import PeakList
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.lib.GuiPeakListView import _getScreenPeakAnnotation, _getPeakId, _getPeakAnnotation, _getPeakClusterId
 from ccpn.ui.gui.lib.OpenGL import CcpnOpenGLDefs as GLDefs
@@ -142,32 +143,38 @@ class GLpeakListMethods():
     def _processNotifier(self, data):
         """Process notifiers
         """
-        triggers = data[Notifier.TRIGGER]
+        trigger = data[Notifier.TRIGGER]
         obj = data[Notifier.OBJECT]
-        if obj.isDeleted:
-            return
 
         if isinstance(obj, Peak):
 
             # update the peak labelling
-            if Notifier.DELETE in triggers:
-                self._deleteSymbol(obj)
-                self._deleteLabel(obj)
+            if trigger == Notifier.DELETE:
+                self._deleteSymbol(obj, data.get('_list'), data.get('_spectrum'))
+                self._deleteLabel(obj, data.get('_list'), data.get('_spectrum'))
 
-            if Notifier.CREATE in triggers:
+            if trigger == Notifier.CREATE:
                 self._createSymbol(obj)
                 self._createLabel(obj)
 
-            if Notifier.CHANGE in triggers:
+            if trigger == Notifier.CHANGE and not obj.isDeleted:
                 self._changeSymbol(obj)
                 self._changeLabel(obj)
 
-        elif isinstance(obj, NmrAtom):
+        elif isinstance(obj, NmrAtom) and not obj.isDeleted:
 
             # update the labels on the peaks
             for peak in obj.assignedPeaks:
                 self._changeSymbol(peak)
                 self._changeLabel(peak)
+
+        elif isinstance(obj, PeakList):
+            if trigger in [Notifier.DELETE]:
+
+                # clear the vertex arrays
+                for pList, glArray in self._GLSymbols.items():
+                    if pList.isDeleted:
+                        glArray.clearArrays()
 
 
 class GLpeakNdLabelling(GLpeakListMethods, GLLabelling):

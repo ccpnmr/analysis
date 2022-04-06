@@ -30,7 +30,10 @@ from typing import List, Tuple, Sequence
 from copy import deepcopy
 from functools import partial
 import numpy as np
+from time import time_ns
+from queue import Queue
 from PyQt5 import QtWidgets, QtCore, QtGui
+
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
 from ccpn.core.lib.Notifiers import Notifier
@@ -73,6 +76,10 @@ class GuiStrip(Frame):
 
     # MAXPEAKLABELTYPES = 6
     # MAXPEAKSYMBOLTYPES = 4
+
+    # set the queue handling parameters
+    _maximumQueueLength = 25
+    _logQueueTime = False
 
     def __init__(self, spectrumDisplay):
         """
@@ -253,6 +260,16 @@ class GuiStrip(Frame):
         # respond to values changed in the containing spectrumDisplay settings widget
         self.spectrumDisplay._spectrumDisplaySettings.symbolsChanged.connect(self._symbolsChangedInSettings)
 
+        # notifier queue
+        self._queuePending = Queue()
+        self._queueActive = Queue()
+        self._qTimer = _qTimer = QtCore.QTimer()
+        _qTimer.timeout.connect(self._queueProcess)
+        _qTimer.setSingleShot(True)
+        _qTimer._busy = False
+        _qTimer._restart = False
+        self._lock = QtCore.QMutex()
+
     def resizeEvent(self, ev):
         super().resizeEvent(ev)
         # call subclass _resize event
@@ -294,22 +311,43 @@ class GuiStrip(Frame):
         # self._stripNotifier = Notifier(self.current, [Notifier.CURRENT], 'strip', self._highlightCurrentStrip)
 
         # Notifier for updating the peaks
-        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
-                         'Peak', self._updateDisplayedPeaks, onceOnly=True)
+        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE], 'Peak',
+                         # self._updateDisplayedPeaks,
+                         partial(self._queueGeneralNotifier, self._updateDisplayedPeaks, 'Peak'),
+                         onceOnly=True)
 
-        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME],
-                         'NmrAtom', self._updateDisplayedNmrAtoms, onceOnly=True)
+        self.setNotifier(self.project, [Notifier.DELETE], 'PeakList',
+                         # self._updateDisplayedPeakLists,
+                         partial(self._queueGeneralNotifier, self._updateDisplayedPeakLists, 'PeakList'),
+                         onceOnly=True)
+
+        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.RENAME], 'NmrAtom',
+                         # self._updateDisplayedNmrAtoms,
+                         partial(self._queueGeneralNotifier, self._updateDisplayedNmrAtoms, None),
+                         onceOnly=True)
 
         # Notifier for updating the integrals
-        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
-                         'Integral', self._updateDisplayedIntegrals, onceOnly=True)
+        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE], 'Integral',
+                         self._updateDisplayedIntegrals,
+                         # partial(self._queueGeneralNotifier, self._updateDisplayedIntegrals, 'Integral'),
+                         onceOnly=True)
 
         # Notifier for updating the multiplets
-        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE],
-                         'Multiplet', self._updateDisplayedMultiplets, onceOnly=True)
+        self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE], 'Multiplet',
+                         # self._updateDisplayedMultiplets,
+                         partial(self._queueGeneralNotifier, self._updateDisplayedMultiplets, 'Multiplet'),
+                         onceOnly=True)
+
+        # Notifier for updating the multiplets
+        self.setNotifier(self.project, [Notifier.DELETE], 'MultipletList',
+                         # self._updateDisplayedMultipletLists,
+                         partial(self._queueGeneralNotifier, self._updateDisplayedMultipletLists, 'MultipletList'),
+                         onceOnly=True)
 
         # Notifier for change of stripLabel
-        self.setNotifier(self.project, [Notifier.RENAME], 'Spectrum', self._updateSpectrumLabels)
+        self.setNotifier(self.project, [Notifier.RENAME], 'Spectrum',
+                         self._updateSpectrumLabels,
+                         onceOnly=True)
 
         # # Notifier for change of stripLabel
         # self.setNotifier(self.project, [Notifier.RENAME], 'NmrResidue', self._updateStripLabel)
@@ -317,6 +355,28 @@ class GuiStrip(Frame):
         # For now, all dropEvents are not strip specific, use spectrumDisplay's handling
         self.setGuiNotifier(self, [GuiNotifier.DROPEVENT], [DropBase.URLS, DropBase.PIDS],
                             self.spectrumDisplay._processDroppedItems)
+
+    def _queueGeneralNotifier(self, func, objType, data):
+        """Add the notifier to the queue handler
+        """
+        try:
+            if data[Notifier.TRIGGER] == 'delete':
+                if objType == 'Peak':
+                    objList = data[Notifier.OBJECT].peakList
+                    spectrum = objList.spectrum
+                elif objType == 'Integral':
+                    objList = data[Notifier.OBJECT].integralList
+                    spectrum = objList.spectrum
+                elif objType == 'Multiplet':
+                    objList = data[Notifier.OBJECT].multipletList
+                    spectrum = objList.spectrum
+                else:
+                    objList = spectrum = None
+                data['_list'] = objList
+                data['_spectrum'] = spectrum
+        except Exception:
+            pass
+        self._queueAppend([func, data, data[Notifier.TRIGGER]])
 
     def viewRange(self):
         return self._CcpnGLWidget.viewRange()
@@ -562,6 +622,11 @@ class GuiStrip(Frame):
         """
         self._CcpnGLWidget._processPeakNotifier(data)
 
+    def _updateDisplayedPeakLists(self, data):
+        """Callback when peakLists are created/deleted
+        """
+        self._CcpnGLWidget._processPeakListNotifier(data)
+
     def _updateDisplayedNmrAtoms(self, data):
         """Callback when nmrAtoms have changed
         """
@@ -571,6 +636,11 @@ class GuiStrip(Frame):
         """Callback when multiplets have changed
         """
         self._CcpnGLWidget._processMultipletNotifier(data)
+
+    def _updateDisplayedMultipletLists(self, data):
+        """Callback when multipletLists are created/deleted
+        """
+        self._CcpnGLWidget._processMultipletListNotifier(data)
 
     def refreshDevicePixelRatio(self):
         """Set the devicePixel ratio in the GL window
@@ -2671,6 +2741,84 @@ class GuiStrip(Frame):
         """
         # Only implemented for nD
         pass
+
+    #=========================================================================================
+    # Notifier queue handling
+    #=========================================================================================
+
+    def queueFull(self):
+        """Method that is called when the queue is deemed to be too big.
+        Apply overall operation instead of all individual notifiers.
+        """
+        self._setSymbolType()
+
+    def _queueProcess(self):
+        """Process current items in the queue
+
+        VERY simple queue handling
+            if the queue contains more than <_maximumQueueLength> items then call
+            method <self.queueFull> which must be subclassed - usually will rebuild everything
+        """
+        # set busy flag
+        self._qTimer._busy = True
+
+        try:
+            with QtCore.QMutexLocker(self._lock):
+                # protect the queue switching
+                self._queueActive = self._queuePending
+                self._queuePending = Queue()
+
+            lastItm = None
+            _startTime = time_ns()
+            _useQueueFull = (self._maximumQueueLength not in [0, None] and len(self._queueActive.queue) > self._maximumQueueLength)
+            if self._logQueueTime:
+                # log the queue-time if required
+                getLogger().debug(f'_queueProcess  {self}  len: {len(self._queueActive.queue)}  useQueueFull: {_useQueueFull}')
+
+            if _useQueueFull:
+                # rebuild from scratch if the queue is too big
+                try:
+                    self._queueActive = Queue()
+                    self.queueFull()
+                except Exception as es:
+                    getLogger().debug(f'Error in {self.__class__.__name__} queueFull: {es}')
+
+            else:
+                # apply queue filtering here?
+                while not self._queueActive.empty():
+                    itm = self._queueActive.get()
+                    # process each item in the queue
+                    try:
+                        func, data, trigger = itm
+                        func(data)
+                    except Exception as es:
+                        getLogger().debug(f'Error in {self.__class__.__name__} queueProcess: {es}')
+                        raise
+
+                    finally:
+                        lastItm = itm
+
+            if self._logQueueTime:
+                getLogger().debug(f'elapsed time {(time_ns() - _startTime) / 1e9}')
+
+        finally:
+            # release busy flag and restart if required
+            self._qTimer._busy = False
+            if self._qTimer._restart:
+                self._qTimer._restart = False
+                self._qTimer.start(0)
+
+    def _queueAppend(self, itm):
+        """Append a new item to the queue
+        """
+        self._queuePending.put(itm)
+        if not self._qTimer.isActive() and not self._qTimer._busy:
+            self._qTimer._restart = False
+            self._qTimer.start(0)
+
+        elif self._qTimer._busy:
+            # caught during the queue processing, need to restart
+            self._qTimer._restart = True
 
 
 #=========================================================================================

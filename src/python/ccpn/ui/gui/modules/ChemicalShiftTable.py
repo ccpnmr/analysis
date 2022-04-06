@@ -977,7 +977,7 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
     search = False
 
     # set the queue handling parameters
-    maximumQueueLength = 25
+    _maximumQueueLength = 25
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None,
                  actionCallback=None, selectionCallback=None,

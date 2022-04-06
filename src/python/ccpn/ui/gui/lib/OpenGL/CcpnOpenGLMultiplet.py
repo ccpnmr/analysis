@@ -100,6 +100,9 @@ class GLmultipletListMethods():
     def listViews(multipletList):
         """Return the multipletListViews attached to the multipletList
         """
+        if multipletList.isDeleted:
+            return ()
+
         return multipletList.multipletListViews
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

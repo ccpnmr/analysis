@@ -2869,6 +2869,12 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.update()
 
+    def _processPeakListNotifier(self, data):
+        self._updateVisibleSpectrumViews()
+        self._GLPeaks._processNotifier(data)
+
+        self.update()
+
     def _processNmrAtomNotifier(self, data):
         self._updateVisibleSpectrumViews()
         self._GLPeaks._processNotifier(data)
@@ -2888,8 +2894,14 @@ class CcpnGLWidget(QOpenGLWidget):
 
         self.update()
 
+    def _processMultipletListNotifier(self, data):
+        self._updateVisibleSpectrumViews()
+        self._GLMultiplets._processNotifier(data)
+
+        self.update()
+
     def _nmrAtomsNotifier(self, data):
-        """respond to a rename notifier on an nmrAtom, and update marks
+        """respond to a rename-notifier on an nmrAtom, and update marks
         """
         trigger = data[Notifier.TRIGGER]
 

@@ -275,7 +275,7 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
 
             drawList.defineIndexVBO()
 
-    def _deleteSymbol(self, integral):
+    def _deleteSymbol(self, integral, parentList, spectrum):
         for ils in self._GLSymbols.values():
 
             # confusing as peakList and integralList share the same list :)

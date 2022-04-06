@@ -1439,7 +1439,8 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
             self._selectCurrentNotifier = Notifier(self.current,
                                                    [Notifier.CURRENT],
                                                    self.callBackClass._pluralLinkName,
-                                                   partial(self._queueGeneralNotifier, self._selectCurrentCallBack),
+                                                   self._selectCurrentCallBack,  # strange behaviour if deferred
+                                                   # partial(self._queueGeneralNotifier, self._selectCurrentCallBack),
                                                    )
 
         if self.search:

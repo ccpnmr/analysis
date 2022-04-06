@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-05 12:05:16 +0100 (Tue, April 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-04-06 11:44:43 +0100 (Wed, April 06, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1229,9 +1229,15 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
             obj = data[Notifier.OBJECT]
             uniqueId = obj.uniqueId
 
-            # check that the object belongs to the list that is being displayed
-            if self._df is None or self._df.empty or obj is None:
+            # check that the dataframe and object are valid
+            if self._df is None:
+                getLogger().debug(f'{self.__class__.__name__}._updateRowCallback: dataFrame is None')
                 return
+            if obj is None:
+                getLogger().debug(f'{self.__class__.__name__}._updateRowCallback: callback object is undefined')
+                return
+
+            # check that the object belongs to the list that is being displayed
             if obj.chemicalShiftList != self._table:
                 return
 
@@ -1249,6 +1255,8 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
                     if uniqueId in (tableIds - dataIds):
                         # remove from the table
                         self.model()._deleteRow(uniqueId)
+
+                        # NOTE:ED - remember which row was deleted for undo?
 
                 elif trigger == Notifier.CREATE:
                     # uniqueIds in the visible table

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-18 14:11:09 +0000 (Fri, March 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-04-06 11:44:42 +0100 (Wed, April 06, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -478,7 +478,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         try:
             return self._data.loc[uniqueId]
         except Exception as es:
-            raise ValueError(f'{self.className}._getByUniqueId: uniqueId {uniqueId} not found')
+            raise ValueError(f'{self.className}._getByUniqueId: error getting row, uniqueId {uniqueId} in {self}  -  {es}')
 
     def _getAttribute(self, uniqueId, name, attribType):
         """Get the named attribute from the chemicalShift with supplied uniqueId
@@ -489,16 +489,16 @@ class ChemicalShiftList(AbstractWrapperObject):
         try:
             _val = self._data.at[uniqueId, name]
             return None if (_val is None or (_val != _val)) else attribType(_val)
-        except:
-            raise ValueError(f'{self.className}._getAttribute: attribute {name} not found in chemicalShift')
+        except Exception as es:
+            raise ValueError(f'{self.className}._getAttribute: error getting attribute {name} in {self}  -  {es}')
 
     def _setAttribute(self, uniqueId, name, value):
         """Set the attribute of the chemicalShift with the supplied uniqueId
         """
         try:
             self._data.at[uniqueId, name] = value
-        except:
-            raise ValueError(f'{self.className}._setAttribute: attribute {name} not found in chemicalShift {self}')
+        except Exception as es:
+            raise ValueError(f'{self.className}._setAttribute: error setting attribute {name} in {self}  -  {es}')
 
     def _getAttributes(self, uniqueId, startName, endName, attribTypes):
         """Get the named attributes from the chemicalShift with supplied uniqueId
@@ -510,16 +510,16 @@ class ChemicalShiftList(AbstractWrapperObject):
             _val = self._data.loc[uniqueId, startName:endName]
             _val = tuple(None if (val is None or (val != val)) else attribType(val) for val, attribType in zip(_val, attribTypes))
             return _val
-        except:
-            raise ValueError(f'{self.className}._getAttributes: attributes {startName}|{endName} not found in chemicalShift')
+        except Exception as es:
+            raise ValueError(f'{self.className}._getAttributes: error getting attributes {startName}|{endName} in {self}  -  {es}')
 
     def _setAttributes(self, uniqueId, startName, endName, value):
         """Set the attributes of the chemicalShift with the supplied uniqueId
         """
         try:
             self._data.loc[uniqueId, startName:endName] = value
-        except:
-            raise ValueError(f'{self.className}._setAttributes: attributes {startName}|{endName} not found in chemicalShift {self}')
+        except Exception as es:
+            raise ValueError(f'{self.className}._setAttributes: error setting attributes {startName}|{endName} in {self}  -  {es}')
 
     def _undoRedoShifts(self, shifts):
         """update to shifts after undo/redo
@@ -889,16 +889,11 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
     :return: a new ChemicalShiftList instance.
     """
 
-    if spectra:
-        getByPid = self._project.getByPid
-        spectra = [getByPid(x) if isinstance(x, str) else x for x in spectra]
-
     name = ChemicalShiftList._uniqueName(project=self, name=name)
 
+    # set up call parameters for new api-object
     dd = {'name'   : name, 'unit': unit, 'autoUpdate': autoUpdate, 'isSimulated': isSimulated,
           'details': comment}
-    if spectra:
-        dd.update({'experiments': OrderedSet([spec._wrappedData.experiment for spec in spectra])})
 
     apiChemicalShiftList = self._wrappedData.newShiftList(**dd)
     result = self._data2Obj.get(apiChemicalShiftList)
@@ -911,6 +906,15 @@ def _newChemicalShiftList(self: Project, name: str = None, unit: str = 'ppm', au
 
     # set as the new subclassed DataFrameABC
     apiChemicalShiftList.data = df  # _ChemicalShiftListFrame(df)
+
+    # if spectra:
+    #     # add the spectra to the new chemicalShiftList - moved outside newObject for now
+    #     getByPid = self._project.getByPid
+    #     if (spectra := list(filter(lambda sp: isinstance(sp, Spectrum),
+    #                                map(lambda sp: getByPid(sp) if isinstance(sp, str) else sp, spectra)))):
+    #         # add/transfer the spectra
+    #         result.spectra = spectra
+    #         # dd.update({'experiments': OrderedSet([spec._wrappedData.experiment for spec in spectra])})
 
     return result
 

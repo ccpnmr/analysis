@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-28 15:14:57 +0100 (Mon, March 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-04-06 11:44:42 +0100 (Wed, April 06, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2033,8 +2033,18 @@ class Project(AbstractWrapperObject):
         :return: a new ChemicalShiftList instance.
         """
         from ccpn.core.ChemicalShiftList import _newChemicalShiftList
+        from ccpn.core.Spectrum import Spectrum
 
-        return _newChemicalShiftList(self, name=name, spectra=spectra, **kwds)
+        if (result := _newChemicalShiftList(self, name=name, **kwds)):
+            # needs to be here so that all chemicalShiftTables are notified correctly
+            if spectra:
+                getByPid = self._project.getByPid
+                if (spectra := list(filter(lambda sp: isinstance(sp, Spectrum),
+                                           map(lambda sp: getByPid(sp) if isinstance(sp, str) else sp, spectra)))):
+                    # add/transfer the spectra
+                    result.spectra = spectra
+
+            return result
 
     @logCommand('project.')
     def getChemicalShiftList(self, name: str = None, **kwds):

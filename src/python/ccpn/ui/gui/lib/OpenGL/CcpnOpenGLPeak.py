@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-04 18:50:46 +0000 (Fri, March 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-04-06 13:44:27 +0100 (Wed, April 06, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -52,17 +52,20 @@ class GLpeakListMethods():
             return peak in self.current.peaks
         return False
 
-    def objects(self, obj):
+    @staticmethod
+    def objects(obj):
         """return the peaks attached to the object
         """
         return obj.peaks if obj else []
 
-    def objectList(self, obj):
+    @staticmethod
+    def objectList(obj):
         """return the peakList attached to the peak
         """
         return obj.peakList if obj else None
 
-    def listViews(self, peakList):
+    @staticmethod
+    def listViews(peakList):
         """Return the peakListViews attached to the peakList
         """
         return peakList.peakListViews
@@ -71,7 +74,8 @@ class GLpeakListMethods():
     # List specific routines
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def getLabelling(self, obj, labelType):
+    @staticmethod
+    def getLabelling(obj, labelType):
         """Get the object label based on the current labelling method
         For peaks, this is constructed from the pids of the attached nmrAtoms
         """
@@ -99,32 +103,38 @@ class GLpeakListMethods():
 
         return text
 
-    def extraIndicesCount(self, obj):
+    @staticmethod
+    def extraIndicesCount(obj):
         """Calculate how many indices to add
         """
         return 0
 
-    def appendExtraIndices(self, drawList, index, obj):
+    @staticmethod
+    def appendExtraIndices(drawList, index, obj):
         """Add extra indices to the index list
         """
         return 0, 0
 
-    def extraVerticesCount(self, obj):
+    @staticmethod
+    def extraVerticesCount(obj):
         """Calculate how many vertices to add
         """
         return 0
 
-    def appendExtraVertices(self, *args):
+    @staticmethod
+    def appendExtraVertices(*args):
         """Add extra vertices to the vertex list
         """
         return 0
 
-    def insertExtraIndices(self, *args):
+    @staticmethod
+    def insertExtraIndices(*args):
         """Insert extra indices into the vertex list
         """
         return 0, 0
 
-    def insertExtraVertices(self, *args):
+    @staticmethod
+    def insertExtraVertices(*args):
         """Insert extra vertices into the vertex list
         """
         return 0
@@ -260,7 +270,7 @@ class GLpeak1dLabelling(GL1dLabelling, GLpeakNdLabelling):
     """Class to handle symbol and symbol labelling for 1d peak displays
     """
 
-    def objIsInVisiblePlanes(self, spectrumView, obj):
+    def objIsInVisiblePlanes(self, spectrumView, obj, viewOutOfPlanePeaks=True):
         """Get the current object is in visible planes settings
         """
         return True, False, 0, 1.0

@@ -54,17 +54,20 @@ class GLintegralListMethods():
             return integral in self.current.integrals
         return False
 
-    def objects(self, obj):
+    @staticmethod
+    def objects(obj):
         """return the integrals attached to the object
         """
         return obj.integrals
 
-    def objectList(self, obj):
+    @staticmethod
+    def objectList(obj):
         """return the integralList attached to the integral
         """
         return obj.integralList
 
-    def listViews(self, integralList):
+    @staticmethod
+    def listViews(integralList):
         """Return the integralListViews attached to the integralList
         """
         return integralList.integralListViews
@@ -73,37 +76,44 @@ class GLintegralListMethods():
     # List specific routines
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def getLabelling(self, obj, labelType):
+    @staticmethod
+    def getLabelling(obj, labelType):
         """get the object label based on the current labelling method
         """
         return obj.id + '\n' + str(obj.value)
 
-    def extraIndicesCount(self, integral):
+    @staticmethod
+    def extraIndicesCount(integral):
         """Calculate how many indices to add
         """
         return 0
 
-    def appendExtraIndices(self, *args):
+    @staticmethod
+    def appendExtraIndices(*args):
         """Add extra indices to the index list
         """
         return 0, 0
 
-    def extraVerticesCount(self, integral):
+    @staticmethod
+    def extraVerticesCount(integral):
         """Calculate how many vertices to add
         """
         return 0
 
-    def appendExtraVertices(self, *args):
+    @staticmethod
+    def appendExtraVertices(*args):
         """Add extra vertices to the vertex list
         """
         return 0
 
-    def insertExtraIndices(self, *args):
+    @staticmethod
+    def insertExtraIndices(*args):
         """Insert extra indices into the vertex list
         """
         return 0, 0
 
-    def insertExtraVertices(self, *args):
+    @staticmethod
+    def insertExtraVertices(*args):
         """Insert extra vertices into the vertex list
         """
         return 0
@@ -397,7 +407,7 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
         # stringList[-1].axisIndex = 0
         # stringList[-1].axisPosition = pos or 0.0
 
-    def objIsInVisiblePlanes(self, spectrumView, obj):
+    def objIsInVisiblePlanes(self, spectrumView, obj, viewOutOfPlanePeaks=True):
         """Get the current object is in visible planes settings
         """
         return True, False, 0, 1.0
@@ -415,7 +425,7 @@ class GLintegral1dLabelling(GLintegralNdLabelling):
     #     """
     #     super(GLintegral1dLabelling, self).__init__(parent=parent, strip=strip, name=name, resizeGL=resizeGL)
 
-    def objIsInVisiblePlanes(self, spectrumView, obj):
+    def objIsInVisiblePlanes(self, spectrumView, obj, viewOutOfPlanePeaks=True):
         """Get the current object is in visible planes settings
         """
         return True, False, 0, 1.0

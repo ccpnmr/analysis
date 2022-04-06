@@ -102,6 +102,10 @@ class GLmultipletListMethods():
         """
         return multipletList.multipletListViews
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # List specific routines
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     @staticmethod
     def getLabelling(obj, labelType):
         """get the object label based on the current labelling method

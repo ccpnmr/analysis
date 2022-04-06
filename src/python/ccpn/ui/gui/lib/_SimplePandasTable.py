@@ -163,6 +163,7 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
         _header.setMinimumSectionSize(_height)
         self.setMinimumSize(3 * _height, 3 * _height + self.horizontalScrollBar().height())
 
+        # set a default empty model
         _clearSimplePandasTable(self)
 
     def setModel(self, model: QtCore.QAbstractItemModel) -> None:

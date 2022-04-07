@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 16:33:12 +0000 (Tue, February 15, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-04-07 16:15:33 +0200 (Thu, April 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1471,7 +1471,7 @@ def estimateNoiseLevel1D(y, f=10, stdFactor=0.5) -> Tuple[float, float]:
 
     eMax, eMin = 0, 0
     if stdFactor == 0:
-        stdFactor = 0.01
+        stdFactor = 1
         getLogger().warning('stdFactor of value zero is not allowed.')
     if y is None:
         return eMax, eMin

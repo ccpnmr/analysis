@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-04 11:31:49 +0100 (Mon, April 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-04-07 17:19:57 +0200 (Thu, April 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1127,16 +1127,11 @@ def _getPeakSNRatio(peak, factor=2.5):
     from ccpn.core.lib.SpectrumLib import estimateSNR
 
     noiseLevel, negativeNoiseLevel = spectrum.noiseLevel, spectrum.negativeNoiseLevel
-    if negativeNoiseLevel is None and noiseLevel is not None:
+    if not negativeNoiseLevel and noiseLevel:
         negativeNoiseLevel = - noiseLevel if noiseLevel > 0 else noiseLevel * 2
         spectrum.negativeNoiseLevel = negativeNoiseLevel
         getLogger().warning('Spectrum Negative noise not defined for %s. Estimated default' % spectrum.pid)
-    if noiseLevel is None:  # estimate it
-        if spectrum.dimensionCount == 1:
-            noiseLevel, negativeNoiseLevel = estimateNoiseLevel1D(spectrum.intensities)
-            spectrum.noiseLevel, spectrum.negativeNoiseLevel = noiseLevel, negativeNoiseLevel
-            getLogger().warning('Spectrum noise level(s) not defined for %s. Estimated default' % spectrum.pid)
-        else:
+    if not noiseLevel:  # estimate it
             noiseLevel = spectrum.estimateNoise()
             negativeNoiseLevel = -noiseLevel
             spectrum.noiseLevel, spectrum.negativeNoiseLevel = noiseLevel, negativeNoiseLevel

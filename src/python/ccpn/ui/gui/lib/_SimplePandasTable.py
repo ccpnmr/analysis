@@ -1813,18 +1813,17 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
             self._queueActive = self._queuePending
             self._queuePending = UpdateQueue()
 
-        lastItm = None
         _startTime = time_ns()
-        _useQueueFull = (self._maximumQueueLength is not None and len(self._queueActive.queue) > self._maximumQueueLength)
+        _useQueueFull = (self._maximumQueueLength not in [0, None] and len(self._queueActive) > self._maximumQueueLength)
         if self._logQueueTime:
             # log the queue-time if required
-            getLogger().debug(f'_queueProcess  {self}  len: {len(self._queueActive.queue)}  useQueueFull: {_useQueueFull}')
+            getLogger().debug(f'_queueProcess  {self}  len: {len(self._queueActive)}  useQueueFull: {_useQueueFull}')
 
         if _useQueueFull:
             # rebuild from scratch if the queue is too big
             try:
                 self._queueActive = Queue()
-                result = self.queueFull()
+                self.queueFull()
             except Exception as es:
                 getLogger().debug(f'Error in {self.__class__.__name__} update queueFull: {es}')
 
@@ -1836,9 +1835,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
                     func, data, trigger = itm
                     func(data)
                 except Exception as es:
-                    getLogger().debug(f'Error in {self.__class__.__name__} update: {es}')
-                finally:
-                    lastItm = itm
+                    getLogger().debug(f'Error in {self.__class__.__name__} queueProcess: {es}')
 
         if self._logQueueTime:
             getLogger().debug(f'elapsed time {(time_ns() - _startTime) / 1e9}')

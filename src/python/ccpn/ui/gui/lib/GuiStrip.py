@@ -43,6 +43,8 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME
 from ccpn.util.decorators import logCommand
 from ccpn.util.Colour import colorSchemeTable
+from ccpn.util.UpdateScheduler import UpdateScheduler
+from ccpn.util.UpdateQueue import UpdateQueue
 from ccpn.ui.gui.guiSettings import GUISTRIP_PIVOT, ZPlaneNavigationModes
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Widget import Widget
@@ -260,14 +262,21 @@ class GuiStrip(Frame):
         # respond to values changed in the containing spectrumDisplay settings widget
         self.spectrumDisplay._spectrumDisplaySettings.symbolsChanged.connect(self._symbolsChangedInSettings)
 
-        # notifier queue
-        self._queuePending = Queue()
-        self._queueActive = Queue()
-        self._qTimer = _qTimer = QtCore.QTimer()
-        _qTimer.timeout.connect(self._queueProcess)
-        _qTimer.setSingleShot(True)
-        _qTimer._busy = False
-        _qTimer._restart = False
+        # # notifier queue
+        # self._queuePending = Queue()
+        # self._queueActive = Queue()
+        # self._qTimer = _qTimer = QtCore.QTimer()
+        # _qTimer.timeout.connect(self._queueProcess)
+        # _qTimer.setSingleShot(True)
+        # _qTimer._busy = False
+        # _qTimer._restart = False
+        # self._lock = QtCore.QMutex()
+
+        # notifier queue handling
+        self._scheduler = UpdateScheduler(self._queueProcess, name='PandasTableNotifierHandler',
+                                          startOnAdd=False, log=False, completeCallback=self.update)
+        self._queuePending = UpdateQueue()
+        self._queueActive = None
         self._lock = QtCore.QMutex()
 
     def resizeEvent(self, ev):
@@ -2759,66 +2768,48 @@ class GuiStrip(Frame):
             if the queue contains more than <_maximumQueueLength> items then call
             method <self.queueFull> which must be subclassed - usually will rebuild everything
         """
-        # set busy flag
-        self._qTimer._busy = True
+        with QtCore.QMutexLocker(self._lock):
+            # protect the queue switching
+            self._queueActive = self._queuePending
+            self._queuePending = UpdateQueue()
 
-        try:
-            with QtCore.QMutexLocker(self._lock):
-                # protect the queue switching
-                self._queueActive = self._queuePending
-                self._queuePending = Queue()
+        _startTime = time_ns()
+        _useQueueFull = (self._maximumQueueLength not in [0, None] and len(self._queueActive) > self._maximumQueueLength)
+        if self._logQueueTime:
+            # log the queue-time if required
+            getLogger().debug(f'_queueProcess  {self}  len: {len(self._queueActive)}  useQueueFull: {_useQueueFull}')
 
-            lastItm = None
-            _startTime = time_ns()
-            _useQueueFull = (self._maximumQueueLength not in [0, None] and len(self._queueActive.queue) > self._maximumQueueLength)
-            if self._logQueueTime:
-                # log the queue-time if required
-                getLogger().debug(f'_queueProcess  {self}  len: {len(self._queueActive.queue)}  useQueueFull: {_useQueueFull}')
+        if _useQueueFull:
+            # rebuild from scratch if the queue is too big
+            try:
+                self._queueActive = Queue()
+                self.queueFull()
+            except Exception as es:
+                getLogger().debug(f'Error in {self.__class__.__name__} update queueFull: {es}')
 
-            if _useQueueFull:
-                # rebuild from scratch if the queue is too big
+        else:
+            # apply queue filtering here?
+            for itm in self._queueActive.items():
+                # process each item in the queue
                 try:
-                    self._queueActive = Queue()
-                    self.queueFull()
+                    func, data, trigger = itm
+                    func(data)
                 except Exception as es:
-                    getLogger().debug(f'Error in {self.__class__.__name__} queueFull: {es}')
+                    getLogger().debug(f'Error in {self.__class__.__name__} queueProcess: {es}')
 
-            else:
-                # apply queue filtering here?
-                while not self._queueActive.empty():
-                    itm = self._queueActive.get()
-                    # process each item in the queue
-                    try:
-                        func, data, trigger = itm
-                        func(data)
-                    except Exception as es:
-                        getLogger().debug(f'Error in {self.__class__.__name__} queueProcess: {es}')
-                        raise
-
-                    finally:
-                        lastItm = itm
-
-            if self._logQueueTime:
-                getLogger().debug(f'elapsed time {(time_ns() - _startTime) / 1e9}')
-
-        finally:
-            # release busy flag and restart if required
-            self._qTimer._busy = False
-            if self._qTimer._restart:
-                self._qTimer._restart = False
-                self._qTimer.start(0)
+        if self._logQueueTime:
+            getLogger().debug(f'elapsed time {(time_ns() - _startTime) / 1e9}')
 
     def _queueAppend(self, itm):
         """Append a new item to the queue
         """
         self._queuePending.put(itm)
-        if not self._qTimer.isActive() and not self._qTimer._busy:
-            self._qTimer._restart = False
-            self._qTimer.start(0)
+        if not self._scheduler.isActive and not self._scheduler.isBusy:
+            self._scheduler.start()
 
-        elif self._qTimer._busy:
-            # caught during the queue processing, need to restart
-            self._qTimer._restart = True
+        elif self._scheduler.isBusy:
+            # caught during the queue processing event, need to restart
+            self._scheduler.restart = True
 
 
 #=========================================================================================

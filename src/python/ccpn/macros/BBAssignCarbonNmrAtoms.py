@@ -55,7 +55,7 @@ def assignNmrAtom(seqCode, atomName, offset):
         peak.assignDimension(axisCode=assignAxCde, value=newna)
     elif offset == 0:
         newna = peakNmrRes.fetchNmrAtom(name=atomName, isotopeCode=assignIsotope)
-        peak.assignDimension(axisCode=assignAxCde, value=newna)
+        peak.assqignDimension(axisCode=assignAxCde, value=newna)
 
 
 def storeDataForGlyCheck(peakShift, peak, atomType):

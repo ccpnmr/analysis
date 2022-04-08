@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-05 12:05:16 +0100 (Tue, April 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-04-08 11:25:43 +0100 (Fri, April 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -832,6 +832,10 @@ def _clearSimplePandasTable(table):
 # _SimplePandasTableViewProjectSpecific project specific
 #=========================================================================================
 
+from ccpn.util.UpdateScheduler import UpdateScheduler
+from ccpn.util.UpdateQueue import UpdateQueue
+
+
 # define a simple class that can contains a simple id
 blankId = SimpleNamespace(className='notDefined', serial=0)
 
@@ -933,14 +937,11 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         if enableDoubleClick:
             self.doubleClicked.connect(self._doubleClickCallback)
 
-        # notifier queue
-        self._queuePending = Queue()
-        self._queueActive = Queue()
-        self._qTimer = _qTimer = QtCore.QTimer()
-        _qTimer.timeout.connect(self._queueProcess)
-        _qTimer.setSingleShot(True)
-        _qTimer._busy = False
-        _qTimer._restart = False
+        # notifier queue handling
+        self._scheduler = UpdateScheduler(self._queueProcess, name='PandasTableNotifierHandler',
+                                          startOnAdd=False, log=False, completeCallback=self.update)
+        self._queuePending = UpdateQueue()
+        self._queueActive = None
         self._lock = QtCore.QMutex()
 
     def setModel(self, model: QtCore.QAbstractItemModel) -> None:
@@ -1810,43 +1811,25 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
     def _queueProcess(self):
         """Process current items in the queue
         """
-        # set busy flag
-        self._qTimer._busy = True
+        with QtCore.QMutexLocker(self._lock):
+            # protect the queue switching
+            self._queueActive = self._queuePending
+            self._queuePending = UpdateQueue()
 
-        try:
-            with QtCore.QMutexLocker(self._lock):
-                # protect the queue switching
-                self._queueActive = self._queuePending
-                self._queuePending = Queue()
-
-            _lastItm = None
-            while not self._queueActive.empty():
-                itm = self._queueActive.get()
-                # process item if different from previous
-                try:
-                    func, data, trigger = itm
-                    func(data)
-                except Exception as es:
-                    getLogger().debug(f'Error in {self.__class__.__name__} update: {es}')
-
-                finally:
-                    _lastItm = itm
-
-        finally:
-            # release busy flag and restart if required
-            self._qTimer._busy = False
-            if self._qTimer._restart:
-                self._qTimer._restart = False
-                self._qTimer.start(0)
+        for itm in self._queueActive.items():
+            try:
+                func, data, trigger = itm
+                func(data)
+            except Exception as es:
+                getLogger().debug(f'Error in {self.__class__.__name__} update: {es}')
 
     def _queueAppend(self, itm):
         """Append a new item to the queue
         """
         self._queuePending.put(itm)
-        if not self._qTimer.isActive() and not self._qTimer._busy:
-            self._qTimer._restart = False
-            self._qTimer.start(0)
+        if not self._scheduler.isActive and not self._scheduler.isBusy:
+            self._scheduler.start()
 
-        elif self._qTimer._busy:
-            # caught during the queue processing, need to restart
-            self._qTimer._restart = True
+        elif self._scheduler.isBusy:
+            # caught during the queue processing event, need to restart
+            self._scheduler.restart = True

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-04-07 17:19:57 +0200 (Thu, April 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-04-12 15:28:11 +0100 (Tue, April 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -765,6 +765,17 @@ def recalculatePeaksHeightAtPosition(peaks):
                     if peak is not None:
                         height = peak.peakList.spectrum.getHeight(peak.position)
                         peak.height = height
+
+def updatePeaksFigureOfMerits(peaks, newMerit=0):
+    """Set the figure of merit to the given value if the peak height is below the Noise threshold """
+    with undoBlockWithoutSideBar():
+        with notificationEchoBlocking():
+            if len(peaks) > 0:
+                for peak in peaks:  # peaks can be from diff peakLists
+                    if peak is not None:
+                        noiseLevel = peak.spectrum.noiseLevel or peak.spectrum.estimateNoise()
+                        if peak.height < noiseLevel:
+                            peak.figureOfMerit = newMerit
 
 def _fitBins(y, bins):
     # fit a gauss curve over the bins

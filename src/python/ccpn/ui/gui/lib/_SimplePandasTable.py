@@ -49,7 +49,7 @@ from ccpn.ui.gui.lib.MenuActions import _openItemObject
 from ccpn.core.lib.CallBack import CallBack
 from ccpn.core.lib.CcpnSorting import universalSortKey
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, catchExceptions
-from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.Notifiers import Notifier, _removeDuplicatedNotifiers
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import copyToClipboard
 from ccpn.util.OrderedSet import OrderedSet
@@ -849,7 +849,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
 
     # set the queue handling parameters
     _maximumQueueLength = 0
-    _logQueueTime = False
+    _logQueueTime = True
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None,
                  actionCallback=None, selectionCallback=None, checkBoxCallback=None,
@@ -911,7 +911,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
             self.doubleClicked.connect(self._doubleClickCallback)
 
         # notifier queue handling
-        self._scheduler = UpdateScheduler(self._queueProcess, name='PandasTableNotifierHandler',
+        self._scheduler = UpdateScheduler(self.project, self._queueProcess, name='PandasTableNotifierHandler',
                                           startOnAdd=False, log=False, completeCallback=self.update)
         self._queuePending = UpdateQueue()
         self._queueActive = None
@@ -1459,7 +1459,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
     def _queueGeneralNotifier(self, func, data):
         """Add the notifier to the queue handler
         """
-        self._queueAppend([func, data, data[Notifier.TRIGGER]])
+        self._queueAppend([func, data])
 
     def _clearTableNotifiers(self):
         """Clean up the notifiers
@@ -1822,20 +1822,20 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         if _useQueueFull:
             # rebuild from scratch if the queue is too big
             try:
-                self._queueActive = Queue()
+                self._queueActive = None
                 self.queueFull()
             except Exception as es:
                 getLogger().debug(f'Error in {self.__class__.__name__} update queueFull: {es}')
 
         else:
-            # apply queue filtering here?
-            for itm in self._queueActive.items():
-                # process each item in the queue
+            executeQueue = _removeDuplicatedNotifiers(self._queueActive)
+            for itm in executeQueue:
+                # process item if different from previous
                 try:
-                    func, data, trigger = itm
+                    func, data = itm
                     func(data)
                 except Exception as es:
-                    getLogger().debug(f'Error in {self.__class__.__name__} queueProcess: {es}')
+                    getLogger().debug(f'Error in {self.__class__.__name__} update - {es}')
 
         if self._logQueueTime:
             getLogger().debug(f'elapsed time {(time_ns() - _startTime) / 1e9}')
@@ -1849,7 +1849,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
 
         elif self._scheduler.isBusy:
             # caught during the queue processing event, need to restart
-            self._scheduler.restart = True
+            self._scheduler.signalRestart()
 
 
 #=========================================================================================

@@ -36,7 +36,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
-from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.Notifiers import Notifier, _removeDuplicatedNotifiers
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlockWithoutSideBar
 from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXHIGHLIGHT, CCPNGLWIDGET_HEXFOREGROUND
 from ccpn.util.Logging import getLogger
@@ -80,8 +80,8 @@ class GuiStrip(Frame):
     # MAXPEAKSYMBOLTYPES = 4
 
     # set the queue handling parameters
-    _maximumQueueLength = 25
-    _logQueueTime = False
+    _maximumQueueLength = 40
+    _logQueueTime = True
 
     def __init__(self, spectrumDisplay):
         """
@@ -262,18 +262,8 @@ class GuiStrip(Frame):
         # respond to values changed in the containing spectrumDisplay settings widget
         self.spectrumDisplay._spectrumDisplaySettings.symbolsChanged.connect(self._symbolsChangedInSettings)
 
-        # # notifier queue
-        # self._queuePending = Queue()
-        # self._queueActive = Queue()
-        # self._qTimer = _qTimer = QtCore.QTimer()
-        # _qTimer.timeout.connect(self._queueProcess)
-        # _qTimer.setSingleShot(True)
-        # _qTimer._busy = False
-        # _qTimer._restart = False
-        # self._lock = QtCore.QMutex()
-
         # notifier queue handling
-        self._scheduler = UpdateScheduler(self._queueProcess, name='PandasTableNotifierHandler',
+        self._scheduler = UpdateScheduler(self.project, self._queueProcess, name='PandasTableNotifierHandler',
                                           startOnAdd=False, log=False, completeCallback=self.update)
         self._queuePending = UpdateQueue()
         self._queueActive = None
@@ -385,7 +375,7 @@ class GuiStrip(Frame):
                 data['_spectrum'] = spectrum
         except Exception:
             pass
-        self._queueAppend([func, data, data[Notifier.TRIGGER]])
+        self._queueAppend([func, data])
 
     def viewRange(self):
         return self._CcpnGLWidget.viewRange()
@@ -1464,6 +1454,10 @@ class GuiStrip(Frame):
     def _setSymbolType(self):
         if self.spectrumViews:
             for sV in self.spectrumViews:
+
+                # NOTE:ED - rebuild the peaks here?
+                #   ...and then notify the GL to copy the new lists to the graphics card
+                #   so rebuild will be inside the progress manager
 
                 for peakListView in sV.peakListViews:
                     peakListView.buildSymbols = True
@@ -2782,20 +2776,20 @@ class GuiStrip(Frame):
         if _useQueueFull:
             # rebuild from scratch if the queue is too big
             try:
-                self._queueActive = Queue()
+                self._queueActive = None
                 self.queueFull()
             except Exception as es:
                 getLogger().debug(f'Error in {self.__class__.__name__} update queueFull: {es}')
 
         else:
-            # apply queue filtering here?
-            for itm in self._queueActive.items():
-                # process each item in the queue
+            executeQueue = _removeDuplicatedNotifiers(self._queueActive)
+            for itm in executeQueue:
+                # process item if different from previous
                 try:
-                    func, data, trigger = itm
+                    func, data = itm
                     func(data)
                 except Exception as es:
-                    getLogger().debug(f'Error in {self.__class__.__name__} queueProcess: {es}')
+                    getLogger().debug(f'Error in {self.__class__.__name__} update - {es}')
 
         if self._logQueueTime:
             getLogger().debug(f'elapsed time {(time_ns() - _startTime) / 1e9}')
@@ -2809,7 +2803,7 @@ class GuiStrip(Frame):
 
         elif self._scheduler.isBusy:
             # caught during the queue processing event, need to restart
-            self._scheduler.restart = True
+            self._scheduler.signalRestart()
 
 
 #=========================================================================================

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-06 18:52:07 +0100 (Wed, April 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-04-13 19:02:29 +0100 (Wed, April 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -348,7 +348,6 @@ class Project(AbstractWrapperObject):
         backupPath = backupUrl.path
         return backupPath
 
-
     #-----------------------------------------------------------------------------------------
     # Implementation methods
     #-----------------------------------------------------------------------------------------
@@ -379,7 +378,7 @@ class Project(AbstractWrapperObject):
         self._resetIds()
 
         # Set up notification machinery
-        # Active notifiers - saved for later cleanup. CORER APPLICAATION ONLY
+        # Active notifiers - saved for later cleanup. CORE APPLICATION ONLY
         self._activeNotifiers = []
 
         # list or None. When set used to accumulate pending notifiers
@@ -388,6 +387,7 @@ class Project(AbstractWrapperObject):
 
         # Notification suspension level - to allow for nested notification suspension
         self._notificationSuspension = 0
+        self._progressSuspension = 0
 
         # Notification blanking level - to allow for nested notification disabling
         self._notificationBlanking = 0
@@ -1034,12 +1034,18 @@ class Project(AbstractWrapperObject):
 
     def suspendNotification(self):
         """Suspend notifier execution and accumulate notifiers for later execution"""
+        self._progressSuspension += 1
+
         return
         # TODO suspension temporarily disabled
         self._notificationSuspension += 1
 
     def resumeNotification(self):
         """Execute accumulated notifiers and resume immediate notifier execution"""
+        self._progressSuspension -= 1
+        if self._progressSuspension < 0:
+            raise RuntimeError("Code Error: _progressSuspension below zero")
+
         return
 
         # TODO suspension temporarily disabled
@@ -1052,7 +1058,9 @@ class Project(AbstractWrapperObject):
         else:
             # Should not be necessary, but in this way we never get below 0 no matter what errors happen
             self._notificationSuspension = 0
+
             scheduledNotifiers = set()
+
             executeNotifications = []
             pendingNotifications = self._pendingNotifications
             while pendingNotifications:
@@ -1260,15 +1268,16 @@ class Project(AbstractWrapperObject):
         # Notification suspension postpones notifications (and removes duplicates)
         # It is broken and has been disabled for a long time.
         # There may be some accumulated bugs when (if)it is turned back on.
-        if False and self._notificationSuspension:
-            ll = self._pendingNotifications
-            for dd in iterator:
-                for notifier, onceOnly in dd.items():
-                    ll.append((notifier, onceOnly, self))
-        else:
-            for dd in iterator:
-                for notifier in dd:
-                    notifier(self)
+        # if False and self._notificationSuspension:
+        #     ll = self._pendingNotifications
+        #     for dd in iterator:
+        #         for notifier, onceOnly in dd.items():
+        #             ll.append((notifier, onceOnly, self))
+        # else:
+
+        for dd in iterator:
+            for notifier in dd:
+                notifier(self)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Library functions
@@ -1730,7 +1739,6 @@ class Project(AbstractWrapperObject):
         from ccpn.core.DataTable import _fetchDataTable
 
         return _fetchDataTable(self, name=name)
-
 
     @logCommand('project.')
     def newPeakCluster(self, peaks: Sequence[Union['Peak', str]] = None, **kwds) -> Optional['PeakCluster']:

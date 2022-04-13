@@ -1695,7 +1695,7 @@ class Framework(NotifierBase, GuiBase):
         chemicalShiftTableModule = ChemicalShiftTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(chemicalShiftTableModule, position=position, relativeTo=relativeTo)
         if chemicalShiftList:
-            chemicalShiftTableModule._selectTable(chemicalShiftList)
+            chemicalShiftTableModule.selectTable(chemicalShiftList)
         return chemicalShiftTableModule
 
     @logCommand('application.')
@@ -1711,7 +1711,7 @@ class Framework(NotifierBase, GuiBase):
         nmrResidueTableModule = NmrResidueTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(nmrResidueTableModule, position=position, relativeTo=relativeTo)
         if nmrChain:
-            nmrResidueTableModule.selectNmrChain(nmrChain)
+            nmrResidueTableModule.selectTable(nmrChain)
         return nmrResidueTableModule
 
     @logCommand('application.')
@@ -1742,7 +1742,7 @@ class Framework(NotifierBase, GuiBase):
             relativeTo = mainWindow.moduleArea
         peakTableModule = PeakTableModule(mainWindow, selectFirstItem=selectFirstItem)
         if peakList:
-            peakTableModule._selectTable(peakList)
+            peakTableModule.selectTable(peakList)
         mainWindow.moduleArea.addModule(peakTableModule, position=position, relativeTo=relativeTo)
         return peakTableModule
 

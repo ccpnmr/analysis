@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-08 11:25:43 +0100 (Fri, April 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-04-13 19:00:26 +0100 (Wed, April 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -35,9 +35,10 @@ class UpdateScheduler:
     """Class for deferred processing of events when the Qt GUI thread is idle
     """
 
-    def __init__(self, updaterCallback, name='unknown', startOnAdd=False, log=False, completeCallback=None):
+    def __init__(self, project, updaterCallback, name='unknown', startOnAdd=False, log=False, completeCallback=None):
         """Initialise a new scheduler
 
+        :param project: project container - used to reference top-level scheduler suspension
         :param updaterCallback: callback to execute
         :param name: optional str name for the scheduler
         :param startOnAdd: True|False - if True, timer starts on creation, defaults to False
@@ -56,6 +57,7 @@ class UpdateScheduler:
         if not isinstance(log, bool):
             raise ValueError(f'log {log} must be True|False')
 
+        self._project = project
         self._name = name
         self._startOnAdd = startOnAdd
         self._log = log
@@ -68,6 +70,9 @@ class UpdateScheduler:
         self._startTime = None
         self._busy = False
         self._restart = False
+
+        # not sure whether this is needed - to fire a single update even if suspended
+        self._overrideSuspension = False
 
         # initialise the timer
         self._initialiseTimer()
@@ -87,18 +92,17 @@ class UpdateScheduler:
     def isBusy(self):
         return self._busy
 
-    @property
-    def restart(self):
+    def signalRestart(self):
         """Signal the timer to restart when it has finished processing
         """
-        return self._restart
+        if self._busy:
+            self._restart = True
 
-    @restart.setter
-    def restart(self, value):
-        if not isinstance(value, bool):
-            raise ValueError(f'restart {value} must be True|False')
-
-        self._restart = value
+    def signalOverride(self):
+        """Signal the update to execute a single event overriding the _progressSuspension flag
+        """
+        # not tested properly yet
+        self._overrideSuspension = True
 
     def _applyUpdates(self):
         """Call the user callbacks when the timer has expired
@@ -106,12 +110,24 @@ class UpdateScheduler:
         try:
             self._busy = True
 
-            # process the callbacks
-            self._logUpdateStart()
-            self._updaterCallback()
-            if self._completeCallback:
-                self._completeCallback()
-            self._logUpdateEnd()
+            # Check busy-state of app at top-level
+            #   defer processing again until not busy
+            if not self._project._progressSuspension or self._overrideSuspension:
+                # process the callbacks
+                self._logUpdateStart()
+
+                # apply the updates
+                self._updaterCallback()
+                if self._completeCallback:
+                    self._completeCallback()
+
+                self._logUpdateEnd()
+
+                # flag to force an update
+                self._overrideSuspension = False
+
+            else:
+                self._restart = True
 
         except Exception:
             self._logException()
@@ -138,6 +154,7 @@ class UpdateScheduler:
         self._initialiseTimer()
 
         self._restart = False
+        self._overrideSuspension = False
         self._timer.start(value)
 
     def stop(self, cleanup=False):

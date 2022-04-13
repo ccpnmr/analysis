@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-08 11:25:43 +0100 (Fri, April 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-04-13 19:00:26 +0100 (Wed, April 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -59,14 +59,14 @@ def main():
 
             self._queuePending = UpdateQueue()
             self._queueActive = None
-            self._scheduler = UpdateScheduler(self._queueProcess, name='QueueTester',
+            self._scheduler = UpdateScheduler(self, self._queueProcess, name='QueueTester',
                                               startOnAdd=False, log=False, completeCallback=None)
 
             self._lock = QtCore.QMutex()
             self._counter = 0
             self._realEvents = []
             self._handledEvents = []
-            self._blocking = 0
+            self._progressSuspension = 0
 
         def start(self):
             print(f'   GO!                 {datetime.datetime.now()}')
@@ -76,10 +76,10 @@ def main():
             QtCore.QTimer.singleShot(0, partial(self._startStuff, 'thread3'))
 
             def _enableBlocking():
-                self._blocking = 1
+                self._progressSuspension = 1
 
             def _disableBlocking():
-                self._blocking = 0
+                self._progressSuspension = 0
 
             # block after 3 seconds - simulate overriding block
             QtCore.QTimer.singleShot(3000, _enableBlocking)
@@ -91,13 +91,6 @@ def main():
         def _queueProcess(self):
             """Process current items in the queue
             """
-            # Check busy-state of app at top-level
-            #   defer processing again until not busy
-            if self._blocking:
-                if self._scheduler.isBusy:
-                    self._scheduler.restart = True
-                    return
-
             print(f'   processing                 {datetime.datetime.now()}')
             with QtCore.QMutexLocker(self._lock):
                 # protect the queue switching
@@ -127,7 +120,7 @@ def main():
 
             elif self._scheduler.isBusy:
                 print(f'   append busy                     {datetime.datetime.now()}      {itm}')
-                self._scheduler.restart = True
+                self._scheduler.signalRestart()
 
             elif self._scheduler.isActive:
                 print(f'   append queued                   {datetime.datetime.now()}      {itm}')
@@ -188,14 +181,14 @@ class SchedulerTester(QtCore.QObject):
         self._application = application
         self._queuePending = UpdateQueue()
         self._queueActive = None
-        self._scheduler = UpdateScheduler(self._queueProcess, name='QueueTester',
+        self._scheduler = UpdateScheduler(self, self._queueProcess, name='QueueTester',
                                           startOnAdd=False, log=False, completeCallback=None)
 
         self._lock = QtCore.QMutex()
         self._counter = 0
         self._realEvents = []
         self._handledEvents = []
-        self._blocking = 0
+        self._progressSuspension = 0
         self._exitSignal = False
 
     def start(self):
@@ -207,10 +200,10 @@ class SchedulerTester(QtCore.QObject):
         QtCore.QTimer.singleShot(0, partial(self._startStuff, 'thread3'))
 
         def _enableBlocking():
-            self._blocking = 1
+            self._progressSuspension = 1
 
         def _disableBlocking():
-            self._blocking = 0
+            self._progressSuspension = 0
 
         # block after 3 seconds - simulate overriding block
         QtCore.QTimer.singleShot(3000, _enableBlocking)
@@ -220,13 +213,6 @@ class SchedulerTester(QtCore.QObject):
     def _queueProcess(self):
         """Process current items in the queue
         """
-        # Check busy-state of app at top-level
-        #   defer processing again until not busy
-        if self._blocking:
-            if self._scheduler.isBusy:
-                self._scheduler.restart = True
-                return
-
         print(f'   processing                 {datetime.datetime.now()}')
         with QtCore.QMutexLocker(self._lock):
             # protect the queue switching
@@ -256,7 +242,7 @@ class SchedulerTester(QtCore.QObject):
 
         elif self._scheduler.isBusy:
             print(f'   append busy                     {datetime.datetime.now()}      {itm}')
-            self._scheduler.restart = True
+            self._scheduler.signalRestart()
 
         elif self._scheduler.isActive:
             print(f'   append queued                   {datetime.datetime.now()}      {itm}')

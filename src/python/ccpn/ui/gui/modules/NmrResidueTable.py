@@ -42,6 +42,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning, showYesNo
 from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.lib.StripLib import navigateToNmrResidueInDisplay, navigateToNmrAtomsInStrip
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrResidue import NmrResidue
@@ -51,8 +52,6 @@ from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot
 from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
 
-from PyQt5 import QtCore
-
 
 logger = getLogger()
 ALL = '<all>'
@@ -60,12 +59,15 @@ ALL = '<all>'
 LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 
 
+#=========================================================================================
+# NmrResidueTableModule
+#=========================================================================================
+
 class NmrResidueTableModule(CcpnModule):
-    """
-    This class implements the module by wrapping a NmrResidueTable instance
+    """This class implements the module by wrapping a NmrResidueTable instance
     """
     includeSettingsWidget = True
-    maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
+    maxSettingsState = 2
     settingsPosition = 'left'
 
     includeDisplaySettings = False
@@ -80,8 +82,7 @@ class NmrResidueTableModule(CcpnModule):
     # we are subclassing this Module, hence some more arguments to the init
     def __init__(self, mainWindow=None, name='NmrResidue Table',
                  nmrChain=None, selectFirstItem=False):
-        """
-        Initialise the Module widgets
+        """Initialise the Module widgets
         """
         super().__init__(mainWindow=mainWindow, name=name)
 
@@ -92,11 +93,17 @@ class NmrResidueTableModule(CcpnModule):
             self.project = mainWindow.application.project
             self.current = mainWindow.application.current
         else:
-            self.application = None
-            self.project = None
-            self.current = None
+            self.application = self.project = self.current = None
 
-        self.nmrResidueTableSettings = StripPlot(parent=self.settingsWidget, mainWindow=self.mainWindow,
+        # set the widgets and callbacks
+        self._setWidgets(self.settingsWidget, self.mainWidget, nmrChain, selectFirstItem)
+        self._setCallbacks()
+
+    def _setWidgets(self, settingsWidget, mainWidget, nmrChain, selectFirstItem):
+        """Set up the widgets for the module
+        """
+        # add to settings widget
+        self.nmrResidueTableSettings = StripPlot(parent=settingsWidget, mainWindow=self.mainWindow,
                                                  includeDisplaySettings=self.includeDisplaySettings,
                                                  includePeakLists=self.includePeakLists,
                                                  includeNmrChains=self.includeNmrChains,
@@ -105,162 +112,45 @@ class NmrResidueTableModule(CcpnModule):
                                                  activePulldownInitialState=False,
                                                  grid=(0, 0))
 
-        # initialise the table
-        self.nmrResidueTable = NmrResidueTable(parent=self.mainWidget,
+        # add the frame containing the pulldown and table
+        self._mainFrame = NmrResidueTableFrame(parent=mainWidget,
                                                mainWindow=self.mainWindow,
                                                moduleParent=self,
-                                               setLayout=True,
-                                               actionCallback=self.navigateToNmrResidueCallBack,
-                                               multiSelect=True,
+                                               nmrChain=nmrChain, selectFirstItem=selectFirstItem,
                                                grid=(0, 0))
 
-        if nmrChain is not None:
-            self.selectNmrChain(nmrChain)
-        elif selectFirstItem:
-            self.nmrResidueTable.ncWidget.selectFirstItem()
+        # link the table to the mainWidget - needs refactoring
+        self._mainFrame._tableWidget._autoClearMarksCheckBox = self.nmrResidueTableSettings.autoClearMarksWidget.checkBox
+        self._mainFrame.nmrResidueTableSettings = self.nmrResidueTableSettings
 
-        # install the event filter to handle maximising from floated dock
-        self.installMaximiseEventHandler(self._maximise, self._closeModule)
-
+    def _setCallbacks(self):
+        """Set the active callbacks for the module
+        """
         if self.activePulldownClass:
             self._setCurrentPulldown = Notifier(self.current,
                                                 [Notifier.CURRENT],
                                                 targetName=self.activePulldownClass._pluralLinkName,
-                                                callback=self._selectCurrentPulldownClass)
+                                                callback=self._mainFrame._selectCurrentPulldownClass)
 
-        # put these in a smaller additional class
-        if self.activePulldownClass:
-            self.nmrResidueTable._activePulldownClass = self.activePulldownClass
-            self.nmrResidueTable._activeCheckbox = getattr(self.nmrResidueTableSettings, LINKTOPULLDOWNCLASS, None)
+            # set the active callback from the pulldown
+            self._mainFrame.setActivePulldownClass(coreClass=self.activePulldownClass,
+                                                   checkBox=getattr(self.nmrResidueTableSettings, LINKTOPULLDOWNCLASS, None))
 
-        # if nmrChain is not None:
-        #     self.selectNmrChain(nmrChain)
-        # elif selectFirstItem:
-        #     # firstItemText = self.nmrResidueTable.ncWidget.getFirstItemText()
-        #     # if firstItemText:
-        #     self.nmrResidueTable.ncWidget.selectFirstItem()
-        #         # chain = self.nmrResidueTable.ncWidget.getCurrentObject()
-        #         # self.nmrResidueTable._update(chain)
+        # set the dropped callback through mainWidget
+        self.mainWidget._dropEventCallback = self._mainFrame._processDroppedItems
 
-    def _maximise(self):
+    def selectTable(self, table):
+        """Select the object in the table
         """
-        Maximise the attached table
-        """
-        self.nmrResidueTable._maximise()
-
-    def _selectCurrentPulldownClass(self, data):
-        """Respond to change in current activePulldownClass
-        """
-        if self.activePulldownClass and self.nmrResidueTable._activeCheckbox and self.nmrResidueTable._activeCheckbox.isChecked():
-            self.selectNmrChain(self.current.nmrChain)
-
-    def selectNmrChain(self, nmrChain=None):
-        """
-        Manually select an NmrChain from the pullDown
-        """
-        self.nmrResidueTable._selectNmrChain(nmrChain)
-
-    # def navigateToNmrResidue(self, nmrResidue, row=None, col=None):
-    def navigateToNmrResidueCallBack(self, data):
-        """Navigate in selected displays to nmrResidue; skip if none defined
-        """
-        from ccpn.core.lib.CallBack import CallBack
-
-        # handle a single nmrResidue - should always contain an object
-        objs = data[CallBack.OBJECT]
-        if not objs or not all(objs):
-            return
-        if isinstance(objs, (tuple, list)):
-            nmrResidue = objs[0]
-        else:
-            nmrResidue = objs
-
-        logger.debug('nmrResidue=%s' % str(nmrResidue.id if nmrResidue else None))
-        displays = []
-        if self.nmrResidueTableSettings.displaysWidget:
-            displays = self.nmrResidueTableSettings.displaysWidget.getDisplays()
-        else:
-            if self.current.strip:
-                displays = [self.current.strip.spectrumDisplay]
-        if len(displays) == 0 and self.nmrResidueTableSettings.displaysWidget:
-            logger.warning('Undefined display module(s); select in settings first')
-            showWarning('startAssignment', 'Undefined display module(s);\nselect in settings first')
-            return
-
-        from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
-
-        with undoBlockWithoutSideBar():
-            # optionally clear the marks
-            if self.nmrResidueTableSettings.autoClearMarksWidget.checkBox.isChecked():
-                self.application.ui.mainWindow.clearMarks()
-
-            newWidths = []
-
-            # follow the previous/next nmrResidues to navigate to the correct position
-            offset = nmrResidue.relativeOffset
-            nmrResidue = nmrResidue.mainNmrResidue
-            if offset is not None:
-                if offset < 0:
-                    for _next in range(-offset):
-                        _adjacent = nmrResidue.previousNmrResidue
-                        if not (_adjacent and _adjacent.mainNmrResidue):
-                            break
-                        nmrResidue = _adjacent.mainNmrResidue
-
-                elif offset > 0:
-                    for _next in range(offset):
-                        _adjacent = nmrResidue.nextNmrResidue
-                        if not (_adjacent and _adjacent.mainNmrResidue):
-                            break
-                        nmrResidue = _adjacent.mainNmrResidue
-
-            for specDisplay in displays:
-                if self.current.strip in specDisplay.strips:
-
-                    # just navigate to this strip
-                    navigateToNmrAtomsInStrip(self.current.strip,
-                                              nmrResidue.nmrAtoms,
-                                              widths=newWidths,
-                                              markPositions=self.nmrResidueTableSettings.markPositionsWidget.checkBox.isChecked(),
-                                              setNmrResidueLabel=True)
-
-                else:
-                    #navigate to the specDisplay (and remove excess strips)
-                    if len(specDisplay.strips) > 0:
-                        newWidths = []
-                        navigateToNmrResidueInDisplay(nmrResidue, specDisplay, stripIndex=0,
-                                                      widths=newWidths,  #['full'] * len(display.strips[0].axisCodes),
-                                                      showSequentialResidues=(len(specDisplay.axisCodes) > 2) and
-                                                                             self.nmrResidueTableSettings.sequentialStripsWidget.checkBox.isChecked(),
-                                                      markPositions=self.nmrResidueTableSettings.markPositionsWidget.checkBox.isChecked()
-                                                      )
-
-                # open the other headers to match
-                for strip in specDisplay.strips:
-                    if strip != self.current.strip and not strip.header.headerVisible:
-                        strip.header.reset()
-                        strip.header.headerVisible = True
-
-    def _closeModule(self):
-        """CCPN-INTERNAL: used to close the module
-        """
-        self.nmrResidueTable._close()
-        self.nmrResidueTableSettings._cleanupWidget()
-        super()._closeModule()
-
-    @staticmethod  # has to be a static method
-    def onDestroyed(widget):
-        # print("DEBUG on destroyed:", widget)
-        widget.self.nmrResidueTable._close()
-        widget.nmrResidueTableSettings._cleanupWidget()
-
-    def paintEvent(self, event):
-        event.ignore()
+        self._mainFrame.selectTable(table)
 
 
-class NmrResidueTable(GuiTable):
-    """
-    Class to present a NmrResidue Table and a NmrChain pulldown list, wrapped in a Widget
+#=========================================================================================
+# NmrResidueTableWidget
+#=========================================================================================
+
+class NmrResidueTableWidget(GuiTable):
+    """Class to present a NmrResidue Table and a NmrChain pulldown list, wrapped in a Widget
     """
     className = 'NmrResidueTable'
     attributeName = 'nmrChains'
@@ -268,13 +158,16 @@ class NmrResidueTable(GuiTable):
     OBJECT = 'object'
     TABLE = 'table'
 
+    tableClass = NmrChain
+    tableName = tableClass.className
+
     @staticmethod
     def _nmrIndex(nmrRes):
-        """
-        CCPN-INTERNAL: Insert an index into ObjectTable
+        """CCPN-INTERNAL: Insert an index into ObjectTable
         """
         try:
             from ccpnc.clibrary import Clibrary
+
             _getNmrIndex = Clibrary.getNmrResidueIndex
 
             return _getNmrIndex(nmrRes)
@@ -284,8 +177,7 @@ class NmrResidueTable(GuiTable):
 
     @staticmethod
     def _nmrLamInt(row, name):
-        """
-        CCPN-INTERNAL: Insert an int into ObjectTable
+        """CCPN-INTERNAL: Insert an int into ObjectTable
         """
         try:
             return int(getattr(row, name))
@@ -295,8 +187,7 @@ class NmrResidueTable(GuiTable):
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None,
                  checkBoxCallback=None, _pulldownKwds=None, nmrChain=None, multiSelect=False,
                  **kwds):
-        """
-        Initialise the widgets for the module. kwds passed to the scrollArea widget
+        """Initialise the widgets for the module. kwds passed to the scrollArea widget
         """
         # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
@@ -312,16 +203,16 @@ class NmrResidueTable(GuiTable):
         # Initialise the scroll widget and common settings
         self._initTableCommonWidgets(parent, **kwds)
 
-        self._nmrChain = None
+        self._table = None
         if actionCallback is None:
             actionCallback = self.defaultActionCallback
 
-        NmrResidueTable.project = self.project
+        NmrResidueTableWidget.project = self.project
 
         # create the column objects
         self.NMRcolumns = ColumnClass([
             ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None, None),
-            ('Index', lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None, None),
+            ('Index', lambda nmrResidue: NmrResidueTableWidget._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None, None),
             # ('Index', lambda nmrResidue: NmrResidueTable._nmrLamInt(nmrResidue, 'Index'), 'Index of NmrResidue in the NmrChain', None, None),
 
             # ('Index',      lambda nmrResidue: nmrResidue.nmrChain.nmrResidues.index(nmrResidue), 'Index of NmrResidue in the NmrChain', None, None),
@@ -331,33 +222,15 @@ class NmrResidueTable(GuiTable):
             ('NmrChain', lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain containing the nmrResidue', None, None),  # just add the nmrChain for clarity
             ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None, None),
             ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None, None),
-            ('NmrAtoms', lambda nmrResidue: NmrResidueTable._getNmrAtomNames(nmrResidue), 'NmrAtoms in NmrResidue', None, None),
-            ('Peak count', lambda nmrResidue: '%3d ' % NmrResidueTable._getNmrResiduePeakCount(nmrResidue),
+            ('NmrAtoms', lambda nmrResidue: NmrResidueTableWidget._getNmrAtomNames(nmrResidue), 'NmrAtoms in NmrResidue', None, None),
+            ('Peak count', lambda nmrResidue: '%3d ' % NmrResidueTableWidget._getNmrResiduePeakCount(nmrResidue),
              'Number of peaks assigned to NmrResidue', None, None),
-            ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes',
-             lambda nmr, value: NmrResidueTable._setComment(nmr, value), None)
+            ('Comment', lambda nmr: NmrResidueTableWidget._getCommentText(nmr), 'Notes',
+             lambda nmr, value: NmrResidueTableWidget._setComment(nmr, value), None)
             ])
 
         selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
-
-        self.spacer = Spacer(self._widget, 5, 5,
-                             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
-                             grid=(0, 0), gridSpan=(1, 1))
-        self.ncWidget = NmrChainPulldown(parent=self._widget,
-                                         mainWindow=self.mainWindow, default=None,  #first NmrChain in project (if present)
-                                         grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
-                                         showSelectName=True,
-                                         sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
-                                         callback=self._selectionPulldownCallback,
-                                         )
-        self.spacer = Spacer(self._widget, 5, 5,
-                             QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
-                             grid=(2, 20), gridSpan=(1, 1))
-        self._widget.getLayout().setColumnStretch(20, 2)
-
-        # initialise the currently attached dataFrame
-        self._hiddenColumns = ['Pid', 'NmrChain']
-        self.dataFrameObject = None
+        actionCallback = self._actionCallback if actionCallback is None else actionCallback
 
         # initialise the table
         super().__init__(parent=parent,
@@ -374,21 +247,15 @@ class NmrResidueTable(GuiTable):
                          )
         self.moduleParent = moduleParent
 
-        # Notifier object to update the table if the peaks change
-        self._peakNotifier = None
-
-        if nmrChain is not None:
-            self._selectNmrChain(nmrChain)
-
         self.setTableNotifiers(tableClass=NmrChain,
                                className=self.attributeName,
-                               tableSelection='_nmrChain',
+                               tableSelection='_table',
                                rowClass=NmrResidue,
                                cellClassNames=[(NmrAtom, 'nmrResidue'), (_OldChemicalShift, 'nmrAtom')],
                                tableName='nmrChain', rowName='nmrResidue',
-                               changeFunc=self.displayTableForNmrChain,
-                               updateFunc=self._update,
-                               pullDownWidget=self.ncWidget,
+                               # changeFunc=self.displayTableForNmrChain, # might be renamed|deleted
+                               # updateFunc=self._update,
+                               # pullDownWidget=self.moduleParent._modulePulldown,
                                callBackClass=NmrResidue,
                                selectCurrentCallBack=self._selectOnTableCurrentNmrResiduesNotifierCallback,
                                moduleParent=moduleParent)
@@ -396,20 +263,19 @@ class NmrResidueTable(GuiTable):
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
 
-        # put into subclass
-        self._activePulldownClass = None
-        self._activeCheckbox = None
+    @property
+    def table(self):
+        """Return the current table
+        """
+        return self._table
 
     def _processDroppedItems(self, data):
+        """CallBack for Drop events
         """
-        CallBack for Drop events
-        """
-        pids = data.get('pids', [])
-        self._handleDroppedItems(pids, NmrChain, self.ncWidget)
+        pass
 
     def addWidgetToTop(self, widget, col=2, colSpan=1):
-        """
-        Convenience to add a widget to the top of the table; col >= 2
+        """Convenience to add a widget to the top of the table; col >= 2
         """
         if col < 2:
             raise RuntimeError('Col has to be >= 2')
@@ -418,12 +284,12 @@ class NmrResidueTable(GuiTable):
         # self._widget.setFixedSize(self._widget.sizeHint())
 
     def addWidgetToPos(self, widget, row=0, col=2, rowSpan=1, colSpan=1, overrideMinimum=False, alignment=None):
-        """
-        Convenience to add a widget to the top of the table; col >= 2
+        """Convenience to add a widget to the top of the table; col >= 2
         """
         if col < 2 and not overrideMinimum:
             raise RuntimeError('Col has to be >= 2')
         self._widget.getLayout().addWidget(widget, row, col, rowSpan, colSpan)
+
         # if alignment is not None:
         #     self._widget.getLayout().setAlignment(widget, alignment)
         # widget.setFixedSize(widget.sizeHint())
@@ -432,30 +298,11 @@ class NmrResidueTable(GuiTable):
     def _setWidgetHeight(self, height):
         self._widgetScrollArea.setFixedHeight(height)
 
-    def _selectNmrChain(self, nmrChain=None):
-        """
-        Manually select a NmrChain from the pullDown
-        """
-        if nmrChain is None:
-            # logger.warning('select: No NmrChain selected')
-            # raise ValueError('select: No NmrChain selected')
-            self.ncWidget.selectFirstItem()
-        else:
-            if not isinstance(nmrChain, NmrChain):
-                logger.warning('select: Object is not of type NmrChain')
-                raise TypeError('select: Object is not of type NmrChain')
-            else:
-                for widgetObj in self.ncWidget.textList:
-                    if nmrChain.pid == widgetObj and self._nmrChain != nmrChain:
-                        self._nmrChain = nmrChain
-                        self.ncWidget.select(self._nmrChain.pid)
-
     def defaultActionCallback(self, data):
+        """default Action Callback if not defined in the parent Module
+        If current strip contains the double-clicked nmrResidue will navigateToPositionInStrip
         """
-        default Action Callback if not defined in the parent Module
-        If current strip contains the double clicked nmrResidue will navigateToPositionInStrip
-        """
-        from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, _getCurrentZoomRatio
+        from ccpn.ui.gui.lib.StripLib import _getCurrentZoomRatio
 
         nmrResidue = data[Notifier.OBJECT]
 
@@ -470,34 +317,27 @@ class NmrResidueTable(GuiTable):
         else:
             logger.warning('Impossible to navigate to position. Set a current strip first')
 
-    def displayTableForNmrChain(self, nmrChain):
-        """
-        Display the table for all NmrResidue's of nmrChain
-        """
-        self.ncWidget.select(nmrChain.pid)
-        self._update(nmrChain)
+    #=========================================================================================
+    # Updates
+    #=========================================================================================
 
-    def _maximise(self):
+    def _update(self):
+        """Update the table with NmrResidues of nmrChain
         """
-        refresh the table on a maximise event
-        """
-        if self._nmrChain:
-            self.displayTableForNmrChain(self._nmrChain)
+        if self._table:
+            self.populateTable(rowObjects=self._table.nmrResidues,
+                               columnDefs=self.NMRcolumns,
+                               selectedObjects=self.current.nmrResidues
+                               )
         else:
             self.clear()
 
-    def _update(self, nmrChain):
-        """
-        Update the table with NmrResidues of nmrChain
-        """
-        self.populateTable(rowObjects=nmrChain.nmrResidues,
-                           columnDefs=self.NMRcolumns,
-                           selectedObjects=self.current.nmrResidues
-                           )
+    #=========================================================================================
+    # Widget callbacks
+    #=========================================================================================
 
     def _selectionCallback(self, data):
-        """
-        Notifier Callback for selecting a row in the table
+        """Notifier Callback for selecting a row in the table
         """
         selected = data[Notifier.OBJECT]
 
@@ -511,58 +351,39 @@ class NmrResidueTable(GuiTable):
             # TODO:ED this should never be called, and where is it?
             self.current.clearNmrResidues()
 
-        NmrResidueTableModule.currentCallback = {'object': self._nmrChain, 'table': self}
-
-    def _selectionPulldownCallback(self, item):
-        """
-        Notifier Callback for selecting NmrChain
-        """
-        self._nmrChain = self.project.getByPid(item)
-        logger.debug('>selectionPulldownCallback>', item, type(item), self._nmrChain)
-        if self._nmrChain is not None:
-            self.displayTableForNmrChain(self._nmrChain)
-
-            if self._activePulldownClass and self._activeCheckbox and \
-                    self._nmrChain != self.current.nmrChain and self._activeCheckbox.isChecked():
-                self.current.nmrChain = self._nmrChain
-        else:
-            self.clearTable()
+        NmrResidueTableModule.currentCallback = {'object': self._table, 'table': self}
 
     def _selectOnTableCurrentNmrResiduesNotifierCallback(self, data):
-        """
-        callback from a notifier to select the current NmrResidue
+        """callback from a notifier to select the current NmrResidue
         :param data:
         """
         currentNmrResidues = data['value']
         self._selectOnTableCurrentNmrResidues(currentNmrResidues)
 
     def _selectOnTableCurrentNmrResidues(self, currentNmrResidues):
-        """
-        highlight  current NmrResidues on the opened table
+        """highlight  current NmrResidues on the opened table
         """
         self.highlightObjects(currentNmrResidues)
 
     @staticmethod
     def _getNmrAtomNames(nmrResidue):
-        """
-        Returns a sorted list of NmrAtom names
+        """Returns a sorted list of NmrAtom names
         """
         return ', '.join(sorted(set([atom.name for atom in nmrResidue.nmrAtoms if not atom.isDeleted]),
                                 key=CcpnSorting.stringSortKey))
 
     @staticmethod
     def _getNmrResiduePeakCount(nmrResidue):
-        """
-        Returns peak list count
+        """Returns peak list count
         """
         l1 = [peak for atom in nmrResidue.nmrAtoms if not atom.isDeleted for peak in atom.assignedPeaks if not peak.isDeleted]
         return len(set(l1))
 
-    def _getPullDownSelection(self):
-        return self.ncWidget.getText()
-
-    def _selectPullDown(self, value):
-        self.ncWidget.select(value)
+    # def _getPullDownSelection(self):
+    #     return self.moduleParent._modulePulldown.getText()
+    #
+    # def _selectPullDown(self, value):
+    #     self.moduleParent._modulePulldown.select(value)
 
     def _setContextMenu(self, enableExport=True, enableDelete=True):
         """Subclass guiTable to insert new merge items to top of context menu
@@ -648,7 +469,8 @@ class NmrResidueTable(GuiTable):
                 from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import markNmrAtoms
 
                 # optionally clear the marks
-                if self.moduleParent.nmrResidueTableSettings.autoClearMarksWidget.checkBox.isChecked():
+                # if self.moduleParent.nmrResidueTableSettings.autoClearMarksWidget.checkBox.isChecked():
+                if self._autoClearMarksCheckBox.isChecked():
                     self.mainWindow.clearMarks()
 
                 markNmrAtoms(self.mainWindow, currentNmrResidue.nmrAtoms)
@@ -658,38 +480,309 @@ KD = 'Kd'
 Deltas = 'Ddelta'
 
 
-class _CSMNmrResidueTable(NmrResidueTable):
+#=========================================================================================
+# NmrResidueTableFrame
+#=========================================================================================
+
+class NmrResidueTableFrame(Frame):
+    """Frame containing the pulldown and the table widget
     """
-    Custom nmrResidue Table with extra columns used in the ChemicalShiftsMapping Module
+    _TableWidget = NmrResidueTableWidget
+    _activePulldownClass = None
+    _activeCheckbox = None
+
+    def __init__(self, parent, mainWindow=None, moduleParent=None,
+                 nmrChain=None, selectFirstItem=False, **kwds):
+        super().__init__(parent, setLayout=True, **kwds)
+
+        # Derive application, project, and current from mainWindow
+        self.mainWindow = mainWindow
+        if mainWindow:
+            self.application = mainWindow.application
+            self.project = mainWindow.application.project
+            self.current = mainWindow.application.current
+        else:
+            self.application = self.project = self.current = None
+        self._table = None
+        self.moduleParent = moduleParent
+
+        # add the widgets
+        self._setWidgets(mainWidget=self)
+
+        if nmrChain is not None:
+            self.selectTable(nmrChain)
+        elif selectFirstItem:
+            self._modulePulldown.selectFirstItem()
+
+    def _setWidgets(self, mainWidget=None):
+        """Set up the widgets for the module
+        """
+        # add to main widget area
+        _topWidget = mainWidget
+
+        # main widgets at the top
+        row = 0
+        Spacer(_topWidget, 5, 5,
+               QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
+               grid=(row, 0), gridSpan=(1, 1))
+
+        row += 1
+        gridHPos = 0
+        self._modulePulldown = NmrChainPulldown(parent=_topWidget,
+                                                mainWindow=self.mainWindow,
+                                                grid=(row, gridHPos), gridSpan=(1, 1), minimumWidths=(0, 100),
+                                                showSelectName=True,
+                                                sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
+                                                callback=self._selectionPulldownCallback)
+
+        # fixed height
+        self._modulePulldown.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
+
+        row += 1
+        self.spacer = Spacer(_topWidget, 5, 5,
+                             QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
+                             grid=(row, 1), gridSpan=(1, 1))
+        _topWidget.getLayout().setColumnStretch(6, 2)
+
+        # main window
+        _hidden = ['Pid', 'NmrChain']
+
+        row += 1
+        self._tableWidget = self._TableWidget(parent=_topWidget,
+                                                  mainWindow=self.mainWindow,
+                                                  # moduleParent=self.moduleParent,
+                                                  setLayout=True,
+                                                  actionCallback=self.navigateToNmrResidueCallBack,
+                                                  multiSelect=True,
+                                                  grid=(row, 0), gridSpan=(1, 6),
+                                                  # hiddenColumns=_hidden,
+                                                  )
+
+        # set policy to fill the frame
+        self._tableWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+
+    def setActivePulldownClass(self, coreClass, checkBox):
+        """Set up the callback properties for changing the current object from the pulldown
+        """
+        self._activePulldownClass = coreClass
+        self._activeCheckbox = checkBox
+
+    @property
+    def table(self):
+        """Return the current table
+        """
+        return self._table
+
+    @property
+    def guiTable(self):
+        """Return the current table widget
+        """
+        return self._tableWidget
+
+    def selectTable(self, table=None):
+        """Manually select a table from the pullDown
+        """
+        if table is None:
+            self._modulePulldown.selectFirstItem()
+        else:
+            if not isinstance(table, self._tableWidget.tableClass):
+                logger.warning(f'select: Object is not of type {self._tableWidget.tableName}')
+                raise TypeError(f'select: Object is not of type {self._tableWidget.tableName}')
+            else:
+                self._modulePulldown.select(table.pid)
+
+    def _closeModule(self):
+        """CCPN-INTERNAL: used to close the module
+        """
+        self._modulePulldown.unRegister()
+        self._tableWidget._close()
+        super()._closeModule()
+
+    def _processDroppedItems(self, data):
+        """CallBack for Drop events
+        """
+        pids = data.get('pids', [])
+        self._handleDroppedItems(pids, NmrChain, self._modulePulldown)
+
+    def _handleDroppedItems(self, pids, objType, pulldown):
+        """handle dropping pids onto the table
+        :param pids: the selected objects pids
+        :param objType: the instance of the obj to handle. Eg. PeakList
+        :param pulldown: the pulldown of the module wich updates the table
+        :return: Actions: Select the dropped item on the table or/and open a new modules if multiple drops.
+        If multiple different obj instances, then asks first.
+        """
+        from ccpn.ui.gui.lib.MenuActions import _openItemObject
+
+        objs = [self.project.getByPid(pid) for pid in pids]
+
+        selectableObjects = [obj for obj in objs if isinstance(obj, objType)]
+        others = [obj for obj in objs if not isinstance(obj, objType)]
+        if len(selectableObjects) > 0:
+            _openItemObject(self.mainWindow, selectableObjects[1:])
+            pulldown.select(selectableObjects[0].pid)
+
+        else:
+            from ccpn.ui.gui.widgets.MessageDialog import showYesNo
+
+            othersClassNames = list(set([obj.className for obj in others if hasattr(obj, 'className')]))
+            if len(othersClassNames) > 0:
+                if len(othersClassNames) == 1:
+                    title, msg = 'Dropped wrong item.', 'Do you want to open the %s in a new module?' % ''.join(othersClassNames)
+                else:
+                    title, msg = 'Dropped wrong items.', 'Do you want to open items in new modules?'
+                openNew = showYesNo(title, msg)
+                if openNew:
+                    _openItemObject(self.mainWindow, others)
+
+    def _selectionPulldownCallback(self, item):
+        """Notifier Callback for selecting nmrChain from the pull down menu
+        """
+        self._table = self._modulePulldown.getSelectedObject()
+        self._tableWidget._table = self._table
+
+        # self._tableWidget._selectionPulldownCallback(self._table)
+        self._tableWidget._update()
+
+        # if self._table is not None:
+        #     self._tableWidget.populateTable(rowObjects=self._table.nmrResidues,
+        #                                     columnDefs=self._tableWidget._getTableColumns(self._table),
+        #                                     selectedObjects=self.current.nmrResidues)
+        # else:
+        #     self._tableWidget.populateEmptyTable()
+
+        # update the current object from the pulldown
+        if self._activePulldownClass and self._activeCheckbox and self._table != self.current.nmrChain and self._activeCheckbox.isChecked():
+            self.current.nmrChain = self._table
+
+    def _selectCurrentPulldownClass(self, data):
+        """Respond to change in current activePulldownClass
+        """
+        if self._activePulldownClass and self._activeCheckbox and self._activeCheckbox.isChecked():
+            self._tableWidget._table = self._table = self.current.nmrChain
+            self._tableWidget._update()
+
+            if self._table:
+                self._modulePulldown.select(self._table.pid, blockSignals=True)
+            else:
+                self._modulePulldown.setIndex(0, blockSignals=True)
+
+    def navigateToNmrResidueCallBack(self, data):
+        """Navigate in selected displays to nmrResidue; skip if none defined
+        """
+        from ccpn.core.lib.CallBack import CallBack
+
+        # handle a single nmrResidue - should always contain an object
+        objs = data[CallBack.OBJECT]
+        if not objs or not all(objs):
+            return
+        if isinstance(objs, (tuple, list)):
+            nmrResidue = objs[0]
+        else:
+            nmrResidue = objs
+
+        logger.debug('nmrResidue=%s' % str(nmrResidue.id if nmrResidue else None))
+        displays = []
+        if self.nmrResidueTableSettings.displaysWidget:
+            displays = self.nmrResidueTableSettings.displaysWidget.getDisplays()
+        else:
+            if self.current.strip:
+                displays = [self.current.strip.spectrumDisplay]
+        if len(displays) == 0 and self.nmrResidueTableSettings.displaysWidget:
+            logger.warning('Undefined display module(s); select in settings first')
+            showWarning('startAssignment', 'Undefined display module(s);\nselect in settings first')
+            return
+
+        from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
+
+        with undoBlockWithoutSideBar():
+            # optionally clear the marks
+            if self.nmrResidueTableSettings.autoClearMarksWidget.checkBox.isChecked():
+                self.application.ui.mainWindow.clearMarks()
+
+            newWidths = []
+
+            # follow the previous/next nmrResidues to navigate to the correct position
+            offset = nmrResidue.relativeOffset
+            nmrResidue = nmrResidue.mainNmrResidue
+            if offset is not None:
+                if offset < 0:
+                    for _next in range(-offset):
+                        _adjacent = nmrResidue.previousNmrResidue
+                        if not (_adjacent and _adjacent.mainNmrResidue):
+                            break
+                        nmrResidue = _adjacent.mainNmrResidue
+
+                elif offset > 0:
+                    for _next in range(offset):
+                        _adjacent = nmrResidue.nextNmrResidue
+                        if not (_adjacent and _adjacent.mainNmrResidue):
+                            break
+                        nmrResidue = _adjacent.mainNmrResidue
+
+            for specDisplay in displays:
+                if self.current.strip in specDisplay.strips:
+
+                    # just navigate to this strip
+                    navigateToNmrAtomsInStrip(self.current.strip,
+                                              nmrResidue.nmrAtoms,
+                                              widths=newWidths,
+                                              markPositions=self.nmrResidueTableSettings.markPositionsWidget.checkBox.isChecked(),
+                                              setNmrResidueLabel=True)
+
+                else:
+                    #navigate to the specDisplay (and remove excess strips)
+                    if len(specDisplay.strips) > 0:
+                        newWidths = []
+                        navigateToNmrResidueInDisplay(nmrResidue, specDisplay, stripIndex=0,
+                                                      widths=newWidths,  #['full'] * len(display.strips[0].axisCodes),
+                                                      showSequentialResidues=(len(specDisplay.axisCodes) > 2) and
+                                                                             self.nmrResidueTableSettings.sequentialStripsWidget.checkBox.isChecked(),
+                                                      markPositions=self.nmrResidueTableSettings.markPositionsWidget.checkBox.isChecked()
+                                                      )
+
+                # open the other headers to match
+                for strip in specDisplay.strips:
+                    if strip != self.current.strip and not strip.header.headerVisible:
+                        strip.header.reset()
+                        strip.header.headerVisible = True
+
+
+#=========================================================================================
+# _CSMNmrResidueTable
+#=========================================================================================
+
+class _CSMNmrResidueTableWidget(NmrResidueTableWidget):
+    """Custom nmrResidue Table with extra columns used in the ChemicalShiftsMapping Module
     """
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None,
                  checkBoxCallback=None, nmrChain=None, **kwds):
 
-        NmrResidueTable.__init__(self, parent=parent, mainWindow=mainWindow,
-                                 moduleParent=moduleParent,
-                                 actionCallback=actionCallback,
-                                 selectionCallback=selectionCallback,
-                                 checkBoxCallback=checkBoxCallback,
-                                 nmrChain=nmrChain,
-                                 multiSelect=True,
-                                 **kwds)
+        NmrResidueTableWidget.__init__(self, parent=parent, mainWindow=mainWindow,
+                                       moduleParent=moduleParent,
+                                       actionCallback=actionCallback,
+                                       selectionCallback=selectionCallback,
+                                       checkBoxCallback=checkBoxCallback,
+                                       nmrChain=nmrChain,
+                                       # multiSelect=True,
+                                       **kwds)
 
         self.NMRcolumns = ColumnClass([
             ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None, None),
             ('Pid', lambda nmrResidue: nmrResidue.pid, 'Pid of NmrResidue', None, None),
             ('_object', lambda nmrResidue: nmrResidue, 'Object', None, None),
-            ('Index', lambda nmrResidue: NmrResidueTable._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None, None),
+            ('Index', lambda nmrResidue: NmrResidueTableWidget._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None, None),
             ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None, None),
             ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None, None),
-            ('Selected', lambda nmrResidue: _CSMNmrResidueTable._getSelectedNmrAtomNames(nmrResidue), 'NmrAtoms selected in NmrResidue', None, None),
-            ('Spectra', lambda nmrResidue: _CSMNmrResidueTable._getNmrResidueSpectraCount(nmrResidue)
+            ('Selected', lambda nmrResidue: _CSMNmrResidueTableWidget._getSelectedNmrAtomNames(nmrResidue), 'NmrAtoms selected in NmrResidue', None, None),
+            ('Spectra', lambda nmrResidue: _CSMNmrResidueTableWidget._getNmrResidueSpectraCount(nmrResidue)
              , 'Number of spectra selected for calculating the deltas', None, None),
             (Deltas, lambda nmrResidue: nmrResidue._delta, '', None, None),
             (KD, lambda nmrResidue: nmrResidue._estimatedKd, '', None, None),
-            ('Include', lambda nmrResidue: nmrResidue._includeInDeltaShift, 'Include this residue in the Mapping calculation', lambda nmr, value: _CSMNmrResidueTable._setChecked(nmr, value), None),
+            ('Include', lambda nmrResidue: nmrResidue._includeInDeltaShift, 'Include this residue in the Mapping calculation', lambda nmr, value: _CSMNmrResidueTableWidget._setChecked(nmr, value), None),
             # ('Flag', lambda nmrResidue: nmrResidue._flag,  '',  None, None),
-            ('Comment', lambda nmr: NmrResidueTable._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTable._setComment(nmr, value), None)
+            ('Comment', lambda nmr: NmrResidueTableWidget._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTableWidget._setComment(nmr, value), None)
             ])  #[Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat)
 
         self._widget.setFixedHeight(45)
@@ -697,18 +790,14 @@ class _CSMNmrResidueTable(NmrResidueTable):
 
     @staticmethod
     def _setChecked(obj, value):
+        """CCPN-INTERNAL: Insert a comment into GuiTable
         """
-        CCPN-INTERNAL: Insert a comment into GuiTable
-        """
-
         obj._includeInDeltaShift = value
         obj._finaliseAction('change')
 
     @staticmethod
     def _getNmrResidueSpectraCount(nmrResidue):
-
-        """
-        CCPN-INTERNAL: Insert an index into ObjectTable
+        """CCPN-INTERNAL: Insert an index into ObjectTable
         """
         try:
             return nmrResidue.spectraCount
@@ -717,9 +806,7 @@ class _CSMNmrResidueTable(NmrResidueTable):
 
     @staticmethod
     def _getSelectedNmrAtomNames(nmrResidue):
-
-        """
-        CCPN-INTERNAL: Insert an index into ObjectTable
+        """CCPN-INTERNAL: Insert an index into ObjectTable
         """
         try:
             return ', '.join(nmrResidue.selectedNmrAtomNames)
@@ -727,10 +814,50 @@ class _CSMNmrResidueTable(NmrResidueTable):
             return None
 
     def _selectPullDown(self, value):
-        """ Used for automatic restoring of widgets """
-        self.ncWidget.select(value)
+        """Used for automatic restoring of widgets
+        """
+        self.moduleParent._modulePulldown.select(value)
         try:
             if self.chemicalShiftsMappingModule is not None:
                 self.chemicalShiftsMappingModule._updateModule()
         except Exception as e:
             getLogger().warning('Impossible update chemicalShiftsMappingModule from restoring %s' % e)
+
+
+#=========================================================================================
+# NmrResidueTableFrame
+#=========================================================================================
+
+class _CSMNmrResidueTableFrame(NmrResidueTableFrame):
+    """Frame containing the pulldown and the table widget
+    """
+    _TableWidget = _CSMNmrResidueTableWidget
+
+
+#=========================================================================================
+# main
+#=========================================================================================
+
+def main():
+    """Show the NmrResidueTable module
+    """
+    from ccpn.ui.gui.widgets.Application import newTestApplication
+    from ccpn.framework.Application import getApplication
+
+    # create a new test application
+    app = newTestApplication(interface='Gui')
+    application = getApplication()
+    mainWindow = application.ui.mainWindow
+
+    # add a module
+    _module = NmrResidueTableModule(mainWindow=mainWindow)
+    mainWindow.moduleArea.addModule(_module)
+
+    # show the mainWindow
+    app.start()
+
+
+if __name__ == '__main__':
+    """Call the test function
+    """
+    main()

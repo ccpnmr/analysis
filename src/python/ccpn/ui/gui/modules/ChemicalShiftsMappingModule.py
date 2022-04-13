@@ -68,8 +68,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-01 09:23:44 +0000 (Tue, March 01, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-04-13 19:28:54 +0100 (Wed, April 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -118,7 +118,7 @@ from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
-from ccpn.ui.gui.modules.NmrResidueTable import _CSMNmrResidueTable, KD, Deltas
+from ccpn.ui.gui.modules.NmrResidueTable import _CSMNmrResidueTableFrame, KD, Deltas
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.modules.PyMolUtil import _CSMSelection2PyMolFile
@@ -142,6 +142,7 @@ from ccpn.core.Project import Project
 from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar
 from ccpn.ui.gui.widgets.Font import Font, getFont
 from ccpn.util.Path import Path, aPath, fetchDir, joinPath
+
 
 # Default values on init
 DefaultConcentration = 0.0
@@ -250,18 +251,23 @@ class ChemicalShiftsMapping(CcpnModule):
     ######################################################################################################################
 
     def __init__(self, mainWindow, name='Chemical Shift Mapping', nmrChain=None, **kwds):
-        super().__init__(mainWindow=mainWindow, name=name, settingButton=True)
+        super().__init__(mainWindow=mainWindow, name=name, )  # settingButton=True)
 
         BarGraph.mouseClickEvent = self._barGraphClickEvent
         BarGraph.mouseDoubleClickEvent = self._navigateToNmrItems
 
+        # Derive application, project, and current from mainWindow
         self.mainWindow = mainWindow
+        if mainWindow:
+            self.application = mainWindow.application
+            self.project = mainWindow.application.project
+            self.current = mainWindow.application.current
+        else:
+            self.application = self.project = self.current = None
+
         self.relativeContribuitions = DefaultAtomWeights  # used in other classes (set in popup)
         self.selectedNmrAtomNames = []  # used in other classes  (set in popup)
         self._selectedSpectrumGroup = None
-        self.project = self.mainWindow.project
-        self.application = self.mainWindow.application
-        self.current = self.application.current
         self.scriptsPath = self.application.scriptsPath
         self.pymolScriptsPath = fetchDir(self.scriptsPath, 'pymol')
 
@@ -294,8 +300,8 @@ class ChemicalShiftsMapping(CcpnModule):
 
         if self.project:
             if len(self.project.nmrChains) > 0:
-                if self.nmrResidueTable.ncWidget.getIndex() == 0:
-                    self.nmrResidueTable.ncWidget.select(self.project.nmrChains[-1].pid)
+                if self.nmrResidueFrame._modulePulldown.getIndex() == 0:
+                    self.nmrResidueFrame._modulePulldown.select(self.project.nmrChains[-1].pid)
                     if len(self.project.spectrumGroups) > 0:
                         self.spectrumGroupPulldown.select(self.project.spectrumGroups[-1])
                         self._setThresholdLineBySTD()
@@ -330,11 +336,19 @@ class ChemicalShiftsMapping(CcpnModule):
         self.barGraphWidget = BarGraphWidget(self.mainWidget, application=self.application, backgroundColour=BackgroundColour)
         self._setBarGraphWidget()
 
-        self.nmrResidueTable = _CSMNmrResidueTable(parent=self.mainWidget, mainWindow=self.mainWindow,
-                                                   # selectionCallback=self._nmrTableSelectionCallback,
-                                                   actionCallback=self._customActionCallBack,
-                                                   checkBoxCallback=self._checkBoxCallback,
-                                                   setLayout=True, grid=(0, 0))
+        # add _CSMNmrResidueTableFrame frame which contains the pulldown and the table
+        self.nmrResidueFrame = _CSMNmrResidueTableFrame(parent=self.mainWidget, mainWindow=self.mainWindow,
+                                                        # selectionCallback=self._nmrTableSelectionCallback,
+                                                        # actionCallback=self._customActionCallBack,
+                                                        # checkBoxCallback=self._checkBoxCallback,
+                                                        # setLayout=True,
+                                                        grid=(0, 0))
+        self.nmrResidueTable = self.nmrResidueFrame.guiTable  # the GuiTable inside the frame
+
+        # add the callbacks
+        self.nmrResidueTable.setActionCallback(self._customActionCallBack)
+        self.nmrResidueTable.setCheckBoxCallback(self._checkBoxCallback)
+
         self.nmrResidueTable.chemicalShiftsMappingModule = self
         self.nmrResidueTable.displayTableForNmrChain = self._displayTableForNmrChain
         self.tabWidget = Tabs(self.mainWidget, setLayout=True)
@@ -357,18 +371,18 @@ class ChemicalShiftsMapping(CcpnModule):
         self.tabWidget.addTab(self.scatterFrame, 'Scatter')
 
         ## These buttons have to be inside the Table layout. Ugly solution but the only way to get them aligned to the rest.
-        self.showOnViewerButton = Button(self.nmrResidueTable._widget, tipText='Show on Molecular Viewer',
+        self.showOnViewerButton = Button(self.nmrResidueFrame, tipText='Show on Molecular Viewer',
                                          icon=self.showStructureIcon, callback=self._showOnMolecularViewer,
-                                         grid=(1, 1), hAlign='l')
+                                         grid=(1, 2), hAlign='l')
         self.showOnViewerButton.setFixedHeight(25)
-        self.updateButton1 = Button(self.nmrResidueTable._widget, text='', icon=self.updateIcon, tipText='Update all',
-                                    callback=self._updateModule, grid=(1, 2), hAlign='r')
+        self.updateButton1 = Button(self.nmrResidueFrame, text='', icon=self.updateIcon, tipText='Update all',
+                                    callback=self._updateModule, grid=(1, 3), hAlign='r')
         self.updateButton1.setFixedHeight(25)
 
-        self.hPlotsTableSplitter.addWidget(self.nmrResidueTable)
+        self.hPlotsTableSplitter.addWidget(self.nmrResidueFrame)
         self.hPlotsTableSplitter.addWidget(self.tabWidget)
         self.hPlotsTableSplitter.setStretchFactor(0, 1)
-        self.vBarTableSplitter.addWidget(self.hPlotsTableSplitter)  # Foundamental! The horizontal splitter MUST be added
+        self.vBarTableSplitter.addWidget(self.hPlotsTableSplitter)  # Fundamental! The horizontal splitter MUST be added
         # to the vertical as a widget before adding any other widgets to it ( to the vertical).
         # Then, only the vertical splitter is added to the main widget Layout.
         # Nested and nasty Qt.
@@ -661,7 +675,7 @@ class ChemicalShiftsMapping(CcpnModule):
     def _plotBindingCFromCurrent(self):
         # check current nmrResidues are present in the selected nmrChain. Otherwise keep the displayed plot
         isOk = False
-        nc = self.project.getByPid(self.nmrResidueTable.ncWidget.getText())
+        nc = self.project.getByPid(self.nmrResidueFrame._modulePulldown.getText())
         if nc:
             nrs = [nr for nr in self.current.nmrResidues if nr in nc.nmrResidues]
             if len(nrs) == len(self.current.nmrResidues):
@@ -693,7 +707,7 @@ class ChemicalShiftsMapping(CcpnModule):
                                       'pen': None}  # red default
                                 dd['pos'] = pair
                                 dd['data'] = peak
-                                if hasattr(spectrum, 'positiveContourColour'):  # colour from the spectrum. The only CCPN obj implemeted so far
+                                if hasattr(spectrum, 'positiveContourColour'):  # colour from the spectrum. The only CCPN obj implemented so far
                                     brush = pg.functions.mkBrush(hexToRgb(spectrum.positiveContourColour), width=10)
                                     dd['brush'] = brush
                                 points.append(dd)
@@ -1144,7 +1158,7 @@ class ChemicalShiftsMapping(CcpnModule):
         self._setThresholdLineBySTD()
 
     def _setThresholdLineBySTD(self):
-        nc = self.project.getByPid(self.nmrResidueTable.ncWidget.getText())
+        nc = self.project.getByPid(self.nmrResidueFrame._modulePulldown.getText())
         if nc:
             deltas = [n._delta for n in nc.nmrResidues if n._delta is not None]
             if len(deltas) > 0:
@@ -1246,8 +1260,8 @@ class ChemicalShiftsMapping(CcpnModule):
         else:
             spectra = []
         if self.nmrResidueTable:
-            if self.nmrResidueTable._nmrChain is not None:
-                for nmrResidue in self.nmrResidueTable._nmrChain.nmrResidues:
+            if self.nmrResidueTable.table is not None:
+                for nmrResidue in self.nmrResidueTable.table.nmrResidues:
                     if self._isInt(nmrResidue.sequenceCode):
                         self._updatedPeakCount(nmrResidue, spectra)
                         if nmrResidue._includeInDeltaShift:
@@ -1271,7 +1285,7 @@ class ChemicalShiftsMapping(CcpnModule):
                         else:
                             nmrResidue._delta = None
                 if not silent:
-                    self._updateTable(self.nmrResidueTable._nmrChain)
+                    self._updateTable(self.nmrResidueTable.table)
                     self._updateBarGraph()
                     self._plotScatters(self._getScatterData(), selectedObjs=self.current.nmrResidues)
                     self._plotBindingCFromCurrent()
@@ -1341,7 +1355,7 @@ class ChemicalShiftsMapping(CcpnModule):
             self._selectBarLabels(pss)
 
     def _getAllBindingCurvesDataFrameForChain(self):
-        nmrChainTxt = self.nmrResidueTable.ncWidget.getText()
+        nmrChainTxt = self.nmrResidueFrame._modulePulldown.getText()
         nmrChain = self.project.getByPid(nmrChainTxt)
         if nmrChain is not None:
             dataFrame, pkDf = self._getBindingCurves(nmrChain.nmrResidues)
@@ -1539,9 +1553,9 @@ class ChemicalShiftsMapping(CcpnModule):
 
     def _updateTable(self, nmrChain):
         """ Updates table based on the given nmrChain """
-        self.nmrResidueTable.ncWidget.select(nmrChain.pid)
-        self.nmrResidueTable._update(nmrChain)
-        self.nmrResidueTable._selectOnTableCurrentNmrResidues(self.current.nmrResidues)
+        self.nmrResidueFrame._modulePulldown.select(nmrChain.pid)
+        # self.nmrResidueTable._update(nmrChain)
+        # self.nmrResidueTable._selectOnTableCurrentNmrResidues(self.current.nmrResidues)
 
     def _updatedPeakCount(self, nmrResidue, spectra):
         if len(nmrResidue.nmrAtoms) > 0:
@@ -1554,7 +1568,7 @@ class ChemicalShiftsMapping(CcpnModule):
             return nmrResidue._spectraWithMissingPeaks
 
     def _clearModule(self):
-        self.nmrResidueTable.ncWidget.select(SELECT)
+        self.nmrResidueFrame._modulePulldown.select(SELECT)
 
     def _clearLegend(self, legend):
         while legend.layout.count() > 0:
@@ -1589,7 +1603,7 @@ class ChemicalShiftsMapping(CcpnModule):
             self._peakDeletedNotifier.unRegister()
             self._nrChangedNotifier.unRegister()
             self._nrDeletedNotifier.unRegister()
-            self.nmrResidueTable._close()
+            self.nmrResidueFrame._closeModule()
         except Exception as es:
             getLogger().warning(str(es))
         finally:
@@ -1659,6 +1673,7 @@ class _BackCompatibility():
                                                   'Impossible to select automatically the spectrumGroup')
                     break
 
+
 # if __name__ == '__main__':
 #   from PyQt5 import QtGui, QtWidgets
 #   from ccpn.ui.gui.widgets.Application import TestApplication
@@ -1681,3 +1696,31 @@ class _BackCompatibility():
 #
 #   app.start()
 #   win.close()
+
+#=========================================================================================
+# main
+#=========================================================================================
+
+def main():
+    """Show the ChemicalShiftsMapping module
+    """
+    from ccpn.ui.gui.widgets.Application import newTestApplication
+    from ccpn.framework.Application import getApplication
+
+    # create a new test application
+    app = newTestApplication(interface='Gui')
+    application = getApplication()
+    mainWindow = application.ui.mainWindow
+
+    # add a module
+    _module = ChemicalShiftsMapping(mainWindow=mainWindow)
+    mainWindow.moduleArea.addModule(_module)
+
+    # show the mainWindow
+    app.start()
+
+
+if __name__ == '__main__':
+    """Call the test function
+    """
+    main()

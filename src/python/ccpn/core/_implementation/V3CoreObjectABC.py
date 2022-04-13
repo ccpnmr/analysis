@@ -370,7 +370,7 @@ class V3CoreObjectABC(NotifierBase):
         # NB 'AbstractWrapperObject' not currently in use (Sep 2016), but kept for future needs
         iterator = (project._context2Notifiers.setdefault((name, action), OrderedDict())
                     for name in (className, 'AbstractWrapperObject'))
-        pendingNotifications = project._pendingNotifications
+        # pendingNotifications = project._pendingNotifications
 
         if action == 'rename':
             try:
@@ -382,30 +382,32 @@ class V3CoreObjectABC(NotifierBase):
                 self._resetIds(oldPid.id)
                 self._project._collectionList._resetItemPids(oldPid, self.pid)
 
-            # Call notifiers with special signature
-            if project._notificationSuspension:
-                for dd in iterator:
-                    for notifier, onceOnly in dd.items():
-                        pendingNotifications.append((notifier, onceOnly, self, oldPid))
-            else:
-                for dd in iterator:
-                    for notifier in tuple(dd):
-                        notifier(self, oldPid)
+            # # Call notifiers with special signature
+            # if project._notificationSuspension:
+            #     for dd in iterator:
+            #         for notifier, onceOnly in dd.items():
+            #             pendingNotifications.append((notifier, onceOnly, self, oldPid))
+            # else:
+
+            for dd in iterator:
+                for notifier in tuple(dd):
+                    notifier(self, oldPid)
 
             # for obj in self._getDirectChildren():  # no children defined for anything yet - consider later
             #     obj._finaliseAction('rename')
 
         else:
-            # Normal case - just call notifiers - as per AbstractWrapperObject
-            if project._notificationSuspension and action != 'delete':
-                # NB Deletion notifiers must currently be executed immediately
-                for dd in iterator:
-                    for notifier, onceOnly in dd.items():
-                        pendingNotifications.append((notifier, onceOnly, self))
-            else:
-                for dd in iterator:
-                    for notifier in tuple(dd):
-                        notifier(self)
+            # # Normal case - just call notifiers - as per AbstractWrapperObject
+            # if project._notificationSuspension and action != 'delete':
+            #     # NB Deletion notifiers must currently be executed immediately
+            #     for dd in iterator:
+            #         for notifier, onceOnly in dd.items():
+            #             pendingNotifications.append((notifier, onceOnly, self))
+            # else:
+
+            for dd in iterator:
+                for notifier in tuple(dd):
+                    notifier(self)
 
         # propagate the action to explicitly associated (generally child) instances
         for obj, action in self._finaliseChildren:

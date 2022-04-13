@@ -169,7 +169,7 @@ class CcpnModule(Dock, DropBase, NotifierBase):
     VERTICAL = 'vertical'
     labelOrientation = HORIZONTAL  # toplabel orientation
 
-    # overide in specific module implementations
+    # override in specific module implementations
     includeSettingsWidget = False
     maxSettingsState = 3  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
     defaultSettingsState = 0  # default state of the settings widget

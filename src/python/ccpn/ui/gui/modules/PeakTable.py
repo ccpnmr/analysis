@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-06 18:52:08 +0100 (Wed, April 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-04-13 19:28:02 +0100 (Wed, April 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -58,11 +58,15 @@ class PeakTableModule(CcpnModule):
     maxSettingsState = 2
     settingsPosition = 'top'
 
+    activePulldownClass = None  # PeakList
+
     className = 'PeakTableModule'
     _allowRename = True
 
     def __init__(self, mainWindow=None, name='Peak Table',
                  peakList=None, selectFirstItem=False):
+        """Initialise the Module widgets
+        """
         super().__init__(mainWindow=mainWindow, name=name)
 
         # Derive application, project, and current from mainWindow
@@ -71,13 +75,15 @@ class PeakTableModule(CcpnModule):
             self.application = mainWindow.application
             self.project = mainWindow.application.project
             self.current = mainWindow.application.current
+        else:
+            self.application = self.project = self.current = None
         self._table = None
 
         # add the widgets
         self._setWidgets()
 
         if peakList is not None:
-            self._selectTable(peakList)
+            self.selectTable(peakList)
         elif selectFirstItem:
             self._modulePulldown.selectFirstItem()
 
@@ -144,17 +150,17 @@ class PeakTableModule(CcpnModule):
         """
         self._selectionPulldownCallback(None)
 
-    def _selectTable(self, peakList=None):
-        """Manually select a peakList from the pullDown
+    def selectTable(self, table=None):
+        """Manually select a table from the pullDown
         """
-        if peakList is None:
+        if table is None:
             self._modulePulldown.selectFirstItem()
         else:
-            if not isinstance(peakList, PeakList):
-                logger.warning('select: Object is not of type PeakList')
-                raise TypeError('select: Object is not of type PeakList')
+            if not isinstance(table, self._tableWidget.tableClass):
+                logger.warning(f'select: Object is not of type {self._tableWidget.tableName}')
+                raise TypeError(f'select: Object is not of type {self._tableWidget.tableName}')
             else:
-                self._modulePulldown.select(peakList.pid)
+                self._modulePulldown.select(table.pid)
 
     def _closeModule(self):
         """CCPN-INTERNAL: used to close the module
@@ -181,6 +187,10 @@ class PeakTableModule(CcpnModule):
         self._tableWidget._setPositionUnit(unit)
         self._tableWidget._updateAllModule()
 
+
+#=========================================================================================
+# PeakListTableWidget
+#=========================================================================================
 
 class PeakListTableWidget(GuiTable):
     """
@@ -397,9 +407,9 @@ class PeakListTableWidget(GuiTable):
 
         return ColumnClass(columnDefs)
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #=========================================================================================
     # Updates
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #=========================================================================================
 
     def _maximise(self):
         """Refresh the table on a maximise event
@@ -451,9 +461,9 @@ class PeakListTableWidget(GuiTable):
                         self._selectedPeakList = peakList
                         self.pLwidget.select(self._selectedPeakList.pid)
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Widgets callbacks
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #=========================================================================================
+    # Widget callbacks
+    #=========================================================================================
 
     def _getPullDownSelection(self):
         return self.pLwidget.getText()
@@ -535,6 +545,10 @@ class PeakListTableWidget(GuiTable):
         if value in UNITS:
             self.positionsUnit = value
 
+
+#=========================================================================================
+# _NewPeakListTableWidget
+#=========================================================================================
 
 import pandas as pd
 from types import SimpleNamespace
@@ -1154,7 +1168,7 @@ class _NewPeakListTableWidget(_SimplePandasTableViewProjectSpecific):
 #=========================================================================================
 
 def main():
-    """Show the peakListTable module
+    """Show the PeakTable module
     """
     from ccpn.ui.gui.widgets.Application import newTestApplication
     from ccpn.framework.Application import getApplication

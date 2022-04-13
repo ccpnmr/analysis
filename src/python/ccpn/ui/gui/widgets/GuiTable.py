@@ -607,6 +607,13 @@ class GuiTable(TableWidget, Base):
     def setActionCallback(self, actionCallback):
         # enable callbacks
         self._actionCallback = actionCallback
+
+        for act in [self._doubleClickCallback, self._defaultDoubleClick]:
+            try:
+                self.doubleClicked.disconnect(act)
+            except Exception:
+                getLogger().debug2('nothing to disconnect')
+
         if self._actionCallback:
             self.doubleClicked.connect(self._doubleClickCallback)
         else:
@@ -615,6 +622,10 @@ class GuiTable(TableWidget, Base):
     def setSelectionCallback(self, selectionCallback):
         # enable callbacks
         self._selectionCallback = selectionCallback
+
+    def setCheckBoxCallback(self, checkBoxCallback):
+        # enable callback on the checkboxes
+        self._checkBoxCallback = checkBoxCallback
 
     def _handleDroppedItems(self, pids, objType, pulldown):
         """

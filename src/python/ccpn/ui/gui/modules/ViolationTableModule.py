@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-22 11:25:37 +0000 (Tue, March 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-04-21 18:53:46 +0100 (Thu, April 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -115,7 +115,7 @@ class ViolationTableModule(CcpnModule):
         self._splitter.setSizes([1000, 2000])
 
         # add the guiTable to the bottom
-        self._tableWidget = _tableWidget(parent=_bottomWidget,
+        self._tableWidget = _TableWidget(parent=_bottomWidget,
                                          mainWindow=self.mainWindow,
                                          moduleParent=self,
                                          setLayout=True,
@@ -265,14 +265,14 @@ class ViolationTableModule(CcpnModule):
 
 
 #=========================================================================================
-# _tableWidget
+# _TableWidget
 #=========================================================================================
 
-class _tableWidget(_SimplePandasTableView):
+class _TableWidget(_SimplePandasTableView):
     """
     Class to present a ViolationTable
     """
-    className = '_tableWidget'
+    className = '_TableWidget'
     attributeName = KlassTable._pluralLinkName
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, **kwds):
@@ -308,6 +308,9 @@ class _tableWidget(_SimplePandasTableView):
 
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
+
+        # may refactor the remaining modules so this isn't needed
+        self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
 
     def _processDroppedItems(self, data):
         """

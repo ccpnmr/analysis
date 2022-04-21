@@ -492,7 +492,11 @@ class GuiTable(TableWidget, Base):
         # add a widget handler to give a clean corner widget for the scroll area
         self._cornerDisplay = ScrollBarVisibilityWatcher(self)
 
-        self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
+        try:
+            # may refactor the remaining modules so this isn't needed
+            self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
+        except:
+            getLogger().debug2(f'{self.__class__.__name__} has no _widgetScrollArea')
 
     def _blockTableEvents(self, blanking=True, _disableScroll=False, _widgetState=None):
         """Block all updates/signals/notifiers in the table.

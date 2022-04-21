@@ -114,7 +114,7 @@ class DataTableModule(CcpnModule):
         self._splitter.setSizes([1000, 2000])
 
         # add the guiTable to the bottom
-        self._tableWidget = _tableWidget(parent=_bottomWidget,
+        self._tableWidget = _TableWidget(parent=_bottomWidget,
                                          mainWindow=self.mainWindow,
                                          moduleParent=self,
                                          setLayout=True,
@@ -233,14 +233,14 @@ class DataTableModule(CcpnModule):
 
 
 #=========================================================================================
-# _tableWidget
+# _TableWidget
 #=========================================================================================
 
-class _tableWidget(_SimplePandasTableView, _SearchTableView):
+class _TableWidget(_SimplePandasTableView, _SearchTableView):
     """
     Class to present a DataTable
     """
-    className = '_tableWidget'
+    className = '_TableWidget'
     attributeName = KlassTable._pluralLinkName
 
     defaultHidden = []
@@ -267,6 +267,10 @@ class _tableWidget(_SimplePandasTableView, _SearchTableView):
         # Initialise the scroll widget and common settings
         self._initTableCommonWidgets(parent, **kwds)
 
+        # initialise the currently attached dataFrame
+        self._hiddenColumns = []
+        self.dataFrameObject = None
+
         # initialise the table
         super().__init__(parent=parent,
                          showHorizontalHeader=True,
@@ -276,6 +280,9 @@ class _tableWidget(_SimplePandasTableView, _SearchTableView):
 
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
+
+        # may refactor the remaining modules so this isn't needed
+        self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
 
         self._initSearchTableView()
 

@@ -555,12 +555,12 @@ class PlaneAxisWidget(_OpenGLFrameABC):
         self._axisLabel.setText(strip.axisCodes[axis] + ':')
         self._axisLabel.setToolTip(strip.axisCodes[axis])
         callbacks = {
-            '_previousPlane' : self._previousPlane,
-            '_spinBoxChanged' : self._spinBoxChanged,
-            '_nextPlane' : self._nextPlane,
-            '_planeCountChanged' : self._planeCountChanged,
-            '_wheelEvent' : self._wheelEvent
-        }
+            '_previousPlane'    : self._previousPlane,
+            '_spinBoxChanged'   : self._spinBoxChanged,
+            '_nextPlane'        : self._nextPlane,
+            '_planeCountChanged': self._planeCountChanged,
+            '_wheelEvent'       : self._wheelEvent
+            }
         self._axisSelector.setCallbacks(callbacks)
         # self._axisSelector.setCallbacks((self._previousPlane,
         #                                  self._spinBoxChanged,
@@ -1268,10 +1268,13 @@ class StripHeaderWidget(_OpenGLFrameABC):
     def _processNotifier(self, data):
         """Process the notifiers for the strip header
         """
+        if self.strip.isDeleted:
+            return
+
         trigger = data[Notifier.TRIGGER]
         obj = data[Notifier.OBJECT]
 
-        if trigger == 'rename':
+        if trigger == Notifier.RENAME:
             oldPid = data[Notifier.OLDPID]
 
             for stripPos in STRIPPOSITIONS:

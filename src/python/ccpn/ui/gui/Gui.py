@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-08 22:14:25 +0000 (Tue, March 08, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-04-26 16:42:27 +0100 (Tue, April 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -450,16 +450,19 @@ class Gui(Ui):
         if not dataLoader.createNewProject:
             raise RuntimeError('DataLoader %s does not create a new project')
 
-        if not self.project.isTemporary:
-            message = 'Do you really want to open a new project (current project will be closed %s)?' % \
-                      (' and any changes will be lost' if self.project.isModified else '')
-            _ok = MessageDialog.showYesNo('Load Project', message, parent=self.mainWindow)
-            if not _ok:
-                return None
+        oldProjectLoader = None
+        oldProjectIsTemporary = True
+        if self.project:
+            if not self.project.isTemporary:
+                message = 'Do you really want to open a new project (current project will be closed %s)?' % \
+                          (' and any changes will be lost' if self.project.isModified else '')
+                _ok = MessageDialog.showYesNo('Load Project', message, parent=self.mainWindow)
+                if not _ok:
+                    return None
 
-        # Some error recovery; store info to re-open the current project (or a new default)
-        oldProjectLoader = CcpNmrV3ProjectDataLoader(self.project.path)
-        oldProjectIsTemporary = self.project.isTemporary
+            # Some error recovery; store info to re-open the current project (or a new default)
+            oldProjectLoader = CcpNmrV3ProjectDataLoader(self.project.path)
+            oldProjectIsTemporary = self.project.isTemporary
 
         try:
             with MessageDialog.progressManager(self.mainWindow, 'Loading project %s ... ' % dataLoader.path):
@@ -482,16 +485,17 @@ class Gui(Ui):
             MessageDialog.showError('Error loading Project:', f'{es}', parent=self)
 
             # Try to restore the state
+            newProject = None
             if oldProjectIsTemporary:
                 newProject = self.application._newProject()
-            else:
+            elif oldProjectLoader:
                 newProject = oldProjectLoader.load()[0]  # dataLoaders return a list
 
-            # The next two lines are essential to have the QT main event loop associated
-            # with the new window; without these, the programs just terminates
-            newProject._mainWindow.show()
-            QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
-
+            if newProject:
+                # The next two lines are essential to have the QT main event loop associated
+                # with the new window; without these, the programs just terminates
+                newProject._mainWindow.show()
+                QtWidgets.QApplication.setActiveWindow(newProject._mainWindow)
 
         return newProject
 
@@ -513,8 +517,11 @@ class Gui(Ui):
 
         # load the project using the dataLoader;
         # We'll ask framework, who will pass it back to ui._loadProject
-        newProject = self.application._loadData([dataLoader])
-        return newProject
+        if (objs := self.application._loadData([dataLoader])):
+            if len(objs) == 1:
+                return objs[0]
+
+        return None
 
     def saveProjectAs(self, newPath=None, overwrite:bool=False) -> bool:
         """Opens save Project to newPath.

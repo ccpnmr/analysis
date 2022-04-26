@@ -69,7 +69,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-13 19:28:54 +0100 (Wed, April 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-04-26 13:55:57 +0100 (Tue, April 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1259,36 +1259,35 @@ class ChemicalShiftsMapping(CcpnModule):
             spectra = sg.spectra
         else:
             spectra = []
-        if self.nmrResidueTable:
-            if self.nmrResidueTable.table is not None:
-                for nmrResidue in self.nmrResidueTable.table.nmrResidues:
-                    if self._isInt(nmrResidue.sequenceCode):
-                        self._updatedPeakCount(nmrResidue, spectra)
-                        if nmrResidue._includeInDeltaShift:
-                            nmrResidue.spectraCount = len(spectra)
-                            nmrResidueAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
-                            nmrResidue.selectedNmrAtomNames = [atom for atom in nmrResidueAtoms if atom in selectedAtomNames]
-                            nmrResidue._delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=spectra, atomWeights=weights)
+        if self.nmrResidueTable and self.nmrResidueTable._table is not None:
+            for nmrResidue in self.nmrResidueTable._table.nmrResidues:
+                if self._isInt(nmrResidue.sequenceCode):
+                    self._updatedPeakCount(nmrResidue, spectra)
+                    if nmrResidue._includeInDeltaShift:
+                        nmrResidue.spectraCount = len(spectra)
+                        nmrResidueAtoms = [atom.name for atom in nmrResidue.nmrAtoms]
+                        nmrResidue.selectedNmrAtomNames = [atom for atom in nmrResidueAtoms if atom in selectedAtomNames]
+                        nmrResidue._delta = getNmrResidueDeltas(nmrResidue, selectedAtomNames, mode=mode, spectra=spectra, atomWeights=weights)
 
-                            df, peaksdf = self._getBindingCurves([nmrResidue])
-                            bindingCurves = self._getScaledBindingCurves(df)
-                            if bindingCurves is not None:
-                                plotData = bindingCurves.replace(np.nan, 0)
-                                columns = df.columns
-                                y = plotData.values.flatten(order='F')
-                                xss = np.array([columns] * plotData.shape[0])
-                                x = xss.flatten(order='F')
-                                kd = _getKd(oneSiteBindingCurve, x, y)
-                                if not kd:
-                                    getLogger().debug('Kd not set for nmrResidue %s' % nmrResidue.pid)
-                                nmrResidue._estimatedKd = kd
-                        else:
-                            nmrResidue._delta = None
-                if not silent:
-                    self._updateTable(self.nmrResidueTable.table)
-                    self._updateBarGraph()
-                    self._plotScatters(self._getScatterData(), selectedObjs=self.current.nmrResidues)
-                    self._plotBindingCFromCurrent()
+                        df, peaksdf = self._getBindingCurves([nmrResidue])
+                        bindingCurves = self._getScaledBindingCurves(df)
+                        if bindingCurves is not None:
+                            plotData = bindingCurves.replace(np.nan, 0)
+                            columns = df.columns
+                            y = plotData.values.flatten(order='F')
+                            xss = np.array([columns] * plotData.shape[0])
+                            x = xss.flatten(order='F')
+                            kd = _getKd(oneSiteBindingCurve, x, y)
+                            if not kd:
+                                getLogger().debug('Kd not set for nmrResidue %s' % nmrResidue.pid)
+                            nmrResidue._estimatedKd = kd
+                    else:
+                        nmrResidue._delta = None
+            if not silent:
+                self._updateTable(self.nmrResidueTable._table)
+                self._updateBarGraph()
+                self._plotScatters(self._getScatterData(), selectedObjs=self.current.nmrResidues)
+                self._plotBindingCFromCurrent()
 
     def _showOnMolecularViewer(self):
         """
@@ -1577,12 +1576,15 @@ class ChemicalShiftsMapping(CcpnModule):
 
     def restoreWidgetsState(self, **widgetsState):
 
-        if 'Spectra' or 'Groups' in widgetsState:
-            _BackCompatibility._spectraToSpectrumGroup(self, **widgetsState)
-        self.selectedNmrAtomNames = widgetsState.get(SelectedNmrAtomNames, {})
-        self.relativeContribuitions = widgetsState.get(RelativeContribuitions, {})
-        super().restoreWidgetsState(**widgetsState)
-        self._updateModule()
+        try:
+            if 'Spectra' or 'Groups' in widgetsState:
+                _BackCompatibility._spectraToSpectrumGroup(self, **widgetsState)
+            self.selectedNmrAtomNames = widgetsState.get(SelectedNmrAtomNames, {})
+            self.relativeContribuitions = widgetsState.get(RelativeContribuitions, {})
+            super().restoreWidgetsState(**widgetsState)
+            self._updateModule()
+        except Exception as es:
+            print(f'    {es}')
 
     @CcpnModule.widgetsState.getter
     def widgetsState(self):

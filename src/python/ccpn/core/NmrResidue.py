@@ -1178,6 +1178,14 @@ class NmrResidue(AbstractWrapperObject):
     def _finaliseAction(self, action: str):
         """Subclassed to handle associated offsetNMrResidues
         """
+        if action == 'delete':
+            # store the old parent information - may be required for some modules
+            self._oldNmrChain = self.nmrChain
+            self._oldNmrAtoms = tuple(self.nmrAtoms)
+        elif action == 'create':
+            self._oldNmrChain = None
+            self._oldNmrAtoms = ()
+
         if not super()._finaliseAction(action):
             return
 

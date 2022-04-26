@@ -187,7 +187,13 @@ class AbstractWrapperObject(NotifierBase):
         # Assign an unique id (per class) if it does not yet exists
         if not hasattr(self._wrappedData, '_uniqueId') or \
                 self._wrappedData._uniqueId is None:
+
+            # NOTE:ED - HACK to stop rogue/unnecessary notifiers
+            wrapperDict = self._wrappedData.__dict__
+            wrapperDict['inConstructor'] = True
             self._wrappedData._uniqueId = self.project._getNextUniqueIdValue(self.className)
+
+            del wrapperDict['inConstructor']
 
     @property
     def _uniqueId(self) -> int:

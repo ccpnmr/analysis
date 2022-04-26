@@ -204,7 +204,11 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
         # add a widget handler to give a clean corner widget for the scroll area
         self._cornerDisplay = ScrollBarVisibilityWatcher(self)
 
-        self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
+        try:
+            # may refactor the remaining modules so this isn't needed
+            self._widgetScrollArea.setFixedHeight(self._widgetScrollArea.sizeHint().height())
+        except:
+            getLogger().debug2(f'{self.__class__.__name__} has no _widgetScrollArea')
 
     def _preChangeSelectionOrderCallback(self, *args):
         """Handle updating the selection when the table is about to change, i.e., before sorting
@@ -849,7 +853,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
 
     # set the queue handling parameters
     _maximumQueueLength = 0
-    _logQueueTime = True
+    _logQueueTime = False
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None,
                  actionCallback=None, selectionCallback=None, checkBoxCallback=None,
@@ -1004,10 +1008,12 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         if event.button() == QtCore.Qt.RightButton:
             # stops the selection from the table when the right button is clicked
             self._rightClickedTableIndex = self.indexAt(event.pos())
-
-        self.setCurrent()
+        else:
+            self._rightClickedTableIndex = None
 
         super().mousePressEvent(event)
+
+        self.setCurrent()
 
     def getRightMouseItem(self):
         if self._rightClickedTableIndex:
@@ -1560,6 +1566,9 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
             # item is editable so skip the action
             return
 
+        if not self.actionCallback:
+            return
+
         # if not a _dataFrameObject is a normal guiTable.
         if self._df is None or self._df.empty:
             item = self.currentItem()
@@ -1609,6 +1618,23 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
                                     rowObject=obj)
 
                     self.actionCallback(data)
+
+    def setActionCallback(self, actionCallback=None):
+        # enable callbacks
+        self.actionCallback = actionCallback
+
+        for act in [self._doubleClickCallback]:
+            try:
+                self.doubleClicked.disconnect(act)
+            except Exception:
+                getLogger().debug2('nothing to disconnect')
+
+        if self.actionCallback:
+            self.doubleClicked.connect(self._doubleClickCallback)
+
+    def setCheckBoxCallback(self, checkBoxCallback):
+        # enable callback on the checkboxes
+        self._checkBoxCallback = checkBoxCallback
 
     #=========================================================================================
     # Table methods
@@ -1850,6 +1876,50 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         elif self._scheduler.isBusy:
             # caught during the queue processing event, need to restart
             self._scheduler.signalRestart()
+
+    #=========================================================================================
+    # Common object properties
+    #=========================================================================================
+
+    @staticmethod
+    def _getCommentText(obj):
+        """
+        CCPN-INTERNAL: Get a comment from GuiTable
+        """
+        try:
+            if obj.comment == '' or not obj.comment:
+                return ''
+            else:
+                return obj.comment
+        except:
+            return ''
+
+    @staticmethod
+    def _setComment(obj, value):
+        """
+        CCPN-INTERNAL: Insert a comment into object
+        """
+        obj.comment = value if value else None
+
+    @staticmethod
+    def _getAnnotation(obj):
+        """
+        CCPN-INTERNAL: Get an annotation from GuiTable
+        """
+        try:
+            if obj.annotation == '' or not obj.annotation:
+                return ''
+            else:
+                return obj.annotation
+        except:
+            return ''
+
+    @staticmethod
+    def _setAnnotation(obj, value):
+        """
+        CCPN-INTERNAL: Insert an annotation into object
+        """
+        obj.annotation = value if value else None
 
 
 #=========================================================================================

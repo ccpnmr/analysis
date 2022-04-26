@@ -31,7 +31,6 @@ from copy import deepcopy
 from functools import partial
 import numpy as np
 from time import time_ns
-from queue import Queue
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 from ccpn.core.Peak import Peak
@@ -81,7 +80,7 @@ class GuiStrip(Frame):
 
     # set the queue handling parameters
     _maximumQueueLength = 40
-    _logQueueTime = True
+    _logQueueTime = False
 
     def __init__(self, spectrumDisplay):
         """
@@ -116,8 +115,8 @@ class GuiStrip(Frame):
         #     openGLGrid = (1, 0)
         #     stripToolBarGrid = (2, 0)
 
-        headerGrid = (0, 0)
-        headerSpan = (1, 5)
+        # headerGrid = (0, 0)
+        # headerSpan = (1, 5)
         openGLGrid = (1, 0)
         openGlSpan = (10, 5)
         stripToolBarGrid = (11, 0)
@@ -394,7 +393,7 @@ class GuiStrip(Frame):
             self.gridAction.setChecked(visible)
         self._CcpnGLWidget._gridVisible = visible
 
-        # spawn a redraw of the GL windows
+        # spawn a redraw event of the GL windows
         self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
     # GWV 07/01/2022: removed
@@ -410,7 +409,7 @@ class GuiStrip(Frame):
     #     """
     #     self._CcpnGLWidget._xUnits = units
     #
-    #     # spawn a redraw of the GL windows
+    #     # spawn a redraw event of the GL windows
     #     self._CcpnGLWidget.GLSignals.emitPaintEvent()
     #
     # @property
@@ -425,7 +424,7 @@ class GuiStrip(Frame):
     #     """
     #     self._CcpnGLWidget._yUnits = units
     #
-    #     # spawn a redraw of the GL windows
+    #     # spawn a redraw event of the GL windows
     #     self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
     @property
@@ -442,7 +441,7 @@ class GuiStrip(Frame):
             self.sideBandsAction.setChecked(visible)
         self._CcpnGLWidget._sideBandsVisible = visible
 
-        # spawn a redraw of the GL windows
+        # spawn a redraw event event of the GL windows
         self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
     @property
@@ -459,7 +458,7 @@ class GuiStrip(Frame):
             self.spectrumBordersAction.setChecked(visible)
         self._CcpnGLWidget._spectrumBordersVisible = visible
 
-        # spawn a redraw of the GL windows
+        # spawn a redraw event event of the GL windows
         self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
     def toggleGrid(self):
@@ -486,7 +485,7 @@ class GuiStrip(Frame):
             self.crosshairAction.setChecked(visible)
         self._CcpnGLWidget._crosshairVisible = visible
 
-        # spawn a redraw of the GL windows
+        # spawn a redraw event of the GL windows
         self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
     def _toggleCrosshair(self):
@@ -771,7 +770,7 @@ class GuiStrip(Frame):
                             perm2 = [pp if pp is not None else -(cc + 1) for cc, pp in enumerate(perm)]
                             # print('>>>    ', perm, perm2)
 
-                            if len(set(perm2)) == len(perm2):  # ignore None's
+                            if len(set(perm2)) == len(perm2):  # ignore Nones
                                 self._createCommonMenuItem(currentStrip, includeAxisCodes, label, menuFunc, perm, position, strip)
 
                         # menuFunc.addItem(text=' - ')
@@ -891,7 +890,7 @@ class GuiStrip(Frame):
                 self._createObjectMark(multiplet, axisIndex)
 
     def _addItemsToCopyAxisFromMenusMainView(self):
-        """Setup the menu for the main view
+        """Set up the menu for the main view
         """
         # self._addItemsToCopyAxisFromMenus([self.copyAllAxisFromMenu, self.copyXAxisFromMenu, self.copyYAxisFromMenu],
         #                                    ['All', 'X', 'Y'])
@@ -900,7 +899,7 @@ class GuiStrip(Frame):
                                            (self.copyYAxisFromMenu, 'Y')))
 
     def _addItemsToCopyAxisFromMenusAxes(self, viewPort, thisMenu, is1D):
-        """Setup the menu for the axis views
+        """Set up the menu for the axis views
         """
         from ccpn.ui.gui.lib.GuiStripContextMenus import _addCopyMenuItems
 
@@ -943,7 +942,7 @@ class GuiStrip(Frame):
                 axisName.setEnabled(True if count else False)
 
     def _addItemsToMarkAxesMenuAxesView(self, viewPort, thisMenu):
-        """Setup the menu for the main view for marking axis codes
+        """Set up the menu for the main view for marking axis codes
         """
         indices = {BOTTOMAXIS: (0,), RIGHTAXIS: (1,)}
         if viewPort in indices.keys():
@@ -997,7 +996,7 @@ class GuiStrip(Frame):
     #     axisName = self.markAxesMenu
 
     def _addItemsToMatchAxisCodesFromMenusMainView(self):
-        """Setup the menu for the main view
+        """Set up the menu for the main view
         """
         self._addItemsToCopyAxisCodesFromMenus(0, self.matchXAxisCodeToMenu)
         self._addItemsToCopyAxisCodesFromMenus(1, self.matchYAxisCodeToMenu)
@@ -1283,7 +1282,7 @@ class GuiStrip(Frame):
                     strip._updatePivotLine(self._newPosition)
 
     def _updatePivotLine(self, newPosition):
-        """Respond to changes in the other strips
+        """Respond to change in the other strips
         """
         if not self.isDeleted and self.pivotLine:
             self._newPosition = newPosition
@@ -1400,7 +1399,7 @@ class GuiStrip(Frame):
                     # peakListView.buildSymbols = True
                     peakListView.buildLabels = True
 
-            # spawn a redraw of the GL windows
+            # spawn a redraw event of the GL windows
             self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
     @property
@@ -1434,7 +1433,7 @@ class GuiStrip(Frame):
         self.symbolLabelling = value
 
     def _emitSymbolChanged(self):
-        # spawn a redraw of the GL windows
+        # spawn a redraw event of the GL windows
         self._CcpnGLWidget.GLSignals._emitSymbolsChanged(source=None, strip=self,
                                                          symbolDict={SYMBOLTYPES           : self.symbolType,
                                                                      ANNOTATIONTYPES       : self.symbolLabelling,
@@ -1467,7 +1466,7 @@ class GuiStrip(Frame):
                     multipletListView.buildSymbols = True
                     multipletListView.buildLabels = True
 
-            # spawn a redraw of the GL windows
+            # spawn a redraw event of the GL windows
             self._CcpnGLWidget.GLSignals.emitPaintEvent()
 
     @property
@@ -1513,7 +1512,7 @@ class GuiStrip(Frame):
                                                          ])
 
     def _symbolsChangedInSettings(self, aDict):
-        """Respond to changes in the symbol values in the settings widget
+        """Respond to change in the symbol values in the settings widget
         """
         _symbolType = aDict[SYMBOLTYPES]
         _annotationsType = aDict[ANNOTATIONTYPES]
@@ -1885,12 +1884,12 @@ class GuiStrip(Frame):
 
     def zoomX(self, x1: float, x2: float):
         """
-        Zooms x axis of strip to the specified region
+        Zooms x-axis of strip to the specified region
         """
         self._CcpnGLWidget.zoomX(x1, x2)
 
     def zoomY(self, y1: float, y2: float):
-        """Zooms y axis of strip to the specified region
+        """Zooms y-axis of strip to the specified region
         """
         self._CcpnGLWidget.zoomY(y1, y2)
 
@@ -2269,7 +2268,7 @@ class GuiStrip(Frame):
                 specView.setVisible(specView.spectrum in spectra)
 
     def report(self):
-        """Generate a drawing object that can be added to reports
+        """Generate a drawing object that can be added to report
         :return reportlab drawing object:
         """
         if self._CcpnGLWidget:
@@ -2399,7 +2398,7 @@ class GuiStrip(Frame):
     def navigateToPosition(self, positions: List[float],
                            axisCodes: List[str] = None,
                            widths: List[float] = None):
-        """Navigate to positions, optionally setting widths of this Strip
+        """Navigate to position, optionally setting widths of this Strip
         """
         from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip
 

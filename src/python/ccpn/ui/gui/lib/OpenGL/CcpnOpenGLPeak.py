@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-06 18:52:08 +0100 (Wed, April 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-04-26 13:44:10 +0100 (Tue, April 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -161,12 +161,17 @@ class GLpeakListMethods():
                 self._changeSymbol(obj)
                 self._changeLabel(obj)
 
-        elif isinstance(obj, NmrAtom) and not obj.isDeleted:
+        elif isinstance(obj, NmrAtom):  # and not obj.isDeleted:
 
-            # update the labels on the peaks
-            for peak in obj.assignedPeaks:
-                self._changeSymbol(peak)
-                self._changeLabel(peak)
+            if obj.isDeleted:
+                # update the labels on the peaks
+                for peak in obj._oldAssignedPeaks:  # use the deleted attribute
+                    self._changeSymbol(peak)
+                    self._changeLabel(peak)
+            else:
+                for peak in obj.assignedPeaks:
+                    self._changeSymbol(peak)
+                    self._changeLabel(peak)
 
         elif isinstance(obj, PeakList):
             if trigger in [Notifier.DELETE]:

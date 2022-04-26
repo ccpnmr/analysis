@@ -30,7 +30,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-13 19:05:54 +0100 (Wed, April 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-04-26 13:35:21 +0100 (Tue, April 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -686,30 +686,41 @@ def _removeDuplicatedNotifiers(notifierQueue):
         if match not in scheduledQueue:
             scheduledQueue.add(match)
 
-            if trigger == Notifier.DELETE:
-                # can skip these two notifiers if DELETE found
-                scheduledQueue |= {(obj, Notifier.CREATE), (obj, Notifier.CHANGE), (obj, Notifier.RENAME)}
-
-                # discard ALL other notifiers, not needed with DELETE
-                executeQueue = list(filter(lambda val: val[1][Notifier.OBJECT] != obj, executeQueue))
-
-            elif trigger == Notifier.CREATE:
-                # can skip this notifier if CREATE found
-                scheduledQueue |= {(obj, Notifier.CHANGE), (obj, Notifier.RENAME)}
-
-                # discard CHANGE, RENAME notifiers
-                executeQueue = list(filter(lambda val: val[1][Notifier.OBJECT] != obj or
-                                                       val[1][Notifier.TRIGGER] not in [Notifier.CHANGE, Notifier.RENAME],
-                                           executeQueue))
-
-            elif trigger == Notifier.RENAME:
-                # can skip this notifier if RENAME found
-                scheduledQueue |= {(obj, Notifier.CHANGE),}
-
-                # discard CHANGE notifiers
-                executeQueue = list(filter(lambda val: val[1][Notifier.OBJECT] != obj or
-                                                       val[1][Notifier.TRIGGER] != Notifier.CHANGE,
-                                           executeQueue))
+            # if True:
+            #     # NOTE:ED - still not sure about this, disabled for the minute
+            #     #   doesn't work correctly with SequenceGraph
+            #     if trigger == Notifier.DELETE:
+            #         # # can skip these two notifiers if DELETE found
+            #         # scheduledQueue |= {(obj, Notifier.CHANGE), (obj, Notifier.RENAME), (obj, Notifier.CREATE)}
+            #         #
+            #         # # discard ALL other notifiers, not needed with DELETE
+            #         # executeQueue = list(filter(lambda val: val[1][Notifier.OBJECT] != obj, executeQueue))
+            #
+            #         # can skip this notifier if CREATE found
+            #         scheduledQueue |= {(obj, Notifier.CHANGE), (obj, Notifier.RENAME)}
+            #
+            #         # discard CHANGE, RENAME notifiers
+            #         executeQueue = list(filter(lambda val: val[1][Notifier.OBJECT] != obj or
+            #                                                val[1][Notifier.TRIGGER] not in [Notifier.CHANGE, Notifier.RENAME],
+            #                                    executeQueue))
+            #
+            #     if trigger == Notifier.CREATE:
+            #         # can skip this notifier if CREATE found
+            #         scheduledQueue |= {(obj, Notifier.CHANGE), (obj, Notifier.RENAME)}
+            #
+            #         # discard CHANGE, RENAME notifiers
+            #         executeQueue = list(filter(lambda val: val[1][Notifier.OBJECT] != obj or
+            #                                                val[1][Notifier.TRIGGER] not in [Notifier.CHANGE, Notifier.RENAME],
+            #                                    executeQueue))
+            #
+            #     elif trigger == Notifier.CHANGE:
+            #         # can skip this notifier if RENAME found
+            #         scheduledQueue |= {(obj, Notifier.RENAME),}
+            #
+            #         # discard CHANGE notifiers
+            #         executeQueue = list(filter(lambda val: val[1][Notifier.OBJECT] != obj or
+            #                                                val[1][Notifier.TRIGGER] not in [Notifier.RENAME],
+            #                                    executeQueue))
 
             # this is in reverse order
             executeQueue.append((func, data))

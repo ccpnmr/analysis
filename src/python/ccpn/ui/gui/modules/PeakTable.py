@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-13 19:28:02 +0100 (Wed, April 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-04-26 13:40:35 +0100 (Tue, April 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,17 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
+import pandas as pd
+from collections import OrderedDict
 from PyQt5 import QtWidgets
+
+from ccpn.core.PeakList import PeakList
+from ccpn.core.Peak import Peak
+from ccpn.core.NmrAtom import NmrAtom
+from ccpn.core.lib.CallBack import CallBack
+from ccpn.core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
+from ccpn.core.lib.DataFrameObject import DataFrameObject
+from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
@@ -36,11 +46,8 @@ from ccpn.ui.gui.widgets.Column import ColumnClass
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.lib.GuiStripContextMenus import _selectedPeaksMenuItem, _addMenuItems, \
     _getNdPeakMenuItems, _setEnabledAllItems
-from ccpn.core.PeakList import PeakList
-from ccpn.core.Peak import Peak
-from ccpn.core.NmrAtom import NmrAtom
-from ccpn.core.lib.CallBack import CallBack
-from ccpn.core.lib.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
+from ccpn.ui.gui.lib._SimplePandasTable import _SimplePandasTableViewProjectSpecific, _updateSimplePandasTable
+from ccpn.util.Common import makeIterableList
 from ccpn.util.Logging import getLogger
 
 
@@ -550,25 +557,6 @@ class PeakListTableWidget(GuiTable):
 # _NewPeakListTableWidget
 #=========================================================================================
 
-import pandas as pd
-from types import SimpleNamespace
-from time import time_ns
-from PyQt5 import QtCore
-from contextlib import contextmanager
-from collections import defaultdict, OrderedDict
-
-from ccpn.ui.gui.lib._SimplePandasTable import _SimplePandasTableViewProjectSpecific, _SimplePandasTableModel, \
-    _SimplePandasTableHeaderModel, _clearSimplePandasTable, _updateSimplePandasTable, _newSimplePandasTable
-from ccpn.ui.gui.widgets.Menu import Menu
-from ccpn.ui.gui.widgets.Font import setWidgetFont, getFontHeight, TABLEFONT
-from ccpn.ui.gui.widgets.ColumnViewSettings import ColumnViewSettingsPopup
-from ccpn.util.AttrDict import AttrDict
-from ccpn.core.lib.DataFrameObject import DataFrameObject, DATAFRAME_OBJECT
-from ccpn.core.lib.Notifiers import Notifier
-from ccpn.core.lib.Util import getParentObjectFromPid
-from ccpn.util.Common import makeIterableList
-
-
 class _NewPeakListTableWidget(_SimplePandasTableViewProjectSpecific):
     """Class to present a peakList Table
     """
@@ -630,29 +618,12 @@ class _NewPeakListTableWidget(_SimplePandasTableViewProjectSpecific):
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
 
-    def _postInitTableCommonWidgets(self):
-        from ccpn.ui.gui.widgets.DropBase import DropBase
-        from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
-        from ccpn.ui.gui.widgets.ScrollBarVisibilityWatcher import ScrollBarVisibilityWatcher
-
-        # add a dropped notifier to all tables
-        if self.moduleParent is not None:
-            # set the dropEvent to the mainWidget of the module, otherwise the event gets stolen by Frames
-            self.moduleParent.mainWidget._dropEventCallback = self._processDroppedItems
-
-        self.droppedNotifier = GuiNotifier(self,
-                                           [GuiNotifier.DROPEVENT], [DropBase.PIDS],
-                                           self._processDroppedItems)
-
-        # add a widget handler to give a clean corner widget for the scroll area
-        self._cornerDisplay = ScrollBarVisibilityWatcher(self)
-
     #=========================================================================================
     # Widget callbacks
     #=========================================================================================
 
     def actionCallback(self, data):
-        """If current strip contains the double clicked peak will navigateToPositionInStrip
+        """If current strip contains the double-clicked peak will navigateToPositionInStrip
         """
         from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip, _getCurrentZoomRatio
 
@@ -765,15 +736,17 @@ class _NewPeakListTableWidget(_SimplePandasTableViewProjectSpecific):
         # print(f'>>> _updateTableCallback')
         pass
 
-    def getCellToRows(self, cellItem, attribute):
+    @staticmethod
+    def getCellToRows(cellItem, attribute=None):
         """Get the list of objects which cellItem maps to for this table
         To be subclassed as required
         """
-        # classItem is usually a type such as PeakList, MultipletList
-        # with an attribute such as peaks/peaks
-
         # this is a step towards making guiTableABC and subclass for each table
-        return makeIterableList(getattr(cellItem, attribute, [])), Notifier.CHANGE
+        # return makeIterableList(getattr(cellItem, attribute, [])), Notifier.CHANGE
+
+        return makeIterableList(cellItem._oldAssignedPeaks) if cellItem.isDeleted \
+                   else makeIterableList(cellItem.assignedPeaks), \
+               Notifier.CHANGE
 
     def _updateCellCallback(self, data):
         """Notifier callback for updating the table
@@ -787,11 +760,6 @@ class _NewPeakListTableWidget(_SimplePandasTableViewProjectSpecific):
 
             if (attr := self.cellClassNames.get(type(cellData))):
                 rowObjs, _triggerType = self.getCellToRows(cellData, attr)
-
-            elif self.cellClassNames is not None:
-                # is a tuple, which is a single cell type
-                rowCallback = self.cellClassNames.attribute
-                rowObjs, _triggerType = self.getCellToRows(cellData, rowCallback)
 
             # update the correct row by calling row handler
             for rowObj in rowObjs:
@@ -810,52 +778,57 @@ class _NewPeakListTableWidget(_SimplePandasTableViewProjectSpecific):
         with self._blockTableSignals('_updateRowCallback'):
             obj = data[Notifier.OBJECT]
 
-            # check that the object belongs to the list that is being displayed
-            if self._df is None or obj is None:
+            # check that the dataframe and object are valid
+            if self._df is None:
+                getLogger().debug(f'{self.__class__.__name__}._updateRowCallback: dataFrame is None')
+                return
+            if obj is None:
+                getLogger().debug(f'{self.__class__.__name__}._updateRowCallback: callback object is undefined')
                 return
 
             trigger = data[Notifier.TRIGGER]
             try:
-                _data = self._df
-                dataIds = set(self._table.peaks)  # objects in the list
-                tableIds = set(self._df[self.OBJECTCOLUMN])
+                df = self._df
+                objSet = set(self._table.peaks)  # objects in the list
+                tableSet = set(df[self.OBJECTCOLUMN])  # objects currently in the table
 
                 if trigger == Notifier.DELETE:
                     # uniqueIds in the visible table
-                    if obj in (tableIds - dataIds):
+                    if obj in (tableSet - objSet):
                         # remove from the table
                         self.model()._deleteRow(obj)
 
                 elif trigger == Notifier.CREATE:
                     # uniqueIds in the visible table
-                    if obj in (dataIds - tableIds):
-                        newRow = self._newRowFromUniqueId(_data, obj, None)
+                    if obj in (objSet - tableSet):
                         # insert into the table
+                        newRow = self._newRowFromUniqueId(df, obj, None)
                         self.model()._insertRow(obj, newRow)
 
-                elif trigger in [Notifier.CHANGE, Notifier.RENAME]:
+                elif trigger == Notifier.CHANGE:
                     # uniqueIds in the visible table
-                    if obj in (dataIds & tableIds):
-                        newRow = self._newRowFromUniqueId(_data, obj, None)
-                        # visible table dataframe update
+                    if obj in (objSet & tableSet):
+                        # visible table dataframe update - object MUST be in the table
+                        newRow = self._newRowFromUniqueId(df, obj, None)
                         self.model()._updateRow(obj, newRow)
 
                 elif trigger == Notifier.RENAME:
-                    # not sure that I need this yet - should be the same as .CHANGE
-                    # currently duplicated above
-                    pass
+                    if obj in (objSet & tableSet):
+                        # visible table dataframe update
+                        newRow = self._newRowFromUniqueId(df, obj, None)
+                        self.model()._updateRow(obj, newRow)
+
+                    elif obj in (objSet - tableSet):
+                        # insert renamed object INTO the table
+                        newRow = self._newRowFromUniqueId(df, obj, None)
+                        self.model()._insertRow(obj, newRow)
+
+                    elif obj in (tableSet - objSet):
+                        # remove renamed object OUT of the table
+                        self.model()._deleteRow(obj)
 
             except Exception as es:
                 getLogger().debug2(f'Error updating row in table {es}')
-
-        # if _update:
-        #     getLogger().debug2('<updateRowCallback>', data['notifier'],
-        #                        self._tableData['tableSelection'],
-        #                        data['trigger'], data['object'])
-        #     _val = self.getSelectedObjects() or []
-        #     self._tableSelectionChanged.emit(_val)
-        #
-        # return _update
 
     def _searchCallBack(self, data):
         # print(f'>>> _searchCallBack')

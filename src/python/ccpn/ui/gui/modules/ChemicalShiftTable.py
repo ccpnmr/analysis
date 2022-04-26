@@ -999,23 +999,6 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
 
-    def _postInitTableCommonWidgets(self):
-        from ccpn.ui.gui.widgets.DropBase import DropBase
-        from ccpn.ui.gui.lib.GuiNotifier import GuiNotifier
-        from ccpn.ui.gui.widgets.ScrollBarVisibilityWatcher import ScrollBarVisibilityWatcher
-
-        # add a dropped notifier to all tables
-        if self.moduleParent is not None:
-            # set the dropEvent to the mainWidget of the module, otherwise the event gets stolen by Frames
-            self.moduleParent.mainWidget._dropEventCallback = self._processDroppedItems
-
-        self.droppedNotifier = GuiNotifier(self,
-                                           [GuiNotifier.DROPEVENT], [DropBase.PIDS],
-                                           self._processDroppedItems)
-
-        # add a widget handler to give a clean corner widget for the scroll area
-        self._cornerDisplay = ScrollBarVisibilityWatcher(self)
-
     #=========================================================================================
     # Widget callbacks
     #=========================================================================================
@@ -1236,54 +1219,51 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
             if obj.chemicalShiftList != self._table:
                 return
 
-            _update = False  # from original row update - need to check
-
             trigger = data[Notifier.TRIGGER]
             try:
-                _data = self._table._data
-                _data = _data[_data[CS_ISDELETED] == False]  # not deleted - should be the only visible ones
-                dataIds = set(_data[CS_UNIQUEID])
-                tableIds = set(self._df['Unique ID'])  # must be table column name, not reference name
+                df = self._table._data
+                df = df[df[CS_ISDELETED] == False]  # not deleted - should be the only visible ones
+                objSet = set(df[CS_UNIQUEID])
+                tableSet = set(self._df['Unique ID'])  # must be table column name, not reference name
 
                 if trigger == Notifier.DELETE:
                     # uniqueIds in the visible table
-                    if uniqueId in (tableIds - dataIds):
+                    if uniqueId in (tableSet - objSet):
                         # remove from the table
                         self.model()._deleteRow(uniqueId)
 
-                        # NOTE:ED - remember which row was deleted for undo?
-
                 elif trigger == Notifier.CREATE:
                     # uniqueIds in the visible table
-                    if uniqueId in (dataIds - tableIds):
-                        newRow = self._newRowFromUniqueId(_data, obj, uniqueId)
-
+                    if uniqueId in (objSet - tableSet):
                         # insert into the table
+                        newRow = self._newRowFromUniqueId(df, obj, uniqueId)
                         self.model()._insertRow(uniqueId, newRow)
 
                 elif trigger == Notifier.CHANGE:
                     # uniqueIds in the visible table
-                    if uniqueId in (dataIds & tableIds):
-                        newRow = self._newRowFromUniqueId(_data, obj, uniqueId)
-
-                        # visible table dataframe update
+                    if uniqueId in (objSet & tableSet):
+                        # visible table dataframe update - object MUST be in the table
+                        newRow = self._newRowFromUniqueId(df, obj, uniqueId)
                         self.model()._updateRow(uniqueId, newRow)
 
                 elif trigger == Notifier.RENAME:
-                    # not sure that I need this yet - should be the same as .CHANGE
-                    pass
+                    # included for completeness, but shouldn't be required for chemical-shifts
+                    if uniqueId in (objSet & tableSet):
+                        # visible table dataframe update
+                        newRow = self._newRowFromUniqueId(df, obj, uniqueId)
+                        self.model()._updateRow(uniqueId, newRow)
+
+                    elif uniqueId in (objSet - tableSet):
+                        # insert renamed object INTO the table
+                        newRow = self._newRowFromUniqueId(df, obj, uniqueId)
+                        self.model()._insertRow(uniqueId, newRow)
+
+                    elif uniqueId in (tableSet - objSet):
+                        # remove renamed object OUT of the table
+                        self.model()._deleteRow(uniqueId)
 
             except Exception as es:
                 getLogger().debug2(f'Error updating row in table {es}')
-
-        if _update:
-            getLogger().debug2('<updateRowCallback>', data['notifier'],
-                               self._tableData['tableSelection'],
-                               data['trigger'], data['object'])
-            _val = self.getSelectedObjects() or []
-            self._tableSelectionChanged.emit(_val)
-
-        return _update
 
     def _searchCallBack(self, data):
         # print(f'>>> _searchCallBack')

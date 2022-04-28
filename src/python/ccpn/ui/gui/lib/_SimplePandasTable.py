@@ -1069,6 +1069,9 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
                 # fire the action callback (double-click on selected)
                 self._doubleClickCallback(self.currentIndex())
 
+        # elif key == QtCore.Qt.Key_Escape:
+        #     print(f' escape pressed')
+
     #=========================================================================================
     # Table context menu
     #=========================================================================================
@@ -1266,6 +1269,13 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
     #=========================================================================================
     # Table updates
     #=========================================================================================
+
+    def _getTableColumns(self, source=None):
+        """format of column = ( Header Name, value, tipText, editOption)
+        editOption allows the user to modify the value content by doubleclick
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError(f'Code error: {self.__class__.__name__}._getTableColumns not implemented')
 
     def populateTable(self, rowObjects=None, columnDefs=None,
                       selectedObjects=None):
@@ -1639,6 +1649,20 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
     #=========================================================================================
     # Table methods
     #=========================================================================================
+
+    @property
+    def _sourceObjects(self):
+        """Return the list of source objects, e.g., _table.peaks/_table.nmrResidues
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError(f'Code error: {self.__class__.__name__}._sourceObjects not implemented')
+
+    @property
+    def _sourceCurrent(self):
+        """Return the list of source objects in the current list, e.g., current.peaks/current.nmrResidues
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError(f'Code error: {self.__class__.__name__}._sourceCurrent not implemented')
 
     def getSelectedObjects(self, fromSelection=None):
         """Return the selected core objects

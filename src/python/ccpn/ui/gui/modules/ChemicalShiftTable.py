@@ -71,7 +71,7 @@ LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 #=========================================================================================
 
 class ChemicalShiftTableModule(CcpnModule):
-    """This class implements the module by wrapping a NmrResidueTable instance
+    """This class implements the module by wrapping a ChemicalShift instance
     """
     includeSettingsWidget = True
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
@@ -162,17 +162,28 @@ class ChemicalShiftTableModule(CcpnModule):
                                                    grid=(row, 0), gridSpan=(1, 6),
                                                    hiddenColumns=_hidden)
 
-    def selectTable(self, chemicalShiftList=None):
-        """Manually select a ChemicalShiftList from the pullDown
+    def selectTable(self, table=None):
+        """Manually select a table from the pullDown
         """
-        if chemicalShiftList is None:
+        if table is None:
             self._modulePulldown.selectFirstItem()
         else:
-            if not isinstance(chemicalShiftList, ChemicalShiftList):
-                logger.warning('select: Object is not of type ChemicalShiftList')
-                raise TypeError('select: Object is not of type ChemicalShiftList')
+            if not isinstance(table, self._tableWidget.tableClass):
+                logger.warning(f'select: Object is not of type {self._tableWidget.tableName}')
+                raise TypeError(f'select: Object is not of type {self._tableWidget.tableName}')
             else:
-                self._modulePulldown.select(chemicalShiftList.pid)
+                self._modulePulldown.select(table.pid)
+
+    def _selectionPulldownCallback(self, item):
+        """Notifier Callback for selecting table from the pull down menu
+        """
+        self._table = self._modulePulldown.getSelectedObject()
+        self._tableWidget._table = self._table
+
+        if self._table is not None:
+            self._tableWidget.populateTable(selectedObjects=self.current.chemicalShifts)
+        else:
+            self._tableWidget.populateEmptyTable()
 
     def _closeModule(self):
         """CCPN-INTERNAL: used to close the module
@@ -180,18 +191,6 @@ class ChemicalShiftTableModule(CcpnModule):
         self._modulePulldown.unRegister()
         self._tableWidget._close()
         super()._closeModule()
-
-    def _selectionPulldownCallback(self, item):
-        """Notifier Callback for selecting ChemicalShiftList from the pull down menu
-        """
-        self._table = self._modulePulldown.getSelectedObject()
-        self._tableWidget._table = self._table
-
-        if self._table is not None:
-            self._tableWidget.populateTable(rowObjects=self._table.chemicalShifts,
-                                            selectedObjects=self.current.chemicalShifts)
-        else:
-            self._tableWidget.populateEmptyTable()
 
 
 #=========================================================================================
@@ -906,7 +905,7 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
     """New chemicalShiftTable based on faster QTableView
     Actually more like the original table but with pandas dataFrame
     """
-    className = 'ChemicalShiftListTable'
+    className = 'ChemicalShiftTable'
     attributeName = 'chemicalShiftLists'
 
     OBJECTCOLUMN = CS_OBJECT  # column holding active objects (uniqueId/ChemicalShift for this table?)
@@ -962,7 +961,7 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
     rowClass = ChemicalShift
     cellClass = None
     tableName = tableClass.className
-    rowName = tableClass.className
+    rowName = rowClass.className
     cellClassNames = None
 
     selectCurrent = True

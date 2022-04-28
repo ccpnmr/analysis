@@ -162,337 +162,6 @@ class NmrResidueTableModule(CcpnModule):
         self._mainFrame.selectTable(table)
 
 
-#=========================================================================================
-# NmrResidueTableWidget
-#=========================================================================================
-
-class NmrResidueTableWidget(GuiTable):
-    """Class to present a NmrResidue Table and a NmrChain pulldown list, wrapped in a Widget
-    """
-    className = 'NmrResidueTable'
-    attributeName = 'nmrChains'
-
-    OBJECT = 'object'
-    TABLE = 'table'
-
-    tableClass = NmrChain
-    tableName = tableClass.className
-
-    @staticmethod
-    def _nmrIndex(nmrRes):
-        """CCPN-INTERNAL: Insert an index into ObjectTable
-        """
-        try:
-            from ccpnc.clibrary import Clibrary
-
-            _getNmrIndex = Clibrary.getNmrResidueIndex
-
-            return _getNmrIndex(nmrRes)
-            # return nmrRes.nmrChain.nmrResidues.index(nmrRes)                # ED: THIS IS VERY SLOW
-        except Exception as es:
-            return None
-
-    @staticmethod
-    def _nmrLamInt(row, name):
-        """CCPN-INTERNAL: Insert an int into ObjectTable
-        """
-        try:
-            return int(getattr(row, name))
-        except:
-            return None
-
-    def __init__(self, parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None,
-                 checkBoxCallback=None, _pulldownKwds=None, nmrChain=None, multiSelect=False,
-                 **kwds):
-        """Initialise the widgets for the module. kwds passed to the scrollArea widget
-        """
-        # Derive application, project, and current from mainWindow
-        self.mainWindow = mainWindow
-        if mainWindow:
-            self.application = mainWindow.application
-            self.project = mainWindow.application.project
-            self.current = mainWindow.application.current
-        else:
-            self.application = None
-            self.project = None
-            self.current = None
-
-        # Initialise the scroll widget and common settings
-        self._initTableCommonWidgets(parent, **kwds)
-
-        self._table = None
-        if actionCallback is None:
-            actionCallback = self.defaultActionCallback
-
-        NmrResidueTableWidget.project = self.project
-
-        # create the column objects
-        self.NMRcolumns = ColumnClass([
-            ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None, None),
-            ('Index', lambda nmrResidue: NmrResidueTableWidget._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None, None),
-            # ('Index', lambda nmrResidue: NmrResidueTable._nmrLamInt(nmrResidue, 'Index'), 'Index of NmrResidue in the NmrChain', None, None),
-
-            # ('Index',      lambda nmrResidue: nmrResidue.nmrChain.nmrResidues.index(nmrResidue), 'Index of NmrResidue in the NmrChain', None, None),
-            # ('NmrChain',   lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain id', None, None),
-            ('Pid', lambda nmrResidue: nmrResidue.pid, 'Pid of NmrResidue', None, None),
-            ('_object', lambda nmrResidue: nmrResidue, 'Object', None, None),
-            ('NmrChain', lambda nmrResidue: nmrResidue.nmrChain.id, 'NmrChain containing the nmrResidue', None, None),  # just add the nmrChain for clarity
-            ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None, None),
-            ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None, None),
-            ('NmrAtoms', lambda nmrResidue: NmrResidueTableWidget._getNmrAtomNames(nmrResidue), 'NmrAtoms in NmrResidue', None, None),
-            ('Peak count', lambda nmrResidue: '%3d ' % NmrResidueTableWidget._getNmrResiduePeakCount(nmrResidue),
-             'Number of peaks assigned to NmrResidue', None, None),
-            ('Comment', lambda nmr: NmrResidueTableWidget._getCommentText(nmr), 'Notes',
-             lambda nmr, value: NmrResidueTableWidget._setComment(nmr, value), None)
-            ])
-
-        selectionCallback = self._selectionCallback if selectionCallback is None else selectionCallback
-        actionCallback = self._actionCallback if actionCallback is None else actionCallback
-
-        # initialise the table
-        super().__init__(parent=parent,
-                         mainWindow=self.mainWindow,
-                         dataFrameObject=None,
-                         setLayout=True,
-                         autoResize=True, multiSelect=multiSelect,
-                         actionCallback=actionCallback,
-                         selectionCallback=selectionCallback,
-                         checkBoxCallback=checkBoxCallback,
-                         _pulldownKwds=_pulldownKwds,
-                         grid=(3, 0), gridSpan=(1, 6),
-                         enableDelete=True
-                         )
-        self.moduleParent = moduleParent
-
-        self.setTableNotifiers(tableClass=NmrChain,
-                               className=self.attributeName,
-                               tableSelection='_table',
-                               rowClass=NmrResidue,
-                               cellClassNames=[(NmrAtom, 'nmrResidue'), (_OldChemicalShift, 'nmrAtom')],
-                               tableName='nmrChain', rowName='nmrResidue',
-                               # changeFunc=self.displayTableForNmrChain, # might be renamed|deleted
-                               # updateFunc=self._update,
-                               # pullDownWidget=self.moduleParent._modulePulldown,
-                               callBackClass=NmrResidue,
-                               selectCurrentCallBack=self._selectOnTableCurrentNmrResiduesNotifierCallback,
-                               moduleParent=moduleParent)
-
-        # Initialise the notifier for processing dropped items
-        self._postInitTableCommonWidgets()
-
-    @property
-    def table(self):
-        """Return the current table
-        """
-        return self._table
-
-    def _processDroppedItems(self, data):
-        """CallBack for Drop events
-        """
-        pass
-
-    def addWidgetToTop(self, widget, col=2, colSpan=1):
-        """Convenience to add a widget to the top of the table; col >= 2
-        """
-        if col < 2:
-            raise RuntimeError('Col has to be >= 2')
-        self._widget.getLayout().addWidget(widget, 0, col, 1, colSpan)
-        # widget.setFixedSize(widget.sizeHint())
-        # self._widget.setFixedSize(self._widget.sizeHint())
-
-    def addWidgetToPos(self, widget, row=0, col=2, rowSpan=1, colSpan=1, overrideMinimum=False, alignment=None):
-        """Convenience to add a widget to the top of the table; col >= 2
-        """
-        if col < 2 and not overrideMinimum:
-            raise RuntimeError('Col has to be >= 2')
-        self._widget.getLayout().addWidget(widget, row, col, rowSpan, colSpan)
-
-        # if alignment is not None:
-        #     self._widget.getLayout().setAlignment(widget, alignment)
-        # widget.setFixedSize(widget.sizeHint())
-        # self._widget.setFixedSize(self._widget.sizeHint())
-
-    def _setWidgetHeight(self, height):
-        self._widgetScrollArea.setFixedHeight(height)
-
-    def defaultActionCallback(self, data):
-        """default Action Callback if not defined in the parent Module
-        If current strip contains the double-clicked nmrResidue will navigateToPositionInStrip
-        """
-        from ccpn.ui.gui.lib.StripLib import _getCurrentZoomRatio
-
-        nmrResidue = data[Notifier.OBJECT]
-
-        if self.current.strip is not None:
-            self.application.ui.mainWindow.clearMarks()
-            strip = self.current.strip
-            newWidths = _getCurrentZoomRatio(strip.viewRange())
-            navigateToNmrResidueInDisplay(nmrResidue, strip.spectrumDisplay, stripIndex=0,
-                                          widths=None)
-            # widths=['default'] * len(strip.axisCodes))
-
-        else:
-            logger.warning('Impossible to navigate to position. Set a current strip first')
-
-    #=========================================================================================
-    # Updates
-    #=========================================================================================
-
-    def _update(self):
-        """Update the table with NmrResidues of nmrChain
-        """
-        if self._table:
-            self.populateTable(rowObjects=self._table.nmrResidues,
-                               columnDefs=self.NMRcolumns,
-                               selectedObjects=self.current.nmrResidues
-                               )
-        else:
-            self.clear()
-
-    #=========================================================================================
-    # Widget callbacks
-    #=========================================================================================
-
-    def _selectionCallback(self, data):
-        """Notifier Callback for selecting a row in the table
-        """
-        selected = data[Notifier.OBJECT]
-
-        if selected:
-            if self.multiSelect:  #In this case selected is a List!!
-                if isinstance(selected, list):
-                    self.current.nmrResidues = selected
-            else:
-                self.current.nmrResidue = selected[0]
-        else:
-            # TODO:ED this should never be called, and where is it?
-            self.current.clearNmrResidues()
-
-        NmrResidueTableModule.currentCallback = {'object': self._table, 'table': self}
-
-    def _selectOnTableCurrentNmrResiduesNotifierCallback(self, data):
-        """callback from a notifier to select the current NmrResidue
-        :param data:
-        """
-        currentNmrResidues = data['value']
-        self._selectOnTableCurrentNmrResidues(currentNmrResidues)
-
-    def _selectOnTableCurrentNmrResidues(self, currentNmrResidues):
-        """highlight  current NmrResidues on the opened table
-        """
-        self.highlightObjects(currentNmrResidues)
-
-    @staticmethod
-    def _getNmrAtomNames(nmrResidue):
-        """Returns a sorted list of NmrAtom names
-        """
-        return ', '.join(sorted(set([atom.name for atom in nmrResidue.nmrAtoms if not atom.isDeleted]),
-                                key=CcpnSorting.stringSortKey))
-
-    @staticmethod
-    def _getNmrResiduePeakCount(nmrResidue):
-        """Returns peak list count
-        """
-        l1 = [peak for atom in nmrResidue.nmrAtoms if not atom.isDeleted for peak in atom.assignedPeaks if not peak.isDeleted]
-        return len(set(l1))
-
-    # def _getPullDownSelection(self):
-    #     return self.moduleParent._modulePulldown.getText()
-    #
-    # def _selectPullDown(self, value):
-    #     self.moduleParent._modulePulldown.select(value)
-
-    def _setContextMenu(self, enableExport=True, enableDelete=True):
-        """Subclass guiTable to insert new merge items to top of context menu
-        """
-        super()._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
-        _actions = self.tableMenu.actions()
-
-        if _actions:
-            _topMenuItem = _actions[0]
-            _topSeparator = self.tableMenu.insertSeparator(_topMenuItem)
-            self._mergeMenuAction = self.tableMenu.addAction('Merge NmrResidues', self._mergeNmrResidues)
-            self._editMenuAction = self.tableMenu.addAction('Edit NmrResidue', self._editNmrResidue)
-            self._markMenuAction = self.tableMenu.addAction('Mark Position', self._markNmrResidue)
-            # move new actions to the top of the list
-            self.tableMenu.insertAction(_topSeparator, self._markMenuAction)
-            self.tableMenu.insertAction(self._markMenuAction, self._mergeMenuAction)
-            self.tableMenu.insertAction(self._mergeMenuAction, self._editMenuAction)
-
-    def _raiseTableContextMenu(self, pos):
-        """Create a new menu and popup at cursor position
-        Add merge item
-        """
-        selection = self.getSelectedObjects()
-        data = self.getRightMouseItem()
-        if data:
-            currentNmrResidue = data.get(DATAFRAME_OBJECT)
-
-            selection = selection or []
-            _check = (currentNmrResidue and (1 < len(selection) < 5) and currentNmrResidue in selection)
-            _option = ' into {}'.format(currentNmrResidue.id if currentNmrResidue else '') if _check else ''
-            self._mergeMenuAction.setText('Merge NmrResidues {}'.format(_option))
-            self._mergeMenuAction.setEnabled(_check)
-
-            self._editMenuAction.setText('Edit NmrResidue {}'.format(currentNmrResidue.id if currentNmrResidue else ''))
-            self._editMenuAction.setEnabled(True if currentNmrResidue else False)
-
-        else:
-            # disabled but visible lets user know that menu items exist
-            self._mergeMenuAction.setText('Merge NmrResidues')
-            self._mergeMenuAction.setEnabled(False)
-            self._editMenuAction.setText('Edit NmrResidue')
-            self._editMenuAction.setEnabled(False)
-
-        super()._raiseTableContextMenu(pos)
-
-    def _mergeNmrResidues(self):
-        """Merge the nmrResidues in the selection into the nmrResidue that has been right-clicked
-        """
-        selection = self.getSelectedObjects()
-        data = self.getRightMouseItem()
-        if data and selection:
-            currentNmrResidue = data.get(DATAFRAME_OBJECT)
-            matching = [ch for ch in selection if ch and ch != currentNmrResidue]
-
-            if len(matching):
-                yesNo = showYesNo('Merge NmrResidues', "Do you want to merge\n\n"
-                                                       "{}   into   {}".format('\n'.join([ss.id for ss in matching]),
-                                                                               currentNmrResidue.id))
-                if yesNo:
-                    currentNmrResidue.mergeNmrResidues(matching)
-
-    def _editNmrResidue(self):
-        """Show the edit nmrResidue popup for the clicked nmrResidue
-        """
-        data = self.getRightMouseItem()
-        if data:
-            currentNmrResidue = data.get(DATAFRAME_OBJECT)
-
-            if currentNmrResidue:
-                from ccpn.ui.gui.popups.NmrResiduePopup import NmrResidueEditPopup
-
-                popup = NmrResidueEditPopup(parent=self.mainWindow, mainWindow=self.mainWindow, obj=currentNmrResidue)
-                popup.exec_()
-
-    def _markNmrResidue(self):
-        """Mark the position of the nmrResidue
-        """
-        data = self.getRightMouseItem()
-        if data:
-            currentNmrResidue = data.get(DATAFRAME_OBJECT)
-
-            if currentNmrResidue:
-                from ccpn.AnalysisAssign.modules.BackboneAssignmentModule import markNmrAtoms
-
-                # optionally clear the marks
-                # if self.moduleParent.nmrResidueTableSettings.autoClearMarksWidget.checkBox.isChecked():
-                if self._autoClearMarksCheckBox.isChecked():
-                    self.mainWindow.clearMarks()
-
-                markNmrAtoms(self.mainWindow, currentNmrResidue.nmrAtoms)
-
-
 KD = 'Kd'
 Deltas = 'Ddelta'
 
@@ -520,7 +189,7 @@ class _NewNmrResidueTableWidget(_SimplePandasTableViewProjectSpecific):
     rowClass = NmrResidue
     cellClass = None
     tableName = tableClass.className
-    rowName = tableClass.className
+    rowName = rowClass.className
     cellClassNames = {NmrAtom: 'nmrResidue'}  # , _OldChemicalShift: 'nmrAtom'}
     selectCurrent = True
     callBackClass = NmrResidue
@@ -637,13 +306,17 @@ class _NewNmrResidueTableWidget(_SimplePandasTableViewProjectSpecific):
                 allItems.append(listItem)
                 objects.append(obj)
 
-        df = pd.DataFrame(allItems, columns=self._columnDefs.headings)
+            df = pd.DataFrame(allItems, columns=self._columnDefs.headings)
+
+        else:
+            self._columnDefs = self._getTableColumns()
+            df = pd.DataFrame(columns=self._columnDefs.headings)
 
         # use the object as the index, object always exists even if isDeleted
         df.set_index(df[self.OBJECTCOLUMN], inplace=True, )
 
         _dfObject = DataFrameObject(dataFrame=df,  # pd.DataFrame(allItems, columns=colDefs.headings),
-                                    columnDefs=self._columnDefs,
+                                    columnDefs=self._columnDefs or [],
                                     table=self)
 
         return _dfObject
@@ -900,7 +573,7 @@ class _NewNmrResidueTableWidget(_SimplePandasTableViewProjectSpecific):
     # Table functions
     #=========================================================================================
 
-    def _getTableColumns(self, objs):
+    def _getTableColumns(self, nmrChain=None):
         """format of column = ( Header Name, value, tipText, editOption)
         editOption allows the user to modify the value content by doubleclick
         """
@@ -942,6 +615,9 @@ class _NewNmrResidueTableWidget(_SimplePandasTableViewProjectSpecific):
         """
         self._update()
 
+    from ccpn.util.decorators import profile
+
+    @profile()
     def _update(self, useSelected=True, nmrResidues=None, nmrChain=None):
         """Display the nmrResidues on the table for the selected nmrChain.
         Obviously, If the nmrResidue has not been previously deleted and flagged isDeleted
@@ -950,15 +626,15 @@ class _NewNmrResidueTableWidget(_SimplePandasTableViewProjectSpecific):
 
         if useSelected:
             if self._table:
-                self.populateTable(rowObjects=self._table.nmrResidues,
-                                   selectedObjects=self.current.nmrResidues)
+                self.populateTable(  #rowObjects=self._table.nmrResidues,
+                        selectedObjects=self.current.nmrResidues)
             else:
                 self.populateEmptyTable()
 
         else:
             if nmrResidues:  # and nmrChain:
-                self.populateTable(rowObjects=nmrResidues,
-                                   selectedObjects=self.current.nmrResidues)
+                self.populateTable(  #rowObjects=nmrResidues,
+                        selectedObjects=self.current.nmrResidues)
             else:
                 self.populateEmptyTable()
 
@@ -1017,7 +693,9 @@ class _NewNmrResidueTableWidget(_SimplePandasTableViewProjectSpecific):
 class NmrResidueTableFrame(Frame):
     """Frame containing the pulldown and the table widget
     """
-    _TableWidget = _NewNmrResidueTableWidget  # NmrResidueTableWidget
+    _TableWidget = _NewNmrResidueTableWidget
+    _TablePulldown = NmrChainPulldown
+
     _activePulldownClass = None
     _activeCheckbox = None
 
@@ -1058,12 +736,12 @@ class NmrResidueTableFrame(Frame):
 
         row += 1
         gridHPos = 0
-        self._modulePulldown = NmrChainPulldown(parent=_topWidget,
-                                                mainWindow=self.mainWindow,
-                                                grid=(row, gridHPos), gridSpan=(1, 1), minimumWidths=(0, 100),
-                                                showSelectName=True,
-                                                sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
-                                                callback=self._selectionPulldownCallback)
+        self._modulePulldown = self._TablePulldown(parent=_topWidget,
+                                                   mainWindow=self.mainWindow,
+                                                   grid=(row, gridHPos), gridSpan=(1, 1), minimumWidths=(0, 100),
+                                                   showSelectName=True,
+                                                   sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
+                                                   callback=self._selectionPulldownCallback)
 
         # fixed height for the pulldown
         self._modulePulldown.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
@@ -1089,7 +767,7 @@ class NmrResidueTableFrame(Frame):
         _topWidget.getLayout().setColumnStretch(5, 2)
 
         # set policy to fill the frame - still required?
-        # self._tableWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        self._tableWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
 
     def setActivePulldownClass(self, coreClass, checkBox):
         """Set up the callback properties for changing the current object from the pulldown
@@ -1131,8 +809,9 @@ class NmrResidueTableFrame(Frame):
     def _processDroppedItems(self, data):
         """CallBack for Drop events
         """
-        pids = data.get('pids', [])
-        self._handleDroppedItems(pids, NmrChain, self._modulePulldown)
+        if self._tableWidget and data:
+            pids = data.get('pids', [])
+            self._handleDroppedItems(pids, self._tableWidget.tableClass, self._modulePulldown)
 
     def _handleDroppedItems(self, pids, objType, pulldown):
         """handle dropping pids onto the table
@@ -1279,82 +958,6 @@ class NmrResidueTableFrame(Frame):
 
 
 #=========================================================================================
-# _CSMNmrResidueTable
-#=========================================================================================
-
-class _CSMNmrResidueTableWidget(NmrResidueTableWidget):
-    """Custom nmrResidue Table with extra columns used in the ChemicalShiftsMapping Module
-    """
-
-    def __init__(self, parent=None, mainWindow=None, moduleParent=None, actionCallback=None, selectionCallback=None,
-                 checkBoxCallback=None, nmrChain=None, **kwds):
-
-        NmrResidueTableWidget.__init__(self, parent=parent, mainWindow=mainWindow,
-                                       moduleParent=moduleParent,
-                                       actionCallback=actionCallback,
-                                       selectionCallback=selectionCallback,
-                                       checkBoxCallback=checkBoxCallback,
-                                       nmrChain=nmrChain,
-                                       # multiSelect=True,
-                                       **kwds)
-
-        self.NMRcolumns = ColumnClass([
-            ('#', lambda nmrResidue: nmrResidue.serial, 'NmrResidue serial number', None, None),
-            ('Pid', lambda nmrResidue: nmrResidue.pid, 'Pid of NmrResidue', None, None),
-            ('_object', lambda nmrResidue: nmrResidue, 'Object', None, None),
-            ('Index', lambda nmrResidue: NmrResidueTableWidget._nmrIndex(nmrResidue), 'Index of NmrResidue in the NmrChain', None, None),
-            ('Sequence', lambda nmrResidue: nmrResidue.sequenceCode, 'Sequence code of NmrResidue', None, None),
-            ('Type', lambda nmrResidue: nmrResidue.residueType, 'NmrResidue type', None, None),
-            ('Selected', lambda nmrResidue: _CSMNmrResidueTableWidget._getSelectedNmrAtomNames(nmrResidue), 'NmrAtoms selected in NmrResidue', None, None),
-            ('Spectra', lambda nmrResidue: _CSMNmrResidueTableWidget._getNmrResidueSpectraCount(nmrResidue)
-             , 'Number of spectra selected for calculating the deltas', None, None),
-            (Deltas, lambda nmrResidue: nmrResidue._delta, '', None, None),
-            (KD, lambda nmrResidue: nmrResidue._estimatedKd, '', None, None),
-            ('Include', lambda nmrResidue: nmrResidue._includeInDeltaShift, 'Include this residue in the Mapping calculation', lambda nmr, value: _CSMNmrResidueTableWidget._setChecked(nmr, value), None),
-            # ('Flag', lambda nmrResidue: nmrResidue._flag,  '',  None, None),
-            ('Comment', lambda nmr: NmrResidueTableWidget._getCommentText(nmr), 'Notes', lambda nmr, value: NmrResidueTableWidget._setComment(nmr, value), None)
-            ])  #[Column(colName, func, tipText=tipText, setEditValue=editValue, format=columnFormat)
-
-        self._widget.setFixedHeight(45)
-        self.chemicalShiftsMappingModule = None
-
-    @staticmethod
-    def _setChecked(obj, value):
-        """CCPN-INTERNAL: Insert a comment into GuiTable
-        """
-        obj._includeInDeltaShift = value
-        obj._finaliseAction('change')
-
-    @staticmethod
-    def _getNmrResidueSpectraCount(nmrResidue):
-        """CCPN-INTERNAL: Insert an index into ObjectTable
-        """
-        try:
-            return nmrResidue.spectraCount
-        except:
-            return None
-
-    @staticmethod
-    def _getSelectedNmrAtomNames(nmrResidue):
-        """CCPN-INTERNAL: Insert an index into ObjectTable
-        """
-        try:
-            return ', '.join(nmrResidue.selectedNmrAtomNames)
-        except:
-            return None
-
-    def _selectPullDown(self, value):
-        """Used for automatic restoring of widgets
-        """
-        self.moduleParent._modulePulldown.select(value)
-        try:
-            if self.chemicalShiftsMappingModule is not None:
-                self.chemicalShiftsMappingModule._updateModule()
-        except Exception as e:
-            getLogger().warning('Impossible update chemicalShiftsMappingModule from restoring %s' % e)
-
-
-#=========================================================================================
 # _NewCSMNmrResidueTable
 #=========================================================================================
 
@@ -1383,7 +986,7 @@ class _NewCSMNmrResidueTableWidget(_NewNmrResidueTableWidget):
     # Table functions
     #=========================================================================================
 
-    def _getTableColumns(self, objs):
+    def _getTableColumns(self, nmrChain):
         """format of column = ( Header Name, value, tipText, editOption)
         editOption allows the user to modify the value content by doubleclick
         """

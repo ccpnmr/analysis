@@ -1751,7 +1751,7 @@ class Framework(NotifierBase, GuiBase):
                            multipletList: MultipletList = None, selectFirstItem=False):
         """Displays multipletList table on left of main window with specified list selected.
         """
-        from ccpn.ui.gui.modules.MultipletListTable import MultipletTableModule
+        from ccpn.ui.gui.modules.MultipletTable import MultipletTableModule
 
         mainWindow = self.ui.mainWindow
         if not relativeTo:
@@ -1775,7 +1775,7 @@ class Framework(NotifierBase, GuiBase):
         integralTableModule = IntegralTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(integralTableModule, position=position, relativeTo=relativeTo)
         if integralList:
-            integralTableModule.selectIntegralList(integralList)
+            integralTableModule.selectTable(integralList)
         return integralTableModule
 
     @logCommand('application.')

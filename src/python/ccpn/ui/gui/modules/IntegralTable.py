@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-28 20:33:15 +0100 (Thu, April 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-04-28 20:33:57 +0100 (Thu, April 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -541,7 +541,7 @@ class _NewIntegralTableWidget(_SimplePandasTableViewProjectSpecific):
 #=========================================================================================
 
 def main():
-    """Show the PeakTable module
+    """Show the IntegralTableModule
     """
     from ccpn.ui.gui.widgets.Application import newTestApplication
     from ccpn.framework.Application import getApplication

@@ -27,13 +27,13 @@ __date__ = "$Date: 2018-12-20 13:28:13 +0000 (Thu, December 20, 2018) $"
 # Start of code
 #=========================================================================================
 
-import sys
 import math
 import numpy as np
-from PyQt5 import QtWidgets
+
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.Multiplet import Multiplet
 from ccpn.core.MultipletList import MultipletList
+from ccpn.core.Integral import Integral
 from ccpn.util.Colour import getAutoColourRgbRatio
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Logging import getLogger
@@ -154,7 +154,7 @@ class GLLabelling():
         trigger = data[Notifier.TRIGGER]
         obj = data[Notifier.OBJECT]
 
-        if isinstance(obj, Multiplet):
+        if isinstance(obj, (Multiplet, Integral)):
             # update the multiplet labelling
             if trigger == Notifier.DELETE:
                 self._deleteSymbol(obj, data.get('_list'), data.get('_spectrum'))

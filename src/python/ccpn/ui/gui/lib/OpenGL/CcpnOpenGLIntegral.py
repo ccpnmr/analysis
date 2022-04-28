@@ -278,14 +278,17 @@ class GLintegralNdLabelling(GL1dLabelling, GLintegralListMethods, GLLabelling): 
     def _deleteSymbol(self, integral, parentList, spectrum):
         for ils in self._GLSymbols.values():
 
-            # confusing as peakList and integralList share the same list :)
-            if not ils.integralListView.isDeleted and integral.integralList == ils.integralListView.integralList:
+            # if not ils.integralListView.isDeleted and integral.integralList == ils.integralListView.integralList:
+            if not ils.integralListView.isDeleted and parentList == ils.integralListView.integralList:
 
                 for reg in ils._regions:
 
                     if reg._object == integral:
                         ils._regions.remove(reg)
-                        ils._rebuild()
+                        try:
+                            ils._rebuild()
+                        except Exception as es:
+                            getLogger.warning(f'   ERROR HERE  {es}')
                         return
 
     def _createSymbol(self, integral):

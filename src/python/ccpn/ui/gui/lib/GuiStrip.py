@@ -326,8 +326,8 @@ class GuiStrip(Frame):
 
         # Notifier for updating the integrals
         self.setNotifier(self.project, [Notifier.CREATE, Notifier.DELETE, Notifier.CHANGE], 'Integral',
-                         self._updateDisplayedIntegrals,
-                         # partial(self._queueGeneralNotifier, self._updateDisplayedIntegrals, 'Integral'),
+                         # self._updateDisplayedIntegrals,
+                         partial(self._queueGeneralNotifier, self._updateDisplayedIntegrals, 'Integral'),
                          onceOnly=True)
 
         # Notifier for updating the multiplets

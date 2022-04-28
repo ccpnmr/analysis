@@ -41,7 +41,6 @@ from ccpn.ui.gui.lib.OpenGL import GL, GLU, GLUT
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_REGIONSHADE, CCPNGLWIDGET_INTEGRALSHADE
 
 
-
 REGION_COLOURS = {
     'green'      : (0, 1.0, 0.1, CCPNGLWIDGET_REGIONSHADE),
     'yellow'     : (0.9, 1.0, 0.05, CCPNGLWIDGET_REGIONSHADE),
@@ -782,6 +781,9 @@ class GLIntegralRegion(GLExternalRegion):
 
         self.clearArrays()
         for reg in self._regions:
+
+            if reg._object.isDeleted:
+                return
 
             axisIndex = 0
             for ps, psCode in enumerate(self._parent.axisOrder[0:2]):

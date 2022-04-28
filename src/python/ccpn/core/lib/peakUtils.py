@@ -35,7 +35,7 @@ from pandas import MultiIndex as m_ix
 from ccpn.util.Common import makeIterableList, percentage
 
 
-# This variables will be moved to SeriesAnalysisVarialbles.py
+# This variables will be moved to SeriesAnalysisVariables.py
 _POSITION = 'position'
 _POINTPOSITION = 'pointPosition'
 _PPMPOSITION = 'ppmPosition'
@@ -81,9 +81,8 @@ def getMultipletPosition(multiplet, dim, unit='ppm'):
         elif unit == 'ppm':
             value = multiplet.position[dim]
 
-        #  NOT implemented for multiplets
-        # elif unit == 'point':
-        #   value = multiplet.pointPositions[dim]
+        elif unit == 'point':
+            value = multiplet.pointPositions[dim]
 
         elif unit == 'Hz':
             value = multiplet.position[dim] * multiplet.multipletList.spectrum.spectrometerFrequencies[dim]

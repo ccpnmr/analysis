@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-04 15:43:14 +0000 (Fri, March 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-03 11:27:25 +0100 (Tue, May 03, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,7 +31,7 @@ import numpy as np
 from typing import Sequence
 from collections import Counter
 from ccpn.core.lib.PeakPickers.PeakPickerABC import PeakPickerABC, SimplePeak
-from ccpn.util.traits.CcpNmrTraits import CFloat, CInt, CBool, CList
+from ccpn.util.traits.CcpNmrTraits import CFloat, CInt, CBool, CList, Dict
 from ccpn.util.Logging import getLogger
 from ccpnc.peak import Peak as CPeak
 
@@ -63,6 +63,7 @@ class PeakPickerNd(PeakPickerABC):
     searchBoxDoFit = CBool(allow_none=True, default_value=True)
     setLineWidths = CBool(allow_none=True, default_value=True)
     searchBoxMode = CBool(allow_none=True, default_value=True)
+    searchBoxWidths = Dict(allow_none=True, default_value={})
 
     def __init__(self, spectrum):
         super().__init__(spectrum=spectrum)

@@ -1490,6 +1490,8 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
     def _clearTableNotifiers(self):
         """Clean up the notifiers
         """
+        getLogger().debug(f'clearing table notifiers {self}')
+
         if self._tableNotifier is not None:
             self._tableNotifier.unRegister()
             self._tableNotifier = None

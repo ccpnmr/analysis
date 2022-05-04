@@ -69,7 +69,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-26 13:55:57 +0100 (Tue, April 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-04 13:41:51 +0100 (Wed, May 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1605,7 +1605,7 @@ class ChemicalShiftsMapping(CcpnModule):
             self._peakDeletedNotifier.unRegister()
             self._nrChangedNotifier.unRegister()
             self._nrDeletedNotifier.unRegister()
-            self.nmrResidueFrame._closeModule()
+            self.nmrResidueFrame._closeFrame()
         except Exception as es:
             getLogger().warning(str(es))
         finally:

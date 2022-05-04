@@ -158,7 +158,7 @@ class NmrResidueTableModule(CcpnModule):
         self._mainFrame.selectTable(table)
 
     def _closeModule(self):
-        self._mainFrame.close()
+        self.tableFrame._closeFrame()
         super()._closeModule()
 
 

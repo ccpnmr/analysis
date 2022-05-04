@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-04 12:22:44 +0100 (Wed, May 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-04 13:41:51 +0100 (Wed, May 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -150,6 +150,11 @@ class PeakTableModule(CcpnModule):
         """
         self._mainFrame.selectTable(table)
 
+    def _closeModule(self):
+        """CCPN-INTERNAL: used to close the module
+        """
+        self.tableFrame._closeFrame()
+        super()._closeModule()
 
 #=========================================================================================
 # _NewPeakTableWidget

@@ -26,16 +26,20 @@ __date__ = "$Date: 2022-02-28 12:23:27 +0100 (Mon, February 28, 2022) $"
 # Start of code
 #=========================================================================================
 
+import numpy as np
+import pandas as pd
+from PyQt5 import QtWidgets, QtCore, QtGui
 from collections import defaultdict
 from contextlib import contextmanager
 from dataclasses import dataclass
 from functools import partial
-import numpy as np
-import pandas as pd
-from PyQt5 import QtWidgets, QtCore, QtGui
 from time import time_ns
 from types import SimpleNamespace
 
+from ccpn.core.lib.CallBack import CallBack
+from ccpn.core.lib.CcpnSorting import universalSortKey
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, catchExceptions
+from ccpn.core.lib.Notifiers import Notifier, _removeDuplicatedNotifiers
 from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND
 from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT, getFontHeight
 from ccpn.ui.gui.widgets.Frame import ScrollableFrame
@@ -46,10 +50,6 @@ from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.SearchWidget import attachDFSearchWidget
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.lib.MenuActions import _openItemObject
-from ccpn.core.lib.CallBack import CallBack
-from ccpn.core.lib.CcpnSorting import universalSortKey
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, catchExceptions
-from ccpn.core.lib.Notifiers import Notifier, _removeDuplicatedNotifiers
 from ccpn.util.Logging import getLogger
 from ccpn.util.Common import copyToClipboard
 from ccpn.util.OrderedSet import OrderedSet
@@ -365,7 +365,7 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
             self.layoutChanged.emit()
 
         else:
-            # not checked
+            # NOTE:ED - not checked
             pass
             # self._df.loc[row] = newRow
             # iLoc = self._df.index.get_loc(row)
@@ -394,7 +394,7 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
                 self.layoutChanged.emit()
 
             else:
-                # not checked
+                # NOTE:ED - not checked
                 pass
                 # # print(f'>>>   _updateRow    {newRow}')
                 # iLoc = self._df.index.get_loc(row)
@@ -442,7 +442,7 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
                 self.endRemoveRows()
 
             else:
-                # not checked
+                # NOTE:ED - not checked
                 # notify rows are going to be inserted
                 self.beginRemoveRows(QtCore.QModelIndex(), iLoc, iLoc)
 
@@ -833,8 +833,9 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
 
     OBJECTCOLUMN = '_object'
     INDEXCOLUMN = 'index'
-    defaultHidden = []
+    _INDEX = None
 
+    defaultHidden = []
     columnHeaders = {}
     tipTexts = ()
 
@@ -957,6 +958,9 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
                 if self.project:
                     self.project.blankNotification()
 
+            # list to store any deferred functions until blocking has finished
+            self._deferredFuncs = []
+
         self._tableBlockingLevel += 1
 
     def _unblockTableEvents(self, blanking=True, disableScroll=False, tableState=None):
@@ -980,6 +984,12 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
                     self._scrollOverride = False
 
                 self.update()
+
+                for func in self._deferredFuncs:
+                    # process simple deferred functions - required so that qt signals are not blocked
+                    func()
+                self._deferredFuncs = []
+
         else:
             raise RuntimeError('Error: tableBlockingLevel already at 0')
 
@@ -1650,27 +1660,12 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
     # Table methods
     #=========================================================================================
 
-    @property
-    def _sourceObjects(self):
-        """Return the list of source objects, e.g., _table.peaks/_table.nmrResidues
-        """
-        # MUST BE SUBCLASSED
-        raise NotImplementedError(f'Code error: {self.__class__.__name__}._sourceObjects not implemented')
-
-    @property
-    def _sourceCurrent(self):
-        """Return the list of source objects in the current list, e.g., current.peaks/current.nmrResidues
-        """
-        # MUST BE SUBCLASSED
-        raise NotImplementedError(f'Code error: {self.__class__.__name__}._sourceCurrent not implemented')
-
     def getSelectedObjects(self, fromSelection=None):
         """Return the selected core objects
         :param fromSelection:
         :return: get a list of table objects. If the table has a header called pid, the object is a ccpn Core obj like Peak,
         otherwise is a Pandas series object corresponding to the selected row(s).
         """
-
         model = self.selectionModel()
         # selects all the items in the row - may need to check selectionMode
         selection = fromSelection if fromSelection else model.selectedRows()

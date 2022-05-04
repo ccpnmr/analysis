@@ -3,19 +3,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-11 20:43:39 +0100 (Mon, October 11, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-05-04 17:38:06 +0100 (Wed, May 04, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -74,6 +74,9 @@ class Sample(AbstractWrapperObject):
     # internal namespace
     _AMOUNTUNITS = 'amountUnits'
     _IONICSTRENGTHUNITS = 'ionicStrengthUnits'
+    _SAMPLENUMBER = 'sampleNumber'
+    _SPECTRALOVERLAPSCORE = 'spectralOverlapScore'
+    _SPECTRALOVERLAPCOUNT = 'spectralOverlapCount'
 
     #=========================================================================================
     # CCPN properties
@@ -328,6 +331,41 @@ class Sample(AbstractWrapperObject):
         self._setInternalParameter(self._IONICSTRENGTHUNITS, value)
 
     #=========================================================================================
+    # Mixtures Implementation
+    #=========================================================================================
+
+    @property
+    def sampleNumber(self):
+        """
+        A non unique identifier for sample. Used for sorting. (This is different from the serial)
+        :return:
+        """
+        return self._getInternalParameter(self._SAMPLENUMBER)
+
+    @sampleNumber.setter
+    def sampleNumber(self, value):
+        if not isinstance(value, int):
+            raise ValueError("sample number must be of format int")
+        self._setInternalParameter(self._SAMPLENUMBER, value)
+
+    @property
+    def spectralOverlapScore(self):
+        return self._getInternalParameter(self._SPECTRALOVERLAPSCORE)
+
+    @spectralOverlapScore.setter
+    def spectralOverlapScore(self, value):
+        self._setInternalParameter(self._SPECTRALOVERLAPSCORE, value)
+
+    @property
+    def spectralOverlapCount(self):
+        return self._getInternalParameter(self._SPECTRALOVERLAPCOUNT)
+
+    @spectralOverlapCount.setter
+    def spectralOverlapCount(self, value):
+        self._setInternalParameter(self._SPECTRALOVERLAPCOUNT, value)
+
+
+    #=========================================================================================
     # Implementation functions
     #=========================================================================================
 
@@ -377,6 +415,14 @@ class Sample(AbstractWrapperObject):
     # CCPN functions
     #=========================================================================================
 
+    def getSubstances(self):
+        substances = []
+        for sampleComponent in self.sampleComponents:
+            substance = sampleComponent.substance
+            if substance is not None:
+               substances.append(substance)
+        return substances
+
     def getSampleComponentsSpectra(self):
         """
         Gets spectra linked to sampleComponents through substances.
@@ -384,8 +430,7 @@ class Sample(AbstractWrapperObject):
         to the sample.spectra when a sample it's a mixtures.
         """
         spectra = []
-        for sampleComponent in self.sampleComponents:
-            substance = sampleComponent.substance
+        for substance in self.getSubstances():
             if substance is not None:
                 spectra += substance.referenceSpectra
         return sorted(set(spectra), key=spectra.index)

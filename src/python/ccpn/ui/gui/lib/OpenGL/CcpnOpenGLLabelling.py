@@ -164,10 +164,7 @@ class GLLabelling():
                 self._createSymbol(obj)
                 self._createLabel(obj)
 
-            if trigger == Notifier.CHANGE:
-                if obj.isDeleted:
-                    return
-
+            if trigger == Notifier.CHANGE and not obj.isDeleted:
                 self._changeSymbol(obj)
                 self._changeLabel(obj)
 

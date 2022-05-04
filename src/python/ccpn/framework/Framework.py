@@ -1759,7 +1759,7 @@ class Framework(NotifierBase, GuiBase):
         multipletTableModule = MultipletTableModule(mainWindow, selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(multipletTableModule, position=position, relativeTo=relativeTo)
         if multipletList:
-            multipletTableModule.selectMultipletList(multipletList)
+            multipletTableModule.selectTable(multipletList)
         return multipletTableModule
 
     @logCommand('application.')

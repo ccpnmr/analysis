@@ -1,5 +1,4 @@
 """Module Documentation here
-
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -15,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-28 20:35:37 +0100 (Thu, April 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-04 12:22:44 +0100 (Wed, May 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,34 +25,43 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import pandas as pd
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 from collections import OrderedDict
 from dataclasses import dataclass
+from functools import partial
 
 from ccpn.core.MultipletList import MultipletList
 from ccpn.core.Multiplet import Multiplet
-from ccpn.core.lib.DataFrameObject import DataFrameObject
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.modules.MultipletPeakTable import MultipletPeakTableWidget
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.PulldownListsForObjects import MultipletListPulldown
 from ccpn.ui.gui.widgets.Column import ColumnClass
-from ccpn.ui.gui.modules.MultipletPeakTable import MultipletPeakTableWidget
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Font import getFontHeight
-from ccpn.core.lib.Notifiers import Notifier
-from ccpn.core.lib.peakUtils import getPeakLinewidth, getMultipletPosition
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.widgets.Spacer import Spacer
+from ccpn.core.lib.Notifiers import Notifier
+from ccpn.core.lib.peakUtils import getPeakLinewidth, getMultipletPosition
+from ccpn.ui.gui.widgets.SettingsWidgets import ModuleSettingsWidget
+from ccpn.ui.gui.lib._CoreTableFrame import _CoreTableWidgetABC, _CoreTableFrameABC
 from ccpn.util.OrderedSet import OrderedSet
-from ccpn.ui.gui.lib._SimplePandasTable import _SimplePandasTableViewProjectSpecific, _updateSimplePandasTable
 from ccpn.util.Logging import getLogger
 
 
 logger = getLogger()
 
 UNITS = ['ppm', 'Hz', 'point']
+ALL = '<all>'
+LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
+
+
+# simple class to show items on the multipletPeakTable
+@dataclass
+class _PeakList:
+    peaks = []
+    spectrum = None
 
 
 #=========================================================================================
@@ -63,9 +71,11 @@ UNITS = ['ppm', 'Hz', 'point']
 class MultipletTableModule(CcpnModule):
     """This class implements the module by wrapping a MultipletTable instance
     """
-    includeSettingsWidget = False
+    includeSettingsWidget = True
     maxSettingsState = 2
     settingsPosition = 'top'
+
+    activePulldownClass = MultipletList
 
     className = 'MultipletTableModule'
     _allowRename = True
@@ -86,110 +96,105 @@ class MultipletTableModule(CcpnModule):
             self.application = self.project = self.current = None
         self._table = None
 
-        # add the widgets
-        self._setWidgets()
+        # set the widgets and callbacks
+        self._setWidgets(self.settingsWidget, self.mainWidget, multipletList, selectFirstItem)
+        self._setCallbacks()
 
         if multipletList is not None:
             self.selectTable(multipletList)
         elif selectFirstItem:
-            self._modulePulldown.selectFirstItem()
+            self._mainFrame._modulePulldown.selectFirstItem()
 
-    def _setWidgets(self):
+    def _setWidgets(self, settingsWidget, mainWidget, multipletList, selectFirstItem):
         """Set up the widgets for the module
         """
-        _topWidget = self.mainWidget
+        self._settings = None
+        if self.activePulldownClass:
+            # add to settings widget - see sequenceGraph for more detailed example
+            settingsDict = OrderedDict(((LINKTOPULLDOWNCLASS, {'label'   : 'Link to current %s' % self.activePulldownClass.className,
+                                                               'tipText' : 'Set/update current %s when selecting from pulldown' % self.activePulldownClass.className,
+                                                               'callBack': None,
+                                                               'enabled' : True,
+                                                               'checked' : False,
+                                                               '_init'   : None,
+                                                               }),
+                                        ))
+            self._settings = ModuleSettingsWidget(parent=settingsWidget, mainWindow=self.mainWindow,
+                                                  settingsDict=settingsDict,
+                                                  grid=(0, 0))
 
-        # main widgets at the top
-        row = 0
-        Spacer(_topWidget, 5, 5,
-               QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
-               grid=(row, 0), gridSpan=(1, 1))
-
-        row += 1
-        gridHPos = 0
-        self._modulePulldown = MultipletListPulldown(parent=_topWidget,
-                                                     mainWindow=self.mainWindow,
-                                                     grid=(row, gridHPos), gridSpan=(1, 1), minimumWidths=(0, 100),
-                                                     showSelectName=True,
-                                                     sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
-                                                     callback=self._selectionPulldownCallback)
-
-        # create widgets for selection of position units
-        gridHPos += 1
-        _posUnitPulldownLabel = Label(parent=_topWidget, text=' Position Unit', grid=(row, gridHPos))
-        gridHPos += 1
-        self.posUnitPulldown = PulldownList(parent=_topWidget, texts=UNITS, callback=self._pulldownUnitsCallback, grid=(row, gridHPos),
-                                            objectName='posUnits_PT')
-
-        # fixed height
-        self._modulePulldown.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
-
-        row += 1
-        self.spacer = Spacer(_topWidget, 5, 5,
-                             QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
-                             grid=(row, 1), gridSpan=(1, 1))
-        _topWidget.getLayout().setColumnStretch(gridHPos + 1, 2)
-
-        # add the splitter between multiplets and peaks
-        row += 1
-        outerFrame = Frame(_topWidget, setLayout=True, grid=(row, 0), gridSpan=(1, gridHPos + 2))
-        splitter = Splitter(horizontal=True, collapsible=False)
+        # add a splitter for the multiplet-peak table
+        outerFrame = Frame(mainWidget, setLayout=True, grid=(0, 0), gridSpan=(1, 1))
+        splitter = Splitter(horizontal=False, collapsible=False)
 
         outerFrame.getLayout().addWidget(splitter)
 
-        # main window
-        _hidden = ['Pid', 'Spectrum', 'MultipletList', 'Id']
+        # add the frame containing the pulldown and table
+        self._mainFrame = MultipletTableFrame(parent=mainWidget,
+                                              mainWindow=self.mainWindow,
+                                              moduleParent=self,
+                                              multipletList=multipletList, selectFirstItem=selectFirstItem,
+                                              grid=(0, 0))
 
-        row += 1
-        self._tableWidget = _NewMultipletTableWidget(parent=_topWidget,
-                                                     mainWindow=self.mainWindow,
-                                                     moduleParent=self,
-                                                     grid=(row, 0), gridSpan=(1, 6),
-                                                     hiddenColumns=_hidden,
-                                                     )
-
-        # make the table expand to fill the frame
-        self._tableWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        # # make the table expand to fill the frame
+        # self._tableWidget.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
 
         # add the peak-table to the right
-        self.peaksFrame = Frame(self.mainWidget, setLayout=True, grid=(0, 1))
-        self.peakListTableLabel = Label(self.peaksFrame, 'Peaks:', grid=(0, 0))
+        self.peaksFrame = Frame(mainWidget, setLayout=True, grid=(0, 1))
+        self.peakListTableLabel = Label(self.peaksFrame, 'Peaks:', grid=(0, 0), gridSpan=(1, 2))
         self.peakListTableLabel.setFixedHeight(getFontHeight())
 
         self.peakListTable = MultipletPeakTableWidget(parent=self.peaksFrame,
                                                       mainWindow=self.mainWindow,
-                                                      moduleParent=None,
-                                                      grid=(1, 0))
+                                                      moduleParent=self,
+                                                      grid=(1, 1))
+        self.spacer = Spacer(self.peaksFrame, 12, 5,
+                             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
+                             grid=(1, 0))
 
         # make the table expand to fill the frame
         self.peakListTable.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
 
         # put the frames into the splitter
-        splitter.addWidget(self._tableWidget)
+        splitter.addWidget(self._mainFrame)
         splitter.addWidget(self.peaksFrame)
 
-    def selectTable(self, table=None):
-        """Manually select a table from the pullDown
+    @property
+    def tableFrame(self):
+        """Return the table frame
         """
-        if table is None:
-            self._modulePulldown.selectFirstItem()
-        else:
-            if not isinstance(table, self._tableWidget.tableClass):
-                logger.warning(f'select: Object is not of type {self._tableWidget.tableName}')
-                raise TypeError(f'select: Object is not of type {self._tableWidget.tableName}')
-            else:
-                self._modulePulldown.select(table.pid)
+        return self._mainFrame
 
-    def _selectionPulldownCallback(self, item):
-        """Notifier Callback for selecting table from the pull down menu
+    @property
+    def tableWidget(self):
+        """Return the table widget in the table frame
         """
-        self._table = self._modulePulldown.getSelectedObject()
-        self._tableWidget._table = self._table
+        return self._mainFrame._tableWidget
 
-        if self._table is not None:
-            self._tableWidget.populateTable(selectedObjects=self.current.multiplets)
-        else:
-            self._tableWidget.populateEmptyTable()
+    def _setCallbacks(self):
+        """Set the active callbacks for the module
+        """
+        if self.activePulldownClass:
+            self._setCurrentPulldown = Notifier(self.current,
+                                                [Notifier.CURRENT],
+                                                targetName=self.activePulldownClass._pluralLinkName,
+                                                callback=self._mainFrame._selectCurrentPulldownClass)
+
+            # set the active callback from the pulldown
+            self._mainFrame.setActivePulldownClass(coreClass=self.activePulldownClass,
+                                                   checkBox=self._settings.checkBoxes[LINKTOPULLDOWNCLASS]['widget'])
+
+        # set the dropped callback through mainWidget
+        self.mainWidget._dropEventCallback = self._mainFrame._processDroppedItems
+
+        # connect the signals for the cross-table linking
+        self.tableWidget.updateLinkedTable.connect(self._updatePeakTable)
+        self.tableFrame.unitsChanged.connect(self._pulldownUnitsCallback)
+
+    def selectTable(self, table):
+        """Select the object in the table
+        """
+        self._mainFrame.selectTable(table)
 
     def _closeModule(self):
         """CCPN-INTERNAL: used to close the module
@@ -199,29 +204,32 @@ class MultipletTableModule(CcpnModule):
         self.peakListTable._close()
         super()._closeModule()
 
+    @QtCore.pyqtSlot(str)
     def _pulldownUnitsCallback(self, unit):
         """Update both tables with the new units
         """
-        self._tableWidget._setPositionUnit(unit)
-        self._tableWidget._updateAllModule()
+        self.tableWidget._setPositionUnit(unit)
+        self.tableWidget._updateAllModule()
         self.peakListTable._setPositionUnit(unit)
         self.peakListTable._updateAllModule()
+
+    @QtCore.pyqtSlot(_PeakList)
+    def _updatePeakTable(self, newTable):
+        """Update the multiplet-peak table with a new table, signalled from the multiplet selection
+        """
+        self.peakListTable._table = newTable
+        self.peakListTable._update()
 
 
 #=========================================================================================
 # _NewMultipletTableWidget
 #=========================================================================================
 
-# simple class to show items on the multipletPeakTable
-@dataclass
-class _PeakList:
-    peaks = []
-    spectrum = None
-
-
-class _NewMultipletTableWidget(_SimplePandasTableViewProjectSpecific):
+class _NewMultipletTableWidget(_CoreTableWidgetABC):
     """Class to present an multipletList Table
     """
+    updateLinkedTable = QtCore.pyqtSignal(_PeakList)
+
     className = 'MultipletTable'
     attributeName = 'multipletLists'
 
@@ -246,30 +254,35 @@ class _NewMultipletTableWidget(_SimplePandasTableViewProjectSpecific):
     # set the queue handling parameters
     _maximumQueueLength = 25
 
-    positionsUnit = UNITS[0]  #default
+    positionsUnit = UNITS[0]  # default
 
-    def __init__(self, parent=None, mainWindow=None, moduleParent=None,
-                 actionCallback=None, selectionCallback=None,
-                 hiddenColumns=None,
-                 enableExport=True, enableDelete=True, enableSearch=False,
-                 **kwds):
-        """Initialise the widgets for the module.
+    #=========================================================================================
+    # Properties
+    #=========================================================================================
+
+    @property
+    def _sourceObjects(self):
+        """Get/set the list of source objects
         """
+        return self._table.multiplets
 
-        self._hiddenColumns = [self.columnHeaders.get(col) or col for col in hiddenColumns] if hiddenColumns else \
-            [self.columnHeaders.get(col) or col for col in self.defaultHidden]
-        self.dataFrameObject = None
+    @_sourceObjects.setter
+    def _sourceObjects(self, value):
+        # shouldn't need this
+        self._table.multiplets = value
 
-        super().__init__(parent=parent,
-                         mainWindow=mainWindow,
-                         moduleParent=moduleParent,
-                         multiSelect=True,
-                         showVerticalHeader=False,
-                         setLayout=True,
-                         **kwds)
+    @property
+    def _sourceCurrent(self):
+        """Get/set the associated list of current objects
+        """
+        return self.current.multiplets
 
-        # Initialise the notifier for processing dropped items
-        self._postInitTableCommonWidgets()
+    @_sourceCurrent.setter
+    def _sourceCurrent(self, value):
+        if value:
+            self.current.multiplets = value
+        else:
+            self.current.clearMultiplets()
 
     #=========================================================================================
     # Widget callbacks
@@ -306,12 +319,9 @@ class _NewMultipletTableWidget(_SimplePandasTableViewProjectSpecific):
     def selectionCallback(self, data):
         """set as current the selected peaks on the table
         """
-        multiplets = data[Notifier.OBJECT]
-        if multiplets is None:
-            self.current.clearMultiplets()
-        else:
-            self.current.multiplets = multiplets
+        super().selectionCallback(data)
 
+        # update the multiplet-peak table
         self._updateMultipletPeaksOnTable()
 
     def _updateMultipletPeaksOnTable(self):
@@ -326,185 +336,23 @@ class _NewMultipletTableWidget(_SimplePandasTableViewProjectSpecific):
                 newTable.peaks = peaks
                 newTable.spectrum = peaks[0].spectrum
 
-        # populate the table - wrong direction, should use a signal
-        self.moduleParent.peakListTable._table = newTable
-        self.moduleParent.peakListTable._updateTable()
+        # signal the multiplet-peak table to update
+        func = partial(self.updateLinkedTable.emit, newTable)
+        if self._tableBlockingLevel == 0:
+            # if not blocked then emit otherwise defer
+            func()
+        else:
+            self._deferredFuncs.append(partial(self.updateLinkedTable.emit, newTable))
 
     #=========================================================================================
     # Create table and row methods
     #=========================================================================================
-
-    @property
-    def _sourceObjects(self):
-        """Return the list of source objects
-        """
-        return self._table.multiplets
-
-    def _newRowFromUniqueId(self, df, obj, uniqueId):
-        """Create a new row to insert into the dataFrame or replace row
-        """
-        # generate a new row
-        listItem = OrderedDict()
-        for header in self._columnDefs.columns:
-            try:
-                listItem[header.headerText] = header.getValue(obj)
-            except Exception as es:
-                # NOTE:ED - catch any nasty surprises in tables
-                listItem[header.headerText] = None
-
-        return list(listItem.values())
-
-    def _derivedFromObject(self, obj):
-        """Get a tuple of derived values from obj
-        Not very generic yet - column class now seems redundant
-        """
-        pass
-
-    def buildTableDataFrame(self):
-        """Return a Pandas dataFrame from an internal list of objects.
-        The columns are based on the 'func' functions in the columnDefinitions.
-        :return pandas dataFrame
-        """
-        allItems = []
-        objects = []
-
-        if self._table:
-            self._columnDefs = self._getTableColumns(self._table)
-
-            for col, obj in enumerate(self._sourceObjects):
-                listItem = OrderedDict()
-                for header in self._columnDefs.columns:
-                    try:
-                        listItem[header.headerText] = header.getValue(obj)
-                    except Exception as es:
-                        # NOTE:ED - catch any nasty surprises in tables
-                        getLogger().debug(f'Error creating table information {es}')
-                        listItem[header.headerText] = None
-
-                allItems.append(listItem)
-                objects.append(obj)
-
-            df = pd.DataFrame(allItems, columns=self._columnDefs.headings)
-
-        else:
-            self._columnDefs = self._getTableColumns()
-            df = pd.DataFrame(columns=self._columnDefs.headings)
-
-        # use the object as the index, object always exists even if isDeleted
-        df.set_index(df[self.OBJECTCOLUMN], inplace=True, )
-
-        _dfObject = DataFrameObject(dataFrame=df,
-                                    columnDefs=self._columnDefs or [],
-                                    table=self)
-
-        return _dfObject
-
-    def refreshTable(self):
-        # subclass to refresh the groups
-        _updateSimplePandasTable(self, self._df)
-        # self.updateTableExpanders()
-
-    def setDataFromSearchWidget(self, dataFrame):
-        """Set the data for the table from the search widget
-        """
-        _updateSimplePandasTable(self, dataFrame)
-        # self._updateGroups(dataFrame)
-        # self.updateTableExpanders()
-
-    def _updateTableCallback(self, data):
-        # print(f'>>> _updateTableCallback')
-        pass
 
     def getCellToRows(self, cellItem, attribute=None):
         """Get the list of objects which cellItem maps to for this table
         To be subclassed as required
         """
         raise RuntimeError(f'{self.__class__.__name__}.getCellToRows not callable')
-
-    def _updateRowCallback(self, data):
-        """Notifier callback for updating the table for change in chemicalShifts
-        :param data: notifier content
-        """
-        with self._blockTableSignals('_updateRowCallback'):
-            obj = data[Notifier.OBJECT]
-
-            # check that the dataframe and object are valid
-            if self._df is None:
-                getLogger().debug(f'{self.__class__.__name__}._updateRowCallback: dataFrame is None')
-                return
-            if obj is None:
-                getLogger().debug(f'{self.__class__.__name__}._updateRowCallback: callback object is undefined')
-                return
-
-            trigger = data[Notifier.TRIGGER]
-            try:
-                df = self._df
-                objSet = set(self._sourceObjects)  # objects in the list
-                tableSet = set(df[self.OBJECTCOLUMN])  # objects currently in the table
-
-                if trigger == Notifier.DELETE:
-                    # uniqueIds in the visible table
-                    if obj in (tableSet - objSet):
-                        # remove from the table
-                        self.model()._deleteRow(obj)
-
-                elif trigger == Notifier.CREATE:
-                    # uniqueIds in the visible table
-                    if obj in (objSet - tableSet):
-                        # insert into the table
-                        newRow = self._newRowFromUniqueId(df, obj, None)
-                        self.model()._insertRow(obj, newRow)
-
-                elif trigger == Notifier.CHANGE:
-                    # uniqueIds in the visible table
-                    if obj in (objSet & tableSet):
-                        # visible table dataframe update - object MUST be in the table
-                        newRow = self._newRowFromUniqueId(df, obj, None)
-                        self.model()._updateRow(obj, newRow)
-
-                elif trigger == Notifier.RENAME:
-                    if obj in (objSet & tableSet):
-                        # visible table dataframe update
-                        newRow = self._newRowFromUniqueId(df, obj, None)
-                        self.model()._updateRow(obj, newRow)
-
-                    elif obj in (objSet - tableSet):
-                        # insert renamed object INTO the table
-                        newRow = self._newRowFromUniqueId(df, obj, None)
-                        self.model()._insertRow(obj, newRow)
-
-                    elif obj in (tableSet - objSet):
-                        # remove renamed object OUT of the table
-                        self.model()._deleteRow(obj)
-
-            except Exception as es:
-                getLogger().debug2(f'Error updating row in table {es}')
-
-    def _searchCallBack(self, data):
-        # print(f'>>> _searchCallBack')
-        pass
-
-    def _selectCurrentCallBack(self, data):
-        """Callback from a notifier to highlight the current objects
-        :param data:
-        """
-        if self._tableBlockingLevel:
-            return
-
-        objs = data['value']
-        self._selectOnTableCurrent(objs)
-
-    def _selectionChangedCallback(self, selected, deselected):
-        """Handle item selection as changed in table - call user callback
-        Includes checking for clicking below last row
-        """
-        self._changeTableSelection(None)
-
-    def _selectOnTableCurrent(self, objs):
-        """Highlight the list of objects on the table
-        :param objs:
-        """
-        self.highlightObjects(objs)
 
     #=========================================================================================
     # Table context menu
@@ -515,14 +363,10 @@ class _NewMultipletTableWidget(_SimplePandasTableViewProjectSpecific):
         """
         super()._setContextMenu(enableExport=enableExport, enableDelete=enableDelete)
 
+        # add edit muliplet to the menu
         self.tableMenu.insertSeparator(self.tableMenu.actions()[0])
         a = self.tableMenu.addAction('Edit Multiplet...', self._editMultiplets)
         self.tableMenu.insertAction(self.tableMenu.actions()[0], a)
-
-    def _raiseTableContextMenu(self, pos):
-        """Raise the right-mouse menu
-        """
-        super()._raiseTableContextMenu(pos)
 
     def _editMultiplets(self):
         """Raise the edit multiplet popup
@@ -552,7 +396,8 @@ class _NewMultipletTableWidget(_SimplePandasTableViewProjectSpecific):
                       ('_object', lambda ml: ml, 'Object', None, None),
                       ('Spectrum', lambda multiplet: multiplet.multipletList.spectrum.id, 'Spectrum containing the Multiplet', None, None),
                       ('MultipletList', lambda multiplet: multiplet.multipletList.serial, 'MultipletList containing the Multiplet', None, None),
-                      ('Id', lambda multiplet: multiplet.serial, 'Multiplet serial', None, None)]
+                      # ('Id', lambda multiplet: multiplet.serial, 'Multiplet serial', None, None)
+                      ]
 
         # Serial column
 
@@ -603,26 +448,6 @@ class _NewMultipletTableWidget(_SimplePandasTableViewProjectSpecific):
     #=========================================================================================
     # Updates
     #=========================================================================================
-
-    def _updateAllModule(self, data=None):
-        """Updates the table and the settings widgets
-        """
-        self._updateTable()
-
-    def _updateTable(self):
-        """Display the objects on the table for the selected list.
-        Obviously, If the object has not been previously deleted and flagged isDeleted
-        """
-        if self._table and self._table.multiplets:
-            self.populateTable(selectedObjects=self.current.multiplets)
-        else:
-            self.populateEmptyTable()
-
-    def queueFull(self):
-        """Method that is called when the queue is deemed to be too big.
-        Apply overall operation instead of all individual notifiers.
-        """
-        self._updateTable()
 
     #=========================================================================================
     # Widgets callbacks
@@ -687,6 +512,56 @@ class _NewMultipletTableWidget(_SimplePandasTableViewProjectSpecific):
                 limits = multiplet.limits[0]
                 if limits:
                     return float(min(limits))
+
+
+#=========================================================================================
+# MultipletTableFrame
+#=========================================================================================
+
+class MultipletTableFrame(_CoreTableFrameABC):
+    """Frame containing the pulldown and the table widget
+    """
+    unitsChanged = QtCore.pyqtSignal(str)
+
+    _TableKlass = _NewMultipletTableWidget
+    _PulldownKlass = MultipletListPulldown
+
+    def __init__(self, parent, mainWindow=None, moduleParent=None,
+                 multipletList=None, selectFirstItem=False, **kwds):
+        super().__init__(parent, mainWindow=mainWindow, moduleParent=moduleParent,
+                         obj=multipletList, selectFirstItem=selectFirstItem, **kwds)
+
+        # create widgets for selection of position units
+        self.posUnitPulldownLabel = Label(parent=self, text=' Position Unit', )
+        self.posUnitPulldown = PulldownList(parent=self, texts=UNITS, callback=self._pulldownUnitsCallback,
+                                            objectName='posUnits_PT')
+
+        self.addWidgetToTop(self.posUnitPulldownLabel, 2)
+        self.addWidgetToTop(self.posUnitPulldown, 3)
+
+    #=========================================================================================
+    # Properties
+    #=========================================================================================
+
+    @property
+    def _tableCurrent(self):
+        """Return the list of source objects, e.g., _table.multiplets/_table.nmrResidues
+        """
+        return self.current.multipletList
+
+    @_tableCurrent.setter
+    def _tableCurrent(self, value):
+        self.current.multipletList = value
+
+    #=========================================================================================
+    # Widgets callbacks
+    #=========================================================================================
+
+    def _pulldownUnitsCallback(self, unit):
+        """Pass units change callback to the table
+        """
+        # signal parent to update the units of both tables
+        self.unitsChanged.emit(unit)
 
 
 #=========================================================================================

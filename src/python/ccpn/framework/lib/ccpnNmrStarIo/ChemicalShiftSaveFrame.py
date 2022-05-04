@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-18 14:08:27 +0000 (Fri, March 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-04 14:00:04 +0100 (Wed, May 04, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -185,9 +185,9 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
                 # propagate xy to carbon; fortunately, these rows appear follow the proton ones so we
                 # can adjust the attributes
                 _cName = _row.ntDef.attachedHeavyAtom.name
-                _cRow = self._lookupDict.get( (_row.residueType, _row.sequenceCode, _cName) )
-                _cRow.nefAtomName = _cRow.atomName.replace('1','x').replace('2','y')
-                _cRow.ambiguityCode = 2
+                if (_cRow := self._lookupDict.get( (_row.residueType, _row.sequenceCode, _cName) )):
+                    _cRow.nefAtomName = _cRow.atomName.replace('1','x').replace('2','y')
+                    _cRow.ambiguityCode = 2
             else:
                 atomName = _row.nefAtomName
 

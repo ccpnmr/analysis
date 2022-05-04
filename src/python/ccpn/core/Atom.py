@@ -4,10 +4,10 @@ Module documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-09-13 19:21:20 +0100 (Mon, September 13, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-05-04 12:19:14 +0100 (Wed, May 04, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -180,7 +180,6 @@ class Atom(AbstractWrapperObject):
         project = self._project
         project._wrappedData.molSystem.newGenericBond(atoms=(self._wrappedData, atom._wrappedData))
 
-    #from ccpn.core.NmrAtom import NmrAtom: This will break the import sequence
     @property
     def nmrAtom(self) -> typing.Optional['NmrAtom']:
         """NmrAtom to which Atom is assigned
@@ -192,19 +191,6 @@ class Atom(AbstractWrapperObject):
             return self._project.getNmrAtom(self._id)
         except:
             return None
-
-    # GWV 20181122: removed setters between Chain/NmrChain, Residue/NmrResidue, Atom/NmrAtom
-    # @nmrAtom.setter
-    # def nmrAtom(self, value:'NmrAtom'):
-    #   oldValue = self.nmrAtom
-    #   if oldValue is value:
-    #     return
-    #   elif value is None:
-    #     raise ValueError("Cannot set Atom.nmrAtom to None")
-    #   elif oldValue is not None:
-    #     raise ValueError("New assignment of Atom clashes with existing assignment")
-    #   else:
-    #     value.atom = self
 
     @property
     def isAssigned(self) -> bool:
@@ -223,6 +209,18 @@ class Atom(AbstractWrapperObject):
     def _getAllWrappedData(cls, parent: Residue) -> list:
         """get wrappedData (MolSystem.Atoms) for all Atom children of parent Residue"""
         return parent._wrappedData.sortedAtoms()
+
+    def _finaliseAction(self, action: str):
+        """Subclassed to handle delete/create
+        """
+        if action == 'delete':
+            # store the old hierarchy information - required for deferred notifiers
+            self._oldResidue = self.residue
+        elif action == 'create':
+            self._oldResidue = None
+
+        if not super()._finaliseAction(action):
+            return
 
     #=========================================================================================
     # CCPN functions
@@ -264,8 +262,3 @@ def _newAtom(self: Residue, name: str, elementSymbol: str = None) -> 'Atom':
     apiAtom.expandNewAtom()
 
     return result
-
-#EJB 20181204: moved to Residue
-# Residue.newAtom = _newAtom
-
-# Connections to parents:

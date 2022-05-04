@@ -29,7 +29,6 @@ import json
 import operator
 import os
 from collections import OrderedDict
-from ccpn.util.Logging import getLogger
 from ccpn.core.Chain import Chain
 from ccpn.core.Residue import Residue
 from ccpn.core.NmrChain import NmrChain
@@ -41,16 +40,17 @@ from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.Sample import Sample
 from ccpn.core.Restraint import Restraint
 from ccpn.core.Substance import Substance
-from ccpn.core.Integral import Integral
+from ccpn.core.Integral import Integral, IntegralList
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.SpectrumHit import SpectrumHit
 from ccpn.core.Spectrum import Spectrum
-from ccpn.core.Peak import Peak
-from ccpn.core.Multiplet import Multiplet
+from ccpn.core.Peak import Peak, PeakList
+from ccpn.core.Multiplet import Multiplet, MultipletList
 from ccpn.core.DataTable import DataTable
 from ccpn.core.ViolationTable import ViolationTable
 from ccpn.core.Collection import Collection
 from ccpn.ui._implementation.Strip import Strip
+from ccpn.util.Logging import getLogger
 
 
 SingularOnly = 'singularOnly'
@@ -63,6 +63,7 @@ _currentClasses = {
     Spectrum         : {},
     Peak             : {},
     Integral         : {},
+    Multiplet        : {},
     NmrChain         : {},
     NmrResidue       : {},
     NmrAtom          : {},
@@ -75,7 +76,9 @@ _currentClasses = {
     Sample           : {},
     SpectrumHit      : {SingularOnly: True},
     Substance        : {},
-    Multiplet        : {},
+    PeakList         : {},
+    IntegralList     : {},
+    MultipletList    : {},
     Restraint        : {},
     DataTable        : {},
     ViolationTable   : {},

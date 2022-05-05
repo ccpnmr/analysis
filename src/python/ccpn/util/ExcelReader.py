@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-04 18:44:48 +0100 (Wed, May 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-05 15:54:40 +0100 (Thu, May 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -509,7 +509,11 @@ class ExcelReader(object):
                                  header == SAMPLE_COMPONENTS and sampleComponentName != NOTGIVEN]
         if len(sample.sampleComponents) == 0:
             if len(sampleComponentsNames) > 0:
-                for name in sampleComponentsNames[0][1].split(','):
+                # check if is , or ; separated
+                splitter = ','
+                if ';' in sampleComponentsNames[0][1]:
+                    splitter = ';'
+                for name in sampleComponentsNames[0][1].split(splitter):
                     if not self._project.getByPid('SC:' + str(name)):
                         sampleComponent = _newComponent(sample, name=(str(name)))
                         sampleComponent.role = 'Compound'

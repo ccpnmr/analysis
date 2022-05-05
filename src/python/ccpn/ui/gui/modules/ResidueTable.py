@@ -78,11 +78,6 @@ class ResidueTableModule(CcpnModule):
         self._setWidgets(self.settingsWidget, self.mainWidget, chain, selectFirstItem)
         self._setCallbacks()
 
-        if chain is not None:
-            self.selectTable(chain)
-        elif selectFirstItem:
-            self._modulePulldown.selectFirstItem()
-
     def _setWidgets(self, settingsWidget, mainWidget, chain, selectFirstItem):
         """Set up the widgets for the module
         """

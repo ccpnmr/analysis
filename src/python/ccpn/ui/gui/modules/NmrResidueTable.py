@@ -95,11 +95,6 @@ class NmrResidueTableModule(CcpnModule):
         self._setWidgets(self.settingsWidget, self.mainWidget, nmrChain, selectFirstItem)
         self._setCallbacks()
 
-        if nmrChain is not None:
-            self.selectTable(nmrChain)
-        elif selectFirstItem:
-            self._mainFrame._modulePulldown.selectFirstItem()
-
     def _setWidgets(self, settingsWidget, mainWidget, nmrChain, selectFirstItem):
         """Set up the widgets for the module
         """

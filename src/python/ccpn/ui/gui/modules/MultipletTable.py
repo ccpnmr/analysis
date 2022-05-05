@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-04 13:41:51 +0100 (Wed, May 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-05 10:23:03 +0100 (Thu, May 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -99,11 +99,6 @@ class MultipletTableModule(CcpnModule):
         # set the widgets and callbacks
         self._setWidgets(self.settingsWidget, self.mainWidget, multipletList, selectFirstItem)
         self._setCallbacks()
-
-        if multipletList is not None:
-            self.selectTable(multipletList)
-        elif selectFirstItem:
-            self._mainFrame._modulePulldown.selectFirstItem()
 
     def _setWidgets(self, settingsWidget, mainWidget, multipletList, selectFirstItem):
         """Set up the widgets for the module

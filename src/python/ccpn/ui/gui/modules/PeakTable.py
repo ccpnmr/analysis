@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-04 13:41:51 +0100 (Wed, May 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-05 10:23:03 +0100 (Thu, May 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -85,12 +85,6 @@ class PeakTableModule(CcpnModule):
         # set the widgets and callbacks
         self._setWidgets(self.settingsWidget, self.mainWidget, peakList, selectFirstItem)
         self._setCallbacks()
-
-        # populate with the selected list or the first in the list
-        if peakList is not None:
-            self.selectTable(peakList)
-        elif selectFirstItem:
-            self._mainFrame._modulePulldown.selectFirstItem()
 
     def _setWidgets(self, settingsWidget, mainWidget, peakList, selectFirstItem):
         """Set up the widgets for the module

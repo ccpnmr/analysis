@@ -48,6 +48,7 @@ from ccpn.core.Peak import Peak, PeakList
 from ccpn.core.Multiplet import Multiplet, MultipletList
 from ccpn.core.DataTable import DataTable
 from ccpn.core.ViolationTable import ViolationTable
+from ccpn.core.StructureEnsemble import StructureEnsemble
 from ccpn.core.Collection import Collection
 from ccpn.ui._implementation.Strip import Strip
 from ccpn.util.Logging import getLogger
@@ -82,6 +83,7 @@ _currentClasses = {
     Restraint        : {},
     DataTable        : {},
     ViolationTable   : {},
+    StructureEnsemble: {},
     Collection       : {},
     }
 

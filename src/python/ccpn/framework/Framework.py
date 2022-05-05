@@ -1807,7 +1807,7 @@ class Framework(NotifierBase, GuiBase):
         structureTableModule = StructureTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(structureTableModule, position=position, relativeTo=relativeTo)
         if structureEnsemble:
-            structureTableModule.selectStructureEnsemble(structureEnsemble)
+            structureTableModule.selectTable(structureEnsemble)
         return structureTableModule
 
     @logCommand('application.')

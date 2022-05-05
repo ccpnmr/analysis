@@ -4,10 +4,10 @@ This file contains StructureTableModule and StructureTable classes
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-04 20:14:38 +0000 (Thu, November 04, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-05-05 10:28:06 +0100 (Thu, May 05, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,35 +27,39 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import pandas as pd
+from collections import OrderedDict
+
+from ccpn.core.StructureEnsemble import StructureEnsemble as KlassTable
 from ccpn.core.lib.CallBack import CallBack
+from ccpn.core.lib.DataFrameObject import DataFrameObject
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.GuiTable import GuiTable
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.widgets.PulldownListsForObjects import StructureEnsemblePulldown
+from ccpn.ui.gui.widgets.PulldownListsForObjects import StructureEnsemblePulldown as KlassPulldown
 from ccpn.ui.gui.widgets.Column import ColumnClass
 from PyQt5 import QtWidgets
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.core.StructureEnsemble import StructureEnsemble
+from ccpn.ui.gui.widgets.SettingsWidgets import ModuleSettingsWidget
+from ccpn.ui.gui.lib._SimplePandasTable import _SimplePandasTableView, _updateSimplePandasTable
+from ccpn.ui.gui.lib._CoreTableFrame import _CoreTableWidgetABC, _CoreTableFrameABC
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.SettingsWidgets import StripPlot
 
 
 ALL = '<all>'
+LINKTOPULLDOWNCLASS = 'linkToPulldownClass'
 
 
 class StructureTableModule(CcpnModule):
-    """
-    This class implements the module by wrapping a StructureTable instance
+    """This class implements the module by wrapping a StructureTable instance
     """
     includeSettingsWidget = True
     maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
-    settingsPosition = 'left'
+    settingsPosition = 'top'
 
-    includePeakLists = False
-    includeNmrChains = False
-    includeSpectrumTable = False
+    activePulldownClass = KlassTable
 
     className = 'StructureTableModule'
     _allowRename = True
@@ -63,8 +67,7 @@ class StructureTableModule(CcpnModule):
     # we are subclassing this Module, hence some more arguments to the init
     def __init__(self, mainWindow=None, name='Structure Table',
                  structureEnsemble=None, selectFirstItem=False):
-        """
-        Initialise the Module widgets
+        """Initialise the Module widgets
         """
         super().__init__(mainWindow=mainWindow, name=name)
 
@@ -75,48 +78,81 @@ class StructureTableModule(CcpnModule):
             self.project = mainWindow.application.project
             self.current = mainWindow.application.current
         else:
-            self.application = None
-            self.project = None
-            self.current = None
+            self.application = self.project = self.current = None
+        self._table = None
 
-        # add test code here
+        # add the widgets
+        self._setWidgets(self.settingsWidget, self.mainWidget, structureEnsemble, selectFirstItem)
+        self._setCallbacks()
 
-        # settings
-        self._STwidget = StripPlot(parent=self.settingsWidget, mainWindow=self.mainWindow,
-                                   includePeakLists=self.includePeakLists,
-                                   includeNmrChains=self.includeNmrChains,
-                                   includeSpectrumTable=self.includeSpectrumTable,
-                                   grid=(0, 0))
-
-        # main window
-        self.structureTable = StructureTable(parent=self.mainWidget,
-                                             mainWindow=self.mainWindow,
-                                             moduleParent=self,
-                                             setLayout=True,
-                                             grid=(0, 0))
-
-        if structureEnsemble is not None:
-            self.selectStructureEnsemble(structureEnsemble)
-        elif selectFirstItem:
-            self.structureTable.stWidget.selectFirstItem()
-
-    def selectStructureEnsemble(self, structureEnsemble=None):
+    def _setWidgets(self, settingsWidget, mainWidget, structureEnsemble, selectFirstItem):
+        """Set up the widgets for the module
         """
-        Manually select a StructureEnsemble from the pullDown
+        self._settings = None
+        if self.activePulldownClass:
+            # add to settings widget - see sequenceGraph for more detailed example
+            settingsDict = OrderedDict(((LINKTOPULLDOWNCLASS, {'label'   : 'Link to current %s' % self.activePulldownClass.className,
+                                                               'tipText' : 'Set/update current %s when selecting from pulldown' % self.activePulldownClass.className,
+                                                               'callBack': None,
+                                                               'enabled' : True,
+                                                               'checked' : False,
+                                                               '_init'   : None,
+                                                               }),
+                                        ))
+            self._settings = ModuleSettingsWidget(parent=settingsWidget, mainWindow=self.mainWindow,
+                                                  settingsDict=settingsDict,
+                                                  grid=(0, 0))
+
+        # add the frame containing the pulldown and table
+        self._mainFrame = StructureTableFrame(parent=mainWidget,
+                                              mainWindow=self.mainWindow,
+                                              moduleParent=self,
+                                              structureEnsemble=structureEnsemble, selectFirstItem=selectFirstItem,
+                                              grid=(0, 0))
+
+    @property
+    def tableFrame(self):
+        """Return the table frame
         """
-        self.structureTable._selectStructureEnsemble(structureEnsemble)
+        return self._mainFrame
+
+    @property
+    def tableWidget(self):
+        """Return the table widget in the table frame
+        """
+        return self._mainFrame._tableWidget
+
+    def _setCallbacks(self):
+        """Set the active callbacks for the module
+        """
+        if self.activePulldownClass:
+            self._setCurrentPulldown = Notifier(self.current,
+                                                [Notifier.CURRENT],
+                                                targetName=self.activePulldownClass._pluralLinkName,
+                                                callback=self._mainFrame._selectCurrentPulldownClass)
+
+            # set the active callback from the pulldown
+            self._mainFrame.setActivePulldownClass(coreClass=self.activePulldownClass,
+                                                   # checkBox=getattr(self.nmrResidueTableSettings, LINKTOPULLDOWNCLASS, None)
+                                                   checkBox=self._settings.checkBoxes[LINKTOPULLDOWNCLASS]['widget'])
+
+        # set the dropped callback through mainWidget
+        self.mainWidget._dropEventCallback = self._mainFrame._processDroppedItems
+
+    def selectTable(self, table):
+        """Select the object in the table
+        """
+        self._mainFrame.selectTable(table)
 
     def _closeModule(self):
+        """CCPN-INTERNAL: used to close the module
         """
-        CCPN-INTERNAL: used to close the module
-        """
-        self.structureTable._close()
+        self.tableFrame._closeFrame()
         super()._closeModule()
 
 
 class GuiTableStructure(GuiTable):
-    """
-    GuiTable specific to tables that only contain a single pid for the pandas dataframe
+    """GuiTable specific to tables that only contain a single pid for the pandas dataframe
     """
 
     def __init__(self, *args, **kwargs):
@@ -254,12 +290,12 @@ class StructureTable(GuiTableStructure):
         self.spacer = Spacer(self._widget, 5, 5,
                              QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed,
                              grid=(0, 0), gridSpan=(1, 1))
-        self.stWidget = StructureEnsemblePulldown(parent=self._widget,
-                                                  mainWindow=self._mainWindow, default=None,  # first Structure in project (if present),
-                                                  grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
-                                                  showSelectName=True,
-                                                  sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
-                                                  callback=self._selectionPulldownCallback)
+        self.stWidget = KlassPulldown(parent=self._widget,
+                                      mainWindow=self._mainWindow, default=None,  # first Structure in project (if present),
+                                      grid=(1, 0), gridSpan=(1, 1), minimumWidths=(0, 100),
+                                      showSelectName=True,
+                                      sizeAdjustPolicy=QtWidgets.QComboBox.AdjustToContents,
+                                      callback=self._selectionPulldownCallback)
         self.stButtons = RadioButtons(self._widget, texts=['Ensemble', 'average'],
                                       selectedInd=1,
                                       callback=self._selectionButtonCallback,
@@ -514,7 +550,7 @@ class StructureTable(GuiTableStructure):
         Notifier DoubleClick action on item in table
         """
         objs = data[CallBack.OBJECT]
-        if not objs:
+        if objs is None or objs.empty:
             return
         if isinstance(objs, (tuple, list)):
             obj = objs[0]
@@ -689,168 +725,245 @@ class StructureTable(GuiTableStructure):
                                           self._updateCallback,
                                           onceOnly=True)
 
-    # def _clearNotifiers(self):
-    #   """
-    #   clean up the notifiers
-    #   """
-    #   if self._ensembleNotifier is not None:
-    #     self._ensembleNotifier.unRegister()
 
-    # def _close(self):
-    #     """
-    #     Cleanup the notifiers when the window is closed
-    #     """
-    #     self.clearTableNotifiers()
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    # def resizeEvent(self, event):
-    #   getLogger().info('table.resize '+str(self.resizeCount))
-    #   self.resizeCount+=1
-    #   return super(StructureTable, self).resizeEvent(event)
-    #
-    # def paintEvent(self, event):
-    #   getLogger().info('table.paint '+str(self.paintCount))
-    #   self.paintCount+=1
-    #   return super(StructureTable, self).paintEvent(event)
+#=========================================================================================
+# _NewStructureTableWidget
+#=========================================================================================
 
-    # #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-    # # add test structure Ensembles
-    # try:
-    #   StructureTableModule.defined
-    # except:
-    #   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-    #   self.ensemble = self.project.newStructureEnsemble()
-    #   self.data = self.ensemble.data
-    #
-    #   self.testAtomName = ['CA', 'C', 'N', 'O', 'H',
-    #      'CB', 'HB1', 'HB2', 'HB3',
-    #      'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23',
-    #      'CE', 'HE1', 'HE2', 'HE3',
-    #      'CG', 'HG1', 'HG2', 'HG3',
-    #      'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
-    #   self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
-    #                                                                                                  'VAL'] * 8
-    #   self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
-    #   self.testSequenceId = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
-    #   self.testModelNumber = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
-    #   self.comment = ['Test'] * 33
-    #
-    #   self.data['atomName'] = self.testAtomName
-    #   self.data['residueName'] = self.testResidueName
-    #   self.data['chainCode'] = self.testChainCode
-    #   self.data['sequenceId'] = self.testSequenceId
-    #   self.data['modelNumber'] = self.testModelNumber
-    #   self.data['comment'] = self.comment
-    #
-    #   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-    #   self.ensemble = self.project.newStructureEnsemble()
-    #   self.data = self.ensemble.data
-    #
-    #   self.testAtomName = ['CA', 'C', 'N', 'O', 'H',
-    #      'CB', 'HB1', 'HB2', 'HB3',
-    #      'CE', 'HE1', 'HE2', 'HE3',
-    #      'CG', 'HG1', 'HG2', 'HG3',
-    #      'CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23',
-    #      'CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
-    #   self.testResidueName = ['ALA'] * 5 + ['ALA'] * 4 + ['LEU'] * 8 + ['MET'] * 4 + ['THR'] * 4 + [
-    #                                                                                                  'VAL'] * 8
-    #   self.testChainCode = ['A'] * 5 + ['B'] * 4 + ['C'] * 8 + ['D'] * 4 + ['E'] * 4 + ['F'] * 8
-    #   self.testSequenceId = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
-    #   self.testModelNumber = [1] * 5 + [2] * 4 + [3] * 8 + [4] * 4 + [5] * 4 + [6] * 8
-    #
-    #   self.data['atomName'] = self.testAtomName
-    #   self.data['residueName'] = self.testResidueName
-    #   self.data['chainCode'] = self.testChainCode
-    #   self.data['sequenceId'] = self.testSequenceId
-    #   self.data['modelNumber'] = self.testModelNumber
-    #   self.data['comment'] = self.comment
-    #
-    #   self.ensemble = self.project.newStructureEnsemble()
-    #   self.ensemble.data = self.data.extract(index='1, 2, 6-7, 9')
-    #
-    #   # make a test dataset in here
-    #
-    #   self.structureData = self.project.newStructureData(self.ensemble.longPid)    # title - should be ensemble name/title/longPid
-    #
-    #   self.dataItem = self.structureData.newData('derivedConformers')
-    #   self.structureData.attachedObject = self.ensemble       # the newest object
-    #   self.dataItem.setParameter(name='backboneSelector', value=self.ensemble.data.backboneSelector)
-    #
-    #   StructureTableModule.defined=True
-    #   # should be a StructureData with the corresponding stuff in it
-    #   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
-    # finally:
-    #   pass
+class _NewStructureTableWidget(_CoreTableWidgetABC):
+    """Class to present a StructureTable
+    """
+    className = '_NewStructureTableWidget'
+    attributeName = KlassTable._pluralLinkName
 
-    # tuples = structureEnsemble.data.as_namedtuples()
-    # self.setColumns(self.STcolumns)
-    # self.setObjects(tuples)
-    # self.show()
+    defaultHidden = ['Pid', 'altLocationCode', 'element', 'occupancy']
+    _internalColumns = ['isDeleted', '_object']  # columns that are always hidden
 
-    # import inspect
-    # attr = inspect.getmembers(StructureEnsemble, lambda a:not (inspect.isroutine(a)))
-    # filteredAttr = [a for a in attr if
-    #                 not (a[0].startswith('__') and a[0].endswith('__')) and not a[0].startswith(
-    #                   '_')]
-    # for i in filteredAttr:
-    #   att, val = i
-    #   try:
-    #     setattr(structureEnsemble, att, val)
-    #   except Exception as e:
-    #     # print(e, att)
-    #     del filteredAttr[att]       # remove the attribute
-    #
-    # data = np.array([
-    #   (1, 1.6, 'x'),
-    #   (3, 5.4, 'y'),
-    #   (8, 12.5, 'z'),
-    #   (443, 1e-12, 'w'),
-    # ], dtype=[('Column 1', int), ('Column 2', float), ('Column 3', object)])
+    # define self._columns here
+    columnHeaders = {}
+    tipTexts = ()
 
-    # self.hide()
-    # tuples = structureEnsemble.data.as_namedtuples()
-    # headings = [head[0] for head in self.STcolumns]
-    # data = []
-    # for row in tuples:
-    #   data.append(list(row))
-    #
-    # df = pd.DataFrame(data[0], columns=headings)
+    # define the notifiers that are required for the specific table-type
+    tableClass = KlassTable
+    rowClass = None
+    cellClass = None
+    tableName = tableClass.className
+    rowName = None
+    cellClassNames = None
+    selectCurrent = False
+    callBackClass = None
+    search = False
 
-    # PandasData = np.dataFra([12,45,'help'], dtype=[('Index', int),
-    #                                       ('modelNumber', int),
-    #                                       ('chainCode', str)])
+    # set the queue handling parameters
+    _maximumQueueLength = 25
 
-    # xdata = np.array({'x':10,'y':13.34}, dtype=[('x', np.uint8), ('y', np.float64)])
-    # df = pd.DataFrame(xdata)
+    #=========================================================================================
+    # Properties
+    #=========================================================================================
 
-    # x = np.empty((10,), dtype=[('x', np.uint8), ('y', np.float64)])
-    # df = pd.DataFrame(x)
-    # t = df.dtypes
+    #=========================================================================================
+    # Widget callbacks
+    #=========================================================================================
 
-    # newArraydata = np.array( [(1, 1.6, 'x'),
-    #       (3, 5.4, 'y'),
-    #       (8, 12.5, 'z'),
-    #       (443, 1e-12, 'w')],
-    #                          dtype=[('Index', np.uint),
-    #                                       ('modelNumber', np.float32),
-    #                                       ('chainCode', np.str)])
+    #=========================================================================================
+    # Create table and row methods
+    #=========================================================================================
 
-    # temp = [(1, 1.6, 'x'),
-    #         (3, 5.4, 'y'),
-    #         (8, 12.5, 'z'),
-    #         (443, 1e-12, 'w')]
-    # newArraydata = np.array(temp, dtype=[('Index', int),
-    #                                         ('modelNumber', float),
-    #                                         ('chainCode', str)])
+    #=========================================================================================
+    # Table context menu
+    #=========================================================================================
 
-    # self._project.blankNotification()
-    #
-    # self.setData(structureEnsemble.data.values)
-    # self.setHorizontalHeaderLabels([head[0] for head in NewStructureTable.columnHeadings])
-    #
-    # self._project.unblankNotification()
-    # self.resizeColumnsToContents()
-    # self.show()
+    #=========================================================================================
+    # Table functions
+    #=========================================================================================
 
-    # add a comment field to the Pandas dataFrame?
+    def _getTableColumns(self, structureEnsemble=None):
+        """Add default columns plus the ones according to structureEnsemble
+         format of column = ( Header Name, value, tipText, editOption)
+         editOption allows the user to modify the value content by doubleclick
+         """
+        # create the column objects
+        columnDefs = [
+            ('#', lambda row: self._stLamInt(row, 'Index'), 'Index', None, None),
+            ('modelNumber', lambda row: self._stLamInt(row, 'modelNumber'), 'modelNumber', None, None),
+            ('chainCode', lambda row: self._stLamStr(row, 'chainCode'), 'chainCode', None, None),
+            ('sequenceId', lambda row: self._stLamInt(row, 'sequenceId'), 'sequenceId', None, None),
+            ('insertionCode', lambda row: self._stLamStr(row, 'insertionCode'), 'insertionCode',
+             None, None),
+            ('residueName', lambda row: self._stLamStr(row, 'residueName'), 'residueName', None, None),
+            ('atomName', lambda row: self._stLamStr(row, 'atomName'), 'atomName', None, None),
+            ('altLocationCode', lambda row: self._stLamStr(row, 'altLocationCode'),
+             'altLocationCode', None, None),
+            ('element', lambda row: self._stLamStr(row, 'element'), 'element', None, None),
+            ('x', lambda row: self._stLamFloat(row, 'x'), 'x', None, '%0.3f'),
+            ('y', lambda row: self._stLamFloat(row, 'y'), 'y', None, '%0.3f'),
+            ('z', lambda row: self._stLamFloat(row, 'z'), 'z', None, '%0.3f'),
+            ('occupancy', lambda row: self._stLamFloat(row, 'occupancy'), 'occupancy', None, None),
+            ('bFactor', lambda row: self._stLamFloat(row, 'bFactor'), 'bFactor', None, None),
+            ('nmrChainCode', lambda row: self._stLamStr(row, 'nmrChainCode'), 'nmrChainCode',
+             None, None),
+            ('nmrSequenceCode', lambda row: self._stLamStr(row, 'nmrSequenceCode'),
+             'nmrSequenceCode', None, None),
+            ('nmrResidueName', lambda row: self._stLamStr(row, 'nmrResidueName'),
+             'nmrResidueName', None, None),
+            ('nmrAtomName', lambda row: self._stLamStr(row, 'nmrAtomName'), 'nmrAtomName', None, None),
+            ('Comment', lambda row: self._getCommentText(row), 'Notes',
+             lambda row, value: self._setComment(row, 'comment', value), None)
+            ]  # [Column(colName, func, tipText, editValue, columnFormat)
 
-    # dataFrameObject = self.getDataFrameFromRows(structureEnsemble.data, self.STcolumns)
+        return ColumnClass(columnDefs)
+
+    def buildTableDataFrame(self):
+        """Return a Pandas dataFrame from an internal list of objects.
+        The columns are based on the 'func' functions in the columnDefinitions.
+        :return pandas dataFrame
+        """
+        if self._table:
+            self._columnDefs = self._getTableColumns(self._table)
+
+            # TODO:ED - columns are wrong
+            #   build similar to chemicalShiftTable
+
+            df = pd.DataFrame(self._table.data, columns=self._columnDefs.headings)
+
+        else:
+            self._columnDefs = self._getTableColumns()
+            df = pd.DataFrame(columns=self._columnDefs.headings)
+
+        # # use the object as the index, object always exists even if isDeleted
+        # df.set_index(df[self.OBJECTCOLUMN], inplace=True, )
+
+        _dfObject = DataFrameObject(dataFrame=df,
+                                    columnDefs=self._columnDefs or [],
+                                    table=self)
+
+        return _dfObject
+
+    #=========================================================================================
+    # Updates
+    #=========================================================================================
+
+    def _update(self):
+        """Display the objects on the table for the selected list.
+        """
+        if self._table:
+            self.populateTable()
+        else:
+            self.populateEmptyTable()
+
+    #=========================================================================================
+    # object properties
+    #=========================================================================================
+
+    @staticmethod
+    def _stLamInt(row, name):
+        """
+        CCPN-INTERNAL: Insert an int into ObjectTable
+        """
+        try:
+            return int(getattr(row, name))
+        except:
+            return None
+
+    @staticmethod
+    def _stLamFloat(row, name):
+        """
+        CCPN-INTERNAL: Insert a float into ObjectTable
+        """
+        try:
+            return float(getattr(row, name))
+        except:
+            return None
+
+    @staticmethod
+    def _stLamStr(row, name):
+        """
+        CCPN-INTERNAL: Insert a str into ObjectTable
+        """
+        try:
+            return str(getattr(row, name))
+        except:
+            return None
+
+
+#=========================================================================================
+# StructureTableFrame
+#=========================================================================================
+
+class StructureTableFrame(_CoreTableFrameABC):
+    """Frame containing the pulldown and the table widget
+    """
+    _TableKlass = _NewStructureTableWidget
+    _PulldownKlass = KlassPulldown
+
+    def __init__(self, parent, mainWindow=None, moduleParent=None,
+                 structureEnsemble=None, selectFirstItem=False, **kwds):
+        super().__init__(parent, mainWindow=mainWindow, moduleParent=moduleParent,
+                         obj=structureEnsemble, selectFirstItem=selectFirstItem, **kwds)
+
+        # create widget for selection of ensemble-average
+        self.stButtons = RadioButtons(self, texts=['Ensemble', 'average'],
+                                      selectedInd=1,
+                                      callback=self._selectionButtonCallback,
+                                      direction='h',
+                                      tipTexts=None,
+                                      )
+
+        self.addWidgetToTop(self.stButtons, 2)
+
+    #=========================================================================================
+    # Properties
+    #=========================================================================================
+
+    @property
+    def _tableCurrent(self):
+        """Return the list of source objects, e.g., _table.peaks/_table.nmrResidues
+        """
+        return self.current.structureEnsemble
+
+    @_tableCurrent.setter
+    def _tableCurrent(self, value):
+        self.current.structureEnsemble = value
+
+    #=========================================================================================
+    # Widgets callbacks
+    #=========================================================================================
+
+    def _selectionButtonCallback(self):
+        """Pass units change to the table
+        """
+        item = self.stButtons.get()
+
+        # signal parent to update the units of both tables
+        self._tableWidget.update()
+
+
+#=========================================================================================
+# main
+#=========================================================================================
+
+def main():
+    """Show the IntegralTableModule
+    """
+    from ccpn.ui.gui.widgets.Application import newTestApplication
+    from ccpn.framework.Application import getApplication
+
+    # create a new test application
+    app = newTestApplication(interface='Gui')
+    application = getApplication()
+    mainWindow = application.ui.mainWindow
+
+    # add a module
+    _module = StructureTableModule(mainWindow=mainWindow)
+    mainWindow.moduleArea.addModule(_module)
+
+    # show the mainWindow
+    app.start()
+
+
+if __name__ == '__main__':
+    """Call the test function
+    """
+    main()

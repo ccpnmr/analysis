@@ -245,7 +245,7 @@ class SampleComponent(AbstractWrapperObject):
         return newSC
 
     #===========================================================================================
-    # new'Object' and other methods
+    # new<Object> and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
 

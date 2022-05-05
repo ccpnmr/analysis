@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-04 12:19:14 +0100 (Wed, May 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-05 10:40:27 +0100 (Thu, May 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -48,7 +48,7 @@ class Atom(AbstractWrapperObject):
 
     _parentClass = Residue
 
-    #: Name of plural link to instances of class
+    # Name of plural link to instance of class
     _pluralLinkName = 'atoms'
 
     #: List of child classes.
@@ -227,7 +227,7 @@ class Atom(AbstractWrapperObject):
     #=========================================================================================
 
     #===========================================================================================
-    # new'Object' and other methods
+    # new<Object> and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
 

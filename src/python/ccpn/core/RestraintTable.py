@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-03 19:09:31 +0000 (Thu, March 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-05 10:40:28 +0100 (Thu, May 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -295,7 +295,7 @@ class RestraintTable(AbstractWrapperObject):
     #=========================================================================================
 
     #===========================================================================================
-    # new'Object' and other methods
+    # new<Object> and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
 

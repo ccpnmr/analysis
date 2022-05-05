@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-04-05 10:23:42 +0100 (Tue, April 05, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-05-05 10:40:29 +0100 (Thu, May 05, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -529,7 +529,7 @@ class SpectrumDisplay(AbstractWrapperObject):
 
 
     #===========================================================================================
-    # new'Object' and other methods
+    # new<Object> and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
 

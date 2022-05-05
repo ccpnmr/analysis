@@ -460,7 +460,7 @@ class Integral(AbstractWrapperObject):
         self._wrappedData.peak = peak._wrappedData if peak else None
 
     #===========================================================================================
-    # new'Object' and other methods
+    # new<Object> and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
 

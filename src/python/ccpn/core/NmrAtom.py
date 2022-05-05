@@ -618,7 +618,7 @@ class NmrAtom(AbstractWrapperObject):
         return mean, sigma if len(peakDims) > 1 else None
 
     #=========================================================================================
-    # new'Object' and other methods
+    # new<Object> and other methods
     # Call appropriate routines in their respective locations
     #=========================================================================================
 

@@ -412,7 +412,7 @@ class Multiplet(AbstractWrapperObject):
         pksWidths = [pp.lineWidths for pp in pks]
         try:
             result = tuple(sum(item) for item in zip(*pksWidths))
-        except Exception as es:
+        except Exception:
             if pks:
                 result = list(pksWidths[0])
                 for otherPks in pksWidths[1:]:
@@ -436,13 +436,13 @@ class Multiplet(AbstractWrapperObject):
     @property
     def pointLineWidths(self) -> Tuple[Optional[float], ...]:
         """Full-width-half-height of peak for each dimension, in points."""
-        # currently assumes that internal storage is in ppms
+        # assumes that internal storage is in ppm
         result = tuple()
         pks = self.peaks
         pksWidths = [pp.pointLineWidths for pp in pks]
         try:
             result = tuple(sum(item) for item in zip(*pksWidths))
-        except Exception as es:
+        except Exception:
             if pks:
                 result = list(pksWidths[0])
                 for otherPks in pksWidths[1:]:
@@ -549,7 +549,7 @@ class Multiplet(AbstractWrapperObject):
             self._finaliseAction(trigger)
 
     #===========================================================================================
-    # new'Object' and other methods
+    # new<Object> and other methods
     # Call appropriate routines in their respective locations
     #===========================================================================================
 
@@ -628,7 +628,7 @@ def _newMultiplet(self: MultipletList,
 
 # EJB 20181128: removed, to be added to multiplet __init__?
 # Notify Multiplets when the contents of peaks have changed
-# i.e PeakDim references
+# i.e. PeakDim references
 Project._apiNotifiers.append(
         ('_notifyRelatedApiObject', {'pathToObject': 'peak.multiplets', 'action': 'change'},
          Nmr.PeakDim._metaclass.qualifiedName(), '')

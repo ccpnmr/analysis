@@ -3103,7 +3103,7 @@ class Spectrum(AbstractWrapperObject):
             sv._finaliseAction(action)
 
     #-----------------------------------------------------------------------------------------
-    # new'Object' and other methods
+    # new<Object> and other methods
     # Call appropriate routines in their respective locations
     #-----------------------------------------------------------------------------------------
 

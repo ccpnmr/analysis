@@ -280,6 +280,21 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
             # press the escape-key to clear the selection
             self.clearSelection()
 
+    def _processDroppedItems(self, data):
+        """CallBack for Drop events
+        """
+        pass
+
+    def _handleDroppedItems(self, pids, objType, pulldown):
+        """Handle dropped items
+        :param pids: the selected objects pids
+        :param objType: the instance of the obj to handle, E.g. PeakList
+        :param pulldown: the pulldown of the module wich updates the table
+        :return: Actions: Select the dropped item on the table or/and open a new modules if multiple drops.
+        If multiple different obj instances, then asks first.
+        """
+        pass
+
 
 #=========================================================================================
 # _SimplePandasTableModel

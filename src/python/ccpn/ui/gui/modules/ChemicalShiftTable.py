@@ -479,7 +479,7 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
         self.populateTable(selectedObjects=self.current.chemicalShifts)
 
     def setDataFromSearchWidget(self, dataFrame):
-        """Set the data for the table from the search widget
+        """Set the data for the table from the search widget.
         """
         # update to the new sub-table
         _updateSimplePandasTable(self, dataFrame)
@@ -488,23 +488,31 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
         # self.updateTableExpanders()
 
     def _updateTableCallback(self, data):
-        # check the trigger and the current pulldown and update accordingly
-        trigger = data[Notifier.TRIGGER]
+        """Respond to table notifier.
+        """
+        obj = data[Notifier.OBJECT]
+        if obj != self._table:
+            return
 
-        if trigger == Notifier.RENAME and data[Notifier.OBJECT] == self.moduleParent._modulePulldown.getSelectedObject():
+        # print(f'>>> _updateTableCallback  {self}')
+        if self._table:
+            # re-populate the table from the current pulldown
             self.populateTable(selectedObjects=self.current.chemicalShifts)
+        else:
+            self.populateEmptyTable()
 
     def _updateCellCallback(self, data):
         """Notifier callback for updating the table
         :param data:
         """
-        # print(f'>>> _updateCellCallback')
+        # print(f'>>> _updateCellCallback  {self}')
         pass
 
     def _updateRowCallback(self, data):
         """Notifier callback for updating the table for change in chemicalShifts
         :param data: notifier content
         """
+        # print(f'>>> _updateRowCallback  {self}')
         with self._blockTableSignals('_updateRowCallback'):
             obj = data[Notifier.OBJECT]
             uniqueId = obj.uniqueId
@@ -568,7 +576,7 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
                 getLogger().debug2(f'Error updating row in table {es}')
 
     def _searchCallBack(self, data):
-        # print(f'>>> _searchCallBack')
+        # print(f'>>> _searchCallBack  {self}')
         pass
 
     def _selectCurrentCallBack(self, data):

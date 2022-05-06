@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-04 16:44:41 +0100 (Wed, May 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-06 12:02:15 +0100 (Fri, May 06, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -69,6 +69,7 @@ class _CoreTableWidgetABC(_SimplePandasTableViewProjectSpecific):
                  actionCallback=None, selectionCallback=None,
                  hiddenColumns=None,
                  enableExport=True, enableDelete=True, enableSearch=False,
+                 showHorizontalHeader=True, showVerticalHeader=False,
                  **kwds):
         """Initialise the widgets for the module.
         """
@@ -81,7 +82,8 @@ class _CoreTableWidgetABC(_SimplePandasTableViewProjectSpecific):
                          mainWindow=mainWindow,
                          moduleParent=moduleParent,
                          multiSelect=True,
-                         showVerticalHeader=False,
+                         showHorizontalHeader=showHorizontalHeader,
+                         showVerticalHeader=showVerticalHeader,
                          setLayout=True,
                          **kwds)
 

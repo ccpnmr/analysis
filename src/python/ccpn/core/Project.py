@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-13 19:02:29 +0100 (Wed, April 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-06 12:11:17 +0100 (Fri, May 06, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1400,14 +1400,14 @@ class Project(AbstractWrapperObject):
                 newChain = self.createChain(sequence=sequence[1], compoundName=sequence[0],
                                             molType='protein')
                 chains.append(newChain)
-            #
+
         return chains
 
     def _loadPdbFile(self, path: (str, Path)) -> list:
         """Load data from pdb file path into new StructureEnsemble object(s)
         CCPNINTERNAL: called from pdb dataLoader
         """
-        from ccpn.util.StructureData import EnsembleData
+        from ccpn.util.StructureData import EnsembleData, averageStructure
 
         with logCommandManager('application.', 'loadData', path):
             path = aPath(path)
@@ -1415,6 +1415,10 @@ class Project(AbstractWrapperObject):
 
             ensemble = EnsembleData.from_pdb(str(path))
             se = self.newStructureEnsemble(name=name, data=ensemble)
+
+            # create a new ensemble-average in a dataTable
+            dTable = self.newDataTable(name=f'{name}-average', data=averageStructure(ensemble))
+            dTable.setMetadata('structureEnsemble', se.pid)
 
         return [se]
 

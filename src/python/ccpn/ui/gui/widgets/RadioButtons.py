@@ -223,13 +223,23 @@ class RadioButtons(QtWidgets.QWidget, Base):
                 if name:
                     return name
 
-    def setIndex(self, i):
-        if self.isExclusive:
-            self.deselectAll()
-        try:
-            self.radioButtons[i].setChecked(True)
-        except:
-            getLogger().debug(f'setIndex: could not set index {i}')
+    def setIndex(self, i, blockSignals=False):
+        if blockSignals:
+            with self.blockWidgetSignals():
+                if self.isExclusive:
+                    self.deselectAll()
+                try:
+                    self.radioButtons[i].setChecked(True)
+                except:
+                    getLogger().debug(f'setIndex: could not set index {i}')
+
+        else:
+            if self.isExclusive:
+                self.deselectAll()
+            try:
+                self.radioButtons[i].setChecked(True)
+            except:
+                getLogger().debug(f'setIndex: could not set index {i}')
 
     def deselectAll(self):
         self.buttonGroup.setExclusive(False)

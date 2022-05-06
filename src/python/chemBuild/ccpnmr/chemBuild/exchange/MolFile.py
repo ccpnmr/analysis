@@ -20,16 +20,18 @@ MOLFILE_BOND_TYPE_DICT = {'1':'single','2':'double','3':'triple',
                           'single':'1', 'double':'2', 'triple':'3',
                           'quadruple':'8', 'aromatic':'4', 'singleplanar':'1'}
 
-def importMolFileV2000(fileName):  
+def importMolFileV2000(fileName):
+  from pathlib import Path
+  compoundName = Path(fileName).stem
 
   fileObj = open(fileName,  'r')
-  compound = Compound('Unnamed')
+  compound = Compound(compoundName)
   var = Variant(compound)
   compound.defaultVars.add(var)
   
   line = fileObj.readline()
-  compound.name = line.strip()
-  
+  # compound.name = line.strip() already set from filename
+
   line = fileObj.readline()
   # Program info
 

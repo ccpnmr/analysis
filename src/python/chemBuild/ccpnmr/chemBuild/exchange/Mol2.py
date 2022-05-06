@@ -34,9 +34,10 @@ MOL2_BOND_TYPES = {'single':'1', 'double':'2', 'aromatic':'ar',
                    '3':'triple', 'am':'singleplanar'}
                       
 def importMol2(fileName):  
-
+  from pathlib import Path
+  compoundName = Path(fileName).stem
   fileObj = open(fileName,  'r')
-  compound = Compound('Unnamed')
+  compound = Compound(compoundName)
   var = Variant(compound)
   compound.defaultVars.add(var)
   
@@ -75,7 +76,8 @@ def importMol2(fileName):
       n += 1
       if mode == 1:
         if n == 1:
-          compound.name = line
+          if not compound.name and line:
+            compound.name = line
         
       elif mode == 2:
         data = line.split()

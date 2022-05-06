@@ -879,14 +879,14 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
                  multiSelect=False, selectRows=True, numberRows=False, autoResize=False,
                  enableExport=True, enableDelete=True, enableSearch=True,
                  hideIndex=True, stretchLastSection=True,
-                 showHorizontalHeader=True, showVerticalHeader=True,
+                 showHorizontalHeader=True, showVerticalHeader=False,
                  enableDoubleClick=True,
                  **kwds):
         """Initialise the widgets for the module.
         """
         super().__init__(parent=parent,
                          multiSelect=multiSelect, selectRows=selectRows,
-                         showHorizontalHeader=True, showVerticalHeader=False,
+                         showHorizontalHeader=showHorizontalHeader, showVerticalHeader=showVerticalHeader,
                          **kwds)
 
         # Derive application, project, and current from mainWindow
@@ -1343,6 +1343,8 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         except Exception as es:
             getLogger().warning('Error populating table', str(es))
             self.populateEmptyTable()
+            if self.application and self.application._isInDebugMode:
+                raise
 
         finally:
             self.project.unblankNotification()

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-06 11:44:42 +0100 (Wed, April 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-06 18:13:03 +0100 (Fri, May 06, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -238,6 +238,7 @@ class ChemicalShiftList(AbstractWrapperObject):
     def _recalculatePeakShifts(self, nmrResidues, shifts):
         # update the assigned nmrAtom chemical shift values - notify the nmrResidues and chemicalShifts
         for sh in shifts:
+            sh._static = False if sh.chemicalShiftList.spectra else True
             sh._recalculateShiftValue()
         for nmr in nmrResidues:
             nmr._finaliseAction('change')
@@ -522,7 +523,7 @@ class ChemicalShiftList(AbstractWrapperObject):
             raise ValueError(f'{self.className}._setAttributes: error setting attributes {startName}|{endName} in {self}  -  {es}')
 
     def _undoRedoShifts(self, shifts):
-        """update to shifts after undo/redo
+        """update the shifts after undo/redo
         shifts should be a simple, non-nested dict of int:<shift> pairs
         """
         # keep the same shift list
@@ -726,7 +727,7 @@ class ChemicalShiftList(AbstractWrapperObject):
         # Note the "additional" tuple around _row; needed to match the shape as one row, 12 columns
         _dfRow = pd.DataFrame(data=(_row,), columns=CS_COLUMNS)
 
-        if data is None:
+        if data is None or data.empty:
             # set as the new subclassed DataFrameABC
             self._wrappedData.data = _dfRow  # _ChemicalShiftListFrame(_dfRow)
         else:

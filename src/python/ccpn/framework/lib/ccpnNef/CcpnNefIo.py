@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-28 15:14:57 +0100 (Mon, March 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-06 18:13:04 +0100 (Fri, May 06, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -4794,7 +4794,10 @@ class CcpnNefReader(CcpnNefContent):
                 parameters['nmrAtom'] = nmrAtom
                 parameters['static'] = row.get('ccpn_static') or False  # may be undefined for older nef files
 
-                result.append(creatorFunc(**parameters))
+                shift = creatorFunc(**parameters)
+                shift._static = False if shift.chemicalShiftList.spectra else True
+
+                result.append(shift)
 
             except ValueError:
                 self.warning("Cannot produce NmrAtom for assignment %s. Skipping ChemicalShift" % (tt,), loop)

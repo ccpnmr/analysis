@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-21 17:49:19 +0000 (Mon, March 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-06 18:13:04 +0100 (Fri, May 06, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1100,7 +1100,7 @@ class Framework(NotifierBase, GuiBase):
 
         if dataLoader.createNewProject:
             self._closeProject()
-            project = self._newProject(dataBlock.getName())
+            project = self._newProject(dataBlock.name)
         else:
             project = self.project
 

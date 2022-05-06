@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-04 14:00:04 +0100 (Wed, May 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-06 18:13:04 +0100 (Fri, May 06, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -217,6 +217,7 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
                                                    valueError=_row.valueError,
                                                    figureOfMerit=_row.figureOfMerit,
                                                    comment=_row.comment)
+        chemShift._static = False if chemShiftList.spectra else True
 
         return chemShift
 

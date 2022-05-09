@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-04-12 15:28:11 +0100 (Tue, April 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-09 17:03:32 +0100 (Mon, May 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -924,6 +924,13 @@ def _getAdjacentPeakPositions1D(peak):
         nextPeakPosition = positions[positions.index(queryPos) + 1]
     return previousPeakPosition, nextPeakPosition
 
+def _correctNegativeHeight(height, doNeg=False):
+    """return height either Positive or Negative value if doNEg=True. If height is negative and doNeg=False:
+    return the smallest positive number (non-zero) like 4.9e-324."""
+    if height < 0:
+        if not doNeg:
+            return np.nextafter(0, 1)
+    return height
 
 def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=False, doNeg=False,
                           figOfMeritLimit=1):
@@ -947,6 +954,7 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
     position, height = peak.position, peak.height
     if peak.figureOfMerit < figOfMeritLimit:
         height = peak.peakList.spectrum.getHeight(peak.position)
+        height = _correctNegativeHeight(height, doNeg)
         return position, height
 
     if useAdjacientPeaksAsLimits:  #  a left # b right limit
@@ -1005,6 +1013,7 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
     else:
         height = peak.peakList.spectrum.getHeight(peak.position)
 
+    height = _correctNegativeHeight(height, doNeg) # Very important. don't return a negative height if doNeg is False.
     return position, float(height)
 
 

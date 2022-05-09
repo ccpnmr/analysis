@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-06 18:13:04 +0100 (Fri, May 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-09 16:28:16 +0100 (Mon, May 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -106,8 +106,8 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
         Parse the chemical shift row and assign attributes for subsequent processing
         :param csRow: a LoopRow instance
         """
-        csRow.value = float(csRow.get(self._VALUE_TAG))
-        csRow.valueError = float(csRow.get(self._VALUE_ERROR_TAG))
+        csRow.value = float(csRow.get(self._VALUE_TAG)) if csRow.get(self._VALUE_TAG) is not None else None
+        csRow.valueError = float(csRow.get(self._VALUE_ERROR_TAG)) if csRow.get(self._VALUE_ERROR_TAG) is not None else None
         figureOfMerit = csRow.get(self._FIGURE_OF_MERIT_TAG)
         csRow.figureOfMerit = float(figureOfMerit) if figureOfMerit is not None else 1.0
 
@@ -115,7 +115,7 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
         csRow.residueType = str(csRow.get(self._RESIDUE_TYPE_TAG))
         csRow.isotopeCode = '%s%s' % (csRow.get(self._ISOTOPE_TAG_1), csRow.get(self._ISOTOPE_TAG_2))
         csRow.atomName = str(csRow.get(self._ATOM_NAME_TAG))
-        csRow.ambiguityCode = int(csRow.get(self._AMBIGUITY_CODE))
+        csRow.ambiguityCode = int(csRow.get(self._AMBIGUITY_CODE)) if csRow.get(self._AMBIGUITY_CODE) is not None else 1
 
         csRow.comment = csRow.get(self._COMMENT_TAG)
 

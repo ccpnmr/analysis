@@ -55,8 +55,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-04-04 14:35:52 +0100 (Mon, April 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-05-09 11:14:31 +0100 (Mon, May 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -6144,6 +6144,8 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 strip._navigateToPeakMenuMain.menuAction().setVisible(False)  # created from stripMethodName
                 strip._makeStripPlotItemMain.setVisible(False)
+                strip._estimateVolumesItemMain.setVisible(False)
+                strip._estimateVolumesItemSelected.setVisible(False)
                 if PEAKSELECT not in selectedDict:
                     _setEnabledAllItems(strip._selectedPeaksMenu, True if self.current.peaks else False)
 

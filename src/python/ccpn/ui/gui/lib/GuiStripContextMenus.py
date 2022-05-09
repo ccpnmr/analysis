@@ -18,8 +18,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-04-05 12:14:15 +0100 (Tue, April 05, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-05-09 11:14:31 +0100 (Mon, May 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -441,12 +441,22 @@ def _snapToExtremaItem():
                     callback=_app.mainWindow.snapCurrentPeaksToExtremum)
 
 
-def _estimateVolumesItem():
+def _estimateVolumesItem(menuId):
     from ccpn.framework.Application import getApplication
 
     _app = getApplication()
-    return _SCMitem(name='Estimate Volume(s)',
+    return _SCMitem(name='Estimate Peak Volumes...',
                     typeItem=ItemTypes.get(ITEM), toolTip='Estimate peak volume(s)', shortcut='EV',
+                    stripMethodName=f'_estimateVolumesItem{menuId}',
+                    callback=_app.showEstimateVolumesPopup)
+
+
+def _estimateCurrentVolumesItem():
+    from ccpn.framework.Application import getApplication
+
+    _app = getApplication()
+    return _SCMitem(name='Estimate Current Peak Volume(s)',
+                    typeItem=ItemTypes.get(ITEM), toolTip='Estimate peak volumes for the currently selected peaks', shortcut='EC',
                     callback=_app.mainWindow.estimateVolumes)
 
 
@@ -779,7 +789,7 @@ def _stackSpectraPhaseItem(strip):
 
 def _get1dDefaultMenu(guiStrip1d) -> Menu:
     """
-    Creates and returns the 1d default context menu. Opened when right clicked on the background canvas
+    Creates and returns the 1d default context menu. Opened when right-clicked on the background canvas
     """
     items = [
         _customiseMenuItem(guiStrip1d),
@@ -845,7 +855,7 @@ def _get1dDefaultMenu(guiStrip1d) -> Menu:
 
 def _get1dPhasingMenu(guiStrip1d) -> Menu:
     """
-    Creates and returns the phasing 1d context menu. Opened when right clicked on the background canvas in "phasing State mode"
+    Creates and returns the phasing 1d context menu. Opened when right-clicked on the background canvas in "phasing State mode"
     """
     items = [
         _addTraceItem(guiStrip1d),
@@ -878,7 +888,8 @@ def _get1dPeakMenuItems(menuId) -> list:
         _refitPeakGroupItem(),
         _recalculatePeakHeightsItem(),
         _snapToExtremaItem(),
-        _estimateVolumesItem(),
+        _estimateVolumesItem(menuId),
+        _estimateCurrentVolumesItem(),
         _separator(),
 
         _newMultipletItem(),
@@ -893,7 +904,7 @@ def _get1dPeakMenuItems(menuId) -> list:
 
 def _get1dPeakMenu(guiStrip1d) -> Menu:
     """
-    Creates and returns the current peak 1d context menu. Opened when right clicked on selected peak/s
+    Creates and returns the current peak 1d context menu. Opened when right-clicked on selected peak/s
     """
     items = _get1dPeakMenuItems(menuId='Selected')
     return _createMenu(guiStrip1d, items)
@@ -901,7 +912,7 @@ def _get1dPeakMenu(guiStrip1d) -> Menu:
 
 def _get1dIntegralMenu(guiStrip1d) -> Menu:
     """
-    Creates and returns the current integral 1d context menu. Opened when right clicked on selected integral/s
+    Creates and returns the current integral 1d context menu. Opened when right-clicked on selected integral/s
     """
     items = [
         _deleteIntegralItem(guiStrip1d),
@@ -912,7 +923,7 @@ def _get1dIntegralMenu(guiStrip1d) -> Menu:
 
 def _get1dMultipletMenu(guiStrip1d) -> Menu:
     """
-    Creates and returns the current multiplet 1d context menu. Opened when right clicked on selected multiplet/s
+    Creates and returns the current multiplet 1d context menu. Opened when right-clicked on selected multiplet/s
     """
     items = [
         _deleteMultipletItem(guiStrip1d),
@@ -925,7 +936,7 @@ def _get1dMultipletMenu(guiStrip1d) -> Menu:
 
 def _get1dAxisMenu(guiStrip) -> Menu:
     """
-    Creates and returns the current Axis context menu. Opened when right clicked on axis
+    Creates and returns the current Axis context menu. Opened when right-clicked on axis
     """
     items = [
         # _copyAllAxisRangeFromStripItem2(guiStrip),
@@ -943,7 +954,7 @@ def _get1dAxisMenu(guiStrip) -> Menu:
 
 def _getNdDefaultMenu(guiStripNd) -> Menu:
     """
-    Creates and returns the Nd default context menu. Opened when right clicked on the background canvas.
+    Creates and returns the Nd default context menu. Opened when right-clicked on the background canvas.
     """
     items = [
         _customiseMenuItem(guiStripNd),
@@ -1028,7 +1039,7 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
 
 def _getNdPhasingMenu(guiStripNd) -> Menu:
     """
-    Creates and returns the phasing Nd context menu.  Opened when right clicked on the background canvas in "phasing State mode"
+    Creates and returns the phasing Nd context menu.  Opened when right-clicked on the background canvas in "phasing State mode"
     """
     items = [
         _addTraceItem(guiStripNd),
@@ -1061,7 +1072,8 @@ def _getNdPeakMenuItems(menuId) -> list:
         _refitPeakGroupItem(),
         _recalculatePeakHeightsItem(),
         _snapToExtremaItem(),
-        _estimateVolumesItem(),
+        _estimateVolumesItem(menuId),
+        _estimateCurrentVolumesItem(),
         _reorderPeakListAxesItem(),
         _separator(),
 
@@ -1080,7 +1092,7 @@ def _getNdPeakMenuItems(menuId) -> list:
 
 def _getNdPeakMenu(guiStripNd) -> Menu:
     """
-    Creates and returns the current peak Nd context menu. Opened when right clicked on selected peak/s
+    Creates and returns the current peak Nd context menu. Opened when right-clicked on selected peak/s
     """
     items = _getNdPeakMenuItems(menuId='Selected')
     return _createMenu(guiStripNd, items)
@@ -1088,7 +1100,7 @@ def _getNdPeakMenu(guiStripNd) -> Menu:
 
 def _getNdIntegralMenu(guiStripNd) -> Menu:
     """
-    Creates and returns the current integral Nd context menu. Opened when right clicked on selected integral/s
+    Creates and returns the current integral Nd context menu. Opened when right-clicked on selected integral/s
     """
     items = [
         _deleteIntegralItem(guiStripNd),
@@ -1099,7 +1111,7 @@ def _getNdIntegralMenu(guiStripNd) -> Menu:
 
 def _getNdMultipletMenu(guiStripNd) -> Menu:
     """
-    Creates and returns the current multiplet Nd context menu. Opened when right clicked on selected multiplet/s
+    Creates and returns the current multiplet Nd context menu. Opened when right-clicked on selected multiplet/s
     """
     items = [
         _deleteMultipletItem(guiStripNd),
@@ -1112,7 +1124,7 @@ def _getNdMultipletMenu(guiStripNd) -> Menu:
 
 def _getNdAxisMenu(guiStripNd) -> Menu:
     """
-    Creates and returns the current Axis context menu. Opened when right clicked on axis
+    Creates and returns the current Axis context menu. Opened when right-clicked on axis
     """
     items = [
         # _copyAllAxisRangeFromStripItem2(guiStrip),
@@ -1127,7 +1139,7 @@ def _getNdAxisMenu(guiStripNd) -> Menu:
 
 def _getSpectrumDisplayMenu(guiStripNd) -> Menu:
     """
-    Creates and returns the current spectrumDisplay menu. Opened when right clicked on axis
+    Creates and returns the current spectrumDisplay menu. Opened when right-clicked on axis
     """
     items = []
     items = [itm for itm in items if itm is not None]

@@ -22,7 +22,7 @@
 <h3>Marks and Rulers</h3>
 <p>From V3.0.1 you can place marks with MK (mark mouse position) and PM (mark selected peak(s)) and rulers with MX, MY, MZ (at mouse position in X/Y/Z dimensions) and PX, PY, PZ (at selected peak(s) in X/Y/Z dimensions). MC clears all marks and rulers. Marks and rulers currently all have the same colour which can be selected in the Preferences dialog (<span class="action">Ctrl/Cmd + ,</span>). In future we hope to make it possible to selectively delete individual marks/rulers.</p>
 <h3>Printing</h3>
-<p>The print dialog now offers even more detailed customisation of which features to print. Additionally, files can be saved in .svg as well as .pdf format. Printing a defined region is still to be implemented.</p>
+<p>The print dialog now offers even more detailed customisation of which features to print. Additionally, files can be saved in .svg as well as .pdf format. Printing a defined region is implemented from version 3.1 onwards.</p>
 <h3>Tentative Assignments</h3>
 <p>These no longer explicitly exist in V3, because they are no longer needed in the same way. The fields containing the NmrAtom names, NmrResidue names and NmrResidue sequence numbers are in fact free text boxes. So you can enter anything you want, e.g. <span class="action">HB/HG</span> or <span class="action">23/45/139</span> or <span class="action">Asn/Asp</span> might signify that you have narrowed the assignment down to just two or three options. Or <span class="action">23?</span> might signify that you are not quite sure about your assignment. Once you know what the assignment should be, you can change it any time by <span class="action">double-clicking</span> on the NmrAtom/NmrResidue in the sidebar and making the change in the <span class="action">NmrAtom/NmrResidue Editor</span>.</p>
 <h3>Tiles / separators in spectrum displays</h3>
@@ -30,15 +30,15 @@
 <h3>Assignment Graph</h3>
 <p>V3 has the Sequence Graph which is similar to the V2 assignment graph, but doesn't currently include as many features.</p>
 <h3>Pseudo-3D spectra</h3>
-    <p>It isn't currently possible to open pseudo-3D spectra in V3 as in Version 2. We are still deciding exactly how to implement this.</p>
+    <p>This is implemented from Version 3.1 onwards.</p>
 <h3>Reference Chemical Shifts</h3>
 <p>You can view these with <span class="action">RC</span>, but the graphs are not yet as interactive as in V2 and do not show a cursor linked to the other spectrum windows. Our intention is to expand the capabilities, so that you can eventually add your own reference data. E.g. if you are working with intrinsically disordered proteins, you could import a different set of reference chemical shifts suitable to these types of proteins.</p>
 <h3>Synthetic peak lists</h3>
-<p>It is currently possible to create a synthetic peak list when importing a BMRB file (see <a href="BMRBImport.html">BMRB Import</a>), but not from a chemical shift list or pdb file (unless you try writing your own macro).</p>
+<p>It is currently possible to create a synthetic peak list when importing a BMRB file (see <a href="BMRBImport.html">BMRB Import</a>), but not from a chemical shift list or pdb file (unless you try writing your own macro). We will be working on this over the summer of 2022.</p>
 <h3>Follow Shift Changes</h3>
 <p>This is implemented as our new Chemical Shift Perturbation module. This is more developed than the V2 feature. You can set the threshold interactively and look at the results on a structure in PyMol directly. It doesn't, however, currently include the automatic tracking of peaks. See our <a href="https://www.ccpn.ac.uk/v3-software/tutorials/chemical-shift-perturbation-analysis-tutorial/view">pdf tutorial</a> and <a href="https://doi.org/10.1111/febs.14771">publication</a> for more information.</p>
 <h3>Follow Intensity Changes</h3>
-<p>This will be implemented in a similar way to the Chemical Shift Perturbation module.</p>
+<p>This will be implemented in a similar way to the Chemical Shift Perturbation module. This should become available from July/August 2022.</p>
 <h3>Shift Differences</h3>
 <p>Not yet implemented</p>
 <h3>Heteronuclear NOE analysis</h3>
@@ -60,7 +60,7 @@
 <h3>Format Converter</h3>
 <p>Version 3 doesn't have a format converter the way that V2 does. This is because all major NMR programme developers and deposition databases have now committed to using the new NMR Exchange format (NEF). This format will make sure that important information, e.g. on stereospecific assignments etc., is not lost (as is currently the case).
 <br>V3 can export any part of the project as NMR Exchange Format (NEF) files. Both the PDB and BMRB will accept NEF files when you deposit your data. Several structure calculation and validation programmes (e.g. CYANA, YASARA and XPLOR-NIH, PDBStat) are also starting read and write NEF files and others (ARIA, AMBER, PSVS) will be implementing this soon.
-<br>A temporary alternative to export data to other programmes will be to use our new V2.5 (to be released in the coming weeks) to read in a NEF file and then you can use the FormatConverter from there.</p>
+<br>A temporary alternative to export data to other programmes is to use V2.5.2 to read in a NEF file and then you can use the FormatConverter from there.</p>
 </div>
 </body>
 </html>

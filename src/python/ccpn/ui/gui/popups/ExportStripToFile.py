@@ -4,10 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-17 16:13:53 +0000 (Mon, January 17, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-05-11 14:26:47 +0100 (Wed, May 11, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -52,7 +52,7 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget, CheckBoxCompoundWidget, DoubleSpinBoxCompoundWidget
-from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
 from ccpn.ui.gui.widgets.MessageDialog import showYesNoWarning, showWarning
 from ccpn.ui.gui.widgets.HighlightBox import HighlightBox
@@ -133,6 +133,10 @@ OPTIONSPECTRA = 'Spectra'
 OPTIONPEAKLISTS = 'Peak Lists'
 OPTIONPRINT = 'Print Options'
 OPTIONLIST = (OPTIONSPECTRA, OPTIONPEAKLISTS, OPTIONPRINT)
+
+DEFAULTSPACING = (3, 3)
+TABMARGINS = (1, 10, 10, 1)  # l, t, r, b
+ZEROMARGINS = (0, 0, 0, 0)  # l, t, r, b
 
 
 @dataclass
@@ -349,8 +353,13 @@ class ExportStripToFilePopup(ExportDialogABC):
     def initialise(self, userFrame):
         """Create the widgets for the userFrame
         """
+        sFrame = ScrollableFrame(userFrame, setLayout=True,
+                                 scrollBarPolicies=('never', 'asNeeded'),
+                                 spacing=DEFAULTSPACING, margins=TABMARGINS,
+                                 grid=(0, 0), gridSpan=(1, 3))
+
         row = 0
-        self.objectPulldown = PulldownListCompoundWidget(userFrame,
+        self.objectPulldown = PulldownListCompoundWidget(sFrame,
                                                          grid=(row, 0), gridSpan=(1, 3), vAlign='top', hAlign='left',
                                                          orientation='left',
                                                          labelText='Strip/SpectrumDisplay',
@@ -359,23 +368,23 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         # add a spacer to separate from the common save widgets
         row += 1
-        HLine(userFrame, grid=(row, 0), gridSpan=(1, 4), colour=getColours()[DIVIDER], height=20)
+        HLine(sFrame, grid=(row, 0), gridSpan=(1, 4), colour=getColours()[DIVIDER], height=20)
 
         row += 1
         topRow = row
-        Label(userFrame, text='Page Size', grid=(row, 0), hAlign='left', vAlign='centre')
-        self.pageSize = PulldownList(userFrame, vAlign='t', grid=(row, 1),
+        Label(sFrame, text='Page Size', grid=(row, 0), hAlign='left', vAlign='centre')
+        self.pageSize = PulldownList(sFrame, vAlign='t', grid=(row, 1),
                                      callback=self._queuePageSizeCallback)
         self.pageSize.setData(texts=PAGESIZES)
 
         row += 1
-        Label(userFrame, text='Page orientation', grid=(row, 0), hAlign='left', vAlign='centre')
-        self.pageOrientation = RadioButtons(userFrame, PAGETYPES,
+        Label(sFrame, text='Page orientation', grid=(row, 0), hAlign='left', vAlign='centre')
+        self.pageOrientation = RadioButtons(sFrame, PAGETYPES,
                                             grid=(row, 1), direction='h', hAlign='left', spacing=(20, 0),
                                             callback=self._queuePageOrientationCallback)
         row += 1
-        Label(userFrame, text='Print Type', grid=(row, 0), hAlign='left', vAlign='centre')
-        self.printType = RadioButtons(userFrame, list(EXPORTTYPES.keys()),
+        Label(sFrame, text='Print Type', grid=(row, 0), hAlign='left', vAlign='centre')
+        self.printType = RadioButtons(sFrame, list(EXPORTTYPES.keys()),
                                       grid=(row, 1), direction='h', hAlign='left', spacing=(20, 0),
                                       callback=self._queuePrintTypeCallback,
                                       # callback=self._changePrintType,
@@ -383,7 +392,7 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         # create a pulldown for the foreground (axes) colour
         row += 1
-        foregroundColourFrame = Frame(userFrame, grid=(row, 0), gridSpan=(1, 3), setLayout=True, showBorder=False)
+        foregroundColourFrame = Frame(sFrame, grid=(row, 0), gridSpan=(1, 3), setLayout=True, showBorder=False)
         Label(foregroundColourFrame, text="Foreground Colour", vAlign='c', hAlign='l', grid=(0, 0))
         self.foregroundColourBox = PulldownList(foregroundColourFrame, vAlign='t', grid=(0, 1))
         self.foregroundColourButton = Button(foregroundColourFrame, vAlign='t', hAlign='l', grid=(0, 2), hPolicy='fixed',
@@ -394,7 +403,7 @@ class ExportStripToFilePopup(ExportDialogABC):
 
         # create a pulldown for the background colour
         row += 1
-        backgroundColourFrame = Frame(userFrame, grid=(row, 0), gridSpan=(1, 3), setLayout=True, showBorder=False)
+        backgroundColourFrame = Frame(sFrame, grid=(row, 0), gridSpan=(1, 3), setLayout=True, showBorder=False)
         Label(backgroundColourFrame, text="Background Colour", vAlign='c', hAlign='l', grid=(0, 0))
         self.backgroundColourBox = PulldownList(backgroundColourFrame, vAlign='t', grid=(0, 1))
         self.backgroundColourButton = Button(backgroundColourFrame, vAlign='t', hAlign='l', grid=(0, 2), hPolicy='fixed',
@@ -404,7 +413,7 @@ class ExportStripToFilePopup(ExportDialogABC):
         self.backgroundColourButton.clicked.connect(self._queueBackgroundButtonCallback)
 
         row += 1
-        self.baseThicknessBox = DoubleSpinBoxCompoundWidget(userFrame, grid=(row, 0), gridSpan=(1, 3), hAlign='left',
+        self.baseThicknessBox = DoubleSpinBoxCompoundWidget(sFrame, grid=(row, 0), gridSpan=(1, 3), hAlign='left',
                                                             labelText='Line Thickness',
                                                             # value=1.0,
                                                             decimals=2, step=0.05, range=(0.01, 20),
@@ -412,7 +421,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                                                             )
 
         row += 1
-        self.stripPaddingBox = DoubleSpinBoxCompoundWidget(userFrame, grid=(row, 0), gridSpan=(1, 3), hAlign='left',
+        self.stripPaddingBox = DoubleSpinBoxCompoundWidget(sFrame, grid=(row, 0), gridSpan=(1, 3), hAlign='left',
                                                            labelText='Strip Padding',
                                                            # value=5,
                                                            decimals=0, step=1, range=(0, 50),
@@ -420,7 +429,7 @@ class ExportStripToFilePopup(ExportDialogABC):
                                                            )
 
         row += 1
-        self.exportDpiBox = DoubleSpinBoxCompoundWidget(userFrame, grid=(row, 0), gridSpan=(1, 3), hAlign='left',
+        self.exportDpiBox = DoubleSpinBoxCompoundWidget(sFrame, grid=(row, 0), gridSpan=(1, 3), hAlign='left',
                                                         labelText='Image dpi',
                                                         # value=300,
                                                         decimals=0, step=5, range=(36, 2400),
@@ -428,28 +437,28 @@ class ExportStripToFilePopup(ExportDialogABC):
                                                         )
 
         row += 1
-        HLine(userFrame, grid=(row, 0), gridSpan=(1, 4), colour=getColours()[DIVIDER], height=20)
+        HLine(sFrame, grid=(row, 0), gridSpan=(1, 4), colour=getColours()[DIVIDER], height=20)
         row += 1
 
-        self._setupRangeWidget(row, userFrame)
+        self._setupRangeWidget(row, sFrame)
         row += 1
 
-        HLine(userFrame, grid=(row, 0), gridSpan=(1, 4), colour=getColours()[DIVIDER], height=20)
+        HLine(sFrame, grid=(row, 0), gridSpan=(1, 4), colour=getColours()[DIVIDER], height=20)
         row += 1
 
         # widgets for handling screen scaling
-        self._setupScalingWidget(row, userFrame)
+        self._setupScalingWidget(row, sFrame)
         row += 1
 
         # widgets for handling fonts
-        self._setupFontWidget(row, userFrame)
+        self._setupFontWidget(row, sFrame)
         row += 1
 
-        self.treeView = PrintTreeCheckBoxes(userFrame, project=None, grid=(row, 0), gridSpan=(1, 4))
+        self.treeView = PrintTreeCheckBoxes(sFrame, project=None, grid=(row, 0), gridSpan=(1, 4))
         self.treeView.itemClicked.connect(self._queueGetPrintOptionCallback)
 
-        userFrame.layout().setRowStretch(row, 100)
-        userFrame.addSpacer(5, 5, expandX=True, expandY=True, grid=(row, 3))
+        sFrame.layout().setRowStretch(row, 100)
+        sFrame.addSpacer(5, 5, expandX=True, expandY=True, grid=(row, 3))
 
     def _setupRangeWidget(self, row, userFrame):
         """Set up the widgets for the range frame
@@ -543,8 +552,8 @@ class ExportStripToFilePopup(ExportDialogABC):
                                             multiSelect=True, acceptDrops=False, copyDrop=False,
                                             parentPopup=self,
                                             parentCallbacks=(self._copyRangeCallback,
-                                                           self._pasteRangeCallback,
-                                                           self._pasteRangeAllCallback)
+                                                             self._pasteRangeCallback,
+                                                             self._pasteRangeAllCallback)
                                             )
         self._rangeLeft.setFixedSize(130, 180)
 

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-06 18:13:04 +0100 (Fri, May 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-11 17:18:39 +0100 (Wed, May 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -7312,9 +7312,15 @@ class CcpnNefReader(CcpnNefContent):
             if obj is None:
                 getLogger().debug2('Loading NEF additional data: unable to find object "%s"' % pid)
             else:
-                obj._ccpnInternalData = jsonIo.loads(data)
+                # read in the new _ccpnInternal and write the existing over the top
+                if (dataIn := jsonIo.loads(data)):
+                    try:
+                        if obj._ccpnInternalData:
+                            dataIn.update(obj._ccpnInternalData)
+                        obj._ccpnInternalData = dataIn
+                    except:
+                        self.warning(f'Could not load additional data for {obj}', loop)
 
-    #
     importers['ccpn_additional_data'] = load_ccpn_additional_data
 
     def verify_ccpn_additional_data(self, project: Project, saveFrame: StarIo.NmrSaveFrame):

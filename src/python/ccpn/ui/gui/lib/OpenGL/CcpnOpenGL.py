@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-09 11:14:31 +0100 (Mon, May 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-11 15:54:11 +0100 (Wed, May 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -798,41 +798,45 @@ class CcpnGLWidget(QOpenGLWidget):
             return
 
         # check the movement of the wheel first
-        numPixels = event.pixelDelta()
+        # numPixels = event.pixelDelta()
         numDegrees = event.angleDelta()
         zoomCentre = self._preferences.zoomCentreType
 
         # get the keyboard state
         keyModifiers = QApplication.keyboardModifiers()
 
-        zoomScale = 0.0
-        scrollDirection = 0
-        if numPixels:
+        zoomScale = 8.0
+        scrollDirection = event.angleDelta().x()
+        if scrollDirection == 0:
+            scrollDirection = event.angleDelta().y()
 
-            # always seems to be numPixels - check with Linux
-            # the Shift key automatically returns the x-axis
-            scrollDirection = numPixels.x() if (keyModifiers & Qt.ShiftModifier) else numPixels.y()
-            zoomScale = 8.0
+        # if numPixels:
+        #
+        #     # always seems to be numPixels - check with Linux
+        #     # the Shift key automatically returns the x-axis
+        #     scrollDirection = numPixels.x() if (keyModifiers & Qt.ShiftModifier) else numPixels.y()
+        #     zoomScale = 8.0
+        #
+        #     # stop the very sensitive movements
+        #     if abs(scrollDirection) < 1:
+        #         event.ignore()
+        #         return
 
-            # stop the very sensitive movements
-            if abs(scrollDirection) < 1:
-                event.ignore()
-                return
-
-        elif numDegrees:
-
-            # this may work when using Linux
-            scrollDirection = (numDegrees.x() / 4) if (keyModifiers & Qt.ShiftModifier) else (numDegrees.y() / 4)
-            zoomScale = 8.0
-
-            # stop the very sensitive movements
-            if abs(scrollDirection) < 1:
-                event.ignore()
-                return
-
-        else:
-            event.ignore()
-            return
+        # if numDegrees:
+        #
+        #     # this may work when using Linux
+        #     scrollDirection = numDegrees.manhattanLength() / 8
+        #     zoomScale = 8.0
+        #
+        #     print(f' scrolldirection   {numDegrees}    {scrollDirection}')
+        #     # stop the very sensitive movements
+        #     if scrollDirection < 0.1:
+        #         event.ignore()
+        #         return
+        #
+        # else:
+        #     event.ignore()
+        #     return
 
         if (keyModifiers & (Qt.ShiftModifier | Qt.ControlModifier)):
 

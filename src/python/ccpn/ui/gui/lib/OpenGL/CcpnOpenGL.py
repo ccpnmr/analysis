@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-11 15:54:11 +0100 (Wed, May 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-11 16:03:04 +0100 (Wed, May 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -798,8 +798,6 @@ class CcpnGLWidget(QOpenGLWidget):
             return
 
         # check the movement of the wheel first
-        # numPixels = event.pixelDelta()
-        numDegrees = event.angleDelta()
         zoomCentre = self._preferences.zoomCentreType
 
         # get the keyboard state
@@ -810,39 +808,10 @@ class CcpnGLWidget(QOpenGLWidget):
         if scrollDirection == 0:
             scrollDirection = event.angleDelta().y()
 
-        # if numPixels:
-        #
-        #     # always seems to be numPixels - check with Linux
-        #     # the Shift key automatically returns the x-axis
-        #     scrollDirection = numPixels.x() if (keyModifiers & Qt.ShiftModifier) else numPixels.y()
-        #     zoomScale = 8.0
-        #
-        #     # stop the very sensitive movements
-        #     if abs(scrollDirection) < 1:
-        #         event.ignore()
-        #         return
-
-        # if numDegrees:
-        #
-        #     # this may work when using Linux
-        #     scrollDirection = numDegrees.manhattanLength() / 8
-        #     zoomScale = 8.0
-        #
-        #     print(f' scrolldirection   {numDegrees}    {scrollDirection}')
-        #     # stop the very sensitive movements
-        #     if scrollDirection < 0.1:
-        #         event.ignore()
-        #         return
-        #
-        # else:
-        #     event.ignore()
-        #     return
-
         if (keyModifiers & (Qt.ShiftModifier | Qt.ControlModifier)):
 
             # process wheel with buttons here
             # transfer event to the correct widget for changing the plane OR raising base contour level...
-
             if (keyModifiers & Qt.ShiftModifier):
                 # raise/lower base contour level - should be strip I think
                 if scrollDirection > 0:

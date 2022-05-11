@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-09 16:28:16 +0100 (Mon, May 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-11 13:12:56 +0100 (Wed, May 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ __date__ = "$Date: 2020-02-17 10:28:41 +0000 (Thu, February 17, 2022) $"
 # Start of code
 #=========================================================================================
 
+from collections import OrderedDict
 from ccpn.util.Logging import getLogger
 from ccpn.util.nef.GenericStarParser import LoopRow
 from ccpn.framework.lib.ccpnNmrStarIo.SaveFrameABC import SaveFrameABC
@@ -115,7 +116,7 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
         csRow.residueType = str(csRow.get(self._RESIDUE_TYPE_TAG))
         csRow.isotopeCode = '%s%s' % (csRow.get(self._ISOTOPE_TAG_1), csRow.get(self._ISOTOPE_TAG_2))
         csRow.atomName = str(csRow.get(self._ATOM_NAME_TAG))
-        csRow.ambiguityCode = int(csRow.get(self._AMBIGUITY_CODE)) if csRow.get(self._AMBIGUITY_CODE) is not None else 1
+        csRow.ambiguityCode = int(csRow.get(self._AMBIGUITY_CODE)) if csRow.get(self._AMBIGUITY_CODE) is not None else None
 
         csRow.comment = csRow.get(self._COMMENT_TAG)
 
@@ -126,6 +127,9 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
         csRow.nefAtomName = self._getNefName(csRow.ntDef)
 
         csRow.skip = False
+
+        dd = self._seqResDict.setdefault((csRow.residueType, csRow.sequenceCode), [])
+        dd.append(csRow)
 
     def _newChemicalShift(self, csRow:LoopRow, chemShiftList):
         """Use chemShift to make a new (v3) chemicalShift in chemShiftList
@@ -209,22 +213,160 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
         # get the NmrAtom object
         nmrChain = project.fetchNmrChain(chainCode)
         nmrResidue = nmrChain.fetchNmrResidue(residueType=_row.residueType, sequenceCode=_row.sequenceCode)
-        nmrAtom = nmrResidue.newNmrAtom(name=atomName, isotopeCode=_row.isotopeCode)
+        try:
+            nmrAtom = nmrResidue.newNmrAtom(name=atomName, isotopeCode=_row.isotopeCode)
 
-        # create the ChemicalShift
-        chemShift = chemShiftList.newChemicalShift(nmrAtom=nmrAtom,
-                                                   value=_row.value,
-                                                   valueError=_row.valueError,
-                                                   figureOfMerit=_row.figureOfMerit,
-                                                   comment=_row.comment)
-        chemShift._static = False if chemShiftList.spectra else True
+            # create the ChemicalShift
+            chemShift = chemShiftList.newChemicalShift(nmrAtom=nmrAtom,
+                                                       value=_row.value,
+                                                       valueError=_row.valueError,
+                                                       figureOfMerit=_row.figureOfMerit,
+                                                       comment=_row.comment)
+            chemShift._static = False if chemShiftList.spectra else True
 
-        return chemShift
+            return chemShift
+        except Exception as es:
+            getLogger().warning(f' ERROR  {es}')
+
+    # def _checkAmbiguityCode(self, csRow:LoopRow):
+    #     """
+    #     Check that matching nmrAtoms don't have any missing ambiguity codes.
+    #
+    #     :param csRow:
+    #     :return:
+    #     """
+    #     _row = csRow
+    #     atomName = _row.atomName
+    #
+    #     if _row.ambiguityCode == 1:
+    #
+    #         # - methyl protons have identical chemical shifts with ambiguity code 1
+    #         if _row.ntDef.isMethyl and _row.ntDef.isProton:
+    #             # We can skip all other methyl protons
+    #             for _aDef in _row.ntDef.otherAttachedProtons:
+    #                 if (_aRow := self._lookupDict.get( (_row.residueType, _row.sequenceCode, _aDef.name) )):
+    #
+    #                     if _aRow.ambiguityCode != 1:
+    #                         getLogger().debug(f'  set ambiguity code 1 - {(_aRow.residueType, _aRow.sequenceCode, _aDef.name)}')
+    #
+    #         # - methylene protons with identical chemical shifts have ambiguity code 1
+    #         elif _row.ntDef.isMethylene and _row.ntDef.isProton:
+    #             _aDef = _row.ntDef.otherAttachedProtons[0]
+    #             if (_aRow := self._lookupDict.get( (_row.residueType, _row.sequenceCode, _aDef.name) )):
+    #                 if _row.value == _aRow.value:
+    #
+    #                     if _aRow.ambiguityCode != 1:
+    #                         getLogger().debug(f'  set ambiguity code 1 - {(_aRow.residueType, _aRow.sequenceCode, _aDef.name)}')
+    #
+    #         # - Phe, Tyr aromatic protons/carbons (e.g. HD1/HD2) with identical chemical shifts have ambiguity code 1
+    #         # these occur on non-sequential rows;
+    #         elif _row.ntDef.parent.name in ('PHE', 'TYR') and _row.atomName in 'HD1 CD1 HD2 CD2 HE1 CE1 HE2 CE2'.split():
+    #             if atomName.endswith('1'):
+    #                 _aName = _row.atomName.replace('1','2')
+    #             elif atomName.endswith('2'):
+    #                 _aName = _row.atomName.replace('2','1')
+    #             if (_aRow := self._lookupDict.get( (_row.residueType, _row.sequenceCode, _aName) )):
+    #                 if _row.value == _aRow.value:
+    #
+    #                     if _aRow.ambiguityCode != 1:
+    #                         getLogger().debug(f'  set ambiguity code 1 - {(_aRow.residueType, _aRow.sequenceCode, _aName)}')
+    #
+    #     elif _row.ambiguityCode == 2:
+    #         #  (Val, Leu NEF xy rules propagation; i.e. HDx% connected to CDx)
+    #         if _row.ntDef.parent.name in ('VAL', 'LEU') and _row.ntDef.isMethyl and _row.ntDef.isProton:
+    #             # We can skip all other methyl protons
+    #             for _aDef in _row.ntDef.otherAttachedProtons:
+    #                 if (_aRow := self._lookupDict.get( (_row.residueType, _row.sequenceCode, _aDef.name) )):
+    #                     # _aRow.ambiguityCode = 2
+    #                     getLogger().debug(f'  set ambiguity code 2 - {(_aRow.residueType, _aRow.sequenceCode, _aDef.name)}')
+    #
+    #             # can adjust the attributes
+    #             _cName = _row.ntDef.attachedHeavyAtom.name
+    #             if (_cRow := self._lookupDict.get( (_row.residueType, _row.sequenceCode, _cName) )):
+    #                 # _cRow.ambiguityCode = 2
+    #                 getLogger().debug(f'  set ambiguity code 2 - {(_cRow.residueType, _cRow.sequenceCode, _cName)}')
+    #
+    #         else:
+    #             atomName = _row.nefAtomName
+    #
+    #     elif _row.ambiguityCode == 3:
+    #         #  (Phe, Tyr NEF xy rules propagation; i.e. HDx connected to CDx)
+    #         if _row.ntDef.parent.name in ('PHE', 'TYR') and _row.atomName in 'HD1 HD2 HE1 HE2'.split():
+    #             _cName = _row.ntDef.attachedHeavyAtom.name
+    #             if (_cRow := self._lookupDict.get( (_row.residueType, _row.sequenceCode, _cName) )):
+    #                 # _cRow.ambiguityCode = 3
+    #                 getLogger().debug(f'  set ambiguity code 3 - {(_cRow.residueType, _cRow.sequenceCode, _cName)}')
+    #
+    #         else:
+    #             atomName = _row.nefAtomName
+
+    def _checkMissingCodes(self):
+        """
+        Check for matching or missing ambiguity codes.
+        :return:
+        """
+        for _res, vals in self._seqResDict.items():
+            matches = OrderedDict()
+            for ll in range(4, 1, -1):
+                for lInner in range(ll, 1, -1):
+                    for _row in vals:
+                        atomName = _row.atomName
+                        if len(atomName) == ll and atomName[-1].isdigit():
+                            name = atomName[:lInner] + '%'  # %%%'[0:ll-lInner] - only need a single hash
+                            rowSet = matches.setdefault(name, [])
+                            rowSet.append(_row)
+
+            # remove all the short matches
+            _matches = {k:v for k, v in matches.items() if len(v) > 1}
+
+            # remove any sets that are duplicated, e.g., HG1% may be the same as HG% if HG2% is missing
+            matches = OrderedDict()
+            ssFound = []
+            for group, rowSet in _matches.items():
+                ss = set(id(rr) for rr in rowSet)
+                if len(ss) != len(rowSet):
+                    getLogger().warning(f'Duplicate values {group}  {[rr.atomName for rr in rowSet]}')
+
+                # allSet = [set(id(rr) for rr in _rSet) for _rSet in matches.values()]
+                if ss not in ssFound:
+                    matches[group] = rowSet
+                    ssFound.append(ss)
+
+            for group, rowSet in list(matches.items()):
+                # check matching ambiguity codes
+                ambCodes = set()
+
+                for _row in rowSet:
+                    ambCodes.add(_row.ambiguityCode)
+                # ambCodes -= {None}
+
+                if len(ambCodes) > 1:
+                    getLogger().warning(f'multiple ambiguity codes for matching atomNames - {_res}:{group}:{list(ambCodes)}')
+                    for _row in rowSet:
+                        _row.ambiguityCode = 2
+
+                elif len(ambCodes) == 1 and ambCodes == {None}:
+                    # may require special cases here
+                    getLogger().warning(f'missing ambiguity codes for matching atomNames - {_res}:{group}:{list(ambCodes)}')
+                    for _row in rowSet:
+                        _row.ambiguityCode = 2
+
+                vals = set(_row.value for _row in rowSet) - {None}
+                if vals and len(vals) == 1:
+                    # atoms need to be merged if they are all the same value
+                    for _row in rowSet[1:]:
+                        _row.skip = True
+
+                else:
+                    # group can be discarded
+                    del matches[group]
+
+            assert 1==1  # just for a breakpoint
 
     def importIntoProject(self, project) -> list:
         """Import the data of self into project.
-        :param project: a Project instance
-        :return list of imported V3 objects
+        :param project: a Project instance.
+        :return: list of imported V3 objects.
         """
         name = f'entry{self.entry_id}'
         chemShiftList = project.newChemicalShiftList(name = name,
@@ -234,11 +376,18 @@ class ChemicalShiftSaveFrame(SaveFrameABC):
         # A two-stage conversion, as sometimes we need to look back or forward
         # 'parse'/convert the rows, assigning the attributes; create a lookupDict
         self._lookupDict = {}
+        self._seqResDict = {}
         for _row in self.chemicalShifts:
             self._parseChemicalShiftRow(_row)
             self._lookupDict[(_row.residueType, _row.sequenceCode, _row.atomName)] = _row
 
-        # Loop again to create the V3 chemcialShift objects
+        self._checkMissingCodes()
+
+        # # Loop again to check that pairs don't have any missing ambiguity codes
+        # for _row in self.chemicalShifts:
+        #     self._checkAmbiguityCode(_row)
+
+        # Loop again to create the V3 chemicalShift objects
         for _row in self.chemicalShifts:
             self._newChemicalShift(_row, chemShiftList)
 

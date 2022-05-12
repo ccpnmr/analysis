@@ -102,7 +102,7 @@
         "aliasEnabled"                         : true,
         "aliasShade"                           : 20,
         "stripArrangement"                     : 0,
-        "showTipOfTheDay"                      : false,
+        "showTipOfTheDay"                      : true,
         "firstTimeShowKeyConcepts"             : true,
         "seenTipsOfTheDay"                     : [],
         "aliasLabelsEnabled"                   : true,

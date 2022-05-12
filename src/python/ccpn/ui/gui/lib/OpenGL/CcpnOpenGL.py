@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-11 16:03:04 +0100 (Wed, May 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-12 17:02:56 +0100 (Thu, May 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2546,7 +2546,7 @@ class CcpnGLWidget(QOpenGLWidget):
         mouseMovedDict = self._updateMouseDict(cursorCoordinate)
 
         if int(event.buttons() & (Qt.LeftButton | Qt.RightButton)):
-            # do the complicated keypresses first
+            # do the complicated key-presses first
             # other keys are: Key_Alt, Key_Meta, and _isALT, _isMETA
 
             # NOTE:ED I think that Linux is doing a strange button switch when you press shift/ctrl
@@ -3850,7 +3850,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
     def getCurrentCursorCoordinate(self):
 
-        if self.cursorSource == None or self.cursorSource == 'self':
+        if self.cursorSource is None or self.cursorSource == 'self':
             currentPos = self.mapFromGlobal(QtGui.QCursor.pos())
 
             # calculate mouse coordinate within the mainView

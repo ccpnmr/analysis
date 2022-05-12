@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-09 11:14:31 +0100 (Mon, May 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-12 12:29:56 +0100 (Thu, May 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -824,14 +824,14 @@ class Framework(NotifierBase, GuiBase):
             dont_show_tips = not self.preferences['general']['showTipOfTheDay']
 
             seen_tip_list = []
-            if not standalone:
-                seen_tip_list = self.preferences['general']['seenTipsOfTheDay']
+            # if not standalone:
+            seen_tip_list = self.preferences['general']['seenTipsOfTheDay']
 
             self._tip_of_the_day = TipOfTheDayWindow(dont_show_tips=dont_show_tips,
                                                      seen_perma_ids=seen_tip_list, standalone=standalone)
             self._tip_of_the_day.dont_show.connect(self._tip_of_the_day_dont_show_callback)
-            if not standalone:
-                self._tip_of_the_day.seen_tips.connect(self._tip_of_the_day_seen_tips_callback)
+            # if not standalone:
+            self._tip_of_the_day.seen_tips.connect(self._tip_of_the_day_seen_tips_callback)
 
             self._tip_of_the_day.show()
             self._tip_of_the_day.raise_()

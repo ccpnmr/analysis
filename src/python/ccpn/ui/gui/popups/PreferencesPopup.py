@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-05 15:42:20 +0100 (Tue, April 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-12 12:29:56 +0100 (Thu, May 12, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -149,6 +149,19 @@ def _makeCheckBox(parent, row, text, callback, toolTip=None, **kwds):
         _label.setToolTip(toolTip)
         _checkBox.setToolTip(toolTip)
     return _checkBox
+
+
+def _makeButton(parent, row, text, callback, toolTip=None, buttonText=None, **kwds):
+    """Convenience routine to make a row with a label and a button
+    :return Button instance
+    """
+    _label = _makeLabel(parent, text=text, grid=(row, 0), **kwds)
+    _button = Button(parent, text=buttonText, grid=(row, 1), hAlign='l', hPolicy='minimal', spacing=(0, 0))
+    _button.pressed.connect(callback)
+    if toolTip is not None:
+        _label.setToolTip(toolTip)
+        _button.setToolTip(toolTip)
+    return _button
 
 
 class PreferencesPopup(CcpnDialogMainWidget):
@@ -602,8 +615,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
         row += 1
         self.useOnlineDocumentation = _makeCheckBox(parent, row=row, text="Use online api-documentation",
-                                                       callback=self._queueSetUseOnlineDocumentation,
-                                                       toolTip="Use the online api-documentation instead of the local folder")
+                                                    callback=self._queueSetUseOnlineDocumentation,
+                                                    toolTip="Use the online api-documentation instead of the local folder")
 
         #====== Tip of the Day ======
         row += 1
@@ -614,9 +627,9 @@ class PreferencesPopup(CcpnDialogMainWidget):
                                                callback=self._queueSetShowTipsAtStartUp)
 
         row += 1
-        self.showAllTips = _makeCheckBox(parent, text="Clear tip history", row=row,
-                                         toolTip="show all tips on next restart",
-                                         callback=self._queueShowAllTips)
+        self.showAllTips = _makeButton(parent, text="Tip history", row=row, buttonText='Clear',
+                                       toolTip="show all tips on next restart",
+                                       callback=self._queueShowAllTips)
 
         # GWV: option removed as test is done after Drop
         # row += 1
@@ -652,10 +665,14 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     @queueStateChange(_verifyPopupApply)
     def _queueShowAllTips(self):
-        if self.showAllTips.isChecked() and (len(self.preferences.general.seenTipsOfTheDay) != 0):
-            return partial(self._setShowAllTips, True)
-        else:
-            return partial(self._setShowAllTips, False)
+        self._setShowAllTips()
+
+        # return a 'null' function so that the revert/ok buttons appear correctly
+        return lambda: True
+
+    def _setShowAllTips(self):
+        self.preferences.general.seenTipsOfTheDay.clear()
+        self.showAllTips.setEnabled(False)
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetShowTipsAtStartUp(self, _value):
@@ -665,13 +682,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     def _setShowTipsAtStartup(self, state):
         self.preferences.general.showTipOfTheDay = state
-
-    def _setShowAllTips(self, showAllTips):
-        if showAllTips:
-            self.preferences.general.seenTipsOfTheDay.clear()
-            self.preferences.general.seenTipsOfTheDay.extend(self._shownTips)
-        else:
-            self.preferences.general.seenTipsOfTheDay.clear()
 
     @queueStateChange(_verifyPopupApply)
     def _queueSetRememberLastClosedModuleState(self, _value):
@@ -693,7 +703,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
 
     # def _queueClearSeenTips(self):
     #     #GST in this case the default should be no, but we can't do this yet... as yesNo doesn't support it
-    #     #    also yes now sould allow custom button names and have default and action button separated...
+    #     #    also yes now should allow custom button names and have default and action button separated...
     #     result = showYesNo(parent=self, title="Reset Seen tips", message="Are you sure you want to clear the seen tips list")
     #     if result:
     #         self.preferences.general.seenTipsOfTheDay.clear()
@@ -724,11 +734,8 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.glFontSizeData.setCurrentIndex(self.glFontSizeData.findText(str(self.preferences.appearance.spectrumDisplayFontSize)))
 
         self.showTipsAtStartUp.setChecked(self.preferences.general.showTipOfTheDay)
+        self.showAllTips.setEnabled(len(self.preferences.general.seenTipsOfTheDay) > 0)
 
-        if len(self.preferences.general.seenTipsOfTheDay) == 0:
-            self.showAllTips.setEnabled(False)
-        self.showAllTips.setChecked(False)
-        self._shownTips = copy(self.preferences.general.seenTipsOfTheDay)
         self.rememberLastClosedModule.setChecked(self.preferences.appearance.rememberLastClosedModuleState)
         self.runPyConsoleOnMacroEditor.setChecked(self.preferences.appearance.autoOpenPythonConsoleOnMacroEditor)
         self.useOnlineDocumentation.setChecked(self.preferences.appearance.useOnlineDocumentation)

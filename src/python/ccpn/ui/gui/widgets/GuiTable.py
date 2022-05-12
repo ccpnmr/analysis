@@ -1013,6 +1013,17 @@ class GuiTable(TableWidget, Base):
         if self.hideIndex:
             headers.hide()
 
+    def _setColumnWidths(self, columnsWidths):
+        """
+        Set the columns widths based on the columnHeader name
+        :param columnsWidths: Dict  {ColumnName:width}
+        :return: None
+        """
+        for i, column in enumerate(self.columns):
+            width = columnsWidths.get(column.headerText)
+            if width is not None:
+                self.setColumnWidth(i, width)
+
     def pressingModifiers(self):
         """Is the user clicking while holding a modifier
         """

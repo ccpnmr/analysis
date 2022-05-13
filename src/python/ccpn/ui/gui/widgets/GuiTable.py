@@ -71,7 +71,7 @@ from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, GREEN1, GUITABLE_DR
 from ccpn.ui.gui.widgets.SideBar import SideBar
 from ccpn.ui.gui.widgets.DropBase import DropBase
 import math
-
+from ccpn.util.Path import aPath
 
 OBJECT_CLASS = 0
 OBJECT_PARENT = 1
@@ -98,7 +98,8 @@ def _moduleId(module):
 
 def dataFrameToExcel(dataFrame, path, sheet_name='Table', columns=None):
     if dataFrame is not None:
-
+        path = aPath(path)
+        path = path.assureSuffix('xlsx')
         if columns is not None and isinstance(columns, list):  #this is wrong. columns can be a 1d array
             dataFrame.to_excel(path, sheet_name=sheet_name, columns=columns)
         else:
@@ -126,6 +127,8 @@ def findExportFormats(path, dataFrame, sheet_name='Table', filterType=None, colu
         ])
 
     extension = os.path.splitext(path)[1]
+    if not extension:
+        extension = '.xlsx'
     if extension in formatTypes.keys():
         formatTypes[extension](dataFrame, path, sheet_name, columns)
         return

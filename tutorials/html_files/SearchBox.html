@@ -24,11 +24,11 @@
 <p>The search will look for any text matches and is case-insensitive. <span class="action">*</span> can be used as a wildcard.</p>
 <p>Note that every item of data in the sidebar is listed as a so-called <span class="action">Project ID</span>, or <span class="action">PID</span> for short. These PIDs contain a short code to signify the data type (e.g. SP for spectrum - see below for a full list) followed by the name of the data item. Nested items also contain the names of their parents/grandparents, separated by a <span class="action">.</span> , e.g. a peak list is shown as <span class="action">PL:spectrumName.peakListName</span> or an NmrAtom as <span class="action">NA:@3.23.THR.CA</span>.</p>
 <p><span class="action">val</span>
-<br>as a search string would should any Valine NmrAtoms and NmrResidues, while
+<br>as a search string would any Valine NmrAtoms, NmrResidues, Atoms and Residues, while
 <br><span class="action">nr*val</span>
 <br>would show only Valine NmrResidues.</p>
 <p><span class="action">hsqc</span>
-<br>might show you any spectra and their peak lists that contain the string <span class="action">hsqc</span>. whereas
+<br>might show you any spectra and their peak lists that contain the string <span class="action">hsqc</span>, whereas
 <br><span class="action">pl*hsqc</span>
 <br>would restrict this to peak lists or
 <br><span class="action">sp*hsqc</span>
@@ -147,16 +147,34 @@
   <td>SE:4kht</td>
  </tr>
  <tr>
-  <td><span class="action">DS</span></td>
-  <td>Data Set</td>
-  <td>Data Set</td>
-  <td>DS:run1</td>
+  <td><span class="action">SD</span></td>
+  <td>Structure Data</td>
+  <td>Structure Data</td>
+  <td>SD:run1</td>
  </tr>
  <tr>
-  <td><span class="action">RL</span></td>
-  <td>Restraint List</td>
-  <td>Data Set / Restraint List</td>
-  <td>RL:run1.TALOS restraints</td>
+  <td><span class="action">RT</span></td>
+  <td>Restraint Table</td>
+  <td>Structure Data / Restraint Table</td>
+  <td>RT:run1.TALOSRestraints</td>
+ </tr>
+ <tr>
+  <td><span class="action">VT</span></td>
+  <td>Violation Table</td>
+  <td>Structure Data / Violation Table</td>
+  <td>VT:run1.NNoesyViolations</td>
+ </tr>
+ <tr>
+  <td><span class="action">DT</span></td>
+  <td>Data Table</td>
+  <td>Data Table</td>
+  <td>DT:ScreeningSet1</td>
+ </tr>
+ <tr>
+  <td><span class="action">CO</span></td>
+  <td>Collections</td>
+  <td>Collections</td>
+  <td>CO:run1</td>
  </tr>
  <tr>
   <td><span class="action">NO</span></td>

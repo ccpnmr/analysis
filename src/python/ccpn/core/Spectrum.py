@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-16 18:10:23 +0100 (Mon, May 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-16 19:56:50 +0100 (Mon, May 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1052,13 +1052,13 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     @_includeInDimensionalCopy
-    def mqIsotopeCodes(self) -> List[str]:
+    def mqIsotopeCodes(self) -> List[List]:
         """multiple quantum isotopeCodes or [None, ...]; per dimension"""
         return self._getDimensionalAttributes('mqIsotopeCodes')
 
     @mqIsotopeCodes.setter
     @logCommand(get='self', isProperty=True)
-    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(str,))
+    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(list, tuple,))
     def mqIsotopeCodes(self, value: Sequence):
         self._setDimensionalAttributes('mqIsotopeCodes', value)
 

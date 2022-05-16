@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-21 16:24:55 +0000 (Mon, March 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-16 19:56:50 +0100 (Mon, May 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -25,7 +25,7 @@ __date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-
+import numpy as np
 from functools import partial
 from PyQt5 import QtWidgets, QtCore, QtGui
 from itertools import permutations
@@ -36,7 +36,7 @@ from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock
 from ccpn.core.lib.ContextManagers import undoStackBlocking
-from ccpn.core.lib.SpectrumLib import getContourLevelsFromNoise, MAXALIASINGRANGE
+from ccpn.core.lib.SpectrumLib import getContourLevelsFromNoise, MAXALIASINGRANGE, CoherenceOrder
 from ccpn.core.lib.ContextManagers import queueStateChange
 
 from ccpn.ui.gui.widgets.Button import Button
@@ -943,6 +943,7 @@ class DimensionsTab(Widget):
         self._changes = ChangeDict()
         self._referenceExperiment = None
         self._referenceDimensions = None
+        self._warningShown = False
 
         Label(self, text="Dimension ", grid=(1, 0), hAlign='l', vAlign='t', )
 
@@ -951,7 +952,8 @@ class DimensionsTab(Widget):
             dimLabel = Label(self, text='%s' % str(i + 1), grid=(1, i + 1), vAlign='t', hAlign='l')
 
         self.axisCodeEdits = [i for i in range(dimensions)]
-        self.isotopeCodePullDowns = [i for i in range(dimensions)]
+        self.isotopeCodePullDowns = np.empty((dimensions, len(CoherenceOrder)), dtype=np.object)
+        self.coherenceOrderPullDowns = [i for i in range(dimensions)]
         self.referenceDimensionPullDowns = [i for i in range(dimensions)]
 
         self._pointCountsLabels = [i for i in range(dimensions)]
@@ -970,11 +972,18 @@ class DimensionsTab(Widget):
         self.minAliasingPullDowns = [i for i in range(dimensions)]
         self.maxAliasingPullDowns = [i for i in range(dimensions)]
 
+        self._isotopeList = [r.isotopeCode for r in isotopeRecords.values() if r.spin > 0]  # All isotopes with a spin
+        self._coherenceOrderList = CoherenceOrder.names()
+        numCohOrders = max(CoherenceOrder.dataValues())
+
         row = 2
         Label(self, text="Axis Code ", grid=(row, 0), vAlign='t', hAlign='l', tipText=getAttributeTipText(Spectrum, 'axisCodes'))
 
         row += 1
         Label(self, text="Isotope Code ", grid=(row, 0), vAlign='t', hAlign='l', tipText=getAttributeTipText(Spectrum, 'isotopeCodes'))
+
+        row += numCohOrders
+        Label(self, text="Coherence Order ", grid=(row, 0), vAlign='t', hAlign='l', tipText=getAttributeTipText(Spectrum, 'coherenceOrders'))
 
         row += 1
         _specLabel = Label(self, text="Reference Experiment Type ", grid=(row, 0), vAlign='t', hAlign='l', tipText=getAttributeTipText(Spectrum, 'experimentType'))
@@ -1034,8 +1043,6 @@ class DimensionsTab(Widget):
         row += 1
         Label(self, text="Lowerbound", grid=(row, 0), hAlign='r')
 
-        self._isotopeList = [r.isotopeCode for r in isotopeRecords.values() if r.spin > 0]  # All isotopes with a spin
-
         # add set of widgets for each dimension
         for i in range(dimensions):
             row = 2
@@ -1044,9 +1051,15 @@ class DimensionsTab(Widget):
             # self.axisCodeEdits[i].text, i))
 
             row += 1
-            self.isotopeCodePullDowns[i] = PulldownList(self, grid=(row, i + 1), vAlign='t')
-            self.isotopeCodePullDowns[i].setData(self._isotopeList)
-            self.isotopeCodePullDowns[i].currentIndexChanged.connect(partial(self._queueSetIsotopeCodes, spectrum, self.isotopeCodePullDowns[i].getText, i))
+            for dd in range(numCohOrders):
+                self.isotopeCodePullDowns[i, dd] = PulldownList(self, grid=(row + dd, i + 1), vAlign='t')
+                self.isotopeCodePullDowns[i, dd].setData(self._isotopeList)
+                self.isotopeCodePullDowns[i, dd].currentIndexChanged.connect(partial(self._queueSetIsotopeCodes, spectrum, self.isotopeCodePullDowns[i, dd].getText, i, dd))
+
+            row += numCohOrders
+            self.coherenceOrderPullDowns[i] = PulldownList(self, grid=(row, i + 1), vAlign='t')
+            self.coherenceOrderPullDowns[i].setData(self._coherenceOrderList)
+            self.coherenceOrderPullDowns[i].currentIndexChanged.connect(partial(self._queueSetCoherenceOrders, spectrum, self.coherenceOrderPullDowns[i].getText, i))
 
             row += 1
             if i == 0:
@@ -1304,12 +1317,26 @@ class DimensionsTab(Widget):
             self.foldLim = tuple(sorted(lim) for lim in self.spectrum.foldingLimits)
             self.deltaLim = self.spectrum.spectralWidths  # tuple(max(lim) - min(lim) for lim in self.foldLim)
 
+            isoCodes = self.spectrum.mqIsotopeCodes
+            cohOrders = self.spectrum.coherenceOrders
             for i in range(self.dimensions):
                 value = self.spectrum.axisCodes[i]
                 self.axisCodeEdits[i].setText('<None>' if value is None else str(value))
 
-                if self.spectrum.isotopeCodes[i] in self._isotopeList:
-                    self.isotopeCodePullDowns[i].setIndex(self._isotopeList.index(self.spectrum.isotopeCodes[i]))
+                cohCount = CoherenceOrder.get(cohOrders[i]).dataValue
+                dimIsoCodes = isoCodes[i]
+                for cc in range(cohCount):
+                    self.isotopeCodePullDowns[i, cc].setVisible(True)
+                    if cc < len(dimIsoCodes) and dimIsoCodes[cc] in self._isotopeList:
+                        self.isotopeCodePullDowns[i, cc].setIndex(self._isotopeList.index(dimIsoCodes[cc]))
+                    else:
+                        # maybe too small
+                        self.isotopeCodePullDowns[i, cc].setIndex(0)
+                for cc in range(cohCount, max(CoherenceOrder.dataValues())):
+                    self.isotopeCodePullDowns[i, cc].setVisible(False)
+
+                if self.spectrum.coherenceOrders[i] in self._coherenceOrderList:
+                    self.coherenceOrderPullDowns[i].setIndex(self._coherenceOrderList.index(self.spectrum.coherenceOrders[i]))
 
                 self._pointCountsLabels[i].setText(str(self.spectrum.pointCounts[i]))
                 self._dimensionTypesLabels[i].setText(self.spectrum.dimensionTypes[i])
@@ -1425,17 +1452,47 @@ class DimensionsTab(Widget):
         spectrum.axisCodes = value
 
     @queueStateChange(_verifyPopupApply)
-    def _queueSetIsotopeCodes(self, spectrum, valueGetter, dim, _value):
+    def _queueSetIsotopeCodes(self, spectrum, valueGetter, dim, coherenceOrder, _value):
         value = valueGetter()
-        if value != spectrum.isotopeCodes[dim]:
+        dimMqCode = spectrum.mqIsotopeCodes[dim]
+        mqCode = dimMqCode[coherenceOrder] if coherenceOrder < len(dimMqCode) else 'SQ'  # may be shorter if not defined
+        if value != mqCode:
             return partial(self._setIsotopeCodes, spectrum, dim, value)
 
-    def _setIsotopeCodes(self, spectrum, dim, value):
-        isotopeCodes = list(spectrum.isotopeCodes)
-        isotopeCodes[dim] = str(value)
-        spectrum.isotopeCodes = isotopeCodes
-        showWarning('Change Isotope Code', 'Caution is advised when changing isotope codes\n'
-                                           'It can adversely affect spectrumDisplays and peak/integral/multiplet lists.')
+    def _setIsotopeCodes(self, spectrum, dim, value=None):
+        self._updateIsotopeCodes(spectrum, dim)
+        if not self._warningShown:
+            showWarning('Change Isotope Code', 'Caution is advised when changing isotope codes\n'
+                                               'It can adversely affect spectrumDisplays and peak/integral/multiplet lists.')
+            self._warningShown = True
+
+    def _updateIsotopeCodes(self, spectrum, dim):
+        mqIsotopeCodes = list(spectrum.mqIsotopeCodes)
+        cohOrders = spectrum.coherenceOrders
+        mqIsotopeCodes[dim] = [self.isotopeCodePullDowns[dim, cc].get() for cc in range(CoherenceOrder.get(cohOrders[dim]).dataValue)]
+        spectrum.mqIsotopeCodes = mqIsotopeCodes
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetCoherenceOrders(self, spectrum, valueGetter, dim, _value):
+        value = valueGetter()
+
+        # change visibility
+        cohOrders = self.coherenceOrderPullDowns[dim].get()
+        cohCount = CoherenceOrder.get(cohOrders).dataValue
+        for cc in range(cohCount):
+            self.isotopeCodePullDowns[dim, cc].setVisible(True)
+        for cc in range(cohCount, max(CoherenceOrder.dataValues())):
+            self.isotopeCodePullDowns[dim, cc].setVisible(False)
+
+        if value != spectrum.coherenceOrders[dim]:
+            return partial(self._setCoherenceOrders, spectrum, dim, value)
+
+    def _setCoherenceOrders(self, spectrum, dim, value):
+        coherenceOrders = list(spectrum.coherenceOrders)
+        coherenceOrders[dim] = str(value)
+        spectrum.coherenceOrders = coherenceOrders
+        # fix the length of the mqIsotopeCodes if not updated
+        self._setIsotopeCodes(spectrum, dim)
 
     def _raiseExperimentFilterPopup(self, spectrum):
         from ccpn.ui.gui.popups.ExperimentFilterPopup import ExperimentFilterPopup

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-28 12:01:01 +0100 (Mon, March 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-16 18:10:24 +0100 (Mon, May 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -62,7 +62,6 @@ class GuiWindow():
 
         context = QtCore.Qt.WidgetWithChildrenShortcut
         addShortCut("c, h", self, self.toggleCrosshairAll, context=context)
-        addShortCut("c, d", self, self.toggleDoubleCrosshairAll, context=context)
         addShortCut("e, n", self, self.estimateNoise, context=context)
         addShortCut("g, s", self, self.toggleGridAll, context=context)
         addShortCut("Del", self, partial(self.deleteSelectedItems), context=context)
@@ -585,14 +584,6 @@ class GuiWindow():
         # toggle crosshairs for the spectrum displays in this window
         for spectrumDisplay in self.spectrumDisplays:
             spectrumDisplay.toggleCrosshair()
-
-    def toggleDoubleCrosshairAll(self):
-        """
-        Toggles whether double crosshairs are displayed in all windows.
-        """
-        # toggle crosshairs for the spectrum displays in this window
-        for spectrumDisplay in self.spectrumDisplays:
-            spectrumDisplay.toggleDoubleCrosshair()
 
     def estimateNoise(self):
         """estimate the noise in the visible region of the current strip

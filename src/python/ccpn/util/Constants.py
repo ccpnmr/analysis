@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-09 10:41:06 +0000 (Wed, February 09, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-05-16 18:10:24 +0100 (Mon, May 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -38,10 +38,6 @@ ERRORSTRING = 'BADVALUE'
 MOUSEDICTSTRIP = 'strip'
 AXIS_MATCHATOMTYPE = 0
 AXIS_FULLATOMNAME = 1
-AXIS_ACTIVEAXES = 'activeAxes'
-DOUBLEAXIS_MATCHATOMTYPE = 2
-DOUBLEAXIS_FULLATOMNAME = 3
-DOUBLEAXIS_ACTIVEAXES = 'doubleActiveAxes'
 
 POSINFINITY = float('Infinity')
 NEGINFINITY = float('-Infinity')

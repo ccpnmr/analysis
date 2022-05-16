@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-12 17:02:56 +0100 (Thu, May 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-16 18:10:24 +0100 (Mon, May 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -37,9 +37,7 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import pyqtSlot, Qt
 
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
-from ccpn.util.Constants import AXIS_FULLATOMNAME, AXIS_ACTIVEAXES, MOUSEDICTSTRIP, \
-    AXIS_MATCHATOMTYPE, DOUBLEAXIS_MATCHATOMTYPE, DOUBLEAXIS_FULLATOMNAME, \
-    DOUBLEAXIS_ACTIVEAXES
+from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME, MOUSEDICTSTRIP
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_BACKGROUND, \
     CCPNGLWIDGET_FOREGROUND, CCPNGLWIDGET_PICKCOLOUR, CCPNGLWIDGET_GRID, CCPNGLWIDGET_HIGHLIGHT, \
@@ -923,9 +921,8 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
         self._spectrumBordersVisible = True
 
         self.gridList = []
-        self._gridVisible = True  #self._preferences.showGrid
-        self._crosshairVisible = True  #self._preferences.showCrosshair
-        self._doubleCrosshairVisible = True  #self._preferences.showDoubleCrosshair
+        self._gridVisible = True
+        self._crosshairVisible = True
         self._sideBandsVisible = True
 
         self.diagonalGLList = None
@@ -1381,23 +1378,23 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             if self._crosshairVisible:  # or self._updateVTrace or self._updateHTrace:
 
                 exactMatch = (self._preferences.matchAxisCode == AXIS_FULLATOMNAME)
-                indices = getAxisCodeMatchIndices(self.spectrumDisplay.axisCodes[:2], mouseMovedDict[AXIS_ACTIVEAXES], exactMatch=exactMatch)
-
-                if indices and len(indices) > 1:
-                    for n in range(2):
-                        if indices[n] is not None:
-
-                            axis = mouseMovedDict[AXIS_ACTIVEAXES][indices[n]]
-                            self.cursorSource = CURSOR_SOURCE_OTHER
-                            self.cursorCoordinate[n] = mouseMovedDict[AXIS_FULLATOMNAME][axis]
-
-                            # coordinates have already been flipped
-                            self.doubleCursorCoordinate[1 - n] = self.cursorCoordinate[n]
-
-                        else:
-                            self.cursorSource = CURSOR_SOURCE_OTHER
-                            self.cursorCoordinate[n] = None
-                            self.doubleCursorCoordinate[1 - n] = None
+                # indices = getAxisCodeMatchIndices(self.spectrumDisplay.axisCodes[:2], mouseMovedDict[AXIS_ACTIVEAXES], exactMatch=exactMatch)
+                #
+                # if indices and len(indices) > 1:
+                #     for n in range(2):
+                #         if indices[n] is not None:
+                #
+                #             axis = mouseMovedDict[AXIS_ACTIVEAXES][indices[n]]
+                #             self.cursorSource = CURSOR_SOURCE_OTHER
+                #             self.cursorCoordinate[n] = mouseMovedDict[AXIS_FULLATOMNAME][axis]
+                #
+                #             # coordinates have already been flipped
+                #             self.doubleCursorCoordinate[1 - n] = self.cursorCoordinate[n]
+                #
+                #         else:
+                #             self.cursorSource = CURSOR_SOURCE_OTHER
+                #             self.cursorCoordinate[n] = None
+                #             self.doubleCursorCoordinate[1 - n] = None
 
                 # self.current.cursorPosition = (self.cursorCoordinate[0], self.cursorCoordinate[1])
 
@@ -2182,45 +2179,40 @@ class Gui1dWidgetAxis(QtWidgets.QOpenGLWidget):
             mouseMovedDict = {MOUSEDICTSTRIP          : None,
                               AXIS_MATCHATOMTYPE      : {},
                               AXIS_FULLATOMNAME       : {},
-                              AXIS_ACTIVEAXES         : (),
-                              DOUBLEAXIS_MATCHATOMTYPE: {},
-                              DOUBLEAXIS_FULLATOMNAME : {},
-                              DOUBLEAXIS_ACTIVEAXES   : ()
                               }
 
         xPos = yPos = 0
-        activeOther = []
-        activeX = activeY = '<None>'
+        atTypes = mouseMovedDict[AXIS_MATCHATOMTYPE] = {}
+        atCodes = mouseMovedDict[AXIS_FULLATOMNAME] = {}
 
-        for n, axisCode in enumerate(self.spectrumDisplay.axisCodes):
+        for n, (atomType, axis) in enumerate(zip(self.spectrumDisplay.isotopeCodes, self.spectrumDisplay.axes)):
+            ats = atTypes.setdefault(atomType, [])
+            atcs = atCodes.setdefault(axis.code, [])
             if n == 0:
                 xPos = pos = cursorCoordinate[0]
-                activeX = axisCode  #[0]
-
-                # double cursor
-                dPos = cursorCoordinate[1]
             elif n == 1:
                 yPos = pos = cursorCoordinate[1]
-                activeY = axisCode  #[0]
-
-                # double cursor
-                dPos = cursorCoordinate[0]
-
             else:
-                dPos = pos = self._orderedAxes[n].position if (n in self._orderedAxes and
-                                                               not self._orderedAxes[n].isDeleted) else 0
-                # dPos = pos = self.spectrumDisplay.axes[n].position  # if n in self._orderedAxes else 0
+                # for other Nd dimensions
+                pos = axis.position
 
-                activeOther.append(axisCode)  #[0])
+            ats.append(pos)
+            atcs.append(pos)
 
-            # populate the mouse moved dict
-            mouseMovedDict[AXIS_MATCHATOMTYPE][axisCode[0]] = pos
-            mouseMovedDict[AXIS_FULLATOMNAME][axisCode] = pos
-            mouseMovedDict[DOUBLEAXIS_MATCHATOMTYPE][axisCode[0]] = dPos
-            mouseMovedDict[DOUBLEAXIS_FULLATOMNAME][axisCode] = dPos
+        if self._matchingIsotopeCodes:
+            for n, (atomType, axis) in enumerate(zip(self.spectrumDisplay.isotopeCodes, self.spectrumDisplay.axes)):
+                ats = atTypes.setdefault(atomType, [])
+                atcs = atCodes.setdefault(axis.code, [])
+                if n == 0:
+                    xPos = pos = cursorCoordinate[1]
+                elif n == 1:
+                    yPos = pos = cursorCoordinate[0]
+                else:
+                    # can ignore the rest
+                    break
 
-        mouseMovedDict[AXIS_ACTIVEAXES] = (activeX, activeY) + tuple(activeOther)  # changed to full axisCodes
-        mouseMovedDict[DOUBLEAXIS_ACTIVEAXES] = (activeY, activeX) + tuple(activeOther)
+                ats.append(pos)
+                atcs.append(pos)
 
         self.current.cursorPosition = (xPos, yPos)
         self.current.mouseMovedDict = mouseMovedDict

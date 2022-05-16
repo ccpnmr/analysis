@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-09 11:14:31 +0100 (Mon, May 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-16 18:10:24 +0100 (Mon, May 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -135,13 +135,6 @@ def _crosshairItem(strip):
                     typeItem=ItemTypes.get(ITEM), toolTip='Toggle Crosshair Mouse On/Off',
                     checkable=True, checked=True, shortcut='CH',
                     callback=strip.spectrumDisplay.toggleCrosshair, stripMethodName='crosshairAction')
-
-
-def _doubleCrosshairItem(strip):
-    return _SCMitem(name='Double Crosshair',
-                    typeItem=ItemTypes.get(ITEM), toolTip='Toggle Double/Single Crosshair Mouse',
-                    checkable=True, checked=True, shortcut='CD',
-                    callback=strip.spectrumDisplay.mainWindow.toggleDoubleCrosshairAll, stripMethodName='doubleCrosshairAction')
 
 
 def _gridItem(strip):
@@ -994,7 +987,6 @@ def _getNdDefaultMenu(guiStripNd) -> Menu:
         _toolBarItem(guiStripNd),
         _spectrumToolBarItem(guiStripNd),
         _crosshairItem(guiStripNd),
-        _doubleCrosshairItem(guiStripNd),
         _gridItem(guiStripNd),
         _sideBandsItem(guiStripNd),
         _shareYAxisItem(guiStripNd),

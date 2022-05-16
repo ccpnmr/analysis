@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-16 10:42:34 +0100 (Mon, May 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-16 18:10:24 +0100 (Mon, May 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -275,7 +275,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
                     strip.gridVisible = self.application.preferences.general.showGrid
                     strip.contourThickness = self.application.preferences.general.contourThickness
                     strip.crosshairVisible = self.application.preferences.general.showCrosshair
-                    strip.doubleCrosshairVisible = self.application.preferences.general.showDoubleCrosshair
                     strip.sideBandsVisible = self.application.preferences.general.showSideBands
 
                     strip.spectrumBordersVisible = self.application.preferences.general.showSpectrumBorder
@@ -821,7 +820,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.spectrumBorderBox.setChecked(self.preferences.general.showSpectrumBorder)
         self.showGridBox.setChecked(self.preferences.general.showGrid)
         self.showCrosshairBox.setChecked(self.preferences.general.showCrosshair)
-        self.showDoubleCrosshairBox.setChecked(self.preferences.general.showDoubleCrosshair)
         self.showSideBandsBox.setChecked(self.preferences.general.showSideBands)
         self.showLastAxisOnlyBox.setChecked(self.preferences.general.lastAxisOnly)
         self.matchAxisCode.setIndex(self.preferences.general.matchAxisCode)
@@ -1141,11 +1139,6 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.showCrosshairLabel = _makeLabel(parent, text="Crosshairs", grid=(row, 0))
         self.showCrosshairBox = CheckBox(parent, grid=(row, 1))
         self.showCrosshairBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showCrosshair'))
-
-        row += 1
-        self.showDoubleCrosshairLabel = _makeLabel(parent, text="Double crosshairs", grid=(row, 0))
-        self.showDoubleCrosshairBox = CheckBox(parent, grid=(row, 1))
-        self.showDoubleCrosshairBox.toggled.connect(partial(self._queueToggleGeneralOptions, 'showDoubleCrosshair'))
 
         row += 1
         self.showSideBandsLabel = _makeLabel(parent, text="MAS side-bands", grid=(row, 0))

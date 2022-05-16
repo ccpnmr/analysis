@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-16 10:42:34 +0100 (Mon, May 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-16 18:10:24 +0100 (Mon, May 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -34,11 +34,10 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from ccpn.core.Peak import Peak
 from ccpn.core.PeakList import PeakList
 from ccpn.core.lib.Notifiers import Notifier
-from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlock, \
-    notificationBlanking, undoBlockWithoutSideBar
+from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlockWithoutSideBar
 from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXHIGHLIGHT, CCPNGLWIDGET_HEXFOREGROUND
 from ccpn.util.Logging import getLogger
-from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME, DOUBLEAXIS_FULLATOMNAME
+from ccpn.util.Constants import AXIS_MATCHATOMTYPE, AXIS_FULLATOMNAME
 from ccpn.util.decorators import logCommand
 from ccpn.util.Colour import colorSchemeTable
 from ccpn.ui.gui.guiSettings import GUISTRIP_PIVOT, ZPlaneNavigationModes
@@ -184,7 +183,6 @@ class GuiStrip(Frame):
 
             self.gridVisible = _firstStrip.gridVisible
             self.crosshairVisible = _firstStrip.crosshairVisible
-            self.doubleCrosshairVisible = _firstStrip.doubleCrosshairVisible
             self.sideBandsVisible = _firstStrip.sideBandsVisible
 
             self.showSpectraOnPhasing = _firstStrip.showSpectraOnPhasing
@@ -201,17 +199,10 @@ class GuiStrip(Frame):
                 else:
                     self.setAxesVisible(True, True)
 
-            # set the axis units from the current settings
-            # self.xUnits = _firstStrip.xUnits
-            # self.yUnits = _firstStrip.yUnits
-            # self._CcpnGLWidget._useLockedAspect = spectrumDisplay.strips[0]._CcpnGLWidget._useLockedAspect
-
         else:
-
             # get the values from the preferences
             self.gridVisible = self._preferences.showGrid
             self.crosshairVisible = self._preferences.showCrosshair
-            self.doubleCrosshairVisible = self._preferences.showDoubleCrosshair
             self.sideBandsVisible = self._preferences.showSideBands
 
             self.showSpectraOnPhasing = self._preferences.showSpectraOnPhasing
@@ -235,10 +226,6 @@ class GuiStrip(Frame):
                                                   aspectRatios=settings[AXISASPECTRATIOS])
 
             self.setAxesVisible(True, True)
-
-            # set the axis units from the current settings
-            # self.xUnits = settings[AXISXUNITS]
-            # self.yUnits = settings[AXISYUNITS]
 
         self._CcpnGLWidget._aspectRatioMode = settings[AXISASPECTRATIOMODE]
         self._CcpnGLWidget._aspectRatios = deepcopy(settings[AXISASPECTRATIOS])
@@ -463,28 +450,6 @@ class GuiStrip(Frame):
         TBD: the naive approach below should be improved
         """
         return axisCode  #if axisCode[0].isupper() else axisCode
-
-    @property
-    def doubleCrosshairVisible(self):
-        """True if doubleCrosshair is visible.
-        """
-        return self._CcpnGLWidget._doubleCrosshairVisible
-
-    @doubleCrosshairVisible.setter
-    def doubleCrosshairVisible(self, visible):
-        """set the doubleCrosshairVisible visibility
-        """
-        if hasattr(self, 'doubleCrosshairAction'):
-            self.doubleCrosshairAction.setChecked(visible)
-        self._CcpnGLWidget._doubleCrosshairVisible = visible
-
-        # spawn a redraw of the GL windows
-        self._CcpnGLWidget.GLSignals.emitPaintEvent()
-
-    def _toggleDoubleCrosshair(self):
-        """Toggles whether doubleCrosshair is visible.
-        """
-        self.doubleCrosshairVisible = not self._CcpnGLWidget._doubleCrosshairVisible
 
     # GWV; commented 24/12/21
     # @property
@@ -781,8 +746,9 @@ class GuiStrip(Frame):
          and uses to pan a selected display from the list of spectrumViews or the current cursor position.
         """
         if self.navigateCursorMenu:
-            position = [self.current.mouseMovedDict[AXIS_FULLATOMNAME][ax]
-                        if ax in self.current.mouseMovedDict[AXIS_FULLATOMNAME] else None
+            mouseDict = self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+            position = [mouseDict[ax][0] if mouseDict[ax] else None
+                        if ax in mouseDict else None
                         for ax in self.axisCodes]
             if None in position:
                 return
@@ -792,7 +758,10 @@ class GuiStrip(Frame):
     def markAxisIndices(self, indices=None):
         """Mark the X/Y/XY axisCodes by index
         """
-        position = [self.current.mouseMovedDict[AXIS_FULLATOMNAME][ax] for ax in self.axisCodes]
+        mouseDict = self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+        position = [mouseDict[ax][0] if mouseDict[ax] else None
+                    if ax in mouseDict else None
+                    for ax in self.axisCodes]
         if indices is None:
             indices = tuple(range(len(self.axisCodes)))
 
@@ -914,12 +883,12 @@ class GuiStrip(Frame):
             self._addItemsToMarkAxesMenuMainView(thisMenu, indices[viewPort])
 
     def _addItemsToMarkAxesMenuMainView(self, axisMenu=None, indices=None):
-        """Setup the menu for the main view for marking axis codes
+        """Set up the menu for the main view for marking axis codes
         """
         axisName = axisMenu if axisMenu else self.markAxesMenu
-        position = [self.current.mouseMovedDict[AXIS_FULLATOMNAME][ax]
-                    if ax in self.current.mouseMovedDict[AXIS_FULLATOMNAME] else None
-                    for ax in self.axisCodes]
+        mouseDict = self.current.mouseMovedDict[AXIS_FULLATOMNAME]
+        position = [mouseDict[ax][0] if mouseDict[ax] else None
+                    for ax in self.axisCodes if mouseDict.get(ax)]
         if None in position:
             return
 
@@ -1107,14 +1076,17 @@ class GuiStrip(Frame):
         if direction == 0:
             for mm in mouseMovedDict[AXIS_MATCHATOMTYPE].keys():
                 if mm[0] == self.axisCodes[0][0]:
-                    position = mouseMovedDict[AXIS_MATCHATOMTYPE][mm]
+                    positions = mouseMovedDict[AXIS_MATCHATOMTYPE][mm]
+                    position = positions[0] if positions else None
         else:
             for mm in mouseMovedDict[AXIS_MATCHATOMTYPE].keys():
                 if mm[0] == self.axisCodes[1][0]:
-                    position = mouseMovedDict[AXIS_MATCHATOMTYPE][mm]
+                    positions = mouseMovedDict[AXIS_MATCHATOMTYPE][mm]
+                    position = positions[0] if positions else None
 
-        phasingFrame.pivotEntry.set(position)
-        self._updatePivot()
+        if position is not None:
+            phasingFrame.pivotEntry.set(position)
+            self._updatePivot()
 
     def removePhasingTraces(self):
         self._CcpnGLWidget.clearStaticTraces()
@@ -1799,37 +1771,12 @@ class GuiStrip(Frame):
             except:
                 defaultColour = '#FF0000'
 
-            # defaultColour = self._preferences.defaultMarksColour
+            # find all the positions valid for this strip
             mouseDict = self.current.mouseMovedDict[AXIS_FULLATOMNAME]
-            positions = [mouseDict[ax] for ax in self.axisCodes if ax in mouseDict]
-            axisCodes = [ax for ax in self.axisCodes if ax in mouseDict]
+            positions = [(pos, ax) for ax in self.axisCodes for pos in mouseDict.get(ax, []) if pos is not None]
 
-            if axisIndex is not None:
-                if (0 <= axisIndex < len(positions)):
-                    positions = (positions[axisIndex],)
-                    axisCodes = (axisCodes[axisIndex],)
-                    self.mainWindow.newMark(defaultColour, positions, axisCodes)
-            else:
-                self.mainWindow.newMark(defaultColour, positions, axisCodes)
-
-            # add the marks for the double cursor - needs to be enabled in preferences
-            if self.doubleCrosshairVisible and self._CcpnGLWidget._matchingIsotopeCodes:
-                mouseDict = self.current.mouseMovedDict[DOUBLEAXIS_FULLATOMNAME]
-                positions = [mouseDict[ax] for ax in self.axisCodes[:2] if ax in mouseDict]
-                axisCodes = [ax for ax in self.axisCodes[:2] if ax in mouseDict]
-
-                if axisIndex is not None:
-
-                    if (0 <= axisIndex < 2):
-                        # get the reflected axisCode and position
-                        doubleIndex = 1 - axisIndex
-                        positions = (positions[doubleIndex],)
-                        axisCodes = (axisCodes[doubleIndex],)
-                        self.mainWindow.newMark(defaultColour, positions, axisCodes)
-                else:
-                    self.mainWindow.newMark(defaultColour, positions, axisCodes)
-
-            # need new mark method of the form newMark(colour=colour, axisCode=position)
+            for pos, ax in positions:
+                self.mainWindow.newMark(defaultColour, [pos], [ax])
 
         except Exception as es:
             getLogger().warning('Error setting mark at current cursor position')

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-04 14:27:40 +0000 (Fri, February 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-05-16 18:10:23 +0100 (Mon, May 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -164,6 +164,9 @@ class Current:
 
         # GWV 20181122: deactivated
         # self.registerNotify(self._updateSelectedPeaks, 'peaks')  # Optimization; see below
+
+        self.cursorPosition = ()
+        self.mouseMovedDict = {}
 
     @property
     def pid(self):

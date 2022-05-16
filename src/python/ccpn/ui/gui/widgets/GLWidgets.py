@@ -4,19 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:19 +0000 (Thu, December 23, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-05-16 18:10:24 +0100 (Mon, May 16, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,16 +28,17 @@ __date__ = "$Date: 2018-12-20 15:44:35 +0000 (Thu, December 20, 2018) $"
 
 import numpy as np
 from itertools import zip_longest
+
+from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
+from ccpn.core.lib.peakUtils import movePeak
+from ccpn.ui.gui.lib.OpenGL import CcpnOpenGLDefs as GLDefs, GL
+from ccpn.ui.gui.lib.mouseEvents import getCurrentMouseMode, PICK
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGL import CcpnGLWidget, GLVertexArray, GLRENDERMODE_DRAW, \
     GLRENDERMODE_RESCALE
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import YAXISUNITS1D, SPECTRUM_VALUEPERPOINT
 import ccpn.util.Phasing as Phasing
-from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
-from ccpn.ui.gui.lib.OpenGL import CcpnOpenGLDefs as GLDefs
+from ccpn.util.Constants import MOUSEDICTSTRIP, AXIS_FULLATOMNAME, AXIS_MATCHATOMTYPE
 from ccpn.util.Logging import getLogger
-from ccpn.core.lib.peakUtils import movePeak
-
-from ccpn.ui.gui.lib.OpenGL import GL
 
 
 class GuiNdWidget(CcpnGLWidget):
@@ -848,6 +849,158 @@ class GuiNdWidget(CcpnGLWidget):
 
         self._buildAxisCodesWithWildCards()
 
+    def buildCursors(self):
+        """Build and draw the cursors/doubleCursors
+        """
+        if not self._disableCursorUpdate and self._crosshairVisible:
+
+            # get the next cursor drawList
+            self._advanceGLCursor()
+            drawList = self._glCursorQueue[self._glCursorHead]
+            vertices = []
+            indices = []
+            index = 0
+
+            # map the cursor to the ratio coordinates - double cursor is flipped about the line x=y
+
+            cursorCoordinate = self.getCurrentCursorCoordinate()
+
+            newCoords = self._scaleAxisToRatio(cursorCoordinate[0:2])
+            # doubleCoords = self._scaleAxisToRatio(self.getCurrentDoubleCursorCoordinates()[0:2])
+
+            if getCurrentMouseMode() == PICK and self.underMouse():
+
+                x = self.deltaX * 8
+                y = self.deltaY * 8
+
+                vertices = [newCoords[0] - x, newCoords[1] - y,
+                            newCoords[0] + x, newCoords[1] - y,
+                            newCoords[0] + x, newCoords[1] - y,
+                            newCoords[0] + x, newCoords[1] + y,
+                            newCoords[0] + x, newCoords[1] + y,
+                            newCoords[0] - x, newCoords[1] + y,
+                            newCoords[0] - x, newCoords[1] + y,
+                            newCoords[0] - x, newCoords[1] - y
+                            ]
+                indices = [0, 1, 2, 3, 4, 5, 6, 7]
+                col = self.mousePickColour
+                index = 8
+
+            else:
+                col = self.foreground
+
+            phasingFrame = self.spectrumDisplay.phasingFrame
+            if not phasingFrame.isVisible():
+                if (coords := self.current.mouseMovedDict):
+
+                    # read values from isotopeCode or axisCode
+                    if self._preferences.matchAxisCode == 0:  # default - match atom type
+                        atomTypes = self.spectrumDisplay.isotopeCodes
+                        xPosList = coords[AXIS_MATCHATOMTYPE].get(atomTypes[0], [])
+                        yPosList = coords[AXIS_MATCHATOMTYPE].get(atomTypes[1], [])
+                    else:
+                        atCodes = self._orderedAxes
+                        xPosList = coords[AXIS_FULLATOMNAME].get(atCodes[0].code, [])
+                        yPosList = coords[AXIS_FULLATOMNAME].get(atCodes[1].code, [])
+
+                    foundX = []
+                    foundY = []
+                    if not self._updateVTrace and newCoords[0] is not None:
+                        for pos in xPosList:
+                            x, _y = self._scaleAxisToRatio([pos, 0])
+                            if all(abs(x - val) > self.deltaX for val in foundX):
+
+                                # store the found value so that overlaying lines are not drawn - OpenGL uses an XOR draw mode
+                                foundX.append(x)
+                                vertices.extend([x, 1.0, x, 0.0])
+                                indices.extend([index, index + 1])
+                                index += 2
+
+                            if self._matchingIsotopeCodes:
+                                # draw the cursor reflected about the x=y line (need to check gammaRatio)
+                                _x, y = self._scaleAxisToRatio([0, pos])
+                                if all(abs(y - val) > self.deltaY for val in foundY):
+                                    foundY.append(y)
+                                    vertices.extend([0.0, y, 1.0, y])
+                                    indices.extend([index, index + 1])
+                                    index += 2
+
+                    if not self._updateHTrace and newCoords[1] is not None:
+                        for pos in yPosList:
+                            _x, y = self._scaleAxisToRatio([0, pos])
+                            if all(abs(y - val) > self.deltaY for val in foundY):
+                                foundY.append(y)
+                                vertices.extend([0.0, y, 1.0, y])
+                                indices.extend([index, index + 1])
+                                index += 2
+
+                            if self._matchingIsotopeCodes:
+                                # draw the cursor reflected about the x=y line (need to check gammaRatio)
+                                x, _y = self._scaleAxisToRatio([pos, 0])
+                                if all(abs(x - val) > self.deltaX for val in foundX):
+                                    foundX.append(x)
+                                    vertices.extend([x, 1.0, x, 0.0])
+                                    indices.extend([index, index + 1])
+                                    index += 2
+
+            drawList.vertices = np.array(vertices, dtype=np.float32)
+            drawList.indices = np.array(indices, dtype=np.int32)
+            drawList.numVertices = len(vertices) // 2
+            drawList.colors = np.array(col * drawList.numVertices, dtype=np.float32)
+
+            # build and draw the VBO
+            drawList.defineIndexVBO()
+
+    def _updateMouseDict(self, cursorCoordinate):
+        try:
+            mouseMovedDict = self.current.mouseMovedDict
+        except:
+            # initialise a new mouse moved dict
+            mouseMovedDict = {MOUSEDICTSTRIP          : self.strip,
+                              AXIS_MATCHATOMTYPE      : {},
+                              AXIS_FULLATOMNAME       : {},
+                              }
+
+        xPos = yPos = 0
+        atTypes = mouseMovedDict[AXIS_MATCHATOMTYPE] = {}
+        atCodes = mouseMovedDict[AXIS_FULLATOMNAME] = {}
+
+        # transfer the mouse position from the coords to the mouseMovedDict for the other displays
+        for n, (atomType, axis) in enumerate(zip(self.spectrumDisplay.isotopeCodes, self._orderedAxes)):
+            ats = atTypes.setdefault(atomType, [])
+            atcs = atCodes.setdefault(axis.code, [])
+            if n == 0:
+                xPos = pos = cursorCoordinate[0]
+            elif n == 1:
+                yPos = pos = cursorCoordinate[1]
+            else:
+                # for other Nd dimensions
+                pos = axis.position
+
+            ats.append(pos)
+            atcs.append(pos)
+
+        if self._matchingIsotopeCodes:
+            # add a copy to show the reflected ppm values
+            for n, (atomType, axis) in enumerate(zip(self.spectrumDisplay.isotopeCodes, self._orderedAxes)):
+                ats = atTypes.setdefault(atomType, [])
+                atcs = atCodes.setdefault(axis.code, [])
+                if n == 0:
+                    xPos = pos = cursorCoordinate[1]
+                elif n == 1:
+                    yPos = pos = cursorCoordinate[0]
+                else:
+                    # can ignore the rest
+                    break
+
+                ats.append(pos)
+                atcs.append(pos)
+
+        self.current.cursorPosition = (xPos, yPos)
+        self.current.mouseMovedDict = mouseMovedDict
+
+        return mouseMovedDict
+
     def initialiseTraces(self):
         # set up the arrays and dimension for showing the horizontal/vertical traces
         for spectrumView in self._ordering:  # strip.spectrumViews:
@@ -1587,6 +1740,127 @@ class Gui1dWidget(CcpnGLWidget):
         self._minY = min(self._minY, fyMin)
 
         self._buildAxisCodesWithWildCards()
+
+    def buildCursors(self):
+        """Build and draw the cursors/doubleCursors
+        """
+        if not self._disableCursorUpdate and self._crosshairVisible:
+
+            # get the next cursor drawList
+            self._advanceGLCursor()
+            drawList = self._glCursorQueue[self._glCursorHead]
+            vertices = []
+            indices = []
+            index = 0
+
+            # map the cursor to the ratio coordinates - double cursor is flipped about the line x=y
+
+            cursorCoordinate = self.getCurrentCursorCoordinate()
+
+            newCoords = self._scaleAxisToRatio(cursorCoordinate[0:2])
+            # doubleCoords = self._scaleAxisToRatio(self.getCurrentDoubleCursorCoordinates()[0:2])
+
+            if getCurrentMouseMode() == PICK and self.underMouse():
+
+                x = self.deltaX * 8
+                y = self.deltaY * 8
+
+                vertices = [newCoords[0] - x, newCoords[1] - y,
+                            newCoords[0] + x, newCoords[1] - y,
+                            newCoords[0] + x, newCoords[1] - y,
+                            newCoords[0] + x, newCoords[1] + y,
+                            newCoords[0] + x, newCoords[1] + y,
+                            newCoords[0] - x, newCoords[1] + y,
+                            newCoords[0] - x, newCoords[1] + y,
+                            newCoords[0] - x, newCoords[1] - y
+                            ]
+                indices = [0, 1, 2, 3, 4, 5, 6, 7]
+                col = self.mousePickColour
+                index = 8
+
+            else:
+                col = self.foreground
+
+            phasingFrame = self.spectrumDisplay.phasingFrame
+            if not phasingFrame.isVisible():
+                if (coords := self.current.mouseMovedDict):
+
+                    # read values from isotopeCode or axisCode
+                    if self._preferences.matchAxisCode == 0:  # default - match atom type
+
+                        # add extra 'isotopeCode' so that 1D appears correctly
+                        atomTypes = self.spectrumDisplay.isotopeCodes + ('intensity',)
+
+                        xPosList = coords[AXIS_MATCHATOMTYPE].get(atomTypes[0], [])
+                        yPosList = coords[AXIS_MATCHATOMTYPE].get(atomTypes[1], [])
+                    else:
+                        atCodes = self._orderedAxes
+                        xPosList = coords[AXIS_FULLATOMNAME].get(atCodes[0].code, [])
+                        yPosList = coords[AXIS_FULLATOMNAME].get(atCodes[1].code, [])
+
+                    foundX = []
+                    foundY = []
+                    if not self._updateVTrace and newCoords[0] is not None:
+                        for pos in xPosList:
+                            x, _y = self._scaleAxisToRatio([pos, 0])
+                            if all(abs(x - val) > self.deltaX for val in foundX):
+
+                                # store the found value so that overlaying lines are not drawn - OpenGL uses an XOR draw mode
+                                foundX.append(x)
+                                vertices.extend([x, 1.0, x, 0.0])
+                                indices.extend([index, index + 1])
+                                index += 2
+
+                    if not self._updateHTrace and newCoords[1] is not None:
+                        for pos in yPosList:
+                            _x, y = self._scaleAxisToRatio([0, pos])
+                            if all(abs(y - val) > self.deltaY for val in foundY):
+                                foundY.append(y)
+                                vertices.extend([0.0, y, 1.0, y])
+                                indices.extend([index, index + 1])
+                                index += 2
+
+            drawList.vertices = np.array(vertices, dtype=np.float32)
+            drawList.indices = np.array(indices, dtype=np.int32)
+            drawList.numVertices = len(vertices) // 2
+            drawList.colors = np.array(col * drawList.numVertices, dtype=np.float32)
+
+            # build and draw the VBO
+            drawList.defineIndexVBO()
+
+    def _updateMouseDict(self, cursorCoordinate):
+        try:
+            mouseMovedDict = self.current.mouseMovedDict
+        except:
+            # initialise a new mouse moved dict
+            mouseMovedDict = {MOUSEDICTSTRIP          : self.strip,
+                              AXIS_MATCHATOMTYPE      : {},
+                              AXIS_FULLATOMNAME       : {},
+                              }
+
+        xPos = yPos = 0
+        atTypes = mouseMovedDict[AXIS_MATCHATOMTYPE] = {}
+        atCodes = mouseMovedDict[AXIS_FULLATOMNAME] = {}
+        isoCodes = self.spectrumDisplay.isotopeCodes + ('intensity',)
+
+        # transfer the mouse position from the coords to the mouseMovedDict for the other displays
+        for n, (atomType, axis) in enumerate(zip(isoCodes, self._orderedAxes)):
+            ats = atTypes.setdefault(atomType, [])
+            atcs = atCodes.setdefault(axis.code, [])
+            if n == 0:
+                xPos = pos = cursorCoordinate[0]
+            elif n == 1:
+                yPos = pos = cursorCoordinate[1]
+            else:
+                break
+
+            ats.append(pos)
+            atcs.append(pos)
+
+        self.current.cursorPosition = (xPos, yPos)
+        self.current.mouseMovedDict = mouseMovedDict
+
+        return mouseMovedDict
 
     def initialiseTraces(self):
         # set up the arrays and dimension for showing the horizontal/vertical traces

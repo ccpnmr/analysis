@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-06 18:13:03 +0100 (Fri, May 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-16 10:48:21 +0100 (Mon, May 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -42,7 +42,7 @@ from ccpn.core.lib.ContextManagers import newObject, newV3Object, renameObject, 
     undoBlockWithoutSideBar, undoStackBlocking, undoBlock, ccpNmrV3CoreSetter
 from ccpn.util.decorators import logCommand
 from ccpn.util.OrderedSet import OrderedSet
-from ccpn.util.LabelledEnum import LabelledEnum
+from ccpn.util.DataEnum import DataEnum
 
 
 CS_UNIQUEID = 'uniqueId'
@@ -86,7 +86,7 @@ CS_CLASSNAME = 'ChemicalShift'
 CS_PLURALNAME = 'chemicalShifts'
 
 
-class ChemicalShiftState(LabelledEnum):
+class ChemicalShiftState(DataEnum):
     STATIC = 0, CS_STATIC
     DYNAMIC = 1, CS_DYNAMIC
     ORPHAN = 2, CS_ORPHAN

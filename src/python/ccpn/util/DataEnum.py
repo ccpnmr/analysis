@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-16 10:42:34 +0100 (Mon, May 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-16 10:48:21 +0100 (Mon, May 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,7 +30,7 @@ from enum import Enum
 from types import DynamicClassAttribute
 
 
-class LabelledEnum(Enum):
+class DataEnum(Enum):
     """
     Class to handle enumerated types with associated descriptions and dataValues
 
@@ -119,7 +119,7 @@ def main():
     """
 
 
-    class Test(LabelledEnum):
+    class Test(DataEnum):
         FLOAT = 0, 'Float'
         INTEGER = 1, 'Integer'
         STRING = 2, 'String'

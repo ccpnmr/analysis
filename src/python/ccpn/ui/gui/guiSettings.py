@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-18 10:15:25 +0000 (Fri, February 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-16 10:48:21 +0100 (Mon, May 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -37,14 +37,14 @@ from ccpn.util.Logging import getLogger
 from ccpn.util.Colour import allColours, hexToRgbRatio, autoCorrectHexColour, \
     spectrumHexDarkColours, spectrumHexLightColours, spectrumHexMediumColours, \
     spectrumHexDefaultLightColours, spectrumHexDefaultDarkColours, rgbRatioToHex
-from ccpn.util.LabelledEnum import LabelledEnum
+from ccpn.util.DataEnum import DataEnum
 from ccpn.framework.Application import getApplication
 
 
 FONTLIST = ['Modules', 'IPython Console', 'Sidebar', 'Tables', 'Sequence Graph']
 
 
-class FontSizes(LabelledEnum):
+class FontSizes(DataEnum):
     MINIMUM = 0.25, 'minimum, quarter size'
     TINY = 0.5, 'smallest font, half size'
     SMALL = 0.75, 'smaller font'
@@ -457,7 +457,7 @@ def getColours():
     return colourDict
 
 
-class ZPlaneNavigationModes(LabelledEnum):
+class ZPlaneNavigationModes(DataEnum):
     PERSPECTRUMDISPLAY = 0, 'Per spectrum display', 'spectrumdisplay'
     PERSTRIP = 1, 'Per strip', 'strip'
     INSTRIP = 2, 'In strip', 'instrip'

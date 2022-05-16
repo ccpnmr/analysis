@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-12 12:29:56 +0100 (Thu, May 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-16 10:42:34 +0100 (Mon, May 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -400,7 +400,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
             if specDisplay.strips and updateSpectrumDisplays:
 
                 if not specDisplay.is1D:
-                    specDisplay.zPlaneNavigationMode = ZPlaneNavigationModes(self.application.preferences.general.zPlaneNavigationMode).label
+                    specDisplay.zPlaneNavigationMode = ZPlaneNavigationModes(self.application.preferences.general.zPlaneNavigationMode).dataValue
                     specDisplay.attachZPlaneWidgets()
                 specDisplay._stripDirectionChangedInSettings(self.application.preferences.general.stripArrangement)
                 # specDisplay.setVisibleAxes()

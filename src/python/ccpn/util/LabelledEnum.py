@@ -4,10 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-11-25 17:59:14 +0000 (Thu, November 25, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-05-16 10:42:34 +0100 (Mon, May 16, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -27,38 +27,40 @@ __date__ = "$Date: 2020-04-03 10:29:12 +0000 (Fri, April 03, 2020) $"
 #=========================================================================================
 
 from enum import Enum
+from types import DynamicClassAttribute
 
 
 class LabelledEnum(Enum):
     """
-    Class to handle enumerated types with associated labels
+    Class to handle enumerated types with associated descriptions and dataValues
 
     e.g.
-        FLOAT = 0, 'Float'
-        INTEGER = 1, 'Integer'
-        STRING = 2, 'String'
+        # name, value, description and optional dataValue
+        FLOAT = 0, 'Float', 'dataValue 1'
+        INTEGER = 1, 'Integer', 'dataValue 1'
+        STRING = 2, 'String', 'dataValue 1'
     """
 
-    def __new__(cls, value, description, label=None):
+    def __new__(cls, value, description=None, dataValue=None):
         obj = object.__new__(cls)
         obj._value_ = value
         obj._description_ = description
         # add optional extra information
-        obj._label_ = label
+        obj._dataValue_ = dataValue
         return obj
 
     def __str__(self):
         return str(self.value)
 
-    # this makes sure that the description is read-only
-    @property
+    # ensure the dataValue is read-only
+    @DynamicClassAttribute
+    def dataValue(self):
+        return self._dataValue_
+
+    # ensure the description is read-only
+    @DynamicClassAttribute
     def description(self):
         return self._description_
-
-    # this makes sure that the label is read-only
-    @property
-    def label(self):
-        return self._label_
 
     def prev(self):
         cls = self.__class__
@@ -74,17 +76,42 @@ class LabelledEnum(Enum):
 
     def search(self, value):
         cls = self.__class__
-        members = [val for val in list(cls) if val.label == value]
+        members = [val for val in list(cls) if val._dataValue_ == value]
         if members and len(members) == 1:
             return members[0]
 
     @classmethod
-    def values(cls):
-        return tuple(v.value for v in cls)
+    def dataValues(cls):
+        """Return a tuple of all dataValues
+        """
+        return tuple(v._dataValue_ for v in cls)
 
     @classmethod
     def descriptions(cls):
-        return tuple(v.description for v in cls)
+        """Return a tuple of all descriptions
+        """
+        return tuple(v._description_ for v in cls)
+
+    @classmethod
+    def names(cls):
+        """Return a tuple of all names
+        """
+        return tuple(v._name_ for v in cls)
+
+    @classmethod
+    def values(cls):
+        """Return a tuple of all values
+        """
+        return tuple(v._value_ for v in cls)
+
+    @classmethod
+    def get(cls, value):
+        """Return the enumerated type from the name
+        """
+        try:
+            return cls.__getitem__(value)
+        except KeyError:
+            raise ValueError(f'value must be one of {repr(cls.names())}')
 
 
 def main():

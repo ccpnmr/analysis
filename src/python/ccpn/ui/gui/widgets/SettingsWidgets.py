@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-03 13:48:42 +0000 (Thu, March 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-16 10:42:34 +0100 (Mon, May 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -202,7 +202,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         row += 1
         self.zPlaneNavigationModeLabel = Label(parent, text="Plane Navigation Mode", grid=(row, 0))
         self.zPlaneNavigationModeData = RadioButtons(parent, texts=[val.description for val in ZPlaneNavigationModes],
-                                                     objectNames=[f'zPlaneSDS_{val.label}' for val in ZPlaneNavigationModes],
+                                                     objectNames=[f'zPlaneSDS_{val.dataValue}' for val in ZPlaneNavigationModes],
                                                      objectName='zPlaneSDS',
                                                      callback=self._zPlaneNavigationModeChanged,
                                                      direction='h',
@@ -509,7 +509,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
         """Update the state of the zPlaneNavigation radioButtons
         """
         self.blockSignals(True)
-        labels = [val.label for val in ZPlaneNavigationModes]
+        labels = [val.dataValue for val in ZPlaneNavigationModes]
         if value in labels:
             self.zPlaneNavigationModeData.setIndex(labels.index(value))
         self.blockSignals(False)

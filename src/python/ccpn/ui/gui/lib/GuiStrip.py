@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-04-05 12:14:15 +0100 (Tue, April 05, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-05-16 10:42:34 +0100 (Mon, May 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1078,7 +1078,7 @@ class GuiStrip(Frame):
         if spec.is1D or len(spec.axisCodes) <= 2:
             return
 
-        if spec.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.label:
+        if spec.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.dataValue:
             # only need to change if showing the spectrumDisplay planeToolBar
             spec.zPlaneFrame.attachZPlaneWidgets(self)
 
@@ -1089,7 +1089,7 @@ class GuiStrip(Frame):
         if spec.is1D or len(spec.axisCodes) <= 2:
             return
 
-        if spec.zPlaneFrame and spec.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.label:
+        if spec.zPlaneFrame and spec.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.dataValue:
             spec.zPlaneFrame.removeZPlaneWidgets()
 
     def _newPhasingTrace(self):

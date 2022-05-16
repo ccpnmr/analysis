@@ -34,7 +34,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-09 11:14:31 +0100 (Mon, May 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-16 10:42:34 +0100 (Mon, May 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -222,11 +222,11 @@ class GuiStripNd(GuiStrip):
         self.zPlaneFrame = ZPlaneToolbar(self._stripToolBarWidget, self.mainWindow, self, grid=(0, 0),
                                          showHeader=False, showLabels=False, margins=(2, 2, 2, 2))
 
-        if self.spectrumDisplay.zPlaneNavigationMode == ZPlaneNavigationModes.PERSTRIP.label:
+        if self.spectrumDisplay.zPlaneNavigationMode == ZPlaneNavigationModes.PERSTRIP.dataValue:
             self.zPlaneFrame.attachZPlaneWidgets(self)
-        self.zPlaneFrame.setVisible(self.spectrumDisplay.zPlaneNavigationMode == ZPlaneNavigationModes.PERSTRIP.label)
+        self.zPlaneFrame.setVisible(self.spectrumDisplay.zPlaneNavigationMode == ZPlaneNavigationModes.PERSTRIP.dataValue)
 
-        if self.spectrumDisplay.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.label:
+        if self.spectrumDisplay.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.dataValue:
             self.spectrumDisplay.zPlaneFrame.attachZPlaneWidgets(self)
 
         self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred)

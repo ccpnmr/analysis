@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-04-04 14:35:52 +0100 (Mon, April 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-05-16 10:42:33 +0100 (Mon, May 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -805,7 +805,7 @@ class GuiSpectrumDisplay(CcpnModule):
         if value not in ZPlaneNavigationModes.values():
             raise ValueError('zPlaneNavigation not in ', ZPlaneNavigationModes)
 
-        newDirection = ZPlaneNavigationModes(value).label
+        newDirection = ZPlaneNavigationModes(value).dataValue
 
         if newDirection != self.zPlaneNavigationMode:
             # set the new stripDirection, and redraw
@@ -907,7 +907,7 @@ class GuiSpectrumDisplay(CcpnModule):
         if arrangement is not None:
             return arrangement
 
-        return ZPlaneNavigationModes(0).label
+        return ZPlaneNavigationModes(0).dataValue
 
     @zPlaneNavigationMode.setter
     @logCommand(get='self', isProperty=True)
@@ -915,7 +915,7 @@ class GuiSpectrumDisplay(CcpnModule):
     def zPlaneNavigationMode(self, value):
         """Set the new position of zPlane navigation buttons
         """
-        labels = [val.label for val in ZPlaneNavigationModes]
+        labels = [val.dataValue for val in ZPlaneNavigationModes]
         if not isinstance(value, str):
             raise TypeError('zPlaneNavigationMode must be a string')
         elif value not in labels:
@@ -2609,7 +2609,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
             with self._hideWidget(self.mainWidget):
 
-                if self.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.label:
+                if self.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.dataValue:
 
                     for strip in self.strips:
                         if strip and not (strip.isDeleted or strip._flaggedForDelete):
@@ -2625,7 +2625,7 @@ class GuiSpectrumDisplay(CcpnModule):
                         self.zPlaneFrame.attachZPlaneWidgets(_currentStrip)
                     self.zPlaneFrame.setVisible(True)
 
-                if self.zPlaneNavigationMode == ZPlaneNavigationModes.PERSTRIP.label:
+                if self.zPlaneNavigationMode == ZPlaneNavigationModes.PERSTRIP.dataValue:
                     self.zPlaneFrame.setVisible(False)
                     self.zPlaneFrame._strip = None
                     for strip in self.strips:
@@ -2638,7 +2638,7 @@ class GuiSpectrumDisplay(CcpnModule):
                             strip.zPlaneFrame.attachZPlaneWidgets(strip)
                             strip.zPlaneFrame.setVisible(True)
 
-                if self.zPlaneNavigationMode == ZPlaneNavigationModes.INSTRIP.label:
+                if self.zPlaneNavigationMode == ZPlaneNavigationModes.INSTRIP.dataValue:
                     for strip in self.strips:
                         if strip and not (strip.isDeleted or strip._flaggedForDelete):
                             strip.zPlaneFrame.setVisible(False)

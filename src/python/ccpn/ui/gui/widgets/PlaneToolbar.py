@@ -18,7 +18,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-16 10:07:26 +0000 (Wed, February 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-16 10:42:34 +0100 (Mon, May 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -610,7 +610,7 @@ class PlaneAxisWidget(_OpenGLFrameABC):
 
     def _selectAxisCallback(self, widgets):
         # if the first widget is clicked then change the selected axis
-        if self.strip.spectrumDisplay.zPlaneNavigationMode == ZPlaneNavigationModes.INSTRIP.label:
+        if self.strip.spectrumDisplay.zPlaneNavigationMode == ZPlaneNavigationModes.INSTRIP.dataValue:
             if widgets[3].isVisible():
                 widgets[3].setVisible(False)
                 widgets[2].setVisible(True)
@@ -625,7 +625,7 @@ class PlaneAxisWidget(_OpenGLFrameABC):
 
     def _selectPositionCallback(self, widgets):
         # if the other widgets are clicked then toggle the planeToolbar buttons
-        if self.strip.spectrumDisplay.zPlaneNavigationMode == ZPlaneNavigationModes.INSTRIP.label:
+        if self.strip.spectrumDisplay.zPlaneNavigationMode == ZPlaneNavigationModes.INSTRIP.dataValue:
             if widgets[3].isVisible():
                 widgets[3].setVisible(False)
                 widgets[2].setVisible(True)
@@ -710,7 +710,7 @@ class PlaneAxisWidget(_OpenGLFrameABC):
     def hideWidgets(self):
         """Hide the planeToolbar if opened
         """
-        if self.strip.spectrumDisplay.zPlaneNavigationMode == ZPlaneNavigationModes.INSTRIP.label:
+        if self.strip.spectrumDisplay.zPlaneNavigationMode == ZPlaneNavigationModes.INSTRIP.dataValue:
             axisButtons = (self._axisLabel, self._axisPpmPosition, self._axisPlaneCount, self._axisSelector)
 
             # if the other widgets are clicked then toggle the planeToolbar buttons

@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-05 14:41:57 +0100 (Tue, April 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-16 10:43:24 +0100 (Mon, May 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1050,6 +1050,30 @@ class Spectrum(AbstractWrapperObject):
     @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(str,))
     def isotopeCodes(self, value: Sequence):
         self._setDimensionalAttributes('isotopeCode', value)
+
+    @property
+    @_includeInDimensionalCopy
+    def mqIsotopeCodes(self) -> List[str]:
+        """multiple quantum isotopeCodes or [None, ...]; per dimension"""
+        return self._getDimensionalAttributes('mqIsotopeCodes')
+
+    @mqIsotopeCodes.setter
+    @logCommand(get='self', isProperty=True)
+    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(str,))
+    def mqIsotopeCodes(self, value: Sequence):
+        self._setDimensionalAttributes('mqIsotopeCodes', value)
+
+    @property
+    @_includeInDimensionalCopy
+    def coherenceOrders(self) -> List[str]:
+        """multiple-quantum coherence orders or [None, ...]; per dimension"""
+        return self._getDimensionalAttributes('coherenceOrder')
+
+    @coherenceOrders.setter
+    @logCommand(get='self', isProperty=True)
+    @checkSpectrumPropertyValue(iterable=True, allowNone=True, types=(str,))
+    def coherenceOrders(self, value: Sequence):
+        self._setDimensionalAttributes('coherenceOrder', value)
 
     @property
     @_includeInDimensionalCopy

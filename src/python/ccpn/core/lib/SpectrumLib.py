@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-04-07 16:15:33 +0200 (Thu, April 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-05-16 10:43:24 +0100 (Mon, May 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -40,6 +40,7 @@ from ccpn.core.lib._DistanceRestraintsLib import _getBoundResonances, longRangeT
 from ccpn.util.Common import percentage, isIterable
 from ccpn.util.Logging import getLogger
 from ccpn.util.decorators import singleton
+from ccpn.util.LabelledEnum import LabelledEnum
 
 
 #=========================================================================================
@@ -101,6 +102,14 @@ NoiseEstimateTuple = collections.namedtuple('NoiseEstimateTuple', 'mean std min 
 FOLDING_MODE_CIRCULAR = 'circular'
 FOLDING_MODE_MIRROR = 'mirror'
 FOLDING_MODES = (FOLDING_MODE_CIRCULAR, FOLDING_MODE_MIRROR)
+
+class CoherenceOrder(LabelledEnum):
+    # name, value, description, dataValue = number of isotope-codes per order
+    ZQ = 0, 'Zero Quantum', 2
+    SQ = 1, 'Single Quantum', 1
+    DQ = 2, 'Double Quantum', 2
+    TQ = 3, 'Triple Quantum', 3
+
 
 WINDOW_FUNCTION_EM = 'EM'
 WINDOW_FUNCTION_GM = 'GM'

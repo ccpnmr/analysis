@@ -296,6 +296,27 @@ class SpectrumDimensionAttributes(object):
     def _isotopeCodes(self, value: Sequence):
         self._expDimRef.isotopeCodes = value
 
+    mqIsotopeCodes = _isotopeCodes
+
+    @property
+    def coherenceOrder(self) -> Optional[str]:
+        """Coherence order matching reference (values: 'ZQ', 'SQ', 'DQ', 'TQ', None)
+        """
+        if not self._hasInternalParameter('coherenceOrder'):
+            specLib.CoherenceOrder.get('SQ')
+            result = specLib.CoherenceOrder.SQ.name  # default to single-quantum?
+        else:
+            idx = self._getInternalParameter('coherenceOrder')
+            result = specLib.CoherenceOrder(idx).name if idx is not None and idx in specLib.CoherenceOrder.values() else None
+        return result
+
+    @coherenceOrder.setter
+    def coherenceOrder(self, value):
+        cohOrders = specLib.CoherenceOrder.names()
+        if value not in list(cohOrders) + [None]:
+            raise ValueError('coherenceOrder should be one of %r or None; got %r' % (cohOrders, value))
+        self._setInternalParameter('coherenceOrder', value if value is None else cohOrders.index(value))
+
     @property
     def foldingMode(self) -> Optional[str]:
         """folding mode matching reference (values: 'circular', 'mirror', None)"""

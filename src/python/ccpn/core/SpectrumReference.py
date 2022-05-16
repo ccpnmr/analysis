@@ -3,19 +3,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2021-12-23 11:27:16 +0000 (Thu, December 23, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-05-16 10:40:30 +0100 (Mon, May 16, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -50,12 +50,12 @@ class SpectrumReference(AbstractWrapperObject, SpectrumDimensionAttributes):
 
     #: Short class name, for PID.
     shortClassName = 'SR'
-    # Attribute it necessary as subclasses must use superclass className
+    # Attribute is necessary as subclasses must use superclass className
     className = 'SpectrumReference'
 
     _parentClass = Spectrum
 
-    #: Name of plural link to instances of class
+    #: Name of plural-link to instances of class
     _pluralLinkName = 'spectrumReferences'
 
     #: List of child classes.
@@ -69,9 +69,9 @@ class SpectrumReference(AbstractWrapperObject, SpectrumDimensionAttributes):
     def __init__(self, project, wrappedData):
         super().__init__(project, wrappedData)
 
-    #-----------------------------------------------------------------------------------------
+    #=========================================================================================
     # CCPN properties
-    #-----------------------------------------------------------------------------------------
+    #=========================================================================================
 
     @property
     def _apiSpectrumReference(self) -> Nmr.DataDimRef:
@@ -123,13 +123,14 @@ class SpectrumReference(AbstractWrapperObject, SpectrumDimensionAttributes):
 
     spectrum = _parent
 
-    #-----------------------------------------------------------------------------------------
+    #=========================================================================================
     # Object properties are inherited from SpectrumDimensionAttributes
-    #-----------------------------------------------------------------------------------------
+    #=========================================================================================
 
     #=========================================================================================
     # CCPN functions
     #=========================================================================================
+
     def pointToValue(self, point: float) -> float:
         """:return ppm-value corresponding to point (float)"""
         return self._dataDimRef.pointToValue(point)

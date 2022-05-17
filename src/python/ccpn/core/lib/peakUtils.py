@@ -1017,7 +1017,7 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
     return position, float(height)
 
 
-def _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1, doNeg=False, figOfMeritLimit=1):
+def _snap1DPeakToClosestExtremum(peak, maximumLimit=0.1, doNeg=False, figOfMeritLimit=0):
     """
     It snaps a peak to its closest extremum, that can be considered as a peak.
     it uses adjacent peak positions as boundaries. However if no adjacent peaks then uses the maximumlimits.

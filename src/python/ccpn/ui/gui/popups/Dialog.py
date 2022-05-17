@@ -4,10 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-01 18:52:47 +0100 (Fri, October 01, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-05-17 17:26:06 +0100 (Tue, May 17, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -36,8 +36,6 @@ from ccpn.ui.gui.widgets.DialogButtonBox import DialogButtonBox
 from ccpn.ui.gui.guiSettings import getColours, TOOLTIP_BACKGROUND
 from ccpn.core.lib.ContextManagers import undoStackBlocking
 from ccpn.ui.gui.lib.ChangeStateHandler import ChangeDict
-from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.ui.gui.widgets.Font import setWidgetFont
 
 
 def _updateGl(self, spectrumList):
@@ -205,7 +203,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
             raise TypeError('bad minimumSize {}'.format(self._minimumSize))
 
         _minimumSize = QtCore.QSize(minimumSize.width() if minimumSize else self.sizeHint().width(),
-                             minimumSize.height() if minimumSize else self.sizeHint().height())
+                                    minimumSize.height() if minimumSize else self.sizeHint().height())
 
         # set the fixed sized policies as required
         if self.FIXEDWIDTH:
@@ -213,7 +211,7 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         elif minimumSize:
             # set minimumSize from settings
             self.setMinimumWidth(_minimumSize.width())
-        
+
         if self.FIXEDHEIGHT:
             self.setFixedHeight(max(_size.height(), _minimumSize.height()))
         elif minimumSize:
@@ -306,9 +304,9 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
                                enabledStates=enabled, visibleStates=visible)
 
     def setUserButton2(self, callback=None, text=None,
-                      tipText='User action 2',
-                      icon='icons/orange-apply',
-                      enabled=True, visible=True):
+                       tipText='User action 2',
+                       icon='icons/orange-apply',
+                       enabled=True, visible=True):
         """Add 2nd User button to the dialog box
         """
         return self._addButton(buttons=self.USERBUTTON2, callbacks=callback,
@@ -367,6 +365,12 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
 
         self._populate()
 
+        # reset the buttons
+        self._setButtonState()
+
+    def _setButtonState(self):
+        """Set the state of the ok/apply/cancel buttons
+        """
         if not hasattr(self, GETCHANGESTATE):
             raise RuntimeError('widget {} must have changes defined'.format(self))
         _getChanges = getattr(self, GETCHANGESTATE)
@@ -421,7 +425,6 @@ class CcpnDialogMainWidget(QtWidgets.QDialog, Base):
         """
         # handle clicking of a user button
         with handleDialogApply(self) as error:
-
             # add item here to redraw items
             with undoStackBlocking() as addUndoItem:
                 addUndoItem(undo=self._refreshGLItems)
@@ -667,7 +670,7 @@ def _verifyPopupApply(self, attributeName, value, *postArgs, **postKwds):
         return
 
     # if attributeName is defined use as key to dict to store change functions
-    # append postFixes if need to differentiate partial functions
+    # append postFixes if you need to differentiate partial functions
     if attributeName:
 
         # append the extra parameters to the end of attributeName to give a unique

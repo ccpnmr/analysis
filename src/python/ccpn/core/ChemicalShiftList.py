@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-16 10:48:21 +0100 (Mon, May 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-17 15:05:35 +0100 (Tue, May 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -290,6 +290,11 @@ class ChemicalShiftList(AbstractWrapperObject):
                 addUndoItem(undo=partial(self._recalculatePeakShifts, nmrResidues, shifts))
 
             self._wrappedData.experiments = set(x._wrappedData.experiment for x in _spectra)
+
+            # set the removed spectra to the default (first shiftList) in the project
+            firstCSL = self.project.chemicalShiftLists[0]
+            for spec in _deleteSpectra:
+                spec.chemicalShiftList = firstCSL
 
             for nmrAtom in _newNmrAtoms:
                 self.newChemicalShift(nmrAtom=nmrAtom)
@@ -582,6 +587,8 @@ class ChemicalShiftList(AbstractWrapperObject):
         """Delete the chemicalShiftList and associated chemicalShifts
         """
         shifts = list(self._shifts)
+        if len(self.project.chemicalShiftLists) < 2:
+            raise RuntimeError(f'{self.className}.delete: cannot delete the last chemicalShiftList')
 
         with undoBlock():
             for sh in shifts:
@@ -596,7 +603,16 @@ class ChemicalShiftList(AbstractWrapperObject):
 
                 sh._deleteWrapper(self, _newDeletedShifts, _newShifts, _oldDeletedShifts, _oldShifts)
 
+            # remember the old spectra for after the actual delete
+            _deleteSpectra = self.spectra
+
+            # delete the chemicalShiftList
             self._delete()
+
+            # set the removed spectra to the default (first shiftList) in the project
+            firstCSL = self.project.chemicalShiftLists[0]
+            for spec in _deleteSpectra:
+                spec.chemicalShiftList = firstCSL
 
     #=========================================================================================
     # CCPN functions
@@ -835,10 +851,11 @@ def chemicalShiftList(self: Spectrum, chemicalShiftList: ChemicalShiftList):
         _shiftList.spectra = set(_shiftList.spectra) | {self}
 
     elif _shiftList is None:
-        # set the chemicalShiftList to None - undo handled in .spectra setter
-        _shiftList = self.chemicalShiftList
-        if _shiftList:
-            _shiftList.spectra = set(_shiftList.spectra) - {self}
+        # # set the chemicalShiftList to None - undo handled in .spectra setter
+        # _shiftList = self.chemicalShiftList
+        # if _shiftList:
+        #     _shiftList.spectra = set(_shiftList.spectra) - {self}
+        raise ValueError(f'{self.__class__.__name__}.chemicalShiftList: cannot set to None')
 
     else:
         # Don't raise errors here or you crash-out a perfectly valid project/Nef from loading

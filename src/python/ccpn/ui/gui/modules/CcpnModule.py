@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-03 16:41:10 +0000 (Thu, March 03, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-05-18 12:02:55 +0100 (Wed, May 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -543,7 +543,13 @@ class CcpnModule(Dock, DropBase, NotifierBase):
                             self._container = i
         if self._includeInLastSeen:
             self.area._seenModuleStates[self.className] = {MODULENAME: self._defaultName, WIDGETSTATE: self.widgetsState}
-        super().close()
+
+        try:
+            super().close()
+        except:
+            """Remove this dock from the DockArea it lives inside."""
+            self._container = None
+            self.sigClosed.emit(self)
 
     #=========================================================================================
     # Super class Methods

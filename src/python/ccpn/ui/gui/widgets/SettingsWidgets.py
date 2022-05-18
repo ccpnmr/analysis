@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-16 10:42:34 +0100 (Mon, May 16, 2022) $"
+__modifiedBy__ = "$modifiedBy: VickyAH $"
+__dateModified__ = "$dateModified: 2022-05-18 14:51:30 +0100 (Wed, May 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -291,7 +291,7 @@ class SpectrumDisplaySettings(Widget, SignalBlocking):
 
         if self._spectrumDisplay.MAXPEAKLABELTYPES:
             row += 1
-            _texts = ['Short', 'Full', 'Pid', 'Minimal', 'Id', 'ClusterId','Annotation']
+            _texts = ['Short', 'Full', 'NmrAtom Pid', 'Minimal', 'Peak Pid', 'ClusterId','Annotation']
             _names = ['annSDS_Short', 'annSDS_Full', 'annSDS_Pid', 'annSDS_Minimal', 'annSDS_Id','annSDS_ClusterId', 'annSDS_Annotation']
             _texts = _texts[:self._spectrumDisplay.MAXPEAKLABELTYPES]
             _names = _names[:self._spectrumDisplay.MAXPEAKLABELTYPES]

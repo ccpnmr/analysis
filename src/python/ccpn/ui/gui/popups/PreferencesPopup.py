@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-16 18:10:24 +0100 (Mon, May 16, 2022) $"
+__modifiedBy__ = "$modifiedBy: VickyAH $"
+__dateModified__ = "$dateModified: 2022-05-18 14:51:30 +0100 (Wed, May 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1341,15 +1341,15 @@ class PreferencesPopup(CcpnDialogMainWidget):
         _makeLine(parent, grid=(row, 0), text="Peak Symbols")
 
         row += 1
-        self.annotationsLabel = _makeLabel(parent, text="Annotation", grid=(row, 0))
-        self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'Pid', 'Minimal', 'Id', 'ClusterId', 'Annotation'],
+        self.annotationsLabel = _makeLabel(parent, text="Label", grid=(row, 0))
+        self.annotationsData = RadioButtons(parent, texts=['Short', 'Full', 'NmrAtom Pid', 'Minimal', 'Peak Pid', 'ClusterId', 'Annotation'],
                                             callback=self._queueSetAnnotations,
                                             direction='h',
                                             grid=(row, 1), hAlign='l', gridSpan=(1, 2),
                                             tipTexts=None,
                                             )
         row += 1
-        self.symbolsLabel = _makeLabel(parent, text="Type", grid=(row, 0))
+        self.symbolsLabel = _makeLabel(parent, text="Symbol", grid=(row, 0))
         self.symbol = RadioButtons(parent, texts=['Cross', 'lineWidths', 'Filled lineWidths', 'Plus'],
                                    callback=self._queueSetSymbol,
                                    direction='h',

@@ -4,10 +4,10 @@ This module implements the Button class
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-01-25 16:31:24 +0000 (Tue, January 25, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-05-18 18:40:28 +0100 (Wed, May 18, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -36,7 +36,7 @@ from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 
 class RadioButton(QtWidgets.QRadioButton, Base):
 
-    def __init__(self, parent, text='', textColor=None, textSize=None, callback=None, **kwds):
+    def __init__(self, parent, text='', textColor=None, textSize=None, squared=False, callback=None, **kwds):
 
         super().__init__(parent)
         Base._init(self, **kwds)
@@ -54,6 +54,26 @@ class RadioButton(QtWidgets.QRadioButton, Base):
             self.setObjectName(text)
 
         self.setStyleSheet('QRadioButton::disabled { color: #7f88ac; }')
+        if squared:
+            self.setStyleSheet('''
+                    QRadioButton::indicator {{
+                        border: {border}px solid black; 
+                        height: {size}px;
+                        width: {size}px;
+                        border-radius: {radius}px;
+                    }}
+                    QRadioButton::indicator:checked {{
+                        color: black;
+                        background: black;
+                        border-width: {border}px;
+                        border-style: solid;
+                        border-radius: {radius}px;
+                        border-color: white;
+                    }}
+                    QRadioButton::disabled {{
+                        color: #7f88ac
+                    }}
+                '''.format(size=10, border=1, radius=0.1))
 
     def get(self):
         return self.text()

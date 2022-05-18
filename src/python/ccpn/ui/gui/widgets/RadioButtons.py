@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-23 20:18:59 +0000 (Wed, March 23, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-05-18 18:40:28 +0100 (Wed, May 18, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -40,7 +40,7 @@ UNCHECKED = QtCore.Qt.Unchecked
 class RadioButtons(QtWidgets.QWidget, Base):
 
     def __init__(self, parent, texts=None, selectedInd=None, exclusive=True,
-                 callback=None, direction='h', tipTexts=None, objectNames=None,
+                 callback=None, direction='h', tipTexts=None, objectNames=None, squared=False,
                  icons=None, initButtons=True,
                  **kwds):
 
@@ -55,6 +55,7 @@ class RadioButtons(QtWidgets.QWidget, Base):
         buttonGroup = self.buttonGroup = QtWidgets.QButtonGroup(self)
         self.isExclusive = exclusive
         buttonGroup.setExclusive(self.isExclusive)
+        self.squared = squared
 
         if not tipTexts:
             tipTexts = [None] * len(texts)
@@ -112,7 +113,7 @@ class RadioButtons(QtWidgets.QWidget, Base):
                 grid = (0, i)
             else:
                 grid = (i, 0)
-            button = RadioButton(self, text, tipText=tipTexts[i], grid=grid, hAlign='l')
+            button = RadioButton(self, text, squared=self.squared, tipText=tipTexts[i], grid=grid, hAlign='l')
             self.radioButtons.append(button)
 
             self.buttonGroup.addButton(button)

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-19 11:39:58 +0100 (Thu, May 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-19 12:51:33 +0100 (Thu, May 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -349,12 +349,10 @@ class V3CoreObjectABC(NotifierBase):
             #   handle the modifying of __str__/__repr__ here so that it does not require
             #   extra calls to _isDeleted which may crash on loose objects in the undo-deque (or elsewhere)
             #   update the pid2Obj list
-            # self._flaggedForDelete = False
             self._deleted = False
             self._isDeleted = False
             project._finalisePid2Obj(self, 'create')
         elif action == 'delete':
-            # self._flaggedForDelete = True  # test for preDelete - may be able to remove this again
             self._deletedId = str(self.id)
             self._deleted = True
             self._isDeleted = True

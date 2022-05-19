@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-16 18:10:24 +0100 (Mon, May 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-19 11:39:58 +0100 (Thu, May 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2438,7 +2438,6 @@ class GuiSpectrumDisplay(CcpnModule):
         # get the spectrumViews from the first strip
         sv = [(spectrum, specView) for specView in self.strips[0].spectrumViews if specView.spectrum == spectrum]
         if len(sv) != 1:
-            getLogger().warning('%.removeSpectrum: No spectrum found' % self.__class__.__name__)
             return
 
         _spectrum, specView = sv[0]
@@ -2606,7 +2605,7 @@ class GuiSpectrumDisplay(CcpnModule):
                 if self.zPlaneNavigationMode == ZPlaneNavigationModes.PERSPECTRUMDISPLAY.dataValue:
 
                     for strip in self.strips:
-                        if strip and not (strip.isDeleted or strip._flaggedForDelete):
+                        if strip and not strip.isDeleted:
                             strip.zPlaneFrame.setVisible(False)
                             strip.zPlaneFrame._strip = None
                             for pl in strip.planeAxisBars:
@@ -2623,7 +2622,7 @@ class GuiSpectrumDisplay(CcpnModule):
                     self.zPlaneFrame.setVisible(False)
                     self.zPlaneFrame._strip = None
                     for strip in self.strips:
-                        if strip and not (strip.isDeleted or strip._flaggedForDelete):
+                        if strip and not strip.isDeleted:
                             for pl in strip.planeAxisBars:
                                 # reattach the widget to the in strip container
                                 pl._attachButton('_axisSelector')
@@ -2634,7 +2633,7 @@ class GuiSpectrumDisplay(CcpnModule):
 
                 if self.zPlaneNavigationMode == ZPlaneNavigationModes.INSTRIP.dataValue:
                     for strip in self.strips:
-                        if strip and not (strip.isDeleted or strip._flaggedForDelete):
+                        if strip and not strip.isDeleted:
                             strip.zPlaneFrame.setVisible(False)
                             strip.zPlaneFrame._strip = None
                             for pl in strip.planeAxisBars:

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-15 16:47:14 +0000 (Tue, February 15, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-19 11:39:58 +0100 (Thu, May 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -177,8 +177,8 @@ class AbstractWrapperObject(NotifierBase):
         self._id = None
         self._resetIds()
 
-        #EJB 20181217: test for preDelete - may be able to remove this again
-        self._flaggedForDelete = False
+        # #EJB 20181217: test for preDelete - may be able to remove this again
+        # self._flaggedForDelete = False
 
         # tuple to hold children that explicitly need finalising after atomic operations
         self._finaliseChildren = []
@@ -1395,11 +1395,11 @@ class AbstractWrapperObject(NotifierBase):
             self._resetIds()
             self._project._collectionList._resetItemPids(oldPid, self.pid)
 
-        elif action == 'create':
-            self._flaggedForDelete = False
-
-        elif action == 'delete':
-            self._flaggedForDelete = True
+        # elif action == 'create':
+        #     self._flaggedForDelete = False
+        #
+        # elif action == 'delete':
+        #     self._flaggedForDelete = True
 
         if self._childActions:
             # operations that MUST be performed during _finalise

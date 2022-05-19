@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-04 18:50:46 +0000 (Fri, March 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-05-19 11:39:58 +0100 (Thu, May 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -62,7 +62,7 @@ def _getPeakLabelling(peak):
     for dimension in range(peak.peakList.spectrum.dimensionCount):
         pdNA = peak.dimensionNmrAtoms
 
-        pdNADim = [atom for atom in pdNA[dimension] if not (atom.isDeleted or atom._flaggedForDelete)]
+        pdNADim = [atom for atom in pdNA[dimension] if not atom.isDeleted]
 
         if not pdNADim:  # len(pdNA[dimension]) == 0:
             if len(pdNA) == 1:
@@ -70,7 +70,7 @@ def _getPeakLabelling(peak):
             else:
                 peakLabel.append('-')
         else:
-            peakNmrResidues = [atom[0].nmrResidue.id for atom in pdNA if len(atom) != 0 and not (atom[0].isDeleted or atom[0]._flaggedForDelete)]
+            peakNmrResidues = [atom[0].nmrResidue.id for atom in pdNA if len(atom) != 0 and not atom[0].isDeleted]
             if all(x == peakNmrResidues[0] for x in peakNmrResidues):
 
                 for item in pdNADim:  # pdNA[dimension]:
@@ -80,7 +80,7 @@ def _getPeakLabelling(peak):
                         peakLabel.append(item.pid.id)
 
             else:
-                pdNADim = [atom for atom in pdNA[dimension] if not (atom.isDeleted or atom._flaggedForDelete)]
+                pdNADim = [atom for atom in pdNA[dimension] if not atom.isDeleted]
                 for item in pdNADim:  # pdNA[dimension]:
                     label = '.'.join((item.nmrResidue.id, item.name))
                     # label = item.nmrResidue.id + '.' + item.name
@@ -124,7 +124,7 @@ def _getScreenPeakAnnotation(peak, useShortCode=False, useMinimalCode=False, use
     ids = OrderedDict((atom.nmrResidue.id, []) for pdNAs in pdNA for atom in pdNAs)
 
     for dimension in range(peak.peakList.spectrum.dimensionCount):
-        pdNADim = [atom for atom in pdNA[dimension] if not (atom.isDeleted or atom._flaggedForDelete)]
+        pdNADim = [atom for atom in pdNA[dimension] if not atom.isDeleted]
 
         for atom in pdNADim:
             nmrRes = ids[atom.nmrResidue.id]

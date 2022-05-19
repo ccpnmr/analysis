@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-09 17:03:32 +0100 (Mon, May 09, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-05-19 11:39:58 +0100 (Thu, May 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -143,7 +143,7 @@ def getPeakPosition(peak, dim, unit='ppm'):
 
 def getPeakAnnotation(peak, dim, separator=', '):
     if len(peak.dimensionNmrAtoms) > dim:
-        return separator.join([dna.pid.id for dna in peak.dimensionNmrAtoms[dim] if not (dna.isDeleted or dna._flaggedForDelete)])
+        return separator.join([dna.pid.id for dna in peak.dimensionNmrAtoms[dim] if not dna.isDeleted])
 
 
 def getPeakLinewidth(peak, dim):

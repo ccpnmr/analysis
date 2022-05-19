@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-17 18:41:30 +0000 (Thu, March 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-19 11:39:57 +0100 (Thu, May 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -73,10 +73,10 @@ def absorbResonance(self: 'NmrAtom', nmrAtom) -> 'NmrAtom':
     if nmrAtom is self:
         return self
 
-    if nmrAtom.isDeleted or nmrAtom._flaggedForDelete:
+    if nmrAtom.isDeleted:
         return self
 
-    if self.isDeleted or self._flaggedForDelete:
+    if self.isDeleted:
         raise RuntimeError("function absorbResonance call on deleted nmrAtom: @{}".format(self.serial))
 
     project = self.project

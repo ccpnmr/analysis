@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: VickyAH $"
-__dateModified__ = "$dateModified: 2022-05-18 14:51:30 +0100 (Wed, May 18, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-05-19 11:39:59 +0100 (Thu, May 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -667,7 +667,7 @@ class _commonSettings():
             if dp.strips:
                 for sv in dp.strips[0].spectrumViews:
 
-                    if not (sv.isDeleted or sv._flaggedForDelete):
+                    if not sv.isDeleted:
                         if sv.spectrum not in validSpectrumViews:
                             validSpectrumViews[sv.spectrum] = sv.isDisplayed
                         else:

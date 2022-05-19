@@ -216,9 +216,11 @@ def _oneLiner(theString):
     """ Remove returns from string. E.g. the one in column Headers"""
     return theString.replace("\n", " ")
 
+
 def _makeTipText(columName, tipText):
     """Make a TipText by joining Column name and tipText to same string """
     return f'{_oneLiner(columName)}\n{tipText}'
+
 
 def _getHiddenColumns(table):
     hidden =[]
@@ -226,6 +228,7 @@ def _getHiddenColumns(table):
         if table._columnsDefs[i].get(HIDDEN):
             hidden.append(i)
     return hidden
+
 
 def _resizeColumnWidths(table):
     columnsWidths = {}
@@ -1549,7 +1552,7 @@ class GuiTable(TableWidget, Base):
         objs = []
 
         if objectList:
-            # get the list of objects, exclude deleted and flagged for delete
+            # get the list of objects, exclude deleted
             for obj in objectList:
                 if isinstance(obj, str):
                     objFromPid = self.project.getByPid(obj)
@@ -2372,7 +2375,7 @@ class GuiTable(TableWidget, Base):
 
                 # concatenate the list - will always return a list
                 rowObjs = makeIterableList(rowObj)
-                # rowObjs = [obj for obj in rowObjs if obj and not (obj.isDeleted or obj._flaggedForDelete)]
+                # rowObjs = [obj for obj in rowObjs if obj and not obj.isDeleted]
 
                 # update the correct row by calling row handler
                 for rowObj in rowObjs:

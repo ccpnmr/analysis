@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-19 11:39:58 +0100 (Thu, May 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-19 12:50:36 +0100 (Thu, May 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -150,7 +150,7 @@ def _getScreenPeakAnnotation(peak, useShortCode=False, useMinimalCode=False, use
 
     # for dimension in range(peak.peakList.spectrum.dimensionCount):
     #
-    #     pdNADim = [atom for atom in pdNA[dimension] if not (atom.isDeleted or atom._flaggedForDelete)]
+    #     pdNADim = [atom for atom in pdNA[dimension] if not atom.isDeleted]
     #     pdNAids = OrderedDict((atom.nmrResidue.id, []) for atom in pdNADim)
     #
     #     if pdNADim:                # pdNA[dimension]:
@@ -160,7 +160,7 @@ def _getScreenPeakAnnotation(peak, useShortCode=False, useMinimalCode=False, use
     #             peakLabel.pop()
     #
     #         try:
-    #             peakNmrResidues = [atom[0].nmrResidue.id for atom in pdNA if len(atom) != 0 and not (atom[0].isDeleted or atom[0]._flaggedForDelete)]
+    #             peakNmrResidues = [atom[0].nmrResidue.id for atom in pdNA if len(atom) != 0 and not atom[0].isDeleted]
     #
     #             if all(x == peakNmrResidues[0] for x in peakNmrResidues):
     #                 for item in pdNADim:                # pdNA[dimension]:

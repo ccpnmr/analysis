@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-28 20:35:37 +0100 (Thu, April 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-19 12:50:36 +0100 (Thu, May 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -84,7 +84,7 @@ class MultipletPeakTableWidget(_NewPeakTableWidget):
 
     # def _update(self, useSelectedPeakList=True, peaks=None, peakList=None):
     #     """Display the peaks on the table for the selected PeakList.
-    #     Obviously, If the peak has not been previously deleted and flagged isDeleted
+    #     Obviously, If the peak has not been previously deleted
     #     """
     #
     #     print(f'  UPDATE')

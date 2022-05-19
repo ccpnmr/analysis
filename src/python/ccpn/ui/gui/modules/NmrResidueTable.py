@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-19 11:39:58 +0100 (Thu, May 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-19 12:50:36 +0100 (Thu, May 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -418,14 +418,14 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
     def _getNmrAtomNames(nmrResidue):
         """Returns a sorted list of NmrAtom names
         """
-        return ', '.join(sorted(set([atom.name for atom in nmrResidue.nmrAtoms if not atom._flaggedForDelete]),
+        return ', '.join(sorted(set([atom.name for atom in nmrResidue.nmrAtoms if not atom.isDeleted]),
                                 key=CcpnSorting.stringSortKey))
 
     @staticmethod
     def _getNmrResiduePeakCount(nmrResidue):
         """Returns peak list count
         """
-        l1 = [peak for atom in nmrResidue.nmrAtoms if not atom._flaggedForDelete for peak in atom.assignedPeaks if not peak._flaggedForDelete]
+        l1 = [peak for atom in nmrResidue.nmrAtoms if not atom.isDeleted for peak in atom.assignedPeaks if not peak.isDeleted]
         return len(set(l1))
 
 

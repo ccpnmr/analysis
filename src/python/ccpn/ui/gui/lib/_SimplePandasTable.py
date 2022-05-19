@@ -1842,7 +1842,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         objs = []
 
         if objectList:
-            # get the list of objects, exclude deleted and flagged for delete
+            # get the list of objects, exclude deleted
             for obj in objectList:
                 if isinstance(obj, str):
                     objFromPid = self.project.getByPid(obj)

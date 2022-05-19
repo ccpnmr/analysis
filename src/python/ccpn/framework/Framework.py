@@ -220,6 +220,7 @@ class Framework(NotifierBase, GuiBase):
         self._experimentClassifications = None  # initialised in _startApplication once a project has loaded
 
         self._disableUndoException = getattr(self.args, 'disableUndoException', False)
+        self._disableModuleException = getattr(self.args, 'disableModuleException', False)
         self._disableQueueException = getattr(self.args, 'disableQueueException', False)
         self._ccpnLogging = getattr(self.args, 'ccpnLogging', False)
 

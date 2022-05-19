@@ -144,6 +144,7 @@ def defineProgramArguments():
     # Ccpn logging options - traceback can sometimes be masked in undo/redo
     # --disable-<option>-exception removes the try:except to allow full traceback to occur
     parser.add_argument('--disable-undo-exception', dest='disableUndoException', action='store_true', help='Disable exception wrapping undo/redo actions, reserved for high-level debugging.')
+    parser.add_argument('--disable-module-exception', dest='disableModuleException', action='store_true', help='Disable exception wrapping in module updates, reserved for high-level debugging.')
     parser.add_argument('--disable-queue-exception', dest='disableQueueException', action='store_true', help='Disable exception wrapping undo/redo actions, reserved for high-level debugging.')
 
     # log information at end of undo/redo if exception occurs (not called if --disable-undo-exception set), calls _logObjects

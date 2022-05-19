@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-18 18:40:28 +0100 (Wed, May 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-19 20:15:00 +0100 (Thu, May 19, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -57,6 +57,7 @@ class Button(QtWidgets.QPushButton, Base):
         else:
             self.setStyleSheet('Button { padding: 3px 2px 3px 2px; }')
 
+        self.toggle = toggle
         if toggle is not None:
             self.setCheckable(True)
             self.setSelected(toggle)
@@ -86,6 +87,24 @@ class Button(QtWidgets.QPushButton, Base):
     def getText(self):
         """Get the text of the button"""
         return self._text
+
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        if self.toggle:
+            return self.isChecked()
+
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        if not value:
+            return
+
+        if self.toggle:
+            return self.set(value)
 
 
 if __name__ == '__main__':

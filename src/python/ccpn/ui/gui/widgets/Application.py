@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: varioustoxins $"
-__dateModified__ = "$dateModified: 2022-02-13 16:34:43 +0000 (Sun, February 13, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-05-20 12:53:13 +0100 (Fri, May 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,8 +29,10 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 import sys
 from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtCore import QTimer
+import os
 
-
+##QT_MAC_WANTS_LAYER: Patch for MacOs >= 11. Without this flag, Testing widgets/windows from PyQt5 don't show at all.
+os.environ['QT_MAC_WANTS_LAYER'] = '1'
 
 class Application(QtWidgets.QApplication):
 

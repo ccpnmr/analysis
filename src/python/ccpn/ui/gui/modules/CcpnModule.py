@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-18 12:02:55 +0100 (Wed, May 18, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-05-20 18:40:30 +0100 (Fri, May 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -189,7 +189,16 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self._defaultName = name
 
         self.area = None
-        if mainWindow is not None:
+        self.mainWindow = mainWindow
+        self.project = None
+        self.application = None
+        self.current = None
+
+        if self.mainWindow is not None:
+            self.project = self.mainWindow.project
+            self.application = self.mainWindow.application
+            self.preferences = self.application.preferences
+            self.current = self.application.current
             self.area = mainWindow.moduleArea
 
         super().__init__(name=name, area=self.area,
@@ -232,7 +241,6 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         Logging.getLogger().debug('CcpnModule>>> %s %s' % (type(self), mainWindow))
 
         # Logging.getLogger().debug('module:"%s"' % (name,))
-        self.mainWindow = mainWindow
         self.closeFunc = closeFunc
         self._nameSplitter = '_'  # used to get the serial number.
 

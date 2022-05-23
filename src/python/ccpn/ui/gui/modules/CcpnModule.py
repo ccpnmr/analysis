@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-20 18:40:30 +0100 (Fri, May 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-23 15:17:14 +0100 (Mon, May 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -190,15 +190,8 @@ class CcpnModule(Dock, DropBase, NotifierBase):
 
         self.area = None
         self.mainWindow = mainWindow
-        self.project = None
-        self.application = None
-        self.current = None
 
         if self.mainWindow is not None:
-            self.project = self.mainWindow.project
-            self.application = self.mainWindow.application
-            self.preferences = self.application.preferences
-            self.current = self.application.current
             self.area = mainWindow.moduleArea
 
         super().__init__(name=name, area=self.area,

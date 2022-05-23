@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:52 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-05-23 15:16:44 +0100 (Mon, May 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -46,20 +46,23 @@ def getApplication():
 def getProject():
     """Return the active Project instance"""
     container = ApplicationContainer()
-    return container.project
+    if container.application is not None:
+        return container.project
 
 
 def getCurrent():
     """Return the Current instance"""
     container = ApplicationContainer()
-    return container.current
+    if container.application is not None:
+        return container.current
 
 
 def getMainWindow():
     """Return the MainWindow instance (if present
     """
     container = ApplicationContainer()
-    return container.mainWindow
+    if container.application is not None:
+        return container.mainWindow
 
 
 @singleton

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-20 18:40:05 +0100 (Fri, May 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-23 15:17:37 +0100 (Mon, May 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -24,9 +24,13 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 #=========================================================================================
 
 import weakref
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel, _panelPositionsAttr
+from collections import defaultdict
+from PyQt5 import QtCore, QtWidgets
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel, PanelPositions,\
+    TopFrame, BottomFrame, LeftFrame, RightFrame
 from ccpn.ui.gui.widgets.Tabs import Tabs
-
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
+from ccpn.ui.gui.widgets.Splitter import Splitter
 class ExperimentAnalysisManager(object):
     """
     This object manages a dedicated part of a ExperimentAnalysis GuiModule instance:
@@ -67,52 +71,92 @@ class ExperimentAnalysisManager(object):
         self._guiModule = guiModule
 
 
-class PanelsManager(ExperimentAnalysisManager):
+    def start(self):
+        pass
+
+    def close(self):
+        pass
+
+
+class PanelHandler(ExperimentAnalysisManager):
     """
     Manages the list of panels and adds them to the GuiModule.
     """
-    def __init__(self, guiModule):
-        super(PanelsManager, self).__init__(guiModule)
+    gridPositions = {
+        TopFrame :   ((0, 0), (1, 2)), #grid and gridSpan
+        LeftFrame:   ((1, 0), (1, 1)),
+        RightFrame:  ((1, 1), (1, 1)),
+        BottomFrame: ((2, 0), (2, 2)),
+    }
+
+    def __init__(self, guiModule, includeSplitters=True):
+        super(PanelHandler, self).__init__(guiModule)
         self._marginSizes = (0, 0, 0, 0)
 
-        for position in _panelPositionsAttr:
-            setattr(self, position, -1)
-        self._panels = {k:{} for k in GuiPanel.PanelPosition.values()}
+        self.panels = defaultdict()
+        self._panelsByFrame = {k:[] for k in PanelPositions}
+        ## Setup the four main Frames: Top/Bottom Left/Right
+        for frameName, gridDefs in self.gridPositions.items():
+            grid, gridSpan = gridDefs
+            setattr(self, frameName, Frame(self.guiModule.mainWidget, setLayout=True, grid=grid, gridSpan=gridSpan))
 
-    def _updateViewport(self):
-        pass
+        if includeSplitters:
+            self._setupSplitters()
 
-    def _update(self):
-        pass
+        self.guiModule.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        self._setupFrameGeometries()
 
-    def append(self, panel, position=GuiPanel.PanelPosition.LEFT):
+    def _setupSplitters(self):
         """
-        Installs a panel on the editor.
+        Create splitters and add frames to them. There are two splitters:
+         - one "vertical" between the Top/Bottom frames,
+         - one "horizontal" between the Left/Right frames .
+        The Vertical is the primary splitter that contains the horizontal.
+        The Vertical splitter is added to the mainWidget layout.
+        (Line-ordering is crucial for the correct layout)
+        """
+        self._horizontalSplitter = Splitter()
+        self._verticalSplitter = Splitter(horizontal=False)
+        ## add frames to splitters
+        self._horizontalSplitter.addWidget(self.getFrame(LeftFrame))
+        self._horizontalSplitter.addWidget(self.getFrame(RightFrame))
+        self._verticalSplitter.addWidget(self._horizontalSplitter) # Important: add horizontalSplitter to the Vertical!
+        self._verticalSplitter.addWidget(self.getFrame(BottomFrame))
+        ## add all to main Layout
+        self.guiModule.mainWidget.getLayout().addWidget(self._verticalSplitter)
 
+    def _setupFrameGeometries(self):
+        for ff in PanelPositions:
+            frame = self.getFrame(ff)
+            frame.getLayout().setAlignment(QtCore.Qt.AlignTop)
+
+    def append(self, panel):
+        """
+        Installs a panel in the proper frame of the MainWidget .
         :param panel: Panel to install
-        :param position: Position where the panel must be installed.
         :return: The installed panel
         """
-
-        # panel.order_in_zone = len(self._panels[position])
-
-        self._panels[position][panel.name] = panel
-        panel.position = position
         panel.onInstall()
+        self._addToLayout(panel)
         return panel
 
-    def remove(self, name_or_klass):
-        """
-        Removes the specified panel.
+    def _addToLayout(self, panel):
 
-        :param name_or_klass: Name or class of the panel to remove.
-        :return: The removed panel
+        frameAttr = panel._panelPositionData.description
+        frame = getattr(self, frameAttr, None)
+        if frame is not None:
+            frame.getLayout().addWidget(panel)
+            self._panelsByFrame[frameAttr].append(panel)
+            self.panels.update({panel.panelName:panel})
+
+    def hidePanel(self, name):
         """
-        panel = self.get(name_or_klass)
-        panel.on_uninstall()
-        panel.hide()
-        panel.setParent(None)
-        return self._panels[panel.position].pop(panel.name, None)
+        """
+        panel = self.panels.get(name)
+        if panel:
+            panel.on_uninstall()
+            panel.hide()
+        return panel
 
     def clear(self):
         """
@@ -120,46 +164,37 @@ class PanelsManager(ExperimentAnalysisManager):
         """
         pass
 
-    def get(self, name_or_klass):
-        """
-        Gets a specific panel instance.
+    def getPanel(self, name):
+        panel = self.panels.get(name)
+        return panel
 
-        :param name_or_klass: Name or class of the panel to retrieve.
-        :return: The specified panel instance.
-        """
-        if not isinstance(name_or_klass, str):
-            name_or_klass = name_or_klass.__name__
-        for zone in range(4):
-            try:
-                panel = self._panels[zone][name_or_klass]
-            except KeyError:
-                pass
-            else:
-                return panel
-        raise KeyError(name_or_klass)
+    def getFrame(self, name):
+        frame = getattr(self, name)
+        return frame
 
     def __iter__(self):
         lst = []
-        for zone, zone_dict in self._panels.items():
-            for name, panel in zone_dict.items():
-                lst.append(panel)
+        for name, panel in self.panels.items():
+            lst.append(panel)
         return iter(lst)
 
     def __len__(self):
         lst = []
-        for zone, zone_dict in self._panels.items():
-            for name, panel in zone_dict.items():
-                lst.append(panel)
+        for name, panel in self.panels.items():
+            lst.append(panel)
         return len(lst)
 
+    def close(self):
+        for name, panel in self.panels.items():
+            panel.close()
 
 
-class SettingsPanelManager(ExperimentAnalysisManager):
+class SettingsPanelHandler(ExperimentAnalysisManager):
     """
     Manages the list of Tab settings and adds them to the GuiModule settingsWidget.
     """
     def __init__(self, guiModule):
-        super(SettingsPanelManager, self).__init__(guiModule)
+        super(SettingsPanelHandler, self).__init__(guiModule)
         self._marginSizes = (5, 5, 5, 5)
         self._panels = {}
         self.settingsWidget = self.guiModule.settingsWidget
@@ -173,3 +208,4 @@ class SettingsPanelManager(ExperimentAnalysisManager):
             raise RuntimeError(f'{panel} is not of instance: {GuiSettingPanel}')
         self.settingsTabWidget.insertTab(panel.tabPosition, panel, panel.tabName)
         self._panels.update({panel.tabPosition:panel})
+

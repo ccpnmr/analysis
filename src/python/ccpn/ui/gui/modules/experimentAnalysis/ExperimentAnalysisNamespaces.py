@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-20 18:40:05 +0100 (Fri, May 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-23 15:17:37 +0100 (Mon, May 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,7 +26,9 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 LASTDISPLAY = 'Last Opened'
 NEW = '<New Item...>'
 EmptySpace = '< >'
+ToolBar = 'ToolBar'
 
 # colours
 import ccpn.ui.gui.guiSettings as gs
 BackgroundColour = gs.getColours()[gs.CCPNGLWIDGET_HEXBACKGROUND]
+

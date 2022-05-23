@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-20 18:40:05 +0100 (Fri, May 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-23 15:17:37 +0100 (Mon, May 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,61 +28,127 @@ This module contains the GUI panel API.
 """
 
 
-from PyQt5 import QtCore, QtWidgets
 from ccpn.util.DataEnum import DataEnum
+######## gui/ui imports ########
+from PyQt5 import QtCore, QtWidgets
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
+from PyQt5 import QtCore, QtWidgets
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.widgets.Label import Label, DividerLabel
+from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget, ScientificSpinBoxCompoundWidget
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons, EditableRadioButtons
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.HLine import HLine
+from ccpn.ui.gui.widgets.Splitter import Splitter
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets import MessageDialog
+from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 
-Top = 'Top'
-Left = 'Left'
-Right = 'Right'
-Bottom = 'Bottom'
-TopLeft = 'TopLeft'
-TopRight = 'TopRight'
-BottomLeft = 'BottomLeft'
-BottomRight = 'BottomRight'
 
-PanelPositions = [Top, TopLeft, Left, BottomLeft, Right, TopRight, BottomRight, Bottom]
-_panelPositionsAttr = [f'_{s[0].lower() + s[1:]}' for s in PanelPositions]
+TopFrame = 'TopFrame'
+LeftFrame = 'LeftFrame'
+RightFrame = 'RightFrame'
+BottomFrame = 'BottomFrame'
+
+PanelPositions = [TopFrame, LeftFrame, RightFrame, BottomFrame]
 
 
-class PanelPosition(DataEnum):
-    TOP = 0, Top
-    LEFT = 1, Left
-    RIGHT = 2, Right
-    BOTTOM = 3, Bottom
-    TOPLEFT = 4, TopLeft
-    TOPRIGHT = 5, TopRight
-    BOTTOMLEFT = 6, BottomLeft
-    BOTTOMRIGHT = 7, BottomRight
+class PanelPositionData(DataEnum):
+    TOP = 0, TopFrame
+    LEFT = 1, LeftFrame
+    RIGHT = 2, RightFrame
+    BOTTOM = 3, BottomFrame
 
 class GuiPanel(Frame):
     """
     Base class for Gui panels.
     A panel is Frame containing a building block of the Experiment Analysis GUI, E.g.: the nmrResidue table
     """
-    PanelPosition = PanelPosition
     position = -1
+    panelName = 'panelName'
 
-    @property
-    def scrollable(self):
-        """
-        :return: bool
-        """
-        return self._scrollable
 
-    @scrollable.setter
-    def scrollable(self, value):
-        self._scrollable = value
-        #set the scroll area
-
-    def __init__(self, guiModule, scrollable=False, *args, **Framekwargs):
+    def __init__(self, guiModule, *args, **Framekwargs):
 
         Frame.__init__(self, setLayout=True, **Framekwargs)
-        self.order_in_zone = -1
-        self._scrollable = False
+        self._panelPositionData = PanelPositionData(self.position)
+
         self._guiModule = guiModule
-        self.scrollable = scrollable
+        self.initWidgets()
+
+    def initWidgets(self):
+        pass
 
     def onInstall(self):
         pass
 
+    def close(self):
+        """ de-register anything left or close table etc"""
+        pass
+
+
+
+class ToolBarPanel(GuiPanel):
+
+    position = 0
+    panelName = 'ToolBar'
+
+    def __init__(self, guiModule, *args, **Framekwargs):
+        GuiPanel.__init__(self, guiModule, *args , **Framekwargs)
+        self.setMaximumHeight(100)
+
+
+    def initWidgets(self):
+        row = 0
+        Label(self, 'Test Colour', grid=(row, 0))
+
+
+class TablePanel(GuiPanel):
+
+    position = 1
+    panelName = 'TablePanel'
+
+    def __init__(self, guiModule, *args, **Framekwargs):
+        GuiPanel.__init__(self, guiModule, *args , **Framekwargs)
+        self.setMaximumHeight(100)
+
+    def initWidgets(self):
+        row = 0
+        Label(self, 'Test TablePanel', grid=(row, 0))
+
+
+class FitPlotPanel(GuiPanel):
+
+    position = 2
+    panelName = 'FitPlotPanel'
+
+    def __init__(self, guiModule, *args, **Framekwargs):
+        GuiPanel.__init__(self, guiModule, *args , **Framekwargs)
+        self.setMaximumHeight(100)
+
+    def initWidgets(self):
+        row = 0
+        Label(self, 'FitPlotPanel', grid=(row, 0))
+
+
+class BarPlotPanel(GuiPanel):
+
+    position = 3
+    panelName = 'BarPlotPanel'
+
+    def __init__(self, guiModule, *args, **Framekwargs):
+        GuiPanel.__init__(self, guiModule, *args , **Framekwargs)
+        self.setMaximumHeight(100)
+
+    def initWidgets(self):
+        row = 0
+        Label(self, 'PlotPanel', hAlign='c', grid=(row, 0))

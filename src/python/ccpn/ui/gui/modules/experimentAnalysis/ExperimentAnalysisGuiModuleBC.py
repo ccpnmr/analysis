@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-20 18:40:05 +0100 (Fri, May 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-23 15:17:37 +0100 (Mon, May 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -24,46 +24,15 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 #=========================================================================================
 
 ######## core imports ########
-import pandas as pd
-import numpy as np
-from functools import partial
-from ccpn.util.Logging import getLogger
-from ccpn.core.Peak import Peak
-from ccpn.core.Substance import Substance
-from ccpn.core.Spectrum import Spectrum
-from ccpn.core.DataTable import DataTable
-from ccpn.core.lib.Notifiers import Notifier
-from ccpn.core.lib.ContextManagers import notificationEchoBlocking
-from ccpn.util.Common import percentage
+from ccpn.framework.Application import getApplication, getCurrent, getProject
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisNotifierHandler import _NotifierHandler
 
 ######## gui/ui imports ########
 from PyQt5 import QtCore, QtWidgets
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.Label import Label, DividerLabel
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.Spinbox import Spinbox
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget, ScientificSpinBoxCompoundWidget
-from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
-from ccpn.ui.gui.widgets.RadioButtons import RadioButtons, EditableRadioButtons
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.HLine import HLine
-from ccpn.ui.gui.widgets.GuiTable import _selectRowsOnTable
-from ccpn.ui.gui.widgets.Splitter import Splitter
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Tabs import Tabs
-from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
-from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
-from ccpn.ui.gui.widgets.ScatterPlotWidget import ScatterPlot, _ItemBC, ScatterSymbolsDict
-from ccpn.ui.gui.widgets.MessageDialog import showWarning, _stoppableProgressBar, progressManager
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiManagers import PanelsManager, SettingsPanelManager
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiManagers import PanelHandler, SettingsPanelHandler
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiSettingsPanel as settingsPanel
-
+import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel as guiPanel
 
 #####################################################################
 #######################  The main GUI Module ########################
@@ -80,8 +49,14 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         super(ExperimentAnalysisGuiModuleBC, self)
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
 
+        self.project = getProject()
+        self.application = getApplication()
+        self.current = getCurrent()
+
+        ## Setup the Notifiers
         if self.mainWindow:
             self._notifierHandler = _NotifierHandler(guiModule=self)
+            self._notifierHandler.start()
 
         ## link to the Non-Gui backend
         # self._backend = SeriesAnalysisABC()
@@ -93,19 +68,18 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         self.updatesOnPeakChanged = False
         self._peaksChangedQueue = set() # temp store any peaks that have been changed but not refreshed on GUI
 
-        ## the working dataTable which drives all
-        self._dataTable = None
-
         ## link to gui Panels
-        self._initLayout()
-        self.panelsManager = PanelsManager(self)
-        self.settingsPanelsManager = SettingsPanelManager(self)
+        self.panelHandler = PanelHandler(self)
+        self.settingsPanelHandler = SettingsPanelHandler(self)
         self._initPanels()
         self._initSettingsPanel()
 
+        ## the working dataTable which drives all
+        self._dataTable = None
+
         ## Startup with the first Data available
         if self.project:
-            self._updateDataSetPulldown()
+            pass
 
     #################################################################
     #####################      Data       ###########################
@@ -116,21 +90,19 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
     #####################      Widgets    ###########################
     #################################################################
 
-    def _initLayout(self):
-        # Splitters are created automatically between two panels. Splitters are nasty!
-        # if a panel is flagged as top and one as bottom, then a horizontal splitter is created.
-        pass
-
 
     def _initPanels(self):
-        pass
+        self.panelHandler.append(guiPanel.ToolBarPanel(self))
+        self.panelHandler.append(guiPanel.TablePanel(self))
+        self.panelHandler.append(guiPanel.FitPlotPanel(self))
+        self.panelHandler.append(guiPanel.BarPlotPanel(self))
 
     def _initSettingsPanel(self):
         """
         Add the Settings Panels to the Gui. To retrieve a Panel use/see the settingsPanelsManager.
         """
-        self.settingsPanelsManager.append(settingsPanel.GuiCalculationPanel(self))
-        self.settingsPanelsManager.append(settingsPanel.AppearancePanel(self))
+        self.settingsPanelHandler.append(settingsPanel.GuiCalculationPanel(self))
+        self.settingsPanelHandler.append(settingsPanel.AppearancePanel(self))
 
     #####################################################################
     #####################  Widgets callbacks  ###########################
@@ -147,7 +119,7 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
 
     def _closeModule(self):
         ## de-register all notifiers
-        _NotifierHandler._unRegisterNotifiers()
+        self._notifierHandler.stop()
         ## close tables
         # pass
         ## deregistr settingsChanged notifiers

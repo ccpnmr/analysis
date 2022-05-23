@@ -23,53 +23,44 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 # Start of code
 #=========================================================================================
 
-"""
-This module contains the GUI panel API.
-"""
-
 
 from ccpn.util.DataEnum import DataEnum
-from ccpn.ui.gui.widgets.Frame import Frame
+######## gui/ui imports ########
+from PyQt5 import QtCore, QtWidgets
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
+from PyQt5 import QtCore, QtWidgets
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.widgets.Label import Label, DividerLabel
+from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget, ScientificSpinBoxCompoundWidget
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons, EditableRadioButtons
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.HLine import HLine
+from ccpn.ui.gui.widgets.Splitter import Splitter
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
+from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets import MessageDialog
+from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
 
 
-TopFrame = 'TopFrame'
-LeftFrame = 'LeftFrame'
-RightFrame = 'RightFrame'
-BottomFrame = 'BottomFrame'
 
-PanelPositions = [TopFrame, LeftFrame, RightFrame, BottomFrame]
+class BarPlotPanel(GuiPanel):
 
-
-class PanelPositionData(DataEnum):
-    TOP = 0, TopFrame
-    LEFT = 1, LeftFrame
-    RIGHT = 2, RightFrame
-    BOTTOM = 3, BottomFrame
-
-class GuiPanel(Frame):
-    """
-    Base class for Gui panels.
-    A panel is Frame containing a building block of the Experiment Analysis GUI, E.g.: the nmrResidue table
-    """
-    position = -1
-    panelName = 'panelName'
-
+    position = 3
+    panelName = 'BarPlotPanel'
 
     def __init__(self, guiModule, *args, **Framekwargs):
-
-        Frame.__init__(self, setLayout=True, **Framekwargs)
-        self._panelPositionData = PanelPositionData(self.position)
-
-        self.guiModule = guiModule
-        self.initWidgets()
+        GuiPanel.__init__(self, guiModule, *args , **Framekwargs)
+        self.setMaximumHeight(100)
 
     def initWidgets(self):
-        pass
-
-    def onInstall(self):
-        pass
-
-    def close(self):
-        """ de-register anything left or close table etc"""
-        pass
-
+        row = 0
+        Label(self, 'PlotPanel', hAlign='c', grid=(row, 0))

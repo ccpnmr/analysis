@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-23 15:17:37 +0100 (Mon, May 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-23 19:35:29 +0100 (Mon, May 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -32,24 +32,22 @@ from ccpn.core.Spectrum import Spectrum
 from ccpn.core.DataTable import DataTable
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib.ContextManagers import notificationEchoBlocking
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiManagers import ExperimentAnalysisHandlerABC
 
 
-
-class _NotifierHandler():
+class _NotifierHandler(ExperimentAnalysisHandlerABC):
     """
     A private class containing all Notifiers for the ExperimentAnalysis GuiModule
     """
     _notifiers = {}
 
-    def __init__(self, guiModule, *args, **kwargs):
-        self.guiModule = guiModule
 
     def start(self):
         """ Initialise all notifiers for the guiModule """
         self._setupNotifiers(self.guiModule)
         getLogger().debug2(f'Setting up notifiers for {self.guiModule}')
 
-    def stop(self):
+    def close(self):
         """ Unregister all notifiers for the guiModule """
         self._unRegisterNotifiers()
         getLogger().debug2(f'Unregistering notifiers for {self.guiModule}')

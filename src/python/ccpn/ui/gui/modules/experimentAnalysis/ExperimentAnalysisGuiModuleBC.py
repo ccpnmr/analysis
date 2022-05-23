@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-23 15:17:37 +0100 (Mon, May 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-23 19:35:28 +0100 (Mon, May 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -32,7 +32,10 @@ from PyQt5 import QtCore, QtWidgets
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiManagers import PanelHandler, SettingsPanelHandler
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiSettingsPanel as settingsPanel
-import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel as guiPanel
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import ToolBarPanel
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiTable import TablePanel
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisBarPlotPanel import BarPlotPanel
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import FitPlotPanel
 
 #####################################################################
 #######################  The main GUI Module ########################
@@ -56,7 +59,6 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         ## Setup the Notifiers
         if self.mainWindow:
             self._notifierHandler = _NotifierHandler(guiModule=self)
-            self._notifierHandler.start()
 
         ## link to the Non-Gui backend
         # self._backend = SeriesAnalysisABC()
@@ -92,10 +94,10 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
 
 
     def _initPanels(self):
-        self.panelHandler.append(guiPanel.ToolBarPanel(self))
-        self.panelHandler.append(guiPanel.TablePanel(self))
-        self.panelHandler.append(guiPanel.FitPlotPanel(self))
-        self.panelHandler.append(guiPanel.BarPlotPanel(self))
+        self.panelHandler.append(ToolBarPanel(self))
+        self.panelHandler.append(TablePanel(self))
+        self.panelHandler.append(FitPlotPanel(self))
+        self.panelHandler.append(BarPlotPanel(self))
 
     def _initSettingsPanel(self):
         """
@@ -119,7 +121,7 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
 
     def _closeModule(self):
         ## de-register all notifiers
-        self._notifierHandler.stop()
+        self._notifierHandler.close()
         ## close tables
         # pass
         ## deregistr settingsChanged notifiers

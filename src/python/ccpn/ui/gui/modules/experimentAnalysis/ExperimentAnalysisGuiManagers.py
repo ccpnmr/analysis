@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-23 15:17:37 +0100 (Mon, May 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-23 19:35:28 +0100 (Mon, May 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,29 +31,30 @@ from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import Gu
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.Splitter import Splitter
-class ExperimentAnalysisManager(object):
+
+
+class ExperimentAnalysisHandlerABC(object):
     """
-    This object manages a dedicated part of a ExperimentAnalysis GuiModule instance:
-        - backend management (ExperimentAnalysis base class)
-        - settings management
-        - panels management (tables, plotting etc)
-        - file manager (I/O)
+    This object manages a dedicated part of a ExperimentAnalysis GuiModule instance e.g:
+        - Backend   (ExperimentAnalysis base class)
+        - Notifiers (core and current)
+        - Settings  (Tab containing setting widgets)
+        - Panels    (Frame containing tables, plotting etc)
+        - Files     (I/O)
 
-    Managers are created internally when you create a ExperimentAnalysis GuiModule.
+    Handlers are created internally when you create a ExperimentAnalysis GuiModule.
     You interact with them later, e.g. when you want to start the backend
-    process or when you want to install/retrieve a mode or a panel.
+    process or when you want to install/retrieve a panel.
 
-    ::
-        ea = ExperimentAnalysis()
-
+    example:
+        experimentAnalysis = ExperimentAnalysis()
         # use the backend manager to start the backend server
-        ea.backend.start(...)
-        ea.backend.calculate(...)
-
+        experimentAnalysis.backend.start(...)
+        experimentAnalysis.backend.calculate(...)
         # use the panels controller to install a panel
-        ea.panels.install(MyPanel(), MyPanel.Position.Right)
-        panel = editor.panels.get(MyPanel)
-        # and so on
+        experimentAnalysis.panels.install(MyPanel(name))
+        panel = experimentAnalysis.panels.get(name)
+        # etc
 
     """
 
@@ -69,7 +70,7 @@ class ExperimentAnalysisManager(object):
         :param guiModule: The GuiModule instance to control
         """
         self._guiModule = guiModule
-
+        self.start()
 
     def start(self):
         pass
@@ -78,7 +79,7 @@ class ExperimentAnalysisManager(object):
         pass
 
 
-class PanelHandler(ExperimentAnalysisManager):
+class PanelHandler(ExperimentAnalysisHandlerABC):
     """
     Manages the list of panels and adds them to the GuiModule.
     """
@@ -89,27 +90,26 @@ class PanelHandler(ExperimentAnalysisManager):
         BottomFrame: ((2, 0), (2, 2)),
     }
 
-    def __init__(self, guiModule, includeSplitters=True):
+    def __init__(self, guiModule):
         super(PanelHandler, self).__init__(guiModule)
         self._marginSizes = (0, 0, 0, 0)
 
         self.panels = defaultdict()
         self._panelsByFrame = {k:[] for k in PanelPositions}
-        ## Setup the four main Frames: Top/Bottom Left/Right
+
+    def start(self):
+        """ Setup the four main Frames: Top/Bottom Left/Right """
         for frameName, gridDefs in self.gridPositions.items():
             grid, gridSpan = gridDefs
             setattr(self, frameName, Frame(self.guiModule.mainWidget, setLayout=True, grid=grid, gridSpan=gridSpan))
-
-        if includeSplitters:
-            self._setupSplitters()
-
+        self._setupSplitters()
         self.guiModule.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         self._setupFrameGeometries()
 
     def _setupSplitters(self):
         """
         Create splitters and add frames to them. There are two splitters:
-         - one "vertical" between the Top/Bottom frames,
+         - one "vertical" as it divides vertically the Top/Bottom frames,
          - one "horizontal" between the Left/Right frames .
         The Vertical is the primary splitter that contains the horizontal.
         The Vertical splitter is added to the mainWidget layout.
@@ -189,7 +189,7 @@ class PanelHandler(ExperimentAnalysisManager):
             panel.close()
 
 
-class SettingsPanelHandler(ExperimentAnalysisManager):
+class SettingsPanelHandler(ExperimentAnalysisHandlerABC):
     """
     Manages the list of Tab settings and adds them to the GuiModule settingsWidget.
     """

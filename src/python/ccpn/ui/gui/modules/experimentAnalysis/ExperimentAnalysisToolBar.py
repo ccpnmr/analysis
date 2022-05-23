@@ -1,0 +1,115 @@
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
+__reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
+                 "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
+                 "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
+#=========================================================================================
+# Last code modification
+#=========================================================================================
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-05-23 19:35:29 +0100 (Mon, May 23, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: Luca Mureddu $"
+__date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
+#=========================================================================================
+# Start of code
+#=========================================================================================
+
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
+######## gui/ui imports ########
+from PyQt5 import QtCore, QtWidgets
+from ccpn.ui.gui.widgets.Label import Label, DividerLabel
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.Button import Button
+
+
+FilterButton = 'filterButton'
+UpdateButton = 'updateButton'
+ShowStructureButton = 'showStructureButton'
+Callback = 'Callback'
+
+class ToolBarPanel(GuiPanel):
+
+    position = 0
+    panelName = 'ToolBar'
+    toolButtonsDefs = {
+                FilterButton:{
+                                   'text' : '',
+                                   'icon':'icons/filter',
+                                   'tipText':'Apply filters as defined in settings',
+                                   'toggle':True,
+                                   'callback':f'_{FilterButton}{Callback}',
+                                   'objectName':FilterButton,
+                                },
+
+                UpdateButton:{
+                                   'text' : '',
+                                   'icon':'icons/update',
+                                   'tipText':'Update all data and GUI',
+                                   'toggle':False,
+                                   'callback':f'_{UpdateButton}{Callback}',
+                                   'objectName':UpdateButton,
+                                },
+                ShowStructureButton: {
+                                'text': '',
+                                'icon': 'icons/showStructure',
+                                'tipText': 'Show on Molecular Viewer',
+                                'toggle': False,
+                                'callback': f'_{ShowStructureButton}{Callback}',
+                                'objectName': UpdateButton,
+                            }}
+    toolButtons = {}
+
+    def __init__(self, guiModule, *args, **Framekwargs):
+
+        GuiPanel.__init__(self, guiModule, *args , **Framekwargs)
+        self.setMaximumHeight(100)
+
+
+    def initWidgets(self):
+        colPos = 0
+        label = Label(self, text='DataTable:', vAlign='l', grid=(0, colPos))
+        colPos += 1
+        self._dataTablePulldown = PulldownList(parent=self, callback=None, grid=(0, colPos))
+        colPos += 1
+        _dividerLabel = DividerLabel(self, grid=(0, colPos))
+        colPos += 1
+        self._initButtons(colPos)
+        self.getLayout().setAlignment(QtCore.Qt.AlignLeft)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
+
+        #  temp hide filter button
+        self.getButton(FilterButton).hide()
+
+    def _initButtons(self, colPos):
+        for i, buttonName in enumerate(self.toolButtonsDefs, start=1):
+            colPos+=i
+            callbackAtt = self.toolButtonsDefs.get(buttonName).pop('callback')
+            button = Button(self, **self.toolButtonsDefs.get(buttonName), grid=(0, colPos))
+            callback = getattr(self, callbackAtt or '', None)
+            button.setCallback(callback)
+            button.setMaximumHeight(25)
+            button.setMaximumWidth(25)
+            setattr(self, buttonName, button)
+            self.toolButtons.update({buttonName:button})
+
+    def getButton(self, name):
+        return self.toolButtons.get(name)
+
+    def _filterButtonCallback(self):
+        print('Clicked _filterButtonCallback')
+
+    def _updateButtonCallback(self):
+        print('Clicked _updateButtonCallback')
+
+    def _showStructureButtonCallback(self):
+        print('Clicked _showStructureButtonCallback')
+

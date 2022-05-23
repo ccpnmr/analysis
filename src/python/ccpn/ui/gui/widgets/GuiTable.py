@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-19 11:39:58 +0100 (Thu, May 19, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-05-23 19:35:54 +0100 (Mon, May 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -88,7 +88,13 @@ def __sortByColumn__(self, col, newOrder):
 blankId = SimpleNamespace(className='notDefined', serial=0)
 
 MODULEIDS = {}
-
+NAME    = 'name'
+GETTER  = 'getter'
+SETTER  = 'setter'
+TIPTEXT = 'tipText'
+FORMAT  = 'format'
+WIDTH   = 'width'
+HIDDEN  = 'hidden'
 
 def _moduleId(module):
     return MODULEIDS[id(module)] if id(module) in MODULEIDS else -1
@@ -205,6 +211,27 @@ def _colourTableByValue(table, values, removeValueFromTable=True):
                     i.setBackground(colour)
         except Exception as e:
             getLogger().debug('Error setting colour on table row. %s' % e)
+
+def _oneLiner(theString):
+    """ Remove returns from string. E.g. the one in column Headers"""
+    return theString.replace("\n", " ")
+
+def _makeTipText(columName, tipText):
+    """Make a TipText by joining Column name and tipText to same string """
+    return f'{_oneLiner(columName)}\n{tipText}'
+
+def _getHiddenColumns(table):
+    hidden =[]
+    for i in table._columnsDefs:
+        if table._columnsDefs[i].get(HIDDEN):
+            hidden.append(i)
+    return hidden
+
+def _resizeColumnWidths(table):
+    columnsWidths = {}
+    for i in table._columnsDefs:
+        columnsWidths.update({i: table._columnsDefs[i].get(WIDTH)})
+    table._setColumnWidths(columnsWidths)
 
 
 class GuiTable(TableWidget, Base):

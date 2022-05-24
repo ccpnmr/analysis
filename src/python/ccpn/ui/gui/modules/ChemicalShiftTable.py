@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-06 11:44:43 +0100 (Wed, April 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-24 15:15:22 +0100 (Tue, May 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1210,8 +1210,11 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
         # self.updateTableExpanders()
 
     def _updateTableCallback(self, data):
-        # print(f'>>> _updateTableCallback')
-        pass
+        # check the trigger and the current pulldown and update accordingly
+        trigger = data[Notifier.TRIGGER]
+
+        if trigger == Notifier.RENAME and data[Notifier.OBJECT] == self.moduleParent._modulePulldown.getSelectedObject():
+            self.populateTable(selectedObjects=self.current.chemicalShifts)
 
     def _updateCellCallback(self, data):
         # print(f'>>> _updateCellCallback')

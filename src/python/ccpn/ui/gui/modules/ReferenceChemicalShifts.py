@@ -4,19 +4,19 @@ Module documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-06-04 19:38:31 +0100 (Fri, June 04, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-05-24 14:03:58 +0100 (Tue, May 24, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,9 +25,12 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-
+import numpy as np
+from functools import partial
 import pyqtgraph as pg
-from PyQt5 import QtWidgets
+from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, MEDIUM_BLUE, GUISTRIP_PIVOT, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_GRID, CCPNGLWIDGET_LABELLING
+from ccpn.ui.gui.widgets.Font import Font, getFont
+from PyQt5 import QtWidgets, QtCore, QtGui
 from ccpn.core.lib.AssignmentLib import CCP_CODES
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
@@ -35,7 +38,20 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.util.Colour import spectrumHexDarkColours, spectrumHexLightColours
 from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXBACKGROUND
 from ccpn.ui.gui.widgets.Frame import Frame
-
+from ccpn.ui.gui.widgets.ToolBar import ToolBar
+from ccpn.ui.gui.widgets.Action import Action
+from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours
+# GridFont = Font('Helvetica', 16, bold=True)
+GridFont = getFont()
+BackgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
+OriginAxes = pg.functions.mkPen(hexToRgb(getColours()[GUISTRIP_PIVOT]), width=1, style=QtCore.Qt.DashLine)
+SelectedPoint = pg.functions.mkPen(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
+SelectedLabel = pg.functions.mkBrush(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
+c = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
+GridPen = pg.functions.mkPen(c, width=1, style=QtCore.Qt.SolidLine)
+bc = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
 
 class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else the drop events are not processed
 
@@ -56,26 +72,71 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
                                     grid=(0, 0), gridSpan=(1, 1),
                                     hPolicy='ignored'
                                     )
+
         self._RCwidget = Frame(self._RCwidgetFrame, setLayout=True,
                                grid=(0, 0), gridSpan=(1, 1),
-                               hPolicy='minimumExpanding',
                                hAlign='l', margins=(5, 5, 5, 5))
+        self._TBFrame = Frame(self._RCwidgetFrame, setLayout=True,
+                               grid=(1, 0), gridSpan=(1, 1),
+                               hAlign='l', margins=(5, 5, 5, 5))
+
         self._RCwidget.getLayout().setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
 
-        bc = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
-        self.plotWidget = pg.PlotWidget(background=bc)
-        self.plotWidget.invertX()
-        self.mainWidget.getLayout().addWidget(self.plotWidget, 1, 0, 1, 1)
-        self.plotWidget.plotItem.addLegend(offset=[1, 10])
-
         self.residueTypeLabel = Label(self._RCwidget, "Residue Type:", grid=(0, 0))
-        self.residueTypePulldown = PulldownList(self._RCwidget, callback=self._updateModule, grid=(0, 1))
+        self.residueTypePulldown = PulldownList(self._RCwidget, callback=self._updateModule, hAlign='l', grid=(0, 1))
         self.residueTypePulldown.setData(CCP_CODES)
         self.atomTypeLabel = Label(self._RCwidget, 'Atom Type:', grid=(0, 2))
-        self.atomTypePulldown = PulldownList(self._RCwidget, callback=self._updateModule, grid=(0, 3))
+        self.atomTypePulldown = PulldownList(self._RCwidget, callback=self._updateModule, hAlign='l', grid=(0, 3))
+        self.zoomAllButton = Button(self._RCwidget, icon=Icon('icons/zoom-full'), callback=self._zoomAllCallback, hAlign='l',grid=(0, 4))
+        self.zoomAllButton.setFixedSize(25,25)
         self.atomTypePulldown.setData(['Hydrogen', 'Heavy'])
+        self.toolBar = ToolBar(self._TBFrame,  grid=(0, 0))
 
+        self.plotWidget = pg.PlotWidget(background=bc)
+        self.plotWidget.invertX()
+        self.mainWidget.getLayout().addWidget(self.plotWidget, 2, 0, 1, 1)
+
+        self.plots = {}
+        self._setupPlot()
+
+        # cross hair
+        self.vLine = pg.InfiniteLine(angle=90, label='H', movable=False, pen=GridPen, labelOpts={'color':c})
+        self.hLine = pg.InfiniteLine(pos=0, angle=0, movable=False, pen=GridPen)
+        self.plotWidget.addItem(self.vLine,  ignoreBounds=True,)
+        self.plotWidget.addItem(self.hLine, ignoreBounds=True,)
+        self.viewBox = self.plotWidget.plotItem.vb
+        self.plotWidget.scene().sigMouseMoved.connect(self.mouseMoved)
+        self.plotWidget.plotItem.autoBtn.setOpacity(0.0)
+        self.plotWidget.plotItem.autoBtn.enabled = False
         self._updateModule()
+
+    def _zoomAllCallback(self):
+        self.plotWidget.plotItem.autoRange()
+
+    def mouseMoved(self, event):
+        # self.plotWidget.plotItem.autoBtn.hide() #make sure is never shown
+        position = event
+        mousePoint = self.viewBox.mapSceneToView(position)
+        x = mousePoint.x()
+        y = mousePoint.y()
+        self.vLine.setPos(x)
+        self.vLine.label.setText(str(round(x,3)))
+
+    def clearPlot(self):
+        """ Clear plot but keep infinite lines"""
+        for item in self.viewBox.addedItems:
+            if not isinstance(item, pg.InfiniteLine):
+                self.viewBox.removeItem(item)
+        for ch in self.viewBox.childGroup.childItems():
+            if not isinstance(ch, pg.InfiniteLine):
+                self.viewBox.removeItem(ch)
+
+    def _setupPlot(self):
+        self.plotWidget.plotItem.getAxis('bottom').setPen(GridPen)
+        self.plotWidget.plotItem.getAxis('left').setPen(GridPen)
+        self.plotWidget.plotItem.getAxis('bottom').tickFont = GridFont
+        self.plotWidget.plotItem.getAxis('left').tickFont = GridFont
+        self.plotWidget.showGrid(x=False, y=False)
 
     def _getDistributionForResidue(self, ccpCode: str, atomType: str):
         """
@@ -103,7 +164,8 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
             for i in range(len(distribution)):
                 x.append(refValue + valuePerPoint * (i - refPoint))
                 y.append(distribution[i])
-            dataSets[atomName] = [x, y, colour]
+
+            dataSets[atomName] = [np.array(x), np.array(y), colour, ]
 
         return dataSets
 
@@ -112,14 +174,44 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         Updates the information displayed in the module when either the residue type or the atom type
         selectors are changed.
         """
-        self.plotWidget.clear()
-        while self.plotWidget.plotItem.legend.layout.count() > 0:
-            self.plotWidget.plotItem.legend.layout.removeAt(0)
-        self.plotWidget.plotItem.legend.items = []
-
-        self.plotWidget.showGrid(x=True, y=True)
+        self.clearPlot()
+        self.plots = {}
+        self.toolBar.clear()
+        self.plotWidget.showGrid(x=False, y=False)
         atomType = self.atomTypePulldown.currentText()
         ccpCode = self.residueTypePulldown.currentText()
         dataSets = self._getDistributionForResidue(ccpCode, atomType)
+        self.toolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
         for atomName, dataSet in dataSets.items():
-            self.plotWidget.plot(dataSet[0], dataSet[1], pen=dataSet[2], name=atomName, kargs={'clear': True})
+            xs = dataSet[0]
+            ys = dataSet[1]
+            color = dataSet[2]
+            plotPen = pg.functions.mkPen(color, width=2, style=QtCore.Qt.SolidLine)
+            plot = self.plotWidget.plot(xs, ys, pen=plotPen, name=atomName)
+            anchor=(-0.3,0.5) # try to don't overlap labels
+            textItem = pg.TextItem(atomName, color=color, anchor=anchor, angle=0, border='w', )
+            labelY = max(ys)
+            labelposXs = xs[ys==labelY]
+            labelX = labelposXs[0]
+            textItem.setPos(labelX, labelY+(np.random.random()*0.01))
+
+            self.plots.update({atomName:plot})
+            action = Action(self, text=atomName, callback=partial(self.toolbarActionCallback, plot, textItem),
+                            checked=True, shortcut=None, checkable=True)
+            action.setObjectName(atomName)
+            action.setIconText(atomName)
+            pixmap = QtGui.QPixmap(20, 5)
+            pixmap.fill(QtGui.QColor(color))
+            action.setIcon(QtGui.QIcon(pixmap))
+            self.toolBar.addAction(action)
+            self.plotWidget.addItem(textItem)
+            widgetAction = self.toolBar.widgetForAction(action)
+            widgetAction.setFixedSize(55, 30)
+        self._zoomAllCallback()
+
+
+    def toolbarActionCallback(self, plot, textItem):
+        checked = self.sender().isChecked()
+        if plot:
+            plot.setVisible(checked)
+            textItem.setVisible(checked)

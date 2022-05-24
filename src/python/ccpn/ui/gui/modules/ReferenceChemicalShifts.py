@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-24 16:33:28 +0100 (Tue, May 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-24 19:17:30 +0100 (Tue, May 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -47,7 +47,7 @@ from ccpn.core.lib.Notifiers import Notifier
 from collections import defaultdict
 from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours
 from ccpn.util.isotopes import isotopeCode2Nucleus, getIsotopeRecords
-
+from ccpn.AnalysisAssign.modules.NmrAtomAssigner import BACKBONEATOMS
 
 # GridFont = Font('Helvetica', 16, bold=True)
 GridFont = getFont()
@@ -99,8 +99,10 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         self.residueTypePulldown.setData(CCP_CODES)
         self.atomTypeLabel = Label(self._RCwidget, 'Atom Type:', grid=(0, 2))
         self.atomTypePulldown = PulldownList(self._RCwidget, callback=self._updateModule, hAlign='l', grid=(0, 3))
-        self.zoomAllButton = Button(self._RCwidget, icon=Icon('icons/zoom-full'), callback=self._zoomAllCallback, hAlign='l',grid=(0, 4))
+        self.zoomAllButton = Button(self._RCwidget, icon=Icon('icons/zoom-full'), tipText='Reset zoom',
+                                    callback=self._zoomAllCallback, hAlign='l',grid=(0, 4))
         self.zoomAllButton.setFixedSize(25,25)
+
         self.atomTypePulldown.setData([Hydrogen, Heavy])
         self.toolBar = ToolBar(self._TBFrame,  grid=(0, 0))
 
@@ -111,7 +113,7 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         self.plots = {}
         self._setupPlot()
 
-        # cross hair
+        # crosshair
         self.vLine = pg.InfiniteLine(angle=90, label='', movable=False, pen=GridPen, labelOpts={'color':c})
         self.hLine = pg.InfiniteLine(pos=0, angle=0, movable=False, pen=GridPen)
         self.plotWidget.addItem(self.vLine,  ignoreBounds=True,)
@@ -130,6 +132,20 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
                                          onceOnly=True)
         self.GLSignals = GLNotifier(parent=self, strip=None)
         self._updateModule()
+
+    # def _toggleBackboneAtoms(self):
+    #     items = []
+    #     isChecked = self.bbButton.isChecked()
+    #     for item in self.viewBox.addedItems:
+    #         atomName = getattr(item, 'atomName', None)
+    #         if atomName in BACKBONEATOMS:
+    #             items.append(item)
+    #     for item in items:
+    #         item.setVisible(isChecked)
+    #     for action in self.toolBar.actions():
+    #         if action.objectName() in BACKBONEATOMS:
+    #             action.setChecked(isChecked)
+
 
     def _zoomAllCallback(self):
         self.plotWidget.plotItem.autoRange()
@@ -156,6 +172,9 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         if pos:
             self.vLine.setPos(pos)
             self.vLine.label.setText(str(round(pos, 3)))
+        else:
+            self.vLine.setPos(-1000)
+            self.vLine.label.setText('')
 
 
     def mouseMoved(self, event):
@@ -241,12 +260,14 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
             color = dataSet[2]
             plotPen = pg.functions.mkPen(color, width=2, style=QtCore.Qt.SolidLine)
             plot = self.plotWidget.plot(xs, ys, pen=plotPen, name=atomName)
+            plot.atomName = atomName
             anchor=(-0.3,0.5) # try to don't overlap labels
             textItem = pg.TextItem(atomName, color=color, anchor=anchor, angle=0, border='w', )
             labelY = max(ys)
             labelposXs = xs[ys==labelY]
             labelX = labelposXs[0]
             textItem.setPos(labelX, labelY+(np.random.random()*0.01))
+            textItem.atomName = atomName
 
             self.plots.update({atomName:plot})
             action = Action(self, text=atomName, callback=partial(self.toolbarActionCallback, plot, textItem),

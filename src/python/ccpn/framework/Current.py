@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-16 18:10:23 +0100 (Mon, May 16, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-05-24 16:33:28 +0100 (Tue, May 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -82,7 +82,7 @@ _currentClasses = {
 
 _currentExtraFields = {
     'positions'      : {'docTemplate': "last cursor %s"},
-    'cursorPositions': {'singularOnly': True, 'docTemplate': 'last cursor %s - (posX,posY) tuple'},
+    'cursorPositions': {'singularOnly': False, 'docTemplate': 'last cursor %s - (posX,posY) tuple'},
     'axisCodes'      : {'singularOnly': True, 'docTemplate': 'last selected %s'},
     PCAcomponents    : {'docTemplate': 'last selected %s, of any obj kind'},
     MacroFiles       : {'docTemplate': 'last selected %s, of any obj kind'},

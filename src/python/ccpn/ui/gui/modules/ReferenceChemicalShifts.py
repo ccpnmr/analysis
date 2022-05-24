@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-24 14:03:58 +0100 (Tue, May 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-24 16:33:28 +0100 (Tue, May 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -42,7 +42,13 @@ from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
+from ccpn.core.lib.Notifiers import Notifier
+from collections import defaultdict
 from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours
+from ccpn.util.isotopes import isotopeCode2Nucleus, getIsotopeRecords
+
+
 # GridFont = Font('Helvetica', 16, bold=True)
 GridFont = getFont()
 BackgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
@@ -52,6 +58,11 @@ SelectedLabel = pg.functions.mkBrush(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_H
 c = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
 GridPen = pg.functions.mkPen(c, width=1, style=QtCore.Qt.SolidLine)
 bc = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
+
+Hydrogen = 'Hydrogen'
+Heavy = 'Heavy'
+Other = 'Other'
+H = 'H'
 
 class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else the drop events are not processed
 
@@ -66,8 +77,9 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         self.preferences = self.mainWindow.application.preferences
 
         self.mainWindow = mainWindow
+        self.current = self.mainWindow.current
         self.project = self.mainWindow.project
-
+        self.displayedAxisCodes = defaultdict(list)
         self._RCwidgetFrame = Frame(self.mainWidget, setLayout=True,
                                     grid=(0, 0), gridSpan=(1, 1),
                                     hPolicy='ignored'
@@ -89,7 +101,7 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         self.atomTypePulldown = PulldownList(self._RCwidget, callback=self._updateModule, hAlign='l', grid=(0, 3))
         self.zoomAllButton = Button(self._RCwidget, icon=Icon('icons/zoom-full'), callback=self._zoomAllCallback, hAlign='l',grid=(0, 4))
         self.zoomAllButton.setFixedSize(25,25)
-        self.atomTypePulldown.setData(['Hydrogen', 'Heavy'])
+        self.atomTypePulldown.setData([Hydrogen, Heavy])
         self.toolBar = ToolBar(self._TBFrame,  grid=(0, 0))
 
         self.plotWidget = pg.PlotWidget(background=bc)
@@ -100,7 +112,7 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         self._setupPlot()
 
         # cross hair
-        self.vLine = pg.InfiniteLine(angle=90, label='H', movable=False, pen=GridPen, labelOpts={'color':c})
+        self.vLine = pg.InfiniteLine(angle=90, label='', movable=False, pen=GridPen, labelOpts={'color':c})
         self.hLine = pg.InfiniteLine(pos=0, angle=0, movable=False, pen=GridPen)
         self.plotWidget.addItem(self.vLine,  ignoreBounds=True,)
         self.plotWidget.addItem(self.hLine, ignoreBounds=True,)
@@ -108,10 +120,43 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         self.plotWidget.scene().sigMouseMoved.connect(self.mouseMoved)
         self.plotWidget.plotItem.autoBtn.setOpacity(0.0)
         self.plotWidget.plotItem.autoBtn.enabled = False
+        self.viewBox.setMenuEnabled(enableMenu=False)
+
+        # GL crossHair notifier
+        self.mousePosNotifier = Notifier(self.current,
+                                         [Notifier.CURRENT],
+                                         targetName='cursorPositions',
+                                         callback=self.mousePosNotifierCallback,
+                                         onceOnly=True)
+        self.GLSignals = GLNotifier(parent=self, strip=None)
         self._updateModule()
 
     def _zoomAllCallback(self):
         self.plotWidget.plotItem.autoRange()
+
+    def mousePosNotifierCallback(self, *args):
+        """Set the vertical line based on current cursor position """
+        pos = None
+        axisCodeDict =  self.current.mouseMovedDict.get(1, {})
+        for currentAxisCode, currentAxisCodePos in axisCodeDict.items():
+            # try an exact match first
+            for displayedAxisCode in self.displayedAxisCodes:
+                exactCodes = self.displayedAxisCodes[displayedAxisCode]
+                for exactCode in exactCodes:
+                    if exactCode == currentAxisCode:
+                        pos = currentAxisCodePos[0]
+                        break
+                if pos is None:
+                    # try a first letter match
+                    if len(currentAxisCode)>0:
+                        if displayedAxisCode == currentAxisCode[0]:
+                            pos = currentAxisCodePos[0]
+                            break
+
+        if pos:
+            self.vLine.setPos(pos)
+            self.vLine.label.setText(str(round(pos, 3)))
+
 
     def mouseMoved(self, event):
         # self.plotWidget.plotItem.autoBtn.hide() #make sure is never shown
@@ -121,6 +166,10 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         y = mousePoint.y()
         self.vLine.setPos(x)
         self.vLine.label.setText(str(round(x,3)))
+        # mouseMovedDict = {'H':{'1H':5}}
+        # self.GLSignals._emitMouseMoved(source=self, coords=None, mouseMovedDict=mouseMovedDict,
+        #                                mainWindow=self.mainWindow)
+
 
     def clearPlot(self):
         """ Clear plot but keep infinite lines"""
@@ -166,8 +215,11 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
                 y.append(distribution[i])
 
             dataSets[atomName] = [np.array(x), np.array(y), colour, ]
+            self.displayedAxisCodes[atomName[0]].append(atomName)
 
         return dataSets
+
+
 
     def _updateModule(self, item=None):
         """
@@ -177,6 +229,7 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         self.clearPlot()
         self.plots = {}
         self.toolBar.clear()
+        self.displayedAxisCodes.clear()
         self.plotWidget.showGrid(x=False, y=False)
         atomType = self.atomTypePulldown.currentText()
         ccpCode = self.residueTypePulldown.currentText()

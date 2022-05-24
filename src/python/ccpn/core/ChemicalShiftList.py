@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-17 15:05:35 +0100 (Tue, May 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-24 17:58:08 +0100 (Tue, May 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -271,6 +271,7 @@ class ChemicalShiftList(AbstractWrapperObject):
 
         # add a spectrum/remove a spectrum
         _createSpectra = set(_spectra) - set(self.spectra)
+        _createCSL = set(spec.chemicalShiftList for spec in _createSpectra) - {None}
         _deleteSpectra = set(self.spectra) - set(_spectra)
         _createNmrAtoms = self._getNmrAtomsFromSpectra(_createSpectra)  # new nmrAtoms to add
         _deleteNmrAtoms = self._getNmrAtomsFromSpectra(_deleteSpectra)  # old nmrAtoms to update
@@ -295,6 +296,12 @@ class ChemicalShiftList(AbstractWrapperObject):
             firstCSL = self.project.chemicalShiftLists[0]
             for spec in _deleteSpectra:
                 spec.chemicalShiftList = firstCSL
+
+            # update the chemicalShiftLists that are now empty
+            for csl in _createCSL:
+                if not csl.spectra:
+                    for sh in csl.chemicalShifts:
+                        sh._static = True
 
             for nmrAtom in _newNmrAtoms:
                 self.newChemicalShift(nmrAtom=nmrAtom)

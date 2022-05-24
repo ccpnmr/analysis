@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-24 19:17:30 +0100 (Tue, May 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-24 19:35:56 +0100 (Tue, May 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -41,7 +41,9 @@ from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
 from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLNotifier import GLNotifier
 from ccpn.core.lib.Notifiers import Notifier
 from collections import defaultdict
@@ -63,6 +65,9 @@ Hydrogen = 'Hydrogen'
 Heavy = 'Heavy'
 Other = 'Other'
 H = 'H'
+Backbone = 'Backbone'
+SideChain = 'SideChain'
+All = 'All'
 
 class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else the drop events are not processed
 
@@ -99,8 +104,10 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         self.residueTypePulldown.setData(CCP_CODES)
         self.atomTypeLabel = Label(self._RCwidget, 'Atom Type:', grid=(0, 2))
         self.atomTypePulldown = PulldownList(self._RCwidget, callback=self._updateModule, hAlign='l', grid=(0, 3))
+        self.atomOptionsRadioButtons = RadioButtons(self._RCwidget, texts=[Backbone, SideChain, All],
+                                                    callback=self._toggleByAtom, selectedInd=2, grid=(0, 4))
         self.zoomAllButton = Button(self._RCwidget, icon=Icon('icons/zoom-full'), tipText='Reset zoom',
-                                    callback=self._zoomAllCallback, hAlign='l',grid=(0, 4))
+                                    callback=self._zoomAllCallback, hAlign='l',grid=(0, 5))
         self.zoomAllButton.setFixedSize(25,25)
 
         self.atomTypePulldown.setData([Hydrogen, Heavy])
@@ -133,18 +140,38 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         self.GLSignals = GLNotifier(parent=self, strip=None)
         self._updateModule()
 
-    # def _toggleBackboneAtoms(self):
-    #     items = []
-    #     isChecked = self.bbButton.isChecked()
-    #     for item in self.viewBox.addedItems:
-    #         atomName = getattr(item, 'atomName', None)
-    #         if atomName in BACKBONEATOMS:
-    #             items.append(item)
-    #     for item in items:
-    #         item.setVisible(isChecked)
-    #     for action in self.toolBar.actions():
-    #         if action.objectName() in BACKBONEATOMS:
-    #             action.setChecked(isChecked)
+    def _toggleByAtom(self):
+        """Toggle spectra if the atom name is in Backbone atoms.
+         Very ugly implemented but  all module should be replaced sooner than later... """
+        value = self.atomOptionsRadioButtons.get()
+        for item in self.viewBox.addedItems:
+            atomName = getattr(item, 'atomName', None)
+            if value == Backbone:
+                if atomName in BACKBONEATOMS:
+                    item.setVisible(True)
+                else:
+                    item.setVisible(False)
+            if value == SideChain:
+                if atomName not in BACKBONEATOMS:
+                    item.setVisible(True)
+                else:
+                    item.setVisible(False)
+        for action in self.toolBar.actions():
+            if value == Backbone:
+                if action.objectName() in BACKBONEATOMS:
+                    action.setChecked(True)
+                else:
+                    action.setChecked(False)
+            if value == SideChain:
+                if action.objectName() not in BACKBONEATOMS:
+                    action.setChecked(True)
+                else:
+                    action.setChecked(False)
+        if value == All:
+            for item in self.viewBox.addedItems:
+                item.setVisible(True)
+            for action in self.toolBar.actions():
+                action.setChecked(True)
 
 
     def _zoomAllCallback(self):
@@ -282,6 +309,7 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
             widgetAction = self.toolBar.widgetForAction(action)
             widgetAction.setFixedSize(55, 30)
         self._zoomAllCallback()
+        self._toggleByAtom()
 
 
     def toolbarActionCallback(self, plot, textItem):

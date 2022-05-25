@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-25 20:15:30 +0100 (Wed, May 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-25 20:32:28 +0100 (Wed, May 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -260,7 +260,7 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         Label(self._RCwidget, 'Select', grid=(0, col))
         col += 1
         self.atomOptionsRadioButtons = RadioButtons(self._RCwidget, texts=[Backbone, SideChain, All],
-                                                    callback=self._toggleByAtom, selectedInd=0, grid=(0, col))
+                                                    callback=self._updateModule, selectedInd=0, grid=(0, col))
         col += 1
         DividerLabel(self._RCwidget, hAlign='l', grid=(0, col))
         col += 1
@@ -556,8 +556,20 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         checked = self.sender().isChecked()
         for plotItem, textItem in zip(plotItems, textItems):
             if plotItem:
-                plotItem.setVisible(checked)
-                textItem.setVisible(checked)
+                # Need to check if is in backBone
+                value = self.atomOptionsRadioButtons.get()
+                atomName = getattr(plotItem, 'atomName', None)
+                if atomName:
+                    if value == Backbone:
+                        if atomName in self._backboneAtoms:
+                            plotItem.setVisible(checked)
+                            textItem.setVisible(checked)
+
+                    if value == SideChain:
+                        if atomName in self._sideChainAtoms:
+                            plotItem.setVisible(checked)
+                            textItem.setVisible(checked)
+
         ccpCodeTextItem.setVisible(checked)
         baselinePlot.setVisible(checked)
 

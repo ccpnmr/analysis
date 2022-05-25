@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-25 20:07:15 +0100 (Wed, May 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-25 20:15:30 +0100 (Wed, May 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -52,6 +52,7 @@ from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRand
 from ccpn.util.isotopes import isotopeCode2Nucleus, getIsotopeRecords
 from ccpn.AnalysisAssign.modules.NmrAtomAssigner import BACKBONEATOMS
 from ccpn.util.isotopes import name2IsotopeCode
+from ccpn.ui.gui.widgets.MessageDialog import showWarning, _stoppableProgressBar, progressManager
 
 CCPCODES = sorted(CCP_CODES)
 # GridFont = Font('Helvetica', 16, bold=True)
@@ -293,7 +294,8 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
                                          callback=self.mousePosNotifierCallback,
                                          onceOnly=True)
         self.GLSignals = GLNotifier(parent=self, strip=None)
-        self._updateModule()
+        with progressManager(self, f'Loading all available reference spectra. Please wait...'):
+            self._updateModule()
 
 
     def _toggleByAtom(self):

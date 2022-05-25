@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-24 15:15:22 +0100 (Tue, May 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-25 12:59:16 +0100 (Wed, May 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1199,13 +1199,18 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
 
     def refreshTable(self):
         # subclass to refresh the groups
-        _updateSimplePandasTable(self, self._df)
-        # self.updateTableExpanders()
+        # _updateSimplePandasTable(self, self._df)
+        # # self.updateTableExpanders()
+
+        # easier to re-populate from scratch
+        self.populateTable(selectedObjects=self.current.chemicalShifts)
 
     def setDataFromSearchWidget(self, dataFrame):
         """Set the data for the table from the search widget
         """
+        # update to the new sub-table
         _updateSimplePandasTable(self, dataFrame)
+        self._df = dataFrame
         # self._updateGroups(dataFrame)
         # self.updateTableExpanders()
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-24 19:35:56 +0100 (Tue, May 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-25 20:07:15 +0100 (Wed, May 25, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,10 +30,11 @@ from functools import partial
 import pyqtgraph as pg
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, MEDIUM_BLUE, GUISTRIP_PIVOT, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_GRID, CCPNGLWIDGET_LABELLING
 from ccpn.ui.gui.widgets.Font import Font, getFont
+from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import PaintModes
 from PyQt5 import QtWidgets, QtCore, QtGui
 from ccpn.core.lib.AssignmentLib import CCP_CODES
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.Label import Label, DividerLabel
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.util.Colour import spectrumHexDarkColours, spectrumHexLightColours
 from ccpn.ui.gui.guiSettings import getColours, CCPNGLWIDGET_HEXBACKGROUND
@@ -50,7 +51,9 @@ from collections import defaultdict
 from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours
 from ccpn.util.isotopes import isotopeCode2Nucleus, getIsotopeRecords
 from ccpn.AnalysisAssign.modules.NmrAtomAssigner import BACKBONEATOMS
+from ccpn.util.isotopes import name2IsotopeCode
 
+CCPCODES = sorted(CCP_CODES)
 # GridFont = Font('Helvetica', 16, bold=True)
 GridFont = getFont()
 BackgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
@@ -69,6 +72,143 @@ Backbone = 'Backbone'
 SideChain = 'SideChain'
 All = 'All'
 
+CurveColours4LightDisplay = \
+                     {'C': '#2b2a07', ## BB
+                      'CA': '#0c37f7',## BB
+                      'CB': '#f70505',## BB
+                      'CD': '#424242',
+                      'CD1': '#693737',
+                      'CD2': '#CD5C5C',
+                      'CE': '#A52A2A',
+                      'CE1': '#B22222',
+                      'CE2': '#800000',
+                      'CE3': '#8B0000',
+                      'CG': '#FF0000',
+                      'CG1': '#FA8072',
+                      'CG2': '#FF6347',
+                      'CH2': '#E9967A',
+                      'CZ': '#FF7F50',
+                      'CZ2': '#FF4500',
+                      'CZ3': '#FFA07A',
+                      'H': '#290f04',
+                      'HA': '#23a634', ## BB
+                      'HA2': '#8B4513',
+                      'HA3': '#F4A460',
+                      'HB': '#802382', ## BB
+                      'HB*': '#FF8C00',
+                      'HB2': '#DEB887',
+                      'HB3': '#D2B48C',
+                      'HD1': '#FFA500',
+                      'HD1*': '#B8860B',
+                      'HD2': '#DAA520',
+                      'HD2*': '#BDB76B',
+                      'HD21': '#808000',
+                      'HD22': '#6B8E23',
+                      'HD3': '#9ACD32',
+                      'HE': '#556B2F',
+                      'HE*': '#228B22',
+                      'HE1': '#32CD32',
+                      'HE2': '#006400',
+                      'HE21': '#008000',
+                      'HE22': '#2E8B57',
+                      'HE3': '#3CB371',
+                      'HG': '#66CDAA',
+                      'HG1': '#20B2AA',
+                      'HG1*': '#48D1CC',
+                      'HG12': '#2F4F4F',
+                      'HG13': '#008080',
+                      'HG2': '#008B8B',
+                      'HG2*': '#00CED1',
+                      'HG3': '#5F9EA0',
+                      'HH': '#00BFFF',
+                      'HH11': '#4682B4',
+                      'HH12': '#1E90FF',
+                      'HH2': '#6495ED',
+                      'HH21': '#4169E1',
+                      'HH22': '#191970',
+                      'HZ': '#000080',
+                      'HZ*': '#00008B',
+                      'HZ2': '#0000CD',
+                      'HZ3': '#0000FF',
+                      'N': '#167311', ## BB
+                      'ND1': '#483D8B',
+                      'ND2': '#7B68EE',
+                      'NE': '#9370DB',
+                      'NE1': '#663399',
+                      'NE2': '#8A2BE2',
+                      'NH1': '#4B0082',
+                      'NH2': '#9932CC',
+                      'NZ': '#9400D3',
+                      }
+
+CurveColours4DarkDisplay = {'C': '#b0f7ee',## BB
+                       'CA': '#a6c8f5',## BB
+                       'CB': '#a1f598',## BB
+                       'CD': '#d5f2f7',
+                       'CD1': '#8fadb3',
+                       'CD2': '#DCDCDC',
+                       'CE': '#F5F5F5',
+                       'CE1': '#FFFFFF',
+                       'CE2': '#F08080',
+                       'CE3': '#CD5C5C',
+                       'CG': '#FF0000',
+                       'CG1': '#FA8072',
+                       'CG2': '#FF6347',
+                       'CH2': '#E9967A',
+                       'CZ': '#FF7F50',
+                       'CZ2': '#FF4500',
+                       'CZ3': '#FFA07A',
+                       'H': '#e8e4e3', ##BB
+                       'HA': '#a5abf2',##BB
+                       'HA2': '#8B4513',
+                       'HA3': '#F4A460',
+                       'HB': '#fae769',##BB
+                       'HB*': '#FF8C00',
+                       'HB2': '#DEB887',
+                       'HB3': '#D2B48C',
+                       'HD1': '#FFDEAD',
+                       'HD1*': '#FFA500',
+                       'HD2': '#B8860B',
+                       'HD2*': '#DAA520',
+                       'HD21': '#FFD700',
+                       'HD22': '#F0E68C',
+                       'HD3': '#BDB76B',
+                       'HE': '#808000',
+                       'HE*': '#FFFF00',
+                       'HE1': '#6B8E23',
+                       'HE2': '#9ACD32',
+                       'HE21': '#556B2F',
+                       'HE22': '#ADFF2F',
+                       'HE3': '#7FFF00',
+                       'HG': '#7CFC00',
+                       'HG1': '#98FB98',
+                       'HG1*': '#90EE90',
+                       'HG12': '#228B22',
+                       'HG13': '#32CD32',
+                       'HG2': '#008000',
+                       'HG2*': '#00FF00',
+                       'HG3': '#2E8B57',
+                       'HH': '#3CB371',
+                       'HH11': '#00FF7F',
+                       'HH12': '#00FA9A',
+                       'HH2': '#66CDAA',
+                       'HH21': '#7FFFD4',
+                       'HH22': '#40E0D0',
+                       'HZ': '#20B2AA',
+                       'HZ*': '#48D1CC',
+                       'HZ2': '#008080',
+                       'HZ3': '#008B8B',
+                       'N': '#9ca899',##BB
+                       'ND1': '#00CED1',
+                       'ND2': '#5F9EA0',
+                       'NE': '#00BFFF',
+                       'NE1': '#87CEEB',
+                       'NE2': '#87CEFA',
+                       'NH1': '#4682B4',
+                       'NH2': '#1E90FF',
+                       'NZ': '#6495ED', }
+
+
 class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else the drop events are not processed
 
     includeSettingsWidget = False
@@ -85,6 +225,9 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         self.current = self.mainWindow.current
         self.project = self.mainWindow.project
         self.displayedAxisCodes = defaultdict(list)
+        self._backboneAtoms = set()
+        self._sideChainAtoms = set()
+
         self._RCwidgetFrame = Frame(self.mainWidget, setLayout=True,
                                     grid=(0, 0), gridSpan=(1, 1),
                                     hPolicy='ignored'
@@ -98,19 +241,33 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
                                hAlign='l', margins=(5, 5, 5, 5))
 
         self._RCwidget.getLayout().setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+        col = 0
+        self.residueTypeLabel = Label(self._RCwidget, "Residue Type:", grid=(0, col))
+        col +=1
+        self.residueTypePulldown = PulldownList(self._RCwidget, index=1, callback=self._updateModule, hAlign='l', grid=(0, col))
+        ccpnCodes = [All]+CCPCODES
+        self.residueTypePulldown.setData(ccpnCodes)
+        col += 1
+        self.atomTypeLabel = Label(self._RCwidget, 'Atom Type:', grid=(0, col))
+        col += 1
+        self.atomTypeRadioButtons = RadioButtons(self._RCwidget, texts=[Hydrogen, Heavy],
+                                                    callback=self._updateModule, selectedInd=1, grid=(0, col))
+        col += 1
+        DividerLabel(self._RCwidget, hAlign='l', grid=(0, col))
 
-        self.residueTypeLabel = Label(self._RCwidget, "Residue Type:", grid=(0, 0))
-        self.residueTypePulldown = PulldownList(self._RCwidget, callback=self._updateModule, hAlign='l', grid=(0, 1))
-        self.residueTypePulldown.setData(CCP_CODES)
-        self.atomTypeLabel = Label(self._RCwidget, 'Atom Type:', grid=(0, 2))
-        self.atomTypePulldown = PulldownList(self._RCwidget, callback=self._updateModule, hAlign='l', grid=(0, 3))
+        col += 1
+        Label(self._RCwidget, 'Select', grid=(0, col))
+        col += 1
         self.atomOptionsRadioButtons = RadioButtons(self._RCwidget, texts=[Backbone, SideChain, All],
-                                                    callback=self._toggleByAtom, selectedInd=2, grid=(0, 4))
+                                                    callback=self._toggleByAtom, selectedInd=0, grid=(0, col))
+        col += 1
+        DividerLabel(self._RCwidget, hAlign='l', grid=(0, col))
+        col += 1
+
         self.zoomAllButton = Button(self._RCwidget, icon=Icon('icons/zoom-full'), tipText='Reset zoom',
-                                    callback=self._zoomAllCallback, hAlign='l',grid=(0, 5))
+                                    callback=self._zoomAllCallback, hAlign='l',grid=(0, col))
         self.zoomAllButton.setFixedSize(25,25)
 
-        self.atomTypePulldown.setData([Hydrogen, Heavy])
         self.toolBar = ToolBar(self._TBFrame,  grid=(0, 0))
 
         self.plotWidget = pg.PlotWidget(background=bc)
@@ -122,9 +279,7 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
 
         # crosshair
         self.vLine = pg.InfiniteLine(angle=90, label='', movable=False, pen=GridPen, labelOpts={'color':c})
-        self.hLine = pg.InfiniteLine(pos=0, angle=0, movable=False, pen=GridPen)
         self.plotWidget.addItem(self.vLine,  ignoreBounds=True,)
-        self.plotWidget.addItem(self.hLine, ignoreBounds=True,)
         self.viewBox = self.plotWidget.plotItem.vb
         self.plotWidget.scene().sigMouseMoved.connect(self.mouseMoved)
         self.plotWidget.plotItem.autoBtn.setOpacity(0.0)
@@ -140,39 +295,33 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         self.GLSignals = GLNotifier(parent=self, strip=None)
         self._updateModule()
 
+
     def _toggleByAtom(self):
         """Toggle spectra if the atom name is in Backbone atoms.
          Very ugly implemented but  all module should be replaced sooner than later... """
         value = self.atomOptionsRadioButtons.get()
+
         for item in self.viewBox.addedItems:
+
             atomName = getattr(item, 'atomName', None)
-            if value == Backbone:
-                if atomName in BACKBONEATOMS:
-                    item.setVisible(True)
-                else:
-                    item.setVisible(False)
-            if value == SideChain:
-                if atomName not in BACKBONEATOMS:
-                    item.setVisible(True)
-                else:
-                    item.setVisible(False)
+            if atomName:
+                if value == Backbone:
+                    item.setVisible(atomName in self._backboneAtoms)
+
+                if value == SideChain:
+                    item.setVisible(atomName in self._sideChainAtoms)
+
         for action in self.toolBar.actions():
             if value == Backbone:
-                if action.objectName() in BACKBONEATOMS:
-                    action.setChecked(True)
-                else:
-                    action.setChecked(False)
+                action.setChecked(action.objectName() in self._backboneAtoms)
             if value == SideChain:
-                if action.objectName() not in BACKBONEATOMS:
-                    action.setChecked(True)
-                else:
-                    action.setChecked(False)
+                action.setChecked(action.objectName() in self._sideChainAtoms)
+
         if value == All:
             for item in self.viewBox.addedItems:
                 item.setVisible(True)
             for action in self.toolBar.actions():
                 action.setChecked(True)
-
 
     def _zoomAllCallback(self):
         self.plotWidget.plotItem.autoRange()
@@ -195,7 +344,6 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
                         if displayedAxisCode == currentAxisCode[0]:
                             pos = currentAxisCodePos[0]
                             break
-
         if pos:
             self.vLine.setPos(pos)
             self.vLine.label.setText(str(round(pos, 3)))
@@ -205,16 +353,31 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
 
 
     def mouseMoved(self, event):
-        # self.plotWidget.plotItem.autoBtn.hide() #make sure is never shown
+
         position = event
         mousePoint = self.viewBox.mapSceneToView(position)
         x = mousePoint.x()
-        y = mousePoint.y()
+        # y = mousePoint.y()
         self.vLine.setPos(x)
         self.vLine.label.setText(str(round(x,3)))
-        # mouseMovedDict = {'H':{'1H':5}}
-        # self.GLSignals._emitMouseMoved(source=self, coords=None, mouseMovedDict=mouseMovedDict,
-        #                                mainWindow=self.mainWindow)
+        atomPosDict = defaultdict(list)
+        isotopeCodePosDict = defaultdict(list)
+        ## find the item under the cursor position
+        for item in self.viewBox.addedItems:
+            if hasattr(item,'getData') and hasattr(item, 'atomName'):
+                xData,yData = item.getData()
+                xDataMin, xDataMax = np.min(xData), np.max(xData)
+                if (x > xDataMin) & (x < xDataMax):
+                    atomPosDict[item.atomName].append(x)
+                    isotope = name2IsotopeCode(item.atomName)
+                    isotopeCodePosDict[isotope].append(x)
+
+        mouseMovedDict = {0:isotopeCodePosDict,
+                          1:atomPosDict}
+
+        self.current.mouseMovedDict = mouseMovedDict
+        self.GLSignals._emitMouseMoved(source=None, coords=None, mouseMovedDict=mouseMovedDict,
+                                       mainWindow=self.mainWindow)
 
 
     def clearPlot(self):
@@ -222,15 +385,22 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         for item in self.viewBox.addedItems:
             if not isinstance(item, pg.InfiniteLine):
                 self.viewBox.removeItem(item)
+
         for ch in self.viewBox.childGroup.childItems():
             if not isinstance(ch, pg.InfiniteLine):
                 self.viewBox.removeItem(ch)
 
+
     def _setupPlot(self):
-        self.plotWidget.plotItem.getAxis('bottom').setPen(GridPen)
-        self.plotWidget.plotItem.getAxis('left').setPen(GridPen)
-        self.plotWidget.plotItem.getAxis('bottom').tickFont = GridFont
-        self.plotWidget.plotItem.getAxis('left').tickFont = GridFont
+
+        baxis = self.plotWidget.plotItem.getAxis('bottom')
+        baxis.tickFont = GridFont
+        baxis.setPen(GridPen)
+        baxis.setLabel('[ppm]')
+        lAxis = self.plotWidget.plotItem.getAxis('left')
+        lAxis.setStyle(tickLength=0, showValues=False)
+        lAxis.setLabel(' ')
+        lAxis.setPen(GridPen)
         self.plotWidget.showGrid(x=False, y=False)
 
     def _getDistributionForResidue(self, ccpCode: str, atomType: str):
@@ -251,37 +421,106 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
             x = []
             y = []
             if self.preferences.general.colourScheme == 'dark':
-                col = (11 + 7 * atomNames.index(atomName)) % len(spectrumHexLightColours) - 1
-                colour = spectrumHexLightColours[col]
+                colour = CurveColours4DarkDisplay.get(atomName, '#ffffff')
             else:
-                col = (11 + 7 * atomNames.index(atomName)) % len(spectrumHexDarkColours) - 1
-                colour = spectrumHexDarkColours[col]
+                colour = CurveColours4LightDisplay.get(atomName, '#000000')
             for i in range(len(distribution)):
                 x.append(refValue + valuePerPoint * (i - refPoint))
                 y.append(distribution[i])
 
             dataSets[atomName] = [np.array(x), np.array(y), colour, ]
             self.displayedAxisCodes[atomName[0]].append(atomName)
+            if atomName in BACKBONEATOMS:
+                self._backboneAtoms.add(atomName)
+            else:
+                self._sideChainAtoms.add(atomName)
 
         return dataSets
 
+    def _addBAseline(self, atomType, offset, ccpCode ):
+        maxBaseline = 20 if atomType == Hydrogen else 300
+        xBaseline = np.arange(0, maxBaseline)
+        yBaseline = np.array([offset] * len(xBaseline))
+        baselinePlot = self.plotWidget.plot(xBaseline, yBaseline, name=ccpCode, pen=GridPen)
+        return baselinePlot
 
+    def _showAllResidues(self, offset=0.175 ):
+        """
+        """
+        self.clearPlot()
+        self.plots = {}
+        self.toolBar.clear()
+        self.displayedAxisCodes.clear()
+        self.toolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+        self.plotWidget.showGrid(x=False, y=False)
+        atomType = self.atomTypeRadioButtons.get()
+        inititialOffset = 0
+        for i, ccpCode in enumerate(CCPCODES):
+            dataSets = self._getDistributionForResidue(ccpCode, atomType)
+            resCurves = []
+            textItems = []
+            baselinePlot = self._addBAseline(atomType, inititialOffset, ccpCode)
+            for atomName, dataSet in dataSets.items():
+                xs = dataSet[0]
+                ys = dataSet[1]+inititialOffset
+                color = dataSet[2]
+                plotPen = pg.functions.mkPen(color, width=2, style=QtCore.Qt.SolidLine)
+                plot = self.plotWidget.plot(xs, ys, pen=plotPen, name=atomName)
+                plot.atomName = atomName
+                anchor=(-0.3,0.5) # try to don't overlap labels
+                textItem = pg.TextItem(atomName, color=color, anchor=anchor, angle=0 )
+                labelY = max(ys)
+                labelposXs = xs[ys==labelY]
+                labelX = labelposXs[0]
+                textItem.setPos(labelX, labelY+(np.random.random()*0.01))
+                textItems.append(textItem)
+                textItem.atomName = atomName
+                resCurves.append(plot)
+                self.plots.update({atomName:plot})
+                self.plotWidget.addItem(textItem)
+
+            ccpCodeTextItem = pg.TextItem(ccpCode, color=c, angle=0, border='w', anchor=(-0.1, 0.5) )
+            ccpCodeTextItem.setPos(0, inititialOffset)
+            self.plotWidget.addItem(ccpCodeTextItem)
+
+            action = Action(self, text=ccpCode,
+                            callback=partial(self.residueToolbarActionCallback, resCurves, textItems, ccpCodeTextItem, baselinePlot),
+                            checked=True, shortcut=None, checkable=True)
+            action.setObjectName(ccpCode)
+            action.setIconText(ccpCode)
+            self.toolBar.addAction(action)
+            widgetAction = self.toolBar.widgetForAction(action)
+            widgetAction.setFixedSize(55, 30)
+
+            inititialOffset += offset
+
+        self._zoomAllCallback()
+        self._toggleByAtom()
+        for action in self.toolBar.actions():
+            action.setChecked(True)
 
     def _updateModule(self, item=None):
         """
         Updates the information displayed in the module when either the residue type or the atom type
         selectors are changed.
         """
+
+        ccpCode = self.residueTypePulldown.currentText()
+        if ccpCode==All:
+            self._showAllResidues()
+            return
+        atomType = self.atomTypeRadioButtons.get()
         self.clearPlot()
         self.plots = {}
         self.toolBar.clear()
         self.displayedAxisCodes.clear()
         self.plotWidget.showGrid(x=False, y=False)
-        atomType = self.atomTypePulldown.currentText()
-        ccpCode = self.residueTypePulldown.currentText()
         dataSets = self._getDistributionForResidue(ccpCode, atomType)
         self.toolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-        for atomName, dataSet in dataSets.items():
+        sortedAtomNames = sorted(dataSets.keys(), key=lambda x: x.lower())
+        self._addBAseline(atomType, 0, ccpCode)
+        for atomName in sortedAtomNames:
+            dataSet = dataSets[atomName]
             xs = dataSet[0]
             ys = dataSet[1]
             color = dataSet[2]
@@ -311,6 +550,14 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         self._zoomAllCallback()
         self._toggleByAtom()
 
+    def residueToolbarActionCallback(self, plotItems, textItems, ccpCodeTextItem, baselinePlot):
+        checked = self.sender().isChecked()
+        for plotItem, textItem in zip(plotItems, textItems):
+            if plotItem:
+                plotItem.setVisible(checked)
+                textItem.setVisible(checked)
+        ccpCodeTextItem.setVisible(checked)
+        baselinePlot.setVisible(checked)
 
     def toolbarActionCallback(self, plot, textItem):
         checked = self.sender().isChecked()

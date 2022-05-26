@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-23 19:35:28 +0100 (Mon, May 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-26 12:06:36 +0100 (Thu, May 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,6 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 This module contains the GUI panel API.
 """
 
-
 from ccpn.util.DataEnum import DataEnum
 from ccpn.ui.gui.widgets.Frame import Frame
 
@@ -38,7 +37,6 @@ RightFrame = 'RightFrame'
 BottomFrame = 'BottomFrame'
 
 PanelPositions = [TopFrame, LeftFrame, RightFrame, BottomFrame]
-
 
 class PanelPositionData(DataEnum):
     TOP = 0, TopFrame
@@ -53,7 +51,6 @@ class GuiPanel(Frame):
     """
     position = -1
     panelName = 'panelName'
-
 
     def __init__(self, guiModule, *args, **Framekwargs):
 
@@ -72,4 +69,3 @@ class GuiPanel(Frame):
     def close(self):
         """ de-register anything left or close table etc"""
         pass
-

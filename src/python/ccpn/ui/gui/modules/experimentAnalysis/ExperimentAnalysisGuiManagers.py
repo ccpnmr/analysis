@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-23 19:35:28 +0100 (Mon, May 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-26 12:06:36 +0100 (Thu, May 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,10 +26,10 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 import weakref
 from collections import defaultdict
 from PyQt5 import QtCore, QtWidgets
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel, PanelPositions,\
-    TopFrame, BottomFrame, LeftFrame, RightFrame
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import PanelPositions, TopFrame, BottomFrame,\
+    LeftFrame, RightFrame
 from ccpn.ui.gui.widgets.Tabs import Tabs
-from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
+from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Splitter import Splitter
 
 
@@ -65,12 +65,14 @@ class ExperimentAnalysisHandlerABC(object):
         """
         return self._guiModule
 
-    def __init__(self, guiModule):
+    def __init__(self, guiModule, autoStart=True):
         """
         :param guiModule: The GuiModule instance to control
+        :param autoStart: bool. True to start the handler processes.
         """
         self._guiModule = guiModule
-        self.start()
+        if autoStart:
+            self.start()
 
     def start(self):
         pass
@@ -78,10 +80,13 @@ class ExperimentAnalysisHandlerABC(object):
     def close(self):
         pass
 
+####################################################################################
+#########################      The Various Handlers        #########################
+####################################################################################
 
 class PanelHandler(ExperimentAnalysisHandlerABC):
     """
-    Manages the list of panels and adds them to the GuiModule.
+    Manages the list of Gui Panels and adds them to the GuiModule.
     """
     gridPositions = {
         TopFrame :   ((0, 0), (1, 2)), #grid and gridSpan
@@ -93,7 +98,6 @@ class PanelHandler(ExperimentAnalysisHandlerABC):
     def __init__(self, guiModule):
         super(PanelHandler, self).__init__(guiModule)
         self._marginSizes = (0, 0, 0, 0)
-
         self.panels = defaultdict()
         self._panelsByFrame = {k:[] for k in PanelPositions}
 
@@ -105,6 +109,44 @@ class PanelHandler(ExperimentAnalysisHandlerABC):
         self._setupSplitters()
         self.guiModule.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         self._setupFrameGeometries()
+
+    def append(self, panel):
+        """
+        Installs a panel in the proper frame of the MainWidget .
+        :param panel: Panel to install
+        :return: The installed panel
+        """
+        panel.onInstall()
+        self._addToLayout(panel)
+        return panel
+
+    def _addToLayout(self, panel):
+        frameAttr = panel._panelPositionData.description
+        frame = getattr(self, frameAttr, None)
+        if frame is not None:
+            frame.getLayout().addWidget(panel)
+            self._panelsByFrame[frameAttr].append(panel)
+            self.panels.update({panel.panelName:panel})
+
+    def clear(self):
+        """
+        Removes all panel from the Module.
+        """
+        pass
+
+    def close(self):
+        for name, panel in self.panels.items():
+            panel.close()
+
+    def getPanel(self, name):
+        panel = self.panels.get(name)
+        return panel
+
+    def getFrame(self, name):
+        frame = getattr(self, name)
+        return frame
+
+    ######## Private methods ######
 
     def _setupSplitters(self):
         """
@@ -130,48 +172,6 @@ class PanelHandler(ExperimentAnalysisHandlerABC):
             frame = self.getFrame(ff)
             frame.getLayout().setAlignment(QtCore.Qt.AlignTop)
 
-    def append(self, panel):
-        """
-        Installs a panel in the proper frame of the MainWidget .
-        :param panel: Panel to install
-        :return: The installed panel
-        """
-        panel.onInstall()
-        self._addToLayout(panel)
-        return panel
-
-    def _addToLayout(self, panel):
-
-        frameAttr = panel._panelPositionData.description
-        frame = getattr(self, frameAttr, None)
-        if frame is not None:
-            frame.getLayout().addWidget(panel)
-            self._panelsByFrame[frameAttr].append(panel)
-            self.panels.update({panel.panelName:panel})
-
-    def hidePanel(self, name):
-        """
-        """
-        panel = self.panels.get(name)
-        if panel:
-            panel.on_uninstall()
-            panel.hide()
-        return panel
-
-    def clear(self):
-        """
-        Removes all panel from the Module.
-        """
-        pass
-
-    def getPanel(self, name):
-        panel = self.panels.get(name)
-        return panel
-
-    def getFrame(self, name):
-        frame = getattr(self, name)
-        return frame
-
     def __iter__(self):
         lst = []
         for name, panel in self.panels.items():
@@ -183,10 +183,6 @@ class PanelHandler(ExperimentAnalysisHandlerABC):
         for name, panel in self.panels.items():
             lst.append(panel)
         return len(lst)
-
-    def close(self):
-        for name, panel in self.panels.items():
-            panel.close()
 
 
 class SettingsPanelHandler(ExperimentAnalysisHandlerABC):
@@ -209,3 +205,26 @@ class SettingsPanelHandler(ExperimentAnalysisHandlerABC):
         self.settingsTabWidget.insertTab(panel.tabPosition, panel, panel.tabName)
         self._panels.update({panel.tabPosition:panel})
 
+    def close(self):
+        pass
+
+class BackendHandler(ExperimentAnalysisHandlerABC):
+    """
+    Manages the no-Gui machinery of the GuiModule.
+    This only for consistency. Not sure if adds an extra layer of complexity to get to data.
+    """
+    def start(self):
+        pass
+        # needs to start the backend engines and notifiers for settingsChanged
+        # self.settingsChanged.register(self.updateAll)
+        # self.settingsChanged.setSilentCallback(self._silentCallback)
+
+    def close(self):
+        pass
+        ## close the settings-Changed notifiers etc
+
+class IOHandler(ExperimentAnalysisHandlerABC):
+    """
+    Manages the I/O machinery of the GuiModule.
+    """
+    pass

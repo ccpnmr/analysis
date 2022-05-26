@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-23 19:35:29 +0100 (Mon, May 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-26 12:06:36 +0100 (Thu, May 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -23,6 +23,7 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 # Start of code
 #=========================================================================================
 
+from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
 ######## gui/ui imports ########
 from PyQt5 import QtCore, QtWidgets
@@ -30,49 +31,49 @@ from ccpn.ui.gui.widgets.Label import Label, DividerLabel
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Button import Button
 
-
 FilterButton = 'filterButton'
 UpdateButton = 'updateButton'
 ShowStructureButton = 'showStructureButton'
 Callback = 'Callback'
 
 class ToolBarPanel(GuiPanel):
+    """
+    A GuiPanel containing the ToolBar Widgets for the Experimental Analysis Module
+    """
 
     position = 0
     panelName = 'ToolBar'
     toolButtonsDefs = {
-                FilterButton:{
-                                   'text' : '',
-                                   'icon':'icons/filter',
-                                   'tipText':'Apply filters as defined in settings',
-                                   'toggle':True,
-                                   'callback':f'_{FilterButton}{Callback}',
-                                   'objectName':FilterButton,
-                                },
+        FilterButton: {
+            'text': '',
+            'icon': 'icons/filter',
+            'tipText': 'Apply filters as defined in settings',
+            'toggle': True,
+            'callback': f'_{FilterButton}{Callback}',
+            'objectName': FilterButton,
+        },
 
-                UpdateButton:{
-                                   'text' : '',
-                                   'icon':'icons/update',
-                                   'tipText':'Update all data and GUI',
-                                   'toggle':False,
-                                   'callback':f'_{UpdateButton}{Callback}',
-                                   'objectName':UpdateButton,
-                                },
-                ShowStructureButton: {
-                                'text': '',
-                                'icon': 'icons/showStructure',
-                                'tipText': 'Show on Molecular Viewer',
-                                'toggle': False,
-                                'callback': f'_{ShowStructureButton}{Callback}',
-                                'objectName': UpdateButton,
-                            }}
+        UpdateButton: {
+            'text': '',
+            'icon': 'icons/update',
+            'tipText': 'Update all data and GUI',
+            'toggle': False,
+            'callback': f'_{UpdateButton}{Callback}',
+            'objectName': UpdateButton,
+        },
+        ShowStructureButton: {
+            'text': '',
+            'icon': 'icons/showStructure',
+            'tipText': 'Show on Molecular Viewer',
+            'toggle': False,
+            'callback': f'_{ShowStructureButton}{Callback}',
+            'objectName': UpdateButton,
+        }}
     toolButtons = {}
 
     def __init__(self, guiModule, *args, **Framekwargs):
-
         GuiPanel.__init__(self, guiModule, *args , **Framekwargs)
         self.setMaximumHeight(100)
-
 
     def initWidgets(self):
         colPos = 0
@@ -85,7 +86,6 @@ class ToolBarPanel(GuiPanel):
         self._initButtons(colPos)
         self.getLayout().setAlignment(QtCore.Qt.AlignLeft)
         self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
-
         #  temp hide filter button
         self.getButton(FilterButton).hide()
 
@@ -105,11 +105,11 @@ class ToolBarPanel(GuiPanel):
         return self.toolButtons.get(name)
 
     def _filterButtonCallback(self):
-        print('Clicked _filterButtonCallback')
+        getLogger().warn('Not implemented. Clicked _filterButtonCallback')
 
     def _updateButtonCallback(self):
-        print('Clicked _updateButtonCallback')
+        getLogger().warn('Not implemented. Clicked _updateButtonCallback')
 
     def _showStructureButtonCallback(self):
-        print('Clicked _showStructureButtonCallback')
+        getLogger().warn('Not implemented. Clicked _showStructureButtonCallback')
 

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-23 19:35:29 +0100 (Mon, May 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-26 12:06:36 +0100 (Thu, May 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -35,23 +35,24 @@ from ccpn.core.lib.ContextManagers import notificationEchoBlocking
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiManagers import ExperimentAnalysisHandlerABC
 
 
-class _NotifierHandler(ExperimentAnalysisHandlerABC):
+class CoreNotifiersHandler(ExperimentAnalysisHandlerABC):
     """
     A private class containing all Notifiers for the ExperimentAnalysis GuiModule
     """
     _notifiers = {}
 
-
     def start(self):
         """ Initialise all notifiers for the guiModule """
-        self._setupNotifiers(self.guiModule)
-        getLogger().debug2(f'Setting up notifiers for {self.guiModule}')
+        if self.guiModule.mainWindow is not None:
+            self._setupNotifiers(self.guiModule)
+            getLogger().debug2(f'Setting up notifiers for {self.guiModule}')
+        else:
+            getLogger().debug(f'Cannot start notifiers for {self.guiModule}')
 
     def close(self):
         """ Unregister all notifiers for the guiModule """
         self._unRegisterNotifiers()
         getLogger().debug2(f'Unregistering notifiers for {self.guiModule}')
-
 
     @staticmethod
     def _setupNotifiers(gm):
@@ -60,52 +61,52 @@ class _NotifierHandler(ExperimentAnalysisHandlerABC):
         :return: None. Set the Notifiers for the GuiModule
         """
 
-        _NotifierHandler._notifiers.update({
+        CoreNotifiersHandler._notifiers.update({
             'onCurrentPeak'         : Notifier(gm.current,
-                                        [Notifier.CURRENT],
-                                        targetName=Peak._currentAttributeName,
-                                        callback=partial(_NotifierHandler._onCurrentPeak, gm),
-                                        onceOnly=True),
+                                               [Notifier.CURRENT],
+                                               targetName=Peak._currentAttributeName,
+                                               callback=partial(CoreNotifiersHandler._onCurrentPeak, gm),
+                                               onceOnly=True),
             'onCurrentNmrResidue'   : Notifier(gm.current,
-                                        [Notifier.CURRENT],
-                                        targetName=Substance._currentAttributeName,
-                                        callback=partial(_NotifierHandler.onCurrentNmrResidue, gm),
-                                        onceOnly=True),
+                                               [Notifier.CURRENT],
+                                               targetName=Substance._currentAttributeName,
+                                               callback=partial(CoreNotifiersHandler.onCurrentNmrResidue, gm),
+                                               onceOnly=True),
             'onDeletePeak'          : Notifier(gm.project,
-                                        [Notifier.DELETE],
-                                        targetName=Peak.className,
-                                        callback=partial(_NotifierHandler._peakDeleted, gm),
-                                        onceOnly=True),
+                                               [Notifier.DELETE],
+                                               targetName=Peak.className,
+                                               callback=partial(CoreNotifiersHandler._peakDeleted, gm),
+                                               onceOnly=True),
             'onCreatePeak'          : Notifier(gm.project,
-                                        [Notifier.CREATE],
-                                        targetName=Peak.className,
-                                        callback=partial(_NotifierHandler._peakCreated, gm),
-                                        onceOnly=True),
+                                               [Notifier.CREATE],
+                                               targetName=Peak.className,
+                                               callback=partial(CoreNotifiersHandler._peakCreated, gm),
+                                               onceOnly=True),
             'onChangePeak'          : Notifier(gm.project,
-                                        [Notifier.CHANGE],
-                                        targetName=Peak.className,
-                                        callback=partial(_NotifierHandler._peakChanged, gm),
-                                        onceOnly=True),
+                                               [Notifier.CHANGE],
+                                               targetName=Peak.className,
+                                               callback=partial(CoreNotifiersHandler._peakChanged, gm),
+                                               onceOnly=True),
             'onCreateDataTable'     : Notifier(gm.project,
-                                        [Notifier.CREATE],
-                                        targetName=DataTable.className,
-                                        callback=partial(_NotifierHandler._dataTableCreated, gm),
-                                        onceOnly=True),
+                                               [Notifier.CREATE],
+                                               targetName=DataTable.className,
+                                               callback=partial(CoreNotifiersHandler._dataTableCreated, gm),
+                                               onceOnly=True),
             'onRenameDataTable'     : Notifier(gm.project,
-                                        [Notifier.RENAME],
-                                        targetName=DataTable.className,
-                                        callback=partial(_NotifierHandler._dataTableRenamed, gm),
-                                        onceOnly=True),
+                                               [Notifier.RENAME],
+                                               targetName=DataTable.className,
+                                               callback=partial(CoreNotifiersHandler._dataTableRenamed, gm),
+                                               onceOnly=True),
             'onDeleteDataTable'     : Notifier(gm.project,
-                                        [Notifier.DELETE],
-                                        targetName=DataTable.className,
-                                        callback=partial(_NotifierHandler._dataTableDeleted, gm),
-                                        )
+                                               [Notifier.DELETE],
+                                               targetName=DataTable.className,
+                                               callback=partial(CoreNotifiersHandler._dataTableDeleted, gm),
+                                               )
         })
 
     @staticmethod
     def _unRegisterNotifiers():
-        for k,v in _NotifierHandler._notifiers.items():
+        for k,v in CoreNotifiersHandler._notifiers.items():
             if v is not None:
                 v.unRegister()
 

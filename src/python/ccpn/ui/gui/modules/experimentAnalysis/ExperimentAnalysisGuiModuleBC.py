@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-23 19:35:28 +0100 (Mon, May 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-26 12:06:36 +0100 (Thu, May 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -25,17 +25,19 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 
 ######## core imports ########
 from ccpn.framework.Application import getApplication, getCurrent, getProject
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisNotifierHandler import _NotifierHandler
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisNotifierHandler import CoreNotifiersHandler
 
 ######## gui/ui imports ########
 from PyQt5 import QtCore, QtWidgets
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiManagers import PanelHandler, SettingsPanelHandler
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiManagers import PanelHandler,\
+    SettingsPanelHandler, IOHandler, BackendHandler
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiSettingsPanel as settingsPanel
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import ToolBarPanel
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import ToolBarPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiTable import TablePanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisBarPlotPanel import BarPlotPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import FitPlotPanel
+
 
 #####################################################################
 #######################  The main GUI Module ########################
@@ -47,7 +49,6 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
     settingsPosition = 'left'
     className = 'ExperimentAnalysis'
 
-
     def __init__(self, mainWindow, name='Experiment Analysis', **kwds):
         super(ExperimentAnalysisGuiModuleBC, self)
         CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
@@ -56,27 +57,24 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         self.application = getApplication()
         self.current = getCurrent()
 
-        ## Setup the Notifiers
-        if self.mainWindow:
-            self._notifierHandler = _NotifierHandler(guiModule=self)
+        ## link to the Non-Gui backend and its Settings
+        self.backendHandler = BackendHandler(self)
 
-        ## link to the Non-Gui backend
-        # self._backend = SeriesAnalysisABC()
-        # self._backend.settingsChanged.register(self.updateAll)
-        # self._backend.settingsChanged.setSilentCallback(self._silentCallback)
-
-        ## settings on PeakChange queue
-        self._updateSilent = True
-        self.updatesOnPeakChanged = False
-        self._peaksChangedQueue = set() # temp store any peaks that have been changed but not refreshed on GUI
-
-        ## link to gui Panels
+        ## link to Gui Panels
         self.panelHandler = PanelHandler(self)
-        self.settingsPanelHandler = SettingsPanelHandler(self)
-        self._initPanels()
-        self._initSettingsPanel()
+        self._addCommonPanels()
 
-        ## the working dataTable which drives all
+        ## link to Gui Setting-Panels
+        self.settingsPanelHandler = SettingsPanelHandler(self)
+        self._addCommonSettingsPanels()
+
+        ## link to Core Notifiers (Project/Current)
+        self.coreNotifiersHandler = CoreNotifiersHandler(guiModule=self)
+
+        ## link to Core Notifiers (Project/Current)
+        self.ioHandler = IOHandler(guiModule=self)
+
+        ## the working dataTable which drives all Gui
         self._dataTable = None
 
         ## Startup with the first Data available
@@ -87,19 +85,21 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
     #####################      Data       ###########################
     #################################################################
 
+    ### Get the input/output dataTables via the backend.
 
     #################################################################
     #####################      Widgets    ###########################
     #################################################################
 
-
-    def _initPanels(self):
+    def _addCommonPanels(self):
+        """ Add the Gui Panels to the panelHandler.
+        Each Panel is a stand-alone frame with information where about to be added on the general GUI."""
         self.panelHandler.append(ToolBarPanel(self))
         self.panelHandler.append(TablePanel(self))
         self.panelHandler.append(FitPlotPanel(self))
         self.panelHandler.append(BarPlotPanel(self))
 
-    def _initSettingsPanel(self):
+    def _addCommonSettingsPanels(self):
         """
         Add the Settings Panels to the Gui. To retrieve a Panel use/see the settingsPanelsManager.
         """
@@ -110,25 +110,23 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
     #####################  Widgets callbacks  ###########################
     #####################################################################
 
-
     def restoreWidgetsState(self, **widgetsState):
-        self._updateSilent = True
         # with self.blockWidgetSignals():
         super().restoreWidgetsState(**widgetsState)
-        self._updateSilent = False
         ## restore and apply filters correctly
 
-
     def _closeModule(self):
-        ## de-register all notifiers
-        self._notifierHandler.close()
-        ## close tables
-        # pass
-        ## deregistr settingsChanged notifiers
-        # self.module -> .settingsChanged.deregister()
+        ## de-register/close all notifiers
+        self.coreNotifiersHandler.close()
+        self.panelHandler.close()
+        self.ioHandler.close()
+        self.settingsPanelHandler.close()
         super()._closeModule()
 
 
+#################################
+######    Testing GUI   #########
+#################################
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
@@ -136,7 +134,6 @@ if __name__ == '__main__':
     win = QtWidgets.QMainWindow()
     moduleArea = CcpnModuleArea(mainWindow=None, )
     m = ExperimentAnalysisGuiModuleBC(mainWindow=None)
-
     moduleArea.addModule(m)
     win.setCentralWidget(moduleArea)
     win.resize(1000, 500)

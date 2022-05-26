@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-26 12:06:36 +0100 (Thu, May 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-26 18:11:25 +0100 (Thu, May 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -143,7 +143,7 @@ class CoreNotifiersHandler(ExperimentAnalysisHandlerABC):
         getLogger().warn('_peakCreated notifier not implemented')
         pass
 
-    #### DataTableS ####
+    #### DataTables ####
     @staticmethod
     def _dataTableCreated(guiModule, data):
         getLogger().warn('_dataTableCreated notifier not implemented')

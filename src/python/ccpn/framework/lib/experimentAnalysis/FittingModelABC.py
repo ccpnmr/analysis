@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-26 10:27:10 +0100 (Thu, May 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-26 18:11:25 +0100 (Thu, May 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -54,10 +54,10 @@ class FittingModelABC(ABC):
     """
     The top level class for the FittingModel Object.
     """
-    ModelName = ''      # The Model name.
-    Info = ''           # A brief description of the fitting model.
-    Description = ''    # A simplified representation of the used equation(s).
-    References = ''     # A list of journal article references. E.g.: DOIs or title/authors/year/journal; web-pages.
+    ModelName = 'ModelName'      # The Model name.
+    Info = 'the info'            # A brief description of the fitting model.
+    Description = 'Description'  # A simplified representation of the used equation(s).
+    References = 'References'    # A list of journal article references. E.g.: DOIs or title/authors/year/journal; web-pages.
     Minimiser = None
     
     @abstractmethod

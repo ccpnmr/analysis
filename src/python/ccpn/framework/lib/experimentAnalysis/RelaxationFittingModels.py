@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-07 10:19:03 +0000 (Mon, March 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-26 10:27:10 +0100 (Thu, May 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -25,7 +25,6 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-
 
 from ccpn.core.DataTable import TableFrame
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
@@ -37,6 +36,9 @@ from collections import defaultdict
 from lmfit.models import update_param_vals
 import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 
+######################################################
+############  Private local functions  ###############
+######################################################
 
 def _popuplateResultInOutputData(outputFrame):
     outputDict = defaultdict(list)
@@ -50,6 +52,9 @@ def _popuplateResultInOutputData(outputFrame):
     for key in outputDict:
         outputFrame[key] = outputDict[key]
 
+###############################################################
+###########  T2 Relaxation Minimiser/Fitting Models   #########
+###############################################################
 
 class ExponentialModel(MinimiserModel):
     """
@@ -61,7 +66,6 @@ class ExponentialModel(MinimiserModel):
     def __init__(self, independent_vars=['x'], prefix='', nan_policy=sv.OMIT_MODE, **kwargs):
         kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
         super().__init__(ExponentialModel.FITTING_FUNC, **kwargs)
-
 
     def guess(self, data, x, **kws):
         """
@@ -95,8 +99,6 @@ class T2FittingModel(FittingModelABC):
 
     Minimiser = ExponentialModel
 
-
-
     def fitSeries(self, inputData: TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
 
         getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
@@ -119,6 +121,9 @@ class T2FittingModel(FittingModelABC):
         _popuplateResultInOutputData(outputFrame)
         return outputFrame
 
+###############################################################
+###########  T2 Relaxation Minimiser/Fitting Models   #########
+###############################################################
 
 class T1Model(MinimiserModel):
     """
@@ -130,7 +135,6 @@ class T1Model(MinimiserModel):
     def __init__(self, independent_vars=['x'], prefix='', nan_policy=sv.OMIT_MODE, **kwargs):
         kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
         super().__init__(ExponentialModel.FITTING_FUNC, **kwargs)
-
 
     def guess(self, data, x, **kws):
         """
@@ -153,17 +157,15 @@ class T1FittingModel(FittingModelABC):
     ModelName   = sv.T1
 
     Info        = '''
-                  
                   The model has two Parameters: `amplitude` (`A`) and `decay` (`tau`)
                   '''
     Description = ''' A *(1- e^{-x / tau })'''
     References  = '''
                   '''
-
     Minimiser = T1Model
 
     def fitSeries(self, inputData: TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
-
+        """Perform the fitting routine to the input DataTable. Return an output dataTable"""
         getLogger().warning(sv.UNDER_DEVELOPMENT_WARNING)
         xArray = np.array(inputData.SERIESSTEPS)
         minimiserResults = []

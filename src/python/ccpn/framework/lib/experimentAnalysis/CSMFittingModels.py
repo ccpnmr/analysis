@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-07 10:19:03 +0000 (Mon, March 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-26 10:27:10 +0100 (Thu, May 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -25,7 +25,6 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-
 
 import numpy as np
 from collections import defaultdict
@@ -41,7 +40,6 @@ import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
 ########################################################################################################################
 ####################################       Minimisers     ##############################################################
 ########################################################################################################################
-
 
 class FractionBindingMinimiser(MinimiserModel):
     """A model based on the fraction bound Fitting equation.
@@ -86,11 +84,9 @@ class Binding1SiteMinimiser(MinimiserModel):
         return params
 
 
-
 ########################################################################################################################
 ####################################    DataSeries Models    ###########################################################
 ########################################################################################################################
-
 
 class DeltaDeltaShiftsCalculation():
     """
@@ -104,7 +100,6 @@ class DeltaDeltaShiftsCalculation():
                     2) Mureddu, L. & Vuister, G. W. Simple high-resolution NMR spectroscopy as a tool in molecular biology.
                        FEBS J. 286, 2035–2042 (2019).
                   '''
-
     _alphaFactors = [sv.DEFAULT_H_ALPHAFACTOR, sv.DEFAULT_N_ALPHAFACTOR]
     _filteringAtoms = [sv._H, sv._N]
     _excludedResidueTypes = []
@@ -138,6 +133,10 @@ class DeltaDeltaShiftsCalculation():
         """
         outputFrame = DeltaDeltaShiftsCalculation._getDeltaDeltasOutputFrame(inputData, **kwargs)
         return outputFrame
+
+    #########################
+    ### Private functions ###
+    #########################
 
     @staticmethod
     def _calculateDeltaDeltas(data, alphaFactors):
@@ -219,7 +218,7 @@ class OneSiteBindingModel(FittingModelABC):
         ddc = DeltaDeltaShiftsCalculation()
         frame = ddc.calculateDeltaDeltaShift(inputData, **kwargs)
         xArray = np.array(inputData.SERIESSTEPS)
-        #TODO  rescale option
+        #TODO Missing rescale option
         outputDataDict = defaultdict(list)
         fittingResults = []
         for ix, row in frame.iterrows():
@@ -227,14 +226,12 @@ class OneSiteBindingModel(FittingModelABC):
             yArray = seriesValues.values
             model = self.Minimiser()
             params = model.guess(yArray, xArray)
-
             try:
                 result = model.fit(yArray, params, x=xArray)
             except:
                 getLogger().warning(f'Fitting Failed for: {row[sv._ROW_UID]} data.')
                 result = MinimiserResult(model, params)
             fittingResults.append(result)
-
             outputDataDict[sv._ROW_UID].append(row[sv._ROW_UID])
             for i, assignmentHeader in enumerate(inputData.assignmentHeaders[:-1]):  ## build new row for the output dataFrame as DefaultDict.
                 outputDataDict[assignmentHeader].append(row[assignmentHeader])  ## add common assignments definitions
@@ -262,11 +259,8 @@ class OneSiteBindingModel(FittingModelABC):
         outputFrame._valuesHeaders = inputData.valuesHeaders
         return outputFrame
 
-
-
-
-
-
+########################################################################################################################
+########################################################################################################################
 
 def _registerChemicalShiftMappingModels():
     """

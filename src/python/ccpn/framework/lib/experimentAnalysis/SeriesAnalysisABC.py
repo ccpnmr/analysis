@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-07 10:20:06 +0000 (Mon, March 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-26 10:27:10 +0100 (Thu, May 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -25,7 +25,6 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-
 
 from abc import ABC, abstractmethod
 from collections import defaultdict
@@ -39,7 +38,6 @@ class SeriesAnalysisABC(ABC):
     """
     The top level class for SeriesAnalysis modules.
     """
-
     seriesAnalysisName = ''
     fittingModels = OrderedSet()
 
@@ -53,13 +51,11 @@ class SeriesAnalysisABC(ABC):
         """
         return list(self._inputDataTables)
 
-
     def addInputDataTable(self, dataTable):
         """
         Add a DataTable as inputData
         """
         self._inputDataTables.add(dataTable)
-
 
     def getOutputDataTables(self, seriesFrameType:str=None):
         """
@@ -98,11 +94,10 @@ class SeriesAnalysisABC(ABC):
     def removeOutputData(self, dataTable):
         self._outputDataTables.discard(dataTable)
 
-
     @classmethod
     def fitInputData(self, *args, **kwargs):
         """
-        ovveride on custom implementation
+        override on custom implementation
         :param args:
         :param kwargs:
         :return: None
@@ -115,7 +110,6 @@ class SeriesAnalysisABC(ABC):
                                     according to its definitions.
 
         """
-        # TODO add logger system with params used in calculations
         pass
 
     @classmethod
@@ -141,7 +135,6 @@ class SeriesAnalysisABC(ABC):
         """
         dd = {model.ModelName:model for model in self.fittingModels}
         return dd.get(modelName, None)
-
 
     @staticmethod
     def newDataTableFromSpectrumGroup(spectrumGroup:SpectrumGroup, seriesTableType:str,
@@ -189,20 +182,13 @@ class SeriesAnalysisABC(ABC):
                 plt.close()
         pdf.close()
 
-
     def __init__(self, application):
-
         self.application = application
         self.project = self.application.project
         self._inputDataTables = OrderedSet()
         self._outputDataTables = OrderedSet()
 
-
-
     def __str__(self):
         return f'<{self.__class__.__name__}: {self.seriesAnalysisName}>'
 
     __repr__ = __str__
-
-
-

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-07 10:19:03 +0000 (Mon, March 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-26 10:27:10 +0100 (Thu, May 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,12 +26,10 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 # Start of code
 #=========================================================================================
 
-
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
 from ccpn.framework.lib.experimentAnalysis.RelaxationFittingModels import _registerRelaxationModels, RELAXATION_MODELS_DICT
 from ccpn.util.Logging import getLogger
-
 
 class RelaxationAnalysisBC(SeriesAnalysisABC):
     """
@@ -42,7 +40,6 @@ class RelaxationAnalysisBC(SeriesAnalysisABC):
     def __init__(self, application):
         super().__init__(application)
         _registerRelaxationModels()
-
 
     @staticmethod
     def newDataTableFromSpectrumGroup(spectrumGroup, seriesTableType=sv.RELAXATION_INPUT_FRAME,
@@ -65,7 +62,6 @@ class RelaxationAnalysisBC(SeriesAnalysisABC):
         seriesFrame = _mergeRowsByHeaders(seriesFrame, sv.GROUPPING_HEADERS, dropColumnNames=sv.ATOM_NAME)
         dataTable = project.newDataTable(name=dataTableName, data=seriesFrame)
         return dataTable
-
 
     def fitInputData(self, *args, **kwargs):
         """
@@ -101,7 +97,3 @@ class RelaxationAnalysisBC(SeriesAnalysisABC):
                                                    overrideExisting=ovverideOutputDataTable)
             outputDataTable.data = outputFrame
             self.addOutputData(outputDataTable)
-
-
-
-

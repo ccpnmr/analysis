@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-04 18:51:50 +0000 (Fri, March 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-26 10:27:10 +0100 (Thu, May 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -104,7 +104,6 @@ class SeriesFrameBC(TableFrame):
 
     def __init__(self,  *args, **kwargs):
         super().__init__(*args, **kwargs)
-
 
     @property
     def seriesValues(self):
@@ -206,7 +205,6 @@ class SeriesFrameBC(TableFrame):
 
     def buildFromSpectrumGroup(self, spectrumGroup, thePeakProperty:str):
         """
-
         :param spectrumGroup: Obj SpectrumGroup
         :param thePeakProperty: any of ppmPosition, lineWidth, volume, height
         :return:
@@ -246,7 +244,6 @@ class SeriesFrameBC(TableFrame):
                  'Time_2'       : [550, 553],
                  ...})
          """
-
         dataDict = defaultdict(list)
         if not len(assignmentValues) == len(seriesValues):
             getLogger().warn(f""" AssignmentValues and SeriesValues need to be of same length.""")
@@ -272,7 +269,6 @@ class SeriesFrameBC(TableFrame):
         return dataDict
 
     def setDataFromDict(self, dataDict):
-        # self.clear()
         for header in dataDict:
             self[header] = dataDict[header]
 
@@ -340,7 +336,7 @@ class CSMBindingOutputFrame(SeriesFrameBC):
 
 
 ########################################################################################################################
-################################                Library  functions                      ################################
+##################################        Private Library  functions                 ###################################
 ########################################################################################################################
 
 def _getValuesFromSpectrumGroup(spectrumGroup, thePeakProperty, peakListIndex=-1):
@@ -378,7 +374,6 @@ def _getAssignedNmrAtoms4Spectra(spectra, peakListIndex=-1):
     nmrAtoms = set(flattenLists([peak.assignedNmrAtoms for peak in allPeaks]))
     return list(nmrAtoms)
 
-
 def _mergeRowsByHeaders(inputData, grouppingHeaders, dropColumnNames=[sv.ATOM_NAME],
                         rebuildUID=True, pidShortClass='NR', keep="first", ):
     """
@@ -398,7 +393,6 @@ def _mergeRowsByHeaders(inputData, grouppingHeaders, dropColumnNames=[sv.ATOM_NA
     if rebuildUID and len(inputData.index) == len(newIDs):
         inputData[sv._ROW_UID] = newIDs
     return inputData
-
 
 def _getOutputFrameFromInputFrame(inputFrame, outputFrameType=RelaxationOutputFrame):
     """
@@ -422,8 +416,8 @@ def _getOutputFrameFromInputFrame(inputFrame, outputFrameType=RelaxationOutputFr
     return outputFrame
 
 INPUT_CSM_SERIESFRAMES_DICT = {
-                          sv.CSM_INPUT_FRAME: CSMInputFrame
-                          }
+                              sv.CSM_INPUT_FRAME: CSMInputFrame
+                              }
 INPUT_RELAXATION_SERIESFRAMES_DICT = {
-                          sv.RELAXATION_INPUT_FRAME: RelaxationInputFrame
-                          }
+                              sv.RELAXATION_INPUT_FRAME: RelaxationInputFrame
+                              }

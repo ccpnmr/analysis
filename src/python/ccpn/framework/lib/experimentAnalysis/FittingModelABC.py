@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-03 16:41:37 +0000 (Thu, March 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-26 10:27:10 +0100 (Thu, May 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -54,7 +54,6 @@ class FittingModelABC(ABC):
     """
     The top level class for the FittingModel Object.
     """
-
     ModelName = ''      # The Model name.
     Info = ''           # A brief description of the fitting model.
     Description = ''    # A simplified representation of the used equation(s).
@@ -68,13 +67,11 @@ class FittingModelABC(ABC):
         :return: an output TableFrame with fitted data
         """
         pass
-    
 
     def __str__(self):
         return f'<{self.__class__.__name__}: {self.ModelName}>'
 
     __repr__ = __str__
-
 
 def _registerModels(cls, fittingModels):
     """
@@ -283,11 +280,8 @@ class MinimiserModel(Model):
             result.r2 = lf.r2_func(redchi=result.redchi, y=data)
         return result
 
-
     def guess(self, data, x, **kws):
         pass
-
-
 
 
 class MinimiserResult(ModelResult):

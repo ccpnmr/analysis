@@ -1,5 +1,7 @@
 """
-This module defines the various fitting functions for Series Analysis
+This module defines the various fitting functions for Series Analysis.
+When employed, they are called recursively by the Minimiser (see Minimiser Object)
+
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -15,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-04 18:51:50 +0000 (Fri, March 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-26 10:27:10 +0100 (Thu, May 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,7 +31,7 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 from lmfit import lineshapes as ls
 import numpy as np
 
-## a series of Fittingls. Called recursively with from the Minimiser
+## Common built-in functions.
 gaussian_func    = ls.gaussian
 lorentzian_func  = ls.lorentzian
 linear_func      = ls.linear
@@ -43,13 +45,10 @@ powerlaw_func    = ls.powerlaw
 
 def T1_func(x, amplitude=1, decay=1):
     """Return an exponential function.
-
     exponential(x, amplitude, decay) = amplitude * (1-exp(-x/decay))
-
     """
     decay = ls.not_zero(decay)
     return amplitude * (1-np.exp(-x/decay))
-
 
 def fractionBound_func(p, l, kd):
     """
@@ -72,7 +71,6 @@ def oneSiteBinding_func(x, kd, bmax):
     :return:
     """
     return (bmax * x) / (x + kd)
-
 
 # def exponential_func(x, amplitude, decay):
 #     return amplitude * np.exp(decay * x)

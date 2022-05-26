@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-01 14:47:16 +0000 (Tue, March 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-26 10:27:10 +0100 (Thu, May 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -65,7 +65,6 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         dataTable = project.newDataTable(name=dataTableName, data=seriesFrame)
         return dataTable
 
-
     def getAlphaFactor(self, atomName):
         """Get the Alpha Factor for the DeltaDeltas calculation """
         return self._AlphaFactors.get(atomName, None)
@@ -82,7 +81,6 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
                 getLogger().warning(f'ChemicalShiftMapping. Cannot set the AlphaFactor value:{v} for the Atom:{k}.')
                 dd.pop(k)
         self._AlphaFactors.update(dd)
-
 
     def calculateDeltaDeltaShifts(self, inputData, **kwargs):
         """
@@ -115,7 +113,6 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
                                     according to its definitions.
         :return: None
         """
-
         if not self.inputDataTables:
             raise RuntimeError('CSM. Cannot run any fitting models. Add a valid inputData first')
 
@@ -131,7 +128,6 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
             outputDataTable.data = outputFrame
             self.addOutputData(outputDataTable)
 
-
     def plotResults(self, *args, **kwargs):
         getLogger().warning('Not implemented yet. Available: plotDeltaDeltas')
 
@@ -145,7 +141,6 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
                         *args, **kwargs):
         """
         Plot a bargraph of the deltaDeltas
-
         :param deltaDeltaShiftsFrame:
         :param yColumnName:
         :param unitLabels:
@@ -160,7 +155,6 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
         :param kwargs:
         :return:
         """
-
         from ccpn.ui.gui.widgets.PlotterWidget import plotter
         from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
         with plotter() as plt:

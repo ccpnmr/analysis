@@ -6,6 +6,9 @@ import sys
 ### now do it in bin/chemBuild script instead
 ###sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
+##QT_MAC_WANTS_LAYER: Patch for MacOs >= 11. Without this flag, Testing widgets/windows from PyQt5 don't show at all.
+os.environ['QT_MAC_WANTS_LAYER'] = '1'
+
 sys.setrecursionlimit(10000)
 
 from PyQt5 import QtCore, QtGui, QtWidgets

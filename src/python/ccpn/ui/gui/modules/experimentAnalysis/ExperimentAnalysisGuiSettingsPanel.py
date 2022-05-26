@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-20 18:40:05 +0100 (Fri, May 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-26 12:38:12 +0100 (Thu, May 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -80,8 +80,8 @@ class GuiCalculationPanel(GuiSettingPanel):
 
     def initWidgets(self):
         row = 0
-        self.calculationModeLabel = Label(self, 'Mode', grid=(row, 0))
-        texts = ['Height', 'LW', 'Volume']
+        self.calculationModeLabel = Label(self, 'Test Mode', grid=(row, 0))
+        texts = ['A', 'B', 'C']
         objectNames = ['calculationMode_' + x for x in texts]
         self.calculationModeOptions = EditableRadioButtons(self, selectedInd=0, texts=texts,
                                                            direction='v',

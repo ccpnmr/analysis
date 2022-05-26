@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-23 19:35:28 +0100 (Mon, May 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-26 12:38:12 +0100 (Thu, May 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -90,7 +90,9 @@ class _ExperimentalAnalysisTableABC(gt.GuiTable):
 
     def build(self, dataFrame):
         self.clear()
-        pass
+        self.dfo = self.getDataFromFrame(table=self, df=dataFrame, colDefs=self._columns)
+        self.setTableFromDataFrameObject(dataFrameObject=self.dfo, columnDefs=self._columns)
+        self.setHiddenColumns(_getHiddenColumns(self))
 
     def mousePressEvent(self, event):
         if self.itemAt(event.pos()) is None:
@@ -149,4 +151,4 @@ class TablePanel(GuiPanel):
         self.mainTable = _ExperimentalAnalysisTableABC(self,
                                                      dataFrame=pd.DataFrame(),
                                                      guiModule = self.guiModule, grid=(0, 0))
-
+        self.mainTable.dataFrame = pd.DataFrame([1, 2, 3, 4], columns=['#'])

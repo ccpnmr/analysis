@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-23 19:35:28 +0100 (Mon, May 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-26 12:38:12 +0100 (Thu, May 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -23,33 +23,25 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 # Start of code
 #=========================================================================================
 
-
-from ccpn.util.DataEnum import DataEnum
-######## gui/ui imports ########
-from PyQt5 import QtCore, QtWidgets
-from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
-from PyQt5 import QtCore, QtWidgets
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.Label import Label, DividerLabel
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.Spinbox import Spinbox
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget, ScientificSpinBoxCompoundWidget
-from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
-from ccpn.ui.gui.widgets.RadioButtons import RadioButtons, EditableRadioButtons
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.HLine import HLine
-from ccpn.ui.gui.widgets.Splitter import Splitter
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
-from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
-from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+import numpy as np
+from ccpn.ui.gui.widgets.BarGraphWidget import BarGraphWidget
+import pyqtgraph as pg
+from PyQt5 import QtCore, QtWidgets, QtGui
+from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, MEDIUM_BLUE, GUISTRIP_PIVOT, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_GRID, CCPNGLWIDGET_LABELLING
+from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
+from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours
+from ccpn.ui.gui.widgets.Font import Font, getFont
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
 
+# colours NEED to go in common place
+BackgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
+OriginAxes = pg.functions.mkPen(hexToRgb(getColours()[GUISTRIP_PIVOT]), width=1, style=QtCore.Qt.DashLine)
+FittingLine = pg.functions.mkPen(hexToRgb(getColours()[DIVIDER]), width=0.5, style=QtCore.Qt.DashLine)
+SelectedPoint = pg.functions.mkPen(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
+SelectedLabel = pg.functions.mkBrush(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
+c = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
+GridPen = pg.functions.mkPen(c, width=1, style=QtCore.Qt.SolidLine)
+GridFont = getFont()
 
 
 class BarPlotPanel(GuiPanel):
@@ -63,4 +55,22 @@ class BarPlotPanel(GuiPanel):
 
     def initWidgets(self):
         row = 0
-        Label(self, 'PlotPanel', hAlign='c', grid=(row, 0))
+        application = self.guiModule.application
+        xValues = [1,2,3,4]
+        yValues = [10,20,30,40]
+        self.barGraphWidget = BarGraphWidget(self, application=application,
+                                             xValues=xValues,
+                                             yValues=yValues,
+                                             backgroundColour=BackgroundColour, grid=(0,0))
+        self._setBarGraphWidget()
+
+    def _setBarGraphWidget(self):
+        # MOCK
+        self.barGraphWidget.setViewBoxLimits(0, None, 0, None)
+        self.barGraphWidget.xLine.hide()
+        self.barGraphWidget.plotWidget.plotItem.getAxis('bottom').setPen(GridPen)
+        self.barGraphWidget.plotWidget.plotItem.getAxis('left').setPen(GridPen)
+        self.barGraphWidget.plotWidget.plotItem.getAxis('bottom').tickFont = GridFont
+        self.barGraphWidget.plotWidget.plotItem.getAxis('left').tickFont = GridFont
+        self.barGraphWidget.plotWidget.setLabel('bottom', 'MOCK')
+        self.barGraphWidget.plotWidget.setLabel('left', 'MOCK')

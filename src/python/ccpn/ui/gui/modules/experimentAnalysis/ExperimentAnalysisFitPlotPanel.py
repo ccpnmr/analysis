@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-23 19:35:28 +0100 (Mon, May 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-26 12:38:12 +0100 (Thu, May 26, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -23,32 +23,24 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 # Start of code
 #=========================================================================================
 
-from ccpn.util.DataEnum import DataEnum
-######## gui/ui imports ########
-from PyQt5 import QtCore, QtWidgets
-from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
-from PyQt5 import QtCore, QtWidgets
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.Label import Label, DividerLabel
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.Spinbox import Spinbox
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget, ScientificSpinBoxCompoundWidget
-from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
-from ccpn.ui.gui.widgets.RadioButtons import RadioButtons, EditableRadioButtons
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.widgets.HLine import HLine
-from ccpn.ui.gui.widgets.Splitter import Splitter
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
-from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
-from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
+
+import pyqtgraph as pg
+from PyQt5 import QtCore, QtWidgets, QtGui
+from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, MEDIUM_BLUE, GUISTRIP_PIVOT, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_GRID, CCPNGLWIDGET_LABELLING
+from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
+from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours
+from ccpn.ui.gui.widgets.Font import Font, getFont
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
 
+# colours
+BackgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
+OriginAxes = pg.functions.mkPen(hexToRgb(getColours()[GUISTRIP_PIVOT]), width=1, style=QtCore.Qt.DashLine)
+FittingLine = pg.functions.mkPen(hexToRgb(getColours()[DIVIDER]), width=0.5, style=QtCore.Qt.DashLine)
+SelectedPoint = pg.functions.mkPen(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
+SelectedLabel = pg.functions.mkBrush(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
+c = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
+GridPen = pg.functions.mkPen(c, width=1, style=QtCore.Qt.SolidLine)
+GridFont = getFont()
 
 
 class FitPlotPanel(GuiPanel):
@@ -61,5 +53,18 @@ class FitPlotPanel(GuiPanel):
         self.setMaximumHeight(100)
 
     def initWidgets(self):
-        row = 0
-        Label(self, 'FitPlotPanel', grid=(row, 0))
+        self._setBindingPlot()
+
+    def _setBindingPlot(self):
+        ###  Plot setup
+        self._bindingPlotView = pg.GraphicsLayoutWidget()
+        self._bindingPlotView.setBackground(BackgroundColour)
+        self.bindingPlot = self._bindingPlotView.addPlot()
+        self.bindingPlot.setMenuEnabled(False)
+        self.bindingPlot.getAxis('bottom').setPen(GridPen)
+        self.bindingPlot.getAxis('left').setPen(GridPen)
+        self.bindingPlot.getAxis('bottom').tickFont = GridFont
+        self.bindingPlot.getAxis('left').tickFont = GridFont
+        self.bindingPlot.setLabel('bottom', 'MOCK')
+        self.bindingPlot.setLabel('left', 'MOCK')
+        self.getLayout().addWidget(self._bindingPlotView)

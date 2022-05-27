@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-26 18:11:25 +0100 (Thu, May 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-27 10:42:33 +0100 (Fri, May 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -94,10 +94,10 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
     def _addCommonPanels(self):
         """ Add the Gui Panels to the panelHandler.
         Each Panel is a stand-alone frame with information where about to be added on the general GUI."""
-        self.panelHandler.append(ToolBarPanel(self))
-        self.panelHandler.append(TablePanel(self))
-        self.panelHandler.append(FitPlotPanel(self))
-        self.panelHandler.append(BarPlotPanel(self))
+        self.panelHandler.addToolBar(ToolBarPanel(self))
+        self.panelHandler.addPanel(TablePanel(self))
+        self.panelHandler.addPanel(FitPlotPanel(self))
+        self.panelHandler.addPanel(BarPlotPanel(self))
 
     def _addCommonSettingsPanels(self):
         """

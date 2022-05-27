@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-26 12:06:36 +0100 (Thu, May 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-27 10:42:33 +0100 (Fri, May 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -84,6 +84,10 @@ class ExperimentAnalysisHandlerABC(object):
 #########################      The Various Handlers        #########################
 ####################################################################################
 
+TOOLBARFRAME = 'toolbarFrame' # reserved
+MAINFRAME = 'mainFrame' # reserved
+
+
 class PanelHandler(ExperimentAnalysisHandlerABC):
     """
     Manages the list of Gui Panels and adds them to the GuiModule.
@@ -102,31 +106,45 @@ class PanelHandler(ExperimentAnalysisHandlerABC):
         self._panelsByFrame = {k:[] for k in PanelPositions}
 
     def start(self):
-        """ Setup the four main Frames: Top/Bottom Left/Right """
+        """ Set-up the 2 main Frames:
+        1) toolbar. reserved for Buttons etc
+        2) main panels: Top, Bottom, Left, Right. Used for anything"""
+
+        setattr(self, TOOLBARFRAME, Frame(self.guiModule.mainWidget, setLayout=True, grid=(0, 0)))
+        setattr(self, MAINFRAME, Frame(self.guiModule.mainWidget, setLayout=True, grid=(1,0)))
+
         for frameName, gridDefs in self.gridPositions.items():
             grid, gridSpan = gridDefs
-            setattr(self, frameName, Frame(self.guiModule.mainWidget, setLayout=True, grid=grid, gridSpan=gridSpan))
+            setattr(self, frameName, Frame(self.getFrame(MAINFRAME), setLayout=True, grid=grid, gridSpan=gridSpan))
         self._setupSplitters()
         self.guiModule.mainWidget.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         self._setupFrameGeometries()
 
-    def append(self, panel):
+    def addPanel(self, panel, **kwargs):
         """
         Installs a panel in the proper frame of the MainWidget .
         :param panel: Panel to install
         :return: The installed panel
         """
         panel.onInstall()
-        self._addToLayout(panel)
+        self._addToLayout(panel, **kwargs)
         return panel
 
-    def _addToLayout(self, panel):
-        frameAttr = panel._panelPositionData.description
-        frame = getattr(self, frameAttr, None)
-        if frame is not None:
-            frame.getLayout().addWidget(panel)
-            self._panelsByFrame[frameAttr].append(panel)
-            self.panels.update({panel.panelName:panel})
+    def getPanel(self, name):
+        """Get an installed Panel by its name"""
+        panel = self.panels.get(name)
+        return panel
+
+    def getFrame(self, name):
+        frame = getattr(self, name)
+        return frame
+
+    def addToolBar(self, toolBarPanel):
+        """ Install the toolBarPanel in the reserved frame inside the main layout"""
+        frame = self.getFrame(TOOLBARFRAME)
+        toolBarPanel.onInstall()
+        frame.getLayout().addWidget(toolBarPanel)
+        return toolBarPanel
 
     def clear(self):
         """
@@ -138,15 +156,15 @@ class PanelHandler(ExperimentAnalysisHandlerABC):
         for name, panel in self.panels.items():
             panel.close()
 
-    def getPanel(self, name):
-        panel = self.panels.get(name)
-        return panel
-
-    def getFrame(self, name):
-        frame = getattr(self, name)
-        return frame
-
     ######## Private methods ######
+
+    def _addToLayout(self, panel, **kwargs):
+        frameAttr = panel._panelPositionData.description
+        frame = getattr(self, frameAttr, None)
+        if frame is not None:
+            frame.getLayout().addWidget(panel, **kwargs)
+            self._panelsByFrame[frameAttr].append(panel)
+            self.panels.update({panel.panelName:panel})
 
     def _setupSplitters(self):
         """
@@ -168,9 +186,12 @@ class PanelHandler(ExperimentAnalysisHandlerABC):
         self.guiModule.mainWidget.getLayout().addWidget(self._verticalSplitter)
 
     def _setupFrameGeometries(self):
+        """Setup layout policy etc """
+        panelFrame = self.getFrame(MAINFRAME)
         for ff in PanelPositions:
             frame = self.getFrame(ff)
             frame.getLayout().setAlignment(QtCore.Qt.AlignTop)
+            frame.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
 
     def __iter__(self):
         lst = []

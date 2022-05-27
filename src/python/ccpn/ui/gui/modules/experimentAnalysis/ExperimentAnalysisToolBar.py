@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-26 12:06:36 +0100 (Thu, May 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-27 10:42:33 +0100 (Fri, May 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -49,7 +49,7 @@ class ToolBarPanel(GuiPanel):
             'icon': 'icons/filter',
             'tipText': 'Apply filters as defined in settings',
             'toggle': True,
-            'callback': f'_{FilterButton}{Callback}',
+            'callback': f'_{FilterButton}{Callback}', # the exact name as the function def
             'objectName': FilterButton,
         },
 

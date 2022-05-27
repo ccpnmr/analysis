@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-19 11:39:59 +0100 (Thu, May 19, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-05-27 17:08:15 +0100 (Fri, May 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -54,6 +54,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import AXISXUNITS, AXISYUNITS, \
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.ui.gui.widgets.Base import SignalBlocking
+from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.Chain import Chain
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.RestraintTable import RestraintTable
@@ -1341,14 +1342,13 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
                 if 'type' in data:
                     widgetType = data['type']
                     if 'kwds' in data:
-                        newItem = widgetType(self, self.mainWindow, grid=(row, 0),
-                                             callback=data['callBack'] if 'callBack' in data else None,
-                                             **data['kwds'],
-                                             )
+                        kws = {'callback': data['callBack']} if 'callBack' in data else {}
+                        data['kwds'].pop('callback', None)
+                        kws.update(data['kwds'])
+                        newItem = widgetType(self, self.mainWindow, grid=(row, 0),  **kws,)
                     else:
-                        newItem = widgetType(self, self.mainWindow, grid=(row, 0),
-                                             callback=data['callBack'] if 'callBack' in data else None,
-                                             **{})
+                        kws = {'callback':data['callBack']}  if 'callBack' in data else {} #this avoid a crash if the widget init doesn't have a callback arg
+                        newItem = widgetType(self, self.mainWindow, grid=(row, 0), **kws)
                     # newItem.setCallback(data['callBack'] if 'callBack' in data else None)
                     # self.checkBoxes[item] = {'widget'      : newItem,
                     #                          'item'        : item,
@@ -1582,6 +1582,8 @@ class ObjectSelectionWidget(ListCompoundWidget):
 class ChainSelectionWidget(ObjectSelectionWidget):
     KLASS = Chain
 
+class SpectrumGroupSelectionWidget(ObjectSelectionWidget):
+    KLASS = SpectrumGroup
 
 class NmrChainSelectionWidget(ObjectSelectionWidget):
     KLASS = NmrChain

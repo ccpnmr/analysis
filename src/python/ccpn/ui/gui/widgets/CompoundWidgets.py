@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-07 22:02:01 +0000 (Mon, March 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-05-27 17:08:15 +0100 (Fri, May 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -411,7 +411,8 @@ class TextEditorCompoundWidget(CompoundBaseWidget):
                grid=(2, 0))
 
         self._addWidget(_labelFrame)
-
+        if compoundKwds is None:
+            compoundKwds = {}
         self.textEditor = TextEditor(parent=self, callback=callback, editable=editable, **compoundKwds)
         self._addWidget(self.textEditor)
 
@@ -743,7 +744,151 @@ class CheckBoxCompoundWidget(CompoundBaseWidget):
         return self.set(value)
 
 
+class ButtonCompoundWidget(CompoundBaseWidget):
+    """
+    Compound class comprising a Label and a Button, combined in a CompoundBaseWidget (i.e. a Frame)
 
+      orientation       widget layout
+      ------------      ------------------------
+      left:             Label       Button
+
+      right:            Button    Label
+
+      top:              Label
+                        Button
+
+      bottom:           Button
+                        Label
+
+    """
+    layoutDict = dict(
+            # grid positions for label and checkBox for the different orientations
+            left=[(0, 0), (0, 1)],
+            right=[(0, 1), (0, 0)],
+            top=[(0, 0), (1, 0)],
+            bottom=[(1, 0), (0, 0)],
+            )
+
+    def __init__(self, parent=None, mainWindow=None,
+                 showBorder=False, orientation='left',
+                 minimumWidths=None, maximumWidths=None, fixedWidths=None,
+                 labelText='', text='', toggle=None, icon=None, callback=None,
+                 compoundKwds=None,
+                 **kwds):
+        """
+        :param parent: parent widget
+        :param showBorder: flag to display the border of Frame (True, False)
+        :param orientation: flag to determine the orientation of the labelText relative to the button widget.
+                            Allowed values: 'left', 'right', 'top', 'bottom'
+        :param minimumWidths: tuple of two values specifying the minimum width of the Label and button widget, respectively
+        :param maximumWidths: tuple of two values specifying the maximum width of the Label and button widget, respectively
+        :param labelText: Text for the Label
+        :param text: (optional) text for the Checkbox
+        :param callback: (optional) callback for the button
+        :param toggle: (optional) initial state of the button
+        :param kwds: (optional) keyword, value pairs for the gridding of Frame
+        """
+
+        CompoundBaseWidget.__init__(self, parent=parent, layoutDict=self.layoutDict, orientation=orientation,
+                                    showBorder=showBorder, **kwds)
+
+        self.label = Label(parent=self, text=labelText, vAlign='center')
+        self._addWidget(self.label)
+
+        hAlign = orientation if (orientation == 'left' or orientation == 'right') else 'center'
+        buttonKwds = { 'toggle'    : toggle,
+                        'text'     : text,
+                        'hAlign'   : hAlign,
+                        'icon'     : icon, 
+                        'callback' : callback,
+                        }
+        buttonKwds.update(compoundKwds or {})
+        self.button = Button(parent=self, **buttonKwds)
+        self.button.setObjectName(labelText)
+        self.setObjectName(labelText)
+        self._addWidget(self.button)
+
+        if minimumWidths is not None:
+            self.setMinimumWidths(minimumWidths)
+
+        if maximumWidths is not None:
+            self.setMaximumWidths(maximumWidths)
+
+        if fixedWidths is not None:
+            self.setFixedWidths(fixedWidths)
+
+class LabelCompoundWidget(CompoundBaseWidget):
+    """
+    Compound class comprising a Label and a Button, combined in a CompoundBaseWidget (i.e. a Frame)
+
+      orientation       widget layout
+      ------------      ------------------------
+      left:             Label       Label
+
+      right:            Label    Label
+
+      top:              Label
+                        Label
+
+      bottom:           Label
+                        Label
+
+    """
+    layoutDict = dict(
+            # grid positions for label and checkBox for the different orientations
+            left=[(0, 0), (0, 1)],
+            right=[(0, 1), (0, 0)],
+            top=[(0, 0), (1, 0)],
+            bottom=[(1, 0), (0, 0)],
+            )
+
+    def __init__(self, parent=None, mainWindow=None,
+                 showBorder=False, orientation='left',
+                 minimumWidths=None, maximumWidths=None, fixedWidths=None,
+                 labelText='', label2Text='', icon=None,
+                 compoundKwds=None,
+                 **kwds):
+        """
+        :param parent: parent widget
+        :param showBorder: flag to display the border of Frame (True, False)
+        :param orientation: flag to determine the orientation of the labelText relative to the label2 widget.
+                            Allowed values: 'left', 'right', 'top', 'bottom'
+        :param minimumWidths: tuple of two values specifying the minimum width of the Label and label2 widget, respectively
+        :param maximumWidths: tuple of two values specifying the maximum width of the Label and label2 widget, respectively
+        :param labelText: Text for the Label
+        :param text: (optional) text for the Checkbox
+        :param callback: (optional) callback for the label2
+        :param toggle: (optional) initial state of the label2
+        :param kwds: (optional) keyword, value pairs for the gridding of Frame
+        """
+
+        CompoundBaseWidget.__init__(self, parent=parent, layoutDict=self.layoutDict, orientation=orientation,
+                                    showBorder=showBorder, **kwds)
+
+        self.label = Label(parent=self, text=labelText, vAlign='center')
+        self._addWidget(self.label)
+
+        hAlign = orientation if (orientation == 'left' or orientation == 'right') else 'center'
+        label2Kwds = {
+                        'text'     : label2Text,
+                        'hAlign'   : hAlign,
+                        'icon'     : icon,
+                        }
+        label2Kwds.update(compoundKwds or {})
+        self.label2 = Label(parent=self, **label2Kwds)
+        self.label2.setObjectName(label2Text)
+        self.setObjectName(labelText)
+        self._addWidget(self.label2)
+
+        if minimumWidths is not None:
+            self.setMinimumWidths(minimumWidths)
+
+        if maximumWidths is not None:
+            self.setMaximumWidths(maximumWidths)
+
+        if fixedWidths is not None:
+            self.setFixedWidths(fixedWidths)
+    
 class SpinBoxCompoundWidget(CompoundBaseWidget):
     """
     Compound class comprising a Label and an integer SpinBox, combined in a CompoundBaseWidget (i.e. a Frame)

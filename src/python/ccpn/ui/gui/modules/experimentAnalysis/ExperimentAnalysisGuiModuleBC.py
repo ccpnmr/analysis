@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-27 10:42:33 +0100 (Fri, May 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-27 17:10:19 +0100 (Fri, May 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -62,11 +62,11 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
 
         ## link to Gui Panels
         self.panelHandler = PanelHandler(self)
-        self._addCommonPanels()
+        self.addPanels()
 
         ## link to Gui Setting-Panels
         self.settingsPanelHandler = SettingsPanelHandler(self)
-        self._addCommonSettingsPanels()
+        self.addSettingsPanels()
 
         ## link to Core Notifiers (Project/Current)
         self.coreNotifiersHandler = CoreNotifiersHandler(guiModule=self)
@@ -91,9 +91,21 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
     #####################      Widgets    ###########################
     #################################################################
 
-    def _addCommonPanels(self):
+    def addPanels(self):
         """ Add the Gui Panels to the panelHandler.
-        Each Panel is a stand-alone frame with information where about to be added on the general GUI."""
+        Each Panel is a stand-alone frame with information where about to be added on the general GUI.
+        Override in Subclasses"""
+        self._addCommonPanels()
+
+    def addSettingsPanels(self):
+        """
+        Add the Settings Panels to the Gui. To retrieve a Panel use/see the settingsPanelsManager.
+        Override in Subclasses
+        """
+        self._addCommonSettingsPanels()
+
+    def _addCommonPanels(self):
+        """ Add the Common Gui Panels to the panelHandler."""
         self.panelHandler.addToolBar(ToolBarPanel(self))
         self.panelHandler.addPanel(TablePanel(self))
         self.panelHandler.addPanel(FitPlotPanel(self))
@@ -101,8 +113,9 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
 
     def _addCommonSettingsPanels(self):
         """
-        Add the Settings Panels to the Gui. To retrieve a Panel use/see the settingsPanelsManager.
+        Add the Common Settings Panels to the settingsPanelsManager.
         """
+        self.settingsPanelHandler.append(settingsPanel.GuiInputDataPanel(self))
         self.settingsPanelHandler.append(settingsPanel.GuiCalculationPanel(self))
         self.settingsPanelHandler.append(settingsPanel.AppearancePanel(self))
 

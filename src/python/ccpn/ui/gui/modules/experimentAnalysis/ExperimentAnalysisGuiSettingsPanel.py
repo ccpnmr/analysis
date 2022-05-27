@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-26 12:38:12 +0100 (Thu, May 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-27 17:10:19 +0100 (Fri, May 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,40 +27,34 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 This module contains the GUI Settings panels.
 """
 
+from collections import OrderedDict as od
 
 ######## gui/ui imports ########
 from PyQt5 import QtCore, QtWidgets
-from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
+
 from PyQt5 import QtCore, QtWidgets
-from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label, DividerLabel
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
-from ccpn.ui.gui.widgets.Spinbox import Spinbox
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.CompoundWidgets import ListCompoundWidget, ScientificSpinBoxCompoundWidget
+import ccpn.ui.gui.widgets.CompoundWidgets as compoundWidget
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons, EditableRadioButtons
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
+import ccpn.ui.gui.widgets.SettingsWidgets as settingWidgets
 from ccpn.ui.gui.widgets.HLine import HLine
-from ccpn.ui.gui.widgets.Splitter import Splitter
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
+import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisNamespaces as nameSpaces
 
 
+MinimumWidgetWidths =  (180, 100, 100)
 
 class GuiSettingPanel(Frame):
     """
     Base class for GuiSettingPanel.
     A panel is Frame which will create a tab in the Gui Module settings
+    Tabs are not added automatically. They need to be manually added from the SettingsHandler.
     """
 
     tabPosition = -1
     tabName = 'tab'
+    tabTipText = 'What this panel will allow to do'
 
     def __init__(self, guiModule,  *args, **Framekwargs):
         Frame.__init__(self, setLayout=True, **Framekwargs)
@@ -71,12 +65,100 @@ class GuiSettingPanel(Frame):
     def initWidgets(self):
         pass
 
+    def getWidget(self, name):
+        pass
 
+
+TABPOS = 0
+## Make a default tab ordering as they are added to this file.
+## Note: Tabs are not added automatically.
+## Tabs are added from the SettingsHandler defined in the main GuiModule which allows more customisation in subclasses.
+
+class GuiInputDataPanel(GuiSettingPanel):
+
+    tabPosition = TABPOS
+    tabName = nameSpaces.Label_InputData
+    tabTipText = nameSpaces.tipText_GuiInputDataPanel
+
+    def initWidgets(self):
+        mainWindow = self._guiModule.mainWindow
+        settingsDict = od((
+            (nameSpaces.WidgetVarName_SpectrumGroupsSeparator,
+                                {'label': nameSpaces.Label_SpectrumGroups,
+                                 'type': compoundWidget.LabelCompoundWidget,
+                                 'kwds': {'labelText': nameSpaces.Label_SpectrumGroups,
+                                          'tipText': nameSpaces.TipText_SpectrumGroupsSeparator}}),
+            (nameSpaces.WidgetVarName_SpectrumGroupsSelection,
+                                {'label':  nameSpaces.Label_SelectSpectrumGroups,
+                                'tipText': nameSpaces.TipText_SpectrumGroupSelectionWidget,
+                                'callBack': None,
+                                'type': settingWidgets.SpectrumGroupSelectionWidget,
+                                'kwds': {
+                                        'labelText': nameSpaces.Label_SelectSpectrumGroups,
+                                        'tipText': nameSpaces.TipText_SpectrumGroupSelectionWidget,
+                                        'displayText': [],
+                                        'defaults': [],
+                                        'objectName': nameSpaces.WidgetVarName_SpectrumGroupsSelection,
+                                        'minimumWidths': MinimumWidgetWidths}, }),
+            (nameSpaces.WidgetVarName_PeakProperty,
+                                {'label': nameSpaces.Label_PeakProperty,
+                                'callBack': None,
+                                'tipText': nameSpaces.TipText_PeakPropertySelectionWidget,
+                                'type': compoundWidget.PulldownListCompoundWidget,
+                                'kwds': {'labelText': nameSpaces.Label_PeakProperty,
+                                       'tipText': nameSpaces.TipText_PeakPropertySelectionWidget,
+                                       'texts': ['Position', 'Height', 'Line-width', 'Volume'],
+                                       'minimumWidths': MinimumWidgetWidths}}),
+            (nameSpaces.WidgetVarName_DataTableName,
+                                {'label': nameSpaces.Label_InputDataTableName,
+                                'tipText': nameSpaces.TipText_dataTableNameSelectionWidget,
+                                'callBack': None,
+                                'enabled': True,
+                                'type': compoundWidget.EntryCompoundWidget,
+                                '_init': None,
+                                'kwds': {'labelText': nameSpaces.Label_InputDataTableName,
+                                        'tipText': nameSpaces.TipText_dataTableNameSelectionWidget,
+                                        'minimumWidths': MinimumWidgetWidths}, }),
+            (nameSpaces.WidgetVarName_CreateDataTable,
+                                {'label': nameSpaces.Label_CreateInput,
+                                'tipText': nameSpaces.TipText_createInputdataTableWidget,
+                                'callBack': None,
+                                'type': compoundWidget.ButtonCompoundWidget,
+                                '_init': None,
+                                'kwds': {'labelText': nameSpaces.Label_CreateInput,
+                                         'text': 'Create', # this is the Button name
+                                         'hAlign': 'left',
+                                         'tipText': nameSpaces.TipText_createInputdataTableWidget,
+                                         'minimumWidths': MinimumWidgetWidths}}),
+            (nameSpaces.WidgetVarName_DataTableSeparator,
+                                {'label': nameSpaces.Label_DataTables,
+                                'type': compoundWidget.LabelCompoundWidget,
+                                'kwds': {'labelText': nameSpaces.Label_DataTables,
+                                         'tipText': nameSpaces.TipText_DataTableSeparator}}),
+            (nameSpaces.WidgetVarName_DataTablesSelection,
+             {'label': nameSpaces.Label_SelectDataTable,
+              'tipText': nameSpaces.TipText_DataTableSelection,
+              'callBack': None,
+              'type': settingWidgets.SpectrumGroupSelectionWidget,
+              'kwds': {
+                  'labelText': nameSpaces.Label_SelectDataTable,
+                  'tipText': nameSpaces.TipText_DataTableSelection,
+                  'displayText': [],
+                  'defaults': [],
+                  'objectName': nameSpaces.WidgetVarName_DataTablesSelection,
+                  'minimumWidths': MinimumWidgetWidths}, }),
+            ))
+        self._moduleSettingsWidget = settingWidgets.ModuleSettingsWidget(parent=self, mainWindow=mainWindow,
+                                               settingsDict=settingsDict,
+                                               grid=(0, 0))
+
+TABPOS += 1
 
 class GuiCalculationPanel(GuiSettingPanel):
 
-    tabPosition = 0
+    tabPosition = TABPOS
     tabName = 'Calculation'
+    tabTipText = 'Set the various calculation modes and options'
 
     def initWidgets(self):
         row = 0
@@ -89,11 +171,13 @@ class GuiCalculationPanel(GuiSettingPanel):
                                                            objectName='calculationMode',
                                                            objectNames=objectNames,
                                                            grid=(row, 1))
+TABPOS += 1
 
 class AppearancePanel(GuiSettingPanel):
 
-    tabPosition = 1
+    tabPosition = TABPOS
     tabName = 'Appearance'
+    tabTipText = ''
 
     def initWidgets(self):
         row = 0
@@ -103,3 +187,5 @@ class AppearancePanel(GuiSettingPanel):
                                                            callback=None,
                                                            objectName='TestColour',
                                                            grid=(row, 1))
+
+TABPOS += 1

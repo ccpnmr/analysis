@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-27 10:42:33 +0100 (Fri, May 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-27 19:23:35 +0100 (Fri, May 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -43,32 +43,7 @@ class ToolBarPanel(GuiPanel):
 
     position = 0
     panelName = 'ToolBar'
-    toolButtonsDefs = {
-        FilterButton: {
-            'text': '',
-            'icon': 'icons/filter',
-            'tipText': 'Apply filters as defined in settings',
-            'toggle': True,
-            'callback': f'_{FilterButton}{Callback}', # the exact name as the function def
-            'objectName': FilterButton,
-        },
 
-        UpdateButton: {
-            'text': '',
-            'icon': 'icons/update',
-            'tipText': 'Update all data and GUI',
-            'toggle': False,
-            'callback': f'_{UpdateButton}{Callback}',
-            'objectName': UpdateButton,
-        },
-        ShowStructureButton: {
-            'text': '',
-            'icon': 'icons/showStructure',
-            'tipText': 'Show on Molecular Viewer',
-            'toggle': False,
-            'callback': f'_{ShowStructureButton}{Callback}',
-            'objectName': UpdateButton,
-        }}
     toolButtons = {}
 
     def __init__(self, guiModule, *args, **Framekwargs):
@@ -76,18 +51,34 @@ class ToolBarPanel(GuiPanel):
         self.setMaximumHeight(100)
 
     def initWidgets(self):
-        colPos = 0
-        label = Label(self, text='DataTable:', vAlign='l', grid=(0, colPos))
-        colPos += 1
-        self._dataTablePulldown = PulldownList(parent=self, callback=None, grid=(0, colPos))
-        colPos += 1
-        _dividerLabel = DividerLabel(self, grid=(0, colPos))
-        colPos += 1
-        self._initButtons(colPos)
-        self.getLayout().setAlignment(QtCore.Qt.AlignLeft)
-        self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Minimum)
-        #  temp hide filter button
-        self.getButton(FilterButton).hide()
+
+        toolButtonsDefs = {
+            FilterButton: {
+                'text': '',
+                'icon': 'icons/filter',
+                'tipText': 'Apply filters as defined in settings',
+                'toggle': True,
+                'callback': f'_{FilterButton}{Callback}',  # the exact name as the function def
+                'objectName': FilterButton,
+            },
+
+            UpdateButton: {
+                'text': '',
+                'icon': 'icons/update',
+                'tipText': 'Update all data and GUI',
+                'toggle': False,
+                'callback': f'_{UpdateButton}{Callback}',
+                'objectName': UpdateButton,
+            },
+            ShowStructureButton: {
+                'text': '',
+                'icon': 'icons/showStructure',
+                'tipText': 'Show on Molecular Viewer',
+                'toggle': False,
+                'callback': f'_{ShowStructureButton}{Callback}',
+                'objectName': UpdateButton,
+            }}
+
 
     def _initButtons(self, colPos):
         for i, buttonName in enumerate(self.toolButtonsDefs, start=1):

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-27 17:10:19 +0100 (Fri, May 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-27 19:23:34 +0100 (Fri, May 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -32,17 +32,9 @@ ToolBar = 'ToolBar'
 import ccpn.ui.gui.guiSettings as gs
 BackgroundColour = gs.getColours()[gs.CCPNGLWIDGET_HEXBACKGROUND]
 
-##### TOOLBAR ######
+##### SETTINGS  ######
 
-# GuiInputDataPanel names
-tipText_GuiInputDataPanel               = 'This tab will allow user to create and set the input DataTable(s)'
-TipText_SpectrumGroupsSeparator         = 'SpectrumGroup Section. Create here a new input DataTable if none is already available.'
-TipText_SpectrumGroupSelectionWidget    = 'Select the SpectrumGroup containing the series of interest'
-TipText_PeakPropertySelectionWidget     = 'Select the Peak property to follow'
-TipText_dataTableNameSelectionWidget    = 'Select the name for the new DataTable input'
-TipText_createInputdataTableWidget      = 'Create the new input DataTable for the selected SpectrumGroup'
-TipText_DataTableSeparator              = 'DataTable Section. Select input DataTable(s) to start the Experiment Analysis'
-TipText_DataTableSelection              = 'Select input DataTable(s) to start the Experiment Analysis'
+# TAB: GuiInputDataPanel names
 WidgetVarName_PeakProperty              = 'peakProperty'
 WidgetVarName_SpectrumGroupsSelection   = 'SpectrumGroupsSelection'
 WidgetVarName_DataTablesSelection       = 'DataTablesSelection'
@@ -59,3 +51,31 @@ Label_SelectDataTable                   = 'Select DataTable(s)'
 Label_PeakProperty                      = 'Peak Property'
 Label_InputDataTableName                = 'Input DataTable Name'
 Label_CreateInput                       = 'Create Input DataTable'
+tipText_GuiInputDataPanel               = 'This tab will allow user to create and set the input DataTable(s)'
+TipText_SpectrumGroupsSeparator         = 'SpectrumGroup Section. Create here a new input DataTable if none is already available.'
+TipText_SpectrumGroupSelectionWidget    = 'Select the SpectrumGroup containing the series of interest'
+TipText_PeakPropertySelectionWidget     = 'Select the Peak property to follow'
+TipText_dataTableNameSelectionWidget    = 'Select the name for the new DataTable input'
+TipText_createInputdataTableWidget      = 'Create the new input DataTable for the selected SpectrumGroup'
+TipText_DataTableSeparator              = 'DataTable Section. Select input DataTable(s) to start the Experiment Analysis'
+TipText_DataTableSelection              = 'Select input DataTable(s) to start the Experiment Analysis'
+
+## ChemicalShiftMapping
+## TAB: CSMCalculationPanel names
+Journal_WilliamsonSection               = '\n4.2. Weighting of shifts from different nuclei'
+Journal_WilliamsonReference             = '\nM.P. Williamson. Progress in Nuclear Magnetic Resonance Spectroscopy 73, 1–16 (2013).'
+WidgetVarName_DeltaDeltasSeparator      = 'SpectrumGroupsSeparator'
+
+# FactorsNames are built dynamically as they are all same and so to reduce code duplication. (H, N, C, Others values are taken from SeriesAnalysis Variables)
+AtomName                                = 'AtomName'
+FactorValue                             = 'FactorValue'
+JournalReference                        = 'JournalReference'
+WidgetVarName_Factor                    = f'{{{AtomName}}}Factor' ## 3}}} to get one } as string for this formatting "{AtomName}" as we are setting from an other dict in GUI Module."
+Label_Factor                            = f'{{{AtomName}}} Alpha Factor'
+TipText_Factor                          = f'Factors are weighting of shifts (0-1) for different nuclei. ' \
+                                          f'Default for {{{AtomName}}}: {{{FactorValue}}}. ' \
+                                          f'See references: {{{JournalReference}}}'
+
+Label_DeltaDeltas                       = '--- DeltaDeltas ---'
+Label_Calculation                       = 'Calculation'
+tipText_CSMCalculationPanelPanel        = 'Set the various calculation modes and options for the Chemical Shift Mapping Analysis'

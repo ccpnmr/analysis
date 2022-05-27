@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-27 17:10:19 +0100 (Fri, May 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-27 19:23:34 +0100 (Fri, May 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -41,7 +41,7 @@ import ccpn.ui.gui.widgets.SettingsWidgets as settingWidgets
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.Button import Button
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisNamespaces as nameSpaces
-
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as seriesVariables
 
 MinimumWidgetWidths =  (180, 100, 100)
 
@@ -154,11 +154,50 @@ class GuiInputDataPanel(GuiSettingPanel):
 
 TABPOS += 1
 
-class GuiCalculationPanel(GuiSettingPanel):
+class CSMCalculationPanel(GuiSettingPanel):
 
     tabPosition = TABPOS
-    tabName = 'Calculation'
-    tabTipText = 'Set the various calculation modes and options'
+    tabName = nameSpaces.Label_Calculation
+    tabTipText = nameSpaces.tipText_CSMCalculationPanelPanel
+
+    def initWidgets(self):
+        mainWindow = self._guiModule.mainWindow
+        settingsDict = od((
+            (nameSpaces.WidgetVarName_DeltaDeltasSeparator,
+             {'label': nameSpaces.Label_DeltaDeltas,
+              'type': compoundWidget.LabelCompoundWidget,
+              'kwds': {'labelText': nameSpaces.Label_DeltaDeltas,
+                       'tipText': nameSpaces.tipText_CSMCalculationPanelPanel}}),
+
+        ))
+        factorsDict = od(())
+        for atomName, factorValue in seriesVariables.DEFAULT_ALPHA_FACTORS.items():
+            label = nameSpaces.Label_Factor.format(**{nameSpaces.AtomName:atomName})
+            att = nameSpaces.WidgetVarName_Factor.format(**{nameSpaces.AtomName:atomName})
+            journalReference = f'{nameSpaces.Journal_WilliamsonReference}{nameSpaces.Journal_WilliamsonSection}'
+            tipText = nameSpaces.TipText_Factor.format(**{nameSpaces.AtomName:atomName,
+                                                          nameSpaces.FactorValue:factorValue,
+                                                          nameSpaces.JournalReference:journalReference})
+            factorsDict[att] = {'label': label,
+            'callBack': None,
+            'tipText': nameSpaces.TipText_Factor,
+            'type': compoundWidget.DoubleSpinBoxCompoundWidget,
+            'kwds': {'labelText': label,
+                   'tipText': tipText,
+                   'value':factorValue,
+                   'range': (0.001, 1), 'step': 0.01, 'decimals': 3,
+                   'minimumWidths': MinimumWidgetWidths}}
+        settingsDict.update(factorsDict)
+        self._moduleSettingsWidget = settingWidgets.ModuleSettingsWidget(parent=self, mainWindow=mainWindow,
+                                                                         settingsDict=settingsDict,
+                                                                         grid=(0, 0))
+
+
+class GuiFittingPanel(GuiSettingPanel):
+
+    tabPosition = TABPOS
+    tabName = 'Fitting'
+    tabTipText = 'Set the various fitting modes and options'
 
     def initWidgets(self):
         row = 0

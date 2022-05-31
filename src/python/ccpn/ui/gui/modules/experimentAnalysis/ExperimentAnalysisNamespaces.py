@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-31 10:23:00 +0100 (Tue, May 31, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-31 14:25:24 +0100 (Tue, May 31, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -88,3 +88,14 @@ TipText_Factor                          = f'Factors are weighting of shifts (0-1
 TipText_DDCalculationMode                 = f'Select the calculation mode for {DELTA}{Delta} shifts. See References.'
 TipText_FollowAtoms                       = 'Consider only the selected (nmr)Atoms in the calculation. E.g.: H, N'
 TipText_ExcludeResType                    = 'Exclude the selected (Nmr)Residue Type from the calculation. E.g.: Pro'
+
+## ChemicalShiftMapping Appearance TAB
+## TAB: Appearance Panel names
+# ThresholdLine
+#  colours modes: above/below line or gradient
+# gradient is for heights or deltaDeltas?
+# molecular Structure
+
+
+
+

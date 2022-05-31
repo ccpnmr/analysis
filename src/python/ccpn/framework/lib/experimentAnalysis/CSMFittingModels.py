@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-26 10:27:10 +0100 (Thu, May 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-31 10:22:59 +0100 (Tue, May 31, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -92,23 +92,27 @@ class DeltaDeltaShiftsCalculation():
     """
     ChemicalShift Analysis DeltaDeltas shift distance calculation
     """
-    ModelName = sv.DELTA_DELTA
-    Info = 'Calculate The DeltaDelta shifts for a series.'
-    Description = ' CSP = √∑𝛂(𝛿i)^2 '
-    References = '''
+    ModelName = sv.EUCLIDEAN_DISTANCE
+    Info        = 'Calculate The DeltaDelta shifts for a series using the average Euclidean Distance.'
+    MaTex       = r'd = $\sqrt{\frac{1}{N}\sum_{i=0}^N (\alpha_i*\delta_i)^2}$'
+    Description = 'Alpha: the factor for each nuclei of interest.'
+    References  = '''
                     1) Eq. (9) M.P. Williamson. Progress in Nuclear Magnetic Resonance Spectroscopy 73, 1–16 (2013).
                     2) Mureddu, L. & Vuister, G. W. Simple high-resolution NMR spectroscopy as a tool in molecular biology.
                        FEBS J. 286, 2035–2042 (2019).
                   '''
+    FullDescription = f'{Info} \n {Description}\nSee References: {References}'
     _alphaFactors = [sv.DEFAULT_H_ALPHAFACTOR, sv.DEFAULT_N_ALPHAFACTOR]
     _filteringAtoms = [sv._H, sv._N]
     _excludedResidueTypes = []
+    _euclideanCalculationMethod = 'mean' # mean or sum.
 
     def __init__(self, alphaFactors=None, filteringAtoms=None, excludedResidues=None,):
         super().__init__()
         self._alphaFactors = alphaFactors or DeltaDeltaShiftsCalculation._alphaFactors
         self._filteringAtoms = filteringAtoms or DeltaDeltaShiftsCalculation._filteringAtoms
         self._excludedResidueTypes = excludedResidues or DeltaDeltaShiftsCalculation._excludedResidueTypes
+        self._euclideanCalculationMethod = 'mean'
 
     def setAlphaFactors(self, values):
         self._alphaFactors = values
@@ -131,7 +135,11 @@ class DeltaDeltaShiftsCalculation():
             Defaults if not given
         :return: outputFrame
         """
-        outputFrame = DeltaDeltaShiftsCalculation._getDeltaDeltasOutputFrame(inputData, **kwargs)
+        _kwargs = { 'FilteringAtoms':self._filteringAtoms,
+                    'AlphaFactors': self._alphaFactors,
+                    'ExcludedResidues' : self._excludedResidueTypes}
+        _kwargs.update(kwargs)
+        outputFrame = DeltaDeltaShiftsCalculation._getDeltaDeltasOutputFrame(inputData, **_kwargs)
         return outputFrame
 
     #########################
@@ -142,7 +150,7 @@ class DeltaDeltaShiftsCalculation():
     def _calculateDeltaDeltas(data, alphaFactors):
         """
         :param data: 2D array containing A and B coordinates to measure.
-        e.g.: for two HN peaks data will be array [[  8.15842 123.49895][  8.17385 123.98413]]
+        e.g.: for two HN peaks data will be a 2D array, e.g.: [[  8.15842 123.49895][  8.17385 123.98413]]
         :return: float
         """
         deltaDeltas = []
@@ -261,6 +269,8 @@ class OneSiteBindingModel(FittingModelABC):
 
 ########################################################################################################################
 ########################################################################################################################
+
+ChemicalShiftCalculationModes = {DeltaDeltaShiftsCalculation.ModelName: DeltaDeltaShiftsCalculation}
 
 def _registerChemicalShiftMappingModels():
     """

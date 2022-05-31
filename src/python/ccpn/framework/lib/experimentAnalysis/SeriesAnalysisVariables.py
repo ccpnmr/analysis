@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-26 10:27:10 +0100 (Thu, May 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-31 10:22:59 +0100 (Tue, May 31, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -124,6 +124,7 @@ _OTHER = pu.OTHER
 
 DELTA = 'Delta'
 DELTA_DELTA = f'{DELTA*2}'
+EUCLIDEAN_DISTANCE = 'Euclidean Distance'
 DELTA_DELTA_MEAN = f'{DELTA*2}(Mean)'
 DELTA_DELTA_SUM = f'{DELTA*2}(Sum)'
 DELTA_DELTA_STD = f'{DELTA*2}(STD)'

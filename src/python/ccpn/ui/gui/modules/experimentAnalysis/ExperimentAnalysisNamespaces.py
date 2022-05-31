@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-27 19:23:34 +0100 (Fri, May 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-31 10:23:00 +0100 (Tue, May 31, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,8 @@ LASTDISPLAY = 'Last Opened'
 NEW = '<New Item...>'
 EmptySpace = '< >'
 ToolBar = 'ToolBar'
+DELTA = '\u0394'
+Delta = '\u03B4'
 
 # colours
 import ccpn.ui.gui.guiSettings as gs
@@ -60,22 +62,29 @@ TipText_createInputdataTableWidget      = 'Create the new input DataTable for th
 TipText_DataTableSeparator              = 'DataTable Section. Select input DataTable(s) to start the Experiment Analysis'
 TipText_DataTableSelection              = 'Select input DataTable(s) to start the Experiment Analysis'
 
-## ChemicalShiftMapping
+## ChemicalShiftMapping TAB
 ## TAB: CSMCalculationPanel names
 Journal_WilliamsonSection               = '\n4.2. Weighting of shifts from different nuclei'
 Journal_WilliamsonReference             = '\nM.P. Williamson. Progress in Nuclear Magnetic Resonance Spectroscopy 73, 1–16 (2013).'
 WidgetVarName_DeltaDeltasSeparator      = 'SpectrumGroupsSeparator'
-
-# FactorsNames are built dynamically as they are all same and so to reduce code duplication. (H, N, C, Others values are taken from SeriesAnalysis Variables)
 AtomName                                = 'AtomName'
 FactorValue                             = 'FactorValue'
 JournalReference                        = 'JournalReference'
 WidgetVarName_Factor                    = f'{{{AtomName}}}Factor' ## 3}}} to get one } as string for this formatting "{AtomName}" as we are setting from an other dict in GUI Module."
+WidgetVarName_DDCalculationMode         = 'DeltaDeltaCalculationMode'
+WidgetVarName_FollowAtoms               = 'FollowAtoms'
+WidgetVarName_ExcludeResType            = 'ExcludeResidueType'
+Label_DDCalculationMode                 = f'{DELTA}{Delta} Calculation Mode'
 Label_Factor                            = f'{{{AtomName}}} Alpha Factor'
-TipText_Factor                          = f'Factors are weighting of shifts (0-1) for different nuclei. ' \
-                                          f'Default for {{{AtomName}}}: {{{FactorValue}}}. ' \
-                                          f'See references: {{{JournalReference}}}'
-
-Label_DeltaDeltas                       = '--- DeltaDeltas ---'
+Label_DeltaDeltas                       = '--- Chemical Shift Perturbation Options ---'
 Label_Calculation                       = 'Calculation'
-tipText_CSMCalculationPanelPanel        = 'Set the various calculation modes and options for the Chemical Shift Mapping Analysis'
+Label_FollowAtoms                       = 'Follow (nmr)Atoms'
+Label_ExcludeResType                    = 'Exclude (Nmr)Residue Type'
+TipText_CSMCalculationPanelPanel        = 'Set the various calculation modes and options for the Chemical Shift Mapping Analysis'
+TipText_DeltaDeltasSeparator            = f'{TipText_CSMCalculationPanelPanel} \n For weighting factors, see reference: ' \
+                                          f'{Journal_WilliamsonReference}{Journal_WilliamsonSection}'
+TipText_Factor                          = f'Factors are weighting of shifts (0-1) for different nuclei. ' \
+                                          f'Default for {{{AtomName}}}: {{{FactorValue}}}. See references.'
+TipText_DDCalculationMode                 = f'Select the calculation mode for {DELTA}{Delta} shifts. See References.'
+TipText_FollowAtoms                       = 'Consider only the selected (nmr)Atoms in the calculation. E.g.: H, N'
+TipText_ExcludeResType                    = 'Exclude the selected (Nmr)Residue Type from the calculation. E.g.: Pro'

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-27 19:23:34 +0100 (Fri, May 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-31 10:23:00 +0100 (Tue, May 31, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ This module contains the GUI Settings panels.
 """
 
 from collections import OrderedDict as od
+from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import ChemicalShiftCalculationModes, DeltaDeltaShiftsCalculation
 
 ######## gui/ui imports ########
 from PyQt5 import QtCore, QtWidgets
@@ -39,11 +40,13 @@ from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons, EditableRadioButtons
 import ccpn.ui.gui.widgets.SettingsWidgets as settingWidgets
 from ccpn.ui.gui.widgets.HLine import HLine
-from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.Label import maTex2Pixmap
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisNamespaces as nameSpaces
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as seriesVariables
 
-MinimumWidgetWidths =  (180, 100, 100)
+
+SettingsWidgeMinimumWidths =  (180, 180, 180)
+SettingsWidgetFixedWidths = (200, 200, 200)
 
 class GuiSettingPanel(Frame):
     """
@@ -99,7 +102,7 @@ class GuiInputDataPanel(GuiSettingPanel):
                                         'displayText': [],
                                         'defaults': [],
                                         'objectName': nameSpaces.WidgetVarName_SpectrumGroupsSelection,
-                                        'minimumWidths': MinimumWidgetWidths}, }),
+                                        'fixedWidths': SettingsWidgetFixedWidths}, }),
             (nameSpaces.WidgetVarName_PeakProperty,
                                 {'label': nameSpaces.Label_PeakProperty,
                                 'callBack': None,
@@ -108,7 +111,7 @@ class GuiInputDataPanel(GuiSettingPanel):
                                 'kwds': {'labelText': nameSpaces.Label_PeakProperty,
                                        'tipText': nameSpaces.TipText_PeakPropertySelectionWidget,
                                        'texts': ['Position', 'Height', 'Line-width', 'Volume'],
-                                       'minimumWidths': MinimumWidgetWidths}}),
+                                       'fixedWidths': SettingsWidgetFixedWidths}}),
             (nameSpaces.WidgetVarName_DataTableName,
                                 {'label': nameSpaces.Label_InputDataTableName,
                                 'tipText': nameSpaces.TipText_dataTableNameSelectionWidget,
@@ -118,7 +121,7 @@ class GuiInputDataPanel(GuiSettingPanel):
                                 '_init': None,
                                 'kwds': {'labelText': nameSpaces.Label_InputDataTableName,
                                         'tipText': nameSpaces.TipText_dataTableNameSelectionWidget,
-                                        'minimumWidths': MinimumWidgetWidths}, }),
+                                        'fixedWidths': SettingsWidgetFixedWidths}, }),
             (nameSpaces.WidgetVarName_CreateDataTable,
                                 {'label': nameSpaces.Label_CreateInput,
                                 'tipText': nameSpaces.TipText_createInputdataTableWidget,
@@ -129,7 +132,7 @@ class GuiInputDataPanel(GuiSettingPanel):
                                          'text': 'Create', # this is the Button name
                                          'hAlign': 'left',
                                          'tipText': nameSpaces.TipText_createInputdataTableWidget,
-                                         'minimumWidths': MinimumWidgetWidths}}),
+                                         'fixedWidths': SettingsWidgetFixedWidths}}),
             (nameSpaces.WidgetVarName_DataTableSeparator,
                                 {'label': nameSpaces.Label_DataTables,
                                 'type': compoundWidget.LabelCompoundWidget,
@@ -146,11 +149,12 @@ class GuiInputDataPanel(GuiSettingPanel):
                   'displayText': [],
                   'defaults': [],
                   'objectName': nameSpaces.WidgetVarName_DataTablesSelection,
-                  'minimumWidths': MinimumWidgetWidths}, }),
+                  'fixedWidths': SettingsWidgetFixedWidths}, }),
             ))
         self._moduleSettingsWidget = settingWidgets.ModuleSettingsWidget(parent=self, mainWindow=mainWindow,
                                                settingsDict=settingsDict,
                                                grid=(0, 0))
+        self._moduleSettingsWidget.getLayout().setAlignment(QtCore.Qt.AlignLeft)
 
 TABPOS += 1
 
@@ -158,39 +162,86 @@ class CSMCalculationPanel(GuiSettingPanel):
 
     tabPosition = TABPOS
     tabName = nameSpaces.Label_Calculation
-    tabTipText = nameSpaces.tipText_CSMCalculationPanelPanel
+    tabTipText = nameSpaces.TipText_CSMCalculationPanelPanel
 
     def initWidgets(self):
         mainWindow = self._guiModule.mainWindow
+        journalReference = nameSpaces.TipText_DeltaDeltasSeparator
         settingsDict = od((
             (nameSpaces.WidgetVarName_DeltaDeltasSeparator,
              {'label': nameSpaces.Label_DeltaDeltas,
               'type': compoundWidget.LabelCompoundWidget,
               'kwds': {'labelText': nameSpaces.Label_DeltaDeltas,
-                       'tipText': nameSpaces.tipText_CSMCalculationPanelPanel}}),
-
+                       'tipText': journalReference}}),
+            (nameSpaces.WidgetVarName_DDCalculationMode,
+            {'label': nameSpaces.Label_DDCalculationMode,
+             'type': compoundWidget.LabelCompoundWidget,
+             'kwds': {'labelText': f'{nameSpaces.Label_DDCalculationMode}:\n{DeltaDeltaShiftsCalculation.ModelName}',
+                      'tipText': DeltaDeltaShiftsCalculation.FullDescription,
+                      'label2Text': DeltaDeltaShiftsCalculation.ModelName,
+                      'icon':maTex2Pixmap(f'{DeltaDeltaShiftsCalculation.MaTex}'),
+                      'compoundKwds':{}}}),
         ))
+        ## add the weighting Factor widgets
         factorsDict = od(())
         for atomName, factorValue in seriesVariables.DEFAULT_ALPHA_FACTORS.items():
             label = nameSpaces.Label_Factor.format(**{nameSpaces.AtomName:atomName})
             att = nameSpaces.WidgetVarName_Factor.format(**{nameSpaces.AtomName:atomName})
-            journalReference = f'{nameSpaces.Journal_WilliamsonReference}{nameSpaces.Journal_WilliamsonSection}'
-            tipText = nameSpaces.TipText_Factor.format(**{nameSpaces.AtomName:atomName,
-                                                          nameSpaces.FactorValue:factorValue,
-                                                          nameSpaces.JournalReference:journalReference})
+            tT = nameSpaces.TipText_Factor.format(**{nameSpaces.AtomName:atomName, nameSpaces.FactorValue:factorValue})
             factorsDict[att] = {'label': label,
             'callBack': None,
             'tipText': nameSpaces.TipText_Factor,
             'type': compoundWidget.DoubleSpinBoxCompoundWidget,
             'kwds': {'labelText': label,
-                   'tipText': tipText,
-                   'value':factorValue,
-                   'range': (0.001, 1), 'step': 0.01, 'decimals': 3,
-                   'minimumWidths': MinimumWidgetWidths}}
+                    'tipText': tT,
+                    'value':factorValue,
+                    'range': (0.001, 1), 'step': 0.01, 'decimals': 3,
+                    'fixedWidths': SettingsWidgetFixedWidths}}
         settingsDict.update(factorsDict)
+        restOfWidgetDict = od((
+            (nameSpaces.WidgetVarName_FollowAtoms,
+             {'label': nameSpaces.Label_FollowAtoms,
+              'tipText': nameSpaces.TipText_FollowAtoms,
+              'callBack': None,
+              'type': settingWidgets.ListCompoundWidget,
+              'postInit': self._followAtomsWidgetPostInit,
+              'kwds': {
+                  'labelText': nameSpaces.Label_FollowAtoms,
+                  'tipText': nameSpaces.TipText_FollowAtoms,
+                  'texts': [],
+                  'defaults': [],
+                  'objectName': nameSpaces.WidgetVarName_FollowAtoms,
+                  'minimumWidths': (50,50,50)
+              }}),
+            (nameSpaces.WidgetVarName_ExcludeResType,
+             {'label': nameSpaces.Label_ExcludeResType,
+              'tipText': nameSpaces.TipText_ExcludeResType,
+              'postInit': self._excludeResiduesWidgetPostInit,
+              'callBack': None,
+              'type': settingWidgets.ListCompoundWidget,
+              'kwds': {
+                  'labelText': nameSpaces.Label_ExcludeResType,
+                  'tipText': nameSpaces.TipText_ExcludeResType,
+                  'texts': [],
+                  'defaults': [],
+                  'objectName': nameSpaces.WidgetVarName_ExcludeResType,
+              }})
+        ))
+        settingsDict.update(restOfWidgetDict)
         self._moduleSettingsWidget = settingWidgets.ModuleSettingsWidget(parent=self, mainWindow=mainWindow,
                                                                          settingsDict=settingsDict,
                                                                          grid=(0, 0))
+        self._moduleSettingsWidget.getLayout().setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
+
+    def _followAtomsWidgetPostInit(self, widget, *args):
+        widget.listWidget.setFixedHeight(100)
+        widget.setMaximumWidths(SettingsWidgetFixedWidths)
+        widget.getLayout().setAlignment(QtCore.Qt.AlignTop)
+
+    def _excludeResiduesWidgetPostInit(self, widget, *args):
+        widget.listWidget.setFixedHeight(100)
+        widget.setFixedWidths(SettingsWidgetFixedWidths)
+        widget.getLayout().setAlignment(QtCore.Qt.AlignTop)
 
 
 class GuiFittingPanel(GuiSettingPanel):

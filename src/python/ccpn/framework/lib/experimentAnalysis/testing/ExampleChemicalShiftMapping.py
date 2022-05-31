@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-26 10:27:10 +0100 (Thu, May 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-31 10:23:00 +0100 (Tue, May 31, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -110,8 +110,8 @@ def _testCSMCalcData():
     df = getCSMInputFrameExample()
     from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import DeltaDeltaShiftsCalculation
     deltaDeltaModel = DeltaDeltaShiftsCalculation(alphaFactors=(1, 0.102))
-    outputFrame = deltaDeltaModel.fit(df)
-    print(outputFrame)
+    outputFrame = deltaDeltaModel.calculateDeltaDeltaShift(df)
+    print(outputFrame[['_ROW_UID',sv.DELTA_DELTA_MEAN]])
 
 
 def oneSiteBindingCurve(x, kd, bmax):
@@ -148,8 +148,8 @@ def _testOneBindingSiteFitting():
 
 
 if __name__ == "__main__":
-    # _testCSMCalcData()
-    _testOneBindingSiteFitting()
+    _testCSMCalcData()
+    # _testOneBindingSiteFitting()
 
 
 

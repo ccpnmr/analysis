@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-26 10:27:10 +0100 (Thu, May 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-31 10:23:00 +0100 (Tue, May 31, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 
 from lmfit import lineshapes as ls
 import numpy as np
+from ccpn.util.Logging import getLogger
 
 ## Common built-in functions.
 gaussian_func    = ls.gaussian
@@ -90,7 +91,7 @@ def r2_func(y, redchi):
         r2 = 1 - redchi / var
         return r2
 
-def euclideanDistance_func(array1, array2, alphaFactors):
+def euclideanDistance_func(array1, array2, alphaFactors, method='mean'):
     """
     Calculate the  Euclidean Distance of two set of coordinates using scaling factors. Used in CSM DeltaDeltas
     :param array1: (1d array), coordinate 1
@@ -99,10 +100,13 @@ def euclideanDistance_func(array1, array2, alphaFactors):
     :return: float
     Ref.: Eq.(9) from: M.P. Williamson Progress in Nuclear Magnetic Resonance Spectroscopy 73 (2013) 1–16
     """
+    if method not in ['sum', 'mean']:
+        getLogger().warn('Euclidean Distance method not available. Used Default.')
     deltas = []
     for a, b, factor in zip(array1, array2, alphaFactors):
         delta = a - b
         delta *= factor
         delta **= 2
         deltas.append(delta)
-    return np.sqrt(np.sum(np.array(deltas)))
+    func = getattr(np, method, 'sum')
+    return np.sqrt(func(np.array(deltas)))

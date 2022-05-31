@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-27 17:08:15 +0100 (Fri, May 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-31 10:23:46 +0100 (Tue, May 31, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1339,6 +1339,7 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
 
             for item, data in settingsDict.items():
                 row += 1
+
                 if 'type' in data:
                     widgetType = data['type']
                     if 'kwds' in data:
@@ -1376,6 +1377,10 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
                                          'item'      : item,
                                          'signalFunc': None
                                          }
+                if 'postInit' in data:
+                    func = data['postInit']
+                    if func:
+                        func(newItem)
 
                 # if data['_init']:
                 #     # attach a one-off signal to the checkBox

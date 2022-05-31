@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-27 17:08:15 +0100 (Fri, May 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-31 10:23:46 +0100 (Tue, May 31, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -871,11 +871,11 @@ class LabelCompoundWidget(CompoundBaseWidget):
         hAlign = orientation if (orientation == 'left' or orientation == 'right') else 'center'
         label2Kwds = {
                         'text'     : label2Text,
-                        'hAlign'   : hAlign,
+
                         'icon'     : icon,
                         }
         label2Kwds.update(compoundKwds or {})
-        self.label2 = Label(parent=self, **label2Kwds)
+        self.label2 = Label(parent=self, hAlign='r', **label2Kwds)
         self.label2.setObjectName(label2Text)
         self.setObjectName(labelText)
         self._addWidget(self.label2)
@@ -1366,7 +1366,7 @@ class RadioButtonsCompoundWidget(CompoundBaseWidget):
     def __init__(self, parent=None, mainWindow=None,
                  showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
-                 labelText='', texts=[], callback=None, selectedInd=0,
+                 labelText='', texts=[], tipTexts=[], icons=[], callback=None, selectedInd=0, direction='h',
                  editable=True, compoundKwds=None,
                  **kwds):
         """
@@ -1390,7 +1390,10 @@ class RadioButtonsCompoundWidget(CompoundBaseWidget):
         self._addWidget(self.label)
 
         hAlign = orientation if (orientation == 'left' or orientation == 'right') else 'center'
-        self.radioButtons = RadioButtons(parent=self, callback=callback, **compoundKwds)
+        if compoundKwds is None:
+            compoundKwds = {}
+        self.radioButtons = RadioButtons(parent=self, texts=texts, tipTexts=tipTexts, selectedInd=selectedInd,
+                                         callback=callback,icons=icons, direction=direction, **compoundKwds)
         self.radioButtons.setObjectName(labelText)
         self.setObjectName(labelText)
         self._addWidget(self.radioButtons)

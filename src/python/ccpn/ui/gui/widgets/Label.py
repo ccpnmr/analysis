@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-19 16:01:23 +0100 (Thu, May 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-31 10:23:46 +0100 (Tue, May 31, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,12 +26,49 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtGui, QtWidgets
 from pyqtgraph.widgets.VerticalLabel import VerticalLabel as pyqtVerticalLabel
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.framework.Translation import translator
 import ccpn.ui.gui.guiSettings as guiSettings
 from ccpn.ui.gui.widgets.Icon import Icon
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg
+
+
+def maTex2Pixmap(mathTex, fontSize=10):
+    """
+    Convert a str with  Matplotlib-laTex syntax to a Pixmap.
+    :param mathTex: A string with  Matplotlib-laTex syntax
+    :param fontSize: int
+    :return: QPixmap
+    """
+    #####  set up a mpl figure instance
+    fig = plt.figure()
+    fig.patch.set_facecolor('none')
+    fig.set_canvas(FigureCanvasAgg(fig))
+    renderer = fig.canvas.get_renderer()
+
+    ##### plot the mathTex expression ----
+    ax = fig.add_axes([0, 0, 1, 1])
+    ax.axis('off')
+    ax.patch.set_facecolor('none')
+    t = ax.text(0, 0, mathTex, ha='left', va='bottom', fontsize=fontSize)
+
+    ##### fit figure size to text artist
+    fwidth, fheight = fig.get_size_inches()
+    fig_bbox = fig.get_window_extent(renderer)
+    text_bbox = t.get_window_extent(renderer)
+    tight_fwidth = text_bbox.width * fwidth / fig_bbox.width
+    tight_fheight = text_bbox.height * fheight / fig_bbox.height
+    fig.set_size_inches(tight_fwidth, tight_fheight)
+
+    ##### convert mpl figure to QPixmap
+    buf, size = fig.canvas.print_to_buffer()
+    qimage = QtGui.QImage.rgbSwapped(QtGui.QImage(buf, size[0], size[1], QtGui.QImage.Format_ARGB32))
+    qpixmap = QtGui.QPixmap(qimage)
+    return qpixmap
+
 
 
 class Label(QtWidgets.QLabel, Base):
@@ -72,6 +109,8 @@ class Label(QtWidgets.QLabel, Base):
 
         if isinstance(icon, Icon):
             self.setPixmap(icon.pixmap(*iconSize))
+        elif isinstance(icon, QtGui.QPixmap):
+            self.setPixmap(icon)
 
     def get(self):
         """get the label text
@@ -227,26 +266,19 @@ class VerticalLabel(pyqtVerticalLabel, Base):
 if __name__ == '__main__':
     from ccpn.ui.gui.widgets.Application import TestApplication
     from ccpn.ui.gui.widgets.Button import Button
+    from ccpn.ui.gui.widgets.Icon import Icon
+    from ccpn.ui.gui.popups.Dialog import CcpnDialog
 
 
-    msg = 'Hello world'
-    count = 0
-
-
-    def func():
-        global count
-        count += 1
-        label.set(msg + ' ' + str(count))
-        print(label.get())
-
+    mathExamples = [
+        r'$\sqrt{\frac{1}{N}\sum_{i=0}^N (\alpha_i*\delta_i)^2}$',
+        '$k_{soil}=\\frac{\\sum f_j k_j \\theta_j}{\\sum f_j \\theta_j}$',
+        '$\\lambda_{soil}=k_{soil} / C_{soil}$']
 
     app = TestApplication()
-
-    window = QtWidgets.QWidget()
-
-    label = Label(window, text=msg, textColor='red', grid=(0, 0))
-    button = Button(window, text='Click me', callback=func, grid=(0, 1))
-
-    window.show()
-
+    pixmap = maTex2Pixmap(f'A test label with equation:  {mathExamples[0]}')
+    popup = CcpnDialog(windowTitle='Test Table', setLayout=True)
+    label = Label(popup, text='', icon=pixmap, grid=(0, 0))
+    popup.show()
+    popup.raise_()
     app.start()

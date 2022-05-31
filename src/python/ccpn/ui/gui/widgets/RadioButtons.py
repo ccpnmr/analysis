@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-18 18:40:28 +0100 (Wed, May 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-05-31 10:23:46 +0100 (Tue, May 31, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,6 +30,7 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.RadioButton import RadioButton, EditableRadioButton, RadioButtonWithSubSelection
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.Label import Label
 from ccpn.util.Logging import getLogger
 
 
@@ -40,7 +41,9 @@ UNCHECKED = QtCore.Qt.Unchecked
 class RadioButtons(QtWidgets.QWidget, Base):
 
     def __init__(self, parent, texts=None, selectedInd=None, exclusive=True,
+
                  callback=None, direction='h', tipTexts=None, objectNames=None, squared=False,
+                 extraLabels=None, extraLabelIcons=None,
                  icons=None, initButtons=True,
                  **kwds):
 
@@ -56,6 +59,8 @@ class RadioButtons(QtWidgets.QWidget, Base):
         self.isExclusive = exclusive
         buttonGroup.setExclusive(self.isExclusive)
         self.squared = squared
+        self.extraLabels = extraLabels
+        self.extraLabelIcons = extraLabelIcons
 
         if not tipTexts:
             tipTexts = [None] * len(texts)
@@ -111,9 +116,18 @@ class RadioButtons(QtWidgets.QWidget, Base):
         for i, text in enumerate(texts):
             if 'h' in direction:
                 grid = (0, i)
+
             else:
                 grid = (i, 0)
-            button = RadioButton(self, text, squared=self.squared, tipText=tipTexts[i], grid=grid, hAlign='l')
+
+            if self.extraLabels and len(self.extraLabels)==len(self.texts):
+                w = Widget(self, grid=grid, hAlign='l', setLayout=True)
+                button = RadioButton(w, text, squared=self.squared, tipText=tipTexts[i], grid=(0,0), hAlign='l')
+                label = Label(w, self.extraLabels[i], grid=(0,1), hAlign='l')
+                if self.extraLabelIcons and len(self.extraLabelIcons) == len(self.texts):
+                    label.setPixmap(self.extraLabelIcons[i])
+            else:
+                button = RadioButton(self, text, squared=self.squared, tipText=tipTexts[i], grid=grid, hAlign='l')
             self.radioButtons.append(button)
 
             self.buttonGroup.addButton(button)
@@ -575,16 +589,23 @@ def main():
         '_txt2':
             {'CheckBoxTexts': ['_cb2Txt1', '_cb2Txt2', '_cb3Txt3']},
         }
-    rbs = RadioButtonsWithSubCheckBoxes(parent=popup,
-                                        texts=['_txt1','_txt2'],
-                                        tipTexts=[''],
-                                        checkBoxesDictionary=checkBoxesDict,
-                                        grid=(1, 0))
+    # rbs = RadioButtonsWithSubCheckBoxes(parent=popup,
+    #                                     texts=['_txt1','_txt2'],
+    #                                     tipTexts=[''],
+    #                                     checkBoxesDictionary=checkBoxesDict,
+    #                                     grid=(1, 0))
     # radioButtons.setCallback(partial(testCallback, radioButtons))
     # for i in range(10):
     #     button = RadioButton(popup, text='TEST', grid=(i, 0),
     #                          callback=testCall)  # partial(self.assignSelect
     #     buttonGroup.addButton(button)
+    from ccpn.ui.gui.widgets.Label import maTex2Pixmap
+    mathExamples = [
+        r'$\sqrt{\frac{1}{N}\sum_{i=0}^N (\alpha_i*\delta_i)^2}$',
+        '$\\lambda_{soil}=k_{soil} / C_{soil}$']
+
+    pixmaps = [maTex2Pixmap(ex) for ex in mathExamples]
+    radioButtons = RadioButtons(popup, texts=['fff', 'gggg'], extraLabels=['', ''], extraLabelIcons=pixmaps, grid=(1, 0))
 
     popup.raise_()
     popup.exec()

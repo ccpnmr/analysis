@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-19 11:39:58 +0100 (Thu, May 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-01 20:13:15 +0100 (Wed, June 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -162,6 +162,9 @@ class GLLabelling():
             self._createLabel(obj)
 
         if Notifier.CHANGE in triggers:
+            if obj.isDeleted:
+                return
+
             self._changeSymbol(obj)
             self._changeLabel(obj)
 
@@ -285,29 +288,34 @@ class GLLabelling():
         if obj.isDeleted:
             return
 
-        objPos = obj.pointPositions
-        if not objPos:
-            return
-        objLineWidths = obj.pointLineWidths
-
-        spectrum = spectrumView.spectrum
-        spectrumFrequency = spectrum.spectrometerFrequencies
+        # spectrum = spectrumView.spectrum
+        # spectrumFrequency = spectrum.spectrometerFrequencies
         # pls = peakListView.peakList
         pls = self.objectList(objListView)
 
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
         try:
+            # fix the pointPositions
+            objPos = obj.pointPositions
             p0 = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
-        except Exception as es:
-            raise
-        pointLineWidths = (objLineWidths[pIndex[0]], objLineWidths[pIndex[1]])
-        frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
-        _alias = obj.aliasing
-        alias = getAliasSetting(_alias[pIndex[0]], _alias[pIndex[1]])
+            _badPos = False
+        except Exception:
+            p0 = (0.0, 0.0)
+            _badPos = True
 
-        if None in p0:
-            getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
-            return
+        try:
+            # fix the lineWidths
+            objLineWidths = obj.pointLineWidths
+            pointLineWidths = (objLineWidths[pIndex[0]], objLineWidths[pIndex[1]])
+        except Exception:
+            pointLineWidths = (None, None)
+
+        # frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
+        try:
+            _alias = obj.aliasing
+            alias = getAliasSetting(_alias[pIndex[0]], _alias[pIndex[1]])
+        except Exception:
+            alias = 0
 
         _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
 
@@ -322,7 +330,7 @@ class GLLabelling():
                 r = GLDefs.STRINGSCALE * r
                 w = GLDefs.STRINGSCALE * w
 
-        if pIndex:
+        if True:  # pIndex:
             # get visible/plane status
             _isInPlane, _isInFlankingPlane, planeIndex, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
@@ -332,6 +340,8 @@ class GLLabelling():
 
             if self._isSelected(obj):
                 listCol = self._GLParent.highlightColour[:3]
+            elif _badPos:
+                listCol = [1.0, 0.2, 0.1]  # red if the position is bad
             else:
                 if objListView.meritEnabled and obj.figureOfMerit < objListView.meritThreshold:
                     objCol = objListView.meritColour or GLDefs.DEFAULTCOLOUR
@@ -358,27 +368,31 @@ class GLLabelling():
     def _fillLabels(self, spectrumView, objListView, pls, objectList):
         """Append all labels to the new list
         """
-        spectrum = spectrumView.spectrum
-        spectrumFrequency = spectrum.spectrometerFrequencies
-
         # use the first object for referencing
         obj = objectList(pls)[0]
 
-        objPos = obj.pointPositions
-        if not objPos:
-            return
-        objLineWidths = obj.pointLineWidths
-
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
-        p0 = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
-        pointLineWidths = (objLineWidths[pIndex[0]], objLineWidths[pIndex[1]])
-        frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
-        _alias = obj.aliasing
-        alias = getAliasSetting(_alias[pIndex[0]], _alias[pIndex[1]])
+        try:
+            # fix the pointPositions
+            objPos = obj.pointPositions
+            p0 = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
+            _badPos = False
+        except Exception:
+            p0 = (0.0, 0.0)
+            _badPos = True
 
-        if None in p0:
-            getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
-            return
+        try:
+            # fix the lineWidths
+            objLineWidths = obj.pointLineWidths
+            pointLineWidths = (objLineWidths[pIndex[0]], objLineWidths[pIndex[1]])
+        except Exception:
+            pointLineWidths = (None, None)
+
+        try:
+            _alias = obj.aliasing
+            alias = getAliasSetting(_alias[pIndex[0]], _alias[pIndex[1]])
+        except Exception:
+            alias = 0
 
         _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
 
@@ -392,8 +406,7 @@ class GLLabelling():
                 r = GLDefs.STRINGSCALE * r
                 w = GLDefs.STRINGSCALE * w
 
-        if pIndex:
-
+        if True:  # pIndex:
             # get visible/plane status
             _isInPlane, _isInFlankingPlane, planeIndex, fade = self.objIsInVisiblePlanes(spectrumView, obj)
 
@@ -403,6 +416,8 @@ class GLLabelling():
 
             if self._isSelected(obj):
                 listCol = self._GLParent.highlightColour[:3]
+            elif _badPos:
+                listCol = [1.0, 0.2, 0.1]  # red if the position is bad
             else:
                 if objListView.meritEnabled and obj.figureOfMerit < objListView.meritThreshold:
                     objCol = objListView.meritColour or GLDefs.DEFAULTCOLOUR
@@ -561,29 +576,40 @@ class GLLabelling():
         if not _isInPlane and not _isInFlankingPlane:
             return
 
+        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        try:
+            # fix the pointPositions
+            objPos = obj.pointPositions
+            p0 = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
+            _badPos = False
+        except Exception:
+            p0 = (0.0, 0.0)
+            _badPos = True
+
         if self._isSelected(obj):
             cols = self._GLParent.highlightColour[:3]
+        elif _badPos:
+            cols = [1.0, 0.2, 0.1]  # red for bad position
         else:
             cols = listCol
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        try:
+            # fix the lineWidths
+            objLineWidths = obj.pointLineWidths
+            pointLineWidths = (objLineWidths[pIndex[0]], objLineWidths[pIndex[1]])
+        except Exception:
+            pointLineWidths = (None, None)
 
-        objPos = obj.pointPositions
-        objLineWidths = obj.pointLineWidths
-        p0 = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
-        pointLineWidths = (objLineWidths[pIndex[0]], objLineWidths[pIndex[1]])
-        frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
-        _alias = obj.aliasing
-        # alias = 1024 * _alias[pIndex[0]] + _alias[pIndex[1]]
-        alias = getAliasSetting(_alias[pIndex[0]], _alias[pIndex[1]])
+        # frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
+        try:
+            _alias = obj.aliasing
+            alias = getAliasSetting(_alias[pIndex[0]], _alias[pIndex[1]])
+        except Exception:
+            alias = 0
 
-        if None in p0:
-            getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
+        if False:  # not pIndex:
             return
 
-        if not pIndex:
-            # if axisCount != 2:
-            getLogger().debug('Bad axisCodes: %s - %s' % (obj.pid, obj.axisCodes))
         else:
             if symbolType == 0 or symbolType == 3:
 
@@ -841,34 +867,40 @@ class GLLabelling():
         if not _isInPlane and not _isInFlankingPlane:
             return
 
+        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        try:
+            # fix the pointPositions
+            objPos = obj.pointPositions
+            p0 = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
+            _badPos = False
+        except Exception:
+            p0 = (0.0, 0.0)
+            _badPos = True
+
+        try:
+            # fix the lineWidths
+            objLineWidths = obj.pointLineWidths
+            pointLineWidths = (objLineWidths[pIndex[0]], objLineWidths[pIndex[1]])
+        except Exception:
+            pointLineWidths = (None, None)
+
         if self._isSelected(obj):
             cols = self._GLParent.highlightColour[:3]
+        elif _badPos:
+            cols = [1.0, 0.2, 0.1]  # red for bad position
         else:
             cols = listCol
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        # frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
+        try:
+            _alias = obj.aliasing
+            alias = getAliasSetting(_alias[pIndex[0]], _alias[pIndex[1]])
+        except Exception:
+            alias = 0
 
-        objPos = obj.pointPositions
-        objLineWidths = obj.pointLineWidths
-
-        if not objPos or not objLineWidths:
-            getLogger().debug('Object %s contains undefined position' % str(obj.pid))
+        if False:  # not pIndex:
             return
 
-        p0 = (objPos[pIndex[0]] - 1, objPos[pIndex[1]] - 1)
-        pointLineWidths = (objLineWidths[pIndex[0]], objLineWidths[pIndex[1]])
-        frequency = (spectrumFrequency[pIndex[0]], spectrumFrequency[pIndex[1]])
-        _alias = obj.aliasing
-        # alias = 1024 * _alias[pIndex[0]] + _alias[pIndex[1]]
-        alias = getAliasSetting(_alias[pIndex[0]], _alias[pIndex[1]])
-
-        if None in p0:
-            getLogger().debug('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
-            return
-
-        if not pIndex:
-            # if axisCount != 2:
-            getLogger().debug('Bad axisCodes: %s - %s' % (obj.pid, obj.axisCodes))
         else:
             if symbolType == 0 or symbolType == 3:
 
@@ -1140,6 +1172,8 @@ class GLLabelling():
 
                     if self._isSelected(obj):
                         drawStr.setStringColour((*self._GLParent.highlightColour[:3], fade))
+                    elif obj.pointPositions and None in obj.pointPositions:
+                        drawStr.setStringColour((1.0, 0.2, 0.1, fade))
                     else:
 
                         if meritEnabled and obj.figureOfMerit < meritThreshold:
@@ -1224,6 +1258,8 @@ class GLLabelling():
 
                         if _selected:
                             cols = self._GLParent.highlightColour[:3]
+                        elif obj.pointPositions and None in obj.pointPositions:
+                            cols = [1.0, 0.2, 0.1]  # red if the position is bad
                         else:
                             if meritEnabled and obj.figureOfMerit < meritThreshold:
                                 cols = meritCol
@@ -1270,6 +1306,8 @@ class GLLabelling():
                                                                                      indexStart + np2 + 2, indexStart + np2 + 1,
                                                                                      indexStart + np2, indexStart + np2 + 3,
                                                                                      indexStart + np2 + 3, indexStart + np2 + 1), dtype=np.uint32))
+                        elif obj.pointPositions and None in obj.pointPositions:
+                            cols = [1.0, 0.2, 0.1]  # red if the position is bad
                         else:
                             if objListView.meritEnabled and obj.figureOfMerit < objListView.meritThreshold:
                                 cols = meritCol
@@ -1308,6 +1346,8 @@ class GLLabelling():
                         if self._isSelected(obj):
                             _selected = True
                             cols = self._GLParent.highlightColour[:3]
+                        elif obj.pointPositions and None in obj.pointPositions:
+                            cols = [1.0, 0.2, 0.1]  # red if the position is bad
                         else:
                             if objListView.meritEnabled and obj.figureOfMerit < objListView.meritThreshold:
                                 cols = meritCol
@@ -1878,6 +1918,8 @@ class GL1dLabelling():
 
                     if _selected:
                         cols = self._GLParent.highlightColour[:3]
+                    elif obj.pointPositions and None in obj.pointPositions:
+                        cols = [1.0, 0.2, 0.1]  # red if the position is bad
                     else:
                         if meritEnabled and obj.figureOfMerit < meritThreshold:
                             cols = meritCol
@@ -1920,22 +1962,27 @@ class GL1dLabelling():
         if not obj:
             return
 
-        objPos = obj.pointPositions
-        if not objPos:
-            getLogger().warning(f'Object contains undefined position {obj}')
+        try:
+            objPos = obj.pointPositions
+            _h = obj.height if obj.height is not None else 0
+            p0 = (objPos[0] - 1, _h)
+            _badPos = False
+        except Exception:
             p0 = (0.0, 0.0)
-        else:
-            p0 = (objPos[0] - 1, obj.height)
-            if None in p0:
-                getLogger().warning(f'Object {str(obj)} contains undefined position {str(p0)}')
-                return
-        _alias = obj.aliasing
-        alias = getAliasSetting(_alias[0], 0)
+            _badPos = True
 
         if self._isSelected(obj):
             cols = self._GLParent.highlightColour[:3]
+        elif _badPos:
+            cols = [1.0, 0.2, 0.1]  # red if the position is bad
         else:
             cols = listCol
+
+        try:
+            _alias = obj.aliasing
+            alias = getAliasSetting(_alias[0], 0)
+        except Exception:
+            alias = 0
 
         if symbolType == 0:  # cross
             iCount, _selected = self._makeSquareSymbol(drawList, indexEnd, vertexStart, 0, obj)
@@ -2038,7 +2085,7 @@ class GL1dLabelling():
                 indexStart = 2 * drawList.pids[pp + 1]
                 try:
                     drawList.vertices[indexStart:indexStart + offsetsLENSQ2] = drawList.offsets[indexStart:indexStart + offsetsLENSQ2] + offsets
-                except Exception as es:
+                except Exception:
                     pass
 
         elif symbolType == 1 or symbolType == 2:
@@ -2070,10 +2117,6 @@ class GL1dLabelling():
         indexing.end = len(drawList.indices)
         indexing.vertexStart = drawList.numVertices
 
-        # NOTE:ED - SEEMS TO BE A BUG HERE WITH THE INDEXING BEFORE HIGHLIGHTING!
-        #           OTHERWISE 1d and Nd SHOULD BE THE SAME _appendSymbolVertices...
-        #           CHECK - but I think solved
-
         pls = self.objectList(objListView)
 
         listCol = getAutoColourRgbRatio(objListView.symbolColour or GLDefs.DEFAULTCOLOUR, pls.spectrum, self.autoColour,
@@ -2083,24 +2126,30 @@ class GL1dLabelling():
         meritEnabled = objListView.meritEnabled
         meritThreshold = objListView.meritThreshold
 
+        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
+        try:
+            _h = obj.height if obj.height is not None else 0
+            p0 = (obj.pointPositions[pIndex[0]] - 1, _h)
+            _badPos = False
+        except Exception:
+            p0 = (0.0, 0.0)
+            _badPos = True
+
         if self._isSelected(obj):
             cols = self._GLParent.highlightColour[:3]
+        elif _badPos:
+            cols = [1.0, 0.2, 0.1]  # red if the position is bad
         else:
             if meritEnabled and obj.figureOfMerit < meritThreshold:
                 cols = meritCol
             else:
                 cols = listCol
 
-        pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
-        if not obj.pointPositions:
-            return
-        p0 = (obj.pointPositions[pIndex[0]] - 1, obj.height)
-        _alias = obj.aliasing
-        alias = getAliasSetting(_alias[0], 0)
-
-        if None in p0:
-            getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
-            return
+        try:
+            _alias = obj.aliasing
+            alias = getAliasSetting(_alias[0], 0)
+        except Exception:
+            alias = 0
 
         if symbolType == 0 or symbolType == 3:  # a cross/plus
 
@@ -2126,7 +2175,7 @@ class GL1dLabelling():
             # check whether the peaks still exists
             obj = drawList.pids[pp]
 
-            if obj == delObj:
+            if obj and obj == delObj:
                 offset = drawList.pids[pp + 1]
                 numPoints = drawList.pids[pp + 2]
 
@@ -2169,18 +2218,24 @@ class GL1dLabelling():
         _, _, symbolType, symbolWidth, r, w = self._getSymbolWidths(spectrumView)
 
         pIndex = self._spectrumSettings[spectrumView][GLDefs.SPECTRUM_POINTINDEX]
-        if not obj.pointPositions:
-            return
-        p0 = (obj.pointPositions[pIndex[0]] - 1, obj.height)
+        try:
+            h = obj.height if obj.height is not None else 0
+            p0 = (obj.pointPositions[pIndex[0]] - 1, h)  # need to split into pos, height
+            _badPos = False
+        except Exception:
+            p0 = (0.0, 0.0)
+            _badPos = True
 
-        if None in p0:
-            getLogger().warning('Object %s contains undefined position %s' % (str(obj.pid), str(p0)))
-            return
-        _alias = obj.aliasing
-        alias = getAliasSetting(_alias[0], 0)
+        try:
+            _alias = obj.aliasing
+            alias = getAliasSetting(_alias[0], 0)
+        except Exception:
+            alias = 0
 
         if self._isSelected(obj):
             cols = self._GLParent.highlightColour[:3]
+        elif _badPos:
+            cols = [1.0, 0.2, 0.1]  # red for bad position
         else:
             listCol = getAutoColourRgbRatio(objListView.textColour or GLDefs.DEFAULTCOLOUR, pls.spectrum, self.autoColour,
                                             getColours()[CCPNGLWIDGET_FOREGROUND])

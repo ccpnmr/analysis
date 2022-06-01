@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-19 11:39:58 +0100 (Thu, May 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-01 20:13:15 +0100 (Wed, June 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -6317,16 +6317,21 @@ class CcpnGLWidget(QOpenGLWidget):
                     y0 = self._startCoordinate[1]
                     y1 = self._endCoordinate[1]
                     y0, y1 = min(y0, y1), max(y0, y1)
-                    # add offsets for when is stackmode
+                    # add offsets for when in stack-mode
                     xOffset, yOffset = self._spectrumSettings[spectrumView].get(GLDefs.SPECTRUM_STACKEDMATRIXOFFSET)
                     y0, y1 = np.array([y0, y1]) - yOffset
                     xPositions = np.array(originalxPositions) - xOffset
                     xAxis = 0
 
                     for peak in peakList.peaks:
-                        height = peak.height  # * scale # TBD: is the scale already taken into account in peak.height???
-                        if xPositions[0] < float(peak.position[xAxis]) < xPositions[1] and y0 < height < y1:
-                            peaks.add(peak)
+                        try:
+                            height = peak.height  # * scale # TBD: is the scale already taken into account in peak.height???
+                            if xPositions[0] < float(peak.position[xAxis]) < xPositions[1] and y0 < height < y1:
+                                peaks.add(peak)
+
+                        except Exception as es:
+                            # NOTE:ED - skip for now
+                            continue
 
                 else:
                     spectrumIndices = spectrumView.dimensionIndices
@@ -6334,19 +6339,24 @@ class CcpnGLWidget(QOpenGLWidget):
                     yAxis = spectrumIndices[1]
 
                     for peak in peakList.peaks:
-                        if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
-                                and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
-                            if len(peak.axisCodes) > 2 and zPositions is not None:
-                                zAxis = spectrumIndices[2]
+                        try:
+                            if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
+                                    and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
+                                if len(peak.axisCodes) > 2 and zPositions is not None:
+                                    zAxis = spectrumIndices[2]
 
-                                # within the XY bounds so check whether inPlane
-                                _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLPeaks.objIsInVisiblePlanes(spectrumView, peak)
+                                    # within the XY bounds so check whether inPlane
+                                    _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLPeaks.objIsInVisiblePlanes(spectrumView, peak)
 
-                                # if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
-                                if _isInPlane:
+                                    # if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
+                                    if _isInPlane:
+                                        peaks.add(peak)
+                                else:
                                     peaks.add(peak)
-                            else:
-                                peaks.add(peak)
+
+                        except Exception as es:
+                            # NOTE:ED - skip for now
+                            continue
 
         self.current.peaks = list(currentPeaks | peaks)
 

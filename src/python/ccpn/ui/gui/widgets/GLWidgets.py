@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-19 11:39:58 +0100 (Thu, May 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-01 20:13:15 +0100 (Wed, June 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -76,27 +76,32 @@ class GuiNdWidget(CcpnGLWidget):
                     yAxis = spectrumIndices[1]
 
                     for peak in peakList.peaks:
-                        if len(peak.axisCodes) > 2 and zPositions is not None:
+                        try:
+                            if len(peak.axisCodes) > 2 and zPositions is not None:
 
-                            zAxis = spectrumIndices[2]
+                                zAxis = spectrumIndices[2]
 
-                            if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
-                                    and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
+                                if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
+                                        and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
 
-                                # within the XY bounds so check whether inPlane
-                                _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLPeaks.objIsInVisiblePlanes(spectrumView, peak)
+                                    # within the XY bounds so check whether inPlane
+                                    _isInPlane, _isInFlankingPlane, planeIndex, fade = self._GLPeaks.objIsInVisiblePlanes(spectrumView, peak)
 
-                                # if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
-                                if _isInPlane:
+                                    # if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
+                                    if _isInPlane:
+                                        peaks.append(peak)
+                                        if firstOnly:
+                                            return peaks
+                            else:
+                                if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
+                                        and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
                                     peaks.append(peak)
                                     if firstOnly:
-                                        return peaks
-                        else:
-                            if (xPositions[0] < float(peak.position[xAxis]) < xPositions[1]
-                                    and yPositions[0] < float(peak.position[yAxis]) < yPositions[1]):
-                                peaks.append(peak)
-                                if firstOnly:
-                                    return peaks if peak in self.current.peaks else []
+                                        return peaks if peak in self.current.peaks else []
+
+                        except Exception:
+                            # NOTE:ED - skip for now
+                            continue
 
         return peaks
 
@@ -240,6 +245,9 @@ class GuiNdWidget(CcpnGLWidget):
 
         # get the correct coordinates based on the axisCodes
         p0 = list(peak.position)
+        if not p0 or None in p0:
+            return
+
         for ii, ind in enumerate(indices[:2]):
             if ind is not None:
                 # update the peak position
@@ -1089,12 +1097,17 @@ class Gui1dWidget(CcpnGLWidget):
                     peakList = peakListView.peakList
 
                     for peak in peakList.peaks:
-                        if (xPositions[0] < float(peak.position[0]) < xPositions[1]
-                                and yPositions[0] < float(peak.height) < yPositions[1]):
+                        try:
+                            if (xPositions[0] < float(peak.position[0]) < xPositions[1]
+                                    and yPositions[0] < float(peak.height) < yPositions[1]):
 
-                            peaks.append(peak)
-                            if firstOnly:
-                                return peaks if peak in self.current.peaks else []
+                                peaks.append(peak)
+                                if firstOnly:
+                                    return peaks if peak in self.current.peaks else []
+
+                        except Exception as es:
+                            # NOTE:ED - skip for now
+                            continue
 
         return peaks
 

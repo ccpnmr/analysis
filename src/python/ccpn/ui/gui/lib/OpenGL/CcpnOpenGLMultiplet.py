@@ -4,10 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-10-14 12:10:14 +0100 (Thu, October 14, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-06-01 20:13:15 +0100 (Wed, June 01, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -227,20 +227,20 @@ class GLmultipletListMethods():
                                      getColours()[CCPNGLWIDGET_MULTIPLETLINK])
 
         posList = p0
-
         for peak in multiplet.peaks:
             # get the correct coordinates based on the axisCodes
             pp = peak.pointPositions
-            p1 = (pp[pIndex[0]] - 1, pp[pIndex[1]] - 1)
-
-            if None in p1:
-                getLogger().warning('Peak %s contains undefined position %s' % (str(peak.pid), str(p1)))
-                posList += p0
-            else:
+            try:
+                p1 = (pp[pIndex[0]] - 1.0, pp[pIndex[1]] - 1.0)
                 posList += p1
+            except Exception:
+                posList += (0, 0)  # add the bad-point
 
-        peakAlias = multiplet.peaks[0].aliasing
-        alias = getAliasSetting(peakAlias[pIndex[0]], peakAlias[pIndex[1]])
+        try:
+            peakAlias = multiplet.peaks[0].aliasing
+            alias = getAliasSetting(peakAlias[pIndex[0]], peakAlias[pIndex[1]])
+        except Exception:
+            alias = 0
 
         numVertices = len(multiplet.peaks) + 1
         drawList.vertices = np.append(drawList.vertices, np.array(posList, dtype=np.float32))
@@ -261,20 +261,20 @@ class GLmultipletListMethods():
                                      getColours()[CCPNGLWIDGET_MULTIPLETLINK])
 
         posList = p0
-
         for peak in multiplet.peaks:
             # get the correct coordinates based on the axisCodes
             pp = peak.pointPositions
-            p1 = (pp[pIndex[0]] - 1, pp[pIndex[1]] - 1)
-
-            if None in p1:
-                getLogger().warning('Peak %s contains undefined position %s' % (str(peak.pid), str(p1)))
-                posList += p0
-            else:
+            try:
+                p1 = (pp[pIndex[0]] - 1.0, pp[pIndex[1]] - 1.0)
                 posList += p1
+            except Exception:
+                posList += (0, 0)  # add the bad-point
 
-        peakAlias = multiplet.peaks[0].aliasing
-        alias = getAliasSetting(peakAlias[pIndex[0]], peakAlias[pIndex[1]])
+        try:
+            peakAlias = multiplet.peaks[0].aliasing
+            alias = getAliasSetting(peakAlias[pIndex[0]], peakAlias[pIndex[1]])
+        except Exception:
+            alias = 0
 
         numVertices = len(multiplet.peaks) + 1
         drawList.vertices[vertexPtr:vertexPtr + 2 * numVertices] = posList
@@ -313,15 +313,11 @@ class GLmultipletListMethods():
         extraIndices, extraIndexCount = self.insertExtraIndices(drawList, indexing.end + iCount, indexing.start + self.LENSQ, obj)
         # add extra vertices for the multiplet
         extraVertices = self.insertExtraVertices(drawList, vertexPtr + self.LENSQ2, pIndex, obj, p0, (*cols, fade), fade)
-        try:
-            # keep a pointer to the obj
-            drawList.pids[objNum:objNum + GLDefs.LENPID] = (obj, drawList.numVertices, (self.LENSQ + extraVertices),
-                                                            _isInPlane, _isInFlankingPlane, _selected,
-                                                            indexing.end, indexing.end + iCount + extraIndices,
-                                                            planeIndex, 0, 0, 0)
-        except Exception as es:
-            # NOTE:ED - check and remove this error trap
-            pass
+        # keep a pointer to the obj
+        drawList.pids[objNum:objNum + GLDefs.LENPID] = (obj, drawList.numVertices, (self.LENSQ + extraVertices),
+                                                        _isInPlane, _isInFlankingPlane, _selected,
+                                                        indexing.end, indexing.end + iCount + extraIndices,
+                                                        planeIndex, 0, 0, 0)
 
         indexing.start += (self.LENSQ + extraIndexCount)
         indexing.end += (iCount + extraIndices)
@@ -502,16 +498,18 @@ class GLmultiplet1dLabelling(GL1dLabelling, GLmultipletNdLabelling):
         posList = p0
         for peak in multiplet.peaks:
             # get the correct coordinates based on the axisCodes
-            p1 = (peak.pointPositions[pIndex[0]] - 1, peak.height)
-
-            if None in p1:
-                getLogger().warning('Peak %s contains undefined position %s' % (str(peak.pid), str(p1)))
-                posList += p0
-            else:
+            try:
+                h = peak.height if peak.height is not None else 0  # p0[1]  # error should only occur on next line
+                p1 = (peak.pointPositions[pIndex[0]] - 1, h)
                 posList += p1
+            except Exception:
+                posList += (0, 0)  # add the bad-point
 
-        peakAlias = multiplet.peaks[0].aliasing
-        alias = getAliasSetting(peakAlias[pIndex[0]], 0)
+        try:
+            peakAlias = multiplet.peaks[0].aliasing
+            alias = getAliasSetting(peakAlias[pIndex[0]], 0)
+        except Exception:
+            alias = 0
 
         numVertices = len(multiplet.peaks) + 1
         drawList.vertices = np.append(drawList.vertices, np.array(posList, dtype=np.float32))
@@ -532,18 +530,20 @@ class GLmultiplet1dLabelling(GL1dLabelling, GLmultipletNdLabelling):
                                      getColours()[CCPNGLWIDGET_MULTIPLETLINK])
 
         posList = p0
-
         for peak in multiplet.peaks:
             # get the correct coordinates based on the axisCodes
-            p1 = (peak.pointPositions[pIndex] - 1, peak.height)
-
-            if None in p1:
-                getLogger().warning('Peak %s contains undefined position %s' % (str(peak.pid), str(p1)))
-                posList += p0
-            else:
+            try:
+                h = peak.height if peak.height is not None else 0  # p0[1]  # error should only occur on next line
+                p1 = (peak.pointPositions[pIndex] - 1, h)
                 posList += p1
-        peakAlias = multiplet.peaks[0].aliasing
-        alias = getAliasSetting(peakAlias[0], 0)
+            except Exception:
+                posList += (0, 0)  # add the bad-point
+
+        try:
+            peakAlias = multiplet.peaks[0].aliasing
+            alias = getAliasSetting(peakAlias[0], 0)
+        except Exception:
+            alias = 0
 
         numVertices = len(multiplet.peaks) + 1
         drawList.vertices[vertexPtr:vertexPtr + 2 * numVertices] = posList

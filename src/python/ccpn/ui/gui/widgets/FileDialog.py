@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-02-07 17:13:53 +0000 (Mon, February 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-06-01 15:04:25 +0100 (Wed, June 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,7 +28,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import sys
 import os
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 from ccpn.util.Path import aPath
 from ccpn.util.Common import makeIterableList
 from ccpn.util.AttrDict import AttrDict
@@ -524,7 +524,8 @@ from os.path import expanduser
 
 
 class LineEditButtonDialog(Widget):
-    def __init__(self, parent, textDialog=None, textLineEdit=None, fileMode=None, fileFilter=None, directory=None, **kwds):
+    def __init__(self, parent, textDialog=None, textLineEdit=None, fileMode=None, fileFilter=None,
+                 directory=None, lineEditMinimumWidth=100, **kwds):
 
         super().__init__(parent, setLayout=True, **kwds)
         self.openPathIcon = Icon('icons/directory')
@@ -548,13 +549,14 @@ class LineEditButtonDialog(Widget):
         self.directory = directory
 
         tipText = 'Click the icon to select'
-        self.lineEdit = LineEdit(self, text=self.textLineEdit, textAlignment='l', hAlign='l', minimumWidth=100,
+        self.lineEdit = LineEdit(self, text=self.textLineEdit, textAlignment='l', hAlign='l', minimumWidth=lineEditMinimumWidth,
                                  tipText=tipText, grid=(0, 0))
         self.lineEdit.setEnabled(True)
-        self.lineEdit.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
-                                    QtWidgets.QSizePolicy.Minimum)
-        button = Button(self, text='', icon=self.openPathIcon, callback=self._openFileDialog, grid=(0, 1), hAlign='c')
+        self.lineEdit.setSizePolicy(QtWidgets.QSizePolicy.Maximum,
+                                    QtWidgets.QSizePolicy.Maximum)
+        button = Button(self, text='', icon=self.openPathIcon, callback=self._openFileDialog, grid=(0, 1), hAlign='l')
         button.setStyleSheet("border: 0px solid transparent")
+        self.getLayout().setAlignment(QtCore.Qt.AlignLeft)
 
     def _openFileDialog(self):
         self.fileDialog = LineButtonFileDialog(self, fileMode=self.fileMode, dialogText=self.textDialog,

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-01 12:04:26 +0100 (Wed, June 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-01 15:04:25 +0100 (Wed, June 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -43,10 +43,10 @@ import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisNamespaces as na
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as seriesVariables
 from ccpn.ui.gui.widgets.HLine import LabeledHLine
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER, setColourScheme, FONTLIST, ZPlaneNavigationModes
-
+from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 
 SettingsWidgeMinimumWidths =  (180, 180, 180)
-SettingsWidgetFixedWidths = (200, 300, 300)
+SettingsWidgetFixedWidths = (250, 300, 300)
 
 DividerColour = getColours()[DIVIDER]
 
@@ -83,7 +83,7 @@ class GuiInputDataPanel(GuiSettingPanel):
 
     tabPosition = TABPOS
     tabName = nameSpaces.Label_InputData
-    tabTipText = nameSpaces.tipText_GuiInputDataPanel
+    tabTipText = nameSpaces.TipText_GuiInputDataPanel
 
     def initWidgets(self):
         mainWindow = self._guiModule.mainWindow
@@ -172,7 +172,6 @@ class CSMCalculationPanel(GuiSettingPanel):
 
     def initWidgets(self):
         mainWindow = self._guiModule.mainWindow
-        journalReference = nameSpaces.TipText_DeltaDeltasSeparator
         extraLabels_ddCalculationsModes = [model.MaTex for modelName, model in ChemicalShiftCalculationModes.items()]
         tipTexts_ddCalculationsModes = [model.FullDescription for modelName, model in
                                         ChemicalShiftCalculationModes.items()]
@@ -185,7 +184,7 @@ class CSMCalculationPanel(GuiSettingPanel):
                'kwds': {'text':  nameSpaces.Label_DeltaDeltas,
                         'gridSpan':(1,2),
                         'colour': DividerColour,
-                        'tipText': journalReference}}),
+                        'tipText': nameSpaces.TipText_DeltaDeltasSeparator}}),
             (nameSpaces.WidgetVarName_DDCalculationMode,
              {'label': nameSpaces.Label_DDCalculationMode,
               'type': compoundWidget.RadioButtonsCompoundWidget,
@@ -198,7 +197,6 @@ class CSMCalculationPanel(GuiSettingPanel):
                        'tipText' :'',
                        'fixedWidths': SettingsWidgetFixedWidths,
                        'compoundKwds':compoundKwds}}),
-
         ))
         ## add the weighting Factor widgets
         factorsDict = od(())
@@ -256,6 +254,17 @@ class CSMCalculationPanel(GuiSettingPanel):
                        'tipTexts': ['Calculate Ratio', 'Calculate the % Change'],
                        'fixedWidths': SettingsWidgetFixedWidths,
                        'compoundKwds': {}}}),
+            (nameSpaces.WidgetVarName_DisappearedPeak,
+             {'label': nameSpaces.Label_DisappearedPeak,
+              'tipText': nameSpaces.TipText_DisappearedPeak,
+              'callBack': None,
+              'enabled': True,
+              'type': compoundWidget.DoubleSpinBoxCompoundWidget,
+              '_init': None,
+              'kwds': {'labelText': nameSpaces.Label_DisappearedPeak,
+                       'tipText': nameSpaces.TipText_DisappearedPeak,
+                       'value': 1,
+                       'fixedWidths': SettingsWidgetFixedWidths}, }),
         ))
         settingsDict.update(restOfWidgetDict)
         self._moduleSettingsWidget = settingWidgets.ModuleSettingsWidget(parent=self, mainWindow=mainWindow,
@@ -310,38 +319,83 @@ class AppearancePanel(GuiSettingPanel):
     def initWidgets(self):
         mainWindow = self._guiModule.mainWindow
         settingsDict = od((
-            (nameSpaces.WidgetVarName_SpectrumGroupsSeparator,
-             {'label': nameSpaces.Label_SpectrumGroups,
+            (nameSpaces.WidgetVarName_GenAppearanceSeparator,
+             {'label': nameSpaces.Label_GeneralAppearance,
               'type': LabeledHLine,
-              'kwds': {'text': nameSpaces.Label_SpectrumGroups,
+              'kwds': {'text': nameSpaces.Label_GeneralAppearance,
                        'colour': DividerColour,
                        'gridSpan': (1, 2),
-                       'tipText': nameSpaces.TipText_SpectrumGroupsSeparator}}),
-            (nameSpaces.WidgetVarName_SpectrumGroupsSelection,
-             {'label': nameSpaces.Label_SelectSpectrumGroups,
-              'tipText': nameSpaces.TipText_SpectrumGroupSelectionWidget,
+                       'tipText': nameSpaces.TipText_GeneralAppearance}}),
+            (nameSpaces.WidgetVarName_ThreshValue,
+             {'label': nameSpaces.Label_ThreshValue,
+              'tipText': nameSpaces.TipText_ThreshValue,
               'callBack': None,
-              'type': settingWidgets.SpectrumGroupSelectionWidget,
-              'kwds': {
-                  'labelText': nameSpaces.Label_SelectSpectrumGroups,
-                  'tipText': nameSpaces.TipText_SpectrumGroupSelectionWidget,
-                  'displayText': [],
-                  'defaults': [],
-                  'objectName': nameSpaces.WidgetVarName_SpectrumGroupsSelection,
-                  'fixedWidths': SettingsWidgetFixedWidths}, }),
-            (nameSpaces.WidgetVarName_PeakProperty,
-             {'label': nameSpaces.Label_PeakProperty,
-              'callBack': None,
-              'tipText': nameSpaces.TipText_PeakPropertySelectionWidget,
-              'type': compoundWidget.PulldownListCompoundWidget,
-              'kwds': {'labelText': nameSpaces.Label_PeakProperty,
-                       'tipText': nameSpaces.TipText_PeakPropertySelectionWidget,
-                       'texts': ['Position', 'Height', 'Line-width', 'Volume'],
+              'enabled': True,
+              'type': compoundWidget.DoubleSpinBoxCompoundWidget,
+              '_init': None,
+              'kwds': {'labelText': nameSpaces.Label_ThreshValue,
+                       'tipText': nameSpaces.TipText_ThreshValue,
+                       'value': 0.1,
                        'fixedWidths': SettingsWidgetFixedWidths}}),
-
-
-
-
+            (nameSpaces.WidgetVarName_PredefThreshValue,
+             {'label': nameSpaces.Label_PredefThreshValue,
+              'tipText': nameSpaces.TipText_PredefThreshValue,
+              'callBack': None,
+              'enabled': True,
+              'type': compoundWidget.ButtonCompoundWidget,
+              '_init': None,
+              'kwds': {'labelText': nameSpaces.Label_PredefThreshValue,
+                       'tipText': nameSpaces.TipText_PredefThreshValue,
+                       'text':nameSpaces.Label_StdThreshValue,
+                       'fixedWidths': SettingsWidgetFixedWidths
+                       }}),
+            (nameSpaces.WidgetVarName_AboveThrColour,
+             {'label': nameSpaces.Label_AboveThrColour,
+              'callBack': None,
+              'tipText': nameSpaces.TipText_AboveThrColour,
+              'type': compoundWidget.ColourSelectionCompoundWidget,
+              'kwds': {'labelText': nameSpaces.Label_AboveThrColour,
+                       'tipText': nameSpaces.TipText_PeakPropertySelectionWidget,
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'compoundKwds':{'includeGradients': True}}}),
+            (nameSpaces.WidgetVarName_BelowThrColour,
+             {'label': nameSpaces.Label_BelowThrColour,
+              'callBack': None,
+              'tipText': nameSpaces.TipText_BelowThrColour,
+              'type': compoundWidget.ColourSelectionCompoundWidget,
+              'kwds': {'labelText': nameSpaces.Label_BelowThrColour,
+                       'tipText': nameSpaces.TipText_BelowThrColour,
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'compoundKwds':{'includeGradients': True}}}),
+            (nameSpaces.WidgetVarName_UntraceableColour,
+             {'label': nameSpaces.Label_UntraceableColour,
+              'callBack': None,
+              'tipText': nameSpaces.TipText_UntraceableColour,
+              'type': compoundWidget.ColourSelectionCompoundWidget,
+              'kwds': {'labelText': nameSpaces.Label_UntraceableColour,
+                       'tipText': nameSpaces.TipText_UntraceableColour,
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'compoundKwds':{'includeGradients': True}}}),
+            (nameSpaces.WidgetVarName_MolStrucSeparator,
+             {'label': nameSpaces.Label_MolStrucSeparator,
+              'type': LabeledHLine,
+              'kwds': {'text': nameSpaces.Label_MolStrucSeparator,
+                       'colour': DividerColour,
+                       'gridSpan': (1, 2),
+                       'tipText': nameSpaces.TipText_MolStrucSeparator}}),
+            (nameSpaces.WidgetVarName_MolStructureFile,
+             {'label': nameSpaces.Label_MolStructureFile,
+              'tipText': nameSpaces.TipText_MolStructureFile,
+              'enabled': True,
+              'type': compoundWidget.EntryPathCompoundWidget,
+              '_init': None,
+              'kwds': {
+                  'labelText': nameSpaces.Label_MolStructureFile,
+                       'tipText': nameSpaces.TipText_MolStructureFile,
+                       'entryText': '~',
+                        'fixedWidths': SettingsWidgetFixedWidths,
+                        'compoundKwds': {'lineEditMinimumWidth':300}
+                       }}),
 
         ))
         self._moduleSettingsWidget = settingWidgets.ModuleSettingsWidget(parent=self, mainWindow=mainWindow,

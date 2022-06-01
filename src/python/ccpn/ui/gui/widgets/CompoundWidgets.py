@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-01 12:04:27 +0100 (Wed, June 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-01 15:04:25 +0100 (Wed, June 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -45,9 +45,10 @@ from ccpn.ui.gui.widgets.CompoundBaseWidget import CompoundBaseWidget
 from ccpn.ui.gui.widgets.CompoundView import CompoundView
 from ccpn.ui.gui.widgets.TextEditor import TextEditor, PlainTextEditor
 from ccpn.ui.gui.widgets.Spacer import Spacer
-from ccpn.util.Colour import spectrumColours
+from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
+from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown
 
 
 class ListCompoundWidget(CompoundBaseWidget):
@@ -261,6 +262,8 @@ class ListCompoundWidget(CompoundBaseWidget):
         return self.setTexts(value)
 
 
+
+
 class EntryCompoundWidget(CompoundBaseWidget):
     """
     Compound class comprising a Label and a Entry widget, combined in a CompoundBaseWidget (i.e. a Frame)
@@ -315,6 +318,83 @@ class EntryCompoundWidget(CompoundBaseWidget):
             self.label.setToolTip(tipText)
 
         self.entry = Entry(parent=self, text=entryText, callback=callback, editable=editable, **compoundKwds)
+        self._addWidget(self.entry)
+
+        if default is not None:
+            self.setText(default)
+
+        if minimumWidths is not None:
+            self.setMinimumWidths(minimumWidths)
+
+        if maximumWidths is not None:
+            self.setMinimumWidths(maximumWidths)
+
+        if fixedWidths is not None:
+            self.setFixedWidths(fixedWidths)
+
+        # if sizeAdjustPolicy is not None:
+        #     self.Entry.setSizeAdjustPolicy(sizeAdjustPolicy)
+
+    def getText(self):
+        """Convenience: Return text of Entry"""
+        return self.entry.getText()
+
+    def setText(self, text):
+        """Convenience: set text of Entry"""
+        self.entry.setText(text)
+
+    def _getSaveState(self):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.getText()
+
+    def _setSavedState(self, value):
+        """
+        Internal. Called for saving/restoring the widget state.
+        """
+        return self.setText(value)
+
+class EntryPathCompoundWidget(CompoundBaseWidget):
+    """
+    """
+    layoutDict = dict(
+            # grid positions for label and Entry for the different orientations
+            left=[(0, 0), (0, 1)],
+            right=[(0, 1), (0, 0)],
+            top=[(0, 0), (1, 0)],
+            bottom=[(1, 0), (0, 0)],
+            )
+
+    def __init__(self, parent=None, mainWindow=None,
+                 showBorder=False, orientation='left',
+                 minimumWidths=None, maximumWidths=None, fixedWidths=None,
+                 labelText='', entryText='', callback=None, default=None, editable=True,
+                 sizeAdjustPolicy=None, compoundKwds={}, tipText=None,
+                 **kwds):
+        """
+        :param parent: parent widget
+        :param showBorder: flag to display the border of Frame (True, False)
+        :param orientation: flag to determine the orientation of the labelText relative to the Entry widget.
+                            Allowed values: 'left', 'right', 'top', 'bottom'
+        :param minimumWidths: tuple of two values specifying the minimum width of the Label and Entry widget, respectively
+        :param maximumWidths: tuple of two values specifying the maximum width of the Label and Entry widget, respectively
+        :param labelText: Text for the Label
+        :param callback: (optional) callback for the Entry
+        :param default: (optional) initial text of the Entry
+        :param editable: (optional) set Entry to editable
+        :param kwds: (optional) keyword, value pairs for the gridding of Frame
+        """
+
+        CompoundBaseWidget.__init__(self, parent=parent, layoutDict=self.layoutDict, orientation=orientation,
+                                    showBorder=showBorder, **kwds)
+
+        self.label = Label(parent=self, text=labelText, vAlign='center')
+        self._addWidget(self.label)
+        if tipText:
+            self.label.setToolTip(tipText)
+
+        self.entry = LineEditButtonDialog(parent=self, textLineEdit=entryText, **compoundKwds)
         self._addWidget(self.entry)
 
         if default is not None:
@@ -1431,6 +1511,24 @@ class RadioButtonsCompoundWidget(CompoundBaseWidget):
         """
         self.radioButtons.set(value)
 
+class ColourSelectionCompoundWidget(PulldownListCompoundWidget):
+
+    def __init__(self, parent=None, vAlign='top', stretch=(0, 0), hAlign='left',
+                 vPolicy='minimal', fixedWidths=(None, None, None), orientation='left',
+                 labelText=None, tipText=None,
+                 callback=None, compoundKwds=None,
+                 **kwds):
+
+        super().__init__(parent=parent,
+                         vAlign=vAlign, stretch=stretch, hAlign=hAlign, vPolicy=vPolicy,
+                         labelText=labelText, tipText=tipText,
+                         fixedWidths=fixedWidths,
+                         callback=callback, **kwds)
+        compoundKwds = compoundKwds or {}
+        includeGradients = compoundKwds.get('includeGradients', False)
+        allowAuto = compoundKwds.get('allowAuto', False)
+        pulldown = self.pulldownList
+        fillColourPulldown(pulldown, allowAuto=allowAuto, includeGradients=includeGradients)
 
 class CompoundViewCompoundWidget(CompoundBaseWidget):
     """

@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-08 22:20:58 +0000 (Tue, March 08, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-06-01 17:38:35 +0100 (Wed, June 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -133,6 +133,7 @@ class Peak(AbstractWrapperObject):
 
     @height.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def height(self, value: Union[float, int, None]):
         if not isinstance(value, (float, int, type(None))):
             raise TypeError('height must be a float, integer or None')
@@ -165,6 +166,7 @@ class Peak(AbstractWrapperObject):
 
     @heightError.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def heightError(self, value: Union[float, int, None]):
         if not isinstance(value, (float, int, type(None))):
             raise TypeError('heightError must be a float, integer or None')
@@ -197,6 +199,7 @@ class Peak(AbstractWrapperObject):
 
     @volume.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def volume(self, value: Union[float, int, None]):
         if not isinstance(value, (float, int, type(None))):
             raise TypeError('volume must be a float, integer or None')
@@ -229,6 +232,7 @@ class Peak(AbstractWrapperObject):
 
     @volumeError.setter
     @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def volumeError(self, value: Union[float, int, None]):
         if not isinstance(value, (float, int, type(None))):
             raise TypeError('volumeError must be a float, integer or None')
@@ -871,16 +875,9 @@ class Peak(AbstractWrapperObject):
         """
         return self._wrappedData.clusterId
 
-    @clusterId.getter
-    def clusterId(self):
-        """Get the clusterId for the peak
-        """
-        if self._wrappedData.clusterId is None:
-            cid = int(self.pid.fields[-1])
-            self.clusterId = cid
-        return self._wrappedData.clusterId
-
     @clusterId.setter
+    @logCommand(get='self', isProperty=True)
+    @ccpNmrV3CoreSetter()
     def clusterId(self, value):
         if not isinstance(value, (int, type(None))):
             raise ValueError('Peak.clusterId must be of type int >= 0, None')
@@ -1249,9 +1246,15 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
 
     apiPeakDims = apiPeak.sortedPeakDims()
     if ppmPositions:
+        if len(ppmPositions) != len(apiPeakDims):
+            raise ValueError(f'ppmPositions must be of length {len(apiPeakDims)}')
+
         for ii, peakDim in enumerate(apiPeakDims):
             peakDim.value = ppmPositions[ii]
+
     elif pointPositions:
+        if len(pointPositions) != len(apiPeakDims):
+            raise ValueError(f'pointPositions must be of length {len(apiPeakDims)}')
 
         pointCounts = result.spectrum.pointCounts
         for ii, peakDim in enumerate(apiPeakDims):
@@ -1268,7 +1271,7 @@ def _newPeak(self: PeakList, height: float = None, volume: float = None,
         for ii, peakDim in enumerate(apiPeakDims):
             peakDim.boxWidth = boxWidths[ii]
 
-    # currently lineWidths/ppmLineWidths are both in Hz/ppm
+    # currently, lineWidths/ppmLineWidths are both in Hz/ppm
     if lineWidths:
         for ii, peakDim in enumerate(apiPeakDims):
             peakDim.lineWidth = lineWidths[ii]

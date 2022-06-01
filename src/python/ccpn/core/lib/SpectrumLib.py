@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-16 10:48:21 +0100 (Mon, May 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-01 17:51:32 +0100 (Wed, June 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1964,7 +1964,7 @@ def _createPeak(spectrum, peakList=None, height=None, **ppmPositions) -> Optiona
                             for indx, (pos, np) in enumerate(zip(_ppmPositions, pointCounts))]
 
             # get the existing peak point-positions for this list
-            existingPositions = [[int(pp) for pp in pk.pointPositions] for pk in peakList.peaks]
+            existingPositions = [[int(pp) for pp in pk.pointPositions] for pk in peakList.peaks if None not in pk.pointPositions]
 
             if intPositions not in existingPositions:
                 # add the new peak only if one doesn't exist at these pointPositions

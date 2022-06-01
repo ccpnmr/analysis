@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-18 14:09:54 +0000 (Fri, March 18, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-01 17:39:03 +0100 (Wed, June 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -600,10 +600,11 @@ class NmrAtom(AbstractWrapperObject):
             peakDims.append(peakDim)
             peaks.add(apiPeak)
 
-            vw = value * weight
-            sum1 += vw
-            sum2 += value * vw
-            N += weight
+            if value is not None and weight is not None:
+                vw = value * weight
+                sum1 += vw
+                sum2 += value * vw
+                N += weight
 
         if N > 0.0:
             mean = sum1 / N

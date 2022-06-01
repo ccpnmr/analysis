@@ -3,10 +3,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-08-20 19:26:48 +0100 (Fri, August 20, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-06-01 20:11:22 +0100 (Wed, June 01, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -92,11 +92,12 @@ def _calculateCenterOfMassPoints(multiplet):
             dim = multiplet.multipletList.spectrum.dimensionCount
             if dim > 1:
                 for d in range(dim):
-                    peakPositions = [peak.pointPositions[d] for peak in _peaks]
+                    peakPositions = set(peak.pointPositions[d] for peak in _peaks) - {None}  # remove the bad points
                     position += (sum(peakPositions) / _lenPeaks,)
             else:
-                position = (sum([peak.pointPositions[0] for peak in _peaks]) / _lenPeaks,
-                            sum([peak.height for peak in _peaks]) / _lenPeaks)
+                peakPositions = set(peak.pointPositions[0] for peak in _peaks) - {None}
+                heights = set(peak.height for peak in _peaks) - {None}
+                position = (sum(peakPositions) / _lenPeaks, sum(heights) / _lenPeaks)
             return position
     except:
         return None

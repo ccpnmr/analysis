@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-31 14:25:24 +0100 (Tue, May 31, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-01 12:04:26 +0100 (Wed, June 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -31,22 +31,24 @@ from collections import OrderedDict as od
 from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import ChemicalShiftCalculationModes, DeltaDeltaShiftsCalculation
 
 ######## gui/ui imports ########
-from PyQt5 import QtCore, QtWidgets
-
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 from ccpn.ui.gui.widgets.Label import Label, DividerLabel
 import ccpn.ui.gui.widgets.CompoundWidgets as compoundWidget
 from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons, EditableRadioButtons
 import ccpn.ui.gui.widgets.SettingsWidgets as settingWidgets
-from ccpn.ui.gui.widgets.HLine import HLine
+from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Label import maTex2Pixmap
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisNamespaces as nameSpaces
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as seriesVariables
+from ccpn.ui.gui.widgets.HLine import LabeledHLine
+from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER, setColourScheme, FONTLIST, ZPlaneNavigationModes
 
 
 SettingsWidgeMinimumWidths =  (180, 180, 180)
-SettingsWidgetFixedWidths = (200, 200, 200)
+SettingsWidgetFixedWidths = (200, 300, 300)
+
+DividerColour = getColours()[DIVIDER]
 
 class GuiSettingPanel(Frame):
     """
@@ -88,8 +90,10 @@ class GuiInputDataPanel(GuiSettingPanel):
         settingsDict = od((
             (nameSpaces.WidgetVarName_SpectrumGroupsSeparator,
                                 {'label': nameSpaces.Label_SpectrumGroups,
-                                 'type': compoundWidget.LabelCompoundWidget,
-                                 'kwds': {'labelText': nameSpaces.Label_SpectrumGroups,
+                                 'type': LabeledHLine,
+                                 'kwds': {'text': nameSpaces.Label_SpectrumGroups,
+                                          'colour':DividerColour,
+                                          'gridSpan':(1,2),
                                           'tipText': nameSpaces.TipText_SpectrumGroupsSeparator}}),
             (nameSpaces.WidgetVarName_SpectrumGroupsSelection,
                                 {'label':  nameSpaces.Label_SelectSpectrumGroups,
@@ -135,9 +139,11 @@ class GuiInputDataPanel(GuiSettingPanel):
                                          'fixedWidths': SettingsWidgetFixedWidths}}),
             (nameSpaces.WidgetVarName_DataTableSeparator,
                                 {'label': nameSpaces.Label_DataTables,
-                                'type': compoundWidget.LabelCompoundWidget,
-                                'kwds': {'labelText': nameSpaces.Label_DataTables,
-                                         'tipText': nameSpaces.TipText_DataTableSeparator}}),
+                                 'type': LabeledHLine,
+                                 'kwds': {'text':nameSpaces.Label_DataTables,
+                                          'gridSpan':(1,2),
+                                          'colour': DividerColour,
+                                          'tipText': nameSpaces.TipText_DataTableSeparator}}),
             (nameSpaces.WidgetVarName_DataTablesSelection,
              {'label': nameSpaces.Label_SelectDataTable,
               'tipText': nameSpaces.TipText_DataTableSelection,
@@ -167,20 +173,32 @@ class CSMCalculationPanel(GuiSettingPanel):
     def initWidgets(self):
         mainWindow = self._guiModule.mainWindow
         journalReference = nameSpaces.TipText_DeltaDeltasSeparator
+        extraLabels_ddCalculationsModes = [model.MaTex for modelName, model in ChemicalShiftCalculationModes.items()]
+        tipTexts_ddCalculationsModes = [model.FullDescription for modelName, model in
+                                        ChemicalShiftCalculationModes.items()]
+        extraLabelPixmaps = [maTex2Pixmap(maTex) for maTex in extraLabels_ddCalculationsModes]
+        compoundKwds = {'extraLabels': extraLabels_ddCalculationsModes, 'extraLabelIcons': extraLabelPixmaps}
         settingsDict = od((
             (nameSpaces.WidgetVarName_DeltaDeltasSeparator,
              {'label': nameSpaces.Label_DeltaDeltas,
-              'type': compoundWidget.LabelCompoundWidget,
-              'kwds': {'labelText': nameSpaces.Label_DeltaDeltas,
-                       'tipText': journalReference}}),
+               'type': LabeledHLine,
+               'kwds': {'text':  nameSpaces.Label_DeltaDeltas,
+                        'gridSpan':(1,2),
+                        'colour': DividerColour,
+                        'tipText': journalReference}}),
             (nameSpaces.WidgetVarName_DDCalculationMode,
-            {'label': nameSpaces.Label_DDCalculationMode,
-             'type': compoundWidget.LabelCompoundWidget,
-             'kwds': {'labelText': f'{nameSpaces.Label_DDCalculationMode}:\n{DeltaDeltaShiftsCalculation.ModelName}',
-                      'tipText': DeltaDeltaShiftsCalculation.FullDescription,
-                      'label2Text': DeltaDeltaShiftsCalculation.ModelName,
-                      'icon':maTex2Pixmap(f'{DeltaDeltaShiftsCalculation.MaTex}'),
-                      'compoundKwds':{}}}),
+             {'label': nameSpaces.Label_DDCalculationMode,
+              'type': compoundWidget.RadioButtonsCompoundWidget,
+              'postInit': self._calculationModePostInit,
+              'kwds': {'labelText' : nameSpaces.Label_DDCalculationMode,
+                       'texts' : list(ChemicalShiftCalculationModes.keys()),
+                       'tipTexts' : tipTexts_ddCalculationsModes,
+                       'direction' : 'v',
+                       'hAlign':'l',
+                       'tipText' :'',
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'compoundKwds':compoundKwds}}),
+
         ))
         ## add the weighting Factor widgets
         factorsDict = od(())
@@ -225,13 +243,27 @@ class CSMCalculationPanel(GuiSettingPanel):
                   'texts': [],
                   'defaults': [],
                   'objectName': nameSpaces.WidgetVarName_ExcludeResType,
-              }})
+              }}),
+            (nameSpaces.WidgetVarName_DDOtherCalculationMode,
+             {'label': nameSpaces.Label_DDOtherCalculationMode,
+              'type': compoundWidget.RadioButtonsCompoundWidget,
+              'postInit': self._calculationModePostInit,
+              'kwds': {'labelText': f'{nameSpaces.Label_DDOtherCalculationMode}',
+                       'tipText': nameSpaces.TipText_DDOtherCalculationMode,
+                       'texts': ['Ratio', '% Change'],
+                       'callback': self._calculationModePostInit,
+                       'direction': 'v',
+                       'tipTexts': ['Calculate Ratio', 'Calculate the % Change'],
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'compoundKwds': {}}}),
         ))
         settingsDict.update(restOfWidgetDict)
         self._moduleSettingsWidget = settingWidgets.ModuleSettingsWidget(parent=self, mainWindow=mainWindow,
                                                                          settingsDict=settingsDict,
                                                                          grid=(0, 0))
-        self._moduleSettingsWidget.getLayout().setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
+        self._moduleSettingsWidget.getLayout().setAlignment(QtCore.Qt.AlignLeft)
+        Spacer(self, 0, 2, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
+               grid=(1, 0), gridSpan=(1, 1))
 
     def _followAtomsWidgetPostInit(self, widget, *args):
         widget.listWidget.setFixedHeight(100)
@@ -242,6 +274,12 @@ class CSMCalculationPanel(GuiSettingPanel):
         widget.listWidget.setFixedHeight(100)
         widget.setFixedWidths(SettingsWidgetFixedWidths)
         widget.getLayout().setAlignment(QtCore.Qt.AlignTop)
+
+    def _calculationModePostInit(self, widget):
+        pass
+        # widget.label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        # widget.getLayout().setAlignment(QtCore.Qt.AlignLeft)
+
 
 TABPOS += 1
 class GuiFittingPanel(GuiSettingPanel):
@@ -270,12 +308,45 @@ class AppearancePanel(GuiSettingPanel):
     tabTipText = ''
 
     def initWidgets(self):
-        row = 0
-        Label(self, 'Test Colour', grid=(row, 0))
-        EditableRadioButtons(self, selectedInd=0, texts=['A','B','C',],
-                                                           direction='v',
-                                                           callback=None,
-                                                           objectName='TestColour',
-                                                           grid=(row, 1))
+        mainWindow = self._guiModule.mainWindow
+        settingsDict = od((
+            (nameSpaces.WidgetVarName_SpectrumGroupsSeparator,
+             {'label': nameSpaces.Label_SpectrumGroups,
+              'type': LabeledHLine,
+              'kwds': {'text': nameSpaces.Label_SpectrumGroups,
+                       'colour': DividerColour,
+                       'gridSpan': (1, 2),
+                       'tipText': nameSpaces.TipText_SpectrumGroupsSeparator}}),
+            (nameSpaces.WidgetVarName_SpectrumGroupsSelection,
+             {'label': nameSpaces.Label_SelectSpectrumGroups,
+              'tipText': nameSpaces.TipText_SpectrumGroupSelectionWidget,
+              'callBack': None,
+              'type': settingWidgets.SpectrumGroupSelectionWidget,
+              'kwds': {
+                  'labelText': nameSpaces.Label_SelectSpectrumGroups,
+                  'tipText': nameSpaces.TipText_SpectrumGroupSelectionWidget,
+                  'displayText': [],
+                  'defaults': [],
+                  'objectName': nameSpaces.WidgetVarName_SpectrumGroupsSelection,
+                  'fixedWidths': SettingsWidgetFixedWidths}, }),
+            (nameSpaces.WidgetVarName_PeakProperty,
+             {'label': nameSpaces.Label_PeakProperty,
+              'callBack': None,
+              'tipText': nameSpaces.TipText_PeakPropertySelectionWidget,
+              'type': compoundWidget.PulldownListCompoundWidget,
+              'kwds': {'labelText': nameSpaces.Label_PeakProperty,
+                       'tipText': nameSpaces.TipText_PeakPropertySelectionWidget,
+                       'texts': ['Position', 'Height', 'Line-width', 'Volume'],
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+
+
+
+
+
+        ))
+        self._moduleSettingsWidget = settingWidgets.ModuleSettingsWidget(parent=self, mainWindow=mainWindow,
+                                                                         settingsDict=settingsDict,
+                                                                         grid=(0, 0))
+        self._moduleSettingsWidget.getLayout().setAlignment(QtCore.Qt.AlignLeft)
 
 TABPOS += 1

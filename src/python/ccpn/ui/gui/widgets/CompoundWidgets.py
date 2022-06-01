@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-31 10:23:46 +0100 (Tue, May 31, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-01 12:04:27 +0100 (Wed, June 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -871,7 +871,6 @@ class LabelCompoundWidget(CompoundBaseWidget):
         hAlign = orientation if (orientation == 'left' or orientation == 'right') else 'center'
         label2Kwds = {
                         'text'     : label2Text,
-
                         'icon'     : icon,
                         }
         label2Kwds.update(compoundKwds or {})
@@ -1393,7 +1392,7 @@ class RadioButtonsCompoundWidget(CompoundBaseWidget):
         if compoundKwds is None:
             compoundKwds = {}
         self.radioButtons = RadioButtons(parent=self, texts=texts, tipTexts=tipTexts, selectedInd=selectedInd,
-                                         callback=callback,icons=icons, direction=direction, **compoundKwds)
+                                         callback=callback,icons=icons, direction=direction, hAlign=hAlign, **compoundKwds)
         self.radioButtons.setObjectName(labelText)
         self.setObjectName(labelText)
         self._addWidget(self.radioButtons)

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-31 14:25:24 +0100 (Tue, May 31, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-01 12:04:27 +0100 (Wed, June 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -36,6 +36,10 @@ BackgroundColour = gs.getColours()[gs.CCPNGLWIDGET_HEXBACKGROUND]
 
 ##### SETTINGS  ######
 
+WidgetVarName_         = 'VarName'
+Label_                 = 'Label'
+tipText_               = 'tipText'
+
 # TAB: GuiInputDataPanel names
 WidgetVarName_PeakProperty              = 'peakProperty'
 WidgetVarName_SpectrumGroupsSelection   = 'SpectrumGroupsSelection'
@@ -45,14 +49,16 @@ WidgetVarName_DataTableName             = 'dataTableName'
 WidgetVarName_CreateDataTable           = 'CreateDataTableName'
 WidgetVarName_DataTableSeparator        = 'DataTableSeparator'
 WidgetVarName_SpectrumGroupsSeparator   = 'SpectrumGroupsSeparator'
+
 Label_InputData                         = 'Input data'
-Label_SpectrumGroups                    = '--- SpectrumGroups ---'
-Label_DataTables                        = '---   DataTables   ---'
+Label_SpectrumGroups                    = 'SpectrumGroups'
+Label_DataTables                        = 'DataTables'
 Label_SelectSpectrumGroups              = 'Select SpectrumGroup'
 Label_SelectDataTable                   = 'Select DataTable(s)'
 Label_PeakProperty                      = 'Peak Property'
 Label_InputDataTableName                = 'Input DataTable Name'
 Label_CreateInput                       = 'Create Input DataTable'
+
 tipText_GuiInputDataPanel               = 'This tab will allow user to create and set the input DataTable(s)'
 TipText_SpectrumGroupsSeparator         = 'SpectrumGroup Section. Create here a new input DataTable if none is already available.'
 TipText_SpectrumGroupSelectionWidget    = 'Select the SpectrumGroup containing the series of interest'
@@ -74,23 +80,32 @@ WidgetVarName_Factor                    = f'{{{AtomName}}}Factor' ## 3}}} to get
 WidgetVarName_DDCalculationMode         = 'DeltaDeltaCalculationMode'
 WidgetVarName_FollowAtoms               = 'FollowAtoms'
 WidgetVarName_ExcludeResType            = 'ExcludeResidueType'
-Label_DDCalculationMode                 = f'{DELTA}{Delta} Calculation Mode'
+WidgetVarName_DDOtherCalculationMode    = 'DeltaDeltaCalculationOtherMode'
+
+Label_DDCalculationMode                 = f'{DELTA}{Delta} Shift Calculation Mode'
 Label_Factor                            = f'{{{AtomName}}} Alpha Factor'
-Label_DeltaDeltas                       = '--- Chemical Shift Perturbation Options ---'
+Label_DeltaDeltas                       = 'Chemical Shift Perturbation Options'
 Label_Calculation                       = 'Calculation'
 Label_FollowAtoms                       = 'Follow (nmr)Atoms'
 Label_ExcludeResType                    = 'Exclude (Nmr)Residue Type'
+Label_DDOtherCalculationMode            = f'{DELTA}{Delta} Height/Volume \nCalculation Mode'
 TipText_CSMCalculationPanelPanel        = 'Set the various calculation modes and options for the Chemical Shift Mapping Analysis'
 TipText_DeltaDeltasSeparator            = f'{TipText_CSMCalculationPanelPanel} \n For weighting factors, see reference: ' \
                                           f'{Journal_WilliamsonReference}{Journal_WilliamsonSection}'
 TipText_Factor                          = f'Factors are weighting of shifts (0-1) for different nuclei. ' \
                                           f'Default for {{{AtomName}}}: {{{FactorValue}}}. See references.'
-TipText_DDCalculationMode                 = f'Select the calculation mode for {DELTA}{Delta} shifts. See References.'
-TipText_FollowAtoms                       = 'Consider only the selected (nmr)Atoms in the calculation. E.g.: H, N'
-TipText_ExcludeResType                    = 'Exclude the selected (Nmr)Residue Type from the calculation. E.g.: Pro'
+TipText_DDCalculationMode               = f'Select the calculation mode for {DELTA}{Delta} shifts. See References.'
+TipText_FollowAtoms                     = 'Consider only the selected (nmr)Atoms in the calculation. E.g.: H, N'
+TipText_ExcludeResType                  = 'Exclude the selected (Nmr)Residue Type from the calculation. E.g.: Pro'
+TipText_DDOtherCalculationMode          = f'Select the calculation mode for other {DELTA}{Delta} analysis. E.g.: Height and Volume.'
 
 ## ChemicalShiftMapping Appearance TAB
 ## TAB: Appearance Panel names
+WidgetVarName_GenAppearanceSeparator    = 'GeneralAppearanceSeparator'
+Label_GeneralAppearance                 = 'General Appearance'
+TipText_GeneralAppearance               = 'General Appearance settings'
+
+# SpectrumDisplay
 # ThresholdLine
 #  colours modes: above/below line or gradient
 # gradient is for heights or deltaDeltas?

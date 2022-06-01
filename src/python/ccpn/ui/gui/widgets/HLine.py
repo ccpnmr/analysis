@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-10 21:10:22 +0000 (Thu, March 10, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-06-01 12:04:27 +0100 (Wed, June 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -112,6 +112,7 @@ class LabeledHLine(Frame):
         """
 
         super(LabeledHLine, self).__init__(parent=parent, setLayout=True, showBorder=False, **kwds)
+        height = height if height is not None else 30
         self.setFixedHeight(height)
 
         # first line

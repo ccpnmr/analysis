@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-31 10:23:46 +0100 (Tue, May 31, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-01 12:04:27 +0100 (Wed, June 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -38,6 +38,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 
 def maTex2Pixmap(mathTex, fontSize=10):
     """
+    https://matplotlib.org/3.5.0/tutorials/text/mathtext.html
     Convert a str with  Matplotlib-laTex syntax to a Pixmap.
     :param mathTex: A string with  Matplotlib-laTex syntax
     :param fontSize: int

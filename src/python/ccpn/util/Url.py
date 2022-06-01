@@ -44,12 +44,12 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
     context.check_hostname = False
     context.verify_mode = ssl.CERT_NONE
 
-    if not headers:
-        headers = {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'}
-    try:
-        body = urlencode(data or {}, quote_via=quote).encode('utf-8')
-    except Exception as err:
-        body = urlencode({}, quote_via=quote).encode('utf-8')
+    # if not headers:
+    #     headers = {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'}
+    # try:
+    #     body = urlencode(data or {}, quote_via=quote).encode('utf-8')
+    # except Exception as err:
+    #     body = urlencode({}, quote_via=quote).encode('utf-8')
 
     urllib3.contrib.pyopenssl.inject_into_urllib3()
 
@@ -116,10 +116,12 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
 
     # generate an http request
     response = http.request(method, url,
+                            fields=data,
                             headers=headers,
-                            body=body,
-                            preload_content=True,
-                            decode_content=False)
+                            # body=body,
+                            # preload_content=True,
+                            # decode_content=False
+                            )
 
     # return the http response
     return response

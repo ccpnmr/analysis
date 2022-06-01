@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-23 19:35:54 +0100 (Mon, May 23, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-06-01 17:40:41 +0100 (Wed, June 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1685,7 +1685,7 @@ class GuiTable(TableWidget, Base):
                         listItem[header.headerText] = header.getValue(obj)
                     except Exception as es:
                         # NOTE:ED - catch any nasty surprises in tables
-                        getLogger().debug(f'Error creating table information {es}')
+                        getLogger().debug2(f'Error creating table information {es}')
                         listItem[header.headerText] = None
 
                 allItems.append(listItem)

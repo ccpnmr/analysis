@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-01 17:38:35 +0100 (Wed, June 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-01 20:11:52 +0100 (Wed, June 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -301,9 +301,13 @@ class Peak(AbstractWrapperObject):
         shifts = set()
         ff = self._project._data2Obj.get
 
-        for ii, peakDim in enumerate(self._wrappedData.sortedPeakDims()):
+        dims = self._wrappedData.sortedPeakDims()
+        if value is not None and len(value) != len(dims):
+            raise ValueError(f'{self.__class__.__name__}.ppmPositions must be None or tuple|list of length {len(dims)}')
+
+        for ii, peakDim in enumerate(dims):
             _old = peakDim.position  # the current pointPosition, quick to get
-            peakDim.value = value[ii]
+            peakDim.value = value[ii] if value else None
             peakDim.realValue = None
 
             # log any peak assignments that have moved in this axis
@@ -921,7 +925,7 @@ class Peak(AbstractWrapperObject):
         """
         _digits = {'1H': 3, '15N': 2, '13C': 2, '19F': 3}
         # _digits.get(iCode,2)
-        ppms = tuple(round(p, _digits.get(iCode, 2))
+        ppms = tuple(round(p, _digits.get(iCode, 2)) if p is not None else None
                      for p, iCode in zip(self.ppmPositions, self.spectrum.isotopeCodes))
         return "<%s: @%r>" % (self.pid, ppms)
 

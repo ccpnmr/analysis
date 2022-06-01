@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-31 14:25:24 +0100 (Tue, May 31, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-01 16:19:59 +0100 (Wed, June 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -117,7 +117,7 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         """
         self.settingsPanelHandler.append(settingsPanel.GuiInputDataPanel(self))
         self.settingsPanelHandler.append(settingsPanel.CSMCalculationPanel(self))
-        self.settingsPanelHandler.append(settingsPanel.GuiFittingPanel(self))
+        self.settingsPanelHandler.append(settingsPanel.GuiCSMFittingPanel(self))
         self.settingsPanelHandler.append(settingsPanel.AppearancePanel(self))
 
     #####################################################################

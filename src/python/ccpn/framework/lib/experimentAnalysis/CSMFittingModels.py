@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-01 12:04:26 +0100 (Wed, June 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-01 16:19:59 +0100 (Wed, June 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -218,7 +218,7 @@ class OneSiteBindingModel(FittingModelABC):
     References = '''
                     1) Eq. (x) M.P. Williamson. Progress in Nuclear Magnetic Resonance Spectroscopy 73, 1–16 (2013).
                   '''
-
+    MaTex = ''
     Minimiser = Binding1SiteMinimiser
 
     def fitSeries(self, inputData:TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
@@ -267,10 +267,30 @@ class OneSiteBindingModel(FittingModelABC):
         outputFrame._valuesHeaders = inputData.valuesHeaders
         return outputFrame
 
+
+class FractionBindingModel(FittingModelABC):
+    """
+    ChemicalShift Analysis: FractionBinding fitting Curve calculation model
+    """
+    ModelName = sv.FRACTION_BINDING_MODEL
+    Info = 'Fit data to using the Fraction Binding model.'
+    Description = ' ... '
+    References = '''
+                '''
+    MaTex = ''
+    Minimiser = FractionBindingMinimiser
+
+    def fitSeries(self, inputData:TableFrame, rescale=True, *args, **kwargs) -> TableFrame:
+        getLogger().critical(sv.NIY_WARNING)
+        return inputData
+
 ########################################################################################################################
 ########################################################################################################################
 
-ChemicalShiftCalculationModes = {DeltaDeltaShiftsCalculation.ModelName: DeltaDeltaShiftsCalculation}
+ChemicalShiftCalculationModes = {DeltaDeltaShiftsCalculation.ModelName: DeltaDeltaShiftsCalculation,
+                                 }
+ChemicalShiftCalculationModels = {OneSiteBindingModel.ModelName: OneSiteBindingModel,
+                                  FractionBindingModel.ModelName: FractionBindingModel}
 
 def _registerChemicalShiftMappingModels():
     """

@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-31 10:22:59 +0100 (Tue, May 31, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-01 16:19:59 +0100 (Wed, June 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -152,7 +152,9 @@ OUTPUT_DATATABLE_NAME = 'outputDataTableName'
 
 
 ## OneSiteBindingModel
-ONE_BINDING_SITE_MODEL = 'OneSiteBindingModel'
+ONE_BINDING_SITE_MODEL = 'One Site Binding'
+
+FRACTION_BINDING_MODEL = 'Fraction Binding'
 
 #### residues names
 CCP_3LETTER_CODES = CCP_CODES_SORTED
@@ -165,6 +167,7 @@ T2 = 'T2'
 
 ## Warnings
 UNDER_DEVELOPMENT_WARNING = f'''This functionality is currently under active development. Use it at your own risk.'''
+NIY_WARNING = f'''This functionality has not been implemented yet.'''
 # Errors
 OMIT_MODE = 'omit'
 RAISE_MODE = 'raise'

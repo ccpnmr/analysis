@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-01 15:04:25 +0100 (Wed, June 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-01 16:20:00 +0100 (Wed, June 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,7 +28,7 @@ This module contains the GUI Settings panels.
 """
 
 from collections import OrderedDict as od
-from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import ChemicalShiftCalculationModes, DeltaDeltaShiftsCalculation
+from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import ChemicalShiftCalculationModes, ChemicalShiftCalculationModels
 
 ######## gui/ui imports ########
 from PyQt5 import QtCore, QtWidgets, QtGui
@@ -291,23 +291,77 @@ class CSMCalculationPanel(GuiSettingPanel):
 
 
 TABPOS += 1
-class GuiFittingPanel(GuiSettingPanel):
+class GuiCSMFittingPanel(GuiSettingPanel):
 
     tabPosition = TABPOS
     tabName = 'Fitting'
     tabTipText = 'Set the various fitting modes and options'
 
     def initWidgets(self):
-        row = 0
-        self.calculationModeLabel = Label(self, 'Test Mode', grid=(row, 0))
-        texts = ['A', 'B', 'C']
-        objectNames = ['calculationMode_' + x for x in texts]
-        self.calculationModeOptions = EditableRadioButtons(self, selectedInd=0, texts=texts,
-                                                           direction='v',
-                                                           callback=None,
-                                                           objectName='calculationMode',
-                                                           objectNames=objectNames,
-                                                           grid=(row, 1))
+        mainWindow = self._guiModule.mainWindow
+        extraLabels_ddCalculationsModels = [model.MaTex for modelName, model in ChemicalShiftCalculationModels.items()]
+        tipTexts_ddCalculationsModels = [model.FullDescription for modelName, model in
+                                        ChemicalShiftCalculationModels.items()]
+        extraLabelPixmaps = [maTex2Pixmap(maTex) for maTex in extraLabels_ddCalculationsModels]
+        compoundKwds = {'extraLabels': extraLabels_ddCalculationsModels, 'extraLabelIcons': extraLabelPixmaps}
+        settingsDict = od((
+            (nameSpaces.WidgetVarName_FittingSeparator,
+             {'label': nameSpaces.Label_FittingSeparator,
+              'type': LabeledHLine,
+              'kwds': {'text': nameSpaces.Label_FittingSeparator,
+                       'gridSpan': (1, 2),
+                       'colour': DividerColour,
+                       'tipText': nameSpaces.TipText_FittingSeparator}}),
+            (nameSpaces.WidgetVarName_FittingModel,
+             {'label': nameSpaces.Label_FittingModel,
+              'type': compoundWidget.RadioButtonsCompoundWidget,
+              'postInit': None,
+              'tipText': nameSpaces.TipText_FittingModel,
+              'kwds': {'labelText': nameSpaces.Label_FittingModel,
+                       'texts': list(ChemicalShiftCalculationModels.keys()),
+                       'tipTexts': tipTexts_ddCalculationsModels,
+                       'direction': 'v',
+                       'hAlign': 'l',
+                       'tipText': '',
+                       'fixedWidths': SettingsWidgetFixedWidths,
+                       'compoundKwds': compoundKwds}}),
+            (nameSpaces.WidgetVarName_OptimiserSeparator,
+             {'label': nameSpaces.Label_OptimiserSeparator,
+              'type': LabeledHLine,
+              'kwds': {'text': nameSpaces.Label_OptimiserSeparator,
+                       'gridSpan': (1, 2),
+                       'colour': DividerColour,
+                       'tipText': nameSpaces.TipText_OptimiserSeparator}}),
+            (nameSpaces.WidgetVarName_OptimiserMethod,
+             {'label': nameSpaces.Label_OptimiserMethod,
+              'callBack': None,
+              'tipText': nameSpaces.TipText_PeakPropertySelectionWidget,
+              'type': compoundWidget.PulldownListCompoundWidget,
+              'kwds': {'labelText': nameSpaces.Label_OptimiserMethod,
+                       'tipText': nameSpaces.TipText_OptimiserMethod,
+                       'texts': ['leastsq', 'differential_evolution', 'ampgo', 'newton'],
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+            (nameSpaces.WidgetVarName_ErrorMethod,
+             {'label': nameSpaces.Label_ErrorMethod,
+              'callBack': None,
+              'tipText': nameSpaces.TipText_ErrorMethod,
+              'type': compoundWidget.PulldownListCompoundWidget,
+              'kwds': {'labelText': nameSpaces.Label_ErrorMethod,
+                       'tipText': nameSpaces.TipText_ErrorMethod,
+                       'texts': ['parametric bootstrapping', 'non-parametric bootstrapping', 'Monte-Carlo',],
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+
+        ))
+        # fittersDict = should be taken from guiModule.backend.fittingModels.
+        # For now add to see the widgets layout
+
+        self._moduleSettingsWidget = settingWidgets.ModuleSettingsWidget(parent=self, mainWindow=mainWindow,
+                                                                         settingsDict=settingsDict,
+                                                                         grid=(0, 0))
+        self._moduleSettingsWidget.getLayout().setAlignment(QtCore.Qt.AlignLeft)
+        Spacer(self, 0, 2, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
+               grid=(1, 0), gridSpan=(1, 1))
+
 TABPOS += 1
 
 class AppearancePanel(GuiSettingPanel):

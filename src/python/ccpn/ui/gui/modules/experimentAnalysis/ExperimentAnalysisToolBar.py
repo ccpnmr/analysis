@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-27 19:23:35 +0100 (Fri, May 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-01 16:20:00 +0100 (Wed, June 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -66,7 +66,7 @@ class ToolBarPanel(GuiPanel):
                 'text': '',
                 'icon': 'icons/update',
                 'tipText': 'Update all data and GUI',
-                'toggle': False,
+                'toggle': None,
                 'callback': f'_{UpdateButton}{Callback}',
                 'objectName': UpdateButton,
             },
@@ -74,23 +74,24 @@ class ToolBarPanel(GuiPanel):
                 'text': '',
                 'icon': 'icons/showStructure',
                 'tipText': 'Show on Molecular Viewer',
-                'toggle': False,
+                'toggle': None,
                 'callback': f'_{ShowStructureButton}{Callback}',
                 'objectName': UpdateButton,
             }}
 
-
-    def _initButtons(self, colPos):
-        for i, buttonName in enumerate(self.toolButtonsDefs, start=1):
+        colPos = 0
+        for i, buttonName in enumerate(toolButtonsDefs, start=1):
             colPos+=i
-            callbackAtt = self.toolButtonsDefs.get(buttonName).pop('callback')
-            button = Button(self, **self.toolButtonsDefs.get(buttonName), grid=(0, colPos))
+            callbackAtt = toolButtonsDefs.get(buttonName).pop('callback')
+            button = Button(self, **toolButtonsDefs.get(buttonName), grid=(0, colPos))
             callback = getattr(self, callbackAtt or '', None)
             button.setCallback(callback)
             button.setMaximumHeight(25)
             button.setMaximumWidth(25)
             setattr(self, buttonName, button)
             self.toolButtons.update({buttonName:button})
+
+        self.getLayout().setAlignment(QtCore.Qt.AlignLeft)
 
     def getButton(self, name):
         return self.toolButtons.get(name)

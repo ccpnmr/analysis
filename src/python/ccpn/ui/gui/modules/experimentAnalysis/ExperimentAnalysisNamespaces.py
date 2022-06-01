@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-01 15:04:25 +0100 (Wed, June 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-01 16:20:00 +0100 (Wed, June 01, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -155,10 +155,32 @@ WidgetVarName_MolStrucSeparator         = 'MolStructureSeparator'
 Label_MolStrucSeparator                 = 'Molecular Structure'
 TipText_MolStrucSeparator               = ''
 
-WidgetVarName_MolStructureFile         = 'MolStructureFile'
-Label_MolStructureFile                 = 'Molecular Structure File'
-TipText_MolStructureFile               = 'Select the molecular structure file path.'
+WidgetVarName_MolStructureFile          = 'MolStructureFile'
+Label_MolStructureFile                  = 'Molecular Structure File'
+TipText_MolStructureFile                = 'Select the molecular structure file path.'
 
 
 
+############################################################
+##########  TAB: Fitting ChemicalShiftMapping     ##########
+############################################################
 
+WidgetVarName_FittingSeparator          = 'FittingSeparator'
+Label_FittingSeparator                  = 'Fitting Options'
+TipText_FittingSeparator                = 'General fitting options'
+
+WidgetVarName_FittingModel              = 'FittingModel'
+Label_FittingModel                      = 'Fitting Model'
+TipText_FittingModel                    = 'Select the Fitting Model'
+
+WidgetVarName_OptimiserSeparator        = 'OptimiserSeparator'
+Label_OptimiserSeparator                = 'Optimiser Options'
+TipText_OptimiserSeparator              = 'General Optimiser options'
+
+WidgetVarName_OptimiserMethod           = 'OptimiserMethod'
+Label_OptimiserMethod                   = 'Optimiser Method'
+TipText_OptimiserMethod                 = 'Select the Optimiser Method'
+
+WidgetVarName_ErrorMethod               = 'ErrorMethod'
+Label_ErrorMethod                       = 'Fitting Error Method'
+TipText_ErrorMethod                     = 'Select the Fitting Error calculation Method'

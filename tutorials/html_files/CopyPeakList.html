@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Copy Peak List</title>
+    <link rel="stylesheet" href="CcpnVideoTutorials.css">
+</head>
+<body>
+<div class="header"><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a href="index.html" class="button">Video<br> Tutorials<br> & Manual</a><a href="https://www.ccpn.ac.uk/forums/"><img src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 15px"></a></div>
+<br>
+<div class="headerBar">Copy Peak List</div>
+<div class="tutorial">
+
+<p></p>
+<h2>Copy Peak List</h2>
+    <h4>Note that this is new for Version 3.1 - in Version 3.0 you will observe different behaviour</h4>
+<p>You can copy a peak list by going to <span class="action">Spectrum / Copy Peak List...</span>, by <span class="action">dragging</span> a peak list from the sidebar onto a spectrum in a SpectrumDisplay or by using the shortcut <span class="action">CL</span>. In all cases a pop-up will open in which you can confirm the <span class="action">Source Peak List</span> and the <span class="action">Target Spectrum</span>. Note that the target spectrum can be the same spectrum to which the peak list already belongs. If you have dragged a peak list into a Spectrum Display containing several spectra, the first one will be selected as the target spectrum by default (you can't copy a peak list to multiple spectra in one go, unless you create a macro to do so).</p>
+    <p>The <span class="action">Copy Peak List</span> pop-up will give you several options for how to copy your peaks. If you select the lower <span class="action">Copy all existing properties</span> option, the new peak list will essentially be a clone of the original one, i.e. the assignments, position, line widths, height and volume will be copied over as they are. The only parameter that will be adjusted is the Signal/Noise since the new spectrum may have a different noise level.</p>
+    <p>The alternative is to <span class="action">Copy position and assignments</span> only. If you select this option without any of the additional options, then your new peak list will only contain positions and assignments and the other properties will be blank (technically, they will be set to <span class="action">None</span>). Additional options let you <span class="action">Snap [the peaks] to extremum</span> and/or <span class="action">Refit [the] peaks</span> (usually using a Gaussian fit, unless you have selected <span class="action">Parabolic</span> in your preferences). Selecting these options will move your peaks slightly away from their original position, but often this is what you want; the peaks will now be at the true peak positions in the new spectrum (provided there is indeed a peak/maximum there). Alternatively, you can <span class="action">Refit [the] peaks at position</span> which will leave the peaks at the original position, but do a fit to give you information about the height and linewidth. This may be something you want to do for a T1 or T2 time series where ideally all peaks should be fit at the same position. Finally, you can also opt to <span class="action">Recalculate [the] volume</span> of the peaks during the copying process if you think you will require these.</p>
+</div>
+</body>
+</html>

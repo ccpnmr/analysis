@@ -32,6 +32,7 @@ import traceback
 from contextlib import contextmanager, nullcontext
 from collections.abc import Iterable
 from functools import partial
+from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtGui import QPainter
 from ccpn.core.lib import Util as coreUtil
 from inspect import signature, Parameter
@@ -221,9 +222,11 @@ def catchExceptions(application=None, errorStringTemplate='Error: "%s"', popupAs
 
         if application.hasGui and popupAsWarning:
             from ccpn.ui.gui.widgets import MessageDialog  # Local import: in case of no-gui, we never get here
+
             MessageDialog.showWarning('Warning', errorStringTemplate % str(es))
         # if application._isInDebugMode:
         #     raise es
+
 
 @contextmanager
 def rebuildSidebar(application):
@@ -462,27 +465,27 @@ def inactivity(application=None, project=None):
         project._apiNotificationBlanking -= 1
 
 
-@contextmanager
-def notificationUnblanking():
-    """
-    Unblock all notifiers, disable at the end of the function block.
-    Used inside notificationBlanking if a notifier is required for a single event
-    """
-
-    # get the current application
-    application = getApplication()
-
-    application.project.unblankNotification()
-    try:
-        # transfer control to the calling function
-        yield
-
-    except AttributeError as es:
-        raise es
-
-    finally:
-        # clean up after blocking notifications
-        application.project.blankNotification()
+# @contextmanager
+# def notificationUnblanking():
+#     """
+#     Unblock all notifiers, disable at the end of the function block.
+#     Used inside notificationBlanking if a notifier is required for a single event
+#     """
+#
+#     # get the current application
+#     application = getApplication()
+#
+#     application.project.unblankNotification()
+#     try:
+#         # transfer control to the calling function
+#         yield
+#
+#     except AttributeError as es:
+#         raise es
+#
+#     finally:
+#         # clean up after blocking notifications
+#         application.project.blankNotification()
 
 
 @contextmanager
@@ -681,7 +684,7 @@ class Timeout:
     def __init__(self, seconds: int = 60, timeoutMessage: str = "", loggingType='warning'):
         self.seconds = int(seconds)
         self.timeoutMessage = timeoutMessage
-        allowedLoggers = ['warning', 'debug','debug1','debug2','debug3', 'critical']
+        allowedLoggers = ['warning', 'debug', 'debug1', 'debug2', 'debug3', 'critical']
         loggingType = loggingType if loggingType in allowedLoggers else 'warning'
         self.loggingType = loggingType
 
@@ -1087,9 +1090,47 @@ def renameObjectNoBlanking(self):
     self._finaliseAction('rename')
 
 
+@contextmanager
+def progressManager(text='busy...', minimum=0, maximum=100, delay=1000):
+    """A context manager to wrap a method in a progress dialog defined by the current gui state.
+    """
+    from ccpn.framework.Application import getApplication
+    from time import sleep
+
+    application = getApplication()
+    mainWindow = application.ui.mainWindow
+
+    progressHandler = application.ui.getProgressHandler()
+
+    # handle QThreads here to check whether they have all finished and close the dialog?
+    _threads = QtCore.QThreadPool.globalInstance()
+
+    try:
+        # get the dialog handler from the gui state - use subclass
+        progress = progressHandler(mainWindow, text=text,
+                                   minimum=minimum, maximum=maximum,
+                                   delay=delay)
+
+        # transfer control to the calling function
+        yield progress
+
+    except Exception as es:
+        if isinstance(es, RuntimeError):
+            raise es
+
+    finally:
+        # wait for 1 second before closing the dialog - small pause to stop it flickering
+        sleep(1)
+
+    getLogger().debug2(f'threads - {_threads.activeThreadCount()}')
+    # wait for threads to complete
+    _threads.waitForDone()
+    QtWidgets.QApplication.processEvents()
+
+
 class BlankedPartial(object):
     """Wrapper (like partial) to call func(**kwds) with blanking
-    optionally trigger the notification of obj, either pre- or post execution.
+    optionally trigger the notification of obj, either pre- or post- execution.
     """
 
     def __init__(self, func, obj=None, trigger=None, preExecution=False, *args, **kwds):
@@ -1353,16 +1394,15 @@ class AntiAliasedPaintContext(PaintContext):
 #
 #         print('>>>close')
 
-if __name__ == '__main__':
-    from ccpn.ui.gui.widgets.Application import newTestApplication
 
+def main():
+    from ccpn.ui.gui.widgets.Application import newTestApplication
 
     # import at top
     # from ccpn.framework.Application import getApplication
 
     def _undoTest(value):
         pass
-
 
     app = newTestApplication()
     application = getApplication()
@@ -1392,3 +1432,7 @@ if __name__ == '__main__':
     print(f'>>> {application.project._undo}')
     for value in application.project._undo:
         print(f'>>>   {value}')
+
+
+if __name__ == '__main__':
+    main()

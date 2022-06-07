@@ -1199,14 +1199,51 @@ def _assignNmrResiduesToPeaks(peaks, nmrResidues):
 
 
 def _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments):
+    from ccpn.core.lib.ContextManagers import progressManager
+    from ccpn.core.lib.ContextManagers import undoBlockWithSideBar as undoBlock
+
     # go through all the peaks in the peakList
-    for peak in peakList.peaks:
+    if peakList.peaks:
+        peak = peakList.peaks[0]
+        axisIso = list(zip(peak.axisCodes, peak.spectrum.isotopeCodes))
 
-        # only process those that are empty OR those not empty when checkbox cleared
-        if not keepAssignments or all(not dimensionNmrAtoms for dimensionNmrAtoms in peak.dimensionNmrAtoms):
+        count = len(peakList.peaks)
+        pDiv = (count // 100) + 1  #10 if count > 100 else 1
+        totalCopies = int(count / pDiv)
 
-            # make a new nmrResidue with new nmrAtoms and assign to the peak
-            nmrResidue = nmrChain.newNmrResidue()
-            for i, (axis, isotope) in enumerate(zip(peak.axisCodes, peak.spectrum.isotopeCodes)):
-                nmrAtom = nmrResidue.fetchNmrAtom(name=str(axis), isotopeCode=isotope)
-                peak.assignDimension(axisCode=axis, value=[nmrAtom])
+        with progressManager(text='Setup NmrResidues...', maximum=totalCopies, delay=0) as progress:
+
+            with undoBlock():
+                try:
+                    for cc, peak in enumerate(peakList.peaks):
+
+                        # check if the progress was cancelled
+                        if progress.wasCanceled():
+                            # set to 100% and exit the loop
+                            progress.setValue(totalCopies)
+                            break
+
+                        if cc % pDiv == 0:
+                            # update the progress-bar
+                            progress.setValue(int(cc / pDiv))
+
+                        # only process those that are empty OR those not empty when checkbox cleared
+                        dimensionNmrAtoms = peak.dimensionNmrAtoms  # for speed reasons !?
+                        if not keepAssignments or all(not dimAtoms for dimAtoms in dimensionNmrAtoms):
+
+                            # make a new nmrResidue with new nmrAtoms and assign to the peak
+                            nmrResidue = nmrChain.newNmrResidue()
+                            for i, (axis, isotope) in enumerate(axisIso):
+                                nmrAtom = nmrResidue.fetchNmrAtom(name=str(axis), isotopeCode=isotope)
+                                peak.assignDimension(axisCode=axis, value=[nmrAtom])
+
+                    progress.finalise()
+
+                except Exception as es:
+                    getLogger().warning(f'fetchNewPeakAssignments: {es}')
+                else:
+                    pass
+
+                finally:
+                    # set closing conditions here
+                    pass

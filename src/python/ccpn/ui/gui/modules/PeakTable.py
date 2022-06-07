@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-05 10:23:03 +0100 (Thu, May 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-07 18:50:43 +0100 (Tue, June 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -434,7 +434,9 @@ class _NewPeakTableWidget(_CoreTableWidgetABC):
         Must be a positive integer
         """
         try:
-            v = int(value)
+            if value == '':
+                value = None
+            v = int(value) if value is not None else None
             obj.clusterId = v
         except Exception as err:
             getLogger().warning('Could not set clusterID.', err)

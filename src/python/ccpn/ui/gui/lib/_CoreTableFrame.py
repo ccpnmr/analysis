@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-06 12:02:15 +0100 (Fri, May 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-07 18:49:20 +0100 (Tue, June 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -176,7 +176,7 @@ class _CoreTableWidgetABC(_SimplePandasTableViewProjectSpecific):
                         listItem[header.headerText] = header.getValue(obj)
                     except Exception as es:
                         # NOTE:ED - catch any nasty surprises in tables
-                        getLogger().debug(f'Error creating table information {es}')
+                        getLogger().debug2(f'Error creating table information {es}')
                         listItem[header.headerText] = None
 
                 allItems.append(listItem)

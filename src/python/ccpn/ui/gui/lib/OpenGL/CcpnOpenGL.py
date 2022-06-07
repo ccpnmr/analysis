@@ -6423,7 +6423,7 @@ class CcpnGLWidget(QOpenGLWidget):
                             if xPositions[0] < float(peak.position[xAxis]) < xPositions[1] and y0 < height < y1:
                                 peaks.add(peak)
 
-                        except Exception as es:
+                        except Exception:
                             # NOTE:ED - skip for now
                             continue
 
@@ -6448,7 +6448,7 @@ class CcpnGLWidget(QOpenGLWidget):
                                 else:
                                     peaks.add(peak)
 
-                        except Exception as es:
+                        except Exception:
                             # NOTE:ED - skip for now
                             continue
 

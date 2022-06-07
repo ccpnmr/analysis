@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-13 19:23:20 +0100 (Wed, April 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-07 18:53:28 +0100 (Tue, June 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,23 +26,30 @@ __date__ = "$Date: 2022-04-11 21:54:44 +0100 (Mon, April 11, 2022) $"
 # Start of code
 #=========================================================================================
 
-from PyQt5 import QtWidgets
+from tqdm import tqdm
+from PyQt5 import QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.Label import Label
 
 
 class ProgressDialog(QtWidgets.QProgressDialog):
 
-    def __init__(self, parent=None, text='', minimum=0, maximum=99):
-        super().__init__(parent=None)
+    def __init__(self, parent, title='Progress Dialog', text='busy...', minimum=0, maximum=100, delay=1000):
+        super().__init__(parent=parent)
 
+        self.setWindowTitle(title)
         self.setText(text)
         self.setRange(minimum, maximum)
         self.setAutoReset(True)
         self.setAutoClose(True)
-        self.setMinimumDuration(1000)
+        self.setMinimumDuration(delay)
+
+        # give full control to the dialog
+        self.setWindowModality(QtCore.Qt.ApplicationModal)
 
     def setText(self, text):
-        self.setLabel(QtWidgets.QLabel(text, self))
+        self._label = Label(self, text=text, margins=(8, 16, 8, 8))
+        self.setLabel(self._label)
 
     def increment(self, n=1):
         self.setValue(self.value() + n)
@@ -67,6 +74,10 @@ class ProgressDialog(QtWidgets.QProgressDialog):
             value += a
 
         self.setValue(int(value))
+
+    def finalise(self):
+        self.setValue(self.maximum())
+        self.close()
 
 
 class ProgressWidget(QtWidgets.QProgressBar, Base):
@@ -100,36 +111,83 @@ class ProgressWidget(QtWidgets.QProgressBar, Base):
         self.setValue(int(value))
 
 
-if __name__ == '__main__':
+class ProgressTextBar(tqdm):
 
-    import time
-    from .Application import Application
-    from .BasePopup import BasePopup
+    def __init__(self, parent, title='Progress Dialog', text='busy...', minimum=0, maximum=100, delay=2000):
+        super().__init__(initial=minimum, total=maximum-minimum, delay=delay / 1000,
+                         ncols=120, miniters=(maximum-minimum) / 100)
+
+    def setText(self, text):
+        self.set_description(text)
+
+    def increment(self, n=1):
+        self.update(n)
+
+    def getValue(self):
+        return self.n
+
+    def getProportion(self):
+        a = self.initial
+        b = self.total
+        return (self.n - a) / (b - a)
+
+    # setRange() inbuilt
+    # reset() inbuilt
+    # setText() inbuilt
+
+    def set(self, value):
+        if (value not in (0, 1)) and value <= 1.0:
+            a = self.initial
+            b = self.total
+            value = float(value) * (b - a)
+            value += a
+
+        self.setValue(int(value))
+
+    def setValue(self, value):
+        """Increment the counter to the required value
+        """
+        val = value - self.n - self.initial
+        self.update(val)
+
+    @staticmethod
+    def wasCanceled():
+        return False
+
+    def finalise(self):
+        self.setValue(self.total + self.initial)
+        self.close()
 
 
-    app = Application()
-
-    window = BasePopup()
-    window.setSize(200, 50)
-    window.show()
-
-    pb1 = ProgressDialog(window, text='Increments')
-    pb2 = ProgressWidget(window)
-
-    for i in range(100):
-        time.sleep(0.1)
-        pb1.setValue(i)
-        #pb1.increment()
-
-    for i in range(100):
-        time.sleep(0.1)
-        pb2.setValue(100 - i)
-
-    app.start()
+def main():
+    # import time
+    # from .Application import Application
+    # from .BasePopup import BasePopup
+    #
+    #
+    # app = Application()
+    #
+    # window = BasePopup()
+    # window.setSize(200, 50)
+    # window.show()
+    #
+    # pb1 = ProgressDialog(window, text='Increments')
+    # pb2 = ProgressWidget(window)
+    #
+    # for i in range(100):
+    #     time.sleep(0.1)
+    #     pb1.setValue(i)
+    #     #pb1.increment()
+    #
+    # for i in range(100):
+    #     time.sleep(0.1)
+    #     pb2.setValue(100 - i)
+    #
+    # app.start()
 
     from ccpn.ui.gui.widgets.Application import newTestApplication
     from ccpn.framework.Application import getApplication
-
+    from ccpn.core.lib.ContextManagers import progressManager
 
     # create a new test application
     app = newTestApplication(interface='Gui')
@@ -137,8 +195,12 @@ if __name__ == '__main__':
     mainWindow = application.ui.mainWindow
 
     # add a module
-    _module = ProgressWidget(mainWindow=mainWindow)
+    _module = ProgressDialog(parent=mainWindow)
     mainWindow.moduleArea.addModule(_module)
 
     # show the mainWindow
     app.start()
+
+
+if __name__ == '__main__':
+    main()

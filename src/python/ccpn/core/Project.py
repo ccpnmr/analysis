@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-06 12:11:17 +0100 (Fri, May 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-07 18:53:28 +0100 (Tue, June 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1034,6 +1034,8 @@ class Project(AbstractWrapperObject):
 
     def suspendNotification(self):
         """Suspend notifier execution and accumulate notifiers for later execution"""
+        if self.application.hasGui:
+            self.application.ui.qtApp.progressAboutToChangeSignal.emit(self._progressSuspension)
         self._progressSuspension += 1
 
         return
@@ -1045,6 +1047,8 @@ class Project(AbstractWrapperObject):
         self._progressSuspension -= 1
         if self._progressSuspension < 0:
             raise RuntimeError("Code Error: _progressSuspension below zero")
+        if self.application.hasGui:
+            self.application.ui.qtApp.progressChangedSignal.emit(self._progressSuspension)
 
         return
 

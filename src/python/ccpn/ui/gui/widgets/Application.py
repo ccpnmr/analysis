@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-20 12:53:13 +0100 (Fri, May 20, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-06-07 18:53:28 +0100 (Tue, June 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -35,6 +35,9 @@ import os
 os.environ['QT_MAC_WANTS_LAYER'] = '1'
 
 class Application(QtWidgets.QApplication):
+
+    progressAboutToChangeSignal = QtCore.pyqtSignal(int)
+    progressChangedSignal = QtCore.pyqtSignal(int)
 
     def __init__(self, applicationName, applicationVersion, organizationName='CCPN', organizationDomain='ccpn.ac.uk'):
         super().__init__([applicationName, ])

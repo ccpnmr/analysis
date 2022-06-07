@@ -4,18 +4,19 @@ Module documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-03-30 15:15:03 +0100 (Mon, March 30, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-06-07 16:18:12 +0100 (Tue, June 07, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,15 +26,14 @@ __date__ = "$Date: 2017-05-28 10:28:42 +0000 (Sun, May 28, 2017) $"
 # Start of code
 #=========================================================================================
 
+import sys
 from functools import partial
-from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.FillBetweenRegions import FillBetweenRegions
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox, ScientificDoubleSpinBox
 import pyqtgraph as pg
 import numpy as np
-from pyqtgraph.graphicsItems.LinearRegionItem import LinearRegionItem
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.util.Logging import getLogger
 from PyQt5.QtCore import pyqtSlot
@@ -100,7 +100,7 @@ class GLTargetButtonSpinBoxes(Widget):
 
         self.spinBoxes = []
         self.values = values or [0, 0]
-        self.bounds = bounds or [-1e10, 1e10]
+        self.bounds = bounds or [-sys.float_info.max, sys.float_info.max]
         self.pointBox1 = ScientificDoubleSpinBox(self, value=self.values[0], step=step, max=self.bounds[1], min=self.bounds[0],
                                        decimals=decimals, grid=(0, 1), hAlign='l', vAlign='l')
         self.pointBox2 = ScientificDoubleSpinBox(self, value=self.values[1], step=step, max=self.bounds[1], min=self.bounds[0],

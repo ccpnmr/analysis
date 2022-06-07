@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-13 19:00:26 +0100 (Wed, April 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-07 19:13:35 +0100 (Tue, June 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -283,7 +283,7 @@ class TestScheduler(unittest.TestCase):
             app.processEvents()
 
         # process any remaining threads/timers
-        QtCore.QTimer.singleShot(10, self._queueEnd)
+        QtCore.QTimer.singleShot(0, self._queueEnd)
         app.processEvents()
 
         print('\n'.join([f'{qVal}    {rVal}' for qVal, rVal in zip_longest(obj._handledEvents, obj._realEvents)]))

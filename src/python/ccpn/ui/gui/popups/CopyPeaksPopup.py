@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-13 19:23:20 +0100 (Wed, April 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-07 18:51:14 +0100 (Tue, June 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -158,7 +158,7 @@ class CopyPeaks(CcpnDialog):
                                 for listNumber, peakList in enumerate(peakLists):
                                     if progress.wasCanceled():
                                         progress.setValue(totalCopies)
-                                        raise RuntimeError()
+                                        raise RuntimeError('Progress was cancelled')
                                     progress.setValue((numPeaks * listNumber + peakNumber) // pDiv)
                                     peak.copyTo(peakList)
 

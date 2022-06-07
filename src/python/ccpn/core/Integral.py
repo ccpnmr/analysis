@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-07 14:59:37 +0100 (Tue, June 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-07 15:22:39 +0100 (Tue, June 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -95,6 +95,12 @@ class Integral(AbstractWrapperObject):
         return self._project._data2Obj[self._wrappedData.integralList]
 
     integralList = _parent
+
+    @property
+    def spectrum(self):
+        """Convenience property to get the spectrum, equivalent to integral.peakList.spectrum
+        """
+        return self.integralList.spectrum
 
     @property
     def value(self) -> Optional[float]:
@@ -229,12 +235,15 @@ class Integral(AbstractWrapperObject):
     @property
     def baseline(self) -> float:
         """baseline of Integral"""
+        baseline = self._wrappedData.offset
+        if baseline is None or baseline == 0:
+            baseline = self.spectrum.noiseLevel
         scale = self.integralList.spectrum.scale
         scale = scale if scale is not None else 1.0
         if -SCALETOLERANCE < scale < SCALETOLERANCE:
             getLogger().warning('Scaling {}.baseline by minimum tolerance (±{})'.format(self, SCALETOLERANCE))
 
-        return self._wrappedData.offset * scale
+        return baseline * scale
 
     @baseline.setter
     @logCommand(get='self', isProperty=True)

@@ -4,9 +4,10 @@ GL routines used to draw vertex buffer objects (VBOs)
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-09 19:13:27 +0000 (Tue, March 09, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2022-06-07 15:59:36 +0100 (Tue, June 07, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -213,7 +214,8 @@ class GLVertexArray():
 
         # check the VBOs, if they don't exist raise error
         if self.VBOs is None:
-            raise RuntimeError('OpenGL Error: cannot update indexVBO: %s' % self)
+            # raise RuntimeError('OpenGL Error: cannot update indexVBO: %s' % self)
+            return
 
         self._defineIndexVBO()
 
@@ -225,7 +227,8 @@ class GLVertexArray():
 
         # check the VBOs, if they don't exist raise error
         if self.VBOs is None:
-            raise RuntimeError('OpenGL Error: cannot update indexArray: %s' % self)
+            # raise RuntimeError('OpenGL Error: cannot update indexArray: %s' % self)
+            return
 
         sizeIndices = self.indices.size * self.indices.itemsize
 
@@ -244,7 +247,8 @@ class GLVertexArray():
         if not self.indices.size:
             return
         if self.VBOs is None:
-            raise RuntimeError('OpenGL Error: cannot draw IndexVBO: %s' % self)
+            # raise RuntimeError('OpenGL Error: cannot draw IndexVBO: %s' % self)
+            return
 
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
@@ -356,7 +360,8 @@ class GLVertexArray():
 
         # check the VBOs, if they don't exist raise error
         if self.VBOs is None:
-            raise RuntimeError('OpenGL Error: cannot update indexVBO: %s' % self)
+            # raise RuntimeError('OpenGL Error: cannot update indexVBO: %s' % self)
+            return
 
         self._defineAliasedIndexVBO()
 
@@ -368,7 +373,8 @@ class GLVertexArray():
 
         # check the VBOs, if they don't exist raise error
         if self.VBOs is None:
-            raise RuntimeError('OpenGL Error: cannot update indexArray: %s' % self)
+            # raise RuntimeError('OpenGL Error: cannot update indexArray: %s' % self)
+            return
 
         sizeIndices = self.indices.size * self.indices.itemsize
 
@@ -387,7 +393,8 @@ class GLVertexArray():
         if not self.indices.size:
             return
         if self.VBOs is None:
-            raise RuntimeError('OpenGL Error: cannot draw IndexVBO: %s' % self)
+            # raise RuntimeError('OpenGL Error: cannot draw IndexVBO: %s' % self)
+            return
 
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
@@ -517,7 +524,8 @@ class GLVertexArray():
 
         # check the VBOs, if they don't exist raise error
         if self.VBOs is None:
-            raise RuntimeError('OpenGL Error: cannot update vertexColorArray: %s' % self)
+            # raise RuntimeError('OpenGL Error: cannot update vertexColorArray: %s' % self)
+            return
 
         self._defineVertexColorVBO()
 
@@ -528,7 +536,8 @@ class GLVertexArray():
         # getLogger().info('>>> drawVertexColorVBO')
 
         if self.VBOs is None:
-            raise RuntimeError('OpenGL Error: cannot draw VertexColorVBO: %s' % self)
+            # raise RuntimeError('OpenGL Error: cannot draw VertexColorVBO: %s' % self)
+            return
 
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)
@@ -668,7 +677,8 @@ class GLVertexArray():
 
         # check the VBOs, if they don't exist raise error
         if self.VBOs is None:
-            raise RuntimeError('OpenGL Error: cannot update textArrayVBO: %s' % self)
+            # raise RuntimeError('OpenGL Error: cannot update textArrayVBO: %s' % self)
+            return
 
         self._defineTextArrayVBO()
 
@@ -680,7 +690,8 @@ class GLVertexArray():
 
         # check the VBOs, if they don't exist raise error
         if self.VBOs is None:
-            raise RuntimeError('OpenGL Error: cannot update textArrayVBOAttribs: %s' % self)
+            # raise RuntimeError('OpenGL Error: cannot update textArrayVBOAttribs: %s' % self)
+            return
 
         sizeAttribs = self.attribs.size * self.attribs.itemsize
 
@@ -697,7 +708,8 @@ class GLVertexArray():
 
         # check the VBOs, if they don't exist raise error
         if self.VBOs is None:
-            raise RuntimeError('OpenGL Error: cannot update textArrayVBOColour: %s' % self)
+            # raise RuntimeError('OpenGL Error: cannot update textArrayVBOColour: %s' % self)
+            return
 
         sizeColors = self.colors.size * self.colors.itemsize
 
@@ -728,7 +740,8 @@ class GLVertexArray():
 
         # check the VBOs, if they don't exist raise error
         if self.VBOs is None:
-            raise RuntimeError('OpenGL Error: cannot drawTextArrayVBO: %s' % self)
+            # raise RuntimeError('OpenGL Error: cannot drawTextArrayVBO: %s' % self)
+            return
 
         if self.blendMode:
             GL.glEnable(GL.GL_BLEND)

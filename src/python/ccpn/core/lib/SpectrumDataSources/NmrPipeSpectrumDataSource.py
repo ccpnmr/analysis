@@ -21,7 +21,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-30 09:25:51 +0100 (Wed, March 30, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-07 17:29:57 +0100 (Tue, June 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -184,7 +184,7 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                 setattr(self, parName, result)
 
                 # Fixes!
-                if self.temperature == 0.0:
+                if parName == 'temperature' and self.temperature == 0.0:
                     self.temperature = None
 
                 # Pipe and NUS dimensions??
@@ -193,7 +193,12 @@ class NmrPipeSpectrumDataSource(SpectrumDataSourceABC):
                     self.pipeDimension = map1[self.pipeDimension]
                 if parName == "nusDimension":
                     self.nusDimension = map1[self.nusDimension]
-                #end if
+
+            # Fix isAcquisition for transposed data
+            if self.dimensionCount >= 2 and self.header.isTransposed:
+                _isAquisition = [False] * self.MAXDIM
+                _isAquisition[1] = True
+                self.isAquisition = _isAquisition
 
             if self.template is None and self.dimensionCount > 2:
                 self.template = self._guessTemplate()

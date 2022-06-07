@@ -50,8 +50,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-16 19:56:50 +0100 (Mon, May 16, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-06-07 17:29:57 +0100 (Tue, June 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2890,7 +2890,10 @@ class Spectrum(AbstractWrapperObject):
             getLogger().warning(f'{self}: Unable to save metadata to {_path.parent}')
             return
 
-        self._spectrumTraits.save(_path)
+        # Only save (and possibly overwrite) if we have valid data
+        if self._dataStore is not None and \
+            self.dataSource is not None:
+            self._spectrumTraits.save(_path)
 
     def _restoreFromSpectrumMetaData(self):
         """Retore the spectrum metadata from the project/state/spectra json file
@@ -3527,12 +3530,12 @@ def _extractRegionToFile(spectrum, dimensions, position, dataStore, name=None) -
             # loop over all requested slices
             for position, aliased in inputFile._selectedPointsIterator(sliceTuples=sliceTuples,
                                                                    excludeDimensions=[readSliceDim]):
-                data = inputFile.getSliceData(position, readSliceDim)
+                data = inputFile.getSliceData(position=position, sliceDim=readSliceDim)
 
                 # map the input position to the output position and write the data
                 outPosition = [position[inverseIndexMap[p]] for p in output.dimensionIndices]
                 # print('>>>', position, outPosition)
-                output.setSliceData(data, outPosition, writeSliceDim)
+                output.setSliceData(data=data, position=outPosition, sliceDim=writeSliceDim)
 
     # create the new Spectrum instance from the dataSource
     newSpectrum = _newSpectrumFromDataSource(project=spectrum.project,

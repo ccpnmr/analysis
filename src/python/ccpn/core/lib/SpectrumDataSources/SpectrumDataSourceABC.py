@@ -92,8 +92,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-04-05 12:14:15 +0100 (Tue, April 05, 2022) $"
+__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
+__dateModified__ = "$dateModified: 2022-06-07 17:29:57 +0100 (Tue, June 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -112,6 +112,7 @@ from itertools import product
 
 import tempfile
 import numpy
+import numpy as np
 
 import ccpn.core.lib.SpectrumLib as specLib
 from ccpn.core._implementation.SpectrumData import SliceData, PlaneData, RegionData
@@ -1086,6 +1087,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
             slices[sliceIdx] = slice(0, pStop - p)  # truncate if necessary
             _tmp = blockdata[tuple(slices[::-1])].flatten()  # invert the slices as multi-d numpy arrays are array[z][y][x] (i.e. reversed indexing)
             data[p:pStop] = _tmp
+        # return data
         return data
 
     def _readBlockedPlane(self, xDim=1, yDim=2, position=None):
@@ -1769,7 +1771,7 @@ class SpectrumDataSourceABC(CcpNmrJson):
         Looping aliases back (ie. when start,stop < 1 and > pointCounts) in all dimensions.
         It is the task of the calling routine to prevent that if not desired
 
-        return a (position, aliased) tuple of lists
+        :return a (position, aliased) tuple of lists
         """
 
         if len(sliceTuples) != self.dimensionCount:

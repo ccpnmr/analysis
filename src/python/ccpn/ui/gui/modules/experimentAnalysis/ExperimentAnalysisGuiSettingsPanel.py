@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-01 16:20:00 +0100 (Wed, June 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-07 15:43:23 +0100 (Tue, June 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -176,7 +176,6 @@ class CSMCalculationPanel(GuiSettingPanel):
         tipTexts_ddCalculationsModes = [model.FullDescription for modelName, model in
                                         ChemicalShiftCalculationModes.items()]
         extraLabelPixmaps = [maTex2Pixmap(maTex) for maTex in extraLabels_ddCalculationsModes]
-        compoundKwds = {'extraLabels': extraLabels_ddCalculationsModes, 'extraLabelIcons': extraLabelPixmaps}
         settingsDict = od((
             (nameSpaces.WidgetVarName_DeltaDeltasSeparator,
              {'label': nameSpaces.Label_DeltaDeltas,
@@ -190,13 +189,14 @@ class CSMCalculationPanel(GuiSettingPanel):
               'type': compoundWidget.RadioButtonsCompoundWidget,
               'postInit': self._calculationModePostInit,
               'kwds': {'labelText' : nameSpaces.Label_DDCalculationMode,
-                       'texts' : list(ChemicalShiftCalculationModes.keys()),
-                       'tipTexts' : tipTexts_ddCalculationsModes,
-                       'direction' : 'v',
                        'hAlign':'l',
                        'tipText' :'',
                        'fixedWidths': SettingsWidgetFixedWidths,
-                       'compoundKwds':compoundKwds}}),
+                       'compoundKwds':{'texts' : list(ChemicalShiftCalculationModes.keys()),
+                                       'extraLabels': extraLabels_ddCalculationsModes,
+                                       'tipTexts': tipTexts_ddCalculationsModes,
+                                       'direction': 'v',
+                                       'extraLabelIcons': extraLabelPixmaps}}}),
         ))
         ## add the weighting Factor widgets
         factorsDict = od(())
@@ -303,7 +303,6 @@ class GuiCSMFittingPanel(GuiSettingPanel):
         tipTexts_ddCalculationsModels = [model.FullDescription for modelName, model in
                                         ChemicalShiftCalculationModels.items()]
         extraLabelPixmaps = [maTex2Pixmap(maTex) for maTex in extraLabels_ddCalculationsModels]
-        compoundKwds = {'extraLabels': extraLabels_ddCalculationsModels, 'extraLabelIcons': extraLabelPixmaps}
         settingsDict = od((
             (nameSpaces.WidgetVarName_FittingSeparator,
              {'label': nameSpaces.Label_FittingSeparator,
@@ -318,13 +317,14 @@ class GuiCSMFittingPanel(GuiSettingPanel):
               'postInit': None,
               'tipText': nameSpaces.TipText_FittingModel,
               'kwds': {'labelText': nameSpaces.Label_FittingModel,
-                       'texts': list(ChemicalShiftCalculationModels.keys()),
-                       'tipTexts': tipTexts_ddCalculationsModels,
-                       'direction': 'v',
-                       'hAlign': 'l',
-                       'tipText': '',
                        'fixedWidths': SettingsWidgetFixedWidths,
-                       'compoundKwds': compoundKwds}}),
+                       'compoundKwds': {'texts': list(ChemicalShiftCalculationModels.keys()),
+                                        'extraLabels': extraLabels_ddCalculationsModels,
+                                        'tipTexts': tipTexts_ddCalculationsModels,
+                                        'direction': 'v',
+                                        'tipText': '',
+                                        'hAlign': 'l',
+                                        'extraLabelIcons': extraLabelPixmaps}}}),
             (nameSpaces.WidgetVarName_OptimiserSeparator,
              {'label': nameSpaces.Label_OptimiserSeparator,
               'type': LabeledHLine,

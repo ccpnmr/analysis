@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-01 17:39:03 +0100 (Wed, June 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-07 15:31:52 +0100 (Tue, June 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -462,6 +462,14 @@ class NmrAtom(AbstractWrapperObject):
             # rename the nmrAtom in the chemicalShifts
             self._childActions.append(self._renameChemicalShifts)
             self._finaliseChildren.extend((sh, 'change') for sh in self.chemicalShifts)
+
+        elif action == 'delete':
+            # store the old parent information - may be required for some modules
+            self._oldNmrResidue = self.nmrResidue
+            self._oldAssignedPeaks = self.assignedPeaks
+        elif action == 'create':
+            self._oldNmrResidue = None
+            self._oldAssignedPeaks = ()
 
         if not super()._finaliseAction(action):
             return

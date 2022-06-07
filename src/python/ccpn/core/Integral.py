@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-02 23:55:21 +0000 (Wed, February 02, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-06-07 14:59:37 +0100 (Tue, June 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -336,24 +336,27 @@ class Integral(AbstractWrapperObject):
     def limits(self, value):
         self._wrappedData.limits = value
 
-        # # automatically calculates Volume given the limits for 1Ds
-        # spectrum = self.integralList.spectrum
-        #
-        # if spectrum.dimensionCount == 1:
-        #     for ii in range(spectrum.dimensionCount):
-        #         limits = value[ii] if value and len(value) > ii else ()
-        #         if len(limits) == 2:
-        #
-        #             if spectrum.intensities is not None and spectrum.intensities.size != 0:
-        #                 limit1, limit2 = limits
-        #                 x = spectrum.positions
-        #                 index01 = np.where((x <= limit2) & (x >= limit1))
-        #                 values = spectrum.intensities[index01]
-        #                 self.value = float(trapz(values))
-        #
-        #                 # small change, only calculate if there is a peak
-        #                 if self.peak:
-        #                     self.peak.volume = self.value
+        # automatically calculates Volume given the limits for 1Ds
+        spectrum = self.integralList.spectrum
+        if spectrum.isEmptySpectrum():
+            return
+
+        if spectrum.dimensionCount == 1:
+            for ii in range(spectrum.dimensionCount):
+                limits = value[ii] if value and len(value) > ii else ()
+                if len(limits) == 2:
+
+                    if spectrum.intensities is not None and spectrum.intensities.size != 0:
+                        limit1, limit2 = limits
+                        x = spectrum.positions
+                        index01 = np.where((x <= limit2) & (x >= limit1))
+                        values = spectrum.intensities[index01]
+                        if all(values):
+                            self.value = float(trapz(values))
+
+                            # small change, only calculate if there is a peak
+                            if self.peak:
+                                self.peak.volume = self.value
 
     @property
     def pointLimits(self) -> List[Tuple[float, float]]:
@@ -405,20 +408,17 @@ class Integral(AbstractWrapperObject):
         # NOTE:ED - now using offset in the model, slope will determine the angle of the baseline
         #           calculate slope automatically?
         baseline = self.baseline
-
-        for i in self.limits:
-            x = self.integralList.spectrum.positions
-            y = self.integralList.spectrum.intensities
-            xRegions = np.where((x <= max(i)) & (x >= min(i)))
-            for xRegion in xRegions:
-                if baseline is not None:
-                    # try:
-                    # baseline = min(y[xRegion])
-                    return (baseline, x[xRegion], y[xRegion])
-                    # except Exception as es:
-                    #     # TODO:Luca check empty list error
-                    #     pass
-                # should be just one for 1D
+        spectrum = self.integralList.spectrum
+        if spectrum.isEmptySpectrum():
+            return []
+        if spectrum.dimensionCount == 1:
+            for i in self.limits:
+                x = spectrum.positions
+                y = spectrum.intensities
+                xRegions = np.where((x <= max(i)) & (x >= min(i)))
+                for xRegion in xRegions:
+                    if baseline is not None:
+                        return (baseline, x[xRegion], y[xRegion])
         return []
 
     #=========================================================================================

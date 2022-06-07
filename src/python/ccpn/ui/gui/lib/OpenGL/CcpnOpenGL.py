@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-01 20:13:15 +0100 (Wed, June 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-07 11:53:14 +0100 (Tue, June 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -72,6 +72,7 @@ import math
 import re
 import time
 import numpy as np
+from functools import partial
 from contextlib import contextmanager
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QPoint, QSize, Qt, pyqtSlot
@@ -146,6 +147,9 @@ SELECTOBJECTS = [PEAKSELECT, INTEGRALSELECT, MULTIPLETSELECT]
 CURSOR_SOURCE_NONE = None
 CURSOR_SOURCE_SELF = 'self'
 CURSOR_SOURCE_OTHER = 'other'
+
+SCROLL_DELTA_LIMIT = 12.0
+SCROLL_DELTA_SCALE = 12.0
 
 
 class CcpnGLWidget(QOpenGLWidget):
@@ -232,6 +236,53 @@ class CcpnGLWidget(QOpenGLWidget):
         self.GLSignals = GLNotifier(parent=self, strip=strip)
 
         self.lastPixelRatio = None
+
+        # Tell the window that we accept touch events.
+        self.setAttribute(Qt.WA_AcceptTouchEvents, True)
+        self.setAttribute(Qt.WA_TouchPadAcceptSingleTouchEvents, True)
+        # Install an event filter to filter the touch events.
+        self.installEventFilter(self)
+
+        self._touches = {QtCore.QEvent.TouchBegin     : 'Begin',
+                         QtCore.QEvent.TouchEnd       : 'End',
+                         QtCore.QEvent.TouchCancel    : 'Cancel',
+                         QtCore.QEvent.TouchUpdate    : 'Update',
+                         }
+        self._touching = False
+
+    #     self._lastScrollDirection = []
+    #     self._lastHistory = []
+    #
+    #     self._touchTimer = QtCore.QTimer(self)
+    #     self._touchTimer.timeout.connect(self._touchUpdate)
+    #     self._touchTimer.start(50)
+    #
+    # def _touchUpdate(self):
+    #     """Remove the head from the scroll directions list
+    #     """
+    #     if self._lastScrollDirection:
+    #         # remove the oldest item
+    #         self._lastScrollDirection.pop(0)
+    #         print(f'pop {self._lastScrollDirection}')
+    #     # else:
+    #     #     # make sure that it always reverts to wheel-scrolling
+    #     #     self._touching = False
+
+    def eventFilter(self, obj, event):
+        """Event filter to handle touch events for touchpad scrolling.
+        Prevent strange behaviour when mixed with wheel-scrolling.
+        """
+        if event.type() in [QtCore.QEvent.TouchBegin, QtCore.QEvent.TouchUpdate]:
+            self._touching = True
+            return True
+        elif event.type() in [QtCore.QEvent.TouchEnd, QtCore.QEvent.TouchCancel]:
+            # cancel touch-mode and clear the scroll queue
+            self._touching = False
+            # self._lastScrollDirection = []
+            # self._lastHistory = []
+            return True
+
+        return super().eventFilter(obj, event)
 
     def _initialiseAll(self):
         """Initialise all attributes for the display
@@ -793,7 +844,7 @@ class CcpnGLWidget(QOpenGLWidget):
     def wheelEvent(self, event):
 
         if self.strip and not self._ordering:  # strip.spectrumViews:
-            event.accept()
+            # event.accept()
             return
 
         # check the movement of the wheel first
@@ -802,11 +853,62 @@ class CcpnGLWidget(QOpenGLWidget):
         # get the keyboard state
         keyModifiers = QApplication.keyboardModifiers()
 
-        zoomScale = 8.0
-        scrollDirection = event.angleDelta().x()
-        if scrollDirection == 0:
-            scrollDirection = event.angleDelta().y()
+        # read the deltas from wheel/touchpad
+        pixDelta = event.pixelDelta()
+        angDelta = event.angleDelta()
 
+        if not pixDelta.isNull():  # not for Windows?
+            x, y = pixDelta.x(), pixDelta.y()
+        elif not angDelta.isNull():
+            x, y = angDelta.x() / SCROLL_DELTA_SCALE, angDelta.y() / SCROLL_DELTA_SCALE
+        else:
+            event.ignore()
+            return
+
+        scrollDirection = x if abs(x) > abs(y) else y
+        zoomScale = min(abs(scrollDirection), SCROLL_DELTA_LIMIT)
+
+        # if self._touching is False:
+        #     # scrolling with the mouse wheel
+        #     zoomScale = min(abs(scrollDirection), 12.0)
+        #
+        # else:
+        #     zoomScale = min(abs(scrollDirection), 12.0)
+
+            # # # scrolling with the touchpad
+            # # if abs(scrollDirection) > 2:
+            # #     if not self._lastScrollDirection or scrollDirection * self._lastScrollDirection[-1] > 0:
+            # #         # keep a history of the last few moves (for smoothing)
+            # #         self._lastScrollDirection.append(scrollDirection)
+            # #     if len(self._lastScrollDirection) > 2:
+            # #         self._lastScrollDirection.pop(0)
+            #
+            # # if abs(scrollDirection) > 2:
+            # #     # keep a history of the last few moves (for smoothing)
+            # #     if not self._lastScrollDirection:
+            # #         self._lastScrollDirection.append(scrollDirection)
+            # #
+            # #     else:
+            # #         _minus = len([pp for pp in self._lastHistory if pp < 0])
+            # #         _plus = len([pp for pp in self._lastHistory if pp > 0])
+            # #         # _mean = sum(self._lastScrollDirection) / len(self._lastScrollDirection)
+            # #         # if _mean * scrollDirection > 0:
+            # #         #     self._lastScrollDirection.append(scrollDirection)
+            # #
+            # #         if (_plus > _minus and scrollDirection > 0) or (_plus < _minus and scrollDirection < 0):
+            # #             self._lastScrollDirection.append(scrollDirection)
+            # #
+            # #     if len(self._lastScrollDirection) > 3:
+            # #         self._lastScrollDirection.pop(0)
+            #
+            # self._lastScrollDirection = [scrollDirection]
+            # if not self._lastScrollDirection:
+            #     return
+            #
+            # # scrollDirection = sum(self._lastScrollDirection) / len(self._lastScrollDirection)
+            # zoomScale = min(abs(scrollDirection), 12.0)
+
+        # print(f'scrolldirection {pixDelta.x()},{pixDelta.y()}   {angDelta.x()},{angDelta.y()}              {self._touching}   {scrollDirection}      {zoomScale}')  # , end='\r')
         if (keyModifiers & (Qt.ShiftModifier | Qt.ControlModifier)):
 
             # process wheel with buttons here
@@ -826,13 +928,13 @@ class CcpnGLWidget(QOpenGLWidget):
                     # pass the event to the correct double spinbox
                     pT[activePlaneAxis - 2].scrollPpmPosition(event)
 
-            event.accept()
+            # event.accept()
             return
 
         # test whether the limits have been reached in either axis
         if (scrollDirection > 0 and self._minReached and self._aspectRatioMode) or \
                 (scrollDirection < 0 and self._maxReached and self._aspectRatioMode):
-            event.accept()
+            # event.accept()
             return
 
         zoomIn = (100.0 + zoomScale) / 100.0
@@ -872,7 +974,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             if (scrollDirection > 0 and self._minReached) or \
                     (scrollDirection < 0 and self._maxReached):
-                event.accept()
+                # event.accept()
                 return
 
             if zoomCentre == 0:  # centre on mouse
@@ -911,7 +1013,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # check the X limits
             if (scrollDirection > 0 and self._minXReached) or (scrollDirection < 0 and self._maxXReached):
-                event.accept()
+                # event.accept()
                 return
 
             if zoomCentre == 0:  # centre on mouse
@@ -954,7 +1056,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
             # check the Y limits
             if (scrollDirection > 0 and self._minYReached) or (scrollDirection < 0 and self._maxYReached):
-                event.accept()
+                # event.accept()
                 return
 
             if zoomCentre == 0:  # centre on mouse
@@ -991,7 +1093,7 @@ class CcpnGLWidget(QOpenGLWidget):
 
                 self._storeZoomHistory()
 
-        event.accept()
+        # event.accept()
 
     def emitAllAxesChanged(self, allStrips=False):
         """Signal all strips in the spectrumDisplay to refresh
@@ -5665,7 +5767,6 @@ class CcpnGLWidget(QOpenGLWidget):
             mouseMovedDict = aDict[GLNotifier.GLMOUSEMOVEDDICT]
 
             if self._crosshairVisible:
-
                 exactMatch = (self._preferences.matchAxisCode == AXIS_FULLATOMNAME)
                 # indices = getAxisCodeMatchIndices(self._axisCodes[:2], mouseMovedDict[AXIS_ACTIVEAXES], exactMatch=exactMatch)
                 #
@@ -6424,7 +6525,7 @@ class CcpnGLWidget(QOpenGLWidget):
             self._resetBoxes()
             selectedRegion = [tuple([round(self._startCoordinate[0], 3), round(self._endCoordinate[0], 3)]),
                               tuple([round(self._startCoordinate[1], 3), round(self._endCoordinate[1], 3)])
-                             ]
+                              ]
 
             if self._validRegionPick:
 

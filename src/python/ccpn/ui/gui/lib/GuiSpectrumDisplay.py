@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-08 19:57:26 +0100 (Wed, June 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-08 20:04:28 +0100 (Wed, June 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -536,11 +536,11 @@ class GuiSpectrumDisplay(CcpnModule):
                                                        SpectrumGroup.className,
                                                        self._spectrumGroupChanged,
                                                        onceOnly=True)
-        self._currentPeakNotifier = self.setNotifier(self.current,
-                                  [Notifier.CURRENT],
-                                  targetName=Peak._currentAttributeName,
-                                  callback=self._onCurrentPeak,
-                                  onceOnly=True),
+        # self._currentPeakNotifier = self.setNotifier(self.current,
+        #                           [Notifier.CURRENT],
+        #                           targetName=Peak._currentAttributeName,
+        #                           callback=self._onCurrentPeak,
+        #                           onceOnly=True)
 
     def _setFloatingAxes(self, xUnits, yUnits, aspectRatioMode, aspectRatios):
         """Set the aspectRatio and units for the floating axes
@@ -657,12 +657,12 @@ class GuiSpectrumDisplay(CcpnModule):
             if spectrumView in self.spectrumViews:
                 _spectrumViewHasChanged({Notifier.OBJECT: spectrumView})
 
-    def _onCurrentPeak(self, data,):
-        """Set current spectra on selected peaks. """
-        spectra = set()
-        for peak in self.current.peaks:
-            spectra.add(peak.spectrum)
-        self.current.spectra = tuple(spectra)
+    # def _onCurrentPeak(self, data,):
+    #     """Set current spectra on selected peaks. """
+    #     spectra = set()
+    #     for peak in self.current.peaks:
+    #         spectra.add(peak.spectrum)
+    #     self.current.spectra = tuple(spectra)
 
 
     def _spectrumGroupChanged(self, data):

@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-08 15:01:23 +0100 (Wed, June 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-08 15:26:58 +0100 (Wed, June 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2473,12 +2473,14 @@ class CcpnGLWidget(QOpenGLWidget):
             with undoBlockWithoutSideBar():
                 for spectrum in self.current.spectra:
                     if spectrum.dimensionCount == 1:
-                        shift = moveDict.get(key)[0]
                         if key in [QtCore.Qt.Key_Left, QtCore.Qt.Key_Right]:
+                            shift = moveDict.get(key)[0]
                             spectrum.referenceValues = [spectrum.referenceValues[0] + shift]
                             spectrum.positions = np.array(spectrum.positions) + shift
                         if key in [QtCore.Qt.Key_Up, QtCore.Qt.Key_Down]:
-                            spectrum.intensities = spectrum.intensities + shift
+                            offset =  moveDict.get(key)[1]
+                            # need to check the peak position/height
+                            spectrum.intensities = spectrum.intensities + offset
                     else:
                         getLogger().warning('This option is not yet available for nD spectra')
 

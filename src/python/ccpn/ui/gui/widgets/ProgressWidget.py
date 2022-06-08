@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-07 18:53:28 +0100 (Tue, June 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-08 20:14:31 +0100 (Wed, June 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,7 @@ __date__ = "$Date: 2022-04-11 21:54:44 +0100 (Mon, April 11, 2022) $"
 #=========================================================================================
 
 from tqdm import tqdm
+from time import sleep, perf_counter
 from PyQt5 import QtWidgets, QtCore
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Label import Label
@@ -34,15 +35,17 @@ from ccpn.ui.gui.widgets.Label import Label
 
 class ProgressDialog(QtWidgets.QProgressDialog):
 
-    def __init__(self, parent, title='Progress Dialog', text='busy...', minimum=0, maximum=100, delay=1000):
+    def __init__(self, parent, title='Progress Dialog', text='busy...', minimum=0, maximum=100,
+                 delay=1000, closeDelay=500, autoClose=True):
         super().__init__(parent=parent)
 
         self.setWindowTitle(title)
         self.setText(text)
         self.setRange(minimum, maximum)
-        self.setAutoReset(True)
-        self.setAutoClose(True)
+        self.setAutoReset(autoClose)
+        self.setAutoClose(autoClose)
         self.setMinimumDuration(delay)
+        self._closeDelay = closeDelay / 1000 if isinstance(closeDelay, (int, float)) else 0
 
         # give full control to the dialog
         self.setWindowModality(QtCore.Qt.ApplicationModal)
@@ -76,7 +79,27 @@ class ProgressDialog(QtWidgets.QProgressDialog):
         self.setValue(int(value))
 
     def finalise(self):
+        """Set the progress to 100%
+        """
         self.setValue(self.maximum())
+
+    def waitForEvents(self):
+        """Process events and sleep if visible (to stop quick popup)
+        """
+        sTime = perf_counter()
+
+        # wait for threads to complete
+        _threads = QtCore.QThreadPool.globalInstance()
+        _threads.waitForDone()
+
+        # process any remaining events
+        QtWidgets.QApplication.processEvents()
+
+        # pause so that the counter doesn't flicker if too quick
+        eTime = perf_counter() - sTime
+        if (eTime < self._closeDelay) and self.isVisible():
+            sleep(self._closeDelay)
+
         self.close()
 
 
@@ -113,9 +136,12 @@ class ProgressWidget(QtWidgets.QProgressBar, Base):
 
 class ProgressTextBar(tqdm):
 
-    def __init__(self, parent, title='Progress Dialog', text='busy...', minimum=0, maximum=100, delay=2000):
-        super().__init__(initial=minimum, total=maximum-minimum, delay=delay / 1000,
-                         ncols=120, miniters=(maximum-minimum) / 100)
+    def __init__(self, parent, title='Progress Dialog', text='busy...', minimum=0, maximum=100, delay=1000, closeDelay=500, autoClose=True):
+        super().__init__(initial=minimum, total=maximum - minimum, delay=delay / 1000,
+                         ncols=120, miniters=(maximum - minimum) / 100)
+        # for compatibility with ProgressDialog above - perform no operation
+        self._closeDelay = closeDelay
+        self._autoClose = autoClose
 
     def setText(self, text):
         self.set_description(text)
@@ -155,7 +181,13 @@ class ProgressTextBar(tqdm):
         return False
 
     def finalise(self):
+        """Set the progress to 100%
+        """
         self.setValue(self.total + self.initial)
+
+    def waitForEvents(self):
+        """Process events and sleep if visible (to stop quick popup)
+        """
         self.close()
 
 
@@ -187,7 +219,6 @@ def main():
 
     from ccpn.ui.gui.widgets.Application import newTestApplication
     from ccpn.framework.Application import getApplication
-    from ccpn.core.lib.ContextManagers import progressManager
 
     # create a new test application
     app = newTestApplication(interface='Gui')

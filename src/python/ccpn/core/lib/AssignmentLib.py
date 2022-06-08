@@ -1199,7 +1199,7 @@ def _assignNmrResiduesToPeaks(peaks, nmrResidues):
 
 
 def _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments):
-    from ccpn.core.lib.ContextManagers import progressManager
+    from ccpn.core.lib.ContextManagers import progressHandler
     from ccpn.core.lib.ContextManagers import undoBlockWithSideBar as undoBlock
 
     # go through all the peaks in the peakList
@@ -1211,7 +1211,7 @@ def _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments):
         pDiv = (count // 100) + 1  #10 if count > 100 else 1
         totalCopies = int(count / pDiv)
 
-        with progressManager(text='Setup NmrResidues...', maximum=totalCopies, delay=0) as progress:
+        with progressHandler(text='Set up NmrResidues...', maximum=totalCopies, autoClose=False) as progress:
 
             with undoBlock():
                 try:
@@ -1224,7 +1224,7 @@ def _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments):
                             break
 
                         if cc % pDiv == 0:
-                            # update the progress-bar
+                            # update the progress-bar - 100 steps at the most
                             progress.setValue(int(cc / pDiv))
 
                         # only process those that are empty OR those not empty when checkbox cleared
@@ -1237,6 +1237,7 @@ def _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments):
                                 nmrAtom = nmrResidue.fetchNmrAtom(name=str(axis), isotopeCode=isotope)
                                 peak.assignDimension(axisCode=axis, value=[nmrAtom])
 
+                    # set the progress to 100%
                     progress.finalise()
 
                 except Exception as es:
@@ -1245,5 +1246,5 @@ def _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments):
                     pass
 
                 finally:
-                    # set closing conditions here
-                    pass
+                    # set closing conditions here, or call progress.close() if autoClose not set
+                    progress.waitForEvents()

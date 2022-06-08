@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-07 19:13:35 +0100 (Tue, June 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-08 20:14:31 +0100 (Wed, June 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -30,21 +30,23 @@ import tqdm
 from time import sleep
 from ccpn.ui.gui.widgets.Application import newTestApplication
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
-from ccpn.core.lib.ContextManagers import progressManager
+from ccpn.core.lib.ContextManagers import progressHandler
 from ccpn.framework.Application import getApplication
 
 
 def showTestProgressDialog():
     """Show a test dialog for a few seconds
     """
-    start, end = 40, 99
-    with progressManager(minimum=start, maximum=end, delay=2000) as progress:
+    from time import sleep
+
+    start, end = 40, 56
+    with progressHandler(minimum=start, maximum=end, autoClose=False) as progress:
 
         # set extra progress-dialog settings here
         progress.setText('counting')
 
         try:
-            for cc in range(start, end):
+            for cc in range(start, end + 1):
                 if progress.wasCanceled():
                     break
 
@@ -55,9 +57,8 @@ def showTestProgressDialog():
                 progress.setValue(cc)
                 progress.setText(f'counting {cc}%')
 
+            # set counter to 100%
             progress.finalise()
-            # progress.setValue(end)
-            # progress.close()
 
         except Exception as es:
             print(f'{es}')
@@ -65,23 +66,28 @@ def showTestProgressDialog():
             print(f'okay')
 
         finally:
-            # set closing conditions here
-            pass
+            # set closing conditions here, or call progress.close() if autoClose not set
+            progress.waitForEvents()
+
+    print(f'nearly')
 
 
 def main():
-    gui = True
+    gui = False
 
     # create a new test application
     _app = newTestApplication(interface='Gui' if gui else 'NoUi')
     app = getApplication()
 
     if app.hasGui:
+        # show a waiting popup otherwise the progress may finish before you see it
         app.ui.mainWindow.show()
         showWarning('progress bar', 'Waiting...')
 
     # show progress dialog
     showTestProgressDialog()
+
+    print(f'end')
 
 
 if __name__ == '__main__':

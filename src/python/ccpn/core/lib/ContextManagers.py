@@ -1091,25 +1091,22 @@ def renameObjectNoBlanking(self):
 
 
 @contextmanager
-def progressManager(text='busy...', minimum=0, maximum=100, delay=1000):
+def progressHandler(text='busy...', minimum=0, maximum=100, delay=1000, closeDelay=500, autoClose=True):
     """A context manager to wrap a method in a progress dialog defined by the current gui state.
     """
     from ccpn.framework.Application import getApplication
-    from time import sleep
 
     application = getApplication()
     mainWindow = application.ui.mainWindow
 
-    progressHandler = application.ui.getProgressHandler()
-
-    # handle QThreads here to check whether they have all finished and close the dialog?
-    _threads = QtCore.QThreadPool.globalInstance()
+    handler = application.ui.getProgressHandler()
 
     try:
         # get the dialog handler from the gui state - use subclass
-        progress = progressHandler(mainWindow, text=text,
-                                   minimum=minimum, maximum=maximum,
-                                   delay=delay)
+        progress = handler(mainWindow, text=text,
+                           minimum=minimum, maximum=maximum,
+                           delay=delay, closeDelay=closeDelay,
+                           autoClose=autoClose)
 
         # transfer control to the calling function
         yield progress
@@ -1117,15 +1114,6 @@ def progressManager(text='busy...', minimum=0, maximum=100, delay=1000):
     except Exception as es:
         if isinstance(es, RuntimeError):
             raise es
-
-    finally:
-        # wait for 1 second before closing the dialog - small pause to stop it flickering
-        sleep(1)
-
-    getLogger().debug2(f'threads - {_threads.activeThreadCount()}')
-    # wait for threads to complete
-    _threads.waitForDone()
-    QtWidgets.QApplication.processEvents()
 
 
 class BlankedPartial(object):

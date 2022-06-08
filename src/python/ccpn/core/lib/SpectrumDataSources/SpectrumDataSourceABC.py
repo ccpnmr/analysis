@@ -92,8 +92,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-06-07 17:29:57 +0100 (Tue, June 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-06-08 14:05:36 +0100 (Wed, June 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -341,10 +341,10 @@ class SpectrumDataSourceABC(CcpNmrJson):
             hasSetterInSpectrumClass=True
             )
     _tmp = [False] * MAXDIM; _tmp[0] = True
-    isAquisition = CList(trait=CBool(), default_value=_tmp, maxlen=MAXDIM).tag(
+    isAcquisition = CList(trait=CBool(), default_value=_tmp, maxlen=MAXDIM).tag(
             isDimensional=True,
             doCopy=True,
-            spectrumAttribute='isAquisition',
+            spectrumAttribute='isAcquisition',
             hasSetterInSpectrumClass=True
             )
     isotopeCodes = CList(trait=CString(allow_none=True), default_value=[None] * MAXDIM, maxlen=MAXDIM).tag(

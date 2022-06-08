@@ -50,8 +50,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-06-07 17:29:57 +0100 (Tue, June 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-06-08 14:05:36 +0100 (Wed, June 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -819,16 +819,16 @@ class Spectrum(AbstractWrapperObject):
 
     @property
     @_includeInDimensionalCopy
-    def isAquisition(self) -> List[bool]:
-        """Boolean per dimension denoting if it is the aquisition dimension"""
+    def isAcquisition(self) -> List[bool]:
+        """Boolean per dimension denoting if it is the acquisition dimension"""
         return self._getDimensionalAttributes('isAcquisition')
 
-    @isAquisition.setter
+    @isAcquisition.setter
     @checkSpectrumPropertyValue(iterable=True, types=(bool, int, float))
-    def isAquisition(self, value: Sequence):
+    def isAcquisition(self, value: Sequence):
         trues = [val for val in value if val == True]
         if len(trues) > 1:
-            raise ValueError('Spectrum.isAquisition: expected zero or one dimension; got %r' % value)
+            raise ValueError('Spectrum.isAcquisition: expected zero or one dimension; got %r' % value)
         self._setDimensionalAttributes('isAcquisition', value)
 
     @property
@@ -845,14 +845,14 @@ class Spectrum(AbstractWrapperObject):
     @property
     def acquisitionAxisCode(self) -> Optional[str]:
         """Axis code of acquisition axis - None if not known"""
-        trues = [idx for idx, val in enumerate(self.isAquisition) if val == True]
+        trues = [idx for idx, val in enumerate(self.isAcquisition) if val == True]
         if len(trues) == 0:
             return None
         elif len(trues) == 1:
             return self.axisCodes[trues[0]]
         else:
             raise RuntimeError(
-                    'Spectrum.aquisitionAxisCode: this should not happen; more then one dimension defined as acquisition dimension')
+                    'Spectrum.acquisitionAxisCode: this should not happen; more then one dimension defined as acquisition dimension')
 
     @property
     def dimensionTypes(self) -> List[Optional[str]]:

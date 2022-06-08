@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-08 19:57:26 +0100 (Wed, June 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-08 20:09:36 +0100 (Wed, June 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -6162,7 +6162,6 @@ class CcpnGLWidget(QOpenGLWidget):
             # Left-click; select peak/integral/multiplet, deselecting others
             event.accept()
             self._resetBoxes()
-            self.current.clearSpectra()
             self.current.clearPeaks()
             self.current.clearIntegrals()
             self.current.clearMultiplets()

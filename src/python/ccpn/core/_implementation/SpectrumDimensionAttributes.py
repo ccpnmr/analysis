@@ -317,6 +317,8 @@ class SpectrumDimensionAttributes(object):
             raise ValueError('coherenceOrder should be one of %r or None; got %r' % (cohOrders, value))
         self._setInternalParameter('coherenceOrder', value if value is None else cohOrders.index(value))
 
+    mqIsotopecodes = _isotopeCodes
+
     @property
     def foldingMode(self) -> Optional[str]:
         """folding mode matching reference (values: 'circular', 'mirror', None)"""

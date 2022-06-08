@@ -26,7 +26,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 __modifiedBy__ = "$Author: Luca Mureddu $"
 __dateModified__ = "$Date: 2021-06-23 17:58:44 +0000 (Wed, June 23, 2021) $"
 __modifiedBy__ = "$modifiedBy: Geerten Vuister $"
-__dateModified__ = "$dateModified: 2022-03-07 22:03:13 +0000 (Mon, March 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-07 17:27:29 +0100 (Tue, June 07, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -85,7 +85,7 @@ from ccpn.core.Collection import Collection
 from ccpn.ui._implementation.Window import Window
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 from ccpn.ui._implementation.Strip import Strip
-from ccpn.ui._implementation.Axis import Axis
+# from ccpn.ui._implementation.Axis import Axis
 from ccpn.ui._implementation.Mark import Mark
 from ccpn.ui._implementation.SpectrumView import SpectrumView
 from ccpn.ui._implementation.MultipletListView import MultipletListView

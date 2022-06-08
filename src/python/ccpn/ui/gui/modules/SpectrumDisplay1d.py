@@ -4,19 +4,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-23 17:50:23 +0000 (Thu, December 23, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-06-08 15:01:23 +0100 (Wed, June 08, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -32,6 +32,7 @@ from ccpn.ui.gui.lib.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumDisplayPropertiesPopup1d
 from ccpn.util.Logging import getLogger
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 
 
 class SpectrumDisplay1d(GuiSpectrumDisplay):
@@ -114,6 +115,32 @@ class SpectrumDisplay1d(GuiSpectrumDisplay):
         """
         # Currently not implemented
         pass
+
+    def increaseSpectrumScale(self):
+        """
+        Increases  Spectrum Scale for current spectra.
+        """
+
+        step = 0.01
+        with undoBlockWithoutSideBar():
+            for spectrumView in self.spectrumViews:
+                if spectrumView.isDisplayed:
+                    spectrum = spectrumView.spectrum
+                    if spectrum in self.current.spectra:
+                        spectrum.scale += step
+
+    def decreaseSpectrumScale(self):
+        """
+        Decreases Spectrum Scale for current spectra.
+        """
+        # Currently not implemented
+        step = 0.01
+        with undoBlockWithoutSideBar():
+            for spectrumView in self.spectrumViews:
+                if spectrumView.isDisplayed:
+                    spectrum = spectrumView.spectrum
+                    if spectrum in self.current.spectra:
+                        spectrum.scale -= step
 
     def setVisibleAxes(self):
         # skip for 1D for the minute

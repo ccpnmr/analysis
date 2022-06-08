@@ -55,8 +55,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-07 12:17:39 +0100 (Tue, June 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-06-08 15:01:23 +0100 (Wed, June 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -845,7 +845,7 @@ class CcpnGLWidget(QOpenGLWidget):
         scrollDirection = x if abs(x) > abs(y) else y
         zoomScale = min(abs(scrollDirection), SCROLL_DELTA_LIMIT)
 
-        if (keyModifiers & (Qt.ShiftModifier | Qt.ControlModifier)):
+        if (keyModifiers & (Qt.ShiftModifier | Qt.ControlModifier | Qt.AltModifier)):
 
             # process wheel with buttons here
             # transfer event to the correct widget for changing the plane OR raising base contour level...
@@ -863,6 +863,12 @@ class CcpnGLWidget(QOpenGLWidget):
                 if pT and activePlaneAxis is not None and (activePlaneAxis - 2) < len(pT):
                     # pass the event to the correct double spinbox
                     pT[activePlaneAxis - 2].scrollPpmPosition(event)
+
+            elif (keyModifiers & Qt.AltModifier):
+                if scrollDirection > 0:
+                    self.strip.spectrumDisplay.increaseSpectrumScale()
+                else:
+                    self.strip.spectrumDisplay.decreaseSpectrumScale()
 
             return
 
@@ -2450,21 +2456,55 @@ class CcpnGLWidget(QOpenGLWidget):
                 for peak in self.current.peaks:
                     self._movePeak(peak, moveDict.get(key))
 
-    def _singleKeyAction(self, key, isShift):
+    def _referenceSpectrumFromGLKeys(self, key):
+
+        if len(self.current.spectra) < 1:
+            return
+        # move by 5 pixels
+        moveFactor = 5
+        moveDict = {
+            QtCore.Qt.Key_Left : (-self.pixelX * moveFactor, 0),
+            QtCore.Qt.Key_Right: (self.pixelX * moveFactor, 0),
+            QtCore.Qt.Key_Up   : (0, self.pixelY * moveFactor),
+            QtCore.Qt.Key_Down : (0, -self.pixelY * moveFactor)
+            }
+
+        if key in moveDict:
+            with undoBlockWithoutSideBar():
+                for spectrum in self.current.spectra:
+                    if spectrum.dimensionCount == 1:
+                        shift = moveDict.get(key)[0]
+                        if key in [QtCore.Qt.Key_Left, QtCore.Qt.Key_Right]:
+                            spectrum.referenceValues = [spectrum.referenceValues[0] + shift]
+                            spectrum.positions = np.array(spectrum.positions) + shift
+                        if key in [QtCore.Qt.Key_Up, QtCore.Qt.Key_Down]:
+                            spectrum.intensities = spectrum.intensities + shift
+                    else:
+                        getLogger().warning('This option is not yet available for nD spectra')
+
+
+    def _singleKeyAction(self, key, isShift, isOption=False):
         """
         :return: Actions for single key press. If current peaks, moves the peaks when using
         directional arrow otherwise pans the spectrum.
         """
+        if isOption:
+            self._referenceSpectrumFromGLKeys(key)
+            return
+
         if not isShift:
             self._panGLSpectrum(key)
 
         if isShift:
             self._movePeakFromGLKeys(key)
 
+
     def _KeyModifiersAction(self, key):
         keyModifiers = QApplication.keyboardModifiers()
         if keyModifiers & (Qt.MetaModifier | Qt.ControlModifier) and key == Qt.Key_A:
             self.mainWindow.selectAllPeaks(self.strip)
+        # elif keyModifiers & (Qt.MetaModifier | Qt.AltModifier) and key == Qt.Key_Left:
+        #     print('@@@ Left')
 
     def glKeyPressEvent(self, aDict):
         """Process the key events from GLsignals
@@ -2483,8 +2523,11 @@ class CcpnGLWidget(QOpenGLWidget):
             _key = event.key()
             keyModifiers = QApplication.keyboardModifiers()
 
+            isShift = True if (keyModifiers & Qt.ShiftModifier) else False
+            isOption = True if (keyModifiers & Qt.AltModifier) else False
+
             if self.strip == self.current.strip:
-                self._singleKeyAction(_key, True if (keyModifiers & Qt.ShiftModifier) else False)
+                self._singleKeyAction(_key, isShift=isShift, isOption=isOption)
                 self._KeyModifiersAction(_key)
 
             elif not self._preferences.currentStripFollowsMouse:
@@ -5937,6 +5980,12 @@ class CcpnGLWidget(QOpenGLWidget):
         newPeaks = self._mouseInPeak(xPosition, yPosition)
 
         self.current.peaks = list(peaks ^ set(newPeaks))  # symmetric difference
+        spectra = set()
+        for peak in self.current.peaks:
+            spectra.add(peak.spectrum)
+        self.current.spectra = tuple(spectra)
+
+
 
     def _selectIntegral(self, xPosition, yPosition):
         """(de-)Select first integral near cursor xPosition, yPosition
@@ -6115,6 +6164,7 @@ class CcpnGLWidget(QOpenGLWidget):
             # Left-click; select peak/integral/multiplet, deselecting others
             event.accept()
             self._resetBoxes()
+            self.current.clearSpectra()
             self.current.clearPeaks()
             self.current.clearIntegrals()
             self.current.clearMultiplets()

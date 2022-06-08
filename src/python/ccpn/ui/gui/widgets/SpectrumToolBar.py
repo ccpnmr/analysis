@@ -4,19 +4,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-23 17:50:23 +0000 (Thu, December 23, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-06-08 19:57:27 +0100 (Wed, June 08, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -39,6 +39,7 @@ from ccpn.ui._implementation.PeakListView import PeakListView
 from ccpn.ui._implementation.IntegralListView import IntegralListView
 from ccpn.ui._implementation.MultipletListView import MultipletListView
 from ccpn.core.PeakList import PeakList
+from ccpn.core.Spectrum import Spectrum
 from ccpn.core.IntegralList import IntegralList
 from ccpn.core.MultipletList import MultipletList
 from ccpn.ui.gui.lib.GuiSpectrumView import _spectrumViewHasChanged
@@ -46,6 +47,10 @@ from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpn.core.lib import Pid
 from ccpn.ui.gui.lib.GuiStripContextMenus import _SCMitem, ItemTypes, ITEM, _addMenuItems, _createMenu, _separator
 from ccpn.util import Colour
+from ccpn.framework.Application import getApplication, getCurrent, getProject
+from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXFOREGROUND, CCPNGLWIDGET_HEXBACKGROUND, CCPNGLWIDGET_HEXHIGHLIGHT, \
+    getColours, BORDERNOFOCUS_COLOUR
+
 
 
 class SpectrumToolBar(ToolBar):
@@ -59,8 +64,39 @@ class SpectrumToolBar(ToolBar):
 
         self.setMouseTracking(True)
         self._spectrumToolBarBlockingLevel = 0
-
+        self.project = getProject()
+        self.current = getCurrent()
         self._firstButton = 0
+        self._currentSpectrumNotifier = Notifier(self.current,
+                                  [Notifier.CURRENT],
+                                  targetName=Spectrum._pluralLinkName,
+                                  callback=self._onCurrentSpectrumNotifier,
+                                  onceOnly=True),
+
+        self.actionCurrentSpectrumStyleSheet = ("\
+                                    QToolButton {   \
+                                        border:0.5px solid %s;    \
+                                        border-radius: 3px; \
+                                        padding: 0px; \
+                                                }   \
+                                    QToolButton:checked{\
+                                        background-color: lightGray;\
+                                    }\
+                                      \
+                                     ")
+        self.actionDefaultStyleSheet =  ("\
+                                    QToolButton {   \
+                                        border:0.5px solid darkGray\
+                                        border-radius: 3px; \
+                                        padding: 0px; \
+                                    }   \
+                                    QToolButton:checked{\
+                                        background-color: lightGray;\
+                                    }\
+                                    \
+                                    ")
+        self._setButtonColourScheme()
+
 
     @property
     def isBlocked(self):
@@ -203,8 +239,15 @@ class SpectrumToolBar(ToolBar):
 
         self._addSubMenusToContext(contextMenu, button)
         contextMenu.addSeparator()
+        isSpectrumInCurrent = self._isSpectrumInCurrent(button)
 
-        menuItems = [_SCMitem(name='Jump on SideBar',
+        menuItems = [
+                    _SCMitem(name='Current',
+                     typeItem=ItemTypes.get(ITEM),
+                     callback=partial(self._setSpectrumAsCurrent, button),
+                     checkable = True,
+                     checked = isSpectrumInCurrent,),
+                    _SCMitem(name='Jump on SideBar',
                               typeItem=ItemTypes.get(ITEM), icon='icons/null',
                               callback=partial(self._jumpOnSideBar, button)),
                      _SCMitem(name='Properties...',
@@ -218,6 +261,23 @@ class SpectrumToolBar(ToolBar):
         _addMenuItems(self.widget, contextMenu, menuItems)
 
         return contextMenu
+
+    def _isSpectrumInCurrent(self, button):
+        spectrum = self.widget.project.getByPid(button.actions()[0].objectName())
+        if spectrum:
+            if spectrum in self.current.spectra:
+                return True
+        return False
+
+    def _setSpectrumAsCurrent(self, button):
+        action = button.actions()[0]
+        spectrum = self.widget.project.getByPid(action.objectName())
+        if spectrum:
+            if spectrum in self.current.spectra:
+                self.current.removeSpectrum(spectrum)
+            else:
+                self.current.addSpectrum(spectrum)
+            self._setButtonColourScheme()
 
     def _jumpOnSideBar(self, button):
         spectrum = self.widget.project.getByPid(button.actions()[0].objectName())
@@ -443,6 +503,7 @@ class SpectrumToolBar(ToolBar):
 
         action.toggled.connect(partial(self._toggleSpectrumViews, spectrum, action))
         setWidgetFont(action, size='SMALL')
+        self._setButtonColourScheme()
 
     def _toggleSpectrumViews(self, spectrum, action, state):
         """Toggle visibility of spectrumViews attached to this spectrum in the same spectrumDisplay
@@ -581,3 +642,20 @@ class SpectrumToolBar(ToolBar):
             pix.fill(QtGui.QColor('gray'))
 
         action.setIcon(QtGui.QIcon(pix))
+
+    def _setButtonColourScheme(self):
+
+        hc = getColours()[CCPNGLWIDGET_HEXHIGHLIGHT]
+        actionCurrentSpectrumStyleSheet = self.actionCurrentSpectrumStyleSheet % hc
+        for action in self.actions():
+            widget = self.widgetForAction(action)
+            spectrumView = self.project.getByPid(action.spectrumViewPid)
+            if spectrumView is not None:
+                spectrum = spectrumView.spectrum
+                if spectrum in self.current.spectra:
+                    widget.setStyleSheet(actionCurrentSpectrumStyleSheet)
+                else:
+                    widget.setStyleSheet(self.actionDefaultStyleSheet)
+
+    def _onCurrentSpectrumNotifier(self, data):
+        self._setButtonColourScheme()

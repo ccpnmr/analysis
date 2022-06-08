@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-08 15:01:23 +0100 (Wed, June 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-08 19:57:26 +0100 (Wed, June 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -178,18 +178,6 @@ class Current:
     def project(self):
         """Project attached to current"""
         return self._project
-
-    @property
-    def spectrum(self):
-        if self.peak:
-            return self.peak.spectrum
-
-    @property
-    def spectra(self):
-        spectra = []
-        for peak in self.peaks:
-            spectra.append(peak.spectrum)
-        return spectra
 
     def registerNotify(self, notify, field):
         """Register notifier function 'notify' to be called on field 'field'

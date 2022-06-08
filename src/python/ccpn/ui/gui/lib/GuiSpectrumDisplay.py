@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-19 11:39:58 +0100 (Thu, May 19, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-06-08 19:57:26 +0100 (Wed, June 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -317,8 +317,9 @@ class GuiSpectrumDisplay(CcpnModule):
         axisRow = 3
         phasingRow = 4
         _spacing = 4
-        _styleSheet = 'QToolBar { spacing: 0px; padding: 0px; }' \
-                      'QToolButton { padding: 0px; }'
+        _styleSheet = 'QToolBar { spacing: 2px; padding: 0px; }'
+        # give some spacing between buttons so that can raise a general context menu for toolbar (not the actions).
+
         _iconSize = max(getFontHeight(size='VLARGE') or 30, 30)
         # TOOLBAR_HEIGHT = _iconSize + _spacing
         self.toolBarFrame = Frame(parent=self.qtParent, grid=(spectrumRow, 0), gridSpan=(1, 7), setLayout=True,
@@ -535,6 +536,11 @@ class GuiSpectrumDisplay(CcpnModule):
                                                        SpectrumGroup.className,
                                                        self._spectrumGroupChanged,
                                                        onceOnly=True)
+        self._currentPeakNotifier = self.setNotifier(self.current,
+                                  [Notifier.CURRENT],
+                                  targetName=Peak._currentAttributeName,
+                                  callback=self._onCurrentPeak,
+                                  onceOnly=True),
 
     def _setFloatingAxes(self, xUnits, yUnits, aspectRatioMode, aspectRatios):
         """Set the aspectRatio and units for the floating axes
@@ -650,6 +656,14 @@ class GuiSpectrumDisplay(CcpnModule):
         elif trigger == Notifier.CHANGE:
             if spectrumView in self.spectrumViews:
                 _spectrumViewHasChanged({Notifier.OBJECT: spectrumView})
+
+    def _onCurrentPeak(self, data,):
+        """Set current spectra on selected peaks. """
+        spectra = set()
+        for peak in self.current.peaks:
+            spectra.add(peak.spectrum)
+        self.current.spectra = tuple(spectra)
+
 
     def _spectrumGroupChanged(self, data):
         """Respond to spectrumViews being created/deleted, update contents of the spectrumWidgets frame

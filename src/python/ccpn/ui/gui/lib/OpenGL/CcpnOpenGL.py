@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-08 15:26:58 +0100 (Wed, June 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-08 19:57:26 +0100 (Wed, June 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -5982,10 +5982,6 @@ class CcpnGLWidget(QOpenGLWidget):
         newPeaks = self._mouseInPeak(xPosition, yPosition)
 
         self.current.peaks = list(peaks ^ set(newPeaks))  # symmetric difference
-        spectra = set()
-        for peak in self.current.peaks:
-            spectra.add(peak.spectrum)
-        self.current.spectra = tuple(spectra)
 
 
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-08 15:01:23 +0100 (Wed, June 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-08 22:26:12 +0100 (Wed, June 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -261,31 +261,6 @@ class SpectrumDisplayNd(GuiSpectrumDisplay):
                         # Display has custom contour count - change that one only
                         if spectrumView.negativeContourCount:
                             spectrumView.negativeContourCount -= 1
-
-    def increaseSpectrumScale(self):
-        """
-        Increases  Spectrum Scale for current spectra.
-        """
-        step = 0.01
-        with undoBlockWithoutSideBar():
-            for spectrumView in self.spectrumViews:
-                if spectrumView.isDisplayed:
-                    spectrum = spectrumView.spectrum
-                    if spectrum in self.current.spectra:
-                        spectrum.scale += step
-
-    def decreaseSpectrumScale(self):
-        """
-        Decreases Spectrum Scale for current spectra.
-        """
-        # Currently not implemented
-        step = 0.01
-        with undoBlockWithoutSideBar():
-            for spectrumView in self.spectrumViews:
-                if spectrumView.isDisplayed:
-                    spectrum = spectrumView.spectrum
-                    if spectrum in self.current.spectra:
-                        spectrum.scale -= step
 
     def updateTraces(self):
         for strip in self.strips:

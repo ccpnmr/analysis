@@ -39,6 +39,7 @@
         "zoomYLimitApply"                      : true,
         "intensityLimit"                       : 10,
         "stripWidthZoomPercent"                : 10.0,
+        "scalingFactorStep"                    : 0.01,
         "lastAxisOnly"                         : true,
         "showGrid"                             : true,
         "showCrosshair"                        : true,

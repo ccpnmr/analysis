@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: VickyAH $"
-__dateModified__ = "$dateModified: 2022-05-18 14:51:30 +0100 (Wed, May 18, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-06-08 22:26:12 +0100 (Wed, June 08, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -824,6 +824,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.showLastAxisOnlyBox.setChecked(self.preferences.general.lastAxisOnly)
         self.matchAxisCode.setIndex(self.preferences.general.matchAxisCode)
         self.axisOrderingOptions.setIndex(self.preferences.general.axisOrderingOptions)
+        self.spectrumScalingData.setValue(float(self.preferences.general.scalingFactorStep))
         self.zoomCentre.setIndex(self.preferences.general.zoomCentreType)
         self.zoomPercentData.setValue(int(self.preferences.general.zoomPercent))
         self.stripWidthZoomPercentData.setValue(int(self.preferences.general.stripWidthZoomPercent))
@@ -1058,6 +1059,17 @@ class PreferencesPopup(CcpnDialogMainWidget):
             self.aspectData[key] = ScientificDoubleSpinBox(parent, min=0.5, grid=(row, 1), hAlign='l')
             self.aspectData[key].setMinimumWidth(LineEditsMinimumWidth)
             self.aspectData[key].valueChanged.connect(partial(self._queueSetAspect, key, ii))
+
+        # ====== Scaling ======
+        row += 1
+        _makeLine(parent, grid=(row, 0), text="Scaling")
+        row += 1
+        self.spectrumScalingLabel = _makeLabel(parent, text="Single step scaling factor",
+                                               tipText= 'Set the single step for rescaling a current spectrum using the shortcuts.',
+                                               grid=(row, 0))
+        self.spectrumScalingData = ScientificDoubleSpinBox(parent, step=0.01, min=None, max=None, grid=(row, 1), hAlign='l')
+        self.spectrumScalingData.setMinimumWidth(LineEditsMinimumWidth)
+        self.spectrumScalingData.valueChanged.connect(self._queueSetSpectrumScaling)
 
         #====== Zooming ======
         row += 1
@@ -1966,6 +1978,17 @@ class PreferencesPopup(CcpnDialogMainWidget):
         prefValue = textFromValue(self.preferences.general.zoomPercent)
         if value >= 0 and textFromValue(value) != prefValue:
             return partial(self._setZoomPercent, value)
+
+
+    @queueStateChange(_verifyPopupApply)
+    def _queueSetSpectrumScaling(self, _value):
+        value = self.spectrumScalingData.get()
+        return partial(self._setSpectrumScaling, value)
+
+    def _setSpectrumScaling(self, value):
+        """Set the value for manual zoom
+        """
+        self.preferences.general.scalingFactorStep = value
 
     def _setZoomPercent(self, value):
         """Set the value for manual zoom

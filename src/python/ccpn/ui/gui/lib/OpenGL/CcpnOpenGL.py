@@ -3046,24 +3046,28 @@ class CcpnGLWidget(QOpenGLWidget):
                 if hasattr(self.project, '_buildWithProfile') and self.project._buildWithProfile is True:
                     self.project._buildWithProfile = False
 
-                    # create a simple cache of the current peaks
-                    self._GLPeaks._caching = True
-                    self._GLPeaks._objCache = None
+                    # create simple speed-caches for the current peaks/multiplets/integrals
+                    for objList in [self._GLPeaks, self._GLMultiplets, self._GLIntegrals]:
+                        objList._caching = True
+                        objList._objCache = None
 
                     self._buildGLWithProfile()
 
-                    self._GLPeaks._caching = True
-                    self._GLPeaks._objCache = None
+                    for objList in [self._GLPeaks, self._GLMultiplets, self._GLIntegrals]:
+                        objList._caching = False
+                        objList._objCache = None
 
                 else:
-                    # create a simple cache of the current peaks - need to apply same to table rebuilds :|
-                    self._GLPeaks._caching = True
-                    self._GLPeaks._objCache = None
+                    # create simple speed-caches for the current peaks/multiplets/integrals
+                    for objList in [self._GLPeaks, self._GLMultiplets, self._GLIntegrals]:
+                        objList._caching = True
+                        objList._objCache = None
 
                     self._buildGL()
 
-                    self._GLPeaks._caching = False
-                    self._GLPeaks._objCache = None
+                    for objList in [self._GLPeaks, self._GLMultiplets, self._GLIntegrals]:
+                        objList._caching = False
+                        objList._objCache = None
 
                 self._paintGL()
 

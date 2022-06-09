@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-19 12:50:36 +0100 (Thu, May 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-09 19:06:30 +0100 (Thu, June 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -354,6 +354,18 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
 
                 markNmrAtoms(self.mainWindow, currentNmrResidue.nmrAtoms)
 
+    def buildTableDataFrame(self):
+        # create a simple speed-cache for the current nmrResidue indexing
+        self._caching = True
+        self._objCache = None
+
+        result = super().buildTableDataFrame()
+
+        self._caching = False
+        self._objCache = None
+
+        return result
+
     #=========================================================================================
     # Table functions
     #=========================================================================================
@@ -391,17 +403,23 @@ class _NewNmrResidueTableWidget(_CoreTableWidgetABC):
     # object properties
     #=========================================================================================
 
-    @staticmethod
-    def _nmrIndex(nmrRes):
+    # @staticmethod
+    def _nmrIndex(self, nmrRes):
         """CCPN-INTERNAL: Insert an index into ObjectTable
         """
         try:
-            from ccpnc.clibrary import Clibrary
+            if getattr(self, '_caching', False):
+                if self._objCache is None:
+                    self._objCache = list(id(pp) for pp in nmrRes.nmrChain.nmrResidues)
+                return self._objCache.index(id(nmrRes))
 
-            _getNmrIndex = Clibrary.getNmrResidueIndex
+            else:
+                from ccpnc.clibrary import Clibrary
 
-            return _getNmrIndex(nmrRes)
-            # return nmrRes.nmrChain.nmrResidues.index(nmrRes)  # ED: THIS IS VERY SLOW
+                _getNmrIndex = Clibrary.getNmrResidueIndex
+
+                return _getNmrIndex(nmrRes)
+                # return nmrRes.nmrChain.nmrResidues.index(nmrRes)  # ED: THIS IS VERY SLOW
         except Exception as es:
             return None
 

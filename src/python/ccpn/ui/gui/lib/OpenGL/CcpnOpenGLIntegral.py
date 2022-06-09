@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-09 16:36:17 +0100 (Thu, June 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-09 19:06:29 +0100 (Thu, June 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -50,10 +50,14 @@ class GLintegralListMethods():
     def _isSelected(self, integral):
         """return True if the obj in the defined object list
         """
-        objs = self.current.integrals
-        if objs:
+        if getattr(self, '_caching', False):
+            if self._objCache is None:
+                self._objCache = list(id(obj) for obj in self.current.integrals)  # this is faster than using __eq__
+            return id(integral) in self._objCache
+
+        else:
+            objs = self.current.integrals
             return integral in objs
-        return False
 
     @staticmethod
     def objects(obj):

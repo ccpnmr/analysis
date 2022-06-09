@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-09 16:37:35 +0100 (Thu, June 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-09 19:06:30 +0100 (Thu, June 09, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -49,9 +49,9 @@ class GLpeakListMethods():
     def _isSelected(self, peak):
         """return True if the obj in the defined object list
         """
-        if self._caching:
+        if getattr(self, '_caching', False):
             if self._objCache is None:
-                self._objCache = list(id(pp) for pp in self.current.peaks)  # this is faster than using __eq__
+                self._objCache = list(id(obj) for obj in self.current.peaks)  # this is faster than using __eq__
             return id(peak) in self._objCache
 
         else:

@@ -79,10 +79,14 @@ class GLmultipletListMethods():
     def _isSelected(self, multiplet):
         """return True if the obj in the defined object list
         """
-        objs = self.current.multiplets
-        if objs:
+        if getattr(self, '_caching', False):
+            if self._objCache is None:
+                self._objCache = list(id(obj) for obj in self.current.multiplets)  # this is faster than using __eq__
+            return id(multiplet) in self._objCache
+
+        else:
+            objs = self.current.multiplets
             return multiplet in objs
-        return False
 
     @staticmethod
     def objects(obj):

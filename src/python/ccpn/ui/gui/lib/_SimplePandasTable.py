@@ -931,7 +931,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
             self.doubleClicked.connect(self._doubleClickCallback)
 
         # notifier queue handling
-        self._scheduler = UpdateScheduler(self.project, self._queueProcess, name='PandasTableNotifierHandler',
+        self._scheduler = UpdateScheduler(self.project, self._queueProcess, name=f'PandasTableNotifierHandler-{self}',
                                           startOnAdd=False, log=False, completeCallback=self.update)
         self._queuePending = UpdateQueue()
         self._queueActive = None

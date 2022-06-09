@@ -79,8 +79,9 @@ class GLmultipletListMethods():
     def _isSelected(self, multiplet):
         """return True if the obj in the defined object list
         """
-        if self.current.multiplets:
-            return multiplet in self.current.multiplets
+        objs = self.current.multiplets
+        if objs:
+            return multiplet in objs
         return False
 
     @staticmethod

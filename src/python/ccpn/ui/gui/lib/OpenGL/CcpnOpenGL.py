@@ -3039,11 +3039,32 @@ class CcpnGLWidget(QOpenGLWidget):
 
             with self.glBlocking():
                 # simple profile of building all
+
+                # NOTE:ED - this should be updated to explicit build calls
+                #   and the _buildGL only moves it to the graphics card
+
                 if hasattr(self.project, '_buildWithProfile') and self.project._buildWithProfile is True:
                     self.project._buildWithProfile = False
+
+                    # create a simple cache of the current peaks
+                    self._GLPeaks._caching = True
+                    self._GLPeaks._objCache = None
+
                     self._buildGLWithProfile()
+
+                    self._GLPeaks._caching = True
+                    self._GLPeaks._objCache = None
+
                 else:
+                    # create a simple cache of the current peaks - need to apply same to table rebuilds :|
+                    self._GLPeaks._caching = True
+                    self._GLPeaks._objCache = None
+
                     self._buildGL()
+
+                    self._GLPeaks._caching = False
+                    self._GLPeaks._objCache = None
+
                 self._paintGL()
 
             # make all following paint events into mouse only

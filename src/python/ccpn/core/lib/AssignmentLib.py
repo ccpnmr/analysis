@@ -1217,15 +1217,13 @@ def _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments):
                 try:
                     for cc, peak in enumerate(peakList.peaks):
 
-                        # check if the progress was cancelled
-                        if progress.wasCanceled():
-                            # set to 100% and exit the loop
-                            progress.setValue(totalCopies)
-                            break
-
                         if cc % pDiv == 0:
                             # update the progress-bar - 100 steps at the most
                             progress.setValue(int(cc / pDiv))
+                        # check if the progress was cancelled
+                        if progress.wasCanceled():
+                            progress.setText('Cancelling...')  # may not be visible
+                            raise RuntimeError('Cancel')
 
                         # only process those that are empty OR those not empty when checkbox cleared
                         dimensionNmrAtoms = peak.dimensionNmrAtoms  # for speed reasons !?
@@ -1237,13 +1235,14 @@ def _fetchNewPeakAssignments(peakList, nmrChain, keepAssignments):
                                 nmrAtom = nmrResidue.fetchNmrAtom(name=str(axis), isotopeCode=isotope)
                                 peak.assignDimension(axisCode=axis, value=[nmrAtom])
 
+                except Exception as es:
+                    if 'Cancel' not in str(es):
+                        # if not cancel button
+                        getLogger().warning(f'fetchNewPeakAssignments: {es}')
+
+                else:
                     # set the progress to 100%
                     progress.finalise()
-
-                except Exception as es:
-                    getLogger().warning(f'fetchNewPeakAssignments: {es}')
-                else:
-                    pass
 
                 finally:
                     # set closing conditions here, or call progress.close() if autoClose not set

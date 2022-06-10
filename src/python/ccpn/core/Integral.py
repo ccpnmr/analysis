@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-07 15:22:39 +0100 (Tue, June 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-10 17:13:12 +0100 (Fri, June 10, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -360,7 +360,7 @@ class Integral(AbstractWrapperObject):
                         x = spectrum.positions
                         index01 = np.where((x <= limit2) & (x >= limit1))
                         values = spectrum.intensities[index01]
-                        if all(values):
+                        if len(values)>0 and all(values):
                             self.value = float(trapz(values))
 
                             # small change, only calculate if there is a peak

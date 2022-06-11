@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-04-04 14:35:52 +0100 (Mon, April 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-06-11 11:08:49 +0100 (Sat, June 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -39,6 +39,7 @@ from ccpn.ui.gui.lib.OpenGL.CcpnOpenGLDefs import GLREGIONTYPE, GLLINETYPE
 from ccpn.ui.gui.lib.OpenGL import GL, GLU, GLUT
 
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_REGIONSHADE, CCPNGLWIDGET_INTEGRALSHADE
+
 
 
 REGION_COLOURS = {
@@ -96,7 +97,7 @@ class GLRegion(QtWidgets.QWidget):
 
     @values.setter
     def values(self, values):
-        from ccpn.core.lib.ContextManagers import undoBlock, notificationEchoBlocking, undoBlockWithoutSideBar, notificationBlanking
+        from ccpn.core.lib.ContextManagers import notificationEchoBlocking, undoStackBlocking
 
         # with notificationBlanking():
         self._values = tuple(values)
@@ -110,9 +111,10 @@ class GLRegion(QtWidgets.QWidget):
 
         # change the limits in the integral object
         # with notificationBlanking():
-        with notificationEchoBlocking():
-            if self._object and not self._object.isDeleted:
-                self._object.limits = [(min(values), max(values))]
+        if self._object and not self._object.isDeleted:
+            with notificationEchoBlocking():
+                with undoStackBlocking():
+                    self._object.limits = [(min(values), max(values))]
 
         # emit notifiers to repaint the GL windows
         self.GLSignals.emitPaintEvent()

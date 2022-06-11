@@ -55,8 +55,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-08 20:09:36 +0100 (Wed, June 08, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-06-11 11:08:49 +0100 (Sat, June 11, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -121,7 +121,7 @@ from typing import Tuple
 from ccpn.util.Constants import AXIS_FULLATOMNAME
 from ccpn.ui.gui.widgets.DropBase import DropBase
 from ccpn.ui.gui.lib.mouseEvents import getMouseEventDict
-from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking, undoStackBlocking
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.core.lib import Pid
 from ccpn.ui.gui.lib.GuiStripContextMenus import _hidePeaksSingleActionItems, _setEnabledAllItems
@@ -484,6 +484,7 @@ class CcpnGLWidget(QOpenGLWidget):
         self.axisCodes = self.strip.axisCodes
 
         self._dragRegions = set()
+        self._dragValues = {}
 
         self.resetRangeLimits()
 
@@ -2720,7 +2721,15 @@ class CcpnGLWidget(QOpenGLWidget):
                                 # moving one edge of a region
                                 values[reg[2]] -= dy * self.pixelY
 
+                        # keep first and last drag values
+                        if reg[0] in self._dragValues:
+                            firstVal, _newVal = self._dragValues[reg[0]]
+                        else:
+                            firstVal = reg[0].values
+
                         reg[0].values = values
+                        # write into drag values to update when the mouse is released
+                        self._dragValues[reg[0]] = (firstVal, values)
 
                         # # NOTE:ED check moving of baseline
                         # if hasattr(reg[0], '_integralArea'):
@@ -6583,6 +6592,21 @@ class CcpnGLWidget(QOpenGLWidget):
             pass
 
         else:
+            VALUES = 'values'
+
+            if self._dragValues:
+                with undoStackBlocking() as addUndoItem:
+                    for obj, (preValues, postValues) in self._dragValues.items():
+
+                        if obj._object and not obj._object.isDeleted:
+                            # set the values and add item to the undo-stack
+                            obj.values = postValues
+
+                            addUndoItem(undo=partial(setattr, obj, VALUES, preValues),
+                                        redo=partial(setattr, obj, VALUES, postValues),)
+
+            self._dragValues = {}
+
             event.ignore()
 
         self.update()

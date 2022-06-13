@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-05 15:54:40 +0100 (Thu, May 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-13 12:16:03 +0100 (Mon, June 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,6 +27,8 @@ import os
 import pandas as pd
 from ccpn.util.Logging import getLogger
 from ccpn.util.Path import aPath, joinPath
+from ccpn.util.Colour import name2Hex
+from itertools import cycle
 
 ################################       Excel Headers Warning      ######################################################
 """The excel headers for sample, sampleComponents, substances properties are named as the appear on the wrapper.
@@ -100,6 +102,8 @@ SUBSTANCE_PROPERTIES = [comment, smiles, synonyms, molecularMass, empiricalFormu
 
 SUBSTANCES_SHEET_COLUMNS = [SUBSTANCE_NAME, SPECTRUM_PATH, SPECTRUM_GROUP_NAME, EXP_TYPE] + SUBSTANCE_PROPERTIES
 SAMPLE_SHEET_COLUMNS = [SAMPLE_NAME, SPECTRUM_GROUP_NAME, SPECTRUM_PATH, SPECTRUM_NAME] + SAMPLE_PROPERTIES
+
+TOP_SG_COLOURS = ['red', 'blue', 'purple', 'green', 'gold', 'dimgrey', 'darksalmon']
 
 
 def makeTemplate(path, fileName='lookupTemplate.xlsx', ):
@@ -338,6 +342,7 @@ class ExcelReader(object):
             if SPECTRUM_GROUP_NAME in dataFrame.columns:
                 for groupName in list(set((dataFrame[SPECTRUM_GROUP_NAME]))):
                     # name = self._checkDuplicatedSpectrumGroupName(groupName)
+                    print('$$$$',groupName)
                     newSG = self._createNewSpectrumGroup(groupName)
                     self._tempSpectrumGroupsSpectra[groupName] = []
                     spectrumGroups.append(newSG)
@@ -450,10 +455,18 @@ class ExcelReader(object):
                     spectrum._setInternalParameter(spectrum._SERIESITEMS, {'SG:' + str(value): dct[SERIES]})
 
     def _fillSpectrumGroups(self):
+
+        colourNames = cycle(TOP_SG_COLOURS)
         for sgName, spectra in self._tempSpectrumGroupsSpectra.items():
             spectrumGroup = self._project.getByPid('SG:' + str(sgName))
             if spectrumGroup is not None:
                 spectrumGroup.spectra = spectra
+            # give some default colours
+            hexColour = name2Hex( next(colourNames))
+            spectrumGroup.sliceColour = hexColour
+            for sp in spectra:
+                sp.sliceColour = hexColour
+
 
     ######################################################################################################################
     ######################            DISPATCH ATTRIBUTES TO RELATIVE OBJECTS         ####################################

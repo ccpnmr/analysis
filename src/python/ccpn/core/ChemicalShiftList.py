@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-24 17:58:08 +0100 (Tue, May 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-13 16:56:11 +0100 (Mon, June 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -280,7 +280,7 @@ class ChemicalShiftList(AbstractWrapperObject):
 
         # nmrAtoms with peakCount = 0 -> these are okay
         _oldNmrAtoms = set(nmr for nmr in _thisNmrAtoms if self not in [pk.chemicalShiftList for pk in nmr.assignedPeaks])
-        _newNmrAtoms = _createNmrAtoms - _oldNmrAtoms
+        _newNmrAtoms = _createNmrAtoms - _thisNmrAtoms  # _oldNmrAtoms <- this skips unassigned :|
 
         _nmrAtoms = _createNmrAtoms | _deleteNmrAtoms | _oldNmrAtoms  # do I need to do all these?
         nmrResidues = set(nmr.nmrResidue for nmr in _nmrAtoms)
@@ -802,8 +802,6 @@ class ChemicalShiftList(AbstractWrapperObject):
             elif len(rows) == 0:
                 raise ValueError(f'{self.className}.deleteChemicalShift: nmrAtom {nmrAtom.pid} not found')
 
-            self._deleteChemicalShiftObject(rows)
-
         elif uniqueId is not None:
             # get shift by uniqueId
             if not isinstance(uniqueId, int):
@@ -816,6 +814,16 @@ class ChemicalShiftList(AbstractWrapperObject):
                 raise RuntimeError(f'{self.className}.deleteChemicalShift: bad number of shifts in list')
             elif len(rows) == 0:
                 raise ValueError(f'{self.className}.deleteChemicalShift: uniqueId {uniqueId} not found')
+
+        else:
+            return
+
+        uniqueId = rows.iloc[0].uniqueId
+        if (_shs := [sh for sh in self._shifts if sh._uniqueId == uniqueId]):
+            # raise an error if there are any assigned peaks
+            _val = _shs[0]
+            if _val.assignedPeaks:
+                raise ValueError(f'{self.className}.deleteChemicalShift: cannot delete chemicalShift with assigned peaks')
 
             self._deleteChemicalShiftObject(rows)
 

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-13 12:16:03 +0100 (Mon, June 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-13 12:22:39 +0100 (Mon, June 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -342,7 +342,6 @@ class ExcelReader(object):
             if SPECTRUM_GROUP_NAME in dataFrame.columns:
                 for groupName in list(set((dataFrame[SPECTRUM_GROUP_NAME]))):
                     # name = self._checkDuplicatedSpectrumGroupName(groupName)
-                    print('$$$$',groupName)
                     newSG = self._createNewSpectrumGroup(groupName)
                     self._tempSpectrumGroupsSpectra[groupName] = []
                     spectrumGroups.append(newSG)

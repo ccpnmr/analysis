@@ -50,8 +50,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-08 14:05:36 +0100 (Wed, June 08, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-06-13 12:17:33 +0100 (Mon, June 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -579,15 +579,19 @@ class Spectrum(AbstractWrapperObject):
         """Noise level for the spectrum
         """
         noise = self._wrappedData.noiseLevel
+        scale = self.scale if self.scale is not None else 1.0
         if noise is None:
-            getLogger().debug2('Noise Level is None. Estimated')
-            self.noiseLevel = noise =  self.estimateNoise()
-        return noise
+            getLogger().debug2('Noise Level is None.')
+            return
+        return self._wrappedData.noiseLevel * scale
 
     @noiseLevel.setter
     @logCommand(get='self', isProperty=True)
     def noiseLevel(self, value: float):
+        scale = self.scale if self.scale is not None else 1.0
         val = float(value) if value is not None else None
+        if val is not None and scale != 0:
+            val = val/scale
         self._wrappedData.noiseLevel = val
 
     @property

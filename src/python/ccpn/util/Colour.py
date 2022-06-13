@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-11 18:38:07 +0000 (Fri, March 11, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-06-13 12:17:01 +0100 (Mon, June 13, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -177,7 +177,7 @@ def colourNameWithSpace(name):
     """insert spaces into the colourname
     """
 
-    # list of all possible words that are in the colour names
+    # list of all possible words that are in the colourname names
     nounList = ['dark', 'dim', 'medium', 'light', 'pale', 'white', 'rosy', 'indian', 'misty',
                 'red', 'orange', 'burly', 'antique', 'navajo', 'blanched', 'papaya', 'floral',
                 'lemon', 'olive', 'yellow', 'green', 'lawn', 'sea', 'forest', 'lime', 'spring',
@@ -264,14 +264,7 @@ def _getRandomColours(numberOfColors):
 
 ERRORCOLOUR = '#FF0000'
 
-colourNameToHexDict = {
-    'red'    : '#ff0000',
-    'green'  : '#00ff00',
-    'blue'   : '#0000ff',
-    'yellow' : '#ffff00',
-    'magenta': '#ff00ff',
-    'cyan'   : '#00ffff',
-    }
+
 
 # small set of colours
 shortSpectrumColours = OrderedDict([('#cb1400', 'red'),
@@ -704,7 +697,7 @@ colorSchemeTable = OrderedDict([('redshade', ('#FFC0C0', '#FF9A9A', '#FF7373', '
                                 ])
 
 allColoursWithSpaces = OrderedDict([(k, colourNameWithSpace(v)) for k, v in allColours.items()])
-
+colourNameToHexDict = {v: k for k, v in allColours.items()}
 # set the spectrum colours to all, override minimum set above
 spectrumColours = brightColours
 
@@ -873,6 +866,9 @@ def autoCorrectHexColour(colour, referenceHexColour='#ffffff', addNewColour=True
         return hx
 
     return colour
+
+def name2Hex(name):
+    return colourNameToHexDict.get(name, None)
 
 
 # def _setNewColour(colList, newCol:str):

@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-14 14:35:58 +0100 (Tue, June 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-14 15:23:00 +0100 (Tue, June 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1022,7 +1022,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         if disableCancel:
             if undos.isDirty():
                 reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT], checkbox=SAVE_DATA, okText=QUIT,
-                                                checked=False)
+                                                checked=True)
                 # reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT, SAVE_QUIT], parent=self, okText=QUIT)
             else:
                 reply = QUIT_WITHOUT_SAVING
@@ -1030,7 +1030,7 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         else:
             if undos.isDirty():
                 reply = MessageDialog.showMulti(MESSAGE, DETAIL, [QUIT, CANCEL], checkbox=SAVE_DATA, okText=QUIT,
-                                                checked=False)
+                                                checked=True)
                 # reply = MessageDialog.showMulti(MESSAGE, DETAIL, texts=[QUIT, SAVE_QUIT, CANCEL], parent=self, okText=QUIT)
             else:
                 reply = QUIT_WITHOUT_SAVING

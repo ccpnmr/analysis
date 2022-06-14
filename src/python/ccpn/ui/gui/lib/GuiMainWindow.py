@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-19 11:39:58 +0100 (Thu, May 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-14 14:35:58 +0100 (Tue, June 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -729,18 +729,27 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
         from ccpn.framework.PathsAndUrls import macroPath
         from os import walk
 
-        # read the macros file directory - only top level
-        macroFiles = []
+        # read the macros file directory - all levels, but sectioned by sub-folder
+        startpath = None
         for (dirpath, dirnames, filenames) in walk(os.path.expanduser(macroPath)):
-            macroFiles.extend([os.path.join(dirpath, filename) for filename in filenames])
-            break
+            startpath = startpath or dirpath
 
-        for file in macroFiles:
-            filename, fileExt = os.path.splitext(file)
+            macroFiles = [os.path.join(dirpath, filename) for filename in filenames if '__' not in filename and filename.endswith('.py')]
 
-            if fileExt == '.py':
-                modulesMenu.addAction(Action(modulesMenu, text=os.path.basename(filename),
-                                             callback=partial(self._runCCPNMacro, file, self)))
+            thispath = dirpath[len(startpath):]
+            if any(thispath.startswith(nn) for nn in ['/old', '/ideas']):
+                continue
+
+            if macroFiles:
+                if thispath:
+                    dirname = modulesMenu.addAction(f'---  {thispath}  ---')
+                    dirname.setEnabled(False)
+
+                for file in sorted(macroFiles):
+                    filename, fileExt = os.path.splitext(file)
+
+                    modulesMenu.addAction(Action(modulesMenu, text=os.path.basename(filename),
+                                                 callback=partial(self._runCCPNMacro, file, self)))
 
     def _fillUserMacrosMenu(self):
         modulesMenu = self.searchMenuAction(USERMACROSMENU)

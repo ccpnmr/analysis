@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-04-26 16:42:27 +0100 (Tue, April 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-14 15:43:44 +0100 (Tue, June 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -420,9 +420,10 @@ class Gui(Ui):
         """Create a new project instance with name.
         :return a Project instance or None
         """
-        if not self.project.isTemporary:
+        # if not self.project.isTemporary:
+        if self.project._undo.isDirty():
             message = 'Do you really want to create a new project (current project will be closed %s)?' % \
-                      (' and any changes will be lost' if self.project.isModified else '')
+                  (' and any changes will be lost' if self.project.isModified else '')
             _ok = MessageDialog.showYesNo('New Project', message, parent=self.mainWindow)
             if not _ok:
                 return
@@ -453,7 +454,8 @@ class Gui(Ui):
         oldProjectLoader = None
         oldProjectIsTemporary = True
         if self.project:
-            if not self.project.isTemporary:
+            # if not self.project.isTemporary:
+            if self.project._undo.isDirty():
                 message = 'Do you really want to open a new project (current project will be closed %s)?' % \
                           (' and any changes will be lost' if self.project.isModified else '')
                 _ok = MessageDialog.showYesNo('Load Project', message, parent=self.mainWindow)

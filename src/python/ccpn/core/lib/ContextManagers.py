@@ -1091,7 +1091,7 @@ def renameObjectNoBlanking(self):
 
 
 @contextmanager
-def progressHandler(text='busy...', minimum=0, maximum=100, delay=1000, closeDelay=500, autoClose=True):
+def progressHandler(text='busy...', minimum=0, maximum=100, delay=1000, closeDelay=250, autoClose=True):
     """A context manager to wrap a method in a progress dialog defined by the current gui state.
     """
     from ccpn.framework.Application import getApplication

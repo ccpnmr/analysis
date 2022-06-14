@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-08 20:14:31 +0100 (Wed, June 08, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-14 17:44:44 +0100 (Tue, June 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -36,7 +36,7 @@ from ccpn.ui.gui.widgets.Label import Label
 class ProgressDialog(QtWidgets.QProgressDialog):
 
     def __init__(self, parent, title='Progress Dialog', text='busy...', minimum=0, maximum=100,
-                 delay=1000, closeDelay=500, autoClose=True):
+                 delay=1000, closeDelay=250, autoClose=True):
         super().__init__(parent=parent)
 
         self.setWindowTitle(title)
@@ -136,7 +136,7 @@ class ProgressWidget(QtWidgets.QProgressBar, Base):
 
 class ProgressTextBar(tqdm):
 
-    def __init__(self, parent, title='Progress Dialog', text='busy...', minimum=0, maximum=100, delay=1000, closeDelay=500, autoClose=True):
+    def __init__(self, parent, title='Progress Dialog', text='busy...', minimum=0, maximum=100, delay=1000, closeDelay=250, autoClose=True):
         super().__init__(initial=minimum, total=maximum - minimum, delay=delay / 1000,
                          ncols=120, miniters=(maximum - minimum) / 100)
         # for compatibility with ProgressDialog above - perform no operation

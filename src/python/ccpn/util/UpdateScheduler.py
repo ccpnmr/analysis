@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-07 19:13:25 +0100 (Tue, June 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-14 17:44:44 +0100 (Tue, June 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -102,6 +102,10 @@ class UpdateScheduler:
     @property
     def isBusy(self):
         return self._busy
+
+    @property
+    def isIdle(self):
+        return not (self.isActive or self._busy)
 
     def signalRestart(self):
         """Signal the timer to restart when it has finished processing

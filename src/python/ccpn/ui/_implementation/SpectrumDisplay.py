@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-05 10:40:29 +0100 (Thu, May 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-14 17:44:44 +0100 (Tue, June 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -527,6 +527,9 @@ class SpectrumDisplay(AbstractWrapperObject):
         """
         return [dim - 1 for dim in self._getDimensionsMapping(spectrum)]
 
+    @property
+    def isIdle(self):
+        return all(ss._scheduler.isIdle for ss in self.strips)
 
     #===========================================================================================
     # new<Object> and other methods

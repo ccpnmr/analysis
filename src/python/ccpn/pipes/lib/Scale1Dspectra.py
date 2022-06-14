@@ -6,6 +6,48 @@ def resetSpectraScale(spectra, value = 1):
         sp.scale = value
 
 
+def getAutoScalingFactor1D(controlSpectrum, targetSpectrum, controlSpectrumWeight=1.1):
+    """
+    #Screening-specific.
+    This factor will scale the spectra in a way  to have the Control-Spectrum (e.g. without a protein-target)
+    with higher intensities than a Target-Spectrum (recorded with a protein-target).
+    :param controlSpectrum: Spectrum object
+    :param targetSpectrum: Spectrum object
+    :param controlSpectrumWeight: a weighting factor for the control spectrum intensities. Default 1.1 (arbitrary)
+    :return: float. a scaling factor from the intensities std-ratio
+    """
+    controlSpectrumWeight = controlSpectrumWeight if controlSpectrumWeight !=0 else 1
+    factor = np.std(targetSpectrum.intensities) / (np.std(controlSpectrum.intensities) * controlSpectrumWeight)
+    return float(factor)
+
+
+def scaleSpectraByStandardScaler(spectra):
+    """ Scale spectra busing the StandardScaler from sklearn.
+    Standardise features by removing the mean and scaling to unit variance.
+    See docs https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html
+    """
+
+    from sklearn.preprocessing import StandardScaler
+
+    for spectrum in spectra:
+        intensities = spectrum.intensities
+        ## reshape to a 2D as required
+        intensities_nd = intensities.reshape(len(intensities), 1)
+        ## init the scaler
+        scaler = StandardScaler()
+        scaler = scaler.fit(intensities_nd, )
+        ## create the new scaled curve
+        normalizedRef = scaler.transform(intensities_nd)
+        z = normalizedRef.flatten()
+        ## scaling value
+        if scaler.scale_ and len(scaler.scale_)>0:
+            scalingValue = scaler.scale_[0]
+            ## apply to the spectrum object
+            if scalingValue != 0:
+                spectrum.scale = 1 / scalingValue
+
+
+
 def scaleSpectraByStd(spectra, pts = 200):
     '''
     Scale 1D spectra intensities by the mean of stds for the first selected pts

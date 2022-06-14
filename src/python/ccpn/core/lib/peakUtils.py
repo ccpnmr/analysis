@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-19 11:39:58 +0100 (Thu, May 19, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-06-14 16:12:24 +0100 (Tue, June 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -798,7 +798,7 @@ def _getBins(y, binCount=None):
     from scipy.stats import binned_statistic
 
     binCount = binCount or int(len(y) / 2)
-    statistics, edges, binNumbers = binned_statistic(y, y, bins=binCount, statistic='mean')
+    statistics, edges, binNumbers = binned_statistic(y, y, bins=binCount, statistic='median')
     mostCommonBinNumber = np.argmax(np.bincount(binNumbers))
     highestValues = y[binNumbers == mostCommonBinNumber]  # values corresponding to most frequent binNumber
     fittedCurve = _fitBins(y, edges)

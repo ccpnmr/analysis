@@ -1,9 +1,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2019"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -11,8 +12,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2017-07-07 16:32:38 +0100 (Fri, July 07, 2017) $"
-__version__ = "$Revision: 3.0.0 $"
+__dateModified__ = "$dateModified: 2022-06-14 16:12:24 +0100 (Tue, June 14, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,7 +32,7 @@ from ccpn.ui.gui.widgets.GLLinearRegionsPlot import GLTargetButtonSpinBoxes
 
 #### NON GUI IMPORTS
 from ccpn.framework.lib.pipeline.PipeBase import SpectraPipe, PIPE_POSTPROCESSING
-from ccpn.pipes.lib.Scale1Dspectra import scaleSpectraByRegion
+from ccpn.pipes.lib.Scale1Dspectra import scaleSpectraByRegion, scaleSpectraByStandardScaler
 from ccpn.util.Logging import getLogger
 
 ########################################################################################################################
@@ -43,15 +44,24 @@ PipeName = 'Scale spectra'
 ReferenceRegion = 'Reference_Region'
 DefaultReferenceRegion = (0.5, -0.5)
 EnginesVar = 'Engines'
-
+StandardScaler = 'StandardScaler'
 Min = 'min'
 Max = 'max'
 Mean = 'mean'
-Engines = [Mean, Min, Max]
+
 
 DefaultEngine = 'mean'
 NotAvailable = 'Not Available'
 
+MinTipText = 'Scale the spectra down to the minimum feature in the selected region'
+MaxTipText = 'Scale the spectra up to the maximum feature in the selected region'
+MeanTipText = 'Scale the spectra (up-down) to the mean feature in the selected region'
+SSTipText = f'''Scale the spectra using the StandarScaler algorithm.
+\nIt standardises features by removing the mean and scaling to unit variance.
+\nSee more at https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html'''
+
+Engines =  [StandardScaler, Mean,       Min,       Max]
+toolTips = [SSTipText,      MeanTipText,MinTipText,MaxTipText]
 
 ########################################################################################################################
 ##########################################      ALGORITHM       ########################################################
@@ -73,6 +83,12 @@ class Scale1DGuiPipe(GuiPipe):
         self.parent = parent
 
         row = 0
+
+        #  Engines
+        self.enginesLabel = Label(self.pipeFrame, EnginesVar, grid=(row, 0))
+        setattr(self, EnginesVar, PulldownList(self.pipeFrame, texts=Engines, toolTips=toolTips,
+                                               callback=self._toggleEnabledWidget,  grid=(row, 1)))
+        row += 1
         # target region
         self.tregionLabel = Label(self.pipeFrame, text=ReferenceRegion, grid=(row, 0))
         setattr(self, ReferenceRegion, GLTargetButtonSpinBoxes(self.pipeFrame, application=self.application,
@@ -80,11 +96,14 @@ class Scale1DGuiPipe(GuiPipe):
                                                                decimals=4,
                                                                step=0.001,
                                                                grid=(row, 1)))
+        self._toggleEnabledWidget()
 
-        row += 1
-        #  Engines
-        self.enginesLabel = Label(self.pipeFrame, EnginesVar, grid=(row, 0))
-        setattr(self, EnginesVar, PulldownList(self.pipeFrame, texts=Engines, grid=(row, 1)))
+    def _toggleEnabledWidget(self, *args):
+        """Toggle on-off the region depending on the selected engine. Not needed for the StandardScaler  """
+        enginesW = _getWidgetByAtt(self, EnginesVar)
+        regionW = _getWidgetByAtt(self, ReferenceRegion)
+        regionW.setEnabled(enginesW.get() != StandardScaler)
+
 
     def _closePipe(self):
         'remove the lines from plotwidget if any'
@@ -123,9 +142,11 @@ class  Scale1DPipe(SpectraPipe):
         if self.project is not None:
             if spectra:
                 # scaleSpectraByStd(spectra)
-                scaleSpectraByRegion(spectra, referenceRegion, engine,)
+                if engine == StandardScaler:
+                    scaleSpectraByStandardScaler(spectra)
+                else:
+                    scaleSpectraByRegion(spectra, referenceRegion, engine,)
                 getLogger().info('Scale 1D completed')
-
                 return spectra
             else:
                 getLogger().warning('Spectra not present. Add spectra first')

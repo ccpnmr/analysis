@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-13 12:17:33 +0100 (Mon, June 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-14 16:12:24 +0100 (Tue, June 14, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -599,14 +599,21 @@ class Spectrum(AbstractWrapperObject):
     def negativeNoiseLevel(self) -> float:
         """Negative noise level value. Stored in Internal"""
         value = self._getInternalParameter(self._NEGATIVENOISELEVEL)
+        scale = self.scale if self.scale is not None else 1.0
         if value is None:
             getLogger().debug2('Returning negativeNoiseLevel=None')
-        return value
+        return value * scale
 
     @negativeNoiseLevel.setter
     @logCommand(get='self', isProperty=True)
     def negativeNoiseLevel(self, value):
         """Stored in Internal """
+
+        scale = self.scale if self.scale is not None else 1.0
+        value = float(value) if value is not None else None
+        if value is not None and scale != 0:
+            value = value / scale
+
         self._setInternalParameter(self._NEGATIVENOISELEVEL, value)
 
     @property

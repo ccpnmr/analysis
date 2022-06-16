@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-17 19:43:57 +0000 (Thu, February 17, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-06-16 18:02:32 +0100 (Thu, June 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -625,6 +625,9 @@ class _openItemChemicalShiftListTable(OpenItemABC):
         contextMenu = Menu('', parentWidget, isFloatWidget=True)
         if self.openAction:
             contextMenu.addAction(self.contextMenuText, self.openAction)
+        contextMenu.addSeparator()
+        contextMenu.addAction('Simulate Spectrum', partial(self._openSimulateSpectrumFromCSLPopup, objs))
+        contextMenu.addSeparator()
         contextMenu.addAction('Copy Pid to clipboard', partial(self._copyPidsToClipboard, objs))
         self._addCollectionMenu(contextMenu, objs)
         contextMenu.addAction('Duplicate', partial(self._duplicateAction, objs))
@@ -639,6 +642,18 @@ class _openItemChemicalShiftListTable(OpenItemABC):
     def _duplicateAction(self, objs):
         for obj in objs:
             obj.duplicate()
+
+    def _openSimulateSpectrumFromCSLPopup(self, objs):
+        if len(objs)>1:
+            showWarning('Simulate Spectrum from ChemicalShift', 'Please select only one ChemicalShift list')
+            # Might think of merging multiple lists ?
+            return
+        if len(objs)>0:
+            from ccpn.ui.gui.popups.ChemicalShiftList2SpectrumPopup import ChemicalShiftList2SpectrumPopup
+            popup = ChemicalShiftList2SpectrumPopup(chemicalShiftList=objs[0])
+            popup.show()
+            popup.raise_()
+
 
 
 class _openItemPeakListTable(OpenItemABC):

@@ -32,8 +32,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-02-22 19:58:04 +0000 (Tue, February 22, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-06-16 18:02:32 +0100 (Thu, June 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -217,23 +217,20 @@ class TreeCheckBoxes(QtWidgets.QTreeWidget, Base):
 
 class StarImporterPopup(CcpnDialog):
 
-    def __init__(self, parent=None, axesCodesMap=None, bmrbFilePath=None, project=None, directory=None,
+    def __init__(self, parent=None, bmrbFilePath=None, project=None, directory=None,
                  dataBlock=None, title='Import From NMRSTAR', **kw):
 
         CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kw)
 
         self.bmrbFilePath = bmrbFilePath or ''
-        self._axesCodesMap = axesCodesMap or defaultAxesCodesMap  # Ordered dict as od([("HA","H")]) see info for more
         self.directory = directory or ''
         self.project = project
         self.dataBlock = dataBlock or {}
-        self._deprecationMessageShown = False
 
         row = 0
         bmrbFileLabel = Label(self, text="BMRB File", grid=(row, 0))
         self.fileName = LineEdit(self, text=os.path.basename(self.bmrbFilePath), grid=(row, 1))
         self.fileName.setEnabled(False)
-        # self.inputDialog = LineEditButtonDialog(self,textLineEdit=self.bmrbFilePath, directory=self.directory, grid=(row, 1))
 
         row += 1
         tree = Label(self, text="Frames", grid=(row, 0))
@@ -245,23 +242,8 @@ class StarImporterPopup(CcpnDialog):
         self._limitFunctionalities()
 
         row += 1
-        self.dynamicsWidgets = []
-        createSimulatedPeakList = Label(self, text="Simulate Peaks From Atoms", grid=(row, 0))
-        self.simulatePLCheckBox = CheckBox(self, checked=False, callback=self._showMapLabel, grid=(row, 1))
-
-        row += 1
-        self.bmrbCodes = Label(self, text="BMRB Atom_ID", grid=(row, 0))
-        self.bmrbCodesEntry = LineEdit(self, text=','.join(self._axesCodesMap.keys()), grid=(row, 1))
-        row += 1
-        self.assignToSpectumCodesLabel = Label(self, text="Assign To Axis", grid=(row, 0))
-        self.assignToSpectumCodes = LineEdit(self, text=','.join(self._axesCodesMap.values()), grid=(row, 1))
-        self.dynamicsWidgets.extend([self.bmrbCodes, self.bmrbCodesEntry,
-                                     self.assignToSpectumCodesLabel, self.assignToSpectumCodes])
-
-        row += 1
         self.buttonList = ButtonList(self, ['Info', 'Cancel', 'Import'], [self._showInfo, self.reject, self._okButton], grid=(row, 1))
 
-        self._showMapLabel(False, False)
 
     def _limitFunctionalities(self):
         """Only check the boxes that current are supported
@@ -274,17 +256,6 @@ class StarImporterPopup(CcpnDialog):
 
         self.treeView.selectObjects(chemicalShiftListOnly)
 
-    def _showMapLabel(self, value, _showWarning=True):
-        self._toggleVisibility(self.dynamicsWidgets, value)
-
-        if not self._deprecationMessageShown and _showWarning:
-            showWarning(DeprecationWarningMessageTitle, DeprecationWarningMessage)
-            self._deprecationMessageShown = True
-
-    def _toggleVisibility(self, ll: list = [], value: bool = True):
-        for l in ll:
-            l.setVisible(value)
-
     def _showInfo(self):
         showWarning(Warnings, InfoMessage)
 
@@ -296,19 +267,6 @@ class StarImporterPopup(CcpnDialog):
         keysToDelete = [key for key in self.dataBlock.keys() if key not in selectedItems]
         for key in keysToDelete:
             del(self.dataBlock[key])
-
-        # from ccpn.core.lib.CcpnStarIo import _importAndCreateV3Objs
-        # self._axesCodesMap.clear()
-        # bmrbFile = self.bmrbFilePath
-        # simulateSpectra = self.simulatePLCheckBox.get()
-        # bmrbCodes = self.bmrbCodesEntry.get().replace(" ", "").split(',')
-        # assignToSpectumCodes = self.assignToSpectumCodes.get().replace(" ", "").split(',')
-        # for bmrbCode, sac in zip(bmrbCodes, assignToSpectumCodes):
-        #     self._axesCodesMap[bmrbCode] = sac
-
-        # success = _importAndCreateV3Objs(self.project, self.bmrbFile, self._axesCodesMap, simulateSpectra=False)
-        # if not success:
-        #     showWarning('Import Failed', 'Check the log file/outputs for more info')
         self.accept()
 
 
@@ -329,17 +287,13 @@ if __name__ == "__main__":
     fileName = 'bmr17285.str'
 
     mybmrb = os.path.join(relativePath, fileName)  # if not using UI:  replace with the full bmrb file path  of interest
-    axesCodesMap = od([  #                   replace with the atom and axes of interest
-        ("N", "N"),
-        ("H", "H"),
-        ("CA", "C"),
-        ])
+
     nmrDataExtent = StarIo.parseNmrStarFile(mybmrb)
     dataBlocks = list(nmrDataExtent.values())
     dataBlock = dataBlocks[0]
 
     if _UI:
-        popup = StarImporterPopup(axesCodesMap=axesCodesMap, bmrbFilePath=mybmrb, dataBlock=dataBlock, directory=relativePath)
+        popup = StarImporterPopup(bmrbFilePath=mybmrb, dataBlock=dataBlock, directory=relativePath)
         popup.show()
         popup.raise_()
         app.start()

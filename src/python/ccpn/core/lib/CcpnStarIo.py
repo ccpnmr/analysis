@@ -313,7 +313,7 @@ def makeCSLfromDF(project, df):
 
     return chemicalShiftList
 
-def _simulatedSpectrumFromCSL(project, csl, axesCodesMap):
+def _simulatedSpectrumFromCSL(project, csl, axesCodesMap, spectrumName=None):
     """
 
     key= NmrAtom name as appears in the CSL ; value = AxisCode name to Assign to the Spectrum AxisCode
@@ -333,7 +333,8 @@ def _simulatedSpectrumFromCSL(project, csl, axesCodesMap):
     with notificationEchoBlocking():
         nmrAtomNames = list(axesCodesMap.keys())
         isotopeCodes = [name2IsotopeCode(x) for x in list(axesCodesMap.values())]
-        targetSpectrum =  project.newEmptySpectrum(isotopeCodes=isotopeCodes, name=csl.name)
+        name = spectrumName or csl.name
+        targetSpectrum =  project.newEmptySpectrum(isotopeCodes=isotopeCodes, name=name)
         targetSpectrum.chemicalShiftList = csl
         peakList = targetSpectrum.peakLists[-1]
 

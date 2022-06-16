@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-16 12:02:43 +0100 (Thu, June 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-16 12:26:54 +0100 (Thu, June 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1362,9 +1362,12 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
             self._mergeMenuAction.setText('Merge NmrAtoms {}'.format(_option))
             self._mergeMenuAction.setEnabled(_check)
 
-            self._editMenuAction.setText('Edit NmrAtom {}'.format(currentNmrAtom.id if currentNmrAtom else ''))
-            self._editMenuAction.setEnabled(True if currentNmrAtom else False)
+            current = True if (currentNmrAtom and selection) else False
+            self._editMenuAction.setText('Edit NmrAtom {}'.format(currentNmrAtom.id if current else ''))
+            self._editMenuAction.setEnabled(True if current else False)
             self._addNavigationStripsToContextMenu()
+
+            self._removeAssignmentsMenuAction.setEnabled(True if selection else False)
 
         else:
             # disabled but visible lets user know that menu items exist
@@ -1372,6 +1375,7 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
             self._mergeMenuAction.setEnabled(False)
             self._editMenuAction.setText('Edit NmrAtom')
             self._editMenuAction.setEnabled(False)
+            self._removeAssignmentsMenuAction.setEnabled(False)
 
         # raise the menu
         super()._raiseTableContextMenu(pos)

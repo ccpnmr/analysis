@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-19 11:39:58 +0100 (Thu, May 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-16 12:26:54 +0100 (Thu, June 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -274,7 +274,6 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
 
         if self._lastSelectionMode:
             self.setSelectionMode(self._lastSelectionMode)
-            self._lastSelectionMode = None
 
     def keyPressEvent(self, event):
         """Handle keyPress events on the table
@@ -285,6 +284,9 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
         if key in [QtCore.Qt.Key_Escape]:
             # press the escape-key to clear the selection
             self.clearSelection()
+
+        if self._lastSelectionMode:
+            self.setSelectionMode(self._lastSelectionMode)
 
 
 #=========================================================================================

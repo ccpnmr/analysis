@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-16 14:50:10 +0100 (Thu, June 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-16 14:54:27 +0100 (Thu, June 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -212,8 +212,6 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
     settingsPosition = 'top'
     className = 'ReferenceChemicalShifts'
 
-    from ccpn.util.decorators import profile
-    @profile('/Users/luca/Documents/V3-testings/profiling/')
 
     def __init__(self, mainWindow, name='Reference Chemical Shifts', ):
         super().__init__(mainWindow=mainWindow, name=name)

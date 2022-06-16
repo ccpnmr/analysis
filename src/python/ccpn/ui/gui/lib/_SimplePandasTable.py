@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-16 12:26:54 +0100 (Thu, June 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-16 13:52:43 +0100 (Thu, June 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -33,9 +33,8 @@ from functools import partial
 import numpy as np
 import pandas as pd
 from PyQt5 import QtWidgets, QtCore, QtGui
-from time import time_ns
+from time import time_ns, perf_counter_ns
 from types import SimpleNamespace
-from queue import Queue
 
 from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND
 from ccpn.ui.gui.widgets.Font import setWidgetFont, TABLEFONT, getFontHeight
@@ -118,8 +117,13 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
         else:
             self._selectionMode = self.SingleSelection
         self.setSelectionMode(self._selectionMode)
-        self._clickInterval = QtWidgets.QApplication.instance().doubleClickInterval()
-        self._lastSelectionMode = None
+        self._clickInterval = QtWidgets.QApplication.instance().doubleClickInterval() * 1e6  # change to ns
+        self._lastSelectionMode = self._selectionMode
+        self._selectionPaused = perf_counter_ns()
+        self._resetTimer = QtCore.QTimer()
+        self._resetTimer.setSingleShot(True)
+        self._resetTimer.timeout.connect(self._resetSelection)
+
         self._clickedInTable = False
         self._currentIndex = None
 
@@ -260,20 +264,32 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
         self._clickedInTable = True if self._currentIndex else False
 
         if self._currentIndex in self.selectedIndexes() and not self._keyModifierPressed():
-            # temporarily disable selection to wait for potential double-click
-            self._lastSelectionMode = self.selectionMode()
+            # temporarily disable selection to wait for potential double-click - doesn't work, need to check
             self.setSelectionMode(QtWidgets.QAbstractItemView.NoSelection)
-            self._selectionPaused = True
+            self._selectionPaused = perf_counter_ns()
 
         super().mousePressEvent(e)
+        self._resetTimer.stop()
 
     def mouseReleaseEvent(self, e: QtGui.QMouseEvent) -> None:
         """Restore correct selection-mode after mouse-press
         """
         super().mouseReleaseEvent(e)
 
-        if self._lastSelectionMode:
+        pause = (perf_counter_ns() - self._selectionPaused)
+        if pause > self._clickInterval:  # changed to ns
             self.setSelectionMode(self._lastSelectionMode)
+        else:
+            self._resetTimer.start(self._clickInterval / 1e6)
+
+    def mouseDoubleClickEvent(self, event):
+        super().mouseDoubleClickEvent(event)
+
+        self.setSelectionMode(self._lastSelectionMode)
+        self._resetTimer.stop()
+
+    def _resetSelection(self):
+        self.setSelectionMode(self._lastSelectionMode)
 
     def keyPressEvent(self, event):
         """Handle keyPress events on the table
@@ -287,7 +303,6 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
 
         if self._lastSelectionMode:
             self.setSelectionMode(self._lastSelectionMode)
-
 
 #=========================================================================================
 # _SimplePandasTableModel

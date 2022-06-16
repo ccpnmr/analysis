@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-25 12:59:16 +0100 (Wed, May 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-16 11:18:15 +0100 (Thu, June 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1088,7 +1088,8 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
         _pidCol = pd.Series(obj.pid, index=[CS_PID, ])
         _extraCols = pd.Series(self._derivedFromObject(obj), index=[CS_STATE, CS_ORPHAN, CS_ALLPEAKS, CS_SHIFTLISTPEAKSCOUNT, CS_ALLPEAKSCOUNT])  # if state required
 
-        newRow = newRow.append([_pidCol, _midRow, _extraCols, _comment])
+        # newRow = newRow.append([_pidCol, _midRow, _extraCols, _comment])  # deprecated
+        newRow = pd.concat([newRow, _pidCol, _midRow, _extraCols, _comment])
 
         # append the actual object to the end - not sure whether this is required - check _highlightObjs
         newRow[CS_OBJECT] = obj

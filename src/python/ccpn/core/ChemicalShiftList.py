@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-13 16:56:11 +0100 (Mon, June 13, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-16 11:18:15 +0100 (Thu, June 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -754,7 +754,8 @@ class ChemicalShiftList(AbstractWrapperObject):
             # set as the new subclassed DataFrameABC
             self._wrappedData.data = _dfRow  # _ChemicalShiftListFrame(_dfRow)
         else:
-            self._wrappedData.data = self._wrappedData.data.append(_dfRow)
+            # self._wrappedData.data = self._wrappedData.data.append(_dfRow)  # deprecated
+            self._wrappedData.data = pd.concat([self._wrappedData.data, _dfRow], ignore_index=True)
 
         _data = self._wrappedData.data
         _data.set_index(_data[CS_UNIQUEID], inplace=True, )  # drop=False)

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-01 17:36:16 +0100 (Wed, June 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-16 11:18:15 +0100 (Thu, June 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -181,7 +181,7 @@ class DataFrameObject(object):
         # row = self.find(self._table, str(obj.pid), column=DATAFRAME_PID)
         row = self.findObject(self._table, obj, column=DATAFRAME_OBJECT)
 
-        # check that the object doesn't already exists in the table
+        # check that the object doesn't already exist in the table
         if row is None:
             self._table.silenceCallBack = True
 
@@ -218,7 +218,8 @@ class DataFrameObject(object):
                     # update internal list
                     self._objects.append(obj)
                     appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
-                    self._df = self._df.append(appendDataFrame)
+                    # self._df = self._df.append(appendDataFrame)  # deprecated
+                    self._df = pd.concat([self._df, appendDataFrame], ignore_index=True)
 
                     with self._table._guiTableUpdate(self):  # keep the column widths
                         self._table.appendRow(list(listDict.values()))
@@ -283,7 +284,8 @@ class DataFrameObject(object):
                 # if DATAFRAME_PID in listDict.keys():
                 #   listDict[DATAFRAME_PID] = obj
                 appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
-                self._df = self._df.append(appendDataFrame)
+                # self._df = self._df.append(appendDataFrame)  # deprecated
+                self._df = pd.concat([self._df, appendDataFrame], ignore_index=True)
 
             except Exception as es:
                 getLogger().warning(str(es))
@@ -329,7 +331,8 @@ class DataFrameObject(object):
             # store to the table
             with self._table._guiTableUpdate(self):
                 appendDataFrame = pd.DataFrame([listDict], columns=self.headings)
-                self._df = self._df.append(appendDataFrame)
+                # self._df = self._df.append(appendDataFrame)  # deprecated
+                self._df = pd.concat([self._df, appendDataFrame], ignore_index=True)
                 self._table.setRow(row, list(listDict.values()))
 
             # except Exception as es:

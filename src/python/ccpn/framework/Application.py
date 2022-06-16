@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-23 15:16:44 +0100 (Mon, May 23, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-06-16 11:17:38 +0100 (Thu, June 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -142,8 +142,10 @@ def defineProgramArguments():
     parser.add_argument('--debug3', dest='debug3', action='store_true', help='Set logging level to debug3')
 
     # Ccpn logging options - traceback can sometimes be masked in undo/redo
-    # --disable-undo-exception removes the try:except to allow full traceback to occur
+    # --disable-<option>-exception removes the try:except to allow full traceback to occur
     parser.add_argument('--disable-undo-exception', dest='disableUndoException', action='store_true', help='Disable exception wrapping undo/redo actions, reserved for high-level debugging.')
+    parser.add_argument('--disable-queue-exception', dest='disableQueueException', action='store_true', help='Disable exception wrapping undo/redo actions, reserved for high-level debugging.')
+
     # log information at end of undo/redo if exception occurs (not called if --disable-undo-exception set), calls _logObjects
     parser.add_argument('--ccpn-logging', dest='ccpnLogging', action='store_true', help='Additional logging of some ccpn objects, reserved for high-level debugging.')
 

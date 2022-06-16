@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-12 12:29:56 +0100 (Thu, May 12, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-16 11:17:38 +0100 (Thu, June 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -220,6 +220,7 @@ class Framework(NotifierBase, GuiBase):
         self._experimentClassifications = None  # initialised in _startApplication once a project has loaded
 
         self._disableUndoException = getattr(self.args, 'disableUndoException', False)
+        self._disableQueueException = getattr(self.args, 'disableQueueException', False)
         self._ccpnLogging = getattr(self.args, 'ccpnLogging', False)
 
         # register dataLoaders for the first and only time

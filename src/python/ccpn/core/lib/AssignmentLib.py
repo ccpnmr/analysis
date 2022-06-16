@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-11 10:30:22 +0000 (Fri, March 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-16 11:17:38 +0100 (Thu, June 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -864,9 +864,10 @@ def matchingNmrAtomsForPeaks(peaks: typing.List[Peak],
         for csl in csls:
             _data = csl._data
 
-            # get the values from the dataFrame
-            _vals = {_data.iloc[ii]['nmrAtom']: _data.iloc[ii]['value'] for ii in range(_data.shape[0])}
-            _shifts[csl] = _vals
+            if _data is not None and not _data.empty:
+                # get the values from the dataFrame
+                _vals = {_data.iloc[ii]['nmrAtom']: _data.iloc[ii]['value'] for ii in range(_data.shape[0])}
+                _shifts[csl] = _vals
 
     for dim in range(N_dims):
         # Find and add the NmrAtoms that dimension dim in all peaks

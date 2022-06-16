@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-01 20:13:15 +0100 (Wed, June 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-16 11:14:14 +0100 (Thu, June 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -397,7 +397,7 @@ class GLmultipletNdLabelling(GLmultipletListMethods, GLLabelling):  #, GLpeakNdL
         try:
             # try to read from the cache
             return self._objIsInVisiblePlanesCache[spectrumView][multiplet]
-        except:
+        except Exception:
             # calculate and store the new value
             value = self._objIsInVisiblePlanes(spectrumView, multiplet, viewOutOfPlaneMultiplets=viewOutOfPlaneMultiplets)
             if spectrumView not in self._objIsInVisiblePlanesCache:

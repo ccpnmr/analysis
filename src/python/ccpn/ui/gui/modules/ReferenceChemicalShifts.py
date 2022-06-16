@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-25 20:32:28 +0100 (Wed, May 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-16 13:29:59 +0100 (Thu, June 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -55,15 +55,9 @@ from ccpn.util.isotopes import name2IsotopeCode
 from ccpn.ui.gui.widgets.MessageDialog import showWarning, _stoppableProgressBar, progressManager
 
 CCPCODES = sorted(CCP_CODES)
-# GridFont = Font('Helvetica', 16, bold=True)
-GridFont = getFont()
-BackgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
-OriginAxes = pg.functions.mkPen(hexToRgb(getColours()[GUISTRIP_PIVOT]), width=1, style=QtCore.Qt.DashLine)
-SelectedPoint = pg.functions.mkPen(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
-SelectedLabel = pg.functions.mkBrush(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
-c = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
-GridPen = pg.functions.mkPen(c, width=1, style=QtCore.Qt.SolidLine)
-bc = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
+
+
+
 
 Hydrogen = 'Hydrogen'
 Heavy = 'Heavy'
@@ -210,6 +204,14 @@ CurveColours4DarkDisplay = {'C': '#b0f7ee',## BB
                        'NZ': '#6495ED', }
 
 
+def getMouseTextLabel(position, label):
+    text = pg.TextItem(
+        html='<div style="text-align: center"><span style="color: #FFF;'
+             '">This is the</span><br><span '
+             'style="color: #FF0; font-size: 16pt;">PEAK</span></div>',
+        anchor=(-0.3, 0.5),  border='w', fill=(0, 0, 255, 100))
+
+
 class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else the drop events are not processed
 
     includeSettingsWidget = False
@@ -228,6 +230,13 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         self.displayedAxisCodes = defaultdict(list)
         self._backboneAtoms = set()
         self._sideChainAtoms = set()
+        self.lines = []
+        self.currentColour = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT])
+        self.gridColour = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
+        self.gridPen = pg.functions.mkPen(self.gridColour, width=1, style=QtCore.Qt.SolidLine)
+        self.backgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
+        self.gridFont = getFont()
+
 
         self._RCwidgetFrame = Frame(self.mainWidget, setLayout=True,
                                     grid=(0, 0), gridSpan=(1, 1),
@@ -270,8 +279,9 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         self.zoomAllButton.setFixedSize(25,25)
 
         self.toolBar = ToolBar(self._TBFrame,  grid=(0, 0))
+        self.maxDimensionLines = 7
 
-        self.plotWidget = pg.PlotWidget(background=bc)
+        self.plotWidget = pg.PlotWidget(background=self.backgroundColour)
         self.plotWidget.invertX()
         self.mainWidget.getLayout().addWidget(self.plotWidget, 2, 0, 1, 1)
 
@@ -279,8 +289,20 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         self._setupPlot()
 
         # crosshair
-        self.vLine = pg.InfiniteLine(angle=90, label='', movable=False, pen=GridPen, labelOpts={'color':c})
-        self.plotWidget.addItem(self.vLine,  ignoreBounds=True,)
+        # create in advance line based on spectral dimensions up to maxDimensionLines (7)
+
+        for i in range(1,self.maxDimensionLines):
+            line = pg.InfiniteLine(angle=90, label='', movable=False, pen=self.gridPen,
+                                   labelOpts={'color':self.currentColour,
+                                           'position':0.1,
+                                           'anchors':[0, 0.5],
+                                           'border':self.currentColour,
+                                            # 'fill':self.currentColour
+                                            },
+                                    name=str(i))
+            self.plotWidget.addItem(line,  ignoreBounds=True,)
+            self.lines.append(line)
+            line.hide()
         self.viewBox = self.plotWidget.plotItem.vb
         self.plotWidget.scene().sigMouseMoved.connect(self.mouseMoved)
         self.plotWidget.plotItem.autoBtn.setOpacity(0.0)
@@ -330,38 +352,44 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
 
     def mousePosNotifierCallback(self, *args):
         """Set the vertical line based on current cursor position """
-        pos = None
-        axisCodeDict =  self.current.mouseMovedDict.get(1, {})
-        for currentAxisCode, currentAxisCodePos in axisCodeDict.items():
-            # try an exact match first
-            for displayedAxisCode in self.displayedAxisCodes:
-                exactCodes = self.displayedAxisCodes[displayedAxisCode]
-                for exactCode in exactCodes:
-                    if exactCode == currentAxisCode:
-                        pos = currentAxisCodePos[0]
-                        break
-                if pos is None:
-                    # try a first letter match
-                    if len(currentAxisCode)>0:
-                        if displayedAxisCode == currentAxisCode[0]:
-                            pos = currentAxisCodePos[0]
-                            break
-        if pos:
-            self.vLine.setPos(pos)
-            self.vLine.label.setText(str(round(pos, 3)))
-        else:
-            self.vLine.setPos(-1000)
-            self.vLine.label.setText('')
+        self._hideLines()
+        axisCodeDict =  self.current.mouseMovedDict.get(0, {'':[]})
+        positions = {}
+        for isotName, glCursorPositions in axisCodeDict.items():
+            for glCursorPosition in glCursorPositions:
+                positions.update({glCursorPosition:isotName})
 
+        if len(positions)<1:
+            return
+        lines = self.lines[:len(positions)]
+
+        for line, (position, isoName) in zip(lines, positions.items()):
+            line.setPos(position)
+            line.label.setText(f'{isoName}: {str(round(position, 3))}')
+            line.show()
+
+
+    def _getFirstLine(self):
+        if len(self.lines)>0:
+            return self.lines[0]
+
+    def _hideLines(self):
+        for l in self.lines:
+            l.hide()
 
     def mouseMoved(self, event):
+        line = self._getFirstLine()
+        if not line:
+            return
+        self._hideLines()
+        line.show()
 
         position = event
         mousePoint = self.viewBox.mapSceneToView(position)
         x = mousePoint.x()
         # y = mousePoint.y()
-        self.vLine.setPos(x)
-        self.vLine.label.setText(str(round(x,3)))
+        line.setPos(x)
+        line.label.setText(str(round(x,3)))
         atomPosDict = defaultdict(list)
         isotopeCodePosDict = defaultdict(list)
         ## find the item under the cursor position
@@ -396,13 +424,13 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
     def _setupPlot(self):
 
         baxis = self.plotWidget.plotItem.getAxis('bottom')
-        baxis.tickFont = GridFont
-        baxis.setPen(GridPen)
+        baxis.tickFont = self.gridFont
+        baxis.setPen(self.gridPen)
         baxis.setLabel('[ppm]')
         lAxis = self.plotWidget.plotItem.getAxis('left')
         lAxis.setStyle(tickLength=0, showValues=False)
         lAxis.setLabel(' ')
-        lAxis.setPen(GridPen)
+        lAxis.setPen(self.gridPen)
         self.plotWidget.showGrid(x=False, y=False)
 
     def _getDistributionForResidue(self, ccpCode: str, atomType: str):
@@ -443,7 +471,7 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         maxBaseline = 20 if atomType == Hydrogen else 300
         xBaseline = np.arange(0, maxBaseline)
         yBaseline = np.array([offset] * len(xBaseline))
-        baselinePlot = self.plotWidget.plot(xBaseline, yBaseline, name=ccpCode, pen=GridPen)
+        baselinePlot = self.plotWidget.plot(xBaseline, yBaseline, name=ccpCode, pen=self.gridPen)
         return baselinePlot
 
     def _showAllResidues(self, offset=0.175 ):
@@ -481,7 +509,7 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
                 self.plots.update({atomName:plot})
                 self.plotWidget.addItem(textItem)
 
-            ccpCodeTextItem = pg.TextItem(ccpCode, color=c, angle=0, border='w', anchor=(-0.1, 0.5) )
+            ccpCodeTextItem = pg.TextItem(ccpCode, color=self.gridColour, angle=0, anchor=(-0.1, 0.5) )
             ccpCodeTextItem.setPos(0, inititialOffset)
             self.plotWidget.addItem(ccpCodeTextItem)
 

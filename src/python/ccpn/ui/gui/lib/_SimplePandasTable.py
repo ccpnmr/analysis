@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-16 14:24:54 +0100 (Thu, June 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-16 17:38:41 +0100 (Thu, June 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -33,7 +33,7 @@ from functools import partial
 import numpy as np
 import pandas as pd
 from PyQt5 import QtWidgets, QtCore, QtGui
-from time import time_ns, perf_counter_ns
+from time import time_ns
 from types import SimpleNamespace
 
 from ccpn.ui.gui.guiSettings import getColours, GUITABLE_ITEM_FOREGROUND
@@ -302,9 +302,8 @@ class _SimplePandasTableModel(QtCore.QAbstractTableModel):
         self._view = view
         if view:
             self.fontMetric = QtGui.QFontMetricsF(view.font())
-            self.bbox = self.fontMetric.boundingRect
-            self._chrWidth = 1 + self.bbox('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789').width() / 36
-            self._chrHeight = self.bbox('A').height() + 8
+            self._chrWidth = 1 + self.fontMetric.boundingRect('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789').width() / 36
+            self._chrHeight = self.fontMetric.boundingRect('A').height() + 8
 
         self._sortColumn = 0
         self._sortDirection = QtCore.Qt.AscendingOrder

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-16 13:29:59 +0100 (Thu, June 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-16 14:50:10 +0100 (Thu, June 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -204,13 +204,6 @@ CurveColours4DarkDisplay = {'C': '#b0f7ee',## BB
                        'NZ': '#6495ED', }
 
 
-def getMouseTextLabel(position, label):
-    text = pg.TextItem(
-        html='<div style="text-align: center"><span style="color: #FFF;'
-             '">This is the</span><br><span '
-             'style="color: #FF0; font-size: 16pt;">PEAK</span></div>',
-        anchor=(-0.3, 0.5),  border='w', fill=(0, 0, 255, 100))
-
 
 class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else the drop events are not processed
 
@@ -218,6 +211,9 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
     maxSettingsState = 2
     settingsPosition = 'top'
     className = 'ReferenceChemicalShifts'
+
+    from ccpn.util.decorators import profile
+    @profile('/Users/luca/Documents/V3-testings/profiling/')
 
     def __init__(self, mainWindow, name='Reference Chemical Shifts', ):
         super().__init__(mainWindow=mainWindow, name=name)
@@ -266,7 +262,7 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         DividerLabel(self._RCwidget, hAlign='l', grid=(0, col))
 
         col += 1
-        Label(self._RCwidget, 'Select', grid=(0, col))
+        Label(self._RCwidget, 'Atom Selection', grid=(0, col))
         col += 1
         self.atomOptionsRadioButtons = RadioButtons(self._RCwidget, texts=[Backbone, SideChain, All],
                                                     callback=self._updateModule, selectedInd=0, grid=(0, col))
@@ -534,6 +530,7 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         Updates the information displayed in the module when either the residue type or the atom type
         selectors are changed.
         """
+        self.viewBox._updatingRange = True
 
         ccpCode = self.residueTypePulldown.currentText()
         if ccpCode==All:
@@ -579,6 +576,7 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
             widgetAction.setFixedSize(55, 30)
         self._zoomAllCallback()
         self._toggleByAtom()
+        self.viewBox._updatingRange = False
 
     def residueToolbarActionCallback(self, plotItems, textItems, ccpCodeTextItem, baselinePlot):
         checked = self.sender().isChecked()
@@ -597,6 +595,9 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
                         if atomName in self._sideChainAtoms:
                             plotItem.setVisible(checked)
                             textItem.setVisible(checked)
+                    else:
+                        plotItem.setVisible(checked)
+                        textItem.setVisible(checked)
 
         ccpCodeTextItem.setVisible(checked)
         baselinePlot.setVisible(checked)

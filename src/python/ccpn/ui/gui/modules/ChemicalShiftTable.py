@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-16 11:18:15 +0100 (Thu, June 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-16 12:02:43 +0100 (Thu, June 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -38,6 +38,7 @@ from ccpn.core.lib.DataFrameObject import DataFrameObject
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.lib.DataFrameObject import DATAFRAME_OBJECT
 from ccpn.core.lib.CallBack import CallBack
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.core.ChemicalShiftList import CS_UNIQUEID, CS_ISDELETED, CS_PID, \
     CS_STATIC, CS_STATE, CS_ORPHAN, CS_VALUE, CS_VALUEERROR, CS_FIGUREOFMERIT, CS_ATOMNAME, \
     CS_NMRATOM, CS_CHAINCODE, CS_SEQUENCECODE, CS_RESIDUETYPE, \
@@ -1338,9 +1339,11 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
             self._navigateMenu = self.tableMenu.addMenu('Navigate to:')
             self._mergeMenuAction = self.tableMenu.addAction('Merge NmrAtoms', self._mergeNmrAtoms)
             self._editMenuAction = self.tableMenu.addAction('Edit NmrAtom', self._editNmrAtom)
+            self._removeAssignmentsMenuAction = self.tableMenu.addAction('Remove assignments', self._removeAssignments)
 
             # move new actions to the top of the list
-            self.tableMenu.insertAction(_topSeparator, self._mergeMenuAction)
+            self.tableMenu.insertAction(_topSeparator, self._removeAssignmentsMenuAction)
+            self.tableMenu.insertAction(self._removeAssignmentsMenuAction, self._mergeMenuAction)
             self.tableMenu.insertAction(self._mergeMenuAction, self._editMenuAction)
 
     def _raiseTableContextMenu(self, pos):
@@ -1465,6 +1468,29 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
                         f'Cannot navigate to position {round(chemicalShift.value, 3)} '
                         f'in {stripStr}: {strips} '
                         f'for nmrAtom {chemicalShift.nmrAtom.name}.')
+
+    def _removeAssignments(self):
+        """Remove assignments from the selection
+        """
+        selection = self.getSelectedObjects()
+        data = self.getRightMouseItem()
+        if (data is not None and not data.empty) and selection:
+            if (matching := [ch for ch in selection if ch and ch.nmrAtom]):
+
+                # if there is a selection and the selection contains shift with nmrAtoms
+                with undoBlockWithoutSideBar():
+                    _peaks = list(pp for pp in self.project.peaks if pp.chemicalShiftList == self._table)
+
+                    for cs in matching:
+                        nmrAtom = cs.nmrAtom
+
+                        for peak in _peaks:
+                            peakDimNmrAtoms = list(list(pp) for pp in peak.dimensionNmrAtoms)
+                            for peakDim in peakDimNmrAtoms:
+                                if nmrAtom in peakDim:
+                                    peakDim.remove(nmrAtom)
+
+                            peak.dimensionNmrAtoms = peakDimNmrAtoms
 
 
 #=========================================================================================

@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-16 12:26:54 +0100 (Thu, June 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-16 13:51:57 +0100 (Thu, June 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1339,10 +1339,12 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
             self._navigateMenu = self.tableMenu.addMenu('Navigate to:')
             self._mergeMenuAction = self.tableMenu.addAction('Merge NmrAtoms', self._mergeNmrAtoms)
             self._editMenuAction = self.tableMenu.addAction('Edit NmrAtom', self._editNmrAtom)
-            self._removeAssignmentsMenuAction = self.tableMenu.addAction('Remove assignments', self._removeAssignments)
+            self._removeAssignmentsMenuAction = self.tableMenu.addAction('Remove assignments', partial(self._removeAssignments, delete=False))
+            self._removeAssignmentsDeleteMenuAction = self.tableMenu.addAction('Remove assignments and Delete', partial(self._removeAssignments, delete=True))
 
             # move new actions to the top of the list
-            self.tableMenu.insertAction(_topSeparator, self._removeAssignmentsMenuAction)
+            self.tableMenu.insertAction(_topSeparator, self._removeAssignmentsDeleteMenuAction)
+            self.tableMenu.insertAction(self._removeAssignmentsDeleteMenuAction, self._removeAssignmentsMenuAction)
             self.tableMenu.insertAction(self._removeAssignmentsMenuAction, self._mergeMenuAction)
             self.tableMenu.insertAction(self._mergeMenuAction, self._editMenuAction)
 
@@ -1368,6 +1370,7 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
             self._addNavigationStripsToContextMenu()
 
             self._removeAssignmentsMenuAction.setEnabled(True if selection else False)
+            self._removeAssignmentsDeleteMenuAction.setEnabled(True if selection else False)
 
         else:
             # disabled but visible lets user know that menu items exist
@@ -1376,6 +1379,7 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
             self._editMenuAction.setText('Edit NmrAtom')
             self._editMenuAction.setEnabled(False)
             self._removeAssignmentsMenuAction.setEnabled(False)
+            self._removeAssignmentsDeleteMenuAction.setEnabled(False)
 
         # raise the menu
         super()._raiseTableContextMenu(pos)
@@ -1473,8 +1477,8 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
                         f'in {stripStr}: {strips} '
                         f'for nmrAtom {chemicalShift.nmrAtom.name}.')
 
-    def _removeAssignments(self):
-        """Remove assignments from the selection
+    def _removeAssignments(self, delete=False):
+        """Remove assignments from the selection and delete as required
         """
         selection = self.getSelectedObjects()
         data = self.getRightMouseItem()
@@ -1494,8 +1498,12 @@ class _NewChemicalShiftTable(_SimplePandasTableViewProjectSpecific):
                                 if nmrAtom in peakDim:
                                     peakDim.remove(nmrAtom)
 
+                            # update the peak assignments
                             peak.dimensionNmrAtoms = peakDimNmrAtoms
 
+                        if delete:
+                            # delete the chemicalShift
+                            cs.delete()
 
 #=========================================================================================
 # _CSLTableDelegate - handle editing the table, needs moving

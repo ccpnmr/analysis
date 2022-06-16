@@ -4,10 +4,10 @@ Module containing functions for defining GLSL shaders.
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2022"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-01-27 15:24:37 +0000 (Thu, January 27, 2022) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-06-16 17:29:54 +0100 (Thu, June 16, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -96,8 +96,14 @@ class ShaderProgramABC(object):
         if not (self.vertexShader or self.fragmentShader) or self.attributes == {}:
             raise RuntimeError('ShaderProgram is not correctly defined')
 
+        self.uniformLocations = {}
         try:
-            self.program_id = GL.glCreateProgram()
+            self._shader = shader = QtGui.QOpenGLShaderProgram()
+            self.vs_id = shader.addShaderFromSourceCode(QtGui.QOpenGLShader.Vertex, self.vertexShader)
+            self.frag_id = shader.addShaderFromSourceCode(QtGui.QOpenGLShader.Fragment, self.fragmentShader)
+            shader.link()
+            shader.bind()
+            self.program_id = shader.programId()
         except Exception as es:
             esType, esValue, esTraceback = sys.exc_info()
             _ver = QtGui.QOpenGLVersionProfile()
@@ -112,29 +118,9 @@ class ShaderProgramABC(object):
                   f"{esTraceback}"
             raise RuntimeError(msg)
 
-        self.vs_id = self._addGLShader(self.vertexShader, GL.GL_VERTEX_SHADER)
-        self.frag_id = self._addGLShader(self.fragmentShader, GL.GL_FRAGMENT_SHADER)
-        # self.attributes = attributes
-        self.uniformLocations = {}
-
-        GL.glAttachShader(self.program_id, self.vs_id)
-        GL.glAttachShader(self.program_id, self.frag_id)
-        GL.glLinkProgram(self.program_id)
-
-        if GL.glGetProgramiv(self.program_id, GL.GL_LINK_STATUS) != GL.GL_TRUE:
-            info = GL.glGetProgramInfoLog(self.program_id)
-            GL.glDeleteProgram(self.program_id)
-            GL.glDeleteShader(self.vs_id)
-            GL.glDeleteShader(self.frag_id)
-            raise RuntimeError(f'Error linking program: {info}')
-
-        # detach after successful link
-        GL.glDetachShader(self.program_id, self.vs_id)
-        GL.glDetachShader(self.program_id, self.frag_id)
-
         # define attributes to be passed to the shaders
         for att in self.attributes.keys():
-            self.uniformLocations[att] = GL.glGetUniformLocation(self.program_id, att)
+            self.uniformLocations[att] = shader.uniformLocation(att)
             self.uniformLocations['_' + att] = np.zeros((self.attributes[att][0],), dtype=self.attributes[att][1])
 
     def _addGLShader(self, source, shader_type):
@@ -176,8 +162,13 @@ class ShaderProgramABC(object):
     def makeCurrent(self):
         """Make self the current shader
         """
-        GL.glUseProgram(self.program_id)
+        self._shader.bind()
         return self
+
+    def release(self):
+        """Unbind the current shader
+        """
+        self._shader.release()
 
     def setProjectionAxes(self, attMatrix, left, right, bottom, top, near, far):
         """Set the contents of the projection matrix
@@ -218,53 +209,51 @@ class ShaderProgramABC(object):
         """Set a 4x4 float32 matrix in the shader
         """
         try:
-            GL.glUniformMatrix4fv(self.uniformLocations[uniformLocation],
-                                  count, transpose, value)
-        except:
-            raise RuntimeError(f'Error setting setGLUniformMatrix4fv: {uniformLocation}')
+            self._shader.setUniformValue(self.uniformLocations[uniformLocation],
+                                         QtGui.QMatrix4x4(*value) if transpose else QtGui.QMatrix4x4(*value).transposed())
+        except Exception as es:
+            raise RuntimeError(f'Error setting setGLUniformMatrix4fv: {uniformLocation}   {es}')
 
     def setGLUniform4fv(self, uniformLocation=None, count=1, value=None):
         """Set a 4x1 float32 vector in the shader
         """
         try:
-            GL.glUniform4fv(self.uniformLocations[uniformLocation],
-                            count, value)
-        except:
-            raise RuntimeError(f'Error setting setGLUniform4fv: {uniformLocation}')
+            self._shader.setUniformValue(self.uniformLocations[uniformLocation], QtGui.QVector4D(*value))
+
+        except Exception as es:
+            raise RuntimeError(f'Error setting setGLUniform4fv: {uniformLocation}   {es}')
 
     def setGLUniform4iv(self, uniformLocation=None, count=1, value=None):
         """Set a 4x1 uint32 vector in the shader
         """
         try:
-            GL.glUniform4iv(self.uniformLocations[uniformLocation],
-                            count, value)
-        except:
-            raise RuntimeError(f'Error setting setGLUniform4iv: {uniformLocation}')
+            self._shader.setUniformValue(self.uniformLocations[uniformLocation], QtGui.QVector4D(*value))
+        except Exception as es:
+            raise RuntimeError(f'Error setting setGLUniform4iv: {uniformLocation}   {es}')
 
     def setGLUniform2fv(self, uniformLocation=None, count=1, value=None):
         """Set a 2x1 uint32 vector in the shader
         """
         try:
-            GL.glUniform2fv(self.uniformLocations[uniformLocation],
-                            count, value)
-        except:
-            raise RuntimeError(f'Error setting setGLUniform2fv: {uniformLocation}')
+            self._shader.setUniformValue(self.uniformLocations[uniformLocation], QtGui.QVector2D(*value))
+        except Exception as es:
+            raise RuntimeError(f'Error setting setGLUniform2fv: {uniformLocation}   {es}')
 
     def setGLUniform1i(self, uniformLocation=None, value=None):
         """Set a single uint32 attribute in the shader
         """
         try:
-            GL.glUniform1i(self.uniformLocations[uniformLocation], value)
-        except:
-            raise RuntimeError(f'Error setting setGLUniform1i: {uniformLocation}')
+            self._shader.setUniformValue(self.uniformLocations[uniformLocation], value)
+        except Exception as es:
+            raise RuntimeError(f'Error setting setGLUniform1i: {uniformLocation}   {es}')
 
     def setGLUniform1f(self, uniformLocation=None, value=None):
         """Set a single float32 attribute in the shader
         """
         try:
-            GL.glUniform1f(self.uniformLocations[uniformLocation], value)
-        except:
-            raise RuntimeError(f'Error setting setGLUniform1f: {uniformLocation}')
+            self._shader.setUniformValue(self.uniformLocations[uniformLocation], float(value))
+        except Exception as es:
+            raise RuntimeError(f'Error setting setGLUniform1f: {uniformLocation}   {es}')
 
     def uniformLocation(self, name):
         """Function to get location of an OpenGL uniform variable

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-04 00:17:35 +0000 (Fri, March 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-16 13:51:27 +0100 (Thu, June 16, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -57,8 +57,8 @@ def fetchHttpResponse(method, url, data=None, headers=None, proxySettings=None):
     options = {
         'cert_reqs': 'CERT_REQUIRED',
         'ca_certs' : certifi.where(),
-        # 'timeout'  : urllib3.Timeout(connect=3.0, read=3.0),
-        # 'retries'  : urllib3.Retry(1, redirect=False)
+        'timeout'  : urllib3.Timeout(connect=3.0),
+        'retries'  : urllib3.Retry(1, redirect=False)
         }
 
     # check whether a proxy is required

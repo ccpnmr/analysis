@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-09 17:07:32 +0000 (Wed, March 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-17 13:42:00 +0100 (Fri, June 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -99,6 +99,9 @@ class Preferences(AttrDict):
             _prefs = json.load(fp, object_hook=AttrDict)
 
         self._lastPath = str(path)
+
+        self._overrideDefaults(_prefs)
+
         return _prefs
 
     def _getUserPreferences(self):
@@ -186,3 +189,11 @@ class Preferences(AttrDict):
 
     def __str__(self):
         return f'<Preferences: {repr(self._lastPath)}>'
+
+    @staticmethod
+    def _overrideDefaults(prefs):
+        """Override any settings that are currently causing problems
+        """
+        # NOTE:ED - there is a bug in pyqt5.12.3 that causes a crash when using QWebEngineView
+        prefs.general.useNativeWebbrowser = True
+        prefs.appearance.useOnlineDocumentation = False

@@ -17,7 +17,7 @@
         "dataPath"                             : "~",
         "useNative"                            : false,
         "useNativeMenus"                       : false,
-        "useNativeWebbrowser"                  : false,
+        "useNativeWebbrowser"                  : true,
         "keepSpectraInsideProject"             : false,
         "showToolbar"                          : true,
         "showSpectrumBorder"                   : true,
@@ -141,7 +141,7 @@
         "rememberLastClosedModuleState"      : true,
         "autoOpenPythonConsoleOnMacroEditor" : true,
         "nefImporterOpenFirstTable"          : false,
-        "useOnlineDocumentation"             : true
+        "useOnlineDocumentation"             : false
     },
     "printSettings"    : {
         "font"              : "Helvetica,15,-1,5,50,0,0,0,0,0,Regular",

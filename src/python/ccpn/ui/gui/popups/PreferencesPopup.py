@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-08 22:26:12 +0100 (Wed, June 08, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-06-17 13:42:00 +0100 (Fri, June 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -594,6 +594,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         row += 1
         self.useNativeWebBox = _makeCheckBox(parent, text="Use native web browser", row=row,
                                              callback=partial(self._queueToggleGeneralOptions, 'useNativeWebbrowser'))
+        self.useNativeWebBox.setEnabled(False)
 
         row += 1
         self.useNativeMenus = _makeCheckBox(parent, text="Use native menus (requires restart)", row=row,
@@ -616,6 +617,7 @@ class PreferencesPopup(CcpnDialogMainWidget):
         self.useOnlineDocumentation = _makeCheckBox(parent, row=row, text="Use online api-documentation",
                                                     callback=self._queueSetUseOnlineDocumentation,
                                                     toolTip="Use the online api-documentation instead of the local folder")
+        self.useOnlineDocumentation.setEnabled(False)
 
         #====== Tip of the Day ======
         row += 1

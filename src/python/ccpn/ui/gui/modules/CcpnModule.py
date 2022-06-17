@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-23 15:17:14 +0100 (Mon, May 23, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-06-17 13:40:26 +0100 (Fri, June 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -134,6 +134,9 @@ PidShortClassName = 'MO'
 
 MODULENAME = 'moduleName'
 WIDGETSTATE = 'widgetsState'
+
+MIN_PIXMAP = 32
+MAX_PIXMAP = 128
 
 
 class CcpnModule(Dock, DropBase, NotifierBase):
@@ -1067,9 +1070,9 @@ class CcpnModule(Dock, DropBase, NotifierBase):
         self.drag.setMimeData(mime)
         dragPixmap = self.grab()
         # make sure that the dragPixmap is not too big
-        self.drag.setPixmap(dragPixmap.scaledToWidth(max(32, min(128, dragPixmap.width())))
+        self.drag.setPixmap(dragPixmap.scaledToWidth(max(MIN_PIXMAP, min(MAX_PIXMAP, dragPixmap.width())))
                             if dragPixmap.width() < dragPixmap.height() else
-                            dragPixmap.scaledToHeight(max(32, min(128, dragPixmap.height()))))
+                            dragPixmap.scaledToHeight(max(MIN_PIXMAP, min(MAX_PIXMAP, dragPixmap.height()))))
         self.widgetArea.setStyleSheet(self.dragStyle)
         self._raiseSelectedOverlay()
         self.updateStyle()

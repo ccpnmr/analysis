@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-16 17:29:54 +0100 (Thu, June 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-17 13:40:47 +0100 (Fri, June 17, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -102,7 +102,7 @@ class ShaderProgramABC(object):
             self.vs_id = shader.addShaderFromSourceCode(QtGui.QOpenGLShader.Vertex, self.vertexShader)
             self.frag_id = shader.addShaderFromSourceCode(QtGui.QOpenGLShader.Fragment, self.fragmentShader)
             shader.link()
-            shader.bind()
+            # shader.bind()
             self.program_id = shader.programId()
         except Exception as es:
             esType, esValue, esTraceback = sys.exc_info()

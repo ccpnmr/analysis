@@ -4,9 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -14,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-03-01 11:22:51 +0000 (Mon, March 01, 2021) $"
-__version__ = "$Revision: 3.0.3 $"
+__dateModified__ = "$dateModified: 2022-06-20 17:03:57 +0100 (Mon, June 20, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -34,7 +35,7 @@ from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownListsForObjects import SpectrumPulldown
 from ccpn.ui.gui.widgets.HLine import HLine
-from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.widgets.MessageDialog import showWarning, showMulti
 from ccpn.ui.gui.guiSettings import getColours, SOFTDIVIDER
 
 
@@ -170,8 +171,40 @@ class EstimateVolumes(CcpnDialogMainWidget):
 
             # estimate the volumes for the peakLists
             with undoBlockWithoutSideBar(self.application):
+
+                badPks = []
                 for peakList in peakLists:
-                    peakList.estimateVolumes(volumeIntegralLimit=volumeIntegralLimit)
+                    for pk in peakList.peaks:
+                        height = pk.height
+                        lineWidths = pk.lineWidths
+                        if lineWidths is None or None in lineWidths or height is None:
+                            badPks.append(pk)
+
+                if badPks:
+                    cancelTxt = 'Cancel'
+                    okTxt = 'Refit Peaks and Estimate Volumes'
+                    ok = showMulti(title='Estimate Volumes',
+                                   message='There are peaks without linewidths.\nYou need to refit your peak(s) in order to estimate the volume(s). This may slightly change the peak position(s).',
+                                   okText=okTxt, cancelText=cancelTxt, texts=[cancelTxt, okTxt])
+
+                    if ok != cancelTxt:
+                        # refit the peaks
+                        fitMethod = self.application.preferences.general.peakFittingMethod
+                        singularMode = True
+                        peakList.fitExistingPeaks(badPks, fitMethod=fitMethod, singularMode=singularMode)
+
+                        # estimate the volumes
+                        for peakList in peakLists:
+                            peakList.estimateVolumes(volumeIntegralLimit=volumeIntegralLimit)
+
+                        self.peakListWidget._disableLabels([pp.pid for pp in peakLists])
+
+                else:
+                    # okay to estimate the volumes
+                    for peakList in peakLists:
+                        peakList.estimateVolumes(volumeIntegralLimit=volumeIntegralLimit)
+
+                    self.peakListWidget._disableLabels([pp.pid for pp in peakLists])
 
     def _estimateVolumesForSelection(self):
         """Estimate the volumes for the selected peaks

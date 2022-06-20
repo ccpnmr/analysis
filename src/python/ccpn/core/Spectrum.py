@@ -51,7 +51,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-14 16:12:24 +0100 (Tue, June 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-20 15:10:33 +0100 (Mon, June 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -648,16 +648,18 @@ class Spectrum(AbstractWrapperObject):
         # nmrExpPrototype = self._wrappedData.root.findFirstNmrExpPrototype(name=value) # Why not findFirst instead of looping all sortedNmrExpPrototypes
         for nmrExpPrototype in self._wrappedData.root.sortedNmrExpPrototypes():
             for refExperiment in nmrExpPrototype.sortedRefExperiments():
-                if refExperiment.name == value:
+                # check if the given value is in the STD nomenclature rather than the CCPN! E.g.: standard=COSY; CCPN=HH
+                ccpnName = refExperiment.name
+                standardName = refExperiment.synonym
+                if value in [ccpnName, standardName] :
                     # set API RefExperiment and ExpTransfer
                     _setApiRefExperiment(self._wrappedData.experiment, refExperiment)
                     _setApiExpTransfers(self._wrappedData.experiment)
-                    synonym = refExperiment.synonym
-                    if synonym:
-                        self.experimentName = synonym
+                    if standardName:
+                        self.experimentName = standardName
                     return
-        # nothing found - error:
-        raise ValueError('No reference experiment matches name "%s"' % value)
+        # No reason to raise an error if cannot find a CCPN experimentType definition!
+        getLogger().warning('Could not set ExperimentType. No reference experiment matches name "%s."' % value)
 
     @property
     def experiment(self):

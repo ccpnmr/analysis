@@ -5,7 +5,7 @@ import pandas as pd
 import os
 import glob
 import numpy as np
-from collections import OrderedDict as od
+from collections import OrderedDict as od, defaultdict
 from ccpn.util.isotopes import name2IsotopeCode
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
 from ccpn.framework.PathsAndUrls import macroPath as mp
@@ -339,7 +339,7 @@ def _simulatedSpectrumFromCSL(project, csl, axesCodesMap, spectrumName=None):
         peakList = targetSpectrum.peakLists[-1]
 
         # filter by NmrAtom of interest
-        nmrResiduesOD = od()
+        nmrResiduesOD = defaultdict(list)
         for chemicalShift in csl.chemicalShifts:
             na = chemicalShift.nmrAtom
             if na.name in nmrAtomNames:

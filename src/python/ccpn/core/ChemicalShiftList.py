@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-16 11:18:15 +0100 (Thu, June 16, 2022) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-06-20 15:10:33 +0100 (Mon, June 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -51,6 +51,7 @@ CS_VALUE = 'value'
 CS_VALUEERROR = 'valueError'
 CS_FIGUREOFMERIT = 'figureOfMerit'
 CS_NMRATOM = 'nmrAtom'
+CS_NMRRESIDUE = 'nmrResidue'
 CS_CHAINCODE = 'chainCode'
 CS_SEQUENCECODE = 'sequenceCode'
 CS_RESIDUETYPE = 'residueType'

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-06 12:11:17 +0100 (Fri, May 06, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-20 17:38:13 +0100 (Mon, June 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -306,7 +306,7 @@ class _NewStructureTableWidget(_CoreTableWidgetABC):
         if self._table:
             self._columnDefs = self._getTableColumns(self._table)
 
-            df = pd.DataFrame(self._table.data).astype(self._columnTypes)
+            df = pd.DataFrame(self._table.data).astype({k: v for k, v in self._columnTypes.items() if k in self._table.data.columns})
 
         else:
             self._columnDefs = self._getTableColumns()

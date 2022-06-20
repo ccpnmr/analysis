@@ -1728,7 +1728,7 @@ class Framework(NotifierBase, GuiBase):
         residueTableModule = ResidueTableModule(mainWindow=mainWindow, selectFirstItem=selectFirstItem)
         mainWindow.moduleArea.addModule(residueTableModule, position=position, relativeTo=relativeTo)
         if chain:
-            residueTableModule.selectChain(chain)
+            residueTableModule.selectTable(chain)
         return residueTableModule
 
     @logCommand('application.')

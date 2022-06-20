@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-11 11:08:49 +0100 (Sat, June 11, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-20 11:19:45 +0100 (Mon, June 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -3764,9 +3764,9 @@ class CcpnGLWidget(QOpenGLWidget):
                 exactMatch = (self._preferences.matchAxisCode == AXIS_FULLATOMNAME)
                 indices = getAxisCodeMatchIndices(mark.axisCodes, self._axisCodes[:2], exactMatch=exactMatch, allMatches=not exactMatch)
 
-                for ii, rr in enumerate(mark.rulerData):
-
-                    axisIndices = makeIterableList(indices[ii])
+                for axisIndices, rr in zip(indices, mark.rulerData):
+                    if not isinstance(axisIndices, tuple):  # may be single axis-code
+                        axisIndices = (axisIndices,)
 
                     for axisIndex in axisIndices:
                         if axisIndex is not None and axisIndex < 2:

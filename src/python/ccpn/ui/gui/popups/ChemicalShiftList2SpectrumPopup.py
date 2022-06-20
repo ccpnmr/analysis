@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-16 18:02:32 +0100 (Thu, June 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-20 19:34:52 +0100 (Mon, June 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -25,38 +25,113 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 
 
 from ccpn.framework.Application import getApplication, getCurrent, getProject
-from ccpn.core.lib.CcpnStarIo import _simulatedSpectrumFromCSL
 import ccpn.ui.gui.widgets.CompoundWidgets as cw
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
-from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.LineEdit import LineEdit
+from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from collections import OrderedDict as od
+from ccpn.framework.lib.spectrumSimulation.SpectrumFromChemicalShiftList import CSL2SPECTRUM_DICT
+from PyQt5 import QtCore, QtGui, QtWidgets
+from ccpn.ui.gui.widgets.HLine import HLine, LabeledHLine
+from ccpn.ui.gui.widgets.MoreLessFrame import MoreLessFrame
+from collections import OrderedDict, defaultdict
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.util.Logging import getLogger
 
-defaultAxesCodesMap = od([  #                   replace with the atom and axes of interest
-                        ("N", "N"),
-                        ("H", "H"),
-                        ])
+widgetFixedWidth = 80
 
-widgetFixedWidths = (150, 150)
+SELECTEXPTYPE = '< Select Experiment Type >'
+
+class MapperRowWidgetLabels(Widget):
+
+    def __init__(self, parent, **kwds):
+        super().__init__(parent, setLayout=True, **kwds)
+
+        col = 0
+        self.isotopeCodeLabel = Label(self, 'Isotope', grid=(0,col),
+                                      tipText='IsotopeCode. Used to simulate the new Spectrum')
+        col += 1
+        self.axisCodeEntryLabel = Label(self, 'AxisCode', grid=(0,col),
+                                      tipText='AxisCode. Used to simulate the new Spectrum and assign the NmrAtom')
+        col += 1
+        self.mmrAtomEntryLabel = Label(self, 'NmrAtom Name', grid=(0,col),
+                                     tipText='NmrAtom Name. Used to assign the NmrAtom to newly created peaks')
+        col += 1
+        self.offsetEntryLabel = Label(self, 'Offset', grid=(0,col),
+                                     tipText='Residue Offset. Used to fetch the correct NmrResidue')
+
+        self.isotopeCodeLabel.setFixedWidth(widgetFixedWidth)
+        self.offsetEntryLabel.setFixedWidth(widgetFixedWidth)
+
+
+
+
+
+class MapperRowWidget(Widget):
+
+    def __init__(self, parent, atomNameMapper, **kwds):
+        super().__init__(parent, setLayout=True, **kwds)
+
+        col = 0
+
+        self.isotopeCodeLabel = Label(self, 'IsotopeCode', grid=(0,col),
+                                      tipText='IsotopeCode. Used to simulate the new Spectrum')
+        col += 1
+        self.axisCodeEntry = LineEdit(self, backgroundText='AxisCode. E.g.: Hn', grid=(0,col),
+                                      tipText='AxisCode. Used to simulate the new Spectrum and assign the NmrAtom')
+        self.axisCodeEntry.setEnabled(False)
+
+        col += 1
+        self.mmrAtomEntry = LineEdit(self, backgroundText='Assigning NmrAtom Name. E.g.: H', grid=(0,col),
+                                     tipText='NmrAtom Name. Used to assign the NmrAtom to newly created peaks')
+        col += 1
+        self.offsetEntry = Spinbox(self, grid=(0,col),min=-10, max=10,
+                                     tipText='Residue Offset. Used to fetch the correct NmrResidue')
+
+        self.isotopeCodeLabel.setFixedWidth(widgetFixedWidth)
+        self.offsetEntry.setFixedWidth(widgetFixedWidth)
+
+        self.getLayout().setAlignment(QtCore.Qt.AlignLeft)
+        self.atomNameMapper = atomNameMapper
+        self.updateWidgets()
+
+
+    def updateWidgets(self):
+
+        self.isotopeCodeLabel.set(self.atomNameMapper.isotopeCode)
+        self.axisCodeEntry.set(self.atomNameMapper.axisCode)
+        for offset, requiredAtomName in self.atomNameMapper.offsetNmrAtomNames.items():
+            self.mmrAtomEntry.set(requiredAtomName)
+            self.offsetEntry.setValue(offset)
+            break #should be always one anyway!
+
+    def upddateMapperFromWidgets(self):
+        self.atomNameMapper.axisCode = self.axisCodeEntry.get()
+        offsetNmrAtomNames = {self.offsetEntry.get():self.mmrAtomEntry.get()}
+        self.atomNameMapper.offsetNmrAtomNames = offsetNmrAtomNames
 
 class ChemicalShiftList2SpectrumPopup(CcpnDialogMainWidget):
     """
 
     """
-    FIXEDWIDTH = True
-    FIXEDHEIGHT = True
+    FIXEDWIDTH = False
+    FIXEDHEIGHT = False
 
     title = 'Simulate Spectrum from ChemicalShiftList (Alpha)'
     def __init__(self, parent=None, chemicalShiftList=None, title=title, **kwds):
         super().__init__(parent, setLayout=True, windowTitle=title,
-                         size=(300, 100), minimumSize=None, **kwds)
+                         size=(500, 500), minimumSize=None, **kwds)
 
         self.project = getProject()
         self.application = getApplication()
         self.current = getCurrent()
         self.chemicalShiftList = chemicalShiftList
-        self._axesCodesMap = defaultAxesCodesMap  # Ordered dict as od([("HA","H")]) see info for more
-
+        self.spectrumSimulatorClass = None
+        self._mapperWidgets = defaultdict(list)
         self._createWidgets()
 
         # enable the buttons
@@ -71,31 +146,83 @@ class ChemicalShiftList2SpectrumPopup(CcpnDialogMainWidget):
 
         row = 0
         spectrumName = self.chemicalShiftList.name if self.chemicalShiftList else ''
-        self.spectrumNameEntry = cw.EntryCompoundWidget(self.mainWidget,
-                                                     labelText='New Spectrum Name', entryText=spectrumName,
-                                                     fixedWidths=widgetFixedWidths,
-                                                     grid=(row, 0))
+        self.spectrumNameLabel = Label(self.mainWidget, 'New Spectrum Name', grid=(row, 0),)
+        self.spectrumNameEntry = LineEdit(self.mainWidget, text=spectrumName, grid=(row, 1))
+        row  += 1
+        self.spectrumNameLabel = Label(self.mainWidget, 'New Spectrum Name', grid=(row, 0), )
+        self.experimentTypePulldown = PulldownList(self.mainWidget, texts = list(CSL2SPECTRUM_DICT.keys()),
+                                                        headerText=SELECTEXPTYPE,
+                                                        callback=self._setWidgetsByExperimentType,
+                                                        grid=(row, 1))
+
         row += 1
-        self.atomNamesEntry = cw.EntryCompoundWidget(self.mainWidget,
-                                                     labelText='Atom Names', entryText=','.join(self._axesCodesMap.keys()),
-                                                     fixedWidths=widgetFixedWidths,
-                                                     grid=(row, 0))
+        self.advancedAssignframe = MoreLessFrame(self.mainWidget, name='Advanced Assignment Options',
+                               showMore=False, scrollable=True, grid=(row, 0), gridSpan=(1, 2))
+        self.mappersFrame = self.advancedAssignframe.contentsFrame
         row += 1
-        self.assignToSpectumCodes = cw.EntryCompoundWidget(self.mainWidget,
-                                                     labelText='Assign To Axes', entryText=','.join(self._axesCodesMap.keys()),
-                                                           fixedWidths=widgetFixedWidths,
-                                                     grid=(row, 0))
+
+        self.mappersFrame.getLayout().setAlignment(QtCore.Qt.AlignTop)
+        self.mainWidget.getLayout().setAlignment(QtCore.Qt.AlignTop)
 
 
+    def _setWidgetsByExperimentType(self, *args):
+        pulldown = self.experimentTypePulldown
+        selected = pulldown.get()
+        self.spectrumSimulatorClass = CSL2SPECTRUM_DICT.get(selected, None)
+
+        _GREY = '#888888'
+        if self.spectrumSimulatorClass:
+            self._clearMapperWidgets()
+            self._mapperWidgets = defaultdict(list)
+            row = 0
+
+            labelsWidget = None
+            for i, mappers in enumerate(self.spectrumSimulatorClass.peakAtomNameMappers):
+                # loop through mappers to get the required atoms names  etc
+                LabeledHLine(self.mappersFrame, text=f'Peak Group {i + 1} ', grid=(row, 0), style='DashLine', colour=_GREY)
+                row += 1
+                if not labelsWidget:
+                    labelsWidget = MapperRowWidgetLabels(self.mappersFrame, grid=(row, 0))
+
+                row += 1
+                for mapper in mappers:
+                    w = MapperRowWidget(self.mappersFrame, mapper, grid=(row, 0))
+                    self._mapperWidgets[i].append(w)
+                    row += 1
+        self.mappersFrame.getLayout().setAlignment(QtCore.Qt.AlignTop)
+
+
+    def _clearMapperWidgets(self):
+        """Clear all rows """
+        layout = self.mappersFrame.getLayout()
+        while layout.count():
+            child = layout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
+
+    def _updateMappersFromWidgets(self, spectrumSim):
+        mappersGroups = []
+        for i, _mapperWidgetList in self._mapperWidgets.items():
+            mappers = []
+            for _mapperWidget in _mapperWidgetList:
+                _mapperWidget.upddateMapperFromWidgets()
+                mappers.append(_mapperWidget.atomNameMapper)
+            mappersGroups.append(mappers)
+        spectrumSim.peakAtomNameMappers = mappersGroups
+        return spectrumSim
 
     def _okCallback(self):
         if self.project and self.chemicalShiftList:
-            bmrbCodes = self.atomNamesEntry.getText().replace(" ", "").split(',')
-            assignToSpectumCodes = self.assignToSpectumCodes.getText().replace(" ", "").split(',')
-            for bmrbCode, sac in zip(bmrbCodes, assignToSpectumCodes):
-                self._axesCodesMap[bmrbCode] = sac
-            spectrumName = self.spectrumNameEntry.getText()
-            _simulatedSpectrumFromCSL(self.project, self.chemicalShiftList, self._axesCodesMap, spectrumName=spectrumName)
+
+            if self.spectrumSimulatorClass:
+                spectrumSim = self.spectrumSimulatorClass(self.chemicalShiftList, {'name':self.spectrumNameEntry.get()})
+                self._updateMappersFromWidgets(spectrumSim)
+                try:
+                    spectrumSim.simulatePeakList()
+                except Exception as err:
+                    msg = f'Failed to simulate PeakList for {spectrumSim.spectrum} from {self.chemicalShiftList}.\n{err}'
+                    getLogger().warning(msg)
+                    showWarning('Error', msg)
 
         self.accept()
 

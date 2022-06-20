@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-20 15:10:33 +0100 (Mon, June 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-20 19:34:52 +0100 (Mon, June 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -39,8 +39,12 @@ from ccpn.framework.Application import getApplication
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.core.NmrResidue import NmrResidue, _getNmrResidue
 import pandas as pd
-from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlockWithoutSideBar, notificationEchoBlocking
+from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlockWithoutSideBar, notificationEchoBlocking, PandasChainedAssignment
 from ccpn.util.Logging import getLogger
+from collections import OrderedDict
+
+
+
 
 #--------------------------------------------------------------------------------------------
 # ExperimentTypeSimulator class
@@ -120,7 +124,8 @@ class SimulatedSpectrumByExperimentTypeABC(TraitBase):
         ## filter CSL on the atomNames of interest
         data = data[data[CS_ATOMNAME].isin(requiredAtomNames)]
         # check if the nmrAtom exists in the project. it should!. create a new column nmrResidue because we need for groupby
-        data[CS_NMRRESIDUE] = [self.project.getByPid(na).nmrResidue if self.project.getByPid(na) else None for na in
+        with PandasChainedAssignment():
+            data[CS_NMRRESIDUE] = [self.project.getByPid(na).nmrResidue if self.project.getByPid(na) else None for na in
                                data[CS_NMRATOM]]
         # Filter any Rows where No NmrResidue
         data = data[data[CS_NMRRESIDUE].notna()]
@@ -173,13 +178,13 @@ class SimulatedSpectrumByExperimentTypeABC(TraitBase):
 # AtomNamesMapper class
 #--------------------------------------------------------------------------------------------
 
-class AtomNamesMapper(TraitBase):
+class AtomNamesMapper(object):
     """
     A container to facilitate the nmrAtoms assignment mapping to a particular axisCode/dimension from a ChemicalShift
     """
-    dimension           = CInt
-    isotopeCode         = CString
-    axisCode            = CString
+    dimension           = None
+    isotopeCode         = None
+    axisCode            = None
     offsetNmrAtomNames  = {}
 
 
@@ -387,7 +392,7 @@ class SimulatedSpectrum_HNCOCA(SimulatedSpectrumByExperimentTypeABC):
 
 class SimulatedSpectrum_HNCACB(SimulatedSpectrumByExperimentTypeABC):
 
-    experimentType  = 'CBCANH/HNCACB'
+    experimentType  = 'HNCA/CB'
     isotopeCodes    = ['1H', '13C', '15N']
     axisCodes       = ['Hn', 'C', 'Nh']
     peakAtomNameMappers = [
@@ -416,3 +421,18 @@ class SimulatedSpectrum_HNCACB(SimulatedSpectrumByExperimentTypeABC):
                             NAtomNamesMapper(),
                             ]
                          ]
+
+
+
+#--------------------------------------------------------------------------------------------
+#  Register the Various ExperimentType classes
+#--------------------------------------------------------------------------------------------
+
+CSL2SPECTRUM_DICT = OrderedDict([
+                            (SimulatedSpectrum_1H.experimentType, SimulatedSpectrum_1H),
+                            (SimulatedSpectrum_15N_HSQC.experimentType, SimulatedSpectrum_15N_HSQC),
+                            (SimulatedSpectrum_HNCO.experimentType, SimulatedSpectrum_HNCO),
+                            (SimulatedSpectrum_HNCA.experimentType, SimulatedSpectrum_HNCA),
+                            (SimulatedSpectrum_HNCOCA.experimentType, SimulatedSpectrum_HNCOCA),
+                            (SimulatedSpectrum_HNCACB.experimentType, SimulatedSpectrum_HNCACB),
+                            ])

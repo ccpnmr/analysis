@@ -4,18 +4,19 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-10-07 17:12:47 +0100 (Wed, October 07, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-06-20 19:34:52 +0100 (Mon, June 20, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -31,7 +32,7 @@ from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Label import ActiveLabel, Label
 from ccpn.ui.gui.guiSettings import getColours, BORDERNOFOCUS
 from ccpn.ui.gui.widgets.Font import getFontHeight
-
+from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 
 class MoreLessFrame(Frame):
     """
@@ -39,7 +40,7 @@ class MoreLessFrame(Frame):
     """
     DEFAULTMARGINS = (0, 2, 0, 0)  # l, t, r, b
 
-    def __init__(self, parent, mainWindow=None, name=None, showMore=True, setLayout=None,
+    def __init__(self, parent, mainWindow=None, name=None, showMore=True, setLayout=None, scrollable=False,
                  showBorder=True, borderColour=None, _frameMargins=DEFAULTMARGINS, **kwds):
         """Initialise the widget
         """
@@ -68,8 +69,15 @@ class MoreLessFrame(Frame):
         # self._label.setFixedHeight(self._labelHeight)
 
         row += 1
+
         self._contentsFrame = Frame(self, setLayout=True, showBorder=False, grid=(row, 0), gridSpan=(1, 2))
         self._openButton.setSelectionCallback(self._toggleContents)
+        self.scrollArea = None
+        if scrollable:
+            self.scrollArea = ScrollArea(self, setLayout=True,grid=(row, 0), gridSpan=(1, 2))
+            self.scrollArea.setWidgetResizable(True)
+            self.scrollAreaWidgetContents = self._contentsFrame
+            self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
         self.setContentsMargins(*_frameMargins)
         self._showContents(showMore)
@@ -83,9 +91,13 @@ class MoreLessFrame(Frame):
             self._openButton.setPixmap(self._minusIcon.pixmap(self.PIXMAPWIDTH, self.PIXMAPWIDTH))
             # arbitrary large height
             self.setMaximumHeight(2000)
+            if self.scrollArea:
+                self.scrollArea.show()
         else:
             self._openButton.setPixmap(self._plusIcon.pixmap(self.PIXMAPWIDTH, self.PIXMAPWIDTH))
             self.setMaximumHeight(self.sizeHint().height())
+            if self.scrollArea:
+                self.scrollArea.hide()
 
         if self._callback:
             self._callback(self)

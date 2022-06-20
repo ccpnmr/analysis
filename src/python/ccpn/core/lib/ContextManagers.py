@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-04-04 23:12:56 +0100 (Mon, April 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-20 19:34:52 +0100 (Mon, June 20, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -32,9 +32,7 @@ import traceback
 from contextlib import contextmanager, nullcontext
 from collections.abc import Iterable
 from functools import partial
-
 from PyQt5.QtGui import QPainter
-
 from ccpn.core.lib import Util as coreUtil
 from inspect import signature, Parameter
 from ccpn.util.Logging import getLogger
@@ -42,7 +40,7 @@ from ccpn.framework.Application import getApplication
 import time
 import signal
 import sys
-
+import pandas as pd
 
 @contextmanager
 def echoCommand(obj, funcName, *params, values=None, defaults=None,
@@ -642,6 +640,25 @@ def waypointBlocking(application=None):
     finally:
         # clean up after blocking undo items
         undo.decreaseWaypointBlocking()
+
+class PandasChainedAssignment:
+    """ Context manager to temporarily set pandas chained assignment warning. Usage:
+        with ChainedAssignment():
+             blah
+    """
+
+    def __init__(self, chained=None):
+        acceptable = [None, 'warn', 'raise']
+        assert chained in acceptable, "chained must be in " + str(acceptable)
+        self.swcw = chained
+
+    def __enter__(self):
+        self.saved_swcw = pd.options.mode.chained_assignment
+        pd.options.mode.chained_assignment = self.swcw
+        return self
+
+    def __exit__(self, *args):
+        pd.options.mode.chained_assignment = self.saved_swcw
 
 
 class Timeout:

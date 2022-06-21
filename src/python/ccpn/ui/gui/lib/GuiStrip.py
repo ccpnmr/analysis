@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-19 11:39:58 +0100 (Thu, May 19, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-21 19:01:26 +0100 (Tue, June 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -747,8 +747,7 @@ class GuiStrip(Frame):
         """
         if self.navigateCursorMenu:
             mouseDict = self.current.mouseMovedDict[AXIS_FULLATOMNAME]
-            position = [mouseDict[ax][0] if mouseDict[ax] else None
-                        if ax in mouseDict else None
+            position = [mouseDict[ax][0] if mouseDict[ax] else None if ax in mouseDict else None
                         for ax in self.axisCodes]
             if None in position:
                 return
@@ -759,8 +758,7 @@ class GuiStrip(Frame):
         """Mark the X/Y/XY axisCodes by index
         """
         mouseDict = self.current.mouseMovedDict[AXIS_FULLATOMNAME]
-        position = [mouseDict[ax][0] if mouseDict[ax] else None
-                    if ax in mouseDict else None
+        position = [mouseDict[ax][0] if mouseDict[ax] else None if ax in mouseDict else None
                     for ax in self.axisCodes]
         if indices is None:
             indices = tuple(range(len(self.axisCodes)))
@@ -2325,16 +2323,16 @@ class GuiStrip(Frame):
         # rebuild the axes for strips
         spectrumDisplay.showAxes(stretchValue=True, widths=False)
 
-    def navigateToPosition(self, positions:List[float],
-                           axisCodes:List[str] = None,
-                           widths:List[float] = None):
+    def navigateToPosition(self, positions: List[float],
+                           axisCodes: List[str] = None,
+                           widths: List[float] = None):
         """Navigate to positions, optionally setting widths of this Strip
         """
         from ccpn.ui.gui.lib.StripLib import navigateToPositionInStrip
 
         navigateToPositionInStrip(self, positions, axisCodes, widths)
 
-    def navigateToPeak(self, peak, widths:List[float] = None):
+    def navigateToPeak(self, peak, widths: List[float] = None):
         """Navigate to peak.position, optionally setting widths of this Strip
         """
         if peak:
@@ -2386,8 +2384,8 @@ class GuiStrip(Frame):
         with undoBlockWithoutSideBar():
             # create the axisDict for this spectrum
             axisDict = {axis: ppm for axis, ppm in zip(self.axisCodes, ppmPositions)}
-            height = axisDict.get('intensity', None) # needed for 1D
-            axisDict.pop('intensity', None) # need to be removed otherwise it cannot pick 1D
+            height = axisDict.get('intensity', None)  # needed for 1D
+            axisDict.pop('intensity', None)  # need to be removed otherwise it cannot pick 1D
 
             # loop through the visible spectra
             for spectrumView in (v for v in self.spectrumViews if v.isDisplayed):
@@ -2413,7 +2411,7 @@ class GuiStrip(Frame):
         return tuple(result), tuple(peakLists)
 
     @logCommand(get='self')
-    def pickPeaks(self, regions: List[Tuple[float,float]]) -> list:
+    def pickPeaks(self, regions: List[Tuple[float, float]]) -> list:
         """Peak-pick in regions for all spectra currently displayed in the strip.
         :param regions: a list of (minVal,maxVal) tuples in display order
         :return a list of Peak instances
@@ -2453,13 +2451,13 @@ class GuiStrip(Frame):
                     _intensityLimits = np.array(regions[1]) - yOffset
                     _xArray = np.array(regions[0]) - xOffset
                     _sliceTuples = _displayedSpectrum.getSliceTuples([_xArray])
-                    spectrum.peakPicker._intensityLimits = _intensityLimits #needed to make sure it peaks only inside the selected box.
-                    positiveThreshold, negativeThreshold = None, None # get automatically
+                    spectrum.peakPicker._intensityLimits = _intensityLimits  #needed to make sure it peaks only inside the selected box.
+                    positiveThreshold, negativeThreshold = None, None  # get automatically
 
                 for thisPeakListView in validPeakListViews:
                     peakList = thisPeakListView.peakList
                     # pick the peaks in this peakList
-                    newPeaks = _pickPeaksByRegion(spectrum = spectrum,
+                    newPeaks = _pickPeaksByRegion(spectrum=spectrum,
                                                   sliceTuples=_sliceTuples,
                                                   peakList=peakList,
                                                   positiveThreshold=positiveThreshold,
@@ -2499,11 +2497,11 @@ class GuiStrip(Frame):
         """
         return self._CcpnGLWidget.getAxisRegion(axisIndex)
 
-    def setAxisRegion(self, axisIndex, width, rescale=True, update=True):
+    def setAxisRegion(self, axisIndex, region, rescale=True, update=True):
         """Set the axis region for the strip.
         if rescale is False, the symbols, etc., must explicitly be refreshed
         """
-        self._CcpnGLWidget.setAxisRegion(axisIndex, width, rescale=rescale, update=update)
+        self._CcpnGLWidget.setAxisRegion(axisIndex, region, rescale=rescale, update=update)
 
     def getAxisRegions(self) -> Tuple[Tuple, ...]:
         """Return a tuple if tuples for the regions ((min, max), ...)
@@ -2515,8 +2513,8 @@ class GuiStrip(Frame):
 
         return tuple(regions)
 
-    def _setAxisPositionAndWidth(self, stripAxisIndex: int, position:float, width:float = None,
-                                       refresh=True):
+    def _setAxisPositionAndWidth(self, stripAxisIndex: int, position: float, width: float = None,
+                                 refresh=True):
         """Change the position of axis defined by stripAxisIndex
         :param stripAxisIndex: an index, defining an Z, A, ... plane; i.e. >= 2
         :param position: the new position (in axis units; i.e. ppm, Hz, points)
@@ -2585,7 +2583,7 @@ class GuiStrip(Frame):
         if refresh:
             self.refresh()
 
-    def _initAxesValues(self,   spectrumView):
+    def _initAxesValues(self, spectrumView):
         """Initialiase the strip.axes using a spectrumView instance
         CCPNINTERNAL: used from _newSpectrumDisplay
         """
@@ -2616,36 +2614,36 @@ class GuiStrip(Frame):
                     if spectrum.isTimeDomains[dimIndex] or spectrum.isSampledDomains[dimIndex]:
                         _axis.unit = AXISUNIT_POINT
                         self._setAxisPositionAndWidth(_axis._index,
-                                                      position = float(_specDim.pointCount/2)+0.5,
-                                                      width = float(_specDim.pointCount),
-                                                      refresh = False
-                        )
+                                                      position=float(_specDim.pointCount / 2) + 0.5,
+                                                      width=float(_specDim.pointCount),
+                                                      refresh=False
+                                                      )
                     else:
                         _axis.unit = AXISUNIT_PPM
                         limits = _specDim.aliasingLimits
                         self._setAxisPositionAndWidth(_axis._index,
-                                                      position = 0.5*(limits[0] + limits[1]),  # The centre
-                                                      width = max(limits) - min(limits),
-                                                      refresh = False
-                        )
+                                                      position=0.5 * (limits[0] + limits[1]),  # The centre
+                                                      width=max(limits) - min(limits),
+                                                      refresh=False
+                                                      )
 
                 else:
                     # A strip Z,A,... "plane-axis"
                     if spectrum.isTimeDomains[dimIndex] or spectrum.isSampledDomains[dimIndex]:
                         _axis.unit = AXISUNIT_POINT
                         self._setAxisPositionAndWidth(_axis._index,
-                                                      position = 1.0,
-                                                      width = 1.0,
-                                                      refresh = False
-                        )
+                                                      position=1.0,
+                                                      width=1.0,
+                                                      refresh=False
+                                                      )
                     else:
                         _axis.unit = AXISUNIT_PPM
                         limits = _specDim.spectrumLimits
                         self._setAxisPositionAndWidth(_axis._index,
-                                                      position = 0.5*(limits[0] + limits[1]),  # The centre
-                                                      width = _specDim.ppmPerPoint,
-                                                      refresh = False
-                        )
+                                                      position=0.5 * (limits[0] + limits[1]),  # The centre
+                                                      width=_specDim.ppmPerPoint,
+                                                      refresh=False
+                                                      )
         # init the GL
         self._CcpnGLWidget.initialiseAxes(strip=self)
 
@@ -2660,8 +2658,8 @@ class GuiStrip(Frame):
         # Only implemented for nD
         pass
 
-    def _changePlane(self, stripAxisIndex: int, planeIncrement:int, planeCount = None,
-                           refresh:bool = True
+    def _changePlane(self, stripAxisIndex: int, planeIncrement: int, planeCount=None,
+                     refresh: bool = True
                      ):
         """Change the position of plane-axis defined by stripAxisIndex by increment (in points)
         :param stripAxisIndex: an index, defining an Z, A, ... plane; i.e. >= 2

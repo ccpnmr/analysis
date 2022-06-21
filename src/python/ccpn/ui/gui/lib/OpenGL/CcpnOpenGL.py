@@ -56,7 +56,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-20 11:19:45 +0100 (Mon, June 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-21 19:01:26 +0100 (Tue, June 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -2479,12 +2479,11 @@ class CcpnGLWidget(QOpenGLWidget):
                             spectrum.referenceValues = [spectrum.referenceValues[0] + shift]
                             spectrum.positions = np.array(spectrum.positions) + shift
                         if key in [QtCore.Qt.Key_Up, QtCore.Qt.Key_Down]:
-                            offset =  moveDict.get(key)[1]
+                            offset = moveDict.get(key)[1]
                             # need to check the peak position/height
                             spectrum.intensities = spectrum.intensities + offset
                     else:
                         getLogger().warning('This option is not yet available for nD spectra')
-
 
     def _singleKeyAction(self, key, isShift, isOption=False):
         """
@@ -2500,7 +2499,6 @@ class CcpnGLWidget(QOpenGLWidget):
 
         if isShift:
             self._movePeakFromGLKeys(key)
-
 
     def _KeyModifiersAction(self, key):
         keyModifiers = QApplication.keyboardModifiers()
@@ -5463,25 +5461,25 @@ class CcpnGLWidget(QOpenGLWidget):
         elif axisIndex == 1:
             return self.axisB, self.axisT
 
-    def setAxisRegion(self, axisIndex, range, rescale=True, update=True):
+    def setAxisRegion(self, axisIndex, region, rescale=True, update=True):
         if axisIndex == 0:
             if self.INVERTXAXIS:
-                self.axisL = max(range)
-                self.axisR = min(range)
+                self.axisL = max(region)
+                self.axisR = min(region)
             else:
-                self.axisL = min(range)
-                self.axisR = max(range)
+                self.axisL = min(region)
+                self.axisR = max(region)
 
             if rescale:
                 self._rescaleXAxis(rescale=rescale, update=update)
 
         elif axisIndex == 1:
             if self.INVERTXAXIS:
-                self.axisB = max(range)
-                self.axisT = min(range)
+                self.axisB = max(region)
+                self.axisT = min(region)
             else:
-                self.axisB = min(range)
-                self.axisT = max(range)
+                self.axisB = min(region)
+                self.axisT = max(region)
 
             if rescale:
                 self._rescaleYAxis(rescale=rescale, update=update)
@@ -5991,8 +5989,6 @@ class CcpnGLWidget(QOpenGLWidget):
         newPeaks = self._mouseInPeak(xPosition, yPosition)
 
         self.current.peaks = list(peaks ^ set(newPeaks))  # symmetric difference
-
-
 
     def _selectIntegral(self, xPosition, yPosition):
         """(de-)Select first integral near cursor xPosition, yPosition
@@ -6603,7 +6599,7 @@ class CcpnGLWidget(QOpenGLWidget):
                             obj.values = postValues
 
                             addUndoItem(undo=partial(setattr, obj, VALUES, preValues),
-                                        redo=partial(setattr, obj, VALUES, postValues),)
+                                        redo=partial(setattr, obj, VALUES, postValues), )
 
             self._dragValues = {}
 

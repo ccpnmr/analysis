@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Peak Picking</title>
+    <title>Peak Picking and Fitting</title>
     <link rel="stylesheet" href="CcpnVideoTutorials.css">
 </head>
 <body>
 <div class="header"><a href="https://www.ccpn.ac.uk/"><img src="CCPN.png" alt="CCPN Logo" height="50"></a><a href="index.html" class="button">Video<br> Tutorials<br> & Manual</a><a href="https://www.ccpn.ac.uk/forums/"><img src="CCPNForumLogo.png" alt="CCPN Logo" height="50" style="padding-left: 15px"></a></div>
 <br>
-<div class="headerBar">Peak Picking</div>
+<div class="headerBar">Peak Picking and Fitting</div>
 <div class="tutorial">
 
 <div class="videoContainer">
@@ -18,19 +18,24 @@
 </div>
 
 <p></p>
-<h2>Peak Picking</h2>
+<h2>Peak Picking and Fitting</h2>
 <h3>Peak pick selected area</h3>
 <p>To pick the peaks in a particular area, hold down <span class="action">Shift</span> and <span class="action">Ctrl</span> (<span class="action">Cmd</span> on a Mac) while <span class="action">left-dragging</span> the mouse. A blue box will be drawn and peaks will be picked at all visible extrema (maxima and minima) in that area. If you find you are picking too many or too few peaks, adjust your contour levels and remember to show/hide positive/negative contours depending on which you would like to have picked. For more information on adjusting contour levels, go to <a href="CustomiseSpectrumDisplay.html">Customise Spectrum Display</a>.</p>
-<p>Alternatively you can type <span class="action">PP</span> or go to <span class="action">Spectrum / Pick Peaks / Pick ND Peaks...</span>. A pop-up will appear in which you can select the area in which you would like to pick peaks (by default the whole spectrum area is included). Choose whether to pick positive or negative peaks or both and click on <span class="action">Find Peaks</span> to pick your peaks.</p>
-<h3>Manual peak pick</h3>
+<p>Alternatively you can type <span class="action">PP</span> or go to <span class="action">Spectrum / Pick Peaks / Pick ND Peaks...</span>. A pop-up will appear in which you can select the area in which you would like to pick peaks (by default the whole spectrum area is included). Choose whether to pick positive or negative peaks or both and click on <span class="action">Find Peaks</span> to pick your peaks. You can also choose whether to estimate linewidths or calculate volumes at the same time as picking your peaks (see <span class="action">Peak fitting and volumes</span> below).</p>
+<h3>Manual peak pick (peak placing)</h3>
 <p>Press <span class="action">Shift</span> and <span class="action">Ctrl/Cmd</span> while <span class="action">left-clicking</span> the mouse where you would like to place your peak.</p>
 <p>Alternatively you can type <span class="action">MM</span> and the mouse will go into peak picking mode. You can now easily place multiple peaks in various places in quick succession. Type <span class="action">MM</span> again to exit the peak picking mouse mode.</p>
-<p>If you would like to snap any manually placed peaks to their closest extrama (maximum or minimum), simply select them and type <span class="action">SE</span>.</p>
+<p>If you would like to snap any manually placed peaks to their closest extremum (maximum or minimum), simply select them and type <span class="action">SE</span>.</p>
 <h3>Peak picking in 3D spectra</h3>
-<p>This is the same as peak picking in 2D spectra, but be aware that if you are not in the plane containing the maximum or minimum of your peak, <span class="action">Shift + Ctrl/Cmd + left-dragging</span> to pick a peak may not work. Move planes until you think you are near the maximum and try again, or place a peak manually and type <span class="action">SE</span>. Navigate to the correct plane to find the peak on the peak extremum, or use the shortcut <span class="action">FP</span> to navigate to the peak.</p>
+<p>This is the same as peak picking in 2D spectra, but be aware that if you are not in the plane containing the maximum or minimum of your peak, <span class="action">Shift + Ctrl/Cmd + left-dragging</span> to pick a peak may not work. Move planes until you think you are near the maximum and try again, or place a peak manually and type <span class="action">SE</span>. Navigate to the correct plane to find the peak on the peak extremum, or use the shortcut <span class="action">FP</span> to find/navigate to the peak.</p>
 <p>It is also possible to peak pick a 3D spectrum based on its 2D root spectrum. You can do this either using the <a href="PickAndAssign.html">Pick and Assign</a> function or within AnalysisStructure by going to <span class="action">Structure / Restricted Peak Pick</span>.</p>
+    <h3>Peak fitting and volumes</h3>
+    <p>When you pick peaks either with <span class="action">Shift+Ctrl/Cmd+drag</span> or the <span class="action">PP</span> pop-up, the program will do a quick analytical (parabolic) fit which will give you an estimation of the peak line widths. This keeps the peak picking process fast. A better fit (which may take a minute or two when you execute it on 100s or 1000s of peaks in one go) can be done by selecting peaks and using <span class="action">RP</span> to refit your peaks. If you have any overlapping peaks, then you can select those separately and use <span class="action">RG</span> to refit a group of peaks which will usually give you a better fit. You can check the quality of the fit by changing your peak symbols to filled line widths (e.g. by cycling the peak symbols with <span class="action">PS</span>: the filled blob should fit nicely onto your peak if the fit is good.</p>
+    <p>If you wish to calculate your peak volumes (e.g. using <span class="action">Spectrum / Estimate Peak Volumes...</span> or shortcut <span class="action">EV</span>) you will first need to have line widths associated with your peak, i.e. you will have to have picked your peaks with <span class="action">Shift+Ctrl/Cmd+drag</span> or the <span class="action">PP</span> pop-up (possibly followed by using <span class="action">RP</span>) or you need to use <span class="action">RP</span> on any manually placed peaks. You can always check in your Peak List table whether your peaks have line widths or volumes associated with them.</p>
 <h3>Peak picking parameters</h3>
-<p>In your Preferences (go to <span class="action">File / Preferences</span> or type <span class="action">Ctrl/Cmd + ,</span>) in the <span class="action">Spectrum</span> tab you will find the <span class="action">Peak Picking Drop</span> parameter. This is the percentage by which a peak must drop off from its maximum in all directions (or rise from its minimum) in order to be recognised as a peak. The higher this value, the less likely you are to pick partially overlapped peaks or peaks with shoulders on them.</p>
+<p>In your Preferences (go to <span class="action">File / Preferences</span> or type <span class="action">Ctrl/Cmd + ,</span>) in the <span class="action">Peaks</span> tab you will find a section on <span class="action">Peak Picking</span>. The <span class="action">1d Peak Picking Drop</span> and <span class="action">nD Peak Picking Drop</span> parameters specify the percentage by which a peak must drop off from its maximum in all directions (or rise from its minimum) in order to be recognised as a peak. The higher this value, the less likely you are to pick partially overlapped peaks or peaks with shoulders on them. Note that while our default nD Peak Picker uses this parameter, the 1d peak picker does not. By default, the 1d Peak picker will not pick negative peaks. Select <span class="action">Include negative peaks 1D</span> if you would like to pick negative 1D peaks.</p>
+    <p>In the <span class="action">Peak Fitting</span> section you can select to add a refit (<span class="action">RP</span>) after a snap-to-extremum (<span class="action">SE</span>) automatically every time. The <span class="action">Peak Interpolation Method</span> (options are <span class="action">parabolic</span> or <span class="action">gaussian</span>) refers to the fitting method used when refitting with <span class="action">RG</span>.</p>
+    <p></p>
 </div>
 </body>
 </html>

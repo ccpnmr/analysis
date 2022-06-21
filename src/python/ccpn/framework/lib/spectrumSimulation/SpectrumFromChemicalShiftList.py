@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-20 19:34:52 +0100 (Mon, June 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-21 13:32:42 +0100 (Tue, June 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -41,7 +41,7 @@ from ccpn.core.NmrResidue import NmrResidue, _getNmrResidue
 import pandas as pd
 from ccpn.core.lib.ContextManagers import undoStackBlocking, undoBlockWithoutSideBar, notificationEchoBlocking, PandasChainedAssignment
 from ccpn.util.Logging import getLogger
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 
 
 
@@ -116,8 +116,16 @@ class SimulatedSpectrumByExperimentTypeABC(TraitBase):
         values = [v._getAllAtomNames() for mm in self.peakAtomNameMappers for v in mm]
         return OrderedSet(flattenLists(values))
 
+
     def simulatePeakList(self):
-        """ create new peaks based on the AtomNames defined in the Mapper. No check on offset."""
+        """ Create new peaks from the ChemicalShiftList.
+         Add ppm positions based on the CS value.
+         Add peak assignment from the CS nmrAtom name.
+         Use the self.peakAtomNameMappers to create group of peaks as needed for the required Experiment Type.
+         Note: cannot deal yet with ccpn partial assignments, such as nmrAtomNames defined as @, @@, #
+         and hardcoded offsets. Those are skipped.
+         E.g.: an offset nmrResidue i-1 for sequenceCode 10 is the nmrResidue 9 and not the nmrResidue named  "10-1".
+         """
 
         data = self.chemicalShiftList._data
         requiredAtomNames = self._getAllRequiredAtomNames()
@@ -129,44 +137,43 @@ class SimulatedSpectrumByExperimentTypeABC(TraitBase):
                                data[CS_NMRATOM]]
         # Filter any Rows where No NmrResidue
         data = data[data[CS_NMRRESIDUE].notna()]
-
         with undoBlockWithoutSideBar():
             with notificationEchoBlocking():
                 for ix, filteredData in data.groupby(CS_NMRRESIDUE):
-                    for mappers in self.peakAtomNameMappers:
+                    for mappers in self.peakAtomNameMappers: # mappers are list of lists
                         # make a new Peak for each mapperGroup
                         peak = self.peakList.newPeak()
                         # loop through mappers to get the required atoms names  to fill the peak assignments and CS value
-                        ppmPositions = []
-                        for mapper in mappers:
-                            for offset, requiredAtomName in mapper.offsetNmrAtomNames.items():
-                                for rowCount, (localIndex, dataRow) in enumerate(filteredData.iterrows()):
-                                    if requiredAtomName == dataRow[CS_ATOMNAME]:
-                                        # get the right nmrAtom based on the offset. Cannot do yet @, @@, # and hardcoded offsets
-                                        nmrAtomName = dataRow[CS_ATOMNAME]
+                        axisCodePpmPositionsDict = {} # make a dict because a ppmPos can be None/missing (expecially when doing i-1 assignments)
+                        for dim, mapper in enumerate(mappers):
+                            axisCodePpmPositionsDict[mapper.axisCode] = None
+                            for offset, requiredAtomName in mapper.offsetNmrAtomNames.items(): ## loop over the required atomName and residue offset
+                                for rowCount, (localIndex, dataRow) in enumerate(filteredData.iterrows()): ## loop over the grouppedBy-Residue rows
+                                    if requiredAtomName == dataRow[CS_ATOMNAME]: ## we found the match in the CSL
+                                        # get the right nmrAtom based on the offset. Cannot deal yet @, @@, and ccpn partial assignments like the str sequenceCode "10-1"
                                         sequenceCode = dataRow[CS_SEQUENCECODE]
                                         try:
                                             sequenceCode = int(sequenceCode)
                                         except:
                                             getLogger().warn('Cannot deal yet with non-numerical nmrResidue sequenceCode. Skipping: %s' % sequenceCode)
                                             continue
-                                        nmrChain = self.project.getNmrChain(dataRow[CS_CHAINCODE])
+                                        ## build the assignment. Get nmrChain, nmrResidue and nmrAtom from project
+                                        nmrChain = self.project.getNmrChain(dataRow[CS_CHAINCODE]) # this is not necessarily as the dataRow nmrResidue.chain; that's why we get this way.
                                         if sequenceCode:
                                             sequenceCode += offset
-                                        nmrResidue = _getNmrResidue(nmrChain, sequenceCode)
+                                        nmrResidue = _getNmrResidue(nmrChain, sequenceCode) # this is not necessarily as the dataRow nmrResidue because the offset value!
                                         if nmrResidue is not None:
-                                            na = nmrResidue.getNmrAtom(nmrAtomName)
+                                            na = nmrResidue.getNmrAtom(dataRow[CS_ATOMNAME]) # this is not necessarily as the dataRow nmrAtom. So search again because the offset value!
                                             if na:
                                                 peak.assignDimension(mapper.axisCode, [na])
-                                                # find the CS value based on the offset
-                                                cs4naValues = data[data[CS_NMRATOM] == na.pid][CS_VALUE].values
-                                                if len(cs4naValues) == 1:  # should be always present!?
-                                                    ppmPositions.append(float(cs4naValues[0]))
+                                            # find the CS value based on the offset, this is not necessarily as the dataRow CS_VALUE. that's why we search again in the whole DF
+                                            cs4naValues = data[data[CS_NMRATOM] == na.pid][CS_VALUE].values
+                                            if len(cs4naValues) == 1:  # should be always present!?
+                                                axisCodePpmPositionsDict[mapper.axisCode] = float(cs4naValues[0])
                                         break
-                        if len(ppmPositions) == self.spectrum.dimensionCount:
-                            peak.ppmPositions = tuple(ppmPositions)
-                        if len(ppmPositions) == 0:
-                            peak.delete()
+                        # fill the peak.ppmPositions. Keep the Nones.
+                        peak.ppmPositions = tuple(axisCodePpmPositionsDict.values())
+
 
     def __str__(self):
         return f'<{self.__class__.__name__}>'
@@ -180,98 +187,85 @@ class SimulatedSpectrumByExperimentTypeABC(TraitBase):
 
 class AtomNamesMapper(object):
     """
-    A container to facilitate the nmrAtoms assignment mapping to a particular axisCode/dimension from a ChemicalShift
+    A container to facilitate the nmrAtoms assignment mapping to a particular axisCode from a ChemicalShift
     """
-    dimension           = None
     isotopeCode         = None
     axisCode            = None
     offsetNmrAtomNames  = {}
 
 
-    def __init__(self, dimension=None, isotopeCode=None, axisCode=None, offsetNmrAtomNames=None, **kwargs):
+    def __init__(self, isotopeCode=None, axisCode=None, offsetNmrAtomNames=None, **kwargs):
         """
-        :param kwargs:
-            dimension:      int. Dimension number (starting from 1)
-            isotopeCode:    str. e.g.:'1H'. Used to define the EmptySpectrum isotopeCodes list
-            axisCode:       str. any allowed. Used to define the EmptySpectrum axisCodes list
-            offsetNmrAtomNames:  dict, key-value.
+        :param isotopeCode:    str. e.g.:'1H'. Used to define the EmptySpectrum isotopeCodes list
+        :param axisCode:       str. any allowed. Used to define the EmptySpectrum axisCodes list
+        :param offsetNmrAtomNames:  dict, key-value.
                                 -Key: offset definition, int  e.g.: 0 to define as "i"; -1 to define as "i-1".
                                 -Value: string to be used for fetching nmrAtom (i) and assign using the defined axisCode
         """
         super().__init__()
-        if dimension:
-            self.dimension = dimension
+
         if isotopeCode:
             self.isotopeCode = isotopeCode
         if axisCode:
             self.axisCode = axisCode
         if offsetNmrAtomNames:
          self.offsetNmrAtomNames = offsetNmrAtomNames
-        self._kwargs = {v:getattr(self, v, None) for v in dir(self) if not v.startswith('_')}
-        self._kwargs.update(**kwargs)
+
 
     def _getAllAtomNames(self):
         return list(self.offsetNmrAtomNames.values())
 
-
     def __str__(self):
-        return f'<{self.__class__.__name__}> : {self._kwargs}'
+        nmrAtoms = [f'NmrAtom="{na}", offset={o}' for o, na in self.offsetNmrAtomNames.items()]
+        return f'<{self.__class__.__name__}>: isotopeCode="{self.isotopeCode}", axisCode="{self.axisCode}", nmrAtoms={"".join(nmrAtoms)} '
 
     __repr__ = __str__
 
 
 class HAtomNamesMapper(AtomNamesMapper):
 
-    dimension           = 1
     isotopeCode         = '1H'
     axisCode            = 'Hn'
     offsetNmrAtomNames  = {0: 'H'}
 
 class NAtomNamesMapper(AtomNamesMapper):
 
-    dimension           = 2
     isotopeCode         = '15N'
     axisCode            = 'Nh'
     offsetNmrAtomNames  = {0: 'N'}
 
 class COAtomNamesMapper(AtomNamesMapper):
 
-    dimension           = 3
     isotopeCode         = '13C'
     axisCode            = 'C'
     offsetNmrAtomNames  = {0: 'C'}
 
 class COM1AtomNamesMapper(AtomNamesMapper):
 
-    dimension           = 3
     isotopeCode         = '13C'
     axisCode            = 'C'
     offsetNmrAtomNames  = {-1: 'C'}
 
 class CAAtomNamesMapper(AtomNamesMapper):
 
-    dimension           = 3
     isotopeCode         = '13C'
     axisCode            = 'C'
     offsetNmrAtomNames  = {0: 'CA'}
 
 class CAM1AtomNamesMapper(AtomNamesMapper):
 
-    dimension           = 3
     isotopeCode         = '13C'
     axisCode            = 'C'
     offsetNmrAtomNames  = {-1: 'CA'}
 
 class CBAtomNamesMapper(AtomNamesMapper):
 
-    dimension           = 3
     isotopeCode         = '13C'
     axisCode            = 'C'
     offsetNmrAtomNames  = {0: 'CB'}
 
 class CBM1AtomNamesMapper(AtomNamesMapper):
 
-    dimension           = 3
     isotopeCode         = '13C'
     axisCode            = 'C'
     offsetNmrAtomNames  = {-1: 'CB'}
@@ -293,7 +287,7 @@ class SimulatedSpectrum_1H(SimulatedSpectrumByExperimentTypeABC):
     isotopeCodes = ['1H']
     axisCodes = ['H']
     peakAtomNameMappers = [
-        [AtomNamesMapper(dimension=1, isotopeCode='1H', axisCode='H', offsetNmrAtomNames={0:'H'})]
+        [AtomNamesMapper(isotopeCode='1H', axisCode='H', offsetNmrAtomNames={0:'H'})]
         ]
 
 

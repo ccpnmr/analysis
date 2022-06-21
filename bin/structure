@@ -14,5 +14,5 @@ for ii in {1..3}; do
     _path="$(dirname "${_pathlink}")"
 done
 
-"%{_pathlink}"/bin/analysisstructure "$@"
+"${_pathlink}"/bin/analysisstructure "$@"
 

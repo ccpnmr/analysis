@@ -13,8 +13,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-03-04 18:50:46 +0000 (Fri, March 04, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-06-21 18:51:14 +0100 (Tue, June 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -130,6 +130,7 @@ class PeakList(PMIListABC):
                     minDropFactor: float = 0.1):
         getLogger().warning('Deprecated method. Use spectrum.pickPeaks instead')
         from ccpn.core.lib.PeakListLib import _pickPeaksNd
+
         return _pickPeaksNd(self, regionToPick=regionToPick,
                             doPos=doPos, doNeg=doNeg,
                             fitMethod=fitMethod,
@@ -138,9 +139,8 @@ class PeakList(PMIListABC):
                             excludedDiagonalTransform=excludedDiagonalTransform,
                             minDropFactor=minDropFactor)
 
-
     @logCommand(get='self')
-    def estimateVolumes(self, volumeIntegralLimit=2.0):
+    def estimateVolumes(self, volumeIntegralLimit=2.0, noWarning=False):
         """Estimate the volumes for the peaks in this peakList
         The width of the volume integral in each dimension is the lineWidth * volumeIntegralLimit,
         the default is 2.0 * FWHM of the peak.
@@ -153,9 +153,8 @@ class PeakList(PMIListABC):
                 lineWidths = pp.lineWidths
                 if lineWidths and None not in lineWidths and height:
                     pp.estimateVolume(volumeIntegralLimit=volumeIntegralLimit)
-                else:
+                elif not noWarning:
                     getLogger().warning('Peak %s contains undefined height/lineWidths' % str(pp))
-
 
     @logCommand(get='self')
     def copyTo(self, targetSpectrum: Spectrum, targetPeakList=None, includeAllPeakProperties=True,
@@ -188,17 +187,17 @@ class PeakList(PMIListABC):
                              % (dimensionCount, self.longPid,
                                 targetSpectrum.dimensionCount, targetSpectrum.longPid))
 
-        dimensionMapping = _axisCodeMapIndices(self.spectrum.axisCodes,targetSpectrum.axisCodes)
+        dimensionMapping = _axisCodeMapIndices(self.spectrum.axisCodes, targetSpectrum.axisCodes)
         if None in dimensionMapping:
             raise ValueError("%s axisCodes %r not compatible with targetSpectrum axisCodes %r"
                              % (self, self.spectrum.axisCodes, targetSpectrum.axisCodes))
 
         if targetPeakList:
-            targetPeakList = self.project.getByPid(targetPeakList) if isinstance(targetPeakList,str) else targetPeakList
+            targetPeakList = self.project.getByPid(targetPeakList) if isinstance(targetPeakList, str) else targetPeakList
             if not isinstance(targetPeakList, PeakList):
                 raise TypeError('targetPeakList is not of type PeakList')
             if not targetPeakList in targetSpectrum.peakLists:
-                raise TypeError('targetPeakList is not a PeakList of: %s'%targetSpectrum.pid)
+                raise TypeError('targetPeakList is not a PeakList of: %s' % targetSpectrum.pid)
 
         else:
             # make a dictionary with parameters of self to be copied to new targetPeakList (if created)
@@ -212,7 +211,7 @@ class PeakList(PMIListABC):
 
         with undoBlockWithoutSideBar():
             if not targetPeakList:
-               targetPeakList = targetSpectrum.newPeakList(**params)
+                targetPeakList = targetSpectrum.newPeakList(**params)
 
             for peak in self.peaks:
                 peak.copyTo(targetPeakList, includeAllProperties=includeAllPeakProperties)
@@ -335,12 +334,12 @@ class PeakList(PMIListABC):
 
         with undoBlockWithoutSideBar():
             peaks = _pickPeaksRegion(self, regionToPick=regionToPick,
-                                          doPos=doPos, doNeg=doNeg,
-                                          minLinewidth=minLinewidth, exclusionBuffer=exclusionBuffer,
-                                          minDropFactor=minDropFactor, checkAllAdjacent=checkAllAdjacent,
-                                          fitMethod=fitMethod, excludedRegions=excludedRegions,
-                                          excludedDiagonalDims=excludedDiagonalDims, excludedDiagonalTransform=excludedDiagonalTransform,
-                                          estimateLineWidths=estimateLineWidths)
+                                     doPos=doPos, doNeg=doNeg,
+                                     minLinewidth=minLinewidth, exclusionBuffer=exclusionBuffer,
+                                     minDropFactor=minDropFactor, checkAllAdjacent=checkAllAdjacent,
+                                     fitMethod=fitMethod, excludedRegions=excludedRegions,
+                                     excludedDiagonalDims=excludedDiagonalDims, excludedDiagonalTransform=excludedDiagonalTransform,
+                                     estimateLineWidths=estimateLineWidths)
         return peaks
 
     def fitExistingPeaks(self, peaks: Sequence['Peak'], fitMethod: str = GAUSSIANMETHOD, singularMode: bool = True,
@@ -365,9 +364,10 @@ class PeakList(PMIListABC):
         Calculate clusterIDs for peaks using the in Depth-First-Search (DFS) algorithm.
         """
         from ccpn.core.lib.PeakClustering import PeakClusterers, DFSPeakClusterer
+
         if tolerances is None:
             defaultTolerancePoints = 8
-            tolerances = [defaultTolerancePoints]*self.spectrum.dimensionCount
+            tolerances = [defaultTolerancePoints] * self.spectrum.dimensionCount
         clusterer = PeakClusterers.get(clustererName, DFSPeakClusterer)
         peakClusterer = clusterer(self.peaks, tolerances)
         clusters = peakClusterer.findClusters()

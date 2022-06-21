@@ -11,8 +11,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-14 16:12:24 +0100 (Tue, June 14, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-06-21 18:51:14 +0100 (Tue, June 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -37,12 +37,12 @@ from ccpn.util.Common import makeIterableList, percentage
 
 # This variables will be moved to SeriesAnalysisVarialbles.py
 _POSITION = 'position'
-_POINTPOSITION  = 'pointPosition'
-_PPMPOSITION    = 'ppmPosition'
-_LINEWIDTH      = 'lineWidth'
+_POINTPOSITION = 'pointPosition'
+_PPMPOSITION = 'ppmPosition'
+_LINEWIDTH = 'lineWidth'
 HEIGHT = 'height'
 VOLUME = 'volume'
-POSITIONS =  f'{_POSITION}s'
+POSITIONS = f'{_POSITION}s'
 LINEWIDTHS = f'{_LINEWIDTH}s'
 POINTPOSITIONS = f'{_POINTPOSITION}s'
 PPMPOSITIONS = f'{_PPMPOSITION}s'
@@ -159,7 +159,6 @@ def getPeakLinewidth(peak, dim):
     return 'None'
 
 
-
 def _pairIntersectionPoints(intersectionPoints):
     """ Yield successive pair chunks from list of intersectionPoints """
     for i in range(0, len(intersectionPoints), 2):
@@ -210,7 +209,7 @@ def estimate1DPeakFWHM(peak):
     pointPositions = np.array([int(peak.pointPosition[0])])
     widths, widthHeight, *limits = peak_widths(y, pointPositions, rel_height=0.5)
     limits = tuple(zip(*limits))
-    if widths and len(widths)>0:
+    if widths and len(widths) > 0:
         return widths[0], widthHeight[0], limits[0]
     return [None, None, (None, None)]
 
@@ -519,7 +518,6 @@ def _fitExpDecayCurve(bindingCurves, aFunc=exponenial_func, xfStep=0.01, xfPerce
     :param TODO
     """
 
-
     errorValue = (None,) * 6
     if aFunc is None or not callable(aFunc):
         getLogger().warning("Error. Fitting curve %s is not callable" % aFunc)
@@ -542,7 +540,7 @@ def _fitExpDecayCurve(bindingCurves, aFunc=exponenial_func, xfStep=0.01, xfPerce
     # yScaled = ys / interc  # scales y to have values 0-1
     # poptScaled, pcov  = curve_fit(aFunc, xs, yScaled)
     yScaled = (ys - np.min(ys)) / (np.max(ys) - np.min(ys))
-    yScaled[np.isnan(yScaled)] = 0 # cannot fit nans
+    yScaled[np.isnan(yScaled)] = 0  # cannot fit nans
     popt, pcov = curve_fit(exponenial_func, xs, yScaled, p0=popt)
     interc, slope = popt
     xfRange = np.max(xs) - np.min(xs)
@@ -575,6 +573,7 @@ def snapToExtremum(peak: 'Peak', halfBoxSearchWidth: int = 3, halfBoxFitWidth: i
 
     else:
         from ccpn.core.lib.PeakPickers.PeakPickerNd import PeakPickerNd
+
         spectrum = peak.spectrum
         myPeakPicker = PeakPickerNd(spectrum=spectrum)
         myPeakPicker.setParameters(dropFactor=minDropFactor,
@@ -652,7 +651,7 @@ def peakParabolicInterpolation(peak: 'Peak', update=False):
     return newPosition, height, heightError
 
 
-def estimateVolumes(peaks: Sequence[Union[str, 'Peak']], volumeIntegralLimit=2.0):
+def estimateVolumes(peaks: Sequence[Union[str, 'Peak']], volumeIntegralLimit=2.0, noWarning=False):
     """Estimate the volumes for the peaks
     :param peaks: list of peaks as pids or strings
     :param volumeIntegralLimit: integral width as a multiple of lineWidth (FWHM)
@@ -681,7 +680,7 @@ def estimateVolumes(peaks: Sequence[Union[str, 'Peak']], volumeIntegralLimit=2.0
         lineWidths = pp.lineWidths
         if lineWidths and None not in lineWidths and height:
             pp.estimateVolume(volumeIntegralLimit=volumeIntegralLimit)
-        else:
+        elif not noWarning:
             getLogger().warning('Peak %s contains undefined height/lineWidths' % str(pp))
 
 
@@ -757,6 +756,7 @@ def snap1DPeaksToExtrema(peaks, maximumLimit=0.1, figOfMeritLimit=1, doNeg=True)
                                                      figOfMeritLimit=figOfMeritLimit,
                                                      doNeg=doNeg)
 
+
 def recalculatePeaksHeightAtPosition(peaks):
     with undoBlockWithoutSideBar():
         with notificationEchoBlocking():
@@ -765,6 +765,7 @@ def recalculatePeaksHeightAtPosition(peaks):
                     if peak is not None:
                         height = peak.peakList.spectrum.getHeight(peak.position)
                         peak.height = height
+
 
 def updatePeaksFigureOfMerits(peaks, newMerit=0):
     """Set the figure of merit to the given value if the peak height is below the Noise threshold """
@@ -776,6 +777,7 @@ def updatePeaksFigureOfMerits(peaks, newMerit=0):
                         noiseLevel = peak.spectrum.noiseLevel or peak.spectrum.estimateNoise()
                         if peak.height < noiseLevel:
                             peak.figureOfMerit = newMerit
+
 
 def _fitBins(y, bins):
     # fit a gauss curve over the bins
@@ -807,7 +809,7 @@ def _getBins(y, binCount=None):
 
 
 def snap1DPeaksAndRereferenceSpectrum(peaks, maximumLimit=0.1, useAdjacientPeaksAsLimits=False,
-                                    doNeg=False, figOfMeritLimit=1, spectrum=None, autoRereferenceSpectrum=False):
+                                      doNeg=False, figOfMeritLimit=1, spectrum=None, autoRereferenceSpectrum=False):
     """
     Snap all peaks to closest maxima
 
@@ -835,7 +837,7 @@ def snap1DPeaksAndRereferenceSpectrum(peaks, maximumLimit=0.1, useAdjacientPeaks
         spectrum = peaks[0].peakList.spectrum
 
     # - reorder the peaks by heights to give higher peaks priority to the snap
-    peaks.sort(key=lambda x: x.height, reverse=True) # reorder peaks by height
+    peaks.sort(key=lambda x: x.height, reverse=True)  # reorder peaks by height
     oPositions, oHeights = [x.position for x in peaks], [x.height for x in peaks]
     nPositions, nHeights = [], []
 
@@ -868,12 +870,12 @@ def snap1DPeaksAndRereferenceSpectrum(peaks, maximumLimit=0.1, useAdjacientPeaks
     for peak in peaks:
         if peak is not None:
             oPosition = peak.position
-            peak.position = [peak.position[0] + shift,] #  - use the shift to re-reference the peak to the moved spectrum
+            peak.position = [peak.position[0] + shift, ]  #  - use the shift to re-reference the peak to the moved spectrum
             position, height = _get1DClosestExtremum(peak, maximumLimit=maximumLimit,
                                                      useAdjacientPeaksAsLimits=useAdjacientPeaksAsLimits, doNeg=doNeg,
                                                      figOfMeritLimit=figOfMeritLimit)
             #  - set newly detected position if found better fits
-            if peak.position == position: # Same position detected. Revert
+            if peak.position == position:  # Same position detected. Revert
                 peak.height = peak.peakList.spectrum.getHeight(oPosition)
                 peak.position = oPosition
             else:
@@ -924,6 +926,7 @@ def _getAdjacentPeakPositions1D(peak):
         nextPeakPosition = positions[positions.index(queryPos) + 1]
     return previousPeakPosition, nextPeakPosition
 
+
 def _correctNegativeHeight(height, doNeg=False):
     """return height either Positive or Negative value if doNEg=True. If height is negative and doNeg=False:
     return the smallest positive number (non-zero) like 4.9e-324."""
@@ -931,6 +934,7 @@ def _correctNegativeHeight(height, doNeg=False):
         if not doNeg:
             return np.nextafter(0, 1)
     return height
+
 
 def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=False, doNeg=False,
                           figOfMeritLimit=1):
@@ -948,6 +952,7 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
     """
     from ccpn.core.lib.SpectrumLib import estimateNoiseLevel1D
     from ccpn.core.lib.PeakPickers.PeakPicker1D import _find1DMaxima
+
     spectrum = peak.peakList.spectrum
     x = spectrum.positions
     y = spectrum.intensities
@@ -1004,7 +1009,7 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
                 height = nearestHeight
         else:
             a, b = _getAdjacentPeakPositions1D(peak)
-            if float(nearestPosition) in (a,b): # avoid snapping to an existing peak,
+            if float(nearestPosition) in (a, b):  # avoid snapping to an existing peak,
                 height = peak.peakList.spectrum.getHeight(peak.position)
 
             else:
@@ -1013,7 +1018,7 @@ def _get1DClosestExtremum(peak, maximumLimit=0.1, useAdjacientPeaksAsLimits=Fals
     else:
         height = peak.peakList.spectrum.getHeight(peak.position)
 
-    height = _correctNegativeHeight(height, doNeg) # Very important. don't return a negative height if doNeg is False.
+    height = _correctNegativeHeight(height, doNeg)  # Very important. don't return a negative height if doNeg is False.
     return position, float(height)
 
 
@@ -1058,7 +1063,8 @@ def getSpectralPeakHeightForNmrResidue(spectra, peakListIndexes: list = None) ->
     newDf = newDf.reset_index(drop=True).groupby(NR_ID).max()
     return newDf
 
-def getSpectralPeakVolumeForNmrResidue(spectra, peakListIndexes:list=None) -> pd.DataFrame:
+
+def getSpectralPeakVolumeForNmrResidue(spectra, peakListIndexes: list = None) -> pd.DataFrame:
     """
     return: Pandas DataFrame with the following structure:
             Index:  ID for the nmrResidue(s) assigned to the peak ;
@@ -1072,11 +1078,12 @@ def getSpectralPeakVolumeForNmrResidue(spectra, peakListIndexes:list=None) -> pd
 
         """
     df = getSpectralPeakVolumes(spectra, peakListIndexes)
-    newDf = df[df[NR_ID] != ''] # remove rows if NR_ID is not defined
+    newDf = df[df[NR_ID] != '']  # remove rows if NR_ID is not defined
     newDf = newDf.reset_index(drop=True).groupby(NR_ID).max()
     return newDf
 
-def _getSpectralPeakPropertyAsDataFrame(spectra, peakProperty=HEIGHT, NR_ID=NR_ID, peakListIndexes:list=None):
+
+def _getSpectralPeakPropertyAsDataFrame(spectra, peakProperty=HEIGHT, NR_ID=NR_ID, peakListIndexes: list = None):
     """
     :param spectra: list of spectra
     :param peakProperty: 'height'or'volume'
@@ -1152,10 +1159,10 @@ def _getPeakSNRatio(peak, factor=2.5):
         spectrum.negativeNoiseLevel = negativeNoiseLevel
         getLogger().warning('Spectrum Negative noise not defined for %s. Estimated default' % spectrum.pid)
     if not noiseLevel:  # estimate it
-            noiseLevel = spectrum.estimateNoise()
-            negativeNoiseLevel = -noiseLevel
-            spectrum.noiseLevel, spectrum.negativeNoiseLevel = noiseLevel, negativeNoiseLevel
-            getLogger().warning('Spectrum noise level(s) not defined for %s. Estimated default' % spectrum.pid)
+        noiseLevel = spectrum.estimateNoise()
+        negativeNoiseLevel = -noiseLevel
+        spectrum.noiseLevel, spectrum.negativeNoiseLevel = noiseLevel, negativeNoiseLevel
+        getLogger().warning('Spectrum noise level(s) not defined for %s. Estimated default' % spectrum.pid)
     if peak.height is None:
         updateHeight(peak)
         _getPeakSNRatio(peak)

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-20 19:34:52 +0100 (Mon, June 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-21 16:36:41 +0100 (Tue, June 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -68,9 +68,6 @@ class MapperRowWidgetLabels(Widget):
         self.offsetEntryLabel.setFixedWidth(widgetFixedWidth)
 
 
-
-
-
 class MapperRowWidget(Widget):
 
     def __init__(self, parent, atomNameMapper, **kwds):
@@ -121,10 +118,10 @@ class ChemicalShiftList2SpectrumPopup(CcpnDialogMainWidget):
     FIXEDWIDTH = False
     FIXEDHEIGHT = False
 
-    title = 'Simulate Spectrum from ChemicalShiftList (Alpha)'
+    title = 'Simulate Spectrum and PeakList from ChemicalShiftList (Alpha)'
     def __init__(self, parent=None, chemicalShiftList=None, title=title, **kwds):
         super().__init__(parent, setLayout=True, windowTitle=title,
-                         size=(500, 500), minimumSize=None, **kwds)
+                         size=(500, 300), minimumSize=None, **kwds)
 
         self.project = getProject()
         self.application = getApplication()
@@ -149,7 +146,7 @@ class ChemicalShiftList2SpectrumPopup(CcpnDialogMainWidget):
         self.spectrumNameLabel = Label(self.mainWidget, 'New Spectrum Name', grid=(row, 0),)
         self.spectrumNameEntry = LineEdit(self.mainWidget, text=spectrumName, grid=(row, 1))
         row  += 1
-        self.spectrumNameLabel = Label(self.mainWidget, 'New Spectrum Name', grid=(row, 0), )
+        self.experimentTypelabel = Label(self.mainWidget, 'Experiment Type', grid=(row, 0), )
         self.experimentTypePulldown = PulldownList(self.mainWidget, texts = list(CSL2SPECTRUM_DICT.keys()),
                                                         headerText=SELECTEXPTYPE,
                                                         callback=self._setWidgetsByExperimentType,
@@ -160,6 +157,8 @@ class ChemicalShiftList2SpectrumPopup(CcpnDialogMainWidget):
                                showMore=False, scrollable=True, grid=(row, 0), gridSpan=(1, 2))
         self.mappersFrame = self.advancedAssignframe.contentsFrame
         row += 1
+        # self.selectAnExpTypeLabel = Label(self.mainWidget, SELECTEXPTYPE, grid=(row, 0),
+        #                               tipText='Select an Experiment Type to see options')
 
         self.mappersFrame.getLayout().setAlignment(QtCore.Qt.AlignTop)
         self.mainWidget.getLayout().setAlignment(QtCore.Qt.AlignTop)
@@ -172,7 +171,7 @@ class ChemicalShiftList2SpectrumPopup(CcpnDialogMainWidget):
 
         _GREY = '#888888'
         if self.spectrumSimulatorClass:
-            self._clearMapperWidgets()
+            self._clearMapperWidgets(self.mappersFrame.getLayout())
             self._mapperWidgets = defaultdict(list)
             row = 0
 
@@ -192,9 +191,8 @@ class ChemicalShiftList2SpectrumPopup(CcpnDialogMainWidget):
         self.mappersFrame.getLayout().setAlignment(QtCore.Qt.AlignTop)
 
 
-    def _clearMapperWidgets(self):
+    def _clearMapperWidgets(self, layout):
         """Clear all rows """
-        layout = self.mappersFrame.getLayout()
         while layout.count():
             child = layout.takeAt(0)
             if child.widget():
@@ -213,16 +211,15 @@ class ChemicalShiftList2SpectrumPopup(CcpnDialogMainWidget):
 
     def _okCallback(self):
         if self.project and self.chemicalShiftList:
-
             if self.spectrumSimulatorClass:
                 spectrumSim = self.spectrumSimulatorClass(self.chemicalShiftList, {'name':self.spectrumNameEntry.get()})
                 self._updateMappersFromWidgets(spectrumSim)
-                try:
-                    spectrumSim.simulatePeakList()
-                except Exception as err:
-                    msg = f'Failed to simulate PeakList for {spectrumSim.spectrum} from {self.chemicalShiftList}.\n{err}'
-                    getLogger().warning(msg)
-                    showWarning('Error', msg)
+                # try:
+                spectrumSim.simulatePeakList()
+                # except Exception as err:
+                # msg = f'Failed to simulate PeakList for {spectrumSim.spectrum} from {self.chemicalShiftList}.\n{err}'
+                # getLogger().warning(msg)
+                # showWarning('Error', msg)
 
         self.accept()
 

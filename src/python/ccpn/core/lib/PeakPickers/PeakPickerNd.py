@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-03 11:27:25 +0100 (Tue, May 03, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-21 18:52:48 +0100 (Tue, June 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -234,7 +234,7 @@ class PeakPickerNd(PeakPickerABC):
         peaks = [SimplePeak(points=point[::-1],
                             height=height,
                             lineWidths=pointLineWidths if self.setLineWidths else None)
-                for height, point, pointLineWidths in foundPeaks]
+                 for height, point, pointLineWidths in foundPeaks]
         return peaks
 
     def snapToExtremum(self, peak) -> list:
@@ -252,11 +252,14 @@ class PeakPickerNd(PeakPickerABC):
             raise RuntimeError('%s.pickPeaks: spectrum %s, No valid spectral datasource defined' %
                                (self.__class__.__name__, self.spectrum))
 
+        pointPositions = peak.pointPositions
+        if not pointPositions or None in pointPositions:
+            raise ValueError(f'Peak.position is invalid for {peak}')
+
         # set up the search box widths
         self._hbsWidth = self.halfBoxSearchWidth
         self._hbfWidth = self.halfBoxFitWidth
 
-        pointPositions = peak.pointPositions
         spectrum = peak.spectrum
         valuesPerPoint = spectrum.ppmPerPoints
         axisCodes = spectrum.axisCodes
@@ -402,7 +405,10 @@ class PeakPickerNd(PeakPickerABC):
         pointCounts = spectrum.pointCounts
         numDim = spectrum.dimensionCount
 
-        for peak in peaks:
+        # only consider peaks that have a valid pointPosition (does not contain None)
+        pointPeaks = [pk for pk in peaks if pk.pointPositions and None not in pk.pointPositions]
+
+        for peak in pointPeaks:
             pointPositions = peak.pointPositions
 
             # round up/down the position
@@ -499,7 +505,7 @@ class PeakPickerNd(PeakPickerABC):
                 getLogger().warning("Aborting peak fit, Error for peak: %s:\n\n%s " % (peak, e))
                 return
 
-            for pkNum, peak in enumerate(peaks):
+            for pkNum, peak in enumerate(pointPeaks):
                 height, center, linewidth = result[pkNum]
 
                 _shape = data.shape[::-1]

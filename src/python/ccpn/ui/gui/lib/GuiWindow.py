@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-07 14:59:37 +0100 (Tue, June 07, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-06-21 18:52:48 +0100 (Tue, June 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,22 +27,20 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 from PyQt5 import QtCore
+from functools import partial
 from ccpn.core.lib import AssignmentLib
 from ccpn.core.lib.peakUtils import estimateVolumes, updateHeight
-from ccpn.core.IntegralList import IntegralList
-from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.lib.SpectrumDisplay import navigateToCurrentPeakPosition, navigateToCurrentNmrResiduePosition
+from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.ui.gui import guiSettings
-from ccpn.util.Logging import getLogger
-from functools import partial
-from ccpn.ui.gui.lib.Shortcuts import addShortCut
+from ccpn.ui.gui.widgets import MessageDialog
+from ccpn.ui.gui.widgets.MessageDialog import showWarning, progressManager
 from ccpn.ui.gui.popups.ShortcutsPopup import UserShortcuts
-from ccpn.ui.gui.widgets.MessageDialog import progressManager
+from ccpn.ui.gui.lib.SpectrumDisplay import navigateToCurrentPeakPosition, navigateToCurrentNmrResiduePosition
+from ccpn.ui.gui.lib.Shortcuts import addShortCut
 from ccpn.ui.gui.lib.mouseEvents import MouseModes, setCurrentMouseMode, getCurrentMouseMode
 from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
 from ccpn.util.Colour import colorSchemeTable
-
+from ccpn.util.Logging import getLogger
 
 
 class GuiWindow():
@@ -326,7 +324,7 @@ class GuiWindow():
                 if strip is not None:
                     if strip.spectrumDisplay.is1D:
                         cursorPosition = self.application.current.cursorPosition
-                        if cursorPosition is not None and len(cursorPosition)>1:
+                        if cursorPosition is not None and len(cursorPosition) > 1:
                             limits = [cursorPosition[0], cursorPosition[0] + 0.01]
 
                             validViews = [sv for sv in strip.spectrumViews if sv.isDisplayed]
@@ -776,17 +774,27 @@ class GuiWindow():
             n = len(peaks)
 
             if n == 1:
-                peaks[0].snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
-                                        minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
+                try:
+                    peaks[0].snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
+                                            minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
+                except Exception as es:
+                    showWarning('Snap to Extremum', str(es))
+
             elif n > 1:
                 title = 'Snap Peak%s to extremum' % ('' if n == 1 else 's')
                 msg = 'Snap %sselected peak%s?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
                 if MessageDialog.showYesNo(title, msg, parent):
                     with progressManager(self, 'Snapping peaks to extrema'):
-                        for peak in peaks:
-                            peaks.sort(key=lambda x: x.position[0], reverse=False)  # reorder peaks by position
-                            peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
-                                                minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
+
+                        try:
+                            peaks.sort(key=lambda x: x.position[0] if x.position and None not in x.position else 0, reverse=False)  # reorder peaks by position
+                            for peak in peaks:
+                                peak.snapToExtremum(halfBoxSearchWidth=4, halfBoxFitWidth=4,
+                                                    minDropFactor=minDropFactor, searchBoxMode=searchBoxMode, searchBoxDoFit=searchBoxDoFit, fitMethod=fitMethod)
+
+                        except Exception as es:
+                            showWarning('Snap to Extremum', str(es))
+
             else:
                 getLogger().warning('No selected peak/s. Select a peak first.')
 
@@ -945,7 +953,6 @@ class GuiWindow():
             else:
                 if not _justCreated:
                     self.pythonConsoleModule.hide()
-
 
     def _lowerContourBaseCallback(self):
         """Callback to lower the contour level for the currently

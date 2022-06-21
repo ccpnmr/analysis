@@ -19,7 +19,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-16 18:10:24 +0100 (Mon, May 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-21 19:04:44 +0100 (Tue, June 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -276,11 +276,13 @@ def _estimateNoise(strip):
                     typeItem=ItemTypes.get(ITEM), toolTip='Estimate spectral noise in the visible region', shortcut='EN',
                     callback=strip.estimateNoise)
 
+
 def _showNoise(strip):
     return _SCMitem(name='Show Noise thresholds',
                     typeItem=ItemTypes.get(ITEM), toolTip='Show the spectral noise thresholds as dotted lines', shortcut='SL',
                     checkable=True, checked=strip._noiseThresholdLinesActive,
                     callback=strip.toggleNoiseThresholdLines)
+
 
 def _makeStripPlot(strip):
     return _SCMitem(name='Make Strip Plot...',
@@ -450,7 +452,7 @@ def _estimateCurrentVolumesItem():
     _app = getApplication()
     return _SCMitem(name='Estimate Current Peak Volume(s)',
                     typeItem=ItemTypes.get(ITEM), toolTip='Estimate peak volumes for the currently selected peaks', shortcut='EC',
-                    callback=_app.mainWindow.estimateVolumes)
+                    callback=_app.showEstimateCurrentVolumesPopup)
 
 
 def _recalculatePeakHeightsItem():

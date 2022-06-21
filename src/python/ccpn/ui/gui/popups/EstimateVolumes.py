@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-20 17:03:57 +0100 (Mon, June 20, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-21 19:04:44 +0100 (Tue, June 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,23 +26,26 @@ __date__ = "$Date: 2020-03-16 17:34:13 +0000 (Mon, March 16, 2020) $"
 # Start of code
 #=========================================================================================
 
+import sys
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
 from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownListsForObjects import SpectrumPulldown
-from ccpn.ui.gui.widgets.HLine import HLine
-from ccpn.ui.gui.widgets.MessageDialog import showWarning, showMulti
-from ccpn.ui.gui.guiSettings import getColours, SOFTDIVIDER
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
+from ccpn.ui.gui.widgets.CompoundWidgets import CheckBoxCompoundWidget
 
 
 SHOWALLSPECTRA = True
 
 
-class EstimateVolumes(CcpnDialogMainWidget):
+#=========================================================================================
+# EstimateVolumesABC - abstract base class
+#=========================================================================================
+
+class EstimateVolumesABC(CcpnDialogMainWidget):
     """
     Popup to estimate volumes of peaks in peakList from selected spectrum.
     Spectra are all those in the project.
@@ -51,8 +54,10 @@ class EstimateVolumes(CcpnDialogMainWidget):
     FIXEDWIDTH = True
     FIXEDHEIGHT = True
 
-    def __init__(self, parent=None, mainWindow=None, title='Estimate Volumes', spectra=None, **kwds):
-        super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
+    TITLE = 'Estimate Volumes'
+
+    def __init__(self, parent=None, mainWindow=None, title=None, spectra=None, **kwds):
+        super().__init__(parent, setLayout=True, windowTitle=title or self.TITLE, **kwds)
 
         if mainWindow:
             self.mainWindow = mainWindow
@@ -77,6 +82,38 @@ class EstimateVolumes(CcpnDialogMainWidget):
         self._okButton = self.dialogButtons.button(self.OKBUTTON)
 
         self._populateWidgets()
+        self._okButton.setEnabled(True)
+
+    def _createWidgets(self):
+        """Create the widgets for the popup
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError(f'Code error: function {repr(sys._getframe().f_code.co_name)} not implemented')
+
+    def _populateWidgets(self):
+        """Populate the tipTexts and peakList
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError(f'Code error: function {repr(sys._getframe().f_code.co_name)} not implemented')
+
+
+#=========================================================================================
+# EstimatePeakListVolumes
+#=========================================================================================
+
+class EstimatePeakListVolumes(EstimateVolumesABC):
+    """
+    Popup to estimate volumes of peaks in peakList from selected spectrum.
+    Spectra are all those in the project.
+    A spectrum is selected from the spectra in the current.strip if current.strip exists.
+    """
+    FIXEDWIDTH = True
+    FIXEDHEIGHT = True
+
+    TITLE = 'Estimate PeakList Volumes'
+
+    def __init__(self, parent, *args, **kwds):
+        super().__init__(parent, *args, **kwds)
 
         # select the first spectrum from the current spectrumDisplay
         if self.current is not None and self.current.strip is not None and \
@@ -86,42 +123,37 @@ class EstimateVolumes(CcpnDialogMainWidget):
     def _createWidgets(self):
         """Create the widgets for the popup
         """
-        self.peakSelectionFrame = Frame(self.mainWidget, setLayout=True, grid=(0, 0))
-        self.peakSelectionLabel = Label(self.peakSelectionFrame, grid=(0, 0), text='Selected Peaks: <None>          ', tipText='Selected Peaks: <None>')
-        self.peakSelectionButton = Button(self.peakSelectionFrame, grid=(0, 1), text='Estimate Volumes', callback=self._estimateVolumesForSelection)
-
-        HLine(self.mainWidget, grid=(1, 0), colour=getColours()[SOFTDIVIDER], height=15)
-
-        self.peakListFrame = Frame(self.mainWidget, setLayout=True, grid=(2, 0))
         row = 0
-        self.spectrumPullDown = SpectrumPulldown(self.peakListFrame, self.mainWindow, grid=(row, 0), gridSpan=(1, 3),
+        self.peakListFrame = Frame(self.mainWidget, setLayout=True, grid=(row, 0))
+
+        pRow = 0
+        self.spectrumPullDown = SpectrumPulldown(self.peakListFrame, self.mainWindow, grid=(pRow, 0), gridSpan=(1, 3),
                                                  callback=self._changePeakLists,
                                                  filterFunction=self._filterToStrip)
 
-        row += 1
-        self._label = Label(self.peakListFrame, grid=(row, 0), gridSpan=(1, 3), text='Select PeakLists:')
+        pRow += 1
+        self._label = Label(self.peakListFrame, grid=(pRow, 0), gridSpan=(1, 3), text='Select PeakLists:')
 
-        row += 1
+        pRow += 1
         self.peakListWidget = ListWidget(self.peakListFrame, multiSelect=True, callback=self._selectPeakLists, tipText='Select PeakLists',
-                                         grid=(row, 0), gridSpan=(1, 3))
+                                         grid=(pRow, 0), gridSpan=(1, 3))
+        self.peakListWidget.selectionModel().selectionChanged.connect(self._selectionChanged)
+
+        pRow += 1
+        self.peakSelectionRefit = CheckBoxCompoundWidget(self.peakListFrame,
+                                                         grid=(pRow, 0), gridSpan=(1, 3), stretch=(0, 0), hAlign='left',
+                                                         # fixedWidths=(None, 30),
+                                                         orientation='right',
+                                                         labelText='Refit peaks without lineWidths (this may change peak positions)',
+                                                         checked=True
+                                                         )
+
         self.peakListWidget.setSelectContextMenu()
 
     def _populateWidgets(self):
         """Populate the tipTexts and peakList
         """
         with self.blockWidgetSignals():
-            peakTexts = [pk.pid for pk in self.current.peaks]
-            if len(peakTexts) > 10:
-                peakTexts = peakTexts[:7] + ['...', '...'] + peakTexts[-1:]
-            tipText = 'Selected Peaks:\n' + '\n'.join(pk for pk in peakTexts)
-            text = 'Selected Peaks: ' + \
-                   (peakTexts[0] if peakTexts else '') + \
-                   ('...' if len(peakTexts) > 1 else '')
-            self.peakSelectionLabel.setText(text)
-            self.peakSelectionLabel.setToolTip(tipText)
-            if not self.current.peaks:
-                self.peakSelectionButton.setEnabled(False)
-
             self._changePeakLists()
 
     def _changePeakLists(self, *args):
@@ -159,12 +191,19 @@ class EstimateVolumes(CcpnDialogMainWidget):
         else:
             self._okButton.setEnabled(False)
 
+    def _selectionChanged(self, *args):
+        """Callback when the selection in the listWidget has changed
+        """
+        # enable/disable the ok button
+        objs = self.peakListWidget.getSelectedTexts()
+        self._okButton.setEnabled(True if objs else False)
+
     def _estimateVolumes(self):
         """Estimate the volumes for the peaks in the peakLists highlighted in the listWidget
         """
         peakLists = self.peakListWidget.getSelectedObjects()
         if not peakLists:
-            showWarning('Estimate Volumes', 'No peakLists selected')
+            showWarning('Estimate PeakList Volumes', 'No peakLists selected')
 
         else:
             volumeIntegralLimit = self.application.preferences.general.volumeIntegralLimit
@@ -172,48 +211,108 @@ class EstimateVolumes(CcpnDialogMainWidget):
             # estimate the volumes for the peakLists
             with undoBlockWithoutSideBar(self.application):
 
-                badPks = []
-                for peakList in peakLists:
-                    for pk in peakList.peaks:
-                        height = pk.height
-                        lineWidths = pk.lineWidths
-                        if lineWidths is None or None in lineWidths or height is None:
-                            badPks.append(pk)
+                if self.peakSelectionRefit.isChecked():
+                    badPks = []
+                    for peakList in peakLists:
+                        for pk in peakList.peaks:
+                            height = pk.height
+                            lineWidths = pk.lineWidths
+                            if lineWidths is None or None in lineWidths or height is None:
+                                badPks.append(pk)
 
-                if badPks:
-                    cancelTxt = 'Cancel'
-                    okTxt = 'Refit Peaks and Estimate Volumes'
-                    ok = showMulti(title='Estimate Volumes',
-                                   message='There are peaks without linewidths.\nYou need to refit your peak(s) in order to estimate the volume(s). This may slightly change the peak position(s).',
-                                   okText=okTxt, cancelText=cancelTxt, texts=[cancelTxt, okTxt])
-
-                    if ok != cancelTxt:
+                    if badPks:
                         # refit the peaks
                         fitMethod = self.application.preferences.general.peakFittingMethod
                         singularMode = True
                         peakList.fitExistingPeaks(badPks, fitMethod=fitMethod, singularMode=singularMode)
 
-                        # estimate the volumes
-                        for peakList in peakLists:
-                            peakList.estimateVolumes(volumeIntegralLimit=volumeIntegralLimit)
+                # okay to estimate the volumes
+                for peakList in peakLists:
+                    peakList.estimateVolumes(volumeIntegralLimit=volumeIntegralLimit, noWarning=True)
 
-                        self.peakListWidget._disableLabels([pp.pid for pp in peakLists])
+                self.peakListWidget._disableLabels([pp.pid for pp in peakLists])
+                self.accept()
 
-                else:
-                    # okay to estimate the volumes
-                    for peakList in peakLists:
-                        peakList.estimateVolumes(volumeIntegralLimit=volumeIntegralLimit)
 
-                    self.peakListWidget._disableLabels([pp.pid for pp in peakLists])
+#=========================================================================================
+# EstimatePeakListVolumes
+#=========================================================================================
 
-    def _estimateVolumesForSelection(self):
+class EstimateCurrentVolumes(EstimateVolumesABC):
+    """
+    Popup to estimate volumes of peaks in peakList from selected spectrum.
+    Spectra are all those in the project.
+    A spectrum is selected from the spectra in the current.strip if current.strip exists.
+    """
+    FIXEDWIDTH = True
+    FIXEDHEIGHT = True
+
+    TITLE = 'Estimate Current Volumes'
+
+    def _createWidgets(self):
+        """Create the widgets for the popup
+        """
+        row = 0
+        self.peakSelectionFrame = Frame(self.mainWidget, setLayout=True, grid=(row, 0))
+
+        pRow = 0
+        self.peakSelectionLabel = Label(self.peakSelectionFrame, grid=(pRow, 0), gridSpan=(1, 3), text='Selected Peaks: <None>          ', tipText='Selected Peaks: <None>')
+
+        pRow += 1
+        self.peakSelectionRefit = CheckBoxCompoundWidget(self.peakSelectionFrame,
+                                                         grid=(pRow, 0), gridSpan=(1, 3), stretch=(0, 0), hAlign='left',
+                                                         # fixedWidths=(None, 30),
+                                                         orientation='right',
+                                                         labelText='Refit peaks without lineWidths (this may change peak positions)',
+                                                         checked=True
+                                                         )
+
+    def _populateWidgets(self):
+        """Populate the tipTexts and peakList
+        """
+        with self.blockWidgetSignals():
+            peakTexts = [pk.pid for pk in self.current.peaks]
+            if len(peakTexts) > 15:
+                peakTexts = peakTexts[:12] + ['...', '...'] + peakTexts[-1:]
+            tipText = 'Selected Peaks:\n' + '\n'.join(pk for pk in peakTexts)
+            text = 'Selected Peaks: ' + \
+                   (peakTexts[0] if peakTexts else '') + \
+                   ('...' if len(peakTexts) > 1 else '')
+            self.peakSelectionLabel.setText(text)
+            self.peakSelectionLabel.setToolTip(tipText)
+
+            if not self.current.peaks:
+                self.peakSelectionButton.setEnabled(False)
+
+    def _estimateVolumes(self):
         """Estimate the volumes for the selected peaks
         """
         from ccpn.core.lib.peakUtils import estimateVolumes
 
         # return if both the lists are empty
-        if not (self.current and self.current.peaks):
+        if not self.current or not (currentPks := self.current.peaks):
             return
 
         with undoBlockWithoutSideBar():
-            estimateVolumes(self.current.peaks)
+
+            if self.peakSelectionRefit.isChecked():
+                # sort bad peaks into peakLists
+                badPks = {}
+                for pk in currentPks:
+                    height = pk.height
+                    lineWidths = pk.lineWidths
+                    if lineWidths is None or None in lineWidths or height is None:
+                        _pks = badPks.setdefault(pk.peakList, [])
+                        _pks.append(pk)
+
+                if badPks:
+                    # refit the peaks
+                    fitMethod = self.application.preferences.general.peakFittingMethod
+                    singularMode = True
+
+                    for pkList, pks in badPks.items():
+                        if pks:
+                            pkList.fitExistingPeaks(pks, fitMethod=fitMethod, singularMode=singularMode)
+
+            estimateVolumes(currentPks, noWarning=True)
+            self.accept()

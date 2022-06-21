@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-16 11:17:38 +0100 (Thu, June 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-21 19:04:44 +0100 (Tue, June 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1546,7 +1546,7 @@ class Framework(NotifierBase, GuiBase):
             getLogger().warning('Estimate Volumes: Project has no peakLists.')
             MessageDialog.showWarning('Estimate Volumes', 'Project has no peakLists.')
         else:
-            from ccpn.ui.gui.popups.EstimateVolumes import EstimateVolumes
+            from ccpn.ui.gui.popups.EstimateVolumes import EstimatePeakListVolumes
 
             if self.current.strip and not self.current.strip.isDeleted:
                 spectra = [specView.spectrum for specView in self.current.strip.spectrumDisplay.spectrumViews]
@@ -1554,17 +1554,26 @@ class Framework(NotifierBase, GuiBase):
                 spectra = self.project.spectra
 
             if spectra:
-                popup = EstimateVolumes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra)
+                popup = EstimatePeakListVolumes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, spectra=spectra)
                 popup.exec_()
             else:
-                getLogger().warning('Peak Picking: no specta selected.')
-                MessageDialog.showWarning('Peak Picking', 'no specta selected.')
+                getLogger().warning('Estimate Volumes: no specta selected.')
+                MessageDialog.showWarning('Estimate Volumes', 'no specta selected.')
 
-    def estimateCurrentVolumes(self):
+    def showEstimateCurrentVolumesPopup(self):
         """
         Calculate volumes for the currently selected peaks
         """
-        self.mainWindow.estimateVolumes()
+        # self.mainWindow.estimateVolumes()
+
+        from ccpn.ui.gui.popups.EstimateVolumes import EstimateCurrentVolumes
+
+        if self.current.peaks:
+            popup = EstimateCurrentVolumes(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow)
+            popup.exec_()
+        else:
+            getLogger().warning('Estimate Current Volumes: no current.peaks')
+            MessageDialog.showWarning('Estimate Current Volumes', 'no current.peaks')
 
     def makeStripPlotPopup(self, includePeakLists=True, includeNmrChains=True, includeNmrChainPullSelection=True):
         if not self.project.peaks and not self.project.nmrResidues and not self.project.nmrChains:

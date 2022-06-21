@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-09 11:14:31 +0100 (Mon, May 09, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-21 19:04:44 +0100 (Tue, June 21, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -189,7 +189,7 @@ class GuiBase(object):
             (),
             ("Quit", self._quitCallback, [('shortcut', '⌃q')]),  # Unicode U+2303, NOT the carrot on your keyboard.
             ]
-        ))
+                   ))
 
         ms.append(('Edit', [
             ("Undo", self.undo, [('shortcut', '⌃z')]),  # Unicode U+2303, NOT the carrot on your keyboard.
@@ -201,7 +201,7 @@ class GuiBase(object):
             ("Paste", self._nyi, [('shortcut', '⌃v'), ('enabled', False)]),
             ("Select all", self._nyi, [('shortcut', '⌃a'), ('enabled', False)]),
             ]
-        ))
+                   ))
 
         ms.append(('View', [
             ("Chemical Shift Table", partial(self.showChemicalShiftTable, selectFirstItem=True), [('shortcut', 'ct')]),
@@ -241,7 +241,7 @@ class GuiBase(object):
             ("Python Console", self._toggleConsoleCallback, [('shortcut', '  '),
                                                              ])
             ]
-        ))
+                   ))
 
         ms.append(('Spectrum', [
             ("Load Spectra...", self._loadSpectraCallback, [('shortcut', 'ls')]),
@@ -256,7 +256,7 @@ class GuiBase(object):
             ("Copy PeakList...", self.showCopyPeakListPopup, [('shortcut', 'cl')]),
             ("Copy Peaks...", self.showCopyPeaks, [('shortcut', 'cp')]),
             ("Estimate Peak Volumes...", self.showEstimateVolumesPopup, [('shortcut', 'ev')]),
-            ("Estimate Current Peak Volumes", self.estimateCurrentVolumes, [('shortcut', 'ec')]),
+            ("Estimate Current Peak Volumes", self.showEstimateCurrentVolumesPopup, [('shortcut', 'ec')]),
             ("Reorder PeakList Axes...", self.showReorderPeakListAxesPopup, [('shortcut', 'rl')]),
             (),
             ("Make Strip Plot...", self.makeStripPlotPopup, [('shortcut', 'sp')]),
@@ -266,7 +266,7 @@ class GuiBase(object):
             (),
             ("Print to File...", self.showPrintSpectrumDisplayPopup, [('shortcut', '⌃p')]),
             ]
-        ))
+                   ))
 
         ms.append(('Molecules', [
             ("Chain from FASTA...", self._loadDataCallback),
@@ -278,7 +278,7 @@ class GuiBase(object):
             (),
             ("Reference Chemical Shifts", self.showReferenceChemicalShifts, [('shortcut', 'rc')]),
             ]
-        ))
+                   ))
 
         ms.append(('Macro', [
             ("New Macro Editor", self._showMacroEditorCallback, [('shortcut', 'nm')]),
@@ -295,13 +295,13 @@ class GuiBase(object):
             (),
             ("Define Macro Shortcuts...", self.defineUserShortcuts, [('shortcut', 'du')]),
             ]
-        ))
+                   ))
 
         ms.append(('Plugins', [
             (CCPNPLUGINSMENU, ()),
             (PLUGINSMENU, ()),
             ]
-        ))
+                   ))
 
         ms.append(('Help', [
             (TUTORIALSMENU, ([
@@ -325,7 +325,7 @@ class GuiBase(object):
             (),
             ("About CcpNmr V3...", self._showAboutPopup),
             ]
-        ))
+                   ))
 
     def _setColourSchemeAndStyleSheet(self):
         """Set the colourScheme and stylesheet as determined by arguments --dark, --light or preferences
@@ -385,12 +385,14 @@ class GuiBase(object):
         """menu callback; use ui.loadData to do the lifting
         """
         from ccpn.framework.lib.DataLoaders.NefDataLoader import NefDataLoader
+
         self.ui.loadData(pathFilter=(NefDataLoader.dataFormat,))
 
     def _loadNMRStarFileCallback(self):
         """menu callback; use ui.loadData to do the lifting
         """
         from ccpn.framework.lib.DataLoaders.StarDataLoader import StarDataLoader
+
         self.ui.loadData(pathFilter=(StarDataLoader.dataFormat,))
 
     def _saveCallback(self):
@@ -415,11 +417,11 @@ class GuiBase(object):
 
         if (path := self.saveToArchive()) is None:
             MessageDialog.showInfo('Archive Project',
-                                   'Unable to archive Project' )
+                                   'Unable to archive Project')
 
         else:
             MessageDialog.showInfo('Archive Project',
-                                   'Project archived to %s' % path )
+                                   'Project archived to %s' % path)
             self.ui.mainWindow._updateRestoreArchiveMenu()
 
     def _restoreFromArchiveCallback(self):
@@ -435,9 +437,9 @@ class GuiBase(object):
         archivePath = dialog.selectedFile()
 
         if archivePath and \
-           (newProject := self.restoreFromArchive(archivePath)) is not None:
+                (newProject := self.restoreFromArchive(archivePath)) is not None:
             MessageDialog.showInfo('Restore from Archive',
-                                   'Project restored as %s' % newProject.path )
+                                   'Project restored as %s' % newProject.path)
 
     def _saveLayoutCallback(self):
         Layout.updateSavedLayout(self.ui.mainWindow)
@@ -476,6 +478,7 @@ class GuiBase(object):
         Displays Application Preferences Popup.
         """
         from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
+
         popup = PreferencesPopup(parent=self.ui.mainWindow, mainWindow=self.ui.mainWindow, preferences=self.preferences)
         popup.exec_()
 
@@ -500,18 +503,22 @@ class GuiBase(object):
 
     def _showBeginnersTutorial(self):
         from ccpn.framework.PathsAndUrls import beginnersTutorialPath
+
         self._systemOpen(beginnersTutorialPath)
 
     def _showBackboneTutorial(self):
         from ccpn.framework.PathsAndUrls import backboneAssignmentTutorialPath
+
         self._systemOpen(backboneAssignmentTutorialPath)
 
     def _showCSPtutorial(self):
         from ccpn.framework.PathsAndUrls import cspTutorialPath
+
         self._systemOpen(cspTutorialPath)
 
     def _showScreenTutorial(self):
         from ccpn.framework.PathsAndUrls import screenTutorialPath
+
         self._systemOpen(screenTutorialPath)
 
     def _showVersion3Documentation(self):
@@ -528,27 +535,33 @@ class GuiBase(object):
         """Displays Forum in a module.
         """
         from ccpn.framework.PathsAndUrls import ccpnForum
+
         self._showHtmlFile("Analysis Version-3 Forum", ccpnForum)
 
     def _showShortcuts(self):
         from ccpn.framework.PathsAndUrls import shortcutsPath
+
         self._systemOpen(shortcutsPath)
 
     def _showAboutPopup(self):
         from ccpn.ui.gui.popups.AboutPopup import AboutPopup
+
         popup = AboutPopup(parent=self.ui.mainWindow)
         popup.exec_()
 
     def _showAboutCcpn(self):
         from ccpn.framework.PathsAndUrls import ccpnUrl
+
         self._showHtmlFile("About CCPN", ccpnUrl)
 
     def _showIssuesList(self):
         from ccpn.framework.PathsAndUrls import ccpnIssuesUrl
+
         self._showHtmlFile("CCPN Issues", ccpnIssuesUrl)
 
     def _showTutorials(self):
         from ccpn.framework.PathsAndUrls import ccpnTutorials
+
         self._showHtmlFile("CCPN Tutorials", ccpnTutorials)
 
     def _showRegisterPopup(self):
@@ -558,6 +571,7 @@ class GuiBase(object):
 
     def _showCcpnLicense(self):
         from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
+
         self._showHtmlFile("CCPN Licence", ccpnLicenceUrl)
 
     def _showUpdatePopup(self):
@@ -586,6 +600,7 @@ class GuiBase(object):
 
     def _showLicense(self):
         from ccpn.framework.PathsAndUrls import licensePath
+
         self._showHtmlFile("CCPN Licence", licensePath)
 
     def _showSubmitMacroPopup(self):
@@ -725,6 +740,7 @@ class GuiBase(object):
     #         position = len(self._menuSpec)
     #     self._menuSpec.insert(position, (str(name), []))
 
+
 #end class
 
 #-----------------------------------------------------------------------------------------
@@ -745,6 +761,7 @@ def _getOpenLayoutPath(mainWindow):
         return None
     if path:
         return path
+
 
 def _getSaveLayoutPath(mainWindow):
     """Opens save Layout as dialog box and gets directory specified in the

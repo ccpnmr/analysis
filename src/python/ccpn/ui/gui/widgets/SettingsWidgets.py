@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-31 10:23:46 +0100 (Tue, May 31, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-22 13:40:16 +0100 (Wed, June 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1342,19 +1342,15 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
 
                 if 'type' in data:
                     widgetType = data['type']
+                    kws = {}
+                    if 'callBack' in data:  # this avoid a crash if the widget init doesn't have a callback/mainWindow arg
+                        kws.update({'callBack': data['callBack']})
+                    kws.update({'mainWindow': self.mainWindow})
                     if 'kwds' in data:
-                        kws = {'callback': data['callBack']} if 'callBack' in data else {}
-                        data['kwds'].pop('callback', None)
                         kws.update(data['kwds'])
-                        newItem = widgetType(self, self.mainWindow, grid=(row, 0),  **kws,)
+                        newItem = widgetType(self, grid=(row, 0),  **kws,)
                     else:
-                        kws = {'callback':data['callBack']}  if 'callBack' in data else {} #this avoid a crash if the widget init doesn't have a callback arg
-                        newItem = widgetType(self, self.mainWindow, grid=(row, 0), **kws)
-                    # newItem.setCallback(data['callBack'] if 'callBack' in data else None)
-                    # self.checkBoxes[item] = {'widget'      : newItem,
-                    #                          'item'        : item,
-                    #                          'signalFunc'  : None
-                    #                          }
+                        newItem = widgetType(self,  self.mainWindow, grid=(row, 0), **kws)
 
                 else:
                     newItem = CheckBoxCompoundWidget(

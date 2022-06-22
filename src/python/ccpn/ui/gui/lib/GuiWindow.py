@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-21 18:52:48 +0100 (Tue, June 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-22 17:32:37 +0100 (Wed, June 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -354,6 +354,7 @@ class GuiWindow():
                 else:
                     getLogger().warning('Current strip is not 1D')
 
+    @logCommand('mainWindow.')
     def refitCurrentPeaks(self, singularMode=True):
         peaks = self.application.current.peaks
         if not peaks:
@@ -755,9 +756,10 @@ class GuiWindow():
         else:
             getLogger().warning('No current strip. Select a strip first.')
 
-    def snapCurrentPeaksToExtremum(self, parent=None):
+    @logCommand('mainWindow.')
+    def snapCurrentPeaksToExtremum(self):
         """
-        Snaps selected peaks. If more then one, pops up a Yes/No.
+        Snaps selected peaks. If more than one, pops up a Yes/No.
         Uses the minDropFactor from the preferences, and applies a parabolic fit to give first-estimate of lineWidths
         """
         peaks = list(self.current.peaks)
@@ -783,7 +785,7 @@ class GuiWindow():
             elif n > 1:
                 title = 'Snap Peak%s to extremum' % ('' if n == 1 else 's')
                 msg = 'Snap %sselected peak%s?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
-                if MessageDialog.showYesNo(title, msg, parent):
+                if MessageDialog.showYesNo(title, msg, self):
                     with progressManager(self, 'Snapping peaks to extrema'):
 
                         try:

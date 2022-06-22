@@ -869,7 +869,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
 
     # set the queue handling parameters
     _maximumQueueLength = 0
-    _logQueueTime = False
+    _logQueue = False
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None,
                  actionCallback=None, selectionCallback=None, checkBoxCallback=None,
@@ -1879,7 +1879,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
 
         _startTime = time_ns()
         _useQueueFull = (self._maximumQueueLength not in [0, None] and len(self._queueActive) > self._maximumQueueLength)
-        if self._logQueueTime:
+        if self._logQueue:
             # log the queue-time if required
             getLogger().debug(f'_queueProcess  {self}  len: {len(self._queueActive)}  useQueueFull: {_useQueueFull}')
 
@@ -1901,7 +1901,7 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
                 except Exception as es:
                     getLogger().debug(f'Error in {self.__class__.__name__} update - {es}')
 
-        if self._logQueueTime:
+        if self._logQueue:
             getLogger().debug(f'elapsed time {(time_ns() - _startTime) / 1e9}')
 
     def _queueAppend(self, itm):

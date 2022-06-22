@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-21 19:01:26 +0100 (Tue, June 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-22 14:29:00 +0100 (Wed, June 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -80,7 +80,7 @@ class GuiStrip(Frame):
 
     # set the queue handling parameters
     _maximumQueueLength = 40
-    _logQueueTime = False
+    _logQueue = False
 
     def __init__(self, spectrumDisplay):
         """
@@ -2768,7 +2768,7 @@ class GuiStrip(Frame):
 
         _startTime = time_ns()
         _useQueueFull = (self._maximumQueueLength not in [0, None] and len(self._queueActive) > self._maximumQueueLength)
-        if self._logQueueTime:
+        if self._logQueue:
             # log the queue-time if required
             getLogger().debug(f'_queueProcess  {self}  len: {len(self._queueActive)}  useQueueFull: {_useQueueFull}')
 
@@ -2790,7 +2790,7 @@ class GuiStrip(Frame):
                 except Exception as es:
                     getLogger().debug(f'Error in {self.__class__.__name__} update - {es}')
 
-        if self._logQueueTime:
+        if self._logQueue:
             getLogger().debug(f'elapsed time {(time_ns() - _startTime) / 1e9}')
 
     def _queueAppend(self, itm):

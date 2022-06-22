@@ -4,10 +4,10 @@ Module Documentation here
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -15,8 +15,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-20 18:47:15 +0000 (Mon, December 20, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-06-22 16:49:53 +0100 (Wed, June 22, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -28,25 +28,24 @@ __date__ = "$Date: 2020-12-10 12:15:19 +0000 (Thu, December 10, 2020) $"
 
 from PyQt5 import QtWidgets
 from typing import Sequence
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
+from functools import partial
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
-from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.ui.gui.widgets.Frame import Frame, ScrollableFrame
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
-from ccpn.ui.gui.guiSettings import getColours, SOFTDIVIDER, DIVIDER
-from ccpn.ui.gui.popups.Dialog import CcpnDialog
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.HLine import HLine
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.CompoundWidgets import PulldownListCompoundWidget
+from ccpn.ui.gui.popups.Dialog import CcpnDialogMainWidget
 from ccpn.ui.gui.popups.Dialog import handleDialogApply
+from ccpn.ui.gui.guiSettings import getColours, SOFTDIVIDER, DIVIDER
 from ccpn.core.lib.ContextManagers import undoStackBlocking
-from functools import partial
 from ccpn.core.lib.SpectrumLib import _calibrateX1D, _calibrateY1D, _calibrateNDAxis
 from ccpn.core.lib.AxisCodeLib import getAxisCodeMatchIndices
+from ccpn.util.Logging import getLogger
 
 
-class CalibrateSpectraFromPeaksPopupNd(CcpnDialog):
+class CalibrateSpectraFromPeaksPopupNd(CcpnDialogMainWidget):
     """Popup to allow calibrating of spectra from a selection of peaks in the same spectrumDisplay
     Specifically for an Nd spectrumDisplay
 
@@ -55,51 +54,55 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialog):
     A single peak is selected as the primary peak from the pullDown,
     all other spectra are updated to align peaks with the primary peak
     """
+    FIXEDWIDTH = False
+    FIXEDHEIGHT = False
 
     def __init__(self, parent=None, mainWindow=None, strip=None, spectrumCount=None,
                  title: str = 'Calibrate Spectra from Peaks', **kwds):
-        CcpnDialog.__init__(self, parent, setLayout=True, windowTitle=title, **kwds)
+        super().__init__(parent, setLayout=True, windowTitle=title, **kwds)
 
         self.mainWindow = mainWindow
         if mainWindow:
             self.application = mainWindow.application
             self.project = mainWindow.application.project
             self.current = mainWindow.application.current
+        else:
+            self.application = self.project = self.current = None
 
         self._parent = parent
         self.strip = strip
         self.spectrumCount = spectrumCount
-        self.peaks = [peak for peak in self.spectrumCount.values()]
         self._spectrumFrame = None
-
-        # the last item that was clicked
-        self._lastClickedObjects = strip._lastClickedObjects
-
-        if not (self._lastClickedObjects and isinstance(self._lastClickedObjects, Sequence)):
-            raise TypeError('last selected objects must be a list')
-        if len(self._lastClickedObjects) > 1:
-            raise TypeError('Too many objects selected')
-
         self.spPulldowns = []
 
-        self.scrollArea = ScrollArea(self, setLayout=True, grid=(0, 0))
-        self.scrollArea.setWidgetResizable(True)
+        # initialise the content
+        self._checkItems()
+        self._setWidgets()
 
-        self.scrollAreaWidgetContents = Frame(self, setLayout=True, showBorder=False)
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.setOkButton(callback=self._accept, tipText='Ok')
+        self.setCloseButton(callback=self.reject, tipText='Close')
 
-        self.scrollAreaWidgetContents.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
-        self.scrollArea.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        self.scrollArea.setStyleSheet("""ScrollArea { border: 0px; }""")
+        minSize = self.minimumSizeHint()
+        self.adjustSize()
+
+        # set the buttons and the size
+        self.__postInit__()
+
+        # allow for the scrollbars
+        newSize = self.scrollAreaWidgetContents.minimumSizeHint() + minSize
+        self.setMinimumHeight(newSize.height())
+        self.setFixedWidth(newSize.width())
+
+    def _setWidgets(self):
+        """Add widgets to the popup
+        """
+        self.scrollAreaWidgetContents = ScrollableFrame(self.mainWidget, setLayout=True, grid=(0, 0),
+                                                        scrollBarPolicies=('never', 'asNeeded'))
 
         row = 0
-        # Label(self.scrollAreaWidgetContents, text=title, bold=True, grid=(row, 0), gridSpan=(1, 3))
-        #
-        # row += 1
         self.primaryPeakPulldown = PulldownListCompoundWidget(self.scrollAreaWidgetContents, labelText="Fixed Peak",
                                                               grid=(row, 0), gridSpan=(1, 3), hAlign='l',
                                                               callback=self._setPrimaryPeak)
-        # self.primaryPeakPulldown.setPreSelect(self._fillPreferredWidget)
         self._fillPreferredWidget()
 
         # add the other peaks that will be moved
@@ -113,13 +116,6 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialog):
                QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding,
                grid=(row, 2), gridSpan=(1, 1))
 
-        self.buttonBox = ButtonList(self, grid=(1, 0), texts=['Close', 'Ok'],
-                                    callbacks=[self._reject, self._accept], hAlign='r', vAlign='b')
-
-        self.adjustSize()
-        self.setFixedHeight(self.size().height() + 24)
-        self.setFixedWidth(self.size().width() + 24)
-
     def _fillPreferredWidget(self):
         """Fill the pullDown with the currently available peak ids when the popup is initialised
         """
@@ -130,6 +126,22 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialog):
             specIndex = ll.index(self._lastClickedObjects[0].id)
             self.primaryPeakPulldown.setIndex(specIndex)
             self.primaryPeak = self.peaks[specIndex]
+
+    def _checkItems(self):
+        """Check the items are valid
+        """
+        if not isinstance(self.spectrumCount, dict):
+            raise TypeError('spectrumCount is not of type dict')
+
+        self.peaks = [peak for peak in self.spectrumCount.values()]
+
+        # the last item that was clicked
+        self._lastClickedObjects = self.strip._lastClickedObjects
+
+        if not (self._lastClickedObjects and isinstance(self._lastClickedObjects, Sequence)):
+            raise TypeError('last selected objects must be a list')
+        if len(self._lastClickedObjects) > 1:
+            raise TypeError('Too many objects selected')
 
     def _setPrimaryPeak(self, value):
         """Set the preferred axis ordering from the pullDown selection
@@ -158,13 +170,13 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialog):
         HLine(spectrumFrame, grid=(specRow, 0), gridSpan=(1, FIELDS), colour=getColours()[DIVIDER], height=15)
 
         specRow += 1
-        incudeAxisLabel = Label(spectrumFrame, text="Include\nAxis", grid=(specRow, 0), hAlign='c')
-        axisLabel = Label(spectrumFrame, text="AxisCode", grid=(specRow, 1), hAlign='c')
-        matchAxisLabel = Label(spectrumFrame, text="Match to\nAxisCode\n(in Fixed Peak)", grid=(specRow, 2), hAlign='c')
-        isoLabel = Label(spectrumFrame, text="Isotope\nCode", grid=(specRow, 3), hAlign='c')
-        oldPpmLabel = Label(spectrumFrame, text="Original\nppmPosition", grid=(specRow, 4), hAlign='c')
-        newPpmLabel = Label(spectrumFrame, text="New\nppmPosition", grid=(specRow, 5), hAlign='c')
-        deltaLabel = Label(spectrumFrame, text="Delta", grid=(specRow, 6), hAlign='c')
+        _incudeAxisLabel = Label(spectrumFrame, text="Include\nAxis", grid=(specRow, 0), hAlign='c')
+        _axisLabel = Label(spectrumFrame, text="AxisCode", grid=(specRow, 1), hAlign='c')
+        _matchAxisLabel = Label(spectrumFrame, text="Match to\nAxisCode\n(in Fixed Peak)", grid=(specRow, 2), hAlign='c')
+        _isoLabel = Label(spectrumFrame, text="Isotope\nCode", grid=(specRow, 3), hAlign='c')
+        _oldPpmLabel = Label(spectrumFrame, text="Original\nppmPosition", grid=(specRow, 4), hAlign='c')
+        _newPpmLabel = Label(spectrumFrame, text="New\nppmPosition", grid=(specRow, 5), hAlign='c')
+        _deltaLabel = Label(spectrumFrame, text="Delta", grid=(specRow, 6), hAlign='c')
 
         specRow += 1
         HLine(spectrumFrame, grid=(specRow, 0), gridSpan=(1, FIELDS), colour=getColours()[SOFTDIVIDER], height=10)
@@ -173,12 +185,12 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialog):
         for peak in self.peaks:
 
             if specRow > 3:
-                # add softdivider
+                # add soft divider
                 HLine(spectrumFrame, grid=(specRow, 0), gridSpan=(1, FIELDS), colour=getColours()[SOFTDIVIDER], height=10)
 
             specRow += 1
             Label(spectrumFrame, text='Peak: %s' % str(peak.id), grid=(specRow, 0), gridSpan=(1, FIELDS), bold=True)
-            numDim = peak.peakList.spectrum.dimensionCount
+            # numDim = peak.peakList.spectrum.dimensionCount
 
             thisSpec = peak.peakList.spectrum
             primarySpec = self.primaryPeak.peakList.spectrum
@@ -190,9 +202,9 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialog):
                 primaryIndices = getAxisCodeMatchIndices(primarySpec.axisCodes, thisSpec.axisCodes[ind])
 
                 specRow += 1
-                axisLabel = Label(spectrumFrame, text=thisSpec.axisCodes[ind], grid=(specRow, 1))
-                isoLabel = Label(spectrumFrame, text=thisSpec.isotopeCodes[ind], grid=(specRow, 3))
-                ppmLabel = Label(spectrumFrame, text='%.3f' % peak.ppmPositions[ind], grid=(specRow, 4))
+                _axisLabel = Label(spectrumFrame, text=thisSpec.axisCodes[ind], grid=(specRow, 1))
+                _isoLabel = Label(spectrumFrame, text=thisSpec.isotopeCodes[ind], grid=(specRow, 3))
+                _ppmLabel = Label(spectrumFrame, text='%.3f' % peak.ppmPositions[ind], grid=(specRow, 4))
 
                 if (peak != self.primaryPeak) and dim is not None:
 
@@ -268,8 +280,7 @@ class CalibrateSpectraFromPeaksPopupNd(CcpnDialog):
             ppmDelta.setText('%.3f' % (self.primaryPeak.ppmPositions[dim] - peak.ppmPositions[ind]))
 
         except Exception as es:
-            print('>>>>>>', str(es))
-            pass
+            getLogger().debug(f'{es}')
 
     def _calibrateSpectra(self, spectra, strip, direction=1.0):
 

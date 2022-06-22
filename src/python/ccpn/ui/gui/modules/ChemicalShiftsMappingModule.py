@@ -69,7 +69,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-04 13:41:51 +0100 (Wed, May 04, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-22 16:02:58 +0100 (Wed, June 22, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -86,6 +86,7 @@ import numpy as np
 import pyqtgraph as pg
 import random
 import pandas as pd
+import warnings
 from functools import partial
 from PyQt5 import QtCore, QtWidgets, QtGui
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
@@ -143,6 +144,9 @@ from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar
 from ccpn.ui.gui.widgets.Font import Font, getFont
 from ccpn.util.Path import Path, aPath, fetchDir, joinPath
 
+
+# suppress warning
+warnings.filterwarnings(action='ignore', category=RuntimeWarning, message='All-NaN slice encountered')
 
 # Default values on init
 DefaultConcentration = 0.0

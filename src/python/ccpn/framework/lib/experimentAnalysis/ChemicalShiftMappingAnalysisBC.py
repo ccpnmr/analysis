@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-26 10:27:10 +0100 (Thu, May 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-23 16:37:36 +0100 (Thu, June 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -39,8 +39,8 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
     seriesAnalysisName = sv.ChemicalShiftMappingAnalysis
     _AlphaFactors = sv.DEFAULT_ALPHA_FACTORS
 
-    def __init__(self, application):
-        super().__init__(application)
+    def __init__(self):
+        super().__init__()
 
         _registerChemicalShiftMappingModels()
 
@@ -106,6 +106,7 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
          override last available.
         :param args:
         :param kwargs:
+            :key: outputName:       outputDataTable name
             :key: fittingModels:    list of fittingModel classes (not initialised).So to use only the specif given,
                                     rather than all available.
             :key: overrideOutputDataTables: bool, True to rewrite the output result in the last available dataTable.
@@ -118,12 +119,14 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
 
         fittingModels = self.fittingModels or kwargs.get(sv.FITTING_MODELS, [])
         ovverideOutputDataTable = kwargs.get(sv.OVERRIDE_OUTPUT_DATATABLE, True)
+        outputDataTableName = kwargs.get(sv.OUTPUT_DATATABLE_NAME, None)
         for model in fittingModels:
             fittingModel = model()
             inputDataTable = self.inputDataTables[-1]
             outputFrame = fittingModel.fitSeries(inputDataTable.data)
-            outputName = f'{inputDataTable.name}_output_{fittingModel.ModelName}'
-            outputDataTable = self._fetchOutputDataTable(name=outputName, seriesFrameType=sv.CSM_OUTPUT_FRAME,
+            if not outputDataTableName:
+                outputDataTableName = f'{inputDataTable.name}_output_{fittingModel.ModelName}'.replace(" ", "")
+            outputDataTable = self._fetchOutputDataTable(name=outputDataTableName, seriesFrameType=sv.CSM_OUTPUT_FRAME,
                                                    overrideExisting=ovverideOutputDataTable)
             outputDataTable.data = outputFrame
             self.addOutputData(outputDataTable)

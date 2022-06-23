@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-26 12:38:12 +0100 (Thu, May 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-23 16:37:36 +0100 (Thu, June 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -50,7 +50,6 @@ class FitPlotPanel(GuiPanel):
 
     def __init__(self, guiModule, *args, **Framekwargs):
         GuiPanel.__init__(self, guiModule, *args , **Framekwargs)
-        self.setMaximumHeight(100)
 
     def initWidgets(self):
         self._setBindingPlot()

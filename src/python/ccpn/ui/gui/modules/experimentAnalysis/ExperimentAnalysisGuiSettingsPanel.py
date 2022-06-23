@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-07 15:43:23 +0100 (Tue, June 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-23 16:37:37 +0100 (Thu, June 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -39,7 +39,7 @@ from ccpn.ui.gui.widgets.RadioButtons import RadioButtons, EditableRadioButtons
 import ccpn.ui.gui.widgets.SettingsWidgets as settingWidgets
 from ccpn.ui.gui.widgets.Spacer import Spacer
 from ccpn.ui.gui.widgets.Label import maTex2Pixmap
-import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisNamespaces as nameSpaces
+import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as nameSpaces
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as seriesVariables
 from ccpn.ui.gui.widgets.HLine import LabeledHLine
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER, setColourScheme, FONTLIST, ZPlaneNavigationModes
@@ -92,6 +92,7 @@ class GuiInputDataPanel(GuiSettingPanel):
                                 {'label': nameSpaces.Label_SpectrumGroups,
                                  'type': LabeledHLine,
                                  'kwds': {'text': nameSpaces.Label_SpectrumGroups,
+                                          # 'height': 30,
                                           'colour':DividerColour,
                                           'gridSpan':(1,2),
                                           'tipText': nameSpaces.TipText_SpectrumGroupsSeparator}}),
@@ -141,6 +142,7 @@ class GuiInputDataPanel(GuiSettingPanel):
                                 {'label': nameSpaces.Label_DataTables,
                                  'type': LabeledHLine,
                                  'kwds': {'text':nameSpaces.Label_DataTables,
+                                          # 'height': 30,
                                           'gridSpan':(1,2),
                                           'colour': DividerColour,
                                           'tipText': nameSpaces.TipText_DataTableSeparator}}),
@@ -181,6 +183,7 @@ class CSMCalculationPanel(GuiSettingPanel):
              {'label': nameSpaces.Label_DeltaDeltas,
                'type': LabeledHLine,
                'kwds': {'text':  nameSpaces.Label_DeltaDeltas,
+                        'height': 30,
                         'gridSpan':(1,2),
                         'colour': DividerColour,
                         'tipText': nameSpaces.TipText_DeltaDeltasSeparator}}),
@@ -308,6 +311,7 @@ class GuiCSMFittingPanel(GuiSettingPanel):
              {'label': nameSpaces.Label_FittingSeparator,
               'type': LabeledHLine,
               'kwds': {'text': nameSpaces.Label_FittingSeparator,
+                       'height': 30,
                        'gridSpan': (1, 2),
                        'colour': DividerColour,
                        'tipText': nameSpaces.TipText_FittingSeparator}}),
@@ -329,6 +333,7 @@ class GuiCSMFittingPanel(GuiSettingPanel):
              {'label': nameSpaces.Label_OptimiserSeparator,
               'type': LabeledHLine,
               'kwds': {'text': nameSpaces.Label_OptimiserSeparator,
+                       'height': 30,
                        'gridSpan': (1, 2),
                        'colour': DividerColour,
                        'tipText': nameSpaces.TipText_OptimiserSeparator}}),
@@ -377,6 +382,7 @@ class AppearancePanel(GuiSettingPanel):
              {'label': nameSpaces.Label_GeneralAppearance,
               'type': LabeledHLine,
               'kwds': {'text': nameSpaces.Label_GeneralAppearance,
+                       'height': 30,
                        'colour': DividerColour,
                        'gridSpan': (1, 2),
                        'tipText': nameSpaces.TipText_GeneralAppearance}}),
@@ -434,6 +440,7 @@ class AppearancePanel(GuiSettingPanel):
              {'label': nameSpaces.Label_MolStrucSeparator,
               'type': LabeledHLine,
               'kwds': {'text': nameSpaces.Label_MolStrucSeparator,
+                       'height': 30,
                        'colour': DividerColour,
                        'gridSpan': (1, 2),
                        'tipText': nameSpaces.TipText_MolStrucSeparator}}),

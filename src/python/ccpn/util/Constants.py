@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-14 16:12:24 +0100 (Tue, June 14, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-23 16:37:37 +0100 (Thu, June 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -86,7 +86,8 @@ MASS_UNITS = ('g', 'mg', 'µg', 'ng', 'pg')
 TEMPERATURE_UNITS = ('K',)
 TIME_UNITS = ('s', 'ms', 'µs', 'ns', 'ps')
 DISTANCE_UNITS = ('µm', 'mm', 'm')
-ALL_SERIES_UNITS = ('',) + TEMPERATURE_UNITS + MASS_UNITS + VOLUME_UNITS + CONCENTRATION_UNITS + DISTANCE_UNITS + TIME_UNITS
+VARIOUS_UNITS = ('', 'EQ', 'AU')
+ALL_SERIES_UNITS = VARIOUS_UNITS + TEMPERATURE_UNITS + MASS_UNITS + VOLUME_UNITS + CONCENTRATION_UNITS + DISTANCE_UNITS + TIME_UNITS
 AMOUNT_UNITS = VOLUME_UNITS + MASS_UNITS
 IONICSTRENGTH_UNITS = CONCENTRATION_UNITS
 SAMPLE_STATES = ('Liquid', 'Solid', 'Ordered', 'Powder', 'Crystal', 'Other')

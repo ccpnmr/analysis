@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-01 16:19:59 +0100 (Wed, June 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-23 16:37:36 +0100 (Thu, June 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -64,10 +64,20 @@ class Binding1SiteMinimiser(MinimiserModel):
     FITTING_FUNC = lf.oneSiteBinding_func
     MODELNAME = '1_Site_Binding_Model'
 
+    KDstr = sv.KD # They must be exactly as they are defined in the FITTING_FUNC arguments! This was too hard to change!
+    BMAXstr = sv.BMAX
+
+    _defaultParams = {KDstr:1,
+                      BMAXstr:0.5}
+
+
     def __init__(self, independent_vars=['x'], prefix='', nan_policy=sv.OMIT_MODE, **kwargs):
         kwargs.update({'prefix': prefix, 'nan_policy': nan_policy, 'independent_vars': independent_vars})
         super().__init__(Binding1SiteMinimiser.FITTING_FUNC, **kwargs)
         self.name = self.MODELNAME
+        self.Kd = None # this will be a Parameter Obj . Set on the fly by the minimiser while inspecting the Fitting Func signature
+        self.BMax = None # this will be a Parameter Obj
+        self.params = self.make_params(**self._defaultParams)
 
     def guess(self, data, x, **kws):
         """
@@ -76,11 +86,13 @@ class Binding1SiteMinimiser(MinimiserModel):
         :param kws:
         :return: dict of params needed for the fitting
         """
-        params = self.make_params(kd=1, bmax=0.5)
-        params['kd'].min = 0.1
-        params['kd'].max = 10
-        params['bmax'].min = 0.001
-        params['bmax'].max = 1
+        params = self.params
+        params.get(self.KDstr).value = np.mean(x)
+        params.get(self.KDstr).min = np.min(x)
+        params.get(self.KDstr).max = np.max(x)+(np.max(x)*0.5)
+        params.get(self.BMAXstr).value = np.mean(data)
+        params.get(self.BMAXstr).min = 0.001
+        params.get(self.BMAXstr).max = np.max(data)+(np.max(data)*0.5)
         return params
 
 
@@ -244,21 +256,9 @@ class OneSiteBindingModel(FittingModelABC):
             for i, assignmentHeader in enumerate(inputData.assignmentHeaders[:-1]):  ## build new row for the output dataFrame as DefaultDict.
                 outputDataDict[assignmentHeader].append(row[assignmentHeader])  ## add common assignments definitions
             outputDataDict['ModelName'].append(model.MODELNAME)
-            for nn, vv in zip([sv.MINIMISER_METHOD, sv.R2, sv.CHISQUARE, sv.REDUCEDCHISQUARE, sv.AKAIKE, sv.BAYESIAN],
-                          ['method', 'r2', 'chisqr','redchi', 'aic', 'bic']):
-                outputDataDict[nn].append(getattr(result, vv, None))
-            vv = ['kd', 'bmax']
-            if result is not None:
-                for j in vv:
-                    param = result.params.get(j)
-                    outputDataDict[j].append(param.value)
-                    outputDataDict[f'{j}_err'].append(param.stderr)
-            else:
-                for j in vv :
-                    outputDataDict[j].append(None)
-                    outputDataDict[f'{j}_err'].append(None)
-
-            outputDataDict['minimiser'].append(result)
+            for resultName, resulValue in result.getAllResultsAsDict().items():
+                outputDataDict[resultName].append(resulValue)
+            # outputDataDict['minimiser'].append(result)
         outputFrame = CSMBindingOutputFrame()
         outputFrame.setDataFromDict(outputDataDict)
         outputFrame.setSeriesUnits(inputData.SERIESUNITS)

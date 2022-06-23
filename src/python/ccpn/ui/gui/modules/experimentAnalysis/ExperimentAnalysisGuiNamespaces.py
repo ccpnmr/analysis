@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-01 16:20:00 +0100 (Wed, June 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-23 16:37:36 +0100 (Thu, June 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -184,3 +184,38 @@ TipText_OptimiserMethod                 = 'Select the Optimiser Method'
 WidgetVarName_ErrorMethod               = 'ErrorMethod'
 Label_ErrorMethod                       = 'Fitting Error Method'
 TipText_ErrorMethod                     = 'Select the Fitting Error calculation Method'
+
+
+
+############################################################
+##########  Panel: TABLES                         ##########
+############################################################
+
+## Table nameSpaces
+ASHTAG = '#'
+
+DELTAdelta = f'{DELTA}{Delta}'
+UNICODE_CHISQUARE = '\u03A7\u00b2'
+UNICODE_RED_CHISQUARE = f'Red-{UNICODE_CHISQUARE}'
+UNICODE_R2 = 'R\u00b2'
+
+ColumnDdelta = DELTAdelta
+ColumnR2 = UNICODE_R2
+ColumnCHISQUARE = UNICODE_CHISQUARE
+ColumnREDCHISQUARE = UNICODE_RED_CHISQUARE
+
+ColumnChainCode = 'Chain Code'
+ColumnResidueCode = 'Residue Code'
+ColumnResidueType = 'Residue Type'
+ColumnAtoms = 'Atoms'
+
+_COLUM_FLOAT_FORM = '%0.3f'
+
+############################################################
+##########  Panel: ChemicalShiftMapping          ##########
+############################################################
+
+CSMTablePanel = 'CSMTablePanel'
+
+
+

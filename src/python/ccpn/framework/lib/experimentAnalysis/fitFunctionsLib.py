@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-31 10:23:00 +0100 (Tue, May 31, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-23 16:37:36 +0100 (Thu, June 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -63,15 +63,16 @@ def fractionBound_func(p, l, kd):
     qd = np.sqrt(((p + l + kd) ** 2) - 4 * p * l)
     return ((p + l + kd - qd) / 2)
 
-def oneSiteBinding_func(x, kd, bmax):
+def oneSiteBinding_func(x, Kd, BMax):
     """
     #FittingFunc. Called recursively with from the Minimiser
+    Args are used/inspected to set the attr to the Minimiser object and other functionalities. Do not change signature characters
     :param x: 1d array
     :param kd: the initial kd value
     :param bmax:
     :return:
     """
-    return (bmax * x) / (x + kd)
+    return (BMax * x) / (x + Kd)
 
 # def exponential_func(x, amplitude, decay):
 #     return amplitude * np.exp(decay * x)

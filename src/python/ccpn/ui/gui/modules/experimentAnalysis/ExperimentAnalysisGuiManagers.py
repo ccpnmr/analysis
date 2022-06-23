@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-27 10:42:33 +0100 (Fri, May 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-23 16:37:36 +0100 (Thu, June 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -228,21 +228,6 @@ class SettingsPanelHandler(ExperimentAnalysisHandlerABC):
 
     def close(self):
         pass
-
-class BackendHandler(ExperimentAnalysisHandlerABC):
-    """
-    Manages the no-Gui machinery of the GuiModule.
-    This only for consistency. Not sure if adds an extra layer of complexity to get to data.
-    """
-    def start(self):
-        pass
-        # needs to start the backend engines and notifiers for settingsChanged
-        # self.settingsChanged.register(self.updateAll)
-        # self.settingsChanged.setSilentCallback(self._silentCallback)
-
-    def close(self):
-        pass
-        ## close the settings-Changed notifiers etc
 
 class IOHandler(ExperimentAnalysisHandlerABC):
     """

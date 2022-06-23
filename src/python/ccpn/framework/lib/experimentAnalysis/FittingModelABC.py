@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-01 16:19:59 +0100 (Wed, June 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-23 16:37:36 +0100 (Thu, June 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -364,7 +364,7 @@ class MinimiserResult(ModelResult):
         """
         dd = {}
         for paramName, paramObj in self.params.items():
-            error = f'{paramName}_err'
+            error = f'{paramName}{sv._ERR}'
             dd[paramName] = None
             dd[error] = None
             if paramObj is not None:
@@ -372,16 +372,22 @@ class MinimiserResult(ModelResult):
                 dd[error] = paramObj.stderr
         return dd
 
+    def getAllResultsAsDict(self):
+        """
+        :return: A dict with all minimiser results
+        """
+        outputDict = {}
+        for key, value in self.getParametersResult().items():
+            outputDict[key] = _formatValue(value)
+        for key, value in self.getStatisticalResult().items():
+            outputDict[key] = _formatValue(value)
+        return outputDict
 
     def getAllResultsAsDataFrame(self):
         """
         :return: A dataFrame with all minimiser results
         """
-        outputDict = defaultdict(list)
-        for key, value in self.getParametersResult().items():
-            outputDict[key].append(_formatValue(value))
-        for key, value in self.getStatisticalResult().items():
-            outputDict[key].append(_formatValue(value))
+        outputDict = self.getAllResultsAsDict()
         df = pd.DataFrame(outputDict)
         return df
 

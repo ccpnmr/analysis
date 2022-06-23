@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-01 16:19:59 +0100 (Wed, June 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-23 16:37:36 +0100 (Thu, June 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -59,10 +59,6 @@ AKAIKE           = 'Akaike'
 BAYESIAN         = 'Bayesian'
 MINIMISER_METHOD = 'Method'
 
-UNICODE_CHISQUARE = '\u03A7\u00b2'
-UNICODE_RED_CHISQUARE = f'Red-{UNICODE_CHISQUARE}'
-UNICODE_R2 = 'R\u00b2'
-
 CONSTANT_TABLE_COLUMNS = [CHAIN_CODE, RESIDUE_CODE, RESIDUE_TYPE, ATOM_NAME]
 CONSTANT_OUTPUT_TABLE_COLUMNS = [CHAIN_CODE, RESIDUE_CODE, RESIDUE_TYPE, ATOM_NAMES]
 CONSTANT_STATS_OUTPUT_TABLE_COLUMNS = [MINIMISER_METHOD, R2, CHISQUARE, REDUCEDCHISQUARE, AKAIKE, BAYESIAN]
@@ -70,7 +66,11 @@ GROUPPING_HEADERS = [CHAIN_CODE, RESIDUE_CODE, RESIDUE_TYPE]
 
 KD = 'Kd'
 BMAX = 'BMax'
+_ERR = '_err'
+ERROR = 'Error'
 
+FLAG = 'Flag'
+SERIAL = 'Serial'
 ############################################################################################
 ### Used in SeriesFrame tables ABCs
 ############################################################################################
@@ -153,7 +153,6 @@ OUTPUT_DATATABLE_NAME = 'outputDataTableName'
 
 ## OneSiteBindingModel
 ONE_BINDING_SITE_MODEL = 'One Site Binding'
-
 FRACTION_BINDING_MODEL = 'Fraction Binding'
 
 #### residues names

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-26 10:27:10 +0100 (Thu, May 26, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-23 16:37:36 +0100 (Thu, June 23, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -33,6 +33,7 @@ from ccpn.core.DataTable import DataTable
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.util.Common import flattenLists
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+from ccpn.framework.Application import getApplication, getCurrent, getProject
 
 class SeriesAnalysisABC(ABC):
     """
@@ -103,6 +104,7 @@ class SeriesAnalysisABC(ABC):
         :return: None
             kwargs
             =======================
+            :key: outputName: outputDataTable name
             :key: fittingModels:  list of fittingModel classes (not initialised).
                             So to use only the specif given, rather that all available.
             :key: overrideOutputDataTables: bool, True to rewrite the output result in the last available dataTable.
@@ -182,9 +184,11 @@ class SeriesAnalysisABC(ABC):
                 plt.close()
         pdf.close()
 
-    def __init__(self, application):
-        self.application = application
-        self.project = self.application.project
+    def __init__(self):
+
+        self.project = getProject()
+        self.application = getApplication()
+        self.current = getCurrent()
         self._inputDataTables = OrderedSet()
         self._outputDataTables = OrderedSet()
 

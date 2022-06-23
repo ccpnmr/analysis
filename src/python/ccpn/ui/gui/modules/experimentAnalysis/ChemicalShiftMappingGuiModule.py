@@ -25,8 +25,7 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 
 ######## core imports ########
 from ccpn.framework.Application import getApplication, getCurrent, getProject
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisNotifierHandler import CoreNotifiersHandler
-from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
+from ccpn.framework.lib.experimentAnalysis.ChemicalShiftMappingAnalysisBC import ChemicalShiftMappingAnalysisBC
 
 ######## gui/ui imports ########
 from PyQt5 import QtCore, QtWidgets
@@ -38,45 +37,23 @@ from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import Too
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiTable import TablePanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisBarPlotPanel import BarPlotPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import FitPlotPanel
-
+from ccpn.ui.gui.modules.experimentAnalysis.CSMGuiTable import CSMTablePanel
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import ExperimentAnalysisGuiModuleBC
 
 #####################################################################
 #######################  The main GUI Module ########################
 #####################################################################
 
-class ExperimentAnalysisGuiModuleBC(CcpnModule):
-    includeSettingsWidget = True
-    maxSettingsState = 2
-    settingsPosition = 'left'
-    className = 'ExperimentAnalysis'
+class ChemicalShiftMappingGuiModule(ExperimentAnalysisGuiModuleBC):
 
-    def __init__(self, mainWindow, name='Experiment Analysis', **kwds):
+    className = 'ChemicalShiftMapping'
+
+    def __init__(self, mainWindow, name='Chemical Shift Mapping (Beta)', **kwds):
         super(ExperimentAnalysisGuiModuleBC, self)
-        CcpnModule.__init__(self, mainWindow=mainWindow, name=name)
-
-        self.project = getProject()
-        self.application = getApplication()
-        self.current = getCurrent()
+        ExperimentAnalysisGuiModuleBC.__init__(self, mainWindow=mainWindow, name=name)
 
         ## link to the Non-Gui backend and its Settings
-        self.backendHandler = SeriesAnalysisABC()
-
-        ## link to Gui Panels
-        self.panelHandler = PanelHandler(self)
-        self.addPanels()
-
-        ## link to Gui Setting-Panels
-        self.settingsPanelHandler = SettingsPanelHandler(self)
-        self.addSettingsPanels()
-
-        ## link to Core Notifiers (Project/Current)
-        self.coreNotifiersHandler = CoreNotifiersHandler(guiModule=self)
-
-        ## link to Core Notifiers (Project/Current)
-        self.ioHandler = IOHandler(guiModule=self)
-
-        ## the working dataTable which drives all Gui
-        self._selectedDataTables = () # add comment on what will be, e.g.: Pids
+        self.backendHandler = ChemicalShiftMappingAnalysisBC()
 
         ## Startup with the first Data available
         if self.project:
@@ -87,13 +64,6 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
     #################################################################
 
     ### Get the input/output dataTables via the backend.
-    @property
-    def inputDataTables(self) -> list:
-        return self.backendHandler.inputDataTables
-
-    @property
-    def outputDataTables(self) -> list:
-        return self.backendHandler.getOutputDataTables()
 
     #################################################################
     #####################      Widgets    ###########################
@@ -103,28 +73,20 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         """ Add the Gui Panels to the panelHandler.
         Each Panel is a stand-alone frame with information where about to be added on the general GUI.
         Override in Subclasses"""
-        self._addCommonPanels()
+        self.panelHandler.addToolBar(ToolBarPanel(self))
+        self.panelHandler.addPanel(CSMTablePanel(self))
+        self.panelHandler.addPanel(FitPlotPanel(self))
+        self.panelHandler.addPanel(BarPlotPanel(self))
 
     def addSettingsPanels(self):
         """
         Add the Settings Panels to the Gui. To retrieve a Panel use/see the settingsPanelsManager.
-        Override in Subclasses
-        """
-        self._addCommonSettingsPanels()
-
-    def _addCommonPanels(self):
-        """ Add the Common Gui Panels to the panelHandler."""
-        self.panelHandler.addToolBar(ToolBarPanel(self))
-        self.panelHandler.addPanel(TablePanel(self))
-        self.panelHandler.addPanel(FitPlotPanel(self))
-        self.panelHandler.addPanel(BarPlotPanel(self))
-
-    def _addCommonSettingsPanels(self):
-        """
-        Add the Common Settings Panels to the settingsPanelsManager.
         """
         self.settingsPanelHandler.append(settingsPanel.GuiInputDataPanel(self))
+        self.settingsPanelHandler.append(settingsPanel.CSMCalculationPanel(self))
+        self.settingsPanelHandler.append(settingsPanel.GuiCSMFittingPanel(self))
         self.settingsPanelHandler.append(settingsPanel.AppearancePanel(self))
+
 
     #####################################################################
     #####################  Widgets callbacks  ###########################
@@ -137,11 +99,10 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
 
     def _closeModule(self):
         ## de-register/close all notifiers
-        self.coreNotifiersHandler.close()
-        self.panelHandler.close()
-        self.ioHandler.close()
-        self.settingsPanelHandler.close()
         super()._closeModule()
+
+
+
 
 
 #################################
@@ -153,7 +114,7 @@ if __name__ == '__main__':
     app = TestApplication()
     win = QtWidgets.QMainWindow()
     moduleArea = CcpnModuleArea(mainWindow=None, )
-    m = ExperimentAnalysisGuiModuleBC(mainWindow=None)
+    m = ChemicalShiftMappingGuiModule(mainWindow=None)
     moduleArea.addModule(m)
     win.setCentralWidget(moduleArea)
     win.resize(1000, 500)

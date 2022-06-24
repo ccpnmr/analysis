@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-21 16:36:41 +0100 (Tue, June 21, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-24 10:12:38 +0100 (Fri, June 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -171,8 +171,13 @@ class SimulatedSpectrumByExperimentTypeABC(TraitBase):
                                                 if len(cs4naValues) == 1:  # should be always present!?
                                                     axisCodePpmPositionsDict[mapper.axisCode] = float(cs4naValues[0])
                                         break
-                        # fill the peak.ppmPositions. Keep the Nones.
-                        peak.ppmPositions = tuple(axisCodePpmPositionsDict.values())
+                        # fill the peak.ppmPositions. Remove peak with None in PpmPosition .
+                        ppmPositions = tuple(axisCodePpmPositionsDict.values())
+                        if not all(ppmPositions):
+                            getLogger().debug3('Simulating peak. Missing ppmPositions for %s. Deleted.' %peak.pid)
+                            peak.delete()
+                            continue
+                        peak.ppmPositions = ppmPositions
 
 
     def __str__(self):

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-07 18:49:20 +0100 (Tue, June 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-24 14:59:47 +0100 (Fri, June 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -199,7 +199,10 @@ class _CoreTableWidgetABC(_SimplePandasTableViewProjectSpecific):
 
     def refreshTable(self):
         # subclass to refresh the groups
-        _updateSimplePandasTable(self, self._df)
+        if self._defaultDf is not None:
+            _updateSimplePandasTable(self, self._defaultDf)
+        else:
+            getLogger().warning(f'{self.__class__.__name__}.refreshTable: defaultDf is not defined')
         # self.updateTableExpanders()
 
     def setDataFromSearchWidget(self, dataFrame):

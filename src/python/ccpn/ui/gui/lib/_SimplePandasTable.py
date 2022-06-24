@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-24 10:08:31 +0100 (Fri, June 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-24 14:59:47 +0100 (Fri, June 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -97,7 +97,7 @@ class _SimplePandasTableView(QtWidgets.QTableView, Base):
         self._parent = parent
 
         # initialise the internal data storage
-        self._df = None
+        self._defaultDf = None
         self._tableBlockingLevel = 0
 
         # set stylesheet
@@ -769,7 +769,8 @@ def _newSimplePandasTable(parent, data, _resize=False):
     table = _SimplePandasTableView(parent)
 
     # set the model
-    model = _SimplePandasTableModel(pd.DataFrame(data), view=table)
+    data = pd.DataFrame(data)
+    model = _SimplePandasTableModel(data, view=table)
     table.setModel(model)
 
     # # put a proxy in between view and model - REALLY SLOW for big tables
@@ -813,7 +814,8 @@ def _clearSimplePandasTable(table):
         raise ValueError('table not defined')
 
     # create new model and set in table
-    model = _SimplePandasTableModel(pd.DataFrame({}), view=table)
+    data = pd.DataFrame({})
+    model = _SimplePandasTableModel(data, view=table)
     table.setModel(model)
 
 
@@ -950,6 +952,16 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         # attach a handler for to respond to the selection changing
         self.selectionModel().selectionChanged.connect(self._selectionChangedCallback)
         model.showEditIcon = True
+
+    @property
+    def _df(self):
+        """Return the Pandas-dataFrame holding the data
+        """
+        return self.model().df
+
+    @_df.setter
+    def _df(self, value):
+        self.model().df = value
 
     #=========================================================================================
     # Block table signals
@@ -1329,6 +1341,8 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
             # create new model and set in table
             model = _SimplePandasTableModel(self._df, view=self)
             self.setModel(model)
+            self._defaultDf = self._df.copy()  # make a copy for the search-widget
+
             self.resizeColumnsToContents()
 
             # re-sort the table
@@ -1360,6 +1374,8 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
             self._df.set_index(self._df[self.OBJECTCOLUMN], inplace=True, )
 
         _updateSimplePandasTable(self, self._df, _resize=True)
+        self._defaultDf = self._df.copy()  # make a copy for the search-widget
+
         self.showColumns(None)
 
     #=========================================================================================

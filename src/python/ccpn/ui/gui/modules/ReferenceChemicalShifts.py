@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-16 14:54:27 +0100 (Thu, June 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-24 09:32:52 +0100 (Fri, June 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -66,6 +66,7 @@ H = 'H'
 Backbone = 'Backbone'
 SideChain = 'SideChain'
 All = 'All'
+H_ISOTOPECODES = ['1H', '2H', '3H']
 
 CurveColours4LightDisplay = \
                      {'C': '#2b2a07', ## BB
@@ -349,13 +350,20 @@ class ReferenceChemicalShifts(CcpnModule):  # DropBase needs to be first, else t
         self._hideLines()
         axisCodeDict =  self.current.mouseMovedDict.get(0, {'':[]})
         positions = {}
+        atomType = self.atomTypeRadioButtons.get()
         for isotName, glCursorPositions in axisCodeDict.items():
+            if atomType == Heavy and isotName in H_ISOTOPECODES:
+                continue
+            if atomType == Hydrogen and isotName not in H_ISOTOPECODES:
+                continue
             for glCursorPosition in glCursorPositions:
                 positions.update({glCursorPosition:isotName})
 
         if len(positions)<1:
             return
         lines = self.lines[:len(positions)]
+
+
 
         for line, (position, isoName) in zip(lines, positions.items()):
             line.setPos(position)

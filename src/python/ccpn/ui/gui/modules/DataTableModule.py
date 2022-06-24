@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-03-22 11:25:37 +0000 (Tue, March 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-24 10:08:31 +0100 (Fri, June 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -40,9 +40,8 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Splitter import Splitter
 from ccpn.ui.gui.guiSettings import getColours, DIVIDER
-from ccpn.ui.gui.lib._SimplePandasTable import _SimplePandasTableView, _updateSimplePandasTable
+from ccpn.ui.gui.lib._SimplePandasTable import _SimplePandasTableView, _updateSimplePandasTable, _SearchTableView
 from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
-
 from ccpn.util.Logging import getLogger
 
 
@@ -237,12 +236,16 @@ class DataTableModule(CcpnModule):
 # _tableWidget
 #=========================================================================================
 
-class _tableWidget(_SimplePandasTableView):
+class _tableWidget(_SimplePandasTableView, _SearchTableView):
     """
     Class to present a DataTable
     """
     className = '_tableWidget'
     attributeName = KlassTable._pluralLinkName
+
+    defaultHidden = []
+    _internalColumns = []
+    _hiddenColumns = []
 
     def __init__(self, parent=None, mainWindow=None, moduleParent=None, **kwds):
         """
@@ -264,10 +267,6 @@ class _tableWidget(_SimplePandasTableView):
         # Initialise the scroll widget and common settings
         self._initTableCommonWidgets(parent, **kwds)
 
-        # initialise the currently attached dataFrame
-        self._hiddenColumns = []
-        self.dataFrameObject = None
-
         # initialise the table
         super().__init__(parent=parent,
                          showHorizontalHeader=True,
@@ -277,6 +276,18 @@ class _tableWidget(_SimplePandasTableView):
 
         # Initialise the notifier for processing dropped items
         self._postInitTableCommonWidgets()
+
+        self._initSearchTableView()
+
+    @property
+    def _df(self):
+        """Return the Pandas-dataFrame holding the data
+        """
+        return self.model()._df
+
+    @_df.setter
+    def _df(self, value):
+        pass
 
     def _processDroppedItems(self, data):
         """

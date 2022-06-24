@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-16 17:38:41 +0100 (Thu, June 16, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-24 10:08:31 +0100 (Fri, June 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1815,3 +1815,163 @@ class _SimplePandasTableViewProjectSpecific(_SimplePandasTableView):
         elif self._scheduler.isBusy:
             # caught during the queue processing event, need to restart
             self._scheduler.restart = True
+
+
+#=========================================================================================
+# SearchMethods - class holding methods for implementing searches on a table
+#=========================================================================================
+
+from ccpn.ui.gui.widgets.SearchWidget import attachSimpleSearchWidget
+
+
+class _SearchTableView():
+
+    def _initSearchTableView(self):
+        # enable the right click menu
+        self.searchWidget = None
+        self._setHeaderContextMenu()
+        self._enableExport = False
+        self._enableDelete = False
+        self._enableSearch = True
+        self._dataFrameObject = None
+
+    #=========================================================================================
+    # hidden column information
+    #=========================================================================================
+
+    def getHiddenColumns(self):
+        """
+        get a list of currently hidden columns
+        """
+        hiddenColumns = self._hiddenColumns
+        ll = list(set(hiddenColumns))
+        return [x for x in ll if x in self.columnTexts]
+
+    def setHiddenColumns(self, texts, update=True):
+        """
+        set a list of columns headers to be hidden from the table.
+        """
+        ll = [x for x in texts if x in self.columnTexts and x not in self._internalColumns]
+        self._hiddenColumns = ll
+        if update:
+            self.showColumns(None)
+
+    def hideDefaultColumns(self):
+        """If the table is empty then check visible headers against the last header hidden list
+        """
+        for i, columnName in enumerate(self.columnTexts):
+            # remember to hide the special column
+            if columnName in self._internalColumns:
+                self.hideColumn(i)
+
+    @property
+    def columnTexts(self):
+        """return a list of column texts.
+        """
+        try:
+            return list(self._df.columns)
+        except:
+            return []
+
+    def showColumns(self, df):
+        # show the columns in the list
+        hiddenColumns = self.getHiddenColumns()
+
+        for i, colName in enumerate(self.columnTexts):
+            # always hide the internal columns
+            if colName in (hiddenColumns + self._internalColumns):
+                self._hideColumn(colName)
+            else:
+                self._showColumn(colName)
+
+    def _showColumn(self, name):
+        if name not in self.columnTexts:
+            return
+        if name in self._hiddenColumns:
+            self._hiddenColumns.remove(name)
+        i = self.columnTexts.index(name)
+        self.showColumn(i)
+
+    def _hideColumn(self, name):
+        if name not in self.columnTexts:
+            return
+        if name not in (self._hiddenColumns + self._internalColumns):
+            self._hiddenColumns.append(name)
+        i = self.columnTexts.index(name)
+        self.hideColumn(i)
+
+    #=========================================================================================
+    # Header context menu
+    #=========================================================================================
+
+    def _setHeaderContextMenu(self):
+        """Set up the context menu for the table header
+        """
+        headers = self.horizontalHeader()
+        headers.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        headers.customContextMenuRequested.connect(self._raiseHeaderContextMenu)
+
+    def _raiseHeaderContextMenu(self, pos):
+        """Raise the menu on the header
+        """
+        if self._df is None or self._df.empty:
+            return
+
+        self.initSearchWidget()
+        pos = QtCore.QPoint(pos.x(), pos.y() + 10)  #move the popup a bit down. Otherwise can trigger an event if the pointer is just on top the first item
+
+        self.headerContextMenumenu = QtWidgets.QMenu()
+        setWidgetFont(self.headerContextMenumenu, )
+        columnsSettings = self.headerContextMenumenu.addAction("Column Settings...")
+        searchSettings = None
+        if self._enableSearch and self.searchWidget is not None:
+            searchSettings = self.headerContextMenumenu.addAction("Filter...")
+        action = self.headerContextMenumenu.exec_(self.mapToGlobal(pos))
+
+        if action == columnsSettings:
+            settingsPopup = ColumnViewSettingsPopup(parent=self._parent, table=self,
+                                                    dataFrameObject=self._df,
+                                                    hiddenColumns=self.getHiddenColumns(),
+                                                    )
+            hiddenColumns = settingsPopup.getHiddenColumns()
+            self.setHiddenColumns(texts=hiddenColumns, update=False)
+            settingsPopup.raise_()
+            settingsPopup.exec_()  # exclusive control to the menu and return _hiddencolumns
+
+        if action == searchSettings:
+            self.showSearchSettings()
+
+    #=========================================================================================
+    # Search methods
+    #=========================================================================================
+
+    def initSearchWidget(self):
+        if self._enableSearch and self.searchWidget is None:
+            if not attachSimpleSearchWidget(self._parent, self):
+                getLogger().warning('Filter option not available')
+
+    def hideSearchWidget(self):
+        if self.searchWidget is not None:
+            self.searchWidget.hide()
+
+    def showSearchSettings(self):
+        """ Display the search frame in the table"""
+
+        self.initSearchWidget()
+        if self.searchWidget is not None:
+            self.searchWidget.show()
+
+    def refreshTable(self):
+        # easier to re-populate from scratch
+        try:
+            df = self.moduleParent._table.data
+            _updateSimplePandasTable(self, df, _resize=False)
+        except Exception:
+            _updateSimplePandasTable(self, pd.DataFrame({}))
+
+    def setDataFromSearchWidget(self, dataFrame):
+        """Set the data for the table from the search widget
+        """
+        # update to the new sub-table
+        _updateSimplePandasTable(self, dataFrame)
+        self.model()._df = dataFrame

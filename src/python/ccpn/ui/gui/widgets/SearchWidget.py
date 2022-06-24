@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-25 12:59:16 +0100 (Wed, May 25, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-24 10:08:31 +0100 (Fri, June 24, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -42,6 +42,7 @@ from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.util.Logging import getLogger
 import operator as op
 import numpy as np
+
 
 VISIBLESEARCH = '<Visible Table>'
 
@@ -79,11 +80,13 @@ SearchConditionsToolTips = [
 
 RangeConditions = [Between, NotBetween]
 
+
 def strTofloat(value):
-  try:
-    return float(value)
-  except:
-    return None
+    try:
+        return float(value)
+    except:
+        return None
+
 
 def _compareKeys(a, b, condition):
     """
@@ -105,6 +108,7 @@ def _compareKeys(a, b, condition):
     except Exception as ex:
         getLogger().debug2('Error in comparing values for GuiTable filters.', ex)
 
+
 def _compareKeysInRange(originValue, queryRange, condition):
     value = strTofloat(originValue)
     _cond1 = strTofloat(queryRange[0])
@@ -118,7 +122,7 @@ def _compareKeysInRange(originValue, queryRange, condition):
     a = np.array([value])
 
     if condition == NotBetween:
-        result =  np.any((a < cond1)|(a > cond2))
+        result = np.any((a < cond1) | (a > cond2))
         # print(f' Checking if {value} is not between {cond1} and {cond2}. It is: {result}')
         return result
 
@@ -128,7 +132,6 @@ def _compareKeysInRange(originValue, queryRange, condition):
         return result
 
     return False
-
 
 
 #=========================================================================================
@@ -155,8 +158,8 @@ class GuiTableFilter(ScrollArea):
                                             toolTips=SearchConditionsToolTips,
                                             callback=self._conditionWidgetCallback,
                                             grid=(0, 0))
-        self.condition1 = LineEdit(self._widget, grid=(0, 1),  backgroundText='Insert value')
-        self.condition2 = LineEdit(self._widget, grid=(0, 2),  backgroundText='Insert value 2')
+        self.condition1 = LineEdit(self._widget, grid=(0, 1), backgroundText='Insert value')
+        self.condition2 = LineEdit(self._widget, grid=(0, 2), backgroundText='Insert value 2')
         self._conditionWidgetCallback(self.conditionWidget.getText())
 
         #  second row
@@ -164,13 +167,13 @@ class GuiTableFilter(ScrollArea):
         self.columnOptions = PulldownList(self._widget, grid=(1, 1))
         self.columnOptions.setMinimumWidth(40)
 
-        self.searchButtons = ButtonList(self._widget, texts=['Search ','Reset', 'Close'],
+        self.searchButtons = ButtonList(self._widget, texts=['Search ', 'Reset', 'Close'],
                                         icons=[Icon('icons/edit-find'), None, None],
                                         tipTexts=['Search in selected Columns', 'Restore Table', 'Close Filter'],
                                         callbacks=[partial(self.findOnTable, self.table),
                                                    partial(self.restoreTable, self.table),
                                                    self.hideSearch],
-                                        grid=(1, 2),)
+                                        grid=(1, 2), )
 
         Spacer(self._widget, 5, 5, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
                grid=(0, 2), gridSpan=(1, 1))
@@ -210,7 +213,6 @@ class GuiTableFilter(ScrollArea):
 
     def _conditionWidgetCallback(self, value):
 
-
         if value not in RangeConditions:
             self.condition2.hide()
         else:
@@ -242,7 +244,6 @@ class GuiTableFilter(ScrollArea):
         condition2Value = self.condition2.text()
         condition = self.conditionWidget.getText()
 
-
         # check using the actual table - not the underlying dataframe
         df = self.table._dataFrameObject.dataFrame
         rows = OrderedSet()
@@ -258,7 +259,7 @@ class GuiTableFilter(ScrollArea):
                     item = table.item(row, column)
                     cellText = item.data(QtCore.Qt.DisplayRole)
                     if condition in RangeConditions:
-                        match = _compareKeysInRange(cellText, (condition1Value,condition2Value), condition)
+                        match = _compareKeysInRange(cellText, (condition1Value, condition2Value), condition)
                     else:
                         match = _compareKeys(cellText, condition1Value, condition)
                         if match is None:
@@ -303,37 +304,12 @@ class GuiTableFilter(ScrollArea):
             getLogger().debug('column not found in table')
 
 
-def attachSearchWidget(parent, table):
-    """
-    Attach the search widget to the bottom of the table widget
-    """
-    returnVal = False
-    try:
-        parentLayout = table.parent().getLayout()
-
-        if isinstance(parentLayout, QtWidgets.QGridLayout):
-            idx = parentLayout.indexOf(table)
-            location = parentLayout.getItemPosition(idx)
-            if location is not None:
-                if len(location) > 0:
-                    row, column, rowSpan, columnSpan = location
-                    table.searchWidget = GuiTableFilter(parent=parent, table=table, vAlign='b')
-                    parentLayout.addWidget(table.searchWidget, row + 1, column, 1, columnSpan)
-                    table.searchWidget.hide()
-
-                returnVal = True
-
-    except Exception as es:
-        getLogger().warning('Error attaching search widget: %s' % str(es))
-    finally:
-        return returnVal
-
-
 #=========================================================================================
-# _DFTableFilter class uses QTableView and model to access data
+# _TableFilterABC class uses QTableView and model to access data
 #=========================================================================================
 
-class _DFTableFilter(ScrollArea):
+class _TableFilterABC(ScrollArea):
+
     def __init__(self, table, parent=None, **kwds):
         # super().__init__(parent, setLayout=True, showBorder=False, **kwds)
         super().__init__(parent, scrollBarPolicies=('never', 'never'), **kwds)
@@ -353,8 +329,8 @@ class _DFTableFilter(ScrollArea):
                                             toolTips=SearchConditionsToolTips,
                                             callback=self._conditionWidgetCallback,
                                             grid=(0, 0))
-        self.condition1 = LineEdit(self._widget, grid=(0, 1),  backgroundText='Insert value')
-        self.condition2 = LineEdit(self._widget, grid=(0, 2),  backgroundText='Insert value 2')
+        self.condition1 = LineEdit(self._widget, grid=(0, 1), backgroundText='Insert value')
+        self.condition2 = LineEdit(self._widget, grid=(0, 2), backgroundText='Insert value 2')
         self._conditionWidgetCallback(self.conditionWidget.getText())
 
         #  second row
@@ -362,13 +338,13 @@ class _DFTableFilter(ScrollArea):
         self.columnOptions = PulldownList(self._widget, grid=(1, 1))
         self.columnOptions.setMinimumWidth(40)
 
-        self.searchButtons = ButtonList(self._widget, texts=['Search ','Reset', 'Close'],
+        self.searchButtons = ButtonList(self._widget, texts=['Search ', 'Reset', 'Close'],
                                         icons=[Icon('icons/edit-find'), None, None],
                                         tipTexts=['Search in selected Columns', 'Restore Table', 'Close Filter'],
                                         callbacks=[partial(self.findOnTable, self.table),
                                                    partial(self.restoreTable, self.table),
                                                    self.hideSearch],
-                                        grid=(1, 2),)
+                                        grid=(1, 2), )
 
         Spacer(self._widget, 5, 5, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed,
                grid=(0, 2), gridSpan=(1, 1))
@@ -392,12 +368,32 @@ class _DFTableFilter(ScrollArea):
         # initialise search list
         self._listRows = None
 
+    @property
+    def columns(self):
+        """Return the full list of columns
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError("Code error: function not implemented")
+
+    def visibleColumns(self, searchColumn=None):
+        """Return the list of visible columns
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError("Code error: function not implemented")
+
+    @property
+    def df(self):
+        """Return the Pandas-dataFrame
+        """
+        # MUST BE SUBCLASSED
+        raise NotImplementedError("Code error: function not implemented")
+
     def setColumnOptions(self):
         # columns = self.table._dataFrameObject.columns
         # texts = [c.heading for c in columns]
         # objectsRange = range(len(columns))
 
-        texts = self.table._dataFrameObject.userHeadings
+        texts = self.columns
         objectsRange = range(len(texts))
 
         self.columnOptions.clear()
@@ -407,7 +403,6 @@ class _DFTableFilter(ScrollArea):
         self.columnOptions.setIndex(0)
 
     def _conditionWidgetCallback(self, value):
-
 
         if value not in RangeConditions:
             self.condition2.hide()
@@ -440,13 +435,12 @@ class _DFTableFilter(ScrollArea):
         condition2Value = self.condition2.text()
         condition = self.conditionWidget.getText()
 
-
         # check using the actual table - not the underlying dataframe
-        df = self.table._dataFrameObject.dataFrame
+        df = self.df
         rows = OrderedSet()
 
         searchColumn = self.columnOptions.getText()
-        visHeadings = self.table._dataFrameObject.visibleColumnHeadings if (searchColumn == VISIBLESEARCH) else [searchColumn]
+        visHeadings = self.visibleColumns(searchColumn=searchColumn)
 
         _compareErrorCount = 0
         _model = self.table.model()
@@ -458,7 +452,7 @@ class _DFTableFilter(ScrollArea):
                     idx = _model.index(row, column)
                     cellText = idx.data(QtCore.Qt.DisplayRole)
                     if condition in RangeConditions:
-                        match = _compareKeysInRange(cellText, (condition1Value,condition2Value), condition)
+                        match = _compareKeysInRange(cellText, (condition1Value, condition2Value), condition)
                     else:
                         match = _compareKeys(cellText, condition1Value, condition)
                         if match is None:
@@ -473,7 +467,7 @@ class _DFTableFilter(ScrollArea):
             getLogger().debug('Error in comparing values for GuiTable filters, use debug2 for details')
 
         try:
-            self._searchedDataFrame = df.iloc[list(rows)].copy()
+            self._searchedDataFrame = df.loc[list(rows)].copy()  # changed from iloc
         except Exception as es:
             getLogger().warning(f'Encountered a problem searching the table {es}')
 
@@ -503,6 +497,84 @@ class _DFTableFilter(ScrollArea):
             getLogger().debug('column not found in table')
 
 
+#=========================================================================================
+# _DFTableFilter class uses QTableView and model to access data
+#=========================================================================================
+
+class _DFTableFilter(_TableFilterABC):
+
+    @property
+    def columns(self):
+        """Return the full list of columns
+        """
+        return self.table._dataFrameObject.userHeadings
+
+    def visibleColumns(self, searchColumn=None):
+        """Return the list of visible columns
+        """
+        return self.table._dataFrameObject.visibleColumnHeadings if (searchColumn == VISIBLESEARCH) else [searchColumn]
+
+    @property
+    def df(self):
+        """Return the Pandas-dataFrame
+        """
+        return self.table._dataFrameObject.dataFrame
+
+
+#=========================================================================================
+# _DFTableFilter class uses QTableView and model to access data
+#=========================================================================================
+
+class _SimplerDFTableFilter(_TableFilterABC):
+
+    @property
+    def columns(self):
+        """Return the full list of columns
+        """
+        return list(self.table._df.columns)
+
+    def visibleColumns(self, searchColumn=None):
+        """Return the list of visible columns
+        """
+        return [col for col in self.table._df.columns if col not in self.table._hiddenColumns + self.table._internalColumns] if (searchColumn == VISIBLESEARCH) else [searchColumn]
+
+    @property
+    def df(self):
+        """Return the Pandas-dataFrame
+        """
+        return self.table._df
+
+
+#=========================================================================================
+# attach methods
+#=========================================================================================
+
+def attachSearchWidget(parent, table):
+    """
+    Attach the search widget to the bottom of the table widget
+    """
+    returnVal = False
+    try:
+        parentLayout = table.parent().getLayout()
+
+        if isinstance(parentLayout, QtWidgets.QGridLayout):
+            idx = parentLayout.indexOf(table)
+            location = parentLayout.getItemPosition(idx)
+            if location is not None:
+                if len(location) > 0:
+                    row, column, rowSpan, columnSpan = location
+                    table.searchWidget = GuiTableFilter(parent=parent, table=table, vAlign='b')
+                    parentLayout.addWidget(table.searchWidget, row + 1, column, 1, columnSpan)
+                    table.searchWidget.hide()
+
+                returnVal = True
+
+    except Exception as es:
+        getLogger().warning('Error attaching search widget: %s' % str(es))
+    finally:
+        return returnVal
+
+
 def attachDFSearchWidget(parent, tableView):
     """Attach the search widget to the bottom of the table widget
     Search widget is applied to QTableView object
@@ -516,9 +588,34 @@ def attachDFSearchWidget(parent, tableView):
             location = parentLayout.getItemPosition(idx)
             if location is not None:
                 if len(location) > 0:
-
                     row, column, rowSpan, columnSpan = location
                     tableView.searchWidget = _DFTableFilter(parent=parent, table=tableView, vAlign='b')
+                    parentLayout.addWidget(tableView.searchWidget, row + 1, column, 1, columnSpan)
+                    tableView.searchWidget.hide()
+
+                returnVal = True
+
+    except Exception as es:
+        getLogger().warning('Error attaching search widget: %s' % str(es))
+    finally:
+        return returnVal
+
+
+def attachSimpleSearchWidget(parent, tableView):
+    """Attach the search widget to the bottom of the table widget
+    Search widget is applied to QTableView object
+    """
+    returnVal = False
+    try:
+        parentLayout = tableView.parent().getLayout()
+
+        if isinstance(parentLayout, QtWidgets.QGridLayout):
+            idx = parentLayout.indexOf(tableView)
+            location = parentLayout.getItemPosition(idx)
+            if location is not None:
+                if len(location) > 0:
+                    row, column, rowSpan, columnSpan = location
+                    tableView.searchWidget = _SimplerDFTableFilter(parent=parent, table=tableView, vAlign='b')
                     parentLayout.addWidget(tableView.searchWidget, row + 1, column, 1, columnSpan)
                     tableView.searchWidget.hide()
 

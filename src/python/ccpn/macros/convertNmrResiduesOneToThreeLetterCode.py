@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: VickyAH $"
-__dateModified__ = "$dateModified: 2022-05-17 12:23:33 +0100 (Tue, May 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-27 14:19:35 +0100 (Mon, June 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -62,7 +62,7 @@ def convertNmrChain1to3LetterCode(nmrChain, molType='protein'):
         if len(nmrResidue.residueType) == 1:
             newNmrResidueName = convertResidueCode(nmrResidue.residueType, inputCodeType='oneLetter', outputCodeType='threeLetter', molType=molType)
             try:
-                nmrResidue.rename('.'.join([nmrResidue.sequenceCode, newNmrResidueName]))
+                nmrResidue.rename(nmrResidue.sequenceCode, newNmrResidueName)
             except Exception as err:
                 print('Error renaming NmrResidue %s.' %nmrResidue.pid, err)
         else:

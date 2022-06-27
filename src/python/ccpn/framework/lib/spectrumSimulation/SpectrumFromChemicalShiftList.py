@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-24 10:12:38 +0100 (Fri, June 24, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-27 13:22:37 +0100 (Mon, June 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -35,7 +35,7 @@ from ccpn.util.traits.TraitBase import TraitBase
 from ccpn.util.traits.CcpNmrTraits import Any, List, Bool, Odict, CString
 from ccpn.core.ChemicalShiftList import ChemicalShiftList, CS_ATOMNAME, CS_VALUE,\
     CS_NMRATOM, CS_NMRRESIDUE, CS_SEQUENCECODE, CS_CHAINCODE
-from ccpn.framework.Application import getApplication
+from ccpn.framework.Application import getApplication, getProject
 from ccpn.util.OrderedSet import OrderedSet
 from ccpn.core.NmrResidue import NmrResidue, _getNmrResidue
 import pandas as pd
@@ -59,6 +59,8 @@ class SimulatedSpectrumByExperimentTypeABC(TraitBase):
     peakAtomNameMappers = [[],]
     isotopeCodes =  []
     axisCodes = []
+    spectralWidths = []
+    referenceValues = []
 
     #=========================================================================================
     # end to be subclassed
@@ -66,7 +68,6 @@ class SimulatedSpectrumByExperimentTypeABC(TraitBase):
 
     # traits
     application = Any(default_value=None, allow_none=True)
-
 
     #=========================================================================================
     # start of methods
@@ -79,10 +80,12 @@ class SimulatedSpectrumByExperimentTypeABC(TraitBase):
             raise ValueError('Invalid chemicalShiftList "%s"' % chemicalShiftList)
 
         self.application = getApplication()
+        self.project = getProject()
         self._spectrum = None
-        self._spectrumKwargs = spectrumKwargs or {}
-        self._initSpectrum()
         self._peakListIndex = -1
+        self._spectrumKwargs = self._getDefaultSpectrumKwargs()
+        self._spectrumKwargs.update(spectrumKwargs if spectrumKwargs else {})
+        self._initSpectrum()
 
     @property
     def spectrum(self):
@@ -95,27 +98,15 @@ class SimulatedSpectrumByExperimentTypeABC(TraitBase):
     def _initSpectrum(self):
         ''' init a new empty spectrum from the defined options
         '''
+
         name = self._spectrumKwargs.get('name', self.chemicalShiftList.name)
-        spectrum = self.project.newEmptySpectrum(isotopeCodes=self.isotopeCodes, name=name)
-        spectrum.chemicalShiftList =  self.chemicalShiftList
-        spectrum.axisCodes = self.axisCodes
-        spectrum.experimentType = self.experimentType
-        self._spectrum = spectrum
-        return spectrum
+        self._spectrumKwargs.pop('name', None)
 
-    @property
-    def project(self):
-        return self.application.project
-
-    @classmethod
-    def checkForValidExperimentType(cls, experimentType):
-        """check if valid experimentType"""
-        pass
-
-    def _getAllRequiredAtomNames(self):
-        values = [v._getAllAtomNames() for mm in self.peakAtomNameMappers for v in mm]
-        return OrderedSet(flattenLists(values))
-
+        with undoBlockWithoutSideBar():
+            with notificationEchoBlocking():
+                self._spectrum = self.project.newEmptySpectrum(isotopeCodes=self.isotopeCodes, name=name,
+                                                               **self._spectrumKwargs)
+        return self._spectrum
 
     def simulatePeakList(self):
         """ Create new peaks from the ChemicalShiftList.
@@ -179,6 +170,52 @@ class SimulatedSpectrumByExperimentTypeABC(TraitBase):
                             continue
                         peak.ppmPositions = ppmPositions
 
+    def _getDefaultSpectrumKwargs(self):
+        """ Get the default Spectrum properties as a dict from the Class attributes"""
+        _spectrumKwargs = {
+                            'experimentType'    : self.experimentType,
+                            'spectralWidths'    : self.spectralWidths,
+                            'referenceValues'   : self.referenceValues,
+                            'axisCodes'         : self.axisCodes,
+                            'chemicalShiftList' : self.chemicalShiftList,
+                          }
+        return _spectrumKwargs
+
+    def _setSpectrumProperties(self, **kwargs):
+        """
+        Set a valid spectrum properti from a dict key:value. key: the property to be set, value: its value.
+        See the Spectrum core class for more info.
+        Usage: .setSpectrumProperties(**{'referenceValues': [12.0, 200.0, 130.0]})
+        :param kwargs:
+        :return:
+        """
+        for key, value in kwargs.items():
+            try:
+                setattr(self.spectrum, key, value)
+            except Exception as error:
+                getLogger().warning(f'Cannot set Spectrum property {key} with values {value}. {error}')
+
+    # =========================================================================================
+    # Convenient methods for error checking/logging
+    # =========================================================================================
+
+    def _isPeakWithinLimits(self, peakList):
+        """check if the newly created peaks are within the expected SpectrumLimits"""
+        pass
+
+    def _isValidExperimentType(self):
+        """check if valid experimentType"""
+        pass
+
+    def _isValidPeakMapper(self):
+        """check if is a valid PeakMapper. e.g.: the structure is same lenght as the dimension count"""
+        pass
+
+    def _getAllRequiredAtomNames(self):
+        values = [v._getAllAtomNames() for mm in self.peakAtomNameMappers for v in mm]
+        return OrderedSet(flattenLists(values))
+
+    # =========================================================================================
 
     def __str__(self):
         return f'<{self.__class__.__name__}>'
@@ -291,6 +328,8 @@ class SimulatedSpectrum_1H(SimulatedSpectrumByExperimentTypeABC):
     experimentType = 'H'
     isotopeCodes = ['1H']
     axisCodes = ['H']
+    spectralWidths = [12]
+    referenceValues = [12]
     peakAtomNameMappers = [
         [AtomNamesMapper(isotopeCode='1H', axisCode='H', offsetNmrAtomNames={0:'H'})]
         ]
@@ -303,9 +342,11 @@ class SimulatedSpectrum_1H(SimulatedSpectrumByExperimentTypeABC):
 
 class SimulatedSpectrum_15N_HSQC(SimulatedSpectrumByExperimentTypeABC):
 
-    experimentType = '15N HSQC/HMQC'
-    isotopeCodes = ['1H', '15N']
-    axisCodes = ['Hn', 'Nh']
+    experimentType      = '15N HSQC/HMQC'
+    isotopeCodes        = ['1H', '15N']
+    axisCodes           = ['Hn', 'Nh']
+    spectralWidths      = [7, 40]
+    referenceValues     = [12, 140]
     peakAtomNameMappers = [
                             [
                             HAtomNamesMapper(),
@@ -320,9 +361,11 @@ class SimulatedSpectrum_15N_HSQC(SimulatedSpectrumByExperimentTypeABC):
 
 class SimulatedSpectrum_HNCO(SimulatedSpectrumByExperimentTypeABC):
 
-    experimentType = 'HNCO'
-    isotopeCodes = ['1H', '13C', '15N']
-    axisCodes = ['Hn', 'C', 'Nh']
+    experimentType      = 'HNCO'
+    isotopeCodes        = ['1H', '13C', '15N']
+    axisCodes           = ['Hn', 'C', 'Nh']
+    spectralWidths      = [7, 30, 40]
+    referenceValues     = [12, 190, 140]
     peakAtomNameMappers = [
                             [
                             HAtomNamesMapper(),
@@ -334,9 +377,11 @@ class SimulatedSpectrum_HNCO(SimulatedSpectrumByExperimentTypeABC):
 
 class SimulatedSpectrum_HNCACO(SimulatedSpectrumByExperimentTypeABC):
 
-    experimentType = 'HNCACO'
-    isotopeCodes = ['1H', '13C', '15N']
-    axisCodes = ['Hn', 'C', 'Nh']
+    experimentType      = 'HNCACO'
+    isotopeCodes        = ['1H', '13C', '15N']
+    axisCodes           = ['Hn', 'C', 'Nh']
+    spectralWidths      = [7, 30, 40]
+    referenceValues     = [12, 190, 140]
     peakAtomNameMappers = [
                             ## first peak assignments
                             [
@@ -355,9 +400,11 @@ class SimulatedSpectrum_HNCACO(SimulatedSpectrumByExperimentTypeABC):
 
 class SimulatedSpectrum_HNCA(SimulatedSpectrumByExperimentTypeABC):
 
-    experimentType  = 'HNCA'
-    isotopeCodes    = ['1H', '13C', '15N']
-    axisCodes       = ['Hn', 'C', 'Nh']
+    experimentType      = 'HNCA'
+    isotopeCodes        = ['1H', '13C', '15N']
+    axisCodes           = ['Hn', 'C', 'Nh']
+    spectralWidths      = [7, 35, 40]
+    referenceValues     = [12, 75, 140]
     peakAtomNameMappers = [
                             ## first peak assignments
                             [
@@ -376,9 +423,11 @@ class SimulatedSpectrum_HNCA(SimulatedSpectrumByExperimentTypeABC):
 
 class SimulatedSpectrum_HNCOCA(SimulatedSpectrumByExperimentTypeABC):
 
-    experimentType  = 'HNCOCA'
-    isotopeCodes    = ['1H', '13C', '15N']
-    axisCodes       = ['Hn', 'C', 'Nh']
+    experimentType      = 'HNCOCA'
+    isotopeCodes        = ['1H', '13C', '15N']
+    axisCodes           = ['Hn', 'C', 'Nh']
+    spectralWidths      = [7, 35, 40]
+    referenceValues     = [12, 75, 140]
     peakAtomNameMappers = [
                             ## first peak assignments
                             [
@@ -391,9 +440,11 @@ class SimulatedSpectrum_HNCOCA(SimulatedSpectrumByExperimentTypeABC):
 
 class SimulatedSpectrum_HNCACB(SimulatedSpectrumByExperimentTypeABC):
 
-    experimentType  = 'HNCA/CB'
-    isotopeCodes    = ['1H', '13C', '15N']
-    axisCodes       = ['Hn', 'C', 'Nh']
+    experimentType      = 'HNCA/CB'
+    isotopeCodes        = ['1H', '13C', '15N']
+    axisCodes           = ['Hn', 'C', 'Nh']
+    spectralWidths      = [7, 80, 40]
+    referenceValues     = [12, 80, 140]
     peakAtomNameMappers = [
                             ## first peak assignments: CA (i)
                             [

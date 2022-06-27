@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-23 16:37:36 +0100 (Thu, June 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-27 13:23:36 +0100 (Mon, June 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -151,6 +151,12 @@ class _CSMGuiTableABC(gt.GuiTable):
               gt.WIDTH: 40,
               gt.HIDDEN: False
               },
+        sv._ROW_UID: {gt.NAME: sv._ROW_UID,
+                  gt.GETTER: lambda row: _getValueByHeader(row, sv._ROW_UID),
+                  gt.TIPTEXT: _makeTipText(sv._ROW_UID, ""),
+                  gt.WIDTH: 100,
+                  gt.HIDDEN: True
+                  },
         }
 
     def __init__(self, parent, guiModule, dataFrame, **kwds):
@@ -201,14 +207,24 @@ class _CSMGuiTableABC(gt.GuiTable):
             GuiTable.mousePressEvent(self, event)
 
     def clearSelection(self):
-        self.moduleParent.matchingTable.clean()
-        if self.current:
-            self.current.peaks = []
-        self.selectionModel().clearSelection()
-        self.moduleParent.hitScatterPlot.selectByPids([])
+        super(_CSMGuiTableABC, self).clearSelection()
+        self.current.nmrResidues = []
 
-    def selection(self, *args):
-        pass
+    def selection(self, data, *args):
+        """
+        selection to set current nmrResidue
+        :param args:
+        :return:
+        """
+        seriesList = data['object']
+        objs = set()
+        for series in seriesList:
+            pid = series[sv._ROW_UID]
+            obj = self.project.getByPid(pid)
+            objs.add(obj)
+        self.current.nmrResidues = list(objs)
+
+
 
     def action(self, *args):
         pass

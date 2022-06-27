@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-23 16:37:36 +0100 (Thu, June 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-27 13:23:36 +0100 (Mon, June 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -32,16 +32,7 @@ from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
 from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours
 from ccpn.ui.gui.widgets.Font import Font, getFont
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
-
-# colours NEED to go in common place
-BackgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
-OriginAxes = pg.functions.mkPen(hexToRgb(getColours()[GUISTRIP_PIVOT]), width=1, style=QtCore.Qt.DashLine)
-FittingLine = pg.functions.mkPen(hexToRgb(getColours()[DIVIDER]), width=0.5, style=QtCore.Qt.DashLine)
-SelectedPoint = pg.functions.mkPen(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
-SelectedLabel = pg.functions.mkBrush(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
-c = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
-GridPen = pg.functions.mkPen(c, width=1, style=QtCore.Qt.SolidLine)
-GridFont = getFont()
+import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 
 
 class BarPlotPanel(GuiPanel):
@@ -52,24 +43,37 @@ class BarPlotPanel(GuiPanel):
     def __init__(self, guiModule, *args, **Framekwargs):
         GuiPanel.__init__(self, guiModule, *args , **Framekwargs)
 
+
+
+
     def initWidgets(self):
-        row = 0
-        application = self.guiModule.application
-        xValues = [1,2,3,4]
-        yValues = [10,20,30,40]
-        self.barGraphWidget = BarGraphWidget(self, application=application,
-                                             xValues=xValues,
-                                             yValues=yValues,
-                                             backgroundColour=BackgroundColour, grid=(0,0))
+        ## this colour def could go in an higher position as they are same for all possible plots
+        colour = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
+        self.backgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
+        self.gridPen = pg.functions.mkPen(colour, width=1, style=QtCore.Qt.SolidLine)
+        self.gridFont = getFont()
+        self.originAxesPen = pg.functions.mkPen(hexToRgb(getColours()[GUISTRIP_PIVOT]), width=1,
+                                                style=QtCore.Qt.DashLine)
+        self.fittingLinePen = pg.functions.mkPen(hexToRgb(getColours()[DIVIDER]), width=0.5, style=QtCore.Qt.DashLine)
+        self.selectedPointPen = pg.functions.mkPen(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
+        self.selectedLabelPen = pg.functions.mkBrush(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
+        self.barGraphWidget = BarGraphWidget(self, application=self.application, backgroundColour=self.backgroundColour,
+                                             grid=(0,0))
         self._setBarGraphWidget()
 
+    def setXLabel(self, label=''):
+        self.barGraphWidget.plotWidget.setLabel('bottom', label)
+
+    def setYLabel(self, label=''):
+        self.barGraphWidget.plotWidget.setLabel('left', label)
+
     def _setBarGraphWidget(self):
-        # MOCK
         self.barGraphWidget.setViewBoxLimits(0, None, 0, None)
         self.barGraphWidget.xLine.hide()
-        self.barGraphWidget.plotWidget.plotItem.getAxis('bottom').setPen(GridPen)
-        self.barGraphWidget.plotWidget.plotItem.getAxis('left').setPen(GridPen)
-        self.barGraphWidget.plotWidget.plotItem.getAxis('bottom').tickFont = GridFont
-        self.barGraphWidget.plotWidget.plotItem.getAxis('left').tickFont = GridFont
-        self.barGraphWidget.plotWidget.setLabel('bottom', 'MOCK')
-        self.barGraphWidget.plotWidget.setLabel('left', 'MOCK')
+        self.barGraphWidget.plotWidget.plotItem.getAxis('bottom').setPen(self.gridPen)
+        self.barGraphWidget.plotWidget.plotItem.getAxis('left').setPen(self.gridPen)
+        self.barGraphWidget.plotWidget.plotItem.getAxis('bottom').tickFont = self.gridFont
+        self.barGraphWidget.plotWidget.plotItem.getAxis('left').tickFont = self.gridFont
+
+    def plotDataFrame(self, dataFrame):
+        pass

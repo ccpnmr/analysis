@@ -31,44 +31,59 @@ from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
 from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours
 from ccpn.ui.gui.widgets.Font import Font, getFont
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import FitPlotPanel
+import numpy as np
+import ccpn.framework.lib.experimentAnalysis.fitFunctionsLib as lf
+
+import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
+from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisBarPlotPanel import BarPlotPanel
+import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
+from ccpn.util.Logging import getLogger
+from ccpn.core.lib.Notifiers import Notifier
 
 
 
-class FitPlotPanel(GuiPanel):
+class CSMFitPlotPanel(FitPlotPanel):
 
     position = 2
-    panelName = 'FitPlotPanel'
+    panelName = guiNameSpaces.CSMFittingPlotPanel
 
     def __init__(self, guiModule, *args, **Framekwargs):
-        GuiPanel.__init__(self, guiModule, *args , **Framekwargs)
+        FitPlotPanel.__init__(self, guiModule, *args , **Framekwargs)
+        self.setXLabel(label='X')
+        self.setYLabel(label=guiNameSpaces.RelativeDisplacement)
+        self._selectCurrentNRNotifier = Notifier(self.current, [Notifier.CURRENT], targetName='nmrResidues',
+                                                 callback=self._selectCurrentNmrResiduesNotifierCallback, onceOnly=True)
+
+    def _selectCurrentNmrResiduesNotifierCallback(self, *args):
+        getLogger().info('Selected Current. Callback in FitPlot')
+        nmrResidues = self.current.nmrResidues
+        dataTables = self.guiModule.getOutputDataTables()
+        df = None
+        if len(dataTables)>0:
+            df = dataTables[0].data
+        if df is None:
+            return
+        if len(nmrResidues) > 0:
+            self.setXLabel(label=df.SERIESUNITS)
+            # get nmrRes form module data or table selection
+            # only first as demo
+            pid = nmrResidues[0].pid
+            selectedDf = df[df[sv._ROW_UID]==pid]
+            func = lf.oneSiteBinding_func
+
+            kd = selectedDf[sv.KD].values[0]
+            bmax = selectedDf[sv.BMAX].values[0]
+
+            xf = np.linspace(min(df.SERIESSTEPS), max(df.SERIESSTEPS), 1000)
+            yf = func(xf, kd, bmax)
+            self.plotCurve(xf, yf)
+
+    def plotCurve(self, xs, ys):
+        self.bindingPlot.clear()
+        self.bindingPlot.plot(xs, ys)
 
 
-    def initWidgets(self):
-        colour = rgbaRatioToHex(*getColours()[CCPNGLWIDGET_LABELLING])
-        self.backgroundColour = getColours()[CCPNGLWIDGET_HEXBACKGROUND]
-        self.gridPen = pg.functions.mkPen(colour, width=1, style=QtCore.Qt.SolidLine)
-        self.gridFont = getFont()
-        self.originAxesPen = pg.functions.mkPen(hexToRgb(getColours()[GUISTRIP_PIVOT]), width=1,
-                                                style=QtCore.Qt.DashLine)
-        self.fittingLinePen = pg.functions.mkPen(hexToRgb(getColours()[DIVIDER]), width=0.5, style=QtCore.Qt.DashLine)
-        self.selectedPointPen = pg.functions.mkPen(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
-        self.selectedLabelPen = pg.functions.mkBrush(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
-        self._setBindingPlot()
 
-    def setXLabel(self, label=''):
-        self.bindingPlot.setLabel('bottom', label)
 
-    def setYLabel(self, label=''):
-        self.bindingPlot.setLabel('left', label)
 
-    def _setBindingPlot(self):
-        ###  Plot setup
-        self._bindingPlotView = pg.GraphicsLayoutWidget()
-        self._bindingPlotView.setBackground(self.backgroundColour)
-        self.bindingPlot = self._bindingPlotView.addPlot()
-        self.bindingPlot.setMenuEnabled(False)
-        self.bindingPlot.getAxis('bottom').setPen(self.gridPen)
-        self.bindingPlot.getAxis('left').setPen(self.gridPen)
-        self.bindingPlot.getAxis('bottom').tickFont = self.gridFont
-        self.bindingPlot.getAxis('left').tickFont = self.gridFont
-        self.getLayout().addWidget(self._bindingPlotView)

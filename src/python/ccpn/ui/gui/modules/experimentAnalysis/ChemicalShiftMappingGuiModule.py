@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-23 16:37:36 +0100 (Thu, June 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-27 13:23:36 +0100 (Mon, June 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -38,6 +38,8 @@ from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiTable import Ta
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisBarPlotPanel import BarPlotPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import FitPlotPanel
 from ccpn.ui.gui.modules.experimentAnalysis.CSMGuiTable import CSMTablePanel
+from ccpn.ui.gui.modules.experimentAnalysis.CSMBarPlotPanel import CSMBarPlotPanel
+from ccpn.ui.gui.modules.experimentAnalysis.CSMFitPlotPanel import CSMFitPlotPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiModuleBC import ExperimentAnalysisGuiModuleBC
 
 #####################################################################
@@ -64,6 +66,8 @@ class ChemicalShiftMappingGuiModule(ExperimentAnalysisGuiModuleBC):
     #################################################################
 
     ### Get the input/output dataTables via the backend.
+    def getOutputDataTables(self):
+        return self.backendHandler.getOutputDataTables()
 
     #################################################################
     #####################      Widgets    ###########################
@@ -75,8 +79,8 @@ class ChemicalShiftMappingGuiModule(ExperimentAnalysisGuiModuleBC):
         Override in Subclasses"""
         self.panelHandler.addToolBar(ToolBarPanel(self))
         self.panelHandler.addPanel(CSMTablePanel(self))
-        self.panelHandler.addPanel(FitPlotPanel(self))
-        self.panelHandler.addPanel(BarPlotPanel(self))
+        self.panelHandler.addPanel(CSMFitPlotPanel(self))
+        self.panelHandler.addPanel(CSMBarPlotPanel(self))
 
     def addSettingsPanels(self):
         """

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-05-27 10:42:33 +0100 (Fri, May 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-27 13:23:36 +0100 (Mon, June 27, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -57,6 +57,9 @@ class GuiPanel(Frame):
         self._panelPositionData = PanelPositionData(self.position)
 
         self.guiModule = guiModule
+        self.project = self.guiModule.project
+        self.application = self.guiModule.application
+        self.current = self.guiModule.current
         self.initWidgets()
 
     def initWidgets(self):

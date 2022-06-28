@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-20 19:34:52 +0100 (Mon, June 20, 2022) $"
+__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
+__dateModified__ = "$dateModified: 2022-06-28 17:30:38 +0100 (Tue, June 28, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1037,6 +1037,9 @@ def renameObject():
             with undoStackBlocking(application=application) as addUndoItem:
                 # call the wrapped rename function
                 result = func(*args, **kwds)
+
+                if result is None:
+                    return False
 
                 addUndoItem(undo=BlankedPartial(func, self, 'rename', False, self, *result),
                             redo=BlankedPartial(func, self, 'rename', False, *args, **kwds)

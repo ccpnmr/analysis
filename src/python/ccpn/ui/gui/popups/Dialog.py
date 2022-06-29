@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-17 17:26:06 +0100 (Tue, May 17, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 15:12:45 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,7 @@ __date__ = "$Date: 2017-07-04 15:21:16 +0000 (Tue, July 04, 2017) $"
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 from contextlib import contextmanager
+from dataclasses import dataclass
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.widgets.Frame import Frame
@@ -631,10 +632,10 @@ def handleDialogApply(self):
     undo = self.project._undo
 
 
-    # object to hold the error value
+    # simple class to export variables from the generator function
+    @dataclass
     class errorContent():
-        def __init__(self):
-            self.errorValue = None
+        errorValue = None
 
 
     try:

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-29 15:35:39 +0100 (Wed, June 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 20:15:38 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1604,7 +1604,7 @@ class UniqueNmrAtomNamesSelectionWidget(ObjectSelectionWidget):
         """
         from ccpn.util.Common import sortByPriorityList
         priorityAtomNames = ['H', 'HA', 'HB', 'C', 'CA', 'CB', 'N', 'NE', 'ND']
-        ll = [SelectToAdd] # + self.standardListItems
+        ll = [SelectToAdd] + self.standardListItems
         uniqueNames = set()
         if self.project:
             for obj in getattr(self.project, self.KLASS._pluralLinkName, []):
@@ -1621,7 +1621,7 @@ class UniqueNmrResidueTypeSelectionWidget(ObjectSelectionWidget):
         """
         from ccpn.util.Common import sortByPriorityList
         ## could add some priority list to show on top.
-        ll = [SelectToAdd]
+        ll = [SelectToAdd] + self.standardListItems
         uniqueNames = set()
         if self.project:
             for obj in getattr(self.project, self.KLASS._pluralLinkName, []):

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-29 11:57:44 +0100 (Wed, June 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 20:15:37 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -83,9 +83,9 @@ class ChemicalShiftMappingGuiModule(ExperimentAnalysisGuiModuleBC):
         """
         Add the Settings Panels to the Gui. To retrieve a Panel use/see the settingsPanelsManager.
         """
-        self.settingsPanelHandler.append(settingsPanel.GuiInputDataPanel(self))
+        self.settingsPanelHandler.append(settingsPanel.CSMGuiInputDataPanel(self))
         self.settingsPanelHandler.append(settingsPanel.CSMCalculationPanel(self))
-        self.settingsPanelHandler.append(settingsPanel.GuiCSMFittingPanel(self))
+        self.settingsPanelHandler.append(settingsPanel.CSMGuiFittingPanel(self))
         self.settingsPanelHandler.append(settingsPanel.AppearancePanel(self))
 
 

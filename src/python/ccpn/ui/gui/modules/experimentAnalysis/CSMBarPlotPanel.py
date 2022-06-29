@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-29 11:57:44 +0100 (Wed, June 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 20:15:37 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -103,7 +103,8 @@ class CSMBarPlotPanel(BarPlotPanel):
     def updatePanel(self, *args, **kwargs):
         getLogger().info('Updating CSM barPlot panel')
         dataFrame = self.guiModule.backendHandler.getOutputDataFrame()
-        self.plotDataFrame(dataFrame)
+        if dataFrame is not None:
+            self.plotDataFrame(dataFrame)
 
     def plotDataFrame(self, dataFrame, xColumnName=sv.RESIDUE_CODE, yColumnName=sv.DELTA_DELTA_MEAN):
         """ Plot the given columns of dataframe as bars """

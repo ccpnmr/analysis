@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-29 15:35:39 +0100 (Wed, June 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 20:15:38 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,6 +29,8 @@ This module contains the GUI Settings panels.
 
 from collections import OrderedDict as od
 from ccpn.framework.lib.experimentAnalysis.CSMFittingModels import ChemicalShiftCalculationModes, ChemicalShiftCalculationModels
+from ccpn.util.Logging import getLogger
+import numpy as np
 
 ######## gui/ui imports ########
 from PyQt5 import QtCore, QtWidgets, QtGui
@@ -119,6 +121,7 @@ class GuiInputDataPanel(GuiSettingPanel):
                                         'tipText': nameSpaces.TipText_SpectrumGroupSelectionWidget,
                                         'displayText': [],
                                         'defaults': [],
+                                        'standardListItems':[],
                                         'objectName': nameSpaces.WidgetVarName_SpectrumGroupsSelection,
                                         'fixedWidths': SettingsWidgetFixedWidths}, }),
             (nameSpaces.WidgetVarName_PeakProperty,
@@ -128,7 +131,7 @@ class GuiInputDataPanel(GuiSettingPanel):
                                 'type': compoundWidget.PulldownListCompoundWidget,
                                 'kwds': {'labelText': nameSpaces.Label_PeakProperty,
                                        'tipText': nameSpaces.TipText_PeakPropertySelectionWidget,
-                                       'texts': ['Position', 'Height', 'Line-width', 'Volume'],
+                                       'texts': [],
                                        'fixedWidths': SettingsWidgetFixedWidths}}),
             (nameSpaces.WidgetVarName_DataTableName,
                                 {'label': nameSpaces.Label_InputDataTableName,
@@ -138,8 +141,9 @@ class GuiInputDataPanel(GuiSettingPanel):
                                 'type': compoundWidget.EntryCompoundWidget,
                                 '_init': None,
                                 'kwds': {'labelText': nameSpaces.Label_InputDataTableName,
-                                        'tipText': nameSpaces.TipText_dataTableNameSelectionWidget,
-                                        'fixedWidths': SettingsWidgetFixedWidths}, }),
+                                         'entryText': 'CSM_Input_DataTable',
+                                         'tipText': nameSpaces.TipText_dataTableNameSelectionWidget,
+                                         'fixedWidths': SettingsWidgetFixedWidths}, }),
             (nameSpaces.WidgetVarName_CreateDataTable,
                                 {'label': nameSpaces.Label_CreateInput,
                                 'tipText': nameSpaces.TipText_createInputdataTableWidget,
@@ -163,12 +167,13 @@ class GuiInputDataPanel(GuiSettingPanel):
              {'label': nameSpaces.Label_SelectDataTable,
               'tipText': nameSpaces.TipText_DataTableSelection,
               'callBack': None,
-              'type': settingWidgets.SpectrumGroupSelectionWidget,
+              'type': settingWidgets.DataTableSelectionWidget,
               'kwds': {
                   'labelText': nameSpaces.Label_SelectDataTable,
                   'tipText': nameSpaces.TipText_DataTableSelection,
                   'displayText': [],
                   'defaults': [],
+                  'standardListItems': [],
                   'objectName': nameSpaces.WidgetVarName_DataTablesSelection,
                   'fixedWidths': SettingsWidgetFixedWidths}, }),
             ))
@@ -178,6 +183,58 @@ class GuiInputDataPanel(GuiSettingPanel):
         self._moduleSettingsWidget.getLayout().setAlignment(QtCore.Qt.AlignLeft)
 
 TABPOS += 1
+
+
+class CSMGuiInputDataPanel(GuiInputDataPanel):
+
+    def __init__(self, guiModule, *args, **Framekwargs):
+        GuiInputDataPanel.__init__(self, guiModule, *args, **Framekwargs)
+
+        self._limitSelectionOnInputData()
+        self._setPeakPropertySelection()
+        self._setCreateDataTableButtonCallback()
+
+    def _setCreateDataTableButtonCallback(self):
+        "Set callback for create-input-DataTable button."
+        buttonWidget = self.getWidget(nameSpaces.WidgetVarName_CreateDataTable)
+        if buttonWidget:
+            buttonWidget.button.clicked.connect(self._createInputDataTableCallback)
+
+    def _setPeakPropertySelection(self):
+        "Allow  selection of 'Position' or 'LineWidth' for creating a new input DataTable. "
+        peakPropertyWidget = self.getWidget(nameSpaces.WidgetVarName_PeakProperty)
+        if peakPropertyWidget:
+            properties = [seriesVariables._PPMPOSITION, seriesVariables._LINEWIDTH]
+            peakPropertyWidget.setTexts(properties)
+
+    def _limitSelectionOnInputData(self):
+        "Allow only one selection on SpectrumGroups and DataTable. "
+        sgSelectionWidget = self.getWidget(nameSpaces.WidgetVarName_SpectrumGroupsSelection)
+        dtSelectionWidget = self.getWidget(nameSpaces.WidgetVarName_DataTablesSelection)
+
+        if sgSelectionWidget:
+            sgSelectionWidget.setMaximumItemSelectionCount(1)
+        if dtSelectionWidget:
+            dtSelectionWidget.setMaximumItemSelectionCount(1)
+
+    def _createInputDataTableCallback(self, *args):
+        """ """
+        settingsPanelHandler = self._guiModule.settingsPanelHandler
+        inputSettings = settingsPanelHandler.getInputDataSettings()
+        sgPids = inputSettings.get(nameSpaces.WidgetVarName_SpectrumGroupsSelection, [None])
+        spGroup = self._guiModule.project.getByPid(sgPids[-1])
+        dataTableName = inputSettings.get(nameSpaces.WidgetVarName_DataTableName, None)
+        peakProperty = inputSettings.get(nameSpaces.WidgetVarName_PeakProperty, seriesVariables._PPMPOSITION)  #this should give a warning if wrong
+        if not spGroup:
+            getLogger().warn('Cannot create an input DataTable without a SpectrumGroup. Select one first')
+            return
+        backend = self._guiModule.backendHandler
+        da = backend.newDataTableFromSpectrumGroup(spGroup, dataTableName=dataTableName, thePeakProperty=peakProperty)
+        backend.addInputDataTable(da)
+        getLogger().info('Successfully created new Input Data. Item available on the DataTable selection')
+
+TABPOS += 1
+
 
 class CSMCalculationPanel(GuiSettingPanel):
 
@@ -227,7 +284,7 @@ class CSMCalculationPanel(GuiSettingPanel):
             'kwds': {'labelText': label,
                     'tipText': tT,
                     'value':factorValue,
-                    'range': (0.001, 1), 'step': 0.01, 'decimals': 3,
+                    'range': (0.001, 1), 'step': 0.01, 'decimals': 4,
                     'fixedWidths': SettingsWidgetFixedWidths}}
         settingsDict.update(factorsDict)
         restOfWidgetDict = od((
@@ -243,6 +300,7 @@ class CSMCalculationPanel(GuiSettingPanel):
                   'texts': seriesVariables.DEFAULT_FILTERING_ATOMS,
                   'defaults': seriesVariables.DEFAULT_FILTERING_ATOMS,
                   'objectName': nameSpaces.WidgetVarName_FollowAtoms,
+                  'standardListItems': [],
                   'fixedWidths': SettingsWidgetFixedWidths
               }}),
             (nameSpaces.WidgetVarName_ExcludeResType,
@@ -256,6 +314,7 @@ class CSMCalculationPanel(GuiSettingPanel):
                   'tipText': nameSpaces.TipText_ExcludeResType,
                   'texts': [],
                   'defaults': [],
+                  'standardListItems': [],
                   'objectName': nameSpaces.WidgetVarName_ExcludeResType,
                   'fixedWidths': SettingsWidgetFixedWidths
               }}),
@@ -271,6 +330,28 @@ class CSMCalculationPanel(GuiSettingPanel):
                        'tipText': nameSpaces.TipText_DisappearedPeak,
                        'value': 1,
                        'fixedWidths': SettingsWidgetFixedWidths}, }),
+            ('CalculateDeltaDelta_separator',
+             {'label': 'CalculateDeltaDelta_separator',
+              'type': LabeledHLine,
+              'kwds': {'text': '',
+                       # 'height': 30,
+                       'gridSpan': (1, 2),
+                       'colour': DividerColour,
+                       'tipText': ''}}),
+
+            (nameSpaces.WidgetVarName_CalculateDeltaDelta,
+             {'label': nameSpaces.WidgetVarName_CalculateDeltaDelta,
+              'tipText': nameSpaces.TipText_CalculateDeltaDelta,
+              'callBack': None,
+              'type': compoundWidget.ButtonCompoundWidget,
+              '_init': None,
+              'kwds': {'labelText': nameSpaces.Label_CalculateDeltaDelta,
+                       'text': 'Calculate',  # this is the Button name
+                       'callback': self._calculateDeltaDeltaCallback,
+                       'hAlign': 'left',
+                       'tipText': nameSpaces.TipText_CalculateDeltaDelta,
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+
         ))
         settingsDict.update(restOfWidgetDict)
         self._moduleSettingsWidget = settingWidgets.ModuleSettingsWidget(parent=self, mainWindow=mainWindow,
@@ -295,9 +376,48 @@ class CSMCalculationPanel(GuiSettingPanel):
         # widget.label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         # widget.getLayout().setAlignment(QtCore.Qt.AlignLeft)
 
+    def _getAlphaFactors(self):
+        factors = {}
+        for atomName, factorValue in seriesVariables.DEFAULT_ALPHA_FACTORS.items():
+            att = nameSpaces.WidgetVarName_Factor.format(**{nameSpaces.AtomName:atomName})
+            widget = self.getWidget(att)
+            if widget is not None:
+                factors.update({atomName:widget.getValue()})
+        return factors
+
+    def getSettingsAsDict(self):
+        """Add the Factors in a dict, instead of single entries for each atom """
+        extraSettings = {nameSpaces.ALPHA_FACTORS:self._getAlphaFactors()}
+        settings = super(CSMCalculationPanel, self).getSettingsAsDict()
+        settings.update(extraSettings)
+        return settings
+
+    def _calculateDeltaDeltaCallback(self, *args):
+        getLogger().info(f'Recalculating {nameSpaces.DELTAdelta} ...')
+        settingsPanelHandler = self._guiModule.settingsPanelHandler
+        calculationSettings = self.getSettingsAsDict()
+        _filteringAtoms = calculationSettings.get(nameSpaces.WidgetVarName_FollowAtoms, [])
+        _alphaFactors = calculationSettings.get(nameSpaces.ALPHA_FACTORS, {})
+        # need to remove this hack asap:
+        useAlphaFactors = {}
+        for atom in _filteringAtoms:
+            useAlphaFactors.update({atom:_alphaFactors.get(atom[0])})
+        backend = self._guiModule.backendHandler
+        backend._AlphaFactors = list(useAlphaFactors.values())
+        backend._FilteringAtoms = list(useAlphaFactors.keys())
+        inputDataTables = backend.inputDataTables
+        if not inputDataTables:
+            getLogger().warning('Cannot calculate DeltaShifts. No inputData available')
+            return
+        dataTable = inputDataTables[-1]
+        deltasDF = backend.calculateDeltaDeltaShifts(dataTable.data,
+                                                     FilteringAtoms=list(useAlphaFactors.keys()),
+                                                     AlphaFactors=list(useAlphaFactors.values()) ,
+                                                    )
+
 
 TABPOS += 1
-class GuiCSMFittingPanel(GuiSettingPanel):
+class CSMGuiFittingPanel(GuiSettingPanel):
 
     tabPosition = TABPOS
     tabName = 'Fitting'
@@ -359,6 +479,28 @@ class GuiCSMFittingPanel(GuiSettingPanel):
                        'texts': ['parametric bootstrapping', 'non-parametric bootstrapping', 'Monte-Carlo',],
                        'fixedWidths': SettingsWidgetFixedWidths}}),
 
+            ('Fitting_separator',
+             {'label': 'Fitting_separator',
+              'type': LabeledHLine,
+              'kwds': {'text': '',
+                       # 'height': 30,
+                       'gridSpan': (1, 2),
+                       'colour': DividerColour,
+                       'tipText': ''}}),
+
+            (nameSpaces.WidgetVarName_CalculateFitting,
+             {'label': nameSpaces.Label_CalculateFitting,
+              'tipText': nameSpaces.TipText_CalculateFitting,
+              'callBack': None,
+              'type': compoundWidget.ButtonCompoundWidget,
+              '_init': None,
+              'kwds': {'labelText': nameSpaces.Label_CalculateDeltaDelta,
+                       'text': 'Calculate',  # this is the Button name
+                       'callback': self._calculateFittingCallback,
+                       'hAlign': 'left',
+                       'tipText': nameSpaces.TipText_CalculateFitting,
+                       'fixedWidths': SettingsWidgetFixedWidths}}),
+
         ))
         # fittersDict = should be taken from guiModule.backend.fittingModels.
         # For now add to see the widgets layout
@@ -369,6 +511,14 @@ class GuiCSMFittingPanel(GuiSettingPanel):
         self._moduleSettingsWidget.getLayout().setAlignment(QtCore.Qt.AlignLeft)
         Spacer(self, 0, 2, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding,
                grid=(1, 0), gridSpan=(1, 1))
+
+    def _calculateFittingCallback(self, *args):
+        getLogger().info(f'Recalculating {nameSpaces.DELTAdelta} ...')
+
+        backend = self._guiModule.backendHandler
+        backend.fitInputData(**{seriesVariables.OUTPUT_DATATABLE_NAME: 'CSM_outPut_fitting'})
+
+
 
 TABPOS += 1
 

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-29 11:57:44 +0100 (Wed, June 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 20:15:37 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -145,6 +145,8 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
                                                      FilteringAtoms=self._FilteringAtoms,
                                                      AlphaFactors=self._AlphaFactors,
                                                      ExcludedResidues=self._ExcludedResidues)
+        if not self.getOutputDataTables():
+            return
         outData = self.getOutputDataTables()[-1]
         outDataFrame = outData.data
         outDataFrame.set_index(sv._ROW_UID, inplace=True, drop=False)

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-29 11:57:44 +0100 (Wed, June 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 20:15:37 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,6 +28,8 @@ from collections import defaultdict
 from PyQt5 import QtCore, QtWidgets
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import PanelPositions, TopFrame, BottomFrame,\
     LeftFrame, RightFrame
+import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
+
 from ccpn.ui.gui.widgets.Tabs import Tabs
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Splitter import Splitter
@@ -241,6 +243,9 @@ class SettingsPanelHandler(ExperimentAnalysisHandlerABC):
         for tabName, tab in self.tabs.items():
             settings[tabName] = tab.getSettingsAsDict()
         return settings
+
+    def getInputDataSettings(self) -> dict:
+        return self.getAllSettings().get(guiNameSpaces.Label_InputData, {})
 
     def close(self):
         pass

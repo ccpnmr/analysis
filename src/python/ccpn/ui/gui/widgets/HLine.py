@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-01 12:04:27 +0100 (Wed, June 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 20:15:38 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -124,6 +124,8 @@ class LabeledHLine(Frame):
 
         # the label with text
         self._label = Label(parent=self, grid=(0, 1), text=text, bold=bold, hAlign='centre')
+        if not text:
+            self._label.hide()
 
         if sides == 'right' or sides == 'both':
             # the second line

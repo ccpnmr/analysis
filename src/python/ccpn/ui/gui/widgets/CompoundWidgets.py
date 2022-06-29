@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-07 15:43:23 +0100 (Tue, June 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 20:15:38 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -49,6 +49,7 @@ from ccpn.ui.gui.widgets.FileDialog import LineEditButtonDialog
 from ccpn.core.lib.Notifiers import Notifier
 from ccpn.ui.gui.guiSettings import getColours, BORDERFOCUS, BORDERNOFOCUS
 from ccpn.util.Colour import spectrumColours, addNewColour, fillColourPulldown
+from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
 
 class ListCompoundWidget(CompoundBaseWidget):
@@ -100,7 +101,7 @@ class ListCompoundWidget(CompoundBaseWidget):
 
     def __init__(self, parent=None, showBorder=False, orientation='left',
                  minimumWidths=None, maximumWidths=None, fixedWidths=None,
-                 labelText='', texts=None, callback=None,
+                 labelText='', texts=None, callback=None, maxItemSelection=None,
                  defaults=None, uniqueList=True, objectName='', compoundKwds=None,
                  **kwds):
         """
@@ -118,13 +119,14 @@ class ListCompoundWidget(CompoundBaseWidget):
         :param texts: (optional) iterable generating text values for the Pulldown
         :param callback: (optional) callback for the Pulldown
         :param defaults: (optional) iterable of initially add elements to the ListWidget (text or index)
+        :param maxItemSelection: (optional) int, limit to a max number of selectable items.
         :param uniqueList: (True) only allow unique elements in the ListWidget
         :param kwds: (optional) keyword, value pairs for the gridding of Frame
         """
 
         CompoundBaseWidget.__init__(self, parent=parent, layoutDict=self.layoutDict, orientation=orientation,
                                     showBorder=showBorder, **kwds)
-
+        self.maxItemSelection = maxItemSelection
         self.label = Label(parent=self, text=labelText, vAlign='center')
         self._addWidget(self.label)
 
@@ -187,6 +189,9 @@ class ListCompoundWidget(CompoundBaseWidget):
     #         self._preSelectCallBack()
     #     return False
 
+    def setMaximumItemSelectionCount(self, value):
+        self.maxItemSelection = value
+
     def setLabelText(self, label):
         """Set the text for the list widget label
         """
@@ -244,10 +249,23 @@ class ListCompoundWidget(CompoundBaseWidget):
 
     def _addToListWidget(self, item):
         """Callback for Pulldown, adding the selcted item to the listWidget"""
-        if item is not None and self.pulldownList.getSelectedIndex() != 0:
-            self.addText(item)
+
+        if self.maxItemSelection is None:
+            if item is not None and self.pulldownList.getSelectedIndex() != 0:
+                self.addText(item)
+
+        if isinstance(self.maxItemSelection, int):
+            if self.listWidget.count() == self.maxItemSelection:
+                showWarning(f'{self.pulldownList.objectName()}',
+                            'Cannot add more to selection. Please remove any existing item(s) to add new')
+
+            else:
+                if item is not None and self.pulldownList.getSelectedIndex() != 0:
+                    self.addText(item)
+
         # reset to first > select-to-add < entry
-        self.pulldownList.setIndex(0)
+        with self.blockWidgetSignals(recursive=False, additionalWidgets=[self.pulldownList, ]):
+            self.pulldownList.setIndex(0)
 
     def _getSaveState(self):
         """
@@ -679,6 +697,9 @@ class PulldownListCompoundWidget(CompoundBaseWidget):
                 self.pulldownList.setIndex(index)
         else:
             self.pulldownList.setIndex(index)
+
+    def setTexts(self, texts):
+        self.modifyTexts(texts)
 
     def modifyTexts(self, texts):
         """Modify the pulldown texts, retaining the current selection

@@ -14,7 +14,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-05-05 10:40:28 +0100 (Thu, May 05, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 15:10:47 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -27,19 +27,19 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import typing
 from functools import partial
-
-from ccpn.util import Common as commonUtil
 from ccpn.core.lib import MoleculeLib
 from ccpn.core.Chain import Chain
 from ccpn.core.Project import Project
 from ccpn.core.Residue import Residue
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrChain as ApiNmrChain
-from ccpnmodel.ccpncore.lib import Constants
-from ccpn.util.decorators import logCommand
 from ccpn.core.lib.ContextManagers import newObject, undoStackBlocking, renameObject, \
     undoBlock, ccpNmrV3CoreUndoBlock
+from ccpn.util.decorators import logCommand
+from ccpn.util.Logging import getLogger
+from ccpn.util import Common as commonUtil
+from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrChain as ApiNmrChain
+from ccpnmodel.ccpncore.lib import Constants
 
 
 class NmrChain(AbstractWrapperObject):
@@ -130,7 +130,7 @@ class NmrChain(AbstractWrapperObject):
 
     @property
     def isConnected(self) -> bool:
-        """True if this this NmrChain is a connected stretch
+        """True if this NmrChain is a connected stretch
         (in which case the mainNmrResidues are sequentially connected)."""
         return self._wrappedData.isConnected
 
@@ -334,12 +334,14 @@ class NmrChain(AbstractWrapperObject):
         """get wrappedData (Nmr.NmrChains) for all NmrChain children of parent Project"""
         return parent._wrappedData.sortedNmrChains()
 
-    @renameObject()
+    @renameObject(blockSidebar=True)
     @logCommand(get='self')
     def rename(self, value: str):
         """Rename NmrChain, changing its shortName and Pid.
         Use the 'deassign' function if you want to revert to the canonical name
         """
+        if self.chain:
+            getLogger().warning(f'{self.__class__.__name__}.rename will lose or change the assigned chain')
 
         wrappedData = self._apiNmrChain
 

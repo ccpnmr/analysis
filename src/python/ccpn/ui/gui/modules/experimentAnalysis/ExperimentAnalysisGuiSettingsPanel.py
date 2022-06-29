@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-29 11:57:45 +0100 (Wed, June 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 15:35:39 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -235,41 +235,31 @@ class CSMCalculationPanel(GuiSettingPanel):
              {'label': nameSpaces.Label_FollowAtoms,
               'tipText': nameSpaces.TipText_FollowAtoms,
               'callBack': None,
-              'type': settingWidgets.ListCompoundWidget,
+              'type': settingWidgets.UniqueNmrAtomNamesSelectionWidget,
               'postInit': self._followAtomsWidgetPostInit,
               'kwds': {
                   'labelText': nameSpaces.Label_FollowAtoms,
                   'tipText': nameSpaces.TipText_FollowAtoms,
-                  'texts': [],
-                  'defaults': [],
+                  'texts': seriesVariables.DEFAULT_FILTERING_ATOMS,
+                  'defaults': seriesVariables.DEFAULT_FILTERING_ATOMS,
                   'objectName': nameSpaces.WidgetVarName_FollowAtoms,
-                  'minimumWidths': (50,50,50)
+                  'fixedWidths': SettingsWidgetFixedWidths
               }}),
             (nameSpaces.WidgetVarName_ExcludeResType,
              {'label': nameSpaces.Label_ExcludeResType,
               'tipText': nameSpaces.TipText_ExcludeResType,
               'postInit': self._excludeResiduesWidgetPostInit,
               'callBack': None,
-              'type': settingWidgets.ListCompoundWidget,
+              'type': settingWidgets.UniqueNmrResidueTypeSelectionWidget,
               'kwds': {
                   'labelText': nameSpaces.Label_ExcludeResType,
                   'tipText': nameSpaces.TipText_ExcludeResType,
                   'texts': [],
                   'defaults': [],
                   'objectName': nameSpaces.WidgetVarName_ExcludeResType,
+                  'fixedWidths': SettingsWidgetFixedWidths
               }}),
-            (nameSpaces.WidgetVarName_DDOtherCalculationMode,
-             {'label': nameSpaces.Label_DDOtherCalculationMode,
-              'type': compoundWidget.RadioButtonsCompoundWidget,
-              'postInit': self._calculationModePostInit,
-              'kwds': {'labelText': f'{nameSpaces.Label_DDOtherCalculationMode}',
-                       'tipText': nameSpaces.TipText_DDOtherCalculationMode,
-                       'texts': ['Ratio', '% Change'],
-                       'callback': self._calculationModePostInit,
-                       'direction': 'v',
-                       'tipTexts': ['Calculate Ratio', 'Calculate the % Change'],
-                       'fixedWidths': SettingsWidgetFixedWidths,
-                       'compoundKwds': {}}}),
+
             (nameSpaces.WidgetVarName_DisappearedPeak,
              {'label': nameSpaces.Label_DisappearedPeak,
               'tipText': nameSpaces.TipText_DisappearedPeak,

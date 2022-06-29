@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-29 11:57:45 +0100 (Wed, June 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 15:35:39 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -57,6 +57,8 @@ from ccpn.ui.gui.widgets.Base import SignalBlocking
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.Chain import Chain
 from ccpn.core.NmrChain import NmrChain
+from ccpn.core.NmrResidue import NmrResidue
+from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.RestraintTable import RestraintTable
 from ccpn.core.DataTable import DataTable
 from ccpn.core.ViolationTable import ViolationTable
@@ -1594,6 +1596,40 @@ class SpectrumGroupSelectionWidget(ObjectSelectionWidget):
 class NmrChainSelectionWidget(ObjectSelectionWidget):
     KLASS = NmrChain
 
+class UniqueNmrAtomNamesSelectionWidget(ObjectSelectionWidget):
+    KLASS = NmrAtom
+
+    def _fillPulldownListWidget(self):
+        """Fill the pulldownList with the currently available objects
+        """
+        from ccpn.util.Common import sortByPriorityList
+        priorityAtomNames = ['H', 'HA', 'HB', 'C', 'CA', 'CB', 'N', 'NE', 'ND']
+        ll = [SelectToAdd] # + self.standardListItems
+        uniqueNames = set()
+        if self.project:
+            for obj in getattr(self.project, self.KLASS._pluralLinkName, []):
+                uniqueNames.add(obj.name)
+        uniqueNames = sortByPriorityList(list(uniqueNames), priorityAtomNames)
+        complete = ll + uniqueNames
+        self.pulldownList.setData(texts=complete)
+
+class UniqueNmrResidueTypeSelectionWidget(ObjectSelectionWidget):
+    KLASS = NmrResidue
+
+    def _fillPulldownListWidget(self):
+        """Fill the pulldownList with the currently available objects
+        """
+        from ccpn.util.Common import sortByPriorityList
+        ## could add some priority list to show on top.
+        ll = [SelectToAdd]
+        uniqueNames = set()
+        if self.project:
+            for obj in getattr(self.project, self.KLASS._pluralLinkName, []):
+                uniqueNames.add(obj.residueType)
+        uniqueNames = list(uniqueNames)
+        uniqueNames.sort(reverse=False)
+        complete = ll + list(uniqueNames)
+        self.pulldownList.setData(texts=complete)
 
 class RestraintTableSelectionWidget(ObjectSelectionWidget):
     KLASS = RestraintTable

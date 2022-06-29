@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-29 11:57:45 +0100 (Wed, June 29, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 15:35:39 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -389,6 +389,19 @@ def contains_whitespace(s):
 def contains_whitespace_nospace(s):
     return True in [c in s for c in string.whitespace if c != ' ']
 
+def sortByPriorityList(values, priority, initialSort=True, initialSortReverse=False):
+    """
+    Sorts an iterable according to a list of priority items.
+    Usage:
+        sort_by_priority_list(values=[1,2,2,3], priority=[2,3,1])
+        [2, 2, 3, 1]
+    """
+    if initialSort:
+        values.sort(reverse=initialSortReverse)
+    priority_dict = {k: i for i, k in enumerate(priority)}
+    def priority_getter(value):
+        return priority_dict.get(value, len(values))
+    return sorted(values, key=priority_getter)
 
 def makeIterableList(inList=None):
     """

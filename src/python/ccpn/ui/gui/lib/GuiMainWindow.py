@@ -17,7 +17,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-27 16:10:08 +0100 (Mon, June 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 15:20:31 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -799,8 +799,10 @@ class GuiMainWindow(GuiWindow, QtWidgets.QMainWindow):
                          ('Backbone Assignment Tutorial', pa.backboneAssignmentTutorialPath),
                          ('Chemical Shift Perturbation Tutorial', pa.cspTutorialPath),
                          ('Solid State Peptide Tutorial', pa.solidStatePeptideTutorialPath),
-                         ('Solid State SH3 Tutorial', pa.solidStateSH3TutorialPath),
-                         ('Screen Tutorial', pa.analysisScreenTutorialPath))
+                         # ('Solid State SH3 Tutorial', pa.solidStateSH3TutorialPath),
+                         # ('Solid State HETs Tutorial', pa.solidStateHETsTutorialPath),
+                         ('Macro Writing Tutorial', pa.macroWritingTutorialPath),
+                         ('Screen Tutorial', pa.screeningTutorialPath))
 
         # add link to website videos
         modulesMenu.addAction(Action(modulesMenu, text='Video Tutorials && Manual', callback=self._showCCPNTutorials))

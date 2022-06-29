@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2022-06-28 17:30:38 +0100 (Tue, June 28, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 15:13:35 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -42,6 +42,7 @@ import time
 import signal
 import sys
 import pandas as pd
+
 
 @contextmanager
 def echoCommand(obj, funcName, *params, values=None, defaults=None,
@@ -644,6 +645,7 @@ def waypointBlocking(application=None):
         # clean up after blocking undo items
         undo.decreaseWaypointBlocking()
 
+
 class PandasChainedAssignment:
     """ Context manager to temporarily set pandas chained assignment warning. Usage:
         with ChainedAssignment():
@@ -1019,8 +1021,8 @@ def deleteV3Object():
     return theDecorator
 
 
-def renameObject():
-    """ A decorator to wrap the rename(self) method of the V3 core classes
+def renameObject(blockSidebar=False):
+    """ A decorator to wrap rename(self) method of the V3 core classes
     calls self._finaliseAction('rename') after the rename
 
     EJB 20191023: modified original contextManager to be decorator to match new/delete
@@ -1033,6 +1035,16 @@ def renameObject():
         self = args[0]
         application = getApplication()  # pass it in to reduce overhead
 
+        if blockSidebar:
+            # currently required for nmrChain and chain as these rename children in the sidebar
+            with undoBlockWithoutSideBar(application=application):
+                return _renameInner(application, args, func, kwds, self)
+        else:
+            return _renameInner(application, args, func, kwds, self)
+
+    def _renameInner(application, args, func, kwds, self) -> bool:
+        """Add items to the undo stack and fire _finaliseAction 'rename'
+        """
         with notificationBlanking(application=application):
             with undoStackBlocking(application=application) as addUndoItem:
                 # call the wrapped rename function
@@ -1054,7 +1066,7 @@ def renameObject():
 
 @contextmanager
 def renameObjectContextManager(self):
-    """ A decorator to wrap the rename(self) method of the V3 core classes
+    """ A decorator to wrap rename(self) method of the V3 core classes
     calls self._finaliseAction('rename', 'change') after the rename
     """
     # get the current application

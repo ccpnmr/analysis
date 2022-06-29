@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-23 16:37:36 +0100 (Thu, June 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 11:57:44 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -61,13 +61,13 @@ class ExperimentAnalysisGuiModuleBC(CcpnModule):
         ## link to the Non-Gui backend and its Settings
         self.backendHandler = SeriesAnalysisABC()
 
+        ## link to Gui Setting-Panels. Needs to be before the GuiPanels
+        self.settingsPanelHandler = SettingsPanelHandler(self)
+        self.addSettingsPanels()
+
         ## link to Gui Panels
         self.panelHandler = PanelHandler(self)
         self.addPanels()
-
-        ## link to Gui Setting-Panels
-        self.settingsPanelHandler = SettingsPanelHandler(self)
-        self.addSettingsPanels()
 
         ## link to Core Notifiers (Project/Current)
         self.coreNotifiersHandler = CoreNotifiersHandler(guiModule=self)

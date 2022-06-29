@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-01 16:20:00 +0100 (Wed, June 01, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 11:57:45 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -23,18 +23,13 @@ __date__ = "$Date: 2022-05-20 12:59:02 +0100 (Fri, May 20, 2022) $"
 # Start of code
 #=========================================================================================
 
+from PyQt5 import QtCore, QtWidgets
 from ccpn.util.Logging import getLogger
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
-######## gui/ui imports ########
-from PyQt5 import QtCore, QtWidgets
-from ccpn.ui.gui.widgets.Label import Label, DividerLabel
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
+import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 from ccpn.ui.gui.widgets.Button import Button
 
-FilterButton = 'filterButton'
-UpdateButton = 'updateButton'
-ShowStructureButton = 'showStructureButton'
-Callback = 'Callback'
+
 
 class ToolBarPanel(GuiPanel):
     """
@@ -42,9 +37,10 @@ class ToolBarPanel(GuiPanel):
     """
 
     position = 0
-    panelName = 'ToolBar'
-
+    panelName = guiNameSpaces.ToolbarPanel
     toolButtons = {}
+
+    updateRequested = QtCore.pyqtSignal(object)
 
     def __init__(self, guiModule, *args, **Framekwargs):
         GuiPanel.__init__(self, guiModule, *args , **Framekwargs)
@@ -53,30 +49,30 @@ class ToolBarPanel(GuiPanel):
     def initWidgets(self):
 
         toolButtonsDefs = {
-            FilterButton: {
+            guiNameSpaces.FilterButton: {
                 'text': '',
                 'icon': 'icons/filter',
                 'tipText': 'Apply filters as defined in settings',
                 'toggle': True,
-                'callback': f'_{FilterButton}{Callback}',  # the exact name as the function def
-                'objectName': FilterButton,
+                'callback': f'_{guiNameSpaces.FilterButton}{guiNameSpaces.Callback}',  # the exact name as the function def
+                'objectName': guiNameSpaces.FilterButton,
             },
 
-            UpdateButton: {
+            guiNameSpaces.UpdateButton: {
                 'text': '',
                 'icon': 'icons/update',
                 'tipText': 'Update all data and GUI',
                 'toggle': None,
-                'callback': f'_{UpdateButton}{Callback}',
-                'objectName': UpdateButton,
+                'callback': f'_{guiNameSpaces.UpdateButton}{guiNameSpaces.Callback}',
+                'objectName': guiNameSpaces.UpdateButton,
             },
-            ShowStructureButton: {
+            guiNameSpaces.ShowStructureButton: {
                 'text': '',
                 'icon': 'icons/showStructure',
                 'tipText': 'Show on Molecular Viewer',
                 'toggle': None,
-                'callback': f'_{ShowStructureButton}{Callback}',
-                'objectName': UpdateButton,
+                'callback': f'_{guiNameSpaces.ShowStructureButton}{guiNameSpaces.Callback}',
+                'objectName':guiNameSpaces.UpdateButton,
             }}
 
         colPos = 0
@@ -100,7 +96,14 @@ class ToolBarPanel(GuiPanel):
         getLogger().warn('Not implemented. Clicked _filterButtonCallback')
 
     def _updateButtonCallback(self):
-        getLogger().warn('Not implemented. Clicked _updateButtonCallback')
+        """ Update all panels and emit a signal with the settings value as a Dict """
+        settingsDict = self.guiModule.settingsPanelHandler.getAllSettings()
+
+        for panelName, panel in self.guiModule.panelHandler.panels.items():
+            panel.updatePanel(**{guiNameSpaces.SETTINGS:settingsDict})
+
+        ## emit signal as well
+        self.updateRequested.emit({guiNameSpaces.SETTINGS:settingsDict})
 
     def _showStructureButtonCallback(self):
         getLogger().warn('Not implemented. Clicked _showStructureButtonCallback')

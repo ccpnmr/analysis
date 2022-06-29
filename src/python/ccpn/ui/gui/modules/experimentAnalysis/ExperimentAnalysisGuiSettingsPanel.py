@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-23 16:37:37 +0100 (Thu, June 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 11:57:45 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -65,13 +65,26 @@ class GuiSettingPanel(Frame):
         Frame.__init__(self, setLayout=True, **Framekwargs)
         self._guiModule = guiModule
         self.getLayout().setAlignment(QtCore.Qt.AlignTop)
+        self._moduleSettingsWidget = None # the widgets the collects all autogen widgets
         self.initWidgets()
 
     def initWidgets(self):
         pass
 
     def getWidget(self, name):
-        pass
+        if self._moduleSettingsWidget is not None:
+            w = self._moduleSettingsWidget.getWidget(name)
+            return w
+
+    def getSettingsAsDict(self):
+        settingsDict = {}
+        for varName, widget in self._moduleSettingsWidget.widgetsDict.items():
+            try:
+                settingsDict[varName] = widget._getSaveState()
+            except Exception as e:
+                print('Could not find get for: varName, widget',  varName, widget, e)
+        return settingsDict
+
 
 
 TABPOS = 0
@@ -372,7 +385,7 @@ TABPOS += 1
 class AppearancePanel(GuiSettingPanel):
 
     tabPosition = TABPOS
-    tabName = 'Appearance'
+    tabName = nameSpaces.AppearancePanel
     tabTipText = ''
 
     def initWidgets(self):

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-27 13:23:36 +0100 (Mon, June 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 11:57:44 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -36,6 +36,7 @@ BackgroundColour = gs.getColours()[gs.CCPNGLWIDGET_HEXBACKGROUND]
 
 ##### SETTINGS  ######
 
+SETTINGS = 'settings'
 WidgetVarName_         = 'VarName'
 Label_                 = 'Label'
 tipText_               = 'tipText'
@@ -212,6 +213,16 @@ ColumnAtoms = 'Atoms'
 _COLUM_FLOAT_FORM = '%0.3f'
 
 ############################################################
+##########          Panel: ToolBar                ##########
+############################################################
+# ToolBar
+FilterButton = 'filterButton'
+UpdateButton = 'updateButton'
+ShowStructureButton = 'showStructureButton'
+Callback = 'Callback'
+
+
+############################################################
 ##########  Panel: ChemicalShiftMapping          ##########
 ############################################################
 
@@ -220,3 +231,5 @@ CSMBarPlotPanel = 'CSMBarPlotPanel'
 CSMFittingPlotPanel = 'CSMFittingPlotPanel'
 
 RelativeDisplacement = 'Relative Displacement'
+AppearancePanel = 'AppearancePanel'
+ToolbarPanel = 'ToolbarPanel'

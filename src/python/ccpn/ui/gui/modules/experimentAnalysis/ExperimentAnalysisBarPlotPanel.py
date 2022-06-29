@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-27 13:23:36 +0100 (Mon, June 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 11:57:44 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -42,8 +42,8 @@ class BarPlotPanel(GuiPanel):
 
     def __init__(self, guiModule, *args, **Framekwargs):
         GuiPanel.__init__(self, guiModule, *args , **Framekwargs)
-
-
+        self._appearancePanel = self.guiModule.settingsPanelHandler.getTab(guiNameSpaces.AppearancePanel)
+        self._toolbarPanel = self.guiModule.panelHandler.getToolBarPanel()
 
 
     def initWidgets(self):
@@ -59,6 +59,7 @@ class BarPlotPanel(GuiPanel):
         self.selectedLabelPen = pg.functions.mkBrush(rgbaRatioToHex(*getColours()[CCPNGLWIDGET_HIGHLIGHT]), width=4)
         self.barGraphWidget = BarGraphWidget(self, application=self.application, backgroundColour=self.backgroundColour,
                                              grid=(0,0))
+        self.barGraphWidget.xLine.sigPositionChangeFinished.connect(self._thresholdLineMoved)
         self._setBarGraphWidget()
 
     def setXLabel(self, label=''):
@@ -74,6 +75,14 @@ class BarPlotPanel(GuiPanel):
         self.barGraphWidget.plotWidget.plotItem.getAxis('left').setPen(self.gridPen)
         self.barGraphWidget.plotWidget.plotItem.getAxis('bottom').tickFont = self.gridFont
         self.barGraphWidget.plotWidget.plotItem.getAxis('left').tickFont = self.gridFont
+
+    def _thresholdLineMoved(self):
+        pos = self.barGraphWidget.xLine.pos().y()
+        if self._appearancePanel:
+            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_ThreshValue)
+            if w:
+                w.setValue(pos)
+        self.updatePanel()
 
     def plotDataFrame(self, dataFrame):
         pass

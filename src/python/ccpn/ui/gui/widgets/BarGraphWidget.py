@@ -1,18 +1,19 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2020"
-__credits__ = ("Ed Brooksbank, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
+__credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
+               "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2020-09-08 12:32:29 +0100 (Tue, September 08, 2020) $"
-__version__ = "$Revision: 3.0.1 $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2022-06-29 11:57:45 +0100 (Wed, June 29, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -40,6 +41,7 @@ AllBelowObjects = 'allBelowObjects'
 BelowObjects = 'belowObjects'
 DisappearedObjects = 'disappearedObjects'
 AboveBrush = 'aboveBrush'
+AboveBrushes = 'aboveBrushes'
 BelowBrush = 'belowBrush'
 DisappearedBrush = 'disappearedBrush'
 DrawLabels = 'drawLabels'
@@ -182,6 +184,7 @@ class BarGraphWidget(Widget):
             belowObjects = args[BelowObjects]
             disappearedObjects = args[DisappearedObjects]
             self.aboveBrush = args[AboveBrush]
+            aboveBrushes = args.get(AboveBrushes, [])
             self.belowBrush = args[BelowBrush]
             self.disappearedBrush = args[DisappearedBrush]
             drawLabels = args.get(DrawLabels)
@@ -196,6 +199,7 @@ class BarGraphWidget(Widget):
             disappearedX = []
             disappearedY = []
             disappearedObjects = []
+            aboveBrushes = []
 
             pos = self.xLine.pos().y()
             self.xLine.show()
@@ -209,8 +213,12 @@ class BarGraphWidget(Widget):
                         belowX.append(x)
                         belowY.append(y)
                         belowObjects.append(obj)
-
-        self.aboveThreshold = BarGraph(viewBox=self.customViewBox, application=self.application, drawLabels=drawLabels,
+        if len(aboveBrushes)>0:
+            self.aboveThreshold = BarGraph(viewBox=self.customViewBox, application=self.application,
+                                           drawLabels=drawLabels,
+                                           xValues=aboveX, yValues=aboveY, objects=aboveObjects, useGradient=True, brushes=aboveBrushes)
+        else:
+            self.aboveThreshold = BarGraph(viewBox=self.customViewBox, application=self.application, drawLabels=drawLabels,
                                        xValues=aboveX, yValues=aboveY, objects=aboveObjects, brush=self.aboveBrush)
         self.belowThreshold = BarGraph(viewBox=self.customViewBox, application=self.application, drawLabels=drawLabels,
                                        xValues=belowX, yValues=belowY, objects=belowObjects, brush=self.belowBrush)
@@ -248,40 +256,40 @@ class BarGraphWidget(Widget):
 ####################################      Mock DATA TESTING    ########################################
 #######################################################################################################
 #
-# from collections import namedtuple
-# import random
-#
-# nmrResidues = []
-# for i in range(30):
-#   nmrResidue = namedtuple('nmrResidue', ['sequenceCode','peaksShifts'])
-#   nmrResidue.__new__.__defaults__ = (0,)
-#   nmrResidue.sequenceCode = i
-#   nmrResidue.peaksShifts = random.uniform(1.5, 3.9)
-#   nmrResidues.append(nmrResidue)
-#
-# nmrChain = namedtuple('nmrChain', ['nmrResidues'])
-# nmrChain.nmrResidues = nmrResidues
+from collections import namedtuple
+import random
+
+nmrResidues = []
+for i in range(30):
+  nmrResidue = namedtuple('nmrResidue', ['sequenceCode','peaksShifts'])
+  nmrResidue.__new__.__defaults__ = (0,)
+  nmrResidue.sequenceCode = i
+  nmrResidue.peaksShifts = random.uniform(1.5, 3.9)
+  nmrResidues.append(nmrResidue)
+
+nmrChain = namedtuple('nmrChain', ['nmrResidues'])
+nmrChain.nmrResidues = nmrResidues
 
 
-#
-# if __name__ == '__main__':
-#   from ccpn.ui.gui.widgets.Application import TestApplication
-#   from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
-#   from ccpn.ui.gui.modules.ChemicalShiftsMappingModule import ChemicalShiftsMapping
-#
-#   app = TestApplication()
-#   win = QtGui.QMainWindow()
-#
-#   moduleArea = CcpnModuleArea(mainWindow=None, )
-#   chemicalShiftsMapping = ChemicalShiftsMapping(mainWindow=None, nmrChain=nmrChain)
-#   moduleArea.addModule(chemicalShiftsMapping)
-#
-#
-#
-#
-#   win.setCentralWidget(moduleArea)
-#   win.resize(1000, 500)
-#   win.setWindowTitle('Testing %s' % chemicalShiftsMapping.moduleName)
-#   win.show()
-#
-#   app.start()
+
+if __name__ == '__main__':
+  from ccpn.ui.gui.widgets.Application import TestApplication
+  from ccpn.ui.gui.widgets.CcpnModuleArea import CcpnModuleArea
+  from ccpn.ui.gui.modules.ChemicalShiftsMappingModule import ChemicalShiftsMapping
+
+  app = TestApplication()
+  win = QtGui.QMainWindow()
+
+  moduleArea = CcpnModuleArea(mainWindow=None, )
+  chemicalShiftsMapping = ChemicalShiftsMapping(mainWindow=None, nmrChain=nmrChain)
+  moduleArea.addModule(chemicalShiftsMapping)
+
+
+
+
+  win.setCentralWidget(moduleArea)
+  win.resize(1000, 500)
+  win.setWindowTitle('Testing %s' % chemicalShiftsMapping.moduleName)
+  win.show()
+
+  app.start()

@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-27 13:23:36 +0100 (Mon, June 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 11:57:45 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -28,8 +28,9 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import pyqtgraph as pg
 from PyQt5 import QtCore, QtGui, QtWidgets
-from pyqtgraph.Point import Point
-
+from pyqtgraph import getConfigOption
+from pyqtgraph import functions as fn
+import numpy as np
 from ccpn.ui.gui.lib.mouseEvents import \
     leftMouse, shiftLeftMouse, controlLeftMouse, controlShiftLeftMouse, \
     middleMouse, shiftMiddleMouse, controlMiddleMouse, controlShiftMiddleMouse, \
@@ -38,15 +39,15 @@ from ccpn.core.NmrResidue import NmrResidue
 from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.util.Logging import getLogger
-from ccpn.util.Common import percentage
-from ccpn.core.Spectrum import Spectrum
+from ccpn.util.Common import percentage,groupIntoChunks
+
 
 
 current = []
 
 class BarGraph(pg.BarGraphItem):
     def __init__(self, application=None, viewBox=None, xValues=None, yValues=None,
-                 objects=None, brush=None, drawLabels=True, labelDistanceRatio=0.1, **kwds):
+                 objects=None, brush=None, brushes = None, useGradient=False, drawLabels=True, labelDistanceRatio=0.1, **kwds):
         super().__init__(**kwds)
         """
         This class allows top draw bars with or without objects.It Needs only xValues and yValues.
@@ -59,9 +60,11 @@ class BarGraph(pg.BarGraphItem):
         self.viewBox = viewBox
         self.callback = None
         self.trigger = QtCore.pyqtSignal()
+        self.useGradient = useGradient
         self.xValues = xValues if xValues is not None else []
         self.yValues = yValues if yValues is not None else []
         self.brush = brush
+        self.brushes = brushes
         self.clicked = None
         self.objects = objects or []
         self.application = application
@@ -72,10 +75,10 @@ class BarGraph(pg.BarGraphItem):
                 x1=self.xValues,
                 height=self.yValues,
                 width=1,
-                pen=self.brush,
+                pen=None,
                 brush=self.brush,
                 pens=None,
-                brushes=None,
+                brushes=self.brushes
                 )
 
         self.opts.update(self.opts)
@@ -97,7 +100,7 @@ class BarGraph(pg.BarGraphItem):
                 pen=self.brush,
                 brush=self.brush,
                 pens=None,
-                brushes=None,
+                brushes=self.brushes,
                 )
         self.opts.update(opts)
 
@@ -185,6 +188,109 @@ class BarGraph(pg.BarGraphItem):
             label.setPos(int(key), value + ratio)
             self.labels.append(label)
             label.setBrush(QtGui.QColor(self.brush))
+
+    def drawPicture(self):
+        self.picture = QtGui.QPicture()
+        self._shape = QtGui.QPainterPath()
+        p = QtGui.QPainter(self.picture)
+
+        pen = self.opts['pen']
+        pens = self.opts['pens']
+
+        if pen is None and pens is None:
+            pen = getConfigOption('foreground')
+
+        brush = self.opts['brush']
+        brushes = self.opts['brushes']
+        if brush is None and brushes is None:
+            brush = (128, 128, 128)
+
+        def asarray(x):
+            if x is None or np.isscalar(x) or isinstance(x, np.ndarray):
+                return x
+            return np.array(x)
+
+        x = asarray(self.opts.get('x'))
+        x0 = asarray(self.opts.get('x0'))
+        x1 = asarray(self.opts.get('x1'))
+        width = asarray(self.opts.get('width'))
+
+        if x0 is None:
+            if width is None:
+                raise Exception('must specify either x0 or width')
+            if x1 is not None:
+                x0 = x1 - width
+            elif x is not None:
+                x0 = x - width / 2.
+            else:
+                raise Exception('must specify at least one of x, x0, or x1')
+        if width is None:
+            if x1 is None:
+                raise Exception('must specify either x1 or width')
+            width = x1 - x0
+
+        y = asarray(self.opts.get('y'))
+        y0 = asarray(self.opts.get('y0'))
+        y1 = asarray(self.opts.get('y1'))
+        height = asarray(self.opts.get('height'))
+
+        if y0 is None:
+            if height is None:
+                y0 = 0
+            elif y1 is not None:
+                y0 = y1 - height
+            elif y is not None:
+                y0 = y - height / 2.
+            else:
+                y0 = 0
+        if height is None:
+            if y1 is None:
+                raise Exception('must specify either y1 or height')
+            height = y1 - y0
+
+        p.setPen(fn.mkPen(pen))
+        p.setBrush(fn.mkBrush(brush))
+        heightGroups = [[height]]
+        if brushes and self.useGradient:
+            count = len(brushes)
+            heightGroups = np.array_split(np.sort(height), count)
+        for i in range(len(x0 if not np.isscalar(x0) else y0)):
+            if pens is not None:
+                p.setPen(fn.mkPen(pens[i]))
+            if brushes and not self.useGradient:
+                try:
+                    p.setBrush(fn.mkBrush(brushes[i]))
+                except:
+                    getLogger().warn(f'BarGraph error. Cannot find a brush for at position {i}')
+
+            if np.isscalar(x0):
+                x = x0
+            else:
+                x = x0[i]
+            if np.isscalar(y0):
+                y = y0
+            else:
+                y = y0[i]
+            if np.isscalar(width):
+                w = width
+            else:
+                w = width[i]
+            if np.isscalar(height):
+                h = height
+            else:
+                h = height[i]
+                if self.useGradient:
+                    for heightGroup, brush in zip(heightGroups, brushes):
+                        if h in heightGroup:
+                            p.setBrush(fn.mkBrush(brush))
+                            break
+
+            rect = QtCore.QRectF(x, y, w, h)
+            p.drawRect(rect)
+            self._shape.addRect(rect)
+
+        p.end()
+        self.prepareGeometryChange()
 
 
 class CustomLabel(QtWidgets.QGraphicsSimpleTextItem):
@@ -505,107 +611,148 @@ class CustomViewBox(pg.ViewBox):
 ###################################      Mock DATA    ################################################
 ######################################################################################################
 
-# from collections import namedtuple
-# import random
+from collections import namedtuple
+import random
+
+nmrResidues = []
+for i in range(30):
+  nmrResidue = namedtuple('nmrResidue', ['sequenceCode'])
+  nmrResidue.__new__.__defaults__ = (0,)
+  nmrResidue.sequenceCode = int(random.randint(1,300))
+  nmrResidues.append(nmrResidue)
+
+x1 = [nmrResidue.sequenceCode for nmrResidue in nmrResidues]
+y1 = [(i**random.random())/10 for i in range(len(x1))]
+
+
+xLows = []
+yLows = []
+
+xMids = []
+yMids = []
+
+xHighs = []
+yHighs = []
+
+
+for x, y in zip(x1,y1):
+    if y <= 0.5:
+        xLows.append(x)
+        yLows.append(y)
+    if y > 0.5 and y <= 1:
+        xMids.append(x)
+        yMids.append(y)
+    if y > 1:
+        xHighs.append(x)
+        yHighs.append(y)
+
+######################################################################################################
+
+app = pg.mkQApp()
+
+customViewBox = CustomViewBox()
 #
-# nmrResidues = []
-# for i in range(30):
-#   nmrResidue = namedtuple('nmrResidue', ['sequenceCode'])
-#   nmrResidue.__new__.__defaults__ = (0,)
-#   nmrResidue.sequenceCode = int(random.randint(1,300))
-#   nmrResidues.append(nmrResidue)
-#
-# x1 = [nmrResidue.sequenceCode for nmrResidue in nmrResidues]
-# y1 = [(i**random.random())/10 for i in range(len(x1))]
-#
-#
-# xLows = []
-# yLows = []
-#
-# xMids = []
-# yMids = []
-#
-# xHighs = []
-# yHighs = []
-#
-#
-# for x, y in zip(x1,y1):
-#     if y <= 0.5:
-#         xLows.append(x)
-#         yLows.append(y)
-#     if y > 0.5 and y <= 1:
-#         xMids.append(x)
-#         yMids.append(y)
-#     if y > 1:
-#         xHighs.append(x)
-#         yHighs.append(y)
-#
-# ######################################################################################################
-#
-# app = pg.mkQApp()
-#
-# customViewBox = CustomViewBox()
-# #
-# plotWidget = pg.PlotWidget(viewBox=customViewBox, background='w')
-# customViewBox.setParent(plotWidget)
-#
-# x=[6,
-#     8,
-#     10,
-#     12,
-#     14,
-#     16,
-#     18,
-#     20]
-# y = [
-# 1.731,
-# 10.809,
-# 10.658,
-# 4.831,
-# 11.406,
-# 5.287,
-# 2.971,
-# 4.412,
-# ]
-#
-# xLow = BarGraph(viewBox=customViewBox, xValues=x, yValues=y, objects=[], brush='r', widht=1)
-# # xMid = BarGraph(viewBox=customViewBox, xValues=xMids, yValues=yMids, objects=[nmrResidues], brush='b',widht=1)
-# # xHigh = BarGraph(viewBox=customViewBox, xValues=xHighs, yValues=yHighs,objects=[nmrResidues],  brush='g',widht=1)
-#
-#
-# customViewBox.addItem(xLow)
-# # customViewBox.addItem(xMid)
-# # customViewBox.addItem(xHigh)
-#
-# # xLine = pg.InfiniteLine(pos=max(yLows), angle=0, movable=True, pen='b')
-# # customViewBox.addItem(xLine)
-#
-# l = pg.LegendItem((100,60), offset=(70,30))  # args are (size, offset)
-# l.setParentItem(customViewBox.graphicsItem())
-#
-# c1 = plotWidget.plot(pen='r', name='low')
-# # c2 = plotWidget.plot(pen='b', name='mid')
-# # c3 = plotWidget.plot(pen='g', name='high')
-#
-# l.addItem(c1, 'low')
-# # l.addItem(c2, 'mid')
-# # l.addItem(c3, 'high')
-#
-# # customViewBox.setLimits(xMin=0, xMax=max(x1) + (max(x1) * 0.5), yMin=0, yMax=max(y1) + (max(y1) * 0.5))
-# customViewBox.setRange(xRange=[10,200], yRange=[0.01,1000],)
-# customViewBox.setMenuEnabled(enableMenu=False)
-# print(customViewBox.xLine._viewBox)
-# plotWidget.show()
-#
-#
-#
-#
-#
+plotWidget = pg.PlotWidget(viewBox=customViewBox, background='w')
+customViewBox.setParent(plotWidget)
+
+x=[
+    6,
+    8,
+    10,
+    12,
+    14,
+    16,
+    18,
+    20,
+    22,
+    24,
+    26,
+    28,
+    30,
+    36,
+    48,
+    60
+   ]
+
+y = [
+    1.731,
+    20.809,
+    10.658,
+    400.831,
+    11.406,
+    5.287,
+    2.971,
+    400.412,
+    10.731,
+    20.809,
+    100.658,
+    400.831,
+    110.406,
+    50.287,
+    20.971,
+    400.412,
+    ]
+
+
+L = 'abcdefghilmnopqrstuvz'
+x = np.arange(1,len(L))
+ticks = [list(zip(x, L))]
+y = np.random.normal(1,100,len(L))
+y = np.absolute(y)
+gradientName = 'gray-black'
+from ccpn.util.Colour import colorSchemeTable
+brushes = colorSchemeTable[gradientName]
+
+
+
+if __name__ == '__main__':
+    from ccpn.ui.gui.widgets.Application import TestApplication
+    app = TestApplication()
+    window = QtWidgets.QWidget()
+    window.setLayout(QtWidgets.QGridLayout())
+
+    xLow = BarGraph(window, viewBox=customViewBox, xValues=x, yValues=y, objects=[], brushes=brushes, useGradient=True, widht=1)
+    # xMid = BarGraph(viewBox=customViewBox, xValues=xMids, yValues=yMids, objects=[nmrResidues], brush='b',widht=1)
+    # xHigh = BarGraph(viewBox=customViewBox, xValues=xHighs, yValues=yHighs,objects=[nmrResidues],  brush='g',widht=1)
+
+    xax = plotWidget.getAxis('bottom')
+    # xax.setTicks(ticks)
+
+    customViewBox.addItem(xLow)
+    # customViewBox.addItem(xMid)
+    # customViewBox.addItem(xHigh)
+
+    # xLine = pg.InfiniteLine(pos=max(yLows), angle=0, movable=True, pen='b')
+    # customViewBox.addItem(xLine)
+
+    l = pg.LegendItem((100,60), offset=(70,30))  # args are (size, offset)
+    l.setParentItem(customViewBox.graphicsItem())
+
+    c1 = plotWidget.plot(pen='r', name='low')
+    # c2 = plotWidget.plot(pen='b', name='mid')
+    # c3 = plotWidget.plot(pen='g', name='high')
+
+    l.addItem(c1, 'low')
+    # l.addItem(c2, 'mid')
+    # l.addItem(c3, 'high')
+
+    # customViewBox.setLimits(xMin=0, xMax=max(x1) + (max(x1) * 0.5), yMin=0, yMax=max(y1) + (max(y1) * 0.5))
+    customViewBox.setRange(xRange=[10,200], yRange=[0.01,1000],)
+    customViewBox.setMenuEnabled(enableMenu=False)
+
+    plotWidget.show()
+
+    window.show()
+    window.raise_()
+
+    app.start()
+
+
 #
 # # Start Qt event
 # if __name__ == '__main__':
 #   import sys
 #   if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
 #     QtWidgets.QApplication.instance().exec_()
-#
-#
+
+

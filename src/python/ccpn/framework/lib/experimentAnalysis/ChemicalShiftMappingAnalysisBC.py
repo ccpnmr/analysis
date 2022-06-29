@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-23 16:37:36 +0100 (Thu, June 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 11:57:44 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -26,6 +26,7 @@ __date__ = "$Date: 2022-02-02 14:08:56 +0000 (Wed, February 02, 2022) $"
 # Start of code
 #=========================================================================================
 
+import numpy as np
 from ccpn.util.Logging import getLogger
 from ccpn.framework.lib.experimentAnalysis.SeriesAnalysisABC import SeriesAnalysisABC
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
@@ -37,10 +38,14 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
     # needed settings:
     """
     seriesAnalysisName = sv.ChemicalShiftMappingAnalysis
-    _AlphaFactors = sv.DEFAULT_ALPHA_FACTORS
+
 
     def __init__(self):
         super().__init__()
+
+        self._FilteringAtoms = sv.DEFAULT_FILTERING_ATOMS
+        self._AlphaFactors = [1, 0.142]
+        self._ExcludedResidues = sv.DEFAULT_EXCLUDED_RESIDUES
 
         _registerChemicalShiftMappingModels()
 
@@ -130,6 +135,24 @@ class ChemicalShiftMappingAnalysisBC(SeriesAnalysisABC):
                                                    overrideExisting=ovverideOutputDataTable)
             outputDataTable.data = outputFrame
             self.addOutputData(outputDataTable)
+
+    def getOutputDataFrame(self, *args):
+        """ Return the outputDataFrame containing the fitting and deltaDeltas calculations"""
+        if len(self.inputDataTables) == 0:
+            return
+        inputDataTable = self.inputDataTables[-1]
+        deltasDF = self.calculateDeltaDeltaShifts(inputDataTable.data,
+                                                     FilteringAtoms=self._FilteringAtoms,
+                                                     AlphaFactors=self._AlphaFactors,
+                                                     ExcludedResidues=self._ExcludedResidues)
+        outData = self.getOutputDataTables()[-1]
+        outDataFrame = outData.data
+        outDataFrame.set_index(sv._ROW_UID, inplace=True, drop=False)
+        deltasDF.set_index(sv._ROW_UID, inplace=True, drop=False)
+        outDataFrame[sv.DELTA_DELTA_MEAN] = deltasDF[sv.DELTA_DELTA_MEAN]
+        outDataFrame[sv.ATOM_NAMES] = deltasDF[sv.ATOM_NAMES]
+        outDataFrame[sv.SERIAL] = np.arange(1, len(outDataFrame) + 1)
+        return outDataFrame
 
     def plotResults(self, *args, **kwargs):
         getLogger().warning('Not implemented yet. Available: plotDeltaDeltas')

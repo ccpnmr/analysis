@@ -22,7 +22,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-02-07 19:53:47 +0000 (Mon, February 07, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 11:57:45 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -224,6 +224,10 @@ def splitIntFromChars(value):
 
     return number, chars
 
+def groupIntoChunks(aList, chunkSize, reverse=True):
+    """Yield successive n-sized chunks from list."""
+    for i in range(0, len(aList), chunkSize):
+        yield sorted(aList[i:i + chunkSize], key=float, reverse=reverse)
 
 def dictionaryProduct(dict1, dict2):
     """multiply input {a:x}, {b:y} to result {(a,b):x*y} dictionary

@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-27 13:23:36 +0100 (Mon, June 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 11:57:44 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -34,9 +34,6 @@ from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiManagers import
     SettingsPanelHandler, IOHandler
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiSettingsPanel as settingsPanel
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisToolBar import ToolBarPanel
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiTable import TablePanel
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisBarPlotPanel import BarPlotPanel
-from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisFitPlotPanel import FitPlotPanel
 from ccpn.ui.gui.modules.experimentAnalysis.CSMGuiTable import CSMTablePanel
 from ccpn.ui.gui.modules.experimentAnalysis.CSMBarPlotPanel import CSMBarPlotPanel
 from ccpn.ui.gui.modules.experimentAnalysis.CSMFitPlotPanel import CSMFitPlotPanel

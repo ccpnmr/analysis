@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-27 13:23:36 +0100 (Mon, June 27, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 11:57:44 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -29,9 +29,10 @@ import pyqtgraph as pg
 from PyQt5 import QtCore, QtWidgets, QtGui
 from ccpn.ui.gui.guiSettings import CCPNGLWIDGET_HEXBACKGROUND, MEDIUM_BLUE, GUISTRIP_PIVOT, CCPNGLWIDGET_HIGHLIGHT, CCPNGLWIDGET_GRID, CCPNGLWIDGET_LABELLING
 from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES, getColours, DIVIDER
-from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours
+from ccpn.util.Colour import spectrumColours, hexToRgb, rgbaRatioToHex, _getRandomColours, getGradientBrushByArray, colourNameToHexDict
 from ccpn.ui.gui.widgets.Font import Font, getFont
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiPanel import GuiPanel
+from ccpn.util.Colour import colorSchemeTable
 import ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisGuiNamespaces as guiNameSpaces
 from ccpn.ui.gui.modules.experimentAnalysis.ExperimentAnalysisBarPlotPanel import BarPlotPanel
 import ccpn.framework.lib.experimentAnalysis.SeriesAnalysisVariables as sv
@@ -45,45 +46,109 @@ class CSMBarPlotPanel(BarPlotPanel):
 
     def __init__(self, guiModule, *args, **Framekwargs):
         BarPlotPanel.__init__(self, guiModule, *args , **Framekwargs)
-
         self.setXLabel(label=guiNameSpaces.ColumnResidueCode)
         self.setYLabel(label=guiNameSpaces.ColumnDdelta)
         self._selectCurrentNRNotifier = Notifier(self.current, [Notifier.CURRENT], targetName='nmrResidues',
                                                  callback=self._selectCurrentNmrResiduesNotifierCallback, onceOnly=True)
 
+        self._defaultAboveThresholdBrushColour  = '#1020aa' # dark blue
+        self._defaultBelowThresholdBrushColour  = '#b0b0b0' # light grey
+        self._defaultDisappearedBrushColour     = '#000000'  # black
 
-    def plotDataFrame(self, dataFrame):
-        """ DEMO """
+        # self._updateButton = self._toolbarPanel.getButton(guiNameSpaces.UpdateButton)
+        # self._updateButton.clicked.connect(self.updatePanel)
+
+    @property
+    def thresholdValue(self):
+        return self.barGraphWidget.xLine.pos().y()
+
+    @thresholdValue.setter
+    def thresholdValue(self, value):
+        self.barGraphWidget.xLine.setPos(value)
+
+    @property
+    def aboveThresholdBrushColour(self):
+        """Returns selected colour name """
+        value = None
+        if self._appearancePanel:
+            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_AboveThrColour)
+            if w:
+                value = w.getText()
+        return value
+
+    @aboveThresholdBrushColour.setter
+    def aboveThresholdBrushColour(self, colourName):
+        if self._appearancePanel:
+            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_AboveThrColour)
+            if w:
+                w.select(colourName)
+
+    @property
+    def belowThresholdBrushColour(self):
+        """Returns selected colour name"""
+        value = None
+        if self._appearancePanel:
+            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_BelowThrColour)
+            if w:
+                value = w.getText()
+        return value
+
+    @belowThresholdBrushColour.setter
+    def belowThresholdBrushColour(self, colourName):
+        if self._appearancePanel:
+            w = self._appearancePanel.getWidget(guiNameSpaces.WidgetVarName_BelowThrColour)
+            if w:
+                w.select(colourName)
+
+    def updatePanel(self, *args, **kwargs):
+        getLogger().info('Updating CSM barPlot panel')
+        dataFrame = self.guiModule.backendHandler.getOutputDataFrame()
+        self.plotDataFrame(dataFrame)
+
+    def plotDataFrame(self, dataFrame, xColumnName=sv.RESIDUE_CODE, yColumnName=sv.DELTA_DELTA_MEAN):
+        """ Plot the given columns of dataframe as bars """
         getLogger().warning('DEMO version of plotting')
-        xs = []
-        ys = []
-        obs = []
+        self.barGraphWidget.clear()
+        ## group by threshold value
+        aboveDf = dataFrame[dataFrame[yColumnName] >= self.thresholdValue]
+        belowDf = dataFrame[dataFrame[yColumnName] < self.thresholdValue]
+        self.aboveX = [int(i) for i in aboveDf[xColumnName]]
+        self.aboveY = aboveDf[yColumnName]
+        self.aboveObjects = [self.project.getByPid(x) for x in aboveDf[sv._ROW_UID]]
+        ## below threshold values
+        self.belowX = [int(i) for i in belowDf[xColumnName]]
+        self.belowY = belowDf[yColumnName]
+        self.belowObjects = [self.project.getByPid(x) for x in belowDf[sv._ROW_UID]]
+
+        # TODO disappeared and excluded filter
         self.disappearedX = []
         self.disappearedY = []
         self.disappereadObjects = []
-        self.aboveX = [int(x) for x in dataFrame[sv.RESIDUE_CODE]]
-        self.aboveY = dataFrame[sv.DELTA_DELTA_MEAN]
-        self.aboveObjects = [self.project.getByPid(x) for x in dataFrame[sv._ROW_UID]]
-        self.belowX = []
-        self.belowY = []
-        self.belowObjects = []
-        self.aboveBrush = 'g'
-        self.belowBrush = 'r'
-        self.disappearedPeakBrush = 'b'
+        self.disappearedPeakBrush = ''
 
-        self.barGraphWidget.clear()
+        aboveBrush = colourNameToHexDict.get(self.aboveThresholdBrushColour, self._defaultAboveThresholdBrushColour)
+        belowBrush = colourNameToHexDict.get(self.belowThresholdBrushColour, self._defaultBelowThresholdBrushColour)
+        disappearedBrush = colourNameToHexDict.get(self.disappearedPeakBrush, self._defaultDisappearedBrushColour)
+
+        gradientName = self.aboveThresholdBrushColour
+        brushes = colorSchemeTable.get(gradientName, [])
+
         self.barGraphWidget._lineMoved(aboveX=self.aboveX,
-                                       aboveY=self.aboveY,
-                                       aboveObjects=self.aboveObjects,
                                        belowX=self.belowX,
-                                       belowY=self.belowY,
-                                       belowObjects=self.belowObjects,
-                                       belowBrush=self.belowBrush,
-                                       aboveBrush=self.aboveBrush,
                                        disappearedX=self.disappearedX,
+                                       ## Y
+                                       aboveY=self.aboveY,
+                                       belowY=self.belowY,
                                        disappearedY=self.disappearedY,
+                                       ## Objects
+                                       aboveObjects=self.aboveObjects,
+                                       belowObjects=self.belowObjects,
                                        disappearedObjects=self.disappereadObjects,
-                                       disappearedBrush=self.disappearedPeakBrush,
+                                       ## Brush
+                                       aboveBrush=aboveBrush,
+                                       aboveBrushes=brushes,
+                                       belowBrush=belowBrush,
+                                       disappearedBrush=disappearedBrush,
                                        )
 
     def _selectCurrentNmrResiduesNotifierCallback(self, *args):

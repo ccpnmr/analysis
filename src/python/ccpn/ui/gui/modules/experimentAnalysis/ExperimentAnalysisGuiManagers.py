@@ -12,7 +12,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-23 16:37:36 +0100 (Thu, June 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 11:57:44 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -104,6 +104,7 @@ class PanelHandler(ExperimentAnalysisHandlerABC):
         self._marginSizes = (0, 0, 0, 0)
         self.panels = defaultdict()
         self._panelsByFrame = {k:[] for k in PanelPositions}
+        self._toolBarPanel = None
 
     def start(self):
         """ Set-up the 2 main Frames:
@@ -139,11 +140,15 @@ class PanelHandler(ExperimentAnalysisHandlerABC):
         frame = getattr(self, name)
         return frame
 
+    def getToolBarPanel(self):
+        return self._toolBarPanel
+
     def addToolBar(self, toolBarPanel):
         """ Install the toolBarPanel in the reserved frame inside the main layout"""
         frame = self.getFrame(TOOLBARFRAME)
         toolBarPanel.onInstall()
         frame.getLayout().addWidget(toolBarPanel)
+        self._toolBarPanel = toolBarPanel
         return toolBarPanel
 
     def clear(self):
@@ -214,6 +219,7 @@ class SettingsPanelHandler(ExperimentAnalysisHandlerABC):
         super(SettingsPanelHandler, self).__init__(guiModule)
         self._marginSizes = (5, 5, 5, 5)
         self._panels = {}
+        self.tabs = defaultdict()
         self.settingsWidget = self.guiModule.settingsWidget
         self.settingsWidget.setContentsMargins(*self._marginSizes)
         self.settingsTabWidget = Tabs(self.settingsWidget, setLayout=True, grid=(0, 0))
@@ -225,6 +231,16 @@ class SettingsPanelHandler(ExperimentAnalysisHandlerABC):
             raise RuntimeError(f'{panel} is not of instance: {GuiSettingPanel}')
         self.settingsTabWidget.insertTab(panel.tabPosition, panel, panel.tabName)
         self._panels.update({panel.tabPosition:panel})
+        self.tabs.update({panel.tabName: panel})
+
+    def getTab(self, name):
+        return self.tabs.get(name, None)
+
+    def getAllSettings(self) -> dict:
+        settings = {}
+        for tabName, tab in self.tabs.items():
+            settings[tabName] = tab.getSettingsAsDict()
+        return settings
 
     def close(self):
         pass

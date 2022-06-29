@@ -16,7 +16,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-23 16:37:36 +0100 (Thu, June 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 11:57:44 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -138,6 +138,8 @@ DEFAULT_ALPHA_FACTORS = OrderedDict((
                             (_C, DEFAULT_C_ALPHAFACTOR),
                             (_OTHER, DEFAULT_OTHER_ALPHAFACTOR)
                             ))
+DEFAULT_FILTERING_ATOMS = (_H, _N)
+DEFAULT_EXCLUDED_RESIDUES = ('PRO')
 
 FILTERINGATOMS  = 'FilteringAtoms'
 ALPHAFACTORS    = 'AlphaFactors'

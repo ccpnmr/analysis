@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-22 13:40:16 +0100 (Wed, June 22, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 11:57:45 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -1320,6 +1320,7 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
         self.callback = callback
         self.returnCallback = returnCallback if returnCallback else self.doCallback
         self.applyCallback = applyCallback
+        self.widgetsDict = {}
 
         # cannot set a notifier for displays, as these are not (yet?) implemented and the Notifier routines
         # underpinning the addNotifier call does not allow for it either
@@ -1368,6 +1369,7 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
                     # newItem.setCallback(data['callBack'] if 'callBack' in data else None)
                     if 'enabled' in data:
                         newItem.setEnabled(data['enabled'])
+                self.widgetsDict[item] = newItem
 
                 self.checkBoxes[item] = {'widget'    : newItem,
                                          'item'      : item,
@@ -1455,6 +1457,9 @@ class ModuleSettingsWidget(Widget):  #, _commonSettings):
         """
         if widgetName in self.checkBoxes and SETTINGSWIDGET in self.checkBoxes[widgetName]:
             return self.checkBoxes[widgetName][SETTINGSWIDGET]
+
+        widget = self.widgetsDict.get(widgetName, None)
+        return widget
 
 
 class ObjectSelectionWidget(ListCompoundWidget):

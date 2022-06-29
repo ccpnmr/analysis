@@ -15,7 +15,7 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Luca Mureddu $"
-__dateModified__ = "$dateModified: 2022-06-23 16:37:36 +0100 (Thu, June 23, 2022) $"
+__dateModified__ = "$dateModified: 2022-06-29 11:57:44 +0100 (Wed, June 29, 2022) $"
 __version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
@@ -202,8 +202,8 @@ class DeltaDeltaShiftsCalculation():
             for i, assignmentHeader in enumerate(grouppingHeaders):                     ## build new row for the output dataFrame as DefaultDict.
                 outputDataDict[assignmentHeader].append(list(assignmentValues)[i])      ## add common assignments definitions
             outputDataDict[sv.ATOM_NAMES].append(','.join(_filteringAtoms))             ## add atom names
-            for colnam, oper in zip([sv.DELTA_DELTA_MEAN, sv.DELTA_DELTA_SUM, sv.DELTA_DELTA_STD],[np.mean, np.sum, np.std]):  ## add calculated values from Deltadeltas
-                outputDataDict[colnam].append(oper(deltaDeltas[1:]))                    ## first item is excluded from as it is always 0 by definition.
+            # for colnam, oper in zip([sv.DELTA_DELTA_MEAN, sv.DELTA_DELTA_SUM, sv.DELTA_DELTA_STD],[np.mean, np.sum, np.std]):  ## add calculated values from Deltadeltas
+            outputDataDict[sv.DELTA_DELTA_MEAN].append(np.mean(deltaDeltas[1:]))        ## first item is excluded from as it is always 0 by definition.
             for _dd, valueHeaderName in zip(deltaDeltas,inputData.valuesHeaders):       ## add single steps Deltadelta value
                 outputDataDict[valueHeaderName].append(_dd)
         outputFrame = CSMOutputFrame()

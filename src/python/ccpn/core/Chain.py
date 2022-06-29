@@ -3,10 +3,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-__copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2021"
+__copyright__ = "Copyright (C) CCPN project (https://www.ccpn.ac.uk) 2014 - 2022"
 __credits__ = ("Ed Brooksbank, Joanna Fox, Victoria A Higman, Luca Mureddu, Eliza Płoskoń",
                "Timothy J Ragan, Brian O Smith, Gary S Thompson & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license")
+__licence__ = ("CCPN licence. See https://ccpn.ac.uk/software/licensing/")
 __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, L.G., & Vuister, G.W.",
                  "CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis",
                  "J.Biomol.Nmr (2016), 66, 111-124, http://doi.org/10.1007/s10858-016-0060-y")
@@ -14,8 +14,8 @@ __reference__ = ("Skinner, S.P., Fogh, R.H., Boucher, W., Ragan, T.J., Mureddu, 
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2021-12-03 20:07:35 +0000 (Fri, December 03, 2021) $"
-__version__ = "$Revision: 3.0.4 $"
+__dateModified__ = "$dateModified: 2022-06-29 15:10:26 +0100 (Wed, June 29, 2022) $"
+__version__ = "$Revision: 3.1.0 $"
 #=========================================================================================
 # Created
 #=========================================================================================
@@ -25,24 +25,20 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 # Start of code
 #=========================================================================================
 
-import collections
-import typing
-from functools import partial
-from ccpn.util import Common as commonUtil
+from typing import Tuple, Optional, Union, Sequence, Iterable
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Substance import Substance
 from ccpn.core.Substance import SampleComponent
+from ccpn.core.lib.ContextManagers import newObject, renameObject, undoBlock
+from ccpn.core.lib import Pid
+from ccpn.util import Common as commonUtil
+from ccpn.util.decorators import logCommand
+from ccpn.util.Logging import getLogger
 from ccpnmodel.ccpncore.lib.CopyData import copySubTree
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
 from ccpnmodel.ccpncore.api.ccp.molecule import Molecule
 from ccpnmodel.ccpncore.api.ccp.lims import Sample
-from ccpn.core.lib import Pid
-from typing import Tuple, Optional, Union, Sequence, Iterable
-from ccpn.util.decorators import logCommand
-from ccpn.core.lib.ContextManagers import newObject, deleteObject, ccpNmrV3CoreSetter, \
-    renameObject, undoBlock, undoStackBlocking
-from ccpn.util.Logging import getLogger
 
 
 class Chain(AbstractWrapperObject):
@@ -133,8 +129,8 @@ class Chain(AbstractWrapperObject):
         return tuple(x for x in self.project.sampleComponents if x.name == compoundName)
 
     @property
-    def nmrChain(self) -> typing.Optional['NmrChain']:
-        "NmrChain to which Chain is assigned"
+    def nmrChain(self) -> Optional['NmrChain']:
+        """NmrChain to which Chain is assigned"""
         try:
             return self._project.getNmrChain(self._id)
         except:
@@ -262,7 +258,8 @@ class Chain(AbstractWrapperObject):
         """ Makes an Nmr Chain from the chain """
         try:
             from ccpn.util.isotopes import DEFAULT_ISOTOPE_DICT
-            from ccpn.core.lib.ContextManagers import undoBlock, undoBlockWithoutSideBar, notificationEchoBlocking
+            from ccpn.core.lib.ContextManagers import undoBlockWithoutSideBar
+
             with undoBlockWithoutSideBar():
                 nmrChain = self.project.newNmrChain(isConnected=True)
                 for residue in self.residues:
@@ -271,9 +268,10 @@ class Chain(AbstractWrapperObject):
                         if atom.name:
                             isotopeCode = DEFAULT_ISOTOPE_DICT.get(atom.elementSymbol)
                             nmrResidue.newNmrAtom(atom.name, isotopeCode=isotopeCode)
+
         except Exception as e:
-            self.project._logger.warning("Error in creating an NmrChain from Chain: %s"
-                                         % e)
+            self.project._logger.warning("Error in creating an NmrChain from Chain: %s" % e)
+
     @property
     def chainType(self):
         return self._wrappedData.molecule.molType
@@ -296,6 +294,9 @@ class Chain(AbstractWrapperObject):
     def rename(self, value: str):
         """Rename Chain, changing its shortName and Pid.
         """
+        if self.nmrChain:
+            getLogger().warning(f'{self.__class__.__name__}.rename will lose or change the assigned nmrChain')
+
         name = self._uniqueName(project=self.project, name=value)
 
         # rename functions from here
@@ -304,17 +305,6 @@ class Chain(AbstractWrapperObject):
         self._apiChain.renameChain(name)
 
         return (oldName,)
-
-    # def delete(self):
-    #     print('>>>deleting - need to delete apiMolecules')
-    #
-    #     # self.substances
-    #     # apiMolecule = substance._apiSubstance.molecule
-    #
-    #     for sub in self.substances:
-    #         print('>>>molecule', sub._apiSubstance.molecule)
-    #
-    #     super().delete()
 
 
 #=========================================================================================
@@ -332,9 +322,9 @@ def _newApiChain(self: Project, apiMolecule, shortName, role, comment):
 
 
 def _getChain(self: Project, sequence: Union[str, Sequence[str]], compoundName: str = None,
-                 startNumber: int = 1, molType: str = None, isCyclic: bool = False,
-                 shortName: str = None, role: str = None, comment: str = None,
-                 serial: int = None) -> Chain:
+              startNumber: int = 1, molType: str = None, isCyclic: bool = False,
+              shortName: str = None, role: str = None, comment: str = None,
+              serial: int = None) -> Chain:
     pass
 
 
@@ -405,8 +395,8 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
                     raise TypeError('sequence element is not a valid string: %s' % str(s))
                 elif len(s) != 3:
                     raise TypeError(
-                        'sequence elements must be 3 characters each, e.g., "ala ala ala"\nor sequence must be a single string, try removing spaces and return characters: %s' % str(
-                            s))
+                            'sequence elements must be 3 characters each, e.g., "ala ala ala"\nor sequence must be a single string, try removing spaces and return characters: %s' % str(
+                                    s))
                 elif not s.isalpha():
                     raise TypeError('sequence element contains bad characters: %s' % str(s))
 
@@ -452,6 +442,7 @@ def _createChain(self: Project, sequence: Union[str, Sequence[str]], compoundNam
         if result:
             if expandFromAtomSets:
                 from ccpn.core.lib.MoleculeLib import expandChainAtoms
+
                 expandChainAtoms(result,
                                  replaceStarWithPercent=True,
                                  addPseudoAtoms=addPseudoAtoms,
@@ -522,6 +513,7 @@ def _createChainFromSubstance(self: Substance, shortName: str = None, role: str 
 
     if expandFromAtomSets:
         from ccpn.core.lib.MoleculeLib import expandChainAtoms
+
         expandChainAtoms(result,
                          replaceStarWithPercent=True,
                          addPseudoAtoms=addPseudoAtoms,
@@ -534,7 +526,7 @@ def _createChainFromSubstance(self: Substance, shortName: str = None, role: str 
 
 
 def _getChainFromSubstance(self: Substance, shortName: str = None, role: str = None,
-                              comment: str = None, serial: int = None) -> Chain:
+                           comment: str = None, serial: int = None) -> Chain:
     """Get existing Chain that matches Substance
 
     :param shortName:
@@ -565,11 +557,12 @@ def _getChainFromSubstance(self: Substance, shortName: str = None, role: str = N
 # del _createChainFromSubstance
 
 def _checkChemCompExists(project, ccpCode):
-    memopsRoot =  project._wrappedData.root
+    memopsRoot = project._wrappedData.root
     chemComp = memopsRoot.findFirstChemComp(ccpCode=ccpCode)  # Check if the chemcomp is already loaded
     if chemComp:
         return chemComp
     return
+
 
 def _fetchChemCompFromFile(project, filePath):
     """
@@ -581,12 +574,13 @@ def _fetchChemCompFromFile(project, filePath):
     """
     from ccpnmodel.ccpncore.xml.memops.Implementation import loadFromStream
     from ccpn.util.Path import aPath
-    memopsRoot =  project._wrappedData.root
+
+    memopsRoot = project._wrappedData.root
     basename = aPath(filePath).basename
-    ll = basename.split('+') # assuming the file is an old xml type with + separators or created from Chembuild.
-    if len(ll)>1:
+    ll = basename.split('+')  # assuming the file is an old xml type with + separators or created from Chembuild.
+    if len(ll) > 1:
         ccpCode = ll[1]
-        chemComp = memopsRoot.findFirstChemComp(ccpCode=ccpCode) # Check if the chemcomp is already loaded
+        chemComp = memopsRoot.findFirstChemComp(ccpCode=ccpCode)  # Check if the chemcomp is already loaded
         if chemComp:
             return chemComp
     topObjId = ll[-1]
@@ -595,15 +589,16 @@ def _fetchChemCompFromFile(project, filePath):
         getLogger().warning('A ChemComp with the same topObjId is already loaded. Returning the pre-existing.')
     else:
         with open(filePath) as stream:
-            chemComp = loadFromStream(stream, topObject=memopsRoot, topObjId=topObjId,)
+            chemComp = loadFromStream(stream, topObject=memopsRoot, topObjId=topObjId, )
 
     return chemComp
 
+
 def _newChainFromChemComp(project, chemComp,
-                          chainCode:str=None,
-                          expandFromAtomSets = True,
-                          addPseudoAtoms = False,
-                          addNonstereoAtoms = False,
+                          chainCode: str = None,
+                          expandFromAtomSets=True,
+                          addPseudoAtoms=False,
+                          addNonstereoAtoms=False,
                           ):
     """
     :param project:
@@ -635,6 +630,7 @@ def _newChainFromChemComp(project, chemComp,
             chain = project._data2Obj[newApiChain]
             if expandFromAtomSets:
                 from ccpn.core.lib.MoleculeLib import expandChainAtoms
+
                 expandChainAtoms(chain,
                                  replaceStarWithPercent=True,
                                  addPseudoAtoms=addPseudoAtoms,
@@ -643,6 +639,7 @@ def _newChainFromChemComp(project, chemComp,
                                  )
 
             return chain
+
 
 def getter(self: Substance) -> Tuple[Chain, ...]:
     name = self.name
